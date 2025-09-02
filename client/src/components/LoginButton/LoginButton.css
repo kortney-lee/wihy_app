@@ -1,0 +1,180 @@
+/* src/components/LoginButton/LoginButton.css */
+.login-button-container {
+  position: relative;
+}
+
+.login-button-container.top-right {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 1500; /* Increase z-index to be above everything */
+  pointer-events: auto !important; /* Force pointer events */
+}
+
+.login-icon {
+  background: transparent;
+  border: none;
+  color: #5f6368;
+  cursor: pointer !important; /* Force cursor */
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+  z-index: 1500; /* Ensure button is clickable */
+  position: relative; /* Establish stacking context */
+  pointer-events: auto !important; /* Force pointer events */
+}
+
+.login-icon:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.login-icon svg {
+  width: 24px;
+  height: 24px;
+}
+
+/* Fixed dropdown positioning */
+.login-dropdown {
+  z-index: 1600; /* Even higher than the button */
+  position: absolute;
+  top: 44px;
+  right: 0;
+  width: 280px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease-out;
+}
+
+/* Ensure dropdown stays above other elements */
+.login-dropdown-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  border-bottom: 1px solid #f1f3f4;
+}
+
+.login-dropdown-header h3 {
+  margin: 0;
+  font-size: 18px;
+  color: #202124;
+  font-weight: 500;
+}
+
+.close-dropdown {
+  background: transparent;
+  border: none;
+  color: #5f6368;
+  font-size: 22px;
+  cursor: pointer;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.login-dropdown-content {
+  padding: 16px;
+}
+
+.login-action-button {
+  width: 100%;
+  padding: 10px;
+  border: none;
+  border-radius: 4px;
+  background-color: #1a73e8;
+  color: white;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  margin-bottom: 8px;
+  transition: background-color 0.2s;
+}
+
+.login-action-button:hover {
+  background-color: #1765cc;
+}
+
+.login-action-button.secondary {
+  background-color: white;
+  color: #1a73e8;
+  border: 1px solid #dadce0;
+}
+
+.login-action-button.secondary:hover {
+  background-color: #f8f9fa;
+}
+
+hr {
+  margin: 16px 0;
+  border: none;
+  border-top: 1px solid #dadce0;
+}
+
+.login-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.login-option {
+  width: 100%;
+  padding: 8px;
+  border: none;
+  background-color: transparent;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.login-option:hover {
+  background-color: #f8f9fa;
+}
+
+.option-icon {
+  margin-right: 12px;
+  font-size: 16px;
+  display: inline-flex;
+  width: 20px;
+  justify-content: center;
+}
+
+/* Adjusted animation for better positioning */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Mobile styles - keep dropdown within viewport */
+@media (max-width: 600px) {
+  .login-dropdown {
+    width: calc(100vw - 32px);
+    right: -8px;
+    position: fixed;
+    top: 60px;
+  }
+  
+  .login-button-container.top-right {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+  }
+}
