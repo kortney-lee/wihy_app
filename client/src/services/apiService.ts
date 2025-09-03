@@ -43,32 +43,20 @@ export const fetchNutritionData = async (query: string): Promise<NutritionRespon
 };
 
 export const processUploadedFoodImage = async (file: File): Promise<any> => {
-  try {
-    const formData = new FormData();
-    formData.append('image', file);
-    
-    const response = await axios.post(`${API_URL}/nutrition/analyze`, formData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
-    });
-    
-    // Type assertion for image analysis response
-    const data = response.data as any;
-    return {
-      success: true,
-      analysis: data?.analysis,
-      nutrition: data?.nutrition,
-      foodName: data?.foodName,
-      tags: data?.tags,
-      confidence: data?.confidence,
-      timestamp: data?.timestamp
-    };
-  } catch (error) {
-    console.error('Error analyzing image:', error);
-    return { 
-      success: false, 
-      message: 'Error analyzing image' 
-    };
+  const formData = new FormData();
+  formData.append('image', file);
+  
+  // Change this URL to match your backend route
+  const response = await fetch('http://localhost:5000/api/nutrition/analyze', {
+    method: 'POST',
+    body: formData
+  });
+  
+  if (!response.ok) {
+    throw new Error('Failed to process image');
   }
+  
+  return response.json();
 };
 
 export const analyzeFoodImage = async (imageData: string): Promise<any> => {
