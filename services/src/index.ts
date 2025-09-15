@@ -1,26 +1,19 @@
 import express from 'express';
 import cors from 'cors';
-import dotenv from 'dotenv';
 import nutritionRoutes from './routes/nutritionRoutes';
 
-dotenv.config();
-
 const app = express();
-const PORT = process.env.PORT || 5000;
-
-// Middleware
 app.use(cors());
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 
-// Test route
-app.get('/api/test', (req, res) => {
-  res.json({ message: 'vHealth API is working!' });
-});
-
-// Mount the nutrition routes at /api
+console.log('About to mount nutrition routes at /api'); // Add this
 app.use('/api', nutritionRoutes);
+console.log('Nutrition routes mounted successfully'); // Add this
 
+const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-  console.log(`🚀 vHealth API server running on port ${PORT}`);
+  console.log(`Server running on port ${PORT}`);
+  console.log('Available routes should be:');
+  console.log('GET  http://localhost:5000/api/health');
+  console.log('POST http://localhost:5000/api/analyze-image');
 });

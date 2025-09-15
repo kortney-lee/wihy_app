@@ -1,56 +1,40 @@
 import express from 'express';
 import cors from 'cors';
-import dotenv from 'dotenv';
 import nutritionRoutes from './routes/nutritionRoutes';
 import { initializeDatabase } from './config/database';
 
-// Load environment variables
-dotenv.config();
-
-// Add this for debugging
-console.log('Environment variables loaded:');
-console.log('PORT:', process.env.PORT);
-console.log('DB_SERVER:', process.env.DB_SERVER);
-console.log('DB_NAME:', process.env.DB_NAME);
-
 const app = express();
-const PORT = process.env.PORT || 5000;
+
+app.use(cors());
+app.use(express.json());
 
 // Initialize database connection
-initializeDatabase();
+initializeDatabase()
+  .then((pool) => {
+    if (pool) {
+      console.log('✅ Database connection established');
+    } else {
+      console.log('📝 Running with mock data only');
+    }
+  })
+  .catch((error) => {
+    console.error('❌ Database initialization error:', error);
+    console.log('📝 Continuing with mock data...');
+  });
 
-// Middleware
-app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:3000',
-  credentials: true
-}));
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
-
-// Routes
-app.use('/api/nutrition', nutritionRoutes);
+console.log('About to mount nutrition routes at /api');
+app.use('/api', nutritionRoutes);
+console.log('Nutrition routes mounted successfully');
 
 // Health check
 app.get('/api/health', (req, res) => {
-  res.json({ 
-    status: 'OK', 
-    message: 'vHealth API is running',
-    timestamp: new Date().toISOString()
-  });
+  res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-// Error handling
-app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
-  console.error('Error:', err);
-  res.status(500).json({ 
-    success: false, 
-    message: 'Internal server error',
-    error: process.env.NODE_ENV === 'development' ? err.message : undefined
-  });
-});
-
-// Start server
+const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-  console.log(`🚀 vHealth API server running on port ${PORT}`);
-  console.log(`📱 Client URL: ${process.env.CLIENT_URL || 'http://localhost:3000'}`);
+  console.log(`Server running on port ${PORT}`);
+  console.log('Available routes should be:');
+  console.log(`GET  http://localhost:${PORT}/api/health`);
+  console.log(`POST http://localhost:${PORT}/api/analyze-image`);
 });

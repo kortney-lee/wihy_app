@@ -1,24 +1,77 @@
-import sql from 'mssql';
-import { dbConfig } from '../config/dbConfig';
-
-// Create connection pool
-const pool = new sql.ConnectionPool(dbConfig);
-const poolConnect = pool.connect();
-
-poolConnect.catch(err => {
-  console.error('Database connection failed:', err);
-});
+import { getPool, sql, initializeDatabase } from '../config/database';
 
 export default class NutritionService {
+  private initialized = false;
+
+  constructor() {
+    console.log('NutritionService initialized with database connection');
+    this.initializeIfNeeded();
+  }
+
+  private async initializeIfNeeded() {
+    if (!this.initialized) {
+      await initializeDatabase();
+      this.initialized = true;
+    }
+  }
+
+  async analyzeImage(imageBuffer: Buffer): Promise<any> {
+    console.log('analyzeImage called with buffer size:', imageBuffer.length);
+    
+    try {
+      // Mock image analysis - detect a food item
+      const detectedFood = "Apple"; // In real implementation, this would come from image analysis
+      
+      // Get nutrition data for the detected food
+      const nutritionData = await this.fetchNutritionData(detectedFood);
+      
+      // Return the expected structure with both foodName and nutrition
+      const result = {
+        success: true,
+        foodName: detectedFood,
+        confidence: 0.95,
+        tags: ["fruit", "healthy", "fresh"],
+        nutrition: {
+          item: nutritionData.item,
+          calories: nutritionData.calories,
+          protein: nutritionData.protein,
+          carbs: nutritionData.carbs,
+          fat: nutritionData.fat,
+          fiber: "3g" // Add fiber if available
+        },
+        analysis: {
+          provider: "mock-vision-api",
+          confidence: 0.95,
+          tags: ["fruit", "healthy", "fresh"]
+        },
+        healthScore: 85,
+        timestamp: new Date().toISOString(),
+        message: "Image analysis complete"
+      };
+
+      return result;
+    } catch (error) {
+      console.error('Error analyzing image:', error);
+      return {
+        success: false,
+        message: 'Image analysis failed'
+      };
+    }
+  }
+
   async fetchNutritionData(foodName: string): Promise<any> {
     try {
-      await poolConnect;
+      await this.initializeIfNeeded();
+      
+      // Use getPool() with error handling
+      const pool = getPool();
       
       const result = await pool.request()
         .input('foodName', sql.VarChar, foodName)
         .query(`
-          SELECT * FROM NutritionFacts 
-          WHERE FoodName LIKE '%' + @foodName + '%'
+          SELECT * FROM NutritionData 
+          WHERE itemName LIKE '%' + @foodName + '%'
+          ORDER BY itemName
         `);
       
       if (result.recordset.length === 0) {
@@ -31,24 +84,14 @@ export default class NutritionService {
       return this.getMockNutritionData(foodName);
     }
   }
-  
-  // Add missing method - analyzeImage
-  async analyzeImage(imageBuffer: Buffer): Promise<any> {
-    // Mock implementation for now
-    return {
-      success: true,
-      foodName: "Detected Food Item",
-      confidence: 0.9,
-      nutritionFacts: await this.fetchNutritionData("apple")
-    };
-  }
-  
-  // Add missing method - saveNutritionData
+
   async saveNutritionData(barcode: string, data: any): Promise<any> {
     try {
-      await poolConnect;
+      await this.initializeIfNeeded();
       
-      // Example implementation - adjust according to your schema
+      // Use getPool() with error handling
+      const pool = getPool();
+      
       const result = await pool.request()
         .input('barcode', sql.VarChar, barcode)
         .input('foodName', sql.VarChar, data.foodName || 'Unknown')
@@ -56,15 +99,26 @@ export default class NutritionService {
         .input('protein', sql.VarChar, data.protein || '0g')
         .input('carbs', sql.VarChar, data.carbs || '0g')
         .input('fat', sql.VarChar, data.fat || '0g')
+        .input('dateCreated', sql.DateTime, new Date())
         .query(`
-          INSERT INTO NutritionFacts (Barcode, FoodName, Calories, Protein, Carbs, Fat)
-          VALUES (@barcode, @foodName, @calories, @protein, @carbs, @fat);
-          SELECT SCOPE_IDENTITY() AS id
+          MERGE INTO NutritionData AS target
+          USING (SELECT @barcode AS barcode) AS source
+          ON target.barcode = source.barcode
+          WHEN MATCHED THEN
+            UPDATE SET 
+              itemName = @foodName,
+              calories = @calories,
+              protein = @protein,
+              carbs = @carbs,
+              fat = @fat,
+              lastUpdated = GETDATE()
+          WHEN NOT MATCHED THEN
+            INSERT (barcode, itemName, calories, protein, carbs, fat, createDate, lastUpdated)
+            VALUES (@barcode, @foodName, @calories, @protein, @carbs, @fat, GETDATE(), GETDATE());
         `);
       
       return {
         success: true,
-        id: result.recordset[0].id,
         message: 'Nutrition data saved successfully'
       };
     } catch (error) {
@@ -75,61 +129,46 @@ export default class NutritionService {
       };
     }
   }
-  
-  // Add missing method - getMockNutritionData
+
   private getMockNutritionData(foodName: string): any {
     const mockData: {[key: string]: any} = {
       apple: {
         success: true,
         item: "Apple",
-        calories_per_serving: 95,
-        macros: {
-          protein: "0.5g",
-          carbs: "25g",
-          fat: "0.3g"
-        },
-        vitamins: ["Vitamin C", "Vitamin A"]
+        calories: 95,
+        protein: "0.5g",
+        carbs: "25g",
+        fat: "0.3g"
       },
       banana: {
         success: true,
-        item: "Banana",
-        calories_per_serving: 105,
-        macros: {
-          protein: "1.3g",
-          carbs: "27g",
-          fat: "0.4g"
-        },
-        vitamins: ["Vitamin B6", "Potassium"]
+        item: "Banana", 
+        calories: 105,
+        protein: "1.3g",
+        carbs: "27g",
+        fat: "0.4g"
       },
       default: {
         success: true,
-        item: foodName || "Unknown Food",
-        calories_per_serving: 100,
-        macros: {
-          protein: "2g",
-          carbs: "15g",
-          fat: "1g"
-        },
-        vitamins: ["Various vitamins"]
+        item: foodName,
+        calories: 100,
+        protein: "2g",
+        carbs: "15g",
+        fat: "1g"
       }
     };
     
     return mockData[foodName.toLowerCase()] || mockData.default;
   }
-  
-  // Add missing method - processNutritionData
+
   private processNutritionData(data: any): any {
     return {
       success: true,
-      item: data.FoodName,
-      calories_per_serving: data.Calories,
-      macros: {
-        protein: `${data.Protein || '0'}g`,
-        carbs: `${data.Carbs || '0'}g`,
-        fat: `${data.Fat || '0'}g`
-      },
-      vitamins: data.Vitamins ? data.Vitamins.split(',') : [],
-      minerals: data.Minerals ? data.Minerals.split(',') : []
+      item: data.itemName,
+      calories: data.calories,
+      protein: `${data.protein}g`,
+      carbs: `${data.carbs}g`,
+      fat: `${data.fat}g`
     };
   }
 }

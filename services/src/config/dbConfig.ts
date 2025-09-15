@@ -1,14 +1,17 @@
 import dotenv from 'dotenv';
+
 dotenv.config();
 
+// Just export the config without connecting:
 export const dbConfig = {
   server: 'localhost\\SQLEXPRESS',
   database: 'consumptiondb',
   options: {
-    encrypt: true,
+    encrypt: false,
     trustServerCertificate: true,
-    trustedConnection: true,
     enableArithAbort: true,
-    integratedSecurity: true
+    connectTimeout: 30000,
+    requestTimeout: 30000,
+    trustedConnection: true
   }
 };

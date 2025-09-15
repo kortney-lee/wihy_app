@@ -1,31 +1,7 @@
 "use strict";
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.lookupBarcode = exports.saveNutritionData = exports.fetchNutritionData = exports.processUploadedFoodImage = exports.analyzeFoodImage = void 0;
-const database_1 = require("../config/database");
-const sql = __importStar(require("mssql"));
+const database_1 = require("../config/database"); // Use getPool instead of pool directly
 // Mock Google Vision API response for now
 const analyzeFoodImage = async (imageBuffer) => {
     try {
@@ -84,8 +60,10 @@ exports.processUploadedFoodImage = processUploadedFoodImage;
 // Fetch nutrition data from database
 const fetchNutritionData = async (query) => {
     try {
-        const request = database_1.pool.request();
-        request.input('query', sql.VarChar, query);
+        // Use getPool() with proper error handling
+        const pool = (0, database_1.getPool)();
+        const request = pool.request();
+        request.input('query', database_1.sql.VarChar, query);
         // Search by barcode or item name
         const result = await request.query(`
       SELECT TOP 1 * FROM dbo.NutritionData 
@@ -170,16 +148,18 @@ const generateMockNutritionData = (query) => {
 // Save nutrition data to database
 const saveNutritionData = async (barcode, data) => {
     try {
-        const request = database_1.pool.request();
-        request.input('barcode', sql.VarChar, barcode);
-        request.input('itemName', sql.NVarChar, data.item || '');
-        request.input('calories', sql.Float, data.calories_per_serving || null);
-        request.input('protein', sql.NVarChar, data.macros?.protein || null);
-        request.input('carbs', sql.NVarChar, data.macros?.carbs || null);
-        request.input('fat', sql.NVarChar, data.macros?.fat || null);
-        request.input('processedLevel', sql.NVarChar, data.processed_level || null);
-        request.input('ingredients', sql.NVarChar, data.verdict || null);
-        request.input('snapEligible', sql.Bit, data.snap_eligible || false);
+        // Use getPool() with proper error handling
+        const pool = (0, database_1.getPool)();
+        const request = pool.request();
+        request.input('barcode', database_1.sql.VarChar, barcode);
+        request.input('itemName', database_1.sql.NVarChar, data.item || '');
+        request.input('calories', database_1.sql.Float, data.calories_per_serving || null);
+        request.input('protein', database_1.sql.NVarChar, data.macros?.protein || null);
+        request.input('carbs', database_1.sql.NVarChar, data.macros?.carbs || null);
+        request.input('fat', database_1.sql.NVarChar, data.macros?.fat || null);
+        request.input('processedLevel', database_1.sql.NVarChar, data.processed_level || null);
+        request.input('ingredients', database_1.sql.NVarChar, data.verdict || null);
+        request.input('snapEligible', database_1.sql.Bit, data.snap_eligible || false);
         await request.query(`
       MERGE INTO dbo.NutritionData AS target
       USING (SELECT @barcode AS barcode) AS source

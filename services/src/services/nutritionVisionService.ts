@@ -1,5 +1,4 @@
-import { pool } from '../config/database';
-import * as sql from 'mssql';
+import { getPool, sql } from '../config/database'; // Use getPool instead of pool directly
 
 // Vision API interfaces
 interface VisionAnalysisResult {
@@ -86,6 +85,8 @@ export const processUploadedFoodImage = async (imageBuffer: Buffer): Promise<any
 // Fetch nutrition data from database
 export const fetchNutritionData = async (query: string): Promise<NutritionData> => {
   try {
+    // Use getPool() with proper error handling
+    const pool = getPool();
     const request = pool.request();
     request.input('query', sql.VarChar, query);
     
@@ -182,6 +183,8 @@ const generateMockNutritionData = (query: string): NutritionData => {
 // Save nutrition data to database
 export const saveNutritionData = async (barcode: string, data: any): Promise<{ success: boolean; message: string }> => {
   try {
+    // Use getPool() with proper error handling
+    const pool = getPool();
     const request = pool.request();
     request.input('barcode', sql.VarChar, barcode);
     request.input('itemName', sql.NVarChar, data.item || '');

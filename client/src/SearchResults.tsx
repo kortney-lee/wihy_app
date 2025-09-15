@@ -255,7 +255,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({
   };
 
   const handleFileSelect = async (file: File) => {
-    setUploadLoading(true); // Use the new state instead
+    setUploadLoading(true);
     setImage(URL.createObjectURL(file));
     
     try {
@@ -267,9 +267,9 @@ const SearchResults: React.FC<SearchResultsProps> = ({
         
         // If we have nutrition data
         if (result.nutrition) {
-          onNewSearch(result.foodName); // Only call search here
+          onNewSearch(result.foodName); // FIRST CALL HERE
         } else {
-          onNewSearch(result.foodName);
+          onNewSearch(result.foodName); // SECOND CALL HERE - DUPLICATE!
         }
       } else {
         // Handle error
@@ -281,7 +281,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({
     } catch (error) {
       console.error('Error processing image:', error);
     } finally {
-      setUploadLoading(false); // Reset the loading state
+      setUploadLoading(false);
       setIsUploadModalOpen(false);
     }
   };
