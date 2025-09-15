@@ -13,7 +13,21 @@ const upload = (0, multer_1.default)({
 });
 const router = express_1.default.Router();
 const nutritionService = new nutritionService_1.default();
-// Route to analyze uploaded food images
+// ADD THIS ROUTE to match your frontend requests
+router.post('/analyze-image', upload.single('image'), async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ success: false, message: 'No image provided' });
+        }
+        const result = await nutritionService.analyzeImage(req.file.buffer);
+        return res.json(result);
+    }
+    catch (error) {
+        console.error('Error analyzing image:', error);
+        return res.status(500).json({ success: false, message: 'Error analyzing image' });
+    }
+});
+// Keep the original route too (if needed)
 router.post('/analyze', upload.single('image'), async (req, res) => {
     try {
         if (!req.file) {

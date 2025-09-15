@@ -1,72 +1,64 @@
-import * as sql from 'mssql';
-import dotenv from 'dotenv';
+// database.ts  (put under src/config if that’s your convention)
+import sql from 'mssql/msnodesqlv8';
+import { dbConfig } from './dbConfig'; // Regular mssql config object
 
-dotenv.config();
+let pool: any = null;
 
-export const dbConfig: sql.config = {
-  server: process.env.DB_SERVER || 'localhost\\SQLEXPRESS',
-  database: process.env.DB_NAME || 'consumptiondb',
-  authentication: {
-    type: 'ntlm', // Use Windows Authentication
-    options: {
-      domain: '', // Leave empty for local
-      userName: '', // Leave empty for Windows auth
-      password: '' // Leave empty for Windows auth
-    }
-  },
-  options: {
-    encrypt: true,
-    trustServerCertificate: true,
-    enableArithAbort: true
+// Convert regular config to connection string for msnodesqlv8
+function createConnectionString(config: any): string {
+  return (
+    `Driver={ODBC Driver 18 for SQL Server};` +
+    `Server=${config.server};` +
+    `Database=${config.database};` +
+    `Trusted_Connection=Yes;` +
+    `Encrypt=${config.options?.encrypt ? 'Yes' : 'No'};` +
+    `TrustServerCertificate=${config.options?.trustServerCertificate ? 'Yes' : 'No'};`
+  );
+}
+
+export async function initializeDatabase() {
+  if (pool) {
+    console.log('Database already initialized');
+    return pool;
   }
-};
 
-// Alternative configuration using SQL Server authentication
-export const dbConfigSqlAuth: sql.config = {
-  server: process.env.DB_SERVER || 'localhost\\SQLEXPRESS',
-  database: process.env.DB_NAME || 'consumptiondb',
-  user: process.env.DB_USER || 'sa',
-  password: process.env.DB_PASSWORD || '',
-  options: {
-    encrypt: true,
-    trustServerCertificate: true,
-    enableArithAbort: true
-  }
-};
-
-// Create connection pool
-export const pool = new sql.ConnectionPool(dbConfig);
-
-// Initialize connection with better error handling
-export const initializeDatabase = async (): Promise<void> => {
+  console.log('🔗 Attempting database connection with SQL Express (Windows Auth)...');
   try {
-    await pool.connect();
-    console.log('✅ Database connected successfully');
+    // Convert config to connection string
+    const connectionString = createConnectionString(dbConfig);
+    console.log('🔗 Connection string:', connectionString);
     
-    // Test the connection
-    const result = await pool.request().query('SELECT 1 as test');
-    console.log('✅ Database test query successful');
-    
-  } catch (error) {
-    console.error('❌ Database connection failed:', error);
-    console.log('⚠️  Continuing without database - using mock data only');
-    
-    // Don't throw error - let app continue with mock data
+    pool = await sql.connect(connectionString);
+    console.log('✅ Connected to SQL Server Express (Windows Auth)');
+
+    const who = await pool.request().query(
+      'SELECT SUSER_SNAME() AS login_name, SYSTEM_USER AS system_user'
+    );
+    console.log('👤 Connected as:', who.recordset[0]);
+    return pool;
+  } catch (err: any) {
+    console.error('❌ Database connection failed:', err?.message || err);
+    if (pool) { try { await pool.close(); } catch {} }
+    pool = null;
+    return null;
   }
-};
+}
 
-// Handle connection errors gracefully
-pool.on('error', (err) => {
-  console.error('Database pool error:', err);
-});
+export function getPool(): any {
+  if (!pool) {
+    throw new Error('Database pool is not available. Using mock data instead.');
+  }
+  return pool;
+}
 
-// Graceful shutdown
-process.on('SIGINT', async () => {
+export { sql };
+
+export async function closeDatabase() {
+  if (!pool) return;
   try {
     await pool.close();
-    console.log('Database connection closed');
-  } catch (error) {
-    console.error('Error closing database connection:', error);
+    console.log('✅ Database connection closed');
+  } finally {
+    pool = null;
   }
-  process.exit(0);
-});
+}
