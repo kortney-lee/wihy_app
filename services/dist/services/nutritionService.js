@@ -16,24 +16,34 @@ class NutritionService {
     async analyzeImage(imageBuffer) {
         console.log('analyzeImage called with buffer size:', imageBuffer.length);
         try {
-            // For now, return mock data. Later you can add real image analysis
-            const mockResult = {
+            // Mock image analysis - detect a food item
+            const detectedFood = "Apple"; // In real implementation, this would come from image analysis
+            // Get nutrition data for the detected food
+            const nutritionData = await this.fetchNutritionData(detectedFood);
+            // Return the expected structure with both foodName and nutrition
+            const result = {
                 success: true,
-                foodName: "Detected Food Item",
+                foodName: detectedFood,
                 confidence: 0.95,
-                nutritionFacts: {
-                    calories: 150,
-                    protein: "8g",
-                    carbs: "20g",
-                    fat: "5g",
-                    fiber: "3g"
+                tags: ["fruit", "healthy", "fresh"],
+                nutrition: {
+                    item: nutritionData.item,
+                    calories: nutritionData.calories,
+                    protein: nutritionData.protein,
+                    carbs: nutritionData.carbs,
+                    fat: nutritionData.fat,
+                    fiber: "3g" // Add fiber if available
+                },
+                analysis: {
+                    provider: "mock-vision-api",
+                    confidence: 0.95,
+                    tags: ["fruit", "healthy", "fresh"]
                 },
                 healthScore: 85,
+                timestamp: new Date().toISOString(),
                 message: "Image analysis complete"
             };
-            // Optionally save to database
-            // await this.saveAnalysisResult(mockResult);
-            return mockResult;
+            return result;
         }
         catch (error) {
             console.error('Error analyzing image:', error);
