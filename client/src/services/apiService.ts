@@ -124,3 +124,30 @@ export const analyzeFoodImage = async (imageData: string): Promise<NutritionResp
     };
   }
 };
+
+// In your client/src/services/apiService.ts or openaiAPI.ts
+export const searchFoodDatabase = async (query: string) => {
+  try {
+    console.log('🔍 Calling database API for:', query);
+    
+    // Make sure this matches your backend route exactly
+    const response = await fetch(`http://localhost:5000/api/search/food?q=${encodeURIComponent(query)}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log('✅ Database API response:', data);
+    
+    return data;
+  } catch (error) {
+    console.error('❌ Database API error:', error);
+    throw error;
+  }
+};

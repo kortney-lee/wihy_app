@@ -5,11 +5,8 @@ import { foodAnalysisService } from './components/foodAnalysisService';
 import ImageUploadModal from './components/ImageUploadModal';
 import LoginButton from './components/LoginButton/LoginButton';
 import ResultQualityPie from './components/ResultQualityPie';
-import { 
-  analyzeFoodImage, 
-  processUploadedFoodImage, 
-  fetchNutritionData 
-} from './services/apiService';
+import NutritionChart from './components/NutritionChart';
+import NovaChart from './components/NovaChart';
 import './VHealthSearch.css';
 import Spinner from './components/Spinner';
 
@@ -72,30 +69,51 @@ interface SearchResultsProps {
 }
 
 // Add this function before the SearchResults component
-const convertLinksToClickable = (text: string): JSX.Element => {
+const convertLinksToClickable = (text: any): React.ReactNode => {
+  // Handle non-string inputs
+  if (!text) return null;
+  
+  // If text is not a string, convert it to string first
+  if (typeof text !== 'string') {
+    // If it's an object, try to stringify it or extract meaningful content
+    if (typeof text === 'object') {
+      // If it has specific properties we can use
+      if (text.content) {
+        text = text.content;
+      } else if (text.message) {
+        text = text.message;
+      } else if (text.details) {
+        text = text.details;
+      } else {
+        // Last resort - stringify the object
+        text = JSON.stringify(text);
+      }
+    } else {
+      // Convert other types to string
+      text = String(text);
+    }
+  }
+
+  // Now we're sure text is a string, proceed with original logic
   const urlRegex = /(https?:\/\/[^\s]+)/g;
   const parts = text.split(urlRegex);
   
-  return (
-    <>
-      {parts.map((part, index) => {
-        if (part.match(urlRegex)) {
-          return (
-            <a 
-              key={index} 
-              href={part} 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="inline-link"
-            >
-              {part}
-            </a>
-          );
-        }
-        return part;
-      })}
-    </>
-  );
+  return parts.map((part: string, index: number) => {
+    if (part.match(urlRegex)) {
+      return (
+        <a 
+          key={index} 
+          href={part} 
+          target="_blank" 
+          rel="noopener noreferrer"
+          style={{ color: '#2563eb', textDecoration: 'underline' }}
+        >
+          {part}
+        </a>
+      );
+    }
+    return part;
+  });
 };
 
 const SearchResults: React.FC<SearchResultsProps> = ({ 
@@ -104,7 +122,8 @@ const SearchResults: React.FC<SearchResultsProps> = ({
   onBackToSearch,
   onNewSearch,
   isLoading = false,
-  dataSource = 'local'
+  dataSource,
+  citations
 }) => {
   const [input, setInput] = useState('');
   const [image, setImage] = useState<File | string | null>(null);
@@ -165,7 +184,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({
     
     // Check for test query - return fake data without API call
     if (trimmedQuery.toLowerCase() === 'test') {
-      console.log('🧪 Test query detected in SearchResults - avoiding API call');
+      console.log('Test query detected in SearchResults - avoiding API call');
       onNewSearch(trimmedQuery); // This will trigger the test logic in parent
       return;
     }
@@ -254,25 +273,31 @@ const SearchResults: React.FC<SearchResultsProps> = ({
     setIsUploadModalOpen(true);
   };
 
+  // Fix the handleFileSelect function:
   const handleFileSelect = async (file: File) => {
     setUploadLoading(true);
     setImage(URL.createObjectURL(file));
     
     try {
-      const result = await processUploadedFoodImage(file);
+      // Use the existing foodAnalysisService instead of the undefined function
+      const result = await foodAnalysisService.analyzeFoodImage(file);
+      console.log("File analysis result:", result);
       
-      if (result.success) {
-        // Use the food name and nutrition data
-        setNewQuery(result.foodName);
-        
-        // If we have nutrition data
-        if (result.nutrition) {
-          onNewSearch(result.foodName); // FIRST CALL HERE
-        } else {
-          onNewSearch(result.foodName); // SECOND CALL HERE - DUPLICATE!
-        }
+      let searchTerm = '';
+      
+      if (typeof result === 'string') {
+        searchTerm = result;
+      } else if (result && typeof result === 'object') {
+        searchTerm = (result as any).name || 
+                    (result as any).foodName || 
+                    (result as any).food || 
+                    'food item';
+      }
+      
+      if (searchTerm) {
+        setNewQuery(searchTerm);
+        onNewSearch(searchTerm); // Only one call now
       } else {
-        // Handle error
         setNotification({
           message: 'Could not identify food in image',
           type: 'error'
@@ -280,6 +305,10 @@ const SearchResults: React.FC<SearchResultsProps> = ({
       }
     } catch (error) {
       console.error('Error processing image:', error);
+      setNotification({
+        message: 'Error analyzing image. Please try again.',
+        type: 'error'
+      });
     } finally {
       setUploadLoading(false);
       setIsUploadModalOpen(false);
@@ -308,78 +337,6 @@ const SearchResults: React.FC<SearchResultsProps> = ({
 
   // Check if current query is "test" to show dummy data styles
   const isTestQuery = query.toLowerCase().trim() === 'test';
-
-  // Replace your existing calculateQualityScore function with this one:
-  const calculateQualityScore = (): number => {
-    // Start with a baseline score
-    let score = 0.5;
-    
-    // Special case: Invalid query responses should score ZERO
-    if (/not appear to be a recognized medical term/.test(results) || 
-        /not a recognized|unrecognized|isn't recognized/.test(results) ||
-        /could not find information|no information found/.test(results) ||
-        /does not seem to be|doesn't seem to be/.test(results) ||
-        /please provide more|please clarify/.test(results)) {
-      return 0; // Zero score (not 0.25) for nonsensical queries
-    }
-    
-    // Check if the query itself looks like gibberish
-    // This catches strings like "yiiiy", "wqerq2", "qaoijna", etc.
-    if (/^[a-z0-9]{1,7}$/i.test(query) && !/^(hiv|flu|cold|covid|bp|bmi|gerd|ibs|std|uti)$/i.test(query)) {
-      return 0; // Zero for short, random character sequences (unless common medical abbreviations)
-    }
-    
-    // If error, return low score immediately
-    if (dataSource === 'error') return 0.2;
-    
-    // For nutrition data, base score on completeness
-    if (dataSource === 'vnutrition') {
-      try {
-        const nutrition = typeof results === 'string' ? JSON.parse(results) : results;
-        if (!nutrition || nutrition === 'null' || nutrition.found === false) {
-          return 0.4; // Incomplete data
-        }
-        // Higher score if detailed nutrition data is available
-        const detailsAvailable = nutrition.calories_per_serving && 
-                                nutrition.macros?.protein && 
-                                nutrition.macros?.carbs;
-        return detailsAvailable ? 0.9 : 0.75;
-      } catch {
-        return 0.5; // Default for nutrition if parsing fails
-      }
-    }
-    
-    // For text-based search results, analyze content quality
-    const resultsText = results.toLowerCase();
-    
-    // Check for academic citations and journal references
-    const hasCitations = /\b(?:doi|pmid|pubmed|journal|citation)\b/i.test(resultsText);
-    const hasJournalNames = /\b(?:jama|nejm|lancet|bmj|nih|nature|science|cell|journal)\b/i.test(resultsText);
-    const hasAcademicSources = /\b(?:study|research|clinical trial|meta-analysis|systematic review)\b/i.test(resultsText);
-    
-    // Check for actionable content
-    const hasActionableContent = /\b(?:recommend|should|can|treatment option|therapy|steps|guidelines|advice)\b/i.test(resultsText);
-    const hasNumericData = /\b\d+(?:\.\d+)?%?\s*(?:mg|g|mcg|iu|percent|patients|cases|risk)\b/i.test(resultsText);
-    
-    // Add points for quality indicators
-    if (hasCitations) score += 0.15;
-    if (hasJournalNames) score += 0.15;
-    if (hasAcademicSources) score += 0.1;
-    if (hasActionableContent) score += 0.1;
-    if (hasNumericData) score += 0.1;
-    
-    // Check for lack of specificity
-    const hasVagueLanguage = /\b(?:may|might|possibly|perhaps|unclear|not certain)\b/i.test(resultsText);
-    
-    // Reduce score for vague content
-    if (hasVagueLanguage && !hasAcademicSources) score -= 0.1;
-    
-    // Cap the score between 0.1 and 0.95
-    return Math.min(0.95, Math.max(0.1, score));
-  };
-
-  // Then in your JSX, add the chart above Related Health Topics
-  const resultQualityScore = calculateQualityScore();
 
   return (
     <div className={`results-page ${isLoading ? 'loading' : ''} ${isUploadModalOpen ? 'modal-open' : ''}`}>
@@ -478,31 +435,39 @@ const SearchResults: React.FC<SearchResultsProps> = ({
               <div className="markdown-content">
                 {dataSource === 'vnutrition' ? (
                   (() => {
+                    // Try to parse and display raw data for vnutrition
                     let nutrition;
                     try {
                       nutrition = typeof results === 'string' ? JSON.parse(results) : results;
+                      console.log('Raw nutrition object for debugging:', nutrition);
+                      
+                      if (nutrition && nutrition.found !== false) {
+                        return (
+                          <div>
+                            <h3>Nutrition Information</h3>
+                            <ul>
+                              <li>Calories per serving: {nutrition.calories_per_serving || 0}</li>
+                              <li>Protein: {nutrition.protein_g || 0}g</li>
+                              <li>Carbs: {nutrition.carbs_g || 0}g</li>
+                              <li>Fat: {nutrition.fat_g || 0}g</li>
+                              <li>NOVA Score: {nutrition.nova_classification || 1}</li>
+                              <li>Processing Level: {nutrition.nova_description || nutrition.processed_level || 'Unknown'}</li>
+                            </ul>
+                          </div>
+                        );
+                      } else {
+                        return (
+                          <div>
+                            <h3>Raw Database Data (Debug)</h3>
+                            <pre style={{ fontSize: '12px', background: '#f5f5f5', padding: '10px' }}>
+                              {JSON.stringify(nutrition, null, 2)}
+                            </pre>
+                          </div>
+                        );
+                      }
                     } catch {
-                      nutrition = results;
+                      return <div>Error parsing nutrition data</div>;
                     }
-                    if (!nutrition || nutrition === 'null') {
-                      return <div>No nutrition data found.</div>;
-                    }
-                    if (nutrition.found === false) {
-                      return <div>{nutrition.message}</div>;
-                    }
-                    return (
-                      <div>
-                        <h3>{nutrition.item || 'Unknown Product'}</h3>
-                        <ul>
-                          <li>Calories per serving: {nutrition.calories_per_serving ?? 'N/A'}</li>
-                          <li>Protein: {nutrition.macros?.protein ?? 'N/A'}</li>
-                          <li>Carbs: {nutrition.macros?.carbs ?? 'N/A'}</li>
-                          <li>Fat: {nutrition.macros?.fat ?? 'N/A'}</li>
-                          <li>Processed Level: {nutrition.processed_level ?? 'N/A'}</li>
-                          <li>Ingredients: {nutrition.verdict ?? 'N/A'}</li>
-                        </ul>
-                      </div>
-                    );
                   })()
                 ) : (
                   convertLinksToClickable(results)
@@ -522,10 +487,42 @@ const SearchResults: React.FC<SearchResultsProps> = ({
           </div>
           
           <div className="sidebar">
-            {/* Add the quality chart here */}
+            {/* Quality Chart */}
             <div className="quality-chart-container" style={{ marginBottom: "2rem" }}>
-              <ResultQualityPie qualityScore={resultQualityScore} />
+              <ResultQualityPie 
+                query={query}
+                results={results}
+                dataSource={dataSource}
+                citations={citations}
+              />
             </div>
+
+            {/* Nutrition Charts - Only show when we have nutrition data */}
+            {dataSource === 'vnutrition' && (
+              <>
+                <div className="nutrition-chart-container" style={{ marginBottom: "2rem" }}>
+                  <h3 style={{ fontSize: "1.1rem", marginBottom: "1rem", color: "#374151" }}>
+                    Nutrition Breakdown
+                  </h3>
+                  <NutritionChart 
+                    query={query}
+                    results={results}
+                    dataSource={dataSource}
+                  />
+                </div>
+
+                <div className="nova-chart-container" style={{ marginBottom: "2rem" }}>
+                  <h3 style={{ fontSize: "1.1rem", marginBottom: "1rem", color: "#374151" }}>
+                    Processing Level (NOVA Score)
+                  </h3>
+                  <NovaChart 
+                    query={query}
+                    results={results}
+                    dataSource={dataSource}
+                  />
+                </div>
+              </>
+            )}
             
             <div className="related-topics-card">
               <h3>Related Health Topics</h3>
@@ -541,7 +538,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({
                       </button>
                     </li>
                   ))
-                ) : (
+                ) : 
                   defaultRelatedTopics.map((topic, index) => (
                     <li key={index}>
                       <button 
@@ -552,7 +549,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({
                       </button>
                     </li>
                   ))
-                )}
+                }
               </ul>
             </div>
             
