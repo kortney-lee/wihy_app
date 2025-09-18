@@ -6,7 +6,7 @@ import { dbConfig } from './dbConfig';
 // Load environment variables at the top
 dotenv.config();
 
-let pool: sql.ConnectionPool | null = null;
+let pool: any = null;
 
 // SQL table creation scripts - WITHOUT foreign keys initially
 const createTablesSQL: Record<string, string> = {
@@ -153,6 +153,16 @@ const createIndexesSQL = [
    CREATE INDEX IX_ImageAnalyses_UserId_CreatedAt ON ImageAnalyses(user_id, created_at DESC)`
 ];
 
+function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) {
+    return error.message;
+  }
+  if (typeof error === 'string') {
+    return error;
+  }
+  return 'An unknown error occurred';
+}
+
 export async function createTables(): Promise<void> {
   if (!pool) {
     throw new Error('Database pool not initialized');
@@ -218,24 +228,32 @@ export async function initializeDatabase(): Promise<sql.ConnectionPool | null> {
     // Just test the connection, don't create tables
     const result = await pool.request().query('SELECT COUNT(*) as table_count FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = \'BASE TABLE\'');
     console.log(`Found ${result.recordset[0].table_count} tables in database`);
+
+    // Make sure to store the pool globally so getPool() can access it
+    pool = pool;
     
     return pool;
-  } catch (err: any) {
-    console.error('Database connection failed:', err.message);
+  } catch (error: unknown) {
+    console.error('Database connection failed:', getErrorMessage(error));
+    
     if (pool) { 
-      try { await pool.close(); } catch {} 
+      try { 
+        await pool.close(); 
+      } catch (closeError: unknown) {
+        console.error('Error closing pool:', getErrorMessage(closeError));
+      } 
     }
     pool = null;
     return null;
   }
 }
 
-export function getPool(): sql.ConnectionPool {
+export const getPool = () => {
   if (!pool) {
-    throw new Error('Database pool is not available');
+    throw new Error('Database pool is not initialized. Call initializeDatabase() first.');
   }
   return pool;
-}
+};
 
 export { sql };
 
@@ -244,6 +262,8 @@ export async function closeDatabase(): Promise<void> {
   try {
     await pool.close();
     console.log('Database connection closed');
+  } catch (error: unknown) {
+    console.error('Error closing database:', getErrorMessage(error));
   } finally {
     pool = null;
   }

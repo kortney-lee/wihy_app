@@ -10,16 +10,21 @@
   },
   "devDependencies": {
     "@types/axios": "^0.9.36",
+    "@types/chart.js": "^2.9.41",
     "@types/node": "^24.3.0",
     "@types/react": "^19.1.12",
     "@types/react-dom": "^19.1.9",
+    "@types/react-router-dom": "^5.3.3",
     "typescript": "^5.9.2"
   },
   "dependencies": {
     "axios": "^1.11.0",
+    "chart.js": "^4.5.0",
     "react": "^19.1.1",
+    "react-chartjs-2": "^5.3.0",
     "react-dom": "^19.1.1",
-    "react-scripts": "^5.0.1"
+    "react-router-dom": "^7.9.1",
+    "react-scripts": "^0.0.0"
   },
   "description": "vhealth is a React application designed to provide a comprehensive health management platform. This application allows users to track their health metrics, manage appointments, and access health-related resources.",
   "main": "config-overrides.js",

@@ -1,82 +1,297 @@
 import React from 'react';
+import {
+  Chart as ChartJS,
+  ArcElement,
+  Tooltip,
+  Legend,
+} from 'chart.js';
+import { Doughnut } from 'react-chartjs-2';
+
+ChartJS.register(ArcElement, Tooltip, Legend);
 
 interface ResultQualityPieProps {
-  qualityScore: number; // 0 to 1, where 1 is 100% good
+  query: string;
+  results: string;
+  dataSource: "error" | "openai" | "local" | "vnutrition";
+  citations?: string[];
 }
 
-const ResultQualityPie: React.FC<ResultQualityPieProps> = ({ qualityScore }) => {
-  // Calculate the stroke dasharray for the SVG circle
-  const circumference = 2 * Math.PI * 90; // 2πr where r=90
-  const goodOffset = circumference * (1 - qualityScore);
-  const goodPercentage = Math.round(qualityScore * 100);
-  const badPercentage = 100 - goodPercentage;
-  
+/* ====================== Evidence Confidence (Gated) ====================== */
+
+type Verdict = 'GOOD' | 'REVIEW' | 'BAD';
+
+/** Trusted domains for quick credibility checks. Tune anytime. */
+const TRUSTED_DOMAINS: Record<string, number> = {
+  'nih.gov': 1,
+  'ncbi.nlm.nih.gov': 1,  // PubMed
+  'who.int': 1,
+  'cdc.gov': 1,
+  'fda.gov': 1,
+  'usda.gov': 1,
+  'jamanetwork.com': 1,
+  'nejm.org': 1,
+  'thelancet.com': 1,
+  'bmj.com': 1,
+  'nature.com': 1,
+  'science.org': 1,
+  'mayoclinic.org': 1,
+  'harvard.edu': 1,
+  'stanford.edu': 1,
+  'clevelandclinic.org': 1,
+  'uptodate.com': 1,
+};
+
+const extractUrls = (text: string): string[] => {
+  const urlRegex = /(https?:\/\/[^\s)]+)(?=\)|\s|$)/g;
+  return [...text.matchAll(urlRegex)].map(m => m[1]);
+};
+
+const domainKey = (url: string): string | null => {
+  try {
+    const u = new URL(url);
+    const parts = u.hostname.split('.');
+    return parts.slice(-2).join('.');
+  } catch {
+    return null;
+  }
+};
+
+const hasStrongId = (text: string) =>
+  /doi\.org\/10\./i.test(text) || /pubmed\.ncbi\.nlm\.nih\.gov\/\d+/i.test(text);
+
+const hasSpecificNumbers = (lower: string) =>
+  /\b\d+(\.\d+)?\s?(mg|g|mcg|iu|kcal|calories|%)\b/.test(lower) || /\b\d+(\.\d+)?%/.test(lower);
+
+const hypeOrBS = (lower: string) =>
+  /(miracle|cure-all|100% guaranteed|secret|instantly|revolutionary|breakthrough|detox scam|shocking)/i.test(lower);
+
+const contradictionWithoutRefs = (lower: string) =>
+  /(contradictory|no consensus|insufficient evidence)/i.test(lower) &&
+  !hasStrongId(lower) &&
+  extractUrls(lower).length === 0;
+
+const recencyOK = (lower: string) => {
+  const years = (lower.match(/\b(20\d{2}|19\d{2})\b/g) || []).map(y => parseInt(y, 10));
+  if (years.length === 0) return true; // no year mentioned: don't punish
+  const mostRecent = Math.max(...years);
+  return new Date().getFullYear() - mostRecent <= 5;
+};
+
+const sourceGate = (text: string, dataSource: ResultQualityPieProps['dataSource']) => {
+  // Database sources count as trusted.
+  if (dataSource === 'vnutrition' || dataSource === 'local') return true;
+
+  // Otherwise require a strong id or a trusted domain link.
+  if (hasStrongId(text)) return true;
+  const urls = extractUrls(text);
+  for (const u of urls) {
+    const key = domainKey(u);
+    if (key && TRUSTED_DOMAINS[key]) return true;
+  }
+  return false;
+};
+
+/**
+ * Evaluate evidence confidence with HARD GATES to reduce ambiguity.
+ * Returns a discrete score for the ring (0.90 | 0.60 | 0.20) + verdict + reasons.
+ */
+function evaluateEvidenceConfidence(
+  query: string,
+  results: string,
+  dataSource: ResultQualityPieProps['dataSource'],
+  citations?: string[]
+): { score: number; verdict: Verdict; reasons: string[] } {
+  const text = results || '';
+  const lower = text.toLowerCase();
+
+  // Short-circuit invalid answers/queries
+  if (!text.trim() || /please (provide|clarify)/i.test(text)) {
+    return { score: 0.20, verdict: 'BAD', reasons: ['No usable answer'] };
+  }
+  if (/not (a|the) recognized|no information found|could not find|doesn'?t seem/i.test(text)) {
+    return { score: 0.20, verdict: 'BAD', reasons: ['Unrecognized topic'] };
+  }
+  if (/^[a-z0-9]{1,7}$/i.test(query) && !/^(hiv|flu|cold|covid|bp|bmi|gerd|ibs|std|uti)$/i.test(query)) {
+    return { score: 0.20, verdict: 'BAD', reasons: ['Query looks invalid'] };
+  }
+
+  // Merge citations into text for gate checks
+  const citationsText = (citations || []).join(' ');
+  const textWithCites = text + ' ' + citationsText;
+
+  // Gates
+  const gates = {
+    source: sourceGate(textWithCites, dataSource),
+    citations: hasStrongId(textWithCites) || extractUrls(textWithCites).length > 0,
+    specificity: hasSpecificNumbers(lower),
+    consistency: !(hypeOrBS(lower) || contradictionWithoutRefs(lower)),
+    recency: recencyOK(lower),
+  };
+
+  const passed = Object.values(gates).filter(Boolean).length;
+  const criticalOkay = (gates.source || gates.citations) && gates.specificity;
+
+  let verdict: Verdict;
+  if ((dataSource === 'vnutrition' || dataSource === 'local') && criticalOkay) {
+    verdict = 'GOOD';
+  } else if (passed >= 4 && criticalOkay) {
+    verdict = 'GOOD';
+  } else if (passed === 3 && !hypeOrBS(lower)) {
+    verdict = 'REVIEW'; // narrow gray zone
+  } else {
+    verdict = 'BAD';
+  }
+
+  // Discrete mapping to compress gray area
+  const score = verdict === 'GOOD' ? 0.90 : verdict === 'REVIEW' ? 0.60 : 0.20;
+
+  const reasons: string[] = [];
+  if (!gates.source) reasons.push('Weak source');
+  if (!gates.citations) reasons.push('No citations');
+  if (!gates.specificity) reasons.push('Low numeric specificity');
+  if (!gates.consistency) reasons.push('Inconsistent language');
+  if (!gates.recency) reasons.push('Out-of-date');
+
+  return { score, verdict, reasons };
+}
+
+/* ====================== Component ====================== */
+
+const ResultQualityPie: React.FC<ResultQualityPieProps> = ({
+  query,
+  results,
+  dataSource,
+  citations
+}) => {
+  const { score, verdict, reasons } = evaluateEvidenceConfidence(
+    query,
+    results,
+    dataSource,
+    citations
+  );
+
+  const percentage = Math.round(score * 100);
+  const remaining = 100 - percentage;
+
+  // Colors by verdict (lock to clear categories)
+  const colorByVerdict = (v: Verdict) =>
+    v === 'GOOD' ? '#10B981' : v === 'REVIEW' ? '#F59E0B' : '#EF4444';
+
+  const labelByVerdict = (v: Verdict) =>
+    v === 'GOOD' ? 'Good' : v === 'REVIEW' ? 'Needs review' : 'Poor';
+
+  const ringColor = colorByVerdict(verdict);
+  const verdictLabel = labelByVerdict(verdict);
+
+  const data = {
+    datasets: [
+      {
+        data: [percentage, remaining],
+        backgroundColor: [ringColor, '#E5E7EB'],
+        borderWidth: 0,
+        cutout: '70%',
+      },
+    ],
+  };
+
+  const options = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: { enabled: false },
+    },
+  };
+
+  const legendGoodColor = verdict === 'BAD' ? '#E5E7EB' : '#10B981';
+  const legendBadColor = verdict === 'BAD' ? '#EF4444' : '#E5E7EB';
+
   return (
-    <div style={{ width: 220, margin: '0 auto', textAlign: 'center' }}>
-      <svg width="220" height="220" viewBox="0 0 220 220">
-        {/* Background circle (red - bad) */}
-        <circle 
-          cx="110" 
-          cy="110" 
-          r="90" 
-          fill="transparent" 
-          stroke="#f44336" 
-          strokeWidth="30"
-        />
-        {/* Foreground circle (green - good) */}
-        <circle 
-          cx="110" 
-          cy="110" 
-          r="90" 
-          fill="transparent" 
-          stroke="#4caf50" 
-          strokeWidth="30"
-          strokeDasharray={circumference}
-          strokeDashoffset={goodOffset}
-          transform="rotate(-90, 110, 110)"
-        />
-        {/* White center */}
-        <circle 
-          cx="110" 
-          cy="110" 
-          r="70" 
-          fill="white" 
-        />
-        {/* Score text */}
-        <text 
-          x="110" 
-          y="105" 
-          textAnchor="middle" 
-          fontSize="24" 
-          fontWeight="bold"
+    <div style={{ textAlign: 'center' }}>
+      <div style={{ position: 'relative', height: '200px', width: '200px', margin: '0 auto' }}>
+        <Doughnut data={data} options={options} />
+        <div
+          style={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            textAlign: 'center',
+          }}
         >
-          {goodPercentage}%
-        </text>
-        <text 
-          x="110" 
-          y="130" 
-          textAnchor="middle" 
-          fontSize="16"
-        >
-          Quality
-        </text>
-      </svg>
-      
-      {/* Verdict */}
-      <div style={{ fontWeight: 600, marginTop: 8 }}>
-        {qualityScore > 0.7 ? '👍 Good Result' : '⚠️ Needs Review'}
+          <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#374151' }}>
+            {percentage}%
+          </div>
+          <div style={{ fontSize: '0.875rem', color: '#6B7280' }}>
+            Evidence
+          </div>
+        </div>
       </div>
-      
-      {/* Legend */}
-      <div style={{ display: 'flex', justifyContent: 'center', marginTop: 8 }}>
-        <div style={{ display: 'flex', alignItems: 'center', marginRight: 16 }}>
-          <div style={{ width: 12, height: 12, backgroundColor: '#4caf50', marginRight: 4 }}></div>
-          <span>Good: {goodPercentage}%</span>
+
+      <div style={{ marginTop: '1rem' }}>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginBottom: '0.5rem'
+          }}
+        >
+          <span
+            style={{
+              fontWeight: 500,
+              color: ringColor,
+              fontSize: '1rem'
+            }}
+          >
+            {verdictLabel}
+          </span>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center' }}>
-          <div style={{ width: 12, height: 12, backgroundColor: '#f44336', marginRight: 4 }}></div>
-          <span>Bad: {badPercentage}%</span>
+
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            gap: '1rem',
+            fontSize: '0.875rem'
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+            <div
+              style={{
+                width: '12px',
+                height: '12px',
+                backgroundColor: legendGoodColor,
+                borderRadius: '2px',
+              }}
+            />
+            <span>Good: {percentage}%</span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+            <div
+              style={{
+                width: '12px',
+                height: '12px',
+                backgroundColor: legendBadColor,
+                borderRadius: '2px',
+              }}
+            />
+            <span>Bad: {remaining}%</span>
+          </div>
         </div>
+
+        {/* Tiny rationale (first 1–2 reasons) */}
+        {reasons.length > 0 && (
+          <div
+            style={{
+              marginTop: '0.5rem',
+              fontSize: '0.85rem',
+              color: '#6B7280'
+            }}
+          >
+            {reasons.slice(0, 2).join(' • ')}
+          </div>
+        )}
       </div>
     </div>
   );
