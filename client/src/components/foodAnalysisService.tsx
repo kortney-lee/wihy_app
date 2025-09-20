@@ -40,73 +40,39 @@ interface AnalyzeImageResponse {
 
 const API_URL = 'http://localhost:5000/api';
 
-export const foodAnalysisService = {
-  // Analyze food image via API
-  analyzeFoodImage: async (imageFile: File): Promise<string | FoodAnalysisResult | null> => {
+// Create or update this file to properly send images to your backend
+
+class FoodAnalysisService {
+  private baseUrl = 'http://localhost:5000/api';
+
+  async analyzeFoodImage(file: File): Promise<any> {
     try {
-      console.log("Analyzing food image:", imageFile.name);
-      
-      // For demo purposes: if filename contains "blueberry", treat as blueberry image
-      if (imageFile.name.toLowerCase().includes("blueberr")) {
-        console.log("Detected blueberries in image name");
+      // Create FormData to send the file
+      const formData = new FormData();
+      formData.append('image', file); // This must match your backend's upload.single('image')
+
+      // Send to your backend endpoint
+      const response = await fetch(`${this.baseUrl}/analyze-image`, {
+        method: 'POST',
+        body: formData,
+        // Don't set Content-Type header - browser will set it with boundary
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
+
+      const result = await response.json();
+      console.log('Backend analysis result:', result);
       
-      // Mock API call with typed response
-      const response = await axios.post<AnalyzeImageResponse>(
-        `${API_URL}/analyze-image`, 
-        {
-          fileName: imageFile.name,
-          foodName: imageFile.name.toLowerCase().includes("blueberr") ? "blueberries" : "Sample Food"
-        }
-      );
+      // Return the food name or relevant data
+      return result.foodName || result.name || result.analysis || 'Unknown food item';
       
-      console.log("Image analysis response:", response.data);
-      
-      // Return the food name for search or the whole analysis result
-      if (response.data.foodName) {
-        return response.data.foodName;
-      } else if (response.data.name) {
-        return response.data.name;
-      } else {
-        return JSON.stringify(response.data);
-      }
     } catch (error) {
-      console.error("Error analyzing food image:", error);
+      console.error('Error analyzing food image:', error);
       throw error;
     }
-  },
-
-  // Fix the private method syntax - can't use 'private' keyword in object literals
-  formatFoodAnalysisResults: function(analysis: FoodAnalysisResult): string {
-    const { classification, nutrition, healthInsight, recommendations } = analysis;
-    
-    return `🍽️ **Food Analysis Results**
-
-**📸 Detected Item:** ${classification.foodName}
-**🎯 Confidence:** ${classification.confidence}%
-**📂 Category:** ${classification.category}
-${classification.portionSize ? `**📏 Portion Size:** ${classification.portionSize}` : ''}
-
-**📊 Nutrition Facts (per serving):**
-• **Calories:** ${nutrition.calories} kcal
-• **Protein:** ${nutrition.macros.protein}g
-• **Carbs:** ${nutrition.macros.carbs}g (${nutrition.macros.sugar}g sugar)
-• **Fat:** ${nutrition.macros.fat}g (${nutrition.macros.saturatedFat}g saturated)
-• **Fiber:** ${nutrition.macros.fiber}g
-• **Sodium:** ${nutrition.macros.sodium}mg
-
-**🎯 Health Score:** ${nutrition.healthScore}/100
-**🏷️ Processing Level:** NOVA ${nutrition.novaClassification}
-${nutrition.allergens.length > 0 ? `**⚠️ Potential Allergens:** ${nutrition.allergens.join(', ')}` : ''}
-**💳 SNAP Eligible:** ${nutrition.snapEligible ? 'Yes ✅' : 'No ❌'}
-
-**💡 Health Insight:**
-${healthInsight}
-
-**📋 Recommendations:**
-${recommendations.map((rec: string) => `• ${rec}`).join('\n')}
-
-**🔬 Sources:** AI Image Recognition, USDA FoodData Central, Nutritionix Database
-*This analysis is for educational purposes. Consult healthcare professionals for medical advice.*`;
   }
-};
+}
+
+export const foodAnalysisService = new FoodAnalysisService();

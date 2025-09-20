@@ -28,12 +28,12 @@ app.get('/api/health', (req, res) => {
 });
 
 // Register food search route BEFORE startServer function
-console.log('🍎 Registering food search route...');
+console.log('Registering food search route...');
 app.get('/api/search/food', (req, res) => {
-  console.log('🍎 Food search route accessed!', req.query);
+  console.log('Food search route accessed!', req.query);
   return searchFoodInDatabase(req, res);
 });
-console.log('✅ Food search route registered at /api/search/food');
+console.log('Food search route registered at /api/search/food');
 
 // Initialize database and start server
 async function startServer() {
@@ -42,35 +42,35 @@ async function startServer() {
     const pool = await initializeDatabase();
     
     if (pool) {
-      console.log('✅ Database initialized successfully');
+      console.log('Database initialized successfully');
       
       // Mount nutrition routes AFTER database is ready
-      console.log('📡 About to mount nutrition routes at /api');
+      console.log(' About to mount nutrition routes at /api');
       app.use('/api', nutritionRoutes);
-      console.log('✅ Nutrition routes mounted successfully');
+      console.log(' Nutrition routes mounted successfully');
       
-      console.log('✅ All routes registered');
+      console.log('All routes registered');
       
       // Start the server
       app.listen(PORT, () => {
-        console.log(`🚀 Server running on port ${PORT}`);
+        console.log(`Server running on port ${PORT}`);
         console.log('');
-        console.log('📡 Available routes:');
+        console.log(' Available routes:');
         console.log(`   GET  http://localhost:${PORT}/api/health`);
         console.log(`   GET  http://localhost:${PORT}/api/search/food?q=broccoli`); // This should now show
         console.log(`   POST http://localhost:${PORT}/api/analyze-image`);
         console.log('');
-        console.log('🧪 Test the food route:');
+        console.log(' Test the food route:');
         console.log(`   http://localhost:${PORT}/api/search/food?q=apple`);
       });
       
     } else {
-      console.error('❌ Database connection failed');
+      console.error('Database connection failed');
       process.exit(1);
     }
     
   } catch (error) {
-    console.error('💥 Failed to start server:', error);
+    console.error('Failed to start server:', error);
     process.exit(1);
   }
 }

@@ -5,7 +5,7 @@ import '../VHealthSearch.css';
 interface ImageUploadModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onFileSelect: (file: File) => Promise<void>;
+  onAnalysisComplete: (foodName: string) => void; // Changed from onFileSelect
   title?: string;
   subtitle?: string;
 }
@@ -13,9 +13,9 @@ interface ImageUploadModalProps {
 const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
   isOpen,
   onClose,
-  onFileSelect,
-  title = "Search any image with vHealth",
-  subtitle = "Upload food, medical, or health-related images for AI analysis"
+  onAnalysisComplete, // Updated prop name
+  title = "Upload Image",
+  subtitle = "Upload images for analysis"
 }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [imageUrl, setImageUrl] = useState('');
@@ -51,9 +51,13 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
 
   // Handle file input
   const handleFileInput = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    console.log('📁 File input triggered');
     const file = e.target.files?.[0];
+    console.log('📁 Selected file:', file);
     if (file) {
       await processFile(file);
+    } else {
+      console.log('❌ No file selected');
     }
   };
 
@@ -83,17 +87,53 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
     }
   };
 
-  // Process file and call parent handler
+  // Process file and analyze it
   const processFile = async (file: File) => {
+    console.log('🔍 STEP 1: File received:', {
+      name: file.name,
+      type: file.type,
+      size: file.size
+    });
+    
     setIsProcessing(true);
+    
     try {
-      await onFileSelect(file);
-      // Close modal after successful upload
-      onClose();
-      setImageUrl('');
+      console.log('🔍 STEP 2: Creating FormData...');
+      const formData = new FormData();
+      formData.append('image', file);
+      
+      console.log('🔍 STEP 3: Making API call...');
+      const response = await fetch('http://localhost:5000/api/analyze-image', {
+        method: 'POST',
+        body: formData,
+      });
+
+      console.log('🔍 STEP 4: Response received:', {
+        status: response.status,
+        statusText: response.statusText,
+        ok: response.ok
+      });
+
+      const result = await response.json();
+      console.log('🔍 STEP 5: Raw backend result:', result);
+      
+      // Let's see exactly what the backend is returning
+      console.log('🔍 STEP 6: Result analysis:', {
+        type: typeof result,
+        keys: Object.keys(result || {}),
+        foodName: result?.foodName,
+        success: result?.success,
+        fullResult: JSON.stringify(result, null, 2)
+      });
+      
+      let foodName = result?.foodName || result?.name || result?.food || 'unknown';
+      console.log('🔍 STEP 7: Extracted food name:', foodName);
+      
+      console.log('🔍 STEP 8: Triggering search for:', foodName);
+      onAnalysisComplete(foodName);
+      
     } catch (error) {
-      console.error('Error processing file:', error);
-      // Don't close modal on error so user can try again
+      console.error('❌ Error in processFile:', error);
     } finally {
       setIsProcessing(false);
     }
@@ -145,7 +185,7 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
             </div>
             
             {isProcessing ? (
-              <p className="upload-text">Processing image...</p>
+              <p className="upload-text">Analyzing image...</p>
             ) : (
               <p className="upload-text">
                 {isDragging ? 'Drop image here' : 'Drag an image here or'}{' '}
@@ -172,7 +212,7 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
         
         {/* Divider */}
         <div className="modal-divider">
-          <span>OR</span>
+          <span> </span>
         </div>
         
         {/* URL Input */}
@@ -195,7 +235,7 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
             onClick={handleUrlUpload}
             disabled={isProcessing || !imageUrl.trim()}
           >
-            {isProcessing ? 'Loading...' : 'Search'}
+            {isProcessing ? 'Analyzing...' : 'Search'}
           </button>
         </div>
         

@@ -220,21 +220,37 @@ export async function initializeDatabase(): Promise<sql.ConnectionPool | null> {
   console.log('Connecting to Azure SQL Database...');
   
   try {
-    pool = new sql.ConnectionPool(dbConfig);
-    await pool.connect();
-    
+    const config = {
+      server: process.env.DB_SERVER!,
+      database: process.env.DB_NAME!,
+      user: process.env.DB_USER!,
+      password: process.env.DB_PASSWORD!,
+      port: parseInt(process.env.DB_PORT || '1433'),
+      options: {
+        encrypt: true,
+        enableArithAbort: true,
+        trustServerCertificate: false
+      }
+    };
+
+    pool = await sql.connect(config);
     console.log('Connected to Azure SQL Database');
 
-    // Just test the connection, don't create tables
-    const result = await pool.request().query('SELECT COUNT(*) as table_count FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = \'BASE TABLE\'');
-    console.log(`Found ${result.recordset[0].table_count} tables in database`);
-
-    // Make sure to store the pool globally so getPool() can access it
-    pool = pool;
+    // Fixed table query - use proper Azure SQL syntax
+    try {
+      const tablesResult = await pool.request().query(`
+        SELECT TABLE_NAME 
+        FROM INFORMATION_SCHEMA.TABLES 
+        WHERE TABLE_TYPE = 'BASE TABLE'
+      `);
+      console.log(`Found ${tablesResult.recordset.length} tables in database`);
+    } catch (tableError) {
+      console.log('Could not query table list, but connection is working:', (tableError as Error).message);
+    }
     
     return pool;
-  } catch (error: unknown) {
-    console.error('Database connection failed:', getErrorMessage(error));
+  } catch (error) {
+    console.error('Database connection failed:', error);
     
     if (pool) { 
       try { 

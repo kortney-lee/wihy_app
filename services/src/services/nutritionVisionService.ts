@@ -1,12 +1,35 @@
 import { getPool, sql } from '../config/database'; // Use getPool instead of pool directly
+import vision from '@google-cloud/vision';
+import OpenAI from 'openai';
+
+// Initialize Google Vision client
+const googleVisionClient = new vision.ImageAnnotatorClient({
+  // You'll need to set up Google Cloud credentials
+  keyFilename: process.env.GOOGLE_APPLICATION_CREDENTIALS, // Path to your service account key
+  projectId: process.env.GOOGLE_CLOUD_PROJECT_ID,
+});
+
+// Initialize OpenAI client
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
 
 // Vision API interfaces
 interface VisionAnalysisResult {
   success: boolean;
   foodName: string;
+  confidence: number;
   tags: string[];
-  confidence?: number;
-  provider?: string;
+  provider: string;
+  googleResult?: any;
+  openaiResult?: any;
+  comparison?: {
+    match: boolean;
+    googleConfidence: number;
+    openaiConfidence: number;
+    finalChoice: string;
+    reasoning: string;
+  };
 }
 
 interface NutritionData {
@@ -24,30 +47,151 @@ interface NutritionData {
   message?: string;
 }
 
-// Mock Google Vision API response for now
-export const analyzeFoodImage = async (imageBuffer: Buffer): Promise<VisionAnalysisResult> => {
+// Analyze with Google Vision API
+const analyzeWithGoogle = async (imageBuffer: Buffer): Promise<any> => {
   try {
-    // TODO: Implement actual Google Vision API call
-    // For now, return mock data
-    const mockFoodLabels = ['apple', 'fruit', 'fresh'];
-    const mockWebEntities = ['healthy', 'organic', 'red apple'];
+    console.log('🔍 Analyzing with Google Vision API...');
+    
+    const [result] = await googleVisionClient.labelDetection({
+      image: { content: imageBuffer },
+    });
+
+    const labels = result.labelAnnotations || [];
+    console.log('Google Vision labels:', labels.map(l => `${l.description} (${l.score})`));
+
+    // Look for food-related labels
+    const foodLabels = labels.filter(label => 
+      label.description?.toLowerCase().includes('food') ||
+      label.description?.toLowerCase().includes('fruit') ||
+      label.description?.toLowerCase().includes('vegetable') ||
+      label.description?.toLowerCase().includes('meal') ||
+      label.description?.toLowerCase().includes('dish')
+    );
+
+    const topLabel = labels[0];
     
     return {
       success: true,
-      provider: 'google',
-      foodName: mockFoodLabels[0] || 'Unknown food',
-      tags: [...new Set([...mockFoodLabels, ...mockWebEntities])],
-      confidence: 0.85
+      foodName: topLabel?.description || 'Unknown Food',
+      confidence: topLabel?.score || 0,
+      allLabels: labels.slice(0, 5).map(l => ({
+        name: l.description,
+        confidence: l.score
+      })),
+      provider: 'google'
     };
   } catch (error) {
-    console.error('Google Vision API error:', error);
+    console.error('Google Vision analysis failed:', error);
     return {
       success: false,
-      foodName: 'Unknown food',
-      tags: [],
-      confidence: 0
+      error: error.message,
+      provider: 'google'
     };
   }
+};
+
+// Analyze with OpenAI Vision API
+const analyzeWithOpenAI = async (imageBuffer: Buffer): Promise<any> => {
+  try {
+    console.log('🔍 Analyzing with OpenAI Vision API...');
+    
+    const base64Image = imageBuffer.toString('base64');
+    
+    const response = await openai.chat.completions.create({
+      model: "gpt-4-vision-preview",
+      messages: [
+        {
+          role: "user",
+          content: [
+            { 
+              type: "text", 
+              text: "Analyze this image and identify the main food item. Respond with JSON format: {\"foodName\": \"item name\", \"confidence\": 0.9, \"description\": \"brief description\", \"tags\": [\"tag1\", \"tag2\"]}" 
+            },
+            { 
+              type: "image_url", 
+              image_url: { url: `data:image/jpeg;base64,${base64Image}` } 
+            }
+          ],
+        },
+      ],
+      max_tokens: 300,
+    });
+
+    const content = response.choices[0]?.message?.content;
+    console.log('OpenAI raw response:', content);
+
+    // Try to parse JSON response
+    let parsedResult;
+    try {
+      parsedResult = JSON.parse(content || '{}');
+    } catch (parseError) {
+      // Fallback if JSON parsing fails
+      parsedResult = {
+        foodName: content?.split('\n')[0] || 'Unknown Food',
+        confidence: 0.7,
+        description: content,
+        tags: []
+      };
+    }
+
+    return {
+      success: true,
+      ...parsedResult,
+      provider: 'openai',
+      rawResponse: content
+    };
+  } catch (error) {
+    console.error('OpenAI Vision analysis failed:', error);
+    return {
+      success: false,
+      error: error.message,
+      provider: 'openai'
+    };
+  }
+};
+
+// Compare results from both APIs
+const compareResults = (googleResult: any, openaiResult: any): any => {
+  const googleFood = googleResult.foodName?.toLowerCase() || '';
+  const openaiFood = openaiResult.foodName?.toLowerCase() || '';
+  
+  const match = googleFood.includes(openaiFood) || 
+                openaiFood.includes(googleFood) ||
+                googleFood === openaiFood;
+
+  let finalChoice = '';
+  let reasoning = '';
+
+  if (match) {
+    // Both agree - choose the one with higher confidence
+    if (googleResult.confidence > openaiResult.confidence) {
+      finalChoice = googleResult.foodName;
+      reasoning = 'Both APIs agree, Google had higher confidence';
+    } else {
+      finalChoice = openaiResult.foodName;
+      reasoning = 'Both APIs agree, OpenAI had higher confidence';
+    }
+  } else {
+    // Results differ - use a scoring system
+    const googleScore = googleResult.confidence * 0.6; // Google is good at labels
+    const openaiScore = openaiResult.confidence * 0.8; // OpenAI better at context
+
+    if (openaiScore > googleScore) {
+      finalChoice = openaiResult.foodName;
+      reasoning = 'Results differ, chose OpenAI based on context analysis';
+    } else {
+      finalChoice = googleResult.foodName;
+      reasoning = 'Results differ, chose Google based on label detection';
+    }
+  }
+
+  return {
+    match,
+    googleConfidence: googleResult.confidence,
+    openaiConfidence: openaiResult.confidence,
+    finalChoice,
+    reasoning
+  };
 };
 
 // Process uploaded food image
@@ -243,6 +387,54 @@ export const lookupBarcode = async (barcode: string): Promise<NutritionData> => 
     return {
       success: false,
       message: 'Error looking up barcode'
+    };
+  }
+};
+
+// Main analysis function that uses both APIs
+export const analyzeFoodImage = async (imageBuffer: Buffer): Promise<VisionAnalysisResult> => {
+  console.log('🔍 Starting dual API food analysis...');
+  
+  try {
+    // Run both analyses in parallel
+    const [googleResult, openaiResult] = await Promise.all([
+      analyzeWithGoogle(imageBuffer),
+      analyzeWithOpenAI(imageBuffer)
+    ]);
+
+    console.log('Google result:', googleResult);
+    console.log('OpenAI result:', openaiResult);
+
+    // Compare and choose best result
+    const comparison = compareResults(googleResult, openaiResult);
+    
+    console.log('Comparison result:', comparison);
+
+    return {
+      success: true,
+      foodName: comparison.finalChoice,
+      confidence: Math.max(googleResult.confidence || 0, openaiResult.confidence || 0),
+      tags: [
+        ...(googleResult.allLabels?.map((l: any) => l.name) || []),
+        ...(openaiResult.tags || [])
+      ],
+      provider: 'dual-api',
+      googleResult,
+      openaiResult,
+      comparison
+    };
+
+  } catch (error) {
+    console.error('Dual API analysis failed:', error);
+    
+    // Fallback to filename analysis
+    return {
+      success: false,
+      foodName: 'Unknown Food',
+      confidence: 0,
+      tags: [],
+      provider: 'error',
+      error: error.message
     };
   }
 };
