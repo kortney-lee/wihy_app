@@ -76,6 +76,12 @@ const VHealthApp: React.FC = () => {
   }, []);
 
   const handleSearch = async (query: string, pushToHistory = true) => {
+    console.log('🔍 SEARCH DEBUG: handleSearch called with query:', query);
+    
+    // Add debugging right when loading starts
+    setIsLoading(true);
+    console.log('🔍 SEARCH DEBUG: setIsLoading(true) called');
+    
     if (!query.trim()) return;
 
     const trimmedQuery = query.trim();
@@ -84,6 +90,7 @@ const VHealthApp: React.FC = () => {
     const cachedResults = searchCache.getCachedResult(trimmedQuery);
     
     if (cachedResults) {
+      console.log('🔍 SEARCH DEBUG: Using cached results');
       // Use cached results
       setCurrentQuery(trimmedQuery);
       setCurrentResults(cachedResults);
@@ -99,26 +106,12 @@ const VHealthApp: React.FC = () => {
         );
       }
     } else {
-      // Perform new search with ChatGPT/OpenAI
-      setIsLoading(true);
-      setCurrentQuery(trimmedQuery);
-      setCurrentView('results');
-      
-      if (pushToHistory) {
-        const url = `?q=${encodeURIComponent(trimmedQuery)}`;
-        window.history.pushState(
-          { view: 'results', query: trimmedQuery, results: '' },
-          '',
-          url
-        );
-      }
+      console.log('🔍 SEARCH DEBUG: Making new search request');
       
       try {
-        console.log('🔍 Searching with ChatGPT for:', trimmedQuery);
-        
-        // Get health information from ChatGPT or fallback
+        console.log('🔍 SEARCH DEBUG: About to call healthSearchService.searchHealthInfo');
         const healthData = await healthSearchService.searchHealthInfo(trimmedQuery);
-        setDataSource(healthData.dataSource);
+        console.log('🔍 SEARCH DEBUG: Got response from healthSearchService:', healthData);
         
         // Format the results for display
         const formattedResults = formatHealthResults(healthData);
@@ -149,11 +142,12 @@ const VHealthApp: React.FC = () => {
 
         console.log(`✅ Search completed using: ${healthData.dataSource === 'openai' ? 'ChatGPT' : 'Local Database'}`);
       } catch (error) {
-        console.error('❌ Search error:', error);
+        console.error('🔍 SEARCH DEBUG: Error in search:', error);
         const errorMessage = 'Sorry, we encountered an error while searching for health information. Please try again or consult with a healthcare provider for medical advice.';
         setCurrentResults(errorMessage);
         setDataSource('error');
       } finally {
+        console.log('🔍 SEARCH DEBUG: setIsLoading(false) called');
         setIsLoading(false);
         setCurrentPhotoId(null); // Reset after use
       }
@@ -277,49 +271,23 @@ const VHealthApp: React.FC = () => {
     setIsUploadModalOpen(true);
   };
 
-  // Add file select handler for the modal
-  const handleFileSelect = async (file: File) => {
-    setImage(file);
-    
-    // Generate a unique ID for this photo
-    const photoId = `photo_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    setCurrentPhotoId(photoId);
-    
-    // Add visual indicator
-    const searchInput = document.querySelector('.search-input') as HTMLInputElement;
-    if (searchInput) {
-      searchInput.classList.add('with-image');
-    }
-    
-    // Auto-analyze food using existing service
+  // Change this function name and simplify it:
+  const handleAnalysisComplete = async (foodName: string) => {
     try {
-      const foodAnalysisResult = await foodAnalysisService.analyzeFoodImage(file);
-      if (foodAnalysisResult) {
-        // Food detected - use the analysis as the search query
-        setCurrentQuery("Food nutrition analysis from uploaded image");
-        
-        // Convert object result to string if needed
-        if (typeof foodAnalysisResult === 'string') {
-          setCurrentResults(foodAnalysisResult);
-        } else {
-          // Handle FoodAnalysisResult object by extracting text content or stringify
-          setCurrentResults(
-            (foodAnalysisResult as any).details || 
-            (foodAnalysisResult as any).text || 
-            JSON.stringify(foodAnalysisResult)
-          );
-        }
-        
-        setCurrentView('results');
-        setDataSource('local');
-      } else {
-        // No food detected
-        setIsLoading(false);
-        alert("Could not identify any food in the image. Please try a different image.");
-      }
+      console.log('Image analysis completed, food detected:', foodName);
+      
+      // Set the analyzed food name as the search query
+      setCurrentQuery(foodName);
+      
+      // Trigger a search with the analyzed food name
+      await handleSearch(foodName);
+      
+      // Close the modal
+      setIsUploadModalOpen(false);
+      
     } catch (error) {
-      console.log('Food analysis failed, continuing with general image upload');
-      setCurrentQuery("Analyze this uploaded health-related image");
+      console.error('Error processing analyzed food:', error);
+      alert('Failed to process the analyzed food. Please try again.');
     }
   };
 
@@ -447,9 +415,9 @@ const VHealthApp: React.FC = () => {
       <ImageUploadModal
         isOpen={isUploadModalOpen}
         onClose={() => setIsUploadModalOpen(false)}
-        onFileSelect={handleFileSelect}
-        title="Upload What You Eat"
-        subtitle="Upload food, medical, or health-related images for AI analysis"
+        onAnalysisComplete={handleAnalysisComplete} // Changed from onFileSelect
+        title="Upload Image"
+        subtitle="Upload images for analysis"
       />
     </div>
   );

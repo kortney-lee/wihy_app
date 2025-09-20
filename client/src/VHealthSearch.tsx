@@ -2,123 +2,87 @@ import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './VHealthSearch.css';
 import ImageUploadModal from './components/ImageUploadModal';
-import { foodAnalysisService } from './components/foodAnalysisService';
 import LoginButton from './components/LoginButton/LoginButton';
 
 const VHealthSearch: React.FC = () => {
-  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [imageError, setImageError] = useState(false);
+  const navigate = useNavigate();
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const recognitionRef = useRef<any>(null);
 
-  const handleSearch = (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
-    
-    if (!searchQuery.trim()) return;
-    
-    console.log("Navigating to results for:", searchQuery);
-    navigate(`/results?q=${encodeURIComponent(searchQuery)}`);
-  };
-
-  const handleVoiceInput = () => {
-    if (!('webkitSpeechRecognition' in window)) {
-      alert('Speech recognition not supported in this browser');
-      return;
-    }
-
-    if (!recognitionRef.current) {
-      const recognition = new (window as any).webkitSpeechRecognition();
-      recognition.continuous = false;
-      recognition.interimResults = false;
-      recognition.lang = 'en-US';
-
-      recognition.onstart = () => {
-        setIsListening(true);
-      };
-
-      recognition.onresult = (event: any) => {
-        const transcript = event.results[0][0].transcript;
-        setSearchQuery(transcript);
-        setIsListening(false);
-      };
-
-      recognition.onerror = () => {
-        setIsListening(false);
-      };
-
-      recognition.onend = () => {
-        setIsListening(false);
-      };
-
-      recognitionRef.current = recognition;
-    }
-
-    if (!isListening) {
-      recognitionRef.current.start();
-    } else {
-      recognitionRef.current.stop();
-      setIsListening(false);
+  const handleSearch = async () => {
+    if (searchQuery.trim()) {
+      setIsLoading(true);
+      try {
+        // Add a small delay to show the spinner
+        await new Promise(resolve => setTimeout(resolve, 500));
+        navigate(`/results?q=${encodeURIComponent(searchQuery)}`);
+      } catch (error) {
+        console.error("Search error:", error);
+        setIsLoading(false);
+      }
     }
   };
 
-  const handleClearAll = () => {
-    setSearchQuery('');
-    setIsListening(false);
-    if (recognitionRef.current) {
-      recognitionRef.current.stop();
-    }
-  };
-
-  const handleFeelingHealthy = () => {
-    const healthyFoods = ['apple', 'broccoli', 'salmon', 'quinoa', 'blueberries'];
-    const randomFood = healthyFoods[Math.floor(Math.random() * healthyFoods.length)];
-    setSearchQuery(randomFood);
-  };
-  
-  const handleFileSelect = async (file: File): Promise<void> => {
+  const handleAnalysisComplete = async (foodName: string): Promise<void> => {
     setIsLoading(true);
     try {
-      const result = await foodAnalysisService.analyzeFoodImage(file);
-      console.log("File analysis result:", result);
+      console.log("Image analysis completed, food detected:", foodName);
       
-      let searchTerm = '';
-      
-      if (typeof result === 'string') {
-        searchTerm = result;
-      } else if (result && typeof result === 'object') {
-        searchTerm = (result as any).name || 
-                    (result as any).foodName || 
-                    (result as any).food || 
-                    'food item';
-      }
-      
-      if (searchTerm) {
-        setSearchQuery(searchTerm);
-        navigate(`/results?q=${encodeURIComponent(searchTerm)}`);
+      if (foodName) {
+        setSearchQuery(foodName);
+        // Add delay to show spinner
+        await new Promise(resolve => setTimeout(resolve, 500));
+        navigate(`/results?q=${encodeURIComponent(foodName)}`);
       }
     } catch (error) {
-      console.error("Error analyzing image:", error);
-    } finally {
+      console.error("Error processing analyzed food:", error);
       setIsLoading(false);
+    } finally {
       setIsUploadModalOpen(false);
     }
   };
 
+  // Loading overlay component
+  const LoadingOverlay = () => (
+    <div className="search-loading-overlay">
+      <div className="search-loading-content">
+        <div className="search-spinner"></div>
+        <p>Searching...</p>
+      </div>
+    </div>
+  );
+
   return (
     <div className="search-landing">
-      <div className="login-container" style={{ position: 'absolute', top: '20px', right: '20px' }}>
-        <LoginButton 
-          position="top-right"
-          className="login-button"
-        />
-      </div>
+      {/* Show loading overlay when searching */}
+      {isLoading && <LoadingOverlay />}
+      
+      <LoginButton 
+        position="top-right"
+        className="login-button-container"
+      />
 
       <div className="search-container-centered">
-        <h1 className="search-logo">
-          What is Healthy?
-        </h1>
+        <div className="logo-container">
+          {!imageError ? (
+            <img 
+              src="/assets/293a2ef6-826c-4ec9-9b26-c2abf3bb894f.png"
+              alt="What is Healthy?"
+              className="search-logo-image"
+              onError={() => setImageError(true)}
+              onLoad={() => setImageError(false)}
+            />
+          ) : (
+            <h1 className="search-logo">
+              What is Healthy?
+            </h1>
+          )}
+        </div>
         
         <div className="search-input-container">
           <form onSubmit={(e) => { 
@@ -133,14 +97,15 @@ const VHealthSearch: React.FC = () => {
               placeholder="Ask anything about health..."
               className="search-input"
               autoFocus
+              disabled={isLoading} // Disable input while loading
             />
           </form>
 
           <div className="search-icons">
-            {searchQuery && (
+            {searchQuery && !isLoading && (
               <button
                 type="button"
-                onClick={handleClearAll}
+                onClick={() => setSearchQuery('')}
                 className="icon-button clear-button"
                 aria-label="Clear all"
               >
@@ -155,6 +120,7 @@ const VHealthSearch: React.FC = () => {
               onClick={() => setIsUploadModalOpen(true)}
               className="icon-button"
               aria-label="Upload image"
+              disabled={isLoading} // Disable while loading
             >
               <svg viewBox="0 0 24 24" fill="currentColor">
                 <path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/>
@@ -163,9 +129,51 @@ const VHealthSearch: React.FC = () => {
             
             <button
               type="button"
-              onClick={handleVoiceInput}
+              onClick={() => {
+                if (isLoading) return; // Don't allow voice input while loading
+                
+                if (!('webkitSpeechRecognition' in window)) {
+                  alert('Speech recognition not supported in this browser');
+                  return;
+                }
+
+                if (!recognitionRef.current) {
+                  const recognition = new (window as any).webkitSpeechRecognition();
+                  recognition.continuous = false;
+                  recognition.interimResults = false;
+                  recognition.lang = 'en-US';
+
+                  recognition.onstart = () => {
+                    setIsListening(true);
+                  };
+
+                  recognition.onresult = (event: any) => {
+                    const transcript = event.results[0][0].transcript;
+                    setSearchQuery(transcript);
+                    setIsListening(false);
+                  };
+
+                  recognition.onerror = () => {
+                    setIsListening(false);
+                  };
+
+                  recognition.onend = () => {
+                    setIsListening(false);
+                  };
+
+                  recognitionRef.current = recognition;
+                }
+
+                if (!isListening) {
+                  recognitionRef.current.start();
+                } else {
+                  recognitionRef.current.stop();
+                  setIsListening(false);
+                }
+              }}
               className={`icon-button ${isListening ? 'listening' : ''}`}
               aria-label={isListening ? 'Stop listening' : 'Start voice input'}
+              disabled={isLoading} // Disable while loading
             >
               <svg viewBox="0 0 24 24" fill="currentColor">
                 <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
@@ -184,14 +192,20 @@ const VHealthSearch: React.FC = () => {
             className="search-btn primary"
             disabled={!searchQuery.trim() || isLoading}
           >
-            {isLoading ? 'Analyzing...' : 'Analyze Nutrition'}
+            {isLoading ? 'Searching...' : 'Analyze Nutrition'}
           </button>
           
           <button 
-            onClick={handleFeelingHealthy}
+            onClick={() => {
+              if (isLoading) return; // Don't allow while loading
+              const healthyFoods = ['apple', 'broccoli', 'salmon', 'quinoa', 'blueberries'];
+              const randomFood = healthyFoods[Math.floor(Math.random() * healthyFoods.length)];
+              setSearchQuery(randomFood);
+            }}
             className="search-btn secondary"
             type="button"
-            style={{ color: '#000000' }} // Force black text
+            style={{ color: '#000000' }}
+            disabled={isLoading} // Disable while loading
           >
             I'm Feeling Healthy
           </button>
@@ -201,9 +215,9 @@ const VHealthSearch: React.FC = () => {
       <ImageUploadModal
         isOpen={isUploadModalOpen}
         onClose={() => setIsUploadModalOpen(false)}
-        onFileSelect={handleFileSelect}
-        title="Upload Health Image"
-        subtitle="Upload food, medical, or health-related images for AI analysis"
+        onAnalysisComplete={handleAnalysisComplete}
+        title="Upload Image"
+        subtitle="Upload Image for Analysis"
       />
     </div>
   );

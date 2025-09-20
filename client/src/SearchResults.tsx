@@ -21,9 +21,9 @@ const defaultRelatedTopics = [
 ];
 
 const defaultResources = [
-  { text: "🩺 mHealth - Mobile Health Solutions", url: "https://mhealth.com" },
-  { text: "🏥 CDC - Health Guidelines", url: "https://cdc.gov/healthliving" },
-  { text: "🌍 WHO - Global Health Information", url: "https://who.int/health-topics" }
+  { text: "Nutrition ED - Learn More", url: "https://vowels.com" },
+  { text: "Nutrition 101", url: "https://members.vowels.com" },
+  { text: "The World Counts", url: "https://www.theworldcounts.com/" }
 ];
 
 // Define the dummy data for "test" queries
@@ -273,45 +273,11 @@ const SearchResults: React.FC<SearchResultsProps> = ({
     setIsUploadModalOpen(true);
   };
 
-  // Fix the handleFileSelect function:
-  const handleFileSelect = async (file: File) => {
-    setUploadLoading(true);
-    setImage(URL.createObjectURL(file));
-    
-    try {
-      // Use the existing foodAnalysisService instead of the undefined function
-      const result = await foodAnalysisService.analyzeFoodImage(file);
-      console.log("File analysis result:", result);
-      
-      let searchTerm = '';
-      
-      if (typeof result === 'string') {
-        searchTerm = result;
-      } else if (result && typeof result === 'object') {
-        searchTerm = (result as any).name || 
-                    (result as any).foodName || 
-                    (result as any).food || 
-                    'food item';
-      }
-      
-      if (searchTerm) {
-        setNewQuery(searchTerm);
-        onNewSearch(searchTerm); // Only one call now
-      } else {
-        setNotification({
-          message: 'Could not identify food in image',
-          type: 'error'
-        });
-      }
-    } catch (error) {
-      console.error('Error processing image:', error);
-      setNotification({
-        message: 'Error analyzing image. Please try again.',
-        type: 'error'
-      });
-    } finally {
-      setUploadLoading(false);
-      setIsUploadModalOpen(false);
+  // Simple handler that just triggers a new search
+  const handleAnalysisComplete = (foodName: string) => {
+    if (foodName) {
+      setNewQuery(foodName);
+      onNewSearch(foodName);
     }
   };
 
@@ -320,7 +286,10 @@ const SearchResults: React.FC<SearchResultsProps> = ({
     const files = Array.from(e.dataTransfer.files);
     const imageFile = files.find(file => file.type.startsWith('image/'));
     if (imageFile) {
-      handleFileSelect(imageFile);
+      // Instead of calling handleFileSelect, open the modal and let it handle the file
+      setIsUploadModalOpen(true);
+      // You could also trigger the analysis directly if you want immediate processing
+      // But it's cleaner to let the user see the modal and confirm
     }
   };
 
@@ -481,7 +450,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({
               ) : dataSource === 'error' ? (
                 <span className="error-source">Error retrieving data</span>
               ) : (
-                <span>From health database</span>
+                <span>What Is Healthy?</span>
               )}
             </div>
           </div>
@@ -580,18 +549,16 @@ const SearchResults: React.FC<SearchResultsProps> = ({
         
         {/* Loading State Overlay - Only shows when loading */}
         {isLoading && (
-          <div className="loading-container">
-            <Spinner message="Searching for health information..." />
-          </div>
+          <Spinner overlay message="Searching......." />
         )}
 
         {/* ImageUploadModal - always available */}
         <ImageUploadModal
           isOpen={isUploadModalOpen}
           onClose={() => setIsUploadModalOpen(false)}
-          onFileSelect={handleFileSelect}
-          title="Upload Health Image"
-          subtitle="Upload food, medical, or health-related images for AI analysis"
+          onAnalysisComplete={handleAnalysisComplete} // Changed from onFileSelect
+          title="Upload Image"
+          subtitle="Upload images for analysis"
         />
       </div>
     </div>

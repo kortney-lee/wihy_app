@@ -8,7 +8,6 @@ exports.insertSampleData = exports.closeDatabase = exports.sql = exports.getPool
 const mssql_1 = __importDefault(require("mssql"));
 exports.sql = mssql_1.default;
 const dotenv_1 = __importDefault(require("dotenv"));
-const dbConfig_1 = require("./dbConfig");
 // Load environment variables at the top
 dotenv_1.default.config();
 let pool = null;
@@ -149,6 +148,15 @@ const createIndexesSQL = [
     `IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_ImageAnalyses_UserId_CreatedAt')
    CREATE INDEX IX_ImageAnalyses_UserId_CreatedAt ON ImageAnalyses(user_id, created_at DESC)`
 ];
+function getErrorMessage(error) {
+    if (error instanceof Error) {
+        return error.message;
+    }
+    if (typeof error === 'string') {
+        return error;
+    }
+    return 'An unknown error occurred';
+}
 async function createTables() {
     if (!pool) {
         throw new Error('Database pool not initialized');
@@ -202,33 +210,55 @@ async function initializeDatabase() {
     }
     console.log('Connecting to Azure SQL Database...');
     try {
-        pool = new mssql_1.default.ConnectionPool(dbConfig_1.dbConfig);
-        await pool.connect();
+        const config = {
+            server: process.env.DB_SERVER,
+            database: process.env.DB_NAME,
+            user: process.env.DB_USER,
+            password: process.env.DB_PASSWORD,
+            port: parseInt(process.env.DB_PORT || '1433'),
+            options: {
+                encrypt: true,
+                enableArithAbort: true,
+                trustServerCertificate: false
+            }
+        };
+        pool = await mssql_1.default.connect(config);
         console.log('Connected to Azure SQL Database');
-        // Just test the connection, don't create tables
-        const result = await pool.request().query('SELECT COUNT(*) as table_count FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = \'BASE TABLE\'');
-        console.log(`Found ${result.recordset[0].table_count} tables in database`);
+        // Fixed table query - use proper Azure SQL syntax
+        try {
+            const tablesResult = await pool.request().query(`
+        SELECT TABLE_NAME 
+        FROM INFORMATION_SCHEMA.TABLES 
+        WHERE TABLE_TYPE = 'BASE TABLE'
+      `);
+            console.log(`Found ${tablesResult.recordset.length} tables in database`);
+        }
+        catch (tableError) {
+            console.log('Could not query table list, but connection is working:', tableError.message);
+        }
         return pool;
     }
-    catch (err) {
-        console.error('Database connection failed:', err.message);
+    catch (error) {
+        console.error('Database connection failed:', error);
         if (pool) {
             try {
                 await pool.close();
             }
-            catch { }
+            catch (closeError) {
+                console.error('Error closing pool:', getErrorMessage(closeError));
+            }
         }
         pool = null;
         return null;
     }
 }
 exports.initializeDatabase = initializeDatabase;
-function getPool() {
+const getPool = () => {
     if (!pool) {
-        throw new Error('Database pool is not available');
+        throw new Error('Database pool is not initialized. Call initializeDatabase() first.');
     }
     return pool;
-}
+};
 exports.getPool = getPool;
 async function closeDatabase() {
     if (!pool)
@@ -236,6 +266,9 @@ async function closeDatabase() {
     try {
         await pool.close();
         console.log('Database connection closed');
+    }
+    catch (error) {
+        console.error('Error closing database:', getErrorMessage(error));
     }
     finally {
         pool = null;
