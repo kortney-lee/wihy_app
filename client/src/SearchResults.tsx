@@ -3,7 +3,7 @@ import { searchCache } from './services/searchCache';
 import { photoStorageService } from './services/photoStorageService';
 import { foodAnalysisService } from './components/foodAnalysisService';
 import ImageUploadModal from './components/ImageUploadModal';
-import LoginButton from './components/LoginButton/LoginButton';
+import MultiAuthLogin from './components/shared/components/MultiAuthLogin';
 import ResultQualityPie from './components/ResultQualityPie';
 import NutritionChart from './components/NutritionChart';
 import NovaChart from './components/NovaChart';
@@ -307,11 +307,27 @@ const SearchResults: React.FC<SearchResultsProps> = ({
   // Check if current query is "test" to show dummy data styles
   const isTestQuery = query.toLowerCase().trim() === 'test';
 
+  // Add auth handlers
+  const handleUserChange = (user: any) => {
+    console.log('User changed in SearchResults:', user);
+  };
+
+  const handleSignIn = (user: any) => {
+    console.log('User signed in from SearchResults:', user);
+  };
+
+  const handleSignOut = () => {
+    console.log('User signed out from SearchResults');
+  };
+
   return (
     <div className={`results-page ${isLoading ? 'loading' : ''} ${isUploadModalOpen ? 'modal-open' : ''}`}>
-      <LoginButton 
+      <MultiAuthLogin 
         position="top-right"
         className="results-login-button"
+        onUserChange={handleUserChange}
+        onSignIn={handleSignIn}
+        onSignOut={handleSignOut}
       />
 
       {/* Always show header */}

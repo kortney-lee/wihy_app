@@ -663,7 +663,7 @@ h1.search-logo {
 }
 
 .search-landing .logo-container .search-logo-image,
-img[src*="293a2ef6-826c-4ec9-9b26-c2abf3bb894f"] {
+img[src*="whatishealthylogo"] {
   width: 600px !important;  /* match search box desktop cap */
   height: auto !important;
   object-fit: contain !important;
@@ -673,10 +673,18 @@ img[src*="293a2ef6-826c-4ec9-9b26-c2abf3bb894f"] {
 }
 
 @media (max-width: 768px) {
-  .search-landing .logo-container .search-logo-image { width: 500px !important; }
+  .search-landing .logo-container .search-logo-image,
+  img[src*="whatishealthylogo"] { 
+    width: 500px !important; 
+  }
 }
+
 @media (max-width: 480px) {
-  .search-landing .logo-container .search-logo-image { width: 90% !important; max-width: 320px !important; }
+  .search-landing .logo-container .search-logo-image,
+  img[src*="whatishealthylogo"] { 
+    width: 90% !important; 
+    max-width: 320px !important; 
+  }
 }
 
 /* =========================================
