@@ -6,7 +6,7 @@ import { healthSearchService } from './services/healthSearchService';
 import { photoStorageService } from './services/photoStorageService';
 import { foodAnalysisService } from './components/foodAnalysisService';
 import './VHealthSearch.css';
-import LoginButton from './components/LoginButton/LoginButton';
+import MultiAuthLogin from './components/shared/components/MultiAuthLogin';
 
 // Add TypeScript declaration for Speech Recognition
 declare global {
@@ -291,6 +291,18 @@ const VHealthApp: React.FC = () => {
     }
   };
 
+  const handleUserChange = (user: any) => {
+    console.log('User changed:', user);
+  };
+
+  const handleSignIn = (user: any) => {
+    console.log('User signed in:', user);
+  };
+
+  const handleSignOut = () => {
+    console.log('User signed out');
+  };
+
   if (currentView === 'results') {
     return (
       <SearchResults
@@ -306,9 +318,12 @@ const VHealthApp: React.FC = () => {
 
   return (
     <div className="search-container">
-      <LoginButton 
+      <MultiAuthLogin 
         position="top-right"
         className="main-login-button"
+        onUserChange={handleUserChange}
+        onSignIn={handleSignIn}
+        onSignOut={handleSignOut}
       />
 
       <h1 className="search-title">What is Healthy?</h1>

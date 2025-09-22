@@ -1,35 +1,56 @@
-import { getPool, sql } from '../config/database'; // Use getPool instead of pool directly
+import { getPool, sql } from '../config/database';
 import vision from '@google-cloud/vision';
 import OpenAI from 'openai';
 
-// Initialize Google Vision client
+// Initialize clients
 const googleVisionClient = new vision.ImageAnnotatorClient({
-  // You'll need to set up Google Cloud credentials
-  keyFilename: process.env.GOOGLE_APPLICATION_CREDENTIALS, // Path to your service account key
+  keyFilename: process.env.GOOGLE_APPLICATION_CREDENTIALS,
   projectId: process.env.GOOGLE_CLOUD_PROJECT_ID,
 });
 
-// Initialize OpenAI client
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-// Vision API interfaces
+// Type definitions
 interface VisionAnalysisResult {
   success: boolean;
   foodName: string;
   confidence: number;
   tags: string[];
   provider: string;
-  googleResult?: any;
-  openaiResult?: any;
-  comparison?: {
-    match: boolean;
-    googleConfidence: number;
-    openaiConfidence: number;
-    finalChoice: string;
-    reasoning: string;
-  };
+  error?: string;
+  googleResult?: GoogleVisionResult;
+  openaiResult?: OpenAIVisionResult;
+  comparison?: ComparisonResult;
+}
+
+interface GoogleVisionResult {
+  success: boolean;
+  foodName: string;
+  confidence: number;
+  allLabels: Array<{ name: string; confidence: number }>;
+  provider: string;
+  error?: string;
+}
+
+interface OpenAIVisionResult {
+  success: boolean;
+  foodName: string;
+  confidence: number;
+  description?: string;
+  tags: string[];
+  provider: string;
+  rawResponse?: string;
+  error?: string;
+}
+
+interface ComparisonResult {
+  match: boolean;
+  googleConfidence: number;
+  openaiConfidence: number;
+  finalChoice: string;
+  reasoning: string;
 }
 
 interface NutritionData {
@@ -47,8 +68,26 @@ interface NutritionData {
   message?: string;
 }
 
-// Analyze with Google Vision API
-const analyzeWithGoogle = async (imageBuffer: Buffer): Promise<any> => {
+interface ProcessedImageResult {
+  success: boolean;
+  analysis?: VisionAnalysisResult;
+  nutrition?: NutritionData;
+  timestamp?: string;
+  message?: string;
+}
+
+interface SaveResult {
+  success: boolean;
+  message: string;
+}
+
+// Utility functions
+const handleError = (error: unknown): string => {
+  return error instanceof Error ? error.message : 'Unknown error occurred';
+};
+
+// Google Vision API analysis
+const analyzeWithGoogle = async (imageBuffer: Buffer): Promise<GoogleVisionResult> => {
   try {
     console.log('🔍 Analyzing with Google Vision API...');
     
@@ -59,39 +98,41 @@ const analyzeWithGoogle = async (imageBuffer: Buffer): Promise<any> => {
     const labels = result.labelAnnotations || [];
     console.log('Google Vision labels:', labels.map(l => `${l.description} (${l.score})`));
 
-    // Look for food-related labels
+    // Look for food-related labels with better filtering
+    const foodKeywords = ['food', 'fruit', 'vegetable', 'meal', 'dish', 'produce', 'ingredient'];
     const foodLabels = labels.filter(label => 
-      label.description?.toLowerCase().includes('food') ||
-      label.description?.toLowerCase().includes('fruit') ||
-      label.description?.toLowerCase().includes('vegetable') ||
-      label.description?.toLowerCase().includes('meal') ||
-      label.description?.toLowerCase().includes('dish')
+      foodKeywords.some(keyword => 
+        label.description?.toLowerCase().includes(keyword)
+      )
     );
 
-    const topLabel = labels[0];
+    const bestLabel = foodLabels.length > 0 ? foodLabels[0] : labels[0];
     
     return {
       success: true,
-      foodName: topLabel?.description || 'Unknown Food',
-      confidence: topLabel?.score || 0,
+      foodName: bestLabel?.description || 'Unknown Food',
+      confidence: bestLabel?.score || 0,
       allLabels: labels.slice(0, 5).map(l => ({
-        name: l.description,
-        confidence: l.score
+        name: l.description || '',
+        confidence: l.score || 0
       })),
       provider: 'google'
     };
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Google Vision analysis failed:', error);
     return {
       success: false,
-      error: error.message,
-      provider: 'google'
+      foodName: 'Unknown Food',
+      confidence: 0,
+      allLabels: [],
+      provider: 'google',
+      error: handleError(error)
     };
   }
 };
 
-// Analyze with OpenAI Vision API
-const analyzeWithOpenAI = async (imageBuffer: Buffer): Promise<any> => {
+// OpenAI Vision API analysis
+const analyzeWithOpenAI = async (imageBuffer: Buffer): Promise<OpenAIVisionResult> => {
   try {
     console.log('🔍 Analyzing with OpenAI Vision API...');
     
@@ -120,12 +161,11 @@ const analyzeWithOpenAI = async (imageBuffer: Buffer): Promise<any> => {
     const content = response.choices[0]?.message?.content;
     console.log('OpenAI raw response:', content);
 
-    // Try to parse JSON response
-    let parsedResult;
+    // Parse JSON response with fallback
+    let parsedResult: any;
     try {
       parsedResult = JSON.parse(content || '{}');
     } catch (parseError) {
-      // Fallback if JSON parsing fails
       parsedResult = {
         foodName: content?.split('\n')[0] || 'Unknown Food',
         confidence: 0.7,
@@ -136,25 +176,32 @@ const analyzeWithOpenAI = async (imageBuffer: Buffer): Promise<any> => {
 
     return {
       success: true,
-      ...parsedResult,
+      foodName: parsedResult.foodName || 'Unknown Food',
+      confidence: parsedResult.confidence || 0.7,
+      description: parsedResult.description,
+      tags: Array.isArray(parsedResult.tags) ? parsedResult.tags : [],
       provider: 'openai',
-      rawResponse: content
+      rawResponse: content || ''
     };
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('OpenAI Vision analysis failed:', error);
     return {
       success: false,
-      error: error.message,
-      provider: 'openai'
+      foodName: 'Unknown Food',
+      confidence: 0,
+      tags: [],
+      provider: 'openai',
+      error: handleError(error)
     };
   }
 };
 
-// Compare results from both APIs
-const compareResults = (googleResult: any, openaiResult: any): any => {
+// Compare results and choose best option
+const compareResults = (googleResult: GoogleVisionResult, openaiResult: OpenAIVisionResult): ComparisonResult => {
   const googleFood = googleResult.foodName?.toLowerCase() || '';
   const openaiFood = openaiResult.foodName?.toLowerCase() || '';
   
+  // Check if results match
   const match = googleFood.includes(openaiFood) || 
                 openaiFood.includes(googleFood) ||
                 googleFood === openaiFood;
@@ -163,7 +210,7 @@ const compareResults = (googleResult: any, openaiResult: any): any => {
   let reasoning = '';
 
   if (match) {
-    // Both agree - choose the one with higher confidence
+    // Results agree - choose higher confidence
     if (googleResult.confidence > openaiResult.confidence) {
       finalChoice = googleResult.foodName;
       reasoning = 'Both APIs agree, Google had higher confidence';
@@ -172,8 +219,8 @@ const compareResults = (googleResult: any, openaiResult: any): any => {
       reasoning = 'Both APIs agree, OpenAI had higher confidence';
     }
   } else {
-    // Results differ - use a scoring system
-    const googleScore = googleResult.confidence * 0.6; // Google is good at labels
+    // Results differ - use weighted scoring
+    const googleScore = googleResult.confidence * 0.6; // Google good at labels
     const openaiScore = openaiResult.confidence * 0.8; // OpenAI better at context
 
     if (openaiScore > googleScore) {
@@ -194,47 +241,67 @@ const compareResults = (googleResult: any, openaiResult: any): any => {
   };
 };
 
-// Process uploaded food image
-export const processUploadedFoodImage = async (imageBuffer: Buffer): Promise<any> => {
-  try {
-    // Analyze the image
-    const visionResult = await analyzeFoodImage(imageBuffer);
-    
-    if (!visionResult.success) {
-      return {
-        success: false,
-        message: 'Failed to analyze image'
-      };
+// Generate mock nutrition data
+const generateMockNutritionData = (query: string): NutritionData => {
+  const mockDatabase: Record<string, Omit<NutritionData, 'success' | 'item'>> = {
+    'apple': {
+      calories_per_serving: 95,
+      macros: { protein: '0.5g', carbs: '25g', fat: '0.3g' },
+      processed_level: 'unprocessed',
+      verdict: 'Fresh fruit, excellent source of fiber and vitamin C',
+      snap_eligible: true
+    },
+    'banana': {
+      calories_per_serving: 105,
+      macros: { protein: '1.3g', carbs: '27g', fat: '0.4g' },
+      processed_level: 'unprocessed',
+      verdict: 'Fresh fruit, good source of potassium',
+      snap_eligible: true
+    },
+    'bread': {
+      calories_per_serving: 80,
+      macros: { protein: '3g', carbs: '15g', fat: '1g' },
+      processed_level: 'processed',
+      verdict: 'Processed grain product, check ingredients for whole grains',
+      snap_eligible: true
+    },
+    'chicken': {
+      calories_per_serving: 165,
+      macros: { protein: '31g', carbs: '0g', fat: '3.6g' },
+      processed_level: 'minimally processed',
+      verdict: 'Lean protein source, good for muscle building',
+      snap_eligible: true
     }
-    
-    // Get nutrition data for the detected food
-    const nutritionData = await fetchNutritionData(visionResult.foodName);
-    
-    return {
-      success: true,
-      analysis: visionResult,
-      nutrition: nutritionData,
-      timestamp: new Date().toISOString()
-    };
-    
-  } catch (error) {
-    console.error('Error processing uploaded image:', error);
-    return {
-      success: false,
-      message: 'Error processing image'
-    };
-  }
+  };
+  
+  // Find matching food item
+  const lowerQuery = query.toLowerCase();
+  const matchedKey = Object.keys(mockDatabase).find(key => 
+    lowerQuery.includes(key) || key.includes(lowerQuery)
+  );
+  
+  const baseData = matchedKey ? mockDatabase[matchedKey] : {
+    calories_per_serving: 150,
+    macros: { protein: '5g', carbs: '20g', fat: '3g' },
+    processed_level: 'unknown',
+    verdict: 'Nutrition information estimated',
+    snap_eligible: false
+  };
+  
+  return {
+    success: true,
+    item: query,
+    ...baseData
+  };
 };
 
-// Fetch nutrition data from database
-export const fetchNutritionData = async (query: string): Promise<NutritionData> => {
+// Database operations
+const fetchNutritionFromDatabase = async (query: string): Promise<NutritionData> => {
   try {
-    // Use getPool() with proper error handling
     const pool = getPool();
     const request = pool.request();
     request.input('query', sql.VarChar, query);
     
-    // Search by barcode or item name
     const result = await request.query(`
       SELECT TOP 1 * FROM dbo.NutritionData 
       WHERE barcode = @query 
@@ -266,70 +333,102 @@ export const fetchNutritionData = async (query: string): Promise<NutritionData> 
       };
     }
     
-    // Return mock data if not found in database
     return generateMockNutritionData(query);
     
-  } catch (error) {
-    console.error('Database error in fetchNutritionData:', error);
-    // Return mock data on database error
+  } catch (error: unknown) {
+    console.error('Database error:', error);
     return generateMockNutritionData(query);
   }
 };
 
-// Generate mock nutrition data when database lookup fails
-const generateMockNutritionData = (query: string): NutritionData => {
-  // Simple mock data based on common foods
-  const mockData: { [key: string]: Partial<NutritionData> } = {
-    'apple': {
-      calories_per_serving: 95,
-      macros: { protein: '0.5g', carbs: '25g', fat: '0.3g' },
-      processed_level: 'unprocessed',
-      verdict: 'Fresh fruit, excellent source of fiber and vitamin C',
-      snap_eligible: true
-    },
-    'banana': {
-      calories_per_serving: 105,
-      macros: { protein: '1.3g', carbs: '27g', fat: '0.4g' },
-      processed_level: 'unprocessed',
-      verdict: 'Fresh fruit, good source of potassium',
-      snap_eligible: true
-    },
-    'bread': {
-      calories_per_serving: 80,
-      macros: { protein: '3g', carbs: '15g', fat: '1g' },
-      processed_level: 'processed',
-      verdict: 'Processed grain product, check ingredients for whole grains',
-      snap_eligible: true
-    }
-  };
+// Main exported functions
+export const analyzeFoodImage = async (imageBuffer: Buffer): Promise<VisionAnalysisResult> => {
+  console.log('🔍 Starting dual API food analysis...');
   
-  // Find the closest match or use default
-  const lowerQuery = query.toLowerCase();
-  const matchedKey = Object.keys(mockData).find(key => 
-    lowerQuery.includes(key) || key.includes(lowerQuery)
-  );
-  
-  const baseData = matchedKey ? mockData[matchedKey] : {
-    calories_per_serving: 150,
-    macros: { protein: '5g', carbs: '20g', fat: '3g' },
-    processed_level: 'unknown',
-    verdict: 'Nutrition information estimated',
-    snap_eligible: false
-  };
-  
-  return {
-    success: true,
-    item: query,
-    ...baseData
-  };
+  try {
+    // Run both analyses in parallel for better performance
+    const [googleResult, openaiResult] = await Promise.all([
+      analyzeWithGoogle(imageBuffer),
+      analyzeWithOpenAI(imageBuffer)
+    ]);
+
+    console.log('Analysis results:', { googleResult, openaiResult });
+
+    // Compare and choose best result
+    const comparison = compareResults(googleResult, openaiResult);
+    
+    // Extract tags from both sources
+    const combinedTags = [
+      ...(googleResult.allLabels?.map(l => l.name) || []),
+      ...(openaiResult.tags || [])
+    ].filter((tag, index, self) => self.indexOf(tag) === index); // Remove duplicates
+
+    return {
+      success: true,
+      foodName: comparison.finalChoice,
+      confidence: Math.max(googleResult.confidence, openaiResult.confidence),
+      tags: combinedTags,
+      provider: 'dual-api',
+      googleResult,
+      openaiResult,
+      comparison
+    };
+
+  } catch (error: unknown) {
+    console.error('Dual API analysis failed:', error);
+    
+    return {
+      success: false,
+      foodName: 'Unknown Food',
+      confidence: 0,
+      tags: [],
+      provider: 'error',
+      error: handleError(error)
+    };
+  }
 };
 
-// Save nutrition data to database
-export const saveNutritionData = async (barcode: string, data: any): Promise<{ success: boolean; message: string }> => {
+export const processUploadedFoodImage = async (imageBuffer: Buffer): Promise<ProcessedImageResult> => {
   try {
-    // Use getPool() with proper error handling
+    // Step 1: Analyze the image
+    const analysisResult = await analyzeFoodImage(imageBuffer);
+    
+    if (!analysisResult.success) {
+      return {
+        success: false,
+        message: 'Failed to analyze food image'
+      };
+    }
+    
+    // Step 2: Get nutrition data
+    const nutritionData = await fetchNutritionFromDatabase(analysisResult.foodName);
+    
+    return {
+      success: true,
+      analysis: analysisResult,
+      nutrition: nutritionData,
+      timestamp: new Date().toISOString()
+    };
+    
+  } catch (error: unknown) {
+    console.error('Error processing uploaded image:', error);
+    return {
+      success: false,
+      message: 'Error processing uploaded food image'
+    };
+  }
+};
+
+export const fetchNutritionData = async (query: string): Promise<NutritionData> => {
+  return await fetchNutritionFromDatabase(query);
+};
+
+export const saveNutritionData = async (barcode: string, data: NutritionData): Promise<SaveResult> => {
+  try {
     const pool = getPool();
     const request = pool.request();
+    
+    // Set up parameters
     request.input('barcode', sql.VarChar, barcode);
     request.input('itemName', sql.NVarChar, data.item || '');
     request.input('calories', sql.Float, data.calories_per_serving || null);
@@ -340,6 +439,7 @@ export const saveNutritionData = async (barcode: string, data: any): Promise<{ s
     request.input('ingredients', sql.NVarChar, data.verdict || null);
     request.input('snapEligible', sql.Bit, data.snap_eligible || false);
     
+    // Use MERGE for upsert operation
     await request.query(`
       MERGE INTO dbo.NutritionData AS target
       USING (SELECT @barcode AS barcode) AS source
@@ -360,81 +460,37 @@ export const saveNutritionData = async (barcode: string, data: any): Promise<{ s
         VALUES (@barcode, @itemName, @calories, @protein, @carbs, @fat, @processedLevel, @ingredients, @snapEligible, GETDATE(), GETDATE());
     `);
     
-    return { success: true, message: 'Nutrition data saved successfully' };
+    return { 
+      success: true, 
+      message: 'Nutrition data saved successfully' 
+    };
     
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error saving nutrition data:', error);
-    return { success: false, message: 'Failed to save nutrition data' };
+    return { 
+      success: false, 
+      message: 'Failed to save nutrition data to database' 
+    };
   }
 };
 
-// Barcode lookup function
 export const lookupBarcode = async (barcode: string): Promise<NutritionData> => {
   try {
-    // First try database lookup
-    const dbResult = await fetchNutritionData(barcode);
+    // Try database lookup first
+    const result = await fetchNutritionFromDatabase(barcode);
     
-    if (dbResult.success && dbResult.item) {
-      return dbResult;
+    if (result.success && result.item) {
+      return result;
     }
     
-    // TODO: If not found in database, try external APIs
-    // For now, return mock data
+    // If not found, return mock data with barcode info
     return generateMockNutritionData(`Product ${barcode}`);
     
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error looking up barcode:', error);
     return {
       success: false,
-      message: 'Error looking up barcode'
-    };
-  }
-};
-
-// Main analysis function that uses both APIs
-export const analyzeFoodImage = async (imageBuffer: Buffer): Promise<VisionAnalysisResult> => {
-  console.log('🔍 Starting dual API food analysis...');
-  
-  try {
-    // Run both analyses in parallel
-    const [googleResult, openaiResult] = await Promise.all([
-      analyzeWithGoogle(imageBuffer),
-      analyzeWithOpenAI(imageBuffer)
-    ]);
-
-    console.log('Google result:', googleResult);
-    console.log('OpenAI result:', openaiResult);
-
-    // Compare and choose best result
-    const comparison = compareResults(googleResult, openaiResult);
-    
-    console.log('Comparison result:', comparison);
-
-    return {
-      success: true,
-      foodName: comparison.finalChoice,
-      confidence: Math.max(googleResult.confidence || 0, openaiResult.confidence || 0),
-      tags: [
-        ...(googleResult.allLabels?.map((l: any) => l.name) || []),
-        ...(openaiResult.tags || [])
-      ],
-      provider: 'dual-api',
-      googleResult,
-      openaiResult,
-      comparison
-    };
-
-  } catch (error) {
-    console.error('Dual API analysis failed:', error);
-    
-    // Fallback to filename analysis
-    return {
-      success: false,
-      foodName: 'Unknown Food',
-      confidence: 0,
-      tags: [],
-      provider: 'error',
-      error: error.message
+      message: `Error looking up barcode: ${barcode}`
     };
   }
 };
