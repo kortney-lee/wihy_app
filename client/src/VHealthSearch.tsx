@@ -406,7 +406,7 @@ const VHealthSearch: React.FC = () => {
         <div className="logo-container">
           {!imageError ? (
             <img 
-              src="/assets/whatishealthylogo.svg"
+              src="/assets/whatishealthylogo.png"
               alt="What is Healthy?"
               className="search-logo-image"
               onError={() => setImageError(true)}
