@@ -3,7 +3,7 @@ import { searchCache } from './services/searchCache';
 import { photoStorageService } from './services/photoStorageService';
 import { foodAnalysisService } from './components/foodAnalysisService';
 import ImageUploadModal from './components/ImageUploadModal';
-import MultiAuthLogin from './components/shared/components/MultiAuthLogin';
+import MultiAuthLogin from './components/MultiAuthLogin';
 import ResultQualityPie from './components/ResultQualityPie';
 import NutritionChart from './components/NutritionChart';
 import NovaChart from './components/NovaChart';
@@ -133,8 +133,12 @@ const SearchResults: React.FC<SearchResultsProps> = ({
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [notification, setNotification] = useState<{message: string, type: string} | null>(null);
   const [isUploadLoading, setUploadLoading] = useState(false);
+  const [lastProcessedQuery, setLastProcessedQuery] = useState<string>('');
   const recognitionRef = useRef<any>(null);
 
+  // Check if we have valid results to display
+  const hasValidResults = results && results.trim() !== '' && !isLoading;
+  
   // Cache results when they change
   useEffect(() => {
     if (query && results && !isLoading) {
@@ -175,21 +179,22 @@ const SearchResults: React.FC<SearchResultsProps> = ({
     }
   }, [notification]);
 
-  // Handle new search submission
+  // Handle new search submission - only allow if user explicitly searches from results page
   const handleTextSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!input.trim()) return;
+    if (!input.trim() || isLoading) return;
     
     const trimmedQuery = input.trim();
     
-    // Check for test query - return fake data without API call
-    if (trimmedQuery.toLowerCase() === 'test') {
-      console.log('Test query detected in SearchResults - avoiding API call');
-      onNewSearch(trimmedQuery); // This will trigger the test logic in parent
+    // Prevent duplicate searches
+    if (trimmedQuery === lastProcessedQuery || trimmedQuery === query) {
+      console.log('Preventing duplicate search for:', trimmedQuery);
       return;
     }
     
+    setLastProcessedQuery(trimmedQuery);
     onNewSearch(trimmedQuery);
+    setInput(''); // Clear input after search
   };
 
   // Handle voice input
@@ -273,10 +278,12 @@ const SearchResults: React.FC<SearchResultsProps> = ({
     setIsUploadModalOpen(true);
   };
 
-  // Simple handler that just triggers a new search
+  // Simple handler that just triggers a new search - only when user explicitly requests it
   const handleAnalysisComplete = (foodName: string) => {
-    if (foodName) {
+    if (foodName && foodName !== lastProcessedQuery && foodName !== query) {
+      console.log('User explicit search from image analysis:', foodName);
       setNewQuery(foodName);
+      setLastProcessedQuery(foodName);
       onNewSearch(foodName);
     }
   };
@@ -299,284 +306,319 @@ const SearchResults: React.FC<SearchResultsProps> = ({
 
   const handleNewSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newQuery.trim()) return;
-    onNewSearch(newQuery);
+    if (!newQuery.trim() || isLoading) return;
+    
+    const trimmedQuery = newQuery.trim();
+    
+    // Prevent duplicate searches
+    if (trimmedQuery === lastProcessedQuery || trimmedQuery === query) {
+      console.log('Preventing duplicate search for:', trimmedQuery);
+      return;
+    }
+    
+    console.log('User explicit search from new query:', trimmedQuery);
+    setLastProcessedQuery(trimmedQuery);
+    onNewSearch(trimmedQuery);
     setNewQuery(''); // Reset after search
   };
+
+  // Update last processed query when props change
+  useEffect(() => {
+    if (query && query !== lastProcessedQuery) {
+      setLastProcessedQuery(query);
+    }
+  }, [query]);
 
   // Check if current query is "test" to show dummy data styles
   const isTestQuery = query.toLowerCase().trim() === 'test';
 
-  // Add auth handlers
-  const handleUserChange = (user: any) => {
-    console.log('User changed in SearchResults:', user);
-  };
-
-  const handleSignIn = (user: any) => {
-    console.log('User signed in from SearchResults:', user);
-  };
-
-  const handleSignOut = () => {
-    console.log('User signed out from SearchResults');
-  };
-
   return (
     <div className={`results-page ${isLoading ? 'loading' : ''} ${isUploadModalOpen ? 'modal-open' : ''}`}>
-      <MultiAuthLogin 
-        position="top-right"
-        className="results-login-button"
-        onUserChange={handleUserChange}
-        onSignIn={handleSignIn}
-        onSignOut={handleSignOut}
-      />
+      {/* Login button - always visible */}
+      <div style={{
+  position: 'fixed',
+  top: '20px',
+  right: '20px',
+  zIndex: 1000
+}}>
+  <MultiAuthLogin className="results-login-button" />
+</div>
 
-      {/* Always show header */}
-      <div className="results-search-header">
-        <div className="search-input-container">
-          <form onSubmit={handleNewSearchSubmit}>
-            <input
-              type="text"
-              placeholder="Ask anything about health..."
-              value={newQuery}
-              onChange={(e) => setNewQuery(e.target.value)}
-              className="search-input results-search-input"
-              data-query={isTestQuery ? 'test' : ''}
-            />
-          </form>
-          
-          {/* Show image chip when image is uploaded */}
-          {image && (
-            <div className="image-preview">
-              <div className="image-icon">📷</div>
-              <span className="image-name">
-                {typeof image === 'object' && image !== null ? image.name : 'Uploaded image'}
-              </span>
-              <button
-                type="button"
-                onClick={() => {
-                  setImage(null);
-                  setCurrentPhotoId(null);
-                  const searchInput = document.querySelector('.results-search-input') as HTMLInputElement;
-                  if (searchInput) {
-                    searchInput.classList.remove('with-image');
-                  }
-                }}
-                className="remove-image"
-                aria-label="Remove image"
-              >
-                ×
-              </button>
-            </div>
-          )}
-          
-          <div className="search-icons">
-            {(newQuery || image) && (
-              <button
-                type="button"
-                onClick={handleClearAll}
-                className="icon-button clear-button"
-                aria-label="Clear all"
-              >
-                <svg viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
-                </svg>
-              </button>
-            )}
-            
-            <button
-              type="button"
-              onClick={handleCameraClick}
-              className="icon-button"
-              aria-label="Upload image"
-            >
-              <svg viewBox="0 0 24 24" fill="currentColor">
-                <path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/>
-              </svg>
-            </button>
-            
-            <button
-              type="button"
-              onClick={handleVoiceInput}
-              className={`icon-button ${isListening ? 'listening' : ''}`}
-              aria-label={isListening ? 'Stop listening' : 'Start voice input'}
-            >
-              <svg viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
-                <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.28c3.39-.49 6-3.3 6-6.72h-2z"/>
-              </svg>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Always show Results Content */}
-      <div className="results-container">
-        <h1 className="results-header">Search Results for: "{query}"</h1>
-        
-        <div className="results-content">
-          <div className="health-info-card">
-            <div className="health-info-content">
-              {/* Use the link conversion function */}
-              <div className="markdown-content">
-                {dataSource === 'vnutrition' ? (
-                  (() => {
-                    // Try to parse and display raw data for vnutrition
-                    let nutrition;
-                    try {
-                      nutrition = typeof results === 'string' ? JSON.parse(results) : results;
-                      console.log('Raw nutrition object for debugging:', nutrition);
-                      
-                      if (nutrition && nutrition.found !== false) {
-                        return (
-                          <div>
-                            <h3>Nutrition Information</h3>
-                            <ul>
-                              <li>Calories per serving: {nutrition.calories_per_serving || 0}</li>
-                              <li>Protein: {nutrition.protein_g || 0}g</li>
-                              <li>Carbs: {nutrition.carbs_g || 0}g</li>
-                              <li>Fat: {nutrition.fat_g || 0}g</li>
-                              <li>NOVA Score: {nutrition.nova_classification || 1}</li>
-                              <li>Processing Level: {nutrition.nova_description || nutrition.processed_level || 'Unknown'}</li>
-                            </ul>
-                          </div>
-                        );
-                      } else {
-                        return (
-                          <div>
-                            <h3>Raw Database Data (Debug)</h3>
-                            <pre style={{ fontSize: '12px', background: '#f5f5f5', padding: '10px' }}>
-                              {JSON.stringify(nutrition, null, 2)}
-                            </pre>
-                          </div>
-                        );
+      {/* ONLY show loading spinner when loading - hide EVERYTHING else */}
+      {isLoading ? (
+        <Spinner overlay message="Searching......." />
+      ) : (
+        /* ONLY show content when NOT loading */
+        <>
+          {/* Search header */}
+          <div className="results-search-header">
+            <div className="search-input-container">
+              <form onSubmit={handleNewSearchSubmit}>
+                <input
+                  type="text"
+                  placeholder="Ask anything about health..."
+                  value={newQuery}
+                  onChange={(e) => setNewQuery(e.target.value)}
+                  className="search-input results-search-input"
+                  data-query={isTestQuery ? 'test' : ''}
+                />
+              </form>
+              
+              {/* Image preview */}
+              {image && (
+                <div className="image-preview">
+                  <div className="image-icon">📷</div>
+                  <span className="image-name">
+                    {typeof image === 'object' && image !== null ? image.name : 'Uploaded image'}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setImage(null);
+                      setCurrentPhotoId(null);
+                      const searchInput = document.querySelector('.results-search-input') as HTMLInputElement;
+                      if (searchInput) {
+                        searchInput.classList.remove('with-image');
                       }
-                    } catch {
-                      return <div>Error parsing nutrition data</div>;
-                    }
-                  })()
-                ) : (
-                  convertLinksToClickable(results)
+                    }}
+                    className="remove-image"
+                    aria-label="Remove image"
+                  >
+                    ×
+                  </button>
+                </div>
+              )}
+              
+              <div className="search-icons">
+                {(newQuery || image) && (
+                  <button
+                    type="button"
+                    onClick={handleClearAll}
+                    className="icon-button clear-button"
+                    aria-label="Clear all"
+                  >
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                    </svg>
+                  </button>
                 )}
+                
+                <button
+                  type="button"
+                  onClick={handleCameraClick}
+                  className="icon-button"
+                  aria-label="Upload image"
+                >
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/>
+                  </svg>
+                </button>
+                
+                <button
+                  type="button"
+                  onClick={handleVoiceInput}
+                  className={`icon-button ${isListening ? 'listening' : ''}`}
+                  aria-label={isListening ? 'Stop listening' : 'Start voice input'}
+                >
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
+                    <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.28c3.39-.49 6-3.3 6-6.72h-2z"/>
+                  </svg>
+                </button>
               </div>
             </div>
-            
-            <div className="data-source-indicator">
-              {dataSource === 'openai' ? (
-                <span>Powered by AI</span>
-              ) : dataSource === 'error' ? (
-                <span className="error-source">Error retrieving data</span>
-              ) : (
-                <span>What Is Healthy?</span>
-              )}
-            </div>
           </div>
-          
-          <div className="sidebar">
-            {/* Quality Chart */}
-            <div className="quality-chart-container" style={{ marginBottom: "2rem" }}>
-              <ResultQualityPie 
-                query={query}
-                results={results}
-                dataSource={dataSource}
-                citations={citations}
-              />
-            </div>
 
-            {/* Nutrition Charts - Only show when we have nutrition data */}
-            {dataSource === 'vnutrition' && (
+          {/* Results Container - ONLY when NOT loading */}
+          <div className="results-container">
+            {hasValidResults ? (
               <>
-                <div className="nutrition-chart-container" style={{ marginBottom: "2rem" }}>
-                  <h3 style={{ fontSize: "1.1rem", marginBottom: "1rem", color: "#374151" }}>
-                    Nutrition Breakdown
-                  </h3>
-                  <NutritionChart 
-                    query={query}
-                    results={results}
-                    dataSource={dataSource}
-                  />
-                </div>
+                <h1 className="results-header">Search Results for: "{query}"</h1>
+                
+                <div className="results-content">
+                  {/* Main content */}
+                  <div className="health-info-card">
+                    <div className="health-info-content">
+                      <div className="markdown-content">
+                        {dataSource === 'vnutrition' ? (
+                          (() => {
+                            let nutrition;
+                            try {
+                              nutrition = typeof results === 'string' ? JSON.parse(results) : results;
+                              console.log('Raw nutrition object for debugging:', nutrition);
+                              
+                              if (nutrition && nutrition.found !== false) {
+                                return (
+                                  <div>
+                                    <h3>Nutrition Information</h3>
+                                    <ul>
+                                      <li>Calories per serving: {nutrition.calories_per_serving || 0}</li>
+                                      <li>Protein: {nutrition.protein_g || 0}g</li>
+                                      <li>Carbs: {nutrition.carbs_g || 0}g</li>
+                                      <li>Fat: {nutrition.fat_g || 0}g</li>
+                                      <li>NOVA Score: {nutrition.nova_classification || 1}</li>
+                                      <li>Processing Level: {nutrition.nova_description || nutrition.processed_level || 'Unknown'}</li>
+                                    </ul>
+                                  </div>
+                                );
+                              } else {
+                                return (
+                                  <div>
+                                    <h3>Raw Database Data (Debug)</h3>
+                                    <pre style={{ fontSize: '12px', background: '#f5f5f5', padding: '10px' }}>
+                                      {JSON.stringify(nutrition, null, 2)}
+                                    </pre>
+                                  </div>
+                                );
+                              }
+                            } catch {
+                              return <div>Error parsing nutrition data</div>;
+                            }
+                          })()
+                        ) : (
+                          convertLinksToClickable(results)
+                        )}
+                      </div>
+                    </div>
+                    
+                    <div className="data-source-indicator">
+                      {dataSource === 'openai' ? (
+                        <span>Powered by AI</span>
+                      ) : dataSource === 'error' ? (
+                        <span className="error-source">Error retrieving data</span>
+                      ) : (
+                        <span>What Is Healthy?</span>
+                      )}
+                    </div>
+                  </div>
+                  
+                  {/* Sidebar - ONLY when NOT loading and we have results */}
+                  <div className="sidebar">
+                    {/* Quality Chart */}
+                    <div className="quality-chart-container" style={{ marginBottom: "2rem" }}>
+                      <ResultQualityPie 
+                        query={query || ''} 
+                        results={results || ''}
+                        dataSource={dataSource || 'openai'}
+                        citations={citations || []}
+                      />
+                    </div>
 
-                <div className="nova-chart-container" style={{ marginBottom: "2rem" }}>
-                  <h3 style={{ fontSize: "1.1rem", marginBottom: "1rem", color: "#374151" }}>
-                    Processing Level (NOVA Score)
-                  </h3>
-                  <NovaChart 
-                    query={query}
-                    results={results}
-                    dataSource={dataSource}
-                  />
+                    {/* Nutrition Charts - Only show when we have nutrition data */}
+                    {dataSource === 'vnutrition' && (
+                      <>
+                        <div className="nutrition-chart-container" style={{ marginBottom: "2rem" }}>
+                          <h3 style={{ fontSize: "1.1rem", marginBottom: "1rem", color: "#374151" }}>
+                            Nutrition Breakdown
+                          </h3>
+                          <NutritionChart 
+                            query={query}
+                            results={results}
+                            dataSource={dataSource}
+                          />
+                        </div>
+
+                        <div className="nova-chart-container" style={{ marginBottom: "2rem" }}>
+                          <h3 style={{ fontSize: "1.1rem", marginBottom: "1rem", color: "#374151" }}>
+                            Processing Level (NOVA Score)
+                          </h3>
+                          <NovaChart 
+                            query={query}
+                            results={results}
+                            dataSource={dataSource}
+                          />
+                        </div>
+                      </>
+                    )}
+                    
+                    {/* Related Topics */}
+                    <div className="related-topics-card">
+                      <h3>Related Health Topics</h3>
+                      <ul className="related-topics-list">
+                        {isTestQuery ? (
+                          dummyTestData.relatedTopics.map((topic, index) => (
+                            <li key={index}>
+                              <button 
+                                onClick={() => {
+                                  if (topic !== lastProcessedQuery && topic !== query && !isLoading) {
+                                    console.log('User explicit search from related topic:', topic);
+                                    setLastProcessedQuery(topic);
+                                    onNewSearch(topic);
+                                  }
+                                }}
+                                className="topic-button"
+                                disabled={isLoading}
+                              >
+                                {topic}
+                              </button>
+                            </li>
+                          ))
+                        ) : (
+                          defaultRelatedTopics.map((topic, index) => (
+                            <li key={index}>
+                              <button 
+                                onClick={() => {
+                                  if (topic !== lastProcessedQuery && topic !== query && !isLoading) {
+                                    console.log('User explicit search from related topic:', topic);
+                                    setLastProcessedQuery(topic);
+                                    onNewSearch(topic);
+                                  }
+                                }}
+                                className="topic-button"
+                                disabled={isLoading}
+                              >
+                                {topic}
+                              </button>
+                            </li>
+                          ))
+                        )}
+                      </ul>
+                    </div>
+                    
+                    {/* Resources */}
+                    <div className="resources-card">
+                      <h3>Useful Resources</h3>
+                      <ul className="resources-list">
+                        {isTestQuery ? (
+                          dummyTestData.resources.map((resource, index) => (
+                            <li key={index}>
+                              <a href={resource.url} target="_blank" rel="noopener noreferrer">
+                                {resource.text}
+                              </a>
+                            </li>
+                          ))
+                        ) : (
+                          defaultResources.map((resource, index) => (
+                            <li key={index}>
+                              <a href={resource.url} target="_blank" rel="noopener noreferrer">
+                                {resource.text}
+                              </a>
+                            </li>
+                          ))
+                        )}
+                      </ul>
+                    </div>
+                  </div>
                 </div>
               </>
+            ) : (
+              /* No results message */
+              <div className="no-results-message">
+                <p>No results to display. Try searching for something else.</p>
+              </div>
             )}
-            
-            <div className="related-topics-card">
-              <h3>Related Health Topics</h3>
-              <ul className="related-topics-list">
-                {isTestQuery ? (
-                  dummyTestData.relatedTopics.map((topic, index) => (
-                    <li key={index}>
-                      <button 
-                        onClick={() => onNewSearch(topic)}
-                        className="topic-button"
-                      >
-                        {topic}
-                      </button>
-                    </li>
-                  ))
-                ) : 
-                  defaultRelatedTopics.map((topic, index) => (
-                    <li key={index}>
-                      <button 
-                        onClick={() => onNewSearch(topic)}
-                        className="topic-button"
-                      >
-                        {topic}
-                      </button>
-                    </li>
-                  ))
-                }
-              </ul>
-            </div>
-            
-            <div className="resources-card">
-              <h3>Useful Resources</h3>
-              <ul className="resources-list">
-                {isTestQuery ? (
-                  dummyTestData.resources.map((resource, index) => (
-                    <li key={index}>
-                      <a href={resource.url} target="_blank" rel="noopener noreferrer">
-                        {resource.text}
-                      </a>
-                    </li>
-                  ))
-                ) : (
-                  defaultResources.map((resource, index) => (
-                    <li key={index}>
-                      <a href={resource.url} target="_blank" rel="noopener noreferrer">
-                        {resource.text}
-                      </a>
-                    </li>
-                  ))
-                )}
-              </ul>
-            </div>
           </div>
-        </div>
-        
-        {/* Loading State Overlay - Only shows when loading */}
-        {isLoading && (
-          <Spinner overlay message="Searching......." />
-        )}
+        </>
+      )}
 
-        {/* ImageUploadModal - always available */}
-        <ImageUploadModal
-          isOpen={isUploadModalOpen}
-          onClose={() => setIsUploadModalOpen(false)}
-          onAnalysisComplete={handleAnalysisComplete} // Changed from onFileSelect
-          title="Upload Image"
-          subtitle="Upload images for analysis"
-        />
-      </div>
+      {/* ImageUploadModal - always available */}
+      <ImageUploadModal
+        isOpen={isUploadModalOpen}
+        onClose={() => setIsUploadModalOpen(false)}
+        onAnalysisComplete={handleAnalysisComplete}
+        title="Upload Image"
+        subtitle="Upload images for analysis"
+      />
     </div>
   );
 };

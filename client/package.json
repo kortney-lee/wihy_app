@@ -18,6 +18,7 @@
     "typescript": "^5.9.2"
   },
   "dependencies": {
+    "@openfoodfacts/openfoodfacts-nodejs": "github:openfoodfacts/openfoodfacts-js",
     "axios": "^1.11.0",
     "chart.js": "^4.5.0",
     "lucide-react": "^0.544.0",

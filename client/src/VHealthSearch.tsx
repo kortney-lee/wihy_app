@@ -2,13 +2,16 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './VHealthSearch.css';
 import ImageUploadModal from './components/ImageUploadModal';
-import MultiAuthLogin from './components/shared/components/MultiAuthLogin';
+import MultiAuthLogin from './components/MultiAuthLogin';
 import { healthSearchService } from './services/healthSearchService';
 import { searchCache } from './services/searchCache';
 import { foodAnalysisService } from './components/foodAnalysisService';
 import HealthNewsFeed from './components/HealthNewsFeed';
 
 const VHealthSearch: React.FC = () => {
+  // ================================
+  // STATE MANAGEMENT
+  // ================================
   const [searchQuery, setSearchQuery] = useState('');
   const [isListening, setIsListening] = useState(false);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
@@ -21,6 +24,16 @@ const VHealthSearch: React.FC = () => {
   const searchInputRef = useRef<HTMLInputElement>(null);
   const recognitionRef = useRef<any>(null);
 
+  // ================================
+  // UTILITY FUNCTIONS
+  // ================================
+
+  /**
+   * PROGRESS CALCULATOR
+   * Converts loading message text to progress percentage for UI feedback
+   * @param msg - The current loading message
+   * @returns Progress percentage (0-100)
+   */
   const progressFromMessage = (msg: string) => {
     if (msg.includes('Initializing')) return 10;
     if (msg.includes('Checking cache')) return 25;
@@ -38,19 +51,46 @@ const VHealthSearch: React.FC = () => {
     return 40; // default midpoint
   };
 
+  // ================================
+  // AUTHENTICATION HANDLERS
+  // ================================
+
+  /**
+   * USER CHANGE HANDLER
+   * Handles when user authentication state changes
+   * @param user - User object from auth service
+   */
   const handleUserChange = (user: any) => {
     console.log('User changed:', user);
   };
 
+  /**
+   * SIGN IN HANDLER
+   * Handles successful user sign-in
+   * @param user - Authenticated user object
+   */
   const handleSignIn = (user: any) => {
     console.log('User signed in:', user);
   };
 
+  /**
+   * SIGN OUT HANDLER
+   * Handles user sign-out action
+   */
   const handleSignOut = () => {
     console.log('User signed out');
   };
 
-  // Simplified search handler
+  // ================================
+  // MAIN SEARCH FUNCTIONALITY
+  // ================================
+
+  /**
+   * MAIN SEARCH HANDLER
+   * Primary search function that handles text-based health queries
+   * Flow: Check cache → API call → Save to cache → Navigate to results
+   * Uses 4-step fallback strategy for reliability
+   */
   const handleSearch = async () => {
     if (!searchQuery.trim() || isLoading) return;
     
@@ -71,7 +111,14 @@ const VHealthSearch: React.FC = () => {
           await new Promise(resolve => setTimeout(resolve, 300));
           
           setIsLoading(false);
-          navigate(`/results?q=${encodeURIComponent(searchQuery)}&cached=true`);
+          // Pass the cached data via navigation state
+          navigate(`/results?q=${encodeURIComponent(searchQuery)}`, {
+            state: {
+              results: cachedData.results,
+              dataSource: cachedData.source || 'cache',
+              fromSearch: true
+            }
+          });
           return;
         }
       } catch (cacheError) {
@@ -121,8 +168,16 @@ const VHealthSearch: React.FC = () => {
           await new Promise(resolve => setTimeout(resolve, 300));
           
           setIsLoading(false);
-          console.log('Navigating to results page');
-          navigate(`/results?q=${encodeURIComponent(searchQuery)}`);
+          console.log('Navigating to results page with data');
+          
+          // Pass the fresh results via navigation state
+          navigate(`/results?q=${encodeURIComponent(searchQuery)}`, {
+            state: {
+              results: searchResults,
+              dataSource: 'openai',
+              fromSearch: true
+            }
+          });
           return;
         } else {
           throw new Error('Invalid results from API');
@@ -146,7 +201,14 @@ const VHealthSearch: React.FC = () => {
               await new Promise(resolve => setTimeout(resolve, 300));
               
               setIsLoading(false);
-              navigate(`/results?q=${encodeURIComponent(searchQuery)}&similar=true`);
+              // Pass similar results via navigation state
+              navigate(`/results?q=${encodeURIComponent(searchQuery)}`, {
+                state: {
+                  results: similarResults[0].results,
+                  dataSource: 'similar',
+                  fromSearch: true
+                }
+              });
               return;
             }
           }
@@ -173,6 +235,16 @@ const VHealthSearch: React.FC = () => {
     }
   };
 
+  // ================================
+  // IMAGE ANALYSIS FUNCTIONALITY
+  // ================================
+
+  /**
+   * IMAGE ANALYSIS COMPLETION HANDLER
+   * Processes results from image upload and food recognition
+   * Triggered when ImageUploadModal completes food detection
+   * @param foodName - The detected food name from image analysis
+   */
   const handleAnalysisComplete = async (foodName: string): Promise<void> => {
     if (!foodName || isLoading) {
       setIsUploadModalOpen(false);
@@ -199,7 +271,14 @@ const VHealthSearch: React.FC = () => {
           await new Promise(resolve => setTimeout(resolve, 300));
           
           setIsLoading(false);
-          navigate(`/results?q=${encodeURIComponent(foodName)}&cached=true`);
+          // Pass the cached data via navigation state
+          navigate(`/results?q=${encodeURIComponent(foodName)}`, {
+            state: {
+              results: cachedData.results,
+              dataSource: cachedData.source || 'cache',
+              fromSearch: true
+            }
+          });
           return;
         }
       } catch (cacheError) {
@@ -245,7 +324,14 @@ const VHealthSearch: React.FC = () => {
           await new Promise(resolve => setTimeout(resolve, 300));
           
           setIsLoading(false);
-          navigate(`/results?q=${encodeURIComponent(foodName)}`);
+          // Pass the fresh nutrition results via navigation state
+          navigate(`/results?q=${encodeURIComponent(foodName)}`, {
+            state: {
+              results: nutritionResults,
+              dataSource: 'image-analysis',
+              fromSearch: true
+            }
+          });
           return;
         } else {
           throw new Error('Invalid nutrition results');
@@ -267,7 +353,7 @@ const VHealthSearch: React.FC = () => {
               await new Promise(resolve => setTimeout(resolve, 300));
               
               setIsLoading(false);
-              navigate(`/results?q=${encodeURIComponent(foodName)}&similar=true`);
+              navigate(`/results?q=${encodeURIComponent(foodName)}`);
               return;
             }
           }
@@ -296,7 +382,15 @@ const VHealthSearch: React.FC = () => {
     }
   };
 
-  // Reset loading state on component unmount
+  // ================================
+  // LIFECYCLE HOOKS
+  // ================================
+
+  /**
+   * CLEANUP EFFECT
+   * Resets loading state when component unmounts
+   * Prevents memory leaks and state persistence issues
+   */
   useEffect(() => {
     return () => {
       setIsLoading(false);
@@ -304,6 +398,16 @@ const VHealthSearch: React.FC = () => {
     };
   }, []);
 
+  // ================================
+  // UI COMPONENTS
+  // ================================
+
+  /**
+   * LOADING OVERLAY COMPONENT
+   * Shows animated loading screen with progress bar during search operations
+   * @param message - Current loading message to display
+   * @param progress - Progress percentage (0-100) for progress bar
+   */
   const LoadingOverlay: React.FC<{ message: string; progress: number }> = ({ message, progress }) => (
     <div style={{
       position: 'fixed',
@@ -385,8 +489,13 @@ const VHealthSearch: React.FC = () => {
     </div>
   );
 
+  // ================================
+  // MAIN COMPONENT RENDER
+  // ================================
+
   return (
     <div className="search-landing">
+      {/* LOADING OVERLAY - Shows during search operations */}
       {isLoading && (
         <LoadingOverlay 
           message={loadingMessage}
@@ -394,15 +503,19 @@ const VHealthSearch: React.FC = () => {
         />
       )}
       
-      <MultiAuthLogin 
-        position="top-right"
-        className="main-login-button"
-        onUserChange={handleUserChange}
-        onSignIn={handleSignIn}
-        onSignOut={handleSignOut}
-      />
+      {/* AUTHENTICATION COMPONENT - Top-right login/logout */}
+      <div style={{
+        position: 'fixed',
+        top: '20px',
+        right: '20px',
+        zIndex: 1000
+      }}>
+        <MultiAuthLogin className="main-login-button" />
+      </div>
 
+      {/* MAIN SEARCH INTERFACE */}
       <div className="search-container-centered">
+        {/* LOGO SECTION - Shows either image logo or text fallback */}
         <div className="logo-container">
           {!imageError ? (
             <img 
@@ -419,6 +532,7 @@ const VHealthSearch: React.FC = () => {
           )}
         </div>
         
+        {/* SEARCH INPUT SECTION - Main search bar with icons */}
         <div className="search-input-container">
           <form onSubmit={(e) => { 
             e.preventDefault();
@@ -436,7 +550,9 @@ const VHealthSearch: React.FC = () => {
             />
           </form>
 
+          {/* SEARCH ICONS - Clear, Camera, Voice input buttons */}
           <div className="search-icons">
+            {/* CLEAR BUTTON - Clears current search query */}
             {searchQuery && !isLoading && (
               <button
                 type="button"
@@ -450,6 +566,7 @@ const VHealthSearch: React.FC = () => {
               </button>
             )}
             
+            {/* CAMERA BUTTON - Opens image upload modal */}
             <button
               type="button"
               onClick={() => setIsUploadModalOpen(true)}
@@ -462,6 +579,7 @@ const VHealthSearch: React.FC = () => {
               </svg>
             </button>
             
+            {/* VOICE INPUT BUTTON - Activates speech recognition */}
             <button
               type="button"
               onClick={() => {
@@ -509,7 +627,9 @@ const VHealthSearch: React.FC = () => {
           </div>
         </div>
 
+        {/* ACTION BUTTONS - Primary search and secondary "feeling healthy" */}
         <div className="search-buttons">
+          {/* PRIMARY SEARCH BUTTON - Triggers main search function */}
           <button 
             onClick={(e) => {
               e.preventDefault();
@@ -521,6 +641,7 @@ const VHealthSearch: React.FC = () => {
             {isLoading ? loadingMessage : 'Analyze Nutrition'}
           </button>
           
+          {/* FEELING HEALTHY BUTTON - Shows/hides health news feed */}
           <button 
             onClick={() => {
               if (isLoading) return;
@@ -544,6 +665,7 @@ const VHealthSearch: React.FC = () => {
         </div>
       </div>
       
+      {/* HEALTH NEWS FEED - Shows when "I'm Feeling Healthy" is active */}
       {showFeelingHealthyContent && (
         <div 
           className="feeling-healthy-section"
@@ -561,6 +683,7 @@ const VHealthSearch: React.FC = () => {
         </div>
       )}
 
+      {/* IMAGE UPLOAD MODAL - Opens when camera button is clicked */}
       <ImageUploadModal
         isOpen={isUploadModalOpen}
         onClose={() => setIsUploadModalOpen(false)}

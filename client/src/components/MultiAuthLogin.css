@@ -30,7 +30,19 @@
 .login-icon svg {
   width: 20px;
   height: 20px;
+  stroke: currentColor; /* Add stroke for outline style */
+  fill: none; /* Remove fill to make it outline */
+  stroke-width: 2; /* Add stroke width */
+  stroke-linecap: round; /* Add rounded line caps */
+  stroke-linejoin: round; /* Add rounded line joins */
   color: #666;
+  transition: all 0.2s ease; /* Add transition */
+}
+
+/* Add hover effect for the icon */
+.login-icon:hover svg {
+  stroke-width: 2.5;
+  color: #1a73e8;
 }
 
 .profile-image {
@@ -69,7 +81,7 @@
 /* Providers Popup */
 .providers-popup {
   position: absolute;
-  top: 50px;
+  top: calc(100% + 8px); /* Changed from top: 50px */
   right: 0;
   background: white;
   border: 1px solid #e0e0e0;
@@ -161,7 +173,7 @@
 /* User Dropdown */
 .user-dropdown {
   position: absolute;
-  top: 50px;
+  top: calc(100% + 8px); /* Changed from top: 50px */
   right: 0;
   background: white;
   border: 1px solid #e0e0e0;

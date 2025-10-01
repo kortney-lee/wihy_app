@@ -6,25 +6,38 @@ interface User {
   name: string;
   email: string;
   picture?: string;
-  provider: 'google' | 'microsoft' | 'apple' | 'facebook';
+  provider: 'google' | 'microsoft' | 'apple' | 'samsung' | 'facebook';
 }
 
 interface AuthProvider {
   name: string;
-  id: 'google' | 'microsoft' | 'apple' | 'facebook';
-  icon: React.JSX.Element; // Use React.JSX.Element instead
+  id: 'google' | 'microsoft' | 'apple' | 'samsung' | 'facebook';
+  icon: React.JSX.Element;
   color: string;
   clientId: string;
   authUrl: string;
 }
 
-const MultiAuthLogin: React.FC = () => {
+// Update the interface to include the optional callbacks:
+interface MultiAuthLoginProps {
+  className?: string;
+  onUserChange?: (user: any) => void;
+  onSignIn?: (user: any) => void;
+  onSignOut?: () => void;
+}
+
+const MultiAuthLogin: React.FC<MultiAuthLoginProps> = ({ 
+  className = '',
+  onUserChange,
+  onSignIn,
+  onSignOut 
+}) => {
   const [user, setUser] = useState<User | null>(null);
   const [showProviders, setShowProviders] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // Authentication providers configuration
+  // Authentication providers configuration - ADD SAMSUNG HERE
   const authProviders: AuthProvider[] = [
     {
       name: 'Google',
@@ -69,6 +82,19 @@ const MultiAuthLogin: React.FC = () => {
       authUrl: 'https://appleid.apple.com/auth/authorize'
     },
     {
+      name: 'Samsung',
+      id: 'samsung',
+      icon: (
+        <svg viewBox="0 0 24 24" className="provider-icon">
+          <path fill="#1428A0" d="M22.7 11.02c-.42-.92-1.33-1.57-2.4-1.57-1.07 0-1.98.65-2.4 1.57h-.02c-1.17-1.74-3.11-2.9-5.32-2.9-3.56 0-6.46 2.9-6.46 6.46 0 3.56 2.9 6.46 6.46 6.46 2.21 0 4.15-1.16 5.32-2.9h.02c.42.92 1.33 1.57 2.4 1.57 1.45 0 2.64-1.19 2.64-2.64 0-.33-.06-.65-.18-.94.12-.29.18-.61.18-.94 0-1.45-1.19-2.64-2.64-2.64zm-10.14 6.66c-2.49 0-4.52-2.03-4.52-4.52s2.03-4.52 4.52-4.52c2.49 0 4.52 2.03 4.52 4.52s-2.03 4.52-4.52 4.52z"/>
+          <circle fill="#1428A0" cx="12.56" cy="13.16" r="2.5"/>
+        </svg>
+      ),
+      color: '#1428A0',
+      clientId: 'your-samsung-client-id',
+      authUrl: 'https://account.samsung.com/mobile/account/check.do'
+    },
+    {
       name: 'Facebook',
       id: 'facebook',
       icon: (
@@ -81,6 +107,8 @@ const MultiAuthLogin: React.FC = () => {
       authUrl: 'https://www.facebook.com/v18.0/dialog/oauth'
     }
   ];
+
+  console.log('Auth providers:', authProviders); // Add this line to debug
 
   useEffect(() => {
     // Check if user is already logged in
@@ -99,12 +127,13 @@ const MultiAuthLogin: React.FC = () => {
     }
   }, []);
 
+  // Update the handleOAuthCallback function to use the callbacks:
   const handleOAuthCallback = async (code: string, state: string) => {
     setLoading(true);
     try {
       // In a real app, you'd send this to your backend
       // For demo purposes, we'll simulate a successful login
-      const provider = state as 'google' | 'microsoft' | 'apple' | 'facebook';
+      const provider = state as 'google' | 'microsoft' | 'apple' | 'samsung' | 'facebook';
       
       // Simulate API call delay
       await new Promise(resolve => setTimeout(resolve, 1000));
@@ -112,13 +141,17 @@ const MultiAuthLogin: React.FC = () => {
       const mockUser: User = {
         id: `${provider}-123456`,
         name: `User from ${provider.charAt(0).toUpperCase() + provider.slice(1)}`,
-        email: `user@${provider === 'microsoft' ? 'outlook.com' : provider}.com`,
+        email: `user@${provider === 'microsoft' ? 'outlook.com' : provider === 'samsung' ? 'samsung.com' : provider}.com`,
         picture: `https://via.placeholder.com/40/${getProviderColor(provider).replace('#', '')}/ffffff?text=${provider.charAt(0).toUpperCase()}`,
         provider
       };
 
       setUser(mockUser);
       localStorage.setItem('vhealth_user', JSON.stringify(mockUser));
+      
+      // Call the callbacks if provided
+      onUserChange?.(mockUser);
+      onSignIn?.(mockUser);
       
       // Clean up URL
       window.history.replaceState({}, document.title, window.location.pathname);
@@ -142,7 +175,8 @@ const MultiAuthLogin: React.FC = () => {
       scope: getProviderScopes(provider.id),
       state: provider.id,
       ...(provider.id === 'microsoft' && { response_mode: 'query' }),
-      ...(provider.id === 'apple' && { response_mode: 'form_post' })
+      ...(provider.id === 'apple' && { response_mode: 'form_post' }),
+      ...(provider.id === 'samsung' && { response_mode: 'query' })
     });
 
     const authUrl = `${provider.authUrl}?${params.toString()}`;
@@ -154,16 +188,21 @@ const MultiAuthLogin: React.FC = () => {
       google: 'openid profile email',
       microsoft: 'openid profile email',
       apple: 'name email',
-      facebook: 'email public_profile'
+      facebook: 'email public_profile',
+      samsung: 'profile email'
     };
     return scopes[providerId as keyof typeof scopes] || 'profile email';
   };
 
+  // Update the handleSignOut function:
   const handleSignOut = () => {
     setUser(null);
     localStorage.removeItem('vhealth_user');
     setShowDropdown(false);
     setShowProviders(false);
+    
+    // Call the callback if provided
+    onSignOut?.();
   };
 
   const handleLoginClick = () => {
@@ -175,7 +214,7 @@ const MultiAuthLogin: React.FC = () => {
   };
 
   return (
-    <div className="multi-auth-container">
+    <div className={`multi-auth-container ${className}`}>
       {/* Main Login Button */}
       <button 
         className={`login-icon ${user ? 'authenticated' : ''}`}
@@ -201,8 +240,19 @@ const MultiAuthLogin: React.FC = () => {
             </div>
           )
         ) : (
-          <svg viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+          // Updated to match the user icon style from the header
+          <svg 
+            width="20" 
+            height="20" 
+            viewBox="0 0 24 24" 
+            fill="none" 
+            stroke="currentColor" 
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+            <circle cx="12" cy="7" r="4" />
           </svg>
         )}
       </button>
@@ -216,21 +266,26 @@ const MultiAuthLogin: React.FC = () => {
               className="close-button"
               onClick={() => setShowProviders(false)}
             >
-              ×
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M18 6L6 18M6 6l12 12" />
+              </svg>
             </button>
           </div>
           <div className="providers-list">
-            {authProviders.map((provider) => (
-              <button
-                key={provider.id}
-                className="provider-button"
-                onClick={() => handleProviderLogin(provider)}
-                style={{ '--provider-color': provider.color } as React.CSSProperties}
-              >
-                {provider.icon}
-                <span>Continue with {provider.name}</span>
-              </button>
-            ))}
+            {authProviders.map((provider) => {
+              console.log('Rendering provider:', provider.name); // Add this line
+              return (
+                <button
+                  key={provider.id}
+                  className="provider-button"
+                  onClick={() => handleProviderLogin(provider)}
+                  style={{ '--provider-color': provider.color } as React.CSSProperties}
+                >
+                  {provider.icon}
+                  <span>Continue with {provider.name}</span>
+                </button>
+              );
+            })}
           </div>
           <p className="providers-disclaimer">
             Your health data is secure and private. We only use your account for authentication.
