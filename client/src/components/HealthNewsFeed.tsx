@@ -1,17 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { NewsService } from '../services/newsService';
+import { fetchNewsFeed, getArticlesByCategory, NewsArticle } from '../services/newsService';
 import './HealthNewsFeed.css';
-
-interface NewsArticle {
-  id: string;
-  title: string;
-  summary: string;
-  url: string;
-  source: string;
-  publishedAt: string;
-  imageUrl?: string;
-  category: string;
-}
 
 interface NewsFeedProps {
   maxArticles?: number;
@@ -24,11 +13,13 @@ const HealthNewsFeed: React.FC<NewsFeedProps> = ({ maxArticles = 6 }) => {
 
   const categories = [
     { id: 'all', label: 'All Health News' },
-    { id: 'nutrition', label: 'Nutrition' },
-    { id: 'fitness', label: 'Fitness' },
-    { id: 'mental-health', label: 'Mental Health' },
-    { id: 'medical', label: 'Medical Research' },
-    { id: 'wellness', label: 'Wellness' }
+    { id: 'Nutrition & Diet', label: 'Nutrition' },
+    { id: 'Medical Research', label: 'Medical Research' },
+    { id: 'Public Health', label: 'Public Health' },
+    { id: 'Clinical Studies', label: 'Clinical Studies' },
+    { id: 'Disease Prevention', label: 'Prevention' },
+    { id: 'Mental Health', label: 'Mental Health' },
+    { id: 'General Health', label: 'General Health' }
   ];
 
   useEffect(() => {
@@ -40,8 +31,21 @@ const HealthNewsFeed: React.FC<NewsFeedProps> = ({ maxArticles = 6 }) => {
     try {
       console.log('Fetching health news for category:', selectedCategory);
       
-      // Use NewsService to fetch real data
-      const newsData = await NewsService.fetchHealthNews(selectedCategory, maxArticles);
+      let newsData;
+      
+      if (selectedCategory === 'all') {
+        // Fetch all categories
+        const response = await fetchNewsFeed();
+        if (response.success && response.articles) {
+          newsData = response.articles.slice(0, maxArticles);
+        }
+      } else {
+        // Fetch specific category
+        const response = await getArticlesByCategory(selectedCategory);
+        if (response.success && response.articles) {
+          newsData = response.articles.slice(0, maxArticles);
+        }
+      }
       
       if (newsData && newsData.length > 0) {
         // Use real API data
@@ -54,61 +58,73 @@ const HealthNewsFeed: React.FC<NewsFeedProps> = ({ maxArticles = 6 }) => {
             id: '1',
             title: 'New Study Reveals Benefits of Mediterranean Diet for Heart Health',
             summary: 'Researchers found that following a Mediterranean diet can reduce cardiovascular disease risk by up to 30%.',
-            url: '#',
-            source: 'Yahoo Health',
-            publishedAt: '2025-01-22T10:30:00Z',
-            imageUrl: '/assets/mediterranean-diet.jpg',
-            category: 'nutrition'
+            url: 'https://www.nih.gov/news-events/news-releases/mediterranean-diet-heart-health',
+            source: 'NIH',
+            domain: 'nih.gov',
+            category: 'Nutrition & Diet',
+            publishedDate: '2025-01-22T10:30:00Z',
+            relevanceScore: 0.95,
+            tags: ['mediterranean-diet', 'heart-health', 'cardiovascular']
           },
           {
             id: '2', 
             title: 'Exercise and Mental Health: The Connection You Need to Know',
             summary: 'New research shows that just 30 minutes of exercise daily can significantly improve mental well-being.',
-            url: '#',
-            source: 'MSN Health',
-            publishedAt: '2025-01-22T08:15:00Z',
-            imageUrl: '/assets/exercise-mental-health.jpg',
-            category: 'fitness'
+            url: 'https://www.cdc.gov/physicalactivity/basics/pa-health/index.htm',
+            source: 'CDC',
+            domain: 'cdc.gov',
+            category: 'Mental Health',
+            publishedDate: '2025-01-22T08:15:00Z',
+            relevanceScore: 0.92,
+            tags: ['exercise', 'mental-health', 'wellness']
           },
           {
             id: '3',
             title: 'Breakthrough in Cancer Research: Early Detection Methods',
             summary: 'Scientists develop new blood test that can detect multiple types of cancer in early stages.',
-            url: '#',
-            source: 'Bing News',
-            publishedAt: '2025-01-22T06:45:00Z',
-            imageUrl: '/assets/cancer-research.jpg',
-            category: 'medical'
+            url: 'https://www.nejm.org/doi/full/10.1056/NEJMoa2035570',
+            source: 'New England Journal of Medicine',
+            domain: 'nejm.org',
+            category: 'Medical Research',
+            publishedDate: '2025-01-22T06:45:00Z',
+            relevanceScore: 0.98,
+            tags: ['cancer', 'early-detection', 'research']
           },
           {
             id: '4',
             title: 'Sleep Quality: How It Affects Your Immune System',
             summary: 'Poor sleep quality can weaken your immune response and increase susceptibility to infections.',
-            url: '#',
-            source: 'Yahoo Health',
-            publishedAt: '2025-01-21T20:30:00Z',
-            imageUrl: '/assets/sleep-health.jpg',
-            category: 'wellness'
+            url: 'https://www.mayoclinic.org/healthy-lifestyle/adult-health/in-depth/sleep/art-20048379',
+            source: 'Mayo Clinic',
+            domain: 'mayoclinic.org',
+            category: 'General Health',
+            publishedDate: '2025-01-21T20:30:00Z',
+            relevanceScore: 0.89,
+            tags: ['sleep', 'immune-system', 'health']
           },
           {
             id: '5',
             title: 'Mindfulness and Stress Reduction Techniques That Actually Work',
             summary: 'Evidence-based mindfulness practices shown to reduce stress hormones and improve overall health.',
-            url: '#',
-            source: 'MSN Health',
-            publishedAt: '2025-01-21T18:20:00Z',
-            imageUrl: '/assets/mindfulness.jpg',
-            category: 'mental-health'
+            url: 'https://www.harvard.edu/healthbeat/benefits-of-mindfulness',
+            source: 'Harvard Health',
+            domain: 'harvard.edu',
+            category: 'Mental Health',
+            publishedDate: '2025-01-21T18:20:00Z',
+            relevanceScore: 0.91,
+            tags: ['mindfulness', 'stress-reduction', 'mental-health']
           },
           {
             id: '6',
             title: 'Superfoods That Boost Your Energy Naturally',
             summary: 'Discover nutrient-dense foods that can help increase energy levels without caffeine crashes.',
-            url: '#',
-            source: 'Bing News',
-            publishedAt: '2025-01-21T15:10:00Z',
-            imageUrl: '/assets/superfoods.jpg',
-            category: 'nutrition'
+            url: 'https://www.usda.gov/topics/food-and-nutrition/dietary-guidelines',
+            source: 'USDA',
+            domain: 'usda.gov',
+            category: 'Nutrition & Diet',
+            publishedDate: '2025-01-21T15:10:00Z',
+            relevanceScore: 0.87,
+            tags: ['nutrition', 'energy', 'superfoods']
           }
         ];
 
@@ -140,16 +156,32 @@ const HealthNewsFeed: React.FC<NewsFeedProps> = ({ maxArticles = 6 }) => {
   };
 
   const getSourceIcon = (source: string) => {
-    switch (source.toLowerCase()) {
-      case 'yahoo health':
-        return '🟣';
-      case 'msn health':
-        return '🔵';
-      case 'bing news':
-        return '🟢';
-      default:
-        return '📰';
-    }
+    const sourceLower = source.toLowerCase();
+    if (sourceLower.includes('nih')) return '🏛️';
+    if (sourceLower.includes('cdc')) return '🏥';
+    if (sourceLower.includes('fda')) return '💊';
+    if (sourceLower.includes('mayo')) return '🩺';
+    if (sourceLower.includes('harvard')) return '🎓';
+    if (sourceLower.includes('stanford')) return '🎓';
+    if (sourceLower.includes('nejm')) return '📚';
+    if (sourceLower.includes('lancet')) return '📚';
+    if (sourceLower.includes('bmj')) return '📚';
+    if (sourceLower.includes('nature')) return '🧬';
+    if (sourceLower.includes('who')) return '🌍';
+    return '📰';
+  };
+
+  const getCategoryColor = (category: string) => {
+    const colors: Record<string, string> = {
+      'Nutrition & Diet': '#4CAF50',
+      'Medical Research': '#2196F3',
+      'Public Health': '#FF9800',
+      'Clinical Studies': '#9C27B0',
+      'Disease Prevention': '#F44336',
+      'Mental Health': '#607D8B',
+      'General Health': '#795548'
+    };
+    return colors[category] || '#666';
   };
 
   if (loading) {
@@ -188,42 +220,53 @@ const HealthNewsFeed: React.FC<NewsFeedProps> = ({ maxArticles = 6 }) => {
       <div className="news-grid">
         {articles.map((article) => (
           <article key={article.id} className="news-card">
-            {article.imageUrl && (
-              <div className="news-image">
-                <img 
-                  src={article.imageUrl} 
-                  alt={article.title}
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).style.display = 'none';
-                  }}
-                />
-              </div>
-            )}
             <div className="news-content">
               <div className="news-meta">
                 <span className="news-source">
                   {getSourceIcon(article.source)} {article.source}
                 </span>
-                <span className="news-time">{formatTimeAgo(article.publishedAt)}</span>
+                <span 
+                  className="news-category"
+                  style={{ backgroundColor: getCategoryColor(article.category) }}
+                >
+                  {article.category}
+                </span>
+                <span className="news-time">{formatTimeAgo(article.publishedDate)}</span>
               </div>
               <h3 className="news-title">{article.title}</h3>
               <p className="news-summary">{article.summary}</p>
-              <a 
-                href={article.url} 
-                className="read-more-btn"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Read Full Article →
-              </a>
+              <div className="news-tags">
+                {article.tags?.map(tag => (
+                  <span key={tag} className="news-tag">{tag}</span>
+                ))}
+              </div>
+              <div className="news-footer">
+                <span className="relevance-score">
+                  Relevance: {Math.round((article.relevanceScore || 0) * 100)}%
+                </span>
+                <a 
+                  href={article.url} 
+                  className="read-more-btn"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Read Full Article →
+                </a>
+              </div>
             </div>
           </article>
         ))}
       </div>
 
+      {articles.length === 0 && !loading && (
+        <div className="no-articles">
+          <p>No articles found for the selected category. Try selecting a different category or refresh the feed.</p>
+        </div>
+      )}
+
       <div className="news-footer">
         <button className="load-more-btn" onClick={fetchHealthNews}>
-          Load More Articles
+          Refresh Articles
         </button>
       </div>
     </div>

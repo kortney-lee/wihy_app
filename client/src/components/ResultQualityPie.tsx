@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Chart as ChartJS,
   ArcElement,
@@ -163,13 +163,46 @@ const ResultQualityPie: React.FC<ResultQualityPieProps> = ({
   dataSource,
   citations
 }) => {
-  const { score, verdict, reasons } = evaluateEvidenceConfidence(
-    query,
-    results,
-    dataSource,
-    citations
-  );
+  const [evaluation, setEvaluation] = useState<{
+    score: number;
+    verdict: Verdict;
+    reasons: string[];
+  }>({ score: 0.20, verdict: 'BAD', reasons: ['Loading...'] });
 
+  // Debug logging to see what props are being received
+  useEffect(() => {
+    console.log('ResultQualityPie received props:', {
+      query,
+      results: results?.substring(0, 100) + '...',
+      dataSource,
+      citations,
+      hasResults: !!results && results.trim() !== ''
+    });
+  }, [query, results, dataSource, citations]);
+
+  // Evaluate when props change and we have valid data
+  useEffect(() => {
+    if (query && results && results.trim() !== '' && dataSource) {
+      console.log('Evaluating evidence confidence...');
+      const newEvaluation = evaluateEvidenceConfidence(query, results, dataSource, citations);
+      console.log('Evidence evaluation result:', newEvaluation);
+      setEvaluation(newEvaluation);
+    } else {
+      console.log('Not evaluating - missing required props:', {
+        hasQuery: !!query,
+        hasResults: !!results && results.trim() !== '',
+        hasDataSource: !!dataSource
+      });
+      // Set a default evaluation for missing data
+      setEvaluation({
+        score: 0.20,
+        verdict: 'BAD',
+        reasons: ['Waiting for results...']
+      });
+    }
+  }, [query, results, dataSource, citations]);
+
+  const { score, verdict, reasons } = evaluation;
   const percentage = Math.round(score * 100);
   const remaining = 100 - percentage;
 
@@ -281,7 +314,7 @@ const ResultQualityPie: React.FC<ResultQualityPieProps> = ({
         </div>
 
         {/* Tiny rationale (first 1–2 reasons) */}
-        {reasons.length > 0 && (
+        {reasons.length > 0 && reasons[0] !== 'Loading...' && reasons[0] !== 'Waiting for results...' && (
           <div
             style={{
               marginTop: '0.5rem',
