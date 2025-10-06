@@ -1,0 +1,13 @@
+# requirements.txt
+
+flask
+sqlalchemy
+pandas
+numpy
+scikit-learn
+torch
+transformers
+python-dotenv
+pytest
+black
+flake8
