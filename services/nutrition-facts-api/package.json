@@ -1,0 +1,14 @@
+{
+  "name": "nutrition-facts-api",
+  "version": "1.0.0",
+  "description": "Nutrition facts and analysis API service using FastAPI",
+  "main": "main.py",
+  "scripts": {
+    "start": "uvicorn main:app --host 0.0.0.0 --port 5003",
+    "dev": "uvicorn main:app --host 0.0.0.0 --port 5003 --reload",
+    "test": "python -m pytest tests/",
+    "install": "pip install -r requirements.txt"
+  },
+  "keywords": ["nutrition", "api", "health", "food", "fastapi"],
+  "author": "vHealth"
+}
