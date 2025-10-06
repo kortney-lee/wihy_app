@@ -1,0 +1,279 @@
+/* ---------------------------
+   VHealth Shared Header Component
+----------------------------*/
+
+.vhealth-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 20px;
+  background: #fff;
+  width: 100%;
+  gap: 20px;
+  box-sizing: border-box;
+}
+
+/* Landing page header (centered layout) */
+.vhealth-header.landing {
+  flex-direction: column;
+  justify-content: center;
+  min-height: 40vh;
+  background: transparent;
+  text-align: center;
+  position: relative;
+}
+
+/* Results page header (horizontal layout) */
+.vhealth-header.results {
+  border-bottom: 1px solid #e8eaed;
+  flex-direction: row;
+  min-height: auto;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+/* Logo Container */
+.vhealth-logo-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.vhealth-logo {
+  object-fit: contain;
+  transition: opacity 0.2s ease;
+}
+
+.vhealth-logo:hover {
+  opacity: 0.8;
+}
+
+/* Landing page logo */
+.vhealth-header.landing .vhealth-logo {
+  width: 600px !important;
+  height: auto !important;
+  margin-bottom: 2rem;
+}
+
+/* Results page logo */
+.vhealth-header.results .vhealth-logo {
+  height: 80px !important;
+  width: auto !important;
+  max-width: 300px !important;
+}
+
+/* Search Section */
+.vhealth-search-section {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  max-width: 800px;
+}
+
+.vhealth-header.landing .vhealth-search-section {
+  width: 80%;
+  max-width: none;
+}
+
+.vhealth-header.results .vhealth-search-section {
+  margin: 0 20px;
+}
+
+.vhealth-search-form {
+  width: 100%;
+}
+
+/* Search Input Container */
+.vhealth-header .search-input-container {
+  position: relative;
+  width: 100%;
+  margin: 0 auto;
+  border: 2px solid transparent;
+  border-radius: 24px;
+  box-shadow: 0 8px 24px rgba(15,23,42,.06);
+  background:
+    linear-gradient(#fff, #fff) padding-box,
+    linear-gradient(90deg, #fbbc05, #34a853, #1a73e8) border-box;
+  background-size: 100% 100%, 200% 100%;
+  transition: box-shadow 0.2s ease, background-position 0.4s linear;
+}
+
+.vhealth-header.results .search-input-container {
+  box-shadow: 0 1px 6px rgba(32,33,36,0.28);
+}
+
+.vhealth-header .search-input-container:hover,
+.vhealth-header .search-input-container:focus-within {
+  animation: vhealth-border-sweep 2.2s linear infinite;
+  box-shadow: 0 2px 8px rgba(32,33,36,0.28);
+}
+
+@keyframes vhealth-border-sweep {
+  0%   { background-position: 0 0,   0% 0; }
+  100% { background-position: 0 0, 200% 0; }
+}
+
+/* Search Input */
+.vhealth-header .search-input {
+  width: 100%;
+  min-height: 44px;
+  max-height: 120px;
+  padding: 10px 60px 10px 20px;
+  font-size: 18px;
+  border: none;
+  outline: none;
+  border-radius: 24px;
+  background: transparent;
+  font-family: inherit;
+  resize: none;
+  overflow: hidden;
+  line-height: 1.4;
+  word-wrap: break-word;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  height: 44px;
+  transition: height 0.2s ease;
+  text-align: left;
+  vertical-align: bottom;
+  display: flex;
+  align-items: flex-end;
+}
+
+.vhealth-header.results .search-input {
+  font-size: 16px;
+  height: 48px;
+}
+
+.vhealth-header .search-input::placeholder {
+  text-align: left;
+  color: #9aa0a6;
+  font-size: 18px;
+  vertical-align: bottom;
+}
+
+.vhealth-header.results .search-input::placeholder {
+  font-size: 16px;
+}
+
+/* Search Icons */
+.vhealth-header .search-icons {
+  display: flex;
+  align-items: center;
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  gap: 4px;
+}
+
+.vhealth-header .icon-button {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #70757a;
+  transition: color .2s ease, background-color .2s ease;
+}
+
+.vhealth-header .icon-button:hover {
+  background-color: #f1f3f4;
+  color: #1a73e8;
+}
+
+.vhealth-header .icon-button svg {
+  width: 20px;
+  height: 20px;
+  fill: currentColor;
+  transition: fill 0.2s ease;
+}
+
+.vhealth-header .clear-button {
+  background: #f8f9fa;
+}
+
+.vhealth-header .clear-button:hover {
+  background: #e8eaed;
+}
+
+.vhealth-header .listening {
+  background: #ea4335 !important;
+}
+
+.vhealth-header .listening svg {
+  fill: #fff !important;
+}
+
+/* User Section */
+.vhealth-user-section {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-shrink: 0;
+}
+
+.vhealth-header.landing .vhealth-user-section {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .vhealth-header.results {
+    flex-direction: column;
+    gap: 15px;
+    padding: 15px;
+  }
+
+  .vhealth-header.results .vhealth-logo {
+    height: 60px !important;
+    max-width: 250px !important;
+  }
+
+  .vhealth-header.landing .vhealth-logo {
+    width: 500px !important;
+  }
+
+  .vhealth-header .search-input-container {
+    max-width: 100%;
+  }
+
+  .vhealth-header.results .vhealth-search-section {
+    margin: 0;
+    order: 2;
+  }
+
+  .vhealth-header.results .vhealth-user-section {
+    order: 1;
+    position: absolute;
+    top: 15px;
+    right: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .vhealth-header.landing .vhealth-logo {
+    width: 90% !important;
+    max-width: 320px !important;
+  }
+
+  .vhealth-header.results .vhealth-logo {
+    height: 36px !important;
+    max-width: 180px !important;
+  }
+
+  .vhealth-header.results {
+    padding: 10px;
+  }
+
+  .vhealth-header .search-input::placeholder {
+    font-size: 16px;
+  }
+}

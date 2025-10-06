@@ -1,0 +1,602 @@
+[
+  {
+    "instruction": "Analyze the nutritional value of this food product and provide a health assessment.",
+    "input": "Product: Husholdningserter 410g Nora\nBrand: Orkla foods norge\nCategory: \nNutritional Information (per 100g):\n- Energy: kcal\n- Protein: g\n- Carbohydrates: g\n- Fat: g\n- Saturated Fat: g\n- Sugars: g\n- Fiber: g\n- Salt: g\n- Sodium: g\nIngredients: Friske erter i lake av vann og salt.\nAllergens: ",
+    "output": "I've analyzed Husholdningserter 410g Nora by Orkla foods norge. I don't have enough nutritional data to provide a complete assessment. For the most accurate analysis, look for products with complete nutrition labels. Key factors: Missing calories per 100g - cannot calculate nutrition density Bottom line: Unknown.",
+    "type": "nutrition_analysis"
+  },
+  {
+    "instruction": "Analyze the nutritional value of this food product and provide a health assessment.",
+    "input": "Product: Orange Soda\nBrand: Zevia\nCategory: \nNutritional Information (per 100g):\n- Energy: 0.28169014084507kcal\n- Protein: 0g\n- Carbohydrates: 0g\n- Fat: 0g\n- Saturated Fat: 0g\n- Sugars: 0g\n- Fiber: g\n- Salt: 0g\n- Sodium: 0g\nIngredients: \nAllergens: ",
+    "output": "I've analyzed Orange Soda by Zevia. This product scores 0.0/100 and receives a 'Fill' rating. While it provides calories, the nutritional density is limited. Best enjoyed occasionally while prioritizing more nutritious options. Key factors: NOVA processing level not available, Ingredient analysis limited - no ingredient text available Bottom line: Fill.",
+    "type": "nutrition_analysis"
+  },
+  {
+    "instruction": "Analyze the nutritional value of this food product and provide a health assessment.",
+    "input": "Product: Croccantini ricoperti di cioccolato\nBrand: \nCategory: Snack, Snack dolci\nNutritional Information (per 100g):\n- Energy: 523kcal\n- Protein: 6.9g\n- Carbohydrates: 51.6g\n- Fat: 32.6g\n- Saturated Fat: 11.2g\n- Sugars: 46.8g\n- Fiber: 73g\n- Salt: 0g\n- Sodium: 0g\nIngredients: \nAllergens: ",
+    "output": "I've analyzed Croccantini ricoperti di cioccolato. This product scores 10.3/100 and receives a 'Fill' rating. While it provides calories, the nutritional density is limited. Best enjoyed occasionally while prioritizing more nutritious options. Key factors: Moderate protein content (1.3g per 100 kcal), High fiber density (14.0g per 100 kcal), High sugar density (8.9g per 100 kcal) Bottom line: Fill.",
+    "type": "nutrition_analysis"
+  },
+  {
+    "instruction": "Analyze the nutritional value of this food product and provide a health assessment.",
+    "input": "Product: Zwieback\nBrand: Jeden Tag\nCategory: Pflanzliche Lebensmittel und Getränke, Pflanzliche Lebensmittel, Getreide und Kartoffeln, Brote, Zwiebäcke\nNutritional Information (per 100g):\n- Energy: 389kcal\n- Protein: 11g\n- Carbohydrates: 70g\n- Fat: 6.4g\n- Saturated Fat: 3g\n- Sugars: 13g\n- Fiber: g\n- Salt: 0.98g\n- Sodium: 0.392g\nIngredients: Weizenmehl, Zucker, Margarine [pflanzliche Öle (Raps, Sonnenblumen) und Fette (Palm) (in veränderlichen Gewichtsanteilen); Wasser, Salz, Emulgatoren: Lecithine (Soja), Mono - und Digylceride von Speisefettsäuren; Säuerungsmittel: Citronensäure; Aroma3; Farbstoff: Carotine], Hefe, Invertzuckersirup, \nAllergens: en:soybeans",
+    "output": "I've analyzed Zwieback by Jeden Tag. This product scores -3.7/100 and receives a 'Fill' rating. While it provides calories, the nutritional density is limited. Best enjoyed occasionally while prioritizing more nutritious options. Key factors: Good protein density (2.8g per 100 kcal), Ultra-processed (NOVA Group 4), Ingredient analysis limited - no ingredient text available Bottom line: Fill.",
+    "type": "nutrition_analysis"
+  },
+  {
+    "instruction": "Analyze the nutritional value of this food product and provide a health assessment.",
+    "input": "Product: Finísimo de pechuga de pavo\nBrand: BonÀrea\nCategory: Productos a base de carne, Carnes, Aves, Pavo y sus productos, Pavo\nNutritional Information (per 100g):\n- Energy: 87kcal\n- Protein: 17g\n- Carbohydrates: 2.5g\n- Fat: 1g\n- Saturated Fat: 0.3g\n- Sugars: 0.5g\n- Fiber: g\n- Salt: 2g\n- Sodium: 0.8g\nIngredients: \nAllergens: ",
+    "output": "I've analyzed Finísimo de pechuga de pavo by BonÀrea. This product scores 10.0/100 and receives a 'Fill' rating. While it provides calories, the nutritional density is limited. Best enjoyed occasionally while prioritizing more nutritious options. Key factors: Good protein density (19.5g per 100 kcal), Very high sodium density (920mg per 100 kcal), NOVA processing level not available Bottom line: Fill.",
+    "type": "nutrition_analysis"
+  },
+  {
+    "instruction": "Analyze the nutritional value of this food product and provide a health assessment.",
+    "input": "Product: Fonds de jambon cuit choix\nBrand: Gourmets de l'Artois, Sans marque\nCategory: Viandes et dérivés, Viandes, Charcuteries, Jambons, Jambons blancs, Fonds de jambons cuits\nNutritional Information (per 100g):\n- Energy: 105kcal\n- Protein: 17g\n- Carbohydrates: 2.4g\n- Fat: 3g\n- Saturated Fat: 1.2g\n- Sugars: 2.4g\n- Fiber: g\n- Salt: 2.3g\n- Sodium: 0.92g\nIngredients: Jambon (85%) (origine UE), eau, sel, sirop de glucose, dextrose, stabilisants : E451, E450, arômes naturels, antioxydant : E301, conservateur : E250.\nAllergens: ",
+    "output": "I've analyzed Fonds de jambon cuit choix by Gourmets de l'Artois, Sans marque. This product scores -5.0/100 and receives a 'Fill' rating. While it provides calories, the nutritional density is limited. Best enjoyed occasionally while prioritizing more nutritious options. Key factors: Good protein density (16.2g per 100 kcal), Ultra-processed (NOVA Group 4), Very high sodium density (876mg per 100 kcal) Bottom line: Fill.",
+    "type": "nutrition_analysis"
+  },
+  {
+    "instruction": "Analyze the nutritional value of this food product and provide a health assessment.",
+    "input": "Product: Tarte gourmande au 3 fromage\nBrand: Carrefour extra\nCategory: Tartes au fromage\nNutritional Information (per 100g):\n- Energy: 252kcal\n- Protein: 11g\n- Carbohydrates: 20g\n- Fat: 14g\n- Saturated Fat: 7g\n- Sugars: 2.7g\n- Fiber: 0.8g\n- Salt: 0.8g\n- Sodium: 0.32g\nIngredients: \nAllergens: ",
+    "output": "I've analyzed Tarte gourmande au 3 fromage by Carrefour extra. This product scores 19.8/100 and receives a 'Fill' rating. While it provides calories, the nutritional density is limited. Best enjoyed occasionally while prioritizing more nutritious options. Key factors: Good protein density (4.4g per 100 kcal), NOVA processing level not available, Ingredient analysis limited - no ingredient text available Bottom line: Fill.",
+    "type": "nutrition_analysis"
+  },
+  {
+    "instruction": "Analyze the nutritional value of this food product and provide a health assessment.",
+    "input": "Product: Hamburger Hafencurry\nBrand: Ankerkraut\nCategory: \nNutritional Information (per 100g):\n- Energy: kcal\n- Protein: g\n- Carbohydrates: g\n- Fat: g\n- Saturated Fat: g\n- Sugars: g\n- Fiber: g\n- Salt: g\n- Sodium: g\nIngredients: \nAllergens: ",
+    "output": "I've analyzed Hamburger Hafencurry by Ankerkraut. I don't have enough nutritional data to provide a complete assessment. For the most accurate analysis, look for products with complete nutrition labels. Key factors: Missing calories per 100g - cannot calculate nutrition density Bottom line: Unknown.",
+    "type": "nutrition_analysis"
+  },
+  {
+    "instruction": "Analyze the nutritional value of this food product and provide a health assessment.",
+    "input": "Product: \nBrand: \nCategory: \nNutritional Information (per 100g):\n- Energy: kcal\n- Protein: g\n- Carbohydrates: g\n- Fat: g\n- Saturated Fat: g\n- Sugars: g\n- Fiber: g\n- Salt: g\n- Sodium: g\nIngredients: \nAllergens: ",
+    "output": "I've analyzed . I don't have enough nutritional data to provide a complete assessment. For the most accurate analysis, look for products with complete nutrition labels. Key factors: Missing calories per 100g - cannot calculate nutrition density Bottom line: Unknown.",
+    "type": "nutrition_analysis"
+  },
+  {
+    "instruction": "Analyze the nutritional value of this food product and provide a health assessment.",
+    "input": "Product: Lean ham\nBrand: \nCategory: \nNutritional Information (per 100g):\n- Energy: 102kcal\n- Protein: 17g\n- Carbohydrates: 2.1g\n- Fat: 2.9g\n- Saturated Fat: 1g\n- Sugars: 1.5g\n- Fiber: g\n- Salt: 2.2g\n- Sodium: 0.88g\nIngredients: \nAllergens: ",
+    "output": "I've analyzed Lean ham. This product scores 10.0/100 and receives a 'Fill' rating. While it provides calories, the nutritional density is limited. Best enjoyed occasionally while prioritizing more nutritious options. Key factors: Good protein density (16.7g per 100 kcal), Very high sodium density (863mg per 100 kcal), NOVA processing level not available Bottom line: Fill.",
+    "type": "nutrition_analysis"
+  },
+  {
+    "instruction": "Analyze the nutritional value of this food product and provide a health assessment.",
+    "input": "Product: mini baklavas\nBrand: Deluxe Lidl\nCategory: pastry\nNutritional Information (per 100g):\n- Energy: 407kcal\n- Protein: 7.2g\n- Carbohydrates: 76.1g\n- Fat: 7.9g\n- Saturated Fat: 2.9g\n- Sugars: 26.9g\n- Fiber: 1.3g\n- Salt: 0.13g\n- Sodium: 0.052g\nIngredients: \nAllergens: ",
+    "output": "I've analyzed mini baklavas by Deluxe Lidl. This product scores -0.5/100 and receives a 'Fill' rating. While it provides calories, the nutritional density is limited. Best enjoyed occasionally while prioritizing more nutritious options. Key factors: Moderate protein content (1.8g per 100 kcal), High sugar density (6.6g per 100 kcal), NOVA processing level not available Bottom line: Fill.",
+    "type": "nutrition_analysis"
+  },
+  {
+    "instruction": "Analyze the nutritional value of this food product and provide a health assessment.",
+    "input": "Product: Honig Salz Mandel Schokolade\nBrand: Aldi,Choceur,Wiha\nCategory: Snacks,Sweet snacks,Cocoa and its products,Confectioneries,Chocolates,Milk chocolates,Chocolates with almonds,Milk chocolates with almonds\nNutritional Information (per 100g):\n- Energy: 559kcal\n- Protein: 10g\n- Carbohydrates: 49g\n- Fat: 35g\n- Saturated Fat: 17g\n- Sugars: 48g\n- Fiber: 3.6g\n- Salt: 0.43g\n- Sodium: 0.172g\nIngredients: Zucker, Mandeln (17,8%), Kakaobutter, Sahnepulver (11,6%), Kakaomasse, Vollmilchpulver (4%), Magermilchpulver, Milchzucker, Honig (0,5%), Salz, Emulgator Lecithine (Soja), Vanilleextrakt. Kann auch Haselnuss, Erdnuss und andere Nüsse enthalten.\nAllergens: en:milk,en:nuts,en:soybeans",
+    "output": "I've analyzed Honig Salz Mandel Schokolade by Aldi,Choceur,Wiha. This product scores -13.0/100 and receives a 'Fill' rating. While it provides calories, the nutritional density is limited. Best enjoyed occasionally while prioritizing more nutritious options. Key factors: Moderate protein content (1.8g per 100 kcal), Ultra-processed (NOVA Group 4), High sugar density (8.6g per 100 kcal) Bottom line: Fill.",
+    "type": "nutrition_analysis"
+  },
+  {
+    "instruction": "Analyze the nutritional value of this food product and provide a health assessment.",
+    "input": "Product: Kartoffelsalat mit Ei und Gurke\nBrand: Aldi, Kühlmann, Wonnemeyer\nCategory: fertiggerichte, fertigsalate, kartoffelgerichte, kartoffelsalate, de:fertiggerichte, de:kartoffelgerichte, de:kartoffelsalate\nNutritional Information (per 100g):\n- Energy: 157kcal\n- Protein: 2.2999999523163g\n- Carbohydrates: 15g\n- Fat: 10g\n- Saturated Fat: 0.94999998807907g\n- Sugars: 4.1999998092651g\n- Fiber: g\n- Salt: 1.4g\n- Sodium: 0.56g\nIngredients: AS: 4061458219648 AN: 29066865 Herzhafter Kartoffelsalat mit Ei und Gurke : Kartofeln (60 99), Rapsöl, Eler (10 9%), Gurken (5 96),Zucker, Branntweinessig, Zwiebeln, Eigelb&quot;, jodiertes Speisesalz (Speisesalz, Kalium - jodat), Stärke, Senf - saaten, Speisesalz, Durchschnittliche Nährwerte Kräute\nAllergens: ",
+    "output": "I've analyzed Kartoffelsalat mit Ei und Gurke by Aldi, Kühlmann, Wonnemeyer. This product scores -14.1/100 and receives a 'Fill' rating. While it provides calories, the nutritional density is limited. Best enjoyed occasionally while prioritizing more nutritious options. Key factors: Moderate protein content (1.5g per 100 kcal), Ultra-processed (NOVA Group 4), High sodium density (357mg per 100 kcal) Bottom line: Fill.",
+    "type": "nutrition_analysis"
+  },
+  {
+    "instruction": "Analyze the nutritional value of this food product and provide a health assessment.",
+    "input": "Product: Marmelade Aprikose\nBrand: Zentis\nCategory: Pflanzliche Lebensmittel und Getränke, Pflanzliche Lebensmittel, Frucht- und gemüsebasierte Lebensmittel, Frühstücke, Brotaufstriche, Fruchtbasierte Lebensmittel, Pflanzliche Brotaufstriche, Süße Brot\nNutritional Information (per 100g):\n- Energy: 114kcal\n- Protein: 0.5g\n- Carbohydrates: 26g\n- Fat: 0.1g\n- Saturated Fat: 0.1g\n- Sugars: 26g\n- Fiber: g\n- Salt: 0.05g\n- Sodium: 0.02g\nIngredients: 50 % Aprikosen, Wasser, Zucker, Geļiermittel Pektine, Zitronensaftkonzentrat.\nAllergens: ",
+    "output": "I've analyzed Marmelade Aprikose by Zentis. This product scores -13.2/100 and receives a 'Fill' rating. While it provides calories, the nutritional density is limited. Best enjoyed occasionally while prioritizing more nutritious options. Key factors: Simple ingredient list, Very high sugar density (22.8g per 100 kcal) Bottom line: Fill.",
+    "type": "nutrition_analysis"
+  },
+  {
+    "instruction": "Analyze the nutritional value of this food product and provide a health assessment.",
+    "input": "Product: Butter rum batter hot drink mix\nBrand: \nCategory: Beverages, Alcoholic beverages\nNutritional Information (per 100g):\n- Energy: 429kcal\n- Protein: 0g\n- Carbohydrates: 75g\n- Fat: 14.29g\n- Saturated Fat: 8.93g\n- Sugars: 75g\n- Fiber: 0g\n- Salt: 0.49g\n- Sodium: 0.196g\nIngredients: Sugar, butter (sweet cream, salt), water, non-dairy creamer (corn syrup solids, partially hydrogenated soybean oil, sodium caseinate [a milk derivative], dipotassium phosphate, sugar, mono & diglycerides, silicon dioxide, sodium stearoyl lactylate, carrageenan, soy lecithin, artificial flavor, artif\nAllergens: en:milk",
+    "output": "I've analyzed Butter rum batter hot drink mix. This product scores -45.0/100 and receives a 'Fill' rating. While it provides calories, the nutritional density is limited. Best enjoyed occasionally while prioritizing more nutritious options. Key factors: Ultra-processed (NOVA Group 4), Very high sugar density (17.5g per 100 kcal), Contains industrial fats (hydrogenated oils) Bottom line: Fill.",
+    "type": "nutrition_analysis"
+  },
+  {
+    "instruction": "Analyze the nutritional value of this food product and provide a health assessment.",
+    "input": "Product: Eau minérale MONTCALM 12 bouteilles de 33cl\nBrand: U\nCategory: Boissons, Eaux, Eaux de sources, Eaux minérales, Boissons et préparations de boissons\nNutritional Information (per 100g):\n- Energy: 0kcal\n- Protein: 0g\n- Carbohydrates: 0g\n- Fat: 0g\n- Saturated Fat: 0g\n- Sugars: 0g\n- Fiber: g\n- Salt: 0g\n- Sodium: 0g\nIngredients: Mineralisation caracteristique en mg/l: calcium ...............................................3 magnesium.......................................0,7 sodium .............................................2,2 potassium.........................................0,6 sulfates ................................\nAllergens: ",
+    "output": "I've analyzed Eau minérale MONTCALM 12 bouteilles de 33cl by U. I don't have enough nutritional data to provide a complete assessment. For the most accurate analysis, look for products with complete nutrition labels. Key factors: Missing calories per 100g - cannot calculate nutrition density Bottom line: Unknown.",
+    "type": "nutrition_analysis"
+  },
+  {
+    "instruction": "Analyze the nutritional value of this food product and provide a health assessment.",
+    "input": "Product: Flavy powder chunky stracciatella\nBrand: \nCategory: \nNutritional Information (per 100g):\n- Energy: 273kcal\n- Protein: 1.5g\n- Carbohydrates: 26g\n- Fat: 6g\n- Saturated Fat: 3.5g\n- Sugars: 10g\n- Fiber: 59g\n- Salt: g\n- Sodium: g\nIngredients: \nAllergens: ",
+    "output": "I've analyzed Flavy powder chunky stracciatella. This product scores 17.2/100 and receives a 'Fill' rating. While it provides calories, the nutritional density is limited. Best enjoyed occasionally while prioritizing more nutritious options. Key factors: High fiber density (21.6g per 100 kcal), NOVA processing level not available, Ingredient analysis limited - no ingredient text available Bottom line: Fill.",
+    "type": "nutrition_analysis"
+  },
+  {
+    "instruction": "Analyze the nutritional value of this food product and provide a health assessment.",
+    "input": "Product: Iced vanilla cake with creamy filling\nBrand: \nCategory: Snacks, Sweet snacks, Biscuits and cakes, Cakes\nNutritional Information (per 100g):\n- Energy: 389kcal\n- Protein: 2.78g\n- Carbohydrates: 68.06g\n- Fat: 12.5g\n- Saturated Fat: 6.25g\n- Sugars: 54.17g\n- Fiber: 0g\n- Salt: 0.7975g\n- Sodium: 0.319g\nIngredients: Sugar, water, enriched bleached wheat flour [flour, reduced iron, \"b\" vitamins (niacin, thiamine mononitrate (b1), riboflavin (b2), folic acid)], partially hydrogenated vegetable and/or animal shortening (soybean, cottonseed and/or canola oil, beef fat), corn syrup, high fructose corn syrup, egg whi\nAllergens: en:milk,en:soybeans",
+    "output": "I've analyzed Iced vanilla cake with creamy filling. This product scores -42.1/100 and receives a 'Fill' rating. While it provides calories, the nutritional density is limited. Best enjoyed occasionally while prioritizing more nutritious options. Key factors: Ultra-processed (NOVA Group 4), Very high sugar density (13.9g per 100 kcal), Contains industrial fats (hydrogenated oils) Bottom line: Fill.",
+    "type": "nutrition_analysis"
+  },
+  {
+    "instruction": "Analyze the nutritional value of this food product and provide a health assessment.",
+    "input": "Product: FOREVER LIME SPARKLING WATER WITH NATURAL FLAVOUR\nBrand: Maison Perrier\nCategory: \nNutritional Information (per 100g):\n- Energy: 0kcal\n- Protein: 0g\n- Carbohydrates: 0g\n- Fat: 0g\n- Saturated Fat: g\n- Sugars: g\n- Fiber: g\n- Salt: 0g\n- Sodium: 0g\nIngredients: \nAllergens: ",
+    "output": "I've analyzed FOREVER LIME SPARKLING WATER WITH NATURAL FLAVOUR by Maison Perrier. I don't have enough nutritional data to provide a complete assessment. For the most accurate analysis, look for products with complete nutrition labels. Key factors: Missing calories per 100g - cannot calculate nutrition density Bottom line: Unknown.",
+    "type": "nutrition_analysis"
+  },
+  {
+    "instruction": "Analyze the nutritional value of this food product and provide a health assessment.",
+    "input": "Product: Dessert fruitier pomme abricot\nBrand: Andros\nCategory: \nNutritional Information (per 100g):\n- Energy: 75kcal\n- Protein: 0.5g\n- Carbohydrates: 17g\n- Fat: 0.2g\n- Saturated Fat: 0g\n- Sugars: 17g\n- Fiber: 1.7g\n- Salt: 0g\n- Sodium: 0g\nIngredients: pommes} 61%, abricots 31%, sucre, arôme} naturel, antioxydant : acidit escorbique. SPECIALITEIT VAN ABRIKOZEN. 61 abrikozen 31%, aroma, antioxidant: * Équivaut à l'une des 5 portions de fruits et légumes par jour.\nAllergens: ",
+    "output": "I've analyzed Dessert fruitier pomme abricot by Andros. This product scores -17.3/100 and receives a 'Fill' rating. While it provides calories, the nutritional density is limited. Best enjoyed occasionally while prioritizing more nutritious options. Key factors: High fiber density (2.3g per 100 kcal), Ultra-processed (NOVA Group 4), Very high sugar density (22.7g per 100 kcal) Bottom line: Fill.",
+    "type": "nutrition_analysis"
+  },
+  {
+    "instruction": "Analyze the nutritional value of this food product and provide a health assessment.",
+    "input": "Product: Lamelles d'encornet geant\nBrand: \nCategory: fr:Encornet géant, en:squid\nNutritional Information (per 100g):\n- Energy: 92kcal\n- Protein: 15.6g\n- Carbohydrates: 3.1g\n- Fat: 1.4g\n- Saturated Fat: 0.4g\n- Sugars: 0g\n- Fiber: g\n- Salt: 0.1g\n- Sodium: 0.04g\nIngredients: \nAllergens: ",
+    "output": "I've analyzed Lamelles d'encornet geant. This product scores 20.0/100 and receives a 'Fill' rating. While it provides calories, the nutritional density is limited. Best enjoyed occasionally while prioritizing more nutritious options. Key factors: Good protein density (17.0g per 100 kcal), NOVA processing level not available, Ingredient analysis limited - no ingredient text available Bottom line: Fill.",
+    "type": "nutrition_analysis"
+  },
+  {
+    "instruction": "Analyze the nutritional value of this food product and provide a health assessment.",
+    "input": "Product: Twimen\nBrand: \nCategory: \nNutritional Information (per 100g):\n- Energy: 592.7kcal\n- Protein: 6.6g\n- Carbohydrates: 56.3g\n- Fat: 37.9g\n- Saturated Fat: 9g\n- Sugars: 1.6g\n- Fiber: g\n- Salt: 14g\n- Sodium: 5.6g\nIngredients: \nAllergens: ",
+    "output": "I've analyzed Twimen. This product scores -5.5/100 and receives a 'Fill' rating. While it provides calories, the nutritional density is limited. Best enjoyed occasionally while prioritizing more nutritious options. Key factors: Very high sodium density (945mg per 100 kcal), NOVA processing level not available, Ingredient analysis limited - no ingredient text available Bottom line: Fill.",
+    "type": "nutrition_analysis"
+  },
+  {
+    "instruction": "Analyze the nutritional value of this food product and provide a health assessment.",
+    "input": "Product: Marcius\nBrand: Náš kraj\nCategory: \nNutritional Information (per 100g):\n- Energy: kcal\n- Protein: g\n- Carbohydrates: g\n- Fat: g\n- Saturated Fat: g\n- Sugars: g\n- Fiber: g\n- Salt: g\n- Sodium: g\nIngredients: \nAllergens: ",
+    "output": "I've analyzed Marcius by Náš kraj. I don't have enough nutritional data to provide a complete assessment. For the most accurate analysis, look for products with complete nutrition labels. Key factors: Missing calories per 100g - cannot calculate nutrition density Bottom line: Unknown.",
+    "type": "nutrition_analysis"
+  },
+  {
+    "instruction": "Analyze the nutritional value of this food product and provide a health assessment.",
+    "input": "Product: Homar\nBrand: \nCategory: \nNutritional Information (per 100g):\n- Energy: kcal\n- Protein: g\n- Carbohydrates: g\n- Fat: g\n- Saturated Fat: g\n- Sugars: g\n- Fiber: g\n- Salt: 0g\n- Sodium: 0g\nIngredients: \nAllergens: ",
+    "output": "I've analyzed Homar. I don't have enough nutritional data to provide a complete assessment. For the most accurate analysis, look for products with complete nutrition labels. Key factors: Missing calories per 100g - cannot calculate nutrition density Bottom line: Unknown.",
+    "type": "nutrition_analysis"
+  },
+  {
+    "instruction": "Analyze the nutritional value of this food product and provide a health assessment.",
+    "input": "Product: \nBrand: \nCategory: \nNutritional Information (per 100g):\n- Energy: kcal\n- Protein: g\n- Carbohydrates: g\n- Fat: g\n- Saturated Fat: g\n- Sugars: g\n- Fiber: g\n- Salt: g\n- Sodium: g\nIngredients: \nAllergens: ",
+    "output": "I've analyzed . I don't have enough nutritional data to provide a complete assessment. For the most accurate analysis, look for products with complete nutrition labels. Key factors: Missing calories per 100g - cannot calculate nutrition density Bottom line: Unknown.",
+    "type": "nutrition_analysis"
+  },
+  {
+    "instruction": "Analyze the nutritional value of this food product and provide a health assessment.",
+    "input": "Product: Alpenpur mit Alpenrahm\nBrand: Edelweiss, Milkana, Savencia\nCategory: Milchprodukte, Fermentierte Lebensmittel, Fermentierte Milch, Käse, Schmelzkäse\nNutritional Information (per 100g):\n- Energy: 266kcal\n- Protein: 13g\n- Carbohydrates: 6.8g\n- Fat: 21g\n- Saturated Fat: 14g\n- Sugars: 6.8g\n- Fiber: g\n- Salt: 1.8g\n- Sodium: 0.72g\nIngredients: Sahne (41%), Käse (30%), Butter, Süßmolkenpul - ver, Milcheiweiß, Milchmineralien, Säuerungsmittel (Milchsäure).  Sahne, Butter und Käse werden mit Alpenmilch hergestellt.\nAllergens: en:milk",
+    "output": "I've analyzed Alpenpur mit Alpenrahm by Edelweiss, Milkana, Savencia. This product scores -0.5/100 and receives a 'Fill' rating. While it provides calories, the nutritional density is limited. Best enjoyed occasionally while prioritizing more nutritious options. Key factors: Good protein density (4.9g per 100 kcal), Ultra-processed (NOVA Group 4), High sodium density (271mg per 100 kcal) Bottom line: Fill.",
+    "type": "nutrition_analysis"
+  },
+  {
+    "instruction": "Analyze the nutritional value of this food product and provide a health assessment.",
+    "input": "Product: Ujooba\nBrand: \nCategory: \nNutritional Information (per 100g):\n- Energy: kcal\n- Protein: g\n- Carbohydrates: g\n- Fat: g\n- Saturated Fat: g\n- Sugars: g\n- Fiber: g\n- Salt: g\n- Sodium: g\nIngredients: \nAllergens: ",
+    "output": "I've analyzed Ujooba. I don't have enough nutritional data to provide a complete assessment. For the most accurate analysis, look for products with complete nutrition labels. Key factors: Missing calories per 100g - cannot calculate nutrition density Bottom line: Unknown.",
+    "type": "nutrition_analysis"
+  },
+  {
+    "instruction": "Analyze the nutritional value of this food product and provide a health assessment.",
+    "input": "Product: Jambon de campagne\nBrand: \nCategory: \nNutritional Information (per 100g):\n- Energy: 1061kcal\n- Protein: 29g\n- Carbohydrates: 1g\n- Fat: 15g\n- Saturated Fat: 6g\n- Sugars: 0.5g\n- Fiber: g\n- Salt: 4.3g\n- Sodium: 1.72g\nIngredients: \nAllergens: ",
+    "output": "I've analyzed Jambon de campagne. This product scores 10.9/100 and receives a 'Fill' rating. While it provides calories, the nutritional density is limited. Best enjoyed occasionally while prioritizing more nutritious options. Key factors: Good protein density (2.7g per 100 kcal), NOVA processing level not available, Ingredient analysis limited - no ingredient text available Bottom line: Fill.",
+    "type": "nutrition_analysis"
+  },
+  {
+    "instruction": "Analyze the nutritional value of this food product and provide a health assessment.",
+    "input": "Product: La truffe au chocolat à 85 % de cacao\nBrand: Nestlé\nCategory: Snacks,Sweet snacks,Cocoa and its products,Confectioneries,Chocolate candies,Bonbons,Chocolate truffles\nNutritional Information (per 100g):\n- Energy: 482kcal\n- Protein: 6g\n- Carbohydrates: 33.2g\n- Fat: 34.3g\n- Saturated Fat: 21.1g\n- Sugars: 28.1g\n- Fiber: 7.3g\n- Salt: 0.1g\n- Sodium: 0.04g\nIngredients: Pâte de cacao, sucre, beurre de cacao, humectant (sorbitol), _lait_ concentré sucré (_lait_ entier, sucre), _beurre_ pâtissier, sirop de glucose, _lait_ entier en poudre, cacao, _lactose_, émulsifiant (lécithine de tournesol), _petit-lait_ en poudre, stabilisant (invertase), arôme. 27 % de chocolat \nAllergens: en:milk",
+    "output": "I've analyzed La truffe au chocolat à 85 % de cacao by Nestlé. This product scores -8.7/100 and receives a 'Fill' rating. While it provides calories, the nutritional density is limited. Best enjoyed occasionally while prioritizing more nutritious options. Key factors: High fiber density (1.5g per 100 kcal), Ultra-processed (NOVA Group 4), High sugar density (5.8g per 100 kcal) Bottom line: Fill.",
+    "type": "nutrition_analysis"
+  },
+  {
+    "instruction": "Analyze the nutritional value of this food product and provide a health assessment.",
+    "input": "Product: Sutdiyari Weichkäse 55%\nBrand: \nCategory: en:cheeses\nNutritional Information (per 100g):\n- Energy: 290kcal\n- Protein: 14g\n- Carbohydrates: 0.5g\n- Fat: 25g\n- Saturated Fat: 17g\n- Sugars: 0.5g\n- Fiber: g\n- Salt: 2.7g\n- Sodium: 1.08g\nIngredients: \nAllergens: ",
+    "output": "I've analyzed Sutdiyari Weichkäse 55%. This product scores 14.3/100 and receives a 'Fill' rating. While it provides calories, the nutritional density is limited. Best enjoyed occasionally while prioritizing more nutritious options. Key factors: Good protein density (4.8g per 100 kcal), High sodium density (372mg per 100 kcal), NOVA processing level not available Bottom line: Fill.",
+    "type": "nutrition_analysis"
+  },
+  {
+    "instruction": "Analyze the nutritional value of this food product and provide a health assessment.",
+    "input": "Product: Préparation tartinable au surimi pour sandwich\nBrand: \nCategory: \nNutritional Information (per 100g):\n- Energy: 310.16kcal\n- Protein: 4.8g\n- Carbohydrates: 8.7g\n- Fat: 28.3g\n- Saturated Fat: 2.7g\n- Sugars: 3g\n- Fiber: g\n- Salt: 1.4g\n- Sodium: 0.56g\nIngredients: \nAllergens: ",
+    "output": "I've analyzed Préparation tartinable au surimi pour sandwich. This product scores 6.2/100 and receives a 'Fill' rating. While it provides calories, the nutritional density is limited. Best enjoyed occasionally while prioritizing more nutritious options. Key factors: Moderate protein content (1.5g per 100 kcal), NOVA processing level not available, Ingredient analysis limited - no ingredient text available Bottom line: Fill.",
+    "type": "nutrition_analysis"
+  },
+  {
+    "instruction": "Analyze the nutritional value of this food product and provide a health assessment.",
+    "input": "Product: Blended Canola & Extra Virgin Olive Oil\nBrand: \nCategory: Plant-based foods and beverages, Plant-based foods, Fats, Vegetable fats, Vegetable oils\nNutritional Information (per 100g):\n- Energy: 866.66666666667kcal\n- Protein: 0g\n- Carbohydrates: 0g\n- Fat: 93.333333333333g\n- Saturated Fat: 6.6666666666667g\n- Sugars: 0g\n- Fiber: g\n- Salt: 0g\n- Sodium: 0g\nIngredients: Canola oil, extra virgin olive oil.\nAllergens: ",
+    "output": "I've analyzed Blended Canola & Extra Virgin Olive Oil. This product scores 10.0/100 and receives a 'Fill' rating. While it provides calories, the nutritional density is limited. Best enjoyed occasionally while prioritizing more nutritious options. Key factors: Simple ingredient list, Lightly processed (NOVA Group 2) Bottom line: Fill.",
+    "type": "nutrition_analysis"
+  },
+  {
+    "instruction": "Analyze the nutritional value of this food product and provide a health assessment.",
+    "input": "Product: Factory day bakery\nBrand: \nCategory: \nNutritional Information (per 100g):\n- Energy: 330kcal\n- Protein: 4g\n- Carbohydrates: 56g\n- Fat: 10g\n- Saturated Fat: 2g\n- Sugars: 40g\n- Fiber: 2g\n- Salt: 0.9g\n- Sodium: 0.36g\nIngredients: \nAllergens: ",
+    "output": "I've analyzed Factory day bakery. This product scores -10.6/100 and receives a 'Fill' rating. While it provides calories, the nutritional density is limited. Best enjoyed occasionally while prioritizing more nutritious options. Key factors: Very high sugar density (12.1g per 100 kcal), NOVA processing level not available, Ingredient analysis limited - no ingredient text available Bottom line: Fill.",
+    "type": "nutrition_analysis"
+  },
+  {
+    "instruction": "Analyze the nutritional value of this food product and provide a health assessment.",
+    "input": "Product: Vegan karbanatek\nBrand: \nCategory: \nNutritional Information (per 100g):\n- Energy: 325kcal\n- Protein: 45g\n- Carbohydrates: 18g\n- Fat: 6.8g\n- Saturated Fat: 1.3g\n- Sugars: 2.3g\n- Fiber: 6.2g\n- Salt: 8g\n- Sodium: 3.2g\nIngredients: \nAllergens: ",
+    "output": "I've analyzed Vegan karbanatek. This product scores 24.3/100 and receives a 'Fill' rating. While it provides calories, the nutritional density is limited. Best enjoyed occasionally while prioritizing more nutritious options. Key factors: Good protein density (13.8g per 100 kcal), High fiber density (1.9g per 100 kcal), Very high sodium density (985mg per 100 kcal) Bottom line: Fill.",
+    "type": "nutrition_analysis"
+  },
+  {
+    "instruction": "Analyze the nutritional value of this food product and provide a health assessment.",
+    "input": "Product: Prima Tyttebær Syltetøy\nBrand: Rema 1000\nCategory: en:jams\nNutritional Information (per 100g):\n- Energy: 197kcal\n- Protein: 0.5g\n- Carbohydrates: 46g\n- Fat: 0.5g\n- Saturated Fat: 0.1g\n- Sugars: 46g\n- Fiber: 1.9g\n- Salt: 0g\n- Sodium: 0g\nIngredients: \nAllergens: ",
+    "output": "I've analyzed Prima Tyttebær Syltetøy by Rema 1000. This product scores -11.8/100 and receives a 'Fill' rating. While it provides calories, the nutritional density is limited. Best enjoyed occasionally while prioritizing more nutritious options. Key factors: Good fiber content (1.0g per 100 kcal), Very high sugar density (23.4g per 100 kcal), NOVA processing level not available Bottom line: Fill.",
+    "type": "nutrition_analysis"
+  },
+  {
+    "instruction": "Analyze the nutritional value of this food product and provide a health assessment.",
+    "input": "Product: Tranches de Coppa\nBrand: maison Milhau\nCategory: Coppa\nNutritional Information (per 100g):\n- Energy: 340kcal\n- Protein: 29g\n- Carbohydrates: 4g\n- Fat: 23g\n- Saturated Fat: 7.8g\n- Sugars: 1g\n- Fiber: g\n- Salt: 2.6g\n- Sodium: 1.04g\nIngredients: Echine de porc, sel, sel nitrité, dextrose, saccharose, arômes naturels, conservateur: E 252, épices antioxydant: E 301.\nAllergens: ",
+    "output": "I've analyzed Tranches de Coppa by maison Milhau. This product scores 0.0/100 and receives a 'Fill' rating. While it provides calories, the nutritional density is limited. Best enjoyed occasionally while prioritizing more nutritious options. Key factors: Good protein density (8.5g per 100 kcal), Ultra-processed (NOVA Group 4), High sodium density (306mg per 100 kcal) Bottom line: Fill.",
+    "type": "nutrition_analysis"
+  },
+  {
+    "instruction": "Analyze the nutritional value of this food product and provide a health assessment.",
+    "input": "Product: Liégeois pomme fraise\nBrand: Andros\nCategory: Desserts,Liégeois aux fruits\nNutritional Information (per 100g):\n- Energy: 123kcal\n- Protein: 0.7g\n- Carbohydrates: 14g\n- Fat: 6.7g\n- Saturated Fat: 4.2g\n- Sugars: 13.7g\n- Fiber: 1.8g\n- Salt: 0.04g\n- Sodium: 0.016g\nIngredients: Tiséa INFUSION momille sea INFUSION mille SACHETS 100%& Plastique Recyclé RECYCLED PLASTIC ORGANIZADOR EN TORRE STORAGE TOWER OPBERGTOREN 100% 30. em Pollane recycle Tecycled ANDROS *Liégeois POMME FRAISE SUR COULIS DE CASSIS 7123\nAllergens: ",
+    "output": "I've analyzed Liégeois pomme fraise by Andros. This product scores -1.7/100 and receives a 'Fill' rating. While it provides calories, the nutritional density is limited. Best enjoyed occasionally while prioritizing more nutritious options. Key factors: High fiber density (1.5g per 100 kcal), Simple ingredient list, Very high sugar density (11.1g per 100 kcal) Bottom line: Fill.",
+    "type": "nutrition_analysis"
+  },
+  {
+    "instruction": "Analyze the nutritional value of this food product and provide a health assessment.",
+    "input": "Product: Herz Kekse Knuspriger Keks mit Erdbeer-Cremefüllung\nBrand: Nora\nCategory: Imbiss, Süßer Snack, Kekse und Kuchen\nNutritional Information (per 100g):\n- Energy: 483kcal\n- Protein: 6.4g\n- Carbohydrates: 62g\n- Fat: 23g\n- Saturated Fat: 13g\n- Sugars: 29g\n- Fiber: g\n- Salt: 0.4g\n- Sodium: 0.16g\nIngredients: WEIZENMEHL, Zucker, Palmfett, VOLLMILCHPULVER, WEIZENSTÄRKE, MAGERMILCHPULVER, SÜSSMOLKENPULVER, pflanzliche Öle (Raps, Kokos), Glukosesirup, Backtriebmittel: Kaliumtartrate, Natriumcarbonate, Ammoniumcarbonat; Invertzuckersirup, färbende Lebensmittel (Radieschen, Zitronensaft, Schwarze Johannisbeer\nAllergens: ",
+    "output": "I've analyzed Herz Kekse Knuspriger Keks mit Erdbeer-Cremefüllung by Nora. This product scores -19.7/100 and receives a 'Fill' rating. While it provides calories, the nutritional density is limited. Best enjoyed occasionally while prioritizing more nutritious options. Key factors: Moderate protein content (1.3g per 100 kcal), Ultra-processed (NOVA Group 4), High sugar density (6.0g per 100 kcal) Bottom line: Fill.",
+    "type": "nutrition_analysis"
+  },
+  {
+    "instruction": "Analyze the nutritional value of this food product and provide a health assessment.",
+    "input": "Product: Kobe Ground Beef\nBrand: Steakhouse American Crafted\nCategory: \nNutritional Information (per 100g):\n- Energy: 250kcal\n- Protein: 16.1g\n- Carbohydrates: 0g\n- Fat: 20.5g\n- Saturated Fat: 8.93g\n- Sugars: g\n- Fiber: g\n- Salt: 0.167g\n- Sodium: 0.067g\nIngredients: \nAllergens: ",
+    "output": "I've analyzed Kobe Ground Beef by Steakhouse American Crafted. This product scores 20.0/100 and receives a 'Fill' rating. While it provides calories, the nutritional density is limited. Best enjoyed occasionally while prioritizing more nutritious options. Key factors: Good protein density (6.4g per 100 kcal), NOVA processing level not available, Ingredient analysis limited - no ingredient text available Bottom line: Fill.",
+    "type": "nutrition_analysis"
+  },
+  {
+    "instruction": "Analyze the nutritional value of this food product and provide a health assessment.",
+    "input": "Product: Panettone Fragoline & Cioccolato bianco\nBrand: Melegatti\nCategory: Snacks, Snacks sucrés, Viennoiseries, Brioches, Panettone\nNutritional Information (per 100g):\n- Energy: 404kcal\n- Protein: 6.6g\n- Carbohydrates: 55.7g\n- Fat: 17g\n- Saturated Fat: 9.9g\n- Sugars: 30.4g\n- Fiber: g\n- Salt: 0.54g\n- Sodium: 0.216g\nIngredients: \nAllergens: ",
+    "output": "I've analyzed Panettone Fragoline & Cioccolato bianco by Melegatti. This product scores -3.5/100 and receives a 'Fill' rating. While it provides calories, the nutritional density is limited. Best enjoyed occasionally while prioritizing more nutritious options. Key factors: Moderate protein content (1.6g per 100 kcal), High sugar density (7.5g per 100 kcal), NOVA processing level not available Bottom line: Fill.",
+    "type": "nutrition_analysis"
+  },
+  {
+    "instruction": "Analyze the nutritional value of this food product and provide a health assessment.",
+    "input": "Product: Berta Protein Bar Brownie Flavour\nBrand: KoRo\nCategory: Nahrungsergänzungsmittel, Nahrungsergänzungen für Bodybuilder, Proteinriegel\nNutritional Information (per 100g):\n- Energy: 364kcal\n- Protein: 30g\n- Carbohydrates: 32g\n- Fat: 15g\n- Saturated Fat: 8.2g\n- Sugars: 1.1g\n- Fiber: 12g\n- Salt: 0.7875g\n- Sodium: 0.315g\nIngredients: 30 % Zartbitterschokolade mit Süßungsmittel (Süßungsmittel: Maltit; Kakaomasse, Kakaobutter, Emulgator: Lecithine), Feuchthaltemittel: Glycerin; SOJAPROTEIN, MILCHPROTEIN, Kollagenhydrolysat, Füllstoff: Polydextrose; Oligofruktose, Süßungsmittel: Maltit; fettreduziertes Kakakopulver, Kakaomasse, Aro\nAllergens: ",
+    "output": "I've analyzed Berta Protein Bar Brownie Flavour by KoRo. This product scores 15.0/100 and receives a 'Fill' rating. While it provides calories, the nutritional density is limited. Best enjoyed occasionally while prioritizing more nutritious options. Key factors: Good protein density (8.2g per 100 kcal), High fiber density (3.3g per 100 kcal), Ultra-processed (NOVA Group 4) Bottom line: Fill.",
+    "type": "nutrition_analysis"
+  },
+  {
+    "instruction": "Analyze the nutritional value of this food product and provide a health assessment.",
+    "input": "Product: Mayonesa\nBrand: \nCategory: \nNutritional Information (per 100g):\n- Energy: 580kcal\n- Protein: 0.8g\n- Carbohydrates: 1.4g\n- Fat: 64g\n- Saturated Fat: 10g\n- Sugars: 1g\n- Fiber: 0g\n- Salt: 0.8g\n- Sodium: 0.32g\nIngredients: \nAllergens: ",
+    "output": "I've analyzed Mayonesa. This product scores 0.6/100 and receives a 'Fill' rating. While it provides calories, the nutritional density is limited. Best enjoyed occasionally while prioritizing more nutritious options. Key factors: NOVA processing level not available, Ingredient analysis limited - no ingredient text available Bottom line: Fill.",
+    "type": "nutrition_analysis"
+  },
+  {
+    "instruction": "Analyze the nutritional value of this food product and provide a health assessment.",
+    "input": "Product: \nBrand: \nCategory: \nNutritional Information (per 100g):\n- Energy: kcal\n- Protein: g\n- Carbohydrates: g\n- Fat: g\n- Saturated Fat: g\n- Sugars: g\n- Fiber: g\n- Salt: g\n- Sodium: g\nIngredients: \nAllergens: ",
+    "output": "I've analyzed . I don't have enough nutritional data to provide a complete assessment. For the most accurate analysis, look for products with complete nutrition labels. Key factors: Missing calories per 100g - cannot calculate nutrition density Bottom line: Unknown.",
+    "type": "nutrition_analysis"
+  },
+  {
+    "instruction": "Analyze the nutritional value of this food product and provide a health assessment.",
+    "input": "Product: Butter Cookies & Chocolate Chip Cookies\nBrand: \nCategory: \nNutritional Information (per 100g):\n- Energy: 504kcal\n- Protein: 5.3g\n- Carbohydrates: 65g\n- Fat: 24g\n- Saturated Fat: 13g\n- Sugars: 27g\n- Fiber: g\n- Salt: 0.43g\n- Sodium: 0.172g\nIngredients: \nAllergens: ",
+    "output": "I've analyzed Butter Cookies & Chocolate Chip Cookies. This product scores -5.8/100 and receives a 'Fill' rating. While it provides calories, the nutritional density is limited. Best enjoyed occasionally while prioritizing more nutritious options. Key factors: High sugar density (5.4g per 100 kcal), NOVA processing level not available, Ingredient analysis limited - no ingredient text available Bottom line: Fill.",
+    "type": "nutrition_analysis"
+  },
+  {
+    "instruction": "Analyze the nutritional value of this food product and provide a health assessment.",
+    "input": "Product: Blije biscuitjes\nBrand: Verkade\nCategory: \nNutritional Information (per 100g):\n- Energy: 472kcal\n- Protein: 7.1g\n- Carbohydrates: 67.6g\n- Fat: 18.7g\n- Saturated Fat: 8.9g\n- Sugars: 16.8g\n- Fiber: g\n- Salt: 0.63g\n- Sodium: 0.252g\nIngredients: \nAllergens: ",
+    "output": "I've analyzed Blije biscuitjes by Verkade. This product scores 6.0/100 and receives a 'Fill' rating. While it provides calories, the nutritional density is limited. Best enjoyed occasionally while prioritizing more nutritious options. Key factors: Moderate protein content (1.5g per 100 kcal), NOVA processing level not available, Ingredient analysis limited - no ingredient text available Bottom line: Fill.",
+    "type": "nutrition_analysis"
+  },
+  {
+    "instruction": "Analyze the nutritional value of this food product and provide a health assessment.",
+    "input": "Product: Cioccolato al gusto limone\nBrand: \nCategory: \nNutritional Information (per 100g):\n- Energy: 527kcal\n- Protein: 5.1g\n- Carbohydrates: 53g\n- Fat: 31g\n- Saturated Fat: 19g\n- Sugars: 50g\n- Fiber: g\n- Salt: g\n- Sodium: g\nIngredients: \nAllergens: ",
+    "output": "I've analyzed Cioccolato al gusto limone. This product scores -6.1/100 and receives a 'Fill' rating. While it provides calories, the nutritional density is limited. Best enjoyed occasionally while prioritizing more nutritious options. Key factors: High sugar density (9.5g per 100 kcal), NOVA processing level not available, Ingredient analysis limited - no ingredient text available Bottom line: Fill.",
+    "type": "nutrition_analysis"
+  },
+  {
+    "instruction": "Analyze the nutritional value of this food product and provide a health assessment.",
+    "input": "Product: Mixed Pickles\nBrand: K-Classic\nCategory: Pflanzliche Lebensmittel und Getränke, Pflanzliche Lebensmittel, Eingelegte Lebensmittel\nNutritional Information (per 100g):\n- Energy: 44kcal\n- Protein: 0.8g\n- Carbohydrates: 7.9g\n- Fat: 0.5g\n- Saturated Fat: 0.1g\n- Sugars: 7.6g\n- Fiber: 2.3g\n- Salt: 1.1g\n- Sodium: 0.44g\nIngredients: Gemüsemischung (in veränderlichen Gewichtsanteilen: Cornichons, Blumenkohl, Silberzwiebeln), Trinkwasser, Gemüsemischung (in veränderlichen Gewichtsanteilen: Paprika rot, Karotten, Maiskölbchen), Branntweinessig, Zucker, Speisesalz, Säuerungsmittel: Citronensäure, Antioxidationsmittel (Ascorbinsäure\nAllergens: ",
+    "output": "I've analyzed Mixed Pickles by K-Classic. This product scores -22.7/100 and receives a 'Fill' rating. While it provides calories, the nutritional density is limited. Best enjoyed occasionally while prioritizing more nutritious options. Key factors: Moderate protein content (1.8g per 100 kcal), High fiber density (5.2g per 100 kcal), Ultra-processed (NOVA Group 4) Bottom line: Fill.",
+    "type": "nutrition_analysis"
+  },
+  {
+    "instruction": "Analyze the nutritional value of this food product and provide a health assessment.",
+    "input": "Product: Hibiscus infused water with ginger\nBrand: \nCategory: \nNutritional Information (per 100g):\n- Energy: 17.79359430605kcal\n- Protein: 0g\n- Carbohydrates: 4.626334519573g\n- Fat: 0g\n- Saturated Fat: 0g\n- Sugars: 4.626334519573g\n- Fiber: 0g\n- Salt: 0g\n- Sodium: 0g\nIngredients: \nAllergens: ",
+    "output": "I've analyzed Hibiscus infused water with ginger. This product scores -20.0/100 and receives a 'Fill' rating. While it provides calories, the nutritional density is limited. Best enjoyed occasionally while prioritizing more nutritious options. Key factors: Very high sugar density (26.0g per 100 kcal), NOVA processing level not available, Ingredient analysis limited - no ingredient text available Bottom line: Fill.",
+    "type": "nutrition_analysis"
+  },
+  {
+    "instruction": "Analyze the nutritional value of this food product and provide a health assessment.",
+    "input": "Product: Lievito per dolci\nBrand: F.lli Rebecchi\nCategory: \nNutritional Information (per 100g):\n- Energy: 41kcal\n- Protein: 0g\n- Carbohydrates: 10.3g\n- Fat: 0g\n- Saturated Fat: 0g\n- Sugars: 0g\n- Fiber: g\n- Salt: 5g\n- Sodium: 2g\nIngredients: \nAllergens: ",
+    "output": "I've analyzed Lievito per dolci by F.lli Rebecchi. This product scores -10.0/100 and receives a 'Fill' rating. While it provides calories, the nutritional density is limited. Best enjoyed occasionally while prioritizing more nutritious options. Key factors: Very high sodium density (4878mg per 100 kcal), NOVA processing level not available, Ingredient analysis limited - no ingredient text available Bottom line: Fill.",
+    "type": "nutrition_analysis"
+  },
+  {
+    "instruction": "Analyze the nutritional value of this food product and provide a health assessment.",
+    "input": "Product: Roasted Chicken & Mozzarella Ravioli Pasta\nBrand: Simply Enjoy\nCategory: Plant-based foods and beverages, Plant-based foods, Cereals and potatoes, Cereals and their products, Pastas\nNutritional Information (per 100g):\n- Energy: 170kcal\n- Protein: 13g\n- Carbohydrates: 26g\n- Fat: 9g\n- Saturated Fat: 5g\n- Sugars: 1g\n- Fiber: 1g\n- Salt: 0.975g\n- Sodium: 0.39g\nIngredients: Filling: ricotta cheese (milk, whey, cream, vinegar, salt, stabilizers [xanthan gum, locust bean gum, guar gum]), chicken (chicken meat, water, sea salt, garlic powder, locust bean gum, arabic gum), mozzarella cheese (pasteurized whole milk, culture, salt, enzymes), cheddar cheese (milk, enzymes, sa\nAllergens: en:eggs",
+    "output": "I've analyzed Roasted Chicken & Mozzarella Ravioli Pasta by Simply Enjoy. This product scores 4.4/100 and receives a 'Fill' rating. While it provides calories, the nutritional density is limited. Best enjoyed occasionally while prioritizing more nutritious options. Key factors: Good protein density (7.6g per 100 kcal), Ultra-processed (NOVA Group 4), High sodium density (229mg per 100 kcal) Bottom line: Fill.",
+    "type": "nutrition_analysis"
+  },
+  {
+    "instruction": "Analyze the nutritional value of this food product and provide a health assessment.",
+    "input": "Product: Empanada de atun\nBrand: \nCategory: Comidas preparadas, Pizzas - empanadas y quiches, Tartas saladas, Empanadas, Empanada de atún\nNutritional Information (per 100g):\n- Energy: kcal\n- Protein: g\n- Carbohydrates: g\n- Fat: g\n- Saturated Fat: g\n- Sugars: g\n- Fiber: g\n- Salt: 1.5g\n- Sodium: 0.6g\nIngredients: \nAllergens: ",
+    "output": "I've analyzed Empanada de atun. I don't have enough nutritional data to provide a complete assessment. For the most accurate analysis, look for products with complete nutrition labels. Key factors: Missing calories per 100g - cannot calculate nutrition density Bottom line: Unknown.",
+    "type": "nutrition_analysis"
+  },
+  {
+    "instruction": "Analyze the nutritional value of this food product and provide a health assessment.",
+    "input": "Product: Chocolate negro 0% azúcares para repostería\nBrand: Eureka\nCategory: \nNutritional Information (per 100g):\n- Energy: 470kcal\n- Protein: 7.8g\n- Carbohydrates: 43.7g\n- Fat: 34.6g\n- Saturated Fat: 9.3g\n- Sugars: 0.5g\n- Fiber: g\n- Salt: 0.025g\n- Sodium: 0.01g\nIngredients: \nAllergens: ",
+    "output": "I've analyzed Chocolate negro 0% azúcares para repostería by Eureka. This product scores 6.6/100 and receives a 'Fill' rating. While it provides calories, the nutritional density is limited. Best enjoyed occasionally while prioritizing more nutritious options. Key factors: Moderate protein content (1.7g per 100 kcal), NOVA processing level not available, Ingredient analysis limited - no ingredient text available Bottom line: Fill.",
+    "type": "nutrition_analysis"
+  },
+  {
+    "instruction": "Analyze the nutritional value of this food product and provide a health assessment.",
+    "input": "Product: Electrolyte Drink Mix Watermelon\nBrand: SOS Hydration\nCategory: \nNutritional Information (per 100g):\n- Energy: 200kcal\n- Protein: 0g\n- Carbohydrates: 60g\n- Fat: 0g\n- Saturated Fat: g\n- Sugars: 60g\n- Fiber: g\n- Salt: 16.5g\n- Sodium: 6.6g\nIngredients: \nAllergens: ",
+    "output": "I've analyzed Electrolyte Drink Mix Watermelon by SOS Hydration. This product scores -30.0/100 and receives a 'Fill' rating. While it provides calories, the nutritional density is limited. Best enjoyed occasionally while prioritizing more nutritious options. Key factors: Very high sugar density (30.0g per 100 kcal), Very high sodium density (3300mg per 100 kcal), NOVA processing level not available Bottom line: Fill.",
+    "type": "nutrition_analysis"
+  },
+  {
+    "instruction": "Analyze the nutritional value of this food product and provide a health assessment.",
+    "input": "Product: müller Oats! oats & milk rasberry\nBrand: müller\nCategory: \nNutritional Information (per 100g):\n- Energy: kcal\n- Protein: g\n- Carbohydrates: g\n- Fat: g\n- Saturated Fat: g\n- Sugars: g\n- Fiber: g\n- Salt: g\n- Sodium: g\nIngredients: \nAllergens: ",
+    "output": "I've analyzed müller Oats! oats & milk rasberry by müller. I don't have enough nutritional data to provide a complete assessment. For the most accurate analysis, look for products with complete nutrition labels. Key factors: Missing calories per 100g - cannot calculate nutrition density Bottom line: Unknown.",
+    "type": "nutrition_analysis"
+  },
+  {
+    "instruction": "Analyze the nutritional value of this food product and provide a health assessment.",
+    "input": "Product: Imperial IPA Beer\nBrand: Steambrew\nCategory: \nNutritional Information (per 100g):\n- Energy: kcal\n- Protein: g\n- Carbohydrates: g\n- Fat: g\n- Saturated Fat: g\n- Sugars: g\n- Fiber: g\n- Salt: g\n- Sodium: g\nIngredients: \nAllergens: ",
+    "output": "I've analyzed Imperial IPA Beer by Steambrew. I don't have enough nutritional data to provide a complete assessment. For the most accurate analysis, look for products with complete nutrition labels. Key factors: Missing calories per 100g - cannot calculate nutrition density Bottom line: Unknown.",
+    "type": "nutrition_analysis"
+  },
+  {
+    "instruction": "Analyze the nutritional value of this food product and provide a health assessment.",
+    "input": "Product: \nBrand: \nCategory: en:honeys\nNutritional Information (per 100g):\n- Energy: kcal\n- Protein: g\n- Carbohydrates: g\n- Fat: g\n- Saturated Fat: g\n- Sugars: g\n- Fiber: g\n- Salt: g\n- Sodium: g\nIngredients: \nAllergens: ",
+    "output": "I've analyzed . I don't have enough nutritional data to provide a complete assessment. For the most accurate analysis, look for products with complete nutrition labels. Key factors: Missing calories per 100g - cannot calculate nutrition density Bottom line: Unknown.",
+    "type": "nutrition_analysis"
+  },
+  {
+    "instruction": "Analyze the nutritional value of this food product and provide a health assessment.",
+    "input": "Product: \nBrand: \nCategory: \nNutritional Information (per 100g):\n- Energy: kcal\n- Protein: g\n- Carbohydrates: g\n- Fat: g\n- Saturated Fat: g\n- Sugars: g\n- Fiber: g\n- Salt: g\n- Sodium: g\nIngredients: \nAllergens: ",
+    "output": "I've analyzed . I don't have enough nutritional data to provide a complete assessment. For the most accurate analysis, look for products with complete nutrition labels. Key factors: Missing calories per 100g - cannot calculate nutrition density Bottom line: Unknown.",
+    "type": "nutrition_analysis"
+  },
+  {
+    "instruction": "Analyze the nutritional value of this food product and provide a health assessment.",
+    "input": "Product: Half Coated Chocolate Chunk Cookies\nBrand: Sondey\nCategory: Naposteltavat, Makeat naposteltavat, Keksit ja kakut, Keksit, Suklaakeksit, Cookies, Suklaahippukeksit\nNutritional Information (per 100g):\n- Energy: 505kcal\n- Protein: 5.6g\n- Carbohydrates: 62.2g\n- Fat: 25.4g\n- Saturated Fat: 13.8g\n- Sugars: 35.6g\n- Fiber: g\n- Salt: 0.5g\n- Sodium: 0.2g\nIngredients: vitaminoitu vehnäjauho (_vehnäjauho_, kalsiumkarbonaatti, rauta, tiamiini, niasiini), 23% maitosuklaapaloja [sokeri, kaakaovoi, kaakaomassa, _täysmaitojauhe_, _herajauhe_ (_maidosta_), emulgointiaine (_soijalesitiini_)], 16 % maitosuklaakuorrutetta [sokeri, kaakaovoi, _täysmaitojauhe_, kaakaomassa, \nAllergens: en:gluten,en:milk,en:soybeans",
+    "output": "I've analyzed Half Coated Chocolate Chunk Cookies by Sondey. This product scores -20.6/100 and receives a 'Fill' rating. While it provides calories, the nutritional density is limited. Best enjoyed occasionally while prioritizing more nutritious options. Key factors: Ultra-processed (NOVA Group 4), High sugar density (7.0g per 100 kcal), Ingredient analysis limited - no ingredient text available Bottom line: Fill.",
+    "type": "nutrition_analysis"
+  },
+  {
+    "instruction": "Analyze the nutritional value of this food product and provide a health assessment.",
+    "input": "Product: \nBrand: \nCategory: \nNutritional Information (per 100g):\n- Energy: kcal\n- Protein: g\n- Carbohydrates: g\n- Fat: g\n- Saturated Fat: g\n- Sugars: g\n- Fiber: g\n- Salt: g\n- Sodium: g\nIngredients: \nAllergens: ",
+    "output": "I've analyzed . I don't have enough nutritional data to provide a complete assessment. For the most accurate analysis, look for products with complete nutrition labels. Key factors: Missing calories per 100g - cannot calculate nutrition density Bottom line: Unknown.",
+    "type": "nutrition_analysis"
+  },
+  {
+    "instruction": "Analyze the nutritional value of this food product and provide a health assessment.",
+    "input": "Product: CACAOCURRY\nBrand: キャニオンスパイス\nCategory: \nNutritional Information (per 100g):\n- Energy: 58.9kcal\n- Protein: 1.5g\n- Carbohydrates: 8.56g\n- Fat: 2.06g\n- Saturated Fat: g\n- Sugars: g\n- Fiber: g\n- Salt: 0.983g\n- Sodium: 0.393g\nIngredients: \nAllergens: ",
+    "output": "I've analyzed CACAOCURRY by キャニオンスパイス. This product scores 0.2/100 and receives a 'Fill' rating. While it provides calories, the nutritional density is limited. Best enjoyed occasionally while prioritizing more nutritious options. Key factors: Good protein density (2.5g per 100 kcal), Very high sodium density (667mg per 100 kcal), NOVA processing level not available Bottom line: Fill.",
+    "type": "nutrition_analysis"
+  },
+  {
+    "instruction": "Analyze the nutritional value of this food product and provide a health assessment.",
+    "input": "Product: Sweetened coconut flakes, sweetened\nBrand: \nCategory: Cooking helpers\nNutritional Information (per 100g):\n- Energy: 467kcal\n- Protein: 6.67g\n- Carbohydrates: 53.33g\n- Fat: 26.67g\n- Saturated Fat: 23.33g\n- Sugars: 33.33g\n- Fiber: 13.3g\n- Salt: 0.5g\n- Sodium: 0.2g\nIngredients: Coconut (sodium metabisulfite added to retain color), sugar, water, propylene glycol, salt.\nAllergens: ",
+    "output": "I've analyzed Sweetened coconut flakes, sweetened. This product scores 15.7/100 and receives a 'Fill' rating. While it provides calories, the nutritional density is limited. Best enjoyed occasionally while prioritizing more nutritious options. Key factors: Moderate protein content (1.4g per 100 kcal), High fiber density (2.8g per 100 kcal), Simple ingredient list Bottom line: Fill.",
+    "type": "nutrition_analysis"
+  },
+  {
+    "instruction": "Analyze the nutritional value of this food product and provide a health assessment.",
+    "input": "Product: Engelse drop\nBrand: Klene\nCategory: Snacks, Zoete snacks, Zoetwaren, Snoep\nNutritional Information (per 100g):\n- Energy: 424kcal\n- Protein: 2.4g\n- Carbohydrates: 86g\n- Fat: 4.9g\n- Saturated Fat: 4.3g\n- Sugars: 69g\n- Fiber: g\n- Salt: 0.05g\n- Sodium: 0.02g\nIngredients: Suiker, glucosestroop, rietsuikermelasse, TARWEBLOEM, kokos, water, gelatine, TARWEZETMEEL, zoethoutwortelextract, cacaopoeder, natuurlijke aroma's, emulgator (mono - en diglyceriden van vetzuren), concentraten (rode biet, saffloer, spirulina), kokosolie, kleurstof (paprika-extract), glansmiddel (bi\nAllergens: en:gluten",
+    "output": "I've analyzed Engelse drop by Klene. This product scores -32.7/100 and receives a 'Fill' rating. While it provides calories, the nutritional density is limited. Best enjoyed occasionally while prioritizing more nutritious options. Key factors: Ultra-processed (NOVA Group 4), Very high sugar density (16.3g per 100 kcal), Ingredient analysis limited - no ingredient text available Bottom line: Fill.",
+    "type": "nutrition_analysis"
+  },
+  {
+    "instruction": "Analyze the nutritional value of this food product and provide a health assessment.",
+    "input": "Product: Farbpaste weiß\nBrand: Sally\nCategory: \nNutritional Information (per 100g):\n- Energy: kcal\n- Protein: g\n- Carbohydrates: g\n- Fat: g\n- Saturated Fat: g\n- Sugars: g\n- Fiber: g\n- Salt: g\n- Sodium: g\nIngredients: \nAllergens: ",
+    "output": "I've analyzed Farbpaste weiß by Sally. I don't have enough nutritional data to provide a complete assessment. For the most accurate analysis, look for products with complete nutrition labels. Key factors: Missing calories per 100g - cannot calculate nutrition density Bottom line: Unknown.",
+    "type": "nutrition_analysis"
+  },
+  {
+    "instruction": "Analyze the nutritional value of this food product and provide a health assessment.",
+    "input": "Product: Sandwich\nBrand: Great Value\nCategory: Frozen foods, Sandwiches\nNutritional Information (per 100g):\n- Energy: 223kcal\n- Protein: 12.69g\n- Carbohydrates: 24.37g\n- Fat: 8.63g\n- Saturated Fat: 2.54g\n- Sugars: 5.08g\n- Fiber: 1g\n- Salt: 1.79g\n- Sodium: 0.716g\nIngredients: Roasted turkey breast and white meat with broth (caramel colored): turkey breast, turkey white meat, water, salt, sugar, vinegar, modified food starch, carrageenan, sodium phosphates, sunflower oil, natural flavoring. hoagie bun: enriched bleached wheat flour (wheat flour, niacin, reduced iron, thia\nAllergens: en:gluten,en:milk",
+    "output": "I've analyzed Sandwich by Great Value. This product scores 3.4/100 and receives a 'Fill' rating. While it provides calories, the nutritional density is limited. Best enjoyed occasionally while prioritizing more nutritious options. Key factors: Good protein density (5.7g per 100 kcal), Ultra-processed (NOVA Group 4), High sodium density (321mg per 100 kcal) Bottom line: Fill.",
+    "type": "nutrition_analysis"
+  },
+  {
+    "instruction": "Analyze the nutritional value of this food product and provide a health assessment.",
+    "input": "Product: Adult Multivitamin Gummies\nBrand: Nature's Bounty\nCategory: Vitaminas,Productos sin gluten\nNutritional Information (per 100g):\n- Energy: kcal\n- Protein: g\n- Carbohydrates: g\n- Fat: g\n- Saturated Fat: g\n- Sugars: g\n- Fiber: g\n- Salt: g\n- Sodium: g\nIngredients: Vitamin A (Retinyl Acetate), Vitamin C (Ascorbic Acid), Vitamin D (D3 Cholecalciferol), Vitamin E (dl-Alpha-Tocopheryl Acetate), Niacin (Niacinamide), Vitamin B6 (Pyridoxine Hydrochloride), Folate, Vitamin B12 (Cyanocobalamin), Biotin (Cyanocobalamin), Pantothenic Acid (d-Calcium Pantothenate), Magn\nAllergens: en:gelatin",
+    "output": "I've analyzed Adult Multivitamin Gummies by Nature's Bounty. I don't have enough nutritional data to provide a complete assessment. For the most accurate analysis, look for products with complete nutrition labels. Key factors: Missing calories per 100g - cannot calculate nutrition density Bottom line: Unknown.",
+    "type": "nutrition_analysis"
+  },
+  {
+    "instruction": "Analyze the nutritional value of this food product and provide a health assessment.",
+    "input": "Product: Mineralwasser mit Kohlensäure\nBrand: Quelbrunn\nCategory: Getränke und Getränkezubereitungen, Getränke, Wasser, Quellwasser, Mineralwasser\nNutritional Information (per 100g):\n- Energy: 0kcal\n- Protein: 0g\n- Carbohydrates: 0g\n- Fat: 0g\n- Saturated Fat: g\n- Sugars: g\n- Fiber: g\n- Salt: g\n- Sodium: g\nIngredients: \nAllergens: ",
+    "output": "I've analyzed Mineralwasser mit Kohlensäure by Quelbrunn. I don't have enough nutritional data to provide a complete assessment. For the most accurate analysis, look for products with complete nutrition labels. Key factors: Missing calories per 100g - cannot calculate nutrition density Bottom line: Unknown.",
+    "type": "nutrition_analysis"
+  },
+  {
+    "instruction": "Analyze the nutritional value of this food product and provide a health assessment.",
+    "input": "Product: Filete de Pechuga de Pollo\nBrand: \nCategory: \nNutritional Information (per 100g):\n- Energy: 170kcal\n- Protein: 22g\n- Carbohydrates: 0g\n- Fat: 2.1g\n- Saturated Fat: 0.7g\n- Sugars: 0g\n- Fiber: g\n- Salt: 0.14g\n- Sodium: 0.056g\nIngredients: \nAllergens: ",
+    "output": "I've analyzed Filete de Pechuga de Pollo. This product scores 20.0/100 and receives a 'Fill' rating. While it provides calories, the nutritional density is limited. Best enjoyed occasionally while prioritizing more nutritious options. Key factors: Good protein density (12.9g per 100 kcal), NOVA processing level not available, Ingredient analysis limited - no ingredient text available Bottom line: Fill.",
+    "type": "nutrition_analysis"
+  },
+  {
+    "instruction": "Analyze the nutritional value of this food product and provide a health assessment.",
+    "input": "Product: Il mille usi biologico lievito\nBrand: \nCategory: \nNutritional Information (per 100g):\n- Energy: kcal\n- Protein: g\n- Carbohydrates: g\n- Fat: g\n- Saturated Fat: g\n- Sugars: g\n- Fiber: g\n- Salt: g\n- Sodium: g\nIngredients: \nAllergens: ",
+    "output": "I've analyzed Il mille usi biologico lievito. I don't have enough nutritional data to provide a complete assessment. For the most accurate analysis, look for products with complete nutrition labels. Key factors: Missing calories per 100g - cannot calculate nutrition density Bottom line: Unknown.",
+    "type": "nutrition_analysis"
+  },
+  {
+    "instruction": "Analyze the nutritional value of this food product and provide a health assessment.",
+    "input": "Product: \nBrand: \nCategory: \nNutritional Information (per 100g):\n- Energy: kcal\n- Protein: g\n- Carbohydrates: g\n- Fat: g\n- Saturated Fat: g\n- Sugars: g\n- Fiber: g\n- Salt: g\n- Sodium: g\nIngredients: \nAllergens: ",
+    "output": "I've analyzed . I don't have enough nutritional data to provide a complete assessment. For the most accurate analysis, look for products with complete nutrition labels. Key factors: Missing calories per 100g - cannot calculate nutrition density Bottom line: Unknown.",
+    "type": "nutrition_analysis"
+  },
+  {
+    "instruction": "Analyze the nutritional value of this food product and provide a health assessment.",
+    "input": "Product: Artisan mexican sauce\nBrand: Brittany Records\nCategory: Condiments, Sauces, Groceries\nNutritional Information (per 100g):\n- Energy: 500kcal\n- Protein: 0g\n- Carbohydrates: 20g\n- Fat: 50g\n- Saturated Fat: 0g\n- Sugars: 0g\n- Fiber: 0g\n- Salt: 2.5g\n- Sodium: 1g\nIngredients: Garlic, canola oil, vinegar, chili peppers, water, sea salt, parsley, xanthan gum, citric acid.\nAllergens: ",
+    "output": "I've analyzed Artisan mexican sauce by Brittany Records. This product scores -20.0/100 and receives a 'Fill' rating. While it provides calories, the nutritional density is limited. Best enjoyed occasionally while prioritizing more nutritious options. Key factors: Ultra-processed (NOVA Group 4), High sodium density (200mg per 100 kcal), Ingredient analysis limited - no ingredient text available Bottom line: Fill.",
+    "type": "nutrition_analysis"
+  },
+  {
+    "instruction": "Analyze the nutritional value of this food product and provide a health assessment.",
+    "input": "Product: Wicked Grove Hard Cider\nBrand: Wicked Grove\nCategory: Beverages, Alcoholic beverages, Ciders, Flavoured ciders, Sparkling ciders, Alcoholic\nNutritional Information (per 100g):\n- Energy: kcal\n- Protein: g\n- Carbohydrates: g\n- Fat: g\n- Saturated Fat: g\n- Sugars: g\n- Fiber: g\n- Salt: g\n- Sodium: g\nIngredients: CIDER, NATURAL FLAVORS, SULFITES.\nAllergens: ",
+    "output": "I've analyzed Wicked Grove Hard Cider by Wicked Grove. I don't have enough nutritional data to provide a complete assessment. For the most accurate analysis, look for products with complete nutrition labels. Key factors: Missing calories per 100g - cannot calculate nutrition density Bottom line: Unknown.",
+    "type": "nutrition_analysis"
+  },
+  {
+    "instruction": "Analyze the nutritional value of this food product and provide a health assessment.",
+    "input": "Product: \nBrand: \nCategory: \nNutritional Information (per 100g):\n- Energy: kcal\n- Protein: g\n- Carbohydrates: g\n- Fat: g\n- Saturated Fat: g\n- Sugars: g\n- Fiber: g\n- Salt: g\n- Sodium: g\nIngredients: \nAllergens: ",
+    "output": "I've analyzed . I don't have enough nutritional data to provide a complete assessment. For the most accurate analysis, look for products with complete nutrition labels. Key factors: Missing calories per 100g - cannot calculate nutrition density Bottom line: Unknown.",
+    "type": "nutrition_analysis"
+  },
+  {
+    "instruction": "Analyze the nutritional value of this food product and provide a health assessment.",
+    "input": "Product: Milk Chocolate Coated Macadamias\nBrand: \nCategory: \nNutritional Information (per 100g):\n- Energy: 463.7kcal\n- Protein: 5.6g\n- Carbohydrates: 36.2g\n- Fat: 33.7g\n- Saturated Fat: 17.1g\n- Sugars: 27.6g\n- Fiber: g\n- Salt: 0.15g\n- Sodium: 0.06g\nIngredients: \nAllergens: ",
+    "output": "I've analyzed Milk Chocolate Coated Macadamias. This product scores -5.2/100 and receives a 'Fill' rating. While it provides calories, the nutritional density is limited. Best enjoyed occasionally while prioritizing more nutritious options. Key factors: High sugar density (6.0g per 100 kcal), NOVA processing level not available, Ingredient analysis limited - no ingredient text available Bottom line: Fill.",
+    "type": "nutrition_analysis"
+  },
+  {
+    "instruction": "Analyze the nutritional value of this food product and provide a health assessment.",
+    "input": "Product: Premium mozzarella cheese\nBrand: \nCategory: Dairies, Fermented foods, Fermented milk products, Cheeses\nNutritional Information (per 100g):\n- Energy: 214kcal\n- Protein: 14.29g\n- Carbohydrates: 3.57g\n- Fat: 14.29g\n- Saturated Fat: 10.71g\n- Sugars: 3.57g\n- Fiber: 0g\n- Salt: 0.4475g\n- Sodium: 0.179g\nIngredients: Pasteurized milk, salt, lactic acid, culture, rennet.\nAllergens: ",
+    "output": "I've analyzed Premium mozzarella cheese. This product scores 25.0/100 and receives a 'Fill' rating. While it provides calories, the nutritional density is limited. Best enjoyed occasionally while prioritizing more nutritious options. Key factors: Good protein density (6.7g per 100 kcal), Simple ingredient list Bottom line: Fill.",
+    "type": "nutrition_analysis"
+  },
+  {
+    "instruction": "Analyze the nutritional value of this food product and provide a health assessment.",
+    "input": "Product: Treccia di mozzarella\nBrand: Murgella\nCategory: Dairies, en:mozzarella\nNutritional Information (per 100g):\n- Energy: 223kcal\n- Protein: 17g\n- Carbohydrates: 0.5g\n- Fat: 17g\n- Saturated Fat: 12g\n- Sugars: 0.5g\n- Fiber: g\n- Salt: 0.7g\n- Sodium: 0.28g\nIngredients: \nAllergens: ",
+    "output": "I've analyzed Treccia di mozzarella by Murgella. This product scores 20.0/100 and receives a 'Fill' rating. While it provides calories, the nutritional density is limited. Best enjoyed occasionally while prioritizing more nutritious options. Key factors: Good protein density (7.6g per 100 kcal), NOVA processing level not available, Ingredient analysis limited - no ingredient text available Bottom line: Fill.",
+    "type": "nutrition_analysis"
+  },
+  {
+    "instruction": "Analyze the nutritional value of this food product and provide a health assessment.",
+    "input": "Product: Sfogliatine zuccherate\nBrand: \nCategory: \nNutritional Information (per 100g):\n- Energy: 542kcal\n- Protein: 6.5g\n- Carbohydrates: 56g\n- Fat: 32g\n- Saturated Fat: 15g\n- Sugars: 14g\n- Fiber: g\n- Salt: 0.8g\n- Sodium: 0.32g\nIngredients: \nAllergens: ",
+    "output": "I've analyzed Sfogliatine zuccherate. This product scores 4.8/100 and receives a 'Fill' rating. While it provides calories, the nutritional density is limited. Best enjoyed occasionally while prioritizing more nutritious options. Key factors: NOVA processing level not available, Ingredient analysis limited - no ingredient text available Bottom line: Fill.",
+    "type": "nutrition_analysis"
+  },
+  {
+    "instruction": "Analyze the nutritional value of this food product and provide a health assessment.",
+    "input": "Product: Peppermint Truffles\nBrand: Famous Brands International\nCategory: \nNutritional Information (per 100g):\n- Energy: 389kcal\n- Protein: 2.78g\n- Carbohydrates: 66.67g\n- Fat: 11.11g\n- Saturated Fat: 6.94g\n- Sugars: 55.56g\n- Fiber: 2.8g\n- Salt: 0.21082g\n- Sodium: 0.084328g\nIngredients: Sugar, dark chocolate [chocolate liquor, sugar, cocoa butter, soy lecithin-emulsifier, natural vanilla flavor], candy canes [sugar, corn syrup, red 40, propylene glycol, glycerin, titanium dioxide, sodium benzoate, peppermint oil], corn syrup, chocolate c\nAllergens: ",
+    "output": "I've analyzed Peppermint Truffles by Famous Brands International. This product scores -26.7/100 and receives a 'Fill' rating. While it provides calories, the nutritional density is limited. Best enjoyed occasionally while prioritizing more nutritious options. Key factors: Good fiber content (0.7g per 100 kcal), Ultra-processed (NOVA Group 4), Very high sugar density (14.3g per 100 kcal) Bottom line: Fill.",
+    "type": "nutrition_analysis"
+  },
+  {
+    "instruction": "Analyze the nutritional value of this food product and provide a health assessment.",
+    "input": "Product: Sausage, Egg & Cheese Croissant\nBrand: Quick Chek\nCategory: \nNutritional Information (per 100g):\n- Energy: 314kcal\n- Protein: 11.1g\n- Carbohydrates: 17.6g\n- Fat: 22.9g\n- Saturated Fat: 8.49g\n- Sugars: 2.61g\n- Fiber: 0.653g\n- Salt: 1.29g\n- Sodium: 0.516g\nIngredients: \nAllergens: ",
+    "output": "I've analyzed Sausage, Egg & Cheese Croissant by Quick Chek. This product scores 15.7/100 and receives a 'Fill' rating. While it provides calories, the nutritional density is limited. Best enjoyed occasionally while prioritizing more nutritious options. Key factors: Good protein density (3.5g per 100 kcal), NOVA processing level not available, Ingredient analysis limited - no ingredient text available Bottom line: Fill.",
+    "type": "nutrition_analysis"
+  },
+  {
+    "instruction": "Analyze the nutritional value of this food product and provide a health assessment.",
+    "input": "Product: Allgäuer Spätzlekäse\nBrand: REWE\nCategory: \nNutritional Information (per 100g):\n- Energy: kcal\n- Protein: g\n- Carbohydrates: g\n- Fat: g\n- Saturated Fat: g\n- Sugars: g\n- Fiber: g\n- Salt: g\n- Sodium: g\nIngredients: \nAllergens: ",
+    "output": "I've analyzed Allgäuer Spätzlekäse by REWE. I don't have enough nutritional data to provide a complete assessment. For the most accurate analysis, look for products with complete nutrition labels. Key factors: Missing calories per 100g - cannot calculate nutrition density Bottom line: Unknown.",
+    "type": "nutrition_analysis"
+  },
+  {
+    "instruction": "Analyze the nutritional value of this food product and provide a health assessment.",
+    "input": "Product: Sourdough Cob\nBrand: \nCategory: Sourdough bread, en:breads\nNutritional Information (per 100g):\n- Energy: 204.1kcal\n- Protein: 5.7g\n- Carbohydrates: 46.5g\n- Fat: 0.8g\n- Saturated Fat: 0.2g\n- Sugars: 0.3g\n- Fiber: g\n- Salt: 1.25g\n- Sodium: 0.5g\nIngredients: Wheat Flour, Wholegrain Rye Flour, Salt, Bakers Yeast (98,5% Yeast, Technical Aids 1,5%), Baking Improver (Wheat Flour, Soy Flour, Enzymes), Vegetable Oil, Rapeseed Oil, Treatment Agent: Ascorbic Acid. ALLERGEN INFORMATION: Ingredients highlighted in BOLD. DIETARY ADVICE: Suitable for vegetarians. B\nAllergens: ",
+    "output": "I've analyzed Sourdough Cob. This product scores 6.2/100 and receives a 'Fill' rating. While it provides calories, the nutritional density is limited. Best enjoyed occasionally while prioritizing more nutritious options. Key factors: Good protein density (2.8g per 100 kcal), High sodium density (245mg per 100 kcal), NOVA processing level not available Bottom line: Fill.",
+    "type": "nutrition_analysis"
+  },
+  {
+    "instruction": "Analyze the nutritional value of this food product and provide a health assessment.",
+    "input": "Product: Mix Arandanos Con Yogurt Griego\nBrand: Manitoba\nCategory: \nNutritional Information (per 100g):\n- Energy: 503kcal\n- Protein: 16.7g\n- Carbohydrates: 43.3g\n- Fat: 33.3g\n- Saturated Fat: 5.67g\n- Sugars: 21.3g\n- Fiber: 10g\n- Salt: 0.358g\n- Sodium: 0.143g\nIngredients: \nAllergens: ",
+    "output": "I've analyzed Mix Arandanos Con Yogurt Griego by Manitoba. This product scores 28.2/100 and receives a 'Fill' rating. While it provides calories, the nutritional density is limited. Best enjoyed occasionally while prioritizing more nutritious options. Key factors: Good protein density (3.3g per 100 kcal), High fiber density (2.0g per 100 kcal), NOVA processing level not available Bottom line: Fill.",
+    "type": "nutrition_analysis"
+  },
+  {
+    "instruction": "Analyze the nutritional value of this food product and provide a health assessment.",
+    "input": "Product: Rillettes Pur Oie\nBrand: Valette\nCategory: Viandes et dérivés, Produits à tartiner, Viandes, Charcuteries, Produits à tartiner salés, Rillettes, Rillettes de viande, Rillettes de viande blanche, Rillettes de volaille, Rillettes d'oie\nNutritional Information (per 100g):\n- Energy: 390kcal\n- Protein: 17.7g\n- Carbohydrates: 0.3g\n- Fat: 35.3g\n- Saturated Fat: 11.5g\n- Sugars: 0.1g\n- Fiber: g\n- Salt: 1.5g\n- Sodium: 0.6g\nIngredients: \nAllergens: ",
+    "output": "I've analyzed Rillettes Pur Oie by Valette. This product scores 18.2/100 and receives a 'Fill' rating. While it provides calories, the nutritional density is limited. Best enjoyed occasionally while prioritizing more nutritious options. Key factors: Good protein density (4.5g per 100 kcal), NOVA processing level not available, Ingredient analysis limited - no ingredient text available Bottom line: Fill.",
+    "type": "nutrition_analysis"
+  },
+  {
+    "instruction": "Analyze the nutritional value of this food product and provide a health assessment.",
+    "input": "Product: Mini croissants surtidos\nBrand: \nCategory: Botanas, Snacks dulces, Galletas y pasteles, Viennoiseries, Bolleria, Croissants\nNutritional Information (per 100g):\n- Energy: 326kcal\n- Protein: 5g\n- Carbohydrates: 45g\n- Fat: 14g\n- Saturated Fat: 9g\n- Sugars: 20g\n- Fiber: g\n- Salt: 1g\n- Sodium: 0.4g\nIngredients: \nAllergens: ",
+    "output": "I've analyzed Mini croissants surtidos. This product scores -3.9/100 and receives a 'Fill' rating. While it provides calories, the nutritional density is limited. Best enjoyed occasionally while prioritizing more nutritious options. Key factors: Moderate protein content (1.5g per 100 kcal), High sugar density (6.1g per 100 kcal), NOVA processing level not available Bottom line: Fill.",
+    "type": "nutrition_analysis"
+  },
+  {
+    "instruction": "Analyze the nutritional value of this food product and provide a health assessment.",
+    "input": "Product: Amazake Rice Shake, Almond Shake\nBrand: Grainaissance  Inc.\nCategory: Dairies, Milks\nNutritional Information (per 100g):\n- Energy: 84kcal\n- Protein: 1.69g\n- Carbohydrates: 13.92g\n- Fat: 1.69g\n- Saturated Fat: 0.21g\n- Sugars: 13.08g\n- Fiber: 2.1g\n- Salt: 0.02g\n- Sodium: 0.008g\nIngredients: Cultured organic rice (filtered water, organic brown rice, rice koji), almonds, natural vanilla flavor, xanthan gum.\nAllergens: ",
+    "output": "I've analyzed Amazake Rice Shake, Almond Shake by Grainaissance  Inc.. This product scores -12.0/100 and receives a 'Fill' rating. While it provides calories, the nutritional density is limited. Best enjoyed occasionally while prioritizing more nutritious options. Key factors: Moderate protein content (2.0g per 100 kcal), High fiber density (2.5g per 100 kcal), Ultra-processed (NOVA Group 4) Bottom line: Fill.",
+    "type": "nutrition_analysis"
+  },
+  {
+    "instruction": "Analyze the nutritional value of this food product and provide a health assessment.",
+    "input": "Product: Fine Cut Salad\nBrand: Asda\nCategory: Meals, Prepared salads, Salads\nNutritional Information (per 100g):\n- Energy: 31kcal\n- Protein: 1.1g\n- Carbohydrates: 3.9g\n- Fat: 0.5g\n- Saturated Fat: 0.1g\n- Sugars: 3.8g\n- Fiber: 4.4g\n- Salt: 0.04g\n- Sodium: 0.016g\nIngredients: Mixed Salad Leaves in varying proportions (34%) (Apollo Lettuce, Endive Leaves), White Cabbage, Carrots (26%), Red Cabbage, Red Peppers (6%).\nAllergens: ",
+    "output": "I've analyzed Fine Cut Salad by Asda. This product scores 9.2/100 and receives a 'Fill' rating. While it provides calories, the nutritional density is limited. Best enjoyed occasionally while prioritizing more nutritious options. Key factors: Good protein density (3.5g per 100 kcal), High fiber density (14.2g per 100 kcal), Very high sugar density (12.3g per 100 kcal) Bottom line: Fill.",
+    "type": "nutrition_analysis"
+  },
+  {
+    "instruction": "Analyze the nutritional value of this food product and provide a health assessment.",
+    "input": "Product: Hendl Filetspieße\nBrand: Hofstädter\nCategory: \nNutritional Information (per 100g):\n- Energy: 101kcal\n- Protein: 23g\n- Carbohydrates: g\n- Fat: 1g\n- Saturated Fat: 0.200000002980232g\n- Sugars: g\n- Fiber: g\n- Salt: g\n- Sodium: g\nIngredients: \nAllergens: ",
+    "output": "I've analyzed Hendl Filetspieße by Hofstädter. This product scores 20.0/100 and receives a 'Fill' rating. While it provides calories, the nutritional density is limited. Best enjoyed occasionally while prioritizing more nutritious options. Key factors: Good protein density (22.8g per 100 kcal), NOVA processing level not available, Ingredient analysis limited - no ingredient text available Bottom line: Fill.",
+    "type": "nutrition_analysis"
+  },
+  {
+    "instruction": "Analyze the nutritional value of this food product and provide a health assessment.",
+    "input": "Product: Kokosmehl\nBrand: Biomond\nCategory: \nNutritional Information (per 100g):\n- Energy: kcal\n- Protein: g\n- Carbohydrates: g\n- Fat: g\n- Saturated Fat: g\n- Sugars: g\n- Fiber: g\n- Salt: g\n- Sodium: g\nIngredients: \nAllergens: ",
+    "output": "I've analyzed Kokosmehl by Biomond. I don't have enough nutritional data to provide a complete assessment. For the most accurate analysis, look for products with complete nutrition labels. Key factors: Missing calories per 100g - cannot calculate nutrition density Bottom line: Unknown.",
+    "type": "nutrition_analysis"
+  },
+  {
+    "instruction": "Analyze the nutritional value of this food product and provide a health assessment.",
+    "input": "Product: Pfeffer ganz schwarz\nBrand: Oase der Hewürze\nCategory: \nNutritional Information (per 100g):\n- Energy: kcal\n- Protein: g\n- Carbohydrates: g\n- Fat: g\n- Saturated Fat: g\n- Sugars: g\n- Fiber: g\n- Salt: g\n- Sodium: g\nIngredients: \nAllergens: ",
+    "output": "I've analyzed Pfeffer ganz schwarz by Oase der Hewürze. I don't have enough nutritional data to provide a complete assessment. For the most accurate analysis, look for products with complete nutrition labels. Key factors: Missing calories per 100g - cannot calculate nutrition density Bottom line: Unknown.",
+    "type": "nutrition_analysis"
+  },
+  {
+    "instruction": "Analyze the nutritional value of this food product and provide a health assessment.",
+    "input": "Product: Røkt ørret\nBrand: Unil as\nCategory: da:fisk\nNutritional Information (per 100g):\n- Energy: 197kcal\n- Protein: 22g\n- Carbohydrates: 0g\n- Fat: 12g\n- Saturated Fat: 1.8g\n- Sugars: 0g\n- Fiber: 0g\n- Salt: 3g\n- Sodium: 1.2g\nIngredients: Ørret\nAllergens: ",
+    "output": "I've analyzed Røkt ørret by Unil as. This product scores 15.0/100 and receives a 'Fill' rating. While it provides calories, the nutritional density is limited. Best enjoyed occasionally while prioritizing more nutritious options. Key factors: Good protein density (11.2g per 100 kcal), Simple ingredient list, Very high sodium density (609mg per 100 kcal) Bottom line: Fill.",
+    "type": "nutrition_analysis"
+  },
+  {
+    "instruction": "Analyze the nutritional value of this food product and provide a health assessment.",
+    "input": "Product: Sesamo caramelizado con jengibre\nBrand: ecoriginal\nCategory: \nNutritional Information (per 100g):\n- Energy: 537kcal\n- Protein: 10g\n- Carbohydrates: 32g\n- Fat: 37g\n- Saturated Fat: 5g\n- Sugars: 29g\n- Fiber: g\n- Salt: 0g\n- Sodium: 0g\nIngredients: \nAllergens: ",
+    "output": "I've analyzed Sesamo caramelizado con jengibre by ecoriginal. This product scores -2.6/100 and receives a 'Fill' rating. While it provides calories, the nutritional density is limited. Best enjoyed occasionally while prioritizing more nutritious options. Key factors: Moderate protein content (1.9g per 100 kcal), High sugar density (5.4g per 100 kcal), NOVA processing level not available Bottom line: Fill.",
+    "type": "nutrition_analysis"
+  },
+  {
+    "instruction": "Analyze the nutritional value of this food product and provide a health assessment.",
+    "input": "Product: Bratwurst groß\nBrand: Edeka\nCategory: Auf Fleisch basierende Lebensmittel, Fleisch, Zubereitetes Fleisch, Würste, Deutsche Würste\nNutritional Information (per 100g):\n- Energy: kcal\n- Protein: g\n- Carbohydrates: g\n- Fat: g\n- Saturated Fat: g\n- Sugars: g\n- Fiber: g\n- Salt: g\n- Sodium: g\nIngredients: \nAllergens: ",
+    "output": "I've analyzed Bratwurst groß by Edeka. I don't have enough nutritional data to provide a complete assessment. For the most accurate analysis, look for products with complete nutrition labels. Key factors: Missing calories per 100g - cannot calculate nutrition density Bottom line: Unknown.",
+    "type": "nutrition_analysis"
+  },
+  {
+    "instruction": "Analyze the nutritional value of this food product and provide a health assessment.",
+    "input": "Product: Levadura\nBrand: Medalla de oro\nCategory: \nNutritional Information (per 100g):\n- Energy: kcal\n- Protein: g\n- Carbohydrates: g\n- Fat: g\n- Saturated Fat: g\n- Sugars: g\n- Fiber: g\n- Salt: g\n- Sodium: g\nIngredients: \nAllergens: ",
+    "output": "I've analyzed Levadura by Medalla de oro. I don't have enough nutritional data to provide a complete assessment. For the most accurate analysis, look for products with complete nutrition labels. Key factors: Missing calories per 100g - cannot calculate nutrition density Bottom line: Unknown.",
+    "type": "nutrition_analysis"
+  },
+  {
+    "instruction": "Analyze the nutritional value of this food product and provide a health assessment.",
+    "input": "Product: barretta muesli con cioccolato al latte\nBrand: \nCategory: Snacks, Snacks sucrés, Barres, Barres de céréales\nNutritional Information (per 100g):\n- Energy: 410kcal\n- Protein: 7.2g\n- Carbohydrates: 66g\n- Fat: 12g\n- Saturated Fat: 5.3g\n- Sugars: 25g\n- Fiber: 5g\n- Salt: 0.16g\n- Sodium: 0.064g\nIngredients: \nAllergens: ",
+    "output": "I've analyzed barretta muesli con cioccolato al latte. This product scores 6.2/100 and receives a 'Fill' rating. While it provides calories, the nutritional density is limited. Best enjoyed occasionally while prioritizing more nutritious options. Key factors: Moderate protein content (1.8g per 100 kcal), Good fiber content (1.2g per 100 kcal), High sugar density (6.1g per 100 kcal) Bottom line: Fill.",
+    "type": "nutrition_analysis"
+  },
+  {
+    "instruction": "Analyze the nutritional value of this food product and provide a health assessment.",
+    "input": "Product: Premier Protein\nBrand: Premier\nCategory: \nNutritional Information (per 100g):\n- Energy: 49.2307692307692kcal\n- Protein: 9.23076923076923g\n- Carbohydrates: 1.53846153846154g\n- Fat: 0.923076923076923g\n- Saturated Fat: 0.153846153846154g\n- Sugars: 0.307692307692308g\n- Fiber: 0.615384615384615g\n- Salt: g\n- Sodium: g\nIngredients: \nAllergens: ",
+    "output": "I've analyzed Premier Protein by Premier. This product scores 29.4/100 and receives a 'Fill' rating. While it provides calories, the nutritional density is limited. Best enjoyed occasionally while prioritizing more nutritious options. Key factors: Good protein density (18.8g per 100 kcal), Good fiber content (1.2g per 100 kcal), NOVA processing level not available Bottom line: Fill.",
+    "type": "nutrition_analysis"
+  },
+  {
+    "instruction": "Analyze the nutritional value of this food product and provide a health assessment.",
+    "input": "Product: Spicy maxican style\nBrand: Dunnes Stores\nCategory: \nNutritional Information (per 100g):\n- Energy: 148kcal\n- Protein: 19g\n- Carbohydrates: 3g\n- Fat: 6.5g\n- Saturated Fat: 1.9g\n- Sugars: 1g\n- Fiber: 0.9g\n- Salt: 0.68g\n- Sodium: 0.272g\nIngredients: \nAllergens: ",
+    "output": "I've analyzed Spicy maxican style by Dunnes Stores. This product scores 24.6/100 and receives a 'Fill' rating. While it provides calories, the nutritional density is limited. Best enjoyed occasionally while prioritizing more nutritious options. Key factors: Good protein density (12.8g per 100 kcal), NOVA processing level not available, Ingredient analysis limited - no ingredient text available Bottom line: Fill.",
+    "type": "nutrition_analysis"
+  },
+  {
+    "instruction": "Analyze the nutritional value of this food product and provide a health assessment.",
+    "input": "Product: Kit respir\nBrand: \nCategory: \nNutritional Information (per 100g):\n- Energy: kcal\n- Protein: g\n- Carbohydrates: g\n- Fat: g\n- Saturated Fat: g\n- Sugars: g\n- Fiber: g\n- Salt: g\n- Sodium: g\nIngredients: \nAllergens: ",
+    "output": "I've analyzed Kit respir. I don't have enough nutritional data to provide a complete assessment. For the most accurate analysis, look for products with complete nutrition labels. Key factors: Missing calories per 100g - cannot calculate nutrition density Bottom line: Unknown.",
+    "type": "nutrition_analysis"
+  },
+  {
+    "instruction": "Analyze the nutritional value of this food product and provide a health assessment.",
+    "input": "Product: \nBrand: Tango\nCategory: \nNutritional Information (per 100g):\n- Energy: kcal\n- Protein: g\n- Carbohydrates: g\n- Fat: g\n- Saturated Fat: g\n- Sugars: g\n- Fiber: g\n- Salt: g\n- Sodium: g\nIngredients: \nAllergens: ",
+    "output": "I've analyzed  by Tango. I don't have enough nutritional data to provide a complete assessment. For the most accurate analysis, look for products with complete nutrition labels. Key factors: Missing calories per 100g - cannot calculate nutrition density Bottom line: Unknown.",
+    "type": "nutrition_analysis"
+  },
+  {
+    "instruction": "Analyze the nutritional value of this food product and provide a health assessment.",
+    "input": "Product: Beer Battered Wild Caught Alaska Pollock Fillets\nBrand: Trident Seafoods\nCategory: \nNutritional Information (per 100g):\n- Energy: 122kcal\n- Protein: 12.2g\n- Carbohydrates: 14.9g\n- Fat: 2.03g\n- Saturated Fat: 0.676g\n- Sugars: 1.35g\n- Fiber: 0g\n- Salt: 1.25g\n- Sodium: 0.5g\nIngredients: \nAllergens: ",
+    "output": "I've analyzed Beer Battered Wild Caught Alaska Pollock Fillets by Trident Seafoods. This product scores 10.0/100 and receives a 'Fill' rating. While it provides calories, the nutritional density is limited. Best enjoyed occasionally while prioritizing more nutritious options. Key factors: Good protein density (10.0g per 100 kcal), Very high sodium density (410mg per 100 kcal), NOVA processing level not available Bottom line: Fill.",
+    "type": "nutrition_analysis"
+  },
+  {
+    "instruction": "Analyze the nutritional value of this food product and provide a health assessment.",
+    "input": "Product: \nBrand: \nCategory: \nNutritional Information (per 100g):\n- Energy: kcal\n- Protein: g\n- Carbohydrates: g\n- Fat: g\n- Saturated Fat: g\n- Sugars: g\n- Fiber: g\n- Salt: g\n- Sodium: g\nIngredients: \nAllergens: ",
+    "output": "I've analyzed . I don't have enough nutritional data to provide a complete assessment. For the most accurate analysis, look for products with complete nutrition labels. Key factors: Missing calories per 100g - cannot calculate nutrition density Bottom line: Unknown.",
+    "type": "nutrition_analysis"
+  },
+  {
+    "instruction": "Analyze the nutritional value of this food product and provide a health assessment.",
+    "input": "Product: Kombucha, a bubbly probiotic tea\nBrand: \nCategory: Beverages\nNutritional Information (per 100g):\n- Energy: 17kcal\n- Protein: 0g\n- Carbohydrates: 3.81g\n- Fat: 0g\n- Saturated Fat: g\n- Sugars: 1.27g\n- Fiber: g\n- Salt: 0.01g\n- Sodium: 0.004g\nIngredients: \nAllergens: ",
+    "output": "I've analyzed Kombucha, a bubbly probiotic tea. This product scores -10.0/100 and receives a 'Fill' rating. While it provides calories, the nutritional density is limited. Best enjoyed occasionally while prioritizing more nutritious options. Key factors: High sugar density (7.5g per 100 kcal), NOVA processing level not available, Ingredient analysis limited - no ingredient text available Bottom line: Fill.",
+    "type": "nutrition_analysis"
+  }
+]

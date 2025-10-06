@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { BrowserRouter as Router, Routes, Route, useSearchParams, useNavigate } from 'react-router-dom';
 import VHealthSearch from './VHealthSearch';
 import SearchResults from './SearchResults';
@@ -6,7 +6,7 @@ import HealthNewsFeed from './components/HealthNewsFeed';
 import openaiAPI from './services/openaiAPI';
 import { searchCache } from './services/searchCache';
 import { fetchNewsFeed, refreshNewsFeed, searchNewsArticles } from './services/newsService';
-import './VHealthSearch.css';
+import './styles/VHealthSearch.css';
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
@@ -65,6 +65,10 @@ const ResultsPage: React.FC = () => {
   // Track if this is initial load to prevent loading spinner on browser navigation
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   
+  // Add ref to prevent duplicate API calls
+  const lastProcessedQuery = useRef<string>('');
+  const isProcessing = useRef<boolean>(false);
+  
   // Detect browser navigation type
   const isBrowserNavigation = () => {
     const navigation = (window as any).performance?.getEntriesByType?.('navigation')?.[0];
@@ -79,12 +83,21 @@ const ResultsPage: React.FC = () => {
         return;
       }
       
-      console.log("Query changed to:", query);
-      console.log("Is health news:", isHealthNews);
-      console.log("Is browser navigation:", isBrowserNavigation());
-      
       // Create cache key based on type
       const cacheKey = isHealthNews ? `health_news_${category}` : query;
+      
+      // Prevent duplicate processing
+      if (isProcessing.current || lastProcessedQuery.current === cacheKey) {
+        console.log('Skipping duplicate query:', cacheKey);
+        return;
+      }
+      
+      console.log("Processing new query:", cacheKey);
+      lastProcessedQuery.current = cacheKey;
+      isProcessing.current = true;
+      
+      console.log("Is health news:", isHealthNews);
+      console.log("Is browser navigation:", isBrowserNavigation());
       
       // Always check cache first - especially for browser navigation
       const cachedResult = searchCache.getCachedResult(cacheKey);
@@ -97,12 +110,14 @@ const ResultsPage: React.FC = () => {
         setRecommendations([]);
         setDisclaimer('');
         setIsInitialLoad(false);
+        isProcessing.current = false; // Reset processing flag
         return; // Exit early - no API calls needed
       }
       
       // If this is browser navigation and no cache, redirect to search page
       if (isBrowserNavigation() || !isInitialLoad) {
         console.log('Browser navigation detected with no cache - redirecting to search');
+        isProcessing.current = false; // Reset processing flag
         navigate('/');
         return;
       }
@@ -156,6 +171,7 @@ const ResultsPage: React.FC = () => {
                 
                 setIsLoading(false);
                 setIsInitialLoad(false);
+                isProcessing.current = false; // Reset processing flag
                 return;
               }
             }
@@ -164,9 +180,9 @@ const ResultsPage: React.FC = () => {
           }
           
           // STEP 2: Fall back to OpenAI if no nutrition data found
-          console.log('Using OpenAI as fallback...');
+          console.log('Making single OpenAI call for query:', query);
           const result: ChatGPTResponse = await openaiAPI.searchHealthInfo(query);
-          console.log("OpenAI Search result:", result);
+          console.log("OpenAI Search result received:", result);
           
           const resultText = result.details || JSON.stringify(result);
           setResults(resultText);
@@ -192,11 +208,12 @@ const ResultsPage: React.FC = () => {
       } finally {
         setIsLoading(false);
         setIsInitialLoad(false);
+        isProcessing.current = false; // Always reset processing flag
       }
     };
     
     fetchResults();
-  }, [query, isHealthNews, category, navigate]);
+  }, [query, isHealthNews, category]); // Removed 'navigate' from dependencies
 
   // Function to format news articles for display
   const formatNewsArticles = (articles: any[]): string => {

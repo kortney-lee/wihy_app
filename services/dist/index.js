@@ -14,7 +14,16 @@ const app = (0, express_1.default)();
 app.use((0, cors_1.default)());
 app.use(express_1.default.json({ limit: '10mb' }));
 app.use(express_1.default.urlencoded({ extended: true, limit: '10mb' }));
+
+// ADD REQUEST LOGGING MIDDLEWARE
+app.use((req, res, next) => {
+    const timestamp = new Date().toISOString();
+    console.log(`📡 [${timestamp}] ${req.method} ${req.url}`);
+    next();
+});
+
 const PORT = process.env.PORT || 5000;
+
 // Initialize database when the application starts
 async function initialize() {
     try {
@@ -24,6 +33,7 @@ async function initialize() {
         console.log(`- DB_NAME: ${process.env.DB_NAME}`);
         console.log(`- DB_USER: ${process.env.DB_USER}`);
         console.log(`- DB_PASSWORD: ${process.env.DB_PASSWORD ? 'SET' : 'NOT SET'}`);
+        
         // Initialize database first (but don't fail if it doesn't work)
         console.log('🔌 Connecting to database...');
         let pool = null;
@@ -38,77 +48,57 @@ async function initialize() {
             console.log('   Continuing without database (using fallback data)...');
             pool = null;
         }
+
+        // ADD BASIC HEALTH CHECK ENDPOINT FIRST
+        app.get('/api/health', (req, res) => {
+            console.log('💓 Health check called');
+            res.json({ 
+                status: 'ok', 
+                timestamp: new Date().toISOString(),
+                port: PORT,
+                message: 'VHealth Services Backend is running',
+                database: pool ? 'connected' : 'disconnected'
+            });
+        });
+
+        app.get('/ping', (req, res) => {
+            console.log('🏓 Ping called');
+            res.send('pong');
+        });
+
         // Mount nutrition routes
         console.log('📊 About to mount nutrition routes at /api');
         app.use('/api', nutritionRoutes_1.default);
         console.log('✅ Nutrition routes mounted successfully');
+
         // Create RSS routes
-        console.log('📰 Creating RSS routes...');
-        let rssController = null;
+        console.log('📰 Loading RSS routes from rssRoutes.js...');
         try {
-            rssController = require('./controllers/rssController');
-            console.log('✅ RSS Controller loaded successfully');
-        }
-        catch (error) {
-            console.log('⚠️  RSS Controller not available:', error.message);
-            rssController = null;
-        }
-        if (rssController) {
-            // GET - Retrieve articles from database
-            app.get('/api/news/feeds', (req, res) => {
-                console.log('📰 GET /api/news/feeds called');
-                rssController.getFeedsForClient(req, res);
-            });
+            console.log('🔍 Attempting to require rssRoutes...');
+            const rssRoutes = require('./routes/rssRoutes');
+            console.log('🔍 RSS routes loaded successfully, mounting...');
+            app.use('/api/news', rssRoutes);
+            console.log('✅ RSS routes from rssRoutes.js mounted successfully');
+        } catch (error) {
+            console.error('❌ Failed to load rssRoutes.js:', error.message);
+            console.error('❌ Error stack:', error.stack);
+            console.error('❌ Error details:', error);
             
-            // GET - Retrieve articles from database
-            app.get('/api/news/articles', (req, res) => {
-                console.log('📰 GET /api/news/articles called');
-                rssController.getArticles(req, res);
-            });
-            
-            // ADD THIS NEW ROUTE - GET for fetching fresh RSS data
-            app.get('/api/news/fetch', (req, res) => {
-                console.log('📰 GET /api/news/fetch called - fetching fresh RSS data');
-                rssController.fetchAllFeeds(req, res);
-            });
-            
-            // POST - Fetch fresh data from RSS feeds and update database
-            app.post('/api/news/fetch', (req, res) => {
-                console.log('📰 POST /api/news/fetch called - fetching fresh RSS data');
-                rssController.fetchAllFeeds(req, res);
-            });
-            
-            // POST - Manual article ingestion
-            app.post('/api/news/articles/ingest', (req, res) => {
-                console.log('📰 POST /api/news/articles/ingest called');
-                rssController.ingestArticles(req, res);
-            });
-            
-            // POST - Seed initial data (setup only)
-            app.post('/api/news/seed', (req, res) => {
-                console.log('📰 POST /api/news/seed called');
-                rssController.seedSampleFeeds(req, res);
-            });
-            
-            // Legacy endpoint
-            app.get('/api/news/rss', (req, res) => {
-                console.log('📰 GET /api/news/rss called (legacy)');
-                rssController.getArticles(req, res);
-            });
-            
-            console.log('✅ RSS routes created successfully');
-        }
-        else {
+            // Keep your fallback routes as backup
             console.log('📰 Creating fallback RSS routes...');
+            
             // Fallback RSS routes with sample data
             app.get('/api/news/feeds', (req, res) => {
+                console.log('📰 GET /api/news/feeds called (fallback)');
                 res.json({
                     success: true,
                     feeds: [],
                     message: 'RSS controller not available'
                 });
             });
+            
             app.get('/api/news/articles', (req, res) => {
+                console.log('📰 GET /api/news/articles called (fallback)');
                 const sampleArticles = [
                     {
                         id: 1,
@@ -150,6 +140,7 @@ async function initialize() {
             });
             
             app.post('/api/news/fetch', (req, res) => {
+                console.log('📰 POST /api/news/fetch called (fallback)');
                 res.json({
                     success: false,
                     message: 'RSS controller not available - cannot fetch fresh data'
@@ -157,6 +148,7 @@ async function initialize() {
             });
             
             app.post('/api/news/seed', (req, res) => {
+                console.log('📰 POST /api/news/seed called (fallback)');
                 res.json({
                     success: false,
                     message: 'RSS controller not available - cannot seed data. Check database connection.'
@@ -164,17 +156,21 @@ async function initialize() {
             });
             console.log('✅ RSS fallback routes created with sample data');
         }
+
         // Start server
         app.listen(PORT, () => {
             console.log(`🚀 Server running on port ${PORT}`);
+            console.log(`🔗 Server accessible at: http://localhost:${PORT}`);
             console.log('');
             console.log('📡 Available routes:');
             console.log(`   GET  http://localhost:${PORT}/api/health`);
+            console.log(`   GET  http://localhost:${PORT}/ping`);
             console.log(`   POST http://localhost:${PORT}/api/analyze-image`);
             console.log('');
             console.log('📰 RSS Routes:');
             console.log(`   GET  http://localhost:${PORT}/api/news/feeds (get feeds from DB)`);
             console.log(`   GET  http://localhost:${PORT}/api/news/articles (get articles from DB)`);
+            console.log(`   GET  http://localhost:${PORT}/api/news/status (RSS status)`);
             console.log(`   POST http://localhost:${PORT}/api/news/fetch (fetch fresh RSS data)`);
             console.log(`   POST http://localhost:${PORT}/api/news/seed (initial setup)`);
             console.log('');
@@ -184,7 +180,26 @@ async function initialize() {
             console.log(`   curl -X POST "http://localhost:${PORT}/api/news/seed"`);
             console.log(`   curl -X POST "http://localhost:${PORT}/api/news/fetch"`);
             console.log('');
+            
+            // AUTO-TEST THE SERVER
+            console.log('🧪 Testing server endpoints...');
+            const http = require('http');
+            
+            setTimeout(() => {
+                http.get(`http://localhost:${PORT}/api/health`, (res) => {
+                    console.log(`✅ Health check test: ${res.statusCode}`);
+                }).on('error', (err) => {
+                    console.error(`❌ Health check test failed: ${err.message}`);
+                });
+                
+                http.get(`http://localhost:${PORT}/api/news/articles`, (res) => {
+                    console.log(`✅ News articles test: ${res.statusCode}`);
+                }).on('error', (err) => {
+                    console.error(`❌ News articles test failed: ${err.message}`);
+                });
+            }, 1000);
         });
+        
         console.log('✅ VHealth Services started successfully');
     }
     catch (error) {
@@ -192,5 +207,6 @@ async function initialize() {
         process.exit(1);
     }
 }
+
 // Run initialization
 initialize();

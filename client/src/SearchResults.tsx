@@ -7,7 +7,8 @@ import MultiAuthLogin from './components/MultiAuthLogin';
 import ResultQualityPie from './components/ResultQualityPie';
 import NutritionChart from './components/NutritionChart';
 import NovaChart from './components/NovaChart';
-import './VHealthSearch.css';
+import './styles/VHealthSearch.css';
+import Header from './components/shared/components/Header';
 import Spinner from './components/Spinner';
 
 /* Define default topics and resources */
@@ -134,6 +135,8 @@ const SearchResults: React.FC<SearchResultsProps> = ({
   const [notification, setNotification] = useState<{message: string, type: string} | null>(null);
   const [isUploadLoading, setUploadLoading] = useState(false);
   const [lastProcessedQuery, setLastProcessedQuery] = useState<string>('');
+  const [imageError, setImageError] = useState(false); // Add this state
+  const [isSearching, setIsSearching] = useState(false);
   const recognitionRef = useRef<any>(null);
 
   // Check if we have valid results to display
@@ -332,284 +335,228 @@ const SearchResults: React.FC<SearchResultsProps> = ({
   // Check if current query is "test" to show dummy data styles
   const isTestQuery = query.toLowerCase().trim() === 'test';
 
+  // Header search handler
+  const handleHeaderSearch = async (newQuery: string) => {
+    if (newQuery.trim() && newQuery !== query) {
+      setIsSearching(true);
+      
+      try {
+        // Call the parent's onNewSearch which should handle the API call
+        await onNewSearch(newQuery);
+      } catch (error) {
+        console.error('Header search error:', error);
+      } finally {
+        setIsSearching(false);
+      }
+    }
+  };
+
+  const handleLogoClick = () => {
+    onBackToSearch();
+  };
+
   return (
-    <div className={`results-page ${isLoading ? 'loading' : ''} ${isUploadModalOpen ? 'modal-open' : ''}`}>
-      {/* Login button - always visible */}
-      <div style={{
-  position: 'fixed',
-  top: '20px',
-  right: '20px',
-  zIndex: 1000
-}}>
-  <MultiAuthLogin className="results-login-button" />
-</div>
+    <div className="results-page">
+      <Header
+        searchQuery={query}
+        onSearchSubmit={handleHeaderSearch}
+        onVoiceInput={() => {/* voice logic */}}
+        onImageUpload={() => setIsUploadModalOpen(true)}
+        onLogoClick={handleLogoClick}
+        isListening={false}
+        variant="results"
+        showLogin={true}
+      />
 
-      {/* ONLY show loading spinner when loading - hide EVERYTHING else */}
-      {isLoading ? (
-        <Spinner overlay message="Searching......." />
-      ) : (
-        /* ONLY show content when NOT loading */
-        <>
-          {/* Search header */}
-          <div className="results-search-header">
-            <div className="search-input-container">
-              <form onSubmit={handleNewSearchSubmit}>
-                <input
-                  type="text"
-                  placeholder="Ask anything about health..."
-                  value={newQuery}
-                  onChange={(e) => setNewQuery(e.target.value)}
-                  className="search-input results-search-input"
-                  data-query={isTestQuery ? 'test' : ''}
-                />
-              </form>
-              
-              {/* Image preview */}
-              {image && (
-                <div className="image-preview">
-                  <div className="image-icon">📷</div>
-                  <span className="image-name">
-                    {typeof image === 'object' && image !== null ? image.name : 'Uploaded image'}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setImage(null);
-                      setCurrentPhotoId(null);
-                      const searchInput = document.querySelector('.results-search-input') as HTMLInputElement;
-                      if (searchInput) {
-                        searchInput.classList.remove('with-image');
-                      }
-                    }}
-                    className="remove-image"
-                    aria-label="Remove image"
-                  >
-                    ×
-                  </button>
-                </div>
-              )}
-              
-              <div className="search-icons">
-                {(newQuery || image) && (
-                  <button
-                    type="button"
-                    onClick={handleClearAll}
-                    className="icon-button clear-button"
-                    aria-label="Clear all"
-                  >
-                    <svg viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
-                    </svg>
-                  </button>
-                )}
-                
-                <button
-                  type="button"
-                  onClick={handleCameraClick}
-                  className="icon-button"
-                  aria-label="Upload image"
-                >
-                  <svg viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/>
-                  </svg>
-                </button>
-                
-                <button
-                  type="button"
-                  onClick={handleVoiceInput}
-                  className={`icon-button ${isListening ? 'listening' : ''}`}
-                  aria-label={isListening ? 'Stop listening' : 'Start voice input'}
-                >
-                  <svg viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
-                    <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.28c3.39-.49 6-3.3 6-6.72h-2z"/>
-                  </svg>
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* Results Container - ONLY when NOT loading */}
-          <div className="results-container">
-            {hasValidResults ? (
-              <>
-                <h1 className="results-header">Search Results for: "{query}"</h1>
-                
-                <div className="results-content">
-                  {/* Main content */}
-                  <div className="health-info-card">
-                    <div className="health-info-content">
-                      <div className="markdown-content">
-                        {dataSource === 'vnutrition' ? (
-                          (() => {
-                            let nutrition;
-                            try {
-                              nutrition = typeof results === 'string' ? JSON.parse(results) : results;
-                              console.log('Raw nutrition object for debugging:', nutrition);
-                              
-                              if (nutrition && nutrition.found !== false) {
-                                return (
-                                  <div>
-                                    <h3>Nutrition Information</h3>
-                                    <ul>
-                                      <li>Calories per serving: {nutrition.calories_per_serving || 0}</li>
-                                      <li>Protein: {nutrition.protein_g || 0}g</li>
-                                      <li>Carbs: {nutrition.carbs_g || 0}g</li>
-                                      <li>Fat: {nutrition.fat_g || 0}g</li>
-                                      <li>NOVA Score: {nutrition.nova_classification || 1}</li>
-                                      <li>Processing Level: {nutrition.nova_description || nutrition.processed_level || 'Unknown'}</li>
-                                    </ul>
-                                  </div>
-                                );
-                              } else {
-                                return (
-                                  <div>
-                                    <h3>Raw Database Data (Debug)</h3>
-                                    <pre style={{ fontSize: '12px', background: '#f5f5f5', padding: '10px' }}>
-                                      {JSON.stringify(nutrition, null, 2)}
-                                    </pre>
-                                  </div>
-                                );
-                              }
-                            } catch {
-                              return <div>Error parsing nutrition data</div>;
-                            }
-                          })()
-                        ) : (
-                          convertLinksToClickable(results)
-                        )}
-                      </div>
-                    </div>
-                    
-                    <div className="data-source-indicator">
-                      {dataSource === 'openai' ? (
-                        <span>Powered by AI</span>
-                      ) : dataSource === 'error' ? (
-                        <span className="error-source">Error retrieving data</span>
-                      ) : (
-                        <span>What Is Healthy?</span>
-                      )}
-                    </div>
+      {/* Show spinner when searching from header */}
+      {(isLoading || isSearching) && (
+        <Spinner
+          overlay={true}
+          title="Analyzing with AI..."
+          subtitle="Processing your health query..."
+          disableEsc={true}
+        />
+      )}
+      
+      <div className="results-container">
+        {hasValidResults ? (
+          <>
+            <h1 className="results-header">Search Results for: "{query}"</h1>
+            
+            <div className="results-content">
+              {/* Main content */}
+              <div className="health-info-card">
+                <div className="health-info-content">
+                  <div className="markdown-content">
+                    {dataSource === 'vnutrition' ? (
+                      (() => {
+                        let nutrition;
+                        try {
+                          nutrition = typeof results === 'string' ? JSON.parse(results) : results;
+                          console.log('Raw nutrition object for debugging:', nutrition);
+                          
+                          if (nutrition && nutrition.found !== false) {
+                            return (
+                              <div>
+                                <h3>Nutrition Information</h3>
+                                <ul>
+                                  <li>Calories per serving: {nutrition.calories_per_serving || 0}</li>
+                                  <li>Protein: {nutrition.protein_g || 0}g</li>
+                                  <li>Carbs: {nutrition.carbs_g || 0}g</li>
+                                  <li>Fat: {nutrition.fat_g || 0}g</li>
+                                  <li>NOVA Score: {nutrition.nova_classification || 1}</li>
+                                  <li>Processing Level: {nutrition.nova_description || nutrition.processed_level || 'Unknown'}</li>
+                                </ul>
+                              </div>
+                            );
+                          } else {
+                            return (
+                              <div>
+                                <h3>Raw Database Data (Debug)</h3>
+                                <pre style={{ fontSize: '12px', background: '#f5f5f5', padding: '10px' }}>
+                                  {JSON.stringify(nutrition, null, 2)}
+                                </pre>
+                              </div>
+                            );
+                          }
+                        } catch {
+                          return <div>Error parsing nutrition data</div>;
+                        }
+                      })()
+                    ) : (
+                      convertLinksToClickable(results)
+                    )}
                   </div>
-                  
-                  {/* Sidebar - ONLY when NOT loading and we have results */}
-                  <div className="sidebar">
-                    {/* Quality Chart */}
-                    <div className="quality-chart-container" style={{ marginBottom: "2rem" }}>
-                      <ResultQualityPie 
-                        query={query || ''} 
-                        results={results || ''}
-                        dataSource={dataSource || 'openai'}
-                        citations={citations || []}
+                </div>
+                
+                <div className="data-source-indicator">
+                  {dataSource === 'openai' ? (
+                    <span>Powered by AI</span>
+                  ) : dataSource === 'error' ? (
+                    <span className="error-source">Error retrieving data</span>
+                  ) : (
+                    <span>What Is Healthy?</span>
+                  )}
+                </div>
+              </div>
+              
+              {/* Sidebar - ONLY when NOT loading and we have results */}
+              <div className="sidebar">
+                {/* Quality Chart */}
+                <div className="quality-chart-container" style={{ marginBottom: "2rem" }}>
+                  <ResultQualityPie 
+                    query={query || ''} 
+                    results={results || ''}
+                    dataSource={dataSource || 'openai'}
+                    citations={citations || []}
+                  />
+                </div>
+
+                {/* Nutrition Charts - Only show when we have nutrition data */}
+                {dataSource === 'vnutrition' && (
+                  <>
+                    <div className="nutrition-chart-container" style={{ marginBottom: "2rem" }}>
+                      <h3 style={{ fontSize: "1.1rem", marginBottom: "1rem", color: "#374151" }}>
+                        Nutrition Breakdown
+                      </h3>
+                      <NutritionChart 
+                        query={query}
+                        results={results}
+                        dataSource={dataSource}
                       />
                     </div>
 
-                    {/* Nutrition Charts - Only show when we have nutrition data */}
-                    {dataSource === 'vnutrition' && (
-                      <>
-                        <div className="nutrition-chart-container" style={{ marginBottom: "2rem" }}>
-                          <h3 style={{ fontSize: "1.1rem", marginBottom: "1rem", color: "#374151" }}>
-                            Nutrition Breakdown
-                          </h3>
-                          <NutritionChart 
-                            query={query}
-                            results={results}
-                            dataSource={dataSource}
-                          />
-                        </div>
-
-                        <div className="nova-chart-container" style={{ marginBottom: "2rem" }}>
-                          <h3 style={{ fontSize: "1.1rem", marginBottom: "1rem", color: "#374151" }}>
-                            Processing Level (NOVA Score)
-                          </h3>
-                          <NovaChart 
-                            query={query}
-                            results={results}
-                            dataSource={dataSource}
-                          />
-                        </div>
-                      </>
+                    <div className="nova-chart-container" style={{ marginBottom: "2rem" }}>
+                      <h3 style={{ fontSize: "1.1rem", marginBottom: "1rem", color: "#374151" }}>
+                        Processing Level (NOVA Score)
+                      </h3>
+                      <NovaChart 
+                        query={query}
+                        results={results}
+                        dataSource={dataSource}
+                      />
+                    </div>
+                  </>
+                )}
+                
+                {/* Related Topics */}
+                <div className="related-topics-card">
+                  <h3>Related Health Topics</h3>
+                  <ul className="related-topics-list">
+                    {isTestQuery ? (
+                      dummyTestData.relatedTopics.map((topic, index) => (
+                        <li key={index}>
+                          <button 
+                            onClick={() => {
+                              if (topic !== lastProcessedQuery && topic !== query && !isLoading) {
+                                console.log('User explicit search from related topic:', topic);
+                                setLastProcessedQuery(topic);
+                                onNewSearch(topic);
+                              }
+                            }}
+                            className="topic-button"
+                            disabled={isLoading}
+                          >
+                            {topic}
+                          </button>
+                        </li>
+                      ))
+                    ) : (
+                      defaultRelatedTopics.map((topic, index) => (
+                        <li key={index}>
+                          <button 
+                            onClick={() => {
+                              if (topic !== lastProcessedQuery && topic !== query && !isLoading) {
+                                console.log('User explicit search from related topic:', topic);
+                                setLastProcessedQuery(topic);
+                                onNewSearch(topic);
+                              }
+                            }}
+                            className="topic-button"
+                            disabled={isLoading}
+                          >
+                            {topic}
+                          </button>
+                        </li>
+                      ))
                     )}
-                    
-                    {/* Related Topics */}
-                    <div className="related-topics-card">
-                      <h3>Related Health Topics</h3>
-                      <ul className="related-topics-list">
-                        {isTestQuery ? (
-                          dummyTestData.relatedTopics.map((topic, index) => (
-                            <li key={index}>
-                              <button 
-                                onClick={() => {
-                                  if (topic !== lastProcessedQuery && topic !== query && !isLoading) {
-                                    console.log('User explicit search from related topic:', topic);
-                                    setLastProcessedQuery(topic);
-                                    onNewSearch(topic);
-                                  }
-                                }}
-                                className="topic-button"
-                                disabled={isLoading}
-                              >
-                                {topic}
-                              </button>
-                            </li>
-                          ))
-                        ) : (
-                          defaultRelatedTopics.map((topic, index) => (
-                            <li key={index}>
-                              <button 
-                                onClick={() => {
-                                  if (topic !== lastProcessedQuery && topic !== query && !isLoading) {
-                                    console.log('User explicit search from related topic:', topic);
-                                    setLastProcessedQuery(topic);
-                                    onNewSearch(topic);
-                                  }
-                                }}
-                                className="topic-button"
-                                disabled={isLoading}
-                              >
-                                {topic}
-                              </button>
-                            </li>
-                          ))
-                        )}
-                      </ul>
-                    </div>
-                    
-                    {/* Resources */}
-                    <div className="resources-card">
-                      <h3>Useful Resources</h3>
-                      <ul className="resources-list">
-                        {isTestQuery ? (
-                          dummyTestData.resources.map((resource, index) => (
-                            <li key={index}>
-                              <a href={resource.url} target="_blank" rel="noopener noreferrer">
-                                {resource.text}
-                              </a>
-                            </li>
-                          ))
-                        ) : (
-                          defaultResources.map((resource, index) => (
-                            <li key={index}>
-                              <a href={resource.url} target="_blank" rel="noopener noreferrer">
-                                {resource.text}
-                              </a>
-                            </li>
-                          ))
-                        )}
-                      </ul>
-                    </div>
-                  </div>
+                  </ul>
                 </div>
-              </>
-            ) : (
-              /* No results message */
-              <div className="no-results-message">
-                <p>No results to display. Try searching for something else.</p>
+                
+                {/* Resources */}
+                <div className="resources-card">
+                  <h3>Useful Resources</h3>
+                  <ul className="resources-list">
+                    {isTestQuery ? (
+                      dummyTestData.resources.map((resource, index) => (
+                        <li key={index}>
+                          <a href={resource.url} target="_blank" rel="noopener noreferrer">
+                            {resource.text}
+                          </a>
+                        </li>
+                      ))
+                    ) : (
+                      defaultResources.map((resource, index) => (
+                        <li key={index}>
+                          <a href={resource.url} target="_blank" rel="noopener noreferrer">
+                            {resource.text}
+                          </a>
+                        </li>
+                      ))
+                    )}
+                  </ul>
+                </div>
               </div>
-            )}
-          </div>
-        </>
-      )}
+            </div>
+          </>
+        ) : (
+          !isLoading && !isSearching && (
+            <div className="no-results-message">
+              <p>No results to display. Try searching for something else.</p>
+            </div>
+          )
+        )}
+      </div>
 
       {/* ImageUploadModal - always available */}
       <ImageUploadModal
