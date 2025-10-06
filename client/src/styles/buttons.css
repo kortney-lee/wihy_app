@@ -1,0 +1,88 @@
+/* ---------------------------
+   Buttons
+----------------------------*/
+.search-actions,
+.search-buttons {
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+  margin-top: 24px;
+  width: 100%;
+}
+
+.search-button,
+.search-btn {
+  --btn-bg: #f8f9fa;
+  --btn-text: #1f2937;
+  --btn-border: #e5e7eb;
+  --btn-shadow: rgba(0,0,0,.08);
+
+  background: var(--btn-bg);
+  color: var(--btn-text);
+  border: 1px solid var(--btn-border);
+  border-radius: 24px;
+  font-size: 14px;
+  padding: 10px 20px;
+  cursor: pointer;
+  transition: background-color .2s, color .2s, border-color .2s, box-shadow .2s, transform .06s ease;
+  min-width: 140px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px var(--btn-shadow);
+}
+
+.search-button:hover,
+.search-btn:hover {
+  background: #e9eef6;
+  border-color: #d3d9e3;
+  box-shadow: 0 4px 14px rgba(0,0,0,.12);
+}
+
+.search-button:active,
+.search-btn:active {
+  background: #dbe4ef;
+  transform: translateY(1px);
+}
+
+.search-button:focus-visible,
+.search-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 2px 6px rgba(0,0,0,.12), var(--vh-ring);
+}
+
+/* Optional: give each button its own subtle accent on hover */
+.search-actions .search-btn:nth-child(1):hover { border-color: var(--vh-accent); color: var(--vh-accent); }
+.search-actions .search-btn:nth-child(2):hover { border-color: var(--vh-accent-2); color: var(--vh-accent-2); }
+
+.search-button-modal {
+  background: #1a73e8;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 0 24px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.search-button-modal:hover { background: #1557b0; }
+.search-button-modal.processing { background: #9aa0a6 !important; cursor: not-allowed !important; }
+
+.back-button {
+  width: 40px;
+  height: 40px;
+  border: none;
+  background: #f8f9fa;
+  cursor: pointer;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 15px;
+  z-index: 1400;
+}
+.back-button:hover { background-color: #e8eaed; }
+.back-button svg { width: 20px; height: 20px; fill: #5f6368; }

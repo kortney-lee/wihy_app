@@ -1,13 +1,16 @@
 const { getPool, sql } = require('../config/database');
-const axios = require('axios');
-const xml2js = require('xml2js');
+const RSSFeedParser = require('./rss/RSSFeedParser');
+const RSSDatabase = require('./rss/RSSDatabase');
+const RSSPolling = require('./rss/RSSPolling');
 
 console.log('📰 RSS Controller loading...');
 
 class RSSController {
   constructor() {
     this.isInitialized = false;
-    this.pollingInterval = null;
+    this.database = new RSSDatabase();
+    this.parser = new RSSFeedParser();
+    this.polling = new RSSPolling(this.database, this.parser);
     console.log('📰 RSS Controller created');
   }
 
@@ -15,12 +18,11 @@ class RSSController {
     if (this.isInitialized) return;
     try {
       console.log('📰 Initializing RSS database components...');
-      await this.createRSSTables();
-      await this.createRSSStoredProcedures();
+      await this.database.initialize();
       this.isInitialized = true;
       
-      // Start automatic polling every 5 minutes
-      this.startPolling();
+      // Start automatic polling
+      this.polling.start();
       
       console.log('✅ RSS Controller initialized successfully');
     } catch (error) {
@@ -29,507 +31,25 @@ class RSSController {
     }
   }
 
-  async createRSSTables() {
-    const pool = getPool();
-
-    // ---- dbo.rss_feeds (Updated to match your schema) ----
-    await pool.request().query(`
-      IF NOT EXISTS (SELECT 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'dbo.rss_feeds') AND type='U')
-      BEGIN
-        CREATE TABLE dbo.rss_feeds (
-          rss_feeds_id    INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
-          country_code    NVARCHAR(10)   NULL,
-          category        NVARCHAR(100)  NULL,
-          feed_url        NVARCHAR(1000) NOT NULL,
-          feed_title      NVARCHAR(500)  NULL,
-          feed_description NVARCHAR(MAX) NULL,
-          feed_link       NVARCHAR(1000) NULL,
-          etag            NVARCHAR(500)  NULL,
-          last_modified   NVARCHAR(500)  NULL,
-          last_status     INT            NULL,
-          last_checked    DATETIME       NULL,
-          is_active       BIT NOT NULL CONSTRAINT DF_dbo_rss_feeds_is_active DEFAULT(1),
-          created_at      DATETIME NOT NULL CONSTRAINT DF_dbo_rss_feeds_created_at DEFAULT(GETDATE()),
-          last_updated    DATETIME       NULL,
-          feed_url_hash   AS CONVERT(VARBINARY(32), HASHBYTES('SHA2_256', LOWER(LTRIM(RTRIM(feed_url))))) PERSISTED,
-          updated_at      DATETIME NOT NULL CONSTRAINT DF_dbo_rss_feeds_updated_at DEFAULT(GETDATE()),
-          last_fetched    DATETIME       NULL,
-          fetch_count     INT NOT NULL CONSTRAINT DF_dbo_rss_feeds_fetch_count DEFAULT(0)
-        );
-        CREATE UNIQUE INDEX UX_dbo_rss_feeds_urlhash ON dbo.rss_feeds(feed_url_hash);
-        CREATE INDEX IX_dbo_rss_feeds_category ON dbo.rss_feeds(category);
-        CREATE INDEX IX_dbo_rss_feeds_country  ON dbo.rss_feeds(country_code);
-        CREATE INDEX IX_dbo_rss_feeds_active   ON dbo.rss_feeds(is_active);
-        CREATE INDEX IX_dbo_rss_feeds_last_checked ON dbo.rss_feeds(last_checked);
-        PRINT 'RSS feeds table created (dbo.rss_feeds)';
-      END
-      ELSE
-      BEGIN
-        -- Add missing columns if they don't exist
-        IF COL_LENGTH('dbo.rss_feeds','feed_description') IS NULL
-          ALTER TABLE dbo.rss_feeds ADD feed_description NVARCHAR(MAX) NULL;
-        IF COL_LENGTH('dbo.rss_feeds','feed_link') IS NULL
-          ALTER TABLE dbo.rss_feeds ADD feed_link NVARCHAR(1000) NULL;
-        IF COL_LENGTH('dbo.rss_feeds','etag') IS NULL
-          ALTER TABLE dbo.rss_feeds ADD etag NVARCHAR(500) NULL;
-        IF COL_LENGTH('dbo.rss_feeds','last_modified') IS NULL
-          ALTER TABLE dbo.rss_feeds ADD last_modified NVARCHAR(500) NULL;
-        IF COL_LENGTH('dbo.rss_feeds','last_status') IS NULL
-          ALTER TABLE dbo.rss_feeds ADD last_status INT NULL;
-        IF COL_LENGTH('dbo.rss_feeds','last_checked') IS NULL
-          ALTER TABLE dbo.rss_feeds ADD last_checked DATETIME NULL;
-        IF COL_LENGTH('dbo.rss_feeds','last_updated') IS NULL
-          ALTER TABLE dbo.rss_feeds ADD last_updated DATETIME NULL;
-        IF COL_LENGTH('dbo.rss_feeds','feed_url_hash') IS NULL
-          ALTER TABLE dbo.rss_feeds ADD feed_url_hash AS CONVERT(VARBINARY(32), HASHBYTES('SHA2_256', LOWER(LTRIM(RTRIM(feed_url))))) PERSISTED;
-        
-        -- Add indexes if they don't exist
-        IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name='UX_dbo_rss_feeds_urlhash' AND object_id=OBJECT_ID('dbo.rss_feeds'))
-          CREATE UNIQUE INDEX UX_dbo_rss_feeds_urlhash ON dbo.rss_feeds(feed_url_hash);
-        IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name='IX_dbo_rss_feeds_last_checked' AND object_id=OBJECT_ID('dbo.rss_feeds'))
-          CREATE INDEX IX_dbo_rss_feeds_last_checked ON dbo.rss_feeds(last_checked);
-          
-        PRINT 'RSS feeds table already exists (dbo.rss_feeds)';
-      END
-    `);
-
-    // ---- dbo.rss_articles (Keep existing) ----
-    await pool.request().query(`
-      IF NOT EXISTS (SELECT 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'dbo.rss_articles') AND type='U')
-      BEGIN
-        CREATE TABLE dbo.rss_articles (
-          id            INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
-          rss_feeds_id  INT NOT NULL,
-          title         NVARCHAR(500) NOT NULL,
-          description   NVARCHAR(MAX) NULL,
-          link          NVARCHAR(1000) NOT NULL,
-          author        NVARCHAR(200)  NULL,
-          pub_date_raw  NVARCHAR(100)  NULL,
-          pub_date      DATETIME       NULL,
-          guid          NVARCHAR(500)  NULL,
-          created_at    DATETIME NOT NULL CONSTRAINT DF_dbo_rss_articles_created_at DEFAULT(GETDATE()),
-          updated_at    DATETIME NOT NULL CONSTRAINT DF_dbo_rss_articles_updated_at DEFAULT(GETDATE()),
-          CONSTRAINT FK_dbo_rss_articles_feeds
-            FOREIGN KEY (rss_feeds_id) REFERENCES dbo.rss_feeds(rss_feeds_id) ON DELETE CASCADE
-        );
-        CREATE INDEX IX_dbo_rss_articles_feed    ON dbo.rss_articles(rss_feeds_id);
-        CREATE INDEX IX_dbo_rss_articles_pubdate ON dbo.rss_articles(pub_date DESC);
-        CREATE INDEX IX_dbo_rss_articles_created ON dbo.rss_articles(created_at DESC);
-        CREATE UNIQUE INDEX UX_dbo_rss_articles_guid ON dbo.rss_articles(guid) WHERE guid IS NOT NULL;
-        PRINT 'RSS articles table created (dbo.rss_articles)';
-      END
-      ELSE
-      BEGIN
-        PRINT 'RSS articles table already exists (dbo.rss_articles)';
-      END
-    `);
-  }
-
-  async createRSSStoredProcedures() {
-    const pool = getPool();
-
-    // -------- sp_GetRSSArticles (Updated for new schema) --------
-    const getArticlesExists = await pool.request().query(`
-      SELECT COUNT(*) as proc_count FROM sys.objects 
-      WHERE object_id = OBJECT_ID('dbo.sp_GetRSSArticles') AND type='P'
-    `);
-
-    if (getArticlesExists.recordset[0].proc_count === 0) {
-      console.log('📰 Creating sp_GetRSSArticles...');
-      await pool.request().query(`
-        CREATE PROCEDURE dbo.sp_GetRSSArticles
-          @limit        INT           = 50,
-          @category     NVARCHAR(100) = NULL,
-          @country_code NVARCHAR(10)  = NULL,
-          @rss_feeds_id INT           = NULL
-        AS
-        BEGIN
-          SET NOCOUNT ON;
-          DECLARE @lim INT = CASE WHEN @limit IS NULL OR @limit <= 0 THEN 2147483647 ELSE @limit END;
-
-          SELECT TOP (@lim)
-              a.id,
-              a.rss_feeds_id,
-              a.title,
-              a.description,
-              a.link,
-              ISNULL(a.pub_date, TRY_CONVERT(datetime, a.pub_date_raw)) AS pub_date,
-              a.author,
-              a.guid,
-              a.created_at,
-              f.rss_feeds_id AS feed_id,
-              f.feed_title,
-              f.feed_url,
-              f.feed_description,
-              f.feed_link,
-              f.category,
-              f.country_code,
-              f.last_checked,
-              f.last_status
-          FROM dbo.rss_articles AS a
-          INNER JOIN dbo.rss_feeds  AS f
-                  ON a.rss_feeds_id = f.rss_feeds_id
-          WHERE f.is_active = 1
-            AND (@category     IS NULL OR f.category     = @category)
-            AND (@country_code IS NULL OR f.country_code = @country_code)
-            AND (@rss_feeds_id IS NULL OR f.rss_feeds_id = @rss_feeds_id)
-          ORDER BY ISNULL(a.pub_date, a.created_at) DESC, a.created_at DESC;
-        END
-      `);
-      console.log('✅ sp_GetRSSArticles created');
-    } else {
-      console.log('✅ sp_GetRSSArticles already exists');
-    }
-
-    // -------- sp_IngestRSSArticles_JSON (Keep existing) --------
-    const ingestExists = await pool.request().query(`
-      SELECT COUNT(*) as proc_count FROM sys.objects 
-      WHERE object_id = OBJECT_ID('dbo.sp_IngestRSSArticles_JSON') AND type='P'
-    `);
-
-    if (ingestExists.recordset[0].proc_count === 0) {
-      console.log('📰 Creating sp_IngestRSSArticles_JSON...');
-      await pool.request().query(`
-        CREATE PROCEDURE dbo.sp_IngestRSSArticles_JSON
-          @rss_feeds_id INT,
-          @items        NVARCHAR(MAX),  -- JSON array [{title,description,link,author,pubDate,guid}]
-          @touch_feed   BIT = 1
-        AS
-        BEGIN
-          SET NOCOUNT ON;
-
-          ;WITH j AS (
-            SELECT
-              JSON_VALUE(a.value,'$.title')       AS title,
-              JSON_VALUE(a.value,'$.description') AS description,
-              JSON_VALUE(a.value,'$.link')        AS link,
-              JSON_VALUE(a.value,'$.author')      AS author,
-              JSON_VALUE(a.value,'$.pubDate')     AS pub_date_raw,
-              JSON_VALUE(a.value,'$.guid')        AS guid
-            FROM OPENJSON(@items) AS a
-          )
-          INSERT INTO dbo.rss_articles
-            (rss_feeds_id, title, description, link, author, pub_date_raw, pub_date, guid)
-          SELECT
-            @rss_feeds_id,
-            LEFT(ISNULL(j.title,''),500),
-            j.description,
-            LEFT(ISNULL(j.link,''),1000),
-            LEFT(ISNULL(j.author,''),200),
-            j.pub_date_raw,
-            TRY_CONVERT(datetime, j.pub_date_raw),
-            LEFT(ISNULL(j.guid,''),500)
-          FROM j
-          WHERE
-            (NULLIF(LTRIM(RTRIM(j.link)),'') IS NOT NULL OR NULLIF(LTRIM(RTRIM(j.guid)),'') IS NOT NULL)
-            AND NOT EXISTS (
-              SELECT 1 FROM dbo.rss_articles x
-              WHERE x.rss_feeds_id = @rss_feeds_id
-                AND (
-                     (NULLIF(LTRIM(RTRIM(j.link)),'') IS NOT NULL AND x.link = j.link)
-                  OR (NULLIF(LTRIM(RTRIM(j.guid)),'') IS NOT NULL AND x.guid = j.guid)
-                )
-            );
-
-          IF (@touch_feed = 1)
-          BEGIN
-            UPDATE dbo.rss_feeds
-              SET last_fetched = GETUTCDATE(),
-                  fetch_count  = ISNULL(fetch_count,0) + 1,
-                  updated_at   = GETUTCDATE(),
-                  last_checked = GETUTCDATE(),
-                  last_status  = 200
-            WHERE rss_feeds_id = @rss_feeds_id;
-          END
-        END
-      `);
-      console.log('✅ sp_IngestRSSArticles_JSON created');
-    } else {
-      console.log('✅ sp_IngestRSSArticles_JSON already exists');
-    }
-
-    console.log('✅ RSS stored procedures verified/created');
-  }
-
-  // ENHANCED: RSS XML Parsing with better metadata
-  async fetchAndParseRSSFeed(feedUrl, feedId = null) {
-    try {
-      console.log(`📰 Fetching RSS feed: ${feedUrl}`);
-      
-      const response = await axios.get(feedUrl, {
-        timeout: 15000,
-        headers: {
-          'User-Agent': 'vHealth RSS Reader 1.0',
-          'Accept': 'application/rss+xml, application/xml, text/xml',
-          'Cache-Control': 'no-cache'
-        }
-      });
-
-      if (!response.data) {
-        throw new Error('No data received from RSS feed');
-      }
-
-      // Extract response headers for caching
-      const etag = response.headers.etag || null;
-      const lastModified = response.headers['last-modified'] || null;
-      const status = response.status;
-
-      console.log(`📰 Parsing XML content (${response.data.length} chars)`);
-      
-      const parser = new xml2js.Parser({
-        explicitArray: false,
-        trim: true,
-        normalize: true,
-        normalizeTags: true
-      });
-
-      const result = await parser.parseStringPromise(response.data);
-      
-      if (!result.rss || !result.rss.channel) {
-        throw new Error('Invalid RSS format - missing rss/channel structure');
-      }
-
-      const channel = result.rss.channel;
-      const items = Array.isArray(channel.item) ? channel.item : (channel.item ? [channel.item] : []);
-
-      console.log(`📰 Found ${items.length} articles in RSS feed`);
-
-      const articles = items.map(item => ({
-        title: this.cleanText(item.title || ''),
-        description: this.cleanText(item.description || item.summary || ''),
-        link: this.cleanText(item.link || item.guid || ''),
-        author: this.cleanText(item.author || item['dc:creator'] || item.creator || ''),
-        pubDate: this.cleanText(item.pubdate || item.pubDate || item.published || ''),
-        guid: this.cleanText(item.guid || item.id || item.link || '')
-      })).filter(article => article.title && (article.link || article.guid));
-
-      // Update feed metadata if feedId provided
-      if (feedId) {
-        await this.updateFeedMetadata(feedId, {
-          feed_title: this.cleanText(channel.title || ''),
-          feed_description: this.cleanText(channel.description || ''),
-          feed_link: this.cleanText(channel.link || ''),
-          etag: etag,
-          last_modified: lastModified,
-          last_status: status,
-          last_checked: new Date(),
-          last_updated: new Date()
-        });
-      }
-
-      return {
-        success: true,
-        feedTitle: this.cleanText(channel.title || ''),
-        feedDescription: this.cleanText(channel.description || ''),
-        feedLink: this.cleanText(channel.link || ''),
-        articles: articles,
-        etag: etag,
-        lastModified: lastModified,
-        status: status
-      };
-
-    } catch (error) {
-      console.error(`❌ Error fetching/parsing RSS feed ${feedUrl}:`, error.message);
-      
-      // Update feed with error status
-      if (feedId) {
-        await this.updateFeedMetadata(feedId, {
-          last_status: error.response?.status || 500,
-          last_checked: new Date()
-        });
-      }
-      
-      return {
-        success: false,
-        error: error.message,
-        articles: [],
-        status: error.response?.status || 500
-      };
-    }
-  }
-
-  async updateFeedMetadata(feedId, metadata) {
-    try {
-      const pool = getPool();
-      
-      const updateFields = [];
-      const request = pool.request().input('rss_feeds_id', sql.Int, feedId);
-      
-      if (metadata.feed_title) {
-        updateFields.push('feed_title = @feed_title');
-        request.input('feed_title', sql.NVarChar, metadata.feed_title);
-      }
-      if (metadata.feed_description) {
-        updateFields.push('feed_description = @feed_description');
-        request.input('feed_description', sql.NVarChar, metadata.feed_description);
-      }
-      if (metadata.feed_link) {
-        updateFields.push('feed_link = @feed_link');
-        request.input('feed_link', sql.NVarChar, metadata.feed_link);
-      }
-      if (metadata.etag) {
-        updateFields.push('etag = @etag');
-        request.input('etag', sql.NVarChar, metadata.etag);
-      }
-      if (metadata.last_modified) {
-        updateFields.push('last_modified = @last_modified');
-        request.input('last_modified', sql.NVarChar, metadata.last_modified);
-      }
-      if (metadata.last_status) {
-        updateFields.push('last_status = @last_status');
-        request.input('last_status', sql.Int, metadata.last_status);
-      }
-      if (metadata.last_checked) {
-        updateFields.push('last_checked = @last_checked');
-        request.input('last_checked', sql.DateTime, metadata.last_checked);
-      }
-      if (metadata.last_updated) {
-        updateFields.push('last_updated = @last_updated');
-        request.input('last_updated', sql.DateTime, metadata.last_updated);
-      }
-      
-      updateFields.push('updated_at = GETDATE()');
-      
-      const query = `UPDATE dbo.rss_feeds SET ${updateFields.join(', ')} WHERE rss_feeds_id = @rss_feeds_id`;
-      
-      await request.query(query);
-      
-    } catch (error) {
-      console.error('❌ Error updating feed metadata:', error);
-    }
-  }
-
-  cleanText(text) {
-    if (!text) return '';
-    return text.toString()
-      .replace(/<[^>]*>/g, '') // Remove HTML tags
-      .replace(/&nbsp;/g, ' ')
-      .replace(/&amp;/g, '&')
-      .replace(/&lt;/g, '<')
-      .replace(/&gt;/g, '>')
-      .replace(/&quot;/g, '"')
-      .replace(/&#39;/g, "'")
-      .replace(/\s+/g, ' ')
-      .trim();
-  }
-
-  // NEW: Automatic polling every 5 minutes
-  startPolling() {
-    if (this.pollingInterval) {
-      clearInterval(this.pollingInterval);
-    }
-    
-    console.log('🕒 Starting RSS polling every 5 minutes...');
-    
-    // Poll every 5 minutes (300,000 ms)
-    this.pollingInterval = setInterval(async () => {
-      try {
-        console.log('🕒 Automatic RSS polling started...');
-        await this.pollAllFeeds();
-      } catch (error) {
-        console.error('❌ Error in automatic polling:', error);
-      }
-    }, 5 * 60 * 1000); // 5 minutes
-    
-    // Also run immediately on startup
-    setTimeout(async () => {
-      try {
-        console.log('🚀 Initial RSS polling on startup...');
-        await this.pollAllFeeds();
-      } catch (error) {
-        console.error('❌ Error in initial polling:', error);
-      }
-    }, 10000); // Wait 10 seconds after startup
-  }
-
-  stopPolling() {
-    if (this.pollingInterval) {
-      clearInterval(this.pollingInterval);
-      this.pollingInterval = null;
-      console.log('🛑 RSS polling stopped');
-    }
-  }
-
-  async pollAllFeeds() {
-    try {
-      const pool = getPool();
-      
-      // Get feeds that need checking (active feeds, prioritize older last_checked)
-      const feedsResult = await pool.request()
-        .query(`
-          SELECT rss_feeds_id, feed_url, feed_title, etag, last_modified, last_checked
-          FROM dbo.rss_feeds 
-          WHERE is_active = 1
-          ORDER BY ISNULL(last_checked, '1900-01-01') ASC
-        `);
-
-      const feeds = feedsResult.recordset;
-      let totalArticlesAdded = 0;
-      
-      console.log(`🕒 Polling ${feeds.length} active RSS feeds...`);
-
-      for (const feed of feeds) {
-        try {
-          const rssResult = await this.fetchAndParseRSSFeed(feed.feed_url, feed.rss_feeds_id);
-          
-          if (rssResult.success && rssResult.articles.length > 0) {
-            // Ingest new articles
-            await pool.request()
-              .input('rss_feeds_id', sql.Int, feed.rss_feeds_id)
-              .input('items', sql.NVarChar(sql.MAX), JSON.stringify(rssResult.articles))
-              .input('touch_feed', sql.Bit, true)
-              .execute('dbo.sp_IngestRSSArticles_JSON');
-
-            totalArticlesAdded += rssResult.articles.length;
-            console.log(`✅ Polled ${feed.feed_title}: ${rssResult.articles.length} new articles`);
-          } else {
-            console.log(`📰 Polled ${feed.feed_title}: No new articles`);
-          }
-
-        } catch (feedError) {
-          console.error(`❌ Error polling feed ${feed.feed_title}:`, feedError.message);
-        }
-        
-        // Small delay between feeds to be respectful
-        await new Promise(resolve => setTimeout(resolve, 1000));
-      }
-
-      if (totalArticlesAdded > 0) {
-        console.log(`🎉 Polling complete: ${totalArticlesAdded} new articles added`);
-      } else {
-        console.log(`📰 Polling complete: No new articles found`);
-      }
-
-    } catch (error) {
-      console.error('❌ Error in pollAllFeeds:', error);
-    }
-  }
-
-  // ---------------- Controller methods (Updated) ----------------
-
+  // API Endpoints
   async getFeedsForClient(req, res) {
     try {
       await this.ensureInitialized();
-
-      const pool = getPool();
-      const limit = Number.parseInt(req.query.limit, 10) || 100;
-      const onlyActive = req.query.only_active !== 'false';
-
-      const result = await pool.request()
-        .input('limit', sql.Int, limit)
-        .input('onlyActive', sql.Bit, onlyActive)
-        .query(`
-          SELECT TOP (@limit)
-            rss_feeds_id, country_code, category, feed_url, feed_title, 
-            feed_description, feed_link, etag, last_modified, last_status,
-            last_checked, is_active, created_at, last_updated, updated_at,
-            last_fetched, fetch_count
-          FROM dbo.rss_feeds
-          WHERE (@onlyActive = 0 OR is_active = 1)
-          ORDER BY last_checked DESC, created_at DESC;
-        `);
-
-      res.json({ success: true, feeds: result.recordset, count: result.recordset.length });
+      const feeds = await this.database.getFeeds(req.query);
+      
+      // Enhance feeds with additional metadata
+      const enhancedFeeds = feeds.map(feed => ({
+        ...feed,
+        article_count: this.getArticleCount(feed.latest_articles),
+        last_updated: feed.last_checked || feed.updated_at,
+        status: this.getFeedStatus(feed)
+      }));
+      
+      res.json({ 
+        success: true, 
+        feeds: enhancedFeeds, 
+        count: enhancedFeeds.length
+      });
     } catch (error) {
       console.error('❌ Error getting feeds:', error);
       res.status(500).json({ success: false, message: 'Failed to get RSS feeds', error: error.message });
@@ -539,143 +59,639 @@ class RSSController {
   async getArticles(req, res) {
     try {
       await this.ensureInitialized();
-
-      const pool = getPool();
-      const limit     = Number.parseInt(req.query.limit, 10) || 50;
-      const category  = req.query.category || null;
-      const country   = req.query.country  || null;
-      const feedId    = req.query.feed_id ? Number.parseInt(req.query.feed_id, 10) : null;
-
-      const result = await pool.request()
-        .input('limit',        sql.Int,      limit)
-        .input('category',     sql.NVarChar, category)
-        .input('country_code', sql.NVarChar, country)
-        .input('rss_feeds_id', sql.Int,      feedId)
-        .execute('dbo.sp_GetRSSArticles');
-
-      res.json({ success: true, articles: result.recordset, count: result.recordset.length });
+      
+      console.log('🔍 Getting articles with params:', req.query);
+      
+      // Check if we have any feeds first
+      const feedCount = await this.database.getFeedCount();
+      console.log(`📊 Total feeds in database: ${feedCount}`);
+      
+      if (feedCount === 0) {
+        console.log('🌱 No feeds found, auto-seeding...');
+        await this.database.seedSampleFeeds();
+        
+        // Trigger immediate polling after seeding
+        console.log('🔄 Triggering immediate polling after seeding...');
+        this.polling.pollOnce();
+      }
+      
+      const articles = await this.database.getArticles(req.query);
+      console.log(`📰 Retrieved ${articles.length} articles`);
+      
+      // Enhance articles with additional computed fields
+      const enhancedArticles = articles.map(article => this.enhanceArticleData(article));
+      
+      // If no articles, provide debug info
+      if (enhancedArticles.length === 0) {
+        const stats = await this.database.getFeedStats();
+        console.log('📊 Feed stats:', stats);
+        
+        res.json({ 
+          success: true, 
+          articles: enhancedArticles, 
+          count: enhancedArticles.length,
+          debug: {
+            total_feeds: feedCount,
+            feed_stats: stats.stats,
+            recent_feeds: stats.recent,
+            message: 'No articles found. Feeds may need time to be polled or there may be parsing issues.'
+          }
+        });
+      } else {
+        res.json({ 
+          success: true, 
+          articles: enhancedArticles, 
+          count: enhancedArticles.length
+        });
+      }
     } catch (error) {
       console.error('❌ Error getting articles:', error);
       res.status(500).json({ success: false, message: 'Failed to get RSS articles', error: error.message });
     }
   }
 
+  // NEW: Get available categories and countries for client filtering
+  async getCategoriesAndCountries(req, res) {
+    try {
+      await this.ensureInitialized();
+      const data = await this.database.getCategoriesAndCountries();
+      res.json({ 
+        success: true, 
+        categories: data.categories,
+        countries: data.countries
+      });
+    } catch (error) {
+      console.error('❌ Error getting categories and countries:', error);
+      res.status(500).json({ success: false, message: 'Failed to get categories and countries', error: error.message });
+    }
+  }
+
   async seedSampleFeeds(req, res) {
     try {
       await this.ensureInitialized();
-
-      const sampleFeeds = [
-        { feed_url: 'https://www.nih.gov/news-events/news-releases/rss.xml', category: 'medical', country_code: 'US' },
-        { feed_url: 'https://www.cdc.gov/rss/health.xml', category: 'health', country_code: 'US' },
-        { feed_url: 'https://feeds.npr.org/1002/rss.xml', category: 'health', country_code: 'US' },
-        { feed_url: 'https://rss.cnn.com/rss/cnn_health.rss', category: 'health', country_code: 'US' },
-        { feed_url: 'https://www.cbsnews.com/latest/rss/health', category: 'health', country_code: 'US' }
-      ];
-
-      const pool = getPool();
-      let feedsAdded = 0;
-      let articlesAdded = 0;
-
-      for (const feed of sampleFeeds) {
-        try {
-          // Insert feed (let RSS parsing fill in the details)
-          const feedResult = await pool.request()
-            .input('feed_url', sql.NVarChar, feed.feed_url)
-            .input('category', sql.NVarChar, feed.category)
-            .input('country_code', sql.NVarChar, feed.country_code)
-            .query(`
-              DECLARE @id INT;
-              SELECT @id = rss_feeds_id FROM dbo.rss_feeds WHERE feed_url = @feed_url;
-
-              IF @id IS NULL
-              BEGIN
-                INSERT INTO dbo.rss_feeds (feed_url, category, country_code)
-                OUTPUT inserted.rss_feeds_id
-                VALUES (@feed_url, @category, @country_code);
-              END
-              ELSE
-              BEGIN
-                SELECT @id AS rss_feeds_id;
-              END
-            `);
-
-          const feedId = feedResult.recordset?.[0]?.rss_feeds_id;
-          if (feedId) {
-            feedsAdded++;
-
-            // Fetch and parse RSS content
-            console.log(`📰 Processing RSS feed: ${feed.feed_url}`);
-            const rssResult = await this.fetchAndParseRSSFeed(feed.feed_url, feedId);
-
-            if (rssResult.success && rssResult.articles.length > 0) {
-              // Ingest articles
-              await pool.request()
-                .input('rss_feeds_id', sql.Int, feedId)
-                .input('items', sql.NVarChar(sql.MAX), JSON.stringify(rssResult.articles))
-                .input('touch_feed', sql.Bit, true)
-                .execute('dbo.sp_IngestRSSArticles_JSON');
-
-              articlesAdded += rssResult.articles.length;
-              console.log(`✅ Added ${rssResult.articles.length} articles from ${rssResult.feedTitle}`);
-            }
-          }
-
-        } catch (feedError) {
-          console.error(`❌ Error processing feed ${feed.feed_url}:`, feedError.message);
-        }
-      }
-
+      const result = await this.database.seedSampleFeeds();
+      
+      // Trigger immediate polling after manual seeding
+      console.log('🔄 Triggering immediate polling after manual seeding...');
+      setTimeout(() => this.polling.pollOnce(), 2000);
+      
       res.json({ 
         success: true, 
-        message: 'Sample feeds seeded and will be polled every 5 minutes', 
-        feeds_added: feedsAdded,
-        articles_added: articlesAdded
+        message: 'Sample feeds seeded for multiple categories', 
+        feeds_added: result.feeds_added,
+        articles_added: result.articles_added
       });
-
     } catch (error) {
       console.error('❌ Error seeding sample feeds:', error);
       res.status(500).json({ success: false, message: 'Failed to seed sample feeds', error: error.message });
     }
   }
 
-  async fetchAllFeeds(req, res) {
+  async debugCheckFeeds(req, res) {
     try {
       await this.ensureInitialized();
-      await this.pollAllFeeds();
+      const stats = await this.database.getFeedStats();
+      
+      // Get a sample of feeds with their article status
+      const pool = getPool();
+      const sampleFeeds = await pool.request().query(`
+        SELECT TOP 5
+          rss_feeds_id, feed_title, category, is_active, last_checked, last_status,
+          CASE 
+            WHEN latest_articles IS NULL THEN 'No articles'
+            WHEN ISJSON(latest_articles) = 0 THEN 'Invalid JSON'
+            WHEN latest_articles = '[]' THEN 'Empty array'
+            ELSE CAST((SELECT COUNT(*) FROM OPENJSON(latest_articles)) AS NVARCHAR(10)) + ' articles'
+          END as article_status,
+          LEN(latest_articles) as json_length
+        FROM dbo.rss_feeds
+        ORDER BY created_at DESC
+      `);
       
       res.json({
         success: true,
-        message: 'Manual RSS fetch completed. Check articles for updates.'
+        message: 'Debug feed check complete',
+        feed_stats: stats.stats,
+        recent_feeds: stats.recent,
+        sample_feeds: sampleFeeds.recordset,
+        polling_active: this.polling.isActive()
       });
-
     } catch (error) {
-      console.error('❌ Error fetching all feeds:', error);
-      res.status(500).json({ success: false, message: 'Failed to fetch all feeds', error: error.message });
+      console.error('❌ Error in debug check:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: 'Failed to check feeds', 
+        error: error.message 
+      });
     }
   }
 
+  // NEW: Manual trigger for polling (useful for debugging)
+  async triggerPolling(req, res) {
+    try {
+      await this.ensureInitialized();
+      
+      console.log('🔄 Manual polling triggered...');
+      this.polling.pollOnce();
+      
+      res.json({
+        success: true,
+        message: 'Polling triggered manually'
+      });
+    } catch (error) {
+      console.error('❌ Error triggering polling:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: 'Failed to trigger polling', 
+        error: error.message 
+      });
+    }
+  }
+
+  // NEW: Manual trigger for article ingestion
   async ingestArticles(req, res) {
     try {
       await this.ensureInitialized();
-
-      const { rss_feeds_id, items, touch_feed = true } = req.body || {};
-      if (!rss_feeds_id || !Array.isArray(items) || items.length === 0) {
-        return res.status(400).json({ success: false, message: 'rss_feeds_id and non-empty items[] are required' });
+      
+      console.log('🔄 Manual ingestion triggered...');
+      
+      // This is the same as triggerPolling - manually fetch fresh RSS data
+      if (this.polling) {
+        this.polling.pollOnce();
+        res.json({
+          success: true,
+          message: 'Article ingestion triggered manually'
+        });
+      } else {
+        // If polling isn't set up yet, initialize it
+        const RSSPolling = require('./rss/RSSPolling');
+        const RSSFeedParser = require('./rss/RSSFeedParser');
+        
+        if (!this.parser) {
+          this.parser = new RSSFeedParser();
+        }
+        
+        this.polling = new RSSPolling(this.database, this.parser);
+        this.polling.pollOnce();
+        
+        res.json({
+          success: true,
+          message: 'Polling initialized and article ingestion triggered'
+        });
       }
-
-      const pool = getPool();
-      const result = await pool.request()
-        .input('rss_feeds_id', sql.Int, rss_feeds_id)
-        .input('items', sql.NVarChar(sql.MAX), JSON.stringify(items))
-        .input('touch_feed', sql.Bit, !!touch_feed)
-        .execute('dbo.sp_IngestRSSArticles_JSON');
-
-      res.json({ success: true, message: 'Ingested', meta: result.recordset?.[0] || null });
     } catch (error) {
-      console.error('❌ Error in RSS ingestion:', error);
-      res.status(500).json({ success: false, message: 'RSS ingestion failed', error: error.message });
+      console.error('❌ Error triggering ingestion:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: 'Failed to trigger article ingestion', 
+        error: error.message 
+      });
+    }
+  }
+
+  async autoInitialize() {
+    try {
+      console.log('🚀 RSS Controller auto-initializing...');
+      await this.ensureInitialized();
+      
+      const feedCount = await this.database.getFeedCount();
+      console.log(`📊 Found ${feedCount} existing feeds`);
+      
+      if (feedCount === 0) {
+        console.log('🌱 No feeds found - auto-seeding...');
+        await this.database.seedSampleFeeds();
+      }
+      
+      // Initial poll after startup with delay to ensure feeds are seeded
+      setTimeout(() => {
+        console.log('🔄 Starting initial RSS polling...');
+        this.polling.pollOnce();
+      }, 5000);
+      
+      console.log('✅ RSS Controller auto-initialization complete');
+    } catch (error) {
+      console.error('❌ RSS Controller auto-initialization failed:', error);
+      throw error;
+    }
+  }
+
+  // Helper methods for data enhancement
+  enhanceArticleData(article) {
+    return {
+      // Core article data
+      id: article.guid || `${article.feed_id}_${article.title?.substring(0, 50)}`,
+      title: article.title || 'Untitled',
+      description: article.description || '',
+      summary: this.createSummary(article.description),
+      link: article.link || '',
+      
+      // Content and media
+      content: article.content_encoded || article.description || '',
+      thumbnail: article.media_thumb_url || article.feed_image_url || '',
+      image_url: article.media_thumb_url || '',
+      has_image: !!(article.media_thumb_url || article.feed_image_url),
+      
+      // Metadata
+      author: article.author || '',
+      published_date: article.pubDate || article.extracted_at,
+      published_timestamp: this.parseDate(article.pubDate || article.extracted_at),
+      time_ago: this.getTimeAgo(article.pubDate || article.extracted_at),
+      
+      // Categories and source
+      category: article.category || article.article_category || '',
+      tags: this.extractTags(article.category || article.article_category),
+      source: article.source || article.feed_title || '',
+      source_url: article.source_url || article.feed_url || '',
+      
+      // Feed information
+      feed_id: article.feed_id,
+      feed_title: article.feed_title || '',
+      feed_category: article.category || '',
+      feed_country: article.country_code || '',
+      feed_image: article.feed_image_url || '',
+      feed_thumbnail: article.feed_thumbnail_url || '',
+      
+      // Technical metadata
+      guid: article.guid || '',
+      extracted_at: article.extracted_at,
+      last_checked: article.last_checked,
+      
+      // Computed fields for client use
+      is_recent: this.isRecent(article.pubDate || article.extracted_at),
+      reading_time: this.estimateReadingTime(article.content_encoded || article.description),
+      word_count: this.getWordCount(article.content_encoded || article.description),
+      has_content: !!(article.content_encoded || article.description),
+      has_author: !!article.author,
+      
+      // URL validation
+      is_valid_link: this.isValidUrl(article.link),
+      domain: this.extractDomain(article.link),
+      
+      // Content quality indicators
+      content_quality: this.assessContentQuality(article),
+      completeness: this.assessCompleteness(article)
+    };
+  }
+
+  createSummary(description, maxLength = 200) {
+    if (!description) return '';
+    const cleaned = description.replace(/<[^>]*>/g, '').trim();
+    return cleaned.length > maxLength 
+      ? cleaned.substring(0, maxLength) + '...'
+      : cleaned;
+  }
+
+  parseDate(dateString) {
+    if (!dateString) return null;
+    try {
+      return new Date(dateString).getTime();
+    } catch {
+      return null;
+    }
+  }
+
+  getTimeAgo(dateString) {
+    if (!dateString) return 'Unknown';
+    
+    try {
+      const date = new Date(dateString);
+      const now = new Date();
+      const diffMs = now - date;
+      const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+      const diffDays = Math.floor(diffHours / 24);
+      
+      if (diffHours < 1) return 'Less than 1 hour ago';
+      if (diffHours < 24) return `${diffHours} hours ago`;
+      if (diffDays < 7) return `${diffDays} days ago`;
+      if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
+      return `${Math.floor(diffDays / 30)} months ago`;
+    } catch {
+      return 'Unknown';
+    }
+  }
+
+  extractTags(categoryString) {
+    if (!categoryString) return [];
+    return categoryString.split(',')
+      .map(tag => tag.trim())
+      .filter(tag => tag.length > 0)
+      .slice(0, 5); // Limit to 5 tags
+  }
+
+  isRecent(dateString) {
+    if (!dateString) return false;
+    try {
+      const date = new Date(dateString);
+      const now = new Date();
+      const diffHours = (now - date) / (1000 * 60 * 60);
+      return diffHours <= 24; // Recent if within 24 hours
+    } catch {
+      return false;
+    }
+  }
+
+  estimateReadingTime(content) {
+    if (!content) return 0;
+    const wordsPerMinute = 200;
+    const wordCount = this.getWordCount(content);
+    return Math.ceil(wordCount / wordsPerMinute);
+  }
+
+  getWordCount(content) {
+    if (!content) return 0;
+    const cleaned = content.replace(/<[^>]*>/g, '').trim();
+    return cleaned.split(/\s+/).length;
+  }
+
+  isValidUrl(url) {
+    if (!url) return false;
+    try {
+      new URL(url);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  extractDomain(url) {
+    if (!url) return '';
+    try {
+      return new URL(url).hostname;
+    } catch {
+      return '';
+    }
+  }
+
+  assessContentQuality(article) {
+    let score = 0;
+    if (article.title && article.title.length > 10) score += 2;
+    if (article.description && article.description.length > 50) score += 2;
+    if (article.author) score += 1;
+    if (article.media_thumb_url) score += 1;
+    if (article.pubDate) score += 1;
+    if (article.content_encoded && article.content_encoded.length > 200) score += 3;
+    
+    if (score >= 8) return 'high';
+    if (score >= 5) return 'medium';
+    return 'low';
+  }
+
+  assessCompleteness(article) {
+    const requiredFields = ['title', 'description', 'link'];
+    const optionalFields = ['author', 'pubDate', 'media_thumb_url', 'content_encoded'];
+    
+    const hasRequired = requiredFields.every(field => article[field]);
+    const optionalCount = optionalFields.filter(field => article[field]).length;
+    
+    if (hasRequired && optionalCount >= 3) return 'complete';
+    if (hasRequired && optionalCount >= 1) return 'partial';
+    return 'minimal';
+  }
+
+  getArticleCount(latestArticles) {
+    if (!latestArticles) return 0;
+    try {
+      const articles = JSON.parse(latestArticles);
+      return Array.isArray(articles) ? articles.length : 0;
+    } catch {
+      return 0;
+    }
+  }
+
+  getFeedStatus(feed) {
+    if (!feed.is_active) return 'inactive';
+    if (!feed.last_checked) return 'never_checked';
+    if (feed.last_status >= 400) return 'error';
+    if (feed.last_status === 200) return 'active';
+    return 'unknown';
+  }
+
+  // NEW: Get system status including feed and polling status
+  async getStatus(req, res) {
+    try {
+      await this.ensureInitialized();
+      
+      const feedCount = await this.database.getFeedCount();
+      const stats = await this.database.getFeedStats();
+      
+      res.json({
+        success: true,
+        status: 'active',
+        feed_count: feedCount,
+        polling_active: this.polling ? this.polling.isActive() : false,
+        last_check: new Date().toISOString(),
+        stats: stats
+      });
+    } catch (error) {
+      console.error('❌ Error getting status:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: 'Failed to get RSS status', 
+        error: error.message 
+      });
+    }
+  }
+
+  // NEW: Fetch all feeds and trigger polling
+  async fetchAllFeeds(req, res) {
+    try {
+      await this.ensureInitialized();
+      
+      console.log('🔄 Fetching all RSS feeds...');
+      
+      // This is the same as triggerPolling - fetch fresh data from all feeds
+      if (this.polling) {
+        this.polling.pollOnce();
+        
+        res.json({
+          success: true,
+          message: 'RSS feed polling triggered for all feeds',
+          timestamp: new Date().toISOString()
+        });
+      } else {
+        res.status(500).json({
+          success: false,
+          message: 'RSS polling system not initialized'
+        });
+      }
+    } catch (error) {
+      console.error('❌ Error fetching all feeds:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: 'Failed to fetch RSS feeds', 
+        error: error.message 
+      });
+    }
+  }
+
+  // NEW: Test a single feed URL by fetching and parsing
+  async testSingleFeed(req, res) {
+    try {
+      await this.ensureInitialized();
+      
+      const testFeedUrl = req.query.url || 'https://www.nibib.nih.gov/rss';
+      
+      console.log(`🧪 Testing single feed: ${testFeedUrl}`);
+      
+      const result = await this.parser.fetchAndParseRSSFeed(testFeedUrl);
+      
+      res.json({
+        success: result.success,
+        feed_url: testFeedUrl,
+        feed_title: result.feedTitle || '',
+        articles_found: result.articles ? result.articles.length : 0,
+        articles: result.articles || [],
+        error: result.error || null,
+        status: result.status || 0
+      });
+    } catch (error) {
+      console.error('❌ Error testing single feed:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: 'Failed to test RSS feed', 
+        error: error.message 
+      });
+    }
+  }
+
+  // NEW: Debugging endpoint to refresh feeds
+  async debugRefreshFeeds(req, res) {
+    try {
+      await this.ensureInitialized();
+      
+      console.log('🧪 Debug refresh - getting all feeds and forcing refresh...');
+      
+      // Get all feeds and reset their last_checked to force immediate polling
+      const feeds = await this.database.getActiveFeedsForPolling();
+      
+      console.log(`🔄 Found ${feeds.length} feeds to refresh`);
+      
+      // Reset last_checked for all feeds to force immediate polling
+      const pool = getPool();
+      await pool.request().query(`
+        UPDATE dbo.rss_feeds 
+        SET last_checked = '1900-01-01', updated_at = GETUTCDATE()
+        WHERE is_active = 1
+      `);
+      
+      // Trigger polling
+      if (this.polling) {
+        this.polling.pollOnce();
+      }
+      
+      res.json({
+        success: true,
+        message: `Debug refresh completed - reset ${feeds.length} feeds for immediate polling`,
+        feeds_reset: feeds.length,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error('❌ Error in debug refresh:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: 'Failed to debug refresh feeds', 
+        error: error.message 
+      });
+    }
+  }
+
+  // NEW: Debug test for controller initialization
+  async testControllerInitialization(req, res) {
+    try {
+      console.log('🧪 Testing RSS controller creation step by step...');
+      
+      const results = {
+        step1_database: false,
+        step2_rss_database_class: false,
+        step3_rss_parser_class: false,
+        step4_rss_controller_class: false,
+        step5_controller_creation: false,
+        step6_controller_initialization: false,
+        errors: []
+      };
+      
+      // Step 1: Test database connection
+      try {
+        const { getPool } = require('../config/database');
+        const pool = getPool();
+        await pool.request().query('SELECT 1');
+        results.step1_database = true;
+        console.log('✅ Step 1: Database connection OK');
+      } catch (error) {
+        results.errors.push(`Step 1 Database: ${error.message}`);
+        console.error('❌ Step 1: Database failed:', error.message);
+      }
+      
+      // Step 2: Test RSSDatabase class loading
+      try {
+        const RSSDatabase = require('../controllers/rss/RSSDatabase');
+        results.step2_rss_database_class = true;
+        console.log('✅ Step 2: RSSDatabase class loaded');
+      } catch (error) {
+        results.errors.push(`Step 2 RSSDatabase: ${error.message}`);
+        console.error('❌ Step 2: RSSDatabase failed:', error.message);
+      }
+      
+      // Step 3: Test RSSFeedParser class loading
+      try {
+        const RSSFeedParser = require('../controllers/rss/RSSFeedParser');
+        results.step3_rss_parser_class = true;
+        console.log('✅ Step 3: RSSFeedParser class loaded');
+      } catch (error) {
+        results.errors.push(`Step 3 RSSFeedParser: ${error.message}`);
+        console.error('❌ Step 3: RSSFeedParser failed:', error.message);
+      }
+      
+      // Step 4: Test RSS Controller class loading
+      try {
+        const RSSController = require('../controllers/rssController');
+        results.step4_rss_controller_class = true;
+        console.log('✅ Step 4: RSSController class loaded');
+        
+        // Step 5: Test controller creation
+        try {
+          const controller = new RSSController();
+          results.step5_controller_creation = true;
+          console.log('✅ Step 5: RSSController instance created');
+          
+          // Step 6: Test controller initialization
+          try {
+            await controller.ensureInitialized();
+            results.step6_controller_initialization = true;
+            console.log('✅ Step 6: RSSController initialized successfully');
+          } catch (error) {
+            results.errors.push(`Step 6 Initialization: ${error.message}`);
+            console.error('❌ Step 6: Controller initialization failed:', error.message);
+          }
+          
+        } catch (error) {
+          results.errors.push(`Step 5 Creation: ${error.message}`);
+          console.error('❌ Step 5: Controller creation failed:', error.message);
+        }
+        
+      } catch (error) {
+        results.errors.push(`Step 4 Controller Class: ${error.message}`);
+        console.error('❌ Step 4: RSSController class failed:', error.message);
+      }
+      
+      res.json({
+        success: results.step6_controller_initialization,
+        message: 'RSS Controller creation test completed',
+        results: results,
+        next_steps: results.step6_controller_initialization 
+          ? 'Controller works! Can test LiveMint feed now.' 
+          : 'Fix the failing step and try again.'
+      });
+      
+    } catch (error) {
+      console.error('❌ Debug controller test error:', error);
+      res.status(500).json({ 
+        success: false, 
+        error: error.message,
+        stack: error.stack
+      });
     }
   }
 }
 
-module.exports = new RSSController();
+module.exports = RSSController; // Export the class, not an instance

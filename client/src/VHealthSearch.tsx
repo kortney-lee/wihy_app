@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import './VHealthSearch.css';
+import './styles/VHealthSearch.css';
 import ImageUploadModal from './components/ImageUploadModal';
 import MultiAuthLogin from './components/MultiAuthLogin';
 import { healthSearchService } from './services/healthSearchService';
@@ -519,7 +519,7 @@ const VHealthSearch: React.FC = () => {
         <div className="logo-container">
           {!imageError ? (
             <img 
-              src="/assets/whatishealthylogo.png"
+              src="/assets/wihylogo.png"
               alt="What is Healthy?"
               className="search-logo-image"
               onError={() => setImageError(true)}
@@ -538,15 +538,30 @@ const VHealthSearch: React.FC = () => {
             e.preventDefault();
             handleSearch();
           }}>
-            <input
-              type="text"
+            <textarea
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  handleSearch();
+                }
+              }}
               placeholder="Ask anything about health..."
               className="search-input"
               autoFocus
               disabled={isLoading}
+              rows={1}
+              style={{
+                resize: 'none',
+                overflow: 'hidden'
+              }}
+              onInput={(e) => {
+                // Auto-resize textarea
+                const target = e.target as HTMLTextAreaElement;
+                target.style.height = 'auto';
+                target.style.height = Math.min(target.scrollHeight, 120) + 'px';
+              }}
             />
           </form>
 

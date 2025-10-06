@@ -64,7 +64,18 @@ const HealthNewsFeed: React.FC<NewsFeedProps> = ({ maxArticles = 6 }) => {
             category: 'Nutrition & Diet',
             publishedDate: '2025-01-22T10:30:00Z',
             relevanceScore: 0.95,
-            tags: ['mediterranean-diet', 'heart-health', 'cardiovascular']
+            tags: ['mediterranean-diet', 'heart-health', 'cardiovascular'],
+            // ADDED: Required fields
+            hasMedia: true,
+            hasAuthor: true,
+            // ADDED: Optional enhanced fields
+            thumbnailUrl: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&q=80",
+            imageUrl: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&q=80",
+            mediaType: "image",
+            author: "Dr. Sarah Johnson",
+            wordCount: 150,
+            readingTime: 1,
+            contentLength: 750
           },
           {
             id: '2', 
@@ -76,7 +87,18 @@ const HealthNewsFeed: React.FC<NewsFeedProps> = ({ maxArticles = 6 }) => {
             category: 'Mental Health',
             publishedDate: '2025-01-22T08:15:00Z',
             relevanceScore: 0.92,
-            tags: ['exercise', 'mental-health', 'wellness']
+            tags: ['exercise', 'mental-health', 'wellness'],
+            // ADDED: Required fields
+            hasMedia: true,
+            hasAuthor: true,
+            // ADDED: Optional enhanced fields
+            thumbnailUrl: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&q=80",
+            imageUrl: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800&q=80",
+            mediaType: "image",
+            author: "Dr. Michael Chen",
+            wordCount: 180,
+            readingTime: 1,
+            contentLength: 900
           },
           {
             id: '3',
@@ -88,7 +110,18 @@ const HealthNewsFeed: React.FC<NewsFeedProps> = ({ maxArticles = 6 }) => {
             category: 'Medical Research',
             publishedDate: '2025-01-22T06:45:00Z',
             relevanceScore: 0.98,
-            tags: ['cancer', 'early-detection', 'research']
+            tags: ['cancer', 'early-detection', 'research'],
+            // ADDED: Required fields
+            hasMedia: true,
+            hasAuthor: true,
+            // ADDED: Optional enhanced fields
+            thumbnailUrl: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?w=400&q=80",
+            imageUrl: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?w=800&q=80",
+            mediaType: "image",
+            author: "Dr. Robert Kim",
+            wordCount: 250,
+            readingTime: 2,
+            contentLength: 1250
           },
           {
             id: '4',
@@ -100,7 +133,18 @@ const HealthNewsFeed: React.FC<NewsFeedProps> = ({ maxArticles = 6 }) => {
             category: 'General Health',
             publishedDate: '2025-01-21T20:30:00Z',
             relevanceScore: 0.89,
-            tags: ['sleep', 'immune-system', 'health']
+            tags: ['sleep', 'immune-system', 'health'],
+            // ADDED: Required fields
+            hasMedia: true,
+            hasAuthor: true,
+            // ADDED: Optional enhanced fields
+            thumbnailUrl: "https://images.unsplash.com/photo-1541781774459-bb2af2f05b55?w=400&q=80",
+            imageUrl: "https://images.unsplash.com/photo-1541781774459-bb2af2f05b55?w=800&q=80",
+            mediaType: "image",
+            author: "Dr. Lisa Rodriguez",
+            wordCount: 200,
+            readingTime: 1,
+            contentLength: 1000
           },
           {
             id: '5',
@@ -112,7 +156,15 @@ const HealthNewsFeed: React.FC<NewsFeedProps> = ({ maxArticles = 6 }) => {
             category: 'Mental Health',
             publishedDate: '2025-01-21T18:20:00Z',
             relevanceScore: 0.91,
-            tags: ['mindfulness', 'stress-reduction', 'mental-health']
+            tags: ['mindfulness', 'stress-reduction', 'mental-health'],
+            // ADDED: Required fields
+            hasMedia: false,
+            hasAuthor: true,
+            // ADDED: Optional enhanced fields
+            author: "Dr. Amanda White",
+            wordCount: 160,
+            readingTime: 1,
+            contentLength: 800
           },
           {
             id: '6',
@@ -124,7 +176,17 @@ const HealthNewsFeed: React.FC<NewsFeedProps> = ({ maxArticles = 6 }) => {
             category: 'Nutrition & Diet',
             publishedDate: '2025-01-21T15:10:00Z',
             relevanceScore: 0.87,
-            tags: ['nutrition', 'energy', 'superfoods']
+            tags: ['nutrition', 'energy', 'superfoods'],
+            // ADDED: Required fields
+            hasMedia: true,
+            hasAuthor: false,
+            // ADDED: Optional enhanced fields
+            thumbnailUrl: "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=400&q=80",
+            imageUrl: "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=800&q=80",
+            mediaType: "image",
+            wordCount: 140,
+            readingTime: 1,
+            contentLength: 700
           }
         ];
 
@@ -155,20 +217,13 @@ const HealthNewsFeed: React.FC<NewsFeedProps> = ({ maxArticles = 6 }) => {
     return `${diffInDays}d ago`;
   };
 
-  const getSourceIcon = (source: string) => {
-    const sourceLower = source.toLowerCase();
-    if (sourceLower.includes('nih')) return '🏛️';
-    if (sourceLower.includes('cdc')) return '🏥';
-    if (sourceLower.includes('fda')) return '💊';
-    if (sourceLower.includes('mayo')) return '🩺';
-    if (sourceLower.includes('harvard')) return '🎓';
-    if (sourceLower.includes('stanford')) return '🎓';
-    if (sourceLower.includes('nejm')) return '📚';
-    if (sourceLower.includes('lancet')) return '📚';
-    if (sourceLower.includes('bmj')) return '📚';
-    if (sourceLower.includes('nature')) return '🧬';
-    if (sourceLower.includes('who')) return '🌍';
-    return '📰';
+  const getSourceInitials = (source: string) => {
+    return source
+      .split(' ')
+      .map(word => word.charAt(0))
+      .join('')
+      .toUpperCase()
+      .substring(0, 2);
   };
 
   const getCategoryColor = (category: string) => {
@@ -182,6 +237,19 @@ const HealthNewsFeed: React.FC<NewsFeedProps> = ({ maxArticles = 6 }) => {
       'General Health': '#795548'
     };
     return colors[category] || '#666';
+  };
+
+  const getPlaceholderImage = (category: string) => {
+    const placeholders: Record<string, string> = {
+      'Nutrition & Diet': 'https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=400&h=200&fit=crop',
+      'Medical Research': 'https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=400&h=200&fit=crop',
+      'Public Health': 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?w=400&h=200&fit=crop',
+      'Clinical Studies': 'https://images.unsplash.com/photo-1559757175-0eb30cd8c063?w=400&h=200&fit=crop',
+      'Disease Prevention': 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=400&h=200&fit=crop',
+      'Mental Health': 'https://images.unsplash.com/photo-1559757175-8a5c71f5e34b?w=400&h=200&fit=crop',
+      'General Health': 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=200&fit=crop'
+    };
+    return placeholders[category] || 'https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=400&h=200&fit=crop';
   };
 
   if (loading) {
@@ -219,11 +287,36 @@ const HealthNewsFeed: React.FC<NewsFeedProps> = ({ maxArticles = 6 }) => {
 
       <div className="news-grid">
         {articles.map((article) => (
-          <article key={article.id} className="news-card">
+          <article 
+            key={article.id} 
+            className="news-card"
+            onClick={() => window.open(article.url, '_blank')}
+          >
+            {/* Image Section */}
+            <div className="news-image">
+              {article.thumbnailUrl ? (
+                <img 
+                  src={article.thumbnailUrl} 
+                  alt={article.title}
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = getPlaceholderImage(article.category);
+                  }}
+                />
+              ) : (
+                <img 
+                  src={getPlaceholderImage(article.category)} 
+                  alt={article.title}
+                />
+              )}
+            </div>
+
             <div className="news-content">
               <div className="news-meta">
                 <span className="news-source">
-                  {getSourceIcon(article.source)} {article.source}
+                  <span className="source-avatar">
+                    {getSourceInitials(article.source)}
+                  </span>
+                  {article.source}
                 </span>
                 <span 
                   className="news-category"
@@ -233,25 +326,23 @@ const HealthNewsFeed: React.FC<NewsFeedProps> = ({ maxArticles = 6 }) => {
                 </span>
                 <span className="news-time">{formatTimeAgo(article.publishedDate)}</span>
               </div>
+              
               <h3 className="news-title">{article.title}</h3>
               <p className="news-summary">{article.summary}</p>
+              
               <div className="news-tags">
-                {article.tags?.map(tag => (
-                  <span key={tag} className="news-tag">{tag}</span>
+                {article.tags?.slice(0, 3).map(tag => (
+                  <span key={tag} className="news-tag">#{tag}</span>
                 ))}
               </div>
+              
               <div className="news-footer">
                 <span className="relevance-score">
                   Relevance: {Math.round((article.relevanceScore || 0) * 100)}%
                 </span>
-                <a 
-                  href={article.url} 
-                  className="read-more-btn"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
+                <span className="read-more-btn">
                   Read Full Article →
-                </a>
+                </span>
               </div>
             </div>
           </article>

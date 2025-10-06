@@ -1,6 +1,6 @@
 // src/components/ImageUploadModal.tsx
 import React, { useState } from 'react';
-import '../VHealthSearch.css';
+import '../styles/VHealthSearch.css';
 
 interface ImageUploadModalProps {
   isOpen: boolean;
