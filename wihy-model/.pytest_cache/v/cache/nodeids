@@ -1,0 +1,14 @@
+[
+  "tests/test_api.py::test_api_basic_functionality",
+  "tests/test_api.py::test_api_endpoints_exist",
+  "tests/test_api.py::test_ask_endpoint_basic",
+  "tests/test_api.py::test_ask_endpoint_empty_query",
+  "tests/test_api.py::test_ask_endpoint_missing_query",
+  "tests/test_api.py::test_ask_endpoint_product_not_found",
+  "tests/test_api.py::test_ask_endpoint_query_variations",
+  "tests/test_api.py::test_health_check",
+  "tests/test_api.py::test_health_check_response_format",
+  "tests/test_api.py::test_predict_endpoint",
+  "tests/test_api.py::test_product_lookup",
+  "tests/test_api.py::test_root_endpoint"
+]
