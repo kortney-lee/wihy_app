@@ -429,16 +429,19 @@ const VHealthSearch: React.FC = () => {
         minWidth: '320px',
         boxShadow: '0 10px 25px rgba(0, 0, 0, 0.2)'
       }}>
-        {/* Spinner */}
-        <div style={{
-          width: '48px',
-          height: '48px',
-          border: '4px solid #e5e7eb',
-          borderTop: '4px solid #3b82f6',
-          borderRadius: '50%',
-          animation: 'spin 1s linear infinite',
-          margin: '0 auto 24px auto'
-        }} />
+      
+        {/* Replace the CSS spinner with your GIF */}
+        <div style={{ margin: '0 auto 24px auto' }}>
+          <img 
+            src="/assets/whatishealthyspinner.gif" 
+            alt="Loading..." 
+            style={{
+              width: '48px',
+              height: '48px',
+              objectFit: 'contain'
+            }}
+          />
+        </div>
         
         {/* Title */}
         <h3 style={{
@@ -477,7 +480,6 @@ const VHealthSearch: React.FC = () => {
           }} />
         </div>
         
-        {/* Progress Text */}
         <p style={{
           margin: 0,
           fontSize: '14px',
