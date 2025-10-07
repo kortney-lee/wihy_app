@@ -51,7 +51,7 @@ h1.search-logo {
   margin: 0 auto 24px auto;
   border: 2px solid transparent;
   border-radius: 24px;
-  box-shadow: 0 8px 24px rgba(15,23,42,.06);
+  box-shadow: 0 8px 24px rgba(15,23,42,.15); /* Change from .06 to .15 for darker shadow */
   background:
     linear-gradient(#fff, #fff) padding-box,
     linear-gradient(90deg, #fbbc05, #34a853, #1a73e8) border-box;
@@ -62,7 +62,8 @@ h1.search-logo {
 .search-input-container:hover,
 .search-input-container:focus-within {
   animation: wiH-border-sweep 2.2s linear infinite;
-  box-shadow: 0 2px 8px rgba(32,33,36,0.28);
+  border-width: 2px;
+  box-shadow: 0 2px 8px rgba(32,33,36,0.4); /* Change from 0.28 to 0.4 for darker hover shadow */
 }
 
 @keyframes wiH-border-sweep {
@@ -147,3 +148,37 @@ h1.search-logo {
 
 .listening { background: #ea4335 !important; }
 .listening svg { fill: #fff !important; }
+
+.search-button {
+  /* ...existing styles... */
+  transition: all 0.3s ease;
+}
+
+/* Red pill - "Analyze Nutrition" (taking the red pill reveals the truth about nutrition) */
+.search-button:first-child:hover {
+  background: linear-gradient(135deg, #dc2626, #991b1b);
+  color: white;
+  box-shadow: 0 8px 20px rgba(220, 38, 38, 0.4);
+  transform: translateY(-2px);
+}
+
+/* Blue pill - "I'm Feeling Healthy" (staying in the comfort zone) */
+.search-button:last-child:hover {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: white;
+  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.4);
+  transform: translateY(-2px);
+}
+
+/* Optional: Add a subtle glow effect */
+.search-button:first-child:hover {
+  box-shadow: 
+    0 8px 20px rgba(220, 38, 38, 0.4),
+    0 0 20px rgba(220, 38, 38, 0.2);
+}
+
+.search-button:last-child:hover {
+  box-shadow: 
+    0 8px 20px rgba(37, 99, 235, 0.4),
+    0 0 20px rgba(37, 99, 235, 0.2);
+}

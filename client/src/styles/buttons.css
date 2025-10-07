@@ -86,3 +86,37 @@
 }
 .back-button:hover { background-color: #e8eaed; }
 .back-button svg { width: 20px; height: 20px; fill: #5f6368; }
+
+/* Add Matrix pill effects to search buttons */
+.search-button:first-child:hover,
+.search-btn:first-child:hover {
+  background: linear-gradient(135deg, #dc2626, #991b1b) !important;
+  color: white !important;
+  border-color: #dc2626 !important;
+  box-shadow: 
+    0 8px 20px rgba(220, 38, 38, 0.4),
+    0 0 20px rgba(220, 38, 38, 0.2) !important;
+  transform: translateY(-2px) !important;
+}
+
+.search-button:last-child:hover,
+.search-btn:last-child:hover {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8) !important;
+  color: white !important;
+  border-color: #033623 !important;
+  box-shadow: 
+    0 8px 20px rgba(37, 99, 235, 0.4),
+    0 0 20px rgba(37, 99, 235, 0.2) !important;
+  transform: translateY(-2px) !important;
+}
+
+/* Override the existing hover styles for Matrix effect */
+.search-actions .search-btn:nth-child(1):hover { 
+  border-color: #dc2626 !important; 
+  color: white !important; 
+}
+
+.search-actions .search-btn:nth-child(2):hover { 
+  border-color: #2563eb !important; 
+  color: white !important; 
+}
