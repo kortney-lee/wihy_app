@@ -3,22 +3,24 @@ import React, { useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import './Spinner.css';
 
-type SpinnerProps = {
+interface SpinnerProps {
   /** Full-screen overlay modal */
   overlay?: boolean;
   /** Bold heading (defaults to “Analyzing with AI…”) */
   title?: string;
   /** Secondary line (defaults to “This may take a few moments…”) */
   subtitle?: string;
-  /** 0–100 for determinate; omit for indeterminate */
-  progress?: number;
-  /** Legacy alias (treated as subtitle if provided) */
-  message?: string;
   /** Prevent closing with Esc (defaults true for blocking tasks) */
   disableEsc?: boolean;
   /** Called if Esc is allowed and user presses it */
   onClose?: () => void;
-};
+  /** 0–100 for determinate; omit for indeterminate */
+  progress?: number;
+  /** Specify spinner type: 'circle' or 'gif' */
+  type?: 'circle' | 'gif';
+  /** Custom GIF source, used if type is 'gif' */
+  gifSrc?: string;
+}
 
 const portalId = 'vh-spinner-portal';
 
@@ -37,13 +39,11 @@ export default function Spinner({
   title = 'Analyzing with AI...',
   subtitle = 'This may take a few moments...',
   progress,
-  message,
   disableEsc = true,
-  onClose
+  onClose,
+  type = 'gif', // Force it to always be GIF
+  gifSrc = '/assets/whatishealthyspinner.gif'
 }: SpinnerProps) {
-  // Preserve legacy "message" prop as subtitle if present
-  const sub = message ?? subtitle;
-
   // Optional: trap/allow ESC when overlayed
   useEffect(() => {
     if (!overlay) return;
@@ -66,7 +66,7 @@ export default function Spinner({
     return (
       <div className="clean-loader" role="status" aria-live="polite">
         <div className="arc-spinner" />
-        {sub && <p style={{ marginTop: 12 }} className="spinner-text">{sub}</p>}
+        {subtitle && <p style={{ marginTop: 12 }} className="spinner-text">{subtitle}</p>}
       </div>
     );
   }
@@ -81,21 +81,30 @@ export default function Spinner({
   const modal = (
     <div className="spinner-overlay" role="dialog" aria-modal="true" aria-labelledby="spinner-title" aria-describedby="spinner-subtitle">
       <div className="spinner-container">
-        <div className="arc-spinner" aria-hidden />
-        <h2 id="spinner-title" className="spinner-title">{title}</h2>
-        {sub && <p id="spinner-subtitle" className="spinner-message">{sub}</p>}
-
-        <div className="spinner-progress">
-          <div className="spinner-track">
-            <div
-              className={`spinner-fill ${clamped === undefined ? 'indeterminate' : ''}`}
-              style={clamped !== undefined ? { width: `${clamped}%` } : undefined}
-            />
-          </div>
-          <div className="spinner-percent">
-            {clamped !== undefined ? `${clamped}% Complete` : 'Working…'}
-          </div>
+        {/* Always show GIF for testing */}
+        <div className="spinner-gif">
+          <img 
+            src="/assets/whatishealthyspinner.gif" 
+            alt="Loading..." 
+            className="spinner-image"
+          />
         </div>
+        <h2 id="spinner-title" className="spinner-title">{title}</h2>
+        {subtitle && <p id="spinner-subtitle" className="spinner-message">{subtitle}</p>}
+
+        {type !== 'gif' && (
+          <div className="spinner-progress">
+            <div className="spinner-track">
+              <div
+                className={`spinner-fill ${clamped === undefined ? 'indeterminate' : ''}`}
+                style={clamped !== undefined ? { width: `${clamped}%` } : undefined}
+              />
+            </div>
+            <div className="spinner-percent">
+              {clamped !== undefined ? `${clamped}% Complete` : 'Working…'}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
