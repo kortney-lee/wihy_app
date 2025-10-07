@@ -1,15 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import { fetchNewsFeed, getArticlesByCategory, NewsArticle } from '../services/newsService';
+import { useNavigate } from 'react-router-dom';
 import './HealthNewsFeed.css';
 
+// Just update the props interface to receive the functions from the parent
 interface NewsFeedProps {
   maxArticles?: number;
+  onAnalyzeArticle?: (query: string) => void;
+  setSearchQuery?: (query: string) => void;
+  triggerSearch?: () => void;
 }
 
-const HealthNewsFeed: React.FC<NewsFeedProps> = ({ maxArticles = 6 }) => {
+const HealthNewsFeed: React.FC<NewsFeedProps> = ({ 
+  maxArticles = 6, 
+  onAnalyzeArticle,
+  setSearchQuery,
+  triggerSearch
+}) => {
   const [articles, setArticles] = useState<NewsArticle[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState('all');
+  // Add loading state for individual articles
+  const [analyzingArticle, setAnalyzingArticle] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   const categories = [
     { id: 'all', label: 'All Health News' },
@@ -252,6 +265,39 @@ const HealthNewsFeed: React.FC<NewsFeedProps> = ({ maxArticles = 6 }) => {
     return placeholders[category] || 'https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=400&h=200&fit=crop';
   };
 
+  // Update the handleAnalyzeWithWihy function to use the parent's search functionality:
+  const handleAnalyzeWithWihy = async (article: NewsArticle, event: React.MouseEvent) => {
+    event.stopPropagation();
+    
+    const analysisQuery = `Analyze this health article and provide a comprehensive review with scoring:
+
+Article Title: "${article.title}"
+Summary: ${article.summary}
+Category: ${article.category}
+Source: ${article.source}
+
+Please provide:
+1. A detailed explanation of the health implications
+2. Key takeaways and actionable insights  
+3. Scientific accuracy assessment (1-10 score)
+4. Practical applicability rating (1-10 score)
+5. Overall credibility score (1-10 score)
+6. How this relates to overall wellness and health optimization
+7. Any potential concerns or limitations of the research
+8. Recommendations for readers based on this information
+
+Format the response with clear sections and scoring breakdown.`;
+
+    // Use the parent's search functionality
+    if (setSearchQuery && triggerSearch) {
+      setSearchQuery(analysisQuery);
+      triggerSearch();
+    } else if (onAnalyzeArticle) {
+      // Fallback to callback if provided
+      onAnalyzeArticle(analysisQuery);
+    }
+  };
+
   if (loading) {
     return (
       <div className="news-feed-container">
@@ -259,7 +305,16 @@ const HealthNewsFeed: React.FC<NewsFeedProps> = ({ maxArticles = 6 }) => {
           <h2>Latest Health News</h2>
         </div>
         <div className="loading-news">
-          <div className="loading-spinner"></div>
+          <img 
+            src="/assets/whatishealthyspinner.gif" 
+            alt="Loading..." 
+            style={{
+              width: '48px',
+              height: '48px',
+              objectFit: 'contain',
+              marginBottom: '16px'  // Add this line for spacing
+            }}
+          />
           <p>Loading latest health news...</p>
         </div>
       </div>
@@ -268,11 +323,6 @@ const HealthNewsFeed: React.FC<NewsFeedProps> = ({ maxArticles = 6 }) => {
 
   return (
     <div className="news-feed-container">
-      <div className="news-feed-header">
-        <h2>Latest Health News</h2>
-        <p>Stay updated with the latest health and wellness news from trusted sources</p>
-      </div>
-
       <div className="news-categories">
         {categories.map(category => (
           <button
@@ -290,6 +340,7 @@ const HealthNewsFeed: React.FC<NewsFeedProps> = ({ maxArticles = 6 }) => {
           <article 
             key={article.id} 
             className="news-card"
+            data-category={article.category}  // Add this line
             onClick={() => window.open(article.url, '_blank')}
           >
             {/* Image Section */}
@@ -312,12 +363,70 @@ const HealthNewsFeed: React.FC<NewsFeedProps> = ({ maxArticles = 6 }) => {
 
             <div className="news-content">
               <div className="news-meta">
+                {/* Replace this source avatar section: */}
+                {/* 
                 <span className="news-source">
                   <span className="source-avatar">
                     {getSourceInitials(article.source)}
                   </span>
                   {article.source}
                 </span>
+                */}
+                
+                {/* With this analyze button: */}
+                <button 
+                  className="analyze-wihy-btn"
+                  onClick={(e) => handleAnalyzeWithWihy(article, e)}
+                  disabled={analyzingArticle === article.id}
+                  style={{
+                    background: analyzingArticle === article.id 
+                      ? 'linear-gradient(#f3f4f6, #f3f4f6)' 
+                      : 'linear-gradient(#fff, #fff) padding-box, linear-gradient(90deg, #fbbc05, #34a853, #1a73e8) border-box',
+                    border: '2px solid transparent',
+                    borderRadius: '16px',
+                    padding: '6px 12px',
+                    fontSize: '11px',
+                    fontWeight: '600',
+                    cursor: analyzingArticle === article.id ? 'not-allowed' : 'pointer',
+                    transition: 'all 0.2s ease',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    color: '#1f2937',
+                    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+                    backgroundSize: '100% 100%, 200% 100%',
+                    opacity: analyzingArticle === article.id ? 0.6 : 1
+                  }}
+                  onMouseOver={(e) => {
+                    if (analyzingArticle !== article.id) {
+                      e.currentTarget.style.animation = 'wiH-border-sweep 2.2s linear infinite';
+                      e.currentTarget.style.transform = 'translateY(-1px)';
+                      e.currentTarget.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.15)';
+                    }
+                  }}
+                  onMouseOut={(e) => {
+                    e.currentTarget.style.animation = 'none';
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.1)';
+                  }}
+                >
+                  {analyzingArticle === article.id ? (
+                    <>
+                      <div style={{
+                        width: '12px',
+                        height: '12px',
+                        border: '2px solid #1f2937',
+                        borderTop: '2px solid transparent',
+                        borderRadius: '50%',
+                        animation: 'spin 1s linear infinite'
+                      }} />
+                      Analyzing...
+                    </>
+                  ) : (
+                    <>🧠 Analyze with WIHY</>
+                  )}
+                </button>
+                
                 <span 
                   className="news-category"
                   style={{ backgroundColor: getCategoryColor(article.category) }}

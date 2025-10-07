@@ -102,10 +102,10 @@
 /* News Card */
 .news-card {
   background: white;
-  border-radius: 16px;
+  border-radius: 28px;  /* Very rounded like the example */
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
-  transition: all 0.3s ease;
+  overflow: hidden;     /* Ensure content respects the rounded corners */
+  transition: transform 0.2s ease, box-shadow 0.3s ease;
   border: 1px solid #f3f4f6;
   cursor: pointer;
   display: flex;
@@ -114,9 +114,42 @@
 }
 
 .news-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  border-color: #e2e8f0;
+  transform: translateY(-4px);
+  cursor: pointer;
+}
+
+/* Category-specific hover shadows */
+.news-card[data-category="Nutrition & Diet"]:hover {
+  box-shadow: 0 8px 25px rgba(76, 175, 80, 0.3);
+}
+
+.news-card[data-category="Medical Research"]:hover {
+  box-shadow: 0 8px 25px rgba(33, 150, 243, 0.3);
+}
+
+.news-card[data-category="Public Health"]:hover {
+  box-shadow: 0 8px 25px rgba(255, 152, 0, 0.3);
+}
+
+.news-card[data-category="Clinical Studies"]:hover {
+  box-shadow: 0 8px 25px rgba(156, 39, 176, 0.3);
+}
+
+.news-card[data-category="Disease Prevention"]:hover {
+  box-shadow: 0 8px 25px rgba(244, 67, 54, 0.3);
+}
+
+.news-card[data-category="Mental Health"]:hover {
+  box-shadow: 0 8px 25px rgba(33, 150, 243, 0.3);  /* Blue shadow */
+}
+
+.news-card[data-category="General Health"]:hover {
+  box-shadow: 0 8px 25px rgba(255, 193, 7, 0.3);   /* Yellow shadow */
+}
+
+/* Default fallback hover shadow */
+.news-card:hover {
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
 }
 
 /* News Image */
@@ -133,6 +166,7 @@
   height: 100%;
   object-fit: cover;
   transition: transform 0.3s ease;
+  border-radius: 24px 24px 0 0;  /* Round only top corners of image */
 }
 
 .news-card:hover .news-image img {
@@ -195,7 +229,7 @@
 .news-category {
   color: white;
   padding: 4px 10px;
-  border-radius: 12px;
+  border-radius: 16px;  /* More pill-shaped */
   font-weight: 600;
   font-size: 10px;
   text-transform: uppercase;
@@ -276,7 +310,7 @@
 
 .news-card {
   background: white;
-  border-radius: 12px;
+  border-radius: 28px;  /* Very rounded like the example */
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   overflow: hidden;
   transition: all 0.3s ease;

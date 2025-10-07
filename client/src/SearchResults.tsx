@@ -381,8 +381,6 @@ const SearchResults: React.FC<SearchResultsProps> = ({
       <div className="results-container">
         {hasValidResults ? (
           <>
-            <h1 className="results-header">Search Results for: "{query}"</h1>
-            
             <div className="results-content">
               {/* Main content */}
               <div className="health-info-card">
