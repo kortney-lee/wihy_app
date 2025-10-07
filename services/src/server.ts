@@ -10,6 +10,7 @@ import { initializeDatabase } from './config/database';
 import nutritionRoutes from './routes/nutritionRoutes';
 import openFoodFactsRoutes from './routes/openFoodFactsRoutes'; // ADD THIS LINE ONLY
 import { searchFoodInDatabase } from './controllers/foodController';
+import rssRoutes from './routes/rssRoutes';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -54,6 +55,9 @@ async function startServer() {
       console.log('🍎 Mounting OpenFoodFacts routes at /api/openfoodfacts');
       app.use('/api/openfoodfacts', openFoodFactsRoutes);
       console.log('✅ OpenFoodFacts routes mounted successfully');
+      console.log('📰 Mounting RSS routes at /api/news');
+      app.use('/api/news', rssRoutes);
+      console.log('✅ RSS routes mounted successfully');
       
       console.log('All routes registered');
       
@@ -66,6 +70,7 @@ async function startServer() {
         console.log(`   GET  http://localhost:${PORT}/api/search/food?q=broccoli`); // This should now show
         console.log(`   POST http://localhost:${PORT}/api/analyze-image`);
         console.log(`   GET  http://localhost:${PORT}/api/openfoodfacts/search?q=apple`); // ADD THIS LINE ONLY
+        console.log(`   GET  http://localhost:${PORT}/api/news/articles`);
         console.log('');
         console.log(' Test the food route:');
         console.log(`   http://localhost:${PORT}/api/search/food?q=apple`);

@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import nutritionRoutes from './routes/nutritionRoutes';
 import openFoodFactsRoutes from './routes/openFoodFactsRoutes'; // Add this
 import { initializeDatabase } from './config/database';
+import rssRoutes from './routes/rssRoutes';
 
 // Load environment
 dotenv.config();
@@ -48,6 +49,7 @@ async function initialize() {
       console.log('About to mount routes at /api');
       app.use('/api', nutritionRoutes);
       app.use('/api/openfoodfacts', openFoodFactsRoutes); // Add this
+      app.use('/api/news', rssRoutes);
       console.log('All routes mounted successfully');
       
       // Start server
@@ -59,6 +61,7 @@ async function initialize() {
         console.log(`GET  http://localhost:${PORT}/api/openfoodfacts/barcode/:barcode`);
         console.log(`GET  http://localhost:${PORT}/api/openfoodfacts/search`);
         console.log(`GET  http://localhost:${PORT}/api/openfoodfacts/nutrition/:barcode`);
+        console.log(`GET  http://localhost:${PORT}/api/news/articles`);
       });
       
       console.log('VHealth Services started successfully');
