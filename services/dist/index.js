@@ -72,89 +72,73 @@ async function initialize() {
         console.log('✅ Nutrition routes mounted successfully');
 
         // Create RSS routes
-        console.log('📰 Loading RSS routes from rssRoutes.js...');
+        console.log('📰 Loading RSS routes...');
         try {
-            console.log('🔍 Attempting to require rssRoutes...');
-            const rssRoutes = require('./routes/rssRoutes');
-            console.log('🔍 RSS routes loaded successfully, mounting...');
+            const { router: rssRoutes, rssController } = require('./routes/rssRoutes');
             app.use('/api/news', rssRoutes);
-            console.log('✅ RSS routes from rssRoutes.js mounted successfully');
+            console.log('✅ RSS routes mounted successfully');
+            
+            // Initialize RSS Controller AFTER routes are mounted
+            if (rssController) {
+                console.log('📰 Initializing RSS Controller...');
+                
+                // Initialize in background, don't block server startup
+                rssController.initialize()
+                    .then(() => {
+                        console.log('✅ RSS Controller initialized successfully');
+                    })
+                    .catch((error) => {
+                        console.error('❌ RSS Controller initialization failed:', error);
+                        console.error('📰 RSS routes will respond with initialization errors until fixed');
+                    });
+            }
+            
+            console.log('📰 RSS Endpoints:');
+            console.log(`   GET  http://localhost:${PORT}/api/news/debug/health`);
+            console.log(`   GET  http://localhost:${PORT}/api/news/feeds`);
+            console.log(`   GET  http://localhost:${PORT}/api/news/articles`);
+            console.log(`   POST http://localhost:${PORT}/api/news/seed`);
+            console.log(`   POST http://localhost:${PORT}/api/news/fetch`);
+            
         } catch (error) {
-            console.error('❌ Failed to load rssRoutes.js:', error.message);
-            console.error('❌ Error stack:', error.stack);
-            console.error('❌ Error details:', error);
+            console.error('❌ Failed to load RSS routes:', error);
             
-            // Keep your fallback routes as backup
-            console.log('📰 Creating fallback RSS routes...');
-            
-            // Fallback RSS routes with sample data
-            app.get('/api/news/feeds', (req, res) => {
-                console.log('📰 GET /api/news/feeds called (fallback)');
-                res.json({
-                    success: true,
-                    feeds: [],
-                    message: 'RSS controller not available'
-                });
-            });
-            
-            app.get('/api/news/articles', (req, res) => {
-                console.log('📰 GET /api/news/articles called (fallback)');
-                const sampleArticles = [
-                    {
-                        id: 1,
-                        title: "Mediterranean Diet Study Shows Heart Benefits",
-                        description: "Recent research demonstrates significant cardiovascular improvements with Mediterranean diet adherence.",
-                        link: "https://www.nih.gov/news-events/mediterranean-diet-2024",
-                        created_at: new Date().toISOString(),
-                        pub_date: new Date().toISOString(),
-                        author: "NIH Research Team",
-                        feed: { title: "NIH Health News", category: "nutrition" }
-                    },
-                    {
-                        id: 2,
-                        title: "Exercise and Mental Health Connection Explored",
-                        description: "New research demonstrates strong links between regular exercise and improved mental wellbeing.",
-                        link: "https://www.cdc.gov/mental-health-exercise-2024",
-                        created_at: new Date(Date.now() - 86400000).toISOString(),
-                        pub_date: new Date(Date.now() - 86400000).toISOString(),
-                        author: "CDC Health Team",
-                        feed: { title: "CDC Health Updates", category: "mental-health" }
-                    },
-                    {
-                        id: 3,
-                        title: "Sleep Quality Critical for Immune Function",
-                        description: "Studies demonstrate that quality sleep is crucial for maintaining a strong immune system.",
-                        link: "https://www.nih.gov/sleep-immune-system-2024",
-                        created_at: new Date(Date.now() - 172800000).toISOString(),
-                        pub_date: new Date(Date.now() - 172800000).toISOString(),
-                        author: "Sleep Research Institute",
-                        feed: { title: "Sleep Health News", category: "health" }
-                    }
-                ];
-                res.json({
-                    success: true,
-                    articles: sampleArticles,
-                    count: sampleArticles.length,
-                    message: 'Sample health news data (RSS controller not available)'
-                });
-            });
-            
-            app.post('/api/news/fetch', (req, res) => {
-                console.log('📰 POST /api/news/fetch called (fallback)');
+            // Create minimal fallback for health check
+            app.get('/api/news/debug/health', (req, res) => {
                 res.json({
                     success: false,
-                    message: 'RSS controller not available - cannot fetch fresh data'
+                    error: 'RSS routes failed to load',
+                    details: error.message,
+                    timestamp: new Date().toISOString()
                 });
             });
+        }
+
+        // ADD DOCUMENTATION ROUTES HERE
+        console.log('📚 Loading API documentation routes...');
+        try {
+            const docsRoutes = require('./routes/docsRoutes');
+            app.use('/api/service/docs', docsRoutes); // Changed from /api/news/docs
+            console.log('✅ API documentation routes mounted successfully');
+            console.log(`📖 Interactive docs available at: http://localhost:${PORT}/api/service/docs`);
+            console.log(`📋 OpenAPI spec available at: http://localhost:${PORT}/api/service/docs/openapi.json`);
+        } catch (docsError) {
+            console.warn('⚠️ Failed to load documentation routes:', docsError.message);
             
-            app.post('/api/news/seed', (req, res) => {
-                console.log('📰 POST /api/news/seed called (fallback)');
+            // Minimal fallback
+            app.get('/api/service/docs', (req, res) => {
                 res.json({
                     success: false,
-                    message: 'RSS controller not available - cannot seed data. Check database connection.'
+                    message: 'Interactive documentation not available',
+                    available_endpoints: [
+                        'GET /api/news/articles - Get RSS articles',
+                        'GET /api/news/feeds - Get RSS feeds',
+                        'POST /api/news/fetch - Fetch latest articles',
+                        'POST /api/news/seed - Add sample feeds',
+                        'GET /api/news/debug/health - Health check'
+                    ]
                 });
             });
-            console.log('✅ RSS fallback routes created with sample data');
         }
 
         // Start server
@@ -174,9 +158,15 @@ async function initialize() {
             console.log(`   POST http://localhost:${PORT}/api/news/fetch (fetch fresh RSS data)`);
             console.log(`   POST http://localhost:${PORT}/api/news/seed (initial setup)`);
             console.log('');
+            console.log('📚 Documentation Routes:');
+            console.log(`   GET  http://localhost:${PORT}/api/service/docs (Interactive Swagger UI)`);
+            console.log(`   GET  http://localhost:${PORT}/api/service/docs/openapi.json (OpenAPI spec)`);
+            console.log(`   GET  http://localhost:${PORT}/api/service/docs/endpoints (Endpoint list)`);
+            console.log('');
             console.log('🧪 Test commands:');
             console.log(`   curl "http://localhost:${PORT}/api/health"`);
             console.log(`   curl "http://localhost:${PORT}/api/news/articles"`);
+            console.log(`   curl "http://localhost:${PORT}/api/service/docs/endpoints"`);
             console.log(`   curl -X POST "http://localhost:${PORT}/api/news/seed"`);
             console.log(`   curl -X POST "http://localhost:${PORT}/api/news/fetch"`);
             console.log('');
@@ -196,6 +186,13 @@ async function initialize() {
                     console.log(`✅ News articles test: ${res.statusCode}`);
                 }).on('error', (err) => {
                     console.error(`❌ News articles test failed: ${err.message}`);
+                });
+
+                // ADD DOCUMENTATION TEST
+                http.get(`http://localhost:${PORT}/api/service/docs/endpoints`, (res) => {
+                    console.log(`✅ API documentation test: ${res.statusCode}`);
+                }).on('error', (err) => {
+                    console.error(`❌ API documentation test failed: ${err.message}`);
                 });
             }, 1000);
         });
