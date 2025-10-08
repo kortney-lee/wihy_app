@@ -20,7 +20,7 @@ class RSSPollingService {
     });
     
     try {
-      // Parse the RSS feed
+      // Parse the RSS feed using RSSFeedParser
       console.log(`📡 Calling RSS parser for feed ${feedData.rss_feeds_id}...`);
       const parseResult = await this.rssParser.fetchAndParseRSSFeed(feedData.feed_url, feedData.rss_feeds_id);
       
@@ -45,26 +45,32 @@ class RSSPollingService {
           link: sampleArticle.link?.substring(0, 50) + '...'
         });
         
-        // **CRITICAL**: Save articles to database
+        // **CRITICAL**: Save articles to database using RSSDatabase
         console.log(`💾 Saving ${parseResult.articles.length} articles to database for feed ${feedData.rss_feeds_id}...`);
+        
+        // FIXED: Map the parseResult to the format RSSDatabase.updateFeedWithArticles expects
         const updateData = {
           articles: parseResult.articles,
           feedTitle: parseResult.feedTitle,
           feedDescription: parseResult.feedDescription,
           feedLink: parseResult.feedLink,
-          feedImage: parseResult.feedImage,
-          feedThumbnail: parseResult.feedThumbnail,
+          feedImage: parseResult.feedImage,        // This maps to image_url in database
+          feedThumbnail: parseResult.feedThumbnail, // This maps to thumbnail_url in database
           etag: parseResult.etag,
           lastModified: parseResult.lastModified,
           status: parseResult.status || 200
         };
         
-        console.log(`💾 Update data summary:`, {
+        console.log(`💾 Update data summary for feed ${feedData.rss_feeds_id}:`, {
           articlesCount: updateData.articles.length,
           feedTitle: updateData.feedTitle || 'N/A',
           feedImage: updateData.feedImage ? 'YES' : 'NO',
           feedThumbnail: updateData.feedThumbnail ? 'YES' : 'NO',
-          status: updateData.status
+          status: updateData.status,
+          sampleImageUrls: updateData.articles.slice(0, 2).map(a => ({
+            media_thumb_url: a.media_thumb_url || 'NONE',
+            media_url: a.media_url || 'NONE'
+          }))
         });
         
         const updateResult = await this.rssDatabase.updateFeedWithArticles(feedData.rss_feeds_id, updateData);
@@ -137,7 +143,7 @@ class RSSPollingService {
     }
   }
 
-  // Add method to poll all active feeds
+  // FIXED: Use RSSDatabase method instead of hardcoded parameters
   async pollAllActiveFeeds(options = {}) {
     const { 
       maxConcurrent = 3, 
@@ -149,15 +155,13 @@ class RSSPollingService {
     console.log(`📋 Polling options:`, { maxConcurrent, delayBetween, maxFeeds });
     
     try {
-      // Get active feeds from database
-      const feeds = await this.rssDatabase.getFeeds({ 
-        limit: maxFeeds, 
-        activeOnly: true 
-      });
+      // FIXED: Use RSSDatabase method to get active feeds
+      const feeds = await this.rssDatabase.getActiveFeedsForPolling();
+      const limitedFeeds = feeds.slice(0, maxFeeds); // Apply maxFeeds limit
       
-      console.log(`📊 Found ${feeds.length} active feeds to poll`);
+      console.log(`📊 Found ${feeds.length} active feeds, processing ${limitedFeeds.length}`);
       
-      if (feeds.length === 0) {
+      if (limitedFeeds.length === 0) {
         console.log(`⚠️ No active feeds found to poll`);
         return {
           total: 0,
@@ -172,12 +176,12 @@ class RSSPollingService {
       let successfulCount = 0;
       let failedCount = 0;
       
-      for (let i = 0; i < feeds.length; i += maxConcurrent) {
-        const batch = feeds.slice(i, i + maxConcurrent);
+      for (let i = 0; i < limitedFeeds.length; i += maxConcurrent) {
+        const batch = limitedFeeds.slice(i, i + maxConcurrent);
         const batchNum = Math.floor(i / maxConcurrent) + 1;
-        const totalBatches = Math.ceil(feeds.length / maxConcurrent);
+        const totalBatches = Math.ceil(limitedFeeds.length / maxConcurrent);
         
-        console.log(`📦 Processing batch ${batchNum}/${totalBatches}: feeds ${i+1}-${Math.min(i+maxConcurrent, feeds.length)}`);
+        console.log(`📦 Processing batch ${batchNum}/${totalBatches}: feeds ${i+1}-${Math.min(i+maxConcurrent, limitedFeeds.length)}`);
         console.log(`📦 Batch feeds:`, batch.map(f => `${f.rss_feeds_id}:${f.feed_title?.substring(0, 30) || 'Unknown'}`));
         
         const batchPromises = batch.map(feed => this.pollFeed(feed));
@@ -214,14 +218,14 @@ class RSSPollingService {
         });
         
         // Delay between batches to be respectful to servers
-        if (i + maxConcurrent < feeds.length && delayBetween > 0) {
+        if (i + maxConcurrent < limitedFeeds.length && delayBetween > 0) {
           console.log(`⏳ Waiting ${delayBetween}ms before next batch...`);
           await new Promise(resolve => setTimeout(resolve, delayBetween));
         }
       }
       
       const summary = {
-        total: feeds.length,
+        total: limitedFeeds.length,
         successful: successfulCount,
         failed: failedCount,
         results: results,

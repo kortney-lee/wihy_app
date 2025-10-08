@@ -13,31 +13,35 @@ export interface NewsArticle {
   publishedDate: string;
   relevanceScore: number;
   tags: string[];
-  // ADDED: New image and media fields
+  // Enhanced RSS fields
   thumbnailUrl?: string;
   imageUrl?: string;
   mediaType?: string;
   mediaDescription?: string;
-  // ADDED: Enhanced content fields
   author?: string;
   fullContent?: string;
   wordCount?: number;
   readingTime?: number;
-  // ADDED: Quality indicators
   hasMedia: boolean;
   hasAuthor: boolean;
   contentLength?: number;
-  // ADDED: Source metadata
   feedTitle?: string;
   feedImageUrl?: string;
   feedThumbnailUrl?: string;
-  // ADDED: Additional metadata
   guid?: string;
   commentsUrl?: string;
   language?: string;
   rights?: string;
   extractedAt?: string;
   lastModified?: string;
+  // RSS API enhanced fields
+  timeAgo?: string;
+  isRecent?: boolean;
+  contentQuality?: 'low' | 'medium' | 'high';
+  completeness?: 'minimal' | 'partial' | 'complete';
+  country?: string;
+  feedName?: string;
+  feedId?: number;
 }
 
 export interface NewsFeedResponse {
@@ -47,67 +51,94 @@ export interface NewsFeedResponse {
   categories?: Record<string, NewsArticle[]>;
   lastUpdated?: string;
   count?: number;
+  filtersApplied?: {
+    category?: string | null;
+    country?: string | null;
+    feed_id?: string | null;
+    limit?: number;
+  };
 }
 
-// UPDATED: Backend API response types with all new fields
-interface BackendArticle {
-  // Feed metadata
-  feed_id?: number;
-  feed_title?: string;
-  feed_url?: string;
-  category?: string;
-  country_code?: string;
-  feed_image_url?: string;
-  feed_thumbnail_url?: string;
-  
-  // Article content
-  title?: string;
-  description?: string;
-  summary?: string;
-  link?: string;
+// RSS API response types
+interface RSSArticleResponse {
+  id: number;
+  title: string;
+  description: string;
+  link: string;
+  published_date: string;
   author?: string;
-  pubDate?: string;
-  guid?: string;
-  article_category?: string;
-  tags?: string;
-  source?: string;
-  source_url?: string;
-  
-  // Media content
+  category?: string;
+  country?: string;
+  feed_name: string;
+  feed_id: number;
+  time_ago: string;
+  reading_time: number;
+  word_count: number;
+  is_recent: boolean;
+  content_quality: 'low' | 'medium' | 'high';
+  completeness: 'minimal' | 'partial' | 'complete';
+  domain: string;
+  extracted_at: string;
+  // Additional possible fields
   media_thumb_url?: string;
   media_url?: string;
   media_type?: string;
   media_description?: string;
-  
-  // Enhanced content
   content_encoded?: string;
-  extracted_at?: string;
-  word_count?: string;
-  reading_time?: string;
-  
-  // Quality indicators
-  has_media?: string | boolean;
-  has_author?: string | boolean;
-  has_content?: string | boolean;
-  content_length?: string;
-  
-  // Additional metadata
+  guid?: string;
   comments_url?: string;
   language?: string;
   rights?: string;
   last_modified?: string;
-  last_checked?: string;
-  updated_at?: string;
-  feed_format?: string;
-  raw_item_keys?: string[];
+  has_media?: boolean;
+  has_author?: boolean;
+  content_length?: number;
 }
 
-interface BackendArticlesResponse {
+interface RSSResponse {
   success: boolean;
-  message?: string;
-  articles: BackendArticle[];
+  articles: RSSArticleResponse[];
   count: number;
-  debug?: any;
+  filters_applied: {
+    category: string | null;
+    country: string | null;
+    feed_id: string | null;
+    limit: number;
+  };
+  message?: string;
+}
+
+interface RSSHealthResponse {
+  success: boolean;
+  message: string;
+  status: {
+    controller_created: boolean;
+    database_available: boolean;
+    parser_available: boolean;
+    polling_available: boolean;
+    is_initialized: boolean;
+    initialization_error: string | null;
+    database_connection?: string;
+    timestamp: string;
+  };
+}
+
+interface RSSCategoriesResponse {
+  success: boolean;
+  categories: string[];
+  countries: string[];
+}
+
+interface RSSPollingResponse {
+  success: boolean;
+  message: string;
+  results: {
+    total: number;
+    successful: number;
+    failed: number;
+    articles_fetched: number;
+    duration: string;
+  };
 }
 
 export const TRUSTED_DOMAINS: Record<string, number> = {
@@ -131,7 +162,7 @@ export const TRUSTED_DOMAINS: Record<string, number> = {
   'cochranelibrary.com': 1,
   'pubmed.ncbi.nlm.nih.gov': 1,
   'medlineplus.gov': 1,
-  'livemint.com': 0.8, // ADDED: LiveMint as trusted source
+  'livemint.com': 0.8,
   'npr.org': 0.9,
   'reuters.com': 0.9,
   'cnn.com': 0.8,
@@ -158,252 +189,299 @@ export const NEWS_CATEGORIES = {
   NATURE: 'nature'
 };
 
-// UPDATED: Enhanced article conversion with all new fields
+// Add simple cache to prevent duplicate calls
+let newsCache: { data: NewsFeedResponse | null; timestamp: number } = {
+  data: null,
+  timestamp: 0
+};
+
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
+// Main function to fetch RSS articles
 export const fetchNewsFeed = async (categories?: string[], limit?: number): Promise<NewsFeedResponse> => {
   try {
-    console.log('🔍 Fetching health news from backend API...', { categories, limit });
+    // Check cache first to prevent duplicate calls
+    const now = Date.now();
+    const cacheKey = `${categories?.join(',') || 'all'}_${limit || 100}`;
     
-    const params: any = {
-      limit: limit || 50,
-      flat: 'true'
-    };
-    
-    if (categories && categories.length > 0 && categories[0] !== 'all') {
-      params.category = categories[0];
+    if (newsCache.data && 
+        newsCache.data.articles && 
+        newsCache.data.articles.length >= (limit || 100) &&
+        (now - newsCache.timestamp) < CACHE_DURATION) {
+      console.log('📦 Using cached RSS data');
+      return newsCache.data;
     }
     
-    console.log('📡 Making request to:', `${API_URL}/news/articles`, 'with params:', params);
+    console.log('🔍 Fetching RSS articles...', { categories, limit });
     
-    const response = await axios.get<BackendArticlesResponse>(`${API_URL}/news/articles`, {
+    // Only make ONE API call
+    const params: any = {
+      limit: limit || 100,
+      flat: true,
+      category: 'health',
+      country: 'US',
+      feed_id: 276
+    };
+    
+    // Override category if specified
+    if (categories && categories.length > 0 && categories[0] !== 'all') {
+      const mappedCategory = mapFrontendToBackendCategory(categories[0]);
+      if (mappedCategory) {
+        params.category = mappedCategory;
+      }
+    }
+    
+    console.log('📡 Making RSS API request:', `${API_URL}/news/articles`, 'with params:', params);
+    
+    const response = await axios.get<RSSResponse>(`${API_URL}/news/articles`, {
       params,
       timeout: 10000
     });
     
     const data = response.data;
     
-    console.log('✅ Backend API response:', {
+    console.log('✅ RSS API response:', {
       success: data.success,
       articleCount: data.articles?.length || 0,
       count: data.count,
-      message: data.message,
-      debug: data.debug
+      filtersApplied: data.filters_applied
     });
-    
+
     if (!data.success) {
-      console.warn('⚠️ Backend returned success=false:', data.message);
+      console.warn('⚠️ RSS API returned success=false, using fallback');
+      return await getFallbackNews();
     }
-    
-    // ENHANCED: Convert backend article format to frontend format with all new fields
+
+    // Convert RSS articles to NewsArticle format
     const articles: NewsArticle[] = (data.articles || [])
       .filter(article => article.title && article.title.trim() !== '')
-      .map((article: BackendArticle, index: number) => {
+      .map((article: RSSArticleResponse, index: number) => {
         
-        // Parse boolean fields
-        const hasMedia = parseBoolean(article.has_media) || !!(article.media_thumb_url || article.media_url);
-        const hasAuthor = parseBoolean(article.has_author) || !!(article.author && article.author.trim());
-        const hasContent = parseBoolean(article.has_content) || !!(article.content_encoded && article.content_encoded.trim());
+        // Enhanced image URL extraction with better validation
+        const extractValidImageUrl = (url: string | undefined): string => {
+          if (!url) return '';
+          const trimmed = url.trim();
+          if (trimmed === 'null' || trimmed === 'undefined' || trimmed === '') return '';
+          if (trimmed.startsWith('http') || trimmed.startsWith('//')) {
+            // Validate it's actually an image URL
+            const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg'];
+            const hasImageExtension = imageExtensions.some(ext => 
+              trimmed.toLowerCase().includes(ext)
+            );
+            // Accept if it has image extension or contains image-related path
+            if (hasImageExtension || trimmed.includes('/image') || trimmed.includes('/photo')) {
+              return trimmed;
+            }
+          }
+          return '';
+        };
         
-        // Choose best available image
-        const thumbnailUrl = chooseBestImage(
-          article.media_thumb_url,
-          article.media_url,
-          article.feed_thumbnail_url,
-          article.feed_image_url
-        );
+        const thumbnailUrl = extractValidImageUrl(article.media_thumb_url);
+        const imageUrl = extractValidImageUrl(article.media_url);
         
-        const imageUrl = chooseBestImage(
-          article.media_url,
-          article.media_thumb_url,
-          article.feed_image_url,
-          article.feed_thumbnail_url
-        );
+        // Better summary handling - ensure we have actual content
+        let summary = article.description || article.content_encoded || '';
+        
+        // Clean up HTML tags and decode entities if present
+        summary = summary.replace(/<[^>]*>/g, '').trim();
+        summary = summary.replace(/&[^;]+;/g, ' ').trim();
+        
+        // If still empty, create a meaningful fallback
+        if (!summary || summary.length < 10) {
+          summary = `Read about ${article.title} from ${article.feed_name}`;
+        }
+        
+        const cleanSummary = summary.length > 200 ? summary.substring(0, 200) + '...' : summary;
         
         return {
-          id: article.guid || `${article.feed_id}_${index}` || `article_${Date.now()}_${index}`,
+          id: article.id?.toString() || article.guid || `rss_${Date.now()}_${index}`,
           title: article.title || 'No title',
-          summary: article.description || article.summary || 'No summary available',
+          summary: cleanSummary,
           url: article.link || '#',
-          source: article.feed_title || article.source || article.author || 'Unknown Source',
-          domain: extractDomain(article.link || ''),
-          category: article.category || article.article_category || 'general',
-          publishedDate: article.pubDate || article.extracted_at || new Date().toISOString(),
-          relevanceScore: calculateRelevanceScore(article.title, article.description || article.summary),
-          tags: extractTags(article.title, article.description || article.summary, article.tags),
+          source: article.feed_name || 'Unknown Source',
+          domain: article.domain || extractDomain(article.link || ''),
+          category: mapBackendCategory(article.category),
+          publishedDate: article.published_date || article.extracted_at || new Date().toISOString(),
+          relevanceScore: calculateRelevanceScore(article.title, article.description),
+          tags: extractTags(article.title, article.description),
           
-          // ADDED: Image and media fields
+          // RSS enhanced fields
           thumbnailUrl,
           imageUrl,
-          mediaType: article.media_type || 'image',
+          mediaType: article.media_type || '',
           mediaDescription: article.media_description || '',
-          
-          // ADDED: Enhanced content fields
           author: article.author || '',
           fullContent: article.content_encoded || '',
-          wordCount: parseInt(article.word_count || '0') || 0,
-          readingTime: parseInt(article.reading_time || '0') || 0,
-          
-          // ADDED: Quality indicators
-          hasMedia,
-          hasAuthor,
-          contentLength: parseInt(article.content_length || '0') || 0,
-          
-          // ADDED: Source metadata
-          feedTitle: article.feed_title || '',
-          feedImageUrl: article.feed_image_url || '',
-          feedThumbnailUrl: article.feed_thumbnail_url || '',
-          
-          // ADDED: Additional metadata
+          wordCount: article.word_count || 0,
+          readingTime: article.reading_time || Math.ceil((article.word_count || 200) / 200),
+          hasMedia: !!(thumbnailUrl || imageUrl),
+          hasAuthor: !!(article.author && article.author.trim()),
+          contentLength: article.content_length || 0,
+          feedTitle: article.feed_name || '',
           guid: article.guid || '',
           commentsUrl: article.comments_url || '',
           language: article.language || '',
           rights: article.rights || '',
           extractedAt: article.extracted_at || '',
-          lastModified: article.last_modified || ''
+          lastModified: article.last_modified || '',
+          
+          // RSS API specific fields
+          timeAgo: article.time_ago || formatTimeAgo(article.published_date || article.extracted_at || ''),
+          isRecent: article.is_recent || false,
+          contentQuality: article.content_quality || 'medium',
+          completeness: article.completeness || 'partial',
+          country: article.country || '',
+          feedName: article.feed_name || '',
+          feedId: article.feed_id || 0
         };
       });
     
-    console.log('📰 Processed articles:', articles.length);
-    console.log('📸 Articles with images:', articles.filter(a => a.hasMedia).length);
-    console.log('✍️ Articles with authors:', articles.filter(a => a.hasAuthor).length);
-    
-    // If no articles from flat endpoint, try the regular endpoint
-    if (articles.length === 0) {
-      console.log('🔄 No articles from flat endpoint, trying regular endpoint...');
-      
-      const regularResponse = await axios.get<BackendArticlesResponse>(`${API_URL}/news/articles`, {
-        params: {
-          limit: limit || 50,
-          category: categories?.[0] !== 'all' ? categories?.[0] : undefined
-        },
-        timeout: 10000
-      });
-      
-      const regularData = regularResponse.data;
-      console.log('📰 Regular endpoint response:', {
-        success: regularData.success,
-        articleCount: regularData.articles?.length || 0,
-        count: regularData.count
-      });
-      
-      // Process regular endpoint articles with enhanced fields
-      const regularArticles: NewsArticle[] = (regularData.articles || [])
-        .filter(article => article.title && article.title.trim() !== '')
-        .map((article: any, index: number) => ({
-          id: article.id?.toString() || article.guid || `article_${Date.now()}_${index}`,
-          title: article.title || 'No title',
-          summary: article.description || article.summary || 'No summary available',
-          url: article.link || article.url || '#',
-          source: article.feed?.title || article.source || article.author || 'Unknown Source',
-          domain: extractDomain(article.link || article.url || ''),
-          category: article.feed?.category || article.category || 'general',
-          publishedDate: article.pub_date || article.pubDate || article.created_at || new Date().toISOString(),
-          relevanceScore: calculateRelevanceScore(article.title, article.description || article.summary),
-          tags: extractTags(article.title, article.description || article.summary),
-          
-          // Enhanced fields with fallbacks
-          thumbnailUrl: article.thumbnail_url || article.media_thumb_url || '',
-          imageUrl: article.image_url || article.media_url || '',
-          mediaType: article.media_type || 'image',
-          mediaDescription: article.media_description || '',
-          author: article.author || '',
-          fullContent: article.content || article.content_encoded || '',
-          wordCount: parseInt(article.word_count || '0') || 0,
-          readingTime: parseInt(article.reading_time || '0') || 0,
-          hasMedia: !!(article.thumbnail_url || article.image_url || article.media_thumb_url || article.media_url),
-          hasAuthor: !!(article.author && article.author.trim()),
-          contentLength: parseInt(article.content_length || '0') || 0,
-          feedTitle: article.feed?.title || '',
-          feedImageUrl: article.feed?.image_url || '',
-          feedThumbnailUrl: article.feed?.thumbnail_url || '',
-          guid: article.guid || article.id?.toString() || '',
-          commentsUrl: article.comments_url || '',
-          language: article.language || '',
-          rights: article.rights || '',
-          extractedAt: article.extracted_at || article.created_at || '',
-          lastModified: article.last_modified || article.updated_at || ''
-        }));
-      
-      articles.push(...regularArticles);
-    }
+    console.log('📰 Processed RSS articles:', {
+      total: articles.length,
+      withImages: articles.filter(a => a.hasMedia).length,
+      withAuthors: articles.filter(a => a.hasAuthor).length,
+      withSummaries: articles.filter(a => a.summary !== 'Click to read full article').length,
+      categories: [...new Set(articles.map(a => a.category))]
+    });
     
     // Categorize articles
     const categorizedArticles: Record<string, NewsArticle[]> = {};
     articles.forEach(article => {
-      const category = mapBackendCategory(article.category);
+      const category = article.category;
       if (!categorizedArticles[category]) {
         categorizedArticles[category] = [];
       }
       categorizedArticles[category].push(article);
     });
     
-    console.log('✅ News feed processed successfully:', {
-      totalArticles: articles.length,
-      articlesWithImages: articles.filter(a => a.hasMedia).length,
-      articlesWithAuthors: articles.filter(a => a.hasAuthor).length,
-      categories: Object.keys(categorizedArticles),
-      categoryCount: Object.entries(categorizedArticles).map(([cat, arts]) => `${cat}: ${arts.length}`).join(', ')
-    });
-    
-    // If still no articles, use fallback
-    if (articles.length === 0) {
-      console.log('📱 No articles found, using fallback...');
-      return await getFallbackNews();
-    }
-    
-    return {
+    const result = {
       success: true,
       articles: articles,
       categories: categorizedArticles,
       lastUpdated: new Date().toISOString(),
       count: articles.length,
-      message: data.message || 'Health news fetched successfully from database'
+      filtersApplied: data.filters_applied,
+      message: 'Health news fetched successfully from RSS feeds'
     };
     
-  } catch (error: any) {
-    console.error('❌ Error fetching news feed from backend:', error);
+    // Cache the result
+    newsCache = {
+      data: result,
+      timestamp: now
+    };
     
-    // Check specific error types
-    if (error.code === 'ECONNREFUSED') {
-      console.log('📱 Backend connection refused, using fallback news...');
-    } else if (error.response?.status === 500) {
-      console.log('📱 Backend server error, using fallback news...');
-    } else if (error.code === 'ENOTFOUND') {
-      console.log('📱 Backend not found, using fallback news...');
-    } else {
-      console.log('📱 Unknown error, using fallback news...', error.message);
+    return result;
+    
+  } catch (error: any) {
+    console.error('❌ Error fetching RSS feed:', error);
+    
+    // If we have cached data, use it even if it's old
+    if (newsCache.data) {
+      console.log('📦 Using stale cached data due to error');
+      return newsCache.data;
     }
     
     const fallback = await getFallbackNews();
     return {
       ...fallback,
-      message: `Backend error (${error.message}). Showing sample news.`
+      message: `RSS service error (${error.message}). Showing sample news.`
     };
   }
 };
 
-// ADDED: Helper function to parse backend boolean values
-const parseBoolean = (value: string | boolean | undefined): boolean => {
-  if (typeof value === 'boolean') return value;
-  if (typeof value === 'string') {
-    return value.toLowerCase() === 'true' || value === '1';
-  }
-  return false;
+// Clear cache function
+export const clearNewsCache = () => {
+  newsCache = { data: null, timestamp: 0 };
+  console.log('🗑️ News cache cleared');
 };
 
-// ADDED: Helper function to choose the best available image
-const chooseBestImage = (...imageUrls: (string | undefined)[]): string => {
-  for (const url of imageUrls) {
-    if (url && url.trim() && url !== 'null' && url !== 'undefined') {
-      // Validate it looks like a URL
-      if (url.startsWith('http') || url.startsWith('//')) {
-        return url;
-      }
-    }
+// Get available categories and countries from RSS API
+export const getRSSFilters = async (): Promise<{
+  success: boolean;
+  categories?: string[];
+  countries?: string[];
+  message?: string;
+}> => {
+  try {
+    console.log('🏷️ Fetching RSS categories and countries...');
+    
+    const response = await axios.get<RSSCategoriesResponse>(`${API_URL}/news/categories-countries`, {
+      timeout: 5000
+    });
+    
+    const data = response.data;
+    console.log('✅ RSS filters response:', data);
+    
+    return {
+      success: data.success,
+      categories: data.categories || [],
+      countries: data.countries || []
+    };
+    
+  } catch (error: any) {
+    console.error('❌ Error fetching RSS filters:', error);
+    return {
+      success: false,
+      message: `Failed to fetch filters: ${error.message}`
+    };
   }
-  return '';
 };
 
-// Helper function to map backend categories to frontend categories
+// Trigger RSS polling manually
+export const triggerRSSPolling = async (force?: boolean, feedId?: number): Promise<{
+  success: boolean;
+  results?: any;
+  message?: string;
+}> => {
+  try {
+    console.log('🔄 Triggering RSS polling...', { force, feedId });
+    
+    const params: any = {};
+    if (force) params.force = 'true';
+    if (feedId) params.feed_id = feedId.toString();
+    
+    const response = await axios.post<RSSPollingResponse>(`${API_URL}/news/polling/trigger`, {}, {
+      params,
+      timeout: 30000 // Longer timeout for polling
+    });
+    
+    const data = response.data;
+    console.log('✅ RSS polling response:', data);
+    
+    return {
+      success: data.success,
+      results: data.results,
+      message: data.message
+    };
+    
+  } catch (error: any) {
+    console.error('❌ Error triggering RSS polling:', error);
+    return {
+      success: false,
+      message: `Failed to trigger polling: ${error.message}`
+    };
+  }
+};
+
+// Map frontend categories to backend RSS categories
+const mapFrontendToBackendCategory = (frontendCategory: string): string | null => {
+  const categoryMap: Record<string, string> = {
+    'nutrition': 'nutrition',
+    'medical': 'medical',
+    'health': 'health',
+    'clinical': 'medical',
+    'prevention': 'health',
+    'mental': 'mental',
+    'science': 'science',
+    'general': 'health',
+    'tech': 'tech',
+    'business': 'business'
+  };
+  
+  return categoryMap[frontendCategory.toLowerCase()] || 'health'; // Default to 'health' instead of null
+};
+
+// Map backend categories to frontend display categories
 const mapBackendCategory = (backendCategory: string | undefined): string => {
   if (!backendCategory) return 'General Health';
   
@@ -434,7 +512,7 @@ const mapBackendCategory = (backendCategory: string | undefined): string => {
   return 'General Health';
 };
 
-// ENHANCED: Updated fallback news with image URLs
+// Enhanced fallback news with RSS structure
 const getFallbackNews = async (): Promise<NewsFeedResponse> => {
   const fallbackArticles: NewsArticle[] = [
     {
@@ -456,7 +534,11 @@ const getFallbackNews = async (): Promise<NewsFeedResponse> => {
       hasAuthor: true,
       wordCount: 150,
       readingTime: 1,
-      contentLength: 750
+      contentLength: 750,
+      timeAgo: "1 day ago",
+      isRecent: true,
+      contentQuality: "high",
+      completeness: "complete"
     },
     {
       id: 'fallback_2',
@@ -477,7 +559,11 @@ const getFallbackNews = async (): Promise<NewsFeedResponse> => {
       hasAuthor: true,
       wordCount: 180,
       readingTime: 1,
-      contentLength: 900
+      contentLength: 900,
+      timeAgo: "2 days ago",
+      isRecent: true,
+      contentQuality: "high",
+      completeness: "complete"
     },
     {
       id: 'fallback_3',
@@ -498,49 +584,11 @@ const getFallbackNews = async (): Promise<NewsFeedResponse> => {
       hasAuthor: true,
       wordCount: 200,
       readingTime: 1,
-      contentLength: 1000
-    },
-    {
-      id: 'fallback_4',
-      title: "Breakthrough in Cancer Research: New Treatment Shows Promise",
-      summary: "Scientists have developed a new immunotherapy approach that shows remarkable results in clinical trials, offering hope for difficult-to-treat cancers.",
-      url: "https://www.nih.gov/news-events/cancer-breakthrough-2024",
-      source: "Medical Research Today",
-      domain: "nih.gov",
-      category: "Medical Research",
-      publishedDate: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(),
-      relevanceScore: 0.98,
-      tags: ['cancer', 'research', 'immunotherapy', 'clinical-trials'],
-      thumbnailUrl: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?w=400&q=80",
-      imageUrl: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?w=800&q=80",
-      mediaType: "image",
-      author: "Dr. Robert Kim",
-      hasMedia: true,
-      hasAuthor: true,
-      wordCount: 250,
-      readingTime: 2,
-      contentLength: 1250
-    },
-    {
-      id: 'fallback_5',
-      title: "Preventive Care: Early Detection Saves Lives",
-      summary: "Regular health screenings can detect potential health issues before they become serious problems. Learn what screenings you need by age.",
-      url: "https://www.cdc.gov/prevention/early-detection",
-      source: "CDC Prevention Guidelines",
-      domain: "cdc.gov",
-      category: "Disease Prevention",
-      publishedDate: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-      relevanceScore: 0.80,
-      tags: ['prevention', 'screening', 'early-detection', 'health-checkup'],
-      thumbnailUrl: "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=400&q=80",
-      imageUrl: "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=800&q=80",
-      mediaType: "image",
-      author: "Dr. Amanda White",
-      hasMedia: true,
-      hasAuthor: true,
-      wordCount: 160,
-      readingTime: 1,
-      contentLength: 800
+      contentLength: 1000,
+      timeAgo: "3 days ago",
+      isRecent: false,
+      contentQuality: "high",
+      completeness: "complete"
     }
   ];
 
@@ -559,96 +607,14 @@ const getFallbackNews = async (): Promise<NewsFeedResponse> => {
     categories: categorizedArticles,
     lastUpdated: new Date().toISOString(),
     count: fallbackArticles.length,
-    message: 'Using sample health news (backend unavailable)'
+    message: 'Using sample health news (RSS service unavailable)'
   };
 };
 
-// Rest of helper functions remain the same but with enhanced logging...
-const extractDomain = (url: string): string => {
-  try {
-    return new URL(url).hostname.toLowerCase();
-  } catch {
-    return 'unknown';
-  }
-};
-
-const calculateRelevanceScore = (title: string = '', description: string = ''): number => {
-  const content = `${title} ${description}`.toLowerCase();
-  
-  const healthKeywords = ['health', 'medical', 'wellness', 'fitness', 'nutrition', 'diet', 'exercise', 'mental health', 'disease', 'treatment', 'research', 'study'];
-  const matchingKeywords = healthKeywords.filter(keyword => content.includes(keyword));
-  
-  let score = 0.5;
-  score += (matchingKeywords.length * 0.08);
-  
-  return Math.min(score, 1.0);
-};
-
-const extractTags = (title: string = '', description: string = '', existingTags?: string): string[] => {
-  const content = `${title} ${description}`.toLowerCase();
-  const tags: string[] = [];
-  
-  if (existingTags) {
-    try {
-      const parsedTags = existingTags.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0);
-      tags.push(...parsedTags);
-    } catch (e) {
-      // Continue with keyword extraction
-    }
-  }
-  
-  const tagKeywords = [
-    'health', 'medical', 'nutrition', 'diet', 'fitness', 'exercise',
-    'mental-health', 'wellness', 'prevention', 'treatment', 'research',
-    'study', 'clinical', 'vaccine', 'medicine', 'hospital', 'doctor',
-    'heart', 'cancer', 'diabetes', 'sleep', 'immune', 'therapy'
-  ];
-  
-  tagKeywords.forEach(keyword => {
-    if (content.includes(keyword.replace('-', ' ')) && !tags.includes(keyword)) {
-      tags.push(keyword);
-    }
-  });
-  
-  return tags.slice(0, 5);
-};
-
-// ENHANCED: Updated utility functions with image support
-export const formatArticleForDisplay = (article: NewsArticle) => {
-  return {
-    ...article,
-    formattedDate: formatTimeAgo(article.publishedDate),
-    isTrusted: isTrustedDomain(article.url),
-    relevancePercentage: Math.round(article.relevanceScore * 100),
-    shortSummary: article.summary.length > 150 
-      ? article.summary.substring(0, 150) + '...'
-      : article.summary,
-    // ADDED: Image display helpers
-    displayImage: article.thumbnailUrl || article.imageUrl || article.feedThumbnailUrl || article.feedImageUrl || '',
-    hasValidImage: !!(article.thumbnailUrl || article.imageUrl),
-    // ADDED: Content quality indicators
-    qualityScore: calculateQualityScore(article),
-    readingTimeText: article.readingTime ? `${article.readingTime} min read` : 'Quick read'
-  };
-};
-
-// ADDED: Calculate article quality score
-const calculateQualityScore = (article: NewsArticle): number => {
-  let score = 0;
-  
-  if (article.hasAuthor) score += 0.2;
-  if (article.hasMedia) score += 0.2;
-  if (article.wordCount && article.wordCount > 100) score += 0.2;
-  if (article.contentLength && article.contentLength > 500) score += 0.2;
-  if (isTrustedDomain(article.url)) score += 0.2;
-  
-  return Math.min(score, 1.0);
-};
-
-// Rest of the functions remain the same...
+// Updated utility functions
 export const getArticlesByCategory = async (category: string, limit?: number): Promise<NewsFeedResponse> => {
   try {
-    console.log('📂 Fetching articles for category:', category);
+    console.log('📂 Fetching RSS articles for category:', category);
     return await fetchNewsFeed([category], limit);
   } catch (error: any) {
     console.error('❌ Error fetching articles by category:', error);
@@ -661,7 +627,7 @@ export const getArticlesByCategory = async (category: string, limit?: number): P
 
 export const searchNewsArticles = async (query: string, category?: string, limit?: number): Promise<NewsFeedResponse> => {
   try {
-    console.log('🔎 Searching articles:', { query, category, limit });
+    console.log('🔎 Searching RSS articles:', { query, category, limit });
     
     if (!query.trim()) {
       return {
@@ -709,14 +675,20 @@ export const searchNewsArticles = async (query: string, category?: string, limit
 
 export const refreshNewsFeed = async (): Promise<NewsFeedResponse> => {
   try {
-    console.log('🔄 Refreshing news feed...');
-    try {
-      await axios.post(`${API_URL}/news/fetch`, {}, { timeout: 5000 });
-      console.log('✅ Triggered backend refresh');
-    } catch (fetchError) {
-      console.log('⚠️ Could not trigger backend refresh, getting current data');
+    console.log('🔄 Refreshing RSS feed...');
+    
+    // Clear cache to force fresh data
+    clearNewsCache();
+    
+    // Trigger RSS polling
+    const pollingResult = await triggerRSSPolling(true);
+    if (pollingResult.success) {
+      console.log('✅ RSS polling triggered successfully:', pollingResult.results);
+    } else {
+      console.warn('⚠️ RSS polling failed:', pollingResult.message);
     }
     
+    // Fetch fresh articles
     return await fetchNewsFeed();
   } catch (error: any) {
     console.error('❌ Error refreshing news feed:', error);
@@ -735,7 +707,6 @@ export const getNewsFeedStats = async (): Promise<{
     categoryCounts: Record<string, number>;
     lastUpdated: string;
     sourcesCounts: Record<string, number>;
-    // ADDED: Enhanced stats
     articlesWithImages: number;
     articlesWithAuthors: number;
     averageWordCount: number;
@@ -788,7 +759,7 @@ export const getNewsFeedStats = async (): Promise<{
       }
     };
   } catch (error: any) {
-    console.error('❌ Error fetching stats:', error);
+    console.error('❌ Error fetching RSS stats:', error);
     return {
       success: false,
       message: 'Error fetching news feed statistics'
@@ -796,7 +767,84 @@ export const getNewsFeedStats = async (): Promise<{
   }
 };
 
-// Utility functions remain the same...
+// Utility functions
+export const formatArticleForDisplay = (article: NewsArticle) => {
+  return {
+    ...article,
+    formattedDate: article.timeAgo || formatTimeAgo(article.publishedDate),
+    isTrusted: isTrustedDomain(article.url),
+    relevancePercentage: Math.round(article.relevanceScore * 100),
+    shortSummary: article.summary.length > 150 
+      ? article.summary.substring(0, 150) + '...'
+      : article.summary,
+    displayImage: article.thumbnailUrl || article.imageUrl || article.feedThumbnailUrl || article.feedImageUrl || '',
+    hasValidImage: !!(article.thumbnailUrl || article.imageUrl),
+    qualityScore: calculateQualityScore(article),
+    readingTimeText: article.readingTime ? `${article.readingTime} min read` : 'Quick read'
+  };
+};
+
+const calculateQualityScore = (article: NewsArticle): number => {
+  let score = 0;
+  
+  if (article.hasAuthor) score += 0.2;
+  if (article.hasMedia) score += 0.2;
+  if (article.wordCount && article.wordCount > 100) score += 0.2;
+  if (article.contentLength && article.contentLength > 500) score += 0.2;
+  if (isTrustedDomain(article.url)) score += 0.2;
+  
+  return Math.min(score, 1.0);
+};
+
+const extractDomain = (url: string): string => {
+  try {
+    return new URL(url).hostname.toLowerCase();
+  } catch {
+    return 'unknown';
+  }
+};
+
+const calculateRelevanceScore = (title: string = '', description: string = ''): number => {
+  const content = `${title} ${description}`.toLowerCase();
+  
+  const healthKeywords = ['health', 'medical', 'wellness', 'fitness', 'nutrition', 'diet', 'exercise', 'mental health', 'disease', 'treatment', 'research', 'study'];
+  const matchingKeywords = healthKeywords.filter(keyword => content.includes(keyword));
+  
+  let score = 0.5;
+  score += (matchingKeywords.length * 0.08);
+  
+  return Math.min(score, 1.0);
+};
+
+const extractTags = (title: string = '', description: string = '', existingTags?: string): string[] => {
+  const content = `${title} ${description}`.toLowerCase();
+  const tags: string[] = [];
+  
+  if (existingTags) {
+    try {
+      const parsedTags = existingTags.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0);
+      tags.push(...parsedTags);
+    } catch (e) {
+      // Continue with keyword extraction
+    }
+  }
+  
+  const tagKeywords = [
+    'health', 'medical', 'nutrition', 'diet', 'fitness', 'exercise',
+    'mental-health', 'wellness', 'prevention', 'treatment', 'research',
+    'study', 'clinical', 'vaccine', 'medicine', 'hospital', 'doctor',
+    'heart', 'cancer', 'diabetes', 'sleep', 'immune', 'therapy'
+  ];
+  
+  tagKeywords.forEach(keyword => {
+    if (content.includes(keyword.replace('-', ' ')) && !tags.includes(keyword)) {
+      tags.push(keyword);
+    }
+  });
+  
+  return tags.slice(0, 5);
+};
+
 export const isTrustedDomain = (url: string): boolean => {
   try {
     const domain = new URL(url).hostname.toLowerCase();
@@ -830,7 +878,27 @@ export const formatTimeAgo = (dateString: string): string => {
   }
 };
 
-export const getAvailableCategories = (): Array<{id: string, label: string}> => {
+export const getAvailableCategories = async (): Promise<Array<{id: string, label: string}>> => {
+  try {
+    const filters = await getRSSFilters();
+    
+    if (filters.success && filters.categories) {
+      // Map RSS categories to display labels
+      const rssCategories = filters.categories.map(cat => ({
+        id: cat,
+        label: mapBackendCategory(cat)
+      }));
+      
+      return [
+        { id: 'all', label: 'All Health News' },
+        ...rssCategories
+      ];
+    }
+  } catch (error) {
+    console.error('❌ Error fetching RSS categories:', error);
+  }
+  
+  // Fallback categories
   return [
     { id: 'all', label: 'All Health News' },
     { id: 'nutrition', label: 'Nutrition & Diet' },
@@ -852,7 +920,6 @@ export interface NewsItem {
   pubDate: string;
   source: string;
   category: string;
-  // ADDED: Legacy support for new fields
   thumbnailUrl?: string;
   imageUrl?: string;
   author?: string;

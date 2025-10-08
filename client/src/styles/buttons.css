@@ -90,9 +90,9 @@
 /* Add Matrix pill effects to search buttons */
 .search-button:first-child:hover,
 .search-btn:first-child:hover {
-  background: linear-gradient(135deg, #dc2626, #991b1b) !important;
+  background: linear-gradient(135deg, #fa5f06, #fa5f06) !important;
   color: white !important;
-  border-color: #dc2626 !important;
+  border-color: #fa5f06 !important;
   box-shadow: 
     0 8px 20px rgba(220, 38, 38, 0.4),
     0 0 20px rgba(220, 38, 38, 0.2) !important;
@@ -101,12 +101,12 @@
 
 .search-button:last-child:hover,
 .search-btn:last-child:hover {
-  background: linear-gradient(135deg, #2563eb, #1d4ed8) !important;
+  background: linear-gradient(135deg, #4cbb17, #4cbb17) !important;
   color: white !important;
-  border-color: #033623 !important;
+  border-color: #4cbb17 !important;
   box-shadow: 
-    0 8px 20px rgba(37, 99, 235, 0.4),
-    0 0 20px rgba(37, 99, 235, 0.2) !important;
+    0 8px 20px rgba(23, 171, 112, 0.4),
+    0 0 20px rgba(11, 169, 82, 0.2) !important;
   transform: translateY(-2px) !important;
 }
 
@@ -119,4 +119,118 @@
 .search-actions .search-btn:nth-child(2):hover { 
   border-color: #2563eb !important; 
   color: white !important; 
+}
+
+/* ADD ONLY: Rotating text animation */
+.rotating-text {
+  display: inline-block;
+  transition: all 0.6s ease;
+  transform-origin: center;
+  min-width: 140px;
+  text-align: center;
+}
+
+.rotating-text.rotate {
+  transform: rotateY(360deg);
+  opacity: 0.7;
+}
+
+/* Add these styles at the end of your existing buttons.css file */
+
+/* Button color overrides for specific buttons */
+.search-btn.analyze-btn:hover {
+  background: #fa5f06 !important;
+  color: white !important;
+  border-color: #fa5f06 !important;
+  box-shadow: 0 8px 20px rgba(250, 95, 6, 0.4) !important;
+  transform: translateY(-2px) !important;
+}
+
+.search-btn.feeling-healthy-btn:hover {
+  background: #4cbb17 !important;
+  color: white !important;
+  border-color: #4cbb17 !important;
+  box-shadow: 0 8px 20px rgba(76, 187, 23, 0.4) !important;
+  transform: translateY(-2px) !important;
+}
+
+/* Looping text animation - smooth fade transition */
+.rotating-text {
+  display: inline-block;
+  transition: opacity 0.3s ease;
+  min-width: 140px;
+  text-align: center;
+}
+
+.rotating-text.rotate {
+  opacity: 0;
+}
+
+/* Enhanced feeling healthy button */
+.feeling-healthy-btn {
+  min-width: 160px !important;
+}
+
+@keyframes healthyPulse {
+  0%, 100% { box-shadow: 0 8px 20px rgba(76, 187, 23, 0.4); }
+  50% { box-shadow: 0 8px 25px rgba(76, 187, 23, 0.6); }
+}
+
+.feeling-healthy-btn:hover {
+  animation: healthyPulse 2s infinite;
+}
+
+/* Add at the end of your existing CSS */
+
+/* Category filter buttons */
+.category-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 20px;
+  justify-content: center;
+}
+
+.category-btn {
+  padding: 8px 16px;
+  border: 2px solid #e5e7eb;
+  border-radius: 20px;
+  background: white;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.category-btn:hover {
+  border-color: #4cbb17;
+  color: #4cbb17;
+  transform: translateY(-1px);
+}
+
+.category-btn.active {
+  background: #4cbb17 !important;
+  color: white !important;
+  border-color: #4cbb17 !important;
+  box-shadow: 0 4px 12px rgba(76, 187, 23, 0.3);
+}
+
+/* Analyze article button */
+.analyze-article-btn {
+  background: linear-gradient(135deg, #fa5f06, #e55205);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 16px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  margin-top: 10px;
+}
+
+.analyze-article-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(250, 95, 6, 0.4);
 }
