@@ -66,7 +66,9 @@ async function startServer() {
         
         let rssController = null;
         try {
-            rssController = require('./dist/controllers/rssController');
+            const RSSController = require('./dist/controllers/rssController');
+            rssController = new RSSController();
+            await rssController.initialize();
             console.log('✅ RSS Controller loaded successfully');
         } catch (error) {
             console.log('⚠️  RSS Controller not available:', error.message);
