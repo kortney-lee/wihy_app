@@ -1,36 +1,27 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { fetchNewsFeed, getArticlesByCategory, NewsArticle } from '../services/newsService';
 import { useNavigate } from 'react-router-dom';
 import './HealthNewsFeed.css';
 
-// Update the props interface at the top of the file:
+// Just update the props interface to receive the functions from the parent
 interface NewsFeedProps {
   maxArticles?: number;
-  selectedCategory?: string;
-  onCategorySelect?: (category: string) => void;
   onAnalyzeArticle?: (query: string) => void;
   setSearchQuery?: (query: string) => void;
   triggerSearch?: () => void;
 }
 
 const HealthNewsFeed: React.FC<NewsFeedProps> = ({ 
-  maxArticles = 6,
-  selectedCategory = 'all',
-  onCategorySelect,
+  maxArticles = 6, 
   onAnalyzeArticle,
   setSearchQuery,
   triggerSearch
 }) => {
   const [articles, setArticles] = useState<NewsArticle[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  // Add loading state for individual articles
   const [analyzingArticle, setAnalyzingArticle] = useState<string | null>(null);
-  const [currentMaxArticles, setCurrentMaxArticles] = useState(maxArticles);
-  
-  // Scroll tracking refs
-  const lastScrollY = useRef(0);
-  const ticking = useRef(false);
-  const containerRef = useRef<HTMLDivElement>(null);
-  
   const navigate = useNavigate();
 
   const categories = [
@@ -44,48 +35,9 @@ const HealthNewsFeed: React.FC<NewsFeedProps> = ({
     { id: 'General Health', label: 'General Health' }
   ];
 
-  // Update currentMaxArticles when maxArticles prop changes
-  useEffect(() => {
-    setCurrentMaxArticles(maxArticles);
-  }, [maxArticles]);
-
   useEffect(() => {
     fetchHealthNews();
-  }, [selectedCategory, currentMaxArticles]);
-
-  // Scroll handler for loading more articles
-  const handleScroll = () => {
-    if (!containerRef.current) return;
-
-    const { scrollTop, scrollHeight, clientHeight } = containerRef.current;
-    const scrollDirection = scrollTop > lastScrollY.current ? 'down' : 'up';
-    
-    // Load more articles when scrolling up and near the top
-    if (scrollDirection === 'up' && scrollTop < 100 && currentMaxArticles < 12) {
-      setCurrentMaxArticles(prev => Math.min(prev + 3, 12));
-    }
-
-    lastScrollY.current = scrollTop;
-    ticking.current = false;
-  };
-
-  const onScroll = () => {
-    if (!ticking.current) {
-      requestAnimationFrame(handleScroll);
-      ticking.current = true;
-    }
-  };
-
-  // Add scroll listener
-  useEffect(() => {
-    const container = containerRef.current;
-    if (container) {
-      container.addEventListener('scroll', onScroll, { passive: true });
-      return () => {
-        container.removeEventListener('scroll', onScroll);
-      };
-    }
-  }, []);
+  }, [selectedCategory, maxArticles]);
 
   const fetchHealthNews = async () => {
     setLoading(true);
@@ -98,13 +50,13 @@ const HealthNewsFeed: React.FC<NewsFeedProps> = ({
         // Fetch all categories
         const response = await fetchNewsFeed();
         if (response.success && response.articles) {
-          newsData = response.articles.slice(0, currentMaxArticles);
+          newsData = response.articles.slice(0, maxArticles);
         }
       } else {
         // Fetch specific category
         const response = await getArticlesByCategory(selectedCategory);
         if (response.success && response.articles) {
-          newsData = response.articles.slice(0, currentMaxArticles);
+          newsData = response.articles.slice(0, maxArticles);
         }
       }
       
@@ -126,8 +78,10 @@ const HealthNewsFeed: React.FC<NewsFeedProps> = ({
             publishedDate: '2025-01-22T10:30:00Z',
             relevanceScore: 0.95,
             tags: ['mediterranean-diet', 'heart-health', 'cardiovascular'],
+            // ADDED: Required fields
             hasMedia: true,
             hasAuthor: true,
+            // ADDED: Optional enhanced fields
             thumbnailUrl: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&q=80",
             imageUrl: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&q=80",
             mediaType: "image",
@@ -147,8 +101,10 @@ const HealthNewsFeed: React.FC<NewsFeedProps> = ({
             publishedDate: '2025-01-22T08:15:00Z',
             relevanceScore: 0.92,
             tags: ['exercise', 'mental-health', 'wellness'],
+            // ADDED: Required fields
             hasMedia: true,
             hasAuthor: true,
+            // ADDED: Optional enhanced fields
             thumbnailUrl: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&q=80",
             imageUrl: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800&q=80",
             mediaType: "image",
@@ -168,8 +124,10 @@ const HealthNewsFeed: React.FC<NewsFeedProps> = ({
             publishedDate: '2025-01-22T06:45:00Z',
             relevanceScore: 0.98,
             tags: ['cancer', 'early-detection', 'research'],
+            // ADDED: Required fields
             hasMedia: true,
             hasAuthor: true,
+            // ADDED: Optional enhanced fields
             thumbnailUrl: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?w=400&q=80",
             imageUrl: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?w=800&q=80",
             mediaType: "image",
@@ -189,8 +147,10 @@ const HealthNewsFeed: React.FC<NewsFeedProps> = ({
             publishedDate: '2025-01-21T20:30:00Z',
             relevanceScore: 0.89,
             tags: ['sleep', 'immune-system', 'health'],
+            // ADDED: Required fields
             hasMedia: true,
             hasAuthor: true,
+            // ADDED: Optional enhanced fields
             thumbnailUrl: "https://images.unsplash.com/photo-1541781774459-bb2af2f05b55?w=400&q=80",
             imageUrl: "https://images.unsplash.com/photo-1541781774459-bb2af2f05b55?w=800&q=80",
             mediaType: "image",
@@ -210,8 +170,10 @@ const HealthNewsFeed: React.FC<NewsFeedProps> = ({
             publishedDate: '2025-01-21T18:20:00Z',
             relevanceScore: 0.91,
             tags: ['mindfulness', 'stress-reduction', 'mental-health'],
+            // ADDED: Required fields
             hasMedia: false,
             hasAuthor: true,
+            // ADDED: Optional enhanced fields
             author: "Dr. Amanda White",
             wordCount: 160,
             readingTime: 1,
@@ -228,78 +190,16 @@ const HealthNewsFeed: React.FC<NewsFeedProps> = ({
             publishedDate: '2025-01-21T15:10:00Z',
             relevanceScore: 0.87,
             tags: ['nutrition', 'energy', 'superfoods'],
+            // ADDED: Required fields
             hasMedia: true,
             hasAuthor: false,
+            // ADDED: Optional enhanced fields
             thumbnailUrl: "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=400&q=80",
             imageUrl: "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=800&q=80",
             mediaType: "image",
             wordCount: 140,
             readingTime: 1,
             contentLength: 700
-          },
-          // ADD MORE MOCK ARTICLES FOR TESTING SCROLL
-          {
-            id: '7',
-            title: 'The Science Behind Intermittent Fasting',
-            summary: 'New research reveals how intermittent fasting affects metabolism and longevity.',
-            url: 'https://www.nejm.org/intermittent-fasting',
-            source: 'NEJM',
-            domain: 'nejm.org',
-            category: 'Nutrition & Diet',
-            publishedDate: '2025-01-21T12:00:00Z',
-            relevanceScore: 0.93,
-            tags: ['intermittent-fasting', 'metabolism', 'longevity'],
-            hasMedia: true,
-            hasAuthor: true,
-            thumbnailUrl: "https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=400&q=80",
-            imageUrl: "https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=800&q=80",
-            mediaType: "image",
-            author: "Dr. John Smith",
-            wordCount: 220,
-            readingTime: 2,
-            contentLength: 1100
-          },
-          {
-            id: '8',
-            title: 'Vitamin D Deficiency: A Global Health Crisis',
-            summary: 'Studies show alarming rates of vitamin D deficiency worldwide and its health implications.',
-            url: 'https://www.who.int/vitamin-d-deficiency',
-            source: 'WHO',
-            domain: 'who.int',
-            category: 'Public Health',
-            publishedDate: '2025-01-21T10:00:00Z',
-            relevanceScore: 0.88,
-            tags: ['vitamin-d', 'deficiency', 'public-health'],
-            hasMedia: true,
-            hasAuthor: true,
-            thumbnailUrl: "https://images.unsplash.com/photo-1559757175-8a5c71f5e34b?w=400&q=80",
-            imageUrl: "https://images.unsplash.com/photo-1559757175-8a5c71f5e34b?w=800&q=80",
-            mediaType: "image",
-            author: "Dr. Maria Garcia",
-            wordCount: 190,
-            readingTime: 1,
-            contentLength: 950
-          },
-          {
-            id: '9',
-            title: 'AI in Healthcare: Revolutionizing Diagnosis',
-            summary: 'Artificial intelligence is transforming how doctors diagnose diseases with unprecedented accuracy.',
-            url: 'https://www.nature.com/ai-healthcare',
-            source: 'Nature',
-            domain: 'nature.com',
-            category: 'Medical Research',
-            publishedDate: '2025-01-21T08:00:00Z',
-            relevanceScore: 0.96,
-            tags: ['ai', 'healthcare', 'diagnosis'],
-            hasMedia: true,
-            hasAuthor: true,
-            thumbnailUrl: "https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=400&q=80",
-            imageUrl: "https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=800&q=80",
-            mediaType: "image",
-            author: "Dr. Alex Chen",
-            wordCount: 280,
-            readingTime: 2,
-            contentLength: 1400
           }
         ];
 
@@ -308,10 +208,11 @@ const HealthNewsFeed: React.FC<NewsFeedProps> = ({
           ? mockArticles 
           : mockArticles.filter(article => article.category === selectedCategory);
 
-        setArticles(filteredArticles.slice(0, currentMaxArticles));
+        setArticles(filteredArticles.slice(0, maxArticles));
       }
     } catch (error) {
       console.error('Error fetching health news:', error);
+      // Use mock data as fallback
       setArticles([]);
     } finally {
       setLoading(false);
@@ -364,6 +265,7 @@ const HealthNewsFeed: React.FC<NewsFeedProps> = ({
     return placeholders[category] || 'https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=400&h=200&fit=crop';
   };
 
+  // Update the handleAnalyzeWithWihy function to use the parent's search functionality:
   const handleAnalyzeWithWihy = async (article: NewsArticle, event: React.MouseEvent) => {
     event.stopPropagation();
     
@@ -386,10 +288,12 @@ Please provide:
 
 Format the response with clear sections and scoring breakdown.`;
 
+    // Use the parent's search functionality
     if (setSearchQuery && triggerSearch) {
       setSearchQuery(analysisQuery);
       triggerSearch();
     } else if (onAnalyzeArticle) {
+      // Fallback to callback if provided
       onAnalyzeArticle(analysisQuery);
     }
   };
@@ -408,7 +312,7 @@ Format the response with clear sections and scoring breakdown.`;
               width: '48px',
               height: '48px',
               objectFit: 'contain',
-              marginBottom: '16px'
+              marginBottom: '16px'  // Add this line for spacing
             }}
           />
           <p>Loading latest health news...</p>
@@ -418,13 +322,13 @@ Format the response with clear sections and scoring breakdown.`;
   }
 
   return (
-    <div className="news-feed-container" ref={containerRef}>
+    <div className="news-feed-container">
       <div className="news-categories">
         {categories.map(category => (
           <button
             key={category.id}
             className={`category-btn ${selectedCategory === category.id ? 'active' : ''}`}
-            onClick={() => onCategorySelect?.(category.id)}
+            onClick={() => setSelectedCategory(category.id)}
           >
             {category.label}
           </button>
@@ -436,9 +340,10 @@ Format the response with clear sections and scoring breakdown.`;
           <article 
             key={article.id} 
             className="news-card"
-            data-category={article.category}
+            data-category={article.category}  // Add this line
             onClick={() => window.open(article.url, '_blank')}
           >
+            {/* Image Section */}
             <div className="news-image">
               {article.thumbnailUrl ? (
                 <img 
@@ -458,6 +363,17 @@ Format the response with clear sections and scoring breakdown.`;
 
             <div className="news-content">
               <div className="news-meta">
+                {/* Replace this source avatar section: */}
+                {/* 
+                <span className="news-source">
+                  <span className="source-avatar">
+                    {getSourceInitials(article.source)}
+                  </span>
+                  {article.source}
+                </span>
+                */}
+                
+                {/* With this analyze button: */}
                 <button 
                   className="analyze-wihy-btn"
                   onClick={(e) => handleAnalyzeWithWihy(article, e)}
@@ -540,6 +456,18 @@ Format the response with clear sections and scoring breakdown.`;
             </div>
           </article>
         ))}
+      </div>
+
+      {articles.length === 0 && !loading && (
+        <div className="no-articles">
+          <p>No articles found for the selected category. Try selecting a different category or refresh the feed.</p>
+        </div>
+      )}
+
+      <div className="news-footer">
+        <button className="load-more-btn" onClick={fetchHealthNews}>
+          Refresh Articles
+        </button>
       </div>
     </div>
   );
