@@ -120,7 +120,19 @@ class ApiDocsController {
                 schema: {
                   type: "integer"
                 },
-                example: 276
+                example: 1
+              },
+              {
+                name: "feed_priority",
+                in: "query", 
+                description: "Filter by feed priority (1-10 = top priority, 0 = extra feeds)",
+                required: false,
+                schema: {
+                  type: "integer",
+                  minimum: 0,
+                  maximum: 10
+                },
+                example: 8
               },
               {
                 name: "flat",
@@ -255,7 +267,19 @@ class ApiDocsController {
                 description: "Poll specific feed only (optional)",
                 required: false,
                 schema: { type: "integer" },
-                example: 276
+                example: 1
+              },
+              {
+                name: "feed_priority",
+                in: "query",
+                description: "Poll feeds by priority level (1-10 = top priority, 0 = extra)",
+                required: false,
+                schema: { 
+                  type: "integer",
+                  minimum: 0,
+                  maximum: 10
+                },
+                example: 8
               }
             ],
             responses: {
@@ -603,7 +627,7 @@ class ApiDocsController {
                 required: true,
                 description: "Feed ID to test image extraction",
                 schema: { type: "integer" },
-                example: 276
+                example: 1
               }
             ],
             responses: {
@@ -657,7 +681,7 @@ class ApiDocsController {
                 required: true,
                 description: "Feed ID to test parsing",
                 schema: { type: "integer" },
-                example: 276
+                example: 1
               }
             ],
             responses: {
@@ -751,7 +775,8 @@ class ApiDocsController {
               has_author: { type: "boolean", example: true, description: "Whether article has author information" },
               category: { type: "string", example: "tech", description: "Article category/topic" },
               source: { type: "string", example: "MIT Technology Review", description: "Source publication name" },
-              feed_id: { type: "integer", example: 276, description: "ID of the RSS feed" },
+              feed_id: { type: "integer", example: 1, description: "ID of the RSS feed" },
+              feed_priority: { type: "integer", example: 8, description: "Feed priority level (1-10 top priority, 0 extra)" },
               reading_time: { type: "integer", example: 4, description: "Estimated reading time in minutes" },
               word_count: { type: "integer", example: 850, description: "Article word count" },
               time_ago: { type: "string", example: "2 hours ago", description: "Human-readable time since publication" },
@@ -767,12 +792,13 @@ class ApiDocsController {
             type: "object",
             description: "RSS Feed configuration and metadata",
             properties: {
-              rss_feeds_id: { type: "integer", example: 276, description: "Unique feed identifier" },
+              rss_feeds_id: { type: "integer", example: 1, description: "Unique feed identifier" },
               feed_title: { type: "string", example: "MIT Technology Review", description: "Human-readable feed name" },
               feed_url: { type: "string", format: "uri", example: "https://www.technologyreview.com/feed/", description: "RSS feed URL" },
               feed_description: { type: "string", example: "The latest technology news and analysis", description: "Feed description" },
               category: { type: "string", example: "tech", description: "Feed category classification" },
               country_code: { type: "string", example: "US", description: "Associated country code" },
+              feed_priority: { type: "integer", example: 8, description: "Feed priority level (1-10 = top priority, 0 = extra feeds)" },
               image_url: { type: "string", format: "uri", example: "https://example.com/feed-logo.png", description: "Feed logo/image URL" },
               thumbnail_url: { type: "string", format: "uri", example: "https://example.com/feed-thumb.png", description: "Feed thumbnail URL" },
               is_active: { type: "boolean", example: true, description: "Whether feed is currently active" },
@@ -784,7 +810,7 @@ class ApiDocsController {
               created_at: { type: "string", format: "date-time", description: "When feed was added" },
               updated_at: { type: "string", format: "date-time", description: "Last modification time" }
             },
-            required: ["rss_feeds_id", "feed_url"]
+            required: ["rss_feeds_id", "feed_url", "feed_priority"]
           },
           Error: {
             type: "object",

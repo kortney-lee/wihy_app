@@ -49,6 +49,7 @@ class RSSDatabase {
             last_status     INT            NULL,
             last_checked    DATETIME       NULL,
             is_active       BIT NOT NULL CONSTRAINT DF_dbo_rss_feeds_is_active DEFAULT(1),
+            feed_priority   INT NOT NULL CONSTRAINT DF_dbo_rss_feeds_feed_priority DEFAULT(5),
             created_at      DATETIME NOT NULL CONSTRAINT DF_dbo_rss_feeds_created_at DEFAULT(GETDATE()),
             updated_at      DATETIME NOT NULL CONSTRAINT DF_dbo_rss_feeds_updated_at DEFAULT(GETDATE()),
             last_fetched    DATETIME       NULL,
@@ -67,7 +68,8 @@ class RSSDatabase {
           `CREATE INDEX IX_dbo_rss_feeds_category ON dbo.rss_feeds(category);`,
           `CREATE INDEX IX_dbo_rss_feeds_country ON dbo.rss_feeds(country_code);`,
           `CREATE INDEX IX_dbo_rss_feeds_active ON dbo.rss_feeds(is_active);`,
-          `CREATE INDEX IX_dbo_rss_feeds_last_checked ON dbo.rss_feeds(last_checked);`
+          `CREATE INDEX IX_dbo_rss_feeds_last_checked ON dbo.rss_feeds(last_checked);`,
+          `CREATE INDEX IX_dbo_rss_feeds_priority ON dbo.rss_feeds(feed_priority DESC);`
         ];
 
         for (const indexQuery of indexes) {
@@ -88,7 +90,8 @@ class RSSDatabase {
           { name: 'thumbnail_url', type: 'NVARCHAR(1000)' },
           { name: 'latest_articles', type: 'NVARCHAR(MAX)' },
           { name: 'last_checked', type: 'DATETIME' },
-          { name: 'last_status', type: 'INT' }
+          { name: 'last_status', type: 'INT' },
+          { name: 'feed_priority', type: 'INT NOT NULL CONSTRAINT DF_dbo_rss_feeds_feed_priority DEFAULT(5)' }
         ];
 
         for (const column of criticalColumns) {
@@ -106,7 +109,7 @@ class RSSDatabase {
 
             if (!columnExists) {
               console.log(`📋 Adding missing column: ${column.name}`);
-              const addColumnQuery = `ALTER TABLE dbo.rss_feeds ADD ${column.name} ${column.type} NULL;`;
+              const addColumnQuery = `ALTER TABLE dbo.rss_feeds ADD ${column.name} ${column.type};`;
               await pool.request().query(addColumnQuery);
               console.log(`✅ Added column: ${column.name}`);
             } else {
@@ -115,6 +118,17 @@ class RSSDatabase {
           } catch (columnError) {
             console.warn(`⚠️ Column check error for ${column.name}: ${columnError.message}`);
           }
+        }
+
+        // Add priority index if it doesn't exist
+        try {
+          await pool.request().query(`
+            IF NOT EXISTS (SELECT name FROM sys.indexes WHERE name = 'IX_dbo_rss_feeds_priority')
+            CREATE INDEX IX_dbo_rss_feeds_priority ON dbo.rss_feeds(feed_priority DESC);
+          `);
+          console.log('✅ Priority index checked/created');
+        } catch (indexError) {
+          console.warn(`⚠️ Priority index warning: ${indexError.message}`);
         }
       }
 
@@ -217,7 +231,7 @@ class RSSDatabase {
       // Now create the procedures fresh with FIXED SQL
       console.log('🔧 Creating fresh RSS stored procedures...');
 
-      // FIXED sp_GetRSSFeeds - COMPLETE SELECT STATEMENT
+      // UPDATED sp_GetRSSFeeds - Now includes feed_priority and proper ordering
       await pool.request().query(`
         CREATE PROCEDURE dbo.sp_GetRSSFeeds
           @limit        INT           = 100,
@@ -247,7 +261,8 @@ class RSSDatabase {
               last_modified, 
               last_status,
               last_checked, 
-              is_active, 
+              is_active,
+              feed_priority,
               created_at, 
               updated_at, 
               last_fetched, 
@@ -257,7 +272,10 @@ class RSSDatabase {
             WHERE (@only_active = 0 OR is_active = 1)
               AND (@category IS NULL OR category = @category)
               AND (@country_code IS NULL OR country_code = @country_code)
-            ORDER BY last_checked DESC, created_at DESC;
+            ORDER BY 
+              ISNULL(feed_priority, 0) DESC,  -- High priority first (1-10)
+              last_checked DESC, 
+              created_at DESC;
           END TRY
           BEGIN CATCH
             PRINT 'Error in sp_GetRSSFeeds: ' + ERROR_MESSAGE();
@@ -277,6 +295,7 @@ class RSSDatabase {
               CAST(NULL AS INT) as last_status,
               CAST(NULL AS DATETIME) as last_checked,
               CAST(NULL AS BIT) as is_active,
+              CAST(NULL AS INT) as feed_priority,
               CAST(NULL AS DATETIME) as created_at,
               CAST(NULL AS DATETIME) as updated_at,
               CAST(NULL AS DATETIME) as last_fetched,
@@ -287,7 +306,7 @@ class RSSDatabase {
         END
       `);
 
-      // FIXED sp_GetFlatArticles
+      // UPDATED sp_GetFlatArticles - Now prioritizes high-priority feeds
       await pool.request().query(`
         CREATE PROCEDURE dbo.sp_GetFlatArticles
           @limit        INT           = 50,
@@ -309,6 +328,7 @@ class RSSDatabase {
               f.feed_url,
               f.category,
               f.country_code,
+              f.feed_priority,
               f.image_url as feed_image_url,
               f.thumbnail_url as feed_thumbnail_url,
               
@@ -346,6 +366,7 @@ class RSSDatabase {
               AND ISJSON(f.latest_articles) = 1
               AND JSON_VALUE(articles.value, '$.title') IS NOT NULL
             ORDER BY 
+              ISNULL(f.feed_priority, 0) DESC,  -- High priority feeds first
               TRY_CAST(JSON_VALUE(articles.value, '$.extracted_at') as DATETIME) DESC,
               f.last_checked DESC;
           END TRY
@@ -358,6 +379,7 @@ class RSSDatabase {
               CAST(NULL AS NVARCHAR(1000)) as feed_url,
               CAST(NULL AS NVARCHAR(100)) as category,
               CAST(NULL AS NVARCHAR(10)) as country_code,
+              CAST(NULL AS INT) as feed_priority,
               CAST(NULL AS NVARCHAR(1000)) as feed_image_url,
               CAST(NULL AS NVARCHAR(1000)) as feed_thumbnail_url,
               CAST(NULL AS NVARCHAR(MAX)) as title,
@@ -486,135 +508,88 @@ class RSSDatabase {
     
     const onlyActive = params.only_active !== 'false';
     
-    console.log(`🔍 Getting feeds with limit: ${limit}, category: ${params.category || 'ALL'}, country: ${params.country || 'ALL'}`);
+    console.log(`🔍 Getting feeds with limit: ${limit}, category: ${params.category || 'ALL'}, country: ${params.country || 'ALL'}, priority: ${params.feed_priority || 'ALL'}`);
     
     try {
-      const result = await pool.request()
+      let whereClause = '';
+      const request = pool.request()
         .input('limit', sql.Int, limit)
-        .input('category', sql.NVarChar, params.category || null)
-        .input('country_code', sql.NVarChar, params.country || null)
-        .input('only_active', sql.Bit, onlyActive)
-        .execute('dbo.sp_GetRSSFeeds');
+        .input('only_active', sql.Bit, onlyActive ? 1 : 0);
+      
+      const conditions = [];
+      
+      if (onlyActive) {
+        conditions.push('is_active = @only_active');
+      }
+      
+      if (params.category) {
+        conditions.push('category = @category');
+        request.input('category', sql.NVarChar, params.category);
+      }
+      
+      if (params.country) {
+        conditions.push('country_code = @country_code');
+        request.input('country_code', sql.NVarChar, params.country);
+      }
 
-      console.log(`✅ Retrieved ${result.recordset.length} feeds`);
-      return result.recordset;
-    } catch (error) {
-      console.error('❌ Error in getFeeds:', error);
-      return []; // Return empty array on error
-    }
-  }
-
-  async updateFeedWithArticles(feedId, data) {
-    const pool = getPool();
-    
-    // Validate feed ID
-    if (!feedId || isNaN(feedId) || feedId <= 0) {
-      console.error(`❌ Invalid feedId: ${feedId}`);
-      return { success: false, error: 'Invalid feed ID' };
-    }
-    
-    console.log(`🔄 [RSSDatabase] Updating feed ${feedId} with data:`, {
-      feedTitle: data.feedTitle?.substring(0, 50) + '...' || 'N/A',
-      feedImage: data.feedImage ? 'YES' : 'NO', 
-      feedThumbnail: data.feedThumbnail ? 'YES' : 'NO',
-      articlesCount: data.articles?.length || 0,
-      status: data.status || 200
-    });
-    
-    try {
-      // Ensure articles is valid JSON
-      let articlesJson = null;
-      if (data.articles && Array.isArray(data.articles) && data.articles.length > 0) {
-        // Validate each article has required fields
-        const validArticles = data.articles.filter(article => {
-          const hasTitle = article.title && article.title.trim();
-          const hasLink = article.link && article.link.trim();
-          if (!hasTitle || !hasLink) {
-            console.warn(`⚠️ Filtering invalid article: title="${article.title}" link="${article.link}"`);
-          }
-          return hasTitle && hasLink;
-        });
-        
-        if (validArticles.length > 0) {
-          articlesJson = JSON.stringify(validArticles);
-          console.log(`📝 [RSSDatabase] Prepared JSON with ${validArticles.length} valid articles (${articlesJson.length} characters)`);
-          
-          // Log sample article structure for debugging
-          const sample = validArticles[0];
-          console.log(`📰 [RSSDatabase] Sample article structure:`, {
-            title: sample.title?.substring(0, 40) + '...',
-            hasMediaThumb: !!sample.media_thumb_url,
-            hasMediaUrl: !!sample.media_url,
-            mediaThumbPreview: sample.media_thumb_url?.substring(0, 50) + '...' || 'NONE',
-            hasAuthor: !!sample.author,
-            pubDate: sample.pubDate,
-            guid: sample.guid?.substring(0, 30) + '...' || 'NONE'
-          });
-        } else {
-          console.warn(`⚠️ [RSSDatabase] No valid articles to store for feed ${feedId}`);
+      // NEW: Add feed priority filtering
+      if (params.feed_priority !== undefined) {
+        const priority = parseInt(params.feed_priority, 10);
+        if (priority >= 1 && priority <= 10) {
+          conditions.push('feed_priority = @feed_priority');
+          request.input('feed_priority', sql.Int, priority);
+        } else if (priority === 0) {
+          conditions.push('(feed_priority = 0 OR feed_priority IS NULL)');
         }
       }
       
-      // **CRITICAL FIX**: Use direct SQL instead of broken stored procedure
-      console.log(`💾 [RSSDatabase] Executing direct SQL update for feed ${feedId}...`);
-      
-      const updateQuery = `
-        UPDATE dbo.rss_feeds
-        SET 
-          latest_articles = @articles,
-          feed_title = COALESCE(@feed_title, feed_title),
-          feed_description = COALESCE(@feed_description, feed_description),
-          feed_link = COALESCE(@feed_link, feed_link),
-          image_url = COALESCE(@image_url, image_url),
-          thumbnail_url = COALESCE(@thumbnail_url, thumbnail_url),
-          etag = @etag,
-          last_modified = @last_modified,
-          last_status = @last_status,
-          last_fetched = GETUTCDATE(),
-          fetch_count = ISNULL(fetch_count, 0) + 1,
-          updated_at = GETUTCDATE(),
-          last_checked = GETUTCDATE()
-        WHERE rss_feeds_id = @rss_feeds_id;
-        
-        SELECT @@ROWCOUNT as rows_affected;
-      `;
-      
-      const result = await pool.request()
-        .input('rss_feeds_id', sql.Int, parseInt(feedId, 10))
-        .input('articles', sql.NVarChar(sql.MAX), articlesJson)
-        .input('feed_title', sql.NVarChar, data.feedTitle || null)
-        .input('feed_description', sql.NVarChar, data.feedDescription || null)
-        .input('feed_link', sql.NVarChar, data.feedLink || null)
-        .input('image_url', sql.NVarChar, data.feedImage || null)
-        .input('thumbnail_url', sql.NVarChar, data.feedThumbnail || null)
-        .input('etag', sql.NVarChar, data.etag || null)
-        .input('last_modified', sql.NVarChar, data.lastModified || null)
-        .input('last_status', sql.Int, data.status || 200)
-        .query(updateQuery);
-
-      const rowsAffected = result.recordset[0]?.rows_affected || 0;
-      
-      if (rowsAffected > 0) {
-        console.log(`✅ [RSSDatabase] Successfully updated feed ${feedId}:`, {
-          rowsAffected,
-          articlesStored: data.articles?.length || 0,
-          feedImageStored: data.feedImage ? 'YES' : 'NO',
-          feedThumbnailStored: data.feedThumbnail ? 'YES' : 'NO'
-        });
-        
-        return { 
-          success: true, 
-          rowsAffected, 
-          articlesStored: data.articles?.length || 0 
-        };
-      } else {
-        console.error(`❌ [RSSDatabase] Feed ${feedId} update failed: No rows affected`);
-        return { success: false, error: 'No rows affected - feed may not exist' };
+      if (conditions.length > 0) {
+        whereClause = 'WHERE ' + conditions.join(' AND ');
       }
       
+      const query = `
+        SELECT TOP (@limit)
+          rss_feeds_id, 
+          country_code, 
+          category, 
+          feed_url, 
+          feed_title, 
+          feed_description, 
+          feed_link, 
+          image_url, 
+          thumbnail_url, 
+          etag, 
+          last_modified, 
+          last_status,
+          last_checked, 
+          is_active,
+          feed_priority,
+          created_at, 
+          updated_at, 
+          last_fetched, 
+          fetch_count, 
+          latest_articles
+        FROM dbo.rss_feeds
+        ${whereClause}
+        ORDER BY 
+          ISNULL(feed_priority, 0) DESC,  -- High priority first (1-10)
+          last_checked DESC, 
+          created_at DESC
+      `;
+      
+      const result = await request.query(query);
+      
+      console.log(`✅ Retrieved ${result.recordset.length} feeds`);
+      console.log(`🏆 Priority breakdown:`, {
+        topPriority: result.recordset.filter(f => f.feed_priority >= 1 && f.feed_priority <= 10).length,
+        extraFeeds: result.recordset.filter(f => f.feed_priority === 0 || !f.feed_priority).length
+      });
+      
+      return result.recordset;
+      
     } catch (error) {
-      console.error(`❌ [RSSDatabase] Database error updating feed ${feedId}:`, error);
-      return { success: false, error: error.message };
+      console.error(`❌ Error in getFeeds:`, error);
+      return [];
     }
   }
 
@@ -637,13 +612,13 @@ class RSSDatabase {
       useFlat, 
       category: params.category || 'ALL',
       country: params.country || 'ALL',
-      feedId: params.feed_id || 'ALL'
+      feedId: params.feed_id || 'ALL',
+      feedPriority: params.feed_priority || 'ALL'
     });
 
     try {
       if (useFlat) {
-        // **CRITICAL FIX**: Use direct SQL instead of broken stored procedure
-        console.log(`📰 [RSSDatabase] Using direct SQL for flat articles...`);
+        console.log(`📰 [RSSDatabase] Using direct SQL for flat articles with priority filtering...`);
         
         let whereClause = 'WHERE f.is_active = 1 AND f.latest_articles IS NOT NULL AND ISJSON(f.latest_articles) = 1';
         const request = pool.request().input('limit', sql.Int, limit);
@@ -662,6 +637,19 @@ class RSSDatabase {
           whereClause += ' AND f.rss_feeds_id = @rss_feeds_id';
           request.input('rss_feeds_id', sql.Int, parseInt(params.feed_id, 10));
         }
+
+        // NEW: Add feed priority filtering
+        if (params.feed_priority) {
+          const priority = parseInt(params.feed_priority, 10);
+          if (priority >= 1 && priority <= 10) {
+            // Filter for specific priority level
+            whereClause += ' AND f.feed_priority = @feed_priority';
+            request.input('feed_priority', sql.Int, priority);
+          } else if (priority === 0) {
+            // Filter for extra feeds (priority 0 or null)
+            whereClause += ' AND (f.feed_priority = 0 OR f.feed_priority IS NULL)';
+          }
+        }
         
         const query = `
           SELECT TOP (@limit)
@@ -670,6 +658,7 @@ class RSSDatabase {
             f.feed_url,
             f.category,
             f.country_code,
+            f.feed_priority,
             f.image_url as feed_image_url,
             f.thumbnail_url as feed_thumbnail_url,
             
@@ -703,6 +692,7 @@ class RSSDatabase {
             AND JSON_VALUE(articles.value, '$.title') IS NOT NULL
             AND JSON_VALUE(articles.value, '$.title') != ''
           ORDER BY 
+            ISNULL(f.feed_priority, 0) DESC,  -- High priority feeds first (1-10 are top priority, 0 is extra)
             TRY_CAST(JSON_VALUE(articles.value, '$.extracted_at') as DATETIME) DESC,
             f.last_checked DESC
         `;
@@ -710,29 +700,39 @@ class RSSDatabase {
         const result = await request.query(query);
         
         console.log(`✅ [RSSDatabase] Retrieved ${result.recordset.length} flat articles`);
-        console.log(`📸 [RSSDatabase] Articles with media:`, {
-          withMediaThumb: result.recordset.filter(a => a.media_thumb_url).length,
-          withMediaUrl: result.recordset.filter(a => a.media_url).length,
-          withFeedImages: result.recordset.filter(a => a.feed_image_url).length
+        console.log(`🏆 [RSSDatabase] Priority distribution:`, {
+          topPriority: result.recordset.filter(a => a.feed_priority >= 1 && a.feed_priority <= 10).length,
+          extraFeeds: result.recordset.filter(a => a.feed_priority === 0 || !a.feed_priority).length
         });
         
         return result.recordset;
         
       } else {
-        // Get feeds and parse JSON articles manually
-        console.log(`📰 [RSSDatabase] Using manual JSON parsing...`);
+        // Get feeds and parse JSON articles manually - WITH PRIORITY FILTERING
+        console.log(`📰 [RSSDatabase] Using manual JSON parsing with priority filtering...`);
         
-        const feeds = await this.getFeeds({ 
+        const feedParams = { 
           category: params.category, 
           country: params.country,
+          feed_priority: params.feed_priority, // Pass priority filter
           limit: 100 // Get more feeds to have more article choices
-        });
+        };
+        
+        const feeds = await this.getFeeds(feedParams);
         
         console.log(`📰 [RSSDatabase] Got ${feeds.length} feeds to process`);
+        
+        // Sort feeds by priority first
+        feeds.sort((a, b) => {
+          const priorityA = a.feed_priority || 0;
+          const priorityB = b.feed_priority || 0;
+          return priorityB - priorityA; // High priority first
+        });
         
         const allArticles = [];
         let feedsWithArticles = 0;
         let totalArticlesParsed = 0;
+        let topPriorityArticles = 0;
 
         feeds.forEach(feed => {
           if (feed.latest_articles) {
@@ -742,11 +742,16 @@ class RSSDatabase {
                 feedsWithArticles++;
                 totalArticlesParsed += articles.length;
                 
+                if (feed.feed_priority >= 1 && feed.feed_priority <= 10) {
+                  topPriorityArticles += articles.length;
+                }
+                
                 articles.forEach(article => {
                   allArticles.push({
                     ...article,
                     feed_id: feed.rss_feeds_id,
                     feed_title: feed.feed_title,
+                    feed_priority: feed.feed_priority || 0,
                     feed_image_url: feed.image_url,
                     feed_thumbnail_url: feed.thumbnail_url,
                     category: feed.category,
@@ -761,9 +766,19 @@ class RSSDatabase {
         });
 
         console.log(`📰 [RSSDatabase] Parsed articles from ${feedsWithArticles} feeds: ${totalArticlesParsed} total articles`);
+        console.log(`🏆 [RSSDatabase] Top priority articles: ${topPriorityArticles}`);
 
-        // Sort by date and limit
+        // Sort by priority first, then by date
         allArticles.sort((a, b) => {
+          const priorityA = a.feed_priority || 0;
+          const priorityB = b.feed_priority || 0;
+          
+          // If priorities are different, sort by priority (high to low)
+          if (priorityA !== priorityB) {
+            return priorityB - priorityA;
+          }
+          
+          // If same priority, sort by date
           const dateA = new Date(a.pubDate || a.extracted_at || 0);
           const dateB = new Date(b.pubDate || b.extracted_at || 0);
           return dateB - dateA;
@@ -772,6 +787,10 @@ class RSSDatabase {
         const limitedArticles = allArticles.slice(0, limit);
         
         console.log(`✅ [RSSDatabase] Returning ${limitedArticles.length} articles (limited from ${allArticles.length})`);
+        console.log(`🏆 [RSSDatabase] Final priority split:`, {
+          topPriority: limitedArticles.filter(a => a.feed_priority >= 1 && a.feed_priority <= 10).length,
+          extraFeeds: limitedArticles.filter(a => a.feed_priority === 0 || !a.feed_priority).length
+        });
         
         return limitedArticles;
       }
@@ -830,28 +849,28 @@ class RSSDatabase {
 
   async seedSampleFeeds() {
     const sampleFeeds = [
-      // Health feeds
-      { feed_url: 'https://www.nibib.nih.gov/rss', category: 'health', country_code: 'US' },
-      { feed_url: 'https://www.nih.gov/news-events/news-releases/rss.xml', category: 'health', country_code: 'US' },
-      { feed_url: 'https://feeds.npr.org/1002/rss.xml', category: 'health', country_code: 'US' },
+      // HIGH PRIORITY Health feeds (1-10)
+      { feed_url: 'https://www.nibib.nih.gov/rss', category: 'health', country_code: 'US', feed_priority: 8 },
+      { feed_url: 'https://www.nih.gov/news-events/news-releases/rss.xml', category: 'health', country_code: 'US', feed_priority: 9 },
+      { feed_url: 'https://feeds.npr.org/1002/rss.xml', category: 'health', country_code: 'US', feed_priority: 7 },
       
-      // Science feeds  
-      { feed_url: 'https://www.sciencedaily.com/rss/all.xml', category: 'science', country_code: 'US' },
-      { feed_url: 'https://feeds.newscientist.com/science-news', category: 'science', country_code: 'US' },
+      // HIGH PRIORITY Science feeds  
+      { feed_url: 'https://www.sciencedaily.com/rss/all.xml', category: 'science', country_code: 'US', feed_priority: 8 },
+      { feed_url: 'https://feeds.newscientist.com/science-news', category: 'science', country_code: 'US', feed_priority: 6 },
       
-      // Tech feeds
-      { feed_url: 'https://feeds.feedburner.com/TechCrunch', category: 'tech', country_code: 'US' },
-      { feed_url: 'https://www.wired.com/feed/rss', category: 'tech', country_code: 'US' },
+      // MEDIUM PRIORITY Tech feeds
+      { feed_url: 'https://feeds.feedburner.com/TechCrunch', category: 'tech', country_code: 'US', feed_priority: 5 },
+      { feed_url: 'https://www.wired.com/feed/rss', category: 'tech', country_code: 'US', feed_priority: 4 },
       
-      // Political feeds
-      { feed_url: 'https://feeds.npr.org/1001/rss.xml', category: 'political', country_code: 'US' },
-      { feed_url: 'https://www.politico.com/rss/politico.xml', category: 'political', country_code: 'US' },
+      // LOW PRIORITY Political feeds
+      { feed_url: 'https://feeds.npr.org/1001/rss.xml', category: 'political', country_code: 'US', feed_priority: 3 },
+      { feed_url: 'https://www.politico.com/rss/politico.xml', category: 'political', country_code: 'US', feed_priority: 2 },
       
-      // Additional diverse feeds
-      { feed_url: 'https://www.espn.com/espn/rss/news', category: 'sports', country_code: 'US' },
-      { feed_url: 'https://www.rollingstone.com/music/rss', category: 'entertainment', country_code: 'US' },
-      { feed_url: 'https://www.wsj.com/xml/rss/3_7085.xml', category: 'business', country_code: 'US' },
-      { feed_url: 'https://www.nationalgeographic.com/news/rss.xml', category: 'nature', country_code: 'US' }
+      // EXTRA feeds (priority 0 - these are just extra)
+      { feed_url: 'https://www.espn.com/espn/rss/news', category: 'sports', country_code: 'US', feed_priority: 0 },
+      { feed_url: 'https://www.rollingstone.com/music/rss', category: 'entertainment', country_code: 'US', feed_priority: 0 },
+      { feed_url: 'https://www.wsj.com/xml/rss/3_7085.xml', category: 'business', country_code: 'US', feed_priority: 0 },
+      { feed_url: 'https://www.nationalgeographic.com/news/rss.xml', category: 'nature', country_code: 'US', feed_priority: 1 }
     ];
 
     const pool = getPool();
@@ -863,22 +882,29 @@ class RSSDatabase {
           .input('feed_url', sql.NVarChar, feed.feed_url)
           .input('category', sql.NVarChar, feed.category)
           .input('country_code', sql.NVarChar, feed.country_code)
+          .input('feed_priority', sql.Int, feed.feed_priority)
           .query(`
             IF NOT EXISTS (SELECT 1 FROM dbo.rss_feeds WHERE feed_url = @feed_url)
             BEGIN
-              INSERT INTO dbo.rss_feeds (feed_url, category, country_code)
-              VALUES (@feed_url, @category, @country_code);
+              INSERT INTO dbo.rss_feeds (feed_url, category, country_code, feed_priority)
+              VALUES (@feed_url, @category, @country_code, @feed_priority);
               SELECT 1 as added;
             END
             ELSE
             BEGIN
+              -- Update priority if feed exists
+              UPDATE dbo.rss_feeds 
+              SET feed_priority = @feed_priority 
+              WHERE feed_url = @feed_url;
               SELECT 0 as added;
             END
           `);
 
         if (result.recordset[0]?.added) {
           feedsAdded++;
-          console.log(`✅ Seeded feed: ${feed.feed_url} (${feed.category})`);
+          console.log(`✅ Seeded feed: ${feed.feed_url} (${feed.category}) - Priority: ${feed.feed_priority}`);
+        } else {
+          console.log(`🔄 Updated priority for: ${feed.feed_url} - Priority: ${feed.feed_priority}`);
         }
       } catch (error) {
         console.error(`❌ Error seeding feed ${feed.feed_url}:`, error.message);
@@ -891,10 +917,12 @@ class RSSDatabase {
   async getActiveFeedsForPolling() {
     const pool = getPool();
     const result = await pool.request().query(`
-      SELECT rss_feeds_id, feed_url, feed_title, category, etag, last_modified, last_checked, last_status
+      SELECT rss_feeds_id, feed_url, feed_title, category, feed_priority, etag, last_modified, last_checked, last_status
       FROM dbo.rss_feeds 
       WHERE is_active = 1
-      ORDER BY ISNULL(last_checked, '1900-01-01') ASC
+      ORDER BY 
+        ISNULL(feed_priority, 0) DESC,  -- High priority feeds polled first
+        ISNULL(last_checked, '1900-01-01') ASC
     `);
     return result.recordset;
   }
@@ -904,7 +932,7 @@ class RSSDatabase {
     
     let query = `
       SELECT 
-        rss_feeds_id, feed_title, feed_url, category, is_active, 
+        rss_feeds_id, feed_title, feed_url, category, feed_priority, is_active, 
         last_status, last_checked, last_fetched, fetch_count,
         CASE 
           WHEN latest_articles IS NULL THEN 'No articles stored'
@@ -923,7 +951,7 @@ class RSSDatabase {
       query += ` WHERE rss_feeds_id = @feed_id`;
       request.input('feed_id', sql.Int, feedId);
     } else {
-      query += ` ORDER BY last_checked DESC, created_at DESC`;
+      query += ` ORDER BY ISNULL(feed_priority, 0) DESC, last_checked DESC, created_at DESC`;
     }
     
     const result = await request.query(query);
