@@ -19,45 +19,10 @@ const VHealthSearch: React.FC = () => {
   const [imageError, setImageError] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState('Searching...');
   const [showFeelingHealthyContent, setShowFeelingHealthyContent] = useState(false);
-
-  // ADD: Rotating text for "I'm Feeling Healthy" button
-  const [currentCategoryIndex, setCurrentCategoryIndex] = useState(0);
-  const [isRotating, setIsRotating] = useState(false);
-
-  // ADD: Selected category state for news filtering
-  const [selectedCategory, setSelectedCategory] = useState('all');
-
-  // ADD: Closing state for news feed animation
-  const [isClosingNewsfeed, setIsClosingNewsfeed] = useState(false);
-  const [visibleArticleCount, setVisibleArticleCount] = useState(3);
-
-  // Health categories that will rotate (excluding "All Health News" since that's what "I'm Feeling Healthy" maps to)
-  const healthCategories = [
-    'I\'m Feeling Healthy',
-    'Nutrition', 
-    'Medical Research',
-    'Public Health',
-    'Clinical Studies',
-    'Prevention',
-    'Mental Health',
-    'General Health'
-  ];
   
   const navigate = useNavigate();
   const searchInputRef = useRef<HTMLInputElement>(null);
   const recognitionRef = useRef<any>(null);
-
-  const closeFeed = () => {
-    if (isClosingNewsfeed) return;
-    setIsClosingNewsfeed(true);
-    setTimeout(() => {
-      setShowFeelingHealthyContent(false);
-      setSearchQuery('What is Healthy?');
-      setSelectedCategory('all');
-      setVisibleArticleCount(3);
-      setIsClosingNewsfeed(false);
-    }, 400); // match your CSS animation
-  };
 
   // ================================
   // UTILITY FUNCTIONS
@@ -433,19 +398,6 @@ const VHealthSearch: React.FC = () => {
     };
   }, []);
 
-  // Rotation effect
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setIsRotating(true);
-      setTimeout(() => {
-        setCurrentCategoryIndex((prev) => (prev + 1) % healthCategories.length);
-        setIsRotating(false);
-      }, 300);
-    }, 3000); // Change every 3 seconds
-
-    return () => clearInterval(interval);
-  }, [healthCategories.length]);
-
   // ================================
   // UI COMPONENTS
   // ================================
@@ -700,32 +652,32 @@ const VHealthSearch: React.FC = () => {
               e.preventDefault();
               handleSearch();
             }}
-            className="search-btn primary analyze-btn"
+            className="search-btn primary"
             disabled={!searchQuery.trim() || isLoading}
           >
             {isLoading ? loadingMessage : 'Analyze Nutrition'}
           </button>
           
-          {/* FEELING HEALTHY BUTTON - Shows/hides health news feed with rotating text */}
+          {/* FEELING HEALTHY BUTTON - Shows/hides health news feed */}
           <button 
             onClick={() => {
               if (isLoading) return;
               
-              if (showFeelingHealthyContent && !isClosingNewsfeed) {
-                closeFeed(); // Use the centralized close function
-              } else if (!showFeelingHealthyContent) {
+              if (showFeelingHealthyContent) {
+                // If news is showing, close it and set "What is Healthy?" in search
+                setShowFeelingHealthyContent(false);
+                setSearchQuery('What is Healthy?');
+              } else {
+                // Show the news feed
                 setShowFeelingHealthyContent(true);
-                setSelectedCategory('all');
-                setVisibleArticleCount(3); // Start with 3 articles
               }
             }}
-            className="search-btn secondary feeling-healthy-btn"
+            className="search-btn secondary"
             type="button"
+            style={{ color: '#000000' }}
             disabled={isLoading}
           >
-            <span className={`rotating-text ${isRotating ? 'rotate' : ''}`}>
-              {healthCategories[currentCategoryIndex]}
-            </span>
+            I'm Feeling Healthy
           </button>
         </div>
       </div>
@@ -733,30 +685,17 @@ const VHealthSearch: React.FC = () => {
       {/* HEALTH NEWS FEED - Shows when "I'm Feeling Healthy" is active */}
       {showFeelingHealthyContent && (
         <div 
-          className={`feeling-healthy-section ${isClosingNewsfeed ? 'closing' : ''}`}
+          className="feeling-healthy-section"
           onClick={(e) => {
             // Close if clicking on the background, not the content
-            if (e.target === e.currentTarget && !isClosingNewsfeed) {
-              closeFeed(); // Use the centralized close function
+            if (e.target === e.currentTarget) {
+              setShowFeelingHealthyContent(false);
+              setSearchQuery('What is Healthy?');
             }
           }}
         >
           <div onClick={(e) => e.stopPropagation()}>
-            <HealthNewsFeed 
-              maxArticles={visibleArticleCount} // Dynamic article count
-              selectedCategory={selectedCategory}
-              onCategorySelect={(category) => setSelectedCategory(category)}
-              onAnalyzeArticle={(analysisQuery) => {
-                setShowFeelingHealthyContent(false);
-                setSearchQuery(analysisQuery);
-                handleSearch();
-              }}
-              setSearchQuery={setSearchQuery}
-              triggerSearch={() => {
-                setShowFeelingHealthyContent(false);
-                handleSearch();
-              }}
-            />
+            <HealthNewsFeed maxArticles={6} />
           </div>
         </div>
       )}
@@ -777,7 +716,7 @@ export default VHealthSearch;
 
 /* Add this CSS to your styles
 @keyframes spin {
-  0% { transform: rotate(0deg); }m: rotate(0deg); }
-  100% { transform: rotate(360deg); }form: rotate(360deg); }
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 */
