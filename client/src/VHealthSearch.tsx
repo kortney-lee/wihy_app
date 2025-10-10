@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './styles/VHealthSearch.css';
 import ImageUploadModal from './components/ImageUploadModal';
-import MultiAuthLogin from './components/MultiAuthLogin';
+import MultiAuthLogin from './components/shared/components/MultiAuthLogin';
 import { healthSearchService } from './services/healthSearchService';
 import { searchCache } from './services/searchCache';
 import { foodAnalysisService } from './components/foodAnalysisService';
@@ -179,7 +179,7 @@ const VHealthSearch: React.FC = () => {
       
       try {
         // Pass signal to healthSearchService
-        const searchResults = await healthSearchService.searchHealthInfo(searchQuery);
+        const searchResults = await healthSearchService.searchHealthInfo(searchQuery, signal);
         console.log('Health search results received:', searchResults);
         
         const isValidResult = searchResults && 
@@ -325,6 +325,10 @@ const VHealthSearch: React.FC = () => {
       return;
     }
 
+    // Create abort controller for this request too
+    abortControllerRef.current = new AbortController();
+    const signal = abortControllerRef.current.signal;
+    
     setIsLoading(true);
     setLoadingMessage('Processing image analysis...');
     
@@ -363,7 +367,7 @@ const VHealthSearch: React.FC = () => {
       setLoadingMessage('Analyzing nutrition content...');
       
       try {
-        const nutritionResults = await healthSearchService.searchHealthInfo(foodName);
+        const nutritionResults = await healthSearchService.searchHealthInfo(foodName, signal);
         
         const isValidResult = nutritionResults && 
           typeof nutritionResults === 'object' && 

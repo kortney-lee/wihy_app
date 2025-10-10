@@ -139,8 +139,8 @@ const Header: React.FC<HeaderProps> = ({
                     onClick={onImageUpload}
                     title="Upload image"
                   >
-                    <svg viewBox="0 0 24 24" width="20" height="20">
-                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm3.5 6L12 10.5 8.5 8 12 5.5 15.5 8zM7.5 9l4-2.5V9L7.5 9zm5 7.5V14l4 2.5-4 2.5zm5-7.5L13.5 6.5v3L17.5 9z"/>
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                      <path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/>
                     </svg>
                   </button>
                 )}
