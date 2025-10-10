@@ -594,22 +594,44 @@ Category: ${article.category || 'Uncategorized'}`;
             <div className="news-content">
               {/* Meta Information */}
               <div className="news-meta">
-                {/* Analyze with WIHY Button */}
+                {/* Analyze with WIHY Button - Updated with Wrapper */}
                 {onAnalyzeArticle && (
-                  <button 
-                    className="analyze-wihy-btn"
-                    onClick={(e) => handleAnalyzeWithWihy(article, e)}
-                    disabled={analyzingArticle === article.id}
-                  >
-                    {analyzingArticle === article.id ? (
-                      <>
-                        <div className="analyze-spinner"></div>
-                        Analyzing...
-                      </>
-                    ) : (
-                      <>Analyze with WiHy</>
-                    )}
-                  </button>
+                  <div className="wihy-btn-wrapper" style={{
+                    display: 'inline-block',
+                    animation: analyzingArticle === article.id ? 'none' : 'wiH-border-sweep 2.2s linear infinite',
+                    background: analyzingArticle === article.id 
+                      ? 'linear-gradient(#f3f4f6, #f3f4f6)' 
+                      : 'linear-gradient(#fff, #fff) padding-box, linear-gradient(90deg, #fa5f06, #ffffff, #C0C0C0, #4cbb17) border-box',
+                    backgroundSize: '100% 100%, 200% 100%',
+                    border: '2px solid transparent',
+                    borderRadius: '16px'
+                  }}>
+                    <button 
+                      className="analyze-wihy-btn"
+                      onClick={(e) => handleAnalyzeWithWihy(article, e)}
+                      disabled={analyzingArticle === article.id}
+                      style={{
+                        background: 'transparent',
+                        border: 'none',
+                        borderRadius: '16px',
+                        padding: '6px 12px',
+                        fontSize: '11px',
+                        fontWeight: '600',
+                        cursor: analyzingArticle === article.id ? 'not-allowed' : 'pointer',
+                        boxShadow: 'none',
+                        transform: 'none'
+                      }}
+                    >
+                      {analyzingArticle === article.id ? (
+                        <>
+                          <div className="analyze-spinner"></div>
+                          Analyzing...
+                        </>
+                      ) : (
+                        <>Analyze with WiHy</>
+                      )}
+                    </button>
+                  </div>
                 )}
                 
                 {/* Source Tag */}
