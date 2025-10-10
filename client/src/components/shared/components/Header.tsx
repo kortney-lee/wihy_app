@@ -1,6 +1,7 @@
 /* filepath: c:\vHealth\vhealth\client\src\components\shared\components\Header.tsx */
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import MultiAuthLogin from './MultiAuthLogin';
+import '../../../styles/VHealthSearch.css';
 
 interface HeaderProps {
   searchQuery?: string;
@@ -28,7 +29,49 @@ const Header: React.FC<HeaderProps> = ({
   showLogin = true
 }) => {
   const [input, setInput] = useState(searchQuery);
-  const searchInputRef = useRef<HTMLInputElement>(null);
+  const searchInputRef = useRef<HTMLTextAreaElement>(null); // Changed to textarea
+
+  // Auto-resize function to match VHealthSearch behavior
+  const autoSize = () => {
+    const el = searchInputRef.current;
+    if (!el) return;
+    
+    // Reset to default height when empty
+    if (!input.trim()) {
+      el.style.height = '44px';
+      el.style.overflowY = 'hidden';
+      return;
+    }
+    
+    // Auto-expand height based on content
+    el.style.height = "0";
+    const next = el.scrollHeight;
+    el.style.height = next + "px";
+    
+    // Enable scrolling if height exceeds max
+    const max = parseFloat(getComputedStyle(el).maxHeight);
+    el.style.overflowY = next > max ? "auto" : "hidden";
+  };
+  
+  // Update sizing when input changes
+  useEffect(() => {
+    autoSize();
+  }, [input]);
+  
+  // Handle input changes
+  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setInput(e.target.value);
+  };
+  
+  // Clear input and reset size
+  const clearInput = () => {
+    setInput('');
+    setTimeout(() => {
+      if (searchInputRef.current) {
+        searchInputRef.current.style.height = '44px';
+      }
+    }, 10);
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,7 +80,7 @@ const Header: React.FC<HeaderProps> = ({
     }
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
+  const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSubmit(e);
@@ -70,14 +113,21 @@ const Header: React.FC<HeaderProps> = ({
         <div className="vhealth-search-section">
           <form className="vhealth-search-form" onSubmit={handleSubmit}>
             <div className="search-input-container">
-              <input
+              <textarea
                 ref={searchInputRef}
-                type="text"
                 value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyPress={handleKeyPress}
+                onChange={handleInputChange}
+                onKeyDown={handleKeyDown}
                 placeholder="Ask anything about health..."
                 className="search-input"
+                rows={1}
+                style={{
+                  resize: 'none',
+                  overflow: 'hidden',
+                  minHeight: '44px',
+                  height: 'auto',
+                  paddingRight: '100px'
+                }}
               />
               
               <div className="search-icons">
@@ -109,12 +159,12 @@ const Header: React.FC<HeaderProps> = ({
                   </button>
                 )}
 
-                {/* Clear button (if there's text) */}
+                {/* Clear button (if there's text) - unchanged */}
                 {input && (
                   <button
                     type="button"
                     className="icon-button clear-button"
-                    onClick={() => setInput('')}
+                    onClick={clearInput}
                     title="Clear"
                   >
                     <svg viewBox="0 0 24 24" width="16" height="16">

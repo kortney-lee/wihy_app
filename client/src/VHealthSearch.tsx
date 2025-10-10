@@ -23,6 +23,7 @@ const VHealthSearch: React.FC = () => {
   const navigate = useNavigate();
   const searchInputRef = useRef<HTMLInputElement>(null);
   const recognitionRef = useRef<any>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   // ================================
   // UTILITY FUNCTIONS
@@ -49,6 +50,44 @@ const VHealthSearch: React.FC = () => {
 
     if (msg.includes('failed')) return 100; // will close shortly
     return 40; // default midpoint
+  };
+
+  /**
+   * AUTO-SIZE TEXT AREA
+   * Dynamically adjusts the height of the search input based on content
+   */
+  const autoSize = () => {
+    const el = document.querySelector('.search-input') as HTMLTextAreaElement;
+    if (!el) return;
+    
+    // Reset to default height when empty
+    if (!searchQuery.trim()) {
+      el.style.height = '44px'; // Default height
+      el.style.overflowY = 'hidden';
+      return;
+    }
+    
+    // Otherwise handle auto-sizing as before
+    el.style.height = "auto";
+    const next = el.scrollHeight;
+    el.style.height = next + "px";
+    
+    // Check if we've hit max height
+    const max = parseFloat(getComputedStyle(el).maxHeight);
+    el.style.overflowY = next > max ? "auto" : "hidden";
+  };
+  
+  /**
+   * CLEAR SEARCH INPUT
+   * Clears search input and resets its height to default
+   */
+  const handleClearSearch = () => {
+    setSearchQuery('');
+    // Force a reset after state update
+    setTimeout(() => {
+      const el = document.querySelector('.search-input') as HTMLTextAreaElement;
+      if (el) el.style.height = '44px';
+    }, 10);
   };
 
   // ================================
@@ -94,6 +133,10 @@ const VHealthSearch: React.FC = () => {
   const handleSearch = async () => {
     if (!searchQuery.trim() || isLoading) return;
     
+    // Create new AbortController for this request
+    abortControllerRef.current = new AbortController();
+    const signal = abortControllerRef.current.signal;
+    
     setIsLoading(true);
     setLoadingMessage('Initializing search...');
     
@@ -102,7 +145,7 @@ const VHealthSearch: React.FC = () => {
       setLoadingMessage('Checking cache...');
       
       try {
-        const response = await fetch(`http://localhost:5000/api/cache/get?q=${encodeURIComponent(searchQuery)}`);
+        const response = await fetch(`http://localhost:5000/api/cache/get?q=${encodeURIComponent(searchQuery)}`, { signal });
         
         if (response.ok) {
           const cachedData = await response.json();
@@ -122,6 +165,11 @@ const VHealthSearch: React.FC = () => {
           return;
         }
       } catch (cacheError) {
+        // Handle AbortError specifically
+        if (cacheError.name === 'AbortError') {
+          console.log('Cache request was cancelled');
+          return; // Exit early
+        }
         console.log('No cache found, proceeding with API call');
       }
 
@@ -130,6 +178,7 @@ const VHealthSearch: React.FC = () => {
       console.log('Getting fresh results for:', searchQuery);
       
       try {
+        // Pass signal to healthSearchService
         const searchResults = await healthSearchService.searchHealthInfo(searchQuery);
         console.log('Health search results received:', searchResults);
         
@@ -184,6 +233,11 @@ const VHealthSearch: React.FC = () => {
         }
         
       } catch (apiError) {
+        // Handle AbortError specifically
+        if (apiError.name === 'AbortError') {
+          console.log('API request was cancelled');
+          return; // Exit early
+        }
         console.error('Health search service failed:', apiError);
         
         // Step 4: Try similar results as fallback
@@ -225,6 +279,12 @@ const VHealthSearch: React.FC = () => {
       }
         
     } catch (error) {
+      // Handle AbortError specifically
+      if (error.name === 'AbortError') {
+        console.log('Search request was cancelled');
+        return; // Exit early
+      }
+      
       console.error("Search error:", error);
       setLoadingMessage('Search failed. Please try again.');
       
@@ -233,6 +293,20 @@ const VHealthSearch: React.FC = () => {
         setLoadingMessage('Searching...');
       }, 2000);
     }
+  };
+
+  /**
+   * SEARCH CANCELLATION HANDLER
+   * Cancels in-progress search requests and resets loading state
+   * Called when user clicks the cancel button in loading overlay
+   */
+  const handleCancelSearch = () => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
+    setIsLoading(false);
+    setLoadingMessage('Searching...');
   };
 
   // ================================
@@ -398,6 +472,14 @@ const VHealthSearch: React.FC = () => {
     };
   }, []);
 
+  // Add this with your other useEffects
+  useEffect(() => {
+    // Call autoSize whenever searchQuery changes
+    if (searchQuery !== undefined) {
+      autoSize();
+    }
+  }, [searchQuery]);
+
   // ================================
   // UI COMPONENTS
   // ================================
@@ -430,7 +512,7 @@ const VHealthSearch: React.FC = () => {
         boxShadow: '0 10px 25px rgba(0, 0, 0, 0.2)'
       }}>
       
-        {/* Replace the CSS spinner with your GIF */}
+        {/* Spinner */}
         <div style={{ margin: '0 auto 24px auto' }}>
           <img 
             src="/assets/whatishealthyspinner.gif" 
@@ -480,13 +562,48 @@ const VHealthSearch: React.FC = () => {
           }} />
         </div>
         
-        <p style={{
-          margin: 0,
-          fontSize: '14px',
-          color: '#6b7280'
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          marginTop: '16px'
         }}>
-          {progress}% Complete
-        </p>
+          <p style={{
+            margin: 0,
+            fontSize: '14px',
+            color: '#6b7280'
+          }}>
+            {progress}% Complete
+          </p>
+          
+          {/* Cancel button */}
+          <button
+            onClick={handleCancelSearch}
+            style={{
+              backgroundColor: 'transparent',
+              color: '#555',
+              border: '1px solid #ccc',
+              borderRadius: '16px',
+              padding: '8px 16px',
+              fontSize: '14px',
+              fontWeight: '500',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease'
+            }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.backgroundColor = '#f1f1f1';
+              e.currentTarget.style.color = '#333';
+              e.currentTarget.style.borderColor = '#aaa';
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.backgroundColor = 'transparent';
+              e.currentTarget.style.color = '#555';
+              e.currentTarget.style.borderColor = '#ccc';
+            }}
+          >
+            Cancel
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -542,7 +659,9 @@ const VHealthSearch: React.FC = () => {
           }}>
             <textarea
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+              }}
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && !e.shiftKey) {
                   e.preventDefault();
@@ -556,13 +675,19 @@ const VHealthSearch: React.FC = () => {
               rows={1}
               style={{
                 resize: 'none',
-                overflow: 'hidden'
+                overflow: 'hidden',
+                minHeight: '44px',
+                height: 'auto',
+                paddingRight: '100px',
+                width: '100%', // Use full width of container
+                boxSizing: 'border-box' // Include padding in width calculation
               }}
               onInput={(e) => {
-                // Auto-resize textarea
+                // Auto-resize height algorithm
                 const target = e.target as HTMLTextAreaElement;
-                target.style.height = 'auto';
-                target.style.height = Math.min(target.scrollHeight, 120) + 'px';
+                target.style.height = '0';
+                const scrollHeight = target.scrollHeight;
+                target.style.height = scrollHeight + 'px';
               }}
             />
           </form>
@@ -570,15 +695,14 @@ const VHealthSearch: React.FC = () => {
           {/* SEARCH ICONS - Clear, Camera, Voice input buttons */}
           <div className="search-icons">
             {/* CLEAR BUTTON - Clears current search query */}
-            {searchQuery && !isLoading && (
-              <button
-                type="button"
-                onClick={() => setSearchQuery('')}
-                className="icon-button clear-button"
-                aria-label="Clear all"
+            {searchQuery && (
+              <button 
+                className="icon-button clear-button" 
+                onClick={handleClearSearch}
+                aria-label="Clear"
               >
-                <svg viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                <svg viewBox="0 0 24 24" width="24" height="24">
+                  <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" fill="currentColor" />
                 </svg>
               </button>
             )}
@@ -695,7 +819,14 @@ const VHealthSearch: React.FC = () => {
           }}
         >
           <div onClick={(e) => e.stopPropagation()}>
-            <HealthNewsFeed maxArticles={6} />
+            <HealthNewsFeed 
+              maxArticles={6}
+              setSearchQuery={setSearchQuery}
+              triggerSearch={() => {
+                setShowFeelingHealthyContent(false); // Close news feed
+                handleSearch(); // Trigger search with the newly set query
+              }}
+            />
           </div>
         </div>
       )}
@@ -703,7 +834,7 @@ const VHealthSearch: React.FC = () => {
       {/* IMAGE UPLOAD MODAL - Opens when camera button is clicked */}
       <ImageUploadModal
         isOpen={isUploadModalOpen}
-        onClose={() => setIsUploadModalOpen(false)}
+        onClose={() => setIsUploadModalOpen(false)} // FIXED: Changed from setIsUploadModal to setIsUploadModalOpen
         onAnalysisComplete={handleAnalysisComplete}
         title="Upload Image"
         subtitle="Upload Image for Analysis"

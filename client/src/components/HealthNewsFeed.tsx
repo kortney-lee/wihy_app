@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { fetchNewsFeed, getArticlesByCategory, NewsArticle } from '../services/newsService';
 import { useNavigate } from 'react-router-dom';
 import './HealthNewsFeed.css';
 
-// Just update the props interface to receive the functions from the parent
+// Update the props interface to receive the search functions
 interface NewsFeedProps {
   maxArticles?: number;
   onAnalyzeArticle?: (query: string) => void;
@@ -11,18 +11,122 @@ interface NewsFeedProps {
   triggerSearch?: () => void;
 }
 
+// Define placeholder images by category
+const PLACEHOLDER_IMAGES: Record<string, string[]> = {
+  'Nutrition & Diet': [
+    'https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=800&q=80',
+    'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=800&q=80',
+    'https://images.unsplash.com/photo-1505253716362-afaea1d3d1af?w=800&q=80',
+    'https://images.unsplash.com/photo-1547592180-85f173990554?w=800&q=80'
+  ],
+  'Medical Research': [
+    'https://images.unsplash.com/photo-1582719508461-905c673771fd?w=800&q=80',
+    'https://images.unsplash.com/photo-1579154204601-01588f351e67?w=800&q=80',
+    'https://images.unsplash.com/photo-1532938911079-1b06ac7ceec7?w=800&q=80',
+    'https://images.unsplash.com/photo-1581093588401-fbb62a02f120?w=800&q=80'
+  ],
+  'Public Health': [
+    'https://images.unsplash.com/photo-1585435557343-3b092031a831?w=800&q=80',
+    'https://images.unsplash.com/photo-1530497610245-94d3c16cda28?w=800&q=80',
+    'https://images.unsplash.com/photo-1584017911766-d451b3d0e843?w=800&q=80',
+    'https://images.unsplash.com/photo-1505751172876-fa1923c5c528?w=800&q=80'
+  ],
+  'Clinical Studies': [
+    'https://images.unsplash.com/photo-1579684385127-1ef15d508118?w=800&q=80',
+    'https://images.unsplash.com/photo-1526256262350-7da7584cf5eb?w=800&q=80',
+    'https://images.unsplash.com/photo-1624727828489-a1e03b79bba8?w=800&q=80',
+    'https://images.unsplash.com/photo-1516069677022-53fe679c7ccb?w=800&q=80'
+  ],
+  'Disease Prevention': [
+    'https://images.unsplash.com/photo-1584982751601-97dcc096659c?w=800&q=80',
+    'https://images.unsplash.com/photo-1598256989800-fe5f95da9787?w=800&q=80',
+    'https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=800&q=80',
+    'https://images.unsplash.com/photo-1603398938378-e54eab446dde?w=800&q=80'
+  ],
+  'Mental Health': [
+    'https://images.unsplash.com/photo-1493836512294-502baa1986e2?w=800&q=80',
+    'https://images.unsplash.com/photo-1527736947477-2790e28f3443?w=800&q=80',
+    'https://images.unsplash.com/photo-1546290581-22fe67c7bd0e?w=800&q=80',
+    'https://images.unsplash.com/photo-1569893033503-9204c3ab911c?w=800&q=80'
+  ],
+  'General Health': [
+    'https://images.unsplash.com/photo-1498837167922-ddd27525d352?w=800&q=80',
+    'https://images.unsplash.com/photo-1511688878353-3a2f5be94cd7?w=800&q=80',
+    'https://images.unsplash.com/photo-1571019613576-2b22c76fd955?w=800&q=80',
+    'https://images.unsplash.com/photo-1579126038374-6064e9370f0f?w=800&q=80'
+  ],
+  'default': [
+    'https://images.unsplash.com/photo-1505751172876-fa1923c5c528?w=800&q=80',
+    'https://images.unsplash.com/photo-1538108149393-fbbd81895907?w=800&q=80',
+    'https://images.unsplash.com/photo-1532938911079-1b06ac7ceec7?w=800&q=80',
+    'https://images.unsplash.com/photo-1505253716362-afaea1d3d1af?w=800&q=80'
+  ]
+};
+
+// Helper function to get a random placeholder image for a category
+const getRandomPlaceholderImage = (category?: string): string => {
+  // Default to 'default' category if the category doesn't exist or is not provided
+  const categoryImages = PLACEHOLDER_IMAGES[category || ''] || PLACEHOLDER_IMAGES['default'];
+  
+  // Get a random image from the array
+  const randomIndex = Math.floor(Math.random() * categoryImages.length);
+  return categoryImages[randomIndex];
+};
+
+// Helper function to get a color based on category
+const getCategoryColor = (category?: string) => {
+  if (!category) return '#94a3b8';
+  
+  const colors: {[key: string]: string} = {
+    'Nutrition & Diet': '#4caf50',
+    'Medical Research': '#2196f3',
+    'Public Health': '#ff9800',
+    'Clinical Studies': '#9c27b0',
+    'Disease Prevention': '#f44336',
+    'Mental Health': '#03a9f4',
+    'General Health': '#ffeb3b'
+  };
+  
+  return colors[category] || '#94a3b8';
+};
+
+const formatTimeAgo = (dateString?: string) => {
+  if (!dateString) return 'Recently';
+  
+  const now = new Date();
+  const date = new Date(dateString);
+  const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+  
+  if (diffInSeconds < 60) return 'Just now';
+  if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} minutes ago`;
+  if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} hours ago`;
+  if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)} days ago`;
+  
+  return date.toLocaleDateString();
+};
+
 const HealthNewsFeed: React.FC<NewsFeedProps> = ({ 
   maxArticles = 6, 
-  onAnalyzeArticle,
+  onAnalyzeArticle = (query: string) => {
+    // Default implementation that will ensure the button always appears
+    console.log('Article analysis requested:', query);
+    // You could show a toast notification here or redirect to the analysis page
+    window.open(`/analyze?query=${encodeURIComponent(query)}`, '_blank');
+  },
   setSearchQuery,
   triggerSearch
 }) => {
   const [articles, setArticles] = useState<NewsArticle[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('all');
-  // Add loading state for individual articles
   const [analyzingArticle, setAnalyzingArticle] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [hasMorePages, setHasMorePages] = useState(true);
   const navigate = useNavigate();
+  
+  const prevFetchParamsRef = useRef<{category: string, max: number}>({category: '', max: 0});
+  const observerTarget = useRef<HTMLDivElement>(null);
 
   const categories = [
     { id: 'all', label: 'All Health News' },
@@ -35,274 +139,393 @@ const HealthNewsFeed: React.FC<NewsFeedProps> = ({
     { id: 'General Health', label: 'General Health' }
   ];
 
+  // Fetch initial articles when category changes
   useEffect(() => {
-    fetchHealthNews();
+    // Only fetch if category or maxArticles actually changed
+    const prevParams = prevFetchParamsRef.current;
+    if (prevParams.category !== selectedCategory || prevParams.max !== maxArticles) {
+      prevFetchParamsRef.current = {category: selectedCategory, max: maxArticles};
+      setCurrentPage(1); // Reset to first page when changing categories
+      setHasMorePages(true); // Reset pagination state
+      fetchHealthNews(true); // true means reset (first page)
+    }
   }, [selectedCategory, maxArticles]);
 
-  const fetchHealthNews = async () => {
-    setLoading(true);
+  // Set up intersection observer for infinite scroll
+  const handleObserver = useCallback((entries: IntersectionObserverEntry[]) => {
+    const [target] = entries;
+    if (target.isIntersecting && !loading && !loadingMore && hasMorePages) {
+      fetchHealthNews(false); // false means don't reset, load more
+    }
+  }, [loading, loadingMore, hasMorePages]);
+
+  useEffect(() => {
+    const element = observerTarget.current;
+    const option = {
+      root: null,
+      rootMargin: '0px',
+      threshold: 0.1,
+    };
+    
+    const observer = new IntersectionObserver(handleObserver, option);
+    
+    if (element) observer.observe(element);
+    
+    return () => {
+      if (element) observer.unobserve(element);
+    };
+  }, [handleObserver, observerTarget]);
+
+  // Update the fetchHealthNews function with priority handling
+
+  const fetchHealthNews = async (resetPage: boolean = true) => {
+    if (resetPage) {
+      setLoading(true);
+      setCurrentPage(1);
+    } else {
+      setLoadingMore(true);
+      setCurrentPage(prev => prev + 1);
+    }
+
     try {
-      console.log('Fetching health news for category:', selectedCategory);
+      const page = resetPage ? 1 : currentPage + 1;
+      console.log('Fetching health news for category:', selectedCategory, 'page:', page);
       
-      let newsData;
+      let response;
+      
+      // Define all health categories and their priority order
+      const healthCategories = [
+        'Nutrition & Diet', 
+        'Medical Research', 
+        'Public Health', 
+        'Clinical Studies', 
+        'Disease Prevention', 
+        'Mental Health', 
+        'General Health'
+      ];
       
       if (selectedCategory === 'all') {
-        // Fetch all categories
-        const response = await fetchNewsFeed();
-        if (response.success && response.articles) {
-          newsData = response.articles.slice(0, maxArticles);
-        }
+        // Explicitly pass an empty array to ensure NO category filters are applied
+        response = await fetchNewsFeed([], maxArticles * 2);
+        console.log('Fetching ALL news with no category filters');
       } else {
-        // Fetch specific category
-        const response = await getArticlesByCategory(selectedCategory);
-        if (response.success && response.articles) {
-          newsData = response.articles.slice(0, maxArticles);
-        }
+        response = await getArticlesByCategory(selectedCategory, maxArticles);
       }
       
-      if (newsData && newsData.length > 0) {
-        // Use real API data
-        setArticles(newsData);
-      } else {
-        // Fallback to mock data if API fails or returns no data
-        console.log('Using fallback mock data');
-        const mockArticles: NewsArticle[] = [
-          {
-            id: '1',
-            title: 'New Study Reveals Benefits of Mediterranean Diet for Heart Health',
-            summary: 'Researchers found that following a Mediterranean diet can reduce cardiovascular disease risk by up to 30%.',
-            url: 'https://www.nih.gov/news-events/news-releases/mediterranean-diet-heart-health',
-            source: 'NIH',
-            domain: 'nih.gov',
-            category: 'Nutrition & Diet',
-            publishedDate: '2025-01-22T10:30:00Z',
-            relevanceScore: 0.95,
-            tags: ['mediterranean-diet', 'heart-health', 'cardiovascular'],
-            // ADDED: Required fields
-            hasMedia: true,
-            hasAuthor: true,
-            // ADDED: Optional enhanced fields
-            thumbnailUrl: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&q=80",
-            imageUrl: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&q=80",
-            mediaType: "image",
-            author: "Dr. Sarah Johnson",
-            wordCount: 150,
-            readingTime: 1,
-            contentLength: 750
-          },
-          {
-            id: '2', 
-            title: 'Exercise and Mental Health: The Connection You Need to Know',
-            summary: 'New research shows that just 30 minutes of exercise daily can significantly improve mental well-being.',
-            url: 'https://www.cdc.gov/physicalactivity/basics/pa-health/index.htm',
-            source: 'CDC',
-            domain: 'cdc.gov',
-            category: 'Mental Health',
-            publishedDate: '2025-01-22T08:15:00Z',
-            relevanceScore: 0.92,
-            tags: ['exercise', 'mental-health', 'wellness'],
-            // ADDED: Required fields
-            hasMedia: true,
-            hasAuthor: true,
-            // ADDED: Optional enhanced fields
-            thumbnailUrl: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&q=80",
-            imageUrl: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800&q=80",
-            mediaType: "image",
-            author: "Dr. Michael Chen",
-            wordCount: 180,
-            readingTime: 1,
-            contentLength: 900
-          },
-          {
-            id: '3',
-            title: 'Breakthrough in Cancer Research: Early Detection Methods',
-            summary: 'Scientists develop new blood test that can detect multiple types of cancer in early stages.',
-            url: 'https://www.nejm.org/doi/full/10.1056/NEJMoa2035570',
-            source: 'New England Journal of Medicine',
-            domain: 'nejm.org',
-            category: 'Medical Research',
-            publishedDate: '2025-01-22T06:45:00Z',
-            relevanceScore: 0.98,
-            tags: ['cancer', 'early-detection', 'research'],
-            // ADDED: Required fields
-            hasMedia: true,
-            hasAuthor: true,
-            // ADDED: Optional enhanced fields
-            thumbnailUrl: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?w=400&q=80",
-            imageUrl: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?w=800&q=80",
-            mediaType: "image",
-            author: "Dr. Robert Kim",
-            wordCount: 250,
-            readingTime: 2,
-            contentLength: 1250
-          },
-          {
-            id: '4',
-            title: 'Sleep Quality: How It Affects Your Immune System',
-            summary: 'Poor sleep quality can weaken your immune response and increase susceptibility to infections.',
-            url: 'https://www.mayoclinic.org/healthy-lifestyle/adult-health/in-depth/sleep/art-20048379',
-            source: 'Mayo Clinic',
-            domain: 'mayoclinic.org',
-            category: 'General Health',
-            publishedDate: '2025-01-21T20:30:00Z',
-            relevanceScore: 0.89,
-            tags: ['sleep', 'immune-system', 'health'],
-            // ADDED: Required fields
-            hasMedia: true,
-            hasAuthor: true,
-            // ADDED: Optional enhanced fields
-            thumbnailUrl: "https://images.unsplash.com/photo-1541781774459-bb2af2f05b55?w=400&q=80",
-            imageUrl: "https://images.unsplash.com/photo-1541781774459-bb2af2f05b55?w=800&q=80",
-            mediaType: "image",
-            author: "Dr. Lisa Rodriguez",
-            wordCount: 200,
-            readingTime: 1,
-            contentLength: 1000
-          },
-          {
-            id: '5',
-            title: 'Mindfulness and Stress Reduction Techniques That Actually Work',
-            summary: 'Evidence-based mindfulness practices shown to reduce stress hormones and improve overall health.',
-            url: 'https://www.harvard.edu/healthbeat/benefits-of-mindfulness',
-            source: 'Harvard Health',
-            domain: 'harvard.edu',
-            category: 'Mental Health',
-            publishedDate: '2025-01-21T18:20:00Z',
-            relevanceScore: 0.91,
-            tags: ['mindfulness', 'stress-reduction', 'mental-health'],
-            // ADDED: Required fields
-            hasMedia: false,
-            hasAuthor: true,
-            // ADDED: Optional enhanced fields
-            author: "Dr. Amanda White",
-            wordCount: 160,
-            readingTime: 1,
-            contentLength: 800
-          },
-          {
-            id: '6',
-            title: 'Superfoods That Boost Your Energy Naturally',
-            summary: 'Discover nutrient-dense foods that can help increase energy levels without caffeine crashes.',
-            url: 'https://www.usda.gov/topics/food-and-nutrition/dietary-guidelines',
-            source: 'USDA',
-            domain: 'usda.gov',
-            category: 'Nutrition & Diet',
-            publishedDate: '2025-01-21T15:10:00Z',
-            relevanceScore: 0.87,
-            tags: ['nutrition', 'energy', 'superfoods'],
-            // ADDED: Required fields
-            hasMedia: true,
-            hasAuthor: false,
-            // ADDED: Optional enhanced fields
-            thumbnailUrl: "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=400&q=80",
-            imageUrl: "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=800&q=80",
-            mediaType: "image",
-            wordCount: 140,
-            readingTime: 1,
-            contentLength: 700
+      if (response.success && response.articles && response.articles.length > 0) {
+        let processedArticles = response.articles;
+        console.log(`Received ${processedArticles.length} articles from API`);
+        
+        // For "all" category, still sort and diversify
+        if (selectedCategory === 'all') {
+          // Sort articles by category priority
+          processedArticles = sortArticlesByPriority(response.articles, healthCategories);
+          
+          // Diversify sources
+          processedArticles = diversifySources(processedArticles);
+          
+          // Limit to maxArticles if we're on the first page
+          if (resetPage) {
+            processedArticles = processedArticles.slice(0, maxArticles);
+          } else {
+            // For subsequent pages, limit to maxArticles more
+            processedArticles = processedArticles.slice(0, maxArticles);
           }
-        ];
-
-        // Filter by category if not 'all'
-        const filteredArticles = selectedCategory === 'all' 
-          ? mockArticles 
-          : mockArticles.filter(article => article.category === selectedCategory);
-
-        setArticles(filteredArticles.slice(0, maxArticles));
+        }
+        
+        if (resetPage) {
+          setArticles(processedArticles);
+        } else {
+          // Append new articles to existing ones
+          setArticles(prev => [...prev, ...processedArticles]);
+        }
+        
+        // If API doesn't provide pagination info, infer it from response length
+        if (response.pagination) {
+          setHasMorePages(response.pagination.has_next_page);
+        } else {
+          // If we received at least as many articles as we requested, assume there are more
+          setHasMorePages(response.articles.length >= maxArticles);
+        }
+      } else {
+        console.log('No articles found for the selected category on page', page);
+        // If no articles found and it's "all" category, try one more time with really no filters
+        if (selectedCategory === 'all') {
+          console.log('Trying again with absolutely no filters');
+          // Last resort - force no filtering at all
+          try {
+            const fallbackResponse = await fetch('/api/news/articles?limit=' + maxArticles);
+            const fallbackData = await fallbackResponse.json();
+            
+            if (fallbackData.success && fallbackData.articles && fallbackData.articles.length > 0) {
+              console.log('Fallback succeeded, got articles');
+              if (resetPage) {
+                setArticles(fallbackData.articles);
+              } else {
+                setArticles(prev => [...prev, ...fallbackData.articles]);
+              }
+              setHasMorePages(fallbackData.articles.length >= maxArticles);
+            } else {
+              if (resetPage) {
+                setArticles([]);
+              }
+              setHasMorePages(false);
+            }
+          } catch (fallbackError) {
+            console.error('Even fallback failed:', fallbackError);
+            if (resetPage) {
+              setArticles([]);
+            }
+            setHasMorePages(false);
+          }
+        } else {
+          if (resetPage) {
+            setArticles([]);
+          }
+          setHasMorePages(false);
+        }
       }
     } catch (error) {
       console.error('Error fetching health news:', error);
-      // Use mock data as fallback
-      setArticles([]);
+      if (resetPage) {
+        setArticles([]);
+      }
+      setHasMorePages(false);
     } finally {
       setLoading(false);
+      setLoadingMore(false);
     }
   };
+  
+  // Replace your current sortArticlesByPriority function with this one
 
-  const formatTimeAgo = (dateString: string) => {
-    const now = new Date();
-    const publishedDate = new Date(dateString);
-    const diffInHours = Math.floor((now.getTime() - publishedDate.getTime()) / (1000 * 60 * 60));
+  const sortArticlesByPriority = (articles: NewsArticle[], priorityCategories: string[]): NewsArticle[] => {
+    // Create a copy of the articles array
+    const sortedArticles = [...articles];
     
-    if (diffInHours < 1) return 'Just now';
-    if (diffInHours < 24) return `${diffInHours}h ago`;
-    const diffInDays = Math.floor(diffInHours / 24);
-    return `${diffInDays}d ago`;
-  };
-
-  const getSourceInitials = (source: string) => {
-    return source
-      .split(' ')
-      .map(word => word.charAt(0))
-      .join('')
-      .toUpperCase()
-      .substring(0, 2);
-  };
-
-  const getCategoryColor = (category: string) => {
-    const colors: Record<string, string> = {
-      'Nutrition & Diet': '#4CAF50',
-      'Medical Research': '#2196F3',
-      'Public Health': '#FF9800',
-      'Clinical Studies': '#9C27B0',
-      'Disease Prevention': '#F44336',
-      'Mental Health': '#607D8B',
-      'General Health': '#795548'
+    // Define a function to get priority score (lower is higher priority)
+    const getPriorityScore = (article: NewsArticle): number => {
+      const category = article.category || '';
+      
+      // 1. Exact match with priority categories (in order)
+      for (let i = 0; i < priorityCategories.length; i++) {
+        if (category === priorityCategories[i]) {
+          return i; // Return the exact index position (0, 1, 2, etc.)
+        }
+      }
+      
+      // 2. Partial match with priority categories
+      for (let i = 0; i < priorityCategories.length; i++) {
+        if (category.includes(priorityCategories[i])) {
+          return i + 20; // Still keep order but with lower priority than exact matches
+        }
+      }
+      
+      // 3. Check for health-related keywords in title/description
+      const title = article.title || '';
+      const description = article.description || '';
+      const content = title + ' ' + description;
+      const contentLower = content.toLowerCase();
+      
+      const healthKeywords = [
+        'health', 'medical', 'medicine', 'doctor', 'patient', 'hospital',
+        'disease', 'treatment', 'cure', 'wellness', 'fitness', 'diet',
+        'nutrition', 'mental', 'therapy', 'clinical', 'drug', 'vaccine',
+        'symptom', 'diagnosis', 'cancer', 'heart', 'diabetes', 'covid'
+      ];
+      
+      if (healthKeywords.some(keyword => contentLower.includes(keyword))) {
+        return 100; // All health-related content after categorized content
+      }
+      
+      // 4. Tech content goes last
+      const techKeywords = ['tech', 'technology', 'computing', 'software', 'hardware', 'ai', 'artificial intelligence'];
+      if (techKeywords.some(keyword => 
+        category.toLowerCase().includes(keyword) || 
+        contentLower.includes(keyword)
+      )) {
+        return 1000; // Tech content at the bottom
+      }
+      
+      // 5. Everything else
+      return 500; // Other content in the middle
     };
-    return colors[category] || '#666';
-  };
-
-  const getPlaceholderImage = (category: string) => {
-    const placeholders: Record<string, string> = {
-      'Nutrition & Diet': 'https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=400&h=200&fit=crop',
-      'Medical Research': 'https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=400&h=200&fit=crop',
-      'Public Health': 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?w=400&h=200&fit=crop',
-      'Clinical Studies': 'https://images.unsplash.com/photo-1559757175-0eb30cd8c063?w=400&h=200&fit=crop',
-      'Disease Prevention': 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=400&h=200&fit=crop',
-      'Mental Health': 'https://images.unsplash.com/photo-1559757175-8a5c71f5e34b?w=400&h=200&fit=crop',
-      'General Health': 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=200&fit=crop'
-    };
-    return placeholders[category] || 'https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=400&h=200&fit=crop';
-  };
-
-  // Update the handleAnalyzeWithWihy function to use the parent's search functionality:
-  const handleAnalyzeWithWihy = async (article: NewsArticle, event: React.MouseEvent) => {
-    event.stopPropagation();
     
-    const analysisQuery = `Analyze this health article and provide a comprehensive review with scoring:
-
-Article Title: "${article.title}"
-Summary: ${article.summary}
-Category: ${article.category}
-Source: ${article.source}
-
-Please provide:
-1. A detailed explanation of the health implications
-2. Key takeaways and actionable insights  
-3. Scientific accuracy assessment (1-10 score)
-4. Practical applicability rating (1-10 score)
-5. Overall credibility score (1-10 score)
-6. How this relates to overall wellness and health optimization
-7. Any potential concerns or limitations of the research
-8. Recommendations for readers based on this information
-
-Format the response with clear sections and scoring breakdown.`;
-
-    // Use the parent's search functionality
-    if (setSearchQuery && triggerSearch) {
-      setSearchQuery(analysisQuery);
-      triggerSearch();
-    } else if (onAnalyzeArticle) {
-      // Fallback to callback if provided
-      onAnalyzeArticle(analysisQuery);
+    // Debug the categories before sorting
+    console.log('Priority order:', priorityCategories);
+    
+    // Sort articles by priority score
+    sortedArticles.sort((a, b) => {
+      const priorityA = getPriorityScore(a);
+      const priorityB = getPriorityScore(b);
+      
+      // First sort by priority category
+      if (priorityA !== priorityB) {
+        return priorityA - priorityB;
+      }
+      
+      // If same priority category, sort by date (newest first)
+      const dateA = a.publishedDate || a.published_date;
+      const dateB = b.publishedDate || b.published_date;
+      
+      if (dateA && dateB) {
+        return new Date(dateB).getTime() - new Date(dateA).getTime();
+      }
+      
+      return 0;
+    });
+    
+    // Log the first few articles to debug the sorting
+    console.log('Articles after sorting:');
+    sortedArticles.slice(0, 5).forEach((article, i) => {
+      const score = getPriorityScore(article);
+      console.log(`  ${i+1}. [${score}] ${article.category || 'uncategorized'}: ${article.title}`);
+    });
+    
+    return sortedArticles;
+  };
+  
+  // Function to ensure diversity of sources
+  const diversifySources = (articles: NewsArticle[]): NewsArticle[] => {
+    if (!articles || articles.length <= 4) return articles;
+    
+    // Group articles by source
+    const sourceMap: Record<string, NewsArticle[]> = {};
+    articles.forEach(article => {
+      const source = article.source || 'unknown';
+      if (!sourceMap[source]) {
+        sourceMap[source] = [];
+      }
+      sourceMap[source].push(article);
+    });
+    
+    // Get all unique sources
+    const sources = Object.keys(sourceMap);
+    console.log('Available sources:', sources);
+    
+    // If we only have one source, return original articles
+    if (sources.length <= 1) return articles;
+    
+    // Build a diversified list by alternating between sources
+    const diversified: NewsArticle[] = [];
+    let remainingArticles = [...articles];
+    
+    // Limit articles per source based on how many sources we have
+    const maxPerSource = Math.max(2, Math.ceil(articles.length / sources.length));
+    
+    // First pass: Take up to the limit from each source
+    sources.forEach(source => {
+      const sourceArticles = sourceMap[source].slice(0, maxPerSource);
+      diversified.push(...sourceArticles);
+      
+      // Remove the ones we've taken
+      remainingArticles = remainingArticles.filter(
+        article => !sourceArticles.includes(article)
+      );
+    });
+    
+    // Add any remaining articles up to the original length
+    if (remainingArticles.length > 0) {
+      const neededCount = articles.length - diversified.length;
+      diversified.push(...remainingArticles.slice(0, neededCount));
     }
+    
+    console.log(`Source diversity: from ${articles.length} articles with ${sources.length} sources, created ${diversified.length} diversified articles`);
+    
+    return diversified;
   };
+  
+  // Replace the handleAnalyzeWithWihy function (lines 471-493)
 
-  if (loading) {
+  const handleAnalyzeWithWihy = (article: NewsArticle, e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    
+    if (analyzingArticle === article.id) return;
+    
+    setAnalyzingArticle(article.id);
+    
+    const searchQuery = `Analyze this health article: ${article.title}. 
+Summary: ${article.description || article.summary || 'No description available'}.
+Source: ${article.source || 'Unknown source'}
+Category: ${article.category || 'Uncategorized'}`;
+
+    console.log('Starting article analysis:', article.title);
+    
+    // GUARANTEED APPROACH: Directly manipulate DOM and submit the form
+    const searchElement = document.querySelector('.search-input') as HTMLInputElement;
+    if (searchElement) {
+      // Direct DOM update for immediate effect
+      searchElement.value = searchQuery;
+      searchElement.focus();
+      
+      // Find the form and submit it directly
+      const form = searchElement.closest('form');
+      if (form) {
+        console.log('Found form, submitting directly');
+        
+        // Also update React state
+        if (setSearchQuery) {
+          setSearchQuery(searchQuery);
+        }
+        
+        // Submit the form
+        setTimeout(() => {
+          form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+        }, 10);
+        
+        // Also try triggerSearch as backup
+        if (triggerSearch) {
+          setTimeout(() => {
+            triggerSearch();
+          }, 50);
+        }
+      } else {
+        // No form found, fall back to triggerSearch
+        console.log('No form found, using triggerSearch directly');
+        if (setSearchQuery) {
+          setSearchQuery(searchQuery);
+        }
+        
+        if (triggerSearch) {
+          triggerSearch();
+        }
+      }
+    } else {
+      // Can't find search element, use the props approach
+      console.log('No search input found, using prop methods');
+      
+      if (setSearchQuery) {
+        setSearchQuery(searchQuery);
+      }
+      
+      if (triggerSearch) {
+        triggerSearch();
+      }
+      
+      // Last resort - use the onAnalyzeArticle function
+      if (!setSearchQuery || !triggerSearch) {
+        onAnalyzeArticle(searchQuery);
+      }
+    }
+    
+    // Reset analyzing state after delay
+    setTimeout(() => setAnalyzingArticle(null), 2000);
+  };
+  
+  if (loading && currentPage === 1) {
     return (
       <div className="news-feed-container">
-        <div className="news-feed-header">
-          <h2>Latest Health News</h2>
+        <div className="news-categories">
+          {categories.map(category => (
+            <button
+              key={category.id}
+              className={`category-btn ${selectedCategory === category.id ? 'active' : ''}`}
+              onClick={() => setSelectedCategory(category.id)}
+            >
+              {category.label}
+            </button>
+          ))}
         </div>
         <div className="loading-news">
           <img 
@@ -312,7 +535,7 @@ Format the response with clear sections and scoring breakdown.`;
               width: '48px',
               height: '48px',
               objectFit: 'contain',
-              marginBottom: '16px'  // Add this line for spacing
+              marginBottom: '16px'
             }}
           />
           <p>Loading latest health news...</p>
@@ -340,104 +563,112 @@ Format the response with clear sections and scoring breakdown.`;
           <article 
             key={article.id} 
             className="news-card"
-            data-category={article.category}  // Add this line
-            onClick={() => window.open(article.url, '_blank')}
+            data-category={article.category}
+            onClick={() => window.open(article.link || article.url, '_blank')}
           >
-            {/* Image Section */}
+            {/* Image Section - Using category-based random placeholders only when needed */}
             <div className="news-image">
-              {article.thumbnailUrl ? (
+              {(article.image_url || article.thumbnail || article.imageUrl || article.thumbnailUrl) ? (
                 <img 
-                  src={article.thumbnailUrl} 
+                  src={article.image_url || article.thumbnail || article.imageUrl || article.thumbnailUrl} 
                   alt={article.title}
                   onError={(e) => {
-                    (e.target as HTMLImageElement).src = getPlaceholderImage(article.category);
+                    console.log('Image failed to load:', article.image_url || article.thumbnail);
+                    // Use category-specific random placeholder instead of hiding
+                    (e.target as HTMLImageElement).src = getRandomPlaceholderImage(article.category);
+                    // Add placeholder class for styling
+                    (e.target as HTMLImageElement).classList.add('placeholder-image');
                   }}
                 />
               ) : (
+                // Use category-specific random placeholder when no image is provided
                 <img 
-                  src={getPlaceholderImage(article.category)} 
-                  alt={article.title}
+                  src={getRandomPlaceholderImage(article.category)}
+                  alt={article.title || 'Health article'}
+                  className="placeholder-image"
                 />
               )}
             </div>
-
+            
+            {/* Content Section */}
             <div className="news-content">
+              {/* Meta Information */}
               <div className="news-meta">
-                {/* Replace this source avatar section: */}
-                {/* 
-                <span className="news-source">
-                  <span className="source-avatar">
-                    {getSourceInitials(article.source)}
-                  </span>
-                  {article.source}
-                </span>
-                */}
+                {/* Analyze with WIHY Button */}
+                {onAnalyzeArticle && (
+                  <button 
+                    className="analyze-wihy-btn"
+                    onClick={(e) => handleAnalyzeWithWihy(article, e)}
+                    disabled={analyzingArticle === article.id}
+                    style={{
+                      background: analyzingArticle === article.id 
+                        ? 'linear-gradient(#f3f4f6, #f3f4f6)' 
+                        : 'linear-gradient(#fff, #fff) padding-box, linear-gradient(90deg, #fbbc05, #34a853, #1a73e8) border-box',
+                      border: '2px solid transparent',
+                      color: analyzingArticle === article.id ? '#9ca3af' : '#1a73e8',
+                      padding: '6px 12px',
+                      borderRadius: '16px',
+                      fontSize: '11px',
+                      fontWeight: '600',
+                      cursor: analyzingArticle === article.id ? 'not-allowed' : 'pointer',
+                      transition: 'all 0.2s ease',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      whiteSpace: 'nowrap',
+                      width: 'auto',
+                      height: '24px',
+                      lineHeight: '1',
+                      boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+                      backgroundSize: '100% 100%, 200% 100%',
+                      opacity: analyzingArticle === article.id ? 0.6 : 1
+                    }}
+                    onMouseOver={(e) => {
+                      if (analyzingArticle !== article.id) {
+                        e.currentTarget.style.animation = 'wiH-border-sweep 2.2s linear infinite';
+                        e.currentTarget.style.transform = 'translateY(-1px)';
+                        e.currentTarget.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.15)';
+                        e.currentTarget.style.backgroundSize = '100% 100%, 300% 100%';
+                      }
+                    }}
+                    onMouseOut={(e) => {
+                      e.currentTarget.style.animation = '';
+                      e.currentTarget.style.transform = '';
+                      e.currentTarget.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.1)';
+                      e.currentTarget.style.backgroundSize = '100% 100%, 200% 100%';
+                    }}
+                  >
+                    {analyzingArticle === article.id ? (
+                      <>
+                        <div style={{
+                          width: '12px',
+                          height: '12px',
+                          border: '2px solid #9ca3af',
+                          borderRightColor: 'transparent',
+                          borderRadius: '50%',
+                          animation: 'spin 0.8s linear infinite',
+                          marginRight: '4px'
+                        }}></div>
+                        Analyzing...
+                      </>
+                    ) : (
+                      <>Analyze with WIHY</>
+                    )}
+                  </button>
+                )}
                 
-                {/* With this analyze button: */}
-                <button 
-                  className="analyze-wihy-btn"
-                  onClick={(e) => handleAnalyzeWithWihy(article, e)}
-                  disabled={analyzingArticle === article.id}
-                  style={{
-                    background: analyzingArticle === article.id 
-                      ? 'linear-gradient(#f3f4f6, #f3f4f6)' 
-                      : 'linear-gradient(#fff, #fff) padding-box, linear-gradient(90deg, #fbbc05, #34a853, #1a73e8) border-box',
-                    border: '2px solid transparent',
-                    borderRadius: '16px',
-                    padding: '6px 12px',
-                    fontSize: '11px',
-                    fontWeight: '600',
-                    cursor: analyzingArticle === article.id ? 'not-allowed' : 'pointer',
-                    transition: 'all 0.2s ease',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '4px',
-                    color: '#1f2937',
-                    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
-                    backgroundSize: '100% 100%, 200% 100%',
-                    opacity: analyzingArticle === article.id ? 0.6 : 1
-                  }}
-                  onMouseOver={(e) => {
-                    if (analyzingArticle !== article.id) {
-                      e.currentTarget.style.animation = 'wiH-border-sweep 2.2s linear infinite';
-                      e.currentTarget.style.transform = 'translateY(-1px)';
-                      e.currentTarget.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.15)';
-                    }
-                  }}
-                  onMouseOut={(e) => {
-                    e.currentTarget.style.animation = 'none';
-                    e.currentTarget.style.transform = 'translateY(0)';
-                    e.currentTarget.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.1)';
-                  }}
-                >
-                  {analyzingArticle === article.id ? (
-                    <>
-                      <div style={{
-                        width: '12px',
-                        height: '12px',
-                        border: '2px solid #1f2937',
-                        borderTop: '2px solid transparent',
-                        borderRadius: '50%',
-                        animation: 'spin 1s linear infinite'
-                      }} />
-                      Analyzing...
-                    </>
-                  ) : (
-                    <>🧠 Analyze with WIHY</>
-                  )}
-                </button>
-                
+                {/* Source Tag */}
                 <span 
                   className="news-category"
                   style={{ backgroundColor: getCategoryColor(article.category) }}
                 >
                   {article.category}
                 </span>
-                <span className="news-time">{formatTimeAgo(article.publishedDate)}</span>
+                <span className="news-time">{formatTimeAgo(article.publishedDate || article.published_date)}</span>
               </div>
               
               <h3 className="news-title">{article.title}</h3>
-              <p className="news-summary">{article.summary}</p>
+              <p className="news-summary">{article.summary || article.description}</p>
               
               <div className="news-tags">
                 {article.tags?.slice(0, 3).map(tag => (
@@ -458,17 +689,29 @@ Format the response with clear sections and scoring breakdown.`;
         ))}
       </div>
 
+      {/* Empty state */}
       {articles.length === 0 && !loading && (
         <div className="no-articles">
-          <p>No articles found for the selected category. Try selecting a different category or refresh the feed.</p>
+          <p>No articles found for the selected category. Try selecting a different category.</p>
         </div>
       )}
 
-      <div className="news-footer">
-        <button className="load-more-btn" onClick={fetchHealthNews}>
-          Refresh Articles
-        </button>
-      </div>
+      {/* Loading more indicator */}
+      {loadingMore && (
+        <div className="loading-more">
+          <div className="loading-spinner"></div>
+          <p>Loading more articles...</p>
+        </div>
+      )}
+
+      {/* Intersection Observer Target - invisible element that triggers loading when scrolled into view */}
+      {hasMorePages && !loadingMore && articles.length > 0 && (
+        <div
+          ref={observerTarget} 
+          className="intersection-observer-target"
+          style={{ height: '20px', margin: '20px 0', visibility: 'hidden' }}
+        />
+      )}
     </div>
   );
 };
