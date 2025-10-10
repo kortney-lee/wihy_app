@@ -600,59 +600,14 @@ Category: ${article.category || 'Uncategorized'}`;
                     className="analyze-wihy-btn"
                     onClick={(e) => handleAnalyzeWithWihy(article, e)}
                     disabled={analyzingArticle === article.id}
-                    style={{
-                      background: analyzingArticle === article.id 
-                        ? 'linear-gradient(#f3f4f6, #f3f4f6)' 
-                        : 'linear-gradient(#fff, #fff) padding-box, linear-gradient(90deg, #fbbc05, #34a853, #1a73e8) border-box',
-                      border: '2px solid transparent',
-                      color: analyzingArticle === article.id ? '#9ca3af' : '#1a73e8',
-                      padding: '6px 12px',
-                      borderRadius: '16px',
-                      fontSize: '11px',
-                      fontWeight: '600',
-                      cursor: analyzingArticle === article.id ? 'not-allowed' : 'pointer',
-                      transition: 'all 0.2s ease',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '4px',
-                      whiteSpace: 'nowrap',
-                      width: 'auto',
-                      height: '24px',
-                      lineHeight: '1',
-                      boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
-                      backgroundSize: '100% 100%, 200% 100%',
-                      opacity: analyzingArticle === article.id ? 0.6 : 1
-                    }}
-                    onMouseOver={(e) => {
-                      if (analyzingArticle !== article.id) {
-                        e.currentTarget.style.animation = 'wiH-border-sweep 2.2s linear infinite';
-                        e.currentTarget.style.transform = 'translateY(-1px)';
-                        e.currentTarget.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.15)';
-                        e.currentTarget.style.backgroundSize = '100% 100%, 300% 100%';
-                      }
-                    }}
-                    onMouseOut={(e) => {
-                      e.currentTarget.style.animation = '';
-                      e.currentTarget.style.transform = '';
-                      e.currentTarget.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.1)';
-                      e.currentTarget.style.backgroundSize = '100% 100%, 200% 100%';
-                    }}
                   >
                     {analyzingArticle === article.id ? (
                       <>
-                        <div style={{
-                          width: '12px',
-                          height: '12px',
-                          border: '2px solid #9ca3af',
-                          borderRightColor: 'transparent',
-                          borderRadius: '50%',
-                          animation: 'spin 0.8s linear infinite',
-                          marginRight: '4px'
-                        }}></div>
+                        <div className="analyze-spinner"></div>
                         Analyzing...
                       </>
                     ) : (
-                      <>Analyze with WIHY</>
+                      <>Analyze with WiHy</>
                     )}
                   </button>
                 )}
