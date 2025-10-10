@@ -3,7 +3,7 @@ import { searchCache } from './services/searchCache';
 import { photoStorageService } from './services/photoStorageService';
 import { foodAnalysisService } from './components/foodAnalysisService';
 import ImageUploadModal from './components/ImageUploadModal';
-import MultiAuthLogin from './components/MultiAuthLogin';
+import MultiAuthLogin from './components/shared/components/MultiAuthLogin';
 import ResultQualityPie from './components/ResultQualityPie';
 import NutritionChart from './components/NutritionChart';
 import NovaChart from './components/NovaChart';

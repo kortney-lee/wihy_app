@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import './MultiAuthLogin.css';
 
 export interface User {
@@ -113,9 +113,12 @@ const MultiAuthLogin: React.FC<MultiAuthLoginProps> = ({
       try {
         const parsedUser = JSON.parse(savedUser);
         setUser(parsedUser);
-        onUserChange?.(parsedUser);
+        // IMPORTANT: Wrap this in a conditional to prevent excessive logging
+        if (!user) {
+          onUserChange?.(parsedUser);
+        }
       } catch (error) {
-        console.error('Error parsing saved user:', error);
+        safeLog('Error parsing saved user', error);
         localStorage.removeItem(storageKey);
       }
     }
@@ -128,7 +131,7 @@ const MultiAuthLogin: React.FC<MultiAuthLoginProps> = ({
     if (code && state && !user) {
       handleOAuthCallback(code, state);
     }
-  }, [storageKey, onUserChange]);
+  }, [storageKey]); // Remove onUserChange from dependencies
 
   const handleOAuthCallback = async (code: string, state: string) => {
     setLoading(true);
@@ -162,7 +165,8 @@ const MultiAuthLogin: React.FC<MultiAuthLoginProps> = ({
       // Clean up URL
       window.history.replaceState({}, document.title, window.location.pathname);
     } catch (error) {
-      console.error('OAuth callback error:', error);
+      // console.error('OAuth callback error:', error);
+      safeLog('OAuth callback error', error);
     } finally {
       setLoading(false);
     }
@@ -314,3 +318,21 @@ const MultiAuthLogin: React.FC<MultiAuthLoginProps> = ({
 };
 
 export default MultiAuthLogin;
+
+// Add this helper function at the top of your file
+const safeLog = (message: string, data?: any) => {
+  if (data === undefined) {
+    console.log(message);
+    return;
+  }
+  
+  try {
+    if (typeof data === 'object' && data !== null) {
+      console.log(message, JSON.stringify(data));
+    } else {
+      console.log(message, data);
+    }
+  } catch (error) {
+    console.log(message, '(Object could not be stringified)');
+  }
+};
