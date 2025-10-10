@@ -1,7 +1,15 @@
-/* ---------------------------
-   VHealth Shared Header Component
-----------------------------*/
+/* Import styles in proper order - search components should override base */
+@import '../../../styles/search-components.css';
+@import '../../../styles/buttons.css';
+@import '../../../styles/base.css';
+@import '../../../styles/modals.css';
+@import '../../../styles/responsive.css';
+@import '../../../styles/utilities.css';
 
+/* Import other component styles */
+@import './MultiAuthLogin.css';
+
+/* Header-specific styles below - keep all of these */
 .vhealth-header {
   display: flex;
   align-items: center;
@@ -78,136 +86,14 @@
 }
 
 .vhealth-header.results .vhealth-search-section {
+  flex: 1;
+  display: flex;
+  justify-content: center;
   margin: 0 20px;
 }
 
 .vhealth-search-form {
   width: 100%;
-}
-
-/* Search Input Container */
-.vhealth-header .search-input-container {
-  position: relative;
-  width: 100%;
-  margin: 0 auto;
-  border: 2px solid transparent;
-  border-radius: 24px;
-  box-shadow: 0 8px 24px rgba(15,23,42,.06);
-  background:
-    linear-gradient(#fff, #fff) padding-box,
-    linear-gradient(90deg, #fbbc05, #34a853, #1a73e8) border-box;
-  background-size: 100% 100%, 200% 100%;
-  transition: box-shadow 0.2s ease, background-position 0.4s linear;
-}
-
-.vhealth-header.results .search-input-container {
-  box-shadow: 0 1px 6px rgba(32,33,36,0.28);
-}
-
-.vhealth-header .search-input-container:hover,
-.vhealth-header .search-input-container:focus-within {
-  animation: vhealth-border-sweep 2.2s linear infinite;
-  box-shadow: 0 2px 8px rgba(32,33,36,0.28);
-}
-
-@keyframes vhealth-border-sweep {
-  0%   { background-position: 0 0,   0% 0; }
-  100% { background-position: 0 0, 200% 0; }
-}
-
-/* Search Input */
-.vhealth-header .search-input {
-  width: 100%;
-  min-height: 44px;
-  max-height: 120px;
-  padding: 10px 60px 10px 20px;
-  font-size: 18px;
-  border: none;
-  outline: none;
-  border-radius: 24px;
-  background: transparent;
-  font-family: inherit;
-  resize: none;
-  overflow: hidden;
-  line-height: 1.4;
-  word-wrap: break-word;
-  word-break: break-word;
-  overflow-wrap: break-word;
-  height: 44px;
-  transition: height 0.2s ease;
-  text-align: left;
-  vertical-align: bottom;
-  display: flex;
-  align-items: flex-end;
-}
-
-.vhealth-header.results .search-input {
-  font-size: 16px;
-  height: 48px;
-}
-
-.vhealth-header .search-input::placeholder {
-  text-align: left;
-  color: #9aa0a6;
-  font-size: 18px;
-  vertical-align: bottom;
-}
-
-.vhealth-header.results .search-input::placeholder {
-  font-size: 16px;
-}
-
-/* Search Icons */
-.vhealth-header .search-icons {
-  display: flex;
-  align-items: center;
-  position: absolute;
-  right: 8px;
-  top: 50%;
-  transform: translateY(-50%);
-  gap: 4px;
-}
-
-.vhealth-header .icon-button {
-  width: 32px;
-  height: 32px;
-  border: none;
-  background: none;
-  cursor: pointer;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #70757a;
-  transition: color .2s ease, background-color .2s ease;
-}
-
-.vhealth-header .icon-button:hover {
-  background-color: #f1f3f4;
-  color: #1a73e8;
-}
-
-.vhealth-header .icon-button svg {
-  width: 20px;
-  height: 20px;
-  fill: currentColor;
-  transition: fill 0.2s ease;
-}
-
-.vhealth-header .clear-button {
-  background: #f8f9fa;
-}
-
-.vhealth-header .clear-button:hover {
-  background: #e8eaed;
-}
-
-.vhealth-header .listening {
-  background: #ea4335 !important;
-}
-
-.vhealth-header .listening svg {
-  fill: #fff !important;
 }
 
 /* User Section */
@@ -222,6 +108,40 @@
   position: absolute;
   top: 20px;
   right: 20px;
+}
+
+/* Override search container width for header */
+.vhealth-header .search-input-container {
+  width: 100% !important;
+  max-width: 800px !important; /* Increased from 600px to 800px */
+  margin: 0 auto !important;
+}
+
+/* Ensure proper centering in landing page */
+.vhealth-header.landing .vhealth-search-section {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+.vhealth-header.landing .vhealth-search-form {
+  width: 100%;
+  max-width: 600px;
+  display: flex;
+  justify-content: center;
+}
+
+/* Results page layout fixes */
+.vhealth-header.results .search-input-container {
+  width: 100% !important;
+  max-width: 1000px !important; /* Increased from 500px to 700px */
+}
+
+/* Ensure logo and search are properly aligned */
+.vhealth-header.results {
+  align-items: center;
+  justify-content: space-between;
 }
 
 /* Responsive Design */
@@ -256,6 +176,16 @@
     top: 15px;
     right: 15px;
   }
+
+  .vhealth-header.landing .search-input-container {
+    width: 90% !important;
+    max-width: none !important;
+  }
+  
+  .vhealth-header.results .search-input-container {
+    width: 100% !important;
+    max-width: none !important;
+  }
 }
 
 @media (max-width: 480px) {
@@ -275,5 +205,47 @@
 
   .vhealth-header .search-input::placeholder {
     font-size: 16px;
+  }
+}
+
+/* ================================
+   REMOVE ALL ICON BUTTON OVERRIDES
+   Let the imported styles handle this
+================================ */
+
+/* Only override container positioning if needed */
+.vhealth-header .search-input-container {
+  position: relative !important;
+  width: 100% !important;
+  max-width: 800px !important;
+  margin: 0 auto !important;
+}
+
+/* Landing page search input - larger font */
+.vhealth-header.landing .search-input {
+  font-size: 18px !important;
+}
+
+/* Results page search input - standard font */
+.vhealth-header.results .search-input {
+  font-size: 16px !important;
+}
+
+/* Ensure proper padding for the search input */
+.vhealth-header .search-input {
+  padding-right: 110px !important; /* Space for icons */
+  padding-left: 16px !important;
+}
+
+/* Mobile responsiveness for search input only */
+@media (max-width: 768px) {
+  .vhealth-header .search-input {
+    padding-right: 90px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .vhealth-header .search-input {
+    padding-right: 80px !important;
   }
 }
