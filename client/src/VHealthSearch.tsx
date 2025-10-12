@@ -130,8 +130,9 @@ const VHealthSearch: React.FC = () => {
    * Flow: Check cache → API call → Save to cache → Navigate to results
    * Uses 4-step fallback strategy for reliability
    */
-  const handleSearch = async () => {
-    if (!searchQuery.trim() || isLoading) return;
+  const handleSearch = async (queryParam?: string) => {
+    const queryToUse = queryParam || searchQuery;
+    if (!queryToUse.trim() || isLoading) return;
     
     // Create new AbortController for this request
     abortControllerRef.current = new AbortController();
@@ -145,7 +146,7 @@ const VHealthSearch: React.FC = () => {
       setLoadingMessage('Checking cache...');
       
       try {
-        const response = await fetch(`http://localhost:5000/api/cache/get?q=${encodeURIComponent(searchQuery)}`, { signal });
+        const response = await fetch(`http://localhost:5000/api/cache/get?q=${encodeURIComponent(queryToUse)}`, { signal });
         
         if (response.ok) {
           const cachedData = await response.json();
@@ -155,7 +156,7 @@ const VHealthSearch: React.FC = () => {
           
           setIsLoading(false);
           // Pass the cached data via navigation state
-          navigate(`/results?q=${encodeURIComponent(searchQuery)}`, {
+          navigate(`/results?q=${encodeURIComponent(queryToUse)}`, {
             state: {
               results: cachedData.results,
               dataSource: cachedData.source || 'cache',
@@ -175,11 +176,11 @@ const VHealthSearch: React.FC = () => {
 
       // Step 2: Get fresh results from API
       setLoadingMessage('Analyzing with AI...');
-      console.log('Getting fresh results for:', searchQuery);
+      console.log('Getting fresh results for:', queryToUse);
       
       try {
         // Pass signal to healthSearchService
-        const searchResults = await healthSearchService.searchHealthInfo(searchQuery, signal);
+        const searchResults = await healthSearchService.searchHealthInfo(queryToUse, signal);
         console.log('Health search results received:', searchResults);
         
         const isValidResult = searchResults && 
@@ -199,7 +200,7 @@ const VHealthSearch: React.FC = () => {
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-              query: searchQuery,
+              query: queryToUse,
               results: searchResults,
               source: 'openai'
             })
@@ -220,7 +221,7 @@ const VHealthSearch: React.FC = () => {
           console.log('Navigating to results page with data');
           
           // Pass the fresh results via navigation state
-          navigate(`/results?q=${encodeURIComponent(searchQuery)}`, {
+          navigate(`/results?q=${encodeURIComponent(queryToUse)}`, {
             state: {
               results: searchResults,
               dataSource: 'openai',
@@ -244,7 +245,7 @@ const VHealthSearch: React.FC = () => {
         setLoadingMessage('Searching for similar results...');
         
         try {
-          const similarResponse = await fetch(`http://localhost:5000/api/cache/similar?q=${encodeURIComponent(searchQuery)}`);
+          const similarResponse = await fetch(`http://localhost:5000/api/cache/similar?q=${encodeURIComponent(queryToUse)}`);
           
           if (similarResponse.ok) {
             const similarResults = await similarResponse.json();
@@ -256,7 +257,7 @@ const VHealthSearch: React.FC = () => {
               
               setIsLoading(false);
               // Pass similar results via navigation state
-              navigate(`/results?q=${encodeURIComponent(searchQuery)}`, {
+              navigate(`/results?q=${encodeURIComponent(queryToUse)}`, {
                 state: {
                   results: similarResults[0].results,
                   dataSource: 'similar',
@@ -826,9 +827,14 @@ const VHealthSearch: React.FC = () => {
             <HealthNewsFeed 
               maxArticles={6}
               setSearchQuery={setSearchQuery}
-              triggerSearch={() => {
+              triggerSearch={(customQuery?: string) => {
                 setShowFeelingHealthyContent(false); // Close news feed
-                handleSearch(); // Trigger search with the newly set query
+                // Use the custom query if provided, otherwise use current searchQuery
+                if (customQuery) {
+                  handleSearch(customQuery);
+                } else {
+                  handleSearch();
+                }
               }}
             />
           </div>

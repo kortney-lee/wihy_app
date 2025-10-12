@@ -8,7 +8,7 @@ interface NewsFeedProps {
   maxArticles?: number;
   onAnalyzeArticle?: (query: string) => void;
   setSearchQuery?: (query: string) => void;
-  triggerSearch?: () => void;
+  triggerSearch?: (customQuery?: string) => void;
 }
 
 // Define placeholder images by category
@@ -452,60 +452,56 @@ Category: ${article.category || 'Uncategorized'}`;
 
     console.log('Starting article analysis:', article.title);
     
-    // GUARANTEED APPROACH: Directly manipulate DOM and submit the form
-    const searchElement = document.querySelector('.search-input') as HTMLInputElement;
-    if (searchElement) {
-      // Direct DOM update for immediate effect
-      searchElement.value = searchQuery;
-      searchElement.focus();
-      
-      // Find the form and submit it directly
-      const form = searchElement.closest('form');
-      if (form) {
-        console.log('Found form, submitting directly');
-        
-        // Also update React state
-        if (setSearchQuery) {
-          setSearchQuery(searchQuery);
-        }
-        
-        // Submit the form
-        setTimeout(() => {
-          form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
-        }, 10);
-        
-        // Also try triggerSearch as backup
-        if (triggerSearch) {
-          setTimeout(() => {
-            triggerSearch();
-          }, 50);
-        }
-      } else {
-        // No form found, fall back to triggerSearch
-        console.log('No form found, using triggerSearch directly');
-        if (setSearchQuery) {
-          setSearchQuery(searchQuery);
-        }
-        
-        if (triggerSearch) {
-          triggerSearch();
-        }
-      }
-    } else {
-      // Can't find search element, use the props approach
-      console.log('No search input found, using prop methods');
-      
+    // Try the new direct approach first
+    if (triggerSearch) {
+      console.log('Using triggerSearch with custom query');
+      // Also update the search input for visual feedback
       if (setSearchQuery) {
         setSearchQuery(searchQuery);
       }
-      
-      if (triggerSearch) {
-        triggerSearch();
-      }
-      
-      // Last resort - use the onAnalyzeArticle function
-      if (!setSearchQuery || !triggerSearch) {
-        onAnalyzeArticle(searchQuery);
+      // Pass the query directly to triggerSearch
+      triggerSearch(searchQuery);
+    } else {
+      // FALLBACK: Directly manipulate DOM and submit the form
+      const searchElement = document.querySelector('.search-input') as HTMLInputElement;
+      if (searchElement) {
+        // Direct DOM update for immediate effect
+        searchElement.value = searchQuery;
+        searchElement.focus();
+        
+        // Find the form and submit it directly
+        const form = searchElement.closest('form');
+        if (form) {
+          console.log('Found form, submitting directly');
+          
+          // Also update React state
+          if (setSearchQuery) {
+            setSearchQuery(searchQuery);
+          }
+          
+          // Submit the form
+          setTimeout(() => {
+            form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+          }, 10);
+        } else {
+          // No form found, fall back to setSearchQuery
+          console.log('No form found, using setSearchQuery only');
+          if (setSearchQuery) {
+            setSearchQuery(searchQuery);
+          }
+        }
+      } else {
+        // Can't find search element, use the props approach
+        console.log('No search input found, using prop methods');
+        
+        if (setSearchQuery) {
+          setSearchQuery(searchQuery);
+        }
+        
+        // Last resort - use the onAnalyzeArticle function
+        if (onAnalyzeArticle) {
+          onAnalyzeArticle(searchQuery);
+        }
       }
     }
     
