@@ -436,14 +436,14 @@
   box-sizing: border-box;
 }
 
-/* Make sure MultiAuthLogin stays compact */
-.header-auth-wrapper > * {
+/* Make sure MultiAuthLogin stays compact but allow modal positioning */
+.header-auth-wrapper > .multi-auth-container {
   display: inline-flex !important;
   margin: 0 !important;
-  position: static !important;
   align-items: center !important;
   justify-content: center !important;
   box-sizing: border-box !important;
+  /* Remove position: static to allow modal positioning */
 }
 
 /* ================================
@@ -535,14 +535,26 @@ body {
   white-space: nowrap;
   margin: 0;
   padding: 0;
+  position: relative; /* Allow absolute positioning of modal */
 }
 
-/* Make sure MultiAuthLogin stays compact */
-.header-auth-wrapper > * {
+/* Make sure MultiAuthLogin login button stays compact but allow modal */
+.header-auth-wrapper > .multi-auth-container > .login-icon {
   display: inline-flex !important;
   margin: 0 !important;
   align-items: center !important;
   justify-content: center !important;
+}
+
+/* Ensure modal elements can display properly */
+.header-auth-wrapper .providers-popup {
+  position: absolute !important;
+  z-index: 1600 !important;
+}
+
+.header-auth-wrapper .auth-overlay {
+  position: fixed !important;
+  z-index: 1500 !important;
 }
 
 /* Responsive adjustments */
