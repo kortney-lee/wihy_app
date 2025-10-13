@@ -4,6 +4,7 @@ import VHealthSearch from './VHealthSearch';
 import SearchResults from './SearchResults';
 import HealthNewsFeed from './components/HealthNewsFeed';
 import openaiAPI from './services/openaiAPI';
+import { wihyAPI } from './services/wihyAPI';
 import { searchCache } from './services/searchCache';
 import { fetchNewsFeed, refreshNewsFeed, searchNewsArticles } from './services/newsService';
 import './styles/VHealthSearch.css';
@@ -46,7 +47,7 @@ export const newsAPI = {
   searchNewsArticles
 };
 
-type AllowedDataSource = "error" | "openai" | "local" | "vnutrition";
+type AllowedDataSource = "error" | "openai" | "local" | "vnutrition" | "wihy";
 
 const ResultsPage: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -179,21 +180,26 @@ const ResultsPage: React.FC = () => {
             console.log('Nutrition API error:', nutritionError);
           }
           
-          // STEP 2: Fall back to OpenAI if no nutrition data found
-          console.log('Making single OpenAI call for query:', query);
-          const result: ChatGPTResponse = await openaiAPI.searchHealthInfo(query);
-          console.log("OpenAI Search result received:", result);
+          // STEP 2: Fall back to WiHy API if no nutrition data found
+          console.log('Making WiHy API call for query:', query);
+          const wihyRequest = { query: query };
+          const wihyResult = await wihyAPI.askAnything(wihyRequest);
+          console.log("WiHy API result received:", wihyResult);
           
-          const resultText = result.details || JSON.stringify(result);
-          setResults(resultText);
-          setDataSource("openai");
-          
-          // Cache the OpenAI results
-          searchCache.setCachedResult(query, resultText, window.location.href);
-          
-          setCitations(result.sources || []);
-          setRecommendations(result.recommendations || []);
-          setDisclaimer(result.medicalDisclaimer || '');
+          if (wihyResult.success) {
+            const formattedResult = wihyAPI.formatWihyResponse(wihyResult);
+            setResults(formattedResult);
+            setDataSource("wihy");
+            
+            // Cache the WiHy results
+            searchCache.setCachedResult(query, formattedResult, window.location.href);
+            
+            setCitations(wihyAPI.extractCitations(wihyResult));
+            setRecommendations(wihyAPI.extractRecommendations(wihyResult));
+            setDisclaimer('This guidance is based on evidence-based health principles. Always consult healthcare professionals for personalized medical advice.');
+          } else {
+            throw new Error('WiHy API request failed');
+          }
         }
         
       } catch (error) {

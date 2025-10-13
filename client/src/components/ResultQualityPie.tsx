@@ -12,7 +12,7 @@ ChartJS.register(ArcElement, Tooltip, Legend);
 interface ResultQualityPieProps {
   query: string;
   results: string;
-  dataSource: "error" | "openai" | "local" | "vnutrition";
+  dataSource: "error" | "openai" | "local" | "vnutrition" | "wihy";
   citations?: string[];
 }
 
@@ -78,8 +78,8 @@ const recencyOK = (lower: string) => {
 };
 
 const sourceGate = (text: string, dataSource: ResultQualityPieProps['dataSource']) => {
-  // Database sources count as trusted.
-  if (dataSource === 'vnutrition' || dataSource === 'local') return true;
+  // Database sources and WiHy count as trusted.
+  if (dataSource === 'vnutrition' || dataSource === 'local' || dataSource === 'wihy') return true;
 
   // Otherwise require a strong id or a trusted domain link.
   if (hasStrongId(text)) return true;
@@ -132,7 +132,7 @@ function evaluateEvidenceConfidence(
   const criticalOkay = (gates.source || gates.citations) && gates.specificity;
 
   let verdict: Verdict;
-  if ((dataSource === 'vnutrition' || dataSource === 'local') && criticalOkay) {
+  if ((dataSource === 'vnutrition' || dataSource === 'local' || dataSource === 'wihy') && criticalOkay) {
     verdict = 'GOOD';
   } else if (passed >= 4 && criticalOkay) {
     verdict = 'GOOD';

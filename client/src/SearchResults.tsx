@@ -63,7 +63,7 @@ interface SearchResultsProps {
   onBackToSearch: () => void;
   onNewSearch: (query: string) => void;
   isLoading: boolean;
-  dataSource: "error" | "openai" | "local" | "vnutrition";
+  dataSource: "error" | "openai" | "local" | "vnutrition" | "wihy";
   citations?: string[];
   recommendations?: string[];
   disclaimer?: string;
