@@ -1,5 +1,5 @@
 import React from 'react';
-import './Dashboard.css';
+import './styles/VHealthSearch.css';
 import Header from './components/components/shared/components/Header';
 import HealthSnapshot from './components/HealthSnapshot';
 import WeightMetrics from './components/WeightMetrics';

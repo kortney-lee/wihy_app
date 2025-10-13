@@ -1,0 +1,224 @@
+/* ---------------------------
+   Dashboard-Only Components
+   (Components that only exist in dashboard context)
+----------------------------*/
+
+/* Metrics side tiles - dashboard specific */
+.metric-col {
+  display: grid;
+  gap: 16px;
+}
+
+.slider-track {
+  position: relative;
+  height: 8px;
+  background: var(--slate-200);
+  border-radius: 999px;
+  margin-top: 8px;
+}
+
+.slider-gradient {
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #ef4444, #f59e0b, #10b981);
+}
+
+.slider-thumb {
+  position: absolute;
+  top: -3px;
+  height: 14px;
+  width: 14px;
+  background: #fff;
+  border: 2px solid var(--blue-500);
+  border-radius: 999px;
+}
+
+.range-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--ink-500);
+  margin-top: 4px;
+}
+
+/* Nutrition tracking - dashboard specific */
+.nutrition-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.nutrition-box {
+  padding: 16px;
+  border-radius: var(--radius-md);
+}
+
+.nutrition--protein { background: var(--blue-50); }
+.nutrition--carbs { background: var(--green-50); }
+.nutrition--fat { background: var(--yellow-50); }
+
+.nutrition-title {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.nutrition-value {
+  font-size: 20px;
+  font-weight: 700;
+  margin-top: 4px;
+}
+
+.nutrition-sub {
+  font-size: 11px;
+  margin-top: 4px;
+}
+
+.nutrition-bar {
+  margin-top: 8px;
+}
+
+/* Activity tracking - dashboard specific */
+.activity-list {
+  display: grid;
+  gap: 12px;
+}
+
+.activity-item {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  color: var(--ink-600);
+}
+
+/* Wellness tracking - dashboard specific */
+.wellness-list {
+  display: grid;
+  gap: 12px;
+}
+
+.wellness-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px;
+  border-radius: var(--radius-md);
+}
+
+.wellness--sleep { background: var(--indigo-50); }
+.wellness--stress { background: var(--green-50); }
+.wellness--fasting { background: var(--yellow-50); }
+
+.wellness-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.pill {
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.pill--indigo { color: #3730a3; }
+.pill--green { color: #065f46; }
+.pill--amber { color: #92400e; }
+
+.trend {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+}
+
+/* Achievements - dashboard specific */
+.achievements-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.achievement {
+  padding: 12px;
+  border-radius: var(--radius-md);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.achievement--blue { background: var(--blue-50); }
+.achievement--green { background: var(--green-50); }
+.achievement--purple { background: var(--purple-50); }
+
+.achievement .avatar {
+  height: 40px;
+  width: 40px;
+}
+
+.achievement p {
+  margin-top: 8px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* Dashboard footer */
+footer.dashboard-footer {
+  margin-top: 32px;
+  padding: 16px;
+  text-align: center;
+  color: var(--ink-500);
+  font-size: 12px;
+}
+
+/* Dashboard-specific responsive breakpoints */
+@media (max-width: 1200px) {
+  .snapshot-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 900px) {
+  .section-wrap {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .snapshot-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Dashboard-specific dark mode */
+@media (prefers-color-scheme: dark) {
+  .card, .section-card {
+    background: #151823;
+    border-color: #252a33;
+  }
+  
+  .progress {
+    background: #1f2430;
+  }
+  
+  .snapshot-heading {
+    color: #e5e7eb;
+  }
+  
+  .card-title, .card-sub, .activity-item, .range-labels {
+    color: #c7cbd4;
+  }
+  
+  .wellness--sleep {
+    background: #1b1f36;
+  }
+  
+  .wellness--stress {
+    background: #11251c;
+  }
+  
+  .wellness--fasting {
+    background: #2a220e;
+  }
+}
