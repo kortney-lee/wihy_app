@@ -78,17 +78,41 @@ wihy_ui/
 │   ├── src/
 │   │   ├── components/     # React components
 │   │   ├── services/       # API services
-│   │   ├── styles/         # CSS styles
+│   │   ├── styles/         # Modular CSS architecture
+│   │   │   ├── base.css    # CSS variables & foundations
+│   │   │   ├── buttons.css # Button component styles
+│   │   │   ├── cards.css   # Card & layout styles
+│   │   │   └── VHealthSearch.css # Main CSS import hub
 │   │   └── types/          # TypeScript types
 │   └── package.json
 ├── user/                   # Health dashboard
 │   ├── src/
 │   │   ├── components/     # Dashboard components
 │   │   ├── services/       # Data services
+│   │   ├── styles/         # Shared styling system
 │   │   └── types/          # TypeScript types
 │   └── package.json
 └── package.json           # Root package file
 ```
+
+### 🎨 CSS Architecture
+
+This project uses a **modular CSS architecture** for consistent styling across both applications:
+
+#### Core CSS Files:
+- **`base.css`**: CSS custom properties (variables) and foundational styles
+- **`buttons.css`**: All button component styles (.btn, .btn-tab, .badge-dot, etc.)
+- **`cards.css`**: Card layouts, sections, and dashboard components
+- **`modals.css`**: Modal dialog styling
+- **`utilities.css`**: Utility classes and helper styles
+- **`VHealthSearch.css`**: Main CSS import hub that imports all modular styles
+
+#### Design System:
+- **Color Variables**: `--ink-*`, `--slate-*`, `--blue-*`, `--green-*`, etc.
+- **Layout Tokens**: `--radius-*`, `--shadow-*` for consistent spacing and effects
+- **Component Classes**: Reusable components like `.card`, `.btn`, `.progress`, etc.
+
+Both applications (client & user) share the same styling system for consistency.
 
 ### 🔧 Troubleshooting
 
@@ -115,10 +139,14 @@ npm install --legacy-peer-deps
 
 ### 🎨 Key Features
 
-#### Recently Fixed:
-- ✅ **"Analyze with WiHy" Bug**: Fixed issue where clicking "Analyze with WiHy" on news articles was loading news instead of performing article analysis
-- ✅ **State Management**: Improved React state handling for better search functionality
-- ✅ **News Integration**: Enhanced news article analysis workflow
+#### Recent Updates (October 2025):
+- ✅ **Modular CSS Architecture**: Implemented unified styling system with modular CSS files (base.css, buttons.css, cards.css, etc.)
+- ✅ **Dashboard Styling Consolidation**: Both client and user apps now share the same CSS architecture for consistent UI
+- ✅ **Brand Asset Updates**: Updated to WIHY branding with new logo assets, removed old placeholder images
+- ✅ **Design System**: Added comprehensive CSS variables for colors, spacing, and layout tokens
+- ✅ **Component Library**: Standardized button, card, and modal components across applications
+- ✅ **Fixed Header Layout**: Implemented responsive fixed header with proper modal positioning
+- ✅ **"Analyze with WiHy" Bug Fix**: Resolved issue where news article analysis wasn't working properly
 
 #### Main Features:
 - 🎯 **Smart Search**: AI-powered health and nutrition search
