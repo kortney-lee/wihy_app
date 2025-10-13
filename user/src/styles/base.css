@@ -1,0 +1,47 @@
+/* ---------------------------
+   Base Reset & Defaults
+----------------------------*/
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f9f9f9;
+  color: #333;
+  line-height: 1.6;
+}
+
+/* Theme tokens */
+:root{
+  --vh-accent: #1a73e8;
+  --vh-accent-2: #34a853;
+  --vh-ink: #202124;
+  --vh-muted: #5f6368;
+  --vh-surface: #ffffff;
+  --vh-surface-2: #f8fbff;
+  --vh-ring: 0 0 0 3px rgba(26,115,232,.18);
+}
+
+/* Subtle page background and spacing harmony */
+body{
+  background: radial-gradient(1200px 600px at 10% -10%, #f5f8ff 0%, transparent 40%),
+              radial-gradient(1000px 500px at 110% 0%, #f7fff8 0%, transparent 35%),
+              #f9f9f9;
+}
+
+/* Common wrappers */
+.results-page,
+.google-style-app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Loading spinner animation */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}

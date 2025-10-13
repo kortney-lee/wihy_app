@@ -1,0 +1,446 @@
+/* Import styles in proper order - search components should override base */
+@import '../../../../styles/search-components.css';
+@import '../../../../styles/buttons.css';
+@import '../../../../styles/base.css';
+@import '../../../../styles/modals.css';
+@import '../../../../styles/responsive.css';
+@import '../../../../styles/utilities.css';
+
+/* Import other component styles */
+@import './MultiAuthLogin.css';
+
+/* Header-specific styles below - keep all of these */
+.vhealth-header {
+  background: #fff;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Landing page header (centered layout) */
+.vhealth-header.landing {
+  min-height: 40vh;
+  background: transparent;
+  text-align: center;
+  position: relative;
+}
+
+.vhealth-header.landing .vhealth-topbar {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  background: transparent;
+  border-bottom: none;
+}
+
+.vhealth-header.landing .vhealth-mainbar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 40vh;
+  padding-top: 60px; /* Account for topbar */
+}
+
+/* Results page header (horizontal layout) */
+.vhealth-header.results {
+  border-bottom: 1px solid #e8eaed;
+  min-height: auto;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.vhealth-header.results .vhealth-mainbar {
+  flex-direction: row;
+  align-items: center;
+  gap: 20px;
+  padding: 10px 16px;
+}
+
+/* Logo Container */
+.vhealth-logo-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.vhealth-logo {
+  object-fit: contain;
+  transition: opacity 0.2s ease;
+}
+
+.vhealth-logo:hover {
+  opacity: 0.8;
+}
+
+/* Landing page logo */
+.vhealth-header.landing .vhealth-logo {
+  width: 600px !important;
+  height: auto !important;
+  margin-bottom: 2rem;
+}
+
+/* Results page logo */
+.vhealth-header.results .vhealth-logo {
+  height: 80px !important;
+  width: auto !important;
+  max-width: 300px !important;
+}
+
+/* Search Section */
+.vhealth-search-section {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.vhealth-header.landing .vhealth-search-section {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.vhealth-header.results .vhealth-search-section {
+  flex: 1;
+  max-width: none;
+}
+
+.vhealth-search-form {
+  width: 100%;
+}
+
+/* User Section - now handled by topbar styles */
+
+/* Override search container width for header */
+.vhealth-header .search-input-container {
+  width: 100% !important;
+  max-width: 800px !important; /* Increased from 600px to 800px */
+  margin: 0 auto !important;
+}
+
+/* Ensure proper centering in landing page */
+.vhealth-header.landing .vhealth-search-section {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+.vhealth-header.landing .vhealth-search-form {
+  width: 100%;
+  max-width: 600px;
+  display: flex;
+  justify-content: center;
+}
+
+/* Results page layout fixes */
+.vhealth-header.results .search-input-container {
+  width: 100% !important;
+  max-width: 1000px !important; /* Increased from 500px to 700px */
+}
+
+/* Ensure logo and search are properly aligned */
+.vhealth-header.results {
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .vhealth-header.results .vhealth-mainbar {
+    flex-direction: column;
+    gap: 15px;
+    padding: 15px;
+  }
+
+  .vhealth-header.results .vhealth-logo {
+    height: 60px !important;
+    max-width: 250px !important;
+  }
+
+  .vhealth-header.landing .vhealth-logo {
+    width: 500px !important;
+  }
+
+  .vhealth-header .search-input-container {
+    max-width: 100%;
+  }
+
+  .vhealth-header.landing .search-input-container {
+    width: 90% !important;
+    max-width: none !important;
+  }
+  
+  .vhealth-header.results .search-input-container {
+    width: 100% !important;
+    max-width: none !important;
+  }
+
+  .vhealth-topbar {
+    padding: 8px 12px;
+  }
+
+  .vhealth-mainbar {
+    padding: 0 12px 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .vhealth-header.landing .vhealth-logo {
+    width: 90% !important;
+    max-width: 320px !important;
+  }
+
+  .vhealth-header.results .vhealth-logo {
+    height: 36px !important;
+    max-width: 180px !important;
+  }
+
+  .vhealth-header.results {
+    padding: 10px;
+  }
+
+  .vhealth-header .search-input::placeholder {
+    font-size: 16px;
+  }
+}
+
+/* ================================
+   REMOVE ALL ICON BUTTON OVERRIDES
+   Let the imported styles handle this
+================================ */
+
+/* Only override container positioning if needed */
+.vhealth-header .search-input-container {
+  position: relative !important;
+  width: 100% !important;
+  max-width: 800px !important;
+  margin: 0 auto !important;
+}
+
+/* Landing page search input - larger font */
+.vhealth-header.landing .search-input {
+  font-size: 18px !important;
+}
+
+/* Results page search input - standard font */
+.vhealth-header.results .search-input {
+  font-size: 16px !important;
+}
+
+/* Ensure proper padding for the search input */
+.vhealth-header .search-input {
+  padding-right: 110px !important; /* Space for icons */
+  padding-left: 16px !important;
+}
+
+/* Mobile responsiveness for search input only */
+@media (max-width: 768px) {
+  .vhealth-header .search-input {
+    padding-right: 90px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .vhealth-header .search-input {
+    padding-right: 80px !important;
+  }
+}
+
+/* ================================
+   NEW LAYOUT STYLES
+   Top bar + Main bar structure
+================================ */
+
+/* Layout shell - override any existing flex styles */
+.vhealth-header {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px;              /* space between topbar and mainbar */
+  align-items: stretch !important;
+  justify-content: flex-start !important;
+}
+
+/* Top bar container */
+.vhealth-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 8px 16px 0;     /* tuck it up tight */
+  border-bottom: 0 !important;   /* remove the dividing line */
+  background: transparent;       /* no strip background */
+}
+
+/* Cluster that holds bell + login */
+.vhealth-topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: nowrap;
+  height: auto;
+}
+
+/* Main bar to hold logo + search */
+.vhealth-mainbar {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 0 16px 16px;
+  /* no borders here either */
+  border-top: 0 !important;
+}
+
+/* Make sure both notification and login are at same vertical position */
+.header-icon-btn,
+.header-auth-wrapper {
+  display: inline-flex;
+  align-items: center;
+  flex: 0 0 auto;
+  vertical-align: middle;
+  align-self: center;
+}
+
+/* Keep your existing header icon/button styles; ensure these exist */
+.header-icon-btn {
+  position: relative;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid #e5e7eb;
+  border-radius: 9999px;
+  background: #fff;
+  cursor: pointer;
+  margin: 0;
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
+
+/* Nuke any margins a nested login component might add */
+.header-auth-wrapper > * {
+  display: inline-flex;
+  margin: 0 !important;
+  vertical-align: middle;
+}
+
+.header-auth-wrapper {
+  max-width: none;
+  white-space: nowrap;
+  margin: 0;
+  padding: 0;
+  height: 36px; /* Match the notification button height */
+  width: 36px; /* Match the notification button width */
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+/* Badge on bell */
+.badge-dot {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: 9px;
+  font-size: 11px;
+  line-height: 18px;
+  text-align: center;
+  color: #fff;
+  background: #ef4444;
+  border: 2px solid #fff; /* ring */
+}
+
+/* Responsive: stack search under logo nicely */
+@media (min-width: 768px) {
+  .vhealth-mainbar {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+}
+
+/* ================================
+   FIXED HEADER LAYOUT
+   Make entire header stick to top
+================================ */
+
+/* Make the entire header fixed at top */
+.vhealth-header {
+  position: fixed !important;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 2000;            /* ensure it stays above all content */
+  background: #fff !important;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05); /* subtle separation shadow */
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  justify-content: flex-start !important;
+  gap: 8px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Prevent page content from hiding under the fixed header */
+body {
+  padding-top: 160px; /* Adjust height based on header size */
+}
+
+/* Keep topbar + mainbar both inside the fixed header */
+.vhealth-topbar {
+  position: relative !important; /* no need for sticky now */
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding: 8px 16px;
+  background: transparent;
+  border: 0;
+  z-index: 2001;
+}
+
+.vhealth-mainbar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 0 16px 16px;
+  width: 100%;
+  background: #fff;
+}
+
+/* Notification + Login side-by-side, always inline */
+.vhealth-topbar-right {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 8px; /* Reduced from 12px to bring them closer */
+  white-space: nowrap;
+}
+
+/* Match their vertical alignment and make same size */
+.header-icon-btn,
+.header-auth-wrapper {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  height: 36px;
+  width: 36px; /* Force same width for both */
+  flex: 0 0 auto;
+  vertical-align: middle;
+  box-sizing: border-box;
+}
+
+/* Make sure MultiAuthLogin never expands and matches notification button */
+.header-auth-wrapper > * {
+  display: inline-flex !important;
+  width: 36px !important; /* Match notification button size exactly */
+  height: 36px !important;
+  margin: 0 !important;
+  position: static !important;
+  border-radius: 9999px !important; /* Same circular shape */
+  align-items: center !important;
+  justify-content: center !important;
+  box-sizing: border-box !important;
+}
