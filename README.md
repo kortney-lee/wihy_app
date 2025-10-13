@@ -37,6 +37,13 @@ WiHy UI is a comprehensive React-based health management platform that provides:
    cd ..
    ```
 
+3. **Configure WiHy API (Optional):**
+   ```bash
+   # Default API endpoint: http://localhost:8000
+   # To customize, set environment variable:
+   export REACT_APP_WIHY_API_URL=http://your-wihy-api-server:port
+   ```
+
 ### 🏃‍♂️ Running the Applications
 
 #### Start Main Health App (Port 3000)
@@ -114,6 +121,37 @@ This project uses a **modular CSS architecture** for consistent styling across b
 
 Both applications (client & user) share the same styling system for consistency.
 
+### 🔌 API Architecture
+
+#### **WiHy API Integration**
+The main health application now integrates with the native WiHy API for enhanced health analysis:
+
+**API Endpoint**: `POST http://localhost:8000/wihy/ask-anything`
+
+**Key Features**:
+- **Personalized Health Analysis**: User context-aware responses with risk factors and action items
+- **Biblical Wisdom Integration**: Health advice grounded in biblical principles  
+- **Research Foundation**: Evidence-based citations and study references
+- **Progress Tracking**: Metrics and reassessment timelines
+- **Comprehensive TypeScript Support**: Full type definitions in `wihyAPI.ts`
+
+**Service Architecture**:
+```typescript
+// client/src/services/wihyAPI.ts
+- UserContext interface for personalized queries
+- WihyRequest/WihyResponse with complete type safety
+- Structured response formatting for existing UI components
+- Error handling and timeout management (30s)
+- Response transformation for SearchResults display
+```
+
+**Response Structure**:
+- **Risk Factors**: Identified health risks with prevalence and preventability scores  
+- **Action Items**: Priority-based health recommendations with evidence levels
+- **Biblical Wisdom**: Scripture-based health principles
+- **Research Citations**: Scientific backing for recommendations
+- **Progress Metrics**: Trackable health indicators
+
 ### 🔧 Troubleshooting
 
 #### Common Issues:
@@ -140,6 +178,9 @@ npm install --legacy-peer-deps
 ### 🎨 Key Features
 
 #### Recent Updates (October 2025):
+- ✅ **WiHy API Integration**: Complete replacement of OpenAI endpoint with native WiHy API (`http://localhost:8000/wihy/ask-anything`)
+- ✅ **Enhanced Health Analysis**: Integrated comprehensive WiHy response format with risk factors, action items, and biblical wisdom
+- ✅ **TypeScript API Service**: Added robust `wihyAPI.ts` service with full type definitions and error handling
 - ✅ **Modular CSS Architecture**: Implemented unified styling system with modular CSS files (base.css, buttons.css, cards.css, etc.)
 - ✅ **Dashboard Styling Consolidation**: Both client and user apps now share the same CSS architecture for consistent UI
 - ✅ **Brand Asset Updates**: Updated to WIHY branding with new logo assets, removed old placeholder images
@@ -149,11 +190,14 @@ npm install --legacy-peer-deps
 - ✅ **"Analyze with WiHy" Bug Fix**: Resolved issue where news article analysis wasn't working properly
 
 #### Main Features:
-- 🎯 **Smart Search**: AI-powered health and nutrition search
+- 🎯 **WiHy-Powered Search**: Native WiHy API integration for personalized health analysis
 - 📰 **News Analysis**: Click "Analyze with WiHy" on any health article for AI insights
-- 📊 **Data Visualization**: Interactive charts and health metrics
+- 🔬 **Risk Assessment**: Detailed health risk factors with prevention strategies
+- ✝️ **Biblical Health Wisdom**: Scripture-based health guidance and principles
+- 📊 **Data Visualization**: Interactive charts and health metrics  
 - 🔄 **Real-time Updates**: Live data synchronization
 - 📱 **Responsive Design**: Works on all device sizes
+- 📈 **Progress Tracking**: Measurable health goals with reassessment timelines
 
 ### 📦 Building for Production
 
