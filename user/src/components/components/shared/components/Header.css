@@ -443,7 +443,7 @@
   align-items: center !important;
   justify-content: center !important;
   box-sizing: border-box !important;
-  /* Remove position: static to allow modal positioning */
+  position: relative; /* Allow modal positioning within this container */
 }
 
 /* ================================
@@ -535,7 +535,7 @@ body {
   white-space: nowrap;
   margin: 0;
   padding: 0;
-  position: relative; /* Allow absolute positioning of modal */
+  /* Remove position relative to maintain inline layout */
 }
 
 /* Make sure MultiAuthLogin login button stays compact but allow modal */
