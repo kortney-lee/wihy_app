@@ -1,0 +1,170 @@
+/* ---------------------------
+   Image Preview & Upload Modal
+----------------------------*/
+.image-preview {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #e8f0fe;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  color: #1a73e8;
+}
+
+.image-icon { font-size: 16px; }
+
+.image-name {
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.remove-image {
+  background: none;
+  border: none;
+  color: #1a73e8;
+  cursor: pointer;
+  font-size: 16px;
+  width: 16px; 
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+
+.remove-image:hover { background: rgba(26,115,232,0.1); }
+.search-input.with-image { padding-left: 160px; }
+
+/* ---------------------------
+   Photo Upload Modal
+----------------------------*/
+.photo-modal-overlay,
+.upload-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  padding: 20px;
+}
+
+.photo-modal,
+.upload-modal-content {
+  background: #fff;
+  border-radius: 8px;
+  width: 100%;
+  max-width: 568px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+  overflow: hidden;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px 24px 16px 24px;
+  border-bottom: 1px solid #e8eaed;
+}
+
+.modal-header h2 {
+  font-size: 22px;
+  font-weight: 400;
+  color: #202124;
+  margin: 0;
+}
+
+.modal-subtitle {
+  font-size: 14px;
+  color: #5f6368;
+  margin: 5px 0 0 0;
+  font-weight: 400;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: #5f6368;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  width: 40px; 
+  height: 40px;
+  display: flex; 
+  align-items: center; 
+  justify-content: center;
+  transition: background-color 0.2s;
+}
+
+.modal-close:hover { background: #f1f3f4; }
+
+.upload-area {
+  padding: 32px 24px;
+  border: 2px dashed #dadce0;
+  margin: 24px;
+  border-radius: 8px;
+  text-align: center;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.upload-area:hover { border-color: #1a73e8; background: #f8f9fa; }
+.upload-area.dragging { border-color: #1a73e8 !important; background: rgba(26,115,232,0.05) !important; }
+.upload-area.processing { pointer-events: none; opacity: 0.7; }
+
+.upload-content { display: flex; flex-direction: column; align-items: center; gap: 16px; }
+.upload-icon { width: 48px; height: 48px; color: #9aa0a6; }
+.upload-icon svg { width: 100%; height: 100%; }
+.upload-text { font-size: 16px; color: #3c4043; margin: 0; }
+.upload-link { background: none; border: none; color: #1a73e8; cursor: pointer; font-size: 16px; text-decoration: underline; padding: 0; }
+.upload-link:hover { color: #1557b0; }
+
+.upload-info { padding: 16px 24px 0 24px; text-align: center; }
+.upload-info small { color: #5f6368; font-size: 12px; }
+
+.modal-divider { text-align: center; margin: 16px 0; position: relative; }
+.modal-divider::before {
+  content: '';
+  position: absolute;
+  top: 50%; left: 24px; right: 24px;
+  height: 1px; background: #e8eaed;
+}
+.modal-divider span { background: #fff; color: #5f6368; padding: 0 16px; font-size: 14px; }
+
+.url-input-section { display: flex; gap: 8px; padding: 0 24px 24px 24px; }
+.url-input {
+  flex: 1;
+  height: 36px;
+  padding: 0 12px;
+  border: 1px solid #dadce0;
+  border-radius: 4px;
+  font-size: 14px;
+  outline: none;
+}
+.url-input:focus { border-color: #1a73e8; box-shadow: 0 0 0 1px #1a73e8; }
+
+/* Hide content when modal opens */
+.search-title,
+.search-form,
+.search-actions,
+.voice-feedback {
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.search-container.modal-open .search-title,
+.search-container.modal-open .search-form,
+.search-container.modal-open .search-actions,
+.search-container.modal-open .voice-feedback {
+  opacity: 0;
+  transform: translateY(-10px);
+  pointer-events: none;
+}
