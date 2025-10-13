@@ -35,6 +35,33 @@ header.dashboard-header{
   box-shadow: var(--shadow-1);
   padding:24px 16px;
 }
+
+/* Integration styles for shared Header component */
+.dashboard-header.vhealth-header {
+  background: #fff;
+  border-bottom: 1px solid var(--slate-200);
+  padding: 16px 24px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+/* Clean up - removed separate header styling since using shared Header component */
+
+.dashboard-header .vhealth-logo-container {
+  flex: 0 0 auto;
+}
+
+.dashboard-header .vhealth-search-section {
+  flex: 1;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.dashboard-header .vhealth-user-section {
+  flex: 0 0 auto;
+}
+
 .dashboard-header__inner{
   max-width:1120px; margin:0 auto;
   display:flex; align-items:center; justify-content:space-between; gap:16px;

@@ -17,3 +17,12 @@ export interface UserProfile {
     email: string;
     healthData: HealthData;
 }
+
+// Health search types for Header component
+export interface HealthSearchResult {
+    summary: string;
+    details: string;
+    sources: string[];
+    relatedTopics: string[];
+    recommendations: string[];
+}
