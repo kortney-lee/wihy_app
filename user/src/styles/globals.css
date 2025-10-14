@@ -521,3 +521,36 @@ a:hover {
     font-size: 18px;
   }
 }
+
+/* WiHy Analyze Button Styles */
+@keyframes wiH-border-sweep {
+  0% { background-position: 0 0, 0% 0; }
+  100% { background-position: 0 0, 200% 0; }
+}
+
+.wihy-btn-wrapper {
+  display: inline-block;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.analyze-wihy-btn {
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  color: #1a73e8 !important;
+  white-space: nowrap !important;
+  background: transparent !important;
+  border: none !important;
+  animation: none !important;
+  padding: 8px 16px !important;
+  transition: all 0.2s ease;
+}
+
+.analyze-wihy-btn:hover {
+  color: #1557b0 !important;
+  transform: scale(1.02);
+}
+
+.analyze-wihy-btn:active {
+  transform: scale(0.98);
+}
