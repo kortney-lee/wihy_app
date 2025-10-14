@@ -7,7 +7,7 @@
   position: fixed; /* Changed from absolute to fixed */
   top: 16px; /* Match LoginButton positioning */
   right: 16px; /* Match LoginButton positioning */
-  z-index: 1500; /* Match LoginButton z-index */
+  z-index: 2010; /* Above header (2000-2001) */
   pointer-events: auto !important; /* Force pointer events */
 }
 
@@ -31,7 +31,7 @@
   color: #5f6368; /* Match LoginButton color */
   width: 40px;
   height: 40px;
-  z-index: 1500; /* Ensure button is clickable */
+  z-index: 2010; /* Ensure button is clickable above header */
   position: relative; /* Establish stacking context */
   pointer-events: auto !important; /* Force pointer events */
 }
@@ -95,7 +95,7 @@
 }
 
 .providers-popup {
-  z-index: 1600; /* Match LoginButton dropdown z-index */
+  z-index: 2100; /* Above header (2000-2001) */
   position: absolute;
   top: 44px; /* Match LoginButton dropdown position */
   right: 0;
@@ -184,7 +184,7 @@
 }
 
 .user-dropdown {
-  z-index: 1600; /* Match LoginButton dropdown z-index */
+  z-index: 2100; /* Above header (2000-2001) */
   position: absolute;
   top: 44px; /* Match LoginButton dropdown position */
   right: 0;
@@ -258,7 +258,7 @@
   right: 0;
   bottom: 0;
   background-color: rgba(0, 0, 0, 0.1);
-  z-index: 999;
+  z-index: 2050; /* Above header (2000-2001) but below popup (2100) */
 }
 
 /* Add the fadeIn animation that LoginButton uses */
@@ -271,6 +271,15 @@
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+/* Inline variant popup positioning - when used in header */
+.multi-auth-container.inline .providers-popup,
+.multi-auth-container.inline .user-dropdown {
+  position: fixed; /* Use fixed positioning when in header to avoid clipping */
+  top: 60px; /* Account for header height */
+  right: 16px; /* Align with right edge of viewport */
+  z-index: 2100; /* Above header */
 }
 
 /* Mobile styles - match LoginButton responsive behavior */
@@ -287,5 +296,11 @@
     position: fixed;
     top: 12px;
     right: 12px;
+  }
+  
+  .multi-auth-container.inline .providers-popup,
+  .multi-auth-container.inline .user-dropdown {
+    right: 16px;
+    top: 60px;
   }
 }
