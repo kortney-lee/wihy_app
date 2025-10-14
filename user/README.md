@@ -5,12 +5,12 @@ The WiHy Health Dashboard is a comprehensive React TypeScript application that p
 
 ## Features
 
-### 🏠 **Dashboard Views**
+### **Dashboard Views**
 - **Overview Mode**: Compact widget layout with essential health metrics
 - **Detailed Analytics**: Full-featured sections with comprehensive data analysis
 - **Responsive Design**: Adapts to different screen sizes and chat widget states
 
-### 📊 **Health Tracking Modules**
+### **Health Tracking Modules**
 - **Weight & Body Metrics**: BMI tracking, body composition analysis
 - **Activity & Movement**: Steps, distance, active minutes with progress visualization
 - **Nutrition Analysis**: Macro breakdown, micronutrients, energy balance
@@ -19,12 +19,12 @@ The WiHy Health Dashboard is a comprehensive React TypeScript application that p
 - **Behavior & Dopamine**: Presence matrix with pie chart analytics, habit tracking
 - **Health Outcomes**: Risk assessment and vital signs monitoring
 
-### 🤖 **AI-Powered Features**
+### **AI-Powered Features**
 - **WiHy Chat Assistant**: Context-aware health analysis and recommendations
 - **Smart Insights**: Personalized health score and trend analysis
 - **Dynamic Recommendations**: AI-driven suggestions based on user data
 
-### 📈 **Data Visualization**
+### **Data Visualization**
 - **Interactive Charts**: Line charts, pie charts, progress bars, and custom visualizations
 - **Real-time Updates**: Dynamic data refresh and responsive chart animations
 - **Health Snapshot**: Quick overview cards with key metrics and progress indicators
