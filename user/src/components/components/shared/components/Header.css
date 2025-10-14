@@ -52,10 +52,10 @@
 }
 
 .vhealth-header.results .vhealth-mainbar {
-  flex-direction: row;
+  flex-direction: column;
   align-items: center;
-  gap: 20px;
-  padding: 10px 16px;
+  gap: 8px;
+  padding: 8px 16px 12px;
 }
 
 /* Logo Container */
@@ -84,9 +84,9 @@
 
 /* Results page logo */
 .vhealth-header.results .vhealth-logo {
-  height: 80px !important;
+  height: 50px !important;
   width: auto !important;
-  max-width: 300px !important;
+  max-width: 200px !important;
 }
 
 /* Search Section */
@@ -115,7 +115,7 @@
 /* Override search container width for header */
 .vhealth-header .search-input-container {
   width: 100% !important;
-  max-width: 800px !important; /* Increased from 600px to 800px */
+  max-width: 600px !important;
   margin: 0 auto !important;
 }
 
