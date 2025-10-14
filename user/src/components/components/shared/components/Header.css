@@ -318,20 +318,21 @@
 }
 
 /* Notification badge */
-.badge-dot {
-  position: absolute;
-  top: -6px;
-  right: -6px;
-  min-width: 18px;
-  height: 18px;
-  padding: 0 4px;
-  border-radius: 9px;
-  font-size: 11px;
-  line-height: 18px;
-  text-align: center;
-  color: #fff;
-  background: #ef4444;
-  border: 2px solid #fff;
+.vhealth-topbar-right .header-icon-btn .badge-dot {
+  position: absolute !important;
+  top: -6px !important;
+  right: -6px !important;
+  min-width: 18px !important;
+  height: 18px !important;
+  padding: 0 4px !important;
+  border-radius: 9px !important;
+  font-size: 11px !important;
+  line-height: 18px !important;
+  text-align: center !important;
+  color: #fff !important;
+  background: #ef4444 !important;
+  border: 2px solid #fff !important;
+  z-index: 10 !important;
 }
 
 /* Main bar to hold logo + search */
