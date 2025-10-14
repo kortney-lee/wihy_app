@@ -11,6 +11,13 @@
   pointer-events: auto !important; /* Force pointer events */
 }
 
+.multi-auth-container.inline {
+  position: static;              /* not fixed/absolute */
+  display: inline-flex;          /* participate in the flex row */
+  align-items: center;
+  justify-content: center;
+}
+
 .login-icon {
   background: transparent; /* Match LoginButton */
   border: none;
@@ -42,6 +49,16 @@
 .login-icon svg {
   width: 24px;
   height: 24px;
+}
+
+/* make sure the button itself behaves like an icon chip */
+.multi-auth-container.inline .login-icon {
+  width: 36px;
+  height: 36px;
+  border: 1px solid #e5e7eb;
+  border-radius: 9999px;
+  background: #fff;
+  padding: 0;
 }
 
 .login-spinner {

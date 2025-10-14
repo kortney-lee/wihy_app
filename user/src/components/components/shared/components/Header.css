@@ -276,31 +276,40 @@
   background: transparent;       /* no strip background */
 }
 
-/* Cluster that holds notifications + login */
 .vhealth-topbar-right {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: nowrap;
-  height: auto;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 8px !important;
+  flex-wrap: nowrap !important;
 }
 
-/* Notification icon button */
+/* Match bell + login sizing */
+.header-icon-btn,
+.login-icon {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 9999px;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  margin: 0 !important;
+  padding: 0;
+}
+
 .header-icon-btn {
   position: relative;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 36px;
-  border: 1px solid #e5e7eb;
-  border-radius: 9999px;
-  background: #fff;
   cursor: pointer;
-  margin: 0;
-  flex-shrink: 0;
-  box-sizing: border-box;
   transition: background-color 0.2s, border-color 0.2s;
+}
+
+/* Size the SVG icons properly within the button */
+.header-icon-btn svg {
+  width: 20px !important;
+  height: 20px !important;
 }
 
 .header-icon-btn:hover {
@@ -335,24 +344,19 @@
   border-top: 0 !important;
 }
 
-/* Login button positioning */
+/* Login button positioning and styling - consolidated */
 .header-auth-wrapper {
-  display: inline-flex;
-  align-items: center;
-  flex: 0 0 auto;
-  vertical-align: middle;
-  align-self: center;
-}
-
-/* Login wrapper styling */
-.header-auth-wrapper {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex: 0 0 auto !important;
+  vertical-align: middle !important;
+  align-self: center !important;
   max-width: none;
   white-space: nowrap;
   margin: 0;
   padding: 0;
   height: 36px;
-  align-items: center;
-  justify-content: center;
   box-sizing: border-box;
 }
 
@@ -417,33 +421,24 @@
   background: #fff;
 }
 
-/* Login side, always inline (no notifications for client) */
-.vhealth-topbar-right {
+/* Login side, always inline (no notifications for client app only) */
+.vhealth-header.client-app .vhealth-topbar-right {
   display: inline-flex !important;
   align-items: center;
   gap: 8px;
   white-space: nowrap;
 }
 
-/* Login button styling */
-.header-auth-wrapper {
-  display: inline-flex !important;
-  align-items: center;
-  justify-content: center;
-  height: 36px;
-  flex: 0 0 auto;
-  vertical-align: middle;
-  box-sizing: border-box;
-}
+/* Duplicate rule removed - using consolidated rule above */
 
-/* Make sure MultiAuthLogin stays compact but allow modal positioning */
+/* Keep MultiAuthLogin compact and let base styles handle modal */
 .header-auth-wrapper > .multi-auth-container {
   display: inline-flex !important;
   margin: 0 !important;
   align-items: center !important;
   justify-content: center !important;
   box-sizing: border-box !important;
-  position: relative; /* Allow modal positioning within this container */
+  /* Remove positioning overrides - let base styles handle modal positioning */
 }
 
 /* ================================
@@ -506,11 +501,7 @@ body {
   box-sizing: border-box;
 }
 
-/* Login wrapper */
-.vhealth-topbar-right {
-  display: flex;
-  align-items: center;
-}
+/* Removed duplicate rule - using main rule above */
 
 /* Main bar to hold logo + search */
 .vhealth-mainbar {
@@ -526,17 +517,7 @@ body {
   box-sizing: border-box;
 }
 
-/* Login button styling */
-.header-auth-wrapper {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  height: 36px;
-  white-space: nowrap;
-  margin: 0;
-  padding: 0;
-  /* Remove position relative to maintain inline layout */
-}
+/* Duplicate rule removed - using consolidated rule above */
 
 /* Make sure MultiAuthLogin login button stays compact but allow modal */
 .header-auth-wrapper > .multi-auth-container > .login-icon {
@@ -546,16 +527,7 @@ body {
   justify-content: center !important;
 }
 
-/* Ensure modal elements can display properly */
-.header-auth-wrapper .providers-popup {
-  position: absolute !important;
-  z-index: 1600 !important;
-}
-
-.header-auth-wrapper .auth-overlay {
-  position: fixed !important;
-  z-index: 1500 !important;
-}
+/* Let base modal styles handle positioning - removed overrides */
 
 /* Responsive adjustments */
 @media (min-width: 768px) {

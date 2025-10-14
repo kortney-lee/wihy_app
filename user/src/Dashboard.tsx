@@ -30,7 +30,7 @@ const Dashboard: React.FC = () => {
           variant="results"
           showSearchInput={true}
           showLogin={true}
-          className="dashboard-header"
+          className="dashboard-header dashboard"
           searchQuery=""
         />
         <HealthSnapshot />

@@ -566,7 +566,7 @@ const Header: React.FC<HeaderProps> = ({
 
             {showLogin && (
               <div className="header-auth-wrapper">
-                <MultiAuthLogin />
+                <MultiAuthLogin position="inline" />
               </div>
             )}
           </div>
