@@ -38,7 +38,7 @@ const MultiAuthLogin: React.FC<MultiAuthLoginProps> = ({
   onSignOut,
   customProviders,
   storageKey = 'vhealth_user',
-  title = 'Sign in to vHealth',
+  title = 'Sign in to WiHy',
   disclaimer = 'Your health data is secure and private. We only use your account for authentication.'
 }) => {
   const [user, setUser] = useState<User | null>(null);
