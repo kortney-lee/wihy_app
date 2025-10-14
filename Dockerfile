@@ -34,18 +34,8 @@ COPY nginx.conf /etc/nginx/nginx.conf
 COPY healthcheck.sh /usr/local/bin/healthcheck.sh
 RUN chmod +x /usr/local/bin/healthcheck.sh
 
-# Copy static web app config for reference
-COPY --from=builder /app/staticwebapp.config.json /usr/share/nginx/html/
-
-# Create non-root user for security
-RUN addgroup -g 1001 -S nodejs && \
-    adduser -S nextjs -u 1001 && \
-    chown -R nextjs:nodejs /usr/share/nginx/html
-
-# Switch to non-root user
-USER nextjs
-
 # Expose port
+EXPOSE 80
 EXPOSE 80
 
 # Health check for container orchestrators

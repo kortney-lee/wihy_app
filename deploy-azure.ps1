@@ -104,6 +104,11 @@ try {
     
 } catch {
     Write-Host "❌ Error during deployment: $($_.Exception.Message)" -ForegroundColor Red
-    Write-Host "💡 Try running the commands manually or check the Azure portal for more details." -ForegroundColor Yellow
+    Write-Host ""
+    Write-Host "🔧 Troubleshooting:" -ForegroundColor Yellow
+    Write-Host "   1. Make sure you have Azure CLI installed"
+    Write-Host "   2. Check your Azure subscription permissions"
+    Write-Host "   3. Try running the commands manually"
+    Write-Host "   4. Check the Azure portal for more details"
     exit 1
 }
