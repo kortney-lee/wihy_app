@@ -1,16 +1,16 @@
-# Multi-stage build for WiHy UI
+# Multi-stage build for WiHy UI - Serverless Container Optimized
 FROM node:18-alpine AS builder
 
 # Set working directory
 WORKDIR /app
 
-# Copy package files
+# Copy package files for dependency installation
 COPY package*.json ./
 COPY client/package*.json ./client/
 
-# Install dependencies
-RUN npm ci
-RUN cd client && npm ci
+# Install dependencies with clean slate
+RUN npm ci --only=production && \
+    cd client && npm ci --only=production
 
 # Copy source code
 COPY . .
@@ -18,22 +18,39 @@ COPY . .
 # Build the client application
 RUN cd client && npm run build
 
-# Production stage
-FROM node:18-alpine AS production
+# Production stage - Optimized for serverless
+FROM nginx:alpine AS production
 
-WORKDIR /app
-
-# Install serve to serve static files
-RUN npm install -g serve
+# Install additional tools for serverless compatibility
+RUN apk add --no-cache curl
 
 # Copy built application
-COPY --from=builder /app/client/build ./build
+COPY --from=builder /app/client/build /usr/share/nginx/html
 
-# Copy static web app config
-COPY staticwebapp.config.json ./
+# Copy nginx configuration for SPA
+COPY nginx.conf /etc/nginx/nginx.conf
+
+# Copy health check script
+COPY healthcheck.sh /usr/local/bin/healthcheck.sh
+RUN chmod +x /usr/local/bin/healthcheck.sh
+
+# Copy static web app config for reference
+COPY --from=builder /app/staticwebapp.config.json /usr/share/nginx/html/
+
+# Create non-root user for security
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S nextjs -u 1001 && \
+    chown -R nextjs:nodejs /usr/share/nginx/html
+
+# Switch to non-root user
+USER nextjs
 
 # Expose port
-EXPOSE 3000
+EXPOSE 80
 
-# Start the application
-CMD ["serve", "-s", "build", "-l", "3000"]
+# Health check for container orchestrators
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD /usr/local/bin/healthcheck.sh
+
+# Start nginx
+CMD ["nginx", "-g", "daemon off;"]
