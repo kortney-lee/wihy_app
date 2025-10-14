@@ -175,6 +175,94 @@ rm -rf node_modules package-lock.json
 npm install --legacy-peer-deps
 ```
 
+### 🛠️ Fixed Issues & Solutions
+
+#### Authentication Modal & Header Layout Fixes (October 2025)
+
+This section documents critical fixes for authentication modal positioning and header layout issues. **Reference these solutions if similar problems arise.**
+
+##### ❌ **Problem**: Authentication Modal Not Displaying Properly
+- Modal was showing only Google login instead of all 4 providers
+- Login button appeared too small compared to notification bell
+- Modal overlay was covering the entire header
+- Notification badge was positioned over the bell icon
+
+##### ✅ **Root Causes & Solutions**:
+
+**1. CSS Positioning Conflicts**
+```css
+/* ISSUE: Global styles overriding component styles */
+/* globals.css was setting header-icon-btn to 44px, Header.css to 36px */
+
+/* SOLUTION: Increased CSS specificity in Header.css */
+.vhealth-topbar-right .header-icon-btn {
+  width: 36px !important;
+  height: 36px !important;
+  /* Higher specificity overrides global styles */
+}
+```
+
+**2. Z-Index Layering Problems**
+```css
+/* ISSUE: Modal z-index (999, 1600) lower than header z-index (2000-2001) */
+
+/* SOLUTION: Updated z-index hierarchy */
+.auth-overlay { z-index: 2050; }           /* Above header */
+.providers-popup { z-index: 2100; }       /* Above overlay */
+.user-dropdown { z-index: 2100; }         /* Above overlay */
+```
+
+**3. Badge Positioning Conflicts**
+```css
+/* ISSUE: Badge positioned inside button (top: 6px) instead of outside */
+
+/* SOLUTION: Negative positioning with high specificity */
+.vhealth-topbar-right .header-icon-btn .badge-dot {
+  top: -6px !important;    /* Outside button area */
+  right: -6px !important;  /* Upper-right corner */
+  z-index: 10 !important;  /* Above other elements */
+}
+```
+
+**4. Inline Layout Implementation**
+```tsx
+// ISSUE: Login component using fixed positioning broke flex layout
+
+// SOLUTION: Added position prop with inline variant
+<MultiAuthLogin position="inline" />
+
+// CSS variants for different contexts
+.multi-auth-container.inline {
+  position: static;          /* Participates in flex flow */
+  display: inline-flex;      /* Inline with notification bell */
+}
+
+.multi-auth-container.top-right {
+  position: fixed;           /* Modal overlay context */
+}
+```
+
+##### 📋 **Files Modified**:
+- `user/src/components/components/shared/components/MultiAuthLogin.tsx`
+- `user/src/components/components/shared/components/MultiAuthLogin.css`
+- `user/src/components/components/shared/components/Header.tsx`
+- `user/src/components/components/shared/components/Header.css`
+
+##### 🔍 **Key Lessons Learned**:
+
+1. **CSS Specificity**: Use parent selectors (`.vhealth-topbar-right .header-icon-btn`) instead of `!important` when possible
+2. **Z-Index Management**: Maintain clear z-index hierarchy (Header: 2000 → Overlay: 2050 → Modal: 2100)
+3. **Component Variants**: Use position props for different rendering contexts (inline vs modal)
+4. **Global Style Conflicts**: Check `globals.css` for conflicting rules when component styles don't apply
+5. **Fixed Positioning**: Be careful with `position: fixed` - it removes elements from normal document flow
+
+##### 🧪 **Testing Checklist**:
+- [ ] Notification bell and login button are same size (36px x 36px)
+- [ ] Badge appears in upper-right corner of notification button
+- [ ] Login modal shows all 4 providers (Google, Microsoft, Apple, Facebook)
+- [ ] Modal overlay appears above header but doesn't cover it inappropriately
+- [ ] Both buttons display inline in header with proper spacing
+
 ### 🎨 Key Features
 
 #### Recent Updates (October 2025):
