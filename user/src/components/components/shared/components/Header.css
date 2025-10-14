@@ -286,35 +286,35 @@
 }
 
 /* Match bell + login sizing */
-.header-icon-btn,
-.login-icon {
+.vhealth-topbar-right .header-icon-btn,
+.vhealth-topbar-right .login-icon {
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
   width: 36px !important;
   height: 36px !important;
-  border-radius: 9999px;
-  border: 1px solid #e5e7eb;
-  background: #fff;
+  border-radius: 9999px !important;
+  border: 1px solid #e5e7eb !important;
+  background: #fff !important;
   margin: 0 !important;
-  padding: 0;
+  padding: 0 !important;
 }
 
-.header-icon-btn {
+.vhealth-topbar-right .header-icon-btn {
   position: relative;
   cursor: pointer;
   transition: background-color 0.2s, border-color 0.2s;
 }
 
 /* Size the SVG icons properly within the button */
-.header-icon-btn svg {
+.vhealth-topbar-right .header-icon-btn svg {
   width: 20px !important;
   height: 20px !important;
 }
 
-.header-icon-btn:hover {
-  background-color: #f9fafb;
-  border-color: #d1d5db;
+.vhealth-topbar-right .header-icon-btn:hover {
+  background-color: #f9fafb !important;
+  border-color: #d1d5db !important;
 }
 
 /* Notification badge */
