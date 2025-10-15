@@ -6,6 +6,8 @@ import ImageUploadModal from '../../ImageUploadModal';
 import { healthSearchService } from '../../../services/healthSearchService';
 import { getApiEndpoint } from '../../../config/apiConfig';
 import '../../../styles/VHealthSearch.css';
+import '../../../styles/search-components.css';
+import './Header.css';
 
 interface HeaderProps {
   searchQuery?: string;
@@ -48,6 +50,41 @@ const Header: React.FC<HeaderProps> = ({
 
   // Use internal listening state if onVoiceInput is not provided
   const currentIsListening = onVoiceInput ? isListening : internalIsListening;
+
+  // ================================
+  // FORCE HEADER ANIMATION WITH JAVASCRIPT
+  // ================================
+  useEffect(() => {
+    // Force apply the rainbow border animation to header search bar using JavaScript
+    const container = document.querySelector('.vhealth-header .search-input-container') as HTMLElement;
+    if (container) {
+      console.log('Applying JavaScript animation to header search bar, variant:', variant);
+      
+      // Set up the base styles
+      container.style.setProperty('border', '2px solid transparent', 'important');
+      container.style.setProperty('background', `
+        linear-gradient(#fff, #fff) padding-box,
+        linear-gradient(90deg, #fa5f06, #ffffff, #C0C0C0, #4cbb17, #1a73e8) border-box
+      `, 'important');
+      container.style.setProperty('background-size', '100% 100%, 200% 100%', 'important');
+      container.style.setProperty('border-radius', '24px', 'important');
+      
+      // Remove CSS animation and use JavaScript instead
+      container.style.setProperty('animation', 'none', 'important');
+      
+      // JavaScript animation
+      let position = 0;
+      const animate = () => {
+        position += 1;
+        if (position >= 200) position = 0;
+        
+        container.style.setProperty('background-position', `0 0, ${position}% 0`, 'important');
+        requestAnimationFrame(animate);
+      };
+      
+      animate();
+    }
+  }, [variant]); // Re-run when variant changes
 
   // ================================
   // UTILITY FUNCTIONS
@@ -493,6 +530,16 @@ const Header: React.FC<HeaderProps> = ({
 
   return (
     <>
+      {/* Ensure keyframes are available */}
+      <style>
+        {`
+          @keyframes wiH-border-sweep {
+            0%   { background-position: 0 0, 0% 0; }
+            100% { background-position: 0 0, 200% 0; }
+          }
+        `}
+      </style>
+      
       {/* LOADING OVERLAY - Shows during search operations */}
       {isLoading && (
         <LoadingOverlay 
@@ -535,7 +582,24 @@ const Header: React.FC<HeaderProps> = ({
           {showSearchInput && (
             <div className="vhealth-search-section">
               <form className="vhealth-search-form" onSubmit={handleSubmit}>
-                <div className="search-input-container">
+                <div 
+                  className="search-input-container"
+                  style={{
+                    animation: 'wiH-border-sweep 2.2s linear infinite !important',
+                    background: `
+                      linear-gradient(#fff, #fff) padding-box,
+                      linear-gradient(90deg, #fa5f06, #ffffff, #C0C0C0, #4cbb17, #1a73e8) border-box
+                    `,
+                    backgroundSize: '100% 100%, 200% 100%',
+                    border: '2px solid transparent',
+                    borderRadius: '24px',
+                    position: 'relative',
+                    width: '100%',
+                    maxWidth: '800px',
+                    margin: '0 auto',
+                    boxShadow: '0 1px 6px rgba(32,33,36,0.28)'
+                  }}
+                >
                   <textarea
                     ref={searchInputRef}
                     value={input}

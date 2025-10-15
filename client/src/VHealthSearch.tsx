@@ -27,6 +27,65 @@ const VHealthSearch: React.FC = () => {
   const abortControllerRef = useRef<AbortController | null>(null);
 
   // ================================
+  // FORCE MOBILE ANIMATION
+  // ================================
+  useEffect(() => {
+    // Force the animation to work on mobile by applying it directly
+    const forceAnimation = () => {
+      const container = document.querySelector('.search-input-container') as HTMLElement;
+      if (container) {
+        // Try a simpler animation approach for mobile
+        if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+          // Mobile-specific animation using background-position sweep (matching desktop pattern)
+          container.style.setProperty('border', '2px solid transparent', 'important');
+          container.style.setProperty('background', `
+            linear-gradient(#fff, #fff) padding-box,
+            linear-gradient(90deg, #fa5f06, #ffffff, #C0C0C0, #4cbb17, #1a73e8) border-box
+          `, 'important');
+          container.style.setProperty('background-size', '100% 100%, 200% 100%', 'important');
+          container.style.setProperty('animation', 'none', 'important');
+          
+          // Use background-position animation to match desktop sweep pattern
+          let position = 0;
+          const animateSweep = () => {
+            position = (position + 1) % 200; // 0 to 200% like the original
+            container.style.setProperty('background-position', `0 0, ${position}% 0`, 'important');
+            setTimeout(() => requestAnimationFrame(animateSweep), 22); // ~2.2s for full cycle (200 * 22ms ≈ 4.4s)
+          };
+          animateSweep();
+          
+          container.classList.add('force-mobile-animation');
+          console.log('Mobile device detected - custom gradient animation started');
+        } else {
+          // Desktop - use CSS animation
+          container.style.setProperty('animation', 'wiH-border-sweep 2.2s linear infinite', 'important');
+          container.style.setProperty('background', `
+            linear-gradient(#fff, #fff) padding-box,
+            linear-gradient(90deg, #fa5f06, #ffffff, #C0C0C0, #4cbb17, #1a73e8) border-box
+          `, 'important');
+          container.style.setProperty('background-size', '100% 100%, 200% 100%', 'important');
+          container.style.setProperty('border', '2px solid transparent', 'important');
+          console.log('Desktop animation applied');
+        }
+        
+        console.log('Forced animation applied to search container');
+      }
+    };
+
+    // Apply immediately and also after a short delay to ensure it sticks
+    forceAnimation();
+    const timeoutId = setTimeout(forceAnimation, 100);
+    
+    // Also apply when the component mounts fully
+    const mountTimeout = setTimeout(forceAnimation, 500);
+    
+    return () => {
+      clearTimeout(timeoutId);
+      clearTimeout(mountTimeout);
+    };
+  }, []);
+
+  // ================================
   // UTILITY FUNCTIONS
   // ================================
 
