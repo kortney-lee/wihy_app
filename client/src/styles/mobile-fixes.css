@@ -199,6 +199,29 @@
     max-width: 100% !important;
     overflow-x: hidden !important;
   }
+
+  /* Fix search input placeholder text display */
+  .search-input {
+    font-size: 16px !important; /* Prevent zoom on iOS */
+    padding: 12px 60px 12px 16px !important; /* More space for icons */
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .search-input::placeholder {
+    font-size: 16px !important;
+    color: #9aa0a6 !important;
+    opacity: 1 !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+  }
+
+  /* Ensure search icons don't overlap text */
+  .search-icons {
+    right: 8px !important;
+    background-color: rgba(255, 255, 255, 0.95) !important;
+  }
 }
 
 /* Extra small mobile devices */
