@@ -7,8 +7,8 @@ on:
   workflow_dispatch:
 
 env:
-  REGISTRY_LOGIN_SERVER: wihy.azurecr.io
-  REGISTRY_USERNAME: wihy
+  REGISTRY_LOGIN_SERVER: wihyuiregistry.azurecr.io
+  REGISTRY_USERNAME: wihyuiregistry
   CONTAINER_APP_NAME: wihy-ui
   CONTAINER_APP_ENVIRONMENT: wihy-env
   RESOURCE_GROUP: rg-wihy
