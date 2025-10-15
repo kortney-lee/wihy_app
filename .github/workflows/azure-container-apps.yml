@@ -13,7 +13,7 @@ env:
   REGISTRY_USERNAME: wihymlregistry
   CONTAINER_APP_NAME: wihy-ui
   CONTAINER_APP_ENVIRONMENT: wihy-ml-env
-  RESOURCE_GROUP: vhealth
+  RESOURCE_GROUP: vHealth
   IMAGE_NAME: wihy-ui
 
 jobs:
@@ -38,9 +38,13 @@ jobs:
 
     - name: Check Azure credentials
       run: |
-        if [ -z "${{ secrets.AZURE_CLIENT_ID }}" ] || [ -z "${{ secrets.AZURE_TENANT_ID }}" ]; then
+        if [ -z "${{ secrets.AZURE_CLIENT_ID }}" ] || [ -z "${{ secrets.AZURE_TENANT_ID }}" ] || [ -z "${{ secrets.REGISTRY_PASSWORD }}" ]; then
           echo "⚠️ Azure credentials not configured"
-          echo "Please see docs/AZURE_GITHUB_ACTIONS_SETUP.md for setup instructions"
+          echo "Missing secrets. Required:"
+          echo "- AZURE_CLIENT_ID"
+          echo "- AZURE_TENANT_ID"
+          echo "- AZURE_SUBSCRIPTION_ID"
+          echo "- REGISTRY_PASSWORD"
           echo "Skipping Azure deployment..."
           exit 0
         fi

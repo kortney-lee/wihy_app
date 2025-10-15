@@ -78,7 +78,7 @@ jobs:
     - name: Login to Azure Container Registry
       run: |
         echo "🔐 Logging into Azure Container Registry..."
-        echo "${{ secrets.REGISTRY_PASSWORD }}" | docker login ${{ env.REGISTRY }} --username wihymlregistry-b6fdh5cmhzgwbbgy --password-stdin
+        echo "${{ secrets.REGISTRY_PASSWORD }}" | docker login ${{ env.REGISTRY }} --username wihymlregistry --password-stdin
 
     - name: Build and push Docker image
       run: |
