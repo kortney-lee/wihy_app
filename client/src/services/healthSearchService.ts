@@ -2,6 +2,7 @@ import openaiAPI, { openaiAPI as openaiService } from './openaiAPI';
 import { healthAPI } from './healthAPI';
 import axios from 'axios';
 import { HealthSearchResult } from '../types/healthTypes';
+import { getApiEndpoint } from '../config/apiConfig';
 
 // Debug utility function
 const safeLog = (message: string, data?: any) => {
@@ -68,7 +69,7 @@ export const healthSearchService = {
 
       // Try to use the API with fetch and abort signal
       try {
-        const response = await fetch('http://localhost:5000/api/search/food', {
+        const response = await fetch(getApiEndpoint('/search/food'), {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -129,7 +130,7 @@ export const healthSearchService = {
   // Add missing checkServiceStatus method
   async checkServiceStatus() {
     try {
-      const response = await fetch('http://localhost:5000/api/status', {
+      const response = await fetch(getApiEndpoint('/status'), {
         method: 'GET',
       });
       

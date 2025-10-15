@@ -1,7 +1,9 @@
 // (Create this file if it doesn't exist)
 
+import { API_CONFIG, getApiEndpoint } from '../config/apiConfig';
+
 class FoodAnalysisService {
-  private baseUrl = 'http://localhost:5000/api';
+  private baseUrl = API_CONFIG.BASE_URL;
 
   async analyzeFoodImage(file: File): Promise<string> {
     try {

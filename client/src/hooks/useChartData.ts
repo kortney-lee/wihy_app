@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { getApiEndpoint } from '../config/apiConfig';
 
 interface ChartData {
   novaDistribution: Array<{
@@ -58,7 +59,7 @@ export const useChartData = (query: string) => {
       setError(null);
       
       try {
-        const response = await fetch(`http://localhost:5000/api/search/${encodeURIComponent(query)}/charts`);
+        const response = await fetch(getApiEndpoint(`/search/${encodeURIComponent(query)}/charts`));
         const data = await response.json();
 
         if (data.success && data.data.totalFoods > 0) {

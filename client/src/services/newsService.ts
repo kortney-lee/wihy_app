@@ -18,7 +18,7 @@ export const TRUSTED_DOMAINS: Record<string, number> = {
 };
 
 // Update API URL configuration
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+import { getApiEndpoint } from '../config/apiConfig';
 
 export interface NewsArticle {
   // API response standard fields
@@ -100,8 +100,10 @@ export interface NewsQueryParams {
 }
 
 class NewsService {
-  // Update the apiUrl to use the correct base URL
-  private apiUrl = `${API_BASE_URL}/api/news`;
+  // Update the apiUrl to use the configurable endpoint
+  private getNewsEndpoint() {
+    return getApiEndpoint('/news');
+  }
   
   /**
    * Fetch news articles based on provided parameters
@@ -121,7 +123,7 @@ class NewsService {
 
       console.log('Fetching news with params:', queryParams);
       
-      const response = await axios.get(`${this.apiUrl}/articles`, { params: queryParams });
+      const response = await axios.get(`${this.getNewsEndpoint()}/articles`, { params: queryParams });
       
       // Process the response to add compatibility fields
       const apiResponse = response.data as NewsFeedResponse;
@@ -182,7 +184,7 @@ class NewsService {
    */
   async getCategories(): Promise<string[]> {
     try {
-      const response = await axios.get(`${this.apiUrl}/categories`);
+      const response = await axios.get(`${this.getNewsEndpoint()}/categories`);
       // Type assertion for correct response type
       return (response.data as any).categories || [];
     } catch (error) {
@@ -196,7 +198,7 @@ class NewsService {
    */
   async getCountries(): Promise<{code: string, name: string}[]> {
     try {
-      const response = await axios.get(`${this.apiUrl}/countries`);
+      const response = await axios.get(`${this.getNewsEndpoint()}/countries`);
       // Type assertion for correct response type
       return (response.data as any).countries || [];
     } catch (error) {
