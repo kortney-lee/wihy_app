@@ -7,6 +7,7 @@ import MultiAuthLogin from './components/shared/components/MultiAuthLogin';
 import ResultQualityPie from './components/ResultQualityPie';
 import NutritionChart from './components/NutritionChart';
 import NovaChart from './components/NovaChart';
+import ChatWidget from './components/ChatWidget';
 import './styles/VHealthSearch.css';
 import Header from './components/shared/components/Header';
 import Spinner from './components/Spinner';
@@ -99,32 +100,37 @@ const convertLinksToClickable = (text: any): React.ReactNode => {
   const urlRegex = /(https?:\/\/[^\s]+)/g;
   const parts = text.split(urlRegex);
   
-  return parts.map((part: string, index: number) => {
-    if (part.match(urlRegex)) {
-      return (
-        <a 
-          key={index} 
-          href={part} 
-          target="_blank" 
-          rel="noopener noreferrer"
-          style={{ color: '#2563eb', textDecoration: 'underline' }}
-        >
-          {part}
-        </a>
-      );
-    }
-    return part;
-  });
+  return (
+    <>
+      {parts.map((part, index) => (
+        urlRegex.test(part) ? (
+          <a 
+            key={index} 
+            href={part} 
+            target="_blank" 
+            rel="noopener noreferrer"
+            style={{ color: '#2563eb', textDecoration: 'underline' }}
+          >
+            {part}
+          </a>
+        ) : (
+          part
+        )
+      ))}
+    </>
+  );
 };
 
-const SearchResults: React.FC<SearchResultsProps> = ({ 
-  query, 
-  results, 
+const SearchResults: React.FC<SearchResultsProps> = ({
+  query,
+  results,
   onBackToSearch,
   onNewSearch,
-  isLoading = false,
+  isLoading,
   dataSource,
-  citations
+  citations = [],
+  recommendations = [],
+  disclaimer = ""
 }) => {
   const [input, setInput] = useState('');
   const [image, setImage] = useState<File | string | null>(null);
@@ -135,9 +141,31 @@ const SearchResults: React.FC<SearchResultsProps> = ({
   const [notification, setNotification] = useState<{message: string, type: string} | null>(null);
   const [isUploadLoading, setUploadLoading] = useState(false);
   const [lastProcessedQuery, setLastProcessedQuery] = useState<string>('');
-  const [imageError, setImageError] = useState(false); // Add this state
+  const [imageError, setImageError] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
+  const [currentContext, setCurrentContext] = useState<string>('search results');
+  const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1200);
   const recognitionRef = useRef<any>(null);
+
+  // Handle window resize for responsive layout
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Prevent body scroll when component mounts  
+  useEffect(() => {
+    // Remove any body scroll restrictions - let the CSS variable approach handle positioning
+    document.body.style.overflow = 'auto';
+    
+    return () => {
+      document.body.style.overflow = 'auto';
+    };
+  }, []);
 
   // Check if we have valid results to display
   const hasValidResults = results && results.trim() !== '' && !isLoading;
@@ -157,7 +185,6 @@ const SearchResults: React.FC<SearchResultsProps> = ({
       document.body.classList.remove('modal-open');
     }
     
-    // Cleanup on unmount
     return () => {
       document.body.classList.remove('modal-open');
     };
@@ -182,191 +209,70 @@ const SearchResults: React.FC<SearchResultsProps> = ({
     }
   }, [notification]);
 
-  // Handle new search submission - only allow if user explicitly searches from results page
+  // Handle new search submission
   const handleTextSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim() || isLoading) return;
     
     const trimmedQuery = input.trim();
     
-    // Prevent duplicate searches
     if (trimmedQuery === lastProcessedQuery || trimmedQuery === query) {
       console.log('Preventing duplicate search for:', trimmedQuery);
       return;
     }
     
+    console.log('User explicit search from results page:', trimmedQuery);
     setLastProcessedQuery(trimmedQuery);
+    setIsSearching(true);
     onNewSearch(trimmedQuery);
-    setInput(''); // Clear input after search
   };
 
-  // Handle voice input
+  // Handle voice input (placeholder for now)
   const handleVoiceInput = () => {
-    if (!('webkitSpeechRecognition' in window)) {
-      alert('Speech recognition not supported in this browser');
-      return;
-    }
-
-    if (!recognitionRef.current) {
-      const recognition = new (window as any).webkitSpeechRecognition();
-      recognition.continuous = false;
-      recognition.interimResults = false;
-      recognition.lang = 'en-US';
-
-      recognition.onstart = () => {
-        setIsListening(true);
-      };
-
-      recognition.onresult = (event: any) => {
-        const transcript = event.results[0][0].transcript;
-        setNewQuery(transcript); // Update the input field
-        setIsListening(false);
-      };
-
-      recognition.onerror = () => {
-        setIsListening(false);
-      };
-
-      recognition.onend = () => {
-        setIsListening(false);
-      };
-
-      recognitionRef.current = recognition;
-    }
-
-    if (!isListening) {
-      recognitionRef.current.start();
-    } else {
-      recognitionRef.current.stop();
-      setIsListening(false);
-    }
+    setIsListening(!isListening);
   };
 
   // Handle image upload
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
     if (file) {
       setImage(file);
-      console.log(`Image uploaded: ${file.name}`);
-    }
-  };
-
-  // Clear all search items
-  const handleClearAll = () => {
-    setInput('');
-    setNewQuery(''); // <-- Add this line
-    setImage(null);
-    setCurrentPhotoId(null);
-    setIsListening(false);
-    if (recognitionRef.current) {
-      recognitionRef.current.stop();
-    }
-    
-    // Remove CSS class
-    const searchInput = document.querySelector('.results-search-input') as HTMLInputElement;
-    if (searchInput) {
-      searchInput.classList.remove('with-image');
-    }
-  };
-
-  // Handle Enter key press
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      handleTextSubmit(e as any);
-    }
-  };
-
-  // Photo modal handlers
-  const handleCameraClick = () => {
-    setIsUploadModalOpen(true);
-  };
-
-  // Simple handler that just triggers a new search - only when user explicitly requests it
-  const handleAnalysisComplete = (foodName: string) => {
-    if (foodName && foodName !== lastProcessedQuery && foodName !== query) {
-      console.log('User explicit search from image analysis:', foodName);
-      setNewQuery(foodName);
-      setLastProcessedQuery(foodName);
-      onNewSearch(foodName);
-    }
-  };
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    const files = Array.from(e.dataTransfer.files);
-    const imageFile = files.find(file => file.type.startsWith('image/'));
-    if (imageFile) {
-      // Instead of calling handleFileSelect, open the modal and let it handle the file
       setIsUploadModalOpen(true);
-      // You could also trigger the analysis directly if you want immediate processing
-      // But it's cleaner to let the user see the modal and confirm
     }
   };
 
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-  };
-
-  const handleNewSearchSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newQuery.trim() || isLoading) return;
-    
-    const trimmedQuery = newQuery.trim();
-    
-    // Prevent duplicate searches
-    if (trimmedQuery === lastProcessedQuery || trimmedQuery === query) {
-      console.log('Preventing duplicate search for:', trimmedQuery);
-      return;
-    }
-    
-    console.log('User explicit search from new query:', trimmedQuery);
-    setLastProcessedQuery(trimmedQuery);
-    onNewSearch(trimmedQuery);
-    setNewQuery(''); // Reset after search
-  };
-
-  // Update last processed query when props change
-  useEffect(() => {
-    if (query && query !== lastProcessedQuery) {
-      setLastProcessedQuery(query);
-    }
-  }, [query]);
-
-  // Check if current query is "test" to show dummy data styles
-  const isTestQuery = query.toLowerCase().trim() === 'test';
-
-  // Header search handler
-  const handleHeaderSearch = async (newQuery: string) => {
-    if (newQuery.trim() && newQuery !== query) {
-      setIsSearching(true);
-      
-      try {
-        // Call the parent's onNewSearch which should handle the API call
-        await onNewSearch(newQuery);
-      } catch (error) {
-        console.error('Header search error:', error);
-      } finally {
-        setIsSearching(false);
-      }
+  // Handle image upload completion
+  const handleAnalysisComplete = (results: any) => {
+    setIsUploadModalOpen(false);
+    if (results) {
+      onNewSearch(JSON.stringify(results));
     }
   };
 
-  const handleLogoClick = () => {
-    onBackToSearch();
-  };
+  // Check if this is a test query
+  const isTestQuery = query.toLowerCase() === 'test';
 
   return (
-    <div className="results-page">
-      <Header
-        searchQuery={query}
-        onSearchSubmit={handleHeaderSearch}
-        onVoiceInput={() => {/* voice logic */}}
-        onImageUpload={() => setIsUploadModalOpen(true)}
-        onLogoClick={handleLogoClick}
-        isListening={false}
-        variant="results"
-        showLogin={true}
-      />
+    <div className="search-results-container" style={{ 
+      minHeight: '100vh',
+      display: 'flex',
+      flexDirection: 'column',
+      paddingTop: 'var(--vh-header-height)',
+      overflow: 'hidden'
+    }}>
+      <div style={{ 
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        zIndex: 1000, 
+        backgroundColor: 'white'
+      }}>
+        <Header
+          variant="results"
+          showLogin={true}
+        />
+      </div>
 
       {/* Show spinner when searching from header */}
       {(isLoading || isSearching) && (
@@ -378,178 +284,137 @@ const SearchResults: React.FC<SearchResultsProps> = ({
         />
       )}
       
-      <div className="results-container">
+      {/* Main Content Area with Dashboard Layout */}
+      <div style={{ 
+        minHeight: 'calc(100vh - var(--vh-header-height))',
+        overflow: 'hidden',
+        padding: windowWidth <= 768 ? '12px' : '20px',
+        backgroundColor: '#f8fafc'
+      }}>
+        
         {hasValidResults ? (
-          <>
-            <div className="results-content">
-              {/* Main content */}
-              <div className="health-info-card">
-                <div className="health-info-content">
-                  <div className="markdown-content">
-                    {dataSource === 'vnutrition' ? (
-                      (() => {
-                        let nutrition;
-                        try {
-                          nutrition = typeof results === 'string' ? JSON.parse(results) : results;
-                          console.log('Raw nutrition object for debugging:', nutrition);
-                          
-                          if (nutrition && nutrition.found !== false) {
-                            return (
-                              <div>
-                                <h3>Nutrition Information</h3>
-                                <ul>
-                                  <li>Calories per serving: {nutrition.calories_per_serving || 0}</li>
-                                  <li>Protein: {nutrition.protein_g || 0}g</li>
-                                  <li>Carbs: {nutrition.carbs_g || 0}g</li>
-                                  <li>Fat: {nutrition.fat_g || 0}g</li>
-                                  <li>NOVA Score: {nutrition.nova_classification || 1}</li>
-                                  <li>Processing Level: {nutrition.nova_description || nutrition.processed_level || 'Unknown'}</li>
-                                </ul>
-                              </div>
-                            );
-                          } else {
-                            return (
-                              <div>
-                                <h3>Raw Database Data (Debug)</h3>
-                                <pre style={{ fontSize: '12px', background: '#f5f5f5', padding: '10px' }}>
-                                  {JSON.stringify(nutrition, null, 2)}
-                                </pre>
-                              </div>
-                            );
-                          }
-                        } catch {
-                          return <div>Error parsing nutrition data</div>;
-                        }
-                      })()
-                    ) : (
-                      convertLinksToClickable(results)
-                    )}
-                  </div>
-                </div>
-                
-                <div className="data-source-indicator">
-                  {dataSource === 'openai' ? (
-                    <span>Powered by AI</span>
-                  ) : dataSource === 'error' ? (
-                    <span className="error-source">Error retrieving data</span>
-                  ) : (
-                    <span>What Is Healthy?</span>
-                  )}
-                </div>
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: windowWidth <= 768 ? '1fr' : '2fr 1fr',
+            gridTemplateRows: windowWidth <= 768 ? '1fr 300px' : '1fr',
+            gap: '20px',
+            maxWidth: '1200px',
+            margin: '0 auto',
+            minHeight: 'calc(100vh - var(--vh-header-height) - 40px)', // Account for padding
+            overflow: 'hidden'
+          }}>
+            
+            {/* Chat Widget as Main Content */}
+            <div style={{
+              backgroundColor: 'white',
+              borderRadius: '12px',
+              border: '1px solid #e5e7eb',
+              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+              padding: windowWidth <= 768 ? '16px' : '24px',
+              display: 'flex',
+              flexDirection: 'column',
+              overflow: 'hidden'
+            }}>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                marginBottom: '20px'
+              }}>
+                <h2 style={{
+                  margin: 0,
+                  fontSize: '20px',
+                  fontWeight: '600',
+                  color: '#1f2937'
+                }}>
+                  Health Assistant Chat
+                </h2>
+                <span style={{
+                  fontSize: '12px',
+                  color: '#6b7280',
+                  backgroundColor: '#f3f4f6',
+                  padding: '4px 8px',
+                  borderRadius: '4px'
+                }}>
+                  {dataSource.toUpperCase()}
+                </span>
               </div>
-              
-              {/* Sidebar - ONLY when NOT loading and we have results */}
-              <div className="sidebar">
-                {/* Quality Chart */}
-                <div className="quality-chart-container" style={{ marginBottom: "2rem" }}>
-                  <ResultQualityPie 
-                    query={query || ''} 
-                    results={results || ''}
-                    dataSource={dataSource || 'openai'}
-                    citations={citations || []}
-                  />
-                </div>
 
-                {/* Nutrition Charts - Only show when we have nutrition data */}
-                {dataSource === 'vnutrition' && (
+              {/* Chat Widget */}
+              <div style={{ flex: 1, overflow: 'hidden' }}>
+                <ChatWidget
+                  isOpen={true}
+                  onToggle={() => {}}
+                  onClose={() => {}}
+                  currentContext={currentContext}
+                  inline={true}
+                />
+              </div>
+            </div>
+
+            {/* Charts Sidebar */}
+            <div style={{
+              padding: windowWidth <= 768 ? '16px' : '20px',
+              backgroundColor: '#ffffff',
+              borderRadius: '12px',
+              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+              display: 'flex',
+              flexDirection: 'column',
+              overflow: 'hidden'
+            }}>
+              <h3 style={{ marginBottom: '20px', color: '#1f2937', fontSize: '18px', fontWeight: '600', flexShrink: 0 }}>
+                Analysis Charts
+              </h3>
+              <div style={{ 
+                display: 'flex', 
+                flexDirection: 'column', 
+                gap: '20px',
+                flex: 1,
+                overflow: 'auto',
+                paddingRight: '4px'
+              }}>
+                {results && (
                   <>
-                    <div className="nutrition-chart-container" style={{ marginBottom: "2rem" }}>
-                      <h3 style={{ fontSize: "1.1rem", marginBottom: "1rem", color: "#374151" }}>
-                        Nutrition Breakdown
-                      </h3>
+                    <div>
+                      <h4 style={{ marginBottom: '12px', color: '#374151', fontSize: '14px' }}>Quality Analysis</h4>
+                      <ResultQualityPie 
+                        query={query}
+                        results={results} 
+                        dataSource={dataSource === 'wihy' ? 'vnutrition' : dataSource}
+                      />
+                    </div>
+                    <div>
+                      <h4 style={{ marginBottom: '12px', color: '#374151', fontSize: '14px' }}>Nutrition Breakdown</h4>
                       <NutritionChart 
                         query={query}
                         results={results}
-                        dataSource={dataSource}
+                        dataSource={dataSource === 'wihy' ? 'vnutrition' : dataSource}
                       />
                     </div>
-
-                    <div className="nova-chart-container" style={{ marginBottom: "2rem" }}>
-                      <h3 style={{ fontSize: "1.1rem", marginBottom: "1rem", color: "#374151" }}>
-                        Processing Level (NOVA Score)
-                      </h3>
+                    <div>
+                      <h4 style={{ marginBottom: '12px', color: '#374151', fontSize: '14px' }}>Processing Level</h4>
                       <NovaChart 
                         query={query}
                         results={results}
-                        dataSource={dataSource}
+                        dataSource={dataSource === 'wihy' ? 'vnutrition' : dataSource}
                       />
                     </div>
                   </>
                 )}
-                
-                {/* Related Topics */}
-                <div className="related-topics-card">
-                  <h3>Related Health Topics</h3>
-                  <ul className="related-topics-list">
-                    {isTestQuery ? (
-                      dummyTestData.relatedTopics.map((topic, index) => (
-                        <li key={index}>
-                          <button 
-                            onClick={() => {
-                              if (topic !== lastProcessedQuery && topic !== query && !isLoading) {
-                                console.log('User explicit search from related topic:', topic);
-                                setLastProcessedQuery(topic);
-                                onNewSearch(topic);
-                              }
-                            }}
-                            className="topic-button"
-                            disabled={isLoading}
-                          >
-                            {topic}
-                          </button>
-                        </li>
-                      ))
-                    ) : (
-                      defaultRelatedTopics.map((topic, index) => (
-                        <li key={index}>
-                          <button 
-                            onClick={() => {
-                              if (topic !== lastProcessedQuery && topic !== query && !isLoading) {
-                                console.log('User explicit search from related topic:', topic);
-                                setLastProcessedQuery(topic);
-                                onNewSearch(topic);
-                              }
-                            }}
-                            className="topic-button"
-                            disabled={isLoading}
-                          >
-                            {topic}
-                          </button>
-                        </li>
-                      ))
-                    )}
-                  </ul>
-                </div>
-                
-                {/* Resources */}
-                <div className="resources-card">
-                  <h3>Useful Resources</h3>
-                  <ul className="resources-list">
-                    {isTestQuery ? (
-                      dummyTestData.resources.map((resource, index) => (
-                        <li key={index}>
-                          <a href={resource.url} target="_blank" rel="noopener noreferrer">
-                            {resource.text}
-                          </a>
-                        </li>
-                      ))
-                    ) : (
-                      defaultResources.map((resource, index) => (
-                        <li key={index}>
-                          <a href={resource.url} target="_blank" rel="noopener noreferrer">
-                            {resource.text}
-                          </a>
-                        </li>
-                      ))
-                    )}
-                  </ul>
-                </div>
               </div>
             </div>
-          </>
+          </div>
         ) : (
           !isLoading && !isSearching && (
-            <div className="no-results-message">
+            <div style={{ 
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              height: '100%',
+              textAlign: 'center', 
+              padding: '40px',
+              color: '#6b7280'
+            }}>
               <p>No results to display. Try searching for something else.</p>
             </div>
           )

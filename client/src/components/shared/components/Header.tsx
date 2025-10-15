@@ -1,5 +1,5 @@
 /* filepath: c:\vHealth\vhealth\client\src\components\shared\components\Header.tsx */
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useLayoutEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import MultiAuthLogin from './MultiAuthLogin';
 import ImageUploadModal from '../../ImageUploadModal';
@@ -50,6 +50,35 @@ const Header: React.FC<HeaderProps> = ({
 
   // Use internal listening state if onVoiceInput is not provided
   const currentIsListening = onVoiceInput ? isListening : internalIsListening;
+
+  // ================================
+  // HEADER HEIGHT MEASUREMENT
+  // ================================
+  // Keep body offset equal to the real header height
+  useLayoutEffect(() => {
+    const header = document.querySelector('header.vhealth-header') as HTMLElement | null;
+    if (!header) return;
+
+    const apply = () => {
+      const h = Math.ceil(header.getBoundingClientRect().height);
+      document.documentElement.style.setProperty('--vh-header-height', `${h}px`);
+    };
+
+    // Run once now
+    apply();
+
+    // Update on header size change
+    const ro = new ResizeObserver(apply);
+    ro.observe(header);
+
+    // Update on viewport resize / orientation change
+    window.addEventListener('resize', apply);
+
+    return () => {
+      window.removeEventListener('resize', apply);
+      ro.disconnect();
+    };
+  }, []);
 
   // ================================
   // FORCE HEADER ANIMATION WITH JAVASCRIPT
