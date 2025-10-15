@@ -1,0 +1,212 @@
+import React from 'react';
+import {
+  Chart as ChartJS,
+  ArcElement,
+  Tooltip,
+  Legend,
+} from 'chart.js';
+import { Doughnut } from 'react-chartjs-2';
+
+ChartJS.register(ArcElement, Tooltip, Legend);
+
+interface NutritionChartProps {
+  query: string;
+  results: string;
+  dataSource: "error" | "openai" | "local" | "vnutrition";
+}
+
+// Extract nutrition data function moved from SearchResults
+const extractNutritionData = (results: string, dataSource: string) => {
+  console.log('=== EXTRACTING NUTRITION DATA IN NUTRITIONCHART ===');
+  console.log('DataSource:', dataSource);
+  console.log('Results type:', typeof results);
+  
+  if (dataSource === 'vnutrition') {
+    try {
+      console.log('Processing vnutrition data source');
+      let nutrition;
+      
+      if (typeof results === 'string') {
+        console.log('Parsing string results');
+        nutrition = JSON.parse(results);
+      } else {
+        console.log('Using object results directly');
+        nutrition = results;
+      }
+      
+      console.log('=== RAW NUTRITION OBJECT ===');
+      console.log('Full object:', nutrition);
+      console.log('Object keys:', Object.keys(nutrition || {}));
+      
+      if (nutrition && nutrition.found !== false) {
+        const extractedData = {
+          calories: nutrition.calories_per_serving || 0,
+          protein: nutrition.protein_g || 0,
+          carbs: nutrition.carbs_g || 0,
+          fat: nutrition.fat_g || 0,
+          fiber: nutrition.fiber_g || 0,
+          sugar: nutrition.sugar_g || 0,
+          sodium: nutrition.sodium_mg || 0,
+          novaScore: nutrition.nova_classification || 1,
+          processedLevel: nutrition.nova_description || nutrition.processed_level || 'Unknown'
+        };
+        
+        console.log('=== EXTRACTED DATA ===');
+        console.log('Final extracted data:', extractedData);
+        
+        return extractedData;
+      } else {
+        console.log('No valid nutrition data - found:', nutrition?.found);
+        return null;
+      }
+    } catch (error) {
+      console.error('Error parsing nutrition data:', error);
+      return null;
+    }
+  }
+  
+  console.log('Not vnutrition source');
+  return null;
+};
+
+const NutritionChart: React.FC<NutritionChartProps> = ({ query, results, dataSource }) => {
+  // Extract nutrition data using internal function
+  const nutritionData = extractNutritionData(results, dataSource);
+
+  // Only render if we have nutrition data
+  if (!nutritionData || dataSource !== 'vnutrition') {
+    return null;
+  }
+
+  const { calories, protein, carbs, fat } = nutritionData;
+
+  // Calculate total for percentages (excluding calories as it's not in grams)
+  const total = protein + carbs + fat;
+  
+  // Prepare data for the pie chart
+  const data = {
+    datasets: [
+      {
+        data: [protein, carbs, fat],
+        backgroundColor: [
+          '#10B981', // Green for protein
+          '#F59E0B', // Yellow for carbs  
+          '#EF4444', // Red for fat
+        ],
+        borderWidth: 0,
+        cutout: '60%',
+      },
+    ],
+  };
+
+  const options = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        display: false,
+      },
+      tooltip: {
+        callbacks: {
+          label: function(context: any) {
+            const labels = ['Protein', 'Carbs', 'Fat'];
+            const label = labels[context.dataIndex];
+            const value = context.parsed;
+            const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
+            return `${label}: ${value}g (${percentage}%)`;
+          },
+        },
+      },
+    },
+  };
+
+  return (
+    <div style={{ textAlign: 'center' }}>
+      <div style={{ position: 'relative', height: '200px', width: '200px', margin: '0 auto' }}>
+        <Doughnut data={data} options={options} />
+        <div
+          style={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            textAlign: 'center',
+          }}
+        >
+          <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#374151' }}>
+            {calories}
+          </div>
+          <div style={{ fontSize: '0.75rem', color: '#6B7280' }}>
+            Calories
+          </div>
+        </div>
+      </div>
+      
+      <div style={{ marginTop: '1rem' }}>
+        <div style={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'center',
+          marginBottom: '0.5rem' 
+        }}>
+          <span style={{ 
+            fontSize: '1.2rem', 
+            marginRight: '0.5rem' 
+          }}>
+            ⚡
+          </span>
+          <span style={{ 
+            fontWeight: '500', 
+            color: '#374151',
+            fontSize: '1rem'
+          }}>
+            Good
+          </span>
+        </div>
+        
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'center', 
+          gap: '1rem',
+          fontSize: '0.875rem'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+            <div
+              style={{
+                width: '12px',
+                height: '12px',
+                backgroundColor: '#10B981',
+                borderRadius: '2px',
+              }}
+            />
+            <span>Protein: {total > 0 ? Math.round((protein / total) * 100) : 0}%</span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+            <div
+              style={{
+                width: '12px',
+                height: '12px',
+                backgroundColor: '#F59E0B',
+                borderRadius: '2px',
+              }}
+            />
+            <span>Carbs: {total > 0 ? Math.round((carbs / total) * 100) : 0}%</span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+            <div
+              style={{
+                width: '12px',
+                height: '12px',
+                backgroundColor: '#EF4444',
+                borderRadius: '2px',
+              }}
+            />
+            <span>Fat: {total > 0 ? Math.round((fat / total) * 100) : 0}%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default NutritionChart;

@@ -1,0 +1,684 @@
+/* ---------------------------
+   Cards & Content
+----------------------------*/
+.health-info-card {
+  background: linear-gradient(135deg, #ffffff 0%, #f8fbff 100%);
+  border-radius: 16px;
+  padding: 30px;
+  box-shadow: 0 4px 20px rgba(26, 115, 232, 0.08);
+  border: 1px solid #e8f0fe;
+  position: relative;
+  overflow: hidden;
+}
+
+.health-info-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0; 
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #1a73e8, #4285f4, #34a853);
+}
+
+.health-info-content {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 25px;
+  border: 1px solid #f0f0f0;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  text-align: left !important;
+}
+
+.markdown-content,
+.health-info-content pre {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 16px;
+  line-height: 1.8;
+  color: #333;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  text-align: left !important;
+}
+
+.sidebar { 
+  width: 300px; 
+  display: block;
+  position: sticky; 
+  top: 90px;
+}
+
+.related-topics-card,
+.resources-card {
+  background: linear-gradient(180deg, var(--vh-surface) 0%, var(--vh-surface-2) 100%);
+  border: 1px solid #e8f0fe;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(26,115,232,.05);
+  overflow: hidden;
+  padding: 0;
+  margin-bottom: 20px;
+}
+
+.related-topics-card h3,
+.resources-card h3 {
+  margin: 0;
+  padding: 14px 16px;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--vh-accent);
+  background: linear-gradient(90deg, rgba(26,115,232,.06), transparent);
+  border-bottom: 1px solid #e8f0fe;
+  text-align: left;
+}
+
+.related-topics-list,
+.resources-list {
+  list-style: none;
+  padding: 8px;
+  margin: 0;
+}
+
+.related-topics-list li,
+.resources-list li {
+  margin: 6px 0;
+  border-bottom: 1px dashed #eef2f7;
+  padding: 2px 0 8px 0;
+}
+
+.related-topics-list li:last-child,
+.resources-list li:last-child { 
+  border-bottom: 0; 
+}
+
+.topic-button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 10px;
+  color: #1a0dab;
+  text-decoration: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: background-color .18s ease, transform .06s ease, color .18s ease;
+  text-align: left;
+}
+
+.topic-button::before {
+  content: "›";
+  font-weight: 700;
+  color: #8ab4f8;
+  transform: translateY(-1px);
+}
+
+.topic-button:hover {
+  background: #eef4ff;
+  color: #1557b0;
+  transform: translateY(-1px);
+}
+
+.resources-list a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #f5f8ff;
+  color: #1a4fb8;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid #e1e9ff;
+  transition: background-color .18s ease, box-shadow .18s ease, transform .06s ease;
+  text-decoration: none;
+  font-size: 13px;
+}
+
+.resources-list a:hover {
+  background: #eaf1ff;
+  box-shadow: 0 6px 16px rgba(26,115,232,.12);
+  text-decoration: none;
+  transform: translateY(-1px);
+}
+
+.data-source-indicator {
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px solid #e8f0fe;
+  font-size: 12px;
+  color: var(--vh-muted);
+  text-align: center;
+}
+
+.error-source { color: #ea4335; }
+
+/* ---------------------------
+   Dashboard-specific Cards & Layout (not conflicting with existing)
+----------------------------*/
+
+/* Dashboard snapshot section */
+.snapshot-section {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 12px 16px 0;
+}
+
+.snapshot-heading {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--ink-800);
+  margin-bottom: 16px;
+}
+
+.snapshot-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 16px;
+}
+
+/* Dashboard card styles (different from existing health-info-card) */
+.card {
+  background: #fff;
+  border: 1px solid var(--slate-200);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  box-shadow: var(--shadow-1);
+}
+
+.card-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.card-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-500);
+}
+
+.card-value {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--ink-800);
+  margin-top: 4px;
+}
+
+.card-sub {
+  font-size: 12px;
+  color: var(--ink-500);
+  margin-top: 4px;
+}
+
+/* Icon circles for dashboard */
+.icon-circle {
+  height: 48px;
+  width: 48px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon--blue { background: var(--blue-100); }
+.icon--green { background: var(--green-100); }
+.icon--purple { background: var(--purple-100); }
+.icon--indigo { background: var(--indigo-100); }
+.icon--cyan { background: var(--cyan-100); }
+
+/* Progress bars */
+.progress {
+  height: 8px;
+  background: var(--slate-200);
+  border-radius: 4px;
+  width: 100%;
+}
+
+.progress__bar {
+  height: 8px;
+  border-radius: 4px;
+}
+
+.progress--blue .progress__bar { background: var(--blue-500); }
+.progress--green .progress__bar { background: var(--green-500); }
+.progress--purple .progress__bar { background: var(--purple-500); }
+.progress--indigo .progress__bar { background: var(--indigo-500); }
+.progress--cyan .progress__bar { background: var(--cyan-500); }
+
+/* Main dashboard sections */
+.section-wrap {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.section-card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 0;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  margin-bottom: 24px;
+  overflow: hidden;
+}
+
+.section-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2937;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 0;
+  padding: 24px 24px 16px 24px;
+  border-bottom: 1px solid #f3f4f6;
+  background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+}
+
+/* ---------------------------
+   Charts & Data Visualization
+----------------------------*/
+
+/* Chart containers and layout */
+.chart-row {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+}
+
+.chart-box {
+  width: 100%;
+  height: 320px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  position: relative;
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Responsive chart container */
+.chart-container {
+  position: relative;
+  height: 240px;
+  width: 100%;
+  flex: 1;
+  margin-bottom: 12px;
+}
+
+/* Chart canvas wrapper for proper sizing */
+.chart-canvas-wrapper {
+  position: relative;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* Split layout for charts with metrics */
+.chart-split-layout {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+/* Metric column for summary cards */
+.metric-col {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 250px;
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  height: fit-content;
+}
+
+/* Full width chart layout */
+.chart-full-width {
+  width: 100%;
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+}
+
+.chart--center {
+  display: flex;
+  justify-content: center;
+}
+
+/* Chart legends and indicators */
+.chart-legend {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--ink-600);
+}
+
+.legend-swatch {
+  width: 12px;
+  height: 2px;
+  display: inline-block;
+}
+
+.swatch-blue {
+  background: var(--blue-500);
+}
+
+/* Responsive chart layout */
+@media (max-width: 1024px) {
+  .chart-split-layout {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  .metric-col {
+    min-width: unset;
+    width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .chart-row {
+    gap: 16px;
+  }
+  
+  .chart-box {
+    height: 280px;
+    padding: 16px;
+  }
+  
+  .chart-container {
+    height: 200px;
+  }
+  
+  .chart-full-width {
+    padding: 16px;
+  }
+  
+  .metric-col {
+    padding: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .chart-box {
+    height: 260px;
+    padding: 12px;
+  }
+  
+  .chart-container {
+    height: 180px;
+  }
+  
+  .chart-full-width {
+    padding: 12px;
+  }
+  
+  .metric-col {
+    padding: 12px;
+  }
+}
+
+.swatch-gray {
+  background: var(--ink-500);
+}
+
+/* Responsive chart layouts */
+@media (max-width: 640px) {
+  .chart-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Dark mode chart styles */
+@media (prefers-color-scheme: dark) {
+  .chart-legend {
+    color: #c7cbd4;
+  }
+}
+
+/* ---------------------------
+   Compact Overview Styles (Chat Widget Ready)
+----------------------------*/
+
+/* Overview grid layout - similar to HealthSnapshot but for chart widgets */
+.overview-section {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 12px 16px 0;
+}
+
+.overview-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.3fr 1.2fr 1fr; /* Variable widths based on content needs */
+  gap: 12px;
+  margin-bottom: 16px;
+  max-width: 1120px;
+}
+
+/* Compact section card for overview */
+.section-card--compact {
+  background: #fff;
+  border: 1px solid var(--slate-200);
+  border-radius: var(--radius-lg);
+  padding: 12px;
+  box-shadow: var(--shadow-1);
+  height: 240px;
+  display: flex;
+  flex-direction: column;
+  min-width: 0; /* Allow natural sizing */
+}
+
+/* Specific minimum widths for different content needs */
+.section-card--compact:nth-child(1) {
+  /* Weight & Body - narrow */
+  min-width: 220px;
+}
+
+.section-card--compact:nth-child(2) {
+  /* Activity - wider for progress bars */
+  min-width: 280px;
+}
+
+.section-card--compact:nth-child(3) {
+  /* Nutrition - medium width for tabs */
+  min-width: 260px;
+}
+
+.section-card--compact:nth-child(4) {
+  /* Sleep - narrow for simple content */
+  min-width: 220px;
+}
+
+/* Compact section header */
+.section-title--compact {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1f2937;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 0 0 12px 0;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #f3f4f6;
+  min-height: 32px; /* Consistent header height */
+}
+
+.section-title--compact h3 {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: #1f2937;
+  line-height: 1.2;
+  flex: 1;
+  min-width: 0;
+}
+
+/* Compact chart container */
+.chart-container--compact {
+  position: relative;
+  height: 180px;
+  width: 100%;
+  flex: 1;
+  margin-bottom: 8px;
+  overflow: hidden;
+}
+
+/* Hide complex elements in compact view */
+.section-card--compact .section-card {
+  border: none;
+  box-shadow: none;
+  margin-bottom: 0;
+  background: transparent;
+  padding: 0;
+  border-radius: 0;
+}
+
+.section-card--compact .section-title {
+  display: none;
+}
+
+.section-card--compact .metric-col {
+  display: none;
+}
+
+.section-card--compact .chart-split-layout {
+  display: block;
+}
+
+.section-card--compact .chart-container {
+  height: 140px;
+  margin-bottom: 0;
+  flex: 1;
+}
+
+/* Compact chart controls */
+.chart-controls--compact {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.chart-controls--compact .btn {
+  font-size: 10px;
+  padding: 4px 8px;
+}
+
+/* Compact analyze button */
+.analyze-wihy-btn--compact {
+  font-size: 10px !important;
+  padding: 4px 8px !important;
+  border-radius: 12px;
+  white-space: nowrap;
+  background: transparent;
+  border: 1px solid #1a73e8;
+  color: #1a73e8;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.analyze-wihy-btn--compact:hover {
+  background: #1a73e8;
+  color: white;
+}
+
+/* Responsive overview layout for wide screens with chat widget */
+@media (min-width: 1400px) {
+  .overview-grid {
+    grid-template-columns: 1fr 1.3fr 1.2fr 1fr; /* Maintain proportional sizing */
+    gap: 10px;
+    max-width: 1000px; /* Leave space for chat widget */
+  }
+  
+  .section-card--compact {
+    height: 220px;
+  }
+  
+  .section-card--compact .chart-container {
+    height: 120px;
+  }
+}
+
+@media (min-width: 1200px) and (max-width: 1399px) {
+  .overview-grid {
+    grid-template-columns: 1fr 1.3fr 1.2fr 1fr; /* Maintain proportional sizing */
+    gap: 10px;
+  }
+  
+  .section-card--compact {
+    height: 230px;
+  }
+}
+
+@media (min-width: 900px) and (max-width: 1199px) {
+  .overview-grid {
+    grid-template-columns: 1fr 1.2fr 1.1fr; /* Three columns with proportional sizing */
+  }
+  
+  /* Move Sleep to second row on smaller screens */
+  .overview-grid > div:nth-child(4) {
+    grid-column: 1 / span 1;
+    justify-self: start;
+  }
+}
+
+@media (max-width: 899px) {
+  .overview-grid {
+    grid-template-columns: 1fr 1fr; /* Two columns */
+    gap: 12px;
+  }
+  
+  .section-card--compact {
+    height: 240px;
+  }
+  
+  .chart-container--compact {
+    height: 160px;
+  }
+}
+
+@media (max-width: 600px) {
+  .overview-grid {
+    grid-template-columns: 1fr; /* Single column on mobile */
+  }
+}
+
+/* Chat widget animations */
+@keyframes slideUpFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInFromLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
