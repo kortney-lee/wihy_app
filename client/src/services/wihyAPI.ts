@@ -1,6 +1,7 @@
 import axios from 'axios';
+import { API_CONFIG, getWihyEndpoint } from '../config/apiConfig';
 
-const WIHY_API_URL = process.env.REACT_APP_WIHY_API_URL || 'http://localhost:8000';
+const WIHY_API_URL = API_CONFIG.WIHY_API_URL;
 
 // Types for the WiHy API
 export interface UserContext {

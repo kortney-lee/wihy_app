@@ -1,5 +1,7 @@
 // src/components/ImageUploadModal.tsx
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
+import './Spinner.css';
+import { getApiEndpoint } from '../config/apiConfig';
 import '../styles/VHealthSearch.css';
 
 interface ImageUploadModalProps {
@@ -103,7 +105,7 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
       formData.append('image', file);
       
       console.log('🔍 STEP 3: Making API call...');
-      const response = await fetch('http://localhost:5000/api/analyze-image', {
+      const response = await fetch(getApiEndpoint('/analyze-image'), {
         method: 'POST',
         body: formData,
       });

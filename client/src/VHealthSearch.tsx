@@ -7,6 +7,7 @@ import { healthSearchService } from './services/healthSearchService';
 import { searchCache } from './services/searchCache';
 import { foodAnalysisService } from './components/foodAnalysisService';
 import HealthNewsFeed from './components/HealthNewsFeed';
+import { getApiEndpoint } from './config/apiConfig';
 
 const VHealthSearch: React.FC = () => {
   // ================================
@@ -146,7 +147,7 @@ const VHealthSearch: React.FC = () => {
       setLoadingMessage('Checking cache...');
       
       try {
-        const response = await fetch(`http://localhost:5000/api/cache/get?q=${encodeURIComponent(queryToUse)}`, { signal });
+        const response = await fetch(getApiEndpoint(`/cache/get?q=${encodeURIComponent(queryToUse)}`), { signal });
         
         if (response.ok) {
           const cachedData = await response.json();
@@ -194,7 +195,7 @@ const VHealthSearch: React.FC = () => {
           // Step 3: Save to database cache (async, don't wait)
           setLoadingMessage('Caching results...');
           
-          fetch('http://localhost:5000/api/cache/save', {
+          fetch(getApiEndpoint('/cache/save'), {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -245,7 +246,7 @@ const VHealthSearch: React.FC = () => {
         setLoadingMessage('Searching for similar results...');
         
         try {
-          const similarResponse = await fetch(`http://localhost:5000/api/cache/similar?q=${encodeURIComponent(queryToUse)}`);
+          const similarResponse = await fetch(getApiEndpoint(`/cache/similar?q=${encodeURIComponent(queryToUse)}`));
           
           if (similarResponse.ok) {
             const similarResults = await similarResponse.json();
@@ -341,7 +342,7 @@ const VHealthSearch: React.FC = () => {
       setLoadingMessage('Checking nutrition database...');
       
       try {
-        const response = await fetch(`http://localhost:5000/api/cache/get?q=${encodeURIComponent(foodName)}`);
+        const response = await fetch(getApiEndpoint(`/cache/get?q=${encodeURIComponent(foodName)}`));
         
         if (response.ok) {
           const cachedData = await response.json();
@@ -379,7 +380,7 @@ const VHealthSearch: React.FC = () => {
           // Step 3: Save to database cache (async, don't wait)
           setLoadingMessage('Caching nutrition data...');
           
-          fetch('http://localhost:5000/api/cache/save', {
+          fetch(getApiEndpoint('/cache/save'), {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -421,7 +422,7 @@ const VHealthSearch: React.FC = () => {
         
         // Try similar results as fallback
         try {
-          const similarResponse = await fetch(`http://localhost:5000/api/cache/similar?q=${encodeURIComponent(foodName)}`);
+          const similarResponse = await fetch(getApiEndpoint(`/cache/similar?q=${encodeURIComponent(foodName)}`));
           
           if (similarResponse.ok) {
             const similarResults = await similarResponse.json();

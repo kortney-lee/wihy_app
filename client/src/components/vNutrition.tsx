@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { openFoodFactsAPI } from '../services/openFoodFactsAPI';
+import { getWihyEndpoint } from '../config/apiConfig';
 
 const VNutrition: React.FC = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -79,7 +80,7 @@ const VNutrition: React.FC = () => {
     formData.append("file", selectedFile);
 
     try {
-      const res = await fetch("http://localhost:8000/analyze", {
+      const res = await fetch(getWihyEndpoint("/analyze"), {
         method: "POST",
         body: formData,
       });

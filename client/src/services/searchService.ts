@@ -3,7 +3,7 @@
 import axios from 'axios';
 
 // Define the API URL constant
-const API_URL = 'http://localhost:5000/api';
+import { getApiEndpoint } from '../config/apiConfig';
 
 // Define interface for API response
 interface ApiSearchResponse {
@@ -31,7 +31,7 @@ export const searchHealthAPI = async (query: string): Promise<SearchResult> => {
     console.log("Searching for:", query);
     
     // Use generic type parameter to specify the expected response structure
-    const response = await axios.post<ApiSearchResponse>(`${API_URL}/search`, { query });
+    const response = await axios.post<ApiSearchResponse>(getApiEndpoint('/search'), { query });
     console.log("Search API response:", response.data);
     
     // Now TypeScript knows the structure of response.data

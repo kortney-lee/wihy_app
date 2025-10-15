@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import MultiAuthLogin from './MultiAuthLogin';
 import ImageUploadModal from '../../ImageUploadModal';
 import { healthSearchService } from '../../../services/healthSearchService';
+import { getApiEndpoint } from '../../../config/apiConfig';
 import '../../../styles/VHealthSearch.css';
 
 interface HeaderProps {
@@ -139,7 +140,7 @@ const Header: React.FC<HeaderProps> = ({
       setLoadingMessage('Checking cache...');
       
       try {
-        const response = await fetch(`http://localhost:5000/api/cache/get?q=${encodeURIComponent(queryToUse)}`, { signal });
+        const response = await fetch(getApiEndpoint(`/cache/get?q=${encodeURIComponent(queryToUse)}`), { signal });
         
         if (response.ok) {
           const cachedData = await response.json();
@@ -180,7 +181,7 @@ const Header: React.FC<HeaderProps> = ({
           // Step 3: Save to database cache (async, don't wait)
           setLoadingMessage('Caching results...');
           
-          fetch('http://localhost:5000/api/cache/save', {
+          fetch(getApiEndpoint('/cache/save'), {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({

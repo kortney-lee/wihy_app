@@ -8,8 +8,11 @@ import { wihyAPI } from './services/wihyAPI';
 import { searchCache } from './services/searchCache';
 import { fetchNewsFeed, refreshNewsFeed, searchNewsArticles } from './services/newsService';
 import './styles/VHealthSearch.css';
+import './index.css';
+import VHealthApp from './vHealthApp';
+import { API_CONFIG, getApiEndpoint } from './config/apiConfig';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+const API_BASE_URL = API_CONFIG.BASE_URL.replace(/\/api$/, ''); // Remove /api suffix
 
 export const searchFoodDatabase = async (query: string) => {
   try {

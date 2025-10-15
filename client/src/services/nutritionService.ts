@@ -1,10 +1,10 @@
 import axios from 'axios';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+import { getApiEndpoint } from '../config/apiConfig';
 
 export const fetchNutritionData = async (query: string): Promise<any> => {
   try {
-    const response = await axios.get(`${API_URL}/nutrition/${encodeURIComponent(query)}`);
+    const response = await axios.get(getApiEndpoint(`/nutrition/${encodeURIComponent(query)}`));
     return response.data;
   } catch (error) {
     console.error('Error fetching nutrition data:', error);
@@ -17,7 +17,7 @@ export const processUploadedFoodImage = async (file: File): Promise<any> => {
     const formData = new FormData();
     formData.append('image', file);
     
-    const response = await axios.post(`${API_URL}/nutrition/analyze`, formData, {
+    const response = await axios.post(getApiEndpoint('/nutrition/analyze'), formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
     });
     

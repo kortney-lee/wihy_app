@@ -1,4 +1,4 @@
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+import { getApiEndpoint } from '../config/apiConfig';
 
 export interface OpenFoodFactsProduct {
   success: boolean;
@@ -60,7 +60,7 @@ class OpenFoodFactsAPI {
     try {
       console.log('🔍 Calling backend for barcode lookup:', barcode);
       
-      const response = await fetch(`${API_URL}/openfoodfacts/barcode/${barcode}`, {
+      const response = await fetch(getApiEndpoint(`/openfoodfacts/barcode/${barcode}`), {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -93,7 +93,7 @@ class OpenFoodFactsAPI {
         limit: limit.toString()
       });
 
-      const response = await fetch(`${API_URL}/openfoodfacts/search?${searchParams}`, {
+      const response = await fetch(getApiEndpoint(`/openfoodfacts/search?${searchParams}`), {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -121,7 +121,7 @@ class OpenFoodFactsAPI {
     try {
       console.log('📊 Getting nutrition facts for:', barcode);
       
-      const response = await fetch(`${API_URL}/openfoodfacts/nutrition/${barcode}`, {
+      const response = await fetch(getApiEndpoint(`/openfoodfacts/nutrition/${barcode}`), {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -149,7 +149,7 @@ class OpenFoodFactsAPI {
     try {
       console.log('🏷️ Getting categories for:', barcode);
       
-      const response = await fetch(`${API_URL}/openfoodfacts/categories/${barcode}`, {
+      const response = await fetch(getApiEndpoint(`/openfoodfacts/categories/${barcode}`), {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -175,7 +175,7 @@ class OpenFoodFactsAPI {
    */
   async checkServiceStatus() {
     try {
-      const response = await fetch(`${API_URL}/openfoodfacts/status`, {
+      const response = await fetch(getApiEndpoint('/openfoodfacts/status'), {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',

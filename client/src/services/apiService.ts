@@ -1,6 +1,6 @@
-import axios from 'axios';
+import { API_CONFIG, getApiEndpoint } from '../config/apiConfig';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+const API_URL = API_CONFIG.BASE_URL;
 
 // Updated interface to match backend response structure
 export interface NutritionResponse {
@@ -81,7 +81,7 @@ export const processUploadedFoodImage = async (file: File): Promise<NutritionRes
   formData.append('image', file);
   
   try {
-    const response = await fetch('http://localhost:5000/api/analyze-image', {
+    const response = await fetch(getApiEndpoint('/analyze-image'), {
       method: 'POST',
       body: formData
     });
@@ -131,7 +131,7 @@ export const searchFoodDatabase = async (query: string) => {
     console.log('🔍 Calling database API for:', query);
     
     // Make sure this matches your backend route exactly
-    const response = await fetch(`http://localhost:5000/api/search/food?q=${encodeURIComponent(query)}`, {
+    const response = await fetch(getApiEndpoint(`/search/food?q=${encodeURIComponent(query)}`), {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

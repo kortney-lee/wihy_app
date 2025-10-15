@@ -38,12 +38,14 @@ interface AnalyzeImageResponse {
   // Add other fields as needed
 }
 
-const API_URL = 'http://localhost:5000/api';
+import { API_CONFIG, getApiEndpoint } from '../config/apiConfig';
+
+const API_URL = API_CONFIG.BASE_URL;
 
 // Create or update this file to properly send images to your backend
 
 class FoodAnalysisService {
-  private baseUrl = 'http://localhost:5000/api';
+  private baseUrl = API_CONFIG.BASE_URL;
 
   async analyzeFoodImage(file: File): Promise<any> {
     try {
