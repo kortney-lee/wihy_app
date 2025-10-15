@@ -148,10 +148,20 @@
 
 /* Responsive Design */
 @media (max-width: 768px) {
-  .vhealth-header.results {
-    flex-direction: column;
+  /* Fix the main bar layout for mobile - stack logo above search */
+  .vhealth-header.results .vhealth-mainbar {
+    flex-direction: column !important;
     gap: 15px;
     padding: 15px;
+    align-items: center;
+  }
+
+  /* Logo should be centered and sized appropriately */
+  .vhealth-header.results .vhealth-logo-container {
+    order: 1;
+    width: 100%;
+    display: flex;
+    justify-content: center;
   }
 
   .vhealth-header.results .vhealth-logo {
@@ -159,38 +169,52 @@
     max-width: 250px !important;
   }
 
+  /* Search section should be full width and below logo */
+  .vhealth-header.results .vhealth-search-section {
+    order: 2;
+    width: 100% !important;
+    margin: 0;
+  }
+
+  /* Landing page adjustments */
   .vhealth-header.landing .vhealth-logo {
     width: 500px !important;
   }
 
+  .vhealth-header.landing .vhealth-mainbar {
+    padding: 20px;
+  }
+
+  /* Search input container should fill available width */
   .vhealth-header .search-input-container {
-    max-width: 100%;
-  }
-
-  .vhealth-header.results .vhealth-search-section {
-    margin: 0;
-    order: 2;
-  }
-
-  .vhealth-header.results .vhealth-user-section {
-    order: 1;
-    position: absolute;
-    top: 15px;
-    right: 15px;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 auto;
   }
 
   .vhealth-header.landing .search-input-container {
-    width: 90% !important;
-    max-width: none !important;
+    width: 100% !important;
+    max-width: 100% !important;
   }
   
   .vhealth-header.results .search-input-container {
     width: 100% !important;
-    max-width: none !important;
+    max-width: 100% !important;
+  }
+
+  /* Ensure search form takes full width */
+  .vhealth-header.results .vhealth-search-form {
+    width: 100%;
+  }
+
+  /* Adjust search input text size for mobile */
+  .vhealth-header .search-input {
+    font-size: 16px !important; /* Prevent zoom on iOS */
   }
 }
 
 @media (max-width: 480px) {
+  /* Even smaller logo for very small screens */
   .vhealth-header.landing .vhealth-logo {
     width: 90% !important;
     max-width: 320px !important;
@@ -201,12 +225,35 @@
     max-width: 180px !important;
   }
 
-  .vhealth-header.results {
+  /* More compact padding */
+  .vhealth-header.results .vhealth-mainbar {
     padding: 10px;
+    gap: 10px;
   }
 
-  .vhealth-header .search-input::placeholder {
-    font-size: 16px;
+  .vhealth-header.landing .vhealth-mainbar {
+    padding: 15px;
+  }
+
+  /* Ensure search input doesn't cause zoom on iOS */
+  .vhealth-header .search-input {
+    font-size: 16px !important;
+    padding: 12px 50px 12px 16px !important;
+  }
+
+  /* Adjust search icons for smaller screens */
+  .vhealth-header .search-icons {
+    right: 6px;
+  }
+
+  .vhealth-header .icon-button {
+    width: 28px;
+    height: 28px;
+  }
+
+  .vhealth-header .icon-button svg {
+    width: 16px;
+    height: 16px;
   }
 }
 
