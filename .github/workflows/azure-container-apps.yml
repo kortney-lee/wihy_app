@@ -36,6 +36,16 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
+    - name: Check Azure credentials
+      run: |
+        if [ -z "${{ secrets.AZURE_CLIENT_ID }}" ] || [ -z "${{ secrets.AZURE_TENANT_ID }}" ]; then
+          echo "⚠️ Azure credentials not configured"
+          echo "Please see docs/AZURE_GITHUB_ACTIONS_SETUP.md for setup instructions"
+          echo "Skipping Azure deployment..."
+          exit 0
+        fi
+        echo "✅ Azure credentials configured"
+
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
 
