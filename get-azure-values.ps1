@@ -1,7 +1,9 @@
 # Quick Azure Values Collection Script
 # Run this to get all the values you need for GitHub secrets
+# ⚠️ IMPORTANT: This project uses the 'vhealth' resource group in West US 2
 
 Write-Host "🔍 Collecting Azure values for GitHub secrets..." -ForegroundColor Green
+Write-Host "📍 Using resource group: vhealth (West US 2)" -ForegroundColor Cyan
 Write-Host ""
 
 # Check if logged in
@@ -32,6 +34,7 @@ Write-Host ""
 # Check if service principal exists
 Write-Host "🔍 Checking for existing service principal..." -ForegroundColor Blue
 $APP_NAME = "wihy-ui-github-actions"
+$RESOURCE_GROUP = "vhealth"  # Always use vhealth resource group
 $existing_sp = az ad sp list --display-name $APP_NAME --query "[0].appId" -o tsv 2>$null
 
 if ($existing_sp -and $existing_sp -ne "null" -and $existing_sp.Trim() -ne "") {
@@ -40,24 +43,22 @@ if ($existing_sp -and $existing_sp -ne "null" -and $existing_sp.Trim() -ne "") {
 } else {
     Write-Host "⚠️  Service principal '$APP_NAME' not found." -ForegroundColor Yellow
     Write-Host "   Create it with:" -ForegroundColor White
-    Write-Host "   az ad sp create-for-rbac --name `"$APP_NAME`" --role contributor --scopes `"/subscriptions/$SUBSCRIPTION_ID/resourceGroups/rg-wihy`"" -ForegroundColor Gray
+    Write-Host "   az ad sp create-for-rbac --name `"$APP_NAME`" --role contributor --scopes `"/subscriptions/$SUBSCRIPTION_ID/resourceGroups/$RESOURCE_GROUP`"" -ForegroundColor Gray
     $CLIENT_ID = "NOT_CREATED_YET"
 }
 
 # Get registry password
 Write-Host "🔐 Getting container registry password..." -ForegroundColor Blue
 try {
-    $REGISTRY_PASSWORD = az acr credential show --name wihy --query "passwords[0].value" -o tsv 2>$null
+    $REGISTRY_PASSWORD = az acr credential show --name wihymlregistry --query "passwords[0].value" -o tsv 2>$null
     if ($REGISTRY_PASSWORD -and $REGISTRY_PASSWORD -ne "null") {
-        Write-Host "✅ Found registry password" -ForegroundColor Green
+        Write-Host "✅ Found registry password for wihymlregistry" -ForegroundColor Green
     } else {
         throw "Registry not found"
     }
 } catch {
-    Write-Host "⚠️  Container registry 'wihy' not found or no access." -ForegroundColor Yellow
-    Write-Host "   Create it with:" -ForegroundColor White
-    Write-Host "   az acr create --name wihy --resource-group rg-wihy --sku Basic" -ForegroundColor Gray
-    Write-Host "   az acr update --name wihy --admin-enabled true" -ForegroundColor Gray
+    Write-Host "⚠️  Container registry 'wihymlregistry' not found or no access." -ForegroundColor Yellow
+    Write-Host "   Check access to vhealth resource group" -ForegroundColor White
     $REGISTRY_PASSWORD = "REGISTRY_NOT_FOUND"
 }
 

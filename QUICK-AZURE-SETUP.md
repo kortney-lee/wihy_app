@@ -1,5 +1,9 @@
 # Quick Setup - Azure GitHub Secrets
 
+## ⚠️ IMPORTANT: Always use `vhealth` resource group in West US 2
+
+All Azure resources for this project are in the **`vhealth`** resource group.
+
 ## Step 1: Get Your Azure Information
 
 Run these commands in Azure CLI or Cloud Shell:
@@ -13,9 +17,9 @@ az account show --query "{subscriptionId: id, tenantId: tenantId}" -o table
 ## Step 2: Create Service Principal
 
 ```bash
-# Replace with your actual subscription ID and resource group
+# Replace with your actual subscription ID - use vhealth resource group
 SUBSCRIPTION_ID="your-subscription-id"
-RESOURCE_GROUP="rg-wihy"
+RESOURCE_GROUP="vhealth"
 
 # Create service principal
 az ad sp create-for-rbac \
@@ -45,7 +49,8 @@ az ad app federated-credential create \
 ## Step 4: Get Container Registry Password
 
 ```bash
-az acr credential show --name wihy --query "passwords[0].value" -o tsv
+# Use the existing registry in vhealth
+az acr credential show --name wihymlregistry --query "passwords[0].value" -o tsv
 ```
 
 ## Step 5: Add GitHub Secrets

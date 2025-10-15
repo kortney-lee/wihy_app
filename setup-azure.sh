@@ -1,8 +1,10 @@
 #!/bin/bash
 # Azure Container Apps Setup Script
 # Run this script to set up Azure authentication for GitHub Actions
+# ⚠️ IMPORTANT: This project uses the 'vhealth' resource group in West US 2
 
 echo "🚀 Setting up Azure Container Apps deployment..."
+echo "📍 Using resource group: vhealth (West US 2)"
 
 # Check if Azure CLI is installed
 if ! command -v az &> /dev/null; then
@@ -26,7 +28,7 @@ echo "   Tenant ID: $TENANT_ID"
 # Create service principal
 echo "🔧 Creating service principal for GitHub Actions..."
 APP_NAME="wihy-ui-github-actions"
-RESOURCE_GROUP="rg-wihy"
+RESOURCE_GROUP="vhealth"  # Always use vhealth resource group
 
 # Create the service principal
 SP_OUTPUT=$(az ad sp create-for-rbac \
@@ -54,7 +56,7 @@ az ad app federated-credential create \
 
 # Get container registry password
 echo "🔐 Getting container registry password..."
-REGISTRY_PASSWORD=$(az acr credential show --name wihy --query "passwords[0].value" -o tsv 2>/dev/null || echo "REGISTRY_NOT_FOUND")
+REGISTRY_PASSWORD=$(az acr credential show --name wihymlregistry --query "passwords[0].value" -o tsv 2>/dev/null || echo "REGISTRY_NOT_FOUND")
 
 echo ""
 echo "🎉 Setup complete! Add these secrets to GitHub:"
@@ -67,9 +69,8 @@ echo "   REGISTRY_PASSWORD:     $REGISTRY_PASSWORD"
 echo ""
 
 if [ "$REGISTRY_PASSWORD" = "REGISTRY_NOT_FOUND" ]; then
-    echo "⚠️  Container registry 'wihy' not found. You may need to:"
-    echo "   1. Create the registry: az acr create --name wihy --resource-group $RESOURCE_GROUP --sku Basic"
-    echo "   2. Enable admin access: az acr update --name wihy --admin-enabled true"
+    echo "⚠️  Container registry 'wihymlregistry' not found or no access."
+    echo "   Check access to vhealth resource group"
 fi
 
 echo "📝 After adding secrets, re-enable the workflow by uncommenting the push trigger in:"
