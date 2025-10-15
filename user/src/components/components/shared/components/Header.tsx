@@ -9,6 +9,7 @@ import NotificationModal from '../../../modals/NotificationModal';
 import AccountModal from '../../../modals/AccountModal';
 import { healthSearchService } from '../../../../services/healthSearchService';
 import '../../../../styles/VHealthSearch.css';
+import '../../../../styles/search-components.css';
 import './Header.css';
 
 const Icon = {
@@ -602,7 +603,19 @@ const Header: React.FC<HeaderProps> = ({
           {showSearchInput && (
             <div className="vhealth-search-section">
               <form className="vhealth-search-form" onSubmit={handleSubmit}>
-                <div className="search-input-container">
+                <div 
+                  className="search-input-container"
+                  style={{
+                    animation: 'wiH-border-sweep 3.5s linear infinite',
+                    background: `
+                      linear-gradient(#fff, #fff) padding-box,
+                      linear-gradient(90deg, #fa5f06, #ffffff, #C0C0C0, #4cbb17, #1a73e8) border-box
+                    `,
+                    backgroundSize: '100% 100%, 200% 100%',
+                    border: '2px solid transparent',
+                    borderRadius: '24px'
+                  }}
+                >
                   <textarea
                     ref={searchInputRef}
                     value={input}

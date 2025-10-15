@@ -43,7 +43,7 @@ h1.search-logo {
   margin: 0 auto;
 }
 
-/* Rainbow-border hover/focus with automatic animation */
+/* Rainbow-border with continuous animation (matching Dashboard buttons exactly) */
 .search-input-container {
   position: relative;
   width: 80%; /* Default width */
@@ -56,12 +56,19 @@ h1.search-logo {
     linear-gradient(#fff, #fff) padding-box,
     linear-gradient(90deg, #fa5f06, #ffffff, #C0C0C0, #4cbb17, #1a73e8) border-box;
   background-size: 100% 100%, 200% 100%;
-  transition: box-shadow 0.2s ease, background-position 0.4s linear;
+  /* CONTINUOUS animation - same as Dashboard buttons */
+  animation: wiH-border-sweep 2.2s linear infinite !important;
   
   /* New CSS variables for consistent spacing */
   --icons-width: 150px;
   --pad-left: 16px;
   --pad-right: calc(var(--icons-width) + 14px);
+}
+
+/* Restore the original animation keyframes */
+@keyframes wiH-border-sweep {
+  0%   { background-position: 0 0, 0% 0; }
+  100% { background-position: 0 0, 200% 0; }
 }
 
 /* Mobile-specific adjustments */
@@ -95,18 +102,20 @@ h1.search-logo {
   }
 }
 
-/* AUTOMATIC RAINBOW ANIMATION ON HOVER/FOCUS */
+/* Enhanced focus states - just add glow effect */
 .search-input-container:hover,
 .search-input-container:focus-within {
-  animation: wiH-border-sweep 2.2s linear infinite;
-  border-width: 2px;
-  box-shadow: 0 2px 8px rgba(32,33,36,0.4);
+  box-shadow: 0 4px 16px rgba(32,33,36,0.3);
 }
 
-/* Rainbow border sweep animation */
-@keyframes wiH-border-sweep {
-  0%   { background-position: 0 0,   0% 0; }
-  100% { background-position: 0 0, 200% 0; }
+/* Force animation for mobile devices */
+.search-input-container.force-mobile-animation {
+  animation: wiH-border-sweep 2.2s linear infinite !important;
+  background:
+    linear-gradient(#fff, #fff) padding-box,
+    linear-gradient(90deg, #fa5f06, #ffffff, #C0C0C0, #4cbb17, #1a73e8) border-box !important;
+  background-size: 100% 100%, 200% 100% !important;
+  border: 2px solid transparent !important;
 }
 
 /* Cancel button styles */

@@ -165,11 +165,12 @@
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   }
 
-  /* Fix search input container */
+  /* Fix search input container with animation */
   .search-input-container {
     background: 
       linear-gradient(#fff, #fff) padding-box,
       linear-gradient(90deg, #fa5f06, #ffffff, #C0C0C0, #4cbb17, #1a73e8) border-box !important;
+    animation: wiH-border-sweep 2.2s linear infinite !important;
   }
 
   /* Remove any unwanted gradients or overlays */

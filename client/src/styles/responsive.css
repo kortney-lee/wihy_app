@@ -141,6 +141,13 @@
   .search-input-container {
     width: 100% !important;
     max-width: 100% !important;
+    /* Complete background and animation for mobile */
+    background:
+      linear-gradient(#fff, #fff) padding-box,
+      linear-gradient(90deg, #fa5f06, #ffffff, #C0C0C0, #4cbb17, #1a73e8) border-box !important;
+    background-size: 100% 100%, 200% 100% !important;
+    animation: wiH-border-sweep 2.2s linear infinite !important;
+    border: 2px solid transparent !important;
   }
 
   .search-input {
@@ -194,6 +201,13 @@
     width: 100% !important;
     max-width: 100% !important;
     margin: 0 auto !important;
+    /* Complete background and animation for very small mobile */
+    background:
+      linear-gradient(#fff, #fff) padding-box,
+      linear-gradient(90deg, #fa5f06, #ffffff, #C0C0C0, #4cbb17, #1a73e8) border-box !important;
+    background-size: 100% 100%, 200% 100% !important;
+    animation: wiH-border-sweep 2.2s linear infinite !important;
+    border: 2px solid transparent !important;
   }
 
   .search-input {

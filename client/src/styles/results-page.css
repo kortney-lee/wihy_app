@@ -4,7 +4,9 @@
 .results-page {
   background: #fff;
   position: relative;
-  padding: 5px 0 0 0;
+  min-height: 100vh;
+  padding: 0;
+  padding-top: 120px; /* Add top padding to push content below header */
 }
 
 .results-search-header {
@@ -56,9 +58,10 @@
   box-shadow: 0 1px 6px rgba(32,33,36,0.28);
   background:
     linear-gradient(#fff, #fff) padding-box,
-    linear-gradient(90deg, #fbbc05, #34a853, #1a73e8) border-box;
+    linear-gradient(90deg, #fa5f06, #ffffff, #C0C0C0, #4cbb17, #1a73e8) border-box;
   background-size: 100% 100%, 200% 100%;
-  transition: box-shadow 0.2s ease, background-position 0.4s linear, height 0.2s ease;
+  /* Add continuous animation to SearchResults header */
+  animation: wiH-border-sweep 2.2s linear infinite !important;
   min-height: 48px;
   height: auto;
 }
@@ -69,6 +72,13 @@
     width: 100% !important;
     max-width: 100% !important;
     margin: 0 auto 16px auto;
+    /* Ensure animation works on mobile results page */
+    animation: wiH-border-sweep 2.2s linear infinite !important;
+    background:
+      linear-gradient(#fff, #fff) padding-box,
+      linear-gradient(90deg, #fa5f06, #ffffff, #C0C0C0, #4cbb17, #1a73e8) border-box !important;
+    background-size: 100% 100%, 200% 100% !important;
+    border: 2px solid transparent !important;
   }
 }
 
@@ -78,6 +88,13 @@
     max-width: 100% !important;
     margin: 0 auto 12px auto;
     min-height: 40px;
+    /* Ensure animation works on small mobile results page */
+    animation: wiH-border-sweep 2.2s linear infinite !important;
+    background:
+      linear-gradient(#fff, #fff) padding-box,
+      linear-gradient(90deg, #fa5f06, #ffffff, #C0C0C0, #4cbb17, #1a73e8) border-box !important;
+    background-size: 100% 100%, 200% 100% !important;
+    border: 2px solid transparent !important;
   }
 }
 
@@ -114,6 +131,15 @@
     min-height: 40px;
     height: 40px;
   }
+  
+  .results-page {
+    padding-top: 140px; /* Increase for mobile header */
+  }
+  
+  .results-container {
+    margin-top: 0;
+    padding: 15px 15px 60px 15px;
+  }
 }
 
 @media (max-width: 480px) {
@@ -123,14 +149,24 @@
     min-height: 36px;
     height: 36px;
   }
+  
+  .results-page {
+    padding-top: 150px; /* Even more space for smaller mobile */
+  }
+  
+  .results-container {
+    margin-top: 0;
+    padding: 10px 10px 60px 10px;
+  }
 }
 
 .results-container {
   max-width: 1200px;
-  margin: 10px auto;
-  padding: 0 20px;
+  margin: 0 auto;
+  margin-top: 0;
+  padding: 20px 20px 60px 20px;
   width: 100%;
-  padding-bottom: 60px;
+  position: relative;
 }
 
 .results-header {
