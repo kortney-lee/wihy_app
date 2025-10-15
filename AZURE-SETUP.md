@@ -1,5 +1,9 @@
 # Azure Container Apps Deployment Setup
 
+## ⚠️ IMPORTANT: Always use `vhealth` resource group
+
+All Azure resources for this project should be in the **`vhealth`** resource group in **West US 2**.
+
 ## Required GitHub Secrets
 
 You need to configure these secrets in your GitHub repository settings:
@@ -24,11 +28,11 @@ If you prefer the legacy approach, you can use:
 # Login to Azure
 az login
 
-# Create service principal with contributor access to your resource group
+# Create service principal with contributor access to vhealth resource group
 az ad sp create-for-rbac \
   --name "wihy-ui-github-actions" \
   --role contributor \
-  --scopes /subscriptions/{subscription-id}/resourceGroups/rg-wihy \
+  --scopes /subscriptions/{subscription-id}/resourceGroups/vhealth \
   --sdk-auth
 
 # For OIDC, also create federated credentials
@@ -45,27 +49,28 @@ Add the secrets from the Azure CLI output.
 
 ### 3. Azure Resources Required
 
-Make sure you have these Azure resources:
-- Resource Group: `rg-wihy`
-- Container Registry: `wihy.azurecr.io`
-- Container App Environment: `wihy-env`
+Make sure you have these Azure resources in the **`vhealth`** resource group:
+- Resource Group: `vhealth` (West US 2)
+- Container Registry: `wihymlregistry-b6fdh5cmhzgwbbgy.azurecr.io`
+- Container App Environment: `wihy-ml-env`
+- Container App: `wihy-ui`
 
 ### 4. Container Registry Setup
 
 ```bash
-# Enable admin access (for REGISTRY_PASSWORD)
-az acr update --name wihy --admin-enabled true
+# Enable admin access (for REGISTRY_PASSWORD) - Use existing registry
+az acr update --name wihymlregistry --admin-enabled true
 
 # Get the password
-az acr credential show --name wihy --query "passwords[0].value" -o tsv
+az acr credential show --name wihymlregistry --query "passwords[0].value" -o tsv
 ```
 
 ## Troubleshooting
 
 ### If deployment still fails:
 
-1. **Check Azure permissions**: Ensure the service principal has `Contributor` access to your resource group
-2. **Verify resource names**: Double-check the environment variables in the workflow match your Azure resources
+1. **Check Azure permissions**: Ensure the service principal has `Contributor` access to the **`vhealth`** resource group
+2. **Verify resource names**: Double-check the environment variables in the workflow match your Azure resources in `vhealth`
 3. **Container Registry**: Ensure the registry exists and the password is correct
 4. **Use manual trigger**: Try running the workflow manually first to test the setup
 

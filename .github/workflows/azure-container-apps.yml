@@ -7,11 +7,11 @@ on:
   workflow_dispatch:
 
 env:
-  REGISTRY_LOGIN_SERVER: wihyuiregistry.azurecr.io
-  REGISTRY_USERNAME: wihyuiregistry
+  REGISTRY_LOGIN_SERVER: wihymlregistry-b6fdh5cmhzgwbbgy.azurecr.io
+  REGISTRY_USERNAME: wihymlregistry
   CONTAINER_APP_NAME: wihy-ui
-  CONTAINER_APP_ENVIRONMENT: wihy-env
-  RESOURCE_GROUP: rg-wihy
+  CONTAINER_APP_ENVIRONMENT: wihy-ml-env
+  RESOURCE_GROUP: vhealth
   IMAGE_NAME: wihy-ui
 
 jobs:
