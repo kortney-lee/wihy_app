@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import './styles/VHealthSearch.css';
+import './styles/dashboard-mobile.css';
+import './styles/dashboard-header-fix.css';
 import Header from './components/components/shared/components/Header';
 import {
   HealthSnapshot,
@@ -50,16 +52,18 @@ const Dashboard: React.FC = () => {
         />
         
         {/* Main Content Area */}
-        <div style={{
+        <div className="dashboard-content" style={{
           marginLeft: isChatOpen ? '350px' : '0',
           transition: 'margin-left 0.3s ease-out',
           minHeight: 'calc(100vh - 80px)',
-          padding: '0 20px'
+          padding: '20px 20px 0 20px',
+          paddingTop: '20px'
         }}>
         
         {/* Dashboard View Toggle */}
-        <div style={{ 
-          padding: '0 24px',
+        <div className="dashboard-controls" style={{ 
+          padding: '20px 24px',
+          marginTop: '20px',
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center'
