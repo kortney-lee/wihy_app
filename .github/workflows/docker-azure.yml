@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 env:
-  REGISTRY: ${{ secrets.AZURE_CONTAINER_REGISTRY }}.azurecr.io
+  REGISTRY: wihymlregistry-b6fdh5cmhzgwbbgy.azurecr.io
   IMAGE_NAME: wihy-ui
 
 jobs:
