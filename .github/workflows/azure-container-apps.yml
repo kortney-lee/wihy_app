@@ -9,11 +9,11 @@ on:
     branches: [ main ]
 
 env:
-  REGISTRY_LOGIN_SERVER: ${{ secrets.AZURE_CONTAINER_REGISTRY }}.azurecr.io
-  REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
+  REGISTRY_LOGIN_SERVER: wihymlregistry-b6fdh5cmhzgwbbgy.azurecr.io
+  REGISTRY_USERNAME: wihymlregistry
   CONTAINER_APP_NAME: wihy-ui
-  CONTAINER_APP_ENVIRONMENT: ${{ secrets.CONTAINER_APP_ENVIRONMENT }}
-  RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP }}
+  CONTAINER_APP_ENVIRONMENT: wihy-ml-env
+  RESOURCE_GROUP: vHealth
   IMAGE_NAME: wihy-ui
 
 jobs:
