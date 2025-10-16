@@ -1,0 +1,99 @@
+name: Debug Build Process
+
+on:
+  workflow_dispatch:
+
+env:
+  REGISTRY_LOGIN_SERVER: wihymlregistry-b6fdh5cmhzgwbbgy.azurecr.io
+  IMAGE_NAME: wihy-ui
+
+jobs:
+  debug-build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - name: Debug Environment
+      run: |
+        echo "🔍 Environment Debug:"
+        echo "Node version: $(node --version)"
+        echo "npm version: $(npm --version)"
+        echo "Working directory: $(pwd)"
+        echo "Directory contents:"
+        ls -la
+        echo ""
+        echo "Package.json exists: $(test -f package.json && echo 'YES' || echo 'NO')"
+        echo "Client directory exists: $(test -d client && echo 'YES' || echo 'NO')"
+
+    - name: Install root dependencies
+      run: |
+        echo "🔧 Installing root dependencies..."
+        npm ci
+        echo "✅ Root dependencies installed"
+
+    - name: Install client dependencies  
+      run: |
+        echo "🔧 Installing client dependencies..."
+        cd client
+        npm ci
+        echo "✅ Client dependencies installed"
+        echo "Client node_modules size:"
+        du -sh node_modules/ || echo "Unable to check node_modules size"
+
+    - name: Run client build
+      run: |
+        echo "🏗️ Building client application..."
+        cd client
+        npm run build
+        echo "✅ Client build completed"
+        echo "Build directory contents:"
+        ls -la build/ || echo "Build directory not found"
+        
+    - name: Test Docker build (without push)
+      run: |
+        echo "🐳 Testing Docker build locally..."
+        docker build -t test-build .
+        echo "✅ Docker build completed successfully"
+        docker images test-build
+
+    - name: Check Azure credentials (without logging in)
+      run: |
+        echo "🔑 Checking Azure credential availability..."
+        if [ -z "${{ secrets.AZURE_CLIENT_ID }}" ] || [ -z "${{ secrets.AZURE_TENANT_ID }}" ]; then
+          echo "❌ Azure credentials not configured"
+          echo "Missing secrets: AZURE_CLIENT_ID and/or AZURE_TENANT_ID"
+          echo "This is likely the cause of the deployment failure"
+        else
+          echo "✅ Azure credential secrets are configured"
+        fi
+        
+        if [ -z "${{ secrets.AZURE_CREDENTIALS }}" ]; then
+          echo "❌ AZURE_CREDENTIALS secret not configured"
+        else
+          echo "✅ AZURE_CREDENTIALS secret is configured"
+        fi
+
+    - name: Summary
+      run: |
+        echo "📋 Build Process Summary:"
+        echo "✅ Code checkout: SUCCESS"
+        echo "✅ Node.js setup: SUCCESS"  
+        echo "✅ Root dependencies: SUCCESS"
+        echo "✅ Client dependencies: SUCCESS"
+        echo "✅ Client build: SUCCESS"
+        echo "✅ Docker build: SUCCESS"
+        echo ""
+        echo "🎯 If this workflow passes but deployment fails,"
+        echo "   the issue is likely with Azure credentials or ACR permissions"
+        echo "   Check the Azure secrets configuration in repository settings"
