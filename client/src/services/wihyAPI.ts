@@ -1,4 +1,5 @@
 import { API_CONFIG, WIHY_API_ENDPOINT } from '../config/apiConfig';
+import { logger } from '../utils/logger';
 
 // Types for the WiHy Unified API (updated to match documentation)
 export interface UnifiedRequest {
@@ -104,7 +105,7 @@ class WihyAPIService {
    */
   async askAnything(request: WihyRequest | UnifiedRequest): Promise<WihyResponse | UnifiedResponse> {
     try {
-      console.log('Making WiHy Unified API request:', request);
+      logger.apiRequest('Making WiHy Unified API request', request);
       
       // Convert legacy WihyRequest to UnifiedRequest format if needed
       let unifiedRequest: UnifiedRequest;
@@ -132,10 +133,10 @@ class WihyAPIService {
       }
 
       const data = await response.json();
-      console.log('WiHy Unified API response:', data);
+      logger.apiResponse('WiHy Unified API response received', data);
       return data;
     } catch (error) {
-      console.error('WiHy API error:', error);
+      logger.error('WiHy API error:', error);
       
       if (error instanceof Error) {
         throw new Error(error.message || 'WiHy API request failed');

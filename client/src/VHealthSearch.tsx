@@ -8,6 +8,7 @@ import { searchCache } from './services/searchCache';
 import { foodAnalysisService } from './components/foodAnalysisService';
 import HealthNewsFeed from './components/HealthNewsFeed';
 import { getApiEndpoint } from './config/apiConfig';
+import { logger } from './utils/logger';
 
 const VHealthSearch: React.FC = () => {
   // ================================
@@ -55,7 +56,7 @@ const VHealthSearch: React.FC = () => {
           animateSweep();
           
           container.classList.add('force-mobile-animation');
-          console.log('Mobile device detected - custom gradient animation started');
+          logger.debug('Mobile device detected - custom gradient animation started');
         } else {
           // Desktop - use CSS animation
           container.style.setProperty('animation', 'wiH-border-sweep 2.2s linear infinite', 'important');
@@ -65,10 +66,10 @@ const VHealthSearch: React.FC = () => {
           `, 'important');
           container.style.setProperty('background-size', '100% 100%, 200% 100%', 'important');
           container.style.setProperty('border', '2px solid transparent', 'important');
-          console.log('Desktop animation applied');
+          logger.debug('Desktop animation applied');
         }
         
-        console.log('Forced animation applied to search container');
+        logger.debug('Forced animation applied to search container');
       }
     };
 
@@ -231,16 +232,16 @@ const VHealthSearch: React.FC = () => {
           console.log('Cache request was cancelled');
           return; // Exit early
         }
-        console.log('No cache found, proceeding with API call');
+        logger.debug('No cache found, proceeding with API call');
       }
 
       // Step 2: Get fresh results from API
       setLoadingMessage('Analyzing with AI...');
-      console.log('Getting fresh results for:', queryToUse);
+      logger.debug('Getting fresh results for query', { query: queryToUse });
       
       try {
         // Use WiHy Unified API for search
-        console.log('Making WiHy API search request for:', queryToUse);
+        logger.apiRequest('WiHy API search', { query: queryToUse });
         const wihyResponse = await wihyAPI.searchHealth(queryToUse);
         
         if (wihyResponse.success) {
@@ -263,7 +264,7 @@ const VHealthSearch: React.FC = () => {
             (searchResults.summary || searchResults.details || Object.keys(searchResults).length > 0);
           
           if (isValidResult) {
-            console.log('Valid results confirmed');
+            logger.info('Valid search results confirmed');
             
             // Step 3: Save to database cache (async, don't wait)
             setLoadingMessage('Caching results...');
@@ -280,19 +281,19 @@ const VHealthSearch: React.FC = () => {
               })
             }).then(response => {
               if (response.ok) {
-                console.log('Results saved to database cache');
+                logger.cache('Results saved to database cache');
               } else {
-                console.warn('Failed to save to cache');
+                logger.warn('Failed to save to cache');
               }
             }).catch(err => {
-              console.warn('Cache save error:', err);
+              logger.warn('Cache save error', { error: err });
             });
             
             setLoadingMessage('Results ready!');
             await new Promise(resolve => setTimeout(resolve, 300));
             
             setIsLoading(false);
-            console.log('Navigating to results page with data');
+            logger.debug('Navigating to results page with data');
             
             // Pass the fresh results via navigation state
             navigate(`/results?q=${encodeURIComponent(queryToUse)}`, {

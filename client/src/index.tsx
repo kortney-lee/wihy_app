@@ -1,5 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
+import './utils/productionConsole'; // Must be first - disables console.log in production
 import './styles/VHealthSearch.css';
 import App from './App';
 

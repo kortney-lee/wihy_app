@@ -7,6 +7,7 @@ import openaiAPI from './services/openaiAPI';
 import { wihyAPI } from './services/wihyAPI';
 import { searchCache } from './services/searchCache';
 import { fetchNewsFeed, refreshNewsFeed, searchNewsArticles } from './services/newsService';
+import { logger } from './utils/logger';
 import './styles/VHealthSearch.css';
 import './index.css';
 import VHealthApp from './vHealthApp';
@@ -16,7 +17,7 @@ const API_BASE_URL = API_CONFIG.BASE_URL.replace(/\/api$/, ''); // Remove /api s
 
 export const searchFoodDatabase = async (query: string) => {
   try {
-    console.log('Calling food database API for:', query);
+    logger.apiRequest('Food Database Search', { query });
     
     const response = await fetch(`${API_BASE_URL}/api/food/search?q=${encodeURIComponent(query)}`, {
       method: 'GET',
@@ -30,7 +31,7 @@ export const searchFoodDatabase = async (query: string) => {
     }
 
     const data = await response.json();
-    console.log('Food API response:', data);
+    logger.apiResponse('Food Database Search', data);
     
     return data;
   } catch (error) {
@@ -92,21 +93,23 @@ const ResultsPage: React.FC = () => {
       
       // Prevent duplicate processing
       if (isProcessing.current || lastProcessedQuery.current === cacheKey) {
-        console.log('Skipping duplicate query:', cacheKey);
+        logger.debug('Skipping duplicate query', { cacheKey });
         return;
       }
       
-      console.log("Processing new query:", cacheKey);
+      logger.debug('Processing new query', { cacheKey });
       lastProcessedQuery.current = cacheKey;
       isProcessing.current = true;
       
-      console.log("Is health news:", isHealthNews);
-      console.log("Is browser navigation:", isBrowserNavigation());
+      logger.debug('Query type analysis', { 
+        isHealthNews, 
+        isBrowserNavigation: isBrowserNavigation() 
+      });
       
       // Always check cache first - especially for browser navigation
       const cachedResult = searchCache.getCachedResult(cacheKey);
       if (cachedResult) {
-        console.log('Using cached results for:', cacheKey);
+        logger.cache('Using cached results', { cacheKey });
         setResults(cachedResult);
         setDataSource('local');
         setIsLoading(false);
@@ -120,7 +123,7 @@ const ResultsPage: React.FC = () => {
       
       // If this is browser navigation and no cache, redirect to search page
       if (isBrowserNavigation() || !isInitialLoad) {
-        console.log('Browser navigation detected with no cache - redirecting to search');
+        logger.debug('Browser navigation detected with no cache - redirecting to search');
         isProcessing.current = false; // Reset processing flag
         navigate('/');
         return;
@@ -131,22 +134,25 @@ const ResultsPage: React.FC = () => {
       
       try {
         // Use WiHy Unified API for all types of searches
-        console.log('Using WiHy Unified API for query:', query || `health news - ${category}`);
+        logger.apiRequest('WiHy Unified API', { 
+          type: isHealthNews ? 'health_news' : 'search',
+          query: query || `health news - ${category}` 
+        });
         
         let wihyResult: any;
         
         if (isHealthNews) {
           // Handle health news requests
-          console.log('Fetching health news via WiHy API...');
+          logger.debug('Fetching health news via WiHy API');
           const categories = category === 'all' ? [] : [category];
           wihyResult = await wihyAPI.getHealthNews(categories, 6);
         } else {
           // Handle regular search queries (health, nutrition, etc.)
-          console.log('Making WiHy API call for query:', query);
+          logger.debug('Making WiHy API call for query', { query });
           wihyResult = await wihyAPI.searchHealth(query);
         }
         
-        console.log("WiHy API result received:", wihyResult);
+        logger.apiResponse('WiHy API result', wihyResult);
         
         if (wihyResult.success) {
           const formattedResult = wihyAPI.formatWihyResponse(wihyResult);
@@ -166,7 +172,7 @@ const ResultsPage: React.FC = () => {
           }
         } else {
           // Fallback: If WiHy fails, try legacy APIs
-          console.log('WiHy API failed, trying fallback methods...');
+          logger.warn('WiHy API failed, trying fallback methods');
           await handleFallbackAPIs();
         }
         
@@ -195,11 +201,11 @@ const ResultsPage: React.FC = () => {
     // Fallback function for legacy APIs
     const handleFallbackAPIs = async () => {
       if (isHealthNews) {
-        console.log('Fallback: Fetching health news via newsService...');
+        logger.debug('Fallback: Fetching health news via newsService');
         const healthNewsResult = await fetchNewsFeed([category], 6);
         
         if (healthNewsResult.success && healthNewsResult.articles) {
-          console.log('Health news fetched successfully');
+          logger.info('Health news fetched successfully');
           
           // Format the news articles for display
           const formattedNews = formatNewsArticles(healthNewsResult.articles);
@@ -218,17 +224,17 @@ const ResultsPage: React.FC = () => {
       } else {
         // Try nutrition database for food-related queries
         try {
-          console.log('Fallback: Trying nutrition database...');
-          console.log('API URL:', `${API_BASE_URL}/api/search/food?q=${encodeURIComponent(query)}`);
+          logger.debug('Fallback: Trying nutrition database');
+          logger.debug('API URL', { url: `${API_BASE_URL}/api/search/food?q=${encodeURIComponent(query)}` });
           
           const nutritionResponse = await fetch(`${API_BASE_URL}/api/search/food?q=${encodeURIComponent(query)}`);
           
           if (nutritionResponse.ok) {
             const nutritionData = await nutritionResponse.json();
-            console.log('Nutrition API response:', nutritionData);
+            logger.apiResponse('Nutrition API', nutritionData);
             
             if (nutritionData && nutritionData.found === true) {
-              console.log('Found nutrition data - using vnutrition source');
+              logger.info('Found nutrition data - using vnutrition source');
               const resultString = JSON.stringify(nutritionData);
               setResults(resultString);
               setDataSource('vnutrition');
@@ -239,7 +245,7 @@ const ResultsPage: React.FC = () => {
             }
           }
         } catch (nutritionError) {
-          console.log('Nutrition API also failed:', nutritionError);
+          logger.debug('Nutrition API also failed', { error: nutritionError });
         }
         
         throw new Error('All fallback APIs failed');
@@ -300,7 +306,7 @@ const ResultsPage: React.FC = () => {
 };
 
 const App: React.FC = () => {
-  console.log("App component rendered");
+  logger.debug("App component rendered");
   
   return (
     <Router>
