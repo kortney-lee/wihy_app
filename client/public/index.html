@@ -75,7 +75,11 @@
         0% { filter: hue-rotate(0deg) saturate(1.05); }
         100% { filter: hue-rotate(-6deg) saturate(1.2); }
       }
-      @media (prefers-reduced-motion: reduce) { body::before { animation: none; } }
+      @media (prefers-reduced-motion: reduce) { 
+        body::before { animation: none; } 
+        .brand img { animation: none; }
+        .dot { animation: none; }
+      }
 
       #root { display: none; }
 
@@ -91,6 +95,15 @@
         box-shadow: 0 20px 60px rgba(0,0,0,0.35);
       }
       .brand { display: flex; align-items: center; gap: 14px; margin-bottom: 8px; }
+      .brand img {
+        animation: logo-glow 3s ease-in-out infinite alternate;
+        transition: transform 0.3s ease;
+      }
+      .brand img:hover { transform: scale(1.05); }
+      @keyframes logo-glow {
+        0% { filter: drop-shadow(0 0 8px rgba(10,174,94,0.3)); }
+        100% { filter: drop-shadow(0 0 12px rgba(10,174,94,0.6)) drop-shadow(0 0 20px rgba(250,95,6,0.2)); }
+      }
       .brand h1 {
         font-size: clamp(22px, 4vw, 28px); font-weight: 800; margin: 0;
         background: linear-gradient(90deg, var(--wihy-green), var(--wihy-orange));
@@ -151,19 +164,8 @@
     <div id="preloader" role="status" aria-live="polite" aria-label="Loading Wihy.ai">
       <div class="loader-card">
         <div class="brand" aria-hidden="true">
-          <!-- Pulse W -->
-          <svg width="34" height="28" viewBox="0 0 34 28" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <path d="M1 14 H7 L11 3 L16 24 L20 10 L23 18 H33" stroke="url(#grad)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-              <animate attributeName="stroke-dasharray" values="0,80;80,0" dur="2.1s" repeatCount="indefinite"/>
-              <animate attributeName="stroke-dashoffset" values="0;-80" dur="2.1s" repeatCount="indefinite"/>
-            </path>
-            <defs>
-              <linearGradient id="grad" x1="0" y1="0" x2="34" y2="0" gradientUnits="userSpaceOnUse">
-                <stop offset="0%" stop-color="#0AAE5E"/>
-                <stop offset="100%" stop-color="#FA5F06"/>
-              </linearGradient>
-            </defs>
-          </svg>
+          <!-- Wihy Logo -->
+          <img src="/assets/wihylogomain.png" alt="Wihy.ai Logo" width="34" height="28" />
           <h1>Wihy.ai</h1>
         </div>
 
