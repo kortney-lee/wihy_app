@@ -9,12 +9,12 @@ on:
     branches: [ main ]
 
 env:
-  REGISTRY_LOGIN_SERVER: ${{ secrets.AZURE_CONTAINER_REGISTRY }}.azurecr.io
-  REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
+  REGISTRY_LOGIN_SERVER: wihymlregistry-b6fdh5cmhzgwbbgy.azurecr.io
   CONTAINER_APP_NAME: wihy-ui
-  CONTAINER_APP_ENVIRONMENT: ${{ secrets.CONTAINER_APP_ENVIRONMENT }}
-  RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP }}
+  CONTAINER_APP_ENVIRONMENT: wihy-ml-env
+  RESOURCE_GROUP: vHealth
   IMAGE_NAME: wihy-ui
+  LOCATION: westus2
 
 jobs:
   build-and-deploy:
@@ -38,70 +38,69 @@ jobs:
 
     - name: Check Azure credentials
       run: |
-        if [ -z "${{ secrets.AZURE_CREDENTIALS }}" ] || [ -z "${{ secrets.REGISTRY_PASSWORD }}" ]; then
+        if [ -z "${{ secrets.AZURE_CLIENT_ID }}" ] || [ -z "${{ secrets.AZURE_TENANT_ID }}" ]; then
           echo "⚠️ Azure credentials not configured"
-          echo "Missing secrets. Required:"
-          echo "- AZURE_CREDENTIALS (JSON format)"
-          echo "- REGISTRY_PASSWORD"
-          echo "- AZURE_CONTAINER_REGISTRY"
-          echo "- REGISTRY_USERNAME"
+          echo "Please see docs/AZURE_GITHUB_ACTIONS_SETUP.md for setup instructions"
           echo "Skipping Azure deployment..."
           exit 0
         fi
         echo "✅ Azure credentials configured"
 
     - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
-
-    - name: Log in to Azure Container Registry
-      uses: azure/docker-login@v1
-      with:
-        login-server: ${{ env.REGISTRY_LOGIN_SERVER }}
-        username: ${{ env.REGISTRY_USERNAME }}
-        password: ${{ secrets.REGISTRY_PASSWORD }}
-
-    - name: Build and push Docker image
-      uses: docker/build-push-action@v5
-      with:
-        context: .
-        push: true
-        tags: |
-          ${{ env.REGISTRY_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
-          ${{ env.REGISTRY_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:latest
-        platforms: linux/amd64
-        # Remove cache options that cause issues with GitHub Actions
-        # cache-from: type=gha
-        # cache-to: type=gha,mode=max
-
-    # Azure Login using Legacy Credentials Format (Most Compatible)
     - name: Log in to Azure
-      uses: azure/login@v2
+      uses: azure/login@v1
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
-    
-    # Alternative: Modern format (if federated identity is configured)
-    # - name: Log in to Azure
-    #   uses: azure/login@v2  
-    #   with:
-    #     client-id: ${{ secrets.AZURE_CLIENT_ID }}
-    #     tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-    #     subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+    - name: Log in to Azure Container Registry
+      run: az acr login --name wihymlregistry-b6fdh5cmhzgwbbgy
+
+    - name: Build and push Docker image
+      run: |
+        az acr build \
+          --registry wihymlregistry-b6fdh5cmhzgwbbgy \
+          --image ${{ env.IMAGE_NAME }}:${{ github.sha }} \
+          --image ${{ env.IMAGE_NAME }}:latest \
+          .
 
     - name: Deploy to Azure Container Apps
-      uses: azure/container-apps-deploy-action@v1
-      with:
-        resourceGroup: ${{ env.RESOURCE_GROUP }}
-        containerAppName: ${{ env.CONTAINER_APP_NAME }}
-        containerAppEnvironment: ${{ env.CONTAINER_APP_ENVIRONMENT }}
-        imageToDeploy: ${{ env.REGISTRY_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
-        registryUrl: ${{ env.REGISTRY_LOGIN_SERVER }}
-        registryUsername: ${{ env.REGISTRY_USERNAME }}
-        registryPassword: ${{ secrets.REGISTRY_PASSWORD }}
-        targetPort: 80
-        environmentVariables: |
-          REACT_APP_ENVIRONMENT=production
-          REACT_APP_API_BASE_URL=${{ secrets.API_BASE_URL }}
-          REACT_APP_GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
-          REACT_APP_MICROSOFT_CLIENT_ID=${{ secrets.MICROSOFT_CLIENT_ID }}
-          REACT_APP_APPLE_CLIENT_ID=${{ secrets.APPLE_CLIENT_ID }}
-          REACT_APP_FACEBOOK_CLIENT_ID=${{ secrets.FACEBOOK_CLIENT_ID }}
+      run: |
+        az containerapp update \
+          --name ${{ env.CONTAINER_APP_NAME }} \
+          --resource-group ${{ env.RESOURCE_GROUP }} \
+          --image ${{ env.REGISTRY_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:${{ github.sha }} || \
+        az containerapp create \
+          --name ${{ env.CONTAINER_APP_NAME }} \
+          --resource-group ${{ env.RESOURCE_GROUP }} \
+          --environment ${{ env.CONTAINER_APP_ENVIRONMENT }} \
+          --image ${{ env.REGISTRY_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:${{ github.sha }} \
+          --target-port 80 \
+          --ingress external \
+          --min-replicas 1 \
+          --max-replicas 5 \
+          --cpu 0.5 \
+          --memory 1Gi \
+          --env-vars \
+            REACT_APP_ENVIRONMENT="production" \
+            REACT_APP_API_BASE_URL="${{ secrets.API_BASE_URL }}" \
+          --registry-server ${{ env.REGISTRY_LOGIN_SERVER }} \
+          --registry-username ${{ secrets.REGISTRY_USERNAME }} \
+          --registry-password ${{ secrets.REGISTRY_PASSWORD }}
+
+    - name: Verify Deployment and Get URL
+      run: |
+        echo "🌟 WIHY UI Deployed Successfully!"
+        echo "================================================"
+        
+        # Wait for deployment to be ready
+        sleep 30
+        
+        UI_URL=$(az containerapp show --name ${{ env.CONTAINER_APP_NAME }} --resource-group ${{ env.RESOURCE_GROUP }} --query 'properties.configuration.ingress.fqdn' -o tsv)
+        
+        echo "📍 WIHY UI: https://$UI_URL"
+        echo "================================================"
+        
+        # Test endpoint
+        echo "🧪 Testing deployed endpoint..."
+        curl -f "https://$UI_URL" || echo "❌ UI health check failed"
+        echo "✅ Deployment verification completed"
