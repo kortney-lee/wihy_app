@@ -177,19 +177,37 @@ const ResultsPage: React.FC = () => {
         }
         
       } catch (error) {
-        console.error("WiHy API error:", error);
+        logger.error("WiHy API error:", error);
         // Try fallback APIs if WiHy fails
         try {
           await handleFallbackAPIs();
         } catch (fallbackError) {
-          console.error("All APIs failed:", fallbackError);
-          const errorMessage = "Sorry, there was an error processing your request.";
-          setResults(errorMessage);
+          logger.error("All APIs failed:", fallbackError);
+          
+          // Check for specific error types
+          const errorMessage = error.message || '';
+          const fallbackErrorMessage = fallbackError.message || '';
+          
+          let userFriendlyMessage;
+          
+          if (errorMessage.includes('NETWORK_ERROR') || errorMessage.includes('TIMEOUT_ERROR')) {
+            userFriendlyMessage = "Oops! Looks like we're having some technical difficulties. 🤖 Please come back in a few minutes while we fix things up!";
+          } else if (errorMessage.includes('SERVER_ERROR')) {
+            userFriendlyMessage = "Our servers are taking a quick break! ☕ Please try again in a few minutes.";
+          } else if (fallbackErrorMessage.includes('fetch') || 
+                     fallbackErrorMessage.includes('network') || 
+                     error.name === 'TypeError') {
+            userFriendlyMessage = "Looks like there's a connection hiccup! 📡 Please check your internet and try again.";
+          } else {
+            userFriendlyMessage = "Sorry, we're experiencing some issues right now. Please try again in a moment or come back later! 😅";
+          }
+          
+          setResults(userFriendlyMessage);
           setDataSource("error");
           
           setCitations([]);
           setRecommendations([]);
-          setDisclaimer('');
+          setDisclaimer('If this issue persists, please try refreshing the page or contact support.');
         }
       } finally {
         setIsLoading(false);
