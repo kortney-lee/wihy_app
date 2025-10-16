@@ -203,39 +203,7 @@ const VHealthSearch: React.FC = () => {
     setLoadingMessage('Initializing search...');
     
     try {
-      // Step 1: Check database cache first
-      setLoadingMessage('Checking cache...');
-      
-      try {
-        const response = await fetch(getApiEndpoint(`/cache/get?q=${encodeURIComponent(queryToUse)}`), { signal });
-        
-        if (response.ok) {
-          const cachedData = await response.json();
-          console.log('Using cached results from database');
-          setLoadingMessage('Loading cached results...');
-          await new Promise(resolve => setTimeout(resolve, 300));
-          
-          setIsLoading(false);
-          // Pass the cached data via navigation state
-          navigate(`/results?q=${encodeURIComponent(queryToUse)}`, {
-            state: {
-              results: cachedData.results,
-              dataSource: cachedData.source || 'cache',
-              fromSearch: true
-            }
-          });
-          return;
-        }
-      } catch (cacheError) {
-        // Handle AbortError specifically
-        if (cacheError.name === 'AbortError') {
-          console.log('Cache request was cancelled');
-          return; // Exit early
-        }
-        logger.debug('No cache found, proceeding with API call');
-      }
-
-      // Step 2: Get fresh results from API
+      // Get fresh results from WiHy API (cache is managed by the API)
       setLoadingMessage('Analyzing with AI...');
       logger.debug('Getting fresh results for query', { query: queryToUse });
       
@@ -266,29 +234,7 @@ const VHealthSearch: React.FC = () => {
           if (isValidResult) {
             logger.info('Valid search results confirmed');
             
-            // Step 3: Save to database cache (async, don't wait)
-            setLoadingMessage('Caching results...');
-            
-            fetch(getApiEndpoint('/cache/save'), {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({
-                query: queryToUse,
-                results: searchResults,
-                source: 'wihy'
-              })
-            }).then(response => {
-              if (response.ok) {
-                logger.cache('Results saved to database cache');
-              } else {
-                logger.warn('Failed to save to cache');
-              }
-            }).catch(err => {
-              logger.warn('Cache save error', { error: err });
-            });
-            
+            // Results ready - cache is managed by the API
             setLoadingMessage('Results ready!');
             await new Promise(resolve => setTimeout(resolve, 300));
             
@@ -326,8 +272,12 @@ const VHealthSearch: React.FC = () => {
                               apiError.message?.includes('Failed to fetch');
         
         const isServerError = apiError.message?.includes('SERVER_ERROR');
+        const isCorsError = apiError.message?.includes('CORS_ERROR');
         
-        if (isNetworkError) {
+        if (isCorsError) {
+          logger.error('CORS error in health search:', apiError);
+          setLoadingMessage('Configuration hiccup! 🔧 Our team is fixing this - try again later!');
+        } else if (isNetworkError) {
           logger.error('Network error in health search:', apiError);
           setLoadingMessage('Connection trouble! 🌐 Our servers might be napping...');
         } else if (isServerError) {
@@ -335,46 +285,14 @@ const VHealthSearch: React.FC = () => {
           setLoadingMessage('Our servers are taking a coffee break ☕ Come back in a few minutes!');
         } else {
           logger.error('Health search service failed:', apiError);
-          setLoadingMessage('Search hit a snag! 🔍 Trying backup options...');
+          setLoadingMessage('Search hit a snag! 🔍 Please try again later.');
         }
         
-        // Step 4: Try similar results as fallback
-        setTimeout(() => {
-          setLoadingMessage('Searching for similar results...');
-        }, 2000);
-        
-        try {
-          const similarResponse = await fetch(getApiEndpoint(`/cache/similar?q=${encodeURIComponent(queryToUse)}`));
-          
-          if (similarResponse.ok) {
-            const similarResults = await similarResponse.json();
-            
-            if (similarResults.length > 0) {
-              console.log('Using similar cached results');
-              setLoadingMessage('Loading similar results...');
-              await new Promise(resolve => setTimeout(resolve, 300));
-              
-              setIsLoading(false);
-              // Pass similar results via navigation state
-              navigate(`/results?q=${encodeURIComponent(queryToUse)}`, {
-                state: {
-                  results: similarResults[0].results,
-                  dataSource: 'similar',
-                  fromSearch: true
-                }
-              });
-              return;
-            }
-          }
-        } catch (similarError) {
-          console.warn('Similar results search failed:', similarError);
-        }
-        
-        setLoadingMessage('No results found. Please try a different search.');
+        // Show error message for a few seconds then reset
         setTimeout(() => {
           setIsLoading(false);
           setLoadingMessage('Searching...');
-        }, 3000);
+        }, 4000);
         return;
       }
         
@@ -390,7 +308,9 @@ const VHealthSearch: React.FC = () => {
       // Check for specific error types
       const errorMessage = error.message || '';
       
-      if (errorMessage.includes('NETWORK_ERROR') || errorMessage.includes('TIMEOUT_ERROR')) {
+      if (errorMessage.includes('CORS_ERROR')) {
+        setLoadingMessage('Configuration issue! 🔧 Our team is working on this - please try again later!');
+      } else if (errorMessage.includes('NETWORK_ERROR') || errorMessage.includes('TIMEOUT_ERROR')) {
         setLoadingMessage('Oops! Our servers are taking a coffee break ☕ Come back in a few minutes!');
       } else if (errorMessage.includes('SERVER_ERROR')) {
         setLoadingMessage('Server hiccup! 🤖 Please try again in a moment.');
@@ -450,38 +370,11 @@ const VHealthSearch: React.FC = () => {
       console.log("Image analysis completed, food detected:", foodName);
       setSearchQuery(foodName);
       
-      // Step 1: Check database cache for nutrition data
-      setLoadingMessage('Checking nutrition database...');
-      
-      try {
-        const response = await fetch(getApiEndpoint(`/cache/get?q=${encodeURIComponent(foodName)}`));
-        
-        if (response.ok) {
-          const cachedData = await response.json();
-          console.log('Using cached nutrition data');
-          setLoadingMessage('Loading cached nutrition data...');
-          await new Promise(resolve => setTimeout(resolve, 300));
-          
-          setIsLoading(false);
-          // Pass the cached data via navigation state
-          navigate(`/results?q=${encodeURIComponent(foodName)}`, {
-            state: {
-              results: cachedData.results,
-              dataSource: cachedData.source || 'cache',
-              fromSearch: true
-            }
-          });
-          return;
-        }
-      } catch (cacheError) {
-        console.log('No cached nutrition data found');
-      }
-      
-      // Step 2: Get fresh nutrition data
+      // Search for nutrition data using WiHy API (cache managed by API)
       setLoadingMessage('Analyzing nutrition content...');
       
       try {
-        console.log('Making WiHy API nutrition search for:', foodName);
+        logger.debug('Making WiHy API nutrition search for:', foodName);
         const wihyResponse = await wihyAPI.searchNutrition(foodName);
         
         if (wihyResponse.success) {
@@ -502,29 +395,7 @@ const VHealthSearch: React.FC = () => {
             (nutritionResults.summary || nutritionResults.details || Object.keys(nutritionResults).length > 0);
           
           if (isValidResult) {
-            // Step 3: Save to database cache (async, don't wait)
-            setLoadingMessage('Caching nutrition data...');
-            
-            fetch(getApiEndpoint('/cache/save'), {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({
-                query: foodName,
-                results: nutritionResults,
-                source: 'wihy'
-              })
-            }).then(response => {
-              if (response.ok) {
-                console.log('Nutrition data saved to cache');
-              } else {
-                console.warn('Failed to save nutrition data to cache');
-              }
-            }).catch(err => {
-              console.warn('Nutrition cache save error:', err);
-            });
-            
+            // Nutrition analysis complete - cache is managed by the API
             setLoadingMessage('Nutrition analysis complete!');
             await new Promise(resolve => setTimeout(resolve, 300));
             
@@ -546,28 +417,7 @@ const VHealthSearch: React.FC = () => {
         }
         
       } catch (nutritionError) {
-        console.error('Nutrition analysis failed:', nutritionError);
-        
-        // Try similar results as fallback
-        try {
-          const similarResponse = await fetch(getApiEndpoint(`/cache/similar?q=${encodeURIComponent(foodName)}`));
-          
-          if (similarResponse.ok) {
-            const similarResults = await similarResponse.json();
-            
-            if (similarResults.length > 0) {
-              console.log('Using similar nutrition data');
-              setLoadingMessage('Loading similar nutrition data...');
-              await new Promise(resolve => setTimeout(resolve, 300));
-              
-              setIsLoading(false);
-              navigate(`/results?q=${encodeURIComponent(foodName)}`);
-              return;
-            }
-          }
-        } catch (similarError) {
-          console.warn('Similar nutrition search failed:', similarError);
-        }
+        logger.error('Nutrition analysis failed:', nutritionError);
         
         setLoadingMessage('Hmm, we couldn\'t figure out what that food is 🤔 Try a different photo or search manually!');
         setTimeout(() => {
