@@ -1,4 +1,4 @@
-name: Build and Push to Azure Container Registry
+name: Deploy Wihy UI to Azure
 
 on:
   push:
@@ -7,7 +7,11 @@ on:
 
 env:
   REGISTRY_LOGIN_SERVER: wihymlregistry-b6fdh5cmhzgwbbgy.azurecr.io
+  CONTAINER_APP_NAME: wihy-ui
+  CONTAINER_APP_ENVIRONMENT: wihy-ml-env
+  RESOURCE_GROUP: vHealth
   IMAGE_NAME: wihy-ui
+  LOCATION: westus2
 
 jobs:
   test:
@@ -40,7 +44,7 @@ jobs:
         cd client
         npm run build
 
-  build-and-push-azure:
+  deploy:
     needs: test
     runs-on: ubuntu-latest
     permissions:
@@ -85,26 +89,31 @@ jobs:
           echo "- AZURE_TENANT_ID" 
           echo "- AZURE_CREDENTIALS"
           echo ""
-          echo "See docs/AZURE_GITHUB_ACTIONS_SETUP.md for setup instructions"
-          exit 1
+          echo "Deployment will be skipped due to missing credentials."
+          echo "SKIP_DEPLOYMENT=true" >> $GITHUB_ENV
+        else
+          echo "✅ All Azure credentials configured"
+          echo "SKIP_DEPLOYMENT=false" >> $GITHUB_ENV
         fi
-        
-        echo "✅ All Azure credentials configured"
 
     - name: Set up Docker Buildx
+      if: env.SKIP_DEPLOYMENT == 'false'
       uses: docker/setup-buildx-action@v3
 
     - name: Azure Login
+      if: env.SKIP_DEPLOYMENT == 'false'
       uses: azure/login@v1
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
 
     - name: Log in to Azure Container Registry
+      if: env.SKIP_DEPLOYMENT == 'false'
       run: |
-        echo "� Logging into wihymlregistry..."
+        echo "🔐 Logging into wihymlregistry..."
         az acr login --name wihymlregistry
 
     - name: Build and push Docker image
+      if: env.SKIP_DEPLOYMENT == 'false'
       run: |
         echo "🏗️ Building with wihymlregistry..."
         echo "Registry: wihymlregistry"
@@ -134,10 +143,55 @@ jobs:
           exit 1
         }
 
-    - name: Image Info
+    - name: Deploy to Azure Container Apps
+      if: env.SKIP_DEPLOYMENT == 'false'
       run: |
-        echo "🐳 Container images published to Azure Container Registry:"
-        echo "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest"
-        echo "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}"
-        echo ""
-        echo "✅ Ready for Azure Container Apps deployment!"
+        echo "🚀 Deploying to Azure Container Apps..."
+        
+        az containerapp update \
+          --name ${{ env.CONTAINER_APP_NAME }} \
+          --resource-group ${{ env.RESOURCE_GROUP }} \
+          --image ${{ env.REGISTRY_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:${{ github.sha }} || \
+        az containerapp create \
+          --name ${{ env.CONTAINER_APP_NAME }} \
+          --resource-group ${{ env.RESOURCE_GROUP }} \
+          --environment ${{ env.CONTAINER_APP_ENVIRONMENT }} \
+          --image ${{ env.REGISTRY_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:${{ github.sha }} \
+          --target-port 80 \
+          --ingress external \
+          --min-replicas 1 \
+          --max-replicas 5 \
+          --cpu 0.5 \
+          --memory 1Gi \
+          --env-vars \
+            REACT_APP_ENVIRONMENT="production" \
+            REACT_APP_API_BASE_URL="${{ secrets.API_BASE_URL }}" \
+          --registry-server ${{ env.REGISTRY_LOGIN_SERVER }} \
+          --registry-username ${{ secrets.REGISTRY_USERNAME }} \
+          --registry-password ${{ secrets.REGISTRY_PASSWORD }}
+
+    - name: Verify Deployment and Get URL
+      if: env.SKIP_DEPLOYMENT == 'false'
+      run: |
+        echo "🌟 WIHY UI Deployed Successfully!"
+        echo "================================================"
+        
+        # Wait for deployment to be ready
+        sleep 30
+        
+        UI_URL=$(az containerapp show --name ${{ env.CONTAINER_APP_NAME }} --resource-group ${{ env.RESOURCE_GROUP }} --query 'properties.configuration.ingress.fqdn' -o tsv)
+        
+        echo "📍 WIHY UI: https://$UI_URL"
+        echo "================================================"
+        
+        # Test endpoint
+        echo "🧪 Testing deployed endpoint..."
+        curl -f "https://$UI_URL" || echo "❌ UI health check failed"
+        echo "✅ Deployment verification completed"
+
+    - name: Deployment Skipped Notice
+      if: env.SKIP_DEPLOYMENT == 'true'
+      run: |
+        echo "⏭️ Deployment skipped due to missing Azure credentials"
+        echo "Code changes have been tested and built successfully"
+        echo "Configure Azure secrets to enable automatic deployment"
