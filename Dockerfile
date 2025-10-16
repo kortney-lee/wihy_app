@@ -8,15 +8,17 @@ WORKDIR /app
 COPY package*.json ./
 COPY client/package*.json ./client/
 
-# Install dependencies with clean slate
-RUN npm ci --only=production && \
-    cd client && npm ci --only=production
+# Install dependencies
+RUN npm ci && \
+    cd client && npm ci
 
 # Copy source code
 COPY . .
 
-# Build the client application
-RUN cd client && npm run build
+# Build the client application with explicit permissions
+RUN cd client && \
+    chmod +x node_modules/.bin/* && \
+    npm run build
 
 # Production stage - Optimized for serverless
 FROM nginx:alpine AS production

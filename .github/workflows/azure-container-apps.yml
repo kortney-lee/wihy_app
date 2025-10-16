@@ -94,22 +94,18 @@ jobs:
     - name: Deploy to Azure Container Apps
       uses: azure/container-apps-deploy-action@v1
       with:
-        resource-group: ${{ env.RESOURCE_GROUP }}
-        container-app-name: ${{ env.CONTAINER_APP_NAME }}
-        container-app-environment: ${{ env.CONTAINER_APP_ENVIRONMENT }}
-        image: ${{ env.REGISTRY_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
-        registry-login-server: ${{ env.REGISTRY_LOGIN_SERVER }}
-        registry-username: ${{ env.REGISTRY_USERNAME }}
-        registry-password: ${{ secrets.REGISTRY_PASSWORD }}
-        environment-variables: |
+        resourceGroup: ${{ env.RESOURCE_GROUP }}
+        containerAppName: ${{ env.CONTAINER_APP_NAME }}
+        containerAppEnvironment: ${{ env.CONTAINER_APP_ENVIRONMENT }}
+        imageToDeploy: ${{ env.REGISTRY_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+        registryUrl: ${{ env.REGISTRY_LOGIN_SERVER }}
+        registryUsername: ${{ env.REGISTRY_USERNAME }}
+        registryPassword: ${{ secrets.REGISTRY_PASSWORD }}
+        targetPort: 80
+        environmentVariables: |
           REACT_APP_ENVIRONMENT=production
           REACT_APP_API_BASE_URL=${{ secrets.API_BASE_URL }}
           REACT_APP_GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
           REACT_APP_MICROSOFT_CLIENT_ID=${{ secrets.MICROSOFT_CLIENT_ID }}
           REACT_APP_APPLE_CLIENT_ID=${{ secrets.APPLE_CLIENT_ID }}
           REACT_APP_FACEBOOK_CLIENT_ID=${{ secrets.FACEBOOK_CLIENT_ID }}
-        cpu: 0.25
-        memory: 0.5Gi
-        min-replicas: 0
-        max-replicas: 10
-        target-port: 80
