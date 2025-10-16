@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 env:
-  REGISTRY: wihymlregistry-b6fdh5cmhzgwbbgy.azurecr.io
+  REGISTRY: ${{ secrets.AZURE_CONTAINER_REGISTRY }}.azurecr.io
   IMAGE_NAME: wihy-ui
 
 jobs:
@@ -53,13 +53,10 @@ jobs:
 
     - name: Check Azure credentials
       run: |
-        if [ -z "${{ secrets.AZURE_CLIENT_ID }}" ] || [ -z "${{ secrets.AZURE_CLIENT_SECRET }}" ] || [ -z "${{ secrets.AZURE_TENANT_ID }}" ]; then
+        if [ -z "${{ secrets.AZURE_CREDENTIALS }}" ] || [ -z "${{ secrets.REGISTRY_PASSWORD }}" ]; then
           echo "⚠️ Azure credentials not configured"
           echo "Please add the required GitHub secrets:"
-          echo "- AZURE_CLIENT_ID"
-          echo "- AZURE_CLIENT_SECRET"
-          echo "- AZURE_TENANT_ID" 
-          echo "- AZURE_SUBSCRIPTION_ID"
+          echo "- AZURE_CREDENTIALS (JSON format)"
           echo "- REGISTRY_PASSWORD"
           echo "- AZURE_CONTAINER_REGISTRY"
           echo "- REGISTRY_USERNAME"
@@ -68,16 +65,21 @@ jobs:
         fi
         echo "✅ Azure credentials configured"
 
+    - name: Debug Registry Configuration
+      run: |
+        echo "🔍 Registry Configuration Debug:"
+        echo "REGISTRY: ${{ env.REGISTRY }}"
+        echo "AZURE_CONTAINER_REGISTRY secret: ${{ secrets.AZURE_CONTAINER_REGISTRY }}"
+        echo "REGISTRY_USERNAME secret: ${{ secrets.REGISTRY_USERNAME }}"
+        echo "Expected full URL: ${{ secrets.AZURE_CONTAINER_REGISTRY }}.azurecr.io"
+
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
 
     - name: Azure Login
       uses: azure/login@v2
       with:
-        client-id: ${{ secrets.AZURE_CLIENT_ID }}
-        client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
-        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
 
     - name: Login to Azure Container Registry
       uses: docker/login-action@v3
