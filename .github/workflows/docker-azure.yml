@@ -69,48 +69,16 @@ jobs:
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-    - name: Debug Azure Container Registries
-      run: |
-        echo "🔍 Listing Azure Container Registries..."
-        az acr list --query "[].{Name:name, LoginServer:loginServer, ResourceGroup:resourceGroup}" -o table
-        
-        echo ""
-        echo "🔍 Checking specific resource group (vHealth)..."
-        az acr list --resource-group vHealth --query "[].{Name:name, LoginServer:loginServer}" -o table || echo "No registries in vHealth RG"
-        
-        echo ""
-        echo "🔍 Looking for WIHY registries..."
-        az acr list --query "[?contains(name, 'wihy')].{Name:name, LoginServer:loginServer}" -o table
-
     - name: Log in to Azure Container Registry
       run: |
-        echo "🔍 Attempting to find and login to registry..."
-        
-        # Get the actual registry name that contains 'wihy'
-        REGISTRY_NAME=$(az acr list --query "[?contains(name, 'wihy')].name" -o tsv | head -1)
-        
-        if [ -z "$REGISTRY_NAME" ]; then
-          echo "❌ No WIHY registry found!"
-          az acr list --query "[].{Name:name, LoginServer:loginServer}" -o table
-          exit 1
-        fi
-        
-        echo "✅ Found registry: $REGISTRY_NAME"
-        az acr login --name $REGISTRY_NAME
+        echo "� Logging into wihymlregistry..."
+        az acr login --name wihymlregistry
 
     - name: Build and push Docker image
       run: |
-        echo "🔍 Getting actual registry name..."
-        REGISTRY_NAME=$(az acr list --query "[?contains(name, 'wihy')].name" -o tsv | head -1)
-        
-        if [ -z "$REGISTRY_NAME" ]; then
-          echo "❌ No WIHY registry found for build!"
-          exit 1
-        fi
-        
-        echo "✅ Building with registry: $REGISTRY_NAME"
+        echo "🏗️ Building with wihymlregistry..."
         az acr build \
-          --registry $REGISTRY_NAME \
+          --registry wihymlregistry \
           --image ${{ env.IMAGE_NAME }}:${{ github.sha }} \
           --image ${{ env.IMAGE_NAME }}:latest \
           .
