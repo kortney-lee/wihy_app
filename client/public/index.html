@@ -1,207 +1,64 @@
-<!DOCTYPE html><!DOCTYPE html>
-
-<html lang="en"><html lang="en">
-
-  <head>  <head>
-
-    <!-- Essentials -->    <!-- Essentials -->
-
-    <meta charset="utf-8" />    <meta charset="utf-8" />
-
-    <meta name="viewport" content="width=device-width, initial-scale=1" />    <meta name="viewport" content="width=device-width, initial-scale=1" />
-
-    <title>Wihy.ai — The World's Smartest Health Search Engine</title>    <title>Wihy.ai — The World’s Smartest Health Search Engine</title>
-
-    <meta name="description" content="Wihy.ai turns research into clear, trusted answers. Search foods and products, decode labels, and see what heals vs. what steals — powered by AI." />    <meta name="description" content="Wihy.ai turns research into clear, trusted answers. Search foods and products, decode labels, and see what heals vs. what steals — powered by AI." />
-
-    <meta name="theme-color" content="#0AAE5E" />    <meta name="theme-color" content="#0AAE5E" />
-
-
-
-    <!-- Canonical -->    <!-- Canonical -->
-
-    <link rel="canonical" href="https://wihy.ai/" />    <link rel="canonical" href="https://wihy.ai/" />
-
-
-
-    <!-- Open Graph -->    <!-- Open Graph -->
-
-    <meta property="og:title" content="Wihy.ai — The World's Smartest Health Search Engine" />    <meta property="og:title" content="Wihy.ai — The World’s Smartest Health Search Engine" />
-
-    <meta property="og:description" content="We have the research. We give you the data. Powered by AI. Search smarter and make confident health choices with Wihy.ai." />    <meta property="og:description" content="We have the research. We give you the data. Powered by AI. Search smarter and make confident health choices with Wihy.ai." />
-
-    <meta property="og:type" content="website" />    <meta property="og:type" content="website" />
-
-    <meta property="og:url" content="https://wihy.ai/" />    <meta property="og:url" content="https://wihy.ai/" />
-
-    <meta property="og:image" content="/assets/og-wihyai.jpg" />    <meta property="og:image" content="/assets/og-wihyai.jpg" />
-
-
-
-    <!-- Twitter -->    <!-- Twitter -->
-
-    <meta name="twitter:card" content="summary_large_image" />    <meta name="twitter:card" content="summary_large_image" />
-
-    <meta name="twitter:title" content="Wihy.ai — The World's Smartest Health Search Engine" />    <meta name="twitter:title" content="Wihy.ai — The World’s Smartest Health Search Engine" />
-
-    <meta name="twitter:description" content="Research-grade answers made simple. What heals vs. what steals — powered by AI." />    <meta name="twitter:description" content="Research-grade answers made simple. What heals vs. what steals — powered by AI." />
-
-    <meta name="twitter:image" content="/assets/og-wihyai.jpg" />    <meta name="twitter:image" content="/assets/og-wihyai.jpg" />
-
-
-
-    <!-- Icons -->    <!-- Icons -->
-
-    <link rel="icon" type="image/png" href="/assets/wihyfavicon.png" />    <link rel="icon" type="image/png" href="/assets/wihyfavicon.png" />
-
-    <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png" />    <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png" />
-
-
-
-    <!-- Structured Data (basic) -->    <!-- Structured Data (basic) -->
-
-    <script type="application/ld+json">    <script type="application/ld+json">
-
-    {    {
-
-      "@context": "https://schema.org",      "@context": "https://schema.org",
-
-      "@type": "SoftwareApplication",      "@type": "SoftwareApplication",
-
-      "name": "Wihy.ai",      "name": "Wihy.ai",
-
-      "applicationCategory": "HealthApplication",      "applicationCategory": "HealthApplication",
-
-      "operatingSystem": "Web",      "operatingSystem": "Web",
-
-      "url": "https://wihy.ai/",      "url": "https://wihy.ai/",
-
-      "description": "The world's smartest health search engine. We have the research. We give you the data. Powered by AI.",      "description": "The world's smartest health search engine. We have the research. We give you the data. Powered by AI.",
-
-      "offers": {      "offers": {
-
-        "@type": "Offer",        "@type": "Offer",
-
-        "price": "0",        "price": "0",
-
-        "priceCurrency": "USD"        "priceCurrency": "USD"
-
-      }      }
-
-    }    }
-
-    </script>    </script>
-
-  </head>  </head>
-
-
-
-  <body>  <body>
-
-    <noscript>    <noscript>
-
-      <p>Wihy.ai needs JavaScript to run. Enable it to search foods, decode labels, and see what heals vs. what steals.</p>      <p>Wihy.ai needs JavaScript to run. Enable it to search foods, decode labels, and see what heals vs. what steals.</p>
-
-    </noscript>    </noscript>
-
-
-
-    <!-- React mount point -->    <!-- React mount point -->
-
-    <div id="root"></div>    <div id="root"></div>
-
-  </body>  </body>
-
-</html></html>
-        <div class="brand" aria-hidden="true">
-          <!-- Wihy Logo -->
-          <img src="/assets/wihylogomain.png" alt="Wihy.ai Logo" width="34" height="28" />
-          <h1>Wihy.ai</h1>
-        </div>
-
-        <div class="headline">The world’s smartest search engine for health.</div>
-
-        <!-- Rotating sub-lines -->
-        <div class="rotator" aria-live="polite">
-          <span class="active">We have the research.</span>
-          <span>We give you the data.</span>
-          <span>Powered by AI.</span>
-          <span>See what heals vs. what steals.</span>
-          <span>Search foods, decode labels, decide with confidence.</span>
-        </div>
-
-        <div class="scope" aria-hidden="true">
-          <svg viewBox="0 0 600 80" width="100%" height="80" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-              <linearGradient id="line" x1="0" y1="0" x2="1" y2="0">
-                <stop offset="0%" stop-color="#0AAE5E"/>
-                <stop offset="100%" stop-color="#FA5F06"/>
-              </linearGradient>
-            </defs>
-            <polyline fill="none" stroke="url(#line)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"
-              points="0,40 40,40 60,40 80,15 100,65 120,40 170,40 190,20 210,60 230,40 280,40 300,15 320,65 340,40 380,40 400,40 460,40 600,40">
-              <animate attributeName="stroke-dasharray" values="0,1000;1000,0" dur="2.4s" repeatCount="indefinite"/>
-              <animate attributeName="stroke-dashoffset" values="0;-1000" dur="2.4s" repeatCount="indefinite"/>
-            </polyline>
-          </svg>
-        </div>
-
-        <p class="muted">Initializing knowledge graphs and nutrition models<span class="dot" aria-hidden="true"></span></p>
-      </div>
-    </div>
-
-    <!-- React mount point -->
-    <div id="root"></div>
-
-    <!-- Preloader controller + rotator -->
-    <script>
-      (function () {
-        const root = document.getElementById('root');
-        const loader = document.getElementById('preloader');
-
-        // Rotating lines
-        const lines = Array.from(document.querySelectorAll('.rotator > span'));
-        let idx = 0;
-        function rotate() {
-          const current = lines[idx % lines.length];
-          const next = lines[(idx + 1) % lines.length];
-          current.classList.remove('active');
-          next.classList.add('active');
-          idx++;
-        }
-        let rotTimer = setInterval(rotate, 2200);
-
-        // Safety fallback
-        const safety = setTimeout(() => {
-          loader.classList.add('fade-out');
-          console.warn('Wihy.ai: App took too long to mount. Check network/bundles.');
-          clearInterval(rotTimer);
-        }, 15000);
-
-        // Reveal app when React mounts
-        const obs = new MutationObserver(() => {
-          if (root.childNodes.length > 0) {
-            clearTimeout(safety);
-            clearInterval(rotTimer);
-            root.style.display = 'block';
-            requestAnimationFrame(() => loader.classList.add('fade-out'));
-            setTimeout(() => loader.remove(), 420);
-            obs.disconnect();
-          }
-        });
-        obs.observe(root, { childList: true });
-
-        document.addEventListener('DOMContentLoaded', () => {
-          if (root.childNodes.length > 0) {
-            clearTimeout(safety);
-            clearInterval(rotTimer);
-            root.style.display = 'block';
-            loader.classList.add('fade-out');
-            setTimeout(() => loader.remove(), 420);
-            obs.disconnect();
-          }
-        });
-      })();
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- Basic -->
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Wihy.ai — The World’s Smartest Health Search Engine</title>
+    <meta
+      name="description"
+      content="Wihy.ai turns research into clear, trusted answers. Search foods, decode labels, and see what heals vs what steals — powered by AI."
+    />
+    <meta name="theme-color" content="#0AAE5E" />
+
+    <!-- Canonical -->
+    <link rel="canonical" href="https://wihy.ai/" />
+
+    <!-- Social (Open Graph / Twitter) -->
+    <meta property="og:title" content="Wihy.ai - The World’s Smartest Health Search Engine" />
+    <meta
+      property="og:description"
+      content="We have the research. We give you the data. Powered by AI. Search smarter and make confident health choices with Wihy.ai."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://wihy.ai/" />
+    <meta property="og:image" content="/assets/wihylogo.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Wihy.ai — The World's Smartest Health Search Engine" />
+    <meta
+      name="twitter:description"
+      content="Research-grade answers made simple. What heals vs what steals — powered by AI."
+    />
+    <meta name="twitter:image" content="/assets/wihylogo.png" />
+
+    <!-- App icons -->
+    <link rel="icon" type="image/png" href="/assets/wihyfavicon.png" />
+    <link rel="apple-touch-icon" href="/assets/wihyfavicon.png" />
+    <link rel="manifest" href="/manifest.json" />
+
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "Wihy.ai",
+      "applicationCategory": "HealthApplication",
+      "operatingSystem": "Web, Android, iOS",
+      "url": "https://wihy.ai/",
+      "description": "The world's smartest health search engine. We have the research. We give you the data. Powered by AI.",
+      "image": "https://wihy.ai/assets/og-wihyai.jpg",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      }
+    }
     </script>
+  </head>
+
+  <body>
+    <noscript>Wihy.ai requires JavaScript to run. Please enable it to continue.</noscript>
+    <div id="root"></div>
   </body>
 </html>
