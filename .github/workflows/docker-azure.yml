@@ -53,13 +53,43 @@ jobs:
 
     - name: Check Azure credentials
       run: |
-        if [ -z "${{ secrets.AZURE_CLIENT_ID }}" ] || [ -z "${{ secrets.AZURE_TENANT_ID }}" ]; then
-          echo "⚠️ Azure credentials not configured"
-          echo "Please see docs/AZURE_GITHUB_ACTIONS_SETUP.md for setup instructions"
-          echo "Skipping Azure deployment..."
-          exit 0
+        echo "🔑 Checking Azure credentials..."
+        
+        # Check individual secrets
+        if [ -z "${{ secrets.AZURE_CLIENT_ID }}" ]; then
+          echo "❌ AZURE_CLIENT_ID secret not configured"
+          MISSING=true
+        else
+          echo "✅ AZURE_CLIENT_ID configured"
         fi
-        echo "✅ Azure credentials configured"
+        
+        if [ -z "${{ secrets.AZURE_TENANT_ID }}" ]; then
+          echo "❌ AZURE_TENANT_ID secret not configured"  
+          MISSING=true
+        else
+          echo "✅ AZURE_TENANT_ID configured"
+        fi
+        
+        if [ -z "${{ secrets.AZURE_CREDENTIALS }}" ]; then
+          echo "❌ AZURE_CREDENTIALS secret not configured"
+          MISSING=true
+        else
+          echo "✅ AZURE_CREDENTIALS configured"
+        fi
+        
+        if [ "$MISSING" = true ]; then
+          echo ""
+          echo "⚠️ Required Azure secrets are missing!"
+          echo "Please configure the following in repository Settings → Secrets:"
+          echo "- AZURE_CLIENT_ID"
+          echo "- AZURE_TENANT_ID" 
+          echo "- AZURE_CREDENTIALS"
+          echo ""
+          echo "See docs/AZURE_GITHUB_ACTIONS_SETUP.md for setup instructions"
+          exit 1
+        fi
+        
+        echo "✅ All Azure credentials configured"
 
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
@@ -77,11 +107,32 @@ jobs:
     - name: Build and push Docker image
       run: |
         echo "🏗️ Building with wihymlregistry..."
+        echo "Registry: wihymlregistry"
+        echo "Image: ${{ env.IMAGE_NAME }}"
+        echo "SHA: ${{ github.sha }}"
+        
+        # Test ACR connectivity first
+        echo "Testing ACR connectivity..."
+        az acr show --name wihymlregistry --query "loginServer" -o tsv || {
+          echo "❌ Cannot access ACR. Check permissions."
+          exit 1
+        }
+        
+        # Build and push with error handling
         az acr build \
           --registry wihymlregistry \
           --image ${{ env.IMAGE_NAME }}:${{ github.sha }} \
           --image ${{ env.IMAGE_NAME }}:latest \
-          .
+          --timeout 1800 \
+          --verbose \
+          . || {
+          echo "❌ ACR build failed. Error details above."
+          echo "Common causes:"
+          echo "1. Azure credentials expired or incorrect"
+          echo "2. ACR permissions insufficient"
+          echo "3. Build timeout or resource limits"
+          exit 1
+        }
 
     - name: Image Info
       run: |
