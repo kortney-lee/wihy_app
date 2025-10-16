@@ -314,13 +314,34 @@ const VHealthSearch: React.FC = () => {
       } catch (apiError) {
         // Handle AbortError specifically
         if (apiError.name === 'AbortError') {
-          console.log('API request was cancelled');
+          logger.debug('API request was cancelled');
           return; // Exit early
         }
-        console.error('Health search service failed:', apiError);
+        
+        const isNetworkError = apiError.message?.includes('NETWORK_ERROR') || 
+                              apiError.message?.includes('TIMEOUT_ERROR') ||
+                              apiError.message?.includes('fetch') || 
+                              apiError.message?.includes('network') || 
+                              apiError.name === 'TypeError' ||
+                              apiError.message?.includes('Failed to fetch');
+        
+        const isServerError = apiError.message?.includes('SERVER_ERROR');
+        
+        if (isNetworkError) {
+          logger.error('Network error in health search:', apiError);
+          setLoadingMessage('Connection trouble! 🌐 Our servers might be napping...');
+        } else if (isServerError) {
+          logger.error('Server error in health search:', apiError);
+          setLoadingMessage('Our servers are taking a coffee break ☕ Come back in a few minutes!');
+        } else {
+          logger.error('Health search service failed:', apiError);
+          setLoadingMessage('Search hit a snag! 🔍 Trying backup options...');
+        }
         
         // Step 4: Try similar results as fallback
-        setLoadingMessage('Searching for similar results...');
+        setTimeout(() => {
+          setLoadingMessage('Searching for similar results...');
+        }, 2000);
         
         try {
           const similarResponse = await fetch(getApiEndpoint(`/cache/similar?q=${encodeURIComponent(queryToUse)}`));
@@ -360,17 +381,31 @@ const VHealthSearch: React.FC = () => {
     } catch (error) {
       // Handle AbortError specifically
       if (error.name === 'AbortError') {
-        console.log('Search request was cancelled');
+        logger.debug('Search request was cancelled');
         return; // Exit early
       }
       
-      console.error("Search error:", error);
-      setLoadingMessage('Search failed. Please try again.');
+      logger.error("Search error:", error);
+      
+      // Check for specific error types
+      const errorMessage = error.message || '';
+      
+      if (errorMessage.includes('NETWORK_ERROR') || errorMessage.includes('TIMEOUT_ERROR')) {
+        setLoadingMessage('Oops! Our servers are taking a coffee break ☕ Come back in a few minutes!');
+      } else if (errorMessage.includes('SERVER_ERROR')) {
+        setLoadingMessage('Server hiccup! 🤖 Please try again in a moment.');
+      } else if (errorMessage.includes('fetch') || 
+                 errorMessage.includes('network') || 
+                 error.name === 'TypeError') {
+        setLoadingMessage('Connection trouble! 📡 Please check your internet and try again.');
+      } else {
+        setLoadingMessage('Something went wrong! Please try your search again 🔄');
+      }
       
       setTimeout(() => {
         setIsLoading(false);
         setLoadingMessage('Searching...');
-      }, 2000);
+      }, 4000); // Give a bit more time to read the friendly message
     }
   };
 
@@ -534,17 +569,26 @@ const VHealthSearch: React.FC = () => {
           console.warn('Similar nutrition search failed:', similarError);
         }
         
-        setLoadingMessage('Could not analyze this food item. Please try again.');
+        setLoadingMessage('Hmm, we couldn\'t figure out what that food is 🤔 Try a different photo or search manually!');
         setTimeout(() => {
           setIsLoading(false);
           setLoadingMessage('Searching...');
-        }, 3000);
+        }, 4000);
         return;
       }
       
     } catch (error) {
-      console.error("Error processing analyzed food:", error);
-      setLoadingMessage('Analysis failed. Please try again.');
+      logger.error("Error processing analyzed food:", error);
+      
+      const isNetworkError = error.message?.includes('fetch') || 
+                            error.message?.includes('network') || 
+                            error.name === 'TypeError';
+      
+      if (isNetworkError) {
+        setLoadingMessage('Oops! Connection hiccup 📡 Please try again in a moment!');
+      } else {
+        setLoadingMessage('Food analysis had a little hiccup 🍎 Please try again!');
+      }
       
       setTimeout(() => {
         setIsLoading(false);

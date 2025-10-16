@@ -121,12 +121,18 @@ class WihyAPIService {
         unifiedRequest = request as UnifiedRequest;
       }
       
-      // Use fetch API to match the working example exactly
+      // Use fetch API to match the working example exactly with timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+      
       const response = await fetch(this.baseURL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(unifiedRequest)
+        body: JSON.stringify(unifiedRequest),
+        signal: controller.signal
       });
+
+      clearTimeout(timeoutId);
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -139,6 +145,24 @@ class WihyAPIService {
       logger.error('WiHy API error:', error);
       
       if (error instanceof Error) {
+        // Check for timeout/abort errors
+        if (error.name === 'AbortError') {
+          throw new Error('TIMEOUT_ERROR: Request timed out - services may be unavailable');
+        }
+        
+        // Check for network/connectivity issues
+        if (error.message.includes('fetch') || 
+            error.message.includes('network') || 
+            error.name === 'TypeError' ||
+            error.message.includes('Failed to fetch')) {
+          throw new Error('NETWORK_ERROR: Unable to connect to WiHy services');
+        }
+        
+        // Check for server errors
+        if (error.message.includes('HTTP error! status: 5')) {
+          throw new Error('SERVER_ERROR: WiHy services are temporarily unavailable');
+        }
+        
         throw new Error(error.message || 'WiHy API request failed');
       }
       
