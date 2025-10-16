@@ -1,0 +1,117 @@
+// Example of the clean flow: User Question → Loading → WiHy API → ChatWidget Response
+import React, { useState } from 'react';
+import { wihyAPI } from '../services/wihyAPI';
+import ChatWidget from '../components/ChatWidget';
+
+interface HealthSearchProps {
+  onResponse?: (response: any) => void;
+}
+
+const CleanHealthSearch: React.FC<HealthSearchProps> = ({ onResponse }) => {
+  const [query, setQuery] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [response, setResponse] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [showChat, setShowChat] = useState(false);
+
+  const handleSearch = async () => {
+    if (!query.trim()) return;
+
+    setIsLoading(true);
+    setError(null);
+    setResponse(null);
+
+    try {
+      console.log('🔍 User asked:', query);
+      
+      // Direct call to WiHy API - no intermediate services
+      const result = await wihyAPI.searchHealth(query.trim());
+      
+      if (result.success) {
+        console.log('✅ WiHy API response received');
+        setResponse(result);
+        setShowChat(true);
+        
+        // Optional callback for parent components
+        if (onResponse) {
+          onResponse(result);
+        }
+      } else {
+        setError('Sorry, I could not process your request. Please try again.');
+      }
+    } catch (err) {
+      console.error('❌ Search error:', err);
+      setError('An error occurred while processing your request.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !isLoading) {
+      handleSearch();
+    }
+  };
+
+  return (
+    <div className="clean-health-search">
+      {/* Search Input */}
+      <div className="search-container">
+        <input
+          type="text"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          onKeyPress={handleKeyPress}
+          placeholder="Ask any health or nutrition question..."
+          disabled={isLoading}
+          className="search-input"
+        />
+        <button 
+          onClick={handleSearch} 
+          disabled={isLoading || !query.trim()}
+          className="search-button"
+        >
+          {isLoading ? 'Searching...' : 'Ask WiHy'}
+        </button>
+      </div>
+
+      {/* Loading Screen */}
+      {isLoading && (
+        <div className="loading-screen">
+          <div className="loading-spinner"></div>
+          <p>Getting your answer from WiHy AI...</p>
+        </div>
+      )}
+
+      {/* Error Display */}
+      {error && (
+        <div className="error-message">
+          <p>{error}</p>
+        </div>
+      )}
+
+      {/* ChatWidget with Response */}
+      {showChat && response && (
+        <ChatWidget
+          isOpen={true}
+          onToggle={() => setShowChat(!showChat)}
+          onClose={() => setShowChat(false)}
+          currentContext={`Search: ${query}`}
+          inline={true}
+        />
+      )}
+
+      {/* Debug Info (remove in production) */}
+      {response && (
+        <div className="debug-info" style={{ marginTop: '20px', fontSize: '12px', color: '#666' }}>
+          <details>
+            <summary>Debug: WiHy API Response</summary>
+            <pre>{JSON.stringify(response, null, 2)}</pre>
+          </details>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default CleanHealthSearch;

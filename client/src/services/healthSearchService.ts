@@ -1,8 +1,8 @@
-import openaiAPI, { openaiAPI as openaiService } from './openaiAPI';
-import { healthAPI } from './healthAPI';
+// DEPRECATED: This service is being phased out in favor of direct wihyAPI calls
+// Only barcode functionality remains for legacy support
+
 import axios from 'axios';
 import { HealthSearchResult } from '../types/healthTypes';
-import { getApiEndpoint } from '../config/apiConfig';
 
 // Debug utility function
 const safeLog = (message: string, data?: any) => {
@@ -22,7 +22,7 @@ const safeLog = (message: string, data?: any) => {
   }
 };
 
-// Helper functions defined outside the object
+// Helper functions for barcode scanning (legacy support only)
 const fetchNutritionData = async (barcode: string) => {
   try {
     const response = await axios.post('/vnutrition/analyze', { barcode });
@@ -36,24 +36,27 @@ const fetchNutritionData = async (barcode: string) => {
 
 const getErrorResponse = (query: string): HealthSearchResult => {
   return {
-    summary: `We encountered an issue searching for information about "${query}".`,
-    details: `We're currently unable to provide detailed health information about "${query}". This could be due to:\n\n• Temporary service issues\n• Network connectivity problems\n• API limitations\n\nPlease try again in a few moments, or consider these general health resources:\n\n• Contact your healthcare provider\n• Visit reputable medical websites like Mayo Clinic or WebMD\n• Call a health information hotline\n• Consult medical reference books`,
+    summary: `Please use the main search functionality for "${query}".`,
+    details: `This service has been deprecated. Please use the main search interface which now uses our improved WiHy AI system for better health and nutrition information.`,
     sources: ['System'],
     relatedTopics: [],
-    recommendations: []
+    recommendations: ['Use the main search interface for better results']
   };
 };
 
+// DEPRECATED: Use wihyAPI.searchHealth() directly instead
 export const healthSearchService = {
   async searchHealthInfo(query: string, signal?: AbortSignal): Promise<HealthSearchResult> {
-    safeLog("HealthSearchService: Searching for " + query);
+    safeLog("⚠️ DEPRECATED: healthSearchService.searchHealthInfo called for: " + query);
+    safeLog("⚠️ Please use wihyAPI.searchHealth() directly instead");
+    
     try {
       // If request is aborted, throw AbortError
       if (signal?.aborted) {
         throw new DOMException('The operation was aborted', 'AbortError');
       }
       
-      // If barcode, call nutrition
+      // Only handle barcodes for legacy support
       if (/^\d{8,14}$/.test(query.trim())) {
         const nutritionResult = await fetchNutritionData(query.trim());
         return {
@@ -67,56 +70,19 @@ export const healthSearchService = {
         };
       }
 
-      // Try to use the API with fetch and abort signal
-      try {
-        const response = await fetch(getApiEndpoint('/search/food'), {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ query }),
-          signal: signal
-        });
-        
-        if (!response.ok) {
-          throw new Error('API request failed');
-        }
-        
-        return await response.json();
-      } catch (fetchError) {
-        if (fetchError.name === 'AbortError') {
-          safeLog('Search request was aborted');
-          throw fetchError; // Re-throw to handle in caller
-        }
-        // Fall through to OpenAI if fetch failed
-      }
-
-      // Otherwise, call OpenAI or local health API
-      if (openaiAPI.isConfigured()) {
-        safeLog("OpenAI API configured, using it for search");
-        const openaiResult = await openaiAPI.searchHealthInfo(query);
-        safeLog("OpenAI search result", openaiResult);
-        return {
-          ...openaiResult,
-          dataSource: 'openai'
-        };
-      } else {
-        safeLog("OpenAI API not configured, using fallback");
-        const localResult = await healthAPI.searchHealthInfo(query);
-        return {
-          ...localResult,
-          dataSource: 'local'
-        };
-      }
+      // For all other queries, return deprecation notice
+      return getErrorResponse(query);
+      
     } catch (error) {
       if (error.name === 'AbortError') {
-        throw error; // Let caller handle abort errors
+        throw error;
       }
-      safeLog("Error in health search", error);
+      safeLog("Error in deprecated health search", error);
       return getErrorResponse(query);
     }
   },
 
+  // Keep barcode search for legacy support
   async searchByBarcode(barcode: string) {
     try {
       const nutritionData = await fetchNutritionData(barcode);
@@ -127,21 +93,11 @@ export const healthSearchService = {
     }
   },
 
-  // Add missing checkServiceStatus method
+  // Deprecated service status check
   async checkServiceStatus() {
-    try {
-      const response = await fetch(getApiEndpoint('/status'), {
-        method: 'GET',
-      });
-      
-      if (!response.ok) {
-        return { status: 'error', message: 'Service is not responding properly' };
-      }
-      
-      return await response.json();
-    } catch (error) {
-      console.error("Error checking service status:", error);
-      return { status: 'offline', message: 'Service is offline or unreachable' };
-    }
+    return { 
+      status: 'deprecated', 
+      message: 'This service has been replaced by wihyAPI. Please use wihyAPI.searchHealth() directly.' 
+    };
   }
 };

@@ -130,94 +130,119 @@ const ResultsPage: React.FC = () => {
       setIsLoading(true);
       
       try {
-        // Handle "I'm Feeling Healthy" requests
+        // Use WiHy Unified API for all types of searches
+        console.log('Using WiHy Unified API for query:', query || `health news - ${category}`);
+        
+        let wihyResult: any;
+        
         if (isHealthNews) {
-          console.log('Fetching health news via newsService...');
-          const healthNewsResult = await fetchNewsFeed([category], 6);
+          // Handle health news requests
+          console.log('Fetching health news via WiHy API...');
+          const categories = category === 'all' ? [] : [category];
+          wihyResult = await wihyAPI.getHealthNews(categories, 6);
+        } else {
+          // Handle regular search queries (health, nutrition, etc.)
+          console.log('Making WiHy API call for query:', query);
+          wihyResult = await wihyAPI.searchHealth(query);
+        }
+        
+        console.log("WiHy API result received:", wihyResult);
+        
+        if (wihyResult.success) {
+          const formattedResult = wihyAPI.formatWihyResponse(wihyResult);
+          setResults(formattedResult);
+          setDataSource("wihy");
           
-          if (healthNewsResult.success && healthNewsResult.articles) {
-            console.log('Health news fetched successfully');
-            
-            // Format the news articles for display
-            const formattedNews = formatNewsArticles(healthNewsResult.articles);
-            
-            setResults(formattedNews);
-            setDataSource('openai'); // Use openai as the display source
-            
-            // Cache the health news results
-            searchCache.setCachedResult(cacheKey, formattedNews, window.location.href);
-            
-            setDisclaimer('Health news provided by AI. Always consult healthcare professionals for medical advice.');
+          // Cache the WiHy results
+          searchCache.setCachedResult(cacheKey, formattedResult, window.location.href);
+          
+          setCitations(wihyAPI.extractCitations(wihyResult));
+          setRecommendations(wihyAPI.extractRecommendations(wihyResult));
+          
+          if (isHealthNews) {
+            setDisclaimer('Health news provided by WiHy AI. Always consult healthcare professionals for medical advice.');
           } else {
-            throw new Error(healthNewsResult.message || 'Failed to fetch health news');
+            setDisclaimer('This guidance is based on evidence-based health principles. Always consult healthcare professionals for personalized medical advice.');
           }
         } else {
-          // Handle regular search queries
-          // STEP 1: First try the nutrition database
-          try {
-            console.log('Trying nutrition database first...');
-            console.log('API URL:', `${API_BASE_URL}/api/search/food?q=${encodeURIComponent(query)}`);
-            
-            const nutritionResponse = await fetch(`${API_BASE_URL}/api/search/food?q=${encodeURIComponent(query)}`);
-            
-            if (nutritionResponse.ok) {
-              const nutritionData = await nutritionResponse.json();
-              console.log('Nutrition API response:', nutritionData);
-              
-              if (nutritionData && nutritionData.found === true) {
-                console.log('Found nutrition data - using vnutrition source');
-                const resultString = JSON.stringify(nutritionData);
-                setResults(resultString);
-                setDataSource('vnutrition');
-                
-                // Cache the nutrition results
-                searchCache.setCachedResult(query, resultString, window.location.href);
-                
-                setIsLoading(false);
-                setIsInitialLoad(false);
-                isProcessing.current = false; // Reset processing flag
-                return;
-              }
-            }
-          } catch (nutritionError) {
-            console.log('Nutrition API error:', nutritionError);
-          }
-          
-          // STEP 2: Fall back to WiHy API if no nutrition data found
-          console.log('Making WiHy API call for query:', query);
-          const wihyRequest = { query: query };
-          const wihyResult = await wihyAPI.askAnything(wihyRequest);
-          console.log("WiHy API result received:", wihyResult);
-          
-          if (wihyResult.success) {
-            const formattedResult = wihyAPI.formatWihyResponse(wihyResult);
-            setResults(formattedResult);
-            setDataSource("wihy");
-            
-            // Cache the WiHy results
-            searchCache.setCachedResult(query, formattedResult, window.location.href);
-            
-            setCitations(wihyAPI.extractCitations(wihyResult));
-            setRecommendations(wihyAPI.extractRecommendations(wihyResult));
-            setDisclaimer('This guidance is based on evidence-based health principles. Always consult healthcare professionals for personalized medical advice.');
-          } else {
-            throw new Error('WiHy API request failed');
-          }
+          // Fallback: If WiHy fails, try legacy APIs
+          console.log('WiHy API failed, trying fallback methods...');
+          await handleFallbackAPIs();
         }
         
       } catch (error) {
-        console.error("Search error:", error);
-        const errorMessage = "Sorry, there was an error processing your request.";
-        setResults(errorMessage);
-        setDataSource("error");
-        
-        setCitations([]);
-        setRecommendations([]);
-        setDisclaimer('');
+        console.error("WiHy API error:", error);
+        // Try fallback APIs if WiHy fails
+        try {
+          await handleFallbackAPIs();
+        } catch (fallbackError) {
+          console.error("All APIs failed:", fallbackError);
+          const errorMessage = "Sorry, there was an error processing your request.";
+          setResults(errorMessage);
+          setDataSource("error");
+          
+          setCitations([]);
+          setRecommendations([]);
+          setDisclaimer('');
+        }
       } finally {
         setIsLoading(false);
         setIsInitialLoad(false);
         isProcessing.current = false; // Always reset processing flag
+      }
+    };
+
+    // Fallback function for legacy APIs
+    const handleFallbackAPIs = async () => {
+      if (isHealthNews) {
+        console.log('Fallback: Fetching health news via newsService...');
+        const healthNewsResult = await fetchNewsFeed([category], 6);
+        
+        if (healthNewsResult.success && healthNewsResult.articles) {
+          console.log('Health news fetched successfully');
+          
+          // Format the news articles for display
+          const formattedNews = formatNewsArticles(healthNewsResult.articles);
+          
+          setResults(formattedNews);
+          setDataSource('openai'); // Use openai as the display source
+          
+          // Cache the health news results
+          const newsKey = `health_news_${category}`;
+          searchCache.setCachedResult(newsKey, formattedNews, window.location.href);
+          
+          setDisclaimer('Health news provided by AI. Always consult healthcare professionals for medical advice.');
+        } else {
+          throw new Error(healthNewsResult.message || 'Failed to fetch health news');
+        }
+      } else {
+        // Try nutrition database for food-related queries
+        try {
+          console.log('Fallback: Trying nutrition database...');
+          console.log('API URL:', `${API_BASE_URL}/api/search/food?q=${encodeURIComponent(query)}`);
+          
+          const nutritionResponse = await fetch(`${API_BASE_URL}/api/search/food?q=${encodeURIComponent(query)}`);
+          
+          if (nutritionResponse.ok) {
+            const nutritionData = await nutritionResponse.json();
+            console.log('Nutrition API response:', nutritionData);
+            
+            if (nutritionData && nutritionData.found === true) {
+              console.log('Found nutrition data - using vnutrition source');
+              const resultString = JSON.stringify(nutritionData);
+              setResults(resultString);
+              setDataSource('vnutrition');
+              
+              // Cache the nutrition results
+              searchCache.setCachedResult(query, resultString, window.location.href);
+              return;
+            }
+          }
+        } catch (nutritionError) {
+          console.log('Nutrition API also failed:', nutritionError);
+        }
+        
+        throw new Error('All fallback APIs failed');
       }
     };
     

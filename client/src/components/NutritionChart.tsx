@@ -28,6 +28,13 @@ const extractNutritionData = (results: string, dataSource: string) => {
       
       if (typeof results === 'string') {
         console.log('Parsing string results');
+        
+        // Check if this is markdown/formatted text instead of JSON
+        if (results.startsWith('#') || results.includes('AI Chat response')) {
+          console.log('Results appear to be formatted text, not JSON nutrition data');
+          return null;
+        }
+        
         nutrition = JSON.parse(results);
       } else {
         console.log('Using object results directly');
@@ -61,6 +68,7 @@ const extractNutritionData = (results: string, dataSource: string) => {
       }
     } catch (error) {
       console.error('Error parsing nutrition data:', error);
+      console.log('This is likely because results are formatted text, not JSON nutrition data');
       return null;
     }
   }

@@ -1,3 +1,6 @@
+// DEPRECATED: Most functionality moved to wihyAPI
+// Only image processing and legacy nutrition functions remain
+
 import { API_CONFIG, getApiEndpoint } from '../config/apiConfig';
 
 const API_URL = API_CONFIG.BASE_URL;
@@ -48,34 +51,19 @@ export interface NutritionResponse {
   snap_eligible?: boolean;
 }
 
+// DEPRECATED: Use wihyAPI.searchNutrition() instead
 export const fetchNutritionData = async (query: string): Promise<NutritionResponse> => {
-  try {
-    const response = await axios.get(`${API_URL}/nutrition/${encodeURIComponent(query)}`);
-    
-    // Type assertion to tell TypeScript what to expect
-    const data = response.data as any;
-    return {
-      success: true,
-      item: data?.item,
-      calories_per_serving: data?.calories_per_serving,
-      macros: data?.macros,
-      processed_level: data?.processed_level,
-      verdict: data?.verdict,
-      snap_eligible: data?.snap_eligible,
-      message: data?.message
-    };
-  } catch (error) {
-    console.error('Error fetching nutrition data:', error);
-    return { 
-      success: false, 
-      message: 'Error fetching nutrition data' 
-    };
-  }
+  console.warn('⚠️ DEPRECATED: fetchNutritionData() - Use wihyAPI.searchNutrition() instead');
+  
+  return {
+    success: false,
+    message: 'This function has been deprecated. Please use wihyAPI.searchNutrition() for nutrition queries.'
+  };
 };
 
-// Updated to handle the new response structure from analyze-image endpoint
+// Keep image processing for image uploads (this is still needed)
 export const processUploadedFoodImage = async (file: File): Promise<NutritionResponse> => {
-  console.log('Sending file:', file.name, 'Size:', file.size);
+  console.log('Processing uploaded food image:', file.name, 'Size:', file.size);
   
   const formData = new FormData();
   formData.append('image', file);
@@ -86,18 +74,18 @@ export const processUploadedFoodImage = async (file: File): Promise<NutritionRes
       body: formData
     });
     
-    console.log('Response status:', response.status);
+    console.log('Image analysis response status:', response.status);
     
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('Error response:', errorText);
+      console.error('Image analysis error response:', errorText);
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     
     const data = await response.json();
-    console.log('Received data:', data); // Add debugging
+    console.log('Image analysis result:', data);
     
-    // The backend now returns the expected structure directly
+    // The backend returns the expected structure directly
     return data as NutritionResponse;
     
   } catch (error) {
@@ -109,6 +97,7 @@ export const processUploadedFoodImage = async (file: File): Promise<NutritionRes
   }
 };
 
+// Keep for image analysis (converts image data to file for processing)
 export const analyzeFoodImage = async (imageData: string): Promise<NutritionResponse> => {
   try {
     const response = await fetch(imageData);
@@ -125,29 +114,9 @@ export const analyzeFoodImage = async (imageData: string): Promise<NutritionResp
   }
 };
 
-// In your client/src/services/apiService.ts or openaiAPI.ts
+// DEPRECATED: Use wihyAPI.searchNutrition() instead
 export const searchFoodDatabase = async (query: string) => {
-  try {
-    console.log('🔍 Calling database API for:', query);
-    
-    // Make sure this matches your backend route exactly
-    const response = await fetch(getApiEndpoint(`/search/food?q=${encodeURIComponent(query)}`), {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const data = await response.json();
-    console.log('✅ Database API response:', data);
-    
-    return data;
-  } catch (error) {
-    console.error('❌ Database API error:', error);
-    throw error;
-  }
+  console.warn('⚠️ DEPRECATED: searchFoodDatabase() - Use wihyAPI.searchNutrition() instead');
+  
+  throw new Error('This function has been deprecated. Please use wihyAPI.searchNutrition() for food database queries.');
 };
