@@ -71,9 +71,10 @@ jobs:
         tags: |
           ${{ env.REGISTRY_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
           ${{ env.REGISTRY_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:latest
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
         platforms: linux/amd64
+        # Remove cache options that cause issues with GitHub Actions
+        # cache-from: type=gha
+        # cache-to: type=gha,mode=max
 
     # Azure Login using Service Principal (Modern Format)
     - name: Log in to Azure
