@@ -11,25 +11,124 @@ export interface UnifiedRequest {
 }
 
 export interface UnifiedResponse {
-  success: boolean;                 // Request processing success status
-  data: {                          // Service-specific response data
-    service?: string;              // Service that handled the request (e.g., "health_coaching")
-    query?: string;                // The original query
-    response?: string;             // The main response text
-    session_id?: string;           // Session identifier
-    conversation_context?: string; // Context of the conversation
-    enhanced?: boolean;            // Whether response was enhanced
-    recommendations?: string[];    // Array of recommendations
-    analysis?: string;             // Analysis text (legacy support)
-    training_status?: string;      // Training status (for ML endpoints)
-    available_models?: string[];   // Available models (for ML endpoints)
-    sources?: string[];            // Sources for research foundation
-    [key: string]: any;            // Allow other properties for flexibility
+  success: boolean;
+  data: {
+    ai_response: {
+      response: string;
+      enhanced: boolean;
+      service: string;
+      confidence: number;
+    };
+    nutrition?: {
+      facts: {
+        calories_per_serving: number;
+        protein_g: number;
+        carbs_g: number;
+        fiber_g: number;
+        fat_g: number;
+        sodium_mg: number;
+        sugar_g: number;
+      };
+      nourish_score: {
+        score: number;
+        category: string;
+        breakdown: {
+          nutrient_density: number;
+          processing_level: number;
+          ingredient_quality: number;
+        };
+      };
+      daily_value_percentages: Record<string, number>;
+      macronutrients: { protein: number; carbs: number; fat: number };
+      micronutrients: string[];
+    };
+    health_analysis?: {
+      safety_score: number;
+      carcinogen_alerts: string[];
+      toxic_additives: string[];
+      processing_level: string;
+      ingredient_analysis: Array<{
+        name: string;
+        safety_score: number;
+        category: string;
+        concerns: string[];
+        benefits: string[];
+      }>;
+    };
+    charts_data?: {
+      nutrition_breakdown: {
+        labels: string[];
+        values: number[];
+        colors: string[];
+        chart_type: string;
+      };
+      ingredient_safety_radar: {
+        labels: string[];
+        values: number[];
+        max_value: number;
+        chart_type: string;
+      };
+      daily_nutrition_progress: {
+        nutrients: Array<{
+          name: string;
+          current: number;
+          target: number;
+          color: string;
+        }>;
+        chart_type: string;
+      };
+    };
+    recommendations?: {
+      immediate_actions: string[];
+      lifestyle_changes: string[];
+      better_alternatives: string[];
+      shopping_tips: string[];
+      meal_planning: string[];
+    };
+    evidence?: {
+      research_studies: string[];
+      scientific_consensus: string;
+      regulatory_status: string[];
+      expert_opinions: string[];
+    };
+    personalization?: {
+      user_goals: string[];
+      dietary_restrictions: string[];
+      health_conditions: string[];
+      personalized_advice: string[];
+    };
+    metadata?: {
+      services_used: string[];
+      data_sources: string[];
+      confidence_scores: Record<string, number>;
+      processing_time: number;
+      enhanced_by_ai: boolean;
+      api_version: string;
+    };
+    // Legacy support fields
+    service?: string;
+    query?: string;
+    response?: string;
+    session_id?: string;
+    conversation_context?: string;
+    enhanced?: boolean;
+    legacy_recommendations?: string[];
+    analysis?: string;
+    training_status?: string;
+    available_models?: string[];
+    sources?: string[];
+    [key: string]: any;
   };
-  service_used: string;            // Which service processed the request (e.g., "chat")
-  request_type: string;            // The request type that was processed
-  processing_time: number;         // Processing time in seconds
-  suggestions: string[];           // Optional suggestions for improvement
+  rendering_hints?: {
+    primary_display: string;
+    chart_components: string[];
+    key_metrics: string[];
+    action_items: string[];
+  };
+  service_used: string;
+  request_type?: string;
+  processing_time?: number;
+  suggestions?: string[];
 }
 
 // Type guard for detecting unified responses at runtime
@@ -251,7 +350,14 @@ class WihyAPIService {
         personalized_analysis: {
           identified_risk_factors: [],
           priority_health_goals: [],
-          action_items: unifiedResponse.data.recommendations?.map((rec: string, index: number) => ({
+          action_items: unifiedResponse.data.recommendations?.immediate_actions?.map((rec: string, index: number) => ({
+            action: rec,
+            priority: 'medium',
+            target_illness: 'general_health',
+            evidence_level: 'moderate',
+            mechanism: 'lifestyle_modification',
+            timeline: 'ongoing'
+          })) || unifiedResponse.data.legacy_recommendations?.map((rec: string, index: number) => ({
             action: rec,
             priority: 'medium',
             target_illness: 'general_health',
@@ -456,8 +562,18 @@ class WihyAPIService {
     const recommendations: string[] = [];
 
     if (isUnifiedResponse(response)) {
-      if (response.data.recommendations && response.data.recommendations.length > 0) {
-        response.data.recommendations.forEach((r: string) => recommendations.push(r));
+      // Handle new structured recommendations
+      if (response.data.recommendations) {
+        const recs = response.data.recommendations;
+        if (recs.immediate_actions) recs.immediate_actions.forEach(r => recommendations.push(r));
+        if (recs.lifestyle_changes) recs.lifestyle_changes.forEach(r => recommendations.push(r));
+        if (recs.better_alternatives) recs.better_alternatives.forEach(r => recommendations.push(r));
+        if (recs.shopping_tips) recs.shopping_tips.forEach(r => recommendations.push(r));
+        if (recs.meal_planning) recs.meal_planning.forEach(r => recommendations.push(r));
+      }
+      // Handle legacy recommendations
+      if (response.data.legacy_recommendations && response.data.legacy_recommendations.length > 0) {
+        response.data.legacy_recommendations.forEach((r: string) => recommendations.push(r));
       }
     } else {
       if (response.wihy_response.personalized_analysis?.action_items) {

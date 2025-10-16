@@ -6,22 +6,65 @@ import {
   Legend,
 } from 'chart.js';
 import { Doughnut } from 'react-chartjs-2';
+import { UnifiedResponse } from '../services/wihyAPI';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 interface NutritionChartProps {
-  query: string;
-  results: string;
-  dataSource: "error" | "openai" | "local" | "vnutrition";
+  apiResponse?: UnifiedResponse | any;
+  query?: string;
+  results?: string;
+  dataSource?: "error" | "openai" | "local" | "vnutrition" | "wihy";
 }
 
-// Extract nutrition data function moved from SearchResults
-const extractNutritionData = (results: string, dataSource: string) => {
+// Extract nutrition data from unified API response or legacy format
+const extractNutritionData = (apiResponse?: UnifiedResponse | any, results?: string, dataSource?: string) => {
   console.log('=== EXTRACTING NUTRITION DATA IN NUTRITIONCHART ===');
+  console.log('API Response:', apiResponse);
   console.log('DataSource:', dataSource);
-  console.log('Results type:', typeof results);
   
-  if (dataSource === 'vnutrition') {
+  // Handle unified API response first
+  if (apiResponse && apiResponse.success && apiResponse.data) {
+    console.log('Processing unified API nutrition data');
+    
+    // Use charts_data if available for direct rendering
+    if (apiResponse.data.charts_data?.nutrition_breakdown) {
+      const chartData = apiResponse.data.charts_data.nutrition_breakdown;
+      console.log('Using charts_data for nutrition breakdown:', chartData);
+      return {
+        type: 'chart_data',
+        labels: chartData.labels,
+        values: chartData.values,
+        colors: chartData.colors,
+        chart_type: chartData.chart_type
+      };
+    }
+    
+    // Use nutrition facts if available
+    if (apiResponse.data.nutrition?.facts) {
+      const nutrition = apiResponse.data.nutrition;
+      const extractedData = {
+        type: 'nutrition_facts',
+        calories: nutrition.facts.calories_per_serving || 0,
+        protein: nutrition.facts.protein_g || 0,
+        carbs: nutrition.facts.carbs_g || 0,
+        fat: nutrition.facts.fat_g || 0,
+        fiber: nutrition.facts.fiber_g || 0,
+        sugar: nutrition.facts.sugar_g || 0,
+        sodium: nutrition.facts.sodium_mg || 0,
+        nourish_score: nutrition.nourish_score?.score || 0,
+        nourish_category: nutrition.nourish_score?.category || 'Unknown',
+        macronutrients: nutrition.macronutrients || null
+      };
+      
+      console.log('=== EXTRACTED UNIFIED NUTRITION DATA ===');
+      console.log('Final extracted data:', extractedData);
+      return extractedData;
+    }
+  }
+  
+  // Fallback to legacy extraction
+  if (dataSource === 'vnutrition' && results) {
     try {
       console.log('Processing vnutrition data source');
       let nutrition;
@@ -77,19 +120,88 @@ const extractNutritionData = (results: string, dataSource: string) => {
   return null;
 };
 
-const NutritionChart: React.FC<NutritionChartProps> = ({ query, results, dataSource }) => {
-  // Extract nutrition data using internal function
-  const nutritionData = extractNutritionData(results, dataSource);
+const NutritionChart: React.FC<NutritionChartProps> = ({ apiResponse, query, results, dataSource }) => {
+  // Extract nutrition data using new unified approach
+  const nutritionData = extractNutritionData(apiResponse, results, dataSource);
 
   // Only render if we have nutrition data
-  if (!nutritionData || dataSource !== 'vnutrition') {
+  if (!nutritionData) {
     return null;
   }
 
-  const { calories, protein, carbs, fat } = nutritionData;
+  // Handle chart_data type (direct from API charts_data)
+  if ((nutritionData as any).type === 'chart_data') {
+    const chartData = nutritionData as any;
+    const data = {
+      datasets: [
+        {
+          data: chartData.values,
+          backgroundColor: chartData.colors,
+          borderColor: chartData.colors.map((color: string) => color),
+          borderWidth: 2,
+        },
+      ],
+      labels: chartData.labels,
+    };
 
-  // Calculate total for percentages (excluding calories as it's not in grams)
-  const total = protein + carbs + fat;
+    const options = {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'bottom' as const,
+          labels: {
+            padding: 20,
+            font: {
+              size: 14,
+            },
+          },
+        },
+        tooltip: {
+          callbacks: {
+            label: function(context: any) {
+              const label = context.label || '';
+              const value = context.parsed;
+              return `${label}: ${value}%`;
+            },
+          },
+        },
+      },
+    };
+
+    return (
+      <div className="nutrition-chart-container">
+        <h4 style={{ marginBottom: '15px', color: '#666' }}>Nutrition Breakdown</h4>
+        <div style={{ width: '300px', height: '300px', margin: '0 auto' }}>
+          <Doughnut data={data} options={options} />
+        </div>
+      </div>
+    );
+  }
+
+  // Handle nutrition_facts type (calculated from nutrition.facts)
+  const nutritionFacts = nutritionData as any;
+  let protein, carbs, fat, total;
+  
+  if (nutritionFacts.macronutrients) {
+    // Use pre-calculated macronutrients percentages
+    protein = nutritionFacts.macronutrients.protein;
+    carbs = nutritionFacts.macronutrients.carbs;
+    fat = nutritionFacts.macronutrients.fat;
+    total = protein + carbs + fat;
+  } else {
+    // Calculate percentages from gram values
+    total = nutritionFacts.protein + nutritionFacts.carbs + nutritionFacts.fat;
+    if (total > 0) {
+      protein = Math.round((nutritionFacts.protein / total) * 100);
+      carbs = Math.round((nutritionFacts.carbs / total) * 100);
+      fat = Math.round((nutritionFacts.fat / total) * 100);
+    } else {
+      protein = carbs = fat = 0;
+    }
+  }
+
+  const { calories } = nutritionFacts;
   
   // Prepare data for the pie chart
   const data = {

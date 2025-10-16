@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import SearchResults from './SearchResults';
 import ImageUploadModal from './components/ImageUploadModal';
 import ChatWidget from './components/ChatWidget';
+import NutritionChart from './components/NutritionChart';
+import ResultQualityPie from './components/ResultQualityPie';
 import { searchCache } from './services/searchCache';
 import { wihyAPI, isUnifiedResponse, UnifiedResponse, WihyResponse } from './services/wihyAPI';
 import { photoStorageService } from './services/photoStorageService';
@@ -61,6 +63,8 @@ const VHealthApp: React.FC = () => {
   const [placeholder, setPlaceholder] = useState(rotatingPrompts[0]);
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [chatMessages, setChatMessages] = useState<any[]>([]);
+  const [currentApiResponse, setCurrentApiResponse] = useState<UnifiedResponse | null>(null);
+  const [currentChatResponse, setCurrentChatResponse] = useState<string>('');
 
   const recognitionRef = useRef<SpeechRecognition | null>(null);
 
@@ -96,6 +100,10 @@ const VHealthApp: React.FC = () => {
 
   const handleSearch = async (query: string, pushToHistory = true) => {
     console.log('🔍 SEARCH DEBUG: handleSearch called with query:', query);
+    
+    // Clear previous search state
+    setCurrentApiResponse(null);
+    setCurrentChatResponse('');
     
     // Add debugging right when loading starts
     setIsLoading(true);
@@ -153,6 +161,13 @@ const VHealthApp: React.FC = () => {
         let formattedResults;
         
         if (wihyResponse.success) {
+          // Store the unified API response for chart components
+          if (isUnifiedResponse(wihyResponse)) {
+            setCurrentApiResponse(wihyResponse as UnifiedResponse);
+          } else {
+            setCurrentApiResponse(null); // Clear for legacy responses
+          }
+          
           // Handle either UnifiedResponse or legacy WihyResponse formats
           let responseData: any = null;
           if (isUnifiedResponse(wihyResponse)) {
@@ -162,7 +177,7 @@ const VHealthApp: React.FC = () => {
             responseData = (wihyResponse as WihyResponse).wihy_response || {};
           }
 
-          const mainResponse = responseData?.response || responseData?.core_principle || 'Health information provided';
+          const mainResponse = responseData?.ai_response?.response || responseData?.response || responseData?.core_principle || 'Health information provided';
           const recommendations = responseData?.recommendations || [];
           
           // Add user message to chat
@@ -173,11 +188,29 @@ const VHealthApp: React.FC = () => {
             timestamp: new Date()
           };
           
-          // Add API response to chat  
+          // Add API response to chat - use ai_response.response if available from unified API
           let chatResponse = mainResponse;
-          if (recommendations.length > 0) {
+          if (recommendations && Array.isArray(recommendations) && recommendations.length > 0) {
             chatResponse += '\n\n**Recommendations:**\n' + 
               recommendations.map((r: string) => `• ${r}`).join('\n');
+          } else if (recommendations && typeof recommendations === 'object') {
+            // Handle structured recommendations from unified API
+            const recSections = [];
+            if (recommendations.immediate_actions?.length) {
+              recSections.push('**Immediate Actions:**\n' + 
+                recommendations.immediate_actions.map((a: string) => `• ${a}`).join('\n'));
+            }
+            if (recommendations.lifestyle_changes?.length) {
+              recSections.push('**Lifestyle Changes:**\n' + 
+                recommendations.lifestyle_changes.map((l: string) => `• ${l}`).join('\n'));
+            }
+            if (recommendations.better_alternatives?.length) {
+              recSections.push('**Better Alternatives:**\n' + 
+                recommendations.better_alternatives.map((b: string) => `• ${b}`).join('\n'));
+            }
+            if (recSections.length > 0) {
+              chatResponse += '\n\n' + recSections.join('\n\n');
+            }
           }
           
           const assistantMessage = {
@@ -189,6 +222,10 @@ const VHealthApp: React.FC = () => {
           
           setChatMessages(prev => [...prev, userMessage, assistantMessage]);
           setIsChatOpen(true); // Open chat to show the response
+          
+          // Store the chat response for external message prop
+          setCurrentChatResponse(chatResponse);
+          console.log('🔍 CHAT DEBUG: Setting chat response:', chatResponse);
           
           // Convert WiHy response to expected format
           healthData = {
@@ -543,6 +580,14 @@ const VHealthApp: React.FC = () => {
               onClose={() => setIsChatOpen(false)}
               currentContext="search results"
               inline={true}
+              externalMessage={(() => {
+                const msg = currentQuery && currentChatResponse ? { 
+                  query: currentQuery, 
+                  response: currentChatResponse 
+                } : null;
+                console.log('🔍 CHAT DEBUG: Passing external message to ChatWidget:', msg);
+                return msg;
+              })()}
             />
           </div>
 
@@ -554,50 +599,24 @@ const VHealthApp: React.FC = () => {
               {/* Quality Analysis Chart */}
               <div className="chart-container" style={{ marginBottom: '30px' }}>
                 <h4 style={{ marginBottom: '15px', color: '#666' }}>Quality Analysis</h4>
-                <div style={{ 
-                  width: '200px', 
-                  height: '200px', 
-                  borderRadius: '50%', 
-                  background: 'conic-gradient(#f0ad4e 0deg 216deg, #ddd 216deg 360deg)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: '#333',
-                  fontWeight: 'bold',
-                  fontSize: '24px',
-                  margin: '0 auto'
-                }}>
-                  <div style={{ textAlign: 'center' }}>
-                    60%<br/>
-                    <small style={{ fontSize: '12px', fontWeight: 'normal' }}>Evidence</small>
-                  </div>
-                </div>
-                <p style={{ color: '#f0ad4e', marginTop: '10px', textAlign: 'center' }}>Needs review</p>
-                <div style={{ display: 'flex', justifyContent: 'center', gap: '15px', marginTop: '10px' }}>
-                  <span style={{ color: '#5cb85c', fontSize: '14px' }}>● Good: 60%</span>
-                  <span style={{ color: '#d9534f', fontSize: '14px' }}>● Bad: 40%</span>
-                </div>
-                <p style={{ fontSize: '12px', color: '#999', textAlign: 'center', marginTop: '5px' }}>
-                  No citations • Low numeric specificity
-                </p>
+                <ResultQualityPie 
+                  query={currentQuery}
+                  results={currentResults}
+                  dataSource={dataSource}
+                  citations={[]}
+                  apiResponse={currentApiResponse}
+                />
               </div>
 
               {/* Nutrition Breakdown */}
               <div className="chart-container">
                 <h4 style={{ marginBottom: '15px', color: '#666' }}>Nutrition Breakdown</h4>
-                <p style={{ color: '#666', textAlign: 'center' }}>Processing Level</p>
-                <div style={{ 
-                  height: '100px', 
-                  background: '#f8f9fa', 
-                  borderRadius: '8px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  marginTop: '10px',
-                  color: '#999'
-                }}>
-                  Nutrition chart will appear here
-                </div>
+                <NutritionChart 
+                  apiResponse={currentApiResponse}
+                  query={currentQuery}
+                  results={currentResults}
+                  dataSource={dataSource}
+                />
               </div>
             </div>
           </div>
