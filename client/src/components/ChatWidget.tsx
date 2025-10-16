@@ -57,13 +57,23 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ isOpen, onToggle, onClose, curr
         timestamp: new Date()
       };
       
-      setMessages(prev => [...prev, userMessage, assistantMessage]);
+      // Replace existing messages with the external conversation
+      setMessages([
+        {
+          id: '1',
+          type: 'assistant',
+          message: 'Hi! I\'m your health assistant. I can help explain your dashboard data and answer questions about your health metrics. What would you like to know?',
+          timestamp: new Date()
+        },
+        userMessage,
+        assistantMessage
+      ]);
     }
   }, [externalMessage, isOpen]);
 
-  // Add contextual message when context changes
+  // Add contextual message when context changes (but not when external message is provided)
   useEffect(() => {
-    if (currentContext && isOpen) {
+    if (currentContext && isOpen && !externalMessage) {
       const contextualMessage: ChatMessage = {
         id: Date.now().toString(),
         type: 'assistant',
@@ -81,7 +91,7 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ isOpen, onToggle, onClose, curr
         return [...prev, contextualMessage];
       });
     }
-  }, [currentContext, isOpen]);
+  }, [currentContext, isOpen, externalMessage]);
 
   const handleSendMessage = async () => {
     if (!inputMessage.trim()) return;

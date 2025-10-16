@@ -6,13 +6,15 @@ import {
   Legend,
 } from 'chart.js';
 import { Doughnut } from 'react-chartjs-2';
+import { UnifiedResponse } from '../services/wihyAPI';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 interface ResultQualityPieProps {
-  query: string;
-  results: string;
-  dataSource: "error" | "openai" | "local" | "vnutrition" | "wihy";
+  apiResponse?: UnifiedResponse | any;
+  query?: string;
+  results?: string;
+  dataSource?: "error" | "openai" | "local" | "vnutrition" | "wihy";
   citations?: string[];
 }
 
@@ -158,6 +160,7 @@ function evaluateEvidenceConfidence(
 /* ====================== Component ====================== */
 
 const ResultQualityPie: React.FC<ResultQualityPieProps> = ({
+  apiResponse,
   query,
   results,
   dataSource,
@@ -172,23 +175,62 @@ const ResultQualityPie: React.FC<ResultQualityPieProps> = ({
   // Debug logging to see what props are being received
   useEffect(() => {
     console.log('ResultQualityPie received props:', {
+      apiResponse,
       query,
       results: results?.substring(0, 100) + '...',
       dataSource,
       citations,
       hasResults: !!results && results.trim() !== ''
     });
-  }, [query, results, dataSource, citations]);
+  }, [query, results, dataSource, citations, apiResponse]);
 
   // Evaluate when props change and we have valid data
   useEffect(() => {
+    // Handle unified API response first
+    if (apiResponse && apiResponse.success && apiResponse.data) {
+      console.log('Using unified API response for quality evaluation...');
+      
+      // Use health_analysis if available
+      if (apiResponse.data.health_analysis?.safety_score) {
+        const safetyScore = apiResponse.data.health_analysis.safety_score / 100; // Convert to 0-1 scale
+        const verdict: Verdict = safetyScore >= 0.8 ? 'GOOD' : safetyScore >= 0.6 ? 'REVIEW' : 'BAD';
+        const reasons = [
+          `Safety Score: ${apiResponse.data.health_analysis.safety_score}%`,
+          `Processing Level: ${apiResponse.data.health_analysis.processing_level}`,
+          ...(apiResponse.data.health_analysis.carcinogen_alerts?.map(alert => `⚠️ ${alert}`) || []),
+          ...(apiResponse.data.health_analysis.toxic_additives?.map(additive => `⚠️ Toxic: ${additive}`) || [])
+        ];
+        
+        setEvaluation({ score: safetyScore, verdict, reasons });
+        return;
+      }
+      
+      // Use nutrition nourish_score if available
+      if (apiResponse.data.nutrition?.nourish_score?.score) {
+        const nourish = apiResponse.data.nutrition.nourish_score;
+        const score = nourish.score / 100; // Convert to 0-1 scale
+        const verdict: Verdict = score >= 0.8 ? 'GOOD' : score >= 0.6 ? 'REVIEW' : 'BAD';
+        const reasons = [
+          `Nourish Score: ${nourish.score}% (${nourish.category})`,
+          `Nutrient Density: ${nourish.breakdown?.nutrient_density || 'N/A'}%`,
+          `Processing Level: ${nourish.breakdown?.processing_level || 'N/A'}%`,
+          `Ingredient Quality: ${nourish.breakdown?.ingredient_quality || 'N/A'}%`
+        ];
+        
+        setEvaluation({ score, verdict, reasons });
+        return;
+      }
+    }
+    
+    // Fallback to legacy evaluation
     if (query && results && results.trim() !== '' && dataSource) {
-      console.log('Evaluating evidence confidence...');
+      console.log('Evaluating evidence confidence using legacy method...');
       const newEvaluation = evaluateEvidenceConfidence(query, results, dataSource, citations);
       console.log('Evidence evaluation result:', newEvaluation);
       setEvaluation(newEvaluation);
     } else {
       console.log('Not evaluating - missing required props:', {
+        hasApiResponse: !!apiResponse,
         hasQuery: !!query,
         hasResults: !!results && results.trim() !== '',
         hasDataSource: !!dataSource
@@ -200,7 +242,7 @@ const ResultQualityPie: React.FC<ResultQualityPieProps> = ({
         reasons: ['Waiting for results...']
       });
     }
-  }, [query, results, dataSource, citations]);
+  }, [query, results, dataSource, citations, apiResponse]);
 
   const { score, verdict, reasons } = evaluation;
   const percentage = Math.round(score * 100);
