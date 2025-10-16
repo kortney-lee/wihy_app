@@ -1,7 +1,7 @@
 // Environment configuration for API endpoints
 export const API_CONFIG = {
   // WIHY Unified API - Single endpoint for all health and nutrition requests
-  WIHY_UNIFIED_API_URL: process.env.REACT_APP_WIHY_API_URL || 'https://wihy-main-api.graypebble-2c416c49.westus2.azurecontainerapps.io',
+  WIHY_UNIFIED_API_URL: process.env.REACT_APP_WIHY_API_URL || 'http://localhost:8001',
   
   // Legacy endpoints (for fallback if needed)
   BASE_URL: process.env.REACT_APP_API_URL || 'http://localhost:5000/api',

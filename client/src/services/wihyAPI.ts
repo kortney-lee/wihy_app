@@ -12,11 +12,29 @@ export interface UnifiedRequest {
 
 export interface UnifiedResponse {
   success: boolean;                 // Request processing success status
-  data: any;                        // Service-specific response data
-  service_used: string;             // Which service processed the request
-  request_type: string;             // The request type that was processed
-  processing_time: number;          // Processing time in seconds
-  suggestions: string[];            // Optional suggestions for improvement
+  data: {                          // Service-specific response data
+    service?: string;              // Service that handled the request (e.g., "health_coaching")
+    query?: string;                // The original query
+    response?: string;             // The main response text
+    session_id?: string;           // Session identifier
+    conversation_context?: string; // Context of the conversation
+    enhanced?: boolean;            // Whether response was enhanced
+    recommendations?: string[];    // Array of recommendations
+    analysis?: string;             // Analysis text (legacy support)
+    training_status?: string;      // Training status (for ML endpoints)
+    available_models?: string[];   // Available models (for ML endpoints)
+    sources?: string[];            // Sources for research foundation
+    [key: string]: any;            // Allow other properties for flexibility
+  };
+  service_used: string;            // Which service processed the request (e.g., "chat")
+  request_type: string;            // The request type that was processed
+  processing_time: number;         // Processing time in seconds
+  suggestions: string[];           // Optional suggestions for improvement
+}
+
+// Type guard for detecting unified responses at runtime
+export function isUnifiedResponse(obj: any): obj is UnifiedResponse {
+  return obj && typeof obj === 'object' && ('data' in obj) && ('service_used' in obj);
 }
 
 // Legacy types for backward compatibility
@@ -304,7 +322,7 @@ class WihyAPIService {
   /**
    * General health search using the unified API
    */
-  async searchHealth(query: string, userContext?: UserContext): Promise<WihyResponse> {
+  async searchHealth(query: string, userContext?: UserContext): Promise<WihyResponse | UnifiedResponse> {
     const request: UnifiedRequest = {
       query: query,
       request_type: 'auto',
@@ -312,11 +330,8 @@ class WihyAPIService {
     };
 
     const response = await this.askAnything(request);
-    if ('data' in response) {
-      // It's a UnifiedResponse, convert to legacy format
-      return this.convertToLegacyFormat(response as UnifiedResponse, query);
-    }
-    return response as WihyResponse;
+    // Return the raw response (could be legacy WihyResponse or UnifiedResponse)
+    return response as WihyResponse | UnifiedResponse;
   }
 
   /**
@@ -437,30 +452,43 @@ class WihyAPIService {
   /**
    * Extract recommendations from WiHy response for UI display
    */
-  extractRecommendations(response: WihyResponse): string[] {
+  extractRecommendations(response: WihyResponse | UnifiedResponse): string[] {
     const recommendations: string[] = [];
-    
-    if (response.wihy_response.personalized_analysis?.action_items) {
-      response.wihy_response.personalized_analysis.action_items.forEach(action => {
-        recommendations.push(`${action.action} (${action.priority} priority)`);
-      });
+
+    if (isUnifiedResponse(response)) {
+      if (response.data.recommendations && response.data.recommendations.length > 0) {
+        response.data.recommendations.forEach((r: string) => recommendations.push(r));
+      }
+    } else {
+      if (response.wihy_response.personalized_analysis?.action_items) {
+        response.wihy_response.personalized_analysis.action_items.forEach(action => {
+          recommendations.push(`${action.action} (${action.priority} priority)`);
+        });
+      }
     }
-    
+
     return recommendations;
   }
 
   /**
    * Extract citations from WiHy response for UI display
    */
-  extractCitations(response: WihyResponse): string[] {
+  extractCitations(response: WihyResponse | UnifiedResponse): string[] {
     const citations: string[] = [];
-    
-    if (response.wihy_response.research_foundation) {
-      response.wihy_response.research_foundation.forEach(research => {
-        citations.push(`${research.citation_text}: ${research.key_finding}`);
-      });
+
+    if (isUnifiedResponse(response)) {
+      // Unified API may include sources array
+      if (response.data.sources && response.data.sources.length > 0) {
+        response.data.sources.forEach((s: string) => citations.push(s));
+      }
+    } else {
+      if (response.wihy_response.research_foundation) {
+        response.wihy_response.research_foundation.forEach(research => {
+          citations.push(`${research.citation_text}: ${research.key_finding}`);
+        });
+      }
     }
-    
+
     return citations;
   }
 

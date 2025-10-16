@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import SearchResults from './SearchResults';
 import ImageUploadModal from './components/ImageUploadModal';
+import ChatWidget from './components/ChatWidget';
 import { searchCache } from './services/searchCache';
-import { wihyAPI } from './services/wihyAPI';
+import { wihyAPI, isUnifiedResponse, UnifiedResponse, WihyResponse } from './services/wihyAPI';
 import { photoStorageService } from './services/photoStorageService';
 import { foodAnalysisService } from './components/foodAnalysisService';
 import './VHealthSearch.css';
@@ -58,6 +59,8 @@ const VHealthApp: React.FC = () => {
   const [image, setImage] = useState<File | null>(null);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [placeholder, setPlaceholder] = useState(rotatingPrompts[0]);
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [chatMessages, setChatMessages] = useState<any[]>([]);
 
   const recognitionRef = useRef<SpeechRecognition | null>(null);
 
@@ -107,16 +110,33 @@ const VHealthApp: React.FC = () => {
     
     if (cachedResults) {
       console.log('🔍 SEARCH DEBUG: Using cached results');
-      // Use cached results
+      // Use cached results and add to chat
       setCurrentQuery(trimmedQuery);
       setCurrentResults(cachedResults);
-      setCurrentView('results');
+      
+      // Add cached result to chat
+      const userMessage = {
+        id: Date.now().toString(),
+        type: 'user',
+        message: trimmedQuery,
+        timestamp: new Date()
+      };
+      
+      const assistantMessage = {
+        id: (Date.now() + 1).toString(),
+        type: 'assistant', 
+        message: `Here are your results for: "${trimmedQuery}"`,
+        timestamp: new Date()
+      };
+      
+      setChatMessages(prev => [...prev, userMessage, assistantMessage]);
+      setIsChatOpen(true);
       setIsLoading(false);
       
       if (pushToHistory) {
         const url = `?q=${encodeURIComponent(trimmedQuery)}`;
         window.history.pushState(
-          { view: 'results', query: trimmedQuery, results: cachedResults },
+          { view: 'search', query: trimmedQuery, results: cachedResults },
           '',
           url
         );
@@ -133,12 +153,49 @@ const VHealthApp: React.FC = () => {
         let formattedResults;
         
         if (wihyResponse.success) {
+          // Handle either UnifiedResponse or legacy WihyResponse formats
+          let responseData: any = null;
+          if (isUnifiedResponse(wihyResponse)) {
+            responseData = (wihyResponse as UnifiedResponse).data;
+          } else {
+            // legacy WihyResponse
+            responseData = (wihyResponse as WihyResponse).wihy_response || {};
+          }
+
+          const mainResponse = responseData?.response || responseData?.core_principle || 'Health information provided';
+          const recommendations = responseData?.recommendations || [];
+          
+          // Add user message to chat
+          const userMessage = {
+            id: Date.now().toString(),
+            type: 'user',
+            message: trimmedQuery,
+            timestamp: new Date()
+          };
+          
+          // Add API response to chat  
+          let chatResponse = mainResponse;
+          if (recommendations.length > 0) {
+            chatResponse += '\n\n**Recommendations:**\n' + 
+              recommendations.map((r: string) => `• ${r}`).join('\n');
+          }
+          
+          const assistantMessage = {
+            id: (Date.now() + 1).toString(),
+            type: 'assistant',
+            message: chatResponse,
+            timestamp: new Date()
+          };
+          
+          setChatMessages(prev => [...prev, userMessage, assistantMessage]);
+          setIsChatOpen(true); // Open chat to show the response
+          
           // Convert WiHy response to expected format
           healthData = {
-            summary: wihyResponse.wihy_response.core_principle,
+            summary: mainResponse,
             details: wihyAPI.formatWihyResponse(wihyResponse),
             sources: wihyAPI.extractCitations(wihyResponse),
-            recommendations: wihyAPI.extractRecommendations(wihyResponse),
+            recommendations: recommendations,
             relatedTopics: [],
             medicalDisclaimer: 'This guidance is based on evidence-based health principles. Always consult healthcare professionals for personalized medical advice.',
             dataSource: 'wihy'
@@ -346,21 +403,10 @@ const VHealthApp: React.FC = () => {
     console.log('User signed out');
   };
 
-  if (currentView === 'results') {
-    return (
-      <SearchResults
-        query={currentQuery}
-        results={currentResults}
-        onBackToSearch={handleBackToSearch}
-        onNewSearch={handleNewSearch}
-        isLoading={isLoading}
-        dataSource={dataSource}
-      />
-    );
-  }
-
   return (
-    <div className="search-container">
+    <div className="app-layout" style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+      {/* Main search area */}
+      <div className="search-container">
       <MultiAuthLogin 
         position="top-right"
         className="main-login-button"
@@ -477,6 +523,86 @@ const VHealthApp: React.FC = () => {
         title="Upload Image"
         subtitle="Upload images for analysis"
       />
+
+      </div>
+
+      {/* Chat and Charts Layout - Shows after search */}
+      {(isChatOpen || currentResults) && (
+        <div className="content-layout" style={{ 
+          display: 'flex', 
+          marginTop: '20px', 
+          gap: '20px',
+          padding: '20px',
+          flex: '1'
+        }}>
+          {/* Chat Widget */}
+          <div className="chat-section" style={{ flex: '1', minWidth: '300px' }}>
+            <ChatWidget
+              isOpen={true}
+              onToggle={() => setIsChatOpen(!isChatOpen)}
+              onClose={() => setIsChatOpen(false)}
+              currentContext="search results"
+              inline={true}
+            />
+          </div>
+
+          {/* Charts Section */}
+          <div className="charts-section" style={{ flex: '1', minWidth: '300px' }}>
+            <div className="analysis-charts">
+              <h3 style={{ marginBottom: '20px', color: '#333' }}>Analysis Charts</h3>
+              
+              {/* Quality Analysis Chart */}
+              <div className="chart-container" style={{ marginBottom: '30px' }}>
+                <h4 style={{ marginBottom: '15px', color: '#666' }}>Quality Analysis</h4>
+                <div style={{ 
+                  width: '200px', 
+                  height: '200px', 
+                  borderRadius: '50%', 
+                  background: 'conic-gradient(#f0ad4e 0deg 216deg, #ddd 216deg 360deg)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: '#333',
+                  fontWeight: 'bold',
+                  fontSize: '24px',
+                  margin: '0 auto'
+                }}>
+                  <div style={{ textAlign: 'center' }}>
+                    60%<br/>
+                    <small style={{ fontSize: '12px', fontWeight: 'normal' }}>Evidence</small>
+                  </div>
+                </div>
+                <p style={{ color: '#f0ad4e', marginTop: '10px', textAlign: 'center' }}>Needs review</p>
+                <div style={{ display: 'flex', justifyContent: 'center', gap: '15px', marginTop: '10px' }}>
+                  <span style={{ color: '#5cb85c', fontSize: '14px' }}>● Good: 60%</span>
+                  <span style={{ color: '#d9534f', fontSize: '14px' }}>● Bad: 40%</span>
+                </div>
+                <p style={{ fontSize: '12px', color: '#999', textAlign: 'center', marginTop: '5px' }}>
+                  No citations • Low numeric specificity
+                </p>
+              </div>
+
+              {/* Nutrition Breakdown */}
+              <div className="chart-container">
+                <h4 style={{ marginBottom: '15px', color: '#666' }}>Nutrition Breakdown</h4>
+                <p style={{ color: '#666', textAlign: 'center' }}>Processing Level</p>
+                <div style={{ 
+                  height: '100px', 
+                  background: '#f8f9fa', 
+                  borderRadius: '8px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginTop: '10px',
+                  color: '#999'
+                }}>
+                  Nutrition chart will appear here
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
