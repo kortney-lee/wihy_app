@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import SearchResults from './SearchResults';
 import ImageUploadModal from './components/ImageUploadModal';
 import { searchCache } from './services/searchCache';
-import { healthSearchService } from './services/healthSearchService';
+import { wihyAPI } from './services/wihyAPI';
 import { photoStorageService } from './services/photoStorageService';
 import { foodAnalysisService } from './components/foodAnalysisService';
 import './VHealthSearch.css';
@@ -109,15 +109,33 @@ const VHealthApp: React.FC = () => {
       console.log('🔍 SEARCH DEBUG: Making new search request');
       
       try {
-        console.log('🔍 SEARCH DEBUG: About to call healthSearchService.searchHealthInfo');
-        const healthData = await healthSearchService.searchHealthInfo(trimmedQuery);
-        console.log('🔍 SEARCH DEBUG: Got response from healthSearchService:', healthData);
+        console.log('🔍 SEARCH DEBUG: About to call wihyAPI.searchHealth');
+        const wihyResponse = await wihyAPI.searchHealth(trimmedQuery);
+        console.log('🔍 SEARCH DEBUG: Got response from wihyAPI:', wihyResponse);
         
-        // Format the results for display
-        const formattedResults = formatHealthResults(healthData);
+        let healthData;
+        let formattedResults;
         
-        setCurrentResults(formattedResults);
-        searchCache.setCachedResult(trimmedQuery, formattedResults, window.location.href);
+        if (wihyResponse.success) {
+          // Convert WiHy response to expected format
+          healthData = {
+            summary: wihyResponse.wihy_response.core_principle,
+            details: wihyAPI.formatWihyResponse(wihyResponse),
+            sources: wihyAPI.extractCitations(wihyResponse),
+            recommendations: wihyAPI.extractRecommendations(wihyResponse),
+            relatedTopics: [],
+            medicalDisclaimer: 'This guidance is based on evidence-based health principles. Always consult healthcare professionals for personalized medical advice.',
+            dataSource: 'wihy'
+          };
+          
+          // Format the results for display
+          formattedResults = formatHealthResults(healthData);
+          
+          setCurrentResults(formattedResults);
+          searchCache.setCachedResult(trimmedQuery, formattedResults, window.location.href);
+        } else {
+          throw new Error('WiHy API request failed');
+        }
         
         // If this search included an image, silently save the analysis
         if (currentPhotoId && image) {
@@ -260,10 +278,8 @@ const VHealthApp: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    // Check service status on load
-    healthSearchService.checkServiceStatus().then(status => {
-      console.log('🔧 Health Search Service Status:', status);
-    });
+    // Service status check is now handled by WiHy API
+    console.log('🔧 Using WiHy Unified API for health searches');
   }, []);
 
   // Replace the handleCameraClick function

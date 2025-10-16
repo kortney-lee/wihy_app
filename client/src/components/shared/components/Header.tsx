@@ -3,7 +3,7 @@ import React, { useState, useRef, useEffect, useLayoutEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import MultiAuthLogin from './MultiAuthLogin';
 import ImageUploadModal from '../../ImageUploadModal';
-import { healthSearchService } from '../../../services/healthSearchService';
+import { wihyAPI } from '../../../services/wihyAPI';
 import { getApiEndpoint } from '../../../config/apiConfig';
 import '../../../styles/VHealthSearch.css';
 import '../../../styles/search-components.css';
@@ -232,18 +232,31 @@ const Header: React.FC<HeaderProps> = ({
         console.log('No cache found, proceeding with API call');
       }
 
-      // Step 2: Get fresh results from API
-      setLoadingMessage('Analyzing with AI...');
+      // Step 2: Get fresh results from WiHy API
+      setLoadingMessage('Analyzing with WiHy AI...');
       
       try {
-        const searchResults = await healthSearchService.searchHealthInfo(queryToUse, signal);
+        console.log('Making WiHy API search request from Header for:', queryToUse);
+        const wihyResponse = await wihyAPI.searchHealth(queryToUse);
         
-        const isValidResult = searchResults && 
-          typeof searchResults === 'object' && 
-          searchResults !== null &&
-          (searchResults.summary || searchResults.details || Object.keys(searchResults).length > 0);
-        
-        if (isValidResult) {
+        if (wihyResponse.success) {
+          // Convert WiHy response to expected format
+          const searchResults = {
+            summary: wihyResponse.wihy_response.core_principle,
+            details: wihyAPI.formatWihyResponse(wihyResponse),
+            sources: wihyAPI.extractCitations(wihyResponse),
+            recommendations: wihyAPI.extractRecommendations(wihyResponse),
+            relatedTopics: [],
+            medicalDisclaimer: 'This guidance is based on evidence-based health principles. Always consult healthcare professionals for personalized medical advice.',
+            dataSource: 'wihy'
+          };
+          
+          const isValidResult = searchResults && 
+            typeof searchResults === 'object' && 
+            searchResults !== null &&
+            (searchResults.summary || searchResults.details || Object.keys(searchResults).length > 0);
+          
+          if (isValidResult) {
           // Step 3: Save to database cache (async, don't wait)
           setLoadingMessage('Caching results...');
           
@@ -264,14 +277,17 @@ const Header: React.FC<HeaderProps> = ({
           navigate(`/results?q=${encodeURIComponent(queryToUse)}`, {
             state: {
               results: searchResults,
-              dataSource: 'openai',
+              dataSource: 'wihy',
               fromSearch: true
             }
           });
           return;
         } else {
-          throw new Error('Invalid results from API');
+          throw new Error('WiHy API returned invalid results');
         }
+      } else {
+        throw new Error('WiHy API request failed');
+      }
         
       } catch (apiError) {
         if (apiError.name === 'AbortError') {
@@ -422,6 +438,9 @@ const Header: React.FC<HeaderProps> = ({
   const handleLogoClick = () => {
     if (onLogoClick) {
       onLogoClick();
+    } else {
+      // Default behavior: navigate to home page
+      navigate('/');
     }
   };
 

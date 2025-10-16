@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import './styles/VHealthSearch.css';
 import ImageUploadModal from './components/ImageUploadModal';
 import MultiAuthLogin from './components/shared/components/MultiAuthLogin';
-import { healthSearchService } from './services/healthSearchService';
+import { wihyAPI } from './services/wihyAPI';
 import { searchCache } from './services/searchCache';
 import { foodAnalysisService } from './components/foodAnalysisService';
 import HealthNewsFeed from './components/HealthNewsFeed';
@@ -239,58 +239,75 @@ const VHealthSearch: React.FC = () => {
       console.log('Getting fresh results for:', queryToUse);
       
       try {
-        // Pass signal to healthSearchService
-        const searchResults = await healthSearchService.searchHealthInfo(queryToUse, signal);
-        console.log('Health search results received:', searchResults);
+        // Use WiHy Unified API for search
+        console.log('Making WiHy API search request for:', queryToUse);
+        const wihyResponse = await wihyAPI.searchHealth(queryToUse);
         
-        const isValidResult = searchResults && 
-          typeof searchResults === 'object' && 
-          searchResults !== null &&
-          (searchResults.summary || searchResults.details || Object.keys(searchResults).length > 0);
+        if (wihyResponse.success) {
+          // Convert WiHy response to expected format
+          const searchResults = {
+            summary: wihyResponse.wihy_response.core_principle,
+            details: wihyAPI.formatWihyResponse(wihyResponse),
+            sources: wihyAPI.extractCitations(wihyResponse),
+            recommendations: wihyAPI.extractRecommendations(wihyResponse),
+            relatedTopics: [],
+            medicalDisclaimer: 'This guidance is based on evidence-based health principles. Always consult healthcare professionals for personalized medical advice.',
+            dataSource: 'wihy'
+          };
+          
+          console.log('WiHy search results received:', searchResults);
         
-        if (isValidResult) {
-          console.log('Valid results confirmed');
+          const isValidResult = searchResults && 
+            typeof searchResults === 'object' && 
+            searchResults !== null &&
+            (searchResults.summary || searchResults.details || Object.keys(searchResults).length > 0);
           
-          // Step 3: Save to database cache (async, don't wait)
-          setLoadingMessage('Caching results...');
-          
-          fetch(getApiEndpoint('/cache/save'), {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              query: queryToUse,
-              results: searchResults,
-              source: 'openai'
-            })
-          }).then(response => {
-            if (response.ok) {
-              console.log('Results saved to database cache');
-            } else {
-              console.warn('Failed to save to cache');
-            }
-          }).catch(err => {
-            console.warn('Cache save error:', err);
-          });
-          
-          setLoadingMessage('Results ready!');
-          await new Promise(resolve => setTimeout(resolve, 300));
-          
-          setIsLoading(false);
-          console.log('Navigating to results page with data');
-          
-          // Pass the fresh results via navigation state
-          navigate(`/results?q=${encodeURIComponent(queryToUse)}`, {
-            state: {
-              results: searchResults,
-              dataSource: 'openai',
-              fromSearch: true
-            }
-          });
-          return;
+          if (isValidResult) {
+            console.log('Valid results confirmed');
+            
+            // Step 3: Save to database cache (async, don't wait)
+            setLoadingMessage('Caching results...');
+            
+            fetch(getApiEndpoint('/cache/save'), {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                query: queryToUse,
+                results: searchResults,
+                source: 'wihy'
+              })
+            }).then(response => {
+              if (response.ok) {
+                console.log('Results saved to database cache');
+              } else {
+                console.warn('Failed to save to cache');
+              }
+            }).catch(err => {
+              console.warn('Cache save error:', err);
+            });
+            
+            setLoadingMessage('Results ready!');
+            await new Promise(resolve => setTimeout(resolve, 300));
+            
+            setIsLoading(false);
+            console.log('Navigating to results page with data');
+            
+            // Pass the fresh results via navigation state
+            navigate(`/results?q=${encodeURIComponent(queryToUse)}`, {
+              state: {
+                results: searchResults,
+                dataSource: 'wihy',
+                fromSearch: true
+              }
+            });
+            return;
+          } else {
+            throw new Error('WiHy API returned invalid results');
+          }
         } else {
-          throw new Error('Invalid results from API');
+          throw new Error('WiHy API request failed');
         }
         
       } catch (apiError) {
@@ -428,52 +445,68 @@ const VHealthSearch: React.FC = () => {
       setLoadingMessage('Analyzing nutrition content...');
       
       try {
-        const nutritionResults = await healthSearchService.searchHealthInfo(foodName, signal);
+        console.log('Making WiHy API nutrition search for:', foodName);
+        const wihyResponse = await wihyAPI.searchNutrition(foodName);
         
-        const isValidResult = nutritionResults && 
-          typeof nutritionResults === 'object' && 
-          nutritionResults !== null &&
-          (nutritionResults.summary || nutritionResults.details || Object.keys(nutritionResults).length > 0);
-        
-        if (isValidResult) {
-          // Step 3: Save to database cache (async, don't wait)
-          setLoadingMessage('Caching nutrition data...');
+        if (wihyResponse.success) {
+          // Convert WiHy response to expected format
+          const nutritionResults = {
+            summary: wihyResponse.wihy_response.core_principle,
+            details: wihyAPI.formatWihyResponse(wihyResponse),
+            sources: wihyAPI.extractCitations(wihyResponse),
+            recommendations: wihyAPI.extractRecommendations(wihyResponse),
+            relatedTopics: [],
+            medicalDisclaimer: 'This guidance is based on evidence-based health principles. Always consult healthcare professionals for personalized medical advice.',
+            dataSource: 'wihy'
+          };
           
-          fetch(getApiEndpoint('/cache/save'), {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              query: foodName,
-              results: nutritionResults,
-              source: 'image-analysis'
-            })
-          }).then(response => {
-            if (response.ok) {
-              console.log('Nutrition data saved to cache');
-            } else {
-              console.warn('Failed to save nutrition data to cache');
-            }
-          }).catch(err => {
-            console.warn('Nutrition cache save error:', err);
-          });
+          const isValidResult = nutritionResults && 
+            typeof nutritionResults === 'object' && 
+            nutritionResults !== null &&
+            (nutritionResults.summary || nutritionResults.details || Object.keys(nutritionResults).length > 0);
           
-          setLoadingMessage('Nutrition analysis complete!');
-          await new Promise(resolve => setTimeout(resolve, 300));
-          
-          setIsLoading(false);
-          // Pass the fresh nutrition results via navigation state
-          navigate(`/results?q=${encodeURIComponent(foodName)}`, {
-            state: {
-              results: nutritionResults,
-              dataSource: 'image-analysis',
-              fromSearch: true
-            }
-          });
-          return;
+          if (isValidResult) {
+            // Step 3: Save to database cache (async, don't wait)
+            setLoadingMessage('Caching nutrition data...');
+            
+            fetch(getApiEndpoint('/cache/save'), {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                query: foodName,
+                results: nutritionResults,
+                source: 'wihy'
+              })
+            }).then(response => {
+              if (response.ok) {
+                console.log('Nutrition data saved to cache');
+              } else {
+                console.warn('Failed to save nutrition data to cache');
+              }
+            }).catch(err => {
+              console.warn('Nutrition cache save error:', err);
+            });
+            
+            setLoadingMessage('Nutrition analysis complete!');
+            await new Promise(resolve => setTimeout(resolve, 300));
+            
+            setIsLoading(false);
+            // Pass the fresh nutrition results via navigation state
+            navigate(`/results?q=${encodeURIComponent(foodName)}`, {
+              state: {
+                results: nutritionResults,
+                dataSource: 'wihy',
+                fromSearch: true
+              }
+            });
+            return;
+          } else {
+            throw new Error('WiHy API returned invalid nutrition results');
+          }
         } else {
-          throw new Error('Invalid nutrition results');
+          throw new Error('WiHy nutrition API request failed');
         }
         
       } catch (nutritionError) {
@@ -708,9 +741,15 @@ const VHealthSearch: React.FC = () => {
               className="search-logo-image"
               onError={() => setImageError(true)}
               onLoad={() => setImageError(false)}
+              onClick={() => navigate('/')}
+              style={{ cursor: 'pointer' }}
             />
           ) : (
-            <h1 className="search-logo">
+            <h1 
+              className="search-logo"
+              onClick={() => navigate('/')}
+              style={{ cursor: 'pointer' }}
+            >
               What is Healthy?
             </h1>
           )}

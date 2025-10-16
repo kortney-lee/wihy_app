@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { wihyAPI } from '../services/wihyAPI';
 
 interface ChatMessage {
   id: string;
@@ -74,19 +75,61 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ isOpen, onToggle, onClose, curr
     setInputMessage('');
     setIsTyping(true);
 
-    // Simulate AI response (replace with actual AI integration)
-    setTimeout(() => {
-      const response = generateContextualResponse(inputMessage, currentContext);
+    try {
+      // Use WiHy API for chat responses
+      console.log('ChatWidget: Making WiHy API request for:', inputMessage.trim());
+      
+      const wihyResponse = await wihyAPI.searchHealth(inputMessage.trim(), {
+        // Add context if available
+        health_concerns: currentContext ? [currentContext] : undefined
+      });
+
+      console.log('ChatWidget: WiHy API full response:', wihyResponse);
+
+      let responseMessage = 'I apologize, but I encountered an issue processing your request. Please try again.';
+
+      if (wihyResponse.success) {
+        // Check if it's a UnifiedResponse format (new API) or legacy format
+        if ('wihy_response' in wihyResponse) {
+          // Legacy format - use existing formatter
+          responseMessage = wihyAPI.formatWihyResponse(wihyResponse);
+          console.log('ChatWidget: Using legacy format response');
+        } else {
+          // New UnifiedResponse format - use dedicated chat formatter
+          responseMessage = wihyAPI.formatUnifiedResponseForChat(wihyResponse as any);
+          console.log('ChatWidget: Using unified format response');
+        }
+        console.log('ChatWidget: Final response message:', responseMessage);
+      } else {
+        console.log('ChatWidget: WiHy API request failed');
+        // Fallback to contextual response
+        responseMessage = generateContextualResponse(inputMessage.trim(), currentContext);
+      }
+
       const assistantMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),
         type: 'assistant',
-        message: response,
+        message: responseMessage,
         timestamp: new Date()
       };
 
       setMessages(prev => [...prev, assistantMessage]);
       setIsTyping(false);
-    }, 1500);
+    } catch (error) {
+      console.error('ChatWidget: Error getting AI response:', error);
+      
+      // Fallback to contextual response on error
+      const fallbackResponse = generateContextualResponse(inputMessage.trim(), currentContext);
+      const assistantMessage: ChatMessage = {
+        id: (Date.now() + 1).toString(),
+        type: 'assistant',
+        message: fallbackResponse,
+        timestamp: new Date()
+      };
+
+      setMessages(prev => [...prev, assistantMessage]);
+      setIsTyping(false);
+    }
   };
 
   const generateContextualResponse = (question: string, context?: string): string => {

@@ -1,9 +1,24 @@
-import axios from 'axios';
-import { API_CONFIG, getWihyEndpoint } from '../config/apiConfig';
+import { API_CONFIG, WIHY_API_ENDPOINT } from '../config/apiConfig';
 
-const WIHY_API_URL = API_CONFIG.WIHY_API_URL;
+// Types for the WiHy Unified API (updated to match documentation)
+export interface UnifiedRequest {
+  query: string;                    // REQUIRED: Your health/nutrition question or request
+  request_type?: 'auto' | 'nutrition' | 'health' | 'chat' | 'auth' | 'predict' | 'train'; // OPTIONAL: defaults to "auto"
+  context?: Record<string, any>;    // OPTIONAL: Additional context object
+  user_id?: string;                 // OPTIONAL: User identifier for personalization
+  session_id?: string;              // OPTIONAL: Session identifier for conversation tracking
+}
 
-// Types for the WiHy API
+export interface UnifiedResponse {
+  success: boolean;                 // Request processing success status
+  data: any;                        // Service-specific response data
+  service_used: string;             // Which service processed the request
+  request_type: string;             // The request type that was processed
+  processing_time: number;          // Processing time in seconds
+  suggestions: string[];            // Optional suggestions for improvement
+}
+
+// Legacy types for backward compatibility
 export interface UserContext {
   age?: number;
   family_size?: number;
@@ -81,38 +96,49 @@ class WihyAPIService {
   private baseURL: string;
 
   constructor() {
-    this.baseURL = WIHY_API_URL;
+    this.baseURL = WIHY_API_ENDPOINT;
   }
 
   /**
-   * Ask WiHy a health-related question with optional user context
+   * Ask WiHy a health-related question using the unified API
    */
-  async askAnything(request: WihyRequest): Promise<WihyResponse> {
+  async askAnything(request: WihyRequest | UnifiedRequest): Promise<WihyResponse | UnifiedResponse> {
     try {
-      console.log('Making WiHy API request:', request);
+      console.log('Making WiHy Unified API request:', request);
       
-      const response = await axios.post<WihyResponse>(
-        `${this.baseURL}/wihy/ask-anything`,
-        request,
-        {
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          timeout: 30000, // 30 second timeout
-        }
-      );
+      // Convert legacy WihyRequest to UnifiedRequest format if needed
+      let unifiedRequest: UnifiedRequest;
+      if ('user_context' in request) {
+        // Legacy format - convert to unified format
+        unifiedRequest = {
+          query: request.query,
+          request_type: 'auto',
+          context: request.user_context || {},
+        };
+      } else {
+        // Already in unified format
+        unifiedRequest = request as UnifiedRequest;
+      }
+      
+      // Use fetch API to match the working example exactly
+      const response = await fetch(this.baseURL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(unifiedRequest)
+      });
 
-      console.log('WiHy API response:', response.data);
-      return response.data;
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log('WiHy Unified API response:', data);
+      return data;
     } catch (error) {
       console.error('WiHy API error:', error);
       
-      if (error && typeof error === 'object' && 'response' in error) {
-        const axiosError = error as any;
-        if (axiosError.response?.data) {
-          throw new Error(axiosError.response.data.detail || 'WiHy API request failed');
-        }
-        throw new Error(`Network error: ${axiosError.message || 'Request failed'}`);
+      if (error instanceof Error) {
+        throw new Error(error.message || 'WiHy API request failed');
       }
       
       throw new Error('Unknown error occurred while contacting WiHy API');
@@ -120,11 +146,184 @@ class WihyAPIService {
   }
 
   /**
+   * Convert UnifiedResponse to legacy WihyResponse format for backward compatibility
+   */
+  private convertToLegacyFormat(unifiedResponse: UnifiedResponse, originalQuery: string): WihyResponse {
+    // Handle chat service response
+    if (unifiedResponse.service_used === 'chat' && unifiedResponse.data.response) {
+      return {
+        success: unifiedResponse.success,
+        timestamp: new Date().toISOString(),
+        response_type: unifiedResponse.request_type,
+        query: originalQuery,
+        wihy_response: {
+          query_type: unifiedResponse.request_type,
+          query: originalQuery,
+          core_principle: unifiedResponse.data.response,
+          personalized_analysis: {
+            identified_risk_factors: [],
+            priority_health_goals: [unifiedResponse.data.response],
+            action_items: [{
+              action: unifiedResponse.data.response,
+              priority: 'medium',
+              target_illness: 'general_health',
+              evidence_level: 'ai_generated',
+              mechanism: 'chat_response',
+              timeline: 'immediate'
+            }],
+            timeline: 'immediate'
+          },
+          research_foundation: [{
+            citation_text: 'WiHy AI Chat System',
+            study_type: 'ai_response',
+            key_finding: unifiedResponse.data.response
+          }],
+          progress_tracking: {
+            key_metrics: ['general_health'],
+            reassessment_period: '1 week'
+          },
+          biblical_wisdom: []
+        },
+        message: unifiedResponse.data.response
+      };
+    }
+
+    // Handle other service types (training, nutrition, etc.)
+    return {
+      success: unifiedResponse.success,
+      timestamp: new Date().toISOString(),
+      response_type: unifiedResponse.request_type,
+      query: originalQuery,
+      wihy_response: {
+        query_type: unifiedResponse.request_type,
+        query: originalQuery,
+        core_principle: unifiedResponse.data.analysis || unifiedResponse.data.response || 'Health Information',
+        personalized_analysis: {
+          identified_risk_factors: [],
+          priority_health_goals: [],
+          action_items: unifiedResponse.data.recommendations?.map((rec: string, index: number) => ({
+            action: rec,
+            priority: 'medium',
+            target_illness: 'general_health',
+            evidence_level: 'moderate',
+            mechanism: 'lifestyle_modification',
+            timeline: 'ongoing'
+          })) || [],
+          timeline: 'ongoing'
+        },
+        research_foundation: unifiedResponse.data.sources?.map((source: string) => ({
+          citation_text: source,
+          study_type: 'research',
+          key_finding: source
+        })) || [],
+        progress_tracking: {
+          key_metrics: ['general_health'],
+          reassessment_period: '1 month'
+        },
+        biblical_wisdom: []
+      },
+      message: unifiedResponse.data.response || unifiedResponse.data.analysis || 'Health information provided'
+    };
+  }
+
+  /**
+   * Get health news articles using the unified API
+   */
+  async getHealthNews(categories?: string[], limit?: number): Promise<WihyResponse> {
+    const query = categories && categories.length > 0 
+      ? `Latest health news about ${categories.join(', ')}`
+      : 'Latest health news';
+    
+    const request: UnifiedRequest = {
+      query: query,
+      request_type: 'health',
+      context: {
+        categories: categories,
+        limit: limit
+      }
+    };
+
+    const response = await this.askAnything(request);
+    if ('data' in response) {
+      // It's a UnifiedResponse, convert to legacy format
+      return this.convertToLegacyFormat(response as UnifiedResponse, query);
+    }
+    return response as WihyResponse;
+  }
+
+  /**
+   * Search for nutrition information using the unified API
+   */
+  async searchNutrition(foodQuery: string, userContext?: UserContext): Promise<WihyResponse> {
+    const request: UnifiedRequest = {
+      query: `Nutrition information for ${foodQuery}`,
+      request_type: 'nutrition',
+      context: userContext || {}
+    };
+
+    const response = await this.askAnything(request);
+    if ('data' in response) {
+      // It's a UnifiedResponse, convert to legacy format
+      return this.convertToLegacyFormat(response as UnifiedResponse, request.query);
+    }
+    return response as WihyResponse;
+  }
+
+  /**
+   * General health search using the unified API
+   */
+  async searchHealth(query: string, userContext?: UserContext): Promise<WihyResponse> {
+    const request: UnifiedRequest = {
+      query: query,
+      request_type: 'auto',
+      context: userContext || {}
+    };
+
+    const response = await this.askAnything(request);
+    if ('data' in response) {
+      // It's a UnifiedResponse, convert to legacy format
+      return this.convertToLegacyFormat(response as UnifiedResponse, query);
+    }
+    return response as WihyResponse;
+  }
+
+  /**
    * Format the WiHy response for display in the existing UI
    * This formats it to be compatible with the existing search results format
    */
-  formatWihyResponse(response: WihyResponse): string {
-    const { wihy_response } = response;
+  formatWihyResponse(response: WihyResponse | UnifiedResponse): string {
+    // Handle UnifiedResponse format (new API)
+    if ('data' in response && 'service_used' in response) {
+      const unifiedResp = response as UnifiedResponse;
+      
+      let formatted = `# WiHy Health Assistant\n\n`;
+      
+      if (unifiedResp.data.response) {
+        formatted += unifiedResp.data.response;
+      } else if (unifiedResp.data.analysis) {
+        formatted += unifiedResp.data.analysis;
+      } else if (unifiedResp.data.training_status) {
+        formatted += `## Training Service\n\n`;
+        formatted += `${unifiedResp.data.training_status}\n\n`;
+        if (unifiedResp.data.available_models && unifiedResp.data.available_models.length > 0) {
+          formatted += `**Available Models:**\n`;
+          unifiedResp.data.available_models.forEach((model: string) => {
+            formatted += `- ${model}\n`;
+          });
+        }
+      } else {
+        formatted += `**Service:** ${unifiedResp.service_used}\n\n`;
+        formatted += `**Processing Time:** ${unifiedResp.processing_time} seconds\n\n`;
+        formatted += `**Data:**\n\`\`\`json\n${JSON.stringify(unifiedResp.data, null, 2)}\n\`\`\``;
+      }
+      
+      formatted += `\n\n---\n\n*Response from ${unifiedResp.service_used} service (${unifiedResp.processing_time}s)*`;
+      return formatted;
+    }
+    
+    // Handle legacy WihyResponse format
+    const legacyResp = response as WihyResponse;
+    const { wihy_response } = legacyResp;
     
     let formatted = `# ${wihy_response.core_principle}\n\n`;
     
@@ -231,6 +430,55 @@ class WihyAPIService {
     }
     
     return citations;
+  }
+
+  /**
+   * Format UnifiedResponse for chat display (simple format)
+   */
+  formatUnifiedResponseForChat(response: UnifiedResponse): string {
+    // Handle chat service responses
+    if (response.service_used === 'chat' && response.data.response) {
+      // For now, the API is returning very brief responses like "AI Chat response to: what is healthy"
+      // We should provide more helpful information to the user
+      const briefResponse = response.data.response;
+      
+      if (briefResponse.includes('AI Chat response to:')) {
+        // The API gave us a placeholder response, provide something more useful
+        const query = response.data.query || 'your question';
+        return `I received your question about "${query}" and I'm here to help! 
+
+The WiHy AI system is currently processing health-related queries. While the response system is being optimized, I can help you with:
+
+• Understanding health and nutrition concepts
+• Providing general wellness guidance  
+• Explaining health data and metrics
+• Offering evidence-based health insights
+
+What specific aspect of health would you like to explore further?`;
+      }
+      
+      return briefResponse;
+    }
+    
+    // Handle other response types
+    if (response.data.response) {
+      return response.data.response;
+    }
+    
+    if (response.data.analysis) {
+      return response.data.analysis;
+    }
+    
+    if (response.data.training_status) {
+      let message = `🔄 ${response.data.training_status}`;
+      if (response.data.available_models && response.data.available_models.length > 0) {
+        message += `\n\n📊 Available models: ${response.data.available_models.join(', ')}`;
+      }
+      return message;
+    }
+    
+    // Fallback - show the raw data in a readable format
+    return `I received a response from the ${response.service_used} service. Here's what I found:\n\n${JSON.stringify(response.data, null, 2)}`;
   }
 }
 
