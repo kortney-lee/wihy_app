@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { wihyAPI } from '../services/wihyAPI';
+import { logger } from '../utils/logger';
 
 interface ChatMessage {
   id: string;
@@ -77,14 +78,14 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ isOpen, onToggle, onClose, curr
 
     try {
       // Use WiHy API for chat responses
-      console.log('ChatWidget: Making WiHy API request for:', inputMessage.trim());
+      logger.debug('ChatWidget: Making WiHy API request for:', inputMessage.trim());
       
       const wihyResponse = await wihyAPI.searchHealth(inputMessage.trim(), {
         // Add context if available
         health_concerns: currentContext ? [currentContext] : undefined
       });
 
-      console.log('ChatWidget: WiHy API full response:', wihyResponse);
+      logger.debug('ChatWidget: WiHy API full response:', wihyResponse);
 
       let responseMessage = 'I apologize, but I encountered an issue processing your request. Please try again.';
 
@@ -93,15 +94,15 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ isOpen, onToggle, onClose, curr
         if ('wihy_response' in wihyResponse) {
           // Legacy format - use existing formatter
           responseMessage = wihyAPI.formatWihyResponse(wihyResponse);
-          console.log('ChatWidget: Using legacy format response');
+          logger.debug('ChatWidget: Using legacy format response');
         } else {
           // New UnifiedResponse format - use dedicated chat formatter
           responseMessage = wihyAPI.formatUnifiedResponseForChat(wihyResponse as any);
-          console.log('ChatWidget: Using unified format response');
+          logger.debug('ChatWidget: Using unified format response');
         }
-        console.log('ChatWidget: Final response message:', responseMessage);
+        logger.debug('ChatWidget: Final response message:', responseMessage);
       } else {
-        console.log('ChatWidget: WiHy API request failed');
+        logger.warn('ChatWidget: WiHy API request failed');
         // Fallback to contextual response
         responseMessage = generateContextualResponse(inputMessage.trim(), currentContext);
       }
@@ -116,7 +117,7 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ isOpen, onToggle, onClose, curr
       setMessages(prev => [...prev, assistantMessage]);
       setIsTyping(false);
     } catch (error) {
-      console.error('ChatWidget: Error getting AI response:', error);
+      logger.error('ChatWidget: Error getting AI response:', error);
       
       // Fallback to contextual response on error
       const fallbackResponse = generateContextualResponse(inputMessage.trim(), currentContext);
