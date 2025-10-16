@@ -150,6 +150,13 @@ class WihyAPIService {
           throw new Error('TIMEOUT_ERROR: Request timed out - services may be unavailable');
         }
         
+        // Check for CORS errors
+        if (error.message.includes('CORS') || 
+            error.message.includes('Access to fetch') ||
+            error.message.includes('No \'Access-Control-Allow-Origin\'')) {
+          throw new Error('CORS_ERROR: Unable to connect to WiHy services from this domain');
+        }
+        
         // Check for network/connectivity issues
         if (error.message.includes('fetch') || 
             error.message.includes('network') || 

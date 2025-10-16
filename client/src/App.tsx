@@ -190,7 +190,9 @@ const ResultsPage: React.FC = () => {
           
           let userFriendlyMessage;
           
-          if (errorMessage.includes('NETWORK_ERROR') || errorMessage.includes('TIMEOUT_ERROR')) {
+          if (errorMessage.includes('CORS_ERROR')) {
+            userFriendlyMessage = "Oops! There's a configuration issue preventing us from reaching our AI services. 🔧 Our team is working on it - please try again later!";
+          } else if (errorMessage.includes('NETWORK_ERROR') || errorMessage.includes('TIMEOUT_ERROR')) {
             userFriendlyMessage = "Oops! Looks like we're having some technical difficulties. 🤖 Please come back in a few minutes while we fix things up!";
           } else if (errorMessage.includes('SERVER_ERROR')) {
             userFriendlyMessage = "Our servers are taking a quick break! ☕ Please try again in a few minutes.";
