@@ -16,9 +16,10 @@ interface ChatWidgetProps {
   onClose: () => void;
   currentContext?: string; // Current dashboard section being viewed
   inline?: boolean; // Whether to render inline or as fixed overlay
+  externalMessage?: { query: string; response: string } | null; // External message to add
 }
 
-const ChatWidget: React.FC<ChatWidgetProps> = ({ isOpen, onToggle, onClose, currentContext, inline = false }) => {
+const ChatWidget: React.FC<ChatWidgetProps> = ({ isOpen, onToggle, onClose, currentContext, inline = false, externalMessage }) => {
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: '1',
@@ -38,6 +39,27 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ isOpen, onToggle, onClose, curr
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // Add external message when provided
+  useEffect(() => {
+    if (externalMessage && isOpen) {
+      const userMessage: ChatMessage = {
+        id: Date.now().toString(),
+        type: 'user',
+        message: externalMessage.query,
+        timestamp: new Date()
+      };
+      
+      const assistantMessage: ChatMessage = {
+        id: (Date.now() + 1).toString(),
+        type: 'assistant',
+        message: externalMessage.response,
+        timestamp: new Date()
+      };
+      
+      setMessages(prev => [...prev, userMessage, assistantMessage]);
+    }
+  }, [externalMessage, isOpen]);
 
   // Add contextual message when context changes
   useEffect(() => {
@@ -90,15 +112,24 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ isOpen, onToggle, onClose, curr
       let responseMessage = 'I apologize, but I encountered an issue processing your request. Please try again.';
 
       if (wihyResponse.success) {
-        // Check if it's a UnifiedResponse format (new API) or legacy format
-        if ('wihy_response' in wihyResponse) {
+        // Handle both new unified response format and legacy format
+        if ((wihyResponse as any).data && (wihyResponse as any).data.response) {
+          // New unified API response format
+          const data = (wihyResponse as any).data;
+          responseMessage = data.response;
+          if (data.recommendations && data.recommendations.length > 0) {
+            responseMessage += '\n\n**Recommendations:**\n' + 
+              data.recommendations.map((r: string) => `• ${r}`).join('\n');
+          }
+          logger.debug('ChatWidget: Using new unified format response');
+        } else if ('wihy_response' in wihyResponse) {
           // Legacy format - use existing formatter
           responseMessage = wihyAPI.formatWihyResponse(wihyResponse);
           logger.debug('ChatWidget: Using legacy format response');
         } else {
-          // New UnifiedResponse format - use dedicated chat formatter
+          // Fallback to dedicated chat formatter
           responseMessage = wihyAPI.formatUnifiedResponseForChat(wihyResponse as any);
-          logger.debug('ChatWidget: Using unified format response');
+          logger.debug('ChatWidget: Using chat formatter fallback');
         }
         logger.debug('ChatWidget: Final response message:', responseMessage);
       } else {
@@ -118,13 +149,14 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ isOpen, onToggle, onClose, curr
       setIsTyping(false);
     } catch (error) {
       logger.error('ChatWidget: Error getting AI response:', error);
-      
+
       // Fallback to contextual response on error
-      const fallbackResponse = generateContextualResponse(inputMessage.trim(), currentContext);
+      const fallbackMessage = generateContextualResponse(inputMessage.trim(), currentContext);
+      
       const assistantMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),
         type: 'assistant',
-        message: fallbackResponse,
+        message: fallbackMessage,
         timestamp: new Date()
       };
 

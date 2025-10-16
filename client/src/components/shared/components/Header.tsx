@@ -240,9 +240,19 @@ const Header: React.FC<HeaderProps> = ({
         const wihyResponse = await wihyAPI.searchHealth(queryToUse);
         
         if (wihyResponse.success) {
+          // Handle both unified and legacy response formats
+          let summary = 'Health information provided';
+          if ('data' in wihyResponse) {
+            // New unified API response format
+            summary = (wihyResponse as any).data?.response || summary;
+          } else {
+            // Legacy WihyResponse format
+            summary = (wihyResponse as any).wihy_response?.core_principle || summary;
+          }
+          
           // Convert WiHy response to expected format
           const searchResults = {
-            summary: wihyResponse.wihy_response.core_principle,
+            summary: summary,
             details: wihyAPI.formatWihyResponse(wihyResponse),
             sources: wihyAPI.extractCitations(wihyResponse),
             recommendations: wihyAPI.extractRecommendations(wihyResponse),
