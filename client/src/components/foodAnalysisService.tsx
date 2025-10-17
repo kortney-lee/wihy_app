@@ -45,30 +45,47 @@ const API_URL = API_CONFIG.BASE_URL;
 // Create or update this file to properly send images to your backend
 
 class FoodAnalysisService {
-  private baseUrl = API_CONFIG.BASE_URL;
-
-  async analyzeFoodImage(file: File): Promise<any> {
+  async analyzeFoodImage(file: File): Promise<string> {
     try {
-      // Create FormData to send the file
-      const formData = new FormData();
-      formData.append('image', file); // This must match your backend's upload.single('image')
-
-      // Send to your backend endpoint
-      const response = await fetch(`${this.baseUrl}/analyze-image`, {
-        method: 'POST',
-        body: formData,
-        // Don't set Content-Type header - browser will set it with boundary
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const result = await response.json();
-      console.log('Backend analysis result:', result);
+      console.log('Using WiHy Scan API for food image analysis...');
       
-      // Return the food name or relevant data
-      return result.foodName || result.name || result.analysis || 'Unknown food item';
+      // Import wihyAPI to use the new scan endpoint
+      const { wihyAPI } = await import('../services/wihyAPI');
+      
+      const result = await wihyAPI.scanFood(file);
+      console.log('WiHy Scan API result:', result);
+      
+      // Extract food name from the scan result using unified format
+      let foodName = 'Unknown food item';
+      
+      // Type-safe check for unified response format
+      if (result.success && 'data' in result && result.data) {
+        const unifiedResult = result as any; // Use any to handle type checking
+        
+        // Primary: Get health advice from AI response
+        if (unifiedResult.data.ai_response?.response) {
+          foodName = unifiedResult.data.ai_response.response;
+          console.log('📊 Using AI response for food name:', foodName);
+        }
+        // Fallback: Try to get product name or other analysis
+        else if (unifiedResult.data.product_name) {
+          foodName = unifiedResult.data.product_name;
+          console.log('📊 Using product name:', foodName);
+        }
+        else if (unifiedResult.data.analysis) {
+          foodName = unifiedResult.data.analysis;
+          console.log('📊 Using analysis:', foodName);
+        }
+        else {
+          foodName = 'Food item analyzed';
+          console.log('📊 Using fallback name');
+        }
+      } else {
+        console.log('❌ No valid response data found in food analysis');
+        foodName = 'Food analysis unavailable';
+      }
+      
+      return foodName;
       
     } catch (error) {
       console.error('Error analyzing food image:', error);
