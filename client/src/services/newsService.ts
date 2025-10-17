@@ -98,10 +98,21 @@ export interface NewsQueryParams {
 }
 
 class NewsService {
-  // Update to use the correct news API endpoint from the OpenAPI spec
+  // Configure multiple endpoints for development and production
+  private getEndpoints() {
+    return [
+      // Production endpoints
+      'https://services.wihy.ai/api/news',
+      'https://ml-news-feed.graypebble-2c416c49.westus2.azurecontainerapps.io/api/news',
+      // Local development endpoints
+      'http://localhost:5000/api/news',
+      'http://localhost:8000/api/news'  // Alternative local port
+    ];
+  }
+
+  // Get primary endpoint (first in list)
   private getNewsEndpoint() {
-    // According to the OpenAPI spec, the server is at http://localhost:5000/api/news
-    return 'http://localhost:5000/api/news';
+    return this.getEndpoints()[0];
   }
   
   /**
@@ -128,7 +139,28 @@ class NewsService {
 
       console.log('Fetching news with params:', queryParams);
       
-      const response = await axios.get(`${this.getNewsEndpoint()}/articles`, { params: queryParams });
+      let response;
+      let lastError;
+      
+      // Try all endpoints in order until one works
+      const endpoints = this.getEndpoints();
+      for (let i = 0; i < endpoints.length; i++) {
+        try {
+          const endpoint = endpoints[i];
+          console.log(`Trying endpoint ${i + 1}/${endpoints.length}:`, endpoint);
+          response = await axios.get(`${endpoint}/articles`, { params: queryParams });
+          console.log('✅ Endpoint successful:', endpoint);
+          break;
+        } catch (error) {
+          lastError = error;
+          console.warn(`❌ Endpoint ${i + 1} failed:`, endpoints[i], error);
+          
+          // If this is the last endpoint, throw the error
+          if (i === endpoints.length - 1) {
+            throw error;
+          }
+        }
+      }
       
       // Process the response to add compatibility fields
       const apiResponse = response.data as NewsFeedResponse;
