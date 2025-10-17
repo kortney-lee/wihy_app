@@ -13,17 +13,14 @@ ChartJS.register(ArcElement, Tooltip, Legend);
 interface NutritionChartProps {
   apiResponse?: UnifiedResponse | any;
   query?: string;
-  results?: string;
-  dataSource?: "error" | "openai" | "local" | "vnutrition" | "wihy";
 }
 
-// Extract nutrition data from unified API response or legacy format
-const extractNutritionData = (apiResponse?: UnifiedResponse | any, results?: string, dataSource?: string) => {
-  console.log('=== EXTRACTING NUTRITION DATA IN NUTRITIONCHART ===');
+// Extract nutrition data from unified API response only
+const extractNutritionData = (apiResponse?: UnifiedResponse | any) => {
+  console.log('=== EXTRACTING NUTRITION DATA FROM NEW API ===');
   console.log('API Response:', apiResponse);
-  console.log('DataSource:', dataSource);
   
-  // Handle unified API response first
+  // Handle unified API response
   if (apiResponse && apiResponse.success && apiResponse.data) {
     console.log('Processing unified API nutrition data');
     
@@ -40,89 +37,36 @@ const extractNutritionData = (apiResponse?: UnifiedResponse | any, results?: str
       };
     }
     
-    // Use nutrition facts if available
-    if (apiResponse.data.nutrition?.facts) {
-      const nutrition = apiResponse.data.nutrition;
+    // Use nutrition_data from the API response
+    if (apiResponse.data.nutrition_data) {
+      const nutrition = apiResponse.data.nutrition_data;
       const extractedData = {
         type: 'nutrition_facts',
-        calories: nutrition.facts.calories_per_serving || 0,
-        protein: nutrition.facts.protein_g || 0,
-        carbs: nutrition.facts.carbs_g || 0,
-        fat: nutrition.facts.fat_g || 0,
-        fiber: nutrition.facts.fiber_g || 0,
-        sugar: nutrition.facts.sugar_g || 0,
-        sodium: nutrition.facts.sodium_mg || 0,
-        nourish_score: nutrition.nourish_score?.score || 0,
-        nourish_category: nutrition.nourish_score?.category || 'Unknown',
+        calories: nutrition.estimated_calories || 0,
+        protein: nutrition.protein || 0,
+        carbs: nutrition.carbohydrates || 0,
+        fat: nutrition.fat || 0,
+        fiber: nutrition.fiber || 0,
+        sugar: nutrition.sugar || 0,
+        sodium: nutrition.sodium || 0,
+        nourish_score: nutrition.nourish_score || 0,
+        nourish_category: nutrition.nourish_category || 'Unknown',
         macronutrients: nutrition.macronutrients || null
       };
       
-      console.log('=== EXTRACTED UNIFIED NUTRITION DATA ===');
+      console.log('=== EXTRACTED NUTRITION DATA FROM NEW API ===');
       console.log('Final extracted data:', extractedData);
       return extractedData;
     }
   }
   
-  // Fallback to legacy extraction
-  if (dataSource === 'vnutrition' && results) {
-    try {
-      console.log('Processing vnutrition data source');
-      let nutrition;
-      
-      if (typeof results === 'string') {
-        console.log('Parsing string results');
-        
-        // Check if this is markdown/formatted text instead of JSON
-        if (results.startsWith('#') || results.includes('AI Chat response')) {
-          console.log('Results appear to be formatted text, not JSON nutrition data');
-          return null;
-        }
-        
-        nutrition = JSON.parse(results);
-      } else {
-        console.log('Using object results directly');
-        nutrition = results;
-      }
-      
-      console.log('=== RAW NUTRITION OBJECT ===');
-      console.log('Full object:', nutrition);
-      console.log('Object keys:', Object.keys(nutrition || {}));
-      
-      if (nutrition && nutrition.found !== false) {
-        const extractedData = {
-          calories: nutrition.calories_per_serving || 0,
-          protein: nutrition.protein_g || 0,
-          carbs: nutrition.carbs_g || 0,
-          fat: nutrition.fat_g || 0,
-          fiber: nutrition.fiber_g || 0,
-          sugar: nutrition.sugar_g || 0,
-          sodium: nutrition.sodium_mg || 0,
-          novaScore: nutrition.nova_classification || 1,
-          processedLevel: nutrition.nova_description || nutrition.processed_level || 'Unknown'
-        };
-        
-        console.log('=== EXTRACTED DATA ===');
-        console.log('Final extracted data:', extractedData);
-        
-        return extractedData;
-      } else {
-        console.log('No valid nutrition data - found:', nutrition?.found);
-        return null;
-      }
-    } catch (error) {
-      console.error('Error parsing nutrition data:', error);
-      console.log('This is likely because results are formatted text, not JSON nutrition data');
-      return null;
-    }
-  }
-  
-  console.log('Not vnutrition source');
+  console.log('No nutrition data available in API response');
   return null;
 };
 
-const NutritionChart: React.FC<NutritionChartProps> = ({ apiResponse, query, results, dataSource }) => {
+const NutritionChart: React.FC<NutritionChartProps> = ({ apiResponse, query }) => {
   // Extract nutrition data using new unified approach
-  const nutritionData = extractNutritionData(apiResponse, results, dataSource);
+  const nutritionData = extractNutritionData(apiResponse);
 
   // Only render if we have nutrition data
   if (!nutritionData) {

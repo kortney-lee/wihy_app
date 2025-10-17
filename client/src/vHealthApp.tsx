@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import SearchResults from './SearchResults';
 import ImageUploadModal from './components/ImageUploadModal';
 import ChatWidget from './components/ChatWidget';
@@ -47,6 +48,7 @@ interface SpeechRecognition extends EventTarget {
 }
 
 const VHealthApp: React.FC = () => {
+  const navigate = useNavigate();
   const [apiStatus, setApiStatus] = useState({
     connected: false,
     message: 'Checking API connection...'
@@ -105,201 +107,92 @@ const VHealthApp: React.FC = () => {
     setCurrentApiResponse(null);
     setCurrentChatResponse('');
     
-    // Add debugging right when loading starts
     setIsLoading(true);
-    console.log('🔍 SEARCH DEBUG: setIsLoading(true) called');
     
     if (!query.trim()) return;
 
     const trimmedQuery = query.trim();
     
-    // Check cache first
-    const cachedResults = searchCache.getCachedResult(trimmedQuery);
-    
-    if (cachedResults) {
-      console.log('🔍 SEARCH DEBUG: Using cached results');
-      // Use cached results and add to chat
-      setCurrentQuery(trimmedQuery);
-      setCurrentResults(cachedResults);
+    try {
+      console.log('🔍 SEARCH DEBUG: Making WiHy API call');
+      const wihyResponse = await wihyAPI.searchHealth(trimmedQuery);
+      console.log('🔍 SEARCH DEBUG: Got response from wihyAPI:', wihyResponse);
       
-      // Add cached result to chat
-      const userMessage = {
-        id: Date.now().toString(),
-        type: 'user',
-        message: trimmedQuery,
-        timestamp: new Date()
-      };
-      
-      const assistantMessage = {
-        id: (Date.now() + 1).toString(),
-        type: 'assistant', 
-        message: `Here are your results for: "${trimmedQuery}"`,
-        timestamp: new Date()
-      };
-      
-      setChatMessages(prev => [...prev, userMessage, assistantMessage]);
-      setIsChatOpen(true);
-      setIsLoading(false);
-      
-      if (pushToHistory) {
-        const url = `?q=${encodeURIComponent(trimmedQuery)}`;
-        window.history.pushState(
-          { view: 'search', query: trimmedQuery, results: cachedResults },
-          '',
-          url
-        );
-      }
-    } else {
-      console.log('🔍 SEARCH DEBUG: Making new search request');
-      
-      try {
-        console.log('🔍 SEARCH DEBUG: About to call wihyAPI.searchHealth');
-        const wihyResponse = await wihyAPI.searchHealth(trimmedQuery);
-        console.log('🔍 SEARCH DEBUG: Got response from wihyAPI:', wihyResponse);
-        
-        let healthData;
-        let formattedResults;
-        
-        if (wihyResponse.success) {
-          // Store the unified API response for chart components
-          if (isUnifiedResponse(wihyResponse)) {
-            setCurrentApiResponse(wihyResponse as UnifiedResponse);
-          } else {
-            setCurrentApiResponse(null); // Clear for legacy responses
-          }
-          
-          // Handle either UnifiedResponse or legacy WihyResponse formats
-          let responseData: any = null;
-          if (isUnifiedResponse(wihyResponse)) {
-            responseData = (wihyResponse as UnifiedResponse).data;
-          } else {
-            // legacy WihyResponse
-            responseData = (wihyResponse as WihyResponse).wihy_response || {};
-          }
-
-          const mainResponse = responseData?.ai_response?.response || responseData?.response || responseData?.core_principle || 'Health information provided';
-          const recommendations = responseData?.recommendations || [];
-          
-          // Add user message to chat
-          const userMessage = {
-            id: Date.now().toString(),
-            type: 'user',
-            message: trimmedQuery,
-            timestamp: new Date()
-          };
-          
-          // Add API response to chat - use ai_response.response if available from unified API
-          let chatResponse = mainResponse;
-          if (recommendations && Array.isArray(recommendations) && recommendations.length > 0) {
-            chatResponse += '\n\n**Recommendations:**\n' + 
-              recommendations.map((r: string) => `• ${r}`).join('\n');
-          } else if (recommendations && typeof recommendations === 'object') {
-            // Handle structured recommendations from unified API
-            const recSections = [];
-            if (recommendations.immediate_actions?.length) {
-              recSections.push('**Immediate Actions:**\n' + 
-                recommendations.immediate_actions.map((a: string) => `• ${a}`).join('\n'));
-            }
-            if (recommendations.lifestyle_changes?.length) {
-              recSections.push('**Lifestyle Changes:**\n' + 
-                recommendations.lifestyle_changes.map((l: string) => `• ${l}`).join('\n'));
-            }
-            if (recommendations.better_alternatives?.length) {
-              recSections.push('**Better Alternatives:**\n' + 
-                recommendations.better_alternatives.map((b: string) => `• ${b}`).join('\n'));
-            }
-            if (recSections.length > 0) {
-              chatResponse += '\n\n' + recSections.join('\n\n');
-            }
-          }
-          
-          const assistantMessage = {
-            id: (Date.now() + 1).toString(),
-            type: 'assistant',
-            message: chatResponse,
-            timestamp: new Date()
-          };
-          
-          setChatMessages(prev => [...prev, userMessage, assistantMessage]);
-          setIsChatOpen(true); // Open chat to show the response
-          
-          // Store the chat response for external message prop
-          setCurrentChatResponse(chatResponse);
-          console.log('🔍 CHAT DEBUG: Setting chat response:', chatResponse);
-          
-          // Convert WiHy response to expected format
-          healthData = {
-            summary: mainResponse,
-            details: wihyAPI.formatWihyResponse(wihyResponse),
-            sources: wihyAPI.extractCitations(wihyResponse),
-            recommendations: recommendations,
-            relatedTopics: [],
-            medicalDisclaimer: 'This guidance is based on evidence-based health principles. Always consult healthcare professionals for personalized medical advice.',
-            dataSource: 'wihy'
-          };
-          
-          // Format the results for display
-          formattedResults = formatHealthResults(healthData);
-          
-          setCurrentResults(formattedResults);
-          searchCache.setCachedResult(trimmedQuery, formattedResults, window.location.href);
+      if (wihyResponse.success) {
+        // Store the unified API response for chart components
+        if (isUnifiedResponse(wihyResponse)) {
+          setCurrentApiResponse(wihyResponse as UnifiedResponse);
         } else {
-          throw new Error('WiHy API request failed');
+          setCurrentApiResponse(null);
         }
+
+        // Extract response text for ChatWidget
+        let responseText = '';
+        console.log('🔍 SEARCH DEBUG: Processing response for ChatWidget');
+        console.log('🔍 SEARCH DEBUG: isUnifiedResponse:', isUnifiedResponse(wihyResponse));
         
-        // If this search included an image, silently save the analysis
-        if (currentPhotoId && image) {
-          await photoStorageService.updatePhotoAnalysis(currentPhotoId, formattedResults);
-          console.log('AI analysis saved for photo:', currentPhotoId);
+        if (isUnifiedResponse(wihyResponse)) {
+          const data = (wihyResponse as UnifiedResponse).data;
+          console.log('🔍 SEARCH DEBUG: Unified response data:', data);
+          
+          if (data.ai_response?.response) {
+            responseText = data.ai_response.response;
+            console.log('🔍 SEARCH DEBUG: Using ai_response.response:', responseText.substring(0, 100) + '...');
+          } else if (data.response) {
+            // Handle JSON string responses
+            if (typeof data.response === 'string') {
+              try {
+                const parsed = JSON.parse(data.response.replace(/'/g, '"'));
+                responseText = parsed.core_principle || parsed.message || data.response;
+                console.log('🔍 SEARCH DEBUG: Parsed JSON response:', responseText.substring(0, 100) + '...');
+              } catch {
+                responseText = data.response;
+                console.log('🔍 SEARCH DEBUG: Using raw string response:', responseText.substring(0, 100) + '...');
+              }
+            } else {
+              responseText = data.response;
+              console.log('🔍 SEARCH DEBUG: Using direct response:', responseText.substring(0, 100) + '...');
+            }
+          }
+        } else {
+          // Legacy WihyResponse format
+          const wihyResp = (wihyResponse as WihyResponse).wihy_response;
+          console.log('🔍 SEARCH DEBUG: Legacy response wihy_response:', wihyResp);
+          if (wihyResp && typeof wihyResp === 'object') {
+            responseText = (wihyResp as any).core_principle || (wihyResp as any).message || 'Health information provided';
+            console.log('🔍 SEARCH DEBUG: Using legacy response:', responseText.substring(0, 100) + '...');
+          } else {
+            responseText = 'Health information provided';
+            console.log('🔍 SEARCH DEBUG: Using fallback response');
+          }
         }
+
+        // Set query and response for ChatWidget
+        setCurrentQuery(trimmedQuery);
+        setCurrentChatResponse(responseText);
         
-        // Update history with results
+        console.log('🔍 SEARCH DEBUG: Final - Setting query:', trimmedQuery);
+        console.log('🔍 SEARCH DEBUG: Final - Setting chat response:', responseText);
+        
+        // Update URL for history
         if (pushToHistory) {
           const url = `?q=${encodeURIComponent(trimmedQuery)}`;
-          window.history.replaceState(
-            { 
-              view: 'results', 
-              query: trimmedQuery, 
-              results: formattedResults,
-              dataSource: healthData.dataSource
-            },
+          window.history.pushState(
+            { view: 'search', query: trimmedQuery, response: responseText },
             '',
             url
           );
         }
-
-        console.log(`✅ Search completed using: ${healthData.dataSource === 'openai' ? 'ChatGPT' : 'Local Database'}`);
-      } catch (error) {
-        console.error('🔍 SEARCH DEBUG: Error in search:', error);
-        const errorMessage = 'Sorry, we encountered an error while searching for health information. Please try again or consult with a healthcare provider for medical advice.';
-        setCurrentResults(errorMessage);
-        setDataSource('error');
-      } finally {
-        console.log('🔍 SEARCH DEBUG: setIsLoading(false) called');
-        setIsLoading(false);
-        setCurrentPhotoId(null); // Reset after use
+      } else {
+        console.error('Search failed:', wihyResponse);
+        setCurrentChatResponse('Sorry, I could not process your request. Please try again.');
       }
+    } catch (error) {
+      console.error('Search error:', error);
+      setCurrentChatResponse('Sorry, we encountered an error while searching. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
-  };
-
-  const formatHealthResults = (healthData: any): string => {
-    let formatted = '';
-    
-    // Keep only the clean content:
-    formatted += `${healthData.summary}\n\n`;
-    formatted += `${healthData.details}\n\n`;
-    
-    if (healthData.recommendations && healthData.recommendations.length > 0) {
-      formatted += `**Recommendations:**\n${healthData.recommendations.map((r: string) => `• ${r}`).join('\n')}\n\n`;
-    }
-    
-    if (healthData.sources && healthData.sources.length > 0) {
-      formatted += `**Sources:** ${healthData.sources.join(', ')}\n\n`;
-    }
-    
-    formatted += `**Medical Disclaimer:** ${healthData.medicalDisclaimer}`;
-    
-    return formatted;
   };
 
   const handleBackToSearch = () => {
@@ -576,18 +469,11 @@ const VHealthApp: React.FC = () => {
           <div className="chat-section" style={{ flex: '1', minWidth: '300px' }}>
             <ChatWidget
               isOpen={true}
-              onToggle={() => setIsChatOpen(!isChatOpen)}
               onClose={() => setIsChatOpen(false)}
               currentContext="search results"
               inline={true}
-              externalMessage={(() => {
-                const msg = currentQuery && currentChatResponse ? { 
-                  query: currentQuery, 
-                  response: currentChatResponse 
-                } : null;
-                console.log('🔍 CHAT DEBUG: Passing external message to ChatWidget:', msg);
-                return msg;
-              })()}
+              searchQuery={currentQuery}
+              searchResponse={currentChatResponse}
             />
           </div>
 
@@ -614,8 +500,6 @@ const VHealthApp: React.FC = () => {
                 <NutritionChart 
                   apiResponse={currentApiResponse}
                   query={currentQuery}
-                  results={currentResults}
-                  dataSource={dataSource}
                 />
               </div>
             </div>

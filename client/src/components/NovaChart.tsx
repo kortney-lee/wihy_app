@@ -6,88 +6,65 @@ import {
   Legend,
 } from 'chart.js';
 import { Doughnut } from 'react-chartjs-2';
+import { UnifiedResponse } from '../services/wihyAPI';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 interface NovaChartProps {
-  query: string;
-  results: string;
-  dataSource: "error" | "openai" | "local" | "vnutrition";
+  apiResponse?: UnifiedResponse | any;
+  query?: string;
 }
 
-// Extract nutrition data function moved from SearchResults
-const extractNutritionData = (results: string, dataSource: string) => {
-  console.log('=== EXTRACTING NUTRITION DATA IN NOVACHART ===');
-  console.log('DataSource:', dataSource);
-  console.log('Results type:', typeof results);
+// Extract nova/processing data from unified API response
+const extractNovaData = (apiResponse?: UnifiedResponse | any) => {
+  console.log('=== EXTRACTING NOVA DATA FROM NEW API ===');
+  console.log('API Response:', apiResponse);
   
-  if (dataSource === 'vnutrition') {
-    try {
-      console.log('Processing vnutrition data source');
-      let nutrition;
+  // Handle unified API response
+  if (apiResponse && apiResponse.success && apiResponse.data) {
+    console.log('Processing unified API nova data');
+    
+    // Use charts_data if available for direct rendering
+    if (apiResponse.data.charts_data?.nova_chart) {
+      const chartData = apiResponse.data.charts_data.nova_chart;
+      console.log('Using charts_data for nova chart:', chartData);
+      return {
+        type: 'chart_data',
+        novaScore: chartData.nova_score,
+        processedLevel: chartData.description,
+        chart_type: chartData.chart_type
+      };
+    }
+    
+    // Use nutrition_data from the API response
+    if (apiResponse.data.nutrition_data) {
+      const nutrition = apiResponse.data.nutrition_data;
+      const extractedData = {
+        type: 'nutrition_facts',
+        novaScore: nutrition.nova_score || 1,
+        processedLevel: nutrition.processing_level || 'Unknown'
+      };
       
-      if (typeof results === 'string') {
-        console.log('Parsing string results');
-        
-        // Check if this is markdown/formatted text instead of JSON
-        if (results.startsWith('#') || results.includes('AI Chat response')) {
-          console.log('Results appear to be formatted text, not JSON nutrition data');
-          return null;
-        }
-        
-        nutrition = JSON.parse(results);
-      } else {
-        console.log('Using object results directly');
-        nutrition = results;
-      }
-      
-      console.log('=== RAW NUTRITION OBJECT ===');
-      console.log('Full object:', nutrition);
-      console.log('Object keys:', Object.keys(nutrition || {}));
-      
-      if (nutrition && nutrition.found !== false) {
-        const extractedData = {
-          calories: nutrition.calories_per_serving || 0,
-          protein: nutrition.protein_g || 0,
-          carbs: nutrition.carbs_g || 0,
-          fat: nutrition.fat_g || 0,
-          fiber: nutrition.fiber_g || 0,
-          sugar: nutrition.sugar_g || 0,
-          sodium: nutrition.sodium_mg || 0,
-          novaScore: nutrition.nova_classification || 1,
-          processedLevel: nutrition.nova_description || nutrition.processed_level || 'Unknown'
-        };
-        
-        console.log('=== EXTRACTED DATA ===');
-        console.log('Final extracted data:', extractedData);
-        console.log('NOVA Score:', extractedData.novaScore);
-        
-        return extractedData;
-      } else {
-        console.log('No valid nutrition data - found:', nutrition?.found);
-        return null;
-      }
-    } catch (error) {
-      console.error('Error parsing nutrition data:', error);
-      console.log('This is likely because results are formatted text, not JSON nutrition data');
-      return null;
+      console.log('=== EXTRACTED NOVA DATA FROM NEW API ===');
+      console.log('Final extracted data:', extractedData);
+      return extractedData;
     }
   }
   
-  console.log('Not vnutrition source');
+  console.log('No nova data available in API response');
   return null;
 };
 
-const NovaChart: React.FC<NovaChartProps> = ({ query, results, dataSource }) => {
-  // Extract nutrition data using internal function
-  const nutritionData = extractNutritionData(results, dataSource);
+const NovaChart: React.FC<NovaChartProps> = ({ apiResponse, query }) => {
+  // Extract nova data using new unified approach
+  const novaData = extractNovaData(apiResponse);
 
-  // Only render if we have nutrition data
-  if (!nutritionData || dataSource !== 'vnutrition') {
+  // Only render if we have nova data
+  if (!novaData) {
     return null;
   }
 
-  const { novaScore, processedLevel } = nutritionData;
+  const { novaScore, processedLevel } = novaData;
 
   // NOVA classification colors
   const novaColors = {

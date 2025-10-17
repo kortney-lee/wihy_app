@@ -94,10 +94,34 @@ const CleanHealthSearch: React.FC<HealthSearchProps> = ({ onResponse }) => {
       {showChat && response && (
         <ChatWidget
           isOpen={true}
-          onToggle={() => setShowChat(!showChat)}
           onClose={() => setShowChat(false)}
           currentContext={`Search: ${query}`}
           inline={true}
+          searchQuery={query}
+          searchResponse={(() => {
+            // Extract response from WiHy API response
+            if (response?.data?.ai_response?.response) {
+              return response.data.ai_response.response;
+            } else if (response?.data?.response) {
+              // Handle JSON string responses
+              let responseText = response.data.response;
+              if (typeof responseText === 'string') {
+                try {
+                  const parsed = JSON.parse(responseText.replace(/'/g, '"'));
+                  return parsed.core_principle || parsed.message || responseText;
+                } catch {
+                  return responseText;
+                }
+              }
+              return responseText;
+            } else if (response?.wihy_response) {
+              return response.wihy_response.core_principle || response.wihy_response.message || 'Health information provided';
+            } else if (response?.message) {
+              return response.message;
+            } else {
+              return 'Health information received from WiHy API';
+            }
+          })()}
         />
       )}
 

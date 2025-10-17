@@ -1,13 +1,30 @@
 import { API_CONFIG, WIHY_API_ENDPOINT } from '../config/apiConfig';
 import { logger } from '../utils/logger';
 
-// Types for the WiHy Unified API (updated to match documentation)
-export interface UnifiedRequest {
-  query: string;                    // REQUIRED: Your health/nutrition question or request
-  request_type?: 'auto' | 'nutrition' | 'health' | 'chat' | 'auth' | 'predict' | 'train'; // OPTIONAL: defaults to "auto"
-  context?: Record<string, any>;    // OPTIONAL: Additional context object
-  user_id?: string;                 // OPTIONAL: User identifier for personalization
-  session_id?: string;              // OPTIONAL: Session identifier for conversation tracking
+// Types for the WiHy Unified API (updated to match actual API structure from /docs)
+export interface HealthQuestion {
+  query: string;                          // REQUIRED: Your health/nutrition question
+  user_context?: Record<string, any>;     // OPTIONAL: User context object
+  include_nutrition?: boolean;            // OPTIONAL: Include nutrition analysis (default: true)
+  include_biblical_wisdom?: boolean;      // OPTIONAL: Include biblical wisdom (default: true)
+  include_charts?: boolean;               // OPTIONAL: Include chart data (default: true)
+}
+
+// Keep the old interface for backward compatibility
+export interface UnifiedRequest extends HealthQuestion {
+  request_type?: 'auto' | 'nutrition' | 'health' | 'chat' | 'auth' | 'predict' | 'train';
+  context?: Record<string, any>;
+  user_id?: string;
+  session_id?: string;
+}
+
+// Interface for the /scan endpoint
+export interface ScanRequest {
+  image_url?: string;                     // OPTIONAL: URL to image
+  image_base64?: string;                  // OPTIONAL: Base64 encoded image
+  product_name?: string;                  // OPTIONAL: Product name to scan
+  barcode?: string;                       // OPTIONAL: Barcode/UPC to scan  
+  user_context?: Record<string, any>;     // OPTIONAL: User context object
 }
 
 export interface UnifiedResponse {
@@ -212,9 +229,11 @@ export interface WihyError {
 
 class WihyAPIService {
   private baseURL: string;
+  private isLocalDevelopment: boolean;
 
   constructor() {
     this.baseURL = WIHY_API_ENDPOINT;
+    this.isLocalDevelopment = API_CONFIG.WIHY_UNIFIED_API_URL.includes('localhost');
   }
 
   /**
@@ -224,28 +243,59 @@ class WihyAPIService {
     try {
       logger.apiRequest('Making WiHy Unified API request', request);
       
-      // Convert legacy WihyRequest to UnifiedRequest format if needed
-      let unifiedRequest: UnifiedRequest;
-      if ('user_context' in request) {
-        // Legacy format - convert to unified format
-        unifiedRequest = {
-          query: request.query,
-          request_type: 'auto',
-          context: request.user_context || {},
-        };
+      let requestBody: any;
+      let endpoint: string;
+      
+      if (this.isLocalDevelopment) {
+        // Local API uses /ask endpoint with HealthQuestion format
+        endpoint = this.baseURL; // Already points to /ask
+        
+        if ('user_context' in request) {
+          requestBody = {
+            query: request.query,
+            user_context: request.user_context || {},
+            include_nutrition: true,
+            include_biblical_wisdom: true,
+            include_charts: true
+          };
+        } else {
+          const unifiedReq = request as UnifiedRequest;
+          requestBody = {
+            query: unifiedReq.query,
+            user_context: unifiedReq.context || unifiedReq.user_context || {},
+            include_nutrition: unifiedReq.include_nutrition !== false,
+            include_biblical_wisdom: unifiedReq.include_biblical_wisdom !== false,
+            include_charts: unifiedReq.include_charts !== false
+          };
+        }
       } else {
-        // Already in unified format
-        unifiedRequest = request as UnifiedRequest;
+        // Remote API uses /wihy/api endpoint with old format
+        endpoint = `${API_CONFIG.WIHY_UNIFIED_API_URL}/wihy/api`;
+        
+        if ('user_context' in request) {
+          requestBody = {
+            query: request.query,
+            request_type: 'auto',
+            context: request.user_context || {}
+          };
+        } else {
+          const unifiedReq = request as UnifiedRequest;
+          requestBody = {
+            query: unifiedReq.query,
+            request_type: unifiedReq.request_type || 'auto',
+            context: unifiedReq.context || unifiedReq.user_context || {}
+          };
+        }
       }
       
       // Use fetch API to match the working example exactly with timeout
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
       
-      const response = await fetch(this.baseURL, {
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(unifiedRequest),
+        body: JSON.stringify(requestBody),
         signal: controller.signal
       });
 
@@ -426,6 +476,77 @@ class WihyAPIService {
   }
 
   /**
+   * Scan food images, barcodes, or products using the unified API
+   */
+  async scanFood(file?: File, scanOptions?: Partial<ScanRequest>): Promise<WihyResponse | UnifiedResponse> {
+    try {
+      let endpoint: string;
+      let requestBody: any;
+      
+      if (this.isLocalDevelopment) {
+        // Local API uses /scan endpoint
+        endpoint = `${API_CONFIG.WIHY_UNIFIED_API_URL}/scan`;
+        
+        if (file) {
+          // Convert file to base64 for the API
+          const base64 = await this.fileToBase64(file);
+          requestBody = {
+            image_base64: base64,
+            user_context: scanOptions?.user_context || {},
+            ...scanOptions
+          };
+        } else {
+          requestBody = scanOptions || {};
+        }
+      } else {
+        // Remote API - fallback to legacy image analysis
+        // This would need to be implemented based on what the remote API supports
+        throw new Error('Image scanning not yet supported on remote API');
+      }
+      
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000);
+      
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(requestBody),
+        signal: controller.signal
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      logger.apiResponse('WiHy Scan API response received', data);
+      return data;
+    } catch (error) {
+      logger.error('WiHy Scan API error:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Convert File to base64 string
+   */
+  private fileToBase64(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => {
+        const result = reader.result as string;
+        // Remove the data:image/jpeg;base64, prefix
+        const base64 = result.split(',')[1];
+        resolve(base64);
+      };
+      reader.onerror = error => reject(error);
+    });
+  }
+
+  /**
    * General health search using the unified API
    */
   async searchHealth(query: string, userContext?: UserContext): Promise<WihyResponse | UnifiedResponse> {
@@ -452,7 +573,46 @@ class WihyAPIService {
       let formatted = `# WiHy Health Assistant\n\n`;
       
       if (unifiedResp.data.response) {
-        formatted += unifiedResp.data.response;
+        // Try to parse JSON string if it's stringified
+        let parsedResponse: any = null;
+        if (typeof unifiedResp.data.response === 'string') {
+          try {
+            parsedResponse = JSON.parse(unifiedResp.data.response.replace(/'/g, '"'));
+          } catch (e) {
+            // If parsing fails, use the raw string
+            formatted += unifiedResp.data.response;
+          }
+        }
+        
+        if (parsedResponse) {
+          // Format the parsed health response
+          formatted += `## ${parsedResponse.core_principle || 'Health Information'}\n\n`;
+          
+          if (parsedResponse.personalized_analysis?.action_items?.length > 0) {
+            formatted += `### 📋 Action Items:\n`;
+            parsedResponse.personalized_analysis.action_items.forEach((action: any, index: number) => {
+              formatted += `#### ${index + 1}. ${action.action}\n`;
+              formatted += `- **Priority:** ${action.priority}\n`;
+              formatted += `- **Timeline:** ${action.timeline}\n`;
+              formatted += `- **Target:** ${action.target_illness}\n\n`;
+            });
+          }
+          
+          if (parsedResponse.research_foundation?.length > 0) {
+            formatted += `### 📚 Research Foundation:\n`;
+            parsedResponse.research_foundation.forEach((research: any) => {
+              formatted += `- **${research.citation_text}** (${research.study_type})\n`;
+              formatted += `  ${research.key_finding}\n\n`;
+            });
+          }
+          
+          if (parsedResponse.biblical_wisdom?.length > 0) {
+            formatted += `### ✝️ Biblical Wisdom:\n`;
+            parsedResponse.biblical_wisdom.forEach((wisdom: string) => {
+              formatted += `> ${wisdom}\n\n`;
+            });
+          }
+        }
       } else if (unifiedResp.data.analysis) {
         formatted += unifiedResp.data.analysis;
       } else if (unifiedResp.data.training_status) {

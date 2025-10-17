@@ -93,69 +93,7 @@ const sourceGate = (text: string, dataSource: ResultQualityPieProps['dataSource'
   return false;
 };
 
-/**
- * Evaluate evidence confidence with HARD GATES to reduce ambiguity.
- * Returns a discrete score for the ring (0.90 | 0.60 | 0.20) + verdict + reasons.
- */
-function evaluateEvidenceConfidence(
-  query: string,
-  results: string,
-  dataSource: ResultQualityPieProps['dataSource'],
-  citations?: string[]
-): { score: number; verdict: Verdict; reasons: string[] } {
-  const text = results || '';
-  const lower = text.toLowerCase();
-
-  // Short-circuit invalid answers/queries
-  if (!text.trim() || /please (provide|clarify)/i.test(text)) {
-    return { score: 0.20, verdict: 'BAD', reasons: ['No usable answer'] };
-  }
-  if (/not (a|the) recognized|no information found|could not find|doesn'?t seem/i.test(text)) {
-    return { score: 0.20, verdict: 'BAD', reasons: ['Unrecognized topic'] };
-  }
-  if (/^[a-z0-9]{1,7}$/i.test(query) && !/^(hiv|flu|cold|covid|bp|bmi|gerd|ibs|std|uti)$/i.test(query)) {
-    return { score: 0.20, verdict: 'BAD', reasons: ['Query looks invalid'] };
-  }
-
-  // Merge citations into text for gate checks
-  const citationsText = (citations || []).join(' ');
-  const textWithCites = text + ' ' + citationsText;
-
-  // Gates
-  const gates = {
-    source: sourceGate(textWithCites, dataSource),
-    citations: hasStrongId(textWithCites) || extractUrls(textWithCites).length > 0,
-    specificity: hasSpecificNumbers(lower),
-    consistency: !(hypeOrBS(lower) || contradictionWithoutRefs(lower)),
-    recency: recencyOK(lower),
-  };
-
-  const passed = Object.values(gates).filter(Boolean).length;
-  const criticalOkay = (gates.source || gates.citations) && gates.specificity;
-
-  let verdict: Verdict;
-  if ((dataSource === 'vnutrition' || dataSource === 'local' || dataSource === 'wihy') && criticalOkay) {
-    verdict = 'GOOD';
-  } else if (passed >= 4 && criticalOkay) {
-    verdict = 'GOOD';
-  } else if (passed === 3 && !hypeOrBS(lower)) {
-    verdict = 'REVIEW'; // narrow gray zone
-  } else {
-    verdict = 'BAD';
-  }
-
-  // Discrete mapping to compress gray area
-  const score = verdict === 'GOOD' ? 0.90 : verdict === 'REVIEW' ? 0.60 : 0.20;
-
-  const reasons: string[] = [];
-  if (!gates.source) reasons.push('Weak source');
-  if (!gates.citations) reasons.push('No citations');
-  if (!gates.specificity) reasons.push('Low numeric specificity');
-  if (!gates.consistency) reasons.push('Inconsistent language');
-  if (!gates.recency) reasons.push('Out-of-date');
-
-  return { score, verdict, reasons };
-}
+/* Legacy evaluation function removed - now using unified API response */
 
 /* ====================== Component ====================== */
 
@@ -222,26 +160,13 @@ const ResultQualityPie: React.FC<ResultQualityPieProps> = ({
       }
     }
     
-    // Fallback to legacy evaluation
-    if (query && results && results.trim() !== '' && dataSource) {
-      console.log('Evaluating evidence confidence using legacy method...');
-      const newEvaluation = evaluateEvidenceConfidence(query, results, dataSource, citations);
-      console.log('Evidence evaluation result:', newEvaluation);
-      setEvaluation(newEvaluation);
-    } else {
-      console.log('Not evaluating - missing required props:', {
-        hasApiResponse: !!apiResponse,
-        hasQuery: !!query,
-        hasResults: !!results && results.trim() !== '',
-        hasDataSource: !!dataSource
-      });
-      // Set a default evaluation for missing data
-      setEvaluation({
-        score: 0.20,
-        verdict: 'BAD',
-        reasons: ['Waiting for results...']
-      });
-    }
+    // No API response available - set default evaluation
+    console.log('No unified API response available for evaluation');
+    setEvaluation({
+      score: 0.20,
+      verdict: 'BAD',
+      reasons: ['Waiting for results...']
+    });
   }, [query, results, dataSource, citations, apiResponse]);
 
   const { score, verdict, reasons } = evaluation;

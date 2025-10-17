@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { BrowserRouter as Router, Routes, Route, useSearchParams, useNavigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useSearchParams, useNavigate, useLocation } from 'react-router-dom';
 import VHealthSearch from './VHealthSearch';
 import SearchResults from './SearchResults';
 import HealthNewsFeed from './components/HealthNewsFeed';
@@ -56,6 +56,7 @@ type AllowedDataSource = "error" | "openai" | "local" | "vnutrition" | "wihy";
 const ResultsPage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const query = searchParams.get('q') || '';
   const isHealthNews = searchParams.get('type') === 'health_news';
   const category = searchParams.get('category') || 'all';
@@ -66,6 +67,7 @@ const ResultsPage: React.FC = () => {
   const [citations, setCitations] = useState<string[]>([]);
   const [recommendations, setRecommendations] = useState<string[]>([]);
   const [disclaimer, setDisclaimer] = useState<string>('');
+  const [apiResponse, setApiResponse] = useState<any>(null);
   
   // Track if this is initial load to prevent loading spinner on browser navigation
   const [isInitialLoad, setIsInitialLoad] = useState(true);
@@ -84,6 +86,20 @@ const ResultsPage: React.FC = () => {
   useEffect(() => {
     const fetchResults = async () => {
       if (!query && !isHealthNews) {
+        setIsLoading(false);
+        return;
+      }
+      
+      // Check if we have fresh data from navigation (e.g., from Header search)
+      const navigationState = location.state as any;
+      if (navigationState?.fromSearch && navigationState?.results && navigationState?.apiResponse) {
+        console.log('🔍 APP DEBUG: Using navigation state data:', navigationState);
+        setResults(navigationState.results.details || navigationState.results.summary || 'No results');
+        setApiResponse(navigationState.apiResponse); // Set the API response for ChatWidget
+        setDataSource(navigationState.dataSource || 'wihy');
+        setCitations(navigationState.results.sources || []);
+        setRecommendations(navigationState.results.recommendations || []);
+        setDisclaimer(navigationState.results.medicalDisclaimer || '');
         setIsLoading(false);
         return;
       }
@@ -158,8 +174,9 @@ const ResultsPage: React.FC = () => {
           const formattedResult = wihyAPI.formatWihyResponse(wihyResult);
           setResults(formattedResult);
           setDataSource("wihy");
+          setApiResponse(wihyResult); // Store the original API response
           
-          // Cache the WiHy results
+          // Cache the WiHy results (still cache the formatted result for legacy compatibility)
           searchCache.setCachedResult(cacheKey, formattedResult, window.location.href);
           
           setCitations(wihyAPI.extractCitations(wihyResult));
@@ -273,7 +290,7 @@ const ResultsPage: React.FC = () => {
     };
     
     fetchResults();
-  }, [query, isHealthNews, category]); // Removed 'navigate' from dependencies
+  }, [query, isHealthNews, category, location.state]); // Added location.state to dependencies
 
   // Function to format news articles for display
   const formatNewsArticles = (articles: any[]): string => {
@@ -321,6 +338,7 @@ const ResultsPage: React.FC = () => {
       citations={citations}
       recommendations={recommendations}
       disclaimer={disclaimer}
+      apiResponse={apiResponse}
     />
   );
 };
