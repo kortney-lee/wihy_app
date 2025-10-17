@@ -5,8 +5,7 @@ import { foodAnalysisService } from './components/foodAnalysisService';
 import ImageUploadModal from './components/ImageUploadModal';
 import MultiAuthLogin from './components/shared/components/MultiAuthLogin';
 import ResultQualityPie from './components/ResultQualityPie';
-import NutritionChart from './components/NutritionChart';
-import NovaChart from './components/NovaChart';
+// Chart imports removed - charts now handled by vHealthApp with new API structure
 import ChatWidget from './components/ChatWidget';
 import './styles/VHealthSearch.css';
 import Header from './components/shared/components/Header';
@@ -68,6 +67,7 @@ interface SearchResultsProps {
   citations?: string[];
   recommendations?: string[];
   disclaimer?: string;
+  apiResponse?: any; // Add unified API response for chart components
 }
 
 // Add this function before the SearchResults component
@@ -130,7 +130,8 @@ const SearchResults: React.FC<SearchResultsProps> = ({
   dataSource,
   citations = [],
   recommendations = [],
-  disclaimer = ""
+  disclaimer = "",
+  apiResponse
 }) => {
   const [input, setInput] = useState('');
   const [image, setImage] = useState<File | string | null>(null);
@@ -327,7 +328,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({
                   fontWeight: '600',
                   color: '#1f2937'
                 }}>
-                  Health Assistant Chat
+                  WiHy Health Response
                 </h2>
                 <span style={{
                   fontSize: '12px',
@@ -336,18 +337,39 @@ const SearchResults: React.FC<SearchResultsProps> = ({
                   padding: '4px 8px',
                   borderRadius: '4px'
                 }}>
-                  {dataSource.toUpperCase()}
+                  AI-Powered
                 </span>
               </div>
 
               {/* Chat Widget */}
               <div style={{ flex: 1, overflow: 'hidden' }}>
                 <ChatWidget
+                  key={`chatwidget-${query}`} // Force re-render when query changes
                   isOpen={true}
-                  onToggle={() => {}}
                   onClose={() => {}}
                   currentContext={currentContext}
                   inline={true}
+                  searchQuery={query}
+                  searchResponse={(() => {
+                    // Extract response from apiResponse or fall back to results
+                    let extractedResponse = '';
+                    if (apiResponse?.data?.ai_response?.response) {
+                      extractedResponse = apiResponse.data.ai_response.response;
+                    } else if (apiResponse?.data?.response) {
+                      extractedResponse = apiResponse.data.response;
+                    } else {
+                      extractedResponse = results;
+                    }
+                    
+                    console.log('🔍 SEARCHRESULTS DEBUG: Passing to ChatWidget:', {
+                      query,
+                      extractedResponse: extractedResponse?.substring(0, 100) + '...',
+                      apiResponse: !!apiResponse,
+                      results: !!results
+                    });
+                    
+                    return extractedResponse;
+                  })()}
                 />
               </div>
             </div>
@@ -378,27 +400,13 @@ const SearchResults: React.FC<SearchResultsProps> = ({
                     <div>
                       <h4 style={{ marginBottom: '12px', color: '#374151', fontSize: '14px' }}>Quality Analysis</h4>
                       <ResultQualityPie 
+                        apiResponse={apiResponse}
                         query={query}
                         results={results} 
                         dataSource={dataSource === 'wihy' ? 'vnutrition' : dataSource}
                       />
                     </div>
-                    <div>
-                      <h4 style={{ marginBottom: '12px', color: '#374151', fontSize: '14px' }}>Nutrition Breakdown</h4>
-                      <NutritionChart 
-                        query={query}
-                        results={results}
-                        dataSource={dataSource === 'wihy' ? 'vnutrition' : dataSource}
-                      />
-                    </div>
-                    <div>
-                      <h4 style={{ marginBottom: '12px', color: '#374151', fontSize: '14px' }}>Processing Level</h4>
-                      <NovaChart 
-                        query={query}
-                        results={results}
-                        dataSource={dataSource === 'wihy' ? 'vnutrition' : dataSource}
-                      />
-                    </div>
+                    {/* Chart components removed - now handled by vHealthApp with new API structure */}
                   </>
                 )}
               </div>

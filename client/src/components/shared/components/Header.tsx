@@ -242,18 +242,41 @@ const Header: React.FC<HeaderProps> = ({
         if (wihyResponse.success) {
           // Handle both unified and legacy response formats
           let summary = 'Health information provided';
+          let actualHealthResponse = 'Health information provided';
+          
           if ('data' in wihyResponse) {
             // New unified API response format
-            summary = (wihyResponse as any).data?.response || summary;
+            const data = (wihyResponse as any).data;
+            if (data?.ai_response?.response) {
+              actualHealthResponse = data.ai_response.response;
+              summary = actualHealthResponse;
+            } else if (data?.response) {
+              // Handle JSON string responses
+              if (typeof data.response === 'string') {
+                try {
+                  const parsed = JSON.parse(data.response.replace(/'/g, '"'));
+                  actualHealthResponse = parsed.core_principle || parsed.message || data.response;
+                } catch {
+                  actualHealthResponse = data.response;
+                }
+              } else {
+                actualHealthResponse = data.response;
+              }
+              summary = actualHealthResponse;
+            }
           } else {
             // Legacy WihyResponse format
-            summary = (wihyResponse as any).wihy_response?.core_principle || summary;
+            const wihyResp = (wihyResponse as any).wihy_response;
+            if (wihyResp && typeof wihyResp === 'object') {
+              actualHealthResponse = wihyResp.core_principle || wihyResp.message || 'Health information provided';
+              summary = actualHealthResponse;
+            }
           }
           
-          // Convert WiHy response to expected format
+          // Convert WiHy response to expected format - use actual health response instead of technical formatting
           const searchResults = {
             summary: summary,
-            details: wihyAPI.formatWihyResponse(wihyResponse),
+            details: actualHealthResponse, // Use actual health response instead of formatted technical response
             sources: wihyAPI.extractCitations(wihyResponse),
             recommendations: wihyAPI.extractRecommendations(wihyResponse),
             relatedTopics: [],
@@ -287,6 +310,7 @@ const Header: React.FC<HeaderProps> = ({
           navigate(`/results?q=${encodeURIComponent(queryToUse)}`, {
             state: {
               results: searchResults,
+              apiResponse: wihyResponse, // Pass the original API response
               dataSource: 'wihy',
               fromSearch: true
             }
