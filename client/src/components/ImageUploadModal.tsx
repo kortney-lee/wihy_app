@@ -1,7 +1,6 @@
 // src/components/ImageUploadModal.tsx
 import React, { useState, useRef } from 'react';
 import './Spinner.css';
-import { getApiEndpoint } from '../config/apiConfig';
 import '../styles/VHealthSearch.css';
 
 interface ImageUploadModalProps {
@@ -100,38 +99,49 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
     setIsProcessing(true);
     
     try {
-      console.log('🔍 STEP 2: Creating FormData...');
-      const formData = new FormData();
-      formData.append('image', file);
+      console.log('🔍 STEP 2: Using WiHy Scan API...');
       
-      console.log('🔍 STEP 3: Making API call...');
-      const response = await fetch(getApiEndpoint('/analyze-image'), {
-        method: 'POST',
-        body: formData,
-      });
+      // Import wihyAPI dynamically to avoid circular imports
+      const { wihyAPI } = await import('../services/wihyAPI');
+      
+      console.log('🔍 STEP 3: Making scan API call...');
+      const result = await wihyAPI.scanFood(file);
 
-      console.log('🔍 STEP 4: Response received:', {
-        status: response.status,
-        statusText: response.statusText,
-        ok: response.ok
-      });
-
-      const result = await response.json();
-      console.log('🔍 STEP 5: Raw backend result:', result);
+      console.log('🔍 STEP 4: Scan API response received:', result);
       
-      // Let's see exactly what the backend is returning
-      console.log('🔍 STEP 6: Result analysis:', {
-        type: typeof result,
-        keys: Object.keys(result || {}),
-        foodName: result?.foodName,
-        success: result?.success,
-        fullResult: JSON.stringify(result, null, 2)
-      });
+      // Extract food name from the scan result using unified format
+      let foodName = 'unknown';
       
-      let foodName = result?.foodName || result?.name || result?.food || 'unknown';
-      console.log('🔍 STEP 7: Extracted food name:', foodName);
+      // Type-safe check for unified response format
+      if (result.success && 'data' in result && result.data) {
+        const unifiedResult = result as any; // Use any to handle type checking
+        
+        // Primary: Get health advice from AI response
+        if (unifiedResult.data.ai_response?.response) {
+          foodName = unifiedResult.data.ai_response.response;
+          console.log('🔍 Using AI response:', foodName);
+        }
+        // Fallback: Try to get product name or other analysis
+        else if (unifiedResult.data.product_name) {
+          foodName = unifiedResult.data.product_name;
+          console.log('🔍 Using product name:', foodName);
+        }
+        else if (unifiedResult.data.analysis) {
+          foodName = unifiedResult.data.analysis;
+          console.log('🔍 Using analysis:', foodName);
+        }
+        else {
+          foodName = 'Food item scanned';
+          console.log('🔍 Using fallback name');
+        }
+      } else {
+        console.log('❌ No valid response data found');
+        foodName = 'Food analysis unavailable';
+      }
       
-      console.log('🔍 STEP 8: Triggering search for:', foodName);
+      console.log('🔍 STEP 5: Extracted food name:', foodName);
+      
+      console.log('🔍 STEP 6: Triggering analysis completion for:', foodName);
       onAnalysisComplete(foodName);
       
     } catch (error) {

@@ -1,7 +1,7 @@
 // Environment configuration for API endpoints
 export const API_CONFIG = {
   // WIHY Unified API - Single endpoint for all health and nutrition requests
-  WIHY_UNIFIED_API_URL: process.env.REACT_APP_WIHY_API_URL || 'http://localhost:8001',
+  WIHY_UNIFIED_API_URL: process.env.REACT_APP_WIHY_API_URL || 'http://localhost:8000',
   
   // Legacy endpoints (for fallback if needed)
   BASE_URL: process.env.REACT_APP_API_URL || 'http://localhost:5000/api',
@@ -11,7 +11,7 @@ export const API_CONFIG = {
 } as const;
 
 // WIHY Unified API endpoint (corrected to match documentation)
-export const WIHY_API_ENDPOINT = `${API_CONFIG.WIHY_UNIFIED_API_URL}/wihy/api`;
+export const WIHY_API_ENDPOINT = `${API_CONFIG.WIHY_UNIFIED_API_URL}/ask`;
 
 // Helper function to get full API endpoint (legacy)
 export const getApiEndpoint = (path: string = '') => {

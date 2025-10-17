@@ -76,19 +76,48 @@ const VNutrition: React.FC = () => {
     setError(null);
     setResult(null);
 
-    const formData = new FormData();
-    formData.append("file", selectedFile);
-
     try {
-      const res = await fetch(getWihyEndpoint("/analyze"), {
-        method: "POST",
-        body: formData,
-      });
-      if (!res.ok) throw new Error(await res.text());
-      const data = await res.json();
-      setResult(data);
+      // Import wihyAPI to use the new scan endpoint
+      const { wihyAPI } = await import('../services/wihyAPI');
+      
+      console.log('Using WiHy Scan API for nutrition analysis...');
+      const scanResult = await wihyAPI.scanFood(selectedFile);
+      
+      // Convert scan result to expected nutrition format using unified API
+      let nutritionData: any = {};
+      
+      // Type-safe check for unified response format
+      if (scanResult.success && 'data' in scanResult && scanResult.data) {
+        const unifiedResult = scanResult as any; // Use any to handle type checking
+        const data = unifiedResult.data;
+        
+        nutritionData = {
+          item: data?.ai_response?.response || data?.product_name || 'Scanned Food Item',
+          calories_per_serving: data?.nutrition?.facts?.calories_per_serving || 0,
+          macros: {
+            protein: data?.nutrition?.facts?.protein_g || 0,
+            carbs: data?.nutrition?.facts?.carbs_g || 0,
+            fat: data?.nutrition?.facts?.fat_g || 0
+          },
+          nourish_score: data?.nutrition?.nourish_score?.score || 0,
+          analysis: data?.ai_response?.response || 'Nutrition analysis provided',
+          processed_level: data?.nutrition?.nova_classification || 'Unknown'
+        };
+        
+        console.log('📊 Converted nutrition data:', nutritionData);
+      } else {
+        console.log('❌ No valid nutrition data found');
+        nutritionData = {
+          item: 'Scanned Food Item',
+          calories_per_serving: 0,
+          macros: { protein: 0, carbs: 0, fat: 0 },
+          analysis: 'Nutrition analysis unavailable'
+        };
+      }
+      
+      setResult(nutritionData);
     } catch (err: any) {
-      setError(err.message || "Upload failed");
+      setError(err.message || "Scan failed");
     } finally {
       setLoading(false);
     }
