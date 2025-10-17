@@ -84,25 +84,24 @@ export interface NewsFeedResponse {
 }
 
 export interface NewsQueryParams {
-  limit?: number;
-  country?: string;
-  category?: string;
-  exclude_category?: string; // Add this field to exclude certain categories
-  feed_id?: number;
-  feed_priority?: string;
-  flat?: boolean;
-  page?: number;
-  per_page?: number;
-  timestamp?: number; // Added to support refreshNewsFeed
-  query?: string;     // Added to support searchNewsArticles
-  sort_by?: string; // Add sorting parameter
-  sort_order?: 'asc' | 'desc'; // Add sort direction
+  limit?: number;                    // Number of articles to return (1-500)
+  quality?: string;                  // '1' or 'true' for quality articles with good images
+  category?: string;                 // Filter by category (tech, business, science, health, etc.)
+  country?: string;                  // Filter by country code (US, IN, UK, CA, AU, DE, FR, JP)
+  feed_id?: number;                  // Filter by specific feed ID
+  feed_priority?: string;            // Filter by feed priority (single, range, or comma-separated)
+  flat?: string | boolean;           // Return flat structure ('true'/'false')
+  page?: number;                     // Page number (starts at 1)
+  per_page?: number;                 // Number of articles per page (1-100)
+  timestamp?: number;                // Added to support refreshNewsFeed
+  query?: string;                    // Added to support searchNewsArticles (not in OpenAPI but used internally)
 }
 
 class NewsService {
-  // Update the apiUrl to use the configurable endpoint
+  // Update to use the correct news API endpoint from the OpenAPI spec
   private getNewsEndpoint() {
-    return getApiEndpoint('/news');
+    // According to the OpenAPI spec, the server is at http://localhost:5000/api/news
+    return 'http://localhost:5000/api/news';
   }
   
   /**
@@ -110,16 +109,22 @@ class NewsService {
    */
   async getArticles(params: NewsQueryParams = {}): Promise<NewsFeedResponse> {
     try {
-      // Set defaults
-      const queryParams: NewsQueryParams = {
-        limit: 500,
-        country: 'US',
-        feed_priority: '1-5',  // Changed from '1-10' to '1-5'
-        flat: true,
+      // Set defaults based on OpenAPI specification
+      const queryParams: any = {
+        limit: 50,                    // Default from OpenAPI spec
+        quality: '1',                 // Use quality=1 to get articles with good images
+        country: 'US',                // Default country
+        feed_priority: '1-10',        // Feed priority range as per spec
+        flat: 'true',                 // Return flat structure
         page: 1,
         per_page: 12,
         ...params // Override with any provided params
       };
+
+      // Convert boolean flat to string for API
+      if (typeof queryParams.flat === 'boolean') {
+        queryParams.flat = queryParams.flat ? 'true' : 'false';
+      }
 
       console.log('Fetching news with params:', queryParams);
       
@@ -180,13 +185,13 @@ class NewsService {
   }
 
   /**
-   * Get available news categories
+   * Get available news categories from articles endpoint
    */
   async getCategories(): Promise<string[]> {
     try {
-      const response = await axios.get(`${this.getNewsEndpoint()}/categories`);
-      // Type assertion for correct response type
-      return (response.data as any).categories || [];
+      // Use the articles endpoint to get category data by checking available categories
+      // Based on the OpenAPI spec, categories are: tech, business, science, health, sports, entertainment, politics, world
+      return ['tech', 'business', 'science', 'health', 'sports', 'entertainment', 'politics', 'world'];
     } catch (error) {
       console.error('Error fetching news categories:', error);
       return [];
@@ -194,13 +199,21 @@ class NewsService {
   }
 
   /**
-   * Get available countries
+   * Get available countries from articles endpoint
    */
   async getCountries(): Promise<{code: string, name: string}[]> {
     try {
-      const response = await axios.get(`${this.getNewsEndpoint()}/countries`);
-      // Type assertion for correct response type
-      return (response.data as any).countries || [];
+      // Based on the OpenAPI spec, supported countries are: US, IN, UK, CA, AU, DE, FR, JP
+      return [
+        { code: 'US', name: 'United States' },
+        { code: 'IN', name: 'India' },
+        { code: 'UK', name: 'United Kingdom' },
+        { code: 'CA', name: 'Canada' },
+        { code: 'AU', name: 'Australia' },
+        { code: 'DE', name: 'Germany' },
+        { code: 'FR', name: 'France' },
+        { code: 'JP', name: 'Japan' }
+      ];
     } catch (error) {
       console.error('Error fetching countries:', error);
       return [];
@@ -235,9 +248,7 @@ export const fetchNewsFeed = async (categories?: string[], limit?: number): Prom
   // Request more articles than needed for better sorting/filtering
   params.limit = limit ? limit * 2 : 50;
   
-  // Always sort by published date to get newest content
-  params.sort_by = 'published_date';
-  params.sort_order = 'desc';
+  // Note: Sorting is handled by the API internally, no sort parameters needed
   
   console.log('Fetching news with params:', params);
   
@@ -392,9 +403,8 @@ export const getArticlesByCategory = async (category: string, limit?: number): P
   
   const params: NewsQueryParams = { 
     category, 
-    limit: limit ? limit * 1.5 : 20, // Fetch a few more than needed
-    sort_by: 'published_date',
-    sort_order: 'desc'
+    limit: limit ? Math.round(limit * 1.5) : 20, // Fetch a few more than needed
+    quality: '1' // Get quality articles with good images
   };
   
   const response = await newsService.getArticles(params);
@@ -442,9 +452,8 @@ export const refreshNewsFeed = async (categories?: string[], limit?: number): Pr
     params.category = categories.join(',');
   }
   
-  // Add sort parameters
-  params.sort_by = 'published_date';
-  params.sort_order = 'desc';
+  // Use quality parameter for better articles
+  params.quality = '1';
   
   console.log('Refreshing news feed with timestamp:', timestamp);
   
@@ -508,8 +517,7 @@ export const searchNewsArticles = async (query: string, limit?: number): Promise
   const params: NewsQueryParams = {
     query: query.trim(),
     limit: limit || 50,
-    sort_by: 'published_date', // Default to recent articles first
-    sort_order: 'desc'
+    quality: '1' // Get quality articles with good images for search
   };
   
   console.log(`Searching news articles with query: "${query}"`);
