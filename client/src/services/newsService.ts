@@ -98,19 +98,32 @@ export interface NewsQueryParams {
 }
 
 class NewsService {
-  // Configure multiple endpoints for development and production
+  // Smart endpoint selection based on environment
   private getEndpoints() {
-    return [
-      // Production endpoints
-      'https://services.wihy.ai/api/news',
-      'https://ml-news-feed.graypebble-2c416c49.westus2.azurecontainerapps.io/api/news',
-      // Local development endpoints
-      'http://localhost:5000/api/news',
-      'http://localhost:8000/api/news'  // Alternative local port
-    ];
+    const isDevelopment = process.env.NODE_ENV === 'development' || 
+                         window.location.hostname === 'localhost' ||
+                         window.location.hostname === '127.0.0.1';
+    
+    if (isDevelopment) {
+      // In development: try local first, then production as fallback
+      return [
+        'http://localhost:5000/api/news',
+        'http://localhost:8000/api/news',
+        'https://services.wihy.ai/api/news',
+        'https://ml-news-feed.graypebble-2c416c49.westus2.azurecontainerapps.io/api/news'
+      ];
+    } else {
+      // In production: try production endpoints first, local as fallback (for hybrid setups)
+      return [
+        'https://services.wihy.ai/api/news',
+        'https://ml-news-feed.graypebble-2c416c49.westus2.azurecontainerapps.io/api/news',
+        'http://localhost:5000/api/news',
+        'http://localhost:8000/api/news'
+      ];
+    }
   }
 
-  // Get primary endpoint (first in list)
+  // Get primary endpoint (first in list based on environment)
   private getNewsEndpoint() {
     return this.getEndpoints()[0];
   }
@@ -123,7 +136,9 @@ class NewsService {
       // Set defaults based on OpenAPI specification
       const queryParams: any = {
         limit: 50,                    // Default from OpenAPI spec
-        quality: '1',                 // Use quality=1 to get articles with good images
+        // Note: quality=1 filters out articles without good images, which may result in empty arrays
+        // We'll include both regular and flagged articles in our processing
+        quality: '0',                 // Use quality=0 to get all articles, not just those with good images
         country: 'US',                // Default country
         feed_priority: '1-10',        // Feed priority range as per spec
         flat: 'true',                 // Return flat structure
@@ -144,16 +159,40 @@ class NewsService {
       
       // Try all endpoints in order until one works
       const endpoints = this.getEndpoints();
+      const isDevelopment = process.env.NODE_ENV === 'development' || 
+                           window.location.hostname === 'localhost';
+      
+      console.log(`🌍 Environment: ${isDevelopment ? 'Development' : 'Production'}`);
+      console.log(`📡 Endpoint priority order:`, endpoints);
+      
       for (let i = 0; i < endpoints.length; i++) {
         try {
           const endpoint = endpoints[i];
-          console.log(`Trying endpoint ${i + 1}/${endpoints.length}:`, endpoint);
-          response = await axios.get(`${endpoint}/articles`, { params: queryParams });
+          console.log(`🔄 Trying endpoint ${i + 1}/${endpoints.length}: ${endpoint}`);
+          
+          // Set timeout based on endpoint type (local vs remote)
+          const isLocal = endpoint.includes('localhost');
+          const timeout = isLocal ? 3000 : 8000; // 3s for local, 8s for remote
+          
+          response = await axios.get(`${endpoint}/articles`, { 
+            params: queryParams,
+            timeout: timeout,
+            headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'application/json'
+            }
+          });
+          
           console.log('✅ Endpoint successful:', endpoint);
           break;
         } catch (error) {
           lastError = error;
-          console.warn(`❌ Endpoint ${i + 1} failed:`, endpoints[i], error);
+          const isTimeout = error.code === 'ECONNABORTED';
+          const isNetworkError = error.code === 'ENOTFOUND' || error.code === 'ECONNREFUSED';
+          
+          console.warn(`❌ Endpoint ${i + 1} failed:`, endpoints[i]);
+          console.warn(`   Error type: ${isTimeout ? 'Timeout' : isNetworkError ? 'Network' : 'Other'}`);
+          console.warn(`   Error details:`, error.message);
           
           // If this is the last endpoint, throw the error
           if (i === endpoints.length - 1) {
@@ -164,6 +203,53 @@ class NewsService {
       
       // Process the response to add compatibility fields
       const apiResponse = response.data as NewsFeedResponse;
+      
+      console.log('📰 News API response structure:', {
+        articlesCount: apiResponse.articles?.length || 0,
+        flaggedCount: (apiResponse as any).flagged_for_review?.length || 0,
+        totalItems: apiResponse.pagination?.total_items || 0
+      });
+      
+      // Handle case where articles are in flagged_for_review due to quality filtering
+      if ((!apiResponse.articles || apiResponse.articles.length === 0) && 
+          (apiResponse as any).flagged_for_review && 
+          (apiResponse as any).flagged_for_review.length > 0) {
+        
+        console.log('📰 Using flagged articles since main articles array is empty');
+        
+        // Convert flagged articles to proper article format
+        const flaggedArticles = (apiResponse as any).flagged_for_review.map((article: any) => ({
+          id: article.id,
+          title: article.title,
+          description: `Health news article from ${article.category}`,
+          link: `#article-${article.id}`, // Placeholder since we don't have the actual URL
+          author: 'Health News',
+          published_date: new Date().toISOString(), // Use current date as fallback
+          thumbnail: '',
+          image_url: '',
+          has_image: false,
+          has_author: true,
+          category: article.category,
+          source: 'Health News Network',
+          feed_id: 1,
+          feed_priority: '5',
+          reading_time: 3,
+          word_count: 200,
+          time_ago: 'Recent',
+          is_recent: true,
+          content_quality: 'medium',
+          completeness: 'partial',
+          domain: 'healthnews.com',
+          extracted_at: new Date().toISOString(),
+          // Add reason for being flagged as additional context
+          flagged_reason: article.reason
+        }));
+        
+        apiResponse.articles = flaggedArticles;
+        apiResponse.count = flaggedArticles.length;
+        
+        console.log(`📰 Converted ${flaggedArticles.length} flagged articles to standard format`);
+      }
       
       // Map API articles to client format
       if (apiResponse.articles && apiResponse.articles.length > 0) {
@@ -436,7 +522,7 @@ export const getArticlesByCategory = async (category: string, limit?: number): P
   const params: NewsQueryParams = { 
     category, 
     limit: limit ? Math.round(limit * 1.5) : 20, // Fetch a few more than needed
-    quality: '1' // Get quality articles with good images
+    quality: '0' // Get all articles, including those flagged for review
   };
   
   const response = await newsService.getArticles(params);
@@ -484,8 +570,8 @@ export const refreshNewsFeed = async (categories?: string[], limit?: number): Pr
     params.category = categories.join(',');
   }
   
-  // Use quality parameter for better articles
-  params.quality = '1';
+  // Use quality parameter to get all articles
+  params.quality = '0';
   
   console.log('Refreshing news feed with timestamp:', timestamp);
   
@@ -549,7 +635,7 @@ export const searchNewsArticles = async (query: string, limit?: number): Promise
   const params: NewsQueryParams = {
     query: query.trim(),
     limit: limit || 50,
-    quality: '1' // Get quality articles with good images for search
+    quality: '0' // Get all articles for search, including flagged ones
   };
   
   console.log(`Searching news articles with query: "${query}"`);
