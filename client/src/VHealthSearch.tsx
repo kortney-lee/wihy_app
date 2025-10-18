@@ -493,6 +493,26 @@ const VHealthSearch: React.FC = () => {
     }
   }, [searchQuery]);
 
+  // Auto-show news feed on mobile devices
+  useEffect(() => {
+    const checkMobile = () => {
+      const isMobile = window.innerWidth <= 768 || 'ontouchstart' in window;
+      if (isMobile && !showFeelingHealthyContent) {
+        setShowFeelingHealthyContent(true);
+      }
+    };
+
+    // Check on mount
+    checkMobile();
+
+    // Check on resize
+    window.addEventListener('resize', checkMobile);
+    
+    return () => {
+      window.removeEventListener('resize', checkMobile);
+    };
+  }, [showFeelingHealthyContent]);
+
   // ================================
   // UI COMPONENTS
   // ================================
@@ -807,9 +827,8 @@ const VHealthSearch: React.FC = () => {
               if (isLoading) return;
               
               if (showFeelingHealthyContent) {
-                // If news is showing, close it and set "What is Healthy?" in search
+                // If news is showing, just close it (don't change search query)
                 setShowFeelingHealthyContent(false);
-                setSearchQuery('What is Healthy?');
               } else {
                 // Show the news feed
                 setShowFeelingHealthyContent(true);
@@ -833,7 +852,7 @@ const VHealthSearch: React.FC = () => {
             // Close if clicking on the background, not the content
             if (e.target === e.currentTarget) {
               setShowFeelingHealthyContent(false);
-              setSearchQuery('What is Healthy?');
+              // Don't change the search query when closing
             }
           }}
         >
