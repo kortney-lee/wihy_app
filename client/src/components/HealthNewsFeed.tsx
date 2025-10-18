@@ -116,11 +116,29 @@ const HealthNewsFeed: React.FC<NewsFeedProps> = ({
   setSearchQuery,
   triggerSearch
 }) => {
+  // Mobile detection
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Check if device is mobile on mount and window resize
+  useEffect(() => {
+    const checkMobile = () => {
+      const mobile = window.innerWidth <= 768;
+      setIsMobile(mobile);
+      console.log(`Device detection: ${mobile ? 'Mobile' : 'Desktop'} (width: ${window.innerWidth}px)`);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   const [articles, setArticles] = useState<NewsArticle[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
+  // On mobile, always start with 'all' category and don't allow changes
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const [analyzingArticle, setAnalyzingArticle] = useState<string | null>(null);
+  const [analyzingArticle, setAnalyzingArticle] = useState<number | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [hasMorePages, setHasMorePages] = useState(true);
   const navigate = useNavigate();
@@ -128,15 +146,24 @@ const HealthNewsFeed: React.FC<NewsFeedProps> = ({
   const prevFetchParamsRef = useRef<{category: string, max: number}>({category: '', max: 0});
   const observerTarget = useRef<HTMLDivElement>(null);
 
+  // Override category selection on mobile
+  const handleCategoryChange = (categoryId: string) => {
+    if (isMobile) {
+      // On mobile, always stay on 'all' category
+      return;
+    }
+    setSelectedCategory(categoryId);
+  };
+
   const categories = [
     { id: 'all', label: 'All Health News' },
-    { id: 'Nutrition & Diet', label: 'Nutrition' },
+    { id: 'Nutrition', label: 'Nutrition' },
     { id: 'Medical Research', label: 'Medical Research' },
-    { id: 'Public Health', label: 'Public Health' },
+    { id: 'Health', label: 'Public Health' },
     { id: 'Clinical Studies', label: 'Clinical Studies' },
-    { id: 'Disease Prevention', label: 'Prevention' },
+    { id: 'Prevention', label: 'Prevention' },
     { id: 'Mental Health', label: 'Mental Health' },
-    { id: 'General Health', label: 'General Health' }
+    { id: 'Environment', label: 'General Health' }
   ];
 
   // Fetch initial articles when category changes
@@ -150,6 +177,17 @@ const HealthNewsFeed: React.FC<NewsFeedProps> = ({
       fetchHealthNews(true); // true means reset (first page)
     }
   }, [selectedCategory, maxArticles]);
+
+  // Force mobile to show all health news on initial load
+  useEffect(() => {
+    if (isMobile && selectedCategory !== 'all') {
+      setSelectedCategory('all');
+    }
+    // Always ensure news loads on mobile immediately
+    if (isMobile && articles.length === 0 && !loading) {
+      fetchHealthNews(true);
+    }
+  }, [isMobile]);
 
   // Set up intersection observer for infinite scroll
   const handleObserver = useCallback((entries: IntersectionObserverEntry[]) => {
@@ -206,10 +244,12 @@ const HealthNewsFeed: React.FC<NewsFeedProps> = ({
       
       if (selectedCategory === 'all') {
         // Explicitly pass an empty array to ensure NO category filters are applied
-        response = await fetchNewsFeed([], maxArticles * 2);
+        const effectiveMaxArticles = isMobile ? Math.max(maxArticles, 12) : maxArticles; // Show more articles on mobile
+        response = await fetchNewsFeed([], effectiveMaxArticles * 2);
         console.log('Fetching ALL news with no category filters');
       } else {
-        response = await getArticlesByCategory(selectedCategory, maxArticles);
+        const effectiveMaxArticles = isMobile ? Math.max(maxArticles, 12) : maxArticles; // Show more articles on mobile
+        response = await getArticlesByCategory(selectedCategory, effectiveMaxArticles);
       }
       
       if (response.success && response.articles && response.articles.length > 0) {
@@ -225,11 +265,12 @@ const HealthNewsFeed: React.FC<NewsFeedProps> = ({
           processedArticles = diversifySources(processedArticles);
           
           // Limit to maxArticles if we're on the first page
+          const effectiveMaxArticles = isMobile ? Math.max(maxArticles, 12) : maxArticles;
           if (resetPage) {
-            processedArticles = processedArticles.slice(0, maxArticles);
+            processedArticles = processedArticles.slice(0, effectiveMaxArticles);
           } else {
             // For subsequent pages, limit to maxArticles more
-            processedArticles = processedArticles.slice(0, maxArticles);
+            processedArticles = processedArticles.slice(0, effectiveMaxArticles);
           }
         }
         
@@ -254,7 +295,7 @@ const HealthNewsFeed: React.FC<NewsFeedProps> = ({
           console.log('Trying again with absolutely no filters');
           // Last resort - force no filtering at all
           try {
-            const fallbackResponse = await fetch('/api/news/articles?limit=' + maxArticles);
+            const fallbackResponse = await fetch('http://localhost:5001/api/news/articles?limit=' + maxArticles);
             const fallbackData = await fallbackResponse.json();
             
             if (fallbackData.success && fallbackData.articles && fallbackData.articles.length > 0) {
@@ -365,8 +406,8 @@ const HealthNewsFeed: React.FC<NewsFeedProps> = ({
       }
       
       // If same priority category, sort by date (newest first)
-      const dateA = a.publishedDate || a.published_date;
-      const dateB = b.publishedDate || b.published_date;
+      const dateA = a.pubDate || a.publishedDate;
+      const dateB = b.pubDate || b.publishedDate;
       
       if (dateA && dateB) {
         return new Date(dateB).getTime() - new Date(dateA).getTime();
@@ -517,7 +558,7 @@ Category: ${article.category || 'Uncategorized'}`;
             <button
               key={category.id}
               className={`category-btn ${selectedCategory === category.id ? 'active' : ''}`}
-              onClick={() => setSelectedCategory(category.id)}
+              onClick={() => handleCategoryChange(category.id)}
             >
               {category.label}
             </button>
@@ -547,7 +588,7 @@ Category: ${article.category || 'Uncategorized'}`;
           <button
             key={category.id}
             className={`category-btn ${selectedCategory === category.id ? 'active' : ''}`}
-            onClick={() => setSelectedCategory(category.id)}
+            onClick={() => handleCategoryChange(category.id)}
           >
             {category.label}
           </button>
@@ -562,15 +603,15 @@ Category: ${article.category || 'Uncategorized'}`;
             data-category={article.category}
             onClick={() => window.open(article.link || article.url, '_blank')}
           >
-            {/* Image Section - Using category-based random placeholders only when needed */}
+            {/* Image Section - Using real images from CNN Health feed */}
             <div className="news-image">
-              {(article.image_url || article.thumbnail || article.imageUrl || article.thumbnailUrl) ? (
+              {(article.media_url || article.media_thumb_url) ? (
                 <img 
-                  src={article.image_url || article.thumbnail || article.imageUrl || article.thumbnailUrl} 
+                  src={article.media_thumb_url || article.media_url} 
                   alt={article.title}
                   onError={(e) => {
-                    console.log('Image failed to load:', article.image_url || article.thumbnail);
-                    // Use category-specific random placeholder instead of hiding
+                    console.log('Real image failed to load:', article.media_thumb_url || article.media_url);
+                    // Use category-specific random placeholder as fallback
                     (e.target as HTMLImageElement).src = getRandomPlaceholderImage(article.category);
                     // Add placeholder class for styling
                     (e.target as HTMLImageElement).classList.add('placeholder-image');
@@ -637,7 +678,7 @@ Category: ${article.category || 'Uncategorized'}`;
                 >
                   {article.category}
                 </span>
-                <span className="news-time">{formatTimeAgo(article.publishedDate || article.published_date)}</span>
+                <span className="news-time">{formatTimeAgo(article.pubDate || article.publishedDate)}</span>
               </div>
               
               <h3 className="news-title">{article.title}</h3>

@@ -1,8 +1,19 @@
+/* Parent container for news feed */
+.feeling-healthy-section {
+  position: relative;
+  overflow: visible;
+  min-height: 100vh;
+  padding: 20px 0;
+  box-sizing: border-box;
+}
+
 .news-feed-container {
   max-width: 1200px;
-  margin: 60px auto 40px auto;
-  padding: 0 20px;
+  margin: 40px auto 40px auto; /* Reduced top margin since parent has padding */
+  padding: 20px 20px 0 20px; /* Add padding on all sides, especially top */
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  overflow: visible; /* Ensure content isn't clipped */
+  position: relative; /* Establish positioning context */
 }
 
 .news-feed-header {
@@ -59,8 +70,85 @@
   flex-wrap: wrap;
   justify-content: center;
   gap: 12px;
-  margin-bottom: 40px;
-  padding: 0 20px;
+  margin: 20px 0 40px 0; /* Add top margin to prevent clipping */
+  padding: 20px 20px 0 20px; /* Add top padding for breathing room */
+  overflow: visible; /* Ensure buttons aren't clipped */
+}
+
+/* Mobile-first: Hide category buttons on mobile devices */
+@media (max-width: 768px) {
+  .news-categories {
+    display: none;
+  }
+  
+  /* Fix mobile layout - prevent page scroll to top and fit content properly */
+  .news-feed-container {
+    margin: 0; /* Remove top margin that pushes content up */
+    padding: 8px 12px 20px 12px; /* Minimal top padding, adequate sides and bottom */
+    max-width: 100vw; /* Ensure it fits screen width */
+    overflow-x: hidden; /* Prevent horizontal scroll */
+  }
+  
+  /* Ensure news grid fits properly and allows scrolling */
+  .news-grid {
+    grid-template-columns: 1fr;
+    gap: 12px; /* Smaller gap for mobile */
+    margin-bottom: 20px;
+    width: 100%; /* Full width */
+    overflow-y: auto; /* Allow vertical scrolling */
+    max-height: calc(100vh - 200px); /* Leave room for header/search */
+  }
+  
+  /* Optimize news cards for mobile */
+  .news-card {
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    margin-bottom: 8px; /* Add some bottom margin for better spacing */
+    width: 100%; /* Ensure full width */
+    box-sizing: border-box; /* Include padding in width calculation */
+  }
+  
+  /* Make news images mobile-optimized */
+  .news-image {
+    height: 160px; /* Smaller height for mobile */
+    width: 100%;
+    overflow: hidden;
+  }
+  
+  .news-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
+  /* Adjust typography for mobile readability */
+  .news-title {
+    font-size: 15px;
+    line-height: 1.3;
+    margin-bottom: 8px;
+  }
+  
+  .news-summary {
+    font-size: 13px;
+    line-height: 1.4;
+    margin-bottom: 10px;
+  }
+  
+  /* Optimize loading state for mobile */
+  .loading-news {
+    padding: 40px 20px; /* Less padding */
+  }
+  
+  /* Ensure no-articles message fits properly */
+  .no-articles {
+    padding: 40px 20px;
+    text-align: center;
+  }
+  
+  .no-articles p {
+    font-size: 14px;
+    line-height: 1.4;
+  }
 }
 
 .category-btn {
