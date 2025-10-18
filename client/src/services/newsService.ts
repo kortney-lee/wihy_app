@@ -21,111 +21,114 @@ export const TRUSTED_DOMAINS: Record<string, number> = {
 import { getApiEndpoint } from '../config/apiConfig';
 
 export interface NewsArticle {
-  // API response standard fields
-  id: string;
-  title: string;
-  description: string;
-  link: string;
-  author: string;
-  published_date: string;
-  thumbnail: string;
-  image_url: string;
-  has_image: boolean;
-  has_author: boolean;
-  category: string;
-  source: string;
-  feed_id: number;
-  feed_priority: string;
-  reading_time: number;
-  word_count: number;
-  time_ago: string;
-  is_recent: boolean;
-  content_quality: string;
-  completeness: string;
-  domain: string;
-  extracted_at: string;
+  // Core API response fields (expected CNN Health API structure)
+  id: number;                        // Unique article identifier (number format like 12359)
+  title: string;                     // Article title
+  description: string;               // Article description/summary
+  link: string;                      // Article URL
+  pubDate: string;                   // Publication date (ISO format)
+  category: string;                  // Original category from feed
+  mapped_category: string;           // Health-specific category mapping
+  feed_title: string;                // Source publication name (e.g., "CNN Health")
+  feed_id: number;                   // RSS feed ID
+  media_url: string;                 // Main image URL (actual images from CNN/sources)
+  media_thumb_url: string;           // Thumbnail image URL
+  has_media: boolean;                // Whether article has images
+  word_count: number;                // Article word count
+  time_ago: string;                  // Human-readable time since publication
+  is_recent: boolean;                // Published within last 24 hours
+  keywords: string[];                // Article keywords/tags
   
-  // Client-side compatibility fields
-  url?: string;
-  summary?: string;
-  publishedDate?: string;
-  thumbnailUrl?: string;
-  imageUrl?: string;        // Added to match client usage
-  tags?: string[];
-  relevanceScore?: number;
-  hasMedia?: boolean;
-  hasAuthor?: boolean;
-  readingTime?: number;     // Added to match client usage
-  wordCount?: number;       // Added to match client usage
-  mediaType?: string;       // Added to match client usage
-  contentLength?: number;   // Added to match client usage
+  // Optional fields that may not always be present
+  author?: string;                   // Article author (can be empty)
+  has_author?: boolean;              // Whether article has author info
+  feed_priority?: string;            // Feed priority level
+  reading_time?: number;             // Estimated reading time in minutes
+  content_quality?: 'high' | 'medium' | 'low';  // Content quality assessment
+  completeness?: 'complete' | 'partial' | 'minimal';  // Data completeness
+  domain?: string;                   // Source domain
+  extracted_at?: string;             // When article was extracted
+  
+  // Legacy/compatibility fields for existing client code
+  url?: string;                      // Alias for link
+  summary?: string;                  // Alias for description
+  publishedDate?: string;            // Alias for pubDate
+  thumbnailUrl?: string;             // Alias for media_thumb_url
+  imageUrl?: string;                 // Alias for media_url
+  hasMedia?: boolean;                // Alias for has_media
+  source?: string;                   // Alias for feed_title
+  tags?: string[];                   // Alias for keywords
+  wordCount?: number;                // Alias for word_count
+  readingTime?: number;              // Calculated reading time
+  relevanceScore?: number;           // Client-side scoring
+  mediaType?: string;                // Media type classification
+  contentLength?: number;            // Content length
 }
 
 export interface NewsFeedResponse {
   success: boolean;
   articles: NewsArticle[];
   count: number;
-  pagination: {
+  total?: number;                    // Total available articles
+  message?: string;                  // API message
+  pagination?: {
     total_items: number;
     total_pages: number;
     current_page: number;
     per_page: number;
     has_next_page: boolean;
-    has_prev_page: false;
+    has_prev_page: boolean;
   };
-  filters_applied: {
+  filters_applied?: {
     category: string | null;
     country: string | null;
     feed_id: number | null;
     limit: number;
+    quality?: string;                // Added from OpenAPI spec
   };
+  // Quality mode field (when quality=1)
+  flagged_for_review?: Array<{
+    id: number;
+    title: string;
+    reason: string;
+    category: string;
+  }>;
   error?: string; // Added to handle errors from the API
-  message?: string; // For backward compatibility
 }
 
 export interface NewsQueryParams {
   limit?: number;                    // Number of articles to return (1-500)
-  quality?: string;                  // '1' or 'true' for quality articles with good images
-  category?: string;                 // Filter by category (tech, business, science, health, etc.)
-  country?: string;                  // Filter by country code (US, IN, UK, CA, AU, DE, FR, JP)
+  quality?: string;                  // '1'/'true' for quality articles, '0'/'false' for all
+  category?: string;                 // Health categories: 'All Health News', 'Nutrition', etc.
+  country?: string;                  // Country code: US, IN, UK, CA, AU, DE, FR, JP
   feed_id?: number;                  // Filter by specific feed ID
-  feed_priority?: string;            // Filter by feed priority (single, range, or comma-separated)
+  feed_priority?: string;            // Feed priority: single, range, or comma-separated
   flat?: string | boolean;           // Return flat structure ('true'/'false')
   page?: number;                     // Page number (starts at 1)
   per_page?: number;                 // Number of articles per page (1-100)
+  your_new_param?: string;           // Additional parameter from API spec
   timestamp?: number;                // Added to support refreshNewsFeed
-  query?: string;                    // Added to support searchNewsArticles (not in OpenAPI but used internally)
+  query?: string;                    // Added to support searchNewsArticles
 }
 
 class NewsService {
-  // Smart endpoint selection based on environment
-  private getEndpoints() {
+  // Get the correct endpoint based on environment
+  private getNewsEndpoint(): string {
     const isDevelopment = process.env.NODE_ENV === 'development' || 
                          window.location.hostname === 'localhost' ||
                          window.location.hostname === '127.0.0.1';
     
     if (isDevelopment) {
-      // In development: try local first, then production as fallback
-      return [
-        'http://localhost:5000/api/news',
-        'http://localhost:8000/api/news',
-        'https://services.wihy.ai/api/news',
-        'https://ml-news-feed.graypebble-2c416c49.westus2.azurecontainerapps.io/api/news'
-      ];
+      // Based on working endpoint: /api/news
+      const localEndpoint = 'http://localhost:5001/api/news';
+      console.log('🔧 Development mode: Using local endpoint:', localEndpoint);
+      return localEndpoint;
     } else {
-      // In production: try production endpoints first, local as fallback (for hybrid setups)
-      return [
-        'https://services.wihy.ai/api/news',
-        'https://ml-news-feed.graypebble-2c416c49.westus2.azurecontainerapps.io/api/news',
-        'http://localhost:5000/api/news',
-        'http://localhost:8000/api/news'
-      ];
+      // In production: use production endpoint
+      const prodEndpoint = 'https://services.wihy.ai/api/news';
+      console.log('🚀 Production mode: Using production endpoint:', prodEndpoint);
+      return prodEndpoint;
     }
-  }
-
-  // Get primary endpoint (first in list based on environment)
-  private getNewsEndpoint() {
-    return this.getEndpoints()[0];
   }
   
   /**
@@ -133,130 +136,173 @@ class NewsService {
    */
   async getArticles(params: NewsQueryParams = {}): Promise<NewsFeedResponse> {
     try {
-      // Set defaults based on OpenAPI specification
+      // Get the endpoint
+      const endpoint = this.getNewsEndpoint();
+      
+      // Set minimal parameters - backend may not support all OpenAPI parameters
       const queryParams: any = {
-        limit: 50,                    // Default from OpenAPI spec
-        // Note: quality=1 filters out articles without good images, which may result in empty arrays
-        // We'll include both regular and flagged articles in our processing
-        quality: '0',                 // Use quality=0 to get all articles, not just those with good images
-        country: 'US',                // Default country
-        feed_priority: '1-10',        // Feed priority range as per spec
-        flat: 'true',                 // Return flat structure
-        page: 1,
-        per_page: 12,
-        ...params // Override with any provided params
+        ...params // Start with provided params
       };
 
-      // Convert boolean flat to string for API
-      if (typeof queryParams.flat === 'boolean') {
-        queryParams.flat = queryParams.flat ? 'true' : 'false';
+      // Only add limit if specified or use a reasonable default
+      if (!queryParams.limit) {
+        queryParams.limit = 50;
       }
+
+      // Try to prioritize sources that might have images
+      // Don't restrict to clinical trials only - get diverse news sources
+      if (!queryParams.feed_id) {
+        // Remove any feed_id restriction to get articles from all sources
+        delete queryParams.feed_id;
+      }
+
+      // Remove any undefined parameters that might cause issues
+      Object.keys(queryParams).forEach(key => {
+        if (queryParams[key] === undefined || queryParams[key] === null || queryParams[key] === '') {
+          delete queryParams[key];
+        }
+      });
 
       console.log('Fetching news with params:', queryParams);
       
-      let response;
-      let lastError;
-      
-      // Try all endpoints in order until one works
-      const endpoints = this.getEndpoints();
       const isDevelopment = process.env.NODE_ENV === 'development' || 
                            window.location.hostname === 'localhost';
       
       console.log(`🌍 Environment: ${isDevelopment ? 'Development' : 'Production'}`);
-      console.log(`📡 Endpoint priority order:`, endpoints);
+      console.log(`📡 Using endpoint: ${endpoint}`);
       
-      for (let i = 0; i < endpoints.length; i++) {
-        try {
-          const endpoint = endpoints[i];
-          console.log(`🔄 Trying endpoint ${i + 1}/${endpoints.length}: ${endpoint}`);
-          
-          // Set timeout based on endpoint type (local vs remote)
-          const isLocal = endpoint.includes('localhost');
-          const timeout = isLocal ? 3000 : 8000; // 3s for local, 8s for remote
-          
-          response = await axios.get(`${endpoint}/articles`, { 
-            params: queryParams,
-            timeout: timeout,
-            headers: {
-              'Accept': 'application/json',
-              'Content-Type': 'application/json'
+      try {
+        // Set timeout based on endpoint type (local vs remote)
+        const isLocal = endpoint.includes('localhost');
+        const timeout = isLocal ? 30000 : 15000; // Much longer timeout for local development
+        
+        console.log(`🚀 Making request to: ${endpoint}`);
+        console.log(`📋 Request params:`, queryParams);
+        console.log(`🔍 Current window location:`, window.location.href);
+        console.log(`🔍 Process NODE_ENV:`, process.env.NODE_ENV);
+        console.log(`🔍 Final axios URL will be:`, endpoint);
+        
+        // For local development, try a simple connectivity test first
+        if (isLocal) {
+          try {
+            console.log('🔍 Testing basic connectivity to service...');
+            const healthCheck = await axios.get('http://localhost:5001/', { timeout: 5000 });
+            console.log('✅ Service is reachable');
+          } catch (connectError: any) {
+            console.log('⚠️ Service connectivity check failed:', connectError.message);
+            if (connectError.code === 'ECONNREFUSED') {
+              throw new Error('Local news service is not running on port 5001. Please start the service first.');
             }
-          });
-          
-          console.log('✅ Endpoint successful:', endpoint);
-          break;
-        } catch (error) {
-          lastError = error;
-          const isTimeout = error.code === 'ECONNABORTED';
-          const isNetworkError = error.code === 'ENOTFOUND' || error.code === 'ECONNREFUSED';
-          
-          console.warn(`❌ Endpoint ${i + 1} failed:`, endpoints[i]);
-          console.warn(`   Error type: ${isTimeout ? 'Timeout' : isNetworkError ? 'Network' : 'Other'}`);
-          console.warn(`   Error details:`, error.message);
-          
-          // If this is the last endpoint, throw the error
-          if (i === endpoints.length - 1) {
-            throw error;
           }
         }
+        
+        const response = await axios.get(endpoint, { 
+          params: queryParams,
+          timeout: timeout,
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        console.log(`✅ Response status: ${response.status}`);
+        console.log(`📦 Response data type:`, typeof response.data);
+        console.log(`🔍 Response structure:`, {
+          keys: Object.keys(response.data || {}),
+          isArray: Array.isArray(response.data),
+          articlesCount: (response.data as any)?.articles?.length || 0,
+          totalCount: (response.data as any)?.count || 0,
+          totalAvailable: (response.data as any)?.total || 0,
+          success: (response.data as any)?.success
+        });
+
+        // Log detailed information about sources and images
+        const articles = (response.data as any)?.articles || [];
+        if (articles.length > 0) {
+          console.log(`📰 Article sources and images:`)
+          articles.slice(0, 5).forEach((article: any, idx: number) => {
+            console.log(`${idx + 1}. Source: ${article.source} (Feed ID: ${article.feed_id})`);
+            console.log(`   Domain: ${article.domain}`);
+            console.log(`   Has Image: ${article.has_image}`);
+            console.log(`   Media URL: ${article.media_url || 'none'}`);
+            console.log(`   Thumbnail URL: ${article.media_thumb_url || 'none'}`);
+            console.log(`   Thumbnail: ${article.thumbnail || 'none'}`);
+            console.log(`   Title: ${article.title?.substring(0, 60)}...`);
+            console.log(`---`);
+          });
+
+          // Show unique sources and their image stats
+          const sourceStats = articles.reduce((acc: any, article: any) => {
+            const source = article.source || 'Unknown';
+            if (!acc[source]) {
+              acc[source] = { count: 0, withImages: 0, feedId: article.feed_id };
+            }
+            acc[source].count++;
+            if (article.has_media || article.media_url || article.media_thumb_url) {
+              acc[source].withImages++;
+            }
+            return acc;
+          }, {});
+
+          console.log('📊 Source statistics:');
+          Object.entries(sourceStats).forEach(([source, stats]: [string, any]) => {
+            console.log(`${source}: ${stats.count} articles, ${stats.withImages} with images (Feed ID: ${stats.feedId})`);
+          });
+        }
+        
+        if (isLocal) {
+          console.log('✅ Local endpoint successful:', endpoint);
+          
+          // Check if database is empty
+          const articleCount = (response.data as any)?.count || 0;
+          if (articleCount === 0) {
+            console.log('📭 No articles found in local database');
+            console.log('💡 The database appears to be empty');
+          }
+        } else {
+          console.log('✅ Production endpoint successful:', endpoint);
+        }
+        
+        // Process the response to add compatibility fields
+        const apiResponse = response.data as NewsFeedResponse;
+        
+        // Map API articles to client format
+        if (apiResponse.articles && apiResponse.articles.length > 0) {
+          apiResponse.articles = apiResponse.articles.map(article => this.adaptArticleForClient(article));
+        }
+        
+        return apiResponse;
+        
+      } catch (error: any) {
+        console.error(`❌ Failed to fetch from ${endpoint}:`, error.name);
+        console.log(`🔍 Error details:`, {
+          message: error.message,
+          code: error.code,
+          status: error.response?.status,
+          statusText: error.response?.statusText,
+          url: error.config?.url,
+          method: error.config?.method
+        });
+        
+        const isLocal = endpoint.includes('localhost');
+        
+        if (isLocal && isDevelopment) {
+          if (error.code === 'ECONNREFUSED' || error.message.includes('Network Error')) {
+            console.error('💡 Local service not available. Make sure the RSS news service is running on port 5001');
+            console.error('💡 You can start it with the appropriate command for your local setup');
+          } else if (error.code === 'ECONNABORTED' || error.message.includes('timeout')) {
+            console.error('💡 Request timed out. The service might be running but responding slowly');
+            console.error('💡 Try testing the endpoint manually: http://localhost:5001/api/news');
+            console.error('💡 Check if the service is processing data or needs time to start up');
+          } else if (error.response?.status === 404) {
+            console.error('💡 404 Error: The /api/news endpoint may not exist');
+            console.error('💡 Check the API documentation at http://localhost:5001/api/service/docs/');
+            console.error('💡 Verify the correct endpoint path with the service documentation');
+          }
+        }
+        
+        throw error; // Re-throw the error instead of trying fallbacks
       }
-      
-      // Process the response to add compatibility fields
-      const apiResponse = response.data as NewsFeedResponse;
-      
-      console.log('📰 News API response structure:', {
-        articlesCount: apiResponse.articles?.length || 0,
-        flaggedCount: (apiResponse as any).flagged_for_review?.length || 0,
-        totalItems: apiResponse.pagination?.total_items || 0
-      });
-      
-      // Handle case where articles are in flagged_for_review due to quality filtering
-      if ((!apiResponse.articles || apiResponse.articles.length === 0) && 
-          (apiResponse as any).flagged_for_review && 
-          (apiResponse as any).flagged_for_review.length > 0) {
-        
-        console.log('📰 Using flagged articles since main articles array is empty');
-        
-        // Convert flagged articles to proper article format
-        const flaggedArticles = (apiResponse as any).flagged_for_review.map((article: any) => ({
-          id: article.id,
-          title: article.title,
-          description: `Health news article from ${article.category}`,
-          link: `#article-${article.id}`, // Placeholder since we don't have the actual URL
-          author: 'Health News',
-          published_date: new Date().toISOString(), // Use current date as fallback
-          thumbnail: '',
-          image_url: '',
-          has_image: false,
-          has_author: true,
-          category: article.category,
-          source: 'Health News Network',
-          feed_id: 1,
-          feed_priority: '5',
-          reading_time: 3,
-          word_count: 200,
-          time_ago: 'Recent',
-          is_recent: true,
-          content_quality: 'medium',
-          completeness: 'partial',
-          domain: 'healthnews.com',
-          extracted_at: new Date().toISOString(),
-          // Add reason for being flagged as additional context
-          flagged_reason: article.reason
-        }));
-        
-        apiResponse.articles = flaggedArticles;
-        apiResponse.count = flaggedArticles.length;
-        
-        console.log(`📰 Converted ${flaggedArticles.length} flagged articles to standard format`);
-      }
-      
-      // Map API articles to client format
-      if (apiResponse.articles && apiResponse.articles.length > 0) {
-        apiResponse.articles = apiResponse.articles.map(article => this.adaptArticleForClient(article));
-      }
-      
-      return apiResponse;
     } catch (error) {
       console.error('Error fetching news articles:', error);
       return {
@@ -267,7 +313,7 @@ class NewsService {
           total_items: 0,
           total_pages: 0,
           current_page: 1,
-          per_page: 12,
+          per_page: 50,
           has_next_page: false,
           has_prev_page: false
         },
@@ -289,16 +335,17 @@ class NewsService {
   private adaptArticleForClient(article: NewsArticle): NewsArticle {
     return {
       ...article,
-      // Add compatibility fields
-      url: article.link || article.url,
-      summary: article.description || article.summary,
-      publishedDate: article.published_date || article.publishedDate,
-      thumbnailUrl: article.thumbnail || article.thumbnailUrl,
-      imageUrl: article.image_url || article.imageUrl,
-      hasMedia: article.has_image || article.hasMedia,
-      hasAuthor: article.has_author || article.hasAuthor,
-      readingTime: article.reading_time || article.readingTime,
-      wordCount: article.word_count || article.wordCount
+      // Map API fields to legacy compatibility fields
+      url: article.link,
+      summary: article.description,
+      publishedDate: article.pubDate,
+      thumbnailUrl: article.media_thumb_url || '',
+      imageUrl: article.media_url || '',
+      hasMedia: article.has_media,
+      source: article.feed_title,
+      tags: article.keywords || [],
+      readingTime: article.reading_time || Math.ceil((article.word_count || 0) / 200),
+      wordCount: article.word_count
     };
   }
 
@@ -307,9 +354,18 @@ class NewsService {
    */
   async getCategories(): Promise<string[]> {
     try {
-      // Use the articles endpoint to get category data by checking available categories
-      // Based on the OpenAPI spec, categories are: tech, business, science, health, sports, entertainment, politics, world
-      return ['tech', 'business', 'science', 'health', 'sports', 'entertainment', 'politics', 'world'];
+      // Based on the OpenAPI spec, health categories are:
+      return [
+        'All Health News', 
+        'Nutrition', 
+        'Medical Research', 
+        'Public Health', 
+        'Clinical Studies', 
+        'Prevention', 
+        'Mental Health', 
+        'General Health', 
+        'Environment'
+      ];
     } catch (error) {
       console.error('Error fetching news categories:', error);
       return [];
@@ -342,11 +398,17 @@ class NewsService {
    * Calculate trust score based on domain
    */
   calculateTrustScore(article: NewsArticle): number {
-    if (!article.domain) return 0.5;
-    
-    return TRUSTED_DOMAINS[article.domain] || 
-           TRUSTED_DOMAINS[`www.${article.domain}`] || 
-           0.5;
+    try {
+      // Extract domain from article link
+      const url = new URL(article.link);
+      const domain = url.hostname.replace('www.', '');
+      
+      return TRUSTED_DOMAINS[domain] || 
+             TRUSTED_DOMAINS[`www.${domain}`] || 
+             0.5;
+    } catch {
+      return 0.5; // Default score if URL parsing fails
+    }
   }
 }
 
@@ -490,8 +552,8 @@ function sortArticlesByPriority(articles: NewsArticle[], priorityCategories: str
     }
     
     // If same priority category, sort by date (newest first)
-    const dateA = a.publishedDate || a.published_date;
-    const dateB = b.publishedDate || b.published_date;
+    const dateA = a.publishedDate || a.pubDate;
+    const dateB = b.publishedDate || b.pubDate;
     
     if (dateA && dateB) {
       return new Date(dateB).getTime() - new Date(dateA).getTime();
@@ -522,7 +584,7 @@ export const getArticlesByCategory = async (category: string, limit?: number): P
   const params: NewsQueryParams = { 
     category, 
     limit: limit ? Math.round(limit * 1.5) : 20, // Fetch a few more than needed
-    quality: '0' // Get all articles, including those flagged for review
+    quality: '1' // Get quality articles with good images
   };
   
   const response = await newsService.getArticles(params);
@@ -530,8 +592,8 @@ export const getArticlesByCategory = async (category: string, limit?: number): P
   if (response.success && response.articles && response.articles.length > 0) {
     // For category views, we still want to sort by date but within the category
     const sortedArticles = response.articles.sort((a, b) => {
-      const dateA = a.publishedDate || a.published_date;
-      const dateB = b.publishedDate || b.published_date;
+      const dateA = a.publishedDate || a.pubDate;
+      const dateB = b.publishedDate || b.pubDate;
       
       if (dateA && dateB) {
         return new Date(dateB).getTime() - new Date(dateA).getTime();
@@ -570,8 +632,8 @@ export const refreshNewsFeed = async (categories?: string[], limit?: number): Pr
     params.category = categories.join(',');
   }
   
-  // Use quality parameter to get all articles
-  params.quality = '0';
+  // Use quality parameter for better articles
+  params.quality = '1';
   
   console.log('Refreshing news feed with timestamp:', timestamp);
   
@@ -635,7 +697,7 @@ export const searchNewsArticles = async (query: string, limit?: number): Promise
   const params: NewsQueryParams = {
     query: query.trim(),
     limit: limit || 50,
-    quality: '0' // Get all articles for search, including flagged ones
+    quality: '1' // Get quality articles with good images for search
   };
   
   console.log(`Searching news articles with query: "${query}"`);
@@ -686,8 +748,8 @@ export const searchNewsArticles = async (query: string, limit?: number): Promise
       }
       
       // Finally, sort by date
-      const dateA = a.publishedDate || a.published_date;
-      const dateB = b.publishedDate || b.published_date;
+      const dateA = a.publishedDate || a.pubDate;
+      const dateB = b.publishedDate || b.pubDate;
       
       if (dateA && dateB) {
         return new Date(dateB).getTime() - new Date(dateA).getTime();

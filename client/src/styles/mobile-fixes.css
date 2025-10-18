@@ -2,6 +2,60 @@
 
 /* Fix any unwanted overlays or background tints */
 @media (max-width: 768px) {
+  /* CRITICAL: Remove horizontal scrollbar completely */
+  html {
+    overflow-x: hidden !important;
+    max-width: 100vw !important;
+    width: 100% !important;
+  }
+
+  /* Force remove scrollbar from body */
+  body {
+    overflow-x: hidden !important;
+    max-width: 100vw !important;
+    width: 100% !important;
+  }
+
+  /* Remove scrollbar from viewport containers */
+  html, body {
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  body {
+    overflow-x: hidden !important;
+    max-width: 100vw !important;
+    background: #f9f9f9 !important;
+    background-image: none !important;
+    padding-top: 10px !important; /* Minimal top padding for mobile */
+    margin: 0 !important;
+    position: relative !important;
+  }
+
+  /* Prevent any element from causing horizontal scroll */
+  * {
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Target common scrollbar culprits */
+  #root,
+  .app,
+  .App,
+  .main-container,
+  .content-wrapper,
+  .page-container {
+    overflow-x: hidden !important;
+    max-width: 100vw !important;
+    width: 100% !important;
+  }
+
+  /* Remove scrollbar from any potential wide elements */
+  div, section, article, main, header, footer {
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
+  }
+
   /* Override CSS variables for mobile to ensure clean look */
   :root {
     --vh-accent: #1a73e8;
@@ -20,11 +74,12 @@
     box-shadow: none !important;
   }
 
-  /* Remove problematic body gradients on mobile */
-  body {
-    background: #f9f9f9 !important;
-    background-image: none !important;
-    padding-top: 60px !important; /* Reduce top padding for mobile */
+  /* Ensure main app container fits properly */
+  .app-container {
+    padding: 10px !important;
+    margin: 0 auto !important;
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
   }
 
   /* Fix main content areas - reduce padding */
@@ -49,11 +104,67 @@
     font-size: 18px !important;
     margin-bottom: 15px !important;
   }
+  
+  /* News feed specific mobile fixes */
+  .feeling-healthy-section {
+    position: relative !important;
+    top: auto !important;
+    transform: none !important;
+    padding-top: 0 !important;
+    margin-top: 0 !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+  
+  /* Ensure news feed container doesn't push content off screen */
+  .news-feed-container {
+    position: relative !important;
+    top: auto !important;
+    transform: none !important;
+  }
+  
+  /* Prevent any scroll-to-top behavior */
+  .news-card {
+    scroll-margin-top: 0 !important;
+    transform: none !important;
+  }
+  
+  /* Ensure smooth scrolling and no layout shifts */
+  html {
+    scroll-behavior: auto !important; /* Disable smooth scroll that might cause issues */
+  }
+  
+  /* Fix any layout shifts on mobile */
+  .search-landing,
+  .results-page {
+    min-height: calc(100vh - 80px) !important; /* Match mobile body padding */
+    margin-top: 0 !important;
+    padding-top: 10px !important;
+  }
+  }
 
   /* Better mobile text sizing throughout */
-  h1, h2, h3, h4, h5, h6 {
+  h2, h3, h4, h5, h6 {
     font-size: clamp(14px, 4vw, 24px) !important;
     line-height: 1.3 !important;
+  }
+
+  /* Special styling for main title/logo - ensure visibility */
+  .search-title,
+  h1 {
+    font-size: clamp(1.8rem, 6vw, 2.5rem) !important;
+    margin: 15px 0 25px 0 !important;
+    text-align: center !important;
+    line-height: 1.2 !important;
+    color: #000000 !important;
+    font-weight: 700 !important;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    background: linear-gradient(135deg, #000000 0%, #000000 100%) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    background-clip: text !important;
   }
 
   /* Improve readability of main content */
@@ -79,6 +190,22 @@
   /* Better spacing between elements */
   .health-info-card {
     margin-bottom: 15px !important;
+  }
+
+  /* Ensure news feed integrates properly with mobile layout */
+  .news-feed-container {
+    margin-top: 20px !important;
+    padding: 0 10px !important;
+    max-width: 100% !important;
+  }
+
+  /* Make sure scrollable areas don't conflict */
+  .search-form,
+  .results-container,
+  .news-feed-container {
+    overflow-x: hidden !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
   }
 
   .related-topics-card,
@@ -223,7 +350,6 @@
     right: 8px !important;
     background-color: rgba(255, 255, 255, 0.95) !important;
   }
-}
 
 /* Extra small mobile devices */
 @media (max-width: 480px) {
@@ -239,5 +365,92 @@
   .search-icons {
     background-color: rgba(255, 255, 255, 0.95) !important;
     backdrop-filter: blur(4px);
+  }
+}
+
+/* Mobile-specific hiding for clean news-only view */
+@media (max-width: 768px) {
+  /* Hide search buttons on mobile - user should only see news */
+  .search-buttons {
+    display: none !important;
+  }
+
+  /* Hide category buttons on mobile - already handled in HealthNewsFeed.css but adding here for extra coverage */
+  .news-categories {
+    display: none !important;
+  }
+
+  /* Ensure news feed takes full width and starts at top */
+  .feeling-healthy-section {
+    padding-top: 0 !important;
+    margin-top: 0 !important;
+    width: 100% !important;
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
+  }
+
+  /* Make search container more compact when buttons are hidden */
+  .search-container {
+    margin-bottom: 10px !important;
+    width: 100% !important;
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
+  }
+
+  /* News feed specific overflow fixes */
+  .news-feed-container {
+    width: 100% !important;
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
+    padding: 8px 12px 20px 12px !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  /* News grid overflow fixes */
+  .news-grid {
+    width: 100% !important;
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* Individual news articles */
+  .news-article,
+  article {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+    box-sizing: border-box !important;
+  }
+
+  /* News article content areas */
+  .news-content,
+  .news-title,
+  .news-description {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-wrap: break-word !important;
+    word-wrap: break-word !important;
+    hyphens: auto !important;
+  }
+
+  /* News images */
+  .news-image,
+  .news-image img {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    object-fit: cover !important;
+  }
+
+  /* Main app container fixes */
+  #root {
+    width: 100% !important;
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
   }
 }
