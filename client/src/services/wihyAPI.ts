@@ -1,13 +1,55 @@
 import { API_CONFIG, WIHY_API_ENDPOINT } from '../config/apiConfig';
 import { logger } from '../utils/logger';
 
-// Types for the WiHy Unified API (updated to match actual API structure from /docs)
+// Types for the WiHy API (updated to match OpenAPI specification v4.0.0)
 export interface HealthQuestion {
   query: string;                          // REQUIRED: Your health/nutrition question
   user_context?: Record<string, any>;     // OPTIONAL: User context object
   include_nutrition?: boolean;            // OPTIONAL: Include nutrition analysis (default: true)
   include_biblical_wisdom?: boolean;      // OPTIONAL: Include biblical wisdom (default: true)
   include_charts?: boolean;               // OPTIONAL: Include chart data (default: true)
+}
+
+// Chart data structure from OpenAPI spec
+export interface ChartData {
+  chart_type: string;
+  labels: string[];
+  values: number[];
+  colors: string[];
+  verdict?: string;
+  reasons?: string[];
+}
+
+export interface ChartsData {
+  nutrition_breakdown?: ChartData;
+  health_quality?: ChartData;
+}
+
+export interface HealthInsights {
+  key_benefits?: string[];
+  potential_risks?: string[];
+  recommendations?: string[];
+}
+
+// Core response data structure from OpenAPI spec
+export interface ProcessedHealthData {
+  query: string;
+  timestamp: number;
+  processor_used: string;
+  processing_time: number;
+  response: string;
+  nutrition_data: Record<string, any>;
+  health_insights: HealthInsights;
+  biblical_wisdom: Record<string, any>;
+  charts_data: ChartsData;
+}
+
+// Main response structure from OpenAPI spec
+export interface HealthQuestionResponse {
+  success: boolean;
+  timestamp: string;
+  endpoint: string;
+  data: ProcessedHealthData;
 }
 
 // Keep the old interface for backward compatibility
@@ -239,53 +281,34 @@ class WihyAPIService {
   /**
    * Ask WiHy a health-related question using the unified API
    */
-  async askAnything(request: WihyRequest | UnifiedRequest): Promise<WihyResponse | UnifiedResponse> {
+  async askAnything(request: WihyRequest | UnifiedRequest): Promise<HealthQuestionResponse | WihyResponse | UnifiedResponse> {
     try {
       logger.apiRequest('Making WiHy Unified API request', request);
       
       let requestBody: any;
       let endpoint: string;
       
-      if (this.isLocalDevelopment) {
-        // Local API uses /ask endpoint with HealthQuestion format
-        endpoint = this.baseURL; // Already points to /ask
-        
-        if ('user_context' in request) {
-          requestBody = {
-            query: request.query,
-            user_context: request.user_context || {},
-            include_nutrition: true,
-            include_biblical_wisdom: true,
-            include_charts: true
-          };
-        } else {
-          const unifiedReq = request as UnifiedRequest;
-          requestBody = {
-            query: unifiedReq.query,
-            user_context: unifiedReq.context || unifiedReq.user_context || {},
-            include_nutrition: unifiedReq.include_nutrition !== false,
-            include_biblical_wisdom: unifiedReq.include_biblical_wisdom !== false,
-            include_charts: unifiedReq.include_charts !== false
-          };
-        }
+      // Both local and remote APIs use the same /ask endpoint with HealthQuestion format
+      endpoint = this.isLocalDevelopment ? this.baseURL : `${API_CONFIG.WIHY_UNIFIED_API_URL}/ask`;
+      
+      // Build HealthQuestion object according to OpenAPI spec
+      if ('user_context' in request) {
+        requestBody = {
+          query: request.query,
+          user_context: request.user_context || {},
+          include_nutrition: true,
+          include_biblical_wisdom: false,
+          include_charts: true
+        };
       } else {
-        // Remote API uses /ask endpoint (corrected from /wihy/api)
-        endpoint = `${API_CONFIG.WIHY_UNIFIED_API_URL}/ask`;
-        
-        if ('user_context' in request) {
-          requestBody = {
-            query: request.query,
-            request_type: 'auto',
-            context: request.user_context || {}
-          };
-        } else {
-          const unifiedReq = request as UnifiedRequest;
-          requestBody = {
-            query: unifiedReq.query,
-            request_type: unifiedReq.request_type || 'auto',
-            context: unifiedReq.context || unifiedReq.user_context || {}
-          };
-        }
+        const unifiedReq = request as UnifiedRequest;
+        requestBody = {
+          query: unifiedReq.query,
+          user_context: unifiedReq.context || unifiedReq.user_context || {},
+          include_nutrition: unifiedReq.include_nutrition !== false,
+          include_biblical_wisdom: unifiedReq.include_biblical_wisdom === true,
+          include_charts: unifiedReq.include_charts !== false
+        };
       }
       
       // Use fetch API to match the working example exactly with timeout
@@ -565,8 +588,48 @@ class WihyAPIService {
    * Format the WiHy response for display in the existing UI
    * This formats it to be compatible with the existing search results format
    */
-  formatWihyResponse(response: WihyResponse | UnifiedResponse): string {
-    // Handle UnifiedResponse format (new API)
+  formatWihyResponse(response: HealthQuestionResponse | WihyResponse | UnifiedResponse): string {
+    // Handle new HealthQuestionResponse format (OpenAPI v4.0.0)
+    if ('success' in response && 'data' in response && response.data && 'response' in response.data && 'processor_used' in response.data) {
+      const healthResp = response as HealthQuestionResponse;
+      const data = healthResp.data;
+      
+      let formatted = `# WiHy Health Intelligence\n\n`;
+      
+      // Main response content
+      formatted += data.response;
+      
+      // Add health insights if available
+      if (data.health_insights) {
+        if (data.health_insights.key_benefits?.length) {
+          formatted += `\n\n## 🌟 Key Benefits\n`;
+          data.health_insights.key_benefits.forEach(benefit => {
+            formatted += `- ${benefit}\n`;
+          });
+        }
+        
+        if (data.health_insights.potential_risks?.length) {
+          formatted += `\n\n## ⚠️ Potential Risks\n`;
+          data.health_insights.potential_risks.forEach(risk => {
+            formatted += `- ${risk}\n`;
+          });
+        }
+        
+        if (data.health_insights.recommendations?.length) {
+          formatted += `\n\n## 📋 Recommendations\n`;
+          data.health_insights.recommendations.forEach(rec => {
+            formatted += `- ${rec}\n`;
+          });
+        }
+      }
+      
+      // Add processing info
+      formatted += `\n\n---\n\n*Processed by ${data.processor_used} in ${data.processing_time.toFixed(2)}ms*`;
+      
+      return formatted;
+    }
+    
+    // Handle UnifiedResponse format (legacy API)
     if ('success' in response && 'data' in response && response.data && 'ai_response' in response.data) {
       const unifiedResp = response as UnifiedResponse;
       
@@ -677,8 +740,17 @@ class WihyAPIService {
   /**
    * Extract recommendations from WiHy response for UI display
    */
-  extractRecommendations(response: WihyResponse | UnifiedResponse): string[] {
+  extractRecommendations(response: HealthQuestionResponse | WihyResponse | UnifiedResponse): string[] {
     const recommendations: string[] = [];
+
+    // Handle new HealthQuestionResponse format (OpenAPI v4.0.0)
+    if ('success' in response && 'data' in response && response.data && 'health_insights' in response.data) {
+      const healthResp = response as HealthQuestionResponse;
+      if (healthResp.data.health_insights.recommendations) {
+        healthResp.data.health_insights.recommendations.forEach(r => recommendations.push(r));
+      }
+      return recommendations;
+    }
 
     if (isUnifiedResponse(response)) {
       // Handle new structured recommendations
@@ -695,8 +767,10 @@ class WihyAPIService {
         response.data.legacy_recommendations.forEach((r: string) => recommendations.push(r));
       }
     } else {
-      if (response.wihy_response.personalized_analysis?.action_items) {
-        response.wihy_response.personalized_analysis.action_items.forEach(action => {
+      // Handle legacy WihyResponse format
+      const legacyResp = response as WihyResponse;
+      if (legacyResp.wihy_response.personalized_analysis?.action_items) {
+        legacyResp.wihy_response.personalized_analysis.action_items.forEach(action => {
           recommendations.push(`${action.action} (${action.priority} priority)`);
         });
       }
@@ -708,8 +782,15 @@ class WihyAPIService {
   /**
    * Extract citations from WiHy response for UI display
    */
-  extractCitations(response: WihyResponse | UnifiedResponse): string[] {
+  extractCitations(response: HealthQuestionResponse | WihyResponse | UnifiedResponse): string[] {
     const citations: string[] = [];
+
+    // Handle new HealthQuestionResponse format (OpenAPI v4.0.0)
+    if ('success' in response && 'data' in response && response.data && 'processor_used' in response.data) {
+      // For now, the new API doesn't include specific citation fields in the schema
+      // We could parse citations from the response text if needed
+      return citations;
+    }
 
     if (isUnifiedResponse(response)) {
       // Unified API may include sources array
@@ -717,8 +798,10 @@ class WihyAPIService {
         response.data.sources.forEach((s: string) => citations.push(s));
       }
     } else {
-      if (response.wihy_response.research_foundation) {
-        response.wihy_response.research_foundation.forEach(research => {
+      // Handle legacy WihyResponse format
+      const legacyResp = response as WihyResponse;
+      if (legacyResp.wihy_response.research_foundation) {
+        legacyResp.wihy_response.research_foundation.forEach(research => {
           citations.push(`${research.citation_text}: ${research.key_finding}`);
         });
       }
