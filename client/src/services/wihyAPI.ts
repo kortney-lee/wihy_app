@@ -567,70 +567,27 @@ class WihyAPIService {
    */
   formatWihyResponse(response: WihyResponse | UnifiedResponse): string {
     // Handle UnifiedResponse format (new API)
-    if ('data' in response && 'service_used' in response) {
+    if ('success' in response && 'data' in response && response.data && 'ai_response' in response.data) {
       const unifiedResp = response as UnifiedResponse;
       
       let formatted = `# WiHy Health Assistant\n\n`;
       
-      if (unifiedResp.data.response) {
-        // Try to parse JSON string if it's stringified
-        let parsedResponse: any = null;
-        if (typeof unifiedResp.data.response === 'string') {
-          try {
-            parsedResponse = JSON.parse(unifiedResp.data.response.replace(/'/g, '"'));
-          } catch (e) {
-            // If parsing fails, use the raw string
-            formatted += unifiedResp.data.response;
-          }
-        }
-        
-        if (parsedResponse) {
-          // Format the parsed health response
-          formatted += `## ${parsedResponse.core_principle || 'Health Information'}\n\n`;
-          
-          if (parsedResponse.personalized_analysis?.action_items?.length > 0) {
-            formatted += `### 📋 Action Items:\n`;
-            parsedResponse.personalized_analysis.action_items.forEach((action: any, index: number) => {
-              formatted += `#### ${index + 1}. ${action.action}\n`;
-              formatted += `- **Priority:** ${action.priority}\n`;
-              formatted += `- **Timeline:** ${action.timeline}\n`;
-              formatted += `- **Target:** ${action.target_illness}\n\n`;
-            });
-          }
-          
-          if (parsedResponse.research_foundation?.length > 0) {
-            formatted += `### 📚 Research Foundation:\n`;
-            parsedResponse.research_foundation.forEach((research: any) => {
-              formatted += `- **${research.citation_text}** (${research.study_type})\n`;
-              formatted += `  ${research.key_finding}\n\n`;
-            });
-          }
-          
-          if (parsedResponse.biblical_wisdom?.length > 0) {
-            formatted += `### ✝️ Biblical Wisdom:\n`;
-            parsedResponse.biblical_wisdom.forEach((wisdom: string) => {
-              formatted += `> ${wisdom}\n\n`;
-            });
-          }
-        }
-      } else if (unifiedResp.data.analysis) {
-        formatted += unifiedResp.data.analysis;
-      } else if (unifiedResp.data.training_status) {
-        formatted += `## Training Service\n\n`;
-        formatted += `${unifiedResp.data.training_status}\n\n`;
-        if (unifiedResp.data.available_models && unifiedResp.data.available_models.length > 0) {
-          formatted += `**Available Models:**\n`;
-          unifiedResp.data.available_models.forEach((model: string) => {
-            formatted += `- ${model}\n`;
-          });
-        }
+      // Use the ai_response.response field which contains the actual response
+      if (unifiedResp.data.ai_response && unifiedResp.data.ai_response.response) {
+        formatted += unifiedResp.data.ai_response.response;
       } else {
-        formatted += `**Service:** ${unifiedResp.service_used}\n\n`;
-        formatted += `**Processing Time:** ${unifiedResp.processing_time} seconds\n\n`;
+        // Fallback to showing raw data if ai_response is not available
         formatted += `**Data:**\n\`\`\`json\n${JSON.stringify(unifiedResp.data, null, 2)}\n\`\`\``;
       }
       
-      formatted += `\n\n---\n\n*Response from ${unifiedResp.service_used} service (${unifiedResp.processing_time}s)*`;
+      // Add service information if available
+      if (unifiedResp.data.ai_response?.service) {
+        formatted += `\n\n---\n\n*Response from ${unifiedResp.data.ai_response.service} service*`;
+        if (unifiedResp.data.ai_response.confidence) {
+          formatted += ` (Confidence: ${Math.round(unifiedResp.data.ai_response.confidence * 100)}%)`;
+        }
+      }
+      
       return formatted;
     }
     
@@ -710,7 +667,9 @@ class WihyAPIService {
       });
     }
     
-    formatted += `---\n\n*WiHy health truth analysis generated at: ${new Date(response.timestamp).toLocaleString()}*\n`;
+    // Add timestamp if available (different field names in different response formats)
+    const timestamp = (response as any).timestamp || (response as any).created_at || new Date().toISOString();
+    formatted += `---\n\n*WiHy health truth analysis generated at: ${new Date(timestamp).toLocaleString()}*\n`;
     
     return formatted;
   }
