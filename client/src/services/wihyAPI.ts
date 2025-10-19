@@ -269,8 +269,8 @@ class WihyAPIService {
           };
         }
       } else {
-        // Remote API uses /wihy/api endpoint with old format
-        endpoint = `${API_CONFIG.WIHY_UNIFIED_API_URL}/wihy/api`;
+        // Remote API uses /ask endpoint (corrected from /wihy/api)
+        endpoint = `${API_CONFIG.WIHY_UNIFIED_API_URL}/ask`;
         
         if ('user_context' in request) {
           requestBody = {
