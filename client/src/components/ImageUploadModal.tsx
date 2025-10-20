@@ -229,16 +229,6 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
   return (
     <div className={`photo-modal-overlay ${isOpen ? 'open' : ''}`} onClick={handleClose}>
       <div className="photo-modal" onClick={(e) => e.stopPropagation()}>
-        <div className="modal-header-simple">
-          <button 
-            className="modal-close-simple"
-            onClick={handleClose}
-            aria-label="Close"
-            disabled={isProcessing}
-          >
-            ×
-          </button>
-        </div>
         
         {/* Simple Upload Area */}
         <div className="simple-upload-container">
@@ -385,25 +375,31 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
                     )}
                   </div>
                   
-                  <button 
-                    className="back-to-upload-button"
-                    onClick={handleCameraToggle}
-                    disabled={isProcessing}
-                    style={{
-                      background: '#f8f9fa',
-                      border: '1px solid #dadce0',
-                      borderRadius: '24px',
-                      padding: '12px 24px',
-                      fontSize: '14px',
-                      fontWeight: '500',
-                      cursor: isProcessing ? 'not-allowed' : 'pointer',
-                      color: '#5f6368',
-                      marginTop: '20px',
-                      marginBottom: '20px'
-                    }}
-                  >
-                    Back to Upload
-                  </button>
+                  <div style={{ 
+                    display: 'flex', 
+                    justifyContent: 'center', 
+                    width: '100%',
+                    marginTop: '20px',
+                    marginBottom: '20px'
+                  }}>
+                    <button 
+                      className="back-to-upload-button"
+                      onClick={handleCameraToggle}
+                      disabled={isProcessing}
+                      style={{
+                        background: '#f8f9fa',
+                        border: '1px solid #dadce0',
+                        borderRadius: '24px',
+                        padding: '12px 24px',
+                        fontSize: '14px',
+                        fontWeight: '500',
+                        cursor: isProcessing ? 'not-allowed' : 'pointer',
+                        color: '#5f6368'
+                      }}
+                    >
+                      Back to Upload
+                    </button>
+                  </div>
                   
                   <canvas
                     ref={canvasRef}
@@ -415,16 +411,17 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
           )}
         </div>
         
-        {/* URL Section - Always visible */}
-        <div className="simple-url-section" style={{ 
-          marginBottom: '16px', 
-          textAlign: 'center',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          width: '100%',
-          padding: '0 20px 4px 20px'
-        }}>
+        {/* URL Section - Only visible when not in camera mode */}
+        {!showCamera && (
+          <div className="simple-url-section" style={{ 
+            marginBottom: '16px', 
+            textAlign: 'center',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            width: '100%',
+            padding: '0 20px 4px 20px'
+          }}>
           <input
             type="url"
             placeholder="Paste image link"
@@ -504,7 +501,8 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
               </button>
             </div>
           </div>
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );
