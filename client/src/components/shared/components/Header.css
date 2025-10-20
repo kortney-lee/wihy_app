@@ -633,3 +633,10 @@ header.vhealth-header.landing .vhealth-search-section .vhealth-search-form .sear
   padding: 4px !important;
   box-shadow: none !important; /* Remove shadow on header */
 }
+
+/* Hide login button on scroll */
+.header-auth-wrapper.hidden-on-scroll {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none;
+}
