@@ -71,14 +71,28 @@ html {
 
 /* Fixed header positioning adjustments */
 .search-landing {
-  min-height: calc(100vh - 160px);
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   padding: 20px;
-  margin-top: -160px; /* Offset the body padding for centering */
-  padding-top: 180px; /* Add back the space for header */
+  margin: 0;
+  position: relative;
+}
+
+/* Hide scrollbars only when on search landing page */
+body.landing-page-active {
+  overflow: hidden !important;
+  height: 100vh;
+  max-height: 100vh;
+  padding-top: 0 !important; /* Remove header padding for landing page */
+}
+
+html.landing-page-active {
+  overflow: hidden !important;
+  height: 100vh;
+  max-height: 100vh;
 }
 
 /* Loading spinner animation */

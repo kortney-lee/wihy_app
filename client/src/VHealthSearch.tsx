@@ -28,6 +28,21 @@ const VHealthSearch: React.FC = () => {
   const abortControllerRef = useRef<AbortController | null>(null);
 
   // ================================
+  // PREVENT SCROLLBARS ON LANDING PAGE
+  // ================================
+  useEffect(() => {
+    // Add class to body to hide scrollbars on landing page
+    document.body.classList.add('landing-page-active');
+    document.documentElement.classList.add('landing-page-active');
+    
+    // Cleanup when component unmounts or navigates away
+    return () => {
+      document.body.classList.remove('landing-page-active');
+      document.documentElement.classList.remove('landing-page-active');
+    };
+  }, []);
+
+  // ================================
   // FORCE MOBILE ANIMATION
   // ================================
   useEffect(() => {

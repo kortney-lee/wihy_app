@@ -61,8 +61,8 @@
 .upload-modal-content {
   background: #fff;
   border-radius: 16px;
-  width: 95%;
-  max-width: 480px;
+  width: 85%;
+  max-width: 440px;
   max-height: 90vh;
   box-shadow: 0 8px 32px rgba(0,0,0,0.12);
   overflow: hidden;
@@ -72,16 +72,16 @@
 @media (max-width: 768px) {
   .photo-modal,
   .upload-modal-content {
-    width: 90%;
-    max-width: 400px;
-    max-height: 85vh;
-    border-radius: 16px;
-    margin: 20px;
+    width: 85%;
+    max-width: 380px;
+    max-height: 75vh;
+    border-radius: 12px;
+    margin: 15px;
   }
   
   .photo-modal-overlay,
   .upload-modal-overlay {
-    padding: 20px;
+    padding: 15px;
   }
 }
 
@@ -200,25 +200,27 @@
 }
 
 .simple-upload-container {
-  padding: 24px;
+  padding: 16px 24px 20px 24px;
   text-align: center;
 }
 
 .simple-title {
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 400;
   color: #202124;
-  margin: 0 0 32px 0;
+  margin: 0 0 16px 0;
 }
 
 .simple-upload-area {
   border: 2px dashed #dadce0;
-  border-radius: 16px;
-  padding: 48px 24px;
-  margin: 0 0 24px 0;
+  border-radius: 12px;
+  padding: 24px 16px;
+  margin: 0 0 12px 0;
   cursor: pointer;
   transition: all 0.3s;
   background: #fafbfc;
+  overflow: hidden;
+  box-sizing: border-box;
 }
 
 .simple-upload-area:hover {
@@ -242,17 +244,26 @@
   flex-direction: column;
   align-items: center;
   gap: 16px;
+  overflow: hidden;
+  width: 100%;
 }
 
 .simple-upload-icon {
   width: 48px;
   height: 48px;
   color: #9aa0a6;
+  overflow: hidden;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .simple-upload-icon svg {
   width: 100%;
   height: 100%;
+  max-width: 48px;
+  max-height: 48px;
 }
 
 .simple-spinner {
@@ -273,6 +284,8 @@
   color: #5f6368;
   margin: 0;
   line-height: 1.4;
+  font-weight: 600;
+  text-align: center;
 }
 
 .upload-link {
