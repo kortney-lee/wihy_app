@@ -21,6 +21,7 @@ const VHealthSearch: React.FC = () => {
   const [imageError, setImageError] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState('Searching...');
   const [showFeelingHealthyContent, setShowFeelingHealthyContent] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   
   const navigate = useNavigate();
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -56,6 +57,26 @@ const VHealthSearch: React.FC = () => {
       document.documentElement.classList.add('landing-page-active');
     }
   }, [showFeelingHealthyContent]);
+
+  // ================================
+  // SCROLL DETECTION FOR LOGIN BUTTON
+  // ================================
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollY = window.scrollY;
+      const threshold = 10; // Hide login button when scrolled more than 10px
+      setIsScrolled(scrollY > threshold);
+    };
+
+    // Check initial scroll position
+    handleScroll();
+    
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
 
   // ================================
   // FORCE MOBILE ANIMATION
@@ -690,7 +711,11 @@ const VHealthSearch: React.FC = () => {
         position: 'fixed',
         top: '20px',
         right: '20px',
-        zIndex: 1000
+        zIndex: 1000,
+        opacity: isScrolled ? 0 : 1,
+        visibility: isScrolled ? 'hidden' : 'visible',
+        pointerEvents: isScrolled ? 'none' : 'auto',
+        transition: 'all 0.2s ease'
       }}>
         <MultiAuthLogin className="main-login-button" />
       </div>
