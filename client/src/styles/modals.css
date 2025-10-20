@@ -72,16 +72,16 @@
 @media (max-width: 768px) {
   .photo-modal,
   .upload-modal-content {
-    width: 85%;
-    max-width: 380px;
-    max-height: 75vh;
-    border-radius: 12px;
-    margin: 15px;
+    width: 95%;
+    max-width: 420px;
+    max-height: 90vh;
+    border-radius: 16px;
+    margin: 10px;
   }
   
   .photo-modal-overlay,
   .upload-modal-overlay {
-    padding: 15px;
+    padding: 10px;
   }
 }
 
