@@ -903,15 +903,32 @@ const VHealthSearch: React.FC = () => {
       {showFeelingHealthyContent && (
         <div 
           className="feeling-healthy-section"
-          onClick={(e) => {
-            // Close if clicking on the background, not the content
-            if (e.target === e.currentTarget) {
-              setShowFeelingHealthyContent(false);
-              // Don't change the search query when closing
-            }
+          onClick={() => {
+            // Close news feed when clicking anywhere in the white space
+            setShowFeelingHealthyContent(false);
+          }}
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(255, 255, 255, 0.95)',
+            backdropFilter: 'blur(2px)',
+            zIndex: 1000,
+            overflow: 'auto',
+            cursor: 'pointer'
           }}
         >
-          <div onClick={(e) => e.stopPropagation()}>
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              maxWidth: '1200px',
+              margin: '40px auto',
+              padding: '20px',
+              cursor: 'default'
+            }}
+          >
             <HealthNewsFeed 
               maxArticles={6}
               setSearchQuery={setSearchQuery}
