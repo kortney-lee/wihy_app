@@ -158,6 +158,32 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
     }
   }, [capturedImage, processFile]);
 
+  // Handle URL upload
+  const handleUrlUpload = useCallback(async () => {
+    if (!imageUrl.trim()) {
+      alert('Please enter an image URL');
+      return;
+    }
+
+    setIsProcessing(true);
+    try {
+      const response = await fetch(imageUrl);
+      if (!response.ok) {
+        throw new Error('Failed to fetch image');
+      }
+      
+      const blob = await response.blob();
+      const file = new File([blob], 'url-image.jpg', { type: blob.type || 'image/jpeg' });
+      
+      await processFile(file);
+    } catch (error) {
+      console.error('Error uploading from URL:', error);
+      alert('Failed to upload image from URL. Please check the URL and try again.');
+    } finally {
+      setIsProcessing(false);
+    }
+  }, [imageUrl, processFile]);
+
   // Back to upload view
   const backToUpload = useCallback(() => {
     stopCamera();
@@ -428,6 +454,48 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
                 }}
               >
                 Use Camera
+              </button>
+            </div>
+
+            {/* URL Input Section */}
+            <div className="url-input-section" style={{ marginBottom: '20px' }}>
+              <input
+                type="url"
+                value={imageUrl}
+                onChange={(e) => setImageUrl(e.target.value)}
+                placeholder="Paste image link"
+                className="url-input"
+                disabled={isProcessing}
+                style={{
+                  width: '100%',
+                  padding: '12px 16px',
+                  borderRadius: '25px',
+                  border: '1px solid #ddd',
+                  fontSize: '16px',
+                  marginBottom: '12px'
+                }}
+              />
+              <button
+                className="analyze-wihy-btn"
+                onClick={handleUrlUpload}
+                disabled={isProcessing || !imageUrl.trim()}
+                style={{
+                  background: 'transparent',
+                  border: '2px solid transparent',
+                  borderRadius: '28px',
+                  padding: '12px 24px',
+                  color: '#1a73e8',
+                  fontSize: '16px',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  backgroundClip: 'padding-box',
+                  position: 'relative',
+                  animation: 'wiH-border-sweep 2.2s linear infinite',
+                  opacity: isProcessing || !imageUrl.trim() ? 0.5 : 1,
+                  width: '100%'
+                }}
+              >
+                {isProcessing ? 'Analyzing...' : 'Analyze with WiHy'}
               </button>
             </div>
 
