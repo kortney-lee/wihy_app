@@ -1,12 +1,12 @@
 // Environment configuration for API endpoints
 export const API_CONFIG = {
   // WIHY Unified API - Single endpoint for all health and nutrition requests
-  WIHY_UNIFIED_API_URL: process.env.REACT_APP_WIHY_API_URL || 'https://ml.wihy.ai:8000',
+  WIHY_UNIFIED_API_URL: process.env.REACT_APP_WIHY_API_URL || 'https://ml.wihy.ai',
   
   // Legacy endpoints (for fallback if needed)
-  BASE_URL: process.env.REACT_APP_API_URL || 'https://services.wihy.ai:5001/api',
+  BASE_URL: process.env.REACT_APP_API_URL || 'https://services.wihy.ai/api',
   OPENFOODFACTS_URL: process.env.REACT_APP_OPENFOODFACTS_URL || 'https://world.openfoodfacts.org/api/v0',
-  NEWS_API_URL: process.env.REACT_APP_NEWS_API_URL || 'https://services.wihy.ai:5001',
+  NEWS_API_URL: process.env.REACT_APP_NEWS_API_URL || 'https://services.wihy.ai',
   READABILITY_API_URL: process.env.REACT_APP_READABILITY_API_URL || 'https://readability.com/api',
 } as const;
 
