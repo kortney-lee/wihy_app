@@ -635,7 +635,14 @@ const Header: React.FC<HeaderProps> = ({
         <div className="vhealth-topbar">
           <div className="vhealth-topbar-right">
             {showLogin && (
-              <div className="header-auth-wrapper">
+              <div className="header-auth-wrapper" style={{
+                minWidth: '48px',
+                minHeight: '48px',
+                padding: '4px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
                 <MultiAuthLogin 
                   position="inline"
                   onUserChange={(user) => console.log('User changed in header:', user)}

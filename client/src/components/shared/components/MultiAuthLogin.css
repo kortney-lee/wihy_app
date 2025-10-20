@@ -257,6 +257,28 @@
   }
 }
 
+/* Hide scrollbars for header auth wrapper */
+.header-auth-wrapper {
+  scrollbar-width: none !important; /* Firefox */
+  -ms-overflow-style: none !important; /* Internet Explorer 10+ */
+  overflow: hidden !important; /* Prevent any overflow that might cause scrollbars */
+}
+
+/* Hide scrollbars for WebKit browsers */
+.header-auth-wrapper::-webkit-scrollbar {
+  display: none !important;
+}
+
+/* Also hide scrollbars for any child elements */
+.header-auth-wrapper * {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+.header-auth-wrapper *::-webkit-scrollbar {
+  display: none !important;
+}
+
 /* Mobile styles - match LoginButton responsive behavior */
 @media (max-width: 600px) {
   .providers-popup,

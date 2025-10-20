@@ -256,12 +256,16 @@
   width: 100% !important;
   max-width: 800px !important;
   margin: 0 auto !important;
+  padding: 4px !important; /* Add padding to contain border effects */
+  border-radius: 28px !important; /* Match the main search container */
+  box-shadow: none !important; /* Remove shadow on header */
   /* Ensure animation is always applied to header search bars */
   animation: wiH-border-sweep 2.2s linear infinite !important;
   background:
     linear-gradient(#fff, #fff) padding-box,
     linear-gradient(90deg, #fa5f06, #ffffff, #C0C0C0, #4cbb17, #1a73e8) border-box !important;
   background-size: 100% 100%, 200% 100% !important;
+  background-clip: border-box !important;
   border: 2px solid transparent !important;
 }
 
@@ -623,6 +627,9 @@ header.vhealth-header.landing .vhealth-search-section .vhealth-search-form .sear
     linear-gradient(#fff, #fff) padding-box,
     linear-gradient(90deg, #fa5f06, #ffffff, #C0C0C0, #4cbb17, #1a73e8) border-box !important;
   background-size: 100% 100%, 200% 100% !important;
+  background-clip: border-box !important;
   border: 2px solid transparent !important;
-  border-radius: 24px !important;
+  border-radius: 28px !important;
+  padding: 4px !important;
+  box-shadow: none !important; /* Remove shadow on header */
 }
