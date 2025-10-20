@@ -10,6 +10,21 @@ import HealthNewsFeed from './components/HealthNewsFeed';
 import { getApiEndpoint } from './config/apiConfig';
 import { logger } from './utils/logger';
 
+const rotatingPrompts = [
+  "Ask me what is healthy",
+  "Do we really need to eat several small meals per day?",
+  "What's the real truth about detox?",
+  "Why doesn't cleansing actually heal the body?",
+  "What does it mean to rediscover real food?",
+  "When did food become a prescription instead of nourishment?",
+  "What do we really know about the metabolism?",
+  "Is the thyroid the whole story—or just part of it?",
+  "How are food and fertility connected to our future?",
+  "What's the hidden cost of convenience in modern life?",
+  "What exactly happened in the year 2000 that changed our health?",
+  "How did disconnection start replacing love?"
+];
+
 const VHealthSearch: React.FC = () => {
   // ================================
   // STATE MANAGEMENT
@@ -22,6 +37,7 @@ const VHealthSearch: React.FC = () => {
   const [loadingMessage, setLoadingMessage] = useState('Searching...');
   const [showFeelingHealthyContent, setShowFeelingHealthyContent] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [placeholder, setPlaceholder] = useState(rotatingPrompts[0]);
   
   const navigate = useNavigate();
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -564,6 +580,17 @@ const VHealthSearch: React.FC = () => {
     };
   }, [showFeelingHealthyContent]);
 
+  // Rotating placeholder effect
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setPlaceholder(prev => {
+        const nextIndex = (rotatingPrompts.indexOf(prev) + 1) % rotatingPrompts.length;
+        return rotatingPrompts[nextIndex];
+      });
+    }, 4000); // rotate every 4 seconds
+    return () => clearInterval(interval);
+  }, []);
+
   // ================================
   // UI COMPONENTS
   // ================================
@@ -762,7 +789,7 @@ const VHealthSearch: React.FC = () => {
                   handleSearch();
                 }
               }}
-              placeholder="Ask anything about health..."
+              placeholder={placeholder}
               className="search-input"
               autoFocus
               disabled={isLoading}

@@ -30,23 +30,23 @@ class VisionAnalysisService {
       
       // Get basic image information
       const imageInfo = this.getImageInfo(imageFile);
-      console.log('📊 Image info:', imageInfo);
+      console.log('Image info:', imageInfo);
 
       // Use existing WiHy API for comprehensive food analysis
       let wihyAnalysis = '';
       let nutritionInfo = '';
       
       try {
-        console.log('🍎 Attempting WiHy API analysis...');
+        console.log('Attempting WiHy API analysis...');
         const { wihyAPI } = await import('./wihyAPI');
         const wihyResult = await wihyAPI.scanFood(imageFile);
         
         if (wihyResult.success && 'data' in wihyResult && wihyResult.data?.ai_response?.response) {
           wihyAnalysis = wihyResult.data.ai_response.response;
-          console.log('✅ WiHy analysis successful');
+          console.log('WiHy analysis successful');
         }
       } catch (error) {
-        console.log('ℹ️ WiHy API analysis not available');
+        console.log('WiHy API analysis not available');
       }
 
       // Extract potential nutrition and food information
@@ -66,11 +66,11 @@ class VisionAnalysisService {
         }
       };
 
-      console.log('✅ Analysis complete:', result);
+      console.log('Analysis complete:', result);
       return result;
 
     } catch (error) {
-      console.error('❌ Vision analysis error:', error);
+      console.error('Vision analysis error:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Analysis failed'
