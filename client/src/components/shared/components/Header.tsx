@@ -58,10 +58,14 @@ const Header: React.FC<HeaderProps> = ({
   useEffect(() => {
     const handleScroll = () => {
       const scrollY = window.scrollY;
-      const threshold = 50; // Hide login button when scrolled more than 50px
+      const threshold = 10; // Hide login button when scrolled more than 10px (more aggressive)
+      console.log('Scroll detected:', scrollY, 'Threshold:', threshold, 'Should hide:', scrollY > threshold);
       setIsScrolled(scrollY > threshold);
     };
 
+    // Check initial scroll position
+    handleScroll();
+    
     window.addEventListener('scroll', handleScroll, { passive: true });
     
     return () => {
@@ -659,12 +663,12 @@ const Header: React.FC<HeaderProps> = ({
                   minWidth: '48px',
                   minHeight: '48px',
                   padding: '4px',
-                  display: 'flex',
+                  display: isScrolled ? 'none' : 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   opacity: isScrolled ? 0 : 1,
                   visibility: isScrolled ? 'hidden' : 'visible',
-                  transition: 'opacity 0.3s ease, visibility 0.3s ease'
+                  transition: 'all 0.2s ease'
                 }}>
                 <MultiAuthLogin 
                   position="inline"
