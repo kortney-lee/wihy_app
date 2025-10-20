@@ -120,12 +120,12 @@ class NewsService {
     
     if (isDevelopment) {
       // Based on working endpoint: /api/news
-      const localEndpoint = 'http://localhost:5001/api/news';
+      const localEndpoint = getApiEndpoint('/news');
       console.log('🔧 Development mode: Using local endpoint:', localEndpoint);
       return localEndpoint;
     } else {
       // In production: use production endpoint
-      const prodEndpoint = 'https://services.wihy.ai/api/news';
+      const prodEndpoint = getApiEndpoint('/news');
       console.log('🚀 Production mode: Using production endpoint:', prodEndpoint);
       return prodEndpoint;
     }
@@ -186,7 +186,7 @@ class NewsService {
         if (isLocal) {
           try {
             console.log('🔍 Testing basic connectivity to service...');
-            const healthCheck = await axios.get('http://localhost:5001/', { timeout: 5000 });
+            const healthCheck = await axios.get(getApiEndpoint('/'), { timeout: 5000 });
             console.log('✅ Service is reachable');
           } catch (connectError: any) {
             console.log('⚠️ Service connectivity check failed:', connectError.message);
@@ -292,11 +292,11 @@ class NewsService {
             console.error('💡 You can start it with the appropriate command for your local setup');
           } else if (error.code === 'ECONNABORTED' || error.message.includes('timeout')) {
             console.error('💡 Request timed out. The service might be running but responding slowly');
-            console.error('💡 Try testing the endpoint manually: http://localhost:5001/api/news');
+            console.error('💡 Try testing the endpoint manually:', getApiEndpoint('/news'));
             console.error('💡 Check if the service is processing data or needs time to start up');
           } else if (error.response?.status === 404) {
             console.error('💡 404 Error: The /api/news endpoint may not exist');
-            console.error('💡 Check the API documentation at http://localhost:5001/api/service/docs/');
+            console.error('💡 Check the API documentation at', getApiEndpoint('/service/docs/'));
             console.error('💡 Verify the correct endpoint path with the service documentation');
           }
         }

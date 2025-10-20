@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { fetchNewsFeed, getArticlesByCategory, NewsArticle } from '../services/newsService';
 import { useNavigate } from 'react-router-dom';
+import { getApiEndpoint } from '../config/apiConfig';
 import './HealthNewsFeed.css';
 
 // Update the props interface to receive the search functions
@@ -295,7 +296,7 @@ const HealthNewsFeed: React.FC<NewsFeedProps> = ({
           console.log('Trying again with absolutely no filters');
           // Last resort - force no filtering at all
           try {
-            const fallbackResponse = await fetch('http://localhost:5001/api/news/articles?limit=' + maxArticles);
+            const fallbackResponse = await fetch(getApiEndpoint(`/news/articles?limit=${maxArticles}`));
             const fallbackData = await fallbackResponse.json();
             
             if (fallbackData.success && fallbackData.articles && fallbackData.articles.length > 0) {
