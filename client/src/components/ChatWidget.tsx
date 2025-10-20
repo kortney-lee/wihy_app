@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { wihyAPI } from '../services/wihyAPI';
+import '../styles/VHealthSearch.css';
 
 interface ChatMessage {
   id: string;
@@ -495,51 +496,23 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ isOpen, onClose, searchQuery, s
       </div>
 
       {/* Input */}
-      <div style={{
-        padding: '16px',
-        borderTop: '1px solid #f3f4f6',
-        backgroundColor: '#fafbfc'
-      }}>
-        <div style={{
-          display: 'flex',
-          gap: '8px',
-          alignItems: 'flex-end'
-        }}>
-          <textarea
-            ref={inputRef}
-            value={inputMessage}
-            onChange={(e) => setInputMessage(e.target.value)}
-            onKeyPress={handleKeyPress}
-            placeholder="Ask about your health data..."
-            style={{
-              flex: 1,
-              border: '1px solid #d1d5db',
-              borderRadius: '12px',
-              padding: '12px 16px',
-              fontSize: '14px',
-              resize: 'none',
-              minHeight: '20px',
-              maxHeight: '80px',
-              fontFamily: 'inherit',
-              outline: 'none'
-            }}
-            rows={1}
-          />
+      <div className="chat-input-area">
+        <div className="chat-input-wrapper">
+          <div className="search-input-container chat-input-container">
+            <textarea
+              ref={inputRef}
+              className="search-input"
+              value={inputMessage}
+              onChange={(e) => setInputMessage(e.target.value)}
+              onKeyPress={handleKeyPress}
+              placeholder="Ask about your health data..."
+              rows={1}
+            />
+          </div>
           <button
             onClick={handleSendMessage}
             disabled={!inputMessage.trim() || isLoading}
-            style={{
-              backgroundColor: inputMessage.trim() ? '#1a73e8' : '#d1d5db',
-              color: 'white',
-              border: 'none',
-              borderRadius: '12px',
-              padding: '12px',
-              cursor: inputMessage.trim() ? 'pointer' : 'not-allowed',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              transition: 'background-color 0.2s ease'
-            }}
+            className={`send-button ${inputMessage.trim() ? 'active' : 'disabled'}`}
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
               <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
@@ -560,11 +533,18 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ isOpen, onClose, searchQuery, s
           }
         }
 
-        /* The ONLY scroller */
+        /* The ONLY scroller - Hide scrollbar but keep functionality */
         .chat-thread {
           height: calc(100vh - 240px);    /* adjust for your header/input */
           overflow-y: auto;
           overscroll-behavior: contain;
+          scrollbar-width: none; /* Firefox */
+          -ms-overflow-style: none; /* Internet Explorer 10+ */
+        }
+        
+        /* Hide scrollbar for WebKit browsers */
+        .chat-thread::-webkit-scrollbar {
+          display: none;
         }
 
         /* Each message keeps its size and never creates its own scrollbar */
@@ -589,6 +569,73 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ isOpen, onClose, searchQuery, s
         .chat-message {
           scrollbar-width: none;
           -ms-overflow-style: none;
+        }
+
+        /* Chat-specific input area styling */
+        .chat-input-area {
+          padding: 16px;
+          border-top: 1px solid #ffffff;
+          background-color: #ffffff; /* Pure white background */
+        }
+
+        /* Wrapper for input and button positioning */
+        .chat-input-wrapper {
+          position: relative;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+
+        /* Chat input container - Simple solid styling for chat */
+        .chat-input-container {
+          width: 100% !important; /* Override the 80% width for chat context */
+          margin: 0 !important; /* Override auto margins for flexbox */
+          flex: 1; /* Allow it to grow in flexbox */
+          /* Override animated styles with solid styling */
+          background: #ffffff !important;
+          border: 2px solid #fa5f06 !important;
+          border-radius: 28px !important;
+          box-shadow: 0 2px 8px rgba(250, 95, 6, 0.1) !important;
+          animation: none !important;
+          padding: 4px;
+        }
+
+        /* Chat input overrides */
+        .chat-input-container .search-input {
+          resize: none;
+          min-height: 20px;
+          max-height: 80px;
+          padding-right: 16px;
+          background-color: #ffffff !important; /* Ensure pure white background */
+        }
+
+        /* Send button styling - now positioned outside animated container */
+        .send-button {
+          position: relative;
+          right: auto;
+          top: auto;
+          transform: none;
+          color: white;
+          border: none;
+          border-radius: 12px;
+          padding: 12px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: background-color 0.2s ease;
+          flex-shrink: 0;
+          min-width: 44px;
+          height: 44px;
+        }
+
+        .send-button.active {
+          background-color: #1a73e8;
+          cursor: pointer;
+        }
+
+        .send-button.disabled {
+          background-color: #d1d5db;
+          cursor: not-allowed;
         }
       `}</style>
     </div>

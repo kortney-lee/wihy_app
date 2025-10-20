@@ -48,9 +48,12 @@ h1.search-logo {
   position: relative;
   width: 80%; /* Default width */
   max-width: 90%; /* Maximum width */
-  margin: 0 auto 24px auto;
+  margin: 0 auto 32px auto; /* Increased bottom margin for shadow */
+  padding: 4px; /* Add padding to contain border effects */
   border: 2px solid transparent;
-  border-radius: 24px;
+  border-radius: 28px !important; /* Slightly larger to accommodate padding */
+  -webkit-border-radius: 28px !important; /* Safari/Chrome */
+  -moz-border-radius: 28px !important; /* Firefox */
   box-shadow: 0 8px 24px rgba(15,23,42,.15);
   background:
     linear-gradient(#fff, #fff) padding-box,
@@ -58,6 +61,9 @@ h1.search-logo {
   background-size: 100% 100%, 200% 100%;
   /* CONTINUOUS animation - same as Dashboard buttons */
   animation: wiH-border-sweep 2.2s linear infinite !important;
+  
+  /* Ensure container properly contains all visual effects */
+  background-clip: border-box;
   
   /* New CSS variables for consistent spacing */
   --icons-width: 150px;
