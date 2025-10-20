@@ -42,6 +42,7 @@ const Header: React.FC<HeaderProps> = ({
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState('Searching...');
+  const [isScrolled, setIsScrolled] = useState(false);
   
   const navigate = useNavigate();
   const searchInputRef = useRef<HTMLTextAreaElement>(null);
@@ -50,6 +51,23 @@ const Header: React.FC<HeaderProps> = ({
 
   // Use internal listening state if onVoiceInput is not provided
   const currentIsListening = onVoiceInput ? isListening : internalIsListening;
+
+  // ================================
+  // SCROLL DETECTION FOR LOGIN BUTTON
+  // ================================
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollY = window.scrollY;
+      const threshold = 50; // Hide login button when scrolled more than 50px
+      setIsScrolled(scrollY > threshold);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
 
   // ================================
   // HEADER HEIGHT MEASUREMENT
@@ -635,14 +653,19 @@ const Header: React.FC<HeaderProps> = ({
         <div className="vhealth-topbar">
           <div className="vhealth-topbar-right">
             {showLogin && (
-              <div className="header-auth-wrapper" style={{
-                minWidth: '48px',
-                minHeight: '48px',
-                padding: '4px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}>
+              <div 
+                className={`header-auth-wrapper ${isScrolled ? 'hidden-on-scroll' : ''}`}
+                style={{
+                  minWidth: '48px',
+                  minHeight: '48px',
+                  padding: '4px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  opacity: isScrolled ? 0 : 1,
+                  visibility: isScrolled ? 'hidden' : 'visible',
+                  transition: 'opacity 0.3s ease, visibility 0.3s ease'
+                }}>
                 <MultiAuthLogin 
                   position="inline"
                   onUserChange={(user) => console.log('User changed in header:', user)}

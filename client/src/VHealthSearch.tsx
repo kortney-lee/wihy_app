@@ -43,6 +43,21 @@ const VHealthSearch: React.FC = () => {
   }, []);
 
   // ================================
+  // ALLOW SCROLLING WHEN NEWS FEED IS OPEN
+  // ================================
+  useEffect(() => {
+    if (showFeelingHealthyContent) {
+      // Remove landing page classes to allow scrolling when news feed is open
+      document.body.classList.remove('landing-page-active');
+      document.documentElement.classList.remove('landing-page-active');
+    } else {
+      // Re-add landing page classes when news feed is closed
+      document.body.classList.add('landing-page-active');
+      document.documentElement.classList.add('landing-page-active');
+    }
+  }, [showFeelingHealthyContent]);
+
+  // ================================
   // FORCE MOBILE ANIMATION
   // ================================
   useEffect(() => {
