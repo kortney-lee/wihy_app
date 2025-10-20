@@ -12,21 +12,6 @@ import { foodAnalysisService } from './components/foodAnalysisService';
 import './VHealthSearch.css';
 import MultiAuthLogin from './components/shared/components/MultiAuthLogin';
 
-const rotatingPrompts = [
-  "Ask me what is healthy",
-  "Do we really need to eat several small meals per day?",
-  "What's the real truth about detox?",
-  "Why doesn't cleansing actually heal the body?",
-  "What does it mean to rediscover real food?",
-  "When did food become a prescription instead of nourishment?",
-  "What do we really know about the metabolism?",
-  "Is the thyroid the whole story—or just part of it?",
-  "How are food and fertility connected to our future?",
-  "What's the hidden cost of convenience in modern life?",
-  "What exactly happened in the year 2000 that changed our health?",
-  "How did disconnection start replacing love?"
-];
-
 // Add TypeScript declaration for Speech Recognition
 declare global {
   interface Window {
@@ -62,7 +47,6 @@ const VHealthApp: React.FC = () => {
   const [isListening, setIsListening] = useState(false);
   const [image, setImage] = useState<File | null>(null);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
-  const [placeholder, setPlaceholder] = useState(rotatingPrompts[0]);
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [chatMessages, setChatMessages] = useState<any[]>([]);
   const [currentApiResponse, setCurrentApiResponse] = useState<UnifiedResponse | null>(null);
@@ -285,16 +269,7 @@ const VHealthApp: React.FC = () => {
     console.log('🔧 Using WiHy Unified API for health searches');
   }, []);
 
-  // Rotating placeholder effect
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setPlaceholder(prev => {
-        const nextIndex = (rotatingPrompts.indexOf(prev) + 1) % rotatingPrompts.length;
-        return rotatingPrompts[nextIndex];
-      });
-    }, 4000); // rotate every 4 seconds
-    return () => clearInterval(interval);
-  }, []);
+
 
   // Replace the handleCameraClick function
   const handleCameraClick = () => {
@@ -351,7 +326,7 @@ const VHealthApp: React.FC = () => {
         <div className="search-input-container">
           <input
             type="text"
-            placeholder={placeholder}
+            placeholder="Ask me what is healthy"
             value={currentQuery}
             onChange={(e) => setCurrentQuery(e.target.value)}
             onKeyPress={handleKeyPress}
