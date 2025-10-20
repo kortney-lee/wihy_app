@@ -50,7 +50,27 @@
     width: 100% !important;
   }
 
-  /* Remove scrollbar from any potential wide elements */
+  /* Hide scrollbars on mobile for chat widget and all scrollable elements */
+  .chat-messages-scroll,
+  .chat-messages-scroll::-webkit-scrollbar,
+  *::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    background: transparent !important;
+  }
+
+  /* Hide scrollbars on Firefox mobile */
+  .chat-messages-scroll,
+  * {
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+  }
+
+  /* Ensure smooth scrolling on mobile */
+  .chat-messages-scroll {
+    -webkit-overflow-scrolling: touch !important;
+  }
+}  /* Remove scrollbar from any potential wide elements */
   div, section, article, main, header, footer {
     max-width: 100vw !important;
     overflow-x: hidden !important;
@@ -140,7 +160,6 @@
     min-height: calc(100vh - 80px) !important; /* Match mobile body padding */
     margin-top: 0 !important;
     padding-top: 10px !important;
-  }
   }
 
   /* Better mobile text sizing throughout */
