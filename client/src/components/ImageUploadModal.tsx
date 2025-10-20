@@ -2,12 +2,12 @@
 import React, { useState, useRef, useCallback } from 'react';
 import './Spinner.css';
 import '../styles/VHealthSearch.css';
-import '../styles/modals.css';
+import { visionAnalysisService } from '../services/visionAnalysisService';
 
 interface ImageUploadModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onAnalysisComplete: (foodName: string) => void;
+  onAnalysisComplete: (foodName: string) => void; // Changed from onFileSelect
   title?: string;
   subtitle?: string;
 }
@@ -15,67 +15,21 @@ interface ImageUploadModalProps {
 const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
   isOpen,
   onClose,
-  onAnalysisComplete,
-  title = "Upload Image",
-  subtitle = "Upload images for analysis"
+  onAnalysisComplete, // Updated prop name
+  title = "Analyze Image",
+  subtitle = "Upload or capture images for comprehensive analysis"
 }) => {
+  // ALL HOOKS MUST BE CALLED BEFORE ANY CONDITIONAL RETURNS
   const [isDragging, setIsDragging] = useState(false);
   const [imageUrl, setImageUrl] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [showCamera, setShowCamera] = useState(false);
   const [stream, setStream] = useState<MediaStream | null>(null);
-  const [capturedImage, setCapturedImage] = useState<string | null>(null);
-  
+  const [cameraError, setCameraError] = useState<string>('');
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Start camera
-  const startCamera = useCallback(async () => {
-    try {
-      const mediaStream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'environment' }
-      });
-      setStream(mediaStream);
-      setShowCamera(true);
-      if (videoRef.current) {
-        videoRef.current.srcObject = mediaStream;
-      }
-    } catch (error) {
-      console.error('Error accessing camera:', error);
-      alert('Unable to access camera. Please check permissions.');
-    }
-  }, []);
-
-  // Stop camera
-  const stopCamera = useCallback(() => {
-    if (stream) {
-      stream.getTracks().forEach(track => track.stop());
-      setStream(null);
-    }
-    setShowCamera(false);
-    setCapturedImage(null);
-  }, [stream]);
-
-  // Capture photo
-  const capturePhoto = useCallback(() => {
-    if (videoRef.current && canvasRef.current) {
-      const video = videoRef.current;
-      const canvas = canvasRef.current;
-      const context = canvas.getContext('2d');
-      
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      
-      if (context) {
-        context.drawImage(video, 0, 0, canvas.width, canvas.height);
-        const imageDataUrl = canvas.toDataURL('image/jpeg');
-        setCapturedImage(imageDataUrl);
-      }
-    }
-  }, []);
-
-  // Process file and analyze it
+  // Process file and analyze it with Vision Analysis Service
   const processFile = useCallback(async (file: File) => {
     console.log('🔍 STEP 1: File received:', {
       name: file.name,
@@ -86,113 +40,115 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
     setIsProcessing(true);
     
     try {
-      console.log('🔍 STEP 2: Using WiHy Scan API...');
+      console.log('🔍 STEP 2: Using Vision Analysis Service for comprehensive analysis...');
       
-      // Import wihyAPI dynamically to avoid circular imports
-      const { wihyAPI } = await import('../services/wihyAPI');
+      // Use Vision Analysis Service for comprehensive detection
+      const visionResult = await visionAnalysisService.analyzeImage(file);
+      console.log('🔍 STEP 3: Vision analysis result:', visionResult);
       
-      console.log('🔍 STEP 3: Making scan API call...');
-      const result = await wihyAPI.scanFood(file);
-
-      console.log('🔍 STEP 4: Scan API response received:', result);
+      let analysisText = 'Image analyzed';
       
-      // Extract food name from the scan result using unified format
-      let foodName = 'unknown';
-      
-      // Type-safe check for unified response format
-      if (result.success && 'data' in result && result.data) {
-        const unifiedResult = result as any; // Use any to handle type checking
+      if (visionResult.success && visionResult.data) {
+        // Format comprehensive analysis results
+        analysisText = visionAnalysisService.formatForDisplay(visionResult);
         
-        // Primary: Get health advice from AI response
-        if (unifiedResult.data.ai_response?.response) {
-          foodName = unifiedResult.data.ai_response.response;
-          console.log('🔍 Using AI response:', foodName);
-        }
-        // Fallback: Try to get product name or other analysis
-        else if (unifiedResult.data.product_name) {
-          foodName = unifiedResult.data.product_name;
-          console.log('🔍 Using product name:', foodName);
-        }
-        else if (unifiedResult.data.analysis) {
-          foodName = unifiedResult.data.analysis;
-          console.log('🔍 Using analysis:', foodName);
-        }
-        else {
-          foodName = 'Food item scanned';
-          console.log('🔍 Using fallback name');
+        // Also try the original WiHy API for additional context
+        try {
+          console.log('🔍 STEP 4: Also checking WiHy API for additional context...');
+          const { wihyAPI } = await import('../services/wihyAPI');
+          const wihyResult = await wihyAPI.scanFood(file);
+          
+          if (wihyResult.success && 'data' in wihyResult && wihyResult.data?.ai_response?.response) {
+            analysisText = `${analysisText}\n\nAI Health Analysis: ${wihyResult.data.ai_response.response}`;
+          }
+        } catch (wihyError) {
+          console.log('ℹ️ WiHy API not available, using Vision Analysis results only');
         }
       } else {
-        console.log('❌ No valid response data found');
-        foodName = 'Food analysis unavailable';
+        console.log('❌ Vision analysis failed, falling back to basic analysis');
+        analysisText = visionResult.error || 'Image analysis unavailable';
       }
       
-      console.log('🔍 STEP 5: Extracted food name:', foodName);
+      console.log('🔍 STEP 5: Final analysis text:', analysisText);
+      console.log('🔍 STEP 6: Triggering analysis completion...');
       
-      console.log('🔍 STEP 6: Triggering analysis completion for:', foodName);
-      onAnalysisComplete(foodName);
+      onAnalysisComplete(analysisText);
       
     } catch (error) {
       console.error('❌ Error in processFile:', error);
+      onAnalysisComplete('Analysis failed. Please try again.');
     } finally {
       setIsProcessing(false);
     }
   }, [onAnalysisComplete]);
 
-  // Analyze captured image
-  const analyzeCapturedImage = useCallback(async () => {
-    if (!capturedImage) return;
-
-    setIsProcessing(true);
+  // Camera functions
+  const startCamera = useCallback(async () => {
     try {
-      // Convert data URL to blob
-      const response = await fetch(capturedImage);
-      const blob = await response.blob();
-      const file = new File([blob], 'captured-image.jpg', { type: 'image/jpeg' });
+      setCameraError('');
+      const mediaStream = await navigator.mediaDevices.getUserMedia({
+        video: { 
+          facingMode: 'environment', // Use back camera on mobile
+          width: { ideal: 1280 },
+          height: { ideal: 720 }
+        }
+      });
       
-      await processFile(file);
-    } catch (error) {
-      console.error('Error analyzing captured image:', error);
-      alert('Failed to analyze the captured image. Please try again.');
-    } finally {
-      setIsProcessing(false);
-    }
-  }, [capturedImage, processFile]);
-
-  // Handle URL upload
-  const handleUrlUpload = useCallback(async () => {
-    if (!imageUrl.trim()) {
-      alert('Please enter an image URL');
-      return;
-    }
-
-    setIsProcessing(true);
-    try {
-      const response = await fetch(imageUrl);
-      if (!response.ok) {
-        throw new Error('Failed to fetch image');
+      setStream(mediaStream);
+      if (videoRef.current) {
+        videoRef.current.srcObject = mediaStream;
       }
-      
-      const blob = await response.blob();
-      const file = new File([blob], 'url-image.jpg', { type: blob.type || 'image/jpeg' });
-      
-      await processFile(file);
     } catch (error) {
-      console.error('Error uploading from URL:', error);
-      alert('Failed to upload image from URL. Please check the URL and try again.');
-    } finally {
-      setIsProcessing(false);
+      console.error('Camera access error:', error);
+      setCameraError('Unable to access camera. Please check permissions.');
     }
-  }, [imageUrl, processFile]);
+  }, []);
 
-  // Back to upload view
-  const backToUpload = useCallback(() => {
-    stopCamera();
-  }, [stopCamera]);
+  const stopCamera = useCallback(() => {
+    if (stream) {
+      stream.getTracks().forEach(track => track.stop());
+      setStream(null);
+    }
+    setShowCamera(false);
+  }, [stream]);
 
-  if (!isOpen) return null;
+  const capturePhoto = useCallback(async () => {
+    if (!videoRef.current || !canvasRef.current) return;
+
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    const context = canvas.getContext('2d');
+
+    if (!context) return;
+
+    // Set canvas dimensions to match video
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+
+    // Draw current video frame to canvas
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    // Convert canvas to blob and then to File
+    canvas.toBlob(async (blob) => {
+      if (blob) {
+        const file = new File([blob], 'camera-capture.jpg', { type: 'image/jpeg' });
+        await processFile(file);
+        stopCamera();
+      }
+    }, 'image/jpeg', 0.9);
+  }, [processFile, stopCamera]);
+
+  const handleCameraToggle = useCallback(() => {
+    if (showCamera) {
+      stopCamera();
+    } else {
+      setShowCamera(true);
+      startCamera();
+    }
+  }, [showCamera, stopCamera, startCamera]);
 
   // Handle file drop
-  const handleDrop = async (e: React.DragEvent) => {
+  const handleDrop = useCallback(async (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(false);
     
@@ -204,21 +160,21 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
     } else {
       alert('Please upload an image file (JPG, PNG, GIF, etc.)');
     }
-  };
+  }, [processFile]);
 
   // Handle drag events
-  const handleDragOver = (e: React.DragEvent) => {
+  const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(true);
-  };
+  }, []);
 
-  const handleDragLeave = (e: React.DragEvent) => {
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(false);
-  };
+  }, []);
 
   // Handle file input
-  const handleFileInput = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileInput = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     console.log('📁 File input triggered');
     const file = e.target.files?.[0];
     console.log('📁 Selected file:', file);
@@ -227,25 +183,55 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
     } else {
       console.log('❌ No file selected');
     }
-  };
+  }, [processFile]);
+
+  // Handle URL upload
+  const handleUrlUpload = useCallback(async () => {
+    if (!imageUrl.trim()) {
+      alert('Please enter a valid image URL');
+      return;
+    }
+
+    setIsProcessing(true);
+    try {
+      const response = await fetch(imageUrl);
+      const blob = await response.blob();
+      
+      if (!blob.type.startsWith('image/')) {
+        throw new Error('URL does not point to an image');
+      }
+
+      const file = new File([blob], 'uploaded-image.jpg', { type: blob.type });
+      await processFile(file);
+    } catch (error) {
+      console.error('Error loading image from URL:', error);
+      alert('Failed to load image from URL. Please check the URL and try again.');
+    } finally {
+      setIsProcessing(false);
+    }
+  }, [imageUrl, processFile]);
 
   // Handle modal close
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     if (!isProcessing) {
+      stopCamera(); // Clean up camera resources
       onClose();
       setImageUrl('');
       setIsDragging(false);
+      setShowCamera(false);
+      setCameraError('');
     }
-  };
+  }, [isProcessing, stopCamera, onClose]);
+
+  // Return null if modal is not open (AFTER all hooks are called)
+  if (!isOpen) return null;
 
   return (
     <div className={`photo-modal-overlay ${isOpen ? 'open' : ''}`} onClick={handleClose}>
       <div className="photo-modal" onClick={(e) => e.stopPropagation()}>
-        <div className="modal-header">
-          <h2>{title}</h2>
-          <p className="modal-subtitle">{subtitle}</p>
+        <div className="modal-header-simple">
           <button 
-            className="modal-close"
+            className="modal-close-simple"
             onClick={handleClose}
             aria-label="Close"
             disabled={isProcessing}
@@ -254,257 +240,258 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
           </button>
         </div>
         
-        {showCamera ? (
-          /* Camera View */
-          <div className="camera-view">
-            {capturedImage ? (
-              /* Captured Image Preview */
-              <div className="captured-image-container">
-                <img src={capturedImage} alt="Captured" className="captured-image" />
-                <div className="camera-controls">
-                  <button 
-                    className="analyze-wihy-btn"
-                    onClick={analyzeCapturedImage}
-                    disabled={isProcessing}
-                    style={{
-                      background: 'transparent',
-                      border: '2px solid transparent',
-                      borderRadius: '28px',
-                      padding: '12px 24px',
-                      color: '#1a73e8',
-                      fontSize: '16px',
-                      fontWeight: '600',
-                      cursor: 'pointer',
-                      backgroundClip: 'padding-box',
-                      position: 'relative',
-                      animation: 'wiH-border-sweep 2.2s linear infinite',
-                      marginBottom: '12px'
-                    }}
-                  >
-                    {isProcessing ? 'Analyzing...' : 'Analyze with WiHy'}
-                  </button>
-                  <button 
-                    onClick={() => setCapturedImage(null)}
-                    style={{
-                      background: '#f8f9fa',
-                      border: '1px solid #ddd',
-                      borderRadius: '8px',
-                      padding: '8px 16px',
-                      color: '#666',
-                      fontSize: '14px',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    Retake
-                  </button>
-                  <button 
-                    onClick={backToUpload}
-                    style={{
-                      background: '#f8f9fa',
-                      border: '1px solid #ddd',
-                      borderRadius: '8px',
-                      padding: '8px 16px',
-                      color: '#666',
-                      fontSize: '14px',
-                      cursor: 'pointer',
-                      marginLeft: '8px'
-                    }}
-                  >
-                    Back to Upload
-                  </button>
-                </div>
-              </div>
-            ) : (
-              /* Live Camera View */
-              <div className="live-camera-container">
-                <video 
-                  ref={videoRef} 
-                  autoPlay 
-                  playsInline 
-                  className="camera-video"
-                  style={{
-                    width: '100%',
-                    height: '300px',
-                    objectFit: 'cover',
-                    borderRadius: '8px'
-                  }}
-                />
-                <canvas ref={canvasRef} style={{ display: 'none' }} />
-                <div className="camera-controls">
-                  <button 
-                    className="analyze-wihy-btn"
-                    onClick={capturePhoto}
-                    style={{
-                      background: 'transparent',
-                      border: '2px solid transparent',
-                      borderRadius: '28px',
-                      padding: '16px 32px',
-                      color: '#1a73e8',
-                      fontSize: '18px',
-                      fontWeight: '600',
-                      cursor: 'pointer',
-                      backgroundClip: 'padding-box',
-                      position: 'relative',
-                      animation: 'wiH-border-sweep 2.2s linear infinite',
-                      marginBottom: '12px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      width: '100%'
-                    }}
-                  >
-                    Capture & Analyze
-                  </button>
-                  <button 
-                    onClick={backToUpload}
-                    style={{
-                      background: '#f8f9fa',
-                      border: '1px solid #ddd',
-                      borderRadius: '8px',
-                      padding: '8px 16px',
-                      color: '#666',
-                      fontSize: '14px',
-                      cursor: 'pointer',
-                      width: '100%'
-                    }}
-                  >
-                    Back to Upload
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-        ) : (
-          /* Upload View */
-          <>
-            {/* Upload Area */}
-            <div 
-              className={`upload-area ${isDragging ? 'dragging' : ''} ${isProcessing ? 'processing' : ''}`}
-              onDrop={handleDrop}
-              onDragOver={handleDragOver}
-              onDragLeave={handleDragLeave}
-            >
-              <div className="upload-content">
-                <div className="upload-icon">
+        {/* Simple Upload Area */}
+        <div className="simple-upload-container">
+          <h2 className="simple-title">Analyze any image</h2>
+          
+          {!showCamera ? (
+            <>
+              <div 
+                className={`simple-upload-area ${isDragging ? 'dragging' : ''} ${isProcessing ? 'processing' : ''}`}
+                onDrop={handleDrop}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+              >
+                <div className="simple-upload-content">
                   {isProcessing ? (
-                    <div className="upload-spinner">
-                      <div className="spinner"></div>
-                    </div>
+                    <>
+                      <div className="simple-spinner">
+                        <div className="spinner"></div>
+                      </div>
+                      <p className="simple-upload-text">Analyzing image...</p>
+                    </>
                   ) : (
-                    <svg viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
-                    </svg>
+                    <>
+                      <div className="simple-upload-icon">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M9,16V10H5L12,3L19,10H15V16H9M5,20V18H19V20H5Z"/>
+                        </svg>
+                      </div>
+                      <p className="simple-upload-text">
+                        {isDragging ? 'Drop image here' : 'Drag an image here or'}{' '}
+                        <span 
+                          className="upload-link"
+                          onClick={() => document.getElementById('modal-file-input')?.click()}
+                        >
+                          upload a file
+                        </span>
+                      </p>
+                    </>
                   )}
                 </div>
                 
-                {isProcessing ? (
-                  <p className="upload-text">Analyzing image...</p>
-                ) : (
-                  <p className="upload-text">
-                    {isDragging ? 'Drop image here' : 'Drag an image here or'}{' '}
-                    <button 
-                      className="upload-link"
-                      onClick={() => fileInputRef.current?.click()}
-                      disabled={isProcessing}
-                    >
-                      upload a file
-                    </button>
-                  </p>
-                )}
+                <input
+                  id="modal-file-input"
+                  type="file"
+                  accept="image/*"
+                  style={{ display: 'none' }}
+                  onChange={handleFileInput}
+                  disabled={isProcessing}
+                  capture="environment" // Mobile camera hint
+                />
               </div>
               
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                style={{ display: 'none' }}
-                onChange={handleFileInput}
-                disabled={isProcessing}
-              />
-            </div>
-
-            {/* Button Bar */}
-            <div style={{ 
-              display: 'flex', 
-              flexDirection: 'column', 
-              gap: '12px', 
-              marginTop: '20px',
-              marginBottom: '20px'
-            }}>
-              <button 
-                className="analyze-wihy-btn"
-                onClick={startCamera}
-                disabled={isProcessing}
-                style={{
-                  background: 'transparent',
+              {/* Camera Toggle Button */}
+              <div className="camera-toggle-section" style={{ 
+                marginBottom: '16px', 
+                textAlign: 'center',
+                display: 'flex',
+                justifyContent: 'center',
+                width: '100%'
+              }}>
+                <div className="wihy-btn-wrapper" style={{
+                  display: 'inline-block',
+                  animation: isProcessing ? 'none' : 'wiH-border-sweep 2.2s linear infinite',
+                  background: isProcessing 
+                    ? 'linear-gradient(#f3f4f6, #f3f4f6)' 
+                    : 'linear-gradient(#fff, #fff) padding-box, linear-gradient(90deg, #fa5f06, #ffffff, #C0C0C0, #4cbb17) border-box',
+                  backgroundSize: '100% 100%, 200% 100%',
                   border: '2px solid transparent',
                   borderRadius: '28px',
-                  padding: '16px 32px',
-                  color: '#1a73e8',
-                  fontSize: '18px',
-                  fontWeight: '600',
-                  cursor: 'pointer',
-                  backgroundClip: 'padding-box',
-                  position: 'relative',
-                  animation: 'wiH-border-sweep 2.2s linear infinite',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  width: '100%'
-                }}
-              >
-                Use Camera
-              </button>
+                  minWidth: '240px',
+                  width: '60%',
+                  maxWidth: '300px'
+                }}>
+                  <button 
+                    className="analyze-wihy-btn"
+                    onClick={handleCameraToggle}
+                    disabled={isProcessing}
+                    style={{
+                      background: 'transparent',
+                      border: 'none',
+                      borderRadius: '28px',
+                      padding: '18px 36px',
+                      fontSize: '20px',
+                      fontWeight: '700',
+                      cursor: isProcessing ? 'not-allowed' : 'pointer',
+                      boxShadow: 'none',
+                      transform: 'none',
+                      color: '#1a73e8',
+                      width: '100%',
+                      letterSpacing: '0.5px',
+                      textAlign: 'center',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}
+                  >
+                    Use Camera
+                  </button>
+                </div>
+              </div>
+            </>
+          ) : (
+            /* Camera Section */
+            <div className="camera-section">
+              {cameraError ? (
+                <div className="camera-error">
+                  <p>{cameraError}</p>
+                  <button onClick={startCamera} className="retry-button">Try Again</button>
+                </div>
+              ) : (
+                <>
+                  <div className="camera-container">
+                    <video
+                      ref={videoRef}
+                      autoPlay
+                      playsInline
+                      className="camera-video"
+                    />
+                    {stream && !isProcessing && (
+                      <div className="wihy-btn-wrapper" style={{
+                        display: 'inline-block',
+                        animation: 'wiH-border-sweep 2.2s linear infinite',
+                        background: 'linear-gradient(#fff, #fff) padding-box, linear-gradient(90deg, #fa5f06, #ffffff, #C0C0C0, #4cbb17) border-box',
+                        backgroundSize: '100% 100%, 200% 100%',
+                        border: '2px solid transparent',
+                        borderRadius: '24px',
+                        position: 'absolute',
+                        bottom: '20px',
+                        left: '50%',
+                        transform: 'translateX(-50%)',
+                        minWidth: '180px'
+                      }}>
+                        <button
+                          className="analyze-wihy-btn"
+                          onClick={capturePhoto}
+                          disabled={isProcessing}
+                          style={{
+                            background: 'transparent',
+                            border: 'none',
+                            borderRadius: '24px',
+                            padding: '14px 28px',
+                            fontSize: '16px',
+                            fontWeight: '600',
+                            cursor: 'pointer',
+                            boxShadow: 'none',
+                            transform: 'none',
+                            color: '#1a73e8',
+                            width: '100%'
+                          }}
+                        >
+                          Capture & Analyze
+                        </button>
+                      </div>
+                    )}
+                    {isProcessing && (
+                      <div className="camera-processing">
+                        <div className="spinner"></div>
+                        <p>Analyzing image...</p>
+                      </div>
+                    )}
+                  </div>
+                  
+                  <button 
+                    className="back-to-upload-button"
+                    onClick={handleCameraToggle}
+                    disabled={isProcessing}
+                    style={{
+                      background: '#f8f9fa',
+                      border: '1px solid #dadce0',
+                      borderRadius: '24px',
+                      padding: '12px 24px',
+                      fontSize: '14px',
+                      fontWeight: '500',
+                      cursor: isProcessing ? 'not-allowed' : 'pointer',
+                      color: '#5f6368',
+                      marginTop: '20px',
+                      marginBottom: '20px'
+                    }}
+                  >
+                    Back to Upload
+                  </button>
+                  
+                  <canvas
+                    ref={canvasRef}
+                    style={{ display: 'none' }}
+                  />
+                </>
+              )}
             </div>
-
-            {/* URL Input Section */}
-            <div className="url-input-section" style={{ marginBottom: '20px' }}>
-              <input
-                type="url"
-                value={imageUrl}
-                onChange={(e) => setImageUrl(e.target.value)}
-                placeholder="Paste image link"
-                className="url-input"
-                disabled={isProcessing}
-                style={{
-                  width: '100%',
-                  padding: '12px 16px',
-                  borderRadius: '25px',
-                  border: '1px solid #ddd',
-                  fontSize: '16px',
-                  marginBottom: '12px'
-                }}
-              />
-              <button
+          )}
+        </div>
+        
+        <div className="simple-url-section" style={{ marginBottom: '30px', textAlign: 'center' }}>
+          <input
+            type="url"
+            placeholder="Paste image link"
+            className="simple-url-input"
+            value={imageUrl}
+            onChange={(e) => setImageUrl(e.target.value)}
+            onKeyPress={(e) => {
+              if (e.key === 'Enter') {
+                handleUrlUpload();
+              }
+            }}
+            disabled={isProcessing}
+            style={{ marginBottom: '16px' }}
+          />
+          <div style={{ 
+            display: 'flex', 
+            justifyContent: 'center', 
+            width: '100%' 
+          }}>
+            <div className="wihy-btn-wrapper" style={{
+              display: 'inline-block',
+              animation: (isProcessing || !imageUrl.trim()) ? 'none' : 'wiH-border-sweep 2.2s linear infinite',
+              background: (isProcessing || !imageUrl.trim()) 
+                ? 'linear-gradient(#f3f4f6, #f3f4f6)' 
+                : 'linear-gradient(#fff, #fff) padding-box, linear-gradient(90deg, #fa5f06, #ffffff, #C0C0C0, #4cbb17) border-box',
+              backgroundSize: '100% 100%, 200% 100%',
+              border: '2px solid transparent',
+              borderRadius: '28px',
+              minWidth: '240px',
+              width: '60%',
+              maxWidth: '300px'
+            }}>
+              <button 
                 className="analyze-wihy-btn"
                 onClick={handleUrlUpload}
                 disabled={isProcessing || !imageUrl.trim()}
                 style={{
                   background: 'transparent',
-                  border: '2px solid transparent',
+                  border: 'none',
                   borderRadius: '28px',
-                  padding: '12px 24px',
-                  color: '#1a73e8',
-                  fontSize: '16px',
-                  fontWeight: '600',
-                  cursor: 'pointer',
-                  backgroundClip: 'padding-box',
-                  position: 'relative',
-                  animation: 'wiH-border-sweep 2.2s linear infinite',
-                  opacity: isProcessing || !imageUrl.trim() ? 0.5 : 1,
-                  width: '100%'
+                  padding: '18px 36px',
+                  fontSize: '20px',
+                  fontWeight: '700',
+                  cursor: isProcessing || !imageUrl.trim() ? 'not-allowed' : 'pointer',
+                  boxShadow: 'none',
+                  transform: 'none',
+                  color: (isProcessing || !imageUrl.trim()) ? '#9ca3af' : '#1a73e8',
+                  width: '100%',
+                  letterSpacing: '0.5px',
+                  textAlign: 'center',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
                 }}
               >
                 {isProcessing ? 'Analyzing...' : 'Analyze with WiHy'}
               </button>
             </div>
-
-            {/* Supported formats */}
-            <div className="upload-info">
-              <small>Supported formats: JPG, PNG, GIF, WebP (max 10MB)</small>
-            </div>
-          </>
-        )}
+          </div>
+        </div>
       </div>
     </div>
   );
