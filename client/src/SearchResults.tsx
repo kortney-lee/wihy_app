@@ -316,32 +316,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({
               flexDirection: 'column',
               overflow: 'hidden'
             }}>
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                marginBottom: '20px'
-              }}>
-                <h2 style={{
-                  margin: 0,
-                  fontSize: '20px',
-                  fontWeight: '600',
-                  color: '#1f2937'
-                }}>
-                  WiHy Health Response
-                </h2>
-                <span style={{
-                  fontSize: '12px',
-                  color: '#6b7280',
-                  backgroundColor: '#f3f4f6',
-                  padding: '4px 8px',
-                  borderRadius: '4px'
-                }}>
-                  AI-Powered
-                </span>
-              </div>
-
-              {/* Chat Widget */}
+              {/* Chat Widget - header now included inside */}
               <div style={{ flex: 1, overflow: 'hidden' }}>
                 <ChatWidget
                   key={`chatwidget-${query}`} // Force re-render when query changes
