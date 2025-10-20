@@ -299,45 +299,29 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
                 justifyContent: 'center',
                 width: '100%'
               }}>
-                <div className="wihy-btn-wrapper" style={{
-                  display: 'inline-block',
-                  animation: isProcessing ? 'none' : 'wiH-border-sweep 2.2s linear infinite',
-                  background: isProcessing 
-                    ? 'linear-gradient(#f3f4f6, #f3f4f6)' 
-                    : 'linear-gradient(#fff, #fff) padding-box, linear-gradient(90deg, #fa5f06, #ffffff, #C0C0C0, #4cbb17) border-box',
-                  backgroundSize: '100% 100%, 200% 100%',
-                  border: '2px solid transparent',
-                  borderRadius: '28px',
-                  minWidth: '240px',
-                  width: '60%',
-                  maxWidth: '300px'
-                }}>
-                  <button 
-                    className="analyze-wihy-btn"
-                    onClick={handleCameraToggle}
-                    disabled={isProcessing}
-                    style={{
-                      background: 'transparent',
-                      border: 'none',
-                      borderRadius: '28px',
-                      padding: '18px 36px',
-                      fontSize: '20px',
-                      fontWeight: '700',
-                      cursor: isProcessing ? 'not-allowed' : 'pointer',
-                      boxShadow: 'none',
-                      transform: 'none',
-                      color: '#1a73e8',
-                      width: '100%',
-                      letterSpacing: '0.5px',
-                      textAlign: 'center',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center'
-                    }}
-                  >
-                    Use Camera
-                  </button>
-                </div>
+                <button 
+                  onClick={handleCameraToggle}
+                  disabled={isProcessing}
+                  style={{
+                    background: '#1a73e8',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '24px',
+                    padding: '12px 24px',
+                    fontSize: '16px',
+                    fontWeight: '600',
+                    cursor: isProcessing ? 'not-allowed' : 'pointer',
+                    minWidth: '200px',
+                    maxWidth: '280px',
+                    boxShadow: 'none !important',
+                    outline: 'none',
+                    filter: 'none',
+                    WebkitBoxShadow: 'none',
+                    MozBoxShadow: 'none'
+                  }}
+                >
+                  Use Camera
+                </button>
               </div>
             </>
           ) : (
@@ -431,7 +415,16 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
           )}
         </div>
         
-        <div className="simple-url-section" style={{ marginBottom: '30px', textAlign: 'center' }}>
+        {/* URL Section - Always visible */}
+        <div className="simple-url-section" style={{ 
+          marginBottom: '16px', 
+          textAlign: 'center',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          width: '100%',
+          padding: '0 20px 4px 20px'
+        }}>
           <input
             type="url"
             placeholder="Paste image link"
@@ -444,25 +437,42 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
               }
             }}
             disabled={isProcessing}
-            style={{ marginBottom: '16px' }}
+            style={{ 
+              marginBottom: '12px',
+              width: '95%',
+              maxWidth: '600px',
+              minWidth: '400px',
+              padding: '12px 24px',
+              borderRadius: '24px',
+              border: '1px solid #dadce0',
+              fontSize: '16px',
+              textAlign: 'center',
+              outline: 'none',
+              boxShadow: 'none !important',
+              WebkitBoxShadow: 'none',
+              MozBoxShadow: 'none',
+              filter: 'none'
+            }}
           />
           <div style={{ 
             display: 'flex', 
             justifyContent: 'center', 
-            width: '100%' 
+            width: '100%',
+            marginTop: '4px'
           }}>
             <div className="wihy-btn-wrapper" style={{
               display: 'inline-block',
-              animation: (isProcessing || !imageUrl.trim()) ? 'none' : 'wiH-border-sweep 2.2s linear infinite',
-              background: (isProcessing || !imageUrl.trim()) 
-                ? 'linear-gradient(#f3f4f6, #f3f4f6)' 
-                : 'linear-gradient(#fff, #fff) padding-box, linear-gradient(90deg, #fa5f06, #ffffff, #C0C0C0, #4cbb17) border-box',
+              animation: 'wiH-border-sweep 2.2s linear infinite',
+              background: 'linear-gradient(#fff, #fff) padding-box, linear-gradient(90deg, #fa5f06, #ffffff, #C0C0C0, #4cbb17) border-box',
               backgroundSize: '100% 100%, 200% 100%',
               border: '2px solid transparent',
               borderRadius: '28px',
-              minWidth: '240px',
-              width: '60%',
-              maxWidth: '300px'
+              minWidth: '220px',
+              maxWidth: '280px',
+              boxShadow: 'none !important',
+              WebkitBoxShadow: 'none',
+              MozBoxShadow: 'none',
+              filter: 'none'
             }}>
               <button 
                 className="analyze-wihy-btn"
@@ -472,19 +482,22 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
                   background: 'transparent',
                   border: 'none',
                   borderRadius: '28px',
-                  padding: '18px 36px',
-                  fontSize: '20px',
-                  fontWeight: '700',
+                  padding: '12px 24px',
+                  fontSize: '16px',
+                  fontWeight: '600',
                   cursor: isProcessing || !imageUrl.trim() ? 'not-allowed' : 'pointer',
-                  boxShadow: 'none',
-                  transform: 'none',
                   color: (isProcessing || !imageUrl.trim()) ? '#9ca3af' : '#1a73e8',
                   width: '100%',
-                  letterSpacing: '0.5px',
-                  textAlign: 'center',
+                  opacity: (isProcessing || !imageUrl.trim()) ? 0.6 : 1,
+                  boxShadow: 'none !important',
+                  WebkitBoxShadow: 'none',
+                  MozBoxShadow: 'none',
+                  filter: 'none',
+                  outline: 'none',
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'center'
+                  justifyContent: 'center',
+                  textAlign: 'center'
                 }}
               >
                 {isProcessing ? 'Analyzing...' : 'Analyze with WiHy'}
