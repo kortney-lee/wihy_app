@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { BrowserRouter as Router, Routes, Route, useSearchParams, useNavigate, useLocation } from 'react-router-dom';
-import VHealthSearch from './VHealthSearch';
-import SearchResults from './SearchResults';
+import VHealthSearch from './components/search/VHealthSearch';
+import SearchResults from './components/search/SearchResults';
 import HealthNewsFeed from './components/HealthNewsFeed';
 import openaiAPI from './services/openaiAPI';
 import { wihyAPI } from './services/wihyAPI';

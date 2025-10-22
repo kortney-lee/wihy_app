@@ -1,16 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import SearchResults from './SearchResults';
-import ImageUploadModal from './components/ImageUploadModal';
-import ChatWidget from './components/ChatWidget';
-import NutritionChart from './components/NutritionChart';
-import ResultQualityPie from './components/ResultQualityPie';
+import SearchResults from './components/search/SearchResults';
+import ImageUploadModal from './components/ui/ImageUploadModal';
+import ChatWidget from './components/ui/ChatWidget';
+import NutritionChart from './components/charts/NutritionChart';
+import ResultQualityPie from './components/charts/ResultQualityPie';
 import { searchCache } from './services/searchCache';
 import { wihyAPI, isUnifiedResponse, UnifiedResponse, WihyResponse } from './services/wihyAPI';
 import { photoStorageService } from './services/photoStorageService';
-import { foodAnalysisService } from './components/foodAnalysisService';
-import './VHealthSearch.css';
-import MultiAuthLogin from './components/shared/components/MultiAuthLogin';
+import { foodAnalysisService } from './services/foodAnalysisService';
+import './styles/VHealthSearch.css';
+import MultiAuthLogin from './components/shared/MultiAuthLogin';
 
 // Add TypeScript declaration for Speech Recognition
 declare global {

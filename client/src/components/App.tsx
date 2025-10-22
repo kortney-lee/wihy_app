@@ -1,5 +1,5 @@
 import React from 'react';
-import VHealthSearch from '../VHealthSearch';
+import VHealthSearch from './search/VHealthSearch';
 
 const App: React.FC = () => {
   return <VHealthSearch />;
