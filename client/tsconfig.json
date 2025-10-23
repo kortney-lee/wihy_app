@@ -24,5 +24,5 @@
   },
   "include": [
     "src/**/*"
-, "../services/src/routes/openFoodFactsRoutes.ts"  ]
+  ]
 }

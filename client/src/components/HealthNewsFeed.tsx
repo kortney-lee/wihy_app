@@ -139,7 +139,7 @@ const HealthNewsFeed: React.FC<NewsFeedProps> = ({
   const [loadingMore, setLoadingMore] = useState(false);
   // On mobile, always start with 'all' category and don't allow changes
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const [analyzingArticle, setAnalyzingArticle] = useState<number | null>(null);
+  const [analyzingArticle, setAnalyzingArticle] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [hasMorePages, setHasMorePages] = useState(true);
   const navigate = useNavigate();
@@ -365,7 +365,7 @@ const HealthNewsFeed: React.FC<NewsFeedProps> = ({
       
       // 3. Check for health-related keywords in title/description
       const title = article.title || '';
-      const description = article.description || '';
+      const description = article.summary || '';
       const content = title + ' ' + description;
       const contentLower = content.toLowerCase();
       
@@ -488,7 +488,7 @@ const HealthNewsFeed: React.FC<NewsFeedProps> = ({
     setAnalyzingArticle(article.id);
     
     const searchQuery = `Analyze this health article: ${article.title}. 
-Summary: ${article.description || article.summary || 'No description available'}.
+Summary: ${article.summary || article.description || 'No description available'}.
 Source: ${article.source || 'Unknown source'}
 Category: ${article.category || 'Uncategorized'}`;
 

@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, useSearchParams, useNavigate, u
 import VHealthSearch from './components/search/VHealthSearch';
 import SearchResults from './components/search/SearchResults';
 import HealthNewsFeed from './components/HealthNewsFeed';
+import TestChartsPage from './pages/TestChartsPage';
 import openaiAPI from './services/openaiAPI';
 import { wihyAPI } from './services/wihyAPI';
 import { searchCache } from './services/searchCache';
@@ -137,11 +138,17 @@ const ResultsPage: React.FC = () => {
         return; // Exit early - no API calls needed
       }
       
-      // If this is browser navigation and no cache, redirect to search page
+      // If this is browser navigation and no cache, show placeholder content instead of redirecting
       if (isBrowserNavigation() || !isInitialLoad) {
-        logger.debug('Browser navigation detected with no cache - redirecting to search');
+        logger.debug('Browser navigation detected with no cache - showing placeholder content');
+        setResults('Please perform a new search to see results.');
+        setDataSource('local');
+        setIsLoading(false);
+        setCitations([]);
+        setRecommendations([]);
+        setDisclaimer('');
+        setIsInitialLoad(false);
         isProcessing.current = false; // Reset processing flag
-        navigate('/');
         return;
       }
       
@@ -218,7 +225,15 @@ const ResultsPage: React.FC = () => {
                      error.name === 'TypeError') {
             userFriendlyMessage = "Looks like there's a connection hiccup! 📡 Please check your internet and try again.";
           } else {
-            userFriendlyMessage = "Sorry, we're experiencing some issues right now. Please try again in a moment or come back later! 😅";
+            userFriendlyMessage = `Sorry, we're experiencing some issues right now. 
+
+🏠 You can still use these features:
+•  Browse health news (click "I'm Feeling Healthy") 
+• 📷 Upload images for basic analysis
+• 🔍 Try visiting /test to see chart examples
+• 📊 View charts in search results sidebar
+
+Please try your search again in a moment! 😅`;
           }
           
           setResults(userFriendlyMessage);
@@ -256,7 +271,7 @@ const ResultsPage: React.FC = () => {
           
           setDisclaimer('Health news provided by AI. Always consult healthcare professionals for medical advice.');
         } else {
-          throw new Error(healthNewsResult.message || 'Failed to fetch health news');
+          throw new Error('Failed to fetch health news');
         }
       } else {
         // Try nutrition database for food-related queries
@@ -351,6 +366,7 @@ const App: React.FC = () => {
       <Routes>
         <Route path="/" element={<VHealthSearch />} />
         <Route path="/results" element={<ResultsPage />} />
+        <Route path="/test" element={<TestChartsPage />} />
       </Routes>
     </Router>
   );
