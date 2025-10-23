@@ -203,10 +203,12 @@ jobs:
         copy_with_retry "wihy-ui-image.tar.gz" || exit 1
         copy_with_retry "setup-ssl.sh" || exit 1  
         copy_with_retry "setup-ssl-template.sh" || exit 1
+        copy_with_retry "cleanup-docker-images.sh" || exit 1
         
         echo "✅ All files copied successfully"
         scp -o StrictHostKeyChecking=no setup-vm-environment.sh ${{ secrets.VM_USERNAME }}@${{ secrets.VM_HOST }}:~/
         scp -o StrictHostKeyChecking=no add-ssh-key.sh ${{ secrets.VM_USERNAME }}@${{ secrets.VM_HOST }}:~/
+        scp -o StrictHostKeyChecking=no manual-cleanup.sh ${{ secrets.VM_USERNAME }}@${{ secrets.VM_HOST }}:~/
 
     - name: Setup SSH Access for Local Development
       if: github.ref == 'refs/heads/main' && env.SKIP_DEPLOYMENT == 'false'
@@ -238,9 +240,10 @@ jobs:
             sudo docker rm ${{ env.CONTAINER_NAME }} || true
         fi
         
-        # Remove old images to save space (keep latest)
-        echo "🧹 Cleaning up old images..."
-        sudo docker image prune -f
+        # Comprehensive Docker cleanup to prevent disk space issues
+        echo "🧹 Running comprehensive Docker cleanup..."
+        chmod +x ~/cleanup-docker-images.sh
+        ~/cleanup-docker-images.sh ${{ env.CONTAINER_NAME }} || echo "⚠️  Cleanup completed with warnings"
         
         # Start new container
         echo "🚀 Starting new container..."
