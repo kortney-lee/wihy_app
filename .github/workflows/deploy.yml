@@ -1,4 +1,4 @@
-name: Deploy WiHy UI to Production VM with Docker
+name: Deploy to VM with Docker (Auto)
 
 on:
   push:
@@ -48,6 +48,24 @@ jobs:
       if: github.ref == 'refs/heads/main'
       run: |
         docker save ${{ env.DOCKER_IMAGE }}:latest | gzip > wihy-ui-image.tar.gz
+
+    - name: Ensure Azure VM ports are open
+      if: github.ref == 'refs/heads/main'
+      run: |
+        echo "🔓 Ensuring Azure VM firewall ports are open..."
+        
+        # Check if Azure CLI is installed and authenticated
+        if command -v az &> /dev/null; then
+          echo "📋 Opening port 80 in Azure Network Security Group..."
+          az vm open-port --port 80 --resource-group vHealth --name wihy-ui-prod-vm || echo "⚠️ Port may already be open"
+          
+          echo "📋 Opening port 443 in Azure Network Security Group..."
+          az vm open-port --port 443 --resource-group vHealth --name wihy-ui-prod-vm || echo "⚠️ Port may already be open"
+          
+          echo "✅ Azure firewall configured"
+        else
+          echo "⚠️ Azure CLI not available - skipping firewall setup (manual configuration required)"
+        fi
         ls -lh wihy-ui-image.tar.gz
 
     - name: Check if deployment secrets are configured
@@ -87,6 +105,7 @@ jobs:
         echo "📦 Copying Docker image and setup scripts to VM..."
         scp -o StrictHostKeyChecking=no wihy-ui-image.tar.gz ${{ secrets.VM_USERNAME }}@${{ secrets.VM_HOST }}:~/
         scp -o StrictHostKeyChecking=no setup-ssl.sh ${{ secrets.VM_USERNAME }}@${{ secrets.VM_HOST }}:~/
+        scp -o StrictHostKeyChecking=no setup-vm-environment.sh ${{ secrets.VM_USERNAME }}@${{ secrets.VM_HOST }}:~/
 
     - name: Deploy to Production VM with Docker
       if: github.ref == 'refs/heads/main' && env.SKIP_DEPLOYMENT == 'false'
@@ -96,35 +115,29 @@ jobs:
         
         echo "🚀 Starting Docker deployment..."
         
-        # Install Docker if not present
-        if ! command -v docker &> /dev/null; then
-            echo "📦 Installing Docker..."
-            sudo apt-get update
-            sudo apt-get install -y docker.io
-            sudo systemctl start docker
-            sudo systemctl enable docker
-            sudo usermod -aG docker $USER
-            newgrp docker
-        fi
+        # Run VM environment setup script
+        echo "🔧 Running VM environment setup..."
+        chmod +x ~/setup-vm-environment.sh
+        ~/setup-vm-environment.sh
         
         # Load the new Docker image
         echo "📥 Loading new Docker image..."
-        docker load < ~/wihy-ui-image.tar.gz
+        sudo docker load < ~/wihy-ui-image.tar.gz
         
         # Stop and remove old container if it exists
-        if docker ps -a --format 'table {{.Names}}' | grep -q "^${{ env.CONTAINER_NAME }}$"; then
+        if sudo docker ps -a --format 'table {{.Names}}' | grep -q "^${{ env.CONTAINER_NAME }}$"; then
             echo "🛑 Stopping old container..."
-            docker stop ${{ env.CONTAINER_NAME }} || true
-            docker rm ${{ env.CONTAINER_NAME }} || true
+            sudo docker stop ${{ env.CONTAINER_NAME }} || true
+            sudo docker rm ${{ env.CONTAINER_NAME }} || true
         fi
         
         # Remove old images to save space (keep latest)
         echo "🧹 Cleaning up old images..."
-        docker image prune -f
+        sudo docker image prune -f
         
         # Start new container
         echo "🚀 Starting new container..."
-        docker run -d \
+        sudo docker run -d \
           --name ${{ env.CONTAINER_NAME }} \
           --restart unless-stopped \
           -p 80:80 \
@@ -136,12 +149,12 @@ jobs:
         sleep 15
         
         # Verify deployment
-        if docker ps | grep -q "${{ env.CONTAINER_NAME }}"; then
+        if sudo docker ps | grep -q "${{ env.CONTAINER_NAME }}"; then
             echo "✅ Container is running!"
-            docker ps --filter name=${{ env.CONTAINER_NAME }}
+            sudo docker ps --filter name=${{ env.CONTAINER_NAME }}
         else
             echo "❌ Container failed to start!"
-            docker logs ${{ env.CONTAINER_NAME }}
+            sudo docker logs ${{ env.CONTAINER_NAME }}
             exit 1
         fi
         
@@ -151,7 +164,7 @@ jobs:
             echo "✅ Health check passed!"
         else
             echo "❌ Health check failed!"
-            docker logs ${{ env.CONTAINER_NAME }}
+            sudo docker logs ${{ env.CONTAINER_NAME }}
             exit 1
         fi
         
@@ -166,7 +179,7 @@ jobs:
         
         # Show container info
         echo "📊 Container info:"
-        docker stats ${{ env.CONTAINER_NAME }} --no-stream
+        sudo docker stats ${{ env.CONTAINER_NAME }} --no-stream
         
         # Copy SSL setup script to proper location
         echo "📋 Setting up SSL script..."

@@ -1,8 +1,9 @@
-name: Deploy Wihy UI to Azure
+name: Deploy to Azure Container Apps (Manual)
 
 on:
-  push:
-    branches: [ main ]
+  # Disabled - Using Docker VM deployment instead
+  # push:
+  #   branches: [ main ]
   workflow_dispatch:
 
 env:
