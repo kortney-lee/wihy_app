@@ -39,9 +39,11 @@ WiHy UI is a comprehensive React-based health management platform that provides:
 
 3. **Configure WiHy API (Optional):**
    ```bash
-   # Default API endpoint: http://localhost:8000
-   # To customize, set environment variable:
-   export REACT_APP_WIHY_API_URL=http://your-wihy-api-server:port
+   # Default Enhanced API endpoint: https://ml.wihy.ai
+   # To customize, set environment variables:
+   export REACT_APP_WIHY_API_URL=https://ml.wihy.ai
+   export REACT_APP_WIHY_BACKUP_URL=http://40.125.85.74
+   export REACT_APP_WIHY_CONTAINER_URL=https://vhealth-wihy-ml-api.gentlebush-f35a13de.westus2.azurecontainerapps.io
    ```
 
 ### 🏃‍♂️ Running the Applications
@@ -123,10 +125,13 @@ Both applications (client & user) share the same styling system for consistency.
 
 ### 🔌 API Architecture
 
-#### **WiHy API Integration**
-The main health application now integrates with the native WiHy API for enhanced health analysis:
+#### **WiHy Enhanced Model API Integration**
+The main health application integrates with the enhanced WiHy ML API trained on 2,325 health examples:
 
-**API Endpoint**: `POST http://localhost:8000/wihy/ask-anything`
+**Primary Endpoint**: `POST https://ml.wihy.ai/ask`
+**Backup Endpoints**: 
+- `http://40.125.85.74/ask` 
+- `https://vhealth-wihy-ml-api.gentlebush-f35a13de.westus2.azurecontainerapps.io/ask`
 
 **Key Features**:
 - **Personalized Health Analysis**: User context-aware responses with risk factors and action items
@@ -286,6 +291,30 @@ This section documents critical fixes for authentication modal positioning and h
 - 🔄 **Real-time Updates**: Live data synchronization
 - 📱 **Responsive Design**: Works on all device sizes
 - 📈 **Progress Tracking**: Measurable health goals with reassessment timelines
+
+## 🌐 Production Deployment
+
+### Live Application URLs
+- **Primary Domain**: https://wihy.ai
+- **Azure URL**: https://wihy-ui-prod.westus2.cloudapp.azure.com
+- **Health Check**: https://wihy.ai/health
+
+### Production Infrastructure
+- **Server**: Azure VM (4.246.82.249)
+- **Container**: Docker with Nginx reverse proxy
+- **Ports**: External 80/443 → Internal 3000
+- **SSL**: Let's Encrypt (auto-renewal)
+- **API**: Enhanced WiHy ML API (ml.wihy.ai) - 2,325 training examples
+- **Deployment**: Automated via GitHub Actions
+
+### Deployment Process
+1. **Push to main** triggers automatic deployment
+2. **Docker build** creates optimized production image
+3. **Health checks** verify container functionality
+4. **Zero-downtime deployment** to production VM
+5. **SSL verification** ensures HTTPS functionality
+
+For detailed deployment instructions, see [DEPLOYMENT.md](DEPLOYMENT.md) and [DEPLOYMENT-QUICK-REFERENCE.md](DEPLOYMENT-QUICK-REFERENCE.md).
 
 ### 📦 Building for Production
 
