@@ -20,8 +20,10 @@ wihy_ui/
 - **VM IP**: 4.246.82.249
 - **Username**: wihyadmin
 - **Container**: wihy-ui-app
-- **Ports**: 80 (HTTP), 443 (HTTPS)
+- **Internal Port**: 3000 (Docker container)
+- **External Ports**: 80 (HTTP), 443 (HTTPS) via Nginx reverse proxy
 - **SSL**: Let's Encrypt (auto-renewal)
+- **API**: Enhanced WiHy ML API (ml.wihy.ai) with 2,325 training examples
 
 ## Quick Commands
 
