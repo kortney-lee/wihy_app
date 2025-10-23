@@ -150,8 +150,7 @@ jobs:
         sudo docker run -d \
           --name ${{ env.CONTAINER_NAME }} \
           --restart unless-stopped \
-          -p 80:80 \
-          -p 443:443 \
+          -p 3000:80 \
           ${{ env.DOCKER_IMAGE }}:latest
         
         # Wait for container to be ready
@@ -170,7 +169,7 @@ jobs:
         
         # Test health endpoint
         echo "🏥 Testing health endpoint..."
-        if curl -f http://localhost/health; then
+        if curl -f http://localhost:3000/health; then
             echo "✅ Health check passed!"
         else
             echo "❌ Health check failed!"
@@ -196,6 +195,17 @@ jobs:
         sudo mkdir -p /opt/wihy-ui
         sudo cp ~/setup-ssl.sh /opt/wihy-ui/setup-ssl.sh
         sudo chmod +x /opt/wihy-ui/setup-ssl.sh
+        
+        # Install and configure Nginx
+        echo "🌐 Installing and configuring Nginx..."
+        sudo apt-get update -qq
+        sudo apt-get install -y nginx
+        
+        # Stop any existing nginx to avoid conflicts
+        sudo systemctl stop nginx || true
+        
+        # Ensure nginx is enabled
+        sudo systemctl enable nginx
         
         # Setup SSL certificates (if DNS is configured)
         echo "🔒 Setting up SSL certificates..."

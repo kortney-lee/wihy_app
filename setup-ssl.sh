@@ -61,18 +61,20 @@ server {
     add_header X-XSS-Protection "1; mode=block" always;
     add_header Referrer-Policy "no-referrer-when-downgrade" always;
     
-    # Proxy to Docker container
+    # Proxy to Docker container running on port 3000
     location / {
-        proxy_pass http://localhost:80;
+        proxy_pass http://localhost:3000;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Host $server_name;
+        proxy_cache_bypass $http_upgrade;
     }
     
     # Health check endpoint
     location /health {
-        proxy_pass http://localhost:80/health;
+        proxy_pass http://localhost:3000/health;
         proxy_set_header Host $host;
         access_log off;
     }
@@ -120,12 +122,12 @@ if [ "$DNS_CHECK" = false ]; then
     exit 0
 fi
 
-# Check if port 80 is accessible
-echo "🔌 Testing port 80 accessibility..."
-if curl -s -m 5 http://localhost/health > /dev/null; then
-    echo "✅ Port 80 is accessible locally"
+# Check if port 3000 is accessible (Docker container)
+echo "🔌 Testing port 3000 accessibility..."
+if curl -s -m 5 http://localhost:3000/health > /dev/null; then
+    echo "✅ Port 3000 is accessible locally"
 else
-    echo "⚠️  Port 80 not accessible locally"
+    echo "⚠️  Port 3000 not accessible locally"
     echo "🔧 Check if Docker container is running: docker ps"
     exit 0
 fi
