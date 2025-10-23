@@ -1,20 +1,6 @@
-// Enhanced searchService to handle richer API responses
+// Enhanced searchService to use WiHy Enhanced Model API only
 
-import axios from 'axios';
-
-// Define the API URL constant
-import { getApiEndpoint } from '../config/apiConfig';
-
-// Define interface for API response
-interface ApiSearchResponse {
-  text: string;
-  source: string;
-  qualityScore?: number;
-  details?: string;
-  citations?: string[];
-  recommendations?: string[];
-  disclaimer?: string;
-}
+import { wihyAPI } from './wihyAPI';
 
 export interface SearchResult {
   text: string;
@@ -30,22 +16,22 @@ export const searchHealthAPI = async (query: string): Promise<SearchResult> => {
   try {
     console.log("Searching for:", query);
     
-    // Use generic type parameter to specify the expected response structure
-    const response = await axios.post<ApiSearchResponse>(getApiEndpoint('/search'), { query });
-    console.log("Search API response:", response.data);
+    // Use WiHy Enhanced Model API (ml.wihy.ai) exclusively
+    const response = await wihyAPI.askEnhancedHealthQuestion({ query });
     
-    // Now TypeScript knows the structure of response.data
+    console.log("WiHy Enhanced API response:", response);
+    
     return {
-      text: response.data.text || "No information found",
-      source: response.data.source || "api",
-      qualityScore: response.data.qualityScore || 0.7,
-      details: response.data.details || response.data.text || "",
-      citations: response.data.citations || [],
-      recommendations: response.data.recommendations || [],
-      disclaimer: response.data.disclaimer || ""
+      text: response.answer || "No information found",
+      source: "WiHy Enhanced Model (ml.wihy.ai)",
+      qualityScore: response.confidence_score || 0.95,
+      details: response.answer || "",
+      citations: response.research_citations || [],
+      recommendations: response.wihy_wisdom || [],
+      disclaimer: "This information is provided by the WiHy Enhanced Health Model trained on 2,325 health examples. Please consult healthcare professionals for medical advice."
     };
   } catch (error) {
-    console.error('Error calling search API:', error);
+    console.error('Error calling WiHy Enhanced API:', error);
     // Return a valid SearchResult even in case of error
     return {
       text: `Sorry, we encountered an error while searching for information about "${query}".`,
