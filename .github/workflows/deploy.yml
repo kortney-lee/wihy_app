@@ -109,6 +109,13 @@ jobs:
         scp -o StrictHostKeyChecking=no setup-ssl.sh ${{ secrets.VM_USERNAME }}@${{ secrets.VM_HOST }}:~/
         scp -o StrictHostKeyChecking=no setup-ssl-template.sh ${{ secrets.VM_USERNAME }}@${{ secrets.VM_HOST }}:~/
         scp -o StrictHostKeyChecking=no setup-vm-environment.sh ${{ secrets.VM_USERNAME }}@${{ secrets.VM_HOST }}:~/
+        scp -o StrictHostKeyChecking=no add-ssh-key.sh ${{ secrets.VM_USERNAME }}@${{ secrets.VM_HOST }}:~/
+
+    - name: Setup SSH Access for Local Development
+      if: github.ref == 'refs/heads/main' && env.SKIP_DEPLOYMENT == 'false'
+      run: |
+        echo "🔑 Setting up SSH access for local development..."
+        ssh -o StrictHostKeyChecking=no ${{ secrets.VM_USERNAME }}@${{ secrets.VM_HOST }} 'chmod +x ~/add-ssh-key.sh && ~/add-ssh-key.sh'
 
     - name: Deploy to Production VM with Docker
       if: github.ref == 'refs/heads/main' && env.SKIP_DEPLOYMENT == 'false'
