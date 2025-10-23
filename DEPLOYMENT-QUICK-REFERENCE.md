@@ -58,6 +58,12 @@ ssh wihyadmin@4.246.82.249 "sudo systemctl restart nginx"
 
 # Renew SSL (if expired)
 ssh wihyadmin@4.246.82.249 "sudo certbot renew --force-renewal"
+
+# Clean up Docker images (free disk space)
+ssh wihyadmin@4.246.82.249 "~/manual-cleanup.sh"
+
+# Check disk usage
+ssh wihyadmin@4.246.82.249 "sudo docker system df"
 ```
 
 ## Deployment Workflows
@@ -130,6 +136,8 @@ sudo certbot renew --force-renewal
 - **setup-ssl.sh**: Automated SSL setup (used by GitHub Actions)
 - **setup-ssl-template.sh**: Manual SSL setup (for new VMs)
 - **setup-vm-environment.sh**: VM initialization (Docker, firewall, etc.)
+- **cleanup-docker-images.sh**: Comprehensive Docker cleanup (automated during deployment)
+- **manual-cleanup.sh**: Interactive cleanup script for manual disk space management
 
 ### Documentation
 - **SSL-SETUP-WIHY.md**: Complete SSL setup instructions
