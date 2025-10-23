@@ -1,24 +1,20 @@
-# Multi-stage build for WiHy UI - Serverless Container Optimized
+# Multi-stage build for WiHy UI - Optimized for React App
 FROM node:18-alpine AS builder
 
-# Set working directory
-WORKDIR /app
+# Set working directory to client
+WORKDIR /app/client
 
-# Copy package files for dependency installation
-COPY package*.json ./
-COPY client/package*.json ./client/
+# Copy client package files for dependency installation
+COPY client/package*.json ./
 
 # Install dependencies
-RUN npm ci && \
-    cd client && npm ci
+RUN npm ci
 
-# Copy source code
-COPY . .
+# Copy client source code
+COPY client/ ./
 
-# Build the client application with explicit permissions
-RUN cd client && \
-    chmod +x node_modules/.bin/* && \
-    npm run build
+# Build the application
+RUN npm run build
 
 # Production stage - Optimized for serverless
 FROM nginx:alpine AS production
@@ -37,7 +33,6 @@ COPY healthcheck.sh /usr/local/bin/healthcheck.sh
 RUN chmod +x /usr/local/bin/healthcheck.sh
 
 # Expose port
-EXPOSE 80
 EXPOSE 80
 
 # Health check for container orchestrators
