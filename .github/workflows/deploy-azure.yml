@@ -13,6 +13,13 @@ env:
   RESOURCE_GROUP: vHealth
   IMAGE_NAME: wihy-ui
   LOCATION: westus2
+  SKIP_DEPLOYMENT: false
+  API_BASE_URL: ${{ secrets.API_BASE_URL || 'https://wihymlapi.westus2.cloudapp.azure.com' }}
+  REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME || 'wihymlregistry-b6fdh5cmhzgwbbgy' }}
+  AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+  AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+  AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
+  REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
 
 jobs:
   test:
@@ -60,22 +67,23 @@ jobs:
       run: |
         echo "🔑 Checking Azure credentials..."
         
-        # Check individual secrets
-        if [ -z "${{ secrets.AZURE_CLIENT_ID }}" ]; then
+        # Check individual secrets with safer approach
+        MISSING=false
+        if [ "${{ env.AZURE_CLIENT_ID }}" = "" ]; then
           echo "❌ AZURE_CLIENT_ID secret not configured"
           MISSING=true
         else
           echo "✅ AZURE_CLIENT_ID configured"
         fi
         
-        if [ -z "${{ secrets.AZURE_TENANT_ID }}" ]; then
+        if [ "${{ env.AZURE_TENANT_ID }}" = "" ]; then
           echo "❌ AZURE_TENANT_ID secret not configured"  
           MISSING=true
         else
           echo "✅ AZURE_TENANT_ID configured"
         fi
         
-        if [ -z "${{ secrets.AZURE_CREDENTIALS }}" ]; then
+        if [ "${{ env.AZURE_CREDENTIALS }}" = "" ]; then
           echo "❌ AZURE_CREDENTIALS secret not configured"
           MISSING=true
         else
@@ -105,7 +113,7 @@ jobs:
       if: env.SKIP_DEPLOYMENT == 'false'
       uses: azure/login@v1
       with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}
+        creds: ${{ env.AZURE_CREDENTIALS }}
 
     - name: Log in to Azure Container Registry
       if: env.SKIP_DEPLOYMENT == 'false'
@@ -166,10 +174,10 @@ jobs:
           --memory 1Gi \
           --env-vars \
             REACT_APP_ENVIRONMENT="production" \
-            REACT_APP_API_BASE_URL="${{ secrets.API_BASE_URL }}" \
+            REACT_APP_API_BASE_URL="${{ env.API_BASE_URL }}" \
           --registry-server ${{ env.REGISTRY_LOGIN_SERVER }} \
-          --registry-username ${{ secrets.REGISTRY_USERNAME }} \
-          --registry-password ${{ secrets.REGISTRY_PASSWORD }}
+          --registry-username ${{ env.REGISTRY_USERNAME }} \
+          --registry-password ${{ env.REGISTRY_PASSWORD }}
 
     - name: Verify Deployment and Get URL
       if: env.SKIP_DEPLOYMENT == 'false'
