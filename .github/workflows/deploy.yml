@@ -1,0 +1,178 @@
+name: Deploy WiHy UI to Production VM with Docker
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  DOCKER_IMAGE: wihy-ui
+  CONTAINER_NAME: wihy-ui-app
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Build Docker image locally (for testing)
+      run: |
+        docker build -t ${{ env.DOCKER_IMAGE }}:latest .
+        docker images
+
+    - name: Test Docker image locally
+      run: |
+        # Start container in background
+        docker run -d --name test-container -p 8080:80 ${{ env.DOCKER_IMAGE }}:latest
+        
+        # Wait for container to start
+        sleep 10
+        
+        # Test health endpoint
+        curl -f http://localhost:8080/health || exit 1
+        
+        # Test main page
+        curl -f http://localhost:8080/ || exit 1
+        
+        # Stop test container
+        docker stop test-container
+        docker rm test-container
+        
+        echo "✅ Docker image test passed!"
+
+    - name: Save Docker image as tar
+      if: github.ref == 'refs/heads/main'
+      run: |
+        docker save ${{ env.DOCKER_IMAGE }}:latest | gzip > wihy-ui-image.tar.gz
+        ls -lh wihy-ui-image.tar.gz
+
+    - name: Setup SSH key
+      if: github.ref == 'refs/heads/main'
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ secrets.VM_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        ssh-keyscan -H ${{ secrets.VM_HOST }} >> ~/.ssh/known_hosts
+
+    - name: Copy Docker image to VM
+      if: github.ref == 'refs/heads/main'
+      run: |
+        echo "📦 Copying Docker image to VM..."
+        scp -o StrictHostKeyChecking=no wihy-ui-image.tar.gz ${{ secrets.VM_USERNAME }}@${{ secrets.VM_HOST }}:~/
+
+    - name: Deploy to Production VM with Docker
+      if: github.ref == 'refs/heads/main'
+      run: |
+        ssh -o StrictHostKeyChecking=no ${{ secrets.VM_USERNAME }}@${{ secrets.VM_HOST }} << 'EOF'
+        set -e
+        
+        echo "🚀 Starting Docker deployment..."
+        
+        # Install Docker if not present
+        if ! command -v docker &> /dev/null; then
+            echo "📦 Installing Docker..."
+            sudo apt-get update
+            sudo apt-get install -y docker.io
+            sudo systemctl start docker
+            sudo systemctl enable docker
+            sudo usermod -aG docker $USER
+            newgrp docker
+        fi
+        
+        # Load the new Docker image
+        echo "📥 Loading new Docker image..."
+        docker load < ~/wihy-ui-image.tar.gz
+        
+        # Stop and remove old container if it exists
+        if docker ps -a --format 'table {{.Names}}' | grep -q "^${{ env.CONTAINER_NAME }}$"; then
+            echo "🛑 Stopping old container..."
+            docker stop ${{ env.CONTAINER_NAME }} || true
+            docker rm ${{ env.CONTAINER_NAME }} || true
+        fi
+        
+        # Remove old images to save space (keep latest)
+        echo "🧹 Cleaning up old images..."
+        docker image prune -f
+        
+        # Start new container
+        echo "🚀 Starting new container..."
+        docker run -d \
+          --name ${{ env.CONTAINER_NAME }} \
+          --restart unless-stopped \
+          -p 80:80 \
+          -p 443:443 \
+          ${{ env.DOCKER_IMAGE }}:latest
+        
+        # Wait for container to be ready
+        echo "⏳ Waiting for container to start..."
+        sleep 15
+        
+        # Verify deployment
+        if docker ps | grep -q "${{ env.CONTAINER_NAME }}"; then
+            echo "✅ Container is running!"
+            docker ps --filter name=${{ env.CONTAINER_NAME }}
+        else
+            echo "❌ Container failed to start!"
+            docker logs ${{ env.CONTAINER_NAME }}
+            exit 1
+        fi
+        
+        # Test health endpoint
+        echo "🏥 Testing health endpoint..."
+        if curl -f http://localhost/health; then
+            echo "✅ Health check passed!"
+        else
+            echo "❌ Health check failed!"
+            docker logs ${{ env.CONTAINER_NAME }}
+            exit 1
+        fi
+        
+        # Get public IP
+        PUBLIC_IP=$(curl -s ifconfig.me || echo "Unable to detect")
+        
+        echo "🎉 Deployment successful!"
+        echo "📱 Application URLs:"
+        echo "   http://$PUBLIC_IP"
+        echo "   http://wihy-ui-prod.westus2.cloudapp.azure.com"
+        echo "🏥 Health check: http://$PUBLIC_IP/health"
+        
+        # Show container info
+        echo "📊 Container info:"
+        docker stats ${{ env.CONTAINER_NAME }} --no-stream
+        
+        # Cleanup
+        rm -f ~/wihy-ui-image.tar.gz
+        
+        EOF
+
+    - name: Final Health Check
+      if: github.ref == 'refs/heads/main'
+      run: |
+        echo "🏥 Final health check..."
+        sleep 10
+        if curl -f http://${{ secrets.VM_HOST }}/health; then
+            echo "✅ External health check passed!"
+        else
+            echo "❌ External health check failed!"
+            exit 1
+        fi
+
+    - name: Deployment Summary
+      if: success() && github.ref == 'refs/heads/main'
+      run: |
+        echo "🎉 Docker Deployment Successful!"
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo "📱 WiHy UI Application: http://wihy-ui-prod.westus2.cloudapp.azure.com"
+        echo "🏥 Health Check: http://wihy-ui-prod.westus2.cloudapp.azure.com/health"
+        echo "📊 Features Available:"
+        echo "   • Health Charts (search: activity, weight, sleep, dopamine, health risk)"
+        echo "   • Updated API endpoint: wihymlapi.westus2.cloudapp.azure.com"
+        echo "   • Responsive design with Chart.js integration"
+        echo "   • Production-optimized Docker container"
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
