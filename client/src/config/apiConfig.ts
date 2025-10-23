@@ -1,16 +1,17 @@
 // Environment configuration for API endpoints
 export const API_CONFIG = {
-  // WIHY Enhanced Model API - Production endpoints
+  // WIHY Enhanced Model API - Production endpoints (ONLY ENDPOINT WE USE)
   WIHY_ENHANCED_API_URL: process.env.REACT_APP_WIHY_API_URL || 'https://ml.wihy.ai',
   WIHY_ENHANCED_API_BACKUP: process.env.REACT_APP_WIHY_BACKUP_URL || 'http://40.125.85.74',
   WIHY_ENHANCED_API_CONTAINER: process.env.REACT_APP_WIHY_CONTAINER_URL || 'https://vhealth-wihy-ml-api.gentlebush-f35a13de.westus2.azurecontainerapps.io',
   
-  // Legacy endpoints (deprecated - use enhanced API)
-  WIHY_UNIFIED_API_URL: process.env.REACT_APP_WIHY_LEGACY_URL || 'http://wihymlapi.westus2.cloudapp.azure.com',
-  BASE_URL: process.env.REACT_APP_API_URL || 'http://wihymlapi.westus2.cloudapp.azure.com/api',
-  OPENFOODFACTS_URL: process.env.REACT_APP_OPENFOODFACTS_URL || 'https://world.openfoodfacts.org/api/v0',
-  NEWS_API_URL: process.env.REACT_APP_NEWS_API_URL || 'https://services.wihy.ai',
-  READABILITY_API_URL: process.env.REACT_APP_READABILITY_API_URL || 'https://readability.com/api',
+  // Legacy endpoints (DEPRECATED - DO NOT USE)
+  // These are kept for reference but should not be called
+  WIHY_UNIFIED_API_URL: 'DEPRECATED',
+  BASE_URL: 'DEPRECATED',
+  OPENFOODFACTS_URL: 'DEPRECATED',
+  NEWS_API_URL: 'DEPRECATED', 
+  READABILITY_API_URL: 'DEPRECATED',
 } as const;
 
 // WIHY Enhanced Model API endpoint (2,325 training examples active)
@@ -28,15 +29,15 @@ export const getEnhancedWihyEndpoint = (path: string = '', usePrimary: boolean =
   return `${baseUrl}${path}`;
 };
 
-// Helper function to get full API endpoint (legacy)
+// DEPRECATED FUNCTIONS - DO NOT USE - Redirect to enhanced API
 export const getApiEndpoint = (path: string = '') => {
-  const baseUrl = API_CONFIG.BASE_URL.replace(/\/api$/, ''); // Remove /api if present
-  return `${baseUrl}/api${path}`;
+  console.warn('DEPRECATED: getApiEndpoint() called. Use getEnhancedWihyEndpoint() instead.');
+  return getEnhancedWihyEndpoint(path);
 };
 
-// Helper function to get WiHy Unified API endpoint (legacy)
 export const getWihyEndpoint = (path: string = '') => {
-  return `${API_CONFIG.WIHY_UNIFIED_API_URL}${path}`;
+  console.warn('DEPRECATED: getWihyEndpoint() called. Use getEnhancedWihyEndpoint() instead.');
+  return getEnhancedWihyEndpoint(path);
 };
 
 // Enhanced Model API Health Check

@@ -1,9 +1,7 @@
-// DEPRECATED: Most functionality moved to wihyAPI
-// Only image processing and legacy nutrition functions remain
+// UPDATED: Now uses WiHy Enhanced API for all functionality
+// Image processing and nutrition analysis via ml.wihy.ai
 
-import { API_CONFIG, getApiEndpoint } from '../config/apiConfig';
-
-const API_URL = API_CONFIG.BASE_URL;
+import { wihyAPI } from './wihyAPI';
 
 // Updated interface to match backend response structure
 export interface NutritionResponse {
@@ -65,28 +63,26 @@ export const fetchNutritionData = async (query: string): Promise<NutritionRespon
 export const processUploadedFoodImage = async (file: File): Promise<NutritionResponse> => {
   console.log('Processing uploaded food image:', file.name, 'Size:', file.size);
   
-  const formData = new FormData();
-  formData.append('image', file);
-  
   try {
-    const response = await fetch(getApiEndpoint('/analyze-image'), {
-      method: 'POST',
-      body: formData
-    });
+    // Use WiHy Enhanced API for image scanning
+    const response = await wihyAPI.scanFoodImage(file);
+    console.log('WiHy Enhanced API image analysis result:', response);
     
-    console.log('Image analysis response status:', response.status);
-    
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('Image analysis error response:', errorText);
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    
-    const data = await response.json();
-    console.log('Image analysis result:', data);
-    
-    // The backend returns the expected structure directly
-    return data as NutritionResponse;
+    // Convert WiHy response to legacy format for compatibility
+    return {
+      success: response.success,
+      message: response.success ? 'Image analyzed successfully' : 'Image analysis failed',
+      foodName: response.overall_assessment?.verdict || 'Unknown food',
+      confidence: response.overall_assessment?.health_score || 0,
+      tags: response.detected_foods?.map(f => f.name) || [],
+      nutrition: {
+        item: response.overall_assessment?.verdict || 'Unknown',
+        // Note: nutrition details would need to come from additional API calls
+      },
+      analysis: {
+        provider: 'WiHy Enhanced Model (ml.wihy.ai)',
+      }
+    };
     
   } catch (error) {
     console.error('Error processing uploaded image:', error);
