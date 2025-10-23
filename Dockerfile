@@ -4,14 +4,16 @@ FROM node:18-alpine AS builder
 # Set working directory to client
 WORKDIR /app/client
 
-# Copy client package files for dependency installation
+# Copy only package files first for better layer caching
 COPY client/package*.json ./
 
 # Install dependencies
-RUN npm install
+RUN npm ci --no-audit --no-fund
 
 # Copy client source code
-COPY client/ ./
+COPY client/src ./src
+COPY client/public ./public
+COPY client/tsconfig.json ./tsconfig.json
 
 # Build the application
 RUN npm run build
