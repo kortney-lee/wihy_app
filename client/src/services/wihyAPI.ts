@@ -1,7 +1,84 @@
-import { API_CONFIG, WIHY_API_ENDPOINT } from '../config/apiConfig';
+import { API_CONFIG, WIHY_API_ENDPOINT, getEnhancedWihyEndpoint, WIHY_HEALTH_CHECK_URL, WIHY_SCAN_IMAGE_URL, WIHY_SCAN_BARCODE_URL } from '../config/apiConfig';
 import { logger } from '../utils/logger';
 
-// Types for the WiHy API (updated to match OpenAPI specification v4.0.0)
+// Types for the WiHy Enhanced Model API (2,325 training examples)
+export interface EnhancedHealthQuestion {
+  query: string;                          // REQUIRED: Your health/nutrition question
+  context?: string;                       // OPTIONAL: Additional context for the question
+  user_id?: string;                       // OPTIONAL: User identifier for personalization
+}
+
+// Enhanced Model Response Structure
+export interface EnhancedHealthResponse {
+  question: string;
+  answer: string;
+  research_citations: string[];
+  wihy_wisdom: string[];
+  confidence_score: number;
+  model_version: string;
+  training_examples_used: number;
+  timestamp: string;
+}
+
+// Image Scanner Response Structure
+export interface ImageScanResponse {
+  success: boolean;
+  overall_assessment: {
+    health_score: number;
+    verdict: string;
+    nova_group: number;
+  };
+  google_vision_analysis: {
+    vision_api_success: boolean;
+    detected_text: string[];
+    labels: string[];
+  };
+  detected_foods: Array<{
+    name: string;
+    confidence: number;
+    nova_group: number;
+  }>;
+  nova_chart_reference: {
+    client_guidance: {
+      color_coding: 'green' | 'yellow' | 'orange' | 'red';
+      action: 'CHOOSE' | 'MODERATE' | 'LIMIT' | 'AVOID';
+      message: string;
+    };
+  };
+  wihy_recommendations: string[];
+  carcinogen_warnings: string[];
+  family_safety: {
+    family_safe: boolean;
+    family_verdict: string;
+  };
+  data_sources: string[];
+}
+
+// Barcode Scanner Response Structure  
+export interface BarcodeScanResponse {
+  success: boolean;
+  nova_group: number;
+  health_score: number;
+  product_name: string;
+  ingredients: string[];
+  nutritional_data: {
+    calories_per_100g: number;
+    protein_g: number;
+    carbs_g: number;
+    fat_g: number;
+    fiber_g: number;
+    sodium_mg: number;
+  };
+  health_analysis: {
+    carcinogen_alerts: string[];
+    toxic_additives: string[];
+    processing_level: string;
+  };
+  wihy_recommendations: string[];
+  data_sources: string[];
+}
+
+// Legacy interfaces for backward compatibility
 export interface HealthQuestion {
   query: string;                          // REQUIRED: Your health/nutrition question
   user_context?: Record<string, any>;     // OPTIONAL: User context object
@@ -269,53 +346,107 @@ export interface WihyError {
   detail: string;
 }
 
-class WihyAPIService {
+class WihyEnhancedAPIService {
   private baseURL: string;
+  private backupURLs: string[];
   private isLocalDevelopment: boolean;
 
   constructor() {
-    this.baseURL = WIHY_API_ENDPOINT;
-    this.isLocalDevelopment = API_CONFIG.WIHY_UNIFIED_API_URL.includes('localhost');
+    this.baseURL = API_CONFIG.WIHY_ENHANCED_API_URL;
+    this.backupURLs = [
+      API_CONFIG.WIHY_ENHANCED_API_BACKUP,
+      API_CONFIG.WIHY_ENHANCED_API_CONTAINER
+    ];
+    this.isLocalDevelopment = this.baseURL.includes('localhost');
   }
 
   /**
-   * Ask WiHy a health-related question using the unified API
+   * Ask WiHy Enhanced Model a health-related question (2,325 training examples)
    */
-  async askAnything(request: WihyRequest | UnifiedRequest): Promise<HealthQuestionResponse | WihyResponse | UnifiedResponse> {
+  async askEnhancedHealthQuestion(request: EnhancedHealthQuestion): Promise<EnhancedHealthResponse> {
     try {
-      logger.apiRequest('Making WiHy Unified API request', request);
+      logger.apiRequest('Making WiHy Enhanced Model API request', request);
       
-      let requestBody: any;
-      let endpoint: string;
+      const endpoint = `${this.baseURL}/ask`;
       
-      // Both local and remote APIs use the same /ask endpoint with HealthQuestion format
-      endpoint = this.isLocalDevelopment ? this.baseURL : `${API_CONFIG.WIHY_UNIFIED_API_URL}/ask`;
-      
-      // Build HealthQuestion object according to OpenAPI spec
-      if ('user_context' in request) {
-        requestBody = {
-          query: request.query,
-          user_context: request.user_context || {},
-          include_nutrition: true,
-          include_biblical_wisdom: false,
-          include_charts: true
-        };
-      } else {
-        const unifiedReq = request as UnifiedRequest;
-        requestBody = {
-          query: unifiedReq.query,
-          user_context: unifiedReq.context || unifiedReq.user_context || {},
-          include_nutrition: unifiedReq.include_nutrition !== false,
-          include_biblical_wisdom: unifiedReq.include_biblical_wisdom === true,
-          include_charts: unifiedReq.include_charts !== false
-        };
-      }
-      
-      // Use fetch API to match the working example exactly with timeout
+      // Use fetch API with timeout and retry logic
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
       
-      const response = await fetch(endpoint, {
+      const response = await this.fetchWithRetry(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(request),
+        signal: controller.signal
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      logger.apiResponse('WiHy Enhanced Model API response received', data);
+      return data;
+    } catch (error) {
+      logger.error('WiHy Enhanced Model API error:', error);
+      throw this.handleEnhancedError(error);
+    }
+  }
+
+  /**
+   * Scan food image using enhanced vision analysis
+   */
+  async scanFoodImage(imageFile: File, context: string = ''): Promise<ImageScanResponse> {
+    try {
+      const formData = new FormData();
+      formData.append('image', imageFile);
+      formData.append('context', context);
+      
+      const endpoint = WIHY_SCAN_IMAGE_URL;
+      
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 45000); // 45 second timeout for images
+      
+      const response = await this.fetchWithRetry(endpoint, {
+        method: 'POST',
+        body: formData,
+        signal: controller.signal
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      logger.apiResponse('WiHy Image Scanner response received', data);
+      return data;
+    } catch (error) {
+      logger.error('WiHy Image Scanner error:', error);
+      throw this.handleScannerError(error, 'image');
+    }
+  }
+
+  /**
+   * Scan barcode using enhanced nutrition database
+   */
+  async scanBarcode(barcode: string, context: any = {}): Promise<BarcodeScanResponse> {
+    try {
+      const requestBody = {
+        query: barcode,
+        scan_location: context.scan_location || 'web_app',
+        device_type: context.device_type || 'desktop'
+      };
+      
+      const endpoint = WIHY_SCAN_BARCODE_URL;
+      
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 20000); // 20 second timeout
+      
+      const response = await this.fetchWithRetry(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(requestBody),
@@ -329,42 +460,261 @@ class WihyAPIService {
       }
 
       const data = await response.json();
-      logger.apiResponse('WiHy Unified API response received', data);
+      logger.apiResponse('WiHy Barcode Scanner response received', data);
       return data;
     } catch (error) {
-      logger.error('WiHy API error:', error);
-      
-      if (error instanceof Error) {
-        // Check for timeout/abort errors
-        if (error.name === 'AbortError') {
-          throw new Error('TIMEOUT_ERROR: Request timed out - services may be unavailable');
+      logger.error('WiHy Barcode Scanner error:', error);
+      throw this.handleScannerError(error, 'barcode');
+    }
+  }
+
+  /**
+   * Check API health and get status
+   */
+  async checkAPIHealth(): Promise<{ status: string; model_version: string; training_examples: number }> {
+    try {
+      const response = await fetch(WIHY_HEALTH_CHECK_URL, {
+        method: 'GET',
+        headers: { 'Accept': 'application/json' }
+      });
+
+      if (!response.ok) {
+        throw new Error(`Health check failed: ${response.status}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      logger.error('WiHy API health check failed:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Fetch with automatic retry logic and fallback endpoints
+   */
+  private async fetchWithRetry(url: string, options: RequestInit, retries: number = 2): Promise<Response> {
+    const endpoints = [this.baseURL, ...this.backupURLs];
+    
+    for (let attempt = 0; attempt <= retries; attempt++) {
+      for (const endpoint of endpoints) {
+        try {
+          const fullUrl = url.replace(this.baseURL, endpoint);
+          const response = await fetch(fullUrl, options);
+          
+          if (response.ok) {
+            return response;
+          }
+          
+          // If primary endpoint fails, try backup
+          if (endpoint === this.baseURL && response.status >= 500) {
+            continue;
+          }
+          
+          return response; // Return even if not ok for error handling
+          
+        } catch (error) {
+          logger.warn(`Attempt ${attempt + 1} failed for ${endpoint}:`, error);
+          
+          // If this is the last endpoint and last attempt, throw error
+          if (endpoint === endpoints[endpoints.length - 1] && attempt === retries) {
+            throw error;
+          }
         }
-        
-        // Check for CORS errors
-        if (error.message.includes('CORS') || 
-            error.message.includes('Access to fetch') ||
-            error.message.includes('No \'Access-Control-Allow-Origin\'')) {
-          throw new Error('CORS_ERROR: Unable to connect to WiHy services from this domain');
-        }
-        
-        // Check for network/connectivity issues
-        if (error.message.includes('fetch') || 
-            error.message.includes('network') || 
-            error.name === 'TypeError' ||
-            error.message.includes('Failed to fetch')) {
-          throw new Error('NETWORK_ERROR: Unable to connect to WiHy services');
-        }
-        
-        // Check for server errors
-        if (error.message.includes('HTTP error! status: 5')) {
-          throw new Error('SERVER_ERROR: WiHy services are temporarily unavailable');
-        }
-        
-        throw new Error(error.message || 'WiHy API request failed');
+      }
+    }
+    
+    throw new Error('All endpoints and retries failed');
+  }
+
+  /**
+   * Enhanced error handling for API responses
+   */
+  private handleEnhancedError(error: any): Error {
+    if (error instanceof Error) {
+      // Check for timeout/abort errors
+      if (error.name === 'AbortError') {
+        return new Error('TIMEOUT_ERROR: Enhanced model request timed out - services may be under heavy load');
       }
       
-      throw new Error('Unknown error occurred while contacting WiHy API');
+      // Check for CORS errors
+      if (error.message.includes('CORS') || 
+          error.message.includes('Access to fetch') ||
+          error.message.includes('No \'Access-Control-Allow-Origin\'')) {
+        return new Error('CORS_ERROR: Unable to connect to WiHy Enhanced Model from this domain');
+      }
+      
+      // Check for network/connectivity issues
+      if (error.message.includes('fetch') || 
+          error.message.includes('network') || 
+          error.name === 'TypeError' ||
+          error.message.includes('Failed to fetch')) {
+        return new Error('NETWORK_ERROR: Unable to connect to WiHy Enhanced Model services');
+      }
+      
+      // Check for server errors
+      if (error.message.includes('HTTP error! status: 5')) {
+        return new Error('SERVER_ERROR: WiHy Enhanced Model temporarily unavailable');
+      }
+      
+      return new Error(error.message || 'WiHy Enhanced Model request failed');
     }
+    
+    return new Error('Unknown error occurred while contacting WiHy Enhanced Model');
+  }
+
+  /**
+   * Scanner-specific error handling
+   */
+  private handleScannerError(error: any, scanType: 'image' | 'barcode'): Error {
+    const context = scanType === 'image' ? 'Image Scanner' : 'Barcode Scanner';
+    
+    if (error instanceof Error) {
+      if (error.name === 'AbortError') {
+        return new Error(`TIMEOUT_ERROR: ${context} request timed out`);
+      }
+      
+      if (error.message.includes('HTTP error! status: 400')) {
+        return new Error(`VALIDATION_ERROR: Invalid ${scanType} format or data`);
+      }
+      
+      if (error.message.includes('HTTP error! status: 404')) {
+        return new Error(`NOT_FOUND: ${scanType === 'barcode' ? 'Product not found in nutrition databases' : 'Unable to analyze image'}`);
+      }
+      
+      return new Error(`${context.toUpperCase()}_ERROR: ${error.message}`);
+    }
+    
+    return new Error(`Unknown ${context.toLowerCase()} error occurred`);
+  }
+
+  /**
+   * Legacy compatibility method - Ask WiHy a health-related question
+   * Now routes to Enhanced Model for better responses
+   */
+  async askAnything(request: WihyRequest | UnifiedRequest): Promise<HealthQuestionResponse | WihyResponse | UnifiedResponse> {
+    try {
+      // Convert legacy request to enhanced format
+      const enhancedRequest: EnhancedHealthQuestion = {
+        query: request.query,
+        context: 'user_context' in request ? JSON.stringify(request.user_context) : '',
+        user_id: 'user_id' in request ? request.user_id : undefined
+      };
+      
+      // Try enhanced model first
+      try {
+        const enhancedResponse = await this.askEnhancedHealthQuestion(enhancedRequest);
+        
+        // Convert enhanced response to legacy format for backward compatibility
+        return this.convertEnhancedToLegacy(enhancedResponse, request.query);
+        
+      } catch (enhancedError) {
+        logger.warn('Enhanced model failed, falling back to legacy format:', enhancedError);
+        
+        // Fallback to legacy unified API if enhanced model fails
+        return this.askLegacyUnified(request);
+      }
+      
+    } catch (error) {
+      logger.error('All WiHy API methods failed:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Fallback method for legacy unified API
+   */
+  private async askLegacyUnified(request: WihyRequest | UnifiedRequest): Promise<HealthQuestionResponse | WihyResponse | UnifiedResponse> {
+    logger.apiRequest('Making WiHy Legacy API request', request);
+    
+    let requestBody: any;
+    let endpoint: string;
+    
+    // Use legacy endpoints
+    endpoint = this.isLocalDevelopment ? 
+      `${API_CONFIG.WIHY_UNIFIED_API_URL}/ask` : 
+      `${API_CONFIG.WIHY_UNIFIED_API_URL}/ask`;
+    
+    // Build HealthQuestion object according to legacy spec
+    if ('user_context' in request) {
+      requestBody = {
+        query: request.query,
+        user_context: request.user_context || {},
+        include_nutrition: true,
+        include_biblical_wisdom: false,
+        include_charts: true
+      };
+    } else {
+      const unifiedReq = request as UnifiedRequest;
+      requestBody = {
+        query: unifiedReq.query,
+        user_context: unifiedReq.context || {},
+        include_nutrition: true,
+        include_biblical_wisdom: true,
+        include_charts: true
+      };
+    }
+    
+    // Use fetch API to match the working example exactly with timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+    
+    const response = await fetch(endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(requestBody),
+      signal: controller.signal
+    });
+
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    logger.apiResponse('WiHy Legacy API response received', data);
+    return data;
+  }
+
+  /**
+   * Convert Enhanced Model response to legacy format for backward compatibility
+   */
+  private convertEnhancedToLegacy(enhancedResponse: EnhancedHealthResponse, originalQuery: string): WihyResponse {
+    return {
+      success: true,
+      timestamp: enhancedResponse.timestamp || new Date().toISOString(),
+      response_type: 'enhanced_model',
+      query: originalQuery,
+      wihy_response: {
+        query_type: 'enhanced_model',
+        query: originalQuery,
+        core_principle: enhancedResponse.answer,
+        personalized_analysis: {
+          identified_risk_factors: [],
+          priority_health_goals: [enhancedResponse.answer],
+          action_items: enhancedResponse.wihy_wisdom.map((wisdom: string, index: number) => ({
+            action: wisdom,
+            priority: 'high',
+            target_illness: 'general_health',
+            evidence_level: 'enhanced_model',
+            mechanism: 'biblical_wisdom',
+            timeline: 'immediate'
+          })),
+          timeline: 'immediate'
+        },
+        research_foundation: enhancedResponse.research_citations.map((citation: string) => ({
+          citation_text: citation,
+          study_type: 'enhanced_model_research',
+          key_finding: citation
+        })),
+        progress_tracking: {
+          key_metrics: ['enhanced_health_understanding'],
+          reassessment_period: '1 week'
+        },
+        biblical_wisdom: enhancedResponse.wihy_wisdom
+      },
+      message: enhancedResponse.answer
+    };
   }
 
   /**
@@ -499,57 +849,130 @@ class WihyAPIService {
   }
 
   /**
-   * Scan food images, barcodes, or products using the unified API
+   * Legacy scan food images method - now uses enhanced scanner
    */
   async scanFood(file?: File, scanOptions?: Partial<ScanRequest>): Promise<WihyResponse | UnifiedResponse> {
     try {
-      let endpoint: string;
-      let requestBody: any;
-      
-      if (this.isLocalDevelopment) {
-        // Local API uses /scan endpoint
-        endpoint = `${API_CONFIG.WIHY_UNIFIED_API_URL}/scan`;
+      if (file) {
+        // Use enhanced image scanner
+        const enhancedResponse = await this.scanFoodImage(file, scanOptions?.user_context ? JSON.stringify(scanOptions.user_context) : '');
         
-        if (file) {
-          // Convert file to base64 for the API
-          const base64 = await this.fileToBase64(file);
-          requestBody = {
-            image_base64: base64,
-            user_context: scanOptions?.user_context || {},
-            ...scanOptions
-          };
-        } else {
-          requestBody = scanOptions || {};
-        }
+        // Convert to legacy format
+        return this.convertImageScanToLegacy(enhancedResponse, 'Image scan analysis');
+        
+      } else if (scanOptions?.barcode) {
+        // Use enhanced barcode scanner
+        const enhancedResponse = await this.scanBarcode(scanOptions.barcode, scanOptions.user_context);
+        
+        // Convert to legacy format
+        return this.convertBarcodeScanToLegacy(enhancedResponse, `Barcode scan: ${scanOptions.barcode}`);
+        
       } else {
-        // Remote API - fallback to legacy image analysis
-        // This would need to be implemented based on what the remote API supports
-        throw new Error('Image scanning not yet supported on remote API');
+        throw new Error('No file or barcode provided for scanning');
       }
       
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 30000);
-      
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(requestBody),
-        signal: controller.signal
-      });
-
-      clearTimeout(timeoutId);
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      logger.apiResponse('WiHy Scan API response received', data);
-      return data;
     } catch (error) {
-      logger.error('WiHy Scan API error:', error);
+      logger.error('WiHy Scan error:', error);
       throw error;
     }
+  }
+
+  /**
+   * Convert Image Scanner response to legacy format
+   */
+  private convertImageScanToLegacy(response: ImageScanResponse, query: string): WihyResponse {
+    const recommendations = response.wihy_recommendations || [];
+    const warnings = response.carcinogen_warnings || [];
+    
+    return {
+      success: response.success,
+      timestamp: new Date().toISOString(),
+      response_type: 'image_scan',
+      query: query,
+      wihy_response: {
+        query_type: 'image_scan',
+        query: query,
+        core_principle: response.overall_assessment?.verdict || 'Image analysis complete',
+        personalized_analysis: {
+          identified_risk_factors: warnings.map(warning => ({
+            risk_factor: warning,
+            associated_illnesses: 'various',
+            prevalence_rate: 0,
+            preventability_score: 100
+          })),
+          priority_health_goals: recommendations,
+          action_items: recommendations.map(rec => ({
+            action: rec,
+            priority: 'high',
+            target_illness: 'general_health',
+            evidence_level: 'image_analysis',
+            mechanism: 'food_choice',
+            timeline: 'immediate'
+          })),
+          timeline: 'immediate'
+        },
+        research_foundation: response.data_sources?.map(source => ({
+          citation_text: source,
+          study_type: 'database',
+          key_finding: source
+        })) || [],
+        progress_tracking: {
+          key_metrics: ['food_quality_awareness'],
+          reassessment_period: '1 week'
+        },
+        biblical_wisdom: ['Choose foods that nourish your temple - 1 Corinthians 6:19']
+      },
+      message: this.formatImageScanResponse(response)
+    };
+  }
+
+  /**
+   * Convert Barcode Scanner response to legacy format
+   */
+  private convertBarcodeScanToLegacy(response: BarcodeScanResponse, query: string): WihyResponse {
+    const recommendations = response.wihy_recommendations || [];
+    const warnings = [...(response.health_analysis?.carcinogen_alerts || []), ...(response.health_analysis?.toxic_additives || [])];
+    
+    return {
+      success: response.success,
+      timestamp: new Date().toISOString(),
+      response_type: 'barcode_scan',
+      query: query,
+      wihy_response: {
+        query_type: 'barcode_scan',
+        query: query,
+        core_principle: `Product Analysis: ${response.product_name}`,
+        personalized_analysis: {
+          identified_risk_factors: warnings.map(warning => ({
+            risk_factor: warning,
+            associated_illnesses: 'various',
+            prevalence_rate: 0,
+            preventability_score: 100
+          })),
+          priority_health_goals: recommendations,
+          action_items: recommendations.map(rec => ({
+            action: rec,
+            priority: 'high',
+            target_illness: 'general_health',
+            evidence_level: 'product_analysis',
+            mechanism: 'ingredient_awareness',
+            timeline: 'immediate'
+          })),
+          timeline: 'immediate'
+        },
+        research_foundation: response.data_sources?.map(source => ({
+          citation_text: source,
+          study_type: 'nutrition_database',
+          key_finding: source
+        })) || [],
+        progress_tracking: {
+          key_metrics: ['product_awareness', 'nova_understanding'],
+          reassessment_period: '1 week'
+        },
+        biblical_wisdom: ['Real food doesn\'t need complicated analysis - choose whole foods']
+      },
+      message: this.formatBarcodeScanResponse(response)
+    };
   }
 
   /**
@@ -585,9 +1008,203 @@ class WihyAPIService {
   }
 
   /**
-   * Format the WiHy response for display in the existing UI
-   * This formats it to be compatible with the existing search results format
+   * Format Enhanced Model response for display in the UI
    */
+  formatEnhancedResponse(response: EnhancedHealthResponse): string {
+    let formatted = `# WiHy Enhanced Health Intelligence\n\n`;
+    
+    // Main response content
+    formatted += response.answer;
+    
+    // Add research citations if available
+    if (response.research_citations && response.research_citations.length > 0) {
+      formatted += `\n\n## 📚 Research Citations\n`;
+      response.research_citations.forEach((citation, index) => {
+        formatted += `${index + 1}. ${citation}\n`;
+      });
+    }
+    
+    // Add biblical wisdom if available
+    if (response.wihy_wisdom && response.wihy_wisdom.length > 0) {
+      formatted += `\n\n## ✝️ Biblical Wisdom\n`;
+      response.wihy_wisdom.forEach(wisdom => {
+        formatted += `> ${wisdom}\n\n`;
+      });
+    }
+    
+    // Add enhanced model info
+    formatted += `\n\n---\n\n`;
+    formatted += `*Enhanced Model Response (${response.training_examples_used} training examples)*\n`;
+    formatted += `*Confidence Score: ${Math.round(response.confidence_score * 100)}%*\n`;
+    formatted += `*Model Version: ${response.model_version}*`;
+    
+    return formatted;
+  }
+
+  /**
+   * Format Image Scanner response for display
+   */
+  formatImageScanResponse(response: ImageScanResponse): string {
+    let formatted = `# 📷 WiHy Image Analysis Results\n\n`;
+    
+    if (response.success && response.overall_assessment) {
+      const { health_score, verdict, nova_group } = response.overall_assessment;
+      const guidance = response.nova_chart_reference?.client_guidance;
+      
+      formatted += `## Health Assessment\n`;
+      formatted += `**Health Score:** ${health_score}/100\n`;
+      formatted += `**Verdict:** ${verdict}\n`;
+      formatted += `**NOVA Group:** ${nova_group} (${this.getNovaLabel(nova_group)})\n`;
+      
+      if (guidance) {
+        formatted += `**Recommendation:** ${guidance.action} - ${guidance.message}\n\n`;
+      }
+      
+      // Detected foods
+      if (response.detected_foods && response.detected_foods.length > 0) {
+        formatted += `## 🍽️ Detected Foods\n`;
+        response.detected_foods.forEach(food => {
+          formatted += `- **${food.name}** (Confidence: ${Math.round(food.confidence * 100)}%, NOVA: ${food.nova_group})\n`;
+        });
+        formatted += '\n';
+      }
+      
+      // WIHY recommendations
+      if (response.wihy_recommendations && response.wihy_recommendations.length > 0) {
+        formatted += `## 💡 WIHY Recommendations\n`;
+        response.wihy_recommendations.forEach(rec => {
+          formatted += `- ${rec}\n`;
+        });
+        formatted += '\n';
+      }
+      
+      // Health warnings
+      if (response.carcinogen_warnings && response.carcinogen_warnings.length > 0) {
+        formatted += `## ⚠️ Health Warnings\n`;
+        response.carcinogen_warnings.forEach(warning => {
+          formatted += `- ${warning}\n`;
+        });
+        formatted += '\n';
+      }
+      
+      // Family safety
+      if (response.family_safety) {
+        formatted += `## 👨‍👩‍👧‍👦 Family Safety\n`;
+        formatted += `**Status:** ${response.family_safety.family_safe ? '✅ Safe' : '❌ Not Recommended'}\n`;
+        formatted += `**Verdict:** ${response.family_safety.family_verdict}\n\n`;
+      }
+      
+    } else {
+      formatted += `Analysis failed. Please try again or choose whole foods when in doubt.\n\n`;
+    }
+    
+    // Data sources
+    if (response.data_sources && response.data_sources.length > 0) {
+      formatted += `---\n\n*Data sources: ${response.data_sources.join(', ')}*`;
+    }
+    
+    return formatted;
+  }
+
+  /**
+   * Format Barcode Scanner response for display
+   */
+  formatBarcodeScanResponse(response: BarcodeScanResponse): string {
+    let formatted = `# 🔍 WiHy Barcode Analysis\n\n`;
+    
+    if (response.success) {
+      formatted += `## Product Information\n`;
+      formatted += `**Product:** ${response.product_name}\n`;
+      formatted += `**Health Score:** ${response.health_score}/100\n`;
+      formatted += `**NOVA Group:** ${response.nova_group} (${this.getNovaLabel(response.nova_group)})\n\n`;
+      
+      // Nutritional data
+      if (response.nutritional_data) {
+        const nutrition = response.nutritional_data;
+        formatted += `## 📊 Nutrition Facts (per 100g)\n`;
+        formatted += `- **Calories:** ${nutrition.calories_per_100g}\n`;
+        formatted += `- **Protein:** ${nutrition.protein_g}g\n`;
+        formatted += `- **Carbohydrates:** ${nutrition.carbs_g}g\n`;
+        formatted += `- **Fat:** ${nutrition.fat_g}g\n`;
+        formatted += `- **Fiber:** ${nutrition.fiber_g}g\n`;
+        formatted += `- **Sodium:** ${nutrition.sodium_mg}mg\n\n`;
+      }
+      
+      // Health analysis
+      if (response.health_analysis) {
+        const analysis = response.health_analysis;
+        formatted += `## 🔬 Health Analysis\n`;
+        formatted += `**Processing Level:** ${analysis.processing_level}\n`;
+        
+        if (analysis.carcinogen_alerts && analysis.carcinogen_alerts.length > 0) {
+          formatted += `**⚠️ Carcinogen Alerts:**\n`;
+          analysis.carcinogen_alerts.forEach(alert => {
+            formatted += `- ${alert}\n`;
+          });
+        }
+        
+        if (analysis.toxic_additives && analysis.toxic_additives.length > 0) {
+          formatted += `**🧪 Toxic Additives:**\n`;
+          analysis.toxic_additives.forEach(additive => {
+            formatted += `- ${additive}\n`;
+          });
+        }
+        formatted += '\n';
+      }
+      
+      // WIHY recommendations
+      if (response.wihy_recommendations && response.wihy_recommendations.length > 0) {
+        formatted += `## 💡 WIHY Recommendations\n`;
+        response.wihy_recommendations.forEach(rec => {
+          formatted += `- ${rec}\n`;
+        });
+        formatted += '\n';
+      }
+      
+      // Ingredients
+      if (response.ingredients && response.ingredients.length > 0) {
+        formatted += `## 🧾 Ingredients\n`;
+        formatted += response.ingredients.join(', ') + '\n\n';
+      }
+      
+    } else {
+      formatted += `Product not found or analysis failed. Choose foods with 5 or fewer ingredients when in doubt.\n\n`;
+    }
+    
+    // Data sources
+    if (response.data_sources && response.data_sources.length > 0) {
+      formatted += `---\n\n*Data sources: ${response.data_sources.join(', ')}*`;
+    }
+    
+    return formatted;
+  }
+
+  /**
+   * Get NOVA group label
+   */
+  private getNovaLabel(novaGroup: number): string {
+    const labels = {
+      1: 'Natural/Unprocessed',
+      2: 'Processed Culinary Ingredients', 
+      3: 'Processed Foods',
+      4: 'Ultra-Processed Foods'
+    };
+    return labels[novaGroup as keyof typeof labels] || 'Unknown';
+  }
+
+  /**
+   * Get NOVA guidance for UI display
+   */
+  getNovaGuidance(novaGroup: number): { action: string; color: string; message: string } {
+    const guidance = {
+      1: { action: 'CHOOSE', color: 'green', message: 'Real food as God intended' },
+      2: { action: 'MODERATE', color: 'yellow', message: 'Use sparingly' },
+      3: { action: 'LIMIT', color: 'orange', message: 'Find alternatives' },
+      4: { action: 'AVOID', color: 'red', message: 'Your family deserves better' }
+    };
+    
+    return guidance[novaGroup as keyof typeof guidance] || guidance[4];
+  }
   formatWihyResponse(response: HealthQuestionResponse | WihyResponse | UnifiedResponse): string {
     // Handle new HealthQuestionResponse format (OpenAPI v4.0.0)
     if ('success' in response && 'data' in response && response.data && 'response' in response.data && 'processor_used' in response.data) {
@@ -860,6 +1477,6 @@ What specific aspect of health would you like to explore further?`;
   }
 }
 
-// Export a singleton instance
-export const wihyAPI = new WihyAPIService();
+// Export a singleton instance of the enhanced API service
+export const wihyAPI = new WihyEnhancedAPIService();
 export default wihyAPI;

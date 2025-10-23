@@ -89,15 +89,50 @@ jobs:
     - name: Setup SSH key
       if: github.ref == 'refs/heads/main' && env.SKIP_DEPLOYMENT == 'false'
       run: |
+        # Create SSH directory with proper permissions
         mkdir -p ~/.ssh
-        echo "${{ secrets.VM_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+        chmod 700 ~/.ssh
+        
+        # Create SSH private key with proper formatting
+        echo "${{ secrets.VM_SSH_PRIVATE_KEY }}" | tr -d '\r' > ~/.ssh/id_rsa
         chmod 600 ~/.ssh/id_rsa
         
-        # Add host key to known_hosts (with error handling)
+        # Validate SSH key format
+        if ! ssh-keygen -l -f ~/.ssh/id_rsa >/dev/null 2>&1; then
+          echo "❌ Invalid SSH private key format"
+          echo "Please ensure your VM_SSH_PRIVATE_KEY secret contains a valid private key"
+          echo "The key should start with '-----BEGIN OPENSSH PRIVATE KEY-----' or '-----BEGIN RSA PRIVATE KEY-----'"
+          exit 1
+        fi
+        
+        # Add host key to known_hosts with retries
         if [ -n "${{ secrets.VM_HOST }}" ]; then
-          ssh-keyscan -H ${{ secrets.VM_HOST }} >> ~/.ssh/known_hosts || echo "Warning: Could not scan host keys"
+          echo "🔑 Adding host key to known_hosts..."
+          for i in {1..3}; do
+            if ssh-keyscan -H ${{ secrets.VM_HOST }} >> ~/.ssh/known_hosts 2>/dev/null; then
+              echo "✅ Host key added successfully"
+              break
+            else
+              echo "⚠️  Attempt $i: Failed to scan host keys, retrying..."
+              sleep 2
+            fi
+          done
         else
-          echo "Error: VM_HOST secret not configured"
+          echo "❌ VM_HOST secret not configured"
+          exit 1
+        fi
+        
+        # Test SSH connection
+        echo "🔌 Testing SSH connection..."
+        if ssh -o ConnectTimeout=10 -o BatchMode=yes ${{ secrets.VM_USERNAME }}@${{ secrets.VM_HOST }} "echo 'SSH connection successful'" 2>/dev/null; then
+          echo "✅ SSH connection test passed"
+        else
+          echo "❌ SSH connection test failed"
+          echo "Please verify:"
+          echo "  1. VM_HOST is correct: ${{ secrets.VM_HOST }}"
+          echo "  2. VM_USERNAME is correct: ${{ secrets.VM_USERNAME }}"
+          echo "  3. SSH private key corresponds to a public key added to the VM"
+          echo "  4. VM is running and accessible"
           exit 1
         fi
 
@@ -105,9 +140,36 @@ jobs:
       if: github.ref == 'refs/heads/main' && env.SKIP_DEPLOYMENT == 'false'
       run: |
         echo "📦 Copying Docker image and setup scripts to VM..."
-        scp -o StrictHostKeyChecking=no wihy-ui-image.tar.gz ${{ secrets.VM_USERNAME }}@${{ secrets.VM_HOST }}:~/
-        scp -o StrictHostKeyChecking=no setup-ssl.sh ${{ secrets.VM_USERNAME }}@${{ secrets.VM_HOST }}:~/
-        scp -o StrictHostKeyChecking=no setup-ssl-template.sh ${{ secrets.VM_USERNAME }}@${{ secrets.VM_HOST }}:~/
+        
+        # Copy files with retry logic and better error handling
+        copy_with_retry() {
+          local file=$1
+          local max_attempts=3
+          local attempt=1
+          
+          while [ $attempt -le $max_attempts ]; do
+            echo "📋 Copying $file (attempt $attempt/$max_attempts)..."
+            if scp -o ConnectTimeout=30 -o ServerAliveInterval=5 -o ServerAliveCountMax=3 -o StrictHostKeyChecking=no "$file" ${{ secrets.VM_USERNAME }}@${{ secrets.VM_HOST }}:~/; then
+              echo "✅ Successfully copied $file"
+              return 0
+            else
+              echo "⚠️  Failed to copy $file (attempt $attempt/$max_attempts)"
+              if [ $attempt -eq $max_attempts ]; then
+                echo "❌ Failed to copy $file after $max_attempts attempts"
+                return 1
+              fi
+              sleep 5
+              attempt=$((attempt + 1))
+            fi
+          done
+        }
+        
+        # Copy each file with retry logic
+        copy_with_retry "wihy-ui-image.tar.gz" || exit 1
+        copy_with_retry "setup-ssl.sh" || exit 1  
+        copy_with_retry "setup-ssl-template.sh" || exit 1
+        
+        echo "✅ All files copied successfully"
         scp -o StrictHostKeyChecking=no setup-vm-environment.sh ${{ secrets.VM_USERNAME }}@${{ secrets.VM_HOST }}:~/
         scp -o StrictHostKeyChecking=no add-ssh-key.sh ${{ secrets.VM_USERNAME }}@${{ secrets.VM_HOST }}:~/
 
