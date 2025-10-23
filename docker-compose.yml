@@ -10,13 +10,16 @@ services:
       - "8080:80"
     environment:
       - REACT_APP_ENVIRONMENT=production
-      - REACT_APP_API_BASE_URL=https://your-serverless-api.azurewebsites.net/api
+      - REACT_APP_WIHY_API_URL=http://wihymlapi.westus2.cloudapp.azure.com
+      - REACT_APP_ENABLE_ANALYTICS=true
+      - REACT_APP_ENABLE_CACHING=true
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost/health"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 40s
+    restart: unless-stopped
 
   # Development container with hot reload
   wihy-ui-dev:
@@ -28,10 +31,12 @@ services:
     environment:
       - NODE_ENV=development
       - REACT_APP_ENVIRONMENT=development
-      - REACT_APP_API_BASE_URL=http://localhost:7071/api
+      - REACT_APP_WIHY_API_URL=http://wihymlapi.westus2.cloudapp.azure.com
+      - REACT_APP_DEBUG_MODE=true
     volumes:
       - ./client/src:/app/client/src:ro
       - ./client/public:/app/client/public:ro
+      - ./client/package.json:/app/client/package.json:ro
     command: sh -c "cd client && npm start"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3000"]
@@ -40,16 +45,16 @@ services:
       retries: 3
       start_period: 40s
 
-  # Local serverless API simulation (Azure Functions Core Tools)
-  serverless-api:
-    image: mcr.microsoft.com/azure-functions/node:4-node18
-    ports:
-      - "7071:80"
-    environment:
-      - AzureWebJobsScriptRoot=/home/site/wwwroot
-      - AzureFunctionsJobHost__Logging__Console__IsEnabled=true
-    volumes:
-      - ./api:/home/site/wwwroot:ro
-    command: /azure-functions-host/Microsoft.Azure.WebJobs.Script.WebHost
-    depends_on:
-      - wihy-ui-dev
+  # WiHy ML API (for local development - optional)
+  # Uncomment and configure if you have the WiHy ML API container
+  # wihy-api:
+  #   image: wihy-ml-api:latest
+  #   ports:
+  #     - "8000:8000"
+  #   environment:
+  #     - ENVIRONMENT=development
+  #   healthcheck:
+  #     test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 3
