@@ -81,11 +81,12 @@ jobs:
           exit 1
         fi
 
-    - name: Copy Docker image to VM
+    - name: Copy Docker image and scripts to VM
       if: github.ref == 'refs/heads/main' && env.SKIP_DEPLOYMENT == 'false'
       run: |
-        echo "📦 Copying Docker image to VM..."
+        echo "📦 Copying Docker image and setup scripts to VM..."
         scp -o StrictHostKeyChecking=no wihy-ui-image.tar.gz ${{ secrets.VM_USERNAME }}@${{ secrets.VM_HOST }}:~/
+        scp -o StrictHostKeyChecking=no setup-ssl.sh ${{ secrets.VM_USERNAME }}@${{ secrets.VM_HOST }}:~/
 
     - name: Deploy to Production VM with Docker
       if: github.ref == 'refs/heads/main' && env.SKIP_DEPLOYMENT == 'false'
@@ -166,6 +167,16 @@ jobs:
         # Show container info
         echo "📊 Container info:"
         docker stats ${{ env.CONTAINER_NAME }} --no-stream
+        
+        # Copy SSL setup script to proper location
+        echo "📋 Setting up SSL script..."
+        sudo mkdir -p /opt/wihy-ui
+        sudo cp ~/setup-ssl.sh /opt/wihy-ui/setup-ssl.sh
+        sudo chmod +x /opt/wihy-ui/setup-ssl.sh
+        
+        # Setup SSL certificates (if DNS is configured)
+        echo "🔒 Setting up SSL certificates..."
+        /opt/wihy-ui/setup-ssl.sh || echo "⚠️  SSL setup skipped or failed (this is normal if DNS isn't configured yet)"
         
         # Cleanup
         rm -f ~/wihy-ui-image.tar.gz

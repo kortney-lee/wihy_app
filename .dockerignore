@@ -106,9 +106,10 @@ get-*
 test-*
 verify-*
 
-# Keep healthcheck.sh and nginx.conf - needed for Docker
+# Keep necessary deployment scripts
 !healthcheck.sh
 !nginx.conf
+!setup-ssl.sh
 
 # GitHub workflows not needed in container
 .github
