@@ -107,6 +107,7 @@ jobs:
         echo "📦 Copying Docker image and setup scripts to VM..."
         scp -o StrictHostKeyChecking=no wihy-ui-image.tar.gz ${{ secrets.VM_USERNAME }}@${{ secrets.VM_HOST }}:~/
         scp -o StrictHostKeyChecking=no setup-ssl.sh ${{ secrets.VM_USERNAME }}@${{ secrets.VM_HOST }}:~/
+        scp -o StrictHostKeyChecking=no setup-ssl-template.sh ${{ secrets.VM_USERNAME }}@${{ secrets.VM_HOST }}:~/
         scp -o StrictHostKeyChecking=no setup-vm-environment.sh ${{ secrets.VM_USERNAME }}@${{ secrets.VM_HOST }}:~/
 
     - name: Deploy to Production VM with Docker
