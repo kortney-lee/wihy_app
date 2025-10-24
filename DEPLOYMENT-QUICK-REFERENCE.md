@@ -24,6 +24,7 @@ wihy_ui/
 - **External Ports**: 80 (HTTP), 443 (HTTPS) via Nginx reverse proxy
 - **SSL**: Let's Encrypt (auto-renewal)
 - **API**: Enhanced WiHy ML API (ml.wihy.ai) with 2,325 training examples
+- **Azure NSG**: wihy-ui-prod-vm-nsg (Rules: open-port-80:900, allow-https:910)
 
 ## Quick Commands
 
@@ -64,6 +65,12 @@ ssh wihyadmin@4.246.82.249 "~/manual-cleanup.sh"
 
 # Check disk usage
 ssh wihyadmin@4.246.82.249 "sudo docker system df"
+
+# Fix Azure NSG if HTTPS not working
+az network nsg rule list --resource-group vHealth --nsg-name wihy-ui-prod-vm-nsg --output table
+
+# Create missing HTTPS rule
+az network nsg rule create --resource-group vHealth --nsg-name wihy-ui-prod-vm-nsg --name allow-https --protocol Tcp --priority 910 --destination-port-range 443 --access Allow --source-address-prefix '*' --destination-address-prefix '*'
 ```
 
 ## Deployment Workflows

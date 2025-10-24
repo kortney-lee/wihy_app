@@ -58,15 +58,65 @@ jobs:
         
         # Check if Azure CLI is installed and authenticated
         if command -v az &> /dev/null; then
-          echo "📋 Opening port 80 in Azure Network Security Group..."
-          az vm open-port --port 80 --resource-group vHealth --name wihy-ui-prod-vm || echo "⚠️ Port may already be open"
+          echo "📋 Configuring Network Security Group for wihy-ui-prod-vm..."
           
-          echo "📋 Opening port 443 in Azure Network Security Group..."
-          az vm open-port --port 443 --resource-group vHealth --name wihy-ui-prod-vm || echo "⚠️ Port may already be open"
+          # Get the NSG name for the VM
+          NSG_NAME=$(az network nsg list --resource-group vHealth --query "[?contains(name, 'wihy-ui-prod-vm')].name" -o tsv || echo "")
+          
+          if [ -n "$NSG_NAME" ]; then
+            echo "🔍 Found NSG: $NSG_NAME"
+            
+            # Check if port 80 rule exists, create if not
+            echo "📋 Ensuring port 80 (HTTP) is open..."
+            if ! az network nsg rule show --resource-group vHealth --nsg-name "$NSG_NAME" --name open-port-80 &>/dev/null; then
+              az network nsg rule create \
+                --resource-group vHealth \
+                --nsg-name "$NSG_NAME" \
+                --name open-port-80 \
+                --protocol '*' \
+                --priority 900 \
+                --destination-port-range 80 \
+                --access Allow \
+                --source-address-prefix '*' \
+                --destination-address-prefix '*' || echo "⚠️ Port 80 rule creation failed"
+            else
+              echo "✅ Port 80 rule already exists"
+            fi
+            
+            # Check if port 443 rule exists, create if not
+            echo "📋 Ensuring port 443 (HTTPS) is open..."
+            if ! az network nsg rule show --resource-group vHealth --nsg-name "$NSG_NAME" --name allow-https &>/dev/null; then
+              az network nsg rule create \
+                --resource-group vHealth \
+                --nsg-name "$NSG_NAME" \
+                --name allow-https \
+                --protocol Tcp \
+                --priority 910 \
+                --destination-port-range 443 \
+                --access Allow \
+                --source-address-prefix '*' \
+                --destination-address-prefix '*' || echo "⚠️ Port 443 rule creation failed"
+            else
+              echo "✅ Port 443 rule already exists"
+            fi
+            
+            echo "✅ Azure NSG configured with proper priority rules"
+          else
+            echo "⚠️ Could not find NSG for wihy-ui-prod-vm, using fallback approach..."
+            # Fallback to vm open-port (may cause conflicts)
+            az vm open-port --port 80 --resource-group vHealth --name wihy-ui-prod-vm || echo "⚠️ Port 80 may already be open"
+            az vm open-port --port 443 --resource-group vHealth --name wihy-ui-prod-vm || echo "⚠️ Port 443 may already be open or conflicted"
+          fi
           
           echo "✅ Azure firewall configured"
         else
-          echo "⚠️ Azure CLI not available - skipping firewall setup (manual configuration required)"
+          echo "⚠️ Azure CLI not available - skipping firewall setup"
+          echo "📋 Manual NSG configuration required:"
+          echo "   Resource Group: vHealth"
+          echo "   NSG: wihy-ui-prod-vm-nsg"
+          echo "   Rules needed:"
+          echo "     - open-port-80: Priority 900, Protocol *, Port 80"
+          echo "     - allow-https: Priority 910, Protocol Tcp, Port 443"
         fi
 
     - name: Check if deployment secrets are configured
