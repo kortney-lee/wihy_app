@@ -14,7 +14,7 @@ import './index.css';
 import VHealthApp from './vHealthApp';
 import { API_CONFIG, getApiEndpoint } from './config/apiConfig';
 
-const API_BASE_URL = API_CONFIG.BASE_URL.replace(/\/api$/, ''); // Remove /api suffix
+const API_BASE_URL = API_CONFIG.WIHY_API_URL; // Use the ml.wihy.ai endpoint
 
 export const searchFoodDatabase = async (query: string) => {
   try {
