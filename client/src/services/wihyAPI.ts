@@ -348,15 +348,10 @@ export interface WihyError {
 
 class WihyEnhancedAPIService {
   private baseURL: string;
-  private backupURLs: string[];
   private isLocalDevelopment: boolean;
 
   constructor() {
     this.baseURL = API_CONFIG.WIHY_ENHANCED_API_URL;
-    this.backupURLs = [
-      API_CONFIG.WIHY_ENHANCED_API_BACKUP,
-      API_CONFIG.WIHY_ENHANCED_API_CONTAINER
-    ];
     this.isLocalDevelopment = this.baseURL.includes('localhost');
   }
 
@@ -490,40 +485,30 @@ class WihyEnhancedAPIService {
   }
 
   /**
-   * Fetch with automatic retry logic and fallback endpoints
+   * Fetch with simple retry logic (single endpoint only)
    */
   private async fetchWithRetry(url: string, options: RequestInit, retries: number = 2): Promise<Response> {
-    const endpoints = [this.baseURL, ...this.backupURLs];
+    let lastError: Error;
     
     for (let attempt = 0; attempt <= retries; attempt++) {
-      for (const endpoint of endpoints) {
-        try {
-          const fullUrl = url.replace(this.baseURL, endpoint);
-          const response = await fetch(fullUrl, options);
-          
-          if (response.ok) {
-            return response;
-          }
-          
-          // If primary endpoint fails, try backup
-          if (endpoint === this.baseURL && response.status >= 500) {
-            continue;
-          }
-          
-          return response; // Return even if not ok for error handling
-          
-        } catch (error) {
-          logger.warn(`Attempt ${attempt + 1} failed for ${endpoint}:`, error);
-          
-          // If this is the last endpoint and last attempt, throw error
-          if (endpoint === endpoints[endpoints.length - 1] && attempt === retries) {
-            throw error;
-          }
+      try {
+        const response = await fetch(url, options);
+        return response; // Return response for error handling upstream
+      } catch (error) {
+        lastError = error as Error;
+        logger.warn(`Attempt ${attempt + 1} failed for ${this.baseURL}:`, error);
+        
+        // If this is the last attempt, throw error
+        if (attempt === retries) {
+          throw lastError;
         }
+        
+        // Wait before retry (exponential backoff)
+        await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, attempt)));
       }
     }
     
-    throw new Error('All endpoints and retries failed');
+    throw lastError!;
   }
 
   /**
@@ -589,7 +574,7 @@ class WihyEnhancedAPIService {
 
   /**
    * Legacy compatibility method - Ask WiHy a health-related question
-   * Now routes to Enhanced Model for better responses
+   * Now routes to Enhanced Model ONLY (no fallbacks)
    */
   async askAnything(request: WihyRequest | UnifiedRequest): Promise<HealthQuestionResponse | WihyResponse | UnifiedResponse> {
     try {
@@ -600,22 +585,14 @@ class WihyEnhancedAPIService {
         user_id: 'user_id' in request ? request.user_id : undefined
       };
       
-      // Try enhanced model first
-      try {
-        const enhancedResponse = await this.askEnhancedHealthQuestion(enhancedRequest);
-        
-        // Convert enhanced response to legacy format for backward compatibility
-        return this.convertEnhancedToLegacy(enhancedResponse, request.query);
-        
-      } catch (enhancedError) {
-        logger.warn('Enhanced model failed, falling back to legacy format:', enhancedError);
-        
-        // Fallback to legacy unified API if enhanced model fails
-        return this.askLegacyUnified(request);
-      }
+      // Use enhanced model ONLY
+      const enhancedResponse = await this.askEnhancedHealthQuestion(enhancedRequest);
+      
+      // Convert enhanced response to legacy format for backward compatibility
+      return this.convertEnhancedToLegacy(enhancedResponse, request.query);
       
     } catch (error) {
-      logger.error('All WiHy API methods failed:', error);
+      logger.error('Enhanced WiHy API failed:', error);
       throw error;
     }
   }
