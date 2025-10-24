@@ -1,4 +1,4 @@
-import { API_CONFIG, WIHY_API_ENDPOINT, getEnhancedWihyEndpoint, WIHY_HEALTH_CHECK_URL, WIHY_SCAN_IMAGE_URL, WIHY_SCAN_BARCODE_URL } from '../config/apiConfig';
+import { API_CONFIG, WIHY_API_ENDPOINT, WIHY_HEALTH_CHECK_URL, WIHY_SCAN_IMAGE_URL, WIHY_SCAN_BARCODE_URL } from '../config/apiConfig';
 import { logger } from '../utils/logger';
 
 // Types for the WiHy Enhanced Model API (2,325 training examples)
@@ -351,7 +351,7 @@ class WihyEnhancedAPIService {
   private isLocalDevelopment: boolean;
 
   constructor() {
-    this.baseURL = API_CONFIG.WIHY_ENHANCED_API_URL;
+    this.baseURL = API_CONFIG.WIHY_API_URL;
     this.isLocalDevelopment = this.baseURL.includes('localhost');
   }
 
@@ -595,62 +595,6 @@ class WihyEnhancedAPIService {
       logger.error('Enhanced WiHy API failed:', error);
       throw error;
     }
-  }
-
-  /**
-   * Fallback method for legacy unified API
-   */
-  private async askLegacyUnified(request: WihyRequest | UnifiedRequest): Promise<HealthQuestionResponse | WihyResponse | UnifiedResponse> {
-    logger.apiRequest('Making WiHy Legacy API request', request);
-    
-    let requestBody: any;
-    let endpoint: string;
-    
-    // Use legacy endpoints
-    endpoint = this.isLocalDevelopment ? 
-      `${API_CONFIG.WIHY_UNIFIED_API_URL}/ask` : 
-      `${API_CONFIG.WIHY_UNIFIED_API_URL}/ask`;
-    
-    // Build HealthQuestion object according to legacy spec
-    if ('user_context' in request) {
-      requestBody = {
-        query: request.query,
-        user_context: request.user_context || {},
-        include_nutrition: true,
-        include_biblical_wisdom: false,
-        include_charts: true
-      };
-    } else {
-      const unifiedReq = request as UnifiedRequest;
-      requestBody = {
-        query: unifiedReq.query,
-        user_context: unifiedReq.context || {},
-        include_nutrition: true,
-        include_biblical_wisdom: true,
-        include_charts: true
-      };
-    }
-    
-    // Use fetch API to match the working example exactly with timeout
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
-    
-    const response = await fetch(endpoint, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(requestBody),
-      signal: controller.signal
-    });
-
-    clearTimeout(timeoutId);
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const data = await response.json();
-    logger.apiResponse('WiHy Legacy API response received', data);
-    return data;
   }
 
   /**

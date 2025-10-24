@@ -3,7 +3,7 @@
 import { API_CONFIG, getApiEndpoint } from '../config/apiConfig';
 
 class FoodAnalysisService {
-  private baseUrl = API_CONFIG.BASE_URL;
+  private baseUrl = API_CONFIG.WIHY_API_URL;
 
   async analyzeFoodImage(file: File): Promise<string> {
     try {
