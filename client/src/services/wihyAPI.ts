@@ -1,6 +1,21 @@
 import { API_CONFIG, WIHY_API_ENDPOINT, WIHY_HEALTH_CHECK_URL, WIHY_SCAN_IMAGE_URL, WIHY_SCAN_BARCODE_URL } from '../config/apiConfig';
 import { logger } from '../utils/logger';
 
+// Interface for processed scan results following integration guide
+interface ProcessedScanResult {
+  isHealthy: boolean;
+  novaGroup: number;
+  healthScore: number;
+  researchQuality: number;
+  verdict: string;
+  addictionScore: number;
+  recommendations: string[];
+  warnings: string[];
+  familySafe: boolean;
+  colorCode: 'green' | 'yellow' | 'orange' | 'red';
+  rawResponse: any;
+}
+
 // Types for the WiHy Enhanced Model API (2,325 training examples)
 export interface EnhancedHealthQuestion {
   query: string;                          // REQUIRED: Your health/nutrition question
@@ -426,17 +441,21 @@ class WihyEnhancedAPIService {
   }
 
   /**
-   * Scan barcode using enhanced nutrition database
+   * Scan barcode using enhanced nutrition database (via /ask endpoint)
    */
   async scanBarcode(barcode: string, context: any = {}): Promise<BarcodeScanResponse> {
     try {
+      // Use the /ask endpoint with barcode-specific query format (per integration guide)
       const requestBody = {
-        query: barcode,
-        scan_location: context.scan_location || 'web_app',
-        device_type: context.device_type || 'desktop'
+        query: `Analyze barcode: ${barcode}`,
+        user_context: {
+          scan_location: context.scan_location || 'web_app',
+          device_type: context.device_type || 'desktop',
+          user_type: context.user_type || 'general'
+        }
       };
       
-      const endpoint = WIHY_SCAN_BARCODE_URL;
+      const endpoint = WIHY_SCAN_BARCODE_URL; // Points to /ask endpoint
       
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 20000); // 20 second timeout
@@ -456,11 +475,52 @@ class WihyEnhancedAPIService {
 
       const data = await response.json();
       logger.apiResponse('WiHy Barcode Scanner response received', data);
-      return data;
+      
+      // Process the response to extract NOVA and health data
+      return this.processBarcodeScanResponse(data, barcode);
     } catch (error) {
       logger.error('WiHy Barcode Scanner error:', error);
       throw this.handleScannerError(error, 'barcode');
     }
+  }
+
+  /**
+   * Process barcode scan response to extract NOVA and health data (per integration guide)
+   */
+  private processBarcodeScanResponse(result: any, barcode: string): BarcodeScanResponse {
+    const analysis = result.analysis || result;
+    const {
+      nova_group,
+      nova_classification,
+      food_quality_score,
+      research_quality_score,
+      health_verdict,
+      addiction_analysis,
+      ingredient_analysis
+    } = analysis;
+
+    return {
+      success: true,
+      nova_group: nova_group || 4,
+      health_score: food_quality_score || 0,
+      product_name: analysis.product_name || `Product ${barcode}`,
+      ingredients: analysis.ingredients || [],
+      nutritional_data: {
+        calories_per_100g: analysis.calories_per_100g || 0,
+        protein_g: analysis.protein_g || 0,
+        carbs_g: analysis.carbs_g || 0,
+        fat_g: analysis.fat_g || 0,
+        fiber_g: analysis.fiber_g || 0,
+        sodium_mg: analysis.sodium_mg || 0,
+      },
+      health_analysis: {
+        carcinogen_alerts: addiction_analysis?.addictive_components || [],
+        toxic_additives: analysis.toxic_additives || [],
+        processing_level: nova_classification || 'Ultra-processed',
+      },
+      wihy_recommendations: analysis.recommendations || [],
+      data_sources: result.research_citations || ['WiHy Enhanced Database', 'OpenFoodFacts v2']
+    };
   }
 
   /**
@@ -914,9 +974,18 @@ class WihyEnhancedAPIService {
   }
 
   /**
-   * General health search using the unified API
+   * General health search using the unified API (single call only)
    */
   async searchHealth(query: string, userContext?: UserContext): Promise<WihyResponse | UnifiedResponse> {
+    const timestamp = new Date().toISOString();
+    const callId = Math.random().toString(36).substr(2, 9);
+    
+    logger.info(`🔍 [${callId}] WiHy searchHealth called at ${timestamp}`, { 
+      query, 
+      userContext,
+      stack: new Error().stack?.split('\n').slice(1, 4).map(line => line.trim())
+    });
+    
     const request: UnifiedRequest = {
       query: query,
       request_type: 'auto',
@@ -924,8 +993,63 @@ class WihyEnhancedAPIService {
     };
 
     const response = await this.askAnything(request);
+    
+    logger.info(`✅ [${callId}] WiHy searchHealth completed at ${new Date().toISOString()}`, { 
+      query, 
+      responseType: response.constructor.name,
+      success: (response as any).success,
+      duration: `${Date.now() - new Date(timestamp).getTime()}ms`
+    });
+    
     // Return the raw response (could be legacy WihyResponse or UnifiedResponse)
     return response as WihyResponse | UnifiedResponse;
+  }
+
+  /**
+   * Get NOVA classification guidance (per integration guide)
+   */
+  getNovaGuidance(novaGroup: number): { action: string; color: string; message: string } {
+    const guidance = {
+      1: { action: 'CHOOSE', color: 'green', message: 'Real food as God intended' },
+      2: { action: 'MODERATE', color: 'yellow', message: 'Use sparingly' },
+      3: { action: 'LIMIT', color: 'orange', message: 'Find alternatives' },
+      4: { action: 'AVOID', color: 'red', message: 'Your family deserves better' }
+    };
+    
+    return guidance[novaGroup as keyof typeof guidance] || guidance[4];
+  }
+
+  /**
+   * Process WiHy response following integration guide patterns
+   */
+  processWihyResponse(result: any): ProcessedScanResult {
+    const analysis = result.analysis || result;
+    const {
+      nova_group,
+      nova_classification,
+      food_quality_score,
+      research_quality_score,
+      health_verdict,
+      addiction_analysis,
+      recommendations
+    } = analysis;
+
+    const novaGroup = nova_group || 4;
+    const guidance = this.getNovaGuidance(novaGroup);
+
+    return {
+      isHealthy: novaGroup <= 2 && (food_quality_score || 0) >= 60,
+      novaGroup: novaGroup,
+      healthScore: food_quality_score || 0,
+      researchQuality: research_quality_score || 0,
+      verdict: health_verdict || 'Unknown',
+      addictionScore: addiction_analysis?.addiction_score || 0,
+      recommendations: recommendations || [],
+      warnings: addiction_analysis?.addictive_components || [],
+      familySafe: (food_quality_score || 0) >= 60,
+      colorCode: guidance.color as 'green' | 'yellow' | 'orange' | 'red',
+      rawResponse: result
+    };
   }
 
   /**
@@ -1114,18 +1238,8 @@ class WihyEnhancedAPIService {
   }
 
   /**
-   * Get NOVA guidance for UI display
+   * Format WiHy Response in user-friendly format for display
    */
-  getNovaGuidance(novaGroup: number): { action: string; color: string; message: string } {
-    const guidance = {
-      1: { action: 'CHOOSE', color: 'green', message: 'Real food as God intended' },
-      2: { action: 'MODERATE', color: 'yellow', message: 'Use sparingly' },
-      3: { action: 'LIMIT', color: 'orange', message: 'Find alternatives' },
-      4: { action: 'AVOID', color: 'red', message: 'Your family deserves better' }
-    };
-    
-    return guidance[novaGroup as keyof typeof guidance] || guidance[4];
-  }
   formatWihyResponse(response: HealthQuestionResponse | WihyResponse | UnifiedResponse): string {
     // Handle new HealthQuestionResponse format (OpenAPI v4.0.0)
     if ('success' in response && 'data' in response && response.data && 'response' in response.data && 'processor_used' in response.data) {

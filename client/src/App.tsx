@@ -91,10 +91,22 @@ const ResultsPage: React.FC = () => {
         return;
       }
       
+      // Create cache key based on type
+      const cacheKey = isHealthNews ? `health_news_${category}` : query;
+      
       // Check if we have fresh data from navigation (e.g., from Header search)
       const navigationState = location.state as any;
+      logger.debug('🔍 ResultsPage: Checking navigation state', { 
+        hasNavigationState: !!navigationState,
+        fromSearch: navigationState?.fromSearch,
+        hasResults: !!navigationState?.results,
+        hasApiResponse: !!navigationState?.apiResponse,
+        query: query,
+        cacheKey: cacheKey
+      });
+      
       if (navigationState?.fromSearch && navigationState?.results && navigationState?.apiResponse) {
-        console.log('🔍 APP DEBUG: Using navigation state data:', navigationState);
+        logger.info('🔍 ResultsPage: Using navigation state data (no API call needed)', { query, cacheKey });
         setResults(navigationState.results.details || navigationState.results.summary || 'No results');
         setApiResponse(navigationState.apiResponse); // Set the API response for ChatWidget
         setDataSource(navigationState.dataSource || 'wihy');
@@ -104,9 +116,6 @@ const ResultsPage: React.FC = () => {
         setIsLoading(false);
         return;
       }
-      
-      // Create cache key based on type
-      const cacheKey = isHealthNews ? `health_news_${category}` : query;
       
       // Prevent duplicate processing
       if (isProcessing.current || lastProcessedQuery.current === cacheKey) {

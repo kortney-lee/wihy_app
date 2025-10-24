@@ -4,13 +4,15 @@ export const API_CONFIG = {
   WIHY_API_URL: process.env.REACT_APP_WIHY_API_URL || 'https://ml.wihy.ai',
 } as const;
 
-// WIHY Enhanced Model API endpoint (2,325 training examples active)
+// WIHY Enhanced Model API endpoints (following integration guide)
 export const WIHY_API_ENDPOINT = `${API_CONFIG.WIHY_API_URL}/ask`;
-
-// API Endpoints
 export const WIHY_HEALTH_CHECK_URL = `${API_CONFIG.WIHY_API_URL}/health`;
-export const WIHY_SCAN_IMAGE_URL = `${API_CONFIG.WIHY_API_URL}/wihy/scan-image`;
-export const WIHY_SCAN_BARCODE_URL = `${API_CONFIG.WIHY_API_URL}/wihy/scan-barcode`;
+export const WIHY_SCAN_ENDPOINT = `${API_CONFIG.WIHY_API_URL}/scan`;
+export const WIHY_DOCS_URL = `${API_CONFIG.WIHY_API_URL}/docs`;
+
+// Legacy compatibility - these now point to the correct endpoints
+export const WIHY_SCAN_IMAGE_URL = WIHY_SCAN_ENDPOINT;
+export const WIHY_SCAN_BARCODE_URL = WIHY_API_ENDPOINT; // Barcodes go through /ask endpoint
 
 // Legacy compatibility functions
 export const getApiEndpoint = (path: string = '') => {

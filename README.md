@@ -39,11 +39,9 @@ WiHy UI is a comprehensive React-based health management platform that provides:
 
 3. **Configure WiHy API (Optional):**
    ```bash
-   # Default Enhanced API endpoint: https://ml.wihy.ai
-   # To customize, set environment variables:
+   # Production API endpoint (ONLY ENDPOINT WE USE):
    export REACT_APP_WIHY_API_URL=https://ml.wihy.ai
-   export REACT_APP_WIHY_BACKUP_URL=http://40.125.85.74
-   export REACT_APP_WIHY_CONTAINER_URL=https://vhealth-wihy-ml-api.gentlebush-f35a13de.westus2.azurecontainerapps.io
+   # No backup endpoints needed - ml.wihy.ai is the single production endpoint
    ```
 
 ### 🏃‍♂️ Running the Applications
@@ -129,9 +127,8 @@ Both applications (client & user) share the same styling system for consistency.
 The main health application integrates with the enhanced WiHy ML API trained on 2,325 health examples:
 
 **Primary Endpoint**: `POST https://ml.wihy.ai/ask`
-**Backup Endpoints**: 
-- `http://40.125.85.74/ask` 
-- `https://vhealth-wihy-ml-api.gentlebush-f35a13de.westus2.azurecontainerapps.io/ask`
+
+**All Environments**: Production uses only `https://ml.wihy.ai` - no backup endpoints needed.
 
 **Key Features**:
 - **Personalized Health Analysis**: User context-aware responses with risk factors and action items
