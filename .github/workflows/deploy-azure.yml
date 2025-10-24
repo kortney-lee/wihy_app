@@ -14,7 +14,7 @@ env:
   IMAGE_NAME: wihy-ui
   LOCATION: westus2
   SKIP_DEPLOYMENT: false
-  API_BASE_URL: ${{ secrets.API_BASE_URL || 'https://wihymlapi.westus2.cloudapp.azure.com' }}
+  API_BASE_URL: ${{ secrets.API_BASE_URL || 'https://ml.wihy.ai' }}
   REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME || 'wihymlregistry-b6fdh5cmhzgwbbgy' }}
   AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
   AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}

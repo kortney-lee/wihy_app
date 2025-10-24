@@ -387,7 +387,7 @@ jobs:
         echo "🏥 Health Check: http://wihy-ui-prod.westus2.cloudapp.azure.com/health"
         echo "📊 Features Available:"
         echo "   • Health Charts (search: activity, weight, sleep, dopamine, health risk)"
-        echo "   • Updated API endpoint: wihymlapi.westus2.cloudapp.azure.com"
+        echo "   • Updated API endpoint: ml.wihy.ai (Enhanced Model)"
         echo "   • Responsive design with Chart.js integration"
         echo "   • Production-optimized Docker container"
         echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
