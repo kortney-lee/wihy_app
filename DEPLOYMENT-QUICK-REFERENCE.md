@@ -21,10 +21,10 @@ wihy_ui/
 - **Username**: wihyadmin
 - **Container**: wihy-ui-app
 - **Internal Port**: 3000 (Docker container)
-- **External Ports**: 80 (HTTP), 443 (HTTPS) via Nginx reverse proxy
+- **External Port**: 443 (HTTPS only) via Nginx SSL termination
 - **SSL**: Let's Encrypt (auto-renewal)
 - **API**: Enhanced WiHy ML API (ml.wihy.ai) with 2,325 training examples
-- **Azure NSG**: wihy-ui-prod-vm-nsg (Rules: open-port-80:900, allow-https:910)
+- **Azure NSG**: wihy-ui-prod-vm-nsg (Rule: allow-https:910 - HTTPS only for security)
 
 ## Quick Commands
 
