@@ -66,22 +66,12 @@ jobs:
           if [ -n "$NSG_NAME" ]; then
             echo "🔍 Found NSG: $NSG_NAME"
             
-            # Check if port 80 rule exists, create if not
-            echo "📋 Ensuring port 80 (HTTP) is open..."
-            if ! az network nsg rule show --resource-group vHealth --nsg-name "$NSG_NAME" --name open-port-80 &>/dev/null; then
-              az network nsg rule create \
-                --resource-group vHealth \
-                --nsg-name "$NSG_NAME" \
-                --name open-port-80 \
-                --protocol '*' \
-                --priority 900 \
-                --destination-port-range 80 \
-                --access Allow \
-                --source-address-prefix '*' \
-                --destination-address-prefix '*' || echo "⚠️ Port 80 rule creation failed"
-            else
-              echo "✅ Port 80 rule already exists"
-            fi
+            # Remove port 80 rule if it exists (HTTPS only for security)
+            echo "� Removing HTTP port 80 rule for security..."
+            az network nsg rule delete \
+              --resource-group vHealth \
+              --nsg-name "$NSG_NAME" \
+              --name open-port-80 || echo "ℹ️ Port 80 rule was already removed or didn't exist"
             
             # Check if port 443 rule exists, create if not
             echo "📋 Ensuring port 443 (HTTPS) is open..."
@@ -100,12 +90,12 @@ jobs:
               echo "✅ Port 443 rule already exists"
             fi
             
-            echo "✅ Azure NSG configured with proper priority rules"
+            echo "✅ Azure NSG configured for HTTPS only (port 443)"
           else
             echo "⚠️ Could not find NSG for wihy-ui-prod-vm, using fallback approach..."
-            # Fallback to vm open-port (may cause conflicts)
-            az vm open-port --port 80 --resource-group vHealth --name wihy-ui-prod-vm || echo "⚠️ Port 80 may already be open"
+            # Fallback - configure for HTTPS only
             az vm open-port --port 443 --resource-group vHealth --name wihy-ui-prod-vm || echo "⚠️ Port 443 may already be open or conflicted"
+            echo "ℹ️ Port 80 removed for security - HTTPS only"
           fi
           
           echo "✅ Azure firewall configured"
@@ -115,8 +105,7 @@ jobs:
           echo "   Resource Group: vHealth"
           echo "   NSG: wihy-ui-prod-vm-nsg"
           echo "   Rules needed:"
-          echo "     - open-port-80: Priority 900, Protocol *, Port 80"
-          echo "     - allow-https: Priority 910, Protocol Tcp, Port 443"
+          echo "     - allow-https: Priority 910, Protocol Tcp, Port 443 (HTTPS only for security)"
         fi
 
     - name: Check if deployment secrets are configured
@@ -383,13 +372,13 @@ jobs:
       run: |
         echo "🎉 Docker Deployment Successful!"
         echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-        echo "📱 WiHy UI Application: http://wihy-ui-prod.westus2.cloudapp.azure.com"
-        echo "🏥 Health Check: http://wihy-ui-prod.westus2.cloudapp.azure.com/health"
+        echo "📱 WiHy UI Application: https://wihy-ui-prod.westus2.cloudapp.azure.com (SSL on port 443)"
+        echo "🏥 Health Check: https://wihy-ui-prod.westus2.cloudapp.azure.com/health"
         echo "📊 Features Available:"
         echo "   • Health Charts (search: activity, weight, sleep, dopamine, health risk)"
         echo "   • Updated API endpoint: ml.wihy.ai (Enhanced Model)"
         echo "   • Responsive design with Chart.js integration"
-        echo "   • Production-optimized Docker container"
+        echo "   • Production-optimized Docker container (SSL/HTTPS only)"
         echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
     - name: Secrets Configuration Required

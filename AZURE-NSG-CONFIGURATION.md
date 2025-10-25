@@ -89,18 +89,16 @@ az network nsg rule list --resource-group vHealth --nsg-name wihy-ui-prod-vm-nsg
 ## Architecture Flow
 
 ```
-Internet Request
+Internet Request (HTTPS only)
     ↓
 Azure NSG (vHealth/wihy-ui-prod-vm-nsg)
-├── Rule: open-port-80 (Priority 900) → Port 80
-├── Rule: allow-https (Priority 910) → Port 443
+├── Rule: allow-https (Priority 910) → Port 443 (HTTPS)
 └── Rule: default-allow-ssh (Priority 1000) → Port 22
     ↓
 VM (4.246.82.249)
     ↓
-Nginx (Reverse Proxy)
-├── Port 80 → HTTP redirects to HTTPS
-└── Port 443 → HTTPS → proxy_pass http://localhost:3000
+Nginx (SSL Termination & Reverse Proxy)
+└── Port 443 → HTTPS (SSL) → proxy_pass http://localhost:3000
     ↓
 Docker Container (wihy-ui-app)
 ├── External Port: 3000
@@ -118,13 +116,13 @@ API Calls → https://ml.wihy.ai (Enhanced Model)
    - Caused by using `az vm open-port` multiple times
    - Solution: Delete conflicting rules and recreate with specific priorities
 
-2. **HTTPS not accessible but HTTP works**:
+2. **HTTPS not accessible**:
    - Missing or misconfigured port 443 rule
    - Solution: Add `allow-https` rule with priority 910
 
-3. **Neither HTTP nor HTTPS work**:
-   - NSG rules missing entirely
-   - Solution: Create both port 80 and 443 rules
+3. **Connection issues**:
+   - Port 80 should be removed for security (HTTPS only)
+   - Solution: Ensure only port 443 rule exists for web traffic
 
 ### Debug Commands:
 
@@ -135,29 +133,29 @@ az vm get-instance-view --resource-group vHealth --name wihy-ui-prod-vm
 # Check NSG association
 az vm show --resource-group vHealth --name wihy-ui-prod-vm --query "networkProfile.networkInterfaces[0].id" -o tsv
 
-# Test connectivity
-telnet wihy.ai 80
+# Test HTTPS connectivity (port 80 should be blocked)
 telnet wihy.ai 443
+openssl s_client -connect wihy.ai:443
 ```
 
 ## Reference: Working vs Broken Configuration
 
 ### ✅ Working (`wihy-ml-vmNSG`):
 ```
-open-port-80    | Priority 900 | Protocol * | Port 80
 allow-https     | Priority 910 | Protocol Tcp | Port 443
 ```
 
-### ❌ Broken (original `wihy-ui-prod-vm-nsg`):
-```
-open-port-80    | Priority 900 | Protocol * | Port 80
-# Missing HTTPS rule - caused external access failure
-```
-
-### ✅ Fixed (`wihy-ui-prod-vm-nsg`):
+### ❌ Old Insecure Configuration:
 ```
 open-port-80    | Priority 900 | Protocol * | Port 80
 allow-https     | Priority 910 | Protocol Tcp | Port 443
+# Both HTTP and HTTPS exposed - security risk
 ```
 
-This configuration ensures reliable HTTPS access for any new WiHy UI deployment.
+### ✅ Secure Configuration (HTTPS only):
+```
+allow-https     | Priority 910 | Protocol Tcp | Port 443
+# Port 80 removed for security - HTTPS only access
+```
+
+This configuration ensures secure, encrypted access for all WiHy UI traffic.
