@@ -1,5 +1,236 @@
-import { API_CONFIG, WIHY_API_ENDPOINT, WIHY_HEALTH_CHECK_URL, WIHY_SCAN_IMAGE_URL, WIHY_SCAN_BARCODE_URL } from '../config/apiConfig';
+import { API_CONFIG, getApiEndpoint } from '../config/apiConfig';
 import { logger } from '../utils/logger';
+
+// ==================== WIHY API CORRECT INTERFACES ====================
+
+// Chart Data Structures based on documentation
+export interface ChartDataPoint {
+  label?: string;
+  value?: number;
+  percentage?: number;
+  color: string;
+  category?: string;
+  source?: string;
+  grain?: string;
+  ingredient?: string;
+  food_group?: string;
+  score?: number;
+  impact_score?: number;
+  servings?: string;
+}
+
+export interface PieChartData {
+  type: 'pie_chart' | 'donut_chart';
+  title: string;
+  data: ChartDataPoint[];
+}
+
+export interface RadarChartData {
+  type: 'radar_chart';
+  title: string;
+  data: {
+    categories: string[];
+    values: number[];
+    max_value: number;
+  };
+}
+
+export interface BarChartData {
+  type: 'bar_chart' | 'horizontal_bar_chart';
+  title: string;
+  data: ChartDataPoint[];
+  scale?: string;
+}
+
+export interface LineChartData {
+  type: 'line_chart';
+  title: string;
+  data: {
+    x_axis: string[];
+    systolic?: number[];
+    diastolic?: number[];
+    target_systolic?: number;
+    target_diastolic?: number;
+    [key: string]: any;
+  };
+}
+
+export interface GaugeChartData {
+  type: 'gauge_chart';
+  title: string;
+  data: {
+    current_value: number;
+    recommended_max: number;
+    units: string;
+    warning_threshold: number;
+    danger_threshold: number;
+    colors: {
+      safe: string;
+      warning: string;
+      danger: string;
+    };
+  };
+}
+
+// NOVA Classification
+export interface NovaClassification {
+  group: number;
+  description: string;
+  explanation: string;
+}
+
+// Ask Endpoint Interfaces
+export interface NutritionalProfile {
+  protein: string;
+  fiber: string;
+  carbohydrates: string;
+  fat: string;
+  micronutrients: string[];
+}
+
+export interface AskDetailedAnalysis {
+  nova_classification: NovaClassification;
+  nutritional_profile?: NutritionalProfile;
+  health_benefits?: string[];
+  considerations?: string[];
+}
+
+export interface AskResponse {
+  summary: string;
+  detailed_analysis: AskDetailedAnalysis;
+  recommendations: string[];
+  charts: {
+    nutritional_breakdown?: PieChartData;
+    health_score_radar?: RadarChartData;
+    comparison_bar?: BarChartData;
+    [key: string]: any;
+  };
+  confidence_score: number;
+}
+
+// Scan Endpoint Interfaces
+export interface IngredientAnalysis {
+  ingredient: string;
+  amount: string;
+  health_impact: string;
+  concerns: string[];
+}
+
+export interface NutritionalConcerns {
+  sugar_content: string;
+  empty_calories: string;
+  sodium: string;
+}
+
+export interface ScanMetadata {
+  barcode?: string;
+  product_name?: string;
+  brand?: string;
+  categories?: string[];
+  data_source?: string;
+  last_updated?: string;
+}
+
+export interface ScanDetailedAnalysis {
+  nova_classification: NovaClassification;
+  ingredients_analysis?: IngredientAnalysis[];
+  nutritional_concerns?: NutritionalConcerns;
+  health_risks?: string[];
+  scan_metadata?: ScanMetadata;
+}
+
+export interface ScanResponse {
+  summary: string;
+  detailed_analysis: ScanDetailedAnalysis;
+  recommendations: string[];
+  charts: {
+    ingredient_health_impact?: BarChartData;
+    nova_classification_breakdown?: PieChartData;
+    daily_intake_warning?: GaugeChartData;
+    [key: string]: any;
+  };
+  confidence_score: number;
+}
+
+// Chat Endpoint Interfaces
+export interface FoodCategory {
+  category: string;
+  examples: string[];
+  benefit?: string;
+  reason?: string;
+}
+
+export interface ConversationMetadata {
+  conversation_id?: string;
+  message_id?: string;
+  user_context?: {
+    health_condition?: string;
+    dietary_preferences?: string[];
+    previous_topics?: string[];
+    [key: string]: any;
+  };
+  follow_up_questions?: string[];
+}
+
+export interface ChatDetailedAnalysis {
+  dietary_approach?: string;
+  foods_to_include?: FoodCategory[];
+  foods_to_avoid?: FoodCategory[];
+  lifestyle_factors?: string[];
+}
+
+export interface ChatResponse {
+  summary: string;
+  detailed_analysis: ChatDetailedAnalysis;
+  recommendations: string[];
+  charts: {
+    dash_diet_pyramid?: any;
+    blood_pressure_impact?: LineChartData;
+    sodium_sources?: PieChartData;
+    potassium_vs_sodium?: any;
+    [key: string]: any;
+  };
+  conversation_metadata?: ConversationMetadata;
+  confidence_score: number;
+}
+
+// Request Interfaces
+export interface WiHyAskRequest {
+  query: string;
+  user_id?: string;
+  context?: string;
+}
+
+export interface WiHyScanRequest {
+  barcode?: string;
+  image?: string;
+  product_name?: string;
+  user_context?: {
+    include_charts?: boolean;
+    include_ingredients?: boolean;
+    enhanced_analysis?: boolean;
+    [key: string]: any;
+  };
+}
+
+export interface WiHyChatRequest {
+  message: string;
+  user_id?: string;
+  conversation_id?: string;
+  context?: {
+    health_condition?: string;
+    age?: number;
+    dietary_preferences?: string[];
+    [key: string]: any;
+  };
+}
+
+// Main Response Wrapper
+export interface WiHyApiResponse {
+  response: AskResponse | ScanResponse | ChatResponse;
+  timestamp: string;
+  processing_time: number;
+}
 
 // Interface for processed scan results following integration guide
 interface ProcessedScanResult {
@@ -414,7 +645,7 @@ class WihyEnhancedAPIService {
       formData.append('image', imageFile);
       formData.append('context', context);
       
-      const endpoint = WIHY_SCAN_IMAGE_URL;
+      const endpoint = getApiEndpoint('scan');
       
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 45000); // 45 second timeout for images
@@ -455,7 +686,7 @@ class WihyEnhancedAPIService {
         }
       };
       
-      const endpoint = WIHY_SCAN_BARCODE_URL; // Points to /ask endpoint
+      const endpoint = getApiEndpoint('ask'); // Points to /ask endpoint
       
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 20000); // 20 second timeout
@@ -519,7 +750,7 @@ class WihyEnhancedAPIService {
         processing_level: nova_classification || 'Ultra-processed',
       },
       wihy_recommendations: analysis.recommendations || [],
-      data_sources: result.research_citations || ['WiHy Enhanced Database', 'OpenFoodFacts v2']
+      data_sources: result.research_citations || ['WiHy Enhanced Database', 'OpenFoodFacts']
     };
   }
 
@@ -528,7 +759,7 @@ class WihyEnhancedAPIService {
    */
   async checkAPIHealth(): Promise<{ status: string; model_version: string; training_examples: number }> {
     try {
-      const response = await fetch(WIHY_HEALTH_CHECK_URL, {
+      const response = await fetch(getApiEndpoint('health'), {
         method: 'GET',
         headers: { 'Accept': 'application/json' }
       });
@@ -1514,4 +1745,196 @@ What specific aspect of health would you like to explore further?`;
 
 // Export a singleton instance of the enhanced API service
 export const wihyAPI = new WihyEnhancedAPIService();
+
+// ==================== NEW WIHY API v3.0.0 SERVICE ====================
+
+export class WihyAPIService {
+  private apiKey: string;
+  private baseUrl: string;
+
+  constructor() {
+    this.apiKey = process.env.REACT_APP_WIHY_API_KEY || '';
+    this.baseUrl = API_CONFIG.WIHY_API_URL;
+  }
+
+  // Health check endpoint
+  async healthCheck(): Promise<{ status: string; timestamp: string }> {
+    try {
+      const response = await fetch(getApiEndpoint('health'), {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${this.apiKey}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      logger.error('WIHY health check failed:', error);
+      throw error;
+    }
+  }
+
+  // Ask endpoint - general health questions
+  async ask(request: WiHyAskRequest): Promise<AskResponse> {
+    try {
+      const response = await fetch(getApiEndpoint('ask'), {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${this.apiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(request),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const data: WiHyApiResponse = await response.json();
+      return data.response as AskResponse;
+    } catch (error) {
+      logger.error('WIHY ask request failed:', error);
+      throw error;
+    }
+  }
+
+  // Scan endpoint - product/barcode scanning
+  async scan(request: WiHyScanRequest): Promise<ScanResponse> {
+    try {
+      const response = await fetch(getApiEndpoint('scan'), {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${this.apiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(request),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const data: WiHyApiResponse = await response.json();
+      return data.response as ScanResponse;
+    } catch (error) {
+      logger.error('WIHY scan request failed:', error);
+      throw error;
+    }
+  }
+
+  // Chat endpoint - conversational health coaching
+  async chat(request: WiHyChatRequest): Promise<ChatResponse> {
+    try {
+      const response = await fetch(getApiEndpoint('chat'), {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${this.apiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(request),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const data: WiHyApiResponse = await response.json();
+      return data.response as ChatResponse;
+    } catch (error) {
+      logger.error('WIHY chat request failed:', error);
+      throw error;
+    }
+  }
+
+  // Legacy compatibility methods for existing code integration
+  async scanBarcode(barcode: string, options?: { enhanced?: boolean }): Promise<any> {
+    try {
+      const scanRequest: WiHyScanRequest = {
+        barcode,
+        user_context: {
+          include_charts: true,
+          include_ingredients: true,
+          enhanced_analysis: options?.enhanced || false,
+        },
+      };
+
+      const scanResponse = await this.scan(scanRequest);
+      
+      // Convert new response format to legacy format for compatibility
+      return {
+        productName: scanResponse.detailed_analysis.scan_metadata?.product_name,
+        ingredients: scanResponse.detailed_analysis.ingredients_analysis?.map(ing => ing.ingredient),
+        nutritionInfo: this.extractNutritionInfo(scanResponse),
+        healthScore: scanResponse.confidence_score,
+        alerts: scanResponse.detailed_analysis.health_risks || [],
+        recommendations: scanResponse.recommendations,
+        barcode: scanResponse.detailed_analysis.scan_metadata?.barcode,
+        brand: scanResponse.detailed_analysis.scan_metadata?.brand,
+        categories: scanResponse.detailed_analysis.scan_metadata?.categories,
+        confidence_score: scanResponse.confidence_score,
+      };
+    } catch (error) {
+      logger.error('Legacy barcode scan failed:', error);
+      throw error;
+    }
+  }
+
+  async scanImage(imageBase64: string, options?: { enhanced?: boolean }): Promise<any> {
+    try {
+      const scanRequest: WiHyScanRequest = {
+        image: imageBase64,
+        user_context: {
+          include_charts: true,
+          include_ingredients: true,
+          enhanced_analysis: options?.enhanced || false,
+        },
+      };
+
+      const scanResponse = await this.scan(scanRequest);
+      
+      // Convert new response format to legacy format for compatibility
+      return {
+        productName: scanResponse.detailed_analysis.scan_metadata?.product_name,
+        ingredients: scanResponse.detailed_analysis.ingredients_analysis?.map(ing => ing.ingredient),
+        nutritionInfo: this.extractNutritionInfo(scanResponse),
+        healthScore: scanResponse.confidence_score,
+        alerts: scanResponse.detailed_analysis.health_risks || [],
+        recommendations: scanResponse.recommendations,
+        confidence_score: scanResponse.confidence_score,
+      };
+    } catch (error) {
+      logger.error('Legacy image scan failed:', error);
+      throw error;
+    }
+  }
+
+  private extractNutritionInfo(scanResponse: ScanResponse): any {
+    // Extract nutrition info from charts if available
+    const nutritionChart = scanResponse.charts.ingredient_health_impact;
+    if (!nutritionChart) return undefined;
+
+    // This is a simplified extraction - in practice, you might need more complex parsing
+    // based on the actual chart data structure
+    return {
+      // These would need to be extracted from the chart data or metadata
+      // For now, returning undefined as the exact mapping depends on chart structure
+      calories: undefined,
+      protein: undefined,
+      carbs: undefined,
+      fat: undefined,
+      sugar: undefined,
+      sodium: undefined,
+      fiber: undefined,
+    };
+  }
+}
+
+// Export new API service instance
+export const wihyAPIv3 = new WihyAPIService();
+
 export default wihyAPI;

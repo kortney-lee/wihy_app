@@ -1,4 +1,4 @@
-// vHealth News API v2.0 Client Integration
+// vHealth News API Client Integration
 // Swagger UI Documentation: https://services.wihy.ai/api/docs
 
 export interface NewsArticle {

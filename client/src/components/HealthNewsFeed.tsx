@@ -499,7 +499,7 @@ Category: ${article.category || article.ai_category || 'Uncategorized'}`;
             data-category={article.category || article.ai_category}
             onClick={() => window.open(article.link || article.url, '_blank')}
           >
-            {/* Image Section - Using images from vHealth News API v2.0 */}
+            {/* Image Section - Using images from vHealth News API */}
             <div className="news-image">
               {(() => {
                 // Debug: Log available image URLs
