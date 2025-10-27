@@ -335,7 +335,6 @@ export const getNewsCategories = async (): Promise<Category[]> => {
     console.error('Error fetching categories:', error);
     // Return Universal News API v2.0 categories as per documentation
     return [
-      { category: 'All News', description: 'All news content from all sources and categories' },
       { category: 'Breaking News', description: 'Latest developments, urgent updates, live news' },
       { category: 'Technology', description: 'Tech innovations, software, hardware, digital trends' },
       { category: 'Business', description: 'Markets, economy, corporate news, financial updates' },

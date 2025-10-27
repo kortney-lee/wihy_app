@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { fetchNewsFeed, getArticlesByCategory, getNewsCategories, getAllNews, NewsArticle, Category } from '../services/newsService';
+import { getAllNews, NewsArticle } from '../services/newsService';
 import { useNavigate } from 'react-router-dom';
 import { getApiEndpoint } from '../config/apiConfig';
 import './HealthNewsFeed.css';
@@ -20,7 +20,7 @@ const getWiHyLogoFallback = (): string => {
 
 // Helper function to get a color based on category
 const getCategoryColor = (category?: string) => {
-  if (!category) return '#94a3b8';
+  if (!category) return '#ffeb2b';
   
   const colors: {[key: string]: string} = {
     'Nutrition': '#4caf50',
@@ -33,7 +33,7 @@ const getCategoryColor = (category?: string) => {
     'Environment': '#22c55e'
   };
   
-  return colors[category] || '#94a3b8';
+  return colors[category] || '#ffeb2b';
 };
 
 const formatTimeAgo = (dateString?: string) => {
@@ -85,42 +85,10 @@ const HealthNewsFeed: React.FC<NewsFeedProps> = ({
   const [analyzingArticle, setAnalyzingArticle] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [hasMorePages, setHasMorePages] = useState(true);
-  const [selectedCategory, setSelectedCategory] = useState<string>('All News');
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [showCategories, setShowCategories] = useState(false);
   const navigate = useNavigate();
   
   const prevFetchParamsRef = useRef<{max: number}>({max: 0});
   const observerTarget = useRef<HTMLDivElement>(null);
-  const categoryFilterRef = useRef<HTMLDivElement>(null);
-
-  // Close category dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (categoryFilterRef.current && !categoryFilterRef.current.contains(event.target as Node)) {
-        setShowCategories(false);
-      }
-    };
-
-    if (showCategories) {
-      document.addEventListener('mousedown', handleClickOutside);
-      return () => document.removeEventListener('mousedown', handleClickOutside);
-    }
-  }, [showCategories]);
-
-  // Load available categories
-  useEffect(() => {
-    const loadCategories = async () => {
-      try {
-        const categoriesData = await getNewsCategories();
-        setCategories(categoriesData);
-      } catch (error) {
-        console.error('Failed to load categories:', error);
-      }
-    };
-    
-    loadCategories();
-  }, []);
 
   // Fetch initial articles when component mounts or maxArticles changes
   useEffect(() => {
@@ -138,16 +106,6 @@ const HealthNewsFeed: React.FC<NewsFeedProps> = ({
       console.log('No fetch needed - parameters unchanged');
     }
   }, [maxArticles]);
-
-  // Refetch articles when category changes
-  useEffect(() => {
-    if (categories.length > 0) { // Only fetch after categories are loaded
-      console.log('Category changed to:', selectedCategory);
-      setCurrentPage(1);
-      setHasMorePages(true);
-      fetchHealthNews(true);
-    }
-  }, [selectedCategory, categories.length]);
 
   // Ensure news loads on mobile immediately with better pagination control
   useEffect(() => {
@@ -279,24 +237,13 @@ const HealthNewsFeed: React.FC<NewsFeedProps> = ({
 
     try {
       const page = resetPage ? 1 : currentPage + 1;
-      console.log('Fetching news, page:', page, 'category:', selectedCategory);
+      console.log('Fetching all news, page:', page);
       
       const effectiveMaxArticles = isMobile ? Math.max(maxArticles, 12) : maxArticles; // Show more articles on mobile
       
-      let response;
-      if (selectedCategory === 'All News') {
-        // Use Universal News API v2.0 for maximum news coverage
-        console.log('Fetching ALL news content from Universal News API v2.0');
-        const allNewsResponse = await getAllNews(effectiveMaxArticles * 2);
-        response = {
-          success: allNewsResponse.success,
-          articles: allNewsResponse.articles
-        };
-      } else {
-        // Fetch news by specific category
-        console.log('Fetching news by category:', selectedCategory);
-        response = await getArticlesByCategory(selectedCategory, effectiveMaxArticles * 2);
-      }
+      // Fetch all news (filtering will be done on service side)
+      console.log('Fetching all news content');
+      const response = await getAllNews(effectiveMaxArticles * 2);
       
       if (response.success && response.articles && response.articles.length > 0) {
         let processedArticles = response.articles;
@@ -634,42 +581,6 @@ Category: ${article.category || article.ai_category || 'Uncategorized'}`;
 
   return (
     <div className="news-feed-container">
-      {/* Category Filter */}
-      <div className="news-category-filter" ref={categoryFilterRef}>
-        <div className="category-filter-header">
-          <button 
-            className="category-toggle-btn"
-            onClick={() => setShowCategories(!showCategories)}
-          >
-            <span className="category-current">
-              📰 {selectedCategory}
-            </span>
-            <span className={`category-arrow ${showCategories ? 'open' : ''}`}>
-              ▼
-            </span>
-          </button>
-        </div>
-        
-        {showCategories && (
-          <div className="category-dropdown">
-            {categories.map((category) => (
-              <button
-                key={category.category}
-                className={`category-option ${selectedCategory === category.category ? 'active' : ''}`}
-                onClick={() => {
-                  setSelectedCategory(category.category);
-                  setShowCategories(false);
-                }}
-                title={category.description}
-              >
-                <span className="category-name">{category.category}</span>
-                <span className="category-desc">{category.description}</span>
-              </button>
-            ))}
-          </div>
-        )}
-      </div>
-
       <div className="news-grid">
         {articles.map((article) => (
           <article 
