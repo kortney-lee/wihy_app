@@ -74,6 +74,7 @@ class VHealthNewsClient {
     category?: string;
     source?: 'all' | 'newsapi' | 'gnews' | 'newsdata' | 'mediastack';
     useAI?: boolean;
+    fresh?: boolean;
   } = {}): Promise<ArticlesResponse> {
     const queryParams = new URLSearchParams();
     
@@ -81,6 +82,7 @@ class VHealthNewsClient {
     if (params.category) queryParams.append('category', params.category);
     if (params.source) queryParams.append('source', params.source);
     if (params.useAI !== undefined) queryParams.append('useAI', params.useAI.toString());
+    if (params.fresh !== undefined) queryParams.append('fresh', params.fresh.toString());
 
     const fullUrl = `${this.baseUrl}/api/news/articles?${queryParams}`;
     console.log('Making API request to:', fullUrl);
@@ -189,11 +191,14 @@ const newsClient = new VHealthNewsClient();
 export const fetchNewsFeed = async (categories?: string[], limit?: number): Promise<{ success: boolean; articles: NewsArticle[] }> => {
   try {
     const category = categories && categories.length > 0 ? categories[0] : undefined;
+    
+    // Use optimal parameters for maximum news coverage as per Universal News API v2.0
     const response = await newsClient.getArticles({
       category,
-      limit: limit || 20,
-      source: 'all',
-      useAI: true
+      limit: limit || 100,  // Maximum articles for comprehensive coverage
+      source: 'all',        // All sources for maximum diversity
+      useAI: true,          // Enable AI categorization for better organization
+      fresh: true           // Bypass cache for latest content
     });
     
     return {
@@ -236,11 +241,13 @@ export const getArticlesByCategory = async (category: string, limit?: number): P
   try {
     console.log('getArticlesByCategory called with:', { category, limit });
     
+    // Use optimal parameters for Universal News API v2.0
     const response = await newsClient.getArticles({
       category,
-      limit: limit || 20,
-      source: 'all',
-      useAI: true
+      limit: limit || 100,  // Maximum articles for comprehensive coverage
+      source: 'all',        // All sources for maximum diversity  
+      useAI: true,          // Enable AI categorization
+      fresh: true           // Bypass cache for latest content
     });
     
     console.log('getArticlesByCategory API response:', response);
@@ -258,8 +265,8 @@ export const getArticlesByCategory = async (category: string, limit?: number): P
 };
 
 export const refreshNewsFeed = async (): Promise<{ success: boolean; articles: NewsArticle[] }> => {
-  // Refresh news feed with latest articles
-  return await fetchNewsFeed(undefined, 50);
+  // Refresh news feed with latest articles using Universal News API v2.0 optimal settings
+  return await fetchNewsFeed(undefined, 100);  // Maximum articles with fresh=true
 };
 
 export const searchNewsArticles = async (query: string, limit?: number): Promise<{ success: boolean; articles: NewsArticle[] }> => {
@@ -268,9 +275,10 @@ export const searchNewsArticles = async (query: string, limit?: number): Promise
     // In future versions, the API might support full-text search
     const response = await newsClient.getArticles({
       category: query,
-      limit: limit || 20,
-      source: 'all',
-      useAI: true
+      limit: limit || 100,  // Maximum articles for comprehensive coverage
+      source: 'all',        // All sources for maximum diversity
+      useAI: true,          // Enable AI categorization  
+      fresh: true           // Bypass cache for latest content
     });
     
     return {
@@ -284,6 +292,41 @@ export const searchNewsArticles = async (query: string, limit?: number): Promise
 };
 
 // Additional utility functions for enhanced functionality
+
+// Universal News API v2.0 - Get ALL news content with maximum coverage
+export const getAllNews = async (limit: number = 100): Promise<{ success: boolean; articles: NewsArticle[]; count: number; sources_used: string[] }> => {
+  try {
+    // Optimal parameters for all news content as per API documentation
+    const response = await newsClient.getArticles({
+      limit: limit,         // Maximum articles (up to 100)
+      fresh: true,          // Bypass cache for latest content  
+      useAI: true,          // Enable AI categorization
+      source: 'all'         // All sources for comprehensive coverage
+      // No category filter = ALL news content included
+    });
+    
+    console.log(`📊 Found ${response.count} news articles across ${response.sources_used.length} sources`);
+    response.articles.forEach(article => {
+      console.log(`📰 [${article.ai_category}] ${article.title}`);
+    });
+    
+    return {
+      success: response.success,
+      articles: response.articles,
+      count: response.count,
+      sources_used: response.sources_used
+    };
+  } catch (error) {
+    console.error('Error fetching all news:', error);
+    return {
+      success: false,
+      articles: [],
+      count: 0,
+      sources_used: []
+    };
+  }
+};
+
 export const getNewsCategories = async (): Promise<Category[]> => {
   try {
     const response = await newsClient.getCategories();

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { fetchNewsFeed, getArticlesByCategory, getNewsCategories, NewsArticle, Category } from '../services/newsService';
+import { fetchNewsFeed, getArticlesByCategory, getNewsCategories, getAllNews, NewsArticle, Category } from '../services/newsService';
 import { useNavigate } from 'react-router-dom';
 import { getApiEndpoint } from '../config/apiConfig';
 import './HealthNewsFeed.css';
@@ -285,9 +285,13 @@ const HealthNewsFeed: React.FC<NewsFeedProps> = ({
       
       let response;
       if (selectedCategory === 'All News') {
-        // Fetch all news content using Universal News API v2.0
-        console.log('Fetching all news content from Universal News API v2.0');
-        response = await fetchNewsFeed([], effectiveMaxArticles * 2);
+        // Use Universal News API v2.0 for maximum news coverage
+        console.log('Fetching ALL news content from Universal News API v2.0');
+        const allNewsResponse = await getAllNews(effectiveMaxArticles * 2);
+        response = {
+          success: allNewsResponse.success,
+          articles: allNewsResponse.articles
+        };
       } else {
         // Fetch news by specific category
         console.log('Fetching news by category:', selectedCategory);
