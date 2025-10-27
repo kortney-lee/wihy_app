@@ -290,16 +290,27 @@ export const getNewsCategories = async (): Promise<Category[]> => {
     return response.success ? response.categories : [];
   } catch (error) {
     console.error('Error fetching categories:', error);
-    // Return default categories matching HealthNewsFeed component
+    // Return Universal News API v2.0 categories as per documentation
     return [
+      { category: 'All News', description: 'All news content from all sources and categories' },
+      { category: 'Breaking News', description: 'Latest developments, urgent updates, live news' },
+      { category: 'Technology', description: 'Tech innovations, software, hardware, digital trends' },
+      { category: 'Business', description: 'Markets, economy, corporate news, financial updates' },
+      { category: 'Science', description: 'Research, discoveries, scientific breakthroughs' },
+      { category: 'Politics', description: 'Government, elections, policy, political developments' },
+      { category: 'World News', description: 'International events, global coverage, foreign affairs' },
+      { category: 'Health', description: 'Medical news, wellness, healthcare developments' },
+      { category: 'Entertainment', description: 'Movies, music, celebrity news, pop culture' },
+      { category: 'Sports', description: 'Games, teams, athletic events, sports news' },
+      { category: 'Education', description: 'Schools, universities, academic developments' },
+      { category: 'Environment', description: 'Climate, sustainability, environmental issues' },
       { category: 'Nutrition', description: 'Diet, supplements, and nutritional research' },
       { category: 'Medical Research', description: 'Latest medical studies and breakthroughs' },
       { category: 'Public Health', description: 'Community health and disease prevention' },
       { category: 'Clinical Studies', description: 'Clinical trials and medical research' },
       { category: 'Prevention', description: 'Preventive medicine and wellness' },
       { category: 'Mental Health', description: 'Mental wellness and psychological health' },
-      { category: 'General Health', description: 'General health news and information' },
-      { category: 'Environment', description: 'Environmental health and safety' }
+      { category: 'General Health', description: 'General health news and information' }
     ];
   }
 };
