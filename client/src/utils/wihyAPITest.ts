@@ -3,7 +3,7 @@
  * Tests the new production endpoints and enhanced features
  */
 
-import { wihyAPI } from '../services/wihyAPI';
+import { wihyAPI } from '../services/wihyAPIv4';
 
 export class WihyEnhancedAPITest {
   
