@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import './MultiAuthLogin.css';
 
 export interface User {
@@ -133,6 +134,20 @@ const MultiAuthLogin: React.FC<MultiAuthLoginProps> = ({
     }
   }, [storageKey]); // Remove onUserChange from dependencies
 
+  // Manage body class for modal state
+  useEffect(() => {
+    if (showProviders || showDropdown) {
+      document.body.classList.add('modal-open');
+    } else {
+      document.body.classList.remove('modal-open');
+    }
+
+    // Cleanup function to remove class when component unmounts
+    return () => {
+      document.body.classList.remove('modal-open');
+    };
+  }, [showProviders, showDropdown]);
+
   const handleOAuthCallback = async (code: string, state: string) => {
     setLoading(true);
     try {
@@ -252,67 +267,82 @@ const MultiAuthLogin: React.FC<MultiAuthLoginProps> = ({
         )}
       </button>
 
-      {/* Provider Selection Popup */}
-      {!user && showProviders && (
-        <div className="providers-popup">
-          <div className="providers-header">
-            <h3>{title}</h3>
-            <button 
-              className="close-button"
-              onClick={() => setShowProviders(false)}
-            >
-              ×
+      {/* Provider Selection Popup - Render via portal to avoid container conflicts */}
+      {!user && showProviders && createPortal(
+        <>
+          <div 
+            className="auth-overlay" 
+            onClick={() => {
+              setShowProviders(false);
+              setShowDropdown(false);
+            }}
+          ></div>
+          <div className="providers-popup">
+            <div className="providers-header">
+              <h3>{title}</h3>
+              <button 
+                className="close-button"
+                onClick={() => setShowProviders(false)}
+              >
+                ×
+              </button>
+            </div>
+            <div className="providers-list">
+              {authProviders.map((provider) => (
+                <button
+                  key={provider.id}
+                  className="provider-button"
+                  onClick={() => handleProviderLogin(provider)}
+                  style={{ '--provider-color': provider.color } as React.CSSProperties}
+                >
+                  {provider.icon}
+                  <span>Continue with {provider.name}</span>
+                </button>
+              ))}
+            </div>
+            <p className="providers-disclaimer">
+              {disclaimer}
+            </p>
+          </div>
+        </>,
+        document.body
+      )}
+
+      {/* User Dropdown - Render via portal */}
+      {user && showDropdown && createPortal(
+        <>
+          <div 
+            className="auth-overlay" 
+            onClick={() => {
+              setShowProviders(false);
+              setShowDropdown(false);
+            }}
+          ></div>
+          <div className="user-dropdown" style={{ 
+            position: 'fixed',
+            top: '60px',
+            right: '20px',
+            zIndex: 10001
+          }}>
+            <div className="user-info">
+              <div className="user-name">{user.name}</div>
+              <div className="user-email">{user.email}</div>
+              <div className="user-provider">
+                Signed in with {user.provider.charAt(0).toUpperCase() + user.provider.slice(1)}
+              </div>
+            </div>
+            <div className="dropdown-divider"></div>
+            <button className="dropdown-item" onClick={handleSignOut}>
+              <svg viewBox="0 0 24 24" fill="currentColor" className="dropdown-icon">
+                <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.59L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>
+              </svg>
+              Sign Out
             </button>
           </div>
-          <div className="providers-list">
-            {authProviders.map((provider) => (
-              <button
-                key={provider.id}
-                className="provider-button"
-                onClick={() => handleProviderLogin(provider)}
-                style={{ '--provider-color': provider.color } as React.CSSProperties}
-              >
-                {provider.icon}
-                <span>Continue with {provider.name}</span>
-              </button>
-            ))}
-          </div>
-          <p className="providers-disclaimer">
-            {disclaimer}
-          </p>
-        </div>
+        </>,
+        document.body
       )}
 
-      {/* User Dropdown */}
-      {user && showDropdown && (
-        <div className="user-dropdown">
-          <div className="user-info">
-            <div className="user-name">{user.name}</div>
-            <div className="user-email">{user.email}</div>
-            <div className="user-provider">
-              Signed in with {user.provider.charAt(0).toUpperCase() + user.provider.slice(1)}
-            </div>
-          </div>
-          <div className="dropdown-divider"></div>
-          <button className="dropdown-item" onClick={handleSignOut}>
-            <svg viewBox="0 0 24 24" fill="currentColor" className="dropdown-icon">
-              <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.59L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>
-            </svg>
-            Sign Out
-          </button>
-        </div>
-      )}
-
-      {/* Overlay */}
-      {(showProviders || showDropdown) && (
-        <div 
-          className="auth-overlay" 
-          onClick={() => {
-            setShowProviders(false);
-            setShowDropdown(false);
-          }}
-        ></div>
-      )}
     </div>
   );
 };

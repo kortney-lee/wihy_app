@@ -12,66 +12,10 @@ interface NewsFeedProps {
   triggerSearch?: (customQuery?: string) => void;
 }
 
-// Define placeholder images by category
-const PLACEHOLDER_IMAGES: Record<string, string[]> = {
-  'Nutrition & Diet': [
-    'https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=800&q=80',
-    'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=800&q=80',
-    'https://images.unsplash.com/photo-1505253716362-afaea1d3d1af?w=800&q=80',
-    'https://images.unsplash.com/photo-1547592180-85f173990554?w=800&q=80'
-  ],
-  'Medical Research': [
-    'https://images.unsplash.com/photo-1582719508461-905c673771fd?w=800&q=80',
-    'https://images.unsplash.com/photo-1579154204601-01588f351e67?w=800&q=80',
-    'https://images.unsplash.com/photo-1532938911079-1b06ac7ceec7?w=800&q=80',
-    'https://images.unsplash.com/photo-1581093588401-fbb62a02f120?w=800&q=80'
-  ],
-  'Public Health': [
-    'https://images.unsplash.com/photo-1585435557343-3b092031a831?w=800&q=80',
-    'https://images.unsplash.com/photo-1530497610245-94d3c16cda28?w=800&q=80',
-    'https://images.unsplash.com/photo-1584017911766-d451b3d0e843?w=800&q=80',
-    'https://images.unsplash.com/photo-1505751172876-fa1923c5c528?w=800&q=80'
-  ],
-  'Clinical Studies': [
-    'https://images.unsplash.com/photo-1579684385127-1ef15d508118?w=800&q=80',
-    'https://images.unsplash.com/photo-1526256262350-7da7584cf5eb?w=800&q=80',
-    'https://images.unsplash.com/photo-1624727828489-a1e03b79bba8?w=800&q=80',
-    'https://images.unsplash.com/photo-1516069677022-53fe679c7ccb?w=800&q=80'
-  ],
-  'Disease Prevention': [
-    'https://images.unsplash.com/photo-1584982751601-97dcc096659c?w=800&q=80',
-    'https://images.unsplash.com/photo-1598256989800-fe5f95da9787?w=800&q=80',
-    'https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=800&q=80',
-    'https://images.unsplash.com/photo-1603398938378-e54eab446dde?w=800&q=80'
-  ],
-  'Mental Health': [
-    'https://images.unsplash.com/photo-1493836512294-502baa1986e2?w=800&q=80',
-    'https://images.unsplash.com/photo-1527736947477-2790e28f3443?w=800&q=80',
-    'https://images.unsplash.com/photo-1546290581-22fe67c7bd0e?w=800&q=80',
-    'https://images.unsplash.com/photo-1569893033503-9204c3ab911c?w=800&q=80'
-  ],
-  'General Health': [
-    'https://images.unsplash.com/photo-1498837167922-ddd27525d352?w=800&q=80',
-    'https://images.unsplash.com/photo-1511688878353-3a2f5be94cd7?w=800&q=80',
-    'https://images.unsplash.com/photo-1571019613576-2b22c76fd955?w=800&q=80',
-    'https://images.unsplash.com/photo-1579126038374-6064e9370f0f?w=800&q=80'
-  ],
-  'default': [
-    'https://images.unsplash.com/photo-1505751172876-fa1923c5c528?w=800&q=80',
-    'https://images.unsplash.com/photo-1538108149393-fbbd81895907?w=800&q=80',
-    'https://images.unsplash.com/photo-1532938911079-1b06ac7ceec7?w=800&q=80',
-    'https://images.unsplash.com/photo-1505253716362-afaea1d3d1af?w=800&q=80'
-  ]
-};
-
-// Helper function to get a random placeholder image for a category
-const getRandomPlaceholderImage = (category?: string): string => {
-  // Default to 'default' category if the category doesn't exist or is not provided
-  const categoryImages = PLACEHOLDER_IMAGES[category || ''] || PLACEHOLDER_IMAGES['default'];
-  
-  // Get a random image from the array
-  const randomIndex = Math.floor(Math.random() * categoryImages.length);
-  return categoryImages[randomIndex];
+// Helper function to get WiHy logo as fallback
+const getWiHyLogoFallback = (): string => {
+  // Use the WiHy logo as fallback instead of random placeholder images
+  return '/assets/wihylogo.png'; // Adjust path as needed
 };
 
 // Helper function to get a color based on category
@@ -79,13 +23,14 @@ const getCategoryColor = (category?: string) => {
   if (!category) return '#94a3b8';
   
   const colors: {[key: string]: string} = {
-    'Nutrition & Diet': '#4caf50',
+    'Nutrition': '#4caf50',
     'Medical Research': '#2196f3',
     'Public Health': '#ff9800',
     'Clinical Studies': '#9c27b0',
-    'Disease Prevention': '#f44336',
+    'Prevention': '#f44336',
     'Mental Health': '#03a9f4',
-    'General Health': '#ffeb3b'
+    'General Health': '#ffeb3b',
+    'Environment': '#22c55e'
   };
   
   return colors[category] || '#94a3b8';
@@ -137,55 +82,35 @@ const HealthNewsFeed: React.FC<NewsFeedProps> = ({
   const [articles, setArticles] = useState<NewsArticle[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
-  // On mobile, always start with 'all' category and don't allow changes
-  const [selectedCategory, setSelectedCategory] = useState('all');
   const [analyzingArticle, setAnalyzingArticle] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [hasMorePages, setHasMorePages] = useState(true);
   const navigate = useNavigate();
   
-  const prevFetchParamsRef = useRef<{category: string, max: number}>({category: '', max: 0});
+  const prevFetchParamsRef = useRef<{max: number}>({max: 0});
   const observerTarget = useRef<HTMLDivElement>(null);
 
-  // Override category selection on mobile
-  const handleCategoryChange = (categoryId: string) => {
-    if (isMobile) {
-      // On mobile, always stay on 'all' category
-      return;
-    }
-    setSelectedCategory(categoryId);
-  };
-
-  const categories = [
-    { id: 'all', label: 'All Health News' },
-    { id: 'Nutrition', label: 'Nutrition' },
-    { id: 'Medical Research', label: 'Medical Research' },
-    { id: 'Health', label: 'Public Health' },
-    { id: 'Clinical Studies', label: 'Clinical Studies' },
-    { id: 'Prevention', label: 'Prevention' },
-    { id: 'Mental Health', label: 'Mental Health' },
-    { id: 'Environment', label: 'General Health' }
-  ];
-
-  // Fetch initial articles when category changes
+  // Fetch initial articles when component mounts or maxArticles changes
   useEffect(() => {
-    // Only fetch if category or maxArticles actually changed
+    console.log('useEffect triggered - maxArticles:', maxArticles);
+    
+    // Only fetch if maxArticles actually changed
     const prevParams = prevFetchParamsRef.current;
-    if (prevParams.category !== selectedCategory || prevParams.max !== maxArticles) {
-      prevFetchParamsRef.current = {category: selectedCategory, max: maxArticles};
-      setCurrentPage(1); // Reset to first page when changing categories
+    if (prevParams.max !== maxArticles) {
+      console.log('Fetching due to parameter change - prev:', prevParams, 'new:', {max: maxArticles});
+      prevFetchParamsRef.current = {max: maxArticles};
+      setCurrentPage(1); // Reset to first page when changing parameters
       setHasMorePages(true); // Reset pagination state
       fetchHealthNews(true); // true means reset (first page)
+    } else {
+      console.log('No fetch needed - parameters unchanged');
     }
-  }, [selectedCategory, maxArticles]);
+  }, [maxArticles]);
 
-  // Force mobile to show all health news on initial load
+  // Ensure news loads on mobile immediately
   useEffect(() => {
-    if (isMobile && selectedCategory !== 'all') {
-      setSelectedCategory('all');
-    }
-    // Always ensure news loads on mobile immediately
-    if (isMobile && articles.length === 0 && !loading) {
+    // Always ensure news loads immediately if no articles
+    if (articles.length === 0 && !loading) {
       fetchHealthNews(true);
     }
   }, [isMobile]);
@@ -228,51 +153,51 @@ const HealthNewsFeed: React.FC<NewsFeedProps> = ({
 
     try {
       const page = resetPage ? 1 : currentPage + 1;
-      console.log('Fetching health news for category:', selectedCategory, 'page:', page);
+      console.log('Fetching latest health news, page:', page);
       
-      let response;
-      
-      // Define all health categories and their priority order
-      const healthCategories = [
-        'Nutrition & Diet', 
-        'Medical Research', 
-        'Public Health', 
-        'Clinical Studies', 
-        'Disease Prevention', 
-        'Mental Health', 
-        'General Health'
-      ];
-      
-      if (selectedCategory === 'all') {
-        // Explicitly pass an empty array to ensure NO category filters are applied
-        const effectiveMaxArticles = isMobile ? Math.max(maxArticles, 12) : maxArticles; // Show more articles on mobile
-        response = await fetchNewsFeed([], effectiveMaxArticles * 2);
-        console.log('Fetching ALL news with no category filters');
-      } else {
-        const effectiveMaxArticles = isMobile ? Math.max(maxArticles, 12) : maxArticles; // Show more articles on mobile
-        response = await getArticlesByCategory(selectedCategory, effectiveMaxArticles);
-      }
+      // Always fetch latest news without category filters
+      const effectiveMaxArticles = isMobile ? Math.max(maxArticles, 12) : maxArticles; // Show more articles on mobile
+      const response = await fetchNewsFeed([], effectiveMaxArticles * 2);
+      console.log('Fetching latest news with no category filters');
       
       if (response.success && response.articles && response.articles.length > 0) {
         let processedArticles = response.articles;
         console.log(`Received ${processedArticles.length} articles from API`);
         
-        // For "all" category, still sort and diversify
-        if (selectedCategory === 'all') {
-          // Sort articles by category priority
-          processedArticles = sortArticlesByPriority(response.articles, healthCategories);
-          
-          // Diversify sources
-          processedArticles = diversifySources(processedArticles);
-          
-          // Limit to maxArticles if we're on the first page
-          const effectiveMaxArticles = isMobile ? Math.max(maxArticles, 12) : maxArticles;
-          if (resetPage) {
-            processedArticles = processedArticles.slice(0, effectiveMaxArticles);
-          } else {
-            // For subsequent pages, limit to maxArticles more
-            processedArticles = processedArticles.slice(0, effectiveMaxArticles);
-          }
+        // Debug: Log first few articles and their image data
+        console.log('Sample articles with image data:');
+        processedArticles.slice(0, 3).forEach((article, index) => {
+          console.log(`Article ${index + 1}: "${article.title}"`);
+          console.log(`  - image_url: ${article.image_url || 'none'}`);
+          console.log(`  - media_url: ${article.media_url || 'none'}`);
+          console.log(`  - media_thumb_url: ${article.media_thumb_url || 'none'}`);
+          console.log(`  - category: ${article.category || article.ai_category || 'none'}`);
+        });
+        
+        // Define health categories for priority sorting
+        const healthCategories = [
+          'Nutrition', 
+          'Medical Research', 
+          'Public Health', 
+          'Clinical Studies', 
+          'Prevention', 
+          'Mental Health', 
+          'General Health',
+          'Environment'
+        ];
+        
+        // Sort articles by category priority
+        processedArticles = sortArticlesByPriority(response.articles, healthCategories);
+        
+        // Diversify sources
+        processedArticles = diversifySources(processedArticles);
+        
+        // Limit to maxArticles if we're on the first page
+        if (resetPage) {
+          processedArticles = processedArticles.slice(0, effectiveMaxArticles);
+        } else {
+          // For subsequent pages, limit to maxArticles more
+          processedArticles = processedArticles.slice(0, effectiveMaxArticles);
         }
         
         if (resetPage) {
@@ -283,44 +208,37 @@ const HealthNewsFeed: React.FC<NewsFeedProps> = ({
         }
         
         // If API doesn't provide pagination info, infer it from response length
-        if (response.pagination) {
-          setHasMorePages(response.pagination.has_next_page);
+        if ('pagination' in response && response.pagination && 
+            typeof response.pagination === 'object' && 
+            'has_next_page' in response.pagination) {
+          setHasMorePages(response.pagination.has_next_page as boolean);
         } else {
           // If we received at least as many articles as we requested, assume there are more
           setHasMorePages(response.articles.length >= maxArticles);
         }
       } else {
-        console.log('No articles found for the selected category on page', page);
-        // If no articles found and it's "all" category, try one more time with really no filters
-        if (selectedCategory === 'all') {
-          console.log('Trying again with absolutely no filters');
-          // Last resort - force no filtering at all
-          try {
-            const fallbackResponse = await fetch(getApiEndpoint(`/news/articles?limit=${maxArticles}`));
-            const fallbackData = await fallbackResponse.json();
-            
-            if (fallbackData.success && fallbackData.articles && fallbackData.articles.length > 0) {
-              console.log('Fallback succeeded, got articles');
-              if (resetPage) {
-                setArticles(fallbackData.articles);
-              } else {
-                setArticles(prev => [...prev, ...fallbackData.articles]);
-              }
-              setHasMorePages(fallbackData.articles.length >= maxArticles);
+        console.log('No articles found on page', page);
+        // Try fallback approach
+        try {
+          const fallbackResponse = await fetch(getApiEndpoint(`/news/articles?limit=${maxArticles}`));
+          const fallbackData = await fallbackResponse.json();
+          
+          if (fallbackData.success && fallbackData.articles && fallbackData.articles.length > 0) {
+            console.log('Fallback succeeded, got articles');
+            if (resetPage) {
+              setArticles(fallbackData.articles);
             } else {
-              if (resetPage) {
-                setArticles([]);
-              }
-              setHasMorePages(false);
+              setArticles(prev => [...prev, ...fallbackData.articles]);
             }
-          } catch (fallbackError) {
-            console.error('Even fallback failed:', fallbackError);
+            setHasMorePages(fallbackData.articles.length >= maxArticles);
+          } else {
             if (resetPage) {
               setArticles([]);
             }
             setHasMorePages(false);
           }
-        } else {
+        } catch (fallbackError) {
+          console.error('Fallback failed:', fallbackError);
           if (resetPage) {
             setArticles([]);
           }
@@ -347,7 +265,7 @@ const HealthNewsFeed: React.FC<NewsFeedProps> = ({
     
     // Define a function to get priority score (lower is higher priority)
     const getPriorityScore = (article: NewsArticle): number => {
-      const category = article.category || '';
+      const category = article.category || article.ai_category || '';
       
       // 1. Exact match with priority categories (in order)
       for (let i = 0; i < priorityCategories.length; i++) {
@@ -421,7 +339,7 @@ const HealthNewsFeed: React.FC<NewsFeedProps> = ({
     console.log('Articles after sorting:');
     sortedArticles.slice(0, 5).forEach((article, i) => {
       const score = getPriorityScore(article);
-      console.log(`  ${i+1}. [${score}] ${article.category || 'uncategorized'}: ${article.title}`);
+      console.log(`  ${i+1}. [${score}] ${article.category || article.ai_category || 'uncategorized'}: ${article.title}`);
     });
     
     return sortedArticles;
@@ -490,7 +408,7 @@ const HealthNewsFeed: React.FC<NewsFeedProps> = ({
     const searchQuery = `Analyze this health article: ${article.title}. 
 Summary: ${article.summary || article.description || 'No description available'}.
 Source: ${article.source || 'Unknown source'}
-Category: ${article.category || 'Uncategorized'}`;
+Category: ${article.category || article.ai_category || 'Uncategorized'}`;
 
     console.log('Starting article analysis:', article.title);
     
@@ -554,17 +472,6 @@ Category: ${article.category || 'Uncategorized'}`;
   if (loading && currentPage === 1) {
     return (
       <div className="news-feed-container">
-        <div className="news-categories">
-          {categories.map(category => (
-            <button
-              key={category.id}
-              className={`category-btn ${selectedCategory === category.id ? 'active' : ''}`}
-              onClick={() => handleCategoryChange(category.id)}
-            >
-              {category.label}
-            </button>
-          ))}
-        </div>
         <div className="loading-news">
           <img 
             src="/assets/whatishealthyspinner.gif" 
@@ -584,48 +491,54 @@ Category: ${article.category || 'Uncategorized'}`;
 
   return (
     <div className="news-feed-container">
-      <div className="news-categories">
-        {categories.map(category => (
-          <button
-            key={category.id}
-            className={`category-btn ${selectedCategory === category.id ? 'active' : ''}`}
-            onClick={() => handleCategoryChange(category.id)}
-          >
-            {category.label}
-          </button>
-        ))}
-      </div>
-
       <div className="news-grid">
         {articles.map((article) => (
           <article 
             key={article.id} 
             className="news-card"
-            data-category={article.category}
+            data-category={article.category || article.ai_category}
             onClick={() => window.open(article.link || article.url, '_blank')}
           >
-            {/* Image Section - Using real images from CNN Health feed */}
+            {/* Image Section - Using images from vHealth News API v2.0 */}
             <div className="news-image">
-              {(article.media_url || article.media_thumb_url) ? (
-                <img 
-                  src={article.media_thumb_url || article.media_url} 
-                  alt={article.title}
-                  onError={(e) => {
-                    console.log('Real image failed to load:', article.media_thumb_url || article.media_url);
-                    // Use category-specific random placeholder as fallback
-                    (e.target as HTMLImageElement).src = getRandomPlaceholderImage(article.category);
-                    // Add placeholder class for styling
-                    (e.target as HTMLImageElement).classList.add('placeholder-image');
-                  }}
-                />
-              ) : (
-                // Use category-specific random placeholder when no image is provided
-                <img 
-                  src={getRandomPlaceholderImage(article.category)}
-                  alt={article.title || 'Health article'}
-                  className="placeholder-image"
-                />
-              )}
+              {(() => {
+                // Debug: Log available image URLs
+                const imageUrl = article.image_url || article.media_url || article.media_thumb_url;
+                if (imageUrl) {
+                  console.log(`Article "${article.title}" has image:`, imageUrl);
+                } else {
+                  console.log(`Article "${article.title}" has no image, using WiHy logo`);
+                }
+                
+                // Use API image if available, otherwise placeholder
+                if (imageUrl) {
+                  return (
+                    <img 
+                      src={imageUrl} 
+                      alt={article.title}
+                      onError={(e) => {
+                        console.log('API image failed to load:', imageUrl);
+                        console.log('Falling back to WiHy logo for article:', article.title);
+                        // Use WiHy logo as fallback
+                        (e.target as HTMLImageElement).src = getWiHyLogoFallback();
+                        // Add placeholder class for styling
+                        (e.target as HTMLImageElement).classList.add('placeholder-image');
+                      }}
+                      onLoad={() => {
+                        console.log('API image loaded successfully:', imageUrl);
+                      }}
+                    />
+                  );
+                } else {
+                  return (
+                    <img 
+                      src={getWiHyLogoFallback()}
+                      alt={article.title || 'Health article'}
+                      className="placeholder-image"
+                    />
+                  );
+                }
+              })()}
             </div>
             
             {/* Content Section */}
@@ -675,11 +588,11 @@ Category: ${article.category || 'Uncategorized'}`;
                 {/* Source Tag */}
                 <span 
                   className="news-category"
-                  style={{ backgroundColor: getCategoryColor(article.category) }}
+                  style={{ backgroundColor: getCategoryColor(article.category || article.ai_category) }}
                 >
-                  {article.category}
+                  {article.category || article.ai_category}
                 </span>
-                <span className="news-time">{formatTimeAgo(article.pubDate || article.publishedDate)}</span>
+                <span className="news-time">{formatTimeAgo(article.pubDate || article.publishedDate || article.published_at)}</span>
               </div>
               
               <h3 className="news-title">{article.title}</h3>
@@ -707,7 +620,7 @@ Category: ${article.category || 'Uncategorized'}`;
       {/* Empty state */}
       {articles.length === 0 && !loading && (
         <div className="no-articles">
-          <p>No articles found for the selected category. Try selecting a different category.</p>
+          <p>No health news articles available at the moment. Please try again later.</p>
         </div>
       )}
 

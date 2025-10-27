@@ -942,7 +942,7 @@ const VHealthSearch: React.FC = () => {
             bottom: 0,
             backgroundColor: 'rgba(255, 255, 255, 0.95)',
             backdropFilter: 'blur(2px)',
-            zIndex: 1000,
+            zIndex: 500,
             overflow: 'auto',
             cursor: 'pointer'
           }}

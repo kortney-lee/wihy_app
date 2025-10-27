@@ -82,7 +82,11 @@ class VHealthNewsClient {
     if (params.source) queryParams.append('source', params.source);
     if (params.useAI !== undefined) queryParams.append('useAI', params.useAI.toString());
 
-    const response = await fetch(`${this.baseUrl}/api/news/articles?${queryParams}`, {
+    const fullUrl = `${this.baseUrl}/api/news/articles?${queryParams}`;
+    console.log('Making API request to:', fullUrl);
+    console.log('Request params:', params);
+
+    const response = await fetch(fullUrl, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -94,9 +98,11 @@ class VHealthNewsClient {
     }
     
     const data: ArticlesResponse = await response.json();
+    console.log('Raw API response:', data);
     
-    // Add legacy compatibility fields to articles
-    data.articles = data.articles.map(article => ({
+    // Ensure we have the correct structure and add legacy compatibility fields to articles
+    const articles = data.articles || [];
+    data.articles = articles.map(article => ({
       ...article,
       // Legacy compatibility fields
       publishedDate: article.published_at,
@@ -106,11 +112,33 @@ class VHealthNewsClient {
       tags: [article.ai_category, article.source],
       media_url: article.image_url,
       media_thumb_url: article.image_url,
-      relevanceScore: article.quality_score * 10,
+      relevanceScore: article.quality_score / 10, // Convert 1-10 scale to 0-1 scale
       link: article.url
     }));
     
-    return data;
+    console.log('Processed articles:', data.articles.length, 'articles');
+    console.log('First processed article:', data.articles[0]);
+    
+    // Ensure we always return a valid response structure
+    return {
+      success: data.success !== false,
+      articles: data.articles,
+      count: data.count || data.articles.length,
+      sources_used: data.sources_used || [],
+      pagination: data.pagination || {
+        total_items: data.articles.length,
+        current_page: 1,
+        per_page: data.articles.length,
+        has_next_page: false
+      },
+      filters_applied: data.filters_applied || {
+        category: params.category || null,
+        source: params.source || 'all',
+        limit: params.limit || 20,
+        ai_categorization: params.useAI !== false
+      },
+      timestamp: data.timestamp || new Date().toISOString()
+    };
   }
 
   async getCategories(): Promise<{ success: boolean; categories: Category[] }> {
@@ -206,12 +234,18 @@ export const fetchNewsFeed = async (categories?: string[], limit?: number): Prom
 
 export const getArticlesByCategory = async (category: string, limit?: number): Promise<{ success: boolean; articles: NewsArticle[] }> => {
   try {
+    console.log('getArticlesByCategory called with:', { category, limit });
+    
     const response = await newsClient.getArticles({
       category,
       limit: limit || 20,
       source: 'all',
       useAI: true
     });
+    
+    console.log('getArticlesByCategory API response:', response);
+    console.log('Articles received:', response.articles?.length, 'articles');
+    console.log('First article category:', response.articles?.[0]?.ai_category || response.articles?.[0]?.category);
     
     return {
       success: response.success,
@@ -256,13 +290,16 @@ export const getNewsCategories = async (): Promise<Category[]> => {
     return response.success ? response.categories : [];
   } catch (error) {
     console.error('Error fetching categories:', error);
-    // Return default categories if API fails
+    // Return default categories matching HealthNewsFeed component
     return [
-      { category: 'Medical Research', description: 'Latest medical research and studies' },
-      { category: 'Nutrition', description: 'Nutrition and dietary health news' },
-      { category: 'Mental Health', description: 'Mental health and wellness news' },
-      { category: 'Public Health', description: 'Public health policies and updates' },
-      { category: 'General Health', description: 'General health and wellness news' }
+      { category: 'Nutrition', description: 'Diet, supplements, and nutritional research' },
+      { category: 'Medical Research', description: 'Latest medical studies and breakthroughs' },
+      { category: 'Public Health', description: 'Community health and disease prevention' },
+      { category: 'Clinical Studies', description: 'Clinical trials and medical research' },
+      { category: 'Prevention', description: 'Preventive medicine and wellness' },
+      { category: 'Mental Health', description: 'Mental wellness and psychological health' },
+      { category: 'General Health', description: 'General health news and information' },
+      { category: 'Environment', description: 'Environmental health and safety' }
     ];
   }
 };

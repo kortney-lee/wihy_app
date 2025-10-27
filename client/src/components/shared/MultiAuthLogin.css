@@ -7,7 +7,7 @@
   position: fixed; /* Changed from absolute to fixed */
   top: 16px; /* Match LoginButton positioning */
   right: 16px; /* Match LoginButton positioning */
-  z-index: 1500; /* Match LoginButton z-index */
+  z-index: 10002; /* Higher than modal content */
   pointer-events: auto !important; /* Force pointer events */
 }
 
@@ -78,7 +78,7 @@
 }
 
 .providers-popup {
-  z-index: 9999; /* Higher z-index to appear above all content */
+  z-index: 10001; /* Higher z-index to appear above all content */
   position: fixed; /* Fixed positioning to prevent clipping */
   top: 60px; /* Position below the header */
   right: 20px; /* Some margin from the right edge */
@@ -89,6 +89,7 @@
   max-width: 90vw; /* Responsive width */
   overflow: hidden;
   animation: fadeIn 0.2s ease-out; /* Match LoginButton animation */
+  pointer-events: auto;
 }
 
 .providers-header {
@@ -168,7 +169,7 @@
 }
 
 .user-dropdown {
-  z-index: 1600; /* Match LoginButton dropdown z-index */
+  z-index: 10001; /* Match providers popup z-index */
   position: absolute;
   top: 44px; /* Match LoginButton dropdown position */
   right: 0;
@@ -179,6 +180,7 @@
   overflow: hidden;
   animation: fadeIn 0.2s ease-out; /* Match LoginButton animation */
   padding: 16px 0;
+  pointer-events: auto;
 }
 
 .user-info {
@@ -241,8 +243,11 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.1);
-  z-index: 999;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 10000;
+  pointer-events: auto;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
 }
 
 /* Add the fadeIn animation that LoginButton uses */
@@ -284,22 +289,45 @@
   .providers-popup,
   .user-dropdown {
     width: calc(100vw - 32px);
-    right: -8px;
+    right: 16px !important;
+    left: 16px !important;
     position: fixed;
     top: 60px;
+    z-index: 10001 !important;
+    max-width: none !important;
+    min-width: auto !important;
   }
   
   .multi-auth-container.top-right {
     position: fixed;
     top: 12px;
     right: 12px;
+    z-index: 10002 !important;
   }
   
-  /* Responsive login modal positioning */
+  /* Enhanced mobile modal positioning */
   .providers-popup {
-    right: 10px !important;
-    top: 50px !important;
-    min-width: 300px !important;
-    max-width: calc(100vw - 20px) !important;
+    right: 16px !important;
+    left: 16px !important;
+    top: 60px !important;
+    width: calc(100vw - 32px) !important;
+    max-width: none !important;
+    min-width: auto !important;
+    margin: 0 !important;
+    z-index: 10001 !important;
+    pointer-events: auto !important;
   }
+  
+  .auth-overlay {
+    z-index: 10000 !important;
+    pointer-events: auto !important;
+    background-color: rgba(0, 0, 0, 0.5) !important;
+    backdrop-filter: blur(4px) !important;
+    -webkit-backdrop-filter: blur(4px) !important;
+  }
+}
+
+/* Remove the body modal-open styles that were reducing opacity */
+body.modal-open {
+  overflow: hidden;
 }
