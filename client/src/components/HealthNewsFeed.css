@@ -663,3 +663,52 @@
   max-width: 400px;
   line-height: 1.6;
 }
+
+/* Mobile scrolling improvements */
+@media (max-width: 768px) {
+  .news-feed-container {
+    margin: 20px auto;
+    padding: 15px;
+    /* Ensure smooth scrolling on mobile */
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+  }
+  
+  .news-grid {
+    /* Prevent scroll anchoring issues */
+    overflow-anchor: none;
+  }
+  
+  /* Improved intersection observer target for mobile */
+  .intersection-observer-target {
+    /* Make sure it doesn't interfere with touch scrolling */
+    pointer-events: none !important;
+    touch-action: none !important;
+  }
+  
+  /* Loading more indicator on mobile */
+  .loading-more {
+    margin: 30px 0;
+    padding: 20px;
+  }
+  
+  /* Back to top button styles */
+  .back-to-top-btn {
+    /* Ensure it's always accessible */
+    position: fixed !important;
+    bottom: 20px !important;
+    right: 20px !important;
+    z-index: 1000 !important;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  .back-to-top-btn:hover {
+    background-color: #e55300;
+    transform: scale(1.1);
+  }
+  
+  .back-to-top-btn:active {
+    transform: scale(0.95);
+  }
+}

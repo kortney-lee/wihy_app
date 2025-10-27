@@ -107,27 +107,105 @@ const HealthNewsFeed: React.FC<NewsFeedProps> = ({
     }
   }, [maxArticles]);
 
-  // Ensure news loads on mobile immediately
+  // Ensure news loads on mobile immediately with better pagination control
   useEffect(() => {
     // Always ensure news loads immediately if no articles
     if (articles.length === 0 && !loading) {
       fetchHealthNews(true);
     }
-  }, [isMobile]);
+    
+    // On mobile, disable infinite scroll if user has scrolled up significantly
+    if (isMobile) {
+      const handleMobilePagination = () => {
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        const windowHeight = window.innerHeight;
+        const documentHeight = document.documentElement.scrollHeight;
+        
+        // If user is near the top of the page, enable normal scrolling
+        if (scrollTop < windowHeight) {
+          setScrollDirection('up');
+        }
+      };
+      
+      window.addEventListener('scroll', handleMobilePagination, { passive: true });
+      
+      return () => {
+        window.removeEventListener('scroll', handleMobilePagination);
+      };
+    }
+  }, [isMobile, articles.length, loading]);
 
-  // Set up intersection observer for infinite scroll
+  // Track scroll direction for better mobile experience
+  const [scrollDirection, setScrollDirection] = useState<'up' | 'down'>('down');
+  const lastScrollTop = useRef(0);
+
+  // Set up intersection observer for infinite scroll with improved mobile handling
   const handleObserver = useCallback((entries: IntersectionObserverEntry[]) => {
     const [target] = entries;
-    if (target.isIntersecting && !loading && !loadingMore && hasMorePages) {
-      fetchHealthNews(false); // false means don't reset, load more
+    
+    // Only trigger pagination if:
+    // 1. Element is intersecting
+    // 2. Not currently loading
+    // 3. Has more pages
+    // 4. User is scrolling down (not up)
+    // 5. Add a small delay to prevent rapid triggering
+    if (target.isIntersecting && 
+        !loading && 
+        !loadingMore && 
+        hasMorePages && 
+        scrollDirection === 'down') {
+      
+      // Add a small delay to ensure user intent
+      setTimeout(() => {
+        // Double-check conditions after delay
+        if (!loading && !loadingMore && hasMorePages) {
+          console.log('Triggering pagination load');
+          fetchHealthNews(false); // false means don't reset, load more
+        }
+      }, 300);
     }
-  }, [loading, loadingMore, hasMorePages]);
+  }, [loading, loadingMore, hasMorePages, scrollDirection]);
+
+  // Track scroll direction
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      
+      if (currentScrollTop > lastScrollTop.current + 50) {
+        // Scrolling down with some threshold to avoid jitter
+        setScrollDirection('down');
+      } else if (currentScrollTop < lastScrollTop.current - 50) {
+        // Scrolling up with some threshold
+        setScrollDirection('up');
+      }
+      
+      lastScrollTop.current = currentScrollTop;
+    };
+
+    // Throttle scroll events for better performance
+    let ticking = false;
+    const throttledHandleScroll = () => {
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          handleScroll();
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+
+    window.addEventListener('scroll', throttledHandleScroll, { passive: true });
+    
+    return () => {
+      window.removeEventListener('scroll', throttledHandleScroll);
+    };
+  }, []);
 
   useEffect(() => {
     const element = observerTarget.current;
     const option = {
       root: null,
-      rootMargin: '0px',
+      rootMargin: '100px', // Increased margin to give more buffer
       threshold: 0.1,
     };
     
@@ -138,11 +216,17 @@ const HealthNewsFeed: React.FC<NewsFeedProps> = ({
     return () => {
       if (element) observer.unobserve(element);
     };
-  }, [handleObserver, observerTarget]);
+  }, [handleObserver]);
 
-  // Update the fetchHealthNews function with priority handling
+  // Update the fetchHealthNews function with better mobile pagination control
 
   const fetchHealthNews = async (resetPage: boolean = true) => {
+    // Prevent excessive loading on mobile when scrolling up
+    if (isMobile && !resetPage && scrollDirection === 'up') {
+      console.log('Preventing pagination load - user scrolling up on mobile');
+      return;
+    }
+    
     if (resetPage) {
       setLoading(true);
       setCurrentPage(1);
@@ -214,7 +298,12 @@ const HealthNewsFeed: React.FC<NewsFeedProps> = ({
           setHasMorePages(response.pagination.has_next_page as boolean);
         } else {
           // If we received at least as many articles as we requested, assume there are more
-          setHasMorePages(response.articles.length >= maxArticles);
+          // But on mobile, limit total articles to prevent infinite scroll issues
+          const shouldHaveMore = response.articles.length >= maxArticles;
+          const mobileLimit = isMobile ? 50 : Infinity; // Limit to 50 articles on mobile
+          const currentTotal = resetPage ? processedArticles.length : articles.length + processedArticles.length;
+          
+          setHasMorePages(shouldHaveMore && currentTotal < mobileLimit);
         }
       } else {
         console.log('No articles found on page', page);
@@ -637,8 +726,44 @@ Category: ${article.category || article.ai_category || 'Uncategorized'}`;
         <div
           ref={observerTarget} 
           className="intersection-observer-target"
-          style={{ height: '20px', margin: '20px 0', visibility: 'hidden' }}
+          style={{ 
+            height: '200px', // Increased height for better mobile detection
+            margin: '40px 0', 
+            visibility: 'hidden',
+            pointerEvents: 'none' // Prevent any interaction with this element
+          }}
         />
+      )}
+
+      {/* Add a "Back to Top" button for mobile */}
+      {isMobile && articles.length > 6 && (
+        <button
+          className="back-to-top-btn"
+          onClick={() => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
+          style={{
+            position: 'fixed',
+            bottom: '20px',
+            right: '20px',
+            width: '50px',
+            height: '50px',
+            borderRadius: '50%',
+            backgroundColor: '#fa5f06',
+            color: 'white',
+            border: 'none',
+            fontSize: '18px',
+            cursor: 'pointer',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+            zIndex: 1000,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}
+          aria-label="Back to top"
+        >
+          ↑
+        </button>
       )}
     </div>
   );
