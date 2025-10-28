@@ -17,9 +17,18 @@ interface ChatWidgetProps {
   searchResponse?: string;
   currentContext?: string; // Current dashboard section being viewed
   inline?: boolean; // Whether to render inline or as fixed overlay
+  onNewSearch?: (query: string, response: any) => void; // Callback to update main content
 }
 
-const ChatWidget: React.FC<ChatWidgetProps> = ({ isOpen, onClose, searchQuery, searchResponse, currentContext, inline = false }) => {
+const ChatWidget: React.FC<ChatWidgetProps> = ({ 
+  isOpen, 
+  onClose, 
+  searchQuery, 
+  searchResponse, 
+  currentContext, 
+  inline = false,
+  onNewSearch 
+}) => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -125,7 +134,29 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ isOpen, onClose, searchQuery, s
 
   // Initialize conversation with search results if provided
   useEffect(() => {
+    // 🔍 CHATWIDGET LOGGING: Initial data received
+    console.log('🔍 CHATWIDGET INITIAL DATA:', {
+      timestamp: new Date().toISOString(),
+      component: 'ChatWidget',
+      action: 'initialDataReceived',
+      hasSearchQuery: !!searchQuery,
+      hasSearchResponse: !!searchResponse,
+      searchQuery: searchQuery,
+      searchResponseLength: searchResponse?.length || 0,
+      currentMessagesCount: messages.length,
+      shouldInitialize: !!(searchQuery && searchResponse && messages.length === 0)
+    });
+    
     if (searchQuery && searchResponse && messages.length === 0) {
+      // 🔍 CHATWIDGET LOGGING: Starting conversation initialization
+      console.log('🔍 CHATWIDGET CONVERSATION INIT:', {
+        timestamp: new Date().toISOString(),
+        component: 'ChatWidget',
+        action: 'conversationInitStart',
+        searchQuery: searchQuery,
+        searchResponsePreview: searchResponse.substring(0, 100) + '...'
+      });
+      
       // Create a conversational summary instead of full response
       let conversationalSummary = searchResponse;
       
@@ -157,6 +188,17 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ isOpen, onClose, searchQuery, s
         }
       ];
       setMessages(initialMessages);
+      
+      // 🔍 CHATWIDGET LOGGING: Conversation initialized
+      console.log('🔍 CHATWIDGET CONVERSATION INITIALIZED:', {
+        timestamp: new Date().toISOString(),
+        component: 'ChatWidget',
+        action: 'conversationInitComplete',
+        messagesCreated: initialMessages.length,
+        userMessage: searchQuery,
+        assistantMessagePreview: conversationalSummary.substring(0, 100) + '...',
+        totalMessagesNow: initialMessages.length
+      });
     }
   }, [searchQuery, searchResponse, messages.length]);
 
@@ -170,6 +212,16 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ isOpen, onClose, searchQuery, s
   const handleSendMessage = async () => {
     if (!inputMessage.trim() || isLoading) return;
 
+    // 🔍 CHATWIDGET LOGGING: New message being sent
+    console.log('🔍 CHATWIDGET NEW MESSAGE:', {
+      timestamp: new Date().toISOString(),
+      component: 'ChatWidget',
+      action: 'newMessageSent',
+      message: inputMessage.trim(),
+      currentContext: currentContext,
+      existingMessagesCount: messages.length
+    });
+
     const userMessage: ChatMessage = {
       id: Date.now().toString() + '-user',
       type: 'user',
@@ -182,6 +234,16 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ isOpen, onClose, searchQuery, s
     setInputMessage('');
     setIsLoading(true);
 
+    // 🔍 CHATWIDGET LOGGING: API request starting
+    console.log('🔍 CHATWIDGET API REQUEST START:', {
+      timestamp: new Date().toISOString(),
+      component: 'ChatWidget',
+      action: 'apiRequestStart',
+      userMessage: userMessage.message,
+      context: currentContext,
+      isLoading: true
+    });
+
     try {
       // Build conversation context from previous messages
       const conversationHistory = messages.slice(-4) // Last 4 messages for context
@@ -191,54 +253,103 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ isOpen, onClose, searchQuery, s
       // Create a focused query for conversational responses
       const contextualQuery = `Please provide a brief, conversational response (2-3 sentences max) to: ${userMessage.message}${conversationHistory ? `\n\nContext from our conversation: ${conversationHistory}` : ''}`;
 
-      const response = await wihyAPI.askAnything({
-        query: contextualQuery,
-        user_context: {
-          conversation_mode: true,
-          response_style: 'concise',
-          conversation_context: conversationHistory,
-          current_context: currentContext,
-          is_followup: messages.length > 0
-        }
-      });
-
-      // Extract just the main response without full formatting
-      let aiResponse = '';
-      if (typeof response === 'object' && response !== null && 'success' in response && 'data' in response) {
-        const healthResp = response as any;
-        if (healthResp.data && 'response' in healthResp.data) {
-          aiResponse = healthResp.data.response;
-          
-          // Clean up the response to be more conversational
-          aiResponse = aiResponse
-            .replace(/🥗.*?\*\*/g, '') // Remove emoji headers
-            .replace(/\*\*.*?\*\*/g, '') // Remove bold formatting
-            .replace(/📋.*?:/g, '') // Remove section headers
-            .replace(/•/g, '-') // Replace bullets
-            .split('\n')
-            .filter(line => line.trim() && !line.includes('Biblical') && !line.includes('Corinthians'))
-            .slice(0, 3) // Take first 3 meaningful lines
-            .join(' ')
-            .trim();
-            
-          // If response is too long, truncate and add follow-up prompt
-          if (aiResponse.length > 200) {
-            aiResponse = aiResponse.substring(0, 200).trim() + '... What would you like to know more about?';
+        const response = await wihyAPI.askAnything({
+          query: contextualQuery,
+          user_context: {
+            conversation_mode: true,
+            response_style: 'concise',
+            conversation_context: conversationHistory,
+            current_context: currentContext,
+            is_followup: messages.length > 0
           }
-        }
-      } else {
-        aiResponse = wihyAPI.formatWihyResponse(response as any);
-      }
-      
-      const aiMessage: ChatMessage = {
-        id: Date.now().toString() + '-assistant',
-        type: 'assistant',
-        message: aiResponse,
-        timestamp: new Date()
-      };
+        });
 
-      appendMessage(aiMessage);
-    } catch (error) {
+        // 🔍 CHATWIDGET LOGGING: API response received
+        console.log('🔍 CHATWIDGET API RESPONSE:', {
+          timestamp: new Date().toISOString(),
+          component: 'ChatWidget',
+          action: 'apiResponseReceived',
+          responseType: typeof response,
+          hasSuccess: !!(response as any)?.success,
+          hasData: !!(response as any)?.data,
+          userMessage: userMessage.message
+        });
+
+        // Call the callback to update the main content if provided
+        if (onNewSearch) {
+          // 🔍 CHATWIDGET LOGGING: Calling parent callback
+          console.log('🔍 CHATWIDGET PARENT CALLBACK:', {
+            timestamp: new Date().toISOString(),
+            component: 'ChatWidget',
+            action: 'parentCallbackTriggered',
+            query: userMessage.message,
+            hasResponse: !!response,
+            callbackExists: !!onNewSearch
+          });
+          
+          onNewSearch(userMessage.message, response);
+        }
+
+        // Extract just the main response without full formatting
+        let aiResponse = '';
+        if (typeof response === 'object' && response !== null && 'success' in response && 'data' in response) {
+          const healthResp = response as any;
+          if (healthResp.data && 'response' in healthResp.data) {
+            aiResponse = healthResp.data.response;
+            
+            // Clean up the response to be more conversational
+            aiResponse = aiResponse
+              .replace(/🥗.*?\*\*/g, '') // Remove emoji headers
+              .replace(/\*\*.*?\*\*/g, '') // Remove bold formatting
+              .replace(/📋.*?:/g, '') // Remove section headers
+              .replace(/•/g, '-') // Replace bullets
+              .split('\n')
+              .filter(line => line.trim() && !line.includes('Biblical') && !line.includes('Corinthians'))
+              .slice(0, 3) // Take first 3 meaningful lines
+              .join(' ')
+              .trim();
+              
+            // If response is too long, truncate and add follow-up prompt
+            if (aiResponse.length > 200) {
+              aiResponse = aiResponse.substring(0, 200).trim() + '... What would you like to know more about?';
+            }
+          }
+        } else {
+          aiResponse = wihyAPI.formatWihyResponse(response as any);
+        }
+        
+        // 🔍 CHATWIDGET LOGGING: AI response processed
+        console.log('🔍 CHATWIDGET AI RESPONSE PROCESSED:', {
+          timestamp: new Date().toISOString(),
+          component: 'ChatWidget',
+          action: 'aiResponseProcessed',
+          originalResponseType: typeof response,
+          finalResponseLength: aiResponse.length,
+          finalResponsePreview: aiResponse.substring(0, 100) + '...',
+          userMessage: userMessage.message
+        });
+        
+        const aiMessage: ChatMessage = {
+          id: Date.now().toString() + '-assistant',
+          type: 'assistant',
+          message: aiResponse,
+          timestamp: new Date()
+        };
+
+        appendMessage(aiMessage);
+        
+        // 🔍 CHATWIDGET LOGGING: AI message added to chat
+        console.log('🔍 CHATWIDGET MESSAGE ADDED:', {
+          timestamp: new Date().toISOString(),
+          component: 'ChatWidget',
+          action: 'aiMessageAdded',
+          messageId: aiMessage.id,
+          messageLength: aiMessage.message.length,
+          totalMessagesNow: messages.length + 1,
+          userMessage: userMessage.message
+        });
+        
+      } catch (error) {
       console.error('Chat error:', error);
       const errorMessage: ChatMessage = {
         id: Date.now().toString() + '-assistant',

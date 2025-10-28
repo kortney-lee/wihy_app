@@ -139,6 +139,22 @@ const SearchResults: React.FC<SearchResultsProps> = ({
   disclaimer = "",
   apiResponse
 }) => {
+  // 🔍 SEARCH RESULTS LOGGING: Component mounted with props
+  console.log('🔍 SEARCH RESULTS MOUNTED:', {
+    query: query,
+    timestamp: new Date().toISOString(),
+    component: 'SearchResults',
+    action: 'componentMounted',
+    isLoading: isLoading,
+    dataSource: dataSource,
+    hasResults: !!results,
+    resultsLength: results?.length || 0,
+    hasApiResponse: !!apiResponse,
+    hasCitations: citations.length > 0,
+    hasRecommendations: recommendations.length > 0,
+    hasDisclaimer: !!disclaimer
+  });
+  
   const [input, setInput] = useState('');
   const [image, setImage] = useState<File | string | null>(null);
   const [currentPhotoId, setCurrentPhotoId] = useState<string | null>(null);
@@ -176,6 +192,30 @@ const SearchResults: React.FC<SearchResultsProps> = ({
 
   // Check if we have valid results to display
   const hasValidResults = results && results.trim() !== '' && !isLoading;
+  
+  // 🔍 SEARCH RESULTS LOGGING: Track loading states
+  useEffect(() => {
+    if (isLoading) {
+      console.log('🔍 SEARCH RESULTS LOADING STATE:', {
+        query: query,
+        timestamp: new Date().toISOString(),
+        component: 'SearchResults',
+        action: 'loadingStarted',
+        isLoading: true,
+        hasValidResults: hasValidResults
+      });
+    } else {
+      console.log('🔍 SEARCH RESULTS LOADING COMPLETE:', {
+        query: query,
+        timestamp: new Date().toISOString(),
+        component: 'SearchResults',
+        action: 'loadingComplete',
+        isLoading: false,
+        hasValidResults: hasValidResults,
+        resultsLength: results?.length || 0
+      });
+    }
+  }, [isLoading, hasValidResults]);
   
   // Cache results when they change
   useEffect(() => {
@@ -259,6 +299,28 @@ const SearchResults: React.FC<SearchResultsProps> = ({
   // Check if this is a test query
   const isTestQuery = query.toLowerCase() === 'test';
 
+  // Handle new search from ChatWidget
+  const handleChatSearch = (query: string, response: any) => {
+    console.log('🔍 ChatWidget triggered new search:', { query, response });
+    // Trigger a new search with the query from the chat
+    onNewSearch(query);
+  };
+
+  // 🔍 SEARCH RESULTS LOGGING: Track prop changes
+  useEffect(() => {
+    console.log('🔍 SEARCH RESULTS PROPS CHANGED:', {
+      query: query,
+      timestamp: new Date().toISOString(),
+      component: 'SearchResults',
+      action: 'propsChanged',
+      isLoading: isLoading,
+      dataSource: dataSource,
+      hasResults: !!results,
+      resultsLength: results?.length || 0,
+      hasApiResponse: !!apiResponse
+    });
+  }, [query, results, isLoading, dataSource, apiResponse]);
+
   return (
     <div className="search-results-container" style={{ 
       minHeight: '100vh',
@@ -331,6 +393,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({
                   currentContext={currentContext}
                   inline={true}
                   searchQuery={query}
+                  onNewSearch={handleChatSearch}
                   searchResponse={(() => {
                     // Extract response from apiResponse or fall back to results
                     let extractedResponse = '';

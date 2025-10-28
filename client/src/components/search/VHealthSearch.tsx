@@ -293,6 +293,14 @@ const VHealthSearch: React.FC = () => {
     const queryToUse = queryParam || searchQuery;
     if (!queryToUse.trim() || isLoading) return;
     
+    // 🔍 MAIN SEARCH LOGGING: Initial request
+    console.log('🔍 MAIN SEARCH INITIATED:', {
+      query: queryToUse,
+      timestamp: new Date().toISOString(),
+      component: 'VHealthSearch',
+      action: 'handleSearch'
+    });
+    
     // Create new AbortController for this request
     abortControllerRef.current = new AbortController();
     const signal = abortControllerRef.current.signal;
@@ -300,15 +308,49 @@ const VHealthSearch: React.FC = () => {
     setIsLoading(true);
     setLoadingMessage('Initializing search...');
     
+    // 🔍 MAIN SEARCH LOGGING: Loading state set
+    console.log('🔍 MAIN SEARCH LOADING:', {
+      query: queryToUse,
+      isLoading: true,
+      loadingMessage: 'Initializing search...',
+      timestamp: new Date().toISOString()
+    });
+    
     try {
       // Get fresh results from WiHy API (cache is managed by the API)
       setLoadingMessage('Analyzing with AI...');
+      
+      // 🔍 MAIN SEARCH LOGGING: AI analysis phase
+      console.log('🔍 MAIN SEARCH AI ANALYSIS:', {
+        query: queryToUse,
+        loadingMessage: 'Analyzing with AI...',
+        timestamp: new Date().toISOString()
+      });
+      
       logger.debug('Getting fresh results for query', { query: queryToUse });
       
       try {
         // Use WiHy Unified API for search
         logger.apiRequest('WiHy API search', { query: queryToUse });
+        
+        // 🔍 MAIN SEARCH LOGGING: API request initiated
+        console.log('🔍 MAIN SEARCH API REQUEST:', {
+          query: queryToUse,
+          service: 'wihyAPI.searchHealth',
+          timestamp: new Date().toISOString()
+        });
+        
         const wihyResponse = await wihyAPI.searchHealth(queryToUse);
+        
+        // 🔍 MAIN SEARCH LOGGING: API response received
+        console.log('🔍 MAIN SEARCH API RESPONSE:', {
+          query: queryToUse,
+          success: wihyResponse.success,
+          responseType: typeof wihyResponse,
+          timestamp: new Date().toISOString(),
+          hasData: !!(wihyResponse as any).data,
+          responseKeys: Object.keys(wihyResponse)
+        });
         
         if (wihyResponse.success) {
           // Handle both unified and legacy response formats

@@ -285,6 +285,18 @@ class WihyAPIService {
    * Ask WiHy a health-related question using the unified API
    */
   async askAnything(request: WihyRequest | UnifiedRequest): Promise<HealthQuestionResponse | WihyResponse | UnifiedResponse> {
+    // 🔍 WIHY API LOGGING: Request initiated
+    const requestStartTime = performance.now();
+    console.log('🔍 WIHY API REQUEST INITIATED:', {
+      timestamp: new Date().toISOString(),
+      component: 'wihyAPI',
+      action: 'requestInitiated',
+      query: request.query,
+      requestType: 'user_context' in request ? 'WihyRequest' : 'UnifiedRequest',
+      hasUserContext: 'user_context' in request ? !!request.user_context : !!(request as any).context,
+      isLocalDev: this.isLocalDevelopment
+    });
+    
     try {
       logger.apiRequest('Making WiHy Unified API request', request);
       
@@ -318,6 +330,22 @@ class WihyAPIService {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
       
+      // 🔍 WIHY API LOGGING: Fetch request starting
+      console.log('🔍 WIHY API FETCH START:', {
+        timestamp: new Date().toISOString(),
+        component: 'wihyAPI',
+        action: 'fetchRequestStart',
+        endpoint: endpoint,
+        requestBody: {
+          query: requestBody.query,
+          include_nutrition: requestBody.include_nutrition,
+          include_biblical_wisdom: requestBody.include_biblical_wisdom,
+          include_charts: requestBody.include_charts,
+          hasUserContext: !!requestBody.user_context
+        },
+        timeout: '30000ms'
+      });
+      
       const response = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -326,15 +354,57 @@ class WihyAPIService {
       });
 
       clearTimeout(timeoutId);
+      
+      // 🔍 WIHY API LOGGING: Fetch response received
+      const requestDuration = performance.now() - requestStartTime;
+      console.log('🔍 WIHY API FETCH RESPONSE:', {
+        timestamp: new Date().toISOString(),
+        component: 'wihyAPI',
+        action: 'fetchResponseReceived',
+        status: response.status,
+        statusText: response.statusText,
+        ok: response.ok,
+        duration: `${requestDuration.toFixed(2)}ms`,
+        headers: {
+          contentType: response.headers.get('content-type'),
+          contentLength: response.headers.get('content-length')
+        }
+      });
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       const data = await response.json();
+      
+      // 🔍 WIHY API LOGGING: Response parsed successfully
+      console.log('🔍 WIHY API RESPONSE PARSED:', {
+        timestamp: new Date().toISOString(),
+        component: 'wihyAPI',
+        action: 'responseParsedSuccess',
+        dataType: typeof data,
+        hasSuccess: !!data.success,
+        hasData: !!data.data,
+        hasResponse: !!(data.data?.response),
+        dataKeys: Object.keys(data),
+        duration: `${(performance.now() - requestStartTime).toFixed(2)}ms`,
+        query: request.query
+      });
+      
       logger.apiResponse('WiHy Unified API response received', data);
       return data;
     } catch (error) {
+      // 🔍 WIHY API LOGGING: Error occurred
+      console.log('🔍 WIHY API ERROR:', {
+        timestamp: new Date().toISOString(),
+        component: 'wihyAPI',
+        action: 'apiError',
+        errorType: error instanceof Error ? error.name : typeof error,
+        errorMessage: error instanceof Error ? error.message : String(error),
+        duration: `${(performance.now() - requestStartTime).toFixed(2)}ms`,
+        query: request.query
+      });
+      
       logger.error('WiHy API error:', error);
       
       if (error instanceof Error) {

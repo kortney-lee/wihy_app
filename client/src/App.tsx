@@ -106,6 +106,19 @@ const ResultsPage: React.FC = () => {
       });
       
       if (navigationState?.fromSearch && navigationState?.results) {
+        // 🔍 RESULTS PAGE LOGGING: Navigation state received
+        console.log('🔍 RESULTS PAGE NAVIGATION:', {
+          query: query,
+          timestamp: new Date().toISOString(),
+          fromSearch: navigationState.fromSearch,
+          dataSource: navigationState.dataSource,
+          hasResults: !!navigationState.results,
+          hasApiResponse: !!navigationState.apiResponse,
+          resultType: typeof navigationState.results,
+          component: 'App.tsx',
+          action: 'navigationStateReceived'
+        });
+        
         logger.info('🔍 ResultsPage: Using navigation state data (no API call needed)', { query, cacheKey });
         setResults(navigationState.results.details || navigationState.results.summary || 'No results');
         setApiResponse(navigationState.apiResponse || null); // Set the API response for ChatWidget (may be null for cached data)
@@ -114,6 +127,19 @@ const ResultsPage: React.FC = () => {
         setRecommendations(navigationState.results.recommendations || []);
         setDisclaimer(navigationState.results.medicalDisclaimer || '');
         setIsLoading(false);
+        
+        // 🔍 RESULTS PAGE LOGGING: State updated
+        console.log('🔍 RESULTS PAGE STATE UPDATED:', {
+          query: query,
+          timestamp: new Date().toISOString(),
+          isLoading: false,
+          dataSource: navigationState.dataSource || 'wihy',
+          hasCitations: !!(navigationState.results.sources?.length),
+          hasRecommendations: !!(navigationState.results.recommendations?.length),
+          hasDisclaimer: !!(navigationState.results.medicalDisclaimer),
+          resultLength: (navigationState.results.details || navigationState.results.summary || '').length
+        });
+        
         return;
       }
       
