@@ -16,19 +16,19 @@ export const searchHealthAPI = async (query: string): Promise<SearchResult> => {
   try {
     console.log("Searching for:", query);
     
-    // Use WiHy Enhanced Model API (ml.wihy.ai) exclusively
-    const response = await wihyAPI.askEnhancedHealthQuestion({ query });
+    // Use WiHy Health Intelligence API v4.0.0 exclusively
+    const response = await wihyAPI.askHealthQuestion({ query });
     
-    console.log("WiHy Enhanced API response:", response);
+    console.log("WiHy API v4.0.0 response:", response);
     
     return {
-      text: response.answer || "No information found",
-      source: "WiHy Enhanced Model (ml.wihy.ai)",
-      qualityScore: response.confidence_score || 0.95,
-      details: response.answer || "",
-      citations: response.research_citations || [],
-      recommendations: response.wihy_wisdom || [],
-      disclaimer: "This information is provided by the WiHy Enhanced Health Model trained on 2,325 health examples. Please consult healthcare professionals for medical advice."
+      text: response.data.response || "No information found",
+      source: "WiHy Health Intelligence v4.0.0",
+      qualityScore: 0.95, // High quality for WiHy responses
+      details: response.data.response || "",
+      citations: [`WiHy Health Intelligence v4.0.0 (${response.data.processor_used})`],
+      recommendations: response.data.health_insights.recommendations || [],
+      disclaimer: "This information is provided by WiHy Health Intelligence v4.0.0. Please consult healthcare professionals for medical advice."
     };
   } catch (error) {
     console.error('Error calling WiHy Enhanced API:', error);

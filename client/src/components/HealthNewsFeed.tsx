@@ -59,7 +59,6 @@ const HealthNewsFeed: React.FC<NewsFeedProps> = ({
   maxArticles = 6, 
   onAnalyzeArticle = (query: string) => {
     // Default implementation that will ensure the button always appears
-    console.log('Article analysis requested:', query);
     // You could show a toast notification here or redirect to the analysis page
     window.open(`/analyze?query=${encodeURIComponent(query)}`, '_blank');
   },
@@ -74,7 +73,6 @@ const HealthNewsFeed: React.FC<NewsFeedProps> = ({
     const checkMobile = () => {
       const mobile = window.innerWidth <= 768;
       setIsMobile(mobile);
-      console.log(`Device detection: ${mobile ? 'Mobile' : 'Desktop'} (width: ${window.innerWidth}px)`);
     };
     
     checkMobile();
@@ -96,18 +94,13 @@ const HealthNewsFeed: React.FC<NewsFeedProps> = ({
 
   // Fetch initial articles when component mounts or maxArticles changes
   useEffect(() => {
-    console.log('useEffect triggered - maxArticles:', maxArticles);
-    
     // Only fetch if maxArticles actually changed
     const prevParams = prevFetchParamsRef.current;
     if (prevParams.max !== maxArticles) {
-      console.log('Fetching due to parameter change - prev:', prevParams, 'new:', {max: maxArticles});
       prevFetchParamsRef.current = {max: maxArticles};
       setCurrentPage(1); // Reset to first page when changing parameters
       setHasMorePages(true); // Reset pagination state
       fetchHealthNews(true); // true means reset (first page)
-    } else {
-      console.log('No fetch needed - parameters unchanged');
     }
   }, [maxArticles]);
 
@@ -163,7 +156,6 @@ const HealthNewsFeed: React.FC<NewsFeedProps> = ({
       setTimeout(() => {
         // Double-check conditions after delay
         if (!loading && !loadingMore && hasMorePages) {
-          console.log('Triggering pagination load');
           fetchHealthNews(false); // false means don't reset, load more
         }
       }, 300);
@@ -227,7 +219,6 @@ const HealthNewsFeed: React.FC<NewsFeedProps> = ({
   const fetchHealthNews = async (resetPage: boolean = true) => {
     // Prevent excessive loading on mobile when scrolling up
     if (isMobile && !resetPage && scrollDirection === 'up') {
-      console.log('Preventing pagination load - user scrolling up on mobile');
       return;
     }
     
@@ -241,29 +232,13 @@ const HealthNewsFeed: React.FC<NewsFeedProps> = ({
 
     try {
       const page = resetPage ? 1 : currentPage + 1;
-      console.log('Fetching all news, page:', page);
-      
       const effectiveMaxArticles = isMobile ? Math.max(maxArticles, 12) : maxArticles; // Show more articles on mobile
       
       // Fetch all news (filtering will be done on service side)
-      console.log('Fetching all news content');
       const response = await getAllNews(effectiveMaxArticles * 2);
       
       if (response.success && response.articles && response.articles.length > 0) {
         let processedArticles = response.articles;
-        console.log(`Received ${processedArticles.length} articles from API`);
-        
-        // Debug: Log first few articles and their categories
-        console.log('Sample articles from API:');
-        processedArticles.slice(0, 3).forEach((article, index) => {
-          console.log(`Article ${index + 1}: "${article.title}"`);
-          console.log(`  - ai_category: ${article.ai_category}`);
-          console.log(`  - priority_position: ${(article as any).priority_position || 'none'}`);
-          console.log(`  - image_url: ${article.image_url || 'none'}`);
-        });
-        
-        // API already handles sorting and prioritization
-        console.log('Articles are pre-sorted by API priority system');
         
         // Limit to maxArticles if we're on the first page
         if (resetPage) {
@@ -295,14 +270,12 @@ const HealthNewsFeed: React.FC<NewsFeedProps> = ({
           setHasMorePages(shouldHaveMore && currentTotal < mobileLimit);
         }
       } else {
-        console.log('No articles found on page', page);
         // Try fallback approach
         try {
           const fallbackResponse = await fetch(getApiEndpoint(`/news/articles?limit=${maxArticles}`));
           const fallbackData = await fallbackResponse.json();
           
           if (fallbackData.success && fallbackData.articles && fallbackData.articles.length > 0) {
-            console.log('Fallback succeeded, got articles');
             if (resetPage) {
               setArticles(fallbackData.articles);
             } else {
@@ -316,7 +289,7 @@ const HealthNewsFeed: React.FC<NewsFeedProps> = ({
             setHasMorePages(false);
           }
         } catch (fallbackError) {
-          console.error('Fallback failed:', fallbackError);
+          console.error('News service fallback failed:', fallbackError);
           if (resetPage) {
             setArticles([]);
           }
@@ -337,7 +310,7 @@ const HealthNewsFeed: React.FC<NewsFeedProps> = ({
   
   // Replace the handleAnalyzeWithWihy function (lines 471-493)
 
-  const handleAnalyzeWithWihy = (article: NewsArticle, e: React.MouseEvent) => {
+  const handleAnalyzeWithWihy = async (article: NewsArticle, e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
     
@@ -350,57 +323,71 @@ Summary: ${article.summary || article.description || 'No description available'}
 Source: ${article.source || 'Unknown source'}
 Category: ${article.category || article.ai_category || 'Uncategorized'}`;
 
-    console.log('Starting article analysis:', article.title);
-    
-    // Try the new direct approach first
-    if (triggerSearch) {
-      console.log('Using triggerSearch with custom query');
-      // Also update the search input for visual feedback
+    // Try to directly call WiHy API with enhanced analysis first
+    try {
+      const { wihyAPI } = await import('../services/wihyAPI');
+      
+      // Use the special analyzeWithWiHy method that always enables enhanced analysis
+      const result = await wihyAPI.analyzeWithWiHy(
+        searchQuery,
+        {
+          age: 35, // Default context
+          health_concerns: ['general_health']
+        },
+        'HealthNewsFeed'
+      );
+      
+      // Format the result for display
+      const formattedResult = wihyAPI.formatResponse(result);
+      
+      // Set the search query for visual feedback
       if (setSearchQuery) {
         setSearchQuery(searchQuery);
       }
-      // Pass the query directly to triggerSearch
-      triggerSearch(searchQuery);
-    } else {
-      // FALLBACK: Directly manipulate DOM and submit the form
-      const searchElement = document.querySelector('.search-input') as HTMLInputElement;
-      if (searchElement) {
-        // Direct DOM update for immediate effect
-        searchElement.value = searchQuery;
-        searchElement.focus();
-        
-        // Find the form and submit it directly
-        const form = searchElement.closest('form');
-        if (form) {
-          console.log('Found form, submitting directly');
-          
-          // Also update React state
-          if (setSearchQuery) {
-            setSearchQuery(searchQuery);
-          }
-          
-          // Submit the form
-          setTimeout(() => {
-            form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
-          }, 10);
-        } else {
-          // No form found, fall back to setSearchQuery
-          console.log('No form found, using setSearchQuery only');
-          if (setSearchQuery) {
-            setSearchQuery(searchQuery);
-          }
-        }
-      } else {
-        // Can't find search element, use the props approach
-        console.log('No search input found, using prop methods');
-        
+      
+      // Trigger search with the enhanced result
+      if (triggerSearch) {
+        triggerSearch(formattedResult);
+      } else if (onAnalyzeArticle) {
+        onAnalyzeArticle(formattedResult);
+      }
+      
+    } catch (wihyError) {
+      console.error('Enhanced WiHy analysis failed, falling back to regular search:', wihyError);
+      
+      // Fallback to regular search behavior
+      if (triggerSearch) {
         if (setSearchQuery) {
           setSearchQuery(searchQuery);
         }
-        
-        // Last resort - use the onAnalyzeArticle function
-        if (onAnalyzeArticle) {
-          onAnalyzeArticle(searchQuery);
+        triggerSearch(searchQuery);
+      } else {
+        // FALLBACK: Directly manipulate DOM and submit the form
+        const searchElement = document.querySelector('.search-input') as HTMLInputElement;
+        if (searchElement) {
+          searchElement.value = searchQuery;
+          searchElement.focus();
+          
+          const form = searchElement.closest('form');
+          if (form) {
+            if (setSearchQuery) {
+              setSearchQuery(searchQuery);
+            }
+            setTimeout(() => {
+              form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+            }, 10);
+          } else {
+            if (setSearchQuery) {
+              setSearchQuery(searchQuery);
+            }
+          }
+        } else {
+          if (setSearchQuery) {
+            setSearchQuery(searchQuery);
+          }
+          if (onAnalyzeArticle) {
+            onAnalyzeArticle(searchQuery);
+          }
         }
       }
     }
@@ -442,13 +429,7 @@ Category: ${article.category || article.ai_category || 'Uncategorized'}`;
             {/* Image Section - Using images from vHealth News API */}
             <div className="news-image">
               {(() => {
-                // Debug: Log available image URLs
                 const imageUrl = article.image_url || article.media_url || article.media_thumb_url;
-                if (imageUrl) {
-                  console.log(`Article "${article.title}" has image:`, imageUrl);
-                } else {
-                  console.log(`Article "${article.title}" has no image, using WiHy logo`);
-                }
                 
                 // Use API image if available, otherwise placeholder
                 if (imageUrl) {
@@ -457,15 +438,10 @@ Category: ${article.category || article.ai_category || 'Uncategorized'}`;
                       src={imageUrl} 
                       alt={article.title}
                       onError={(e) => {
-                        console.log('API image failed to load:', imageUrl);
-                        console.log('Falling back to WiHy logo for article:', article.title);
                         // Use WiHy logo as fallback
                         (e.target as HTMLImageElement).src = getWiHyLogoFallback();
                         // Add placeholder class for styling
                         (e.target as HTMLImageElement).classList.add('placeholder-image');
-                      }}
-                      onLoad={() => {
-                        console.log('API image loaded successfully:', imageUrl);
                       }}
                     />
                   );

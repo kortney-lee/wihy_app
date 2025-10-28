@@ -31,20 +31,11 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
 
   // Process file and analyze it with Vision Analysis Service
   const processFile = useCallback(async (file: File) => {
-    console.log('🔍 STEP 1: File received:', {
-      name: file.name,
-      type: file.type,
-      size: file.size
-    });
-    
     setIsProcessing(true);
     
     try {
-      console.log('🔍 STEP 2: Using Vision Analysis Service for comprehensive analysis...');
-      
       // Use Vision Analysis Service for comprehensive detection
       const visionResult = await visionAnalysisService.analyzeImage(file);
-      console.log('🔍 STEP 3: Vision analysis result:', visionResult);
       
       let analysisText = 'Image analyzed';
       
@@ -52,25 +43,45 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
         // Format comprehensive analysis results
         analysisText = visionAnalysisService.formatForDisplay(visionResult);
         
-        // Also try the original WiHy API for additional context
+        // Also try enhanced WiHy API analysis for additional context
         try {
-          console.log('🔍 STEP 4: Also checking WiHy API for additional context...');
           const { wihyAPI } = await import('../../services/wihyAPI');
-          const wihyResult = await wihyAPI.scanFood(file);
           
-          if (wihyResult.success && 'data' in wihyResult && wihyResult.data?.ai_response?.response) {
-            analysisText = `${analysisText}\n\nAI Health Analysis: ${wihyResult.data.ai_response.response}`;
+          // Create a detailed query for enhanced analysis
+          const enhancedQuery = `Analyze this food image comprehensively. 
+Vision Analysis Results: ${analysisText}
+Provide detailed health insights, nutritional benefits, potential risks, and recommendations.`;
+          
+          // Use the special analyzeWithWiHy method for enhanced analysis
+          const wihyResult = await wihyAPI.analyzeWithWiHy(
+            enhancedQuery,
+            {
+              health_concerns: ['nutrition', 'food_safety']
+            },
+            'ImageUploadModal'
+          );
+          
+          if (wihyResult.success && wihyResult.data) {
+            // Format the enhanced analysis
+            const enhancedAnalysis = wihyAPI.formatResponse(wihyResult);
+            analysisText = `${analysisText}\n\n=== Enhanced WiHy Analysis ===\n${enhancedAnalysis}`;
           }
         } catch (wihyError) {
-          console.log('ℹ️ WiHy API not available, using Vision Analysis results only');
+          // Fallback to basic scan method
+          try {
+            const { wihyAPI } = await import('../../services/wihyAPI');
+            const basicResult = await wihyAPI.scanFood(file);
+            
+            if (basicResult.success && basicResult.message) {
+              analysisText = `${analysisText}\n\nBasic AI Health Analysis: ${basicResult.message}`;
+            }
+          } catch (basicError) {
+            // Basic WiHy API also not available, using Vision Analysis results only
+          }
         }
       } else {
-        console.log('❌ Vision analysis failed, falling back to basic analysis');
         analysisText = visionResult.error || 'Image analysis unavailable';
       }
-      
-      console.log('🔍 STEP 5: Final analysis text:', analysisText);
-      console.log('🔍 STEP 6: Triggering analysis completion...');
       
       onAnalysisComplete(analysisText);
       
@@ -175,13 +186,9 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
 
   // Handle file input
   const handleFileInput = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
-    console.log('📁 File input triggered');
     const file = e.target.files?.[0];
-    console.log('📁 Selected file:', file);
     if (file) {
       await processFile(file);
-    } else {
-      console.log('❌ No file selected');
     }
   }, [processFile]);
 

@@ -204,28 +204,30 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ isOpen, onClose, searchQuery, s
 
       // Extract just the main response without full formatting
       let aiResponse = '';
-      if ('success' in response && 'data' in response && response.data && 'response' in response.data) {
+      if (typeof response === 'object' && response !== null && 'success' in response && 'data' in response) {
         const healthResp = response as any;
-        aiResponse = healthResp.data.response;
-        
-        // Clean up the response to be more conversational
-        aiResponse = aiResponse
-          .replace(/🥗.*?\*\*/g, '') // Remove emoji headers
-          .replace(/\*\*.*?\*\*/g, '') // Remove bold formatting
-          .replace(/📋.*?:/g, '') // Remove section headers
-          .replace(/•/g, '-') // Replace bullets
-          .split('\n')
-          .filter(line => line.trim() && !line.includes('Biblical') && !line.includes('Corinthians'))
-          .slice(0, 3) // Take first 3 meaningful lines
-          .join(' ')
-          .trim();
+        if (healthResp.data && 'response' in healthResp.data) {
+          aiResponse = healthResp.data.response;
           
-        // If response is too long, truncate and add follow-up prompt
-        if (aiResponse.length > 200) {
-          aiResponse = aiResponse.substring(0, 200).trim() + '... What would you like to know more about?';
+          // Clean up the response to be more conversational
+          aiResponse = aiResponse
+            .replace(/🥗.*?\*\*/g, '') // Remove emoji headers
+            .replace(/\*\*.*?\*\*/g, '') // Remove bold formatting
+            .replace(/📋.*?:/g, '') // Remove section headers
+            .replace(/•/g, '-') // Replace bullets
+            .split('\n')
+            .filter(line => line.trim() && !line.includes('Biblical') && !line.includes('Corinthians'))
+            .slice(0, 3) // Take first 3 meaningful lines
+            .join(' ')
+            .trim();
+            
+          // If response is too long, truncate and add follow-up prompt
+          if (aiResponse.length > 200) {
+            aiResponse = aiResponse.substring(0, 200).trim() + '... What would you like to know more about?';
+          }
         }
       } else {
-        aiResponse = wihyAPI.formatWihyResponse(response);
+        aiResponse = wihyAPI.formatWihyResponse(response as any);
       }
       
       const aiMessage: ChatMessage = {
