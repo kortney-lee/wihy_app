@@ -3,7 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import './styles/VHealthSearch.css';
 import ImageUploadModal from './components/ui/ImageUploadModal';
 import MultiAuthLogin from './components/shared/MultiAuthLogin';
-import { wihyAPI } from './services/wihyAPI';
+import ChatWidget from './components/ui/ChatWidget';
+import NutritionChart from './components/charts/NutritionChart';
+import ResultQualityPie from './components/charts/ResultQualityPie';
+import { wihyAPI, isUnifiedResponse, UnifiedResponse, WihyResponse } from './services/wihyAPI';
 import { searchCache } from './services/searchCache';
 import { foodAnalysisService } from './services/foodAnalysisService';
 import HealthNewsFeed from './components/HealthNewsFeed';
@@ -39,6 +42,11 @@ const VHealthSearch: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [placeholder, setPlaceholder] = useState(rotatingPrompts[0]);
   
+  // Results display state (like VHealthApp)
+  const [currentApiResponse, setCurrentApiResponse] = useState<UnifiedResponse | null>(null);
+  const [currentChatResponse, setCurrentChatResponse] = useState<string>('');
+  const [showResults, setShowResults] = useState(false);
+  
   const navigate = useNavigate();
   const searchInputRef = useRef<HTMLInputElement>(null);
   const recognitionRef = useRef<any>(null);
@@ -60,19 +68,19 @@ const VHealthSearch: React.FC = () => {
   }, []);
 
   // ================================
-  // ALLOW SCROLLING WHEN NEWS FEED IS OPEN
+  // ALLOW SCROLLING WHEN NEWS FEED OR RESULTS ARE OPEN
   // ================================
   useEffect(() => {
-    if (showFeelingHealthyContent) {
-      // Remove landing page classes to allow scrolling when news feed is open
+    if (showFeelingHealthyContent || showResults) {
+      // Remove landing page classes to allow scrolling when news feed or results are open
       document.body.classList.remove('landing-page-active');
       document.documentElement.classList.remove('landing-page-active');
     } else {
-      // Re-add landing page classes when news feed is closed
+      // Re-add landing page classes when news feed and results are closed
       document.body.classList.add('landing-page-active');
       document.documentElement.classList.add('landing-page-active');
     }
-  }, [showFeelingHealthyContent]);
+  }, [showFeelingHealthyContent, showResults]);
 
   // ================================
   // SCROLL DETECTION FOR LOGIN BUTTON
@@ -207,10 +215,13 @@ const VHealthSearch: React.FC = () => {
   
   /**
    * CLEAR SEARCH INPUT
-   * Clears search input and resets its height to default
+   * Clears search input, resets its height to default, and hides results
    */
   const handleClearSearch = () => {
     setSearchQuery('');
+    setShowResults(false);
+    setCurrentApiResponse(null);
+    setCurrentChatResponse('');
     // Force a reset after state update
     setTimeout(() => {
       const el = document.querySelector('.search-input') as HTMLTextAreaElement;
@@ -253,9 +264,29 @@ const VHealthSearch: React.FC = () => {
   // ================================
 
   /**
+   * BACK TO SEARCH HANDLER
+   * Clears results and returns to search interface
+   */
+  const handleBackToSearch = () => {
+    setShowResults(false);
+    setCurrentApiResponse(null);
+    setCurrentChatResponse('');
+    setSearchQuery('');
+  };
+
+  /**
+   * NEW SEARCH HANDLER
+   * Handles new search from chat widget or other components
+   */
+  const handleNewSearch = (newQuery: string) => {
+    setSearchQuery(newQuery);
+    handleSearch(newQuery);
+  };
+
+  /**
    * MAIN SEARCH HANDLER
    * Primary search function that handles text-based health queries
-   * Flow: Check cache → API call → Save to cache → Navigate to results
+   * Flow: Check cache → API call → Save to cache → Display results inline
    * Uses 4-step fallback strategy for reliability
    */
   const handleSearch = async (queryParam?: string) => {
@@ -316,17 +347,48 @@ const VHealthSearch: React.FC = () => {
             await new Promise(resolve => setTimeout(resolve, 300));
             
             setIsLoading(false);
-            logger.debug('Navigating to results page with data');
             
-            // Pass the fresh results via navigation state
-            navigate(`/results?q=${encodeURIComponent(queryToUse)}`, {
-              state: {
-                results: searchResults,
-                apiResponse: wihyResponse, // Include the raw API response for ChatWidget
-                dataSource: 'wihy',
-                fromSearch: true
+            // Store the unified API response for chart components
+            if (isUnifiedResponse(wihyResponse)) {
+              setCurrentApiResponse(wihyResponse as UnifiedResponse);
+            } else {
+              setCurrentApiResponse(null);
+            }
+
+            // Extract response text for ChatWidget
+            let responseText = '';
+            if (isUnifiedResponse(wihyResponse)) {
+              const data = (wihyResponse as UnifiedResponse).data;
+              if (data.ai_response?.response) {
+                responseText = data.ai_response.response;
+              } else if (data.response) {
+                // Handle JSON string responses
+                if (typeof data.response === 'string') {
+                  try {
+                    const parsed = JSON.parse(data.response.replace(/'/g, '"'));
+                    responseText = parsed.core_principle || parsed.message || data.response;
+                  } catch {
+                    responseText = data.response;
+                  }
+                } else {
+                  responseText = data.response;
+                }
               }
-            });
+            } else {
+              // Legacy WihyResponse format
+              const wihyResp = (wihyResponse as WihyResponse).wihy_response;
+              if (wihyResp && typeof wihyResp === 'object') {
+                responseText = (wihyResp as any).core_principle || (wihyResp as any).message || 'Health information provided';
+              } else {
+                responseText = 'Health information provided';
+              }
+            }
+
+            // Set chat response and show results
+            setCurrentChatResponse(responseText);
+            setShowResults(true);
+            
+            logger.debug('Showing results inline with chat widget and charts');
             return;
           } else {
             throw new Error('WiHy API returned invalid results');
@@ -488,15 +550,49 @@ const VHealthSearch: React.FC = () => {
             await new Promise(resolve => setTimeout(resolve, 300));
             
             setIsLoading(false);
-            // Pass the fresh nutrition results via navigation state
-            navigate(`/results?q=${encodeURIComponent(foodName)}`, {
-              state: {
-                results: nutritionResults,
-                apiResponse: wihyResponse, // Include the raw API response for ChatWidget
-                dataSource: 'wihy',
-                fromSearch: true
+            
+            // Store the unified API response for chart components
+            if (isUnifiedResponse(wihyResponse)) {
+              setCurrentApiResponse(wihyResponse as UnifiedResponse);
+            } else {
+              setCurrentApiResponse(null);
+            }
+
+            // Extract response text for ChatWidget
+            let responseText = '';
+            if (isUnifiedResponse(wihyResponse)) {
+              const data = (wihyResponse as UnifiedResponse).data;
+              if (data.ai_response?.response) {
+                responseText = data.ai_response.response;
+              } else if (data.response) {
+                // Handle JSON string responses
+                if (typeof data.response === 'string') {
+                  try {
+                    const parsed = JSON.parse(data.response.replace(/'/g, '"'));
+                    responseText = parsed.core_principle || parsed.message || data.response;
+                  } catch {
+                    responseText = data.response;
+                  }
+                } else {
+                  responseText = data.response;
+                }
               }
-            });
+            } else {
+              // Legacy WihyResponse format
+              const wihyResp = (wihyResponse as WihyResponse).wihy_response;
+              if (wihyResp && typeof wihyResp === 'object') {
+                responseText = (wihyResp as any).core_principle || (wihyResp as any).message || 'Nutrition information provided';
+              } else {
+                responseText = 'Nutrition information provided';
+              }
+            }
+
+            // Set the analyzed food name as the search query and show results
+            setSearchQuery(foodName);
+            setCurrentChatResponse(responseText);
+            setShowResults(true);
+            
+            logger.debug('Showing nutrition results inline with chat widget and charts');
             return;
           } else {
             throw new Error('WiHy API returned invalid nutrition results');
@@ -925,7 +1021,59 @@ const VHealthSearch: React.FC = () => {
           >
             I'm Feeling Healthy
           </button>
+          
+          {/* DEMO BUTTON - Only shows in development */}
+          {process.env.NODE_ENV === 'development' && (
+            <button 
+              onClick={() => navigate('/demo')}
+              className="search-btn secondary"
+              type="button"
+              style={{ color: '#666666', fontSize: '14px' }}
+            >
+              📋 View Demo Results
+            </button>
+          )}
         </div>
+        
+        {/* DEVELOPMENT SHORTCUTS - Only shows in development */}
+        {process.env.NODE_ENV === 'development' && (
+          <div style={{ 
+            marginTop: '20px', 
+            textAlign: 'center',
+            opacity: 0.7,
+            fontSize: '12px'
+          }}>
+            <p style={{ color: '#666', marginBottom: '10px' }}>Development Mode - Quick Links:</p>
+            <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap' }}>
+              <a 
+                href="/demo" 
+                style={{ 
+                  color: '#1a73e8', 
+                  textDecoration: 'none',
+                  padding: '4px 8px',
+                  border: '1px solid #e0e0e0',
+                  borderRadius: '4px',
+                  fontSize: '11px'
+                }}
+              >
+                Demo Results Page
+              </a>
+              <a 
+                href="/test" 
+                style={{ 
+                  color: '#1a73e8', 
+                  textDecoration: 'none',
+                  padding: '4px 8px',
+                  border: '1px solid #e0e0e0',
+                  borderRadius: '4px',
+                  fontSize: '11px'
+                }}
+              >
+                Test Charts
+              </a>
+            </div>
+          </div>
+        )}
       </div>
       
       {/* HEALTH NEWS FEED - Shows when "I'm Feeling Healthy" is active */}
@@ -971,6 +1119,57 @@ const VHealthSearch: React.FC = () => {
                 }
               }}
             />
+          </div>
+        </div>
+      )}
+
+      {/* RESULTS SECTION - Shows after search like VHealthApp */}
+      {showResults && (
+        <div className="content-layout" style={{ 
+          display: 'flex', 
+          marginTop: '20px', 
+          gap: '20px',
+          padding: '20px',
+          flex: '1'
+        }}>
+          {/* Chat Widget */}
+          <div className="chat-section" style={{ flex: '1', minWidth: '300px' }}>
+            <ChatWidget
+              isOpen={true}
+              onClose={handleBackToSearch}
+              currentContext="search results"
+              inline={true}
+              searchQuery={searchQuery}
+              searchResponse={currentChatResponse}
+            />
+          </div>
+
+          {/* Charts Section */}
+          <div className="charts-section" style={{ flex: '1', minWidth: '300px' }}>
+            <div className="analysis-charts">
+              <h3 style={{ marginBottom: '20px', color: '#333' }}>Analysis Charts</h3>
+              
+              {/* Quality Analysis Chart */}
+              <div className="chart-container" style={{ marginBottom: '30px' }}>
+                <h4 style={{ marginBottom: '15px', color: '#666' }}>Quality Analysis</h4>
+                <ResultQualityPie 
+                  query={searchQuery}
+                  results={currentChatResponse}
+                  dataSource="wihy"
+                  citations={[]}
+                  apiResponse={currentApiResponse}
+                />
+              </div>
+
+              {/* Nutrition Breakdown */}
+              <div className="chart-container">
+                <h4 style={{ marginBottom: '15px', color: '#666' }}>Nutrition Breakdown</h4>
+                <NutritionChart 
+                  apiResponse={currentApiResponse}
+                  query={searchQuery}
+                />
+              </div>
+            </div>
           </div>
         </div>
       )}

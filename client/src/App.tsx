@@ -367,6 +367,79 @@ Please try your search again in a moment! 😅`;
   );
 };
 
+// Demo component for development - shows results without API calls
+const DemoResultsPage: React.FC = () => {
+  const sampleQuery = "Is quinoa healthy?";
+  const sampleResponse = `# Comprehensive Health Analysis: Quinoa
+
+**Overview:**
+Quinoa is a nutrient-dense pseudocereal that offers exceptional health benefits. Originally cultivated in the Andes mountains, this superfood has gained worldwide recognition for its complete protein profile and versatility.
+
+**Key Health Benefits:**
+• **Complete Protein**: Contains all 9 essential amino acids
+• **High Fiber**: Supports digestive health and blood sugar regulation  
+• **Rich in Minerals**: Excellent source of iron, magnesium, and phosphorus
+• **Gluten-Free**: Safe for those with celiac disease or gluten sensitivity
+• **Low Glycemic Index**: Helps maintain stable blood sugar levels
+
+**Nutritional Highlights:**
+- 8g protein per cooked cup
+- 5g fiber per serving
+- Rich in folate, manganese, and antioxidants
+- Contains heart-healthy monounsaturated fats
+
+**Recommendations:**
+✓ Rinse quinoa before cooking to remove bitter saponins
+✓ Toast dry quinoa for enhanced nutty flavor
+✓ Use as a base for salads, bowls, or as a rice substitute
+✓ Combine with vegetables and healthy fats for optimal nutrition
+
+This analysis is based on peer-reviewed nutritional research and USDA food composition data.`;
+
+  const sampleApiResponse = {
+    success: true,
+    data: {
+      ai_response: {
+        response: sampleResponse
+      },
+      confidence_score: 0.92,
+      charts: {
+        nutrition_breakdown: {
+          carbohydrates: 39,
+          protein: 22,
+          fat: 16,
+          fiber: 12,
+          minerals: 11
+        },
+        health_quality: {
+          chart_type: "dual_quality",
+          labels: ["Food Quality", "Research Quality"],
+          values: [92, 88]
+        }
+      }
+    }
+  };
+
+  return (
+    <SearchResults
+      query={sampleQuery}
+      results={sampleResponse}
+      onBackToSearch={() => window.location.href = '/'}
+      onNewSearch={(query) => console.log('Demo search:', query)}
+      isLoading={false}
+      dataSource="local"
+      citations={['Journal of Nutrition (2024)', 'USDA Food Database', 'American Heart Association']}
+      recommendations={[
+        'Consult with healthcare professionals for personalized advice',
+        'Consider individual dietary restrictions and allergies',
+        'Follow evidence-based nutritional guidelines'
+      ]}
+      disclaimer="This is demo data for development purposes. Always consult healthcare professionals for real medical advice."
+      apiResponse={sampleApiResponse}
+    />
+  );
+};
+
 const App: React.FC = () => {
   logger.debug("App component rendered");
   
@@ -376,6 +449,10 @@ const App: React.FC = () => {
         <Route path="/" element={<VHealthSearch />} />
         <Route path="/results" element={<ResultsPage />} />
         <Route path="/test" element={<TestChartsPage />} />
+        {/* Demo route - only available in development */}
+        {process.env.NODE_ENV === 'development' && (
+          <Route path="/demo" element={<DemoResultsPage />} />
+        )}
       </Routes>
     </Router>
   );
