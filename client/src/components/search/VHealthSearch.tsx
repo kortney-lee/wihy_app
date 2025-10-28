@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import '../../styles/VHealthSearch.css';
 import ImageUploadModal from '../ui/ImageUploadModal';
 import MultiAuthLogin from '../shared/MultiAuthLogin';
@@ -48,9 +48,22 @@ const VHealthSearch: React.FC = () => {
   const [showResults, setShowResults] = useState(false);
   
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const searchInputRef = useRef<HTMLInputElement>(null);
   const recognitionRef = useRef<any>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
+
+  // ================================
+  // HANDLE URL SEARCH PARAMETERS (Optional auto-population, no auto-search)
+  // ================================
+  useEffect(() => {
+    const queryFromUrl = searchParams.get('q');
+    if (queryFromUrl && queryFromUrl.trim()) {
+      console.log('🔍 VHealthSearch: Auto-populating from URL parameter:', queryFromUrl);
+      setSearchQuery(queryFromUrl);
+      // Note: No auto-search here to avoid conflicts with direct navigation
+    }
+  }, [searchParams]);
 
   // ================================
   // PREVENT SCROLLBARS ON LANDING PAGE
@@ -349,30 +362,83 @@ const VHealthSearch: React.FC = () => {
           responseType: typeof wihyResponse,
           timestamp: new Date().toISOString(),
           hasData: !!(wihyResponse as any).data,
-          responseKeys: Object.keys(wihyResponse)
+          responseKeys: Object.keys(wihyResponse),
+          fullResponse: wihyResponse  // Debug: See the full response
         });
         
-        if (wihyResponse.success) {
+        // Check for response format - handle both production and local server responses
+        const isProductionResponse = wihyResponse.success === true;
+        const isLocalResponse = !('success' in wihyResponse) && 'analysis' in wihyResponse;
+        
+        // 🔍 MAIN SEARCH LOGGING: Response format check
+        console.log('🔍 MAIN SEARCH RESPONSE FORMAT CHECK:', {
+          timestamp: new Date().toISOString(),
+          hasSuccessField: 'success' in wihyResponse,
+          hasAnalysisField: 'analysis' in wihyResponse,
+          hasDataField: 'data' in wihyResponse,
+          isValidLocalResponse: isLocalResponse,
+          isValidProductionResponse: isProductionResponse
+        });
+        
+        if (isProductionResponse || isLocalResponse) {
           // Handle both unified and legacy response formats
           let summary = 'Health information provided';
-          if ('data' in wihyResponse) {
-            // New unified API response format
+          let searchResults;
+          
+          if (isLocalResponse) {
+            // Handle local development server response format
+            const localResp = wihyResponse as any;
+            const analysis = localResp.analysis;
+            
+            summary = analysis?.summary || 'Health information provided';
+            
+            searchResults = {
+              summary: summary,
+              details: analysis?.details || summary,
+              sources: [], // Local server doesn't provide sources in same format
+              recommendations: analysis?.recommendations || [],
+              relatedTopics: [],
+              medicalDisclaimer: 'This guidance is based on evidence-based health principles. Always consult healthcare professionals for personalized medical advice.',
+              dataSource: 'wihy'
+            };
+            
+            // 🔍 MAIN SEARCH LOGGING: Local response parsed
+            console.log('🔍 LOCAL RESPONSE PARSED:', {
+              timestamp: new Date().toISOString(),
+              summaryLength: summary?.length || 0,
+              detailsLength: searchResults.details?.length || 0,
+              recommendationsCount: searchResults.recommendations?.length || 0,
+              hasCharts: !!(analysis?.charts),
+              analysisKeys: Object.keys(analysis || {})
+            });
+            
+          } else if ('data' in wihyResponse) {
+            // New unified API response format  
             summary = (wihyResponse as any).data?.response || summary;
+            
+            searchResults = {
+              summary: summary,
+              details: wihyAPI.formatWihyResponse(wihyResponse),
+              sources: wihyAPI.extractCitations(wihyResponse),
+              recommendations: wihyAPI.extractRecommendations(wihyResponse),
+              relatedTopics: [],
+              medicalDisclaimer: 'This guidance is based on evidence-based health principles. Always consult healthcare professionals for personalized medical advice.',
+              dataSource: 'wihy'
+            };
           } else {
             // Legacy WihyResponse format
             summary = (wihyResponse as any).wihy_response?.core_principle || summary;
+            
+            searchResults = {
+              summary: summary,
+              details: wihyAPI.formatWihyResponse(wihyResponse),
+              sources: wihyAPI.extractCitations(wihyResponse),
+              recommendations: wihyAPI.extractRecommendations(wihyResponse),
+              relatedTopics: [],
+              medicalDisclaimer: 'This guidance is based on evidence-based health principles. Always consult healthcare professionals for personalized medical advice.',
+              dataSource: 'wihy'
+            };
           }
-          
-          // Convert WiHy response to expected format
-          const searchResults = {
-            summary: summary,
-            details: wihyAPI.formatWihyResponse(wihyResponse),
-            sources: wihyAPI.extractCitations(wihyResponse),
-            recommendations: wihyAPI.extractRecommendations(wihyResponse),
-            relatedTopics: [],
-            medicalDisclaimer: 'This guidance is based on evidence-based health principles. Always consult healthcare professionals for personalized medical advice.',
-            dataSource: 'wihy'
-          };
           
           console.log('WiHy search results received:', searchResults);
         
@@ -384,37 +450,31 @@ const VHealthSearch: React.FC = () => {
           if (isValidResult) {
             logger.info('Valid search results confirmed');
             
-            // Results ready - display inline
+            // Show "Results ready!" for a moment to give user feedback
             setLoadingMessage('Results ready!');
-            await new Promise(resolve => setTimeout(resolve, 300));
+            await new Promise(resolve => setTimeout(resolve, 500));
             
-            setIsLoading(false);
-            
-            // Store results for inline display
-            if (isUnifiedResponse(wihyResponse)) {
-              setCurrentApiResponse(wihyResponse);
-              setCurrentChatResponse(wihyResponse.data?.ai_response?.response || summary);
-            } else {
-              // Convert WihyResponse to UnifiedResponse format for consistency
-              const unifiedResponse: UnifiedResponse = {
-                success: true,
-                data: {
-                  response: wihyResponse.wihy_response?.core_principle || summary,
-                  ai_response: {
-                    response: wihyResponse.wihy_response?.core_principle || summary,
-                    enhanced: true,
-                    service: 'wihy',
-                    confidence: 0.9
-                  }
+            // Navigate to SearchResults with the results
+            navigate(`/results?q=${encodeURIComponent(queryToUse)}`, {
+              state: {
+                results: {
+                  summary: summary,
+                  details: summary, // Use the extracted summary
+                  sources: wihyAPI.extractCitations(wihyResponse),
+                  recommendations: wihyAPI.extractRecommendations(wihyResponse),
+                  relatedTopics: [],
+                  medicalDisclaimer: 'This guidance is based on evidence-based health principles. Always consult healthcare professionals for personalized medical advice.',
+                  dataSource: 'wihy'
                 },
-                service_used: 'wihy'
-              };
-              setCurrentApiResponse(unifiedResponse);
-              setCurrentChatResponse(wihyResponse.wihy_response?.core_principle || summary);
-            }
-            setShowResults(true);
+                apiResponse: wihyResponse,
+                dataSource: 'wihy',
+                fromSearch: true
+              }
+            });
             
-            logger.debug('Displaying results inline');
+            // Turn off loading after navigation
+            setIsLoading(false);
+            logger.debug('Navigating to SearchResults route');
             return;
           } else {
             throw new Error('WiHy API returned invalid results');

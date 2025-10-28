@@ -5,15 +5,9 @@ import { foodAnalysisService } from '../../services/foodAnalysisService';
 import ImageUploadModal from '../ui/ImageUploadModal';
 import MultiAuthLogin from '../shared/MultiAuthLogin';
 import ResultQualityPie from '../charts/ResultQualityPie';
-import ActivityChart from '../charts/ActivityChart';
-import WeightTrendChart from '../charts/WeightTrendChart';
-import SleepChart from '../charts/SleepChart';
-import BMIBodyFatChart from '../charts/BMIBodyFatChart';
-import DopamineChart from '../charts/DopamineChart';
-import HealthRiskChart from '../charts/HealthRiskChart';
+// Chart imports removed - charts now handled by vHealthApp with new API structure
 import ChatWidget from '../ui/ChatWidget';
 import '../../styles/VHealthSearch.css';
-import '../../styles/charts.css';
 import Header from '../shared/Header';
 import Spinner from '../ui/Spinner';
 
@@ -299,10 +293,17 @@ const SearchResults: React.FC<SearchResultsProps> = ({
   // Check if this is a test query
   const isTestQuery = query.toLowerCase() === 'test';
 
+  // Handle new search from header
+  const handleHeaderSearch = (query: string) => {
+    console.log('🔍 HEADER SEARCH initiated:', { query });
+    // Don't manage loading here - let the parent handle it
+    onNewSearch(query);
+  };
+
   // Handle new search from ChatWidget
   const handleChatSearch = (query: string, response: any) => {
     console.log('🔍 ChatWidget triggered new search:', { query, response });
-    // Trigger a new search with the query from the chat
+    // Don't manage loading here - let the parent handle it
     onNewSearch(query);
   };
 
@@ -340,11 +341,13 @@ const SearchResults: React.FC<SearchResultsProps> = ({
         <Header
           variant="results"
           showLogin={true}
+          showSearchInput={true}
+          onSearchSubmit={handleHeaderSearch}
         />
       </div>
 
-      {/* Show spinner when searching from header */}
-      {(isLoading || isSearching) && (
+      {/* Show spinner when loading from parent */}
+      {isLoading && (
         <Spinner
           overlay={true}
           title="Analyzing with AI..."
@@ -450,70 +453,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({
                         dataSource={dataSource === 'wihy' ? 'vnutrition' : dataSource}
                       />
                     </div>
-                    
-                    {/* Enhanced Health Dashboard Charts */}
-                    {query.toLowerCase().includes('activity') || query.toLowerCase().includes('steps') || query.toLowerCase().includes('exercise') ? (
-                      <div className="dashboard-chart-card">
-                        <h4 style={{ marginBottom: '12px', color: '#374151', fontSize: '14px' }}>Activity Trends</h4>
-                        <ActivityChart period="week" chartType="steps" />
-                      </div>
-                    ) : null}
-
-                    {query.toLowerCase().includes('weight') || query.toLowerCase().includes('bmi') || query.toLowerCase().includes('body') ? (
-                      <div className="dashboard-chart-card">
-                        <h4 style={{ marginBottom: '12px', color: '#374151', fontSize: '14px' }}>Weight & BMI Tracking</h4>
-                        <WeightTrendChart period="week" />
-                      </div>
-                    ) : null}
-
-                    {query.toLowerCase().includes('sleep') || query.toLowerCase().includes('rest') ? (
-                      <div className="dashboard-chart-card">
-                        <h4 style={{ marginBottom: '12px', color: '#374151', fontSize: '14px' }}>Sleep Analysis</h4>
-                        <SleepChart period="week" chartType="duration" />
-                      </div>
-                    ) : null}
-
-                    {/* Dopamine-related charts */}
-                    {query.toLowerCase().includes('dopamine') || query.toLowerCase().includes('mood') || query.toLowerCase().includes('motivation') ? (
-                      <div className="dashboard-chart-card">
-                        <h4 style={{ marginBottom: '12px', color: '#374151', fontSize: '14px' }}>Dopamine Analysis</h4>
-                        <DopamineChart period="week" chartType="levels" />
-                      </div>
-                    ) : null}
-
-                    {/* Health risk charts */}
-                    {query.toLowerCase().includes('risk') || query.toLowerCase().includes('health risk') || query.toLowerCase().includes('prevention') ? (
-                      <div className="dashboard-chart-card">
-                        <h4 style={{ marginBottom: '12px', color: '#374151', fontSize: '14px' }}>Health Risk Assessment</h4>
-                        <HealthRiskChart period="week" chartType="risk-factors" />
-                      </div>
-                    ) : null}
-
-                    {/* Default health overview charts when no specific topic is mentioned */}
-                    {(!query.toLowerCase().includes('activity') && 
-                      !query.toLowerCase().includes('weight') && 
-                      !query.toLowerCase().includes('sleep') &&
-                      !query.toLowerCase().includes('steps') &&
-                      !query.toLowerCase().includes('exercise') &&
-                      !query.toLowerCase().includes('bmi') &&
-                      !query.toLowerCase().includes('body') &&
-                      !query.toLowerCase().includes('rest') &&
-                      !query.toLowerCase().includes('dopamine') &&
-                      !query.toLowerCase().includes('mood') &&
-                      !query.toLowerCase().includes('motivation') &&
-                      !query.toLowerCase().includes('risk') &&
-                      !query.toLowerCase().includes('prevention')) ? (
-                      <>
-                        <div className="dashboard-chart-card">
-                          <h4 style={{ marginBottom: '12px', color: '#374151', fontSize: '14px' }}>Health Overview</h4>
-                          <ActivityChart period="week" chartType="activity" />
-                        </div>
-                        <div className="dashboard-chart-card">
-                          <h4 style={{ marginBottom: '12px', color: '#374151', fontSize: '14px' }}>Risk Assessment</h4>
-                          <HealthRiskChart period="week" chartType="categories" />
-                        </div>
-                      </>
-                    ) : null}
+                    {/* Chart components removed - now handled by vHealthApp with new API structure */}
                   </>
                 )}
               </div>
