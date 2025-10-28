@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { getAllNews, NewsArticle } from '../services/newsService';
+import { getAllNews, getPaginatedNews, NewsArticle, ARTICLES_PER_PAGE } from '../services/newsService';
 import { useNavigate } from 'react-router-dom';
 import { getApiEndpoint } from '../config/apiConfig';
 import './HealthNewsFeed.css';
@@ -232,64 +232,42 @@ const HealthNewsFeed: React.FC<NewsFeedProps> = ({
 
     try {
       const page = resetPage ? 1 : currentPage + 1;
-      const effectiveMaxArticles = isMobile ? Math.max(maxArticles, 12) : maxArticles; // Show more articles on mobile
       
-      // Fetch all news (filtering will be done on service side)
-      const response = await getAllNews(effectiveMaxArticles * 2);
+      // Use new pagination system: fetch 100 results, cache for 5 mins, show 12 per page
+      const response = await getPaginatedNews(page);
       
       if (response.success && response.articles && response.articles.length > 0) {
-        let processedArticles = response.articles;
-        
-        // Limit to maxArticles if we're on the first page
         if (resetPage) {
-          processedArticles = processedArticles.slice(0, effectiveMaxArticles);
-        } else {
-          // For subsequent pages, limit to maxArticles more
-          processedArticles = processedArticles.slice(0, effectiveMaxArticles);
-        }
-        
-        if (resetPage) {
-          setArticles(processedArticles);
+          setArticles(response.articles);
         } else {
           // Append new articles to existing ones
-          setArticles(prev => [...prev, ...processedArticles]);
+          setArticles(prev => [...prev, ...response.articles]);
         }
         
-        // If API doesn't provide pagination info, infer it from response length
-        if ('pagination' in response && response.pagination && 
-            typeof response.pagination === 'object' && 
-            'has_next_page' in response.pagination) {
-          setHasMorePages(response.pagination.has_next_page as boolean);
-        } else {
-          // If we received at least as many articles as we requested, assume there are more
-          // But on mobile, limit total articles to prevent infinite scroll issues
-          const shouldHaveMore = response.articles.length >= maxArticles;
-          const mobileLimit = isMobile ? 50 : Infinity; // Limit to 50 articles on mobile
-          const currentTotal = resetPage ? processedArticles.length : articles.length + processedArticles.length;
-          
-          setHasMorePages(shouldHaveMore && currentTotal < mobileLimit);
+        // Use pagination info from the new service
+        setHasMorePages(response.hasNextPage);
+        
+        if (process.env.NODE_ENV === 'development') {
+          console.log('📄 Pagination info:', {
+            currentPage: response.currentPage,
+            totalPages: response.totalPages,
+            totalCount: response.totalCount,
+            hasNextPage: response.hasNextPage,
+            articlesOnThisPage: response.articles.length
+          });
         }
       } else {
-        // Try fallback approach
-        try {
-          const fallbackResponse = await fetch(getApiEndpoint(`/news/articles?limit=${maxArticles}`));
-          const fallbackData = await fallbackResponse.json();
-          
-          if (fallbackData.success && fallbackData.articles && fallbackData.articles.length > 0) {
-            if (resetPage) {
-              setArticles(fallbackData.articles);
-            } else {
-              setArticles(prev => [...prev, ...fallbackData.articles]);
-            }
-            setHasMorePages(fallbackData.articles.length >= maxArticles);
+        // Fallback: try old method if pagination fails
+        const fallbackResponse = await getAllNews(ARTICLES_PER_PAGE);
+        
+        if (fallbackResponse.success && fallbackResponse.articles && fallbackResponse.articles.length > 0) {
+          if (resetPage) {
+            setArticles(fallbackResponse.articles);
           } else {
-            if (resetPage) {
-              setArticles([]);
-            }
-            setHasMorePages(false);
+            setArticles(prev => [...prev, ...fallbackResponse.articles]);
           }
-        } catch (fallbackError) {
-          console.error('News service fallback failed:', fallbackError);
+          setHasMorePages(fallbackResponse.articles.length >= ARTICLES_PER_PAGE);
+        } else {
           if (resetPage) {
             setArticles([]);
           }

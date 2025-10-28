@@ -151,27 +151,115 @@ const API_BASE_URL = {
   development: 'http://localhost:5001'
 };
 
+// Local cache configuration
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes in milliseconds
+const ARTICLES_PER_PAGE = 12;
+const API_FETCH_LIMIT = 100;
+
+interface CachedData {
+  articles: NewsArticle[];
+  timestamp: number;
+  totalCount: number;
+}
+
+class NewsCache {
+  private cache: Map<string, CachedData> = new Map();
+
+  private getCacheKey(params: any): string {
+    return JSON.stringify(params);
+  }
+
+  get(params: any): CachedData | null {
+    const key = this.getCacheKey(params);
+    const cached = this.cache.get(key);
+    
+    if (!cached) return null;
+    
+    // Check if cache is expired (5 minutes)
+    if (Date.now() - cached.timestamp > CACHE_DURATION) {
+      this.cache.delete(key);
+      return null;
+    }
+    
+    return cached;
+  }
+
+  set(params: any, data: NewsArticle[], totalCount: number): void {
+    const key = this.getCacheKey(params);
+    this.cache.set(key, {
+      articles: data,
+      timestamp: Date.now(),
+      totalCount
+    });
+  }
+
+  clear(): void {
+    this.cache.clear();
+  }
+}
+
 class VHealthNewsClient {
   private baseUrl: string;
+  private cache: NewsCache;
 
   constructor(baseUrl?: string) {
     // Use production by default
     this.baseUrl = baseUrl || API_BASE_URL.production;
+    this.cache = new NewsCache();
   }
 
   async getArticles(params: {
     limit?: number;
     category?: string;
     fresh?: boolean;
+    useCache?: boolean;
   } = {}): Promise<ArticlesResponse> {
+    const cacheParams = {
+      category: params.category,
+      fresh: params.fresh
+    };
+
+    // Check cache first (unless fresh is explicitly requested or cache is disabled)
+    if (params.useCache !== false && !params.fresh) {
+      const cached = this.cache.get(cacheParams);
+      if (cached) {
+        if (process.env.NODE_ENV === 'development') {
+          console.log('📱 Serving from cache:', {
+            totalArticles: cached.articles.length,
+            cacheAge: Math.round((Date.now() - cached.timestamp) / 1000) + 's'
+          });
+        }
+        
+        return {
+          success: true,
+          articles: cached.articles,
+          count: cached.totalCount,
+          meta: {
+            cache_info: {
+              served_from_cache: true,
+              cache_size: cached.articles.length,
+              last_refresh: new Date(cached.timestamp).toISOString(),
+              last_top_refresh: new Date(cached.timestamp).toISOString(),
+              cache_age_minutes: Math.round((Date.now() - cached.timestamp) / 60000)
+            }
+          }
+        };
+      }
+    }
+
+    // Fetch from API with increased limit for better caching
     const queryParams = new URLSearchParams();
+    const fetchLimit = API_FETCH_LIMIT; // Always fetch 100 for better caching
+    queryParams.append('limit', fetchLimit.toString());
     
-    if (params.limit) queryParams.append('limit', params.limit.toString());
     if (params.category) queryParams.append('category', params.category);
     if (params.fresh !== undefined) queryParams.append('fresh', params.fresh.toString());
 
     const fullUrl = `${this.baseUrl}/api/news/articles?${queryParams}`;
-    console.log('Making API request to:', fullUrl);
+    
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🌐 Making API request to:', fullUrl);
+    }
 
     const response = await fetch(fullUrl, {
       method: 'GET',
@@ -209,7 +297,7 @@ class VHealthNewsClient {
     
     // Add legacy compatibility fields to articles
     const articles = data.articles || [];
-    data.articles = articles.map(article => ({
+    const processedArticles = articles.map(article => ({
       ...article,
       // Ensure core fields are properly mapped
       has_author: !!article.author,
@@ -225,16 +313,34 @@ class VHealthNewsClient {
       relevanceScore: article.quality_score ? article.quality_score / 10 : 0.5,
       link: article.url
     }));
+
+    // Cache the results for future use
+    if (params.useCache !== false) {
+      this.cache.set(cacheParams, processedArticles, data.count || processedArticles.length);
+    }
     
     return {
       success: data.success !== false,
-      articles: data.articles,
-      count: data.count || data.articles.length,
-      meta: data.meta,
+      articles: processedArticles,
+      count: data.count || processedArticles.length,
+      meta: {
+        ...data.meta,
+        cache_info: {
+          served_from_cache: false,
+          cache_size: processedArticles.length,
+          last_refresh: new Date().toISOString(),
+          last_top_refresh: new Date().toISOString(),
+          cache_age_minutes: 0
+        }
+      },
       // Legacy compatibility fields extracted from meta
       sources_used: data.sources_used || [],
       timestamp: data.timestamp || new Date().toISOString()
     };
+  }
+
+  clearCache(): void {
+    this.cache.clear();
   }
 
   async getCategories(): Promise<{ success: boolean; categories: Category[] }> {
@@ -351,13 +457,14 @@ export const searchNewsArticles = async (query: string, limit?: number): Promise
   }
 };
 
-// Simple function to get all news - API handles filtering and priority
+// Simple function to get all news with pagination - API handles filtering and priority
 export const getAllNews = async (limit: number = 100): Promise<{ success: boolean; articles: NewsArticle[]; count: number; sources_used: string[] }> => {
   try {
     // Simple API call - server handles all filtering, categorization, and priority sorting
     const response = await newsClient.getArticles({
       limit: limit,
-      fresh: true
+      fresh: false, // Allow cache usage
+      useCache: true
     });
     
     return {
@@ -375,6 +482,72 @@ export const getAllNews = async (limit: number = 100): Promise<{ success: boolea
       sources_used: []
     };
   }
+};
+
+// New paginated function that returns specific page from cached results
+export const getPaginatedNews = async (page: number = 1, category?: string): Promise<{
+  success: boolean;
+  articles: NewsArticle[];
+  totalCount: number;
+  currentPage: number;
+  totalPages: number;
+  hasNextPage: boolean;
+  hasPrevPage: boolean;
+}> => {
+  try {
+    // Fetch full dataset (100 articles) and cache it
+    const response = await newsClient.getArticles({
+      limit: API_FETCH_LIMIT,
+      category: category,
+      fresh: false,
+      useCache: true
+    });
+
+    if (!response.success || !response.articles) {
+      return {
+        success: false,
+        articles: [],
+        totalCount: 0,
+        currentPage: page,
+        totalPages: 0,
+        hasNextPage: false,
+        hasPrevPage: false
+      };
+    }
+
+    // Calculate pagination
+    const totalCount = response.articles.length;
+    const totalPages = Math.ceil(totalCount / ARTICLES_PER_PAGE);
+    const startIndex = (page - 1) * ARTICLES_PER_PAGE;
+    const endIndex = startIndex + ARTICLES_PER_PAGE;
+    const paginatedArticles = response.articles.slice(startIndex, endIndex);
+
+    return {
+      success: true,
+      articles: paginatedArticles,
+      totalCount: totalCount,
+      currentPage: page,
+      totalPages: totalPages,
+      hasNextPage: page < totalPages,
+      hasPrevPage: page > 1
+    };
+  } catch (error) {
+    console.error('Error fetching paginated news:', error);
+    return {
+      success: false,
+      articles: [],
+      totalCount: 0,
+      currentPage: page,
+      totalPages: 0,
+      hasNextPage: false,
+      hasPrevPage: false
+    };
+  }
+};
+
+// Clear cache function
+export const clearNewsCache = (): void => {
+  newsClient.clearCache();
 };
 
 export const getNewsCategories = async (): Promise<Category[]> => {
@@ -447,3 +620,6 @@ export const getCategoryPriorities = (response: ArticlesResponse) => {
 
 // Export the client for advanced usage
 export { VHealthNewsClient, newsClient };
+
+// Export pagination constants
+export { ARTICLES_PER_PAGE, API_FETCH_LIMIT, CACHE_DURATION };
