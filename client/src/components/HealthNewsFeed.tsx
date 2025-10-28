@@ -30,7 +30,11 @@ const getCategoryColor = (category?: string) => {
     'Prevention': '#f44336',
     'Mental Health': '#03a9f4',
     'General Health': '#ffeb3b',
-    'Environment': '#22c55e'
+    'Environment': '#22c55e',
+    'Technology': '#607d8b',
+    'General News': '#9e9e9e',
+    'Health Technology': '#00bcd4',
+    'Medical Technology': '#3f51b5'
   };
   
   return colors[category] || '#ffeb2b';
@@ -249,33 +253,17 @@ const HealthNewsFeed: React.FC<NewsFeedProps> = ({
         let processedArticles = response.articles;
         console.log(`Received ${processedArticles.length} articles from API`);
         
-        // Debug: Log first few articles and their image data
-        console.log('Sample articles with image data:');
+        // Debug: Log first few articles and their categories
+        console.log('Sample articles from API:');
         processedArticles.slice(0, 3).forEach((article, index) => {
           console.log(`Article ${index + 1}: "${article.title}"`);
+          console.log(`  - ai_category: ${article.ai_category}`);
+          console.log(`  - priority_position: ${(article as any).priority_position || 'none'}`);
           console.log(`  - image_url: ${article.image_url || 'none'}`);
-          console.log(`  - media_url: ${article.media_url || 'none'}`);
-          console.log(`  - media_thumb_url: ${article.media_thumb_url || 'none'}`);
-          console.log(`  - category: ${article.category || article.ai_category || 'none'}`);
         });
         
-        // Define health categories for priority sorting
-        const healthCategories = [
-          'Nutrition', 
-          'Medical Research', 
-          'Public Health', 
-          'Clinical Studies', 
-          'Prevention', 
-          'Mental Health', 
-          'General Health',
-          'Environment'
-        ];
-        
-        // Sort articles by category priority
-        processedArticles = sortArticlesByPriority(response.articles, healthCategories);
-        
-        // Diversify sources
-        processedArticles = diversifySources(processedArticles);
+        // API already handles sorting and prioritization
+        console.log('Articles are pre-sorted by API priority system');
         
         // Limit to maxArticles if we're on the first page
         if (resetPage) {
@@ -345,144 +333,6 @@ const HealthNewsFeed: React.FC<NewsFeedProps> = ({
       setLoading(false);
       setLoadingMore(false);
     }
-  };
-  
-  // Replace your current sortArticlesByPriority function with this one
-
-  const sortArticlesByPriority = (articles: NewsArticle[], priorityCategories: string[]): NewsArticle[] => {
-    // Create a copy of the articles array
-    const sortedArticles = [...articles];
-    
-    // Define a function to get priority score (lower is higher priority)
-    const getPriorityScore = (article: NewsArticle): number => {
-      const category = article.category || article.ai_category || '';
-      
-      // 1. Exact match with priority categories (in order)
-      for (let i = 0; i < priorityCategories.length; i++) {
-        if (category === priorityCategories[i]) {
-          return i; // Return the exact index position (0, 1, 2, etc.)
-        }
-      }
-      
-      // 2. Partial match with priority categories
-      for (let i = 0; i < priorityCategories.length; i++) {
-        if (category.includes(priorityCategories[i])) {
-          return i + 20; // Still keep order but with lower priority than exact matches
-        }
-      }
-      
-      // 3. Check for health-related keywords in title/description
-      const title = article.title || '';
-      const description = article.summary || '';
-      const content = title + ' ' + description;
-      const contentLower = content.toLowerCase();
-      
-      const healthKeywords = [
-        'health', 'medical', 'medicine', 'doctor', 'patient', 'hospital',
-        'disease', 'treatment', 'cure', 'wellness', 'fitness', 'diet',
-        'nutrition', 'mental', 'therapy', 'clinical', 'drug', 'vaccine',
-        'symptom', 'diagnosis', 'cancer', 'heart', 'diabetes', 'covid'
-      ];
-      
-      if (healthKeywords.some(keyword => contentLower.includes(keyword))) {
-        return 100; // All health-related content after categorized content
-      }
-      
-      // 4. Tech content goes last
-      const techKeywords = ['tech', 'technology', 'computing', 'software', 'hardware', 'ai', 'artificial intelligence'];
-      if (techKeywords.some(keyword => 
-        category.toLowerCase().includes(keyword) || 
-        contentLower.includes(keyword)
-      )) {
-        return 1000; // Tech content at the bottom
-      }
-      
-      // 5. Everything else
-      return 500; // Other content in the middle
-    };
-    
-    // Debug the categories before sorting
-    console.log('Priority order:', priorityCategories);
-    
-    // Sort articles by priority score
-    sortedArticles.sort((a, b) => {
-      const priorityA = getPriorityScore(a);
-      const priorityB = getPriorityScore(b);
-      
-      // First sort by priority category
-      if (priorityA !== priorityB) {
-        return priorityA - priorityB;
-      }
-      
-      // If same priority category, sort by date (newest first)
-      const dateA = a.pubDate || a.publishedDate;
-      const dateB = b.pubDate || b.publishedDate;
-      
-      if (dateA && dateB) {
-        return new Date(dateB).getTime() - new Date(dateA).getTime();
-      }
-      
-      return 0;
-    });
-    
-    // Log the first few articles to debug the sorting
-    console.log('Articles after sorting:');
-    sortedArticles.slice(0, 5).forEach((article, i) => {
-      const score = getPriorityScore(article);
-      console.log(`  ${i+1}. [${score}] ${article.category || article.ai_category || 'uncategorized'}: ${article.title}`);
-    });
-    
-    return sortedArticles;
-  };
-  
-  // Function to ensure diversity of sources
-  const diversifySources = (articles: NewsArticle[]): NewsArticle[] => {
-    if (!articles || articles.length <= 4) return articles;
-    
-    // Group articles by source
-    const sourceMap: Record<string, NewsArticle[]> = {};
-    articles.forEach(article => {
-      const source = article.source || 'unknown';
-      if (!sourceMap[source]) {
-        sourceMap[source] = [];
-      }
-      sourceMap[source].push(article);
-    });
-    
-    // Get all unique sources
-    const sources = Object.keys(sourceMap);
-    console.log('Available sources:', sources);
-    
-    // If we only have one source, return original articles
-    if (sources.length <= 1) return articles;
-    
-    // Build a diversified list by alternating between sources
-    const diversified: NewsArticle[] = [];
-    let remainingArticles = [...articles];
-    
-    // Limit articles per source based on how many sources we have
-    const maxPerSource = Math.max(2, Math.ceil(articles.length / sources.length));
-    
-    // First pass: Take up to the limit from each source
-    sources.forEach(source => {
-      const sourceArticles = sourceMap[source].slice(0, maxPerSource);
-      diversified.push(...sourceArticles);
-      
-      // Remove the ones we've taken
-      remainingArticles = remainingArticles.filter(
-        article => !sourceArticles.includes(article)
-      );
-    });
-    
-    // Add any remaining articles up to the original length
-    if (remainingArticles.length > 0) {
-      const neededCount = articles.length - diversified.length;
-      diversified.push(...remainingArticles.slice(0, neededCount));
-    }
-    
-    console.log(`Source diversity: from ${articles.length} articles with ${sources.length} sources, created ${diversified.length} diversified articles`);
-    
-    return diversified;
   };
   
   // Replace the handleAnalyzeWithWihy function (lines 471-493)

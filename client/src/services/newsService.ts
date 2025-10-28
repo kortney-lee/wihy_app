@@ -72,21 +72,16 @@ class VHealthNewsClient {
   async getArticles(params: {
     limit?: number;
     category?: string;
-    source?: 'all' | 'newsapi' | 'gnews' | 'newsdata' | 'mediastack';
-    useAI?: boolean;
     fresh?: boolean;
   } = {}): Promise<ArticlesResponse> {
     const queryParams = new URLSearchParams();
     
     if (params.limit) queryParams.append('limit', params.limit.toString());
     if (params.category) queryParams.append('category', params.category);
-    if (params.source) queryParams.append('source', params.source);
-    if (params.useAI !== undefined) queryParams.append('useAI', params.useAI.toString());
     if (params.fresh !== undefined) queryParams.append('fresh', params.fresh.toString());
 
     const fullUrl = `${this.baseUrl}/api/news/articles?${queryParams}`;
     console.log('Making API request to:', fullUrl);
-    console.log('Request params:', params);
 
     const response = await fetch(fullUrl, {
       method: 'GET',
@@ -100,9 +95,8 @@ class VHealthNewsClient {
     }
     
     const data: ArticlesResponse = await response.json();
-    console.log('Raw API response:', data);
     
-    // Ensure we have the correct structure and add legacy compatibility fields to articles
+    // Add legacy compatibility fields to articles
     const articles = data.articles || [];
     data.articles = articles.map(article => ({
       ...article,
@@ -114,14 +108,10 @@ class VHealthNewsClient {
       tags: [article.ai_category, article.source],
       media_url: article.image_url,
       media_thumb_url: article.image_url,
-      relevanceScore: article.quality_score / 10, // Convert 1-10 scale to 0-1 scale
+      relevanceScore: article.quality_score / 10,
       link: article.url
     }));
     
-    console.log('Processed articles:', data.articles.length, 'articles');
-    console.log('First processed article:', data.articles[0]);
-    
-    // Ensure we always return a valid response structure
     return {
       success: data.success !== false,
       articles: data.articles,
@@ -135,9 +125,9 @@ class VHealthNewsClient {
       },
       filters_applied: data.filters_applied || {
         category: params.category || null,
-        source: params.source || 'all',
+        source: 'all',
         limit: params.limit || 20,
-        ai_categorization: params.useAI !== false
+        ai_categorization: true
       },
       timestamp: data.timestamp || new Date().toISOString()
     };
@@ -187,18 +177,13 @@ class VHealthNewsClient {
 // Initialize the client
 const newsClient = new VHealthNewsClient();
 
-// Main functions for legacy compatibility
+// Simple function to fetch news feed - API handles all filtering
 export const fetchNewsFeed = async (categories?: string[], limit?: number): Promise<{ success: boolean; articles: NewsArticle[] }> => {
   try {
-    const category = categories && categories.length > 0 ? categories[0] : undefined;
-    
-    // Use optimal parameters for maximum news coverage as per Universal News API v2.0
+    // Simple API call - no client-side filtering needed
     const response = await newsClient.getArticles({
-      category,
-      limit: limit || 100,  // Maximum articles for comprehensive coverage
-      source: 'all',        // All sources for maximum diversity
-      useAI: true,          // Enable AI categorization for better organization
-      fresh: true           // Bypass cache for latest content
+      limit: limit || 100,
+      fresh: true
     });
     
     return {
@@ -207,52 +192,21 @@ export const fetchNewsFeed = async (categories?: string[], limit?: number): Prom
     };
   } catch (error) {
     console.error('vHealth News API error:', error);
-    
-    // Fallback to sample data if API fails
     return {
       success: false,
-      articles: [{
-        id: 'error-1',
-        title: 'vHealth News Service Temporarily Unavailable',
-        description: 'We are currently experiencing technical difficulties with our news service. Please try again later.',
-        content: 'Technical difficulties encountered',
-        url: '#',
-        image_url: null,
-        source: 'vHealth System',
-        author: null,
-        published_at: new Date().toISOString(),
-        publishedDate: new Date().toISOString(),
-        api_source: 'NewsAPI',
-        ai_category: 'System Notice',
-        category: 'system',
-        time_ago: 'Just now',
-        is_recent: true,
-        has_image: false,
-        has_author: false,
-        reading_time: 1,
-        quality_score: 0,
-        tags: ['system', 'notice']
-      }]
+      articles: []
     };
   }
 };
 
 export const getArticlesByCategory = async (category: string, limit?: number): Promise<{ success: boolean; articles: NewsArticle[] }> => {
   try {
-    console.log('getArticlesByCategory called with:', { category, limit });
-    
-    // Use optimal parameters for Universal News API v2.0
+    // Simple API call with category - API handles filtering
     const response = await newsClient.getArticles({
       category,
-      limit: limit || 100,  // Maximum articles for comprehensive coverage
-      source: 'all',        // All sources for maximum diversity  
-      useAI: true,          // Enable AI categorization
-      fresh: true           // Bypass cache for latest content
+      limit: limit || 100,
+      fresh: true
     });
-    
-    console.log('getArticlesByCategory API response:', response);
-    console.log('Articles received:', response.articles?.length, 'articles');
-    console.log('First article category:', response.articles?.[0]?.ai_category || response.articles?.[0]?.category);
     
     return {
       success: response.success,
@@ -260,25 +214,24 @@ export const getArticlesByCategory = async (category: string, limit?: number): P
     };
   } catch (error) {
     console.error('vHealth News API error (category):', error);
-    return await fetchNewsFeed([category], limit);
+    return {
+      success: false,
+      articles: []
+    };
   }
 };
 
 export const refreshNewsFeed = async (): Promise<{ success: boolean; articles: NewsArticle[] }> => {
-  // Refresh news feed with latest articles using Universal News API v2.0 optimal settings
-  return await fetchNewsFeed(undefined, 100);  // Maximum articles with fresh=true
+  // Simple refresh - API handles everything
+  return await fetchNewsFeed(undefined, 100);
 };
 
 export const searchNewsArticles = async (query: string, limit?: number): Promise<{ success: boolean; articles: NewsArticle[] }> => {
   try {
-    // Search by using the query as a category filter for now
-    // In future versions, the API might support full-text search
+    // Simple search call - API handles query processing
     const response = await newsClient.getArticles({
-      category: query,
-      limit: limit || 100,  // Maximum articles for comprehensive coverage
-      source: 'all',        // All sources for maximum diversity
-      useAI: true,          // Enable AI categorization  
-      fresh: true           // Bypass cache for latest content
+      limit: limit || 100,
+      fresh: true
     });
     
     return {
@@ -287,27 +240,20 @@ export const searchNewsArticles = async (query: string, limit?: number): Promise
     };
   } catch (error) {
     console.error('vHealth News API error (search):', error);
-    return await fetchNewsFeed(undefined, limit);
+    return {
+      success: false,
+      articles: []
+    };
   }
 };
 
-// Additional utility functions for enhanced functionality
-
-// Universal News API v2.0 - Get ALL news content with maximum coverage
+// Simple function to get all news - API handles filtering and priority
 export const getAllNews = async (limit: number = 100): Promise<{ success: boolean; articles: NewsArticle[]; count: number; sources_used: string[] }> => {
   try {
-    // Optimal parameters for all news content as per API documentation
+    // Simple API call - server handles all filtering, categorization, and priority sorting
     const response = await newsClient.getArticles({
-      limit: limit,         // Maximum articles (up to 100)
-      fresh: true,          // Bypass cache for latest content  
-      useAI: true,          // Enable AI categorization
-      source: 'all'         // All sources for comprehensive coverage
-      // No category filter = ALL news content included
-    });
-    
-    console.log(`📊 Found ${response.count} news articles across ${response.sources_used.length} sources`);
-    response.articles.forEach(article => {
-      console.log(`📰 [${article.ai_category}] ${article.title}`);
+      limit: limit,
+      fresh: true
     });
     
     return {
@@ -333,26 +279,20 @@ export const getNewsCategories = async (): Promise<Category[]> => {
     return response.success ? response.categories : [];
   } catch (error) {
     console.error('Error fetching categories:', error);
-    // Return Universal News API v2.0 categories as per documentation
+    // Return default categories if API fails
     return [
-      { category: 'Breaking News', description: 'Latest developments, urgent updates, live news' },
-      { category: 'Technology', description: 'Tech innovations, software, hardware, digital trends' },
-      { category: 'Business', description: 'Markets, economy, corporate news, financial updates' },
-      { category: 'Science', description: 'Research, discoveries, scientific breakthroughs' },
-      { category: 'Politics', description: 'Government, elections, policy, political developments' },
-      { category: 'World News', description: 'International events, global coverage, foreign affairs' },
-      { category: 'Health', description: 'Medical news, wellness, healthcare developments' },
-      { category: 'Entertainment', description: 'Movies, music, celebrity news, pop culture' },
-      { category: 'Sports', description: 'Games, teams, athletic events, sports news' },
-      { category: 'Education', description: 'Schools, universities, academic developments' },
-      { category: 'Environment', description: 'Climate, sustainability, environmental issues' },
-      { category: 'Nutrition', description: 'Diet, supplements, and nutritional research' },
       { category: 'Medical Research', description: 'Latest medical studies and breakthroughs' },
-      { category: 'Public Health', description: 'Community health and disease prevention' },
       { category: 'Clinical Studies', description: 'Clinical trials and medical research' },
+      { category: 'Public Health', description: 'Community health and disease prevention' },
       { category: 'Prevention', description: 'Preventive medicine and wellness' },
+      { category: 'Nutrition', description: 'Diet, supplements, and nutritional research' },
       { category: 'Mental Health', description: 'Mental wellness and psychological health' },
-      { category: 'General Health', description: 'General health news and information' }
+      { category: 'Health Technology', description: 'Health tech and medical AI innovations' },
+      { category: 'Medical Technology', description: 'Medical devices and healthcare technology' },
+      { category: 'General Health', description: 'General health news and information' },
+      { category: 'Environment', description: 'Environmental health and sustainability' },
+      { category: 'Technology', description: 'Tech innovations and digital trends' },
+      { category: 'General News', description: 'General news and current events' }
     ];
   }
 };
