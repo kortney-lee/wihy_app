@@ -426,7 +426,7 @@ Category: ${article.category || article.ai_category || 'Uncategorized'}`;
             data-category={article.category || article.ai_category}
             onClick={() => window.open(article.link || article.url, '_blank')}
           >
-            {/* Image Section - Enhanced image handling with better fallbacks */}
+            {/* Image Section - Using images from vHealth News API */}
             <div className="news-image">
               {(() => {
                 const imageUrl = article.image_url || article.media_url || article.media_thumb_url;
@@ -462,20 +462,13 @@ Category: ${article.category || article.ai_category || 'Uncategorized'}`;
                     />
                   );
                 } else {
-                  // Enhanced placeholder with better visual indication
+                  // Simple placeholder without overlay
                   return (
-                    <div className="news-image-placeholder">
-                      <img 
-                        src={getWiHyLogoFallback()}
-                        alt={article.title || 'Health article'}
-                        className="placeholder-image"
-                      />
-                      {article.image_status === 'missing' && (
-                        <div className="image-status-overlay">
-                          <span className="image-status-text">Image not available</span>
-                        </div>
-                      )}
-                    </div>
+                    <img 
+                      src={getWiHyLogoFallback()}
+                      alt={article.title || 'Health article'}
+                      className="placeholder-image"
+                    />
                   );
                 }
               })()}
