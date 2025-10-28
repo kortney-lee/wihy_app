@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { getAllNews, getPaginatedNews, NewsArticle, ARTICLES_PER_PAGE } from '../services/newsService';
+import { getAllNews, getLazyLoadedNews, NewsArticle, ARTICLES_PER_PAGE } from '../services/newsService';
 import { useNavigate } from 'react-router-dom';
 import { getApiEndpoint } from '../config/apiConfig';
 import './HealthNewsFeed.css';
@@ -233,31 +233,33 @@ const HealthNewsFeed: React.FC<NewsFeedProps> = ({
     try {
       const page = resetPage ? 1 : currentPage + 1;
       
-      // Use new pagination system: fetch 100 results, cache for 5 mins, show 12 per page
-      const response = await getPaginatedNews(page);
+      // Use lazy loading system: fetch 100 results, cache for 5 mins, append 12 per page
+      const response = await getLazyLoadedNews(page);
       
-      if (response.success && response.articles && response.articles.length > 0) {
+      if (response.success && response.newArticles && response.newArticles.length > 0) {
         if (resetPage) {
-          setArticles(response.articles);
+          // First load: show first page of articles
+          setArticles(response.newArticles);
         } else {
-          // Append new articles to existing ones
-          setArticles(prev => [...prev, ...response.articles]);
+          // Lazy loading: append new articles to existing ones
+          setArticles(prev => [...prev, ...response.newArticles]);
         }
         
-        // Use pagination info from the new service
+        // Use lazy loading info from the service
         setHasMorePages(response.hasNextPage);
         
         if (process.env.NODE_ENV === 'development') {
-          console.log('📄 Pagination info:', {
+          console.log('📄 Lazy loading info:', {
             currentPage: response.currentPage,
             totalPages: response.totalPages,
             totalCount: response.totalCount,
             hasNextPage: response.hasNextPage,
-            articlesOnThisPage: response.articles.length
+            newArticlesLoaded: response.newArticles.length,
+            totalArticlesLoaded: response.loadedCount
           });
         }
       } else {
-        // Fallback: try old method if pagination fails
+        // Fallback: try old method if lazy loading fails
         const fallbackResponse = await getAllNews(ARTICLES_PER_PAGE);
         
         if (fallbackResponse.success && fallbackResponse.articles && fallbackResponse.articles.length > 0) {

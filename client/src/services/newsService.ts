@@ -545,6 +545,75 @@ export const getPaginatedNews = async (page: number = 1, category?: string): Pro
   }
 };
 
+// New lazy loading function that returns all articles up to the current page
+export const getLazyLoadedNews = async (page: number = 1, category?: string): Promise<{
+  success: boolean;
+  articles: NewsArticle[];
+  newArticles: NewsArticle[];
+  totalCount: number;
+  currentPage: number;
+  totalPages: number;
+  hasNextPage: boolean;
+  loadedCount: number;
+}> => {
+  try {
+    // Fetch full dataset (100 articles) and cache it
+    const response = await newsClient.getArticles({
+      limit: API_FETCH_LIMIT,
+      category: category,
+      fresh: false,
+      useCache: true
+    });
+
+    if (!response.success || !response.articles) {
+      return {
+        success: false,
+        articles: [],
+        newArticles: [],
+        totalCount: 0,
+        currentPage: page,
+        totalPages: 0,
+        hasNextPage: false,
+        loadedCount: 0
+      };
+    }
+
+    // Calculate lazy loading: return all articles from page 1 to current page
+    const totalCount = response.articles.length;
+    const totalPages = Math.ceil(totalCount / ARTICLES_PER_PAGE);
+    const loadedCount = Math.min(page * ARTICLES_PER_PAGE, totalCount);
+    const allArticles = response.articles.slice(0, loadedCount);
+    
+    // Get just the new articles for this page (for appending)
+    const startIndex = (page - 1) * ARTICLES_PER_PAGE;
+    const endIndex = Math.min(startIndex + ARTICLES_PER_PAGE, totalCount);
+    const newArticles = response.articles.slice(startIndex, endIndex);
+
+    return {
+      success: true,
+      articles: allArticles, // All articles from page 1 to current page
+      newArticles: newArticles, // Just the new articles for this page
+      totalCount: totalCount,
+      currentPage: page,
+      totalPages: totalPages,
+      hasNextPage: page < totalPages,
+      loadedCount: loadedCount
+    };
+  } catch (error) {
+    console.error('Error fetching lazy loaded news:', error);
+    return {
+      success: false,
+      articles: [],
+      newArticles: [],
+      totalCount: 0,
+      currentPage: page,
+      totalPages: 0,
+      hasNextPage: false,
+      loadedCount: 0
+    };
+  }
+};
+
 // Clear cache function
 export const clearNewsCache = (): void => {
   newsClient.clearCache();
