@@ -3,7 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import '../../styles/VHealthSearch.css';
 import ImageUploadModal from '../ui/ImageUploadModal';
 import MultiAuthLogin from '../shared/MultiAuthLogin';
-import { wihyAPI } from '../../services/wihyAPI';
+import ChatWidget from '../ui/ChatWidget';
+import NutritionChart from '../charts/NutritionChart';
+import ResultQualityPie from '../charts/ResultQualityPie';
+import { wihyAPI, isUnifiedResponse, UnifiedResponse, WihyResponse } from '../../services/wihyAPI';
 import { searchCache } from '../../services/searchCache';
 import { foodAnalysisService } from '../../services/foodAnalysisService';
 import HealthNewsFeed from '../HealthNewsFeed';
@@ -39,6 +42,11 @@ const VHealthSearch: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [placeholder, setPlaceholder] = useState(rotatingPrompts[0]);
   
+  // Results display state (like VHealthApp)
+  const [currentApiResponse, setCurrentApiResponse] = useState<UnifiedResponse | null>(null);
+  const [currentChatResponse, setCurrentChatResponse] = useState<string>('');
+  const [showResults, setShowResults] = useState(false);
+  
   const navigate = useNavigate();
   const searchInputRef = useRef<HTMLInputElement>(null);
   const recognitionRef = useRef<any>(null);
@@ -60,19 +68,19 @@ const VHealthSearch: React.FC = () => {
   }, []);
 
   // ================================
-  // ALLOW SCROLLING WHEN NEWS FEED IS OPEN
+  // ALLOW SCROLLING WHEN NEWS FEED OR RESULTS ARE OPEN
   // ================================
   useEffect(() => {
-    if (showFeelingHealthyContent) {
-      // Remove landing page classes to allow scrolling when news feed is open
+    if (showFeelingHealthyContent || showResults) {
+      // Remove landing page classes to allow scrolling when news feed or results are open
       document.body.classList.remove('landing-page-active');
       document.documentElement.classList.remove('landing-page-active');
     } else {
-      // Re-add landing page classes when news feed is closed
+      // Re-add landing page classes when news feed and results are closed
       document.body.classList.add('landing-page-active');
       document.documentElement.classList.add('landing-page-active');
     }
-  }, [showFeelingHealthyContent]);
+  }, [showFeelingHealthyContent, showResults]);
 
   // ================================
   // SCROLL DETECTION FOR LOGIN BUTTON
@@ -207,10 +215,13 @@ const VHealthSearch: React.FC = () => {
   
   /**
    * CLEAR SEARCH INPUT
-   * Clears search input and resets its height to default
+   * Clears search input, resets its height to default, and hides results
    */
   const handleClearSearch = () => {
     setSearchQuery('');
+    setShowResults(false);
+    setCurrentApiResponse(null);
+    setCurrentChatResponse('');
     // Force a reset after state update
     setTimeout(() => {
       const el = document.querySelector('.search-input') as HTMLTextAreaElement;
@@ -253,9 +264,29 @@ const VHealthSearch: React.FC = () => {
   // ================================
 
   /**
+   * BACK TO SEARCH HANDLER
+   * Clears results and returns to search interface
+   */
+  const handleBackToSearch = () => {
+    setShowResults(false);
+    setCurrentApiResponse(null);
+    setCurrentChatResponse('');
+    setSearchQuery('');
+  };
+
+  /**
+   * NEW SEARCH HANDLER
+   * Handles new search from chat widget or other components
+   */
+  const handleNewSearch = (newQuery: string) => {
+    setSearchQuery(newQuery);
+    handleSearch(newQuery);
+  };
+
+  /**
    * MAIN SEARCH HANDLER
    * Primary search function that handles text-based health queries
-   * Flow: Check cache → API call → Save to cache → Navigate to results
+   * Flow: Check cache → API call → Save to cache → Display results inline
    * Uses 4-step fallback strategy for reliability
    */
   const handleSearch = async (queryParam?: string) => {
@@ -311,22 +342,34 @@ const VHealthSearch: React.FC = () => {
           if (isValidResult) {
             logger.info('Valid search results confirmed');
             
-            // Results ready - cache is managed by the API
+            // Results ready - display inline
             setLoadingMessage('Results ready!');
             await new Promise(resolve => setTimeout(resolve, 300));
             
             setIsLoading(false);
-            logger.debug('Navigating to results page with data');
             
-            // Pass the fresh results via navigation state
-            navigate(`/results?q=${encodeURIComponent(queryToUse)}`, {
-              state: {
-                results: searchResults,
-                apiResponse: wihyResponse, // Include the raw API response for ChatWidget
-                dataSource: 'wihy',
-                fromSearch: true
-              }
-            });
+            // Store results for inline display
+            if (isUnifiedResponse(wihyResponse)) {
+              setCurrentApiResponse(wihyResponse);
+              setCurrentChatResponse(wihyResponse.data?.ai_response?.response || summary);
+            } else {
+              // Convert WihyResponse to UnifiedResponse format for consistency
+              const unifiedResponse: UnifiedResponse = {
+                success: true,
+                data: {
+                  response: wihyResponse.wihy_response?.core_principle || summary,
+                  ai_response: {
+                    response: wihyResponse.wihy_response?.core_principle || summary
+                  }
+                },
+                service_used: 'wihy'
+              };
+              setCurrentApiResponse(unifiedResponse);
+              setCurrentChatResponse(wihyResponse.wihy_response?.core_principle || summary);
+            }
+            setShowResults(true);
+            
+            logger.debug('Displaying results inline');
             return;
           } else {
             throw new Error('WiHy API returned invalid results');
@@ -925,6 +968,26 @@ const VHealthSearch: React.FC = () => {
           >
             I'm Feeling Healthy
           </button>
+
+          {/* DEMO MODE BUTTON - Development only */}
+          {process.env.NODE_ENV === 'development' && (
+            <button 
+              onClick={() => {
+                if (isLoading) return;
+                navigate('/demo');
+              }}
+              className="search-btn secondary"
+              type="button"
+              style={{ 
+                color: '#10b981',
+                border: '1px solid #10b981',
+                fontSize: '14px'
+              }}
+              disabled={isLoading}
+            >
+              Demo Mode
+            </button>
+          )}
         </div>
       </div>
       
@@ -971,6 +1034,149 @@ const VHealthSearch: React.FC = () => {
                 }
               }}
             />
+          </div>
+        </div>
+      )}
+
+      {/* INLINE RESULTS DISPLAY - Shows search results without navigation */}
+      {showResults && (
+        <div 
+          className="inline-results-section"
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(255, 255, 255, 0.98)',
+            backdropFilter: 'blur(2px)',
+            zIndex: 1000,
+            overflow: 'auto',
+            padding: '20px'
+          }}
+        >
+          <div style={{
+            maxWidth: '1200px',
+            margin: '0 auto',
+            display: 'grid',
+            gridTemplateColumns: window.innerWidth <= 768 ? '1fr' : '2fr 1fr',
+            gap: '20px',
+            minHeight: 'calc(100vh - 40px)'
+          }}>
+            
+            {/* Chat Widget as Main Content */}
+            <div style={{
+              backgroundColor: 'white',
+              borderRadius: '12px',
+              border: '1px solid #e5e7eb',
+              boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+              padding: '24px',
+              display: 'flex',
+              flexDirection: 'column',
+              overflow: 'hidden'
+            }}>
+              <div style={{ 
+                display: 'flex', 
+                justifyContent: 'space-between', 
+                alignItems: 'center', 
+                marginBottom: '20px',
+                borderBottom: '1px solid #e5e7eb',
+                paddingBottom: '15px'
+              }}>
+                <h2 style={{ 
+                  margin: 0, 
+                  color: '#1f2937', 
+                  fontSize: '20px', 
+                  fontWeight: '600' 
+                }}>
+                  Search Results: {searchQuery}
+                </h2>
+                <button
+                  onClick={handleBackToSearch}
+                  style={{
+                    background: 'none',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '8px',
+                    padding: '8px 16px',
+                    cursor: 'pointer',
+                    fontSize: '14px',
+                    color: '#6b7280'
+                  }}
+                >
+                  ← Back to Search
+                </button>
+              </div>
+              
+              <div style={{ flex: 1, overflow: 'hidden' }}>
+                <ChatWidget
+                  key={`chatwidget-inline-${searchQuery}`}
+                  isOpen={true}
+                  onClose={() => {}}
+                  currentContext={`Search: ${searchQuery}`}
+                  inline={true}
+                  searchQuery={searchQuery}
+                  searchResponse={currentChatResponse}
+                />
+              </div>
+            </div>
+
+            {/* Charts Sidebar */}
+            <div style={{
+              padding: '20px',
+              backgroundColor: '#ffffff',
+              borderRadius: '12px',
+              border: '1px solid #e5e7eb',
+              boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+              display: 'flex',
+              flexDirection: 'column',
+              overflow: 'hidden'
+            }}>
+              <h3 style={{ 
+                marginBottom: '20px', 
+                color: '#1f2937', 
+                fontSize: '18px', 
+                fontWeight: '600',
+                flexShrink: 0 
+              }}>
+                Analysis Charts
+              </h3>
+              <div style={{ 
+                display: 'flex', 
+                flexDirection: 'column', 
+                gap: '20px',
+                flex: 1,
+                overflow: 'auto'
+              }}>
+                {currentApiResponse && (
+                  <>
+                    <div style={{ minHeight: '200px' }}>
+                      <NutritionChart 
+                        apiResponse={currentApiResponse}
+                      />
+                    </div>
+                    
+                    <div style={{ minHeight: '200px' }}>
+                      <ResultQualityPie 
+                        apiResponse={currentApiResponse}
+                      />
+                    </div>
+                  </>
+                )}
+                
+                {process.env.NODE_ENV === 'development' && (
+                  <div style={{ 
+                    marginTop: '20px', 
+                    padding: '15px',
+                    backgroundColor: '#f3f4f6',
+                    borderRadius: '8px',
+                    fontSize: '12px',
+                    color: '#6b7280'
+                  }}>
+                    <strong>Dev Mode:</strong> Charts display based on search context
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       )}
