@@ -2,52 +2,142 @@
 // Swagger UI Documentation: https://services.wihy.ai/api/docs
 
 export interface NewsArticle {
+  // Article Identity
   id: string;
   title: string;
   description: string;
-  content: string;
+  content?: string;
   url: string;
-  link?: string; // Alternative URL field for legacy compatibility
-  image_url: string | null;
+  
+  // Source Information
   source: string;
+  api_source?: 'NewsAPI' | 'GNews' | 'NewsData' | 'MediaStack';
   author: string | null;
-  published_at: string;
-  publishedDate?: string; // Alternative date field for legacy compatibility
-  pubDate?: string; // Alternative date field for legacy compatibility
-  api_source: 'NewsAPI' | 'GNews' | 'NewsData' | 'MediaStack';
+  published_at: string; // API uses published_at
+  
+  // AI Categorization
   ai_category: string;
-  category?: string; // Legacy compatibility
+  category_priority?: number;
+  priority_position?: number;
+  
+  // Image Data (Complete)
+  image_url: string | null;
+  has_image: boolean;
+  image_status?: 'original' | 'generated' | 'missing';
+  image_source?: 'unsplash' | 'pexels' | 'pixabay' | 'extracted';
+  image_attribution?: string;
+  photographer?: string;
+  
+  // Enriched Metadata
   time_ago: string;
   is_recent: boolean;
-  has_image: boolean;
-  has_author: boolean;
-  reading_time: number;
-  quality_score: number;
-  tags: string[]; // Legacy compatibility
-  summary?: string; // Legacy compatibility
-  media_url?: string; // Legacy compatibility
-  media_thumb_url?: string; // Legacy compatibility
-  relevanceScore?: number; // Legacy compatibility
+  reading_time: number; // Minutes
+  quality_score: number; // 0-10 scale
+  
+  // Legacy compatibility fields
+  published_date?: string; // Alternative date field
+  publishedDate?: string; // Alternative date field
+  pubDate?: string; // Alternative date field
+  category?: string; // Maps to ai_category
+  has_author?: boolean; // Computed from author field
+  tags?: string[]; // Legacy compatibility
+  summary?: string; // Maps to description
+  media_url?: string; // Maps to image_url
+  media_thumb_url?: string; // Maps to image_url
+  relevanceScore?: number; // Maps to quality_score
+  link?: string; // Maps to url
 }
 
 export interface ArticlesResponse {
   success: boolean;
   articles: NewsArticle[];
   count: number;
-  sources_used: string[];
-  pagination: {
-    total_items: number;
-    current_page: number;
-    per_page: number;
-    has_next_page: boolean;
+  meta?: {
+    // Cache Information
+    total_articles?: number;
+    returned_articles?: number;
+    cache_info?: {
+      served_from_cache: boolean;
+      cache_size: number;
+      last_refresh: string;
+      last_top_refresh: string;
+      cache_age_minutes: number;
+    };
+    
+    // Sorting Information
+    sorting?: {
+      sort_by: string;
+      sort_order: string;
+      sorted_field: string;
+    };
+    
+    // Image Statistics
+    image_stats?: {
+      total_articles: number;
+      articles_with_images: number;
+      image_percentage: number;
+      original_images: number;
+      generated_images: number;
+      ai_enhanced_images: number;
+      sources: {
+        extracted: number;
+        unsplash: number;
+        pexels: number;
+        pixabay: number;
+      };
+    };
+    
+    // Pagination
+    pagination?: {
+      total_items: number;
+      current_page: number;
+      per_page: number;
+      has_next_page: boolean;
+    };
+    
+    // Applied Filters
+    filters_applied?: {
+      images_only: boolean;
+      top_articles_only: boolean;
+      limit: number;
+      offset: number;
+      category?: string | null;
+      source?: string;
+      ai_categorization?: boolean;
+    };
+    
+    // Priority Sorting System
+    priority_sorting?: {
+      enabled: boolean;
+      description: string;
+      sorting_order: string;
+      total: number;
+      priority_categories: number;
+      discovered_categories: number;
+      categories: string[];
+      category_priorities: Record<string, number>;
+      dynamic_learning: string;
+    };
+    
+    // Adaptive Recency System
+    recency_stats?: {
+      recent_articles: number;
+      older_articles: number;
+      threshold: string;
+      threshold_description: string;
+      adaptive_sorting?: string;
+    };
+    
+    // Category Distribution (Current Response)
+    category_distribution?: Record<string, number>;
+    
+    // Category Priorities (Duplicate for convenience)
+    category_priorities?: Record<string, number>;
   };
-  filters_applied: {
-    category: string | null;
-    source: string;
-    limit: number;
-    ai_categorization: boolean;
-  };
-  timestamp: string;
+  
+  // Legacy compatibility fields
+  sources_used?: string[];
+  timestamp?: string;
 }
 
 export interface Category {
@@ -100,15 +190,18 @@ class VHealthNewsClient {
     const articles = data.articles || [];
     data.articles = articles.map(article => ({
       ...article,
+      // Ensure core fields are properly mapped
+      has_author: !!article.author,
       // Legacy compatibility fields
+      published_date: article.published_at,
       publishedDate: article.published_at,
       pubDate: article.published_at,
       category: article.ai_category,
       summary: article.description,
-      tags: [article.ai_category, article.source],
-      media_url: article.image_url,
-      media_thumb_url: article.image_url,
-      relevanceScore: article.quality_score / 10,
+      tags: article.ai_category ? [article.ai_category, article.source] : [article.source],
+      media_url: article.image_url, // Map image_url to media_url for legacy compatibility
+      media_thumb_url: article.image_url, // Map image_url to media_thumb_url for legacy compatibility
+      relevanceScore: article.quality_score ? article.quality_score / 10 : 0.5,
       link: article.url
     }));
     
@@ -116,19 +209,9 @@ class VHealthNewsClient {
       success: data.success !== false,
       articles: data.articles,
       count: data.count || data.articles.length,
+      meta: data.meta,
+      // Legacy compatibility fields extracted from meta
       sources_used: data.sources_used || [],
-      pagination: data.pagination || {
-        total_items: data.articles.length,
-        current_page: 1,
-        per_page: data.articles.length,
-        has_next_page: false
-      },
-      filters_applied: data.filters_applied || {
-        category: params.category || null,
-        source: 'all',
-        limit: params.limit || 20,
-        ai_categorization: true
-      },
       timestamp: data.timestamp || new Date().toISOString()
     };
   }
@@ -260,7 +343,7 @@ export const getAllNews = async (limit: number = 100): Promise<{ success: boolea
       success: response.success,
       articles: response.articles,
       count: response.count,
-      sources_used: response.sources_used
+      sources_used: response.sources_used || []
     };
   } catch (error) {
     console.error('Error fetching all news:', error);
@@ -314,6 +397,31 @@ export const checkNewsServiceHealth = async (): Promise<boolean> => {
     console.error('News service health check failed:', error);
     return false;
   }
+};
+
+// Helper functions to extract information from the new meta structure
+export const getImageStats = (response: ArticlesResponse) => {
+  return response.meta?.image_stats || null;
+};
+
+export const getCacheInfo = (response: ArticlesResponse) => {
+  return response.meta?.cache_info || null;
+};
+
+export const getPriorityInfo = (response: ArticlesResponse) => {
+  return response.meta?.priority_sorting || null;
+};
+
+export const getRecencyStats = (response: ArticlesResponse) => {
+  return response.meta?.recency_stats || null;
+};
+
+export const getCategoryDistribution = (response: ArticlesResponse) => {
+  return response.meta?.category_distribution || {};
+};
+
+export const getCategoryPriorities = (response: ArticlesResponse) => {
+  return response.meta?.category_priorities || response.meta?.priority_sorting?.category_priorities || {};
 };
 
 // Export the client for advanced usage

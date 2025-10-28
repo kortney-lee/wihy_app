@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import './styles/VHealthSearch.css';
 import ImageUploadModal from './components/ui/ImageUploadModal';
 import MultiAuthLogin from './components/shared/MultiAuthLogin';
-import { wihyAPI } from './services/wihyAPIv4';
+import { wihyAPI } from './services/wihyAPI';
 import { searchCache } from './services/searchCache';
 import { foodAnalysisService } from './services/foodAnalysisService';
 import HealthNewsFeed from './components/HealthNewsFeed';
