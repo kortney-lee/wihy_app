@@ -1,81 +1,212 @@
-// ==================== WIHY HEALTH INTELLIGENCE API v4.0.0 ====================
-// Simplified implementation using ONLY the ASK endpoint
-// All legacy functionality removed per user request
-// Documentation: WIHY Health Intelligence API v4.0.0
+import { API_CONFIG, getApiEndpoint } from '../config/apiConfig';
+import { logger } from '../utils/logger';
 
-import logger from '../utils/logger';
-import { API_CONFIG } from '../config/apiConfig';
+// Updated API endpoint to use the working configuration
+const WIHY_API_ENDPOINT = getApiEndpoint('/ask');
 
-// ==================== API v4.0.0 INTERFACES ====================
-
-// ASK endpoint request interface (OpenAPI v4.0.0)
-export interface HealthQuestionRequest {
-  query: string;
-  analyse?: boolean; // Optional OpenAI enhanced analysis
-  user_context?: {
-    age?: number;
-    health_goals?: string[];
-    dietary_restrictions?: string[];
-    current_medications?: string[];
-    activity_level?: 'low' | 'moderate' | 'high' | 'very_high';
-    health_concerns?: string[];
-  };
+// Types for the WiHy API (updated to match OpenAPI specification v4.0.0)
+export interface HealthQuestion {
+  query: string;                          // REQUIRED: Your health/nutrition question
+  user_context?: Record<string, any>;     // OPTIONAL: User context object
+  include_nutrition?: boolean;            // OPTIONAL: Include nutrition analysis (default: true)
+  include_biblical_wisdom?: boolean;      // OPTIONAL: Include biblical wisdom (default: true)
+  include_charts?: boolean;               // OPTIONAL: Include chart data (default: true)
 }
 
-// ASK endpoint response interface (OpenAPI v4.0.0)
+// Chart data structure from OpenAPI spec
+export interface ChartData {
+  chart_type: string;
+  labels: string[];
+  values: number[];
+  colors: string[];
+  verdict?: string;
+  reasons?: string[];
+}
+
+export interface ChartsData {
+  nutrition_breakdown?: ChartData;
+  health_quality?: ChartData;
+}
+
+export interface HealthInsights {
+  key_benefits?: string[];
+  potential_risks?: string[];
+  recommendations?: string[];
+}
+
+// Core response data structure from OpenAPI spec
+export interface ProcessedHealthData {
+  query: string;
+  timestamp: number;
+  processor_used: string;
+  processing_time: number;
+  response: string;
+  nutrition_data: Record<string, any>;
+  health_insights: HealthInsights;
+  biblical_wisdom: Record<string, any>;
+  charts_data: ChartsData;
+}
+
+// Main response structure from OpenAPI spec
 export interface HealthQuestionResponse {
   success: boolean;
-  data: {
-    response: string;
-    health_insights: {
-      key_benefits: string[];
-      potential_risks: string[];
-      recommendations: string[];
-    };
-    processor_used: string;
-    processing_time: number;
-  };
-  analysis?: {
-    summary: string;
-    recommendations: string[];
-    confidence_score: number;
-    charts?: {
-      [key: string]: {
-        type: string;
-        title: string;
-        data: any[];
-        colors?: string[];
-      };
-    };
-    metadata?: {
-      processor: string;
-      nova_group?: number;
-      health_score?: number;
-    };
-    openai_analysis?: {
-      summary: string;
-      details: string;
-      sources: string[];
-      related_topics: string[];
-      recommendations: string[];
-      medical_disclaimer: string;
-    };
-  };
   timestamp: string;
-  processing_time?: number;
+  endpoint: string;
+  data: ProcessedHealthData;
 }
 
-// Legacy compatibility types (minimal set for existing components)
+// Keep the old interface for backward compatibility
+export interface UnifiedRequest extends HealthQuestion {
+  request_type?: 'auto' | 'nutrition' | 'health' | 'chat' | 'auth' | 'predict' | 'train';
+  context?: Record<string, any>;
+  user_id?: string;
+  session_id?: string;
+}
+
+// Interface for the /scan endpoint
+export interface ScanRequest {
+  image_url?: string;                     // OPTIONAL: URL to image
+  image_base64?: string;                  // OPTIONAL: Base64 encoded image
+  product_name?: string;                  // OPTIONAL: Product name to scan
+  barcode?: string;                       // OPTIONAL: Barcode/UPC to scan  
+  user_context?: Record<string, any>;     // OPTIONAL: User context object
+}
+
+export interface UnifiedResponse {
+  success: boolean;
+  data: {
+    ai_response: {
+      response: string;
+      enhanced: boolean;
+      service: string;
+      confidence: number;
+    };
+    nutrition?: {
+      facts: {
+        calories_per_serving: number;
+        protein_g: number;
+        carbs_g: number;
+        fiber_g: number;
+        fat_g: number;
+        sodium_mg: number;
+        sugar_g: number;
+      };
+      nourish_score: {
+        score: number;
+        category: string;
+        breakdown: {
+          nutrient_density: number;
+          processing_level: number;
+          ingredient_quality: number;
+        };
+      };
+      daily_value_percentages: Record<string, number>;
+      macronutrients: { protein: number; carbs: number; fat: number };
+      micronutrients: string[];
+    };
+    health_analysis?: {
+      safety_score: number;
+      carcinogen_alerts: string[];
+      toxic_additives: string[];
+      processing_level: string;
+      ingredient_analysis: Array<{
+        name: string;
+        safety_score: number;
+        category: string;
+        concerns: string[];
+        benefits: string[];
+      }>;
+    };
+    charts_data?: {
+      nutrition_breakdown: {
+        labels: string[];
+        values: number[];
+        colors: string[];
+        chart_type: string;
+      };
+      ingredient_safety_radar: {
+        labels: string[];
+        values: number[];
+        max_value: number;
+        chart_type: string;
+      };
+      daily_nutrition_progress: {
+        nutrients: Array<{
+          name: string;
+          current: number;
+          target: number;
+          color: string;
+        }>;
+        chart_type: string;
+      };
+    };
+    recommendations?: {
+      immediate_actions: string[];
+      lifestyle_changes: string[];
+      better_alternatives: string[];
+      shopping_tips: string[];
+      meal_planning: string[];
+    };
+    evidence?: {
+      research_studies: string[];
+      scientific_consensus: string;
+      regulatory_status: string[];
+      expert_opinions: string[];
+    };
+    personalization?: {
+      user_goals: string[];
+      dietary_restrictions: string[];
+      health_conditions: string[];
+      personalized_advice: string[];
+    };
+    metadata?: {
+      services_used: string[];
+      data_sources: string[];
+      confidence_scores: Record<string, number>;
+      processing_time: number;
+      enhanced_by_ai: boolean;
+      api_version: string;
+    };
+    // Legacy support fields
+    service?: string;
+    query?: string;
+    response?: string;
+    session_id?: string;
+    conversation_context?: string;
+    enhanced?: boolean;
+    legacy_recommendations?: string[];
+    analysis?: string;
+    training_status?: string;
+    available_models?: string[];
+    sources?: string[];
+    [key: string]: any;
+  };
+  rendering_hints?: {
+    primary_display: string;
+    chart_components: string[];
+    key_metrics: string[];
+    action_items: string[];
+  };
+  service_used: string;
+  request_type?: string;
+  processing_time?: number;
+  suggestions?: string[];
+}
+
+// Type guard for detecting unified responses at runtime
+export function isUnifiedResponse(obj: any): obj is UnifiedResponse {
+  return obj && typeof obj === 'object' && ('data' in obj) && ('service_used' in obj);
+}
+
+// Legacy types for backward compatibility
 export interface UserContext {
   age?: number;
+  family_size?: number;
+  family_history?: string[];
   health_concerns?: string[];
   dietary_restrictions?: string[];
   activity_level?: 'low' | 'moderate' | 'high';
-  conversation_mode?: boolean; // For ChatWidget compatibility
-  response_style?: string; // For ChatWidget compatibility
-  current_context?: string; // For ChatWidget compatibility
-  is_followup?: boolean; // For ChatWidget compatibility
-  conversation_context?: any; // For ChatWidget conversation history
+  current_health_concerns?: string[];
 }
 
 export interface WihyRequest {
@@ -83,597 +214,743 @@ export interface WihyRequest {
   user_context?: UserContext;
 }
 
-// Legacy response interface for backward compatibility
+export interface RiskFactor {
+  risk_factor: string;
+  associated_illnesses: string;
+  prevalence_rate: number;
+  preventability_score: number;
+}
+
+export interface ActionItem {
+  action: string;
+  priority: string;
+  target_illness: string;
+  evidence_level: string;
+  mechanism: string;
+  timeline: string;
+}
+
+export interface PersonalizedAnalysis {
+  identified_risk_factors: RiskFactor[];
+  priority_health_goals: string[];
+  action_items: ActionItem[];
+  timeline: string;
+}
+
+export interface ResearchFoundation {
+  citation_text: string;
+  study_type: string;
+  key_finding: string;
+}
+
+export interface ProgressTracking {
+  key_metrics: string[];
+  reassessment_period: string;
+}
+
+export interface WihyResponseData {
+  query_type: string;
+  query: string;
+  core_principle: string;
+  personalized_analysis: PersonalizedAnalysis;
+  research_foundation: ResearchFoundation[];
+  progress_tracking: ProgressTracking;
+  biblical_wisdom: string[];
+}
+
 export interface WihyResponse {
   success: boolean;
   timestamp: string;
   response_type: string;
   query: string;
   user_context?: UserContext;
-  wihy_response: {
-    query_type: string;
-    query: string;
-    core_principle: string;
-    personalized_analysis: {
-      identified_risk_factors: any[];
-      priority_health_goals: string[];
-      action_items: Array<{
-        action: string;
-        priority: string;
-        target_illness: string;
-        evidence_level: string;
-        mechanism: string;
-        timeline: string;
-      }>;
-      timeline: string;
-    };
-    research_foundation: Array<{
-      citation_text: string;
-      study_type: string;
-      key_finding: string;
-    }>;
-    progress_tracking: {
-      key_metrics: string[];
-      reassessment_period: string;
-    };
-    biblical_wisdom: string[];
-  };
+  wihy_response: WihyResponseData;
   message: string;
 }
 
-// Legacy UnifiedResponse interface for chart components compatibility
-export interface UnifiedResponse {
-  success: boolean;
-  data: {
-    response?: string;
-    analysis?: string;
-    recommendations?: {
-      immediate_actions?: string[];
-      lifestyle_changes?: string[];
-      better_alternatives?: string[];
-      shopping_tips?: string[];
-      meal_planning?: string[];
-    };
-    sources?: string[];
-    [key: string]: any;
-  };
-  service_used: string;
-  request_type?: string;
-  processing_time?: number;
+export interface WihyError {
+  detail: string;
 }
-
-// Type guard for detecting unified responses at runtime (for chart compatibility)
-export function isUnifiedResponse(obj: any): obj is UnifiedResponse {
-  return obj && typeof obj === 'object' && ('data' in obj) && ('service_used' in obj);
-}
-
-// ==================== WIHY API SERVICE CLASS ====================
 
 class WihyAPIService {
   private baseURL: string;
+  private isLocalDevelopment: boolean;
 
   constructor() {
-    this.baseURL = API_CONFIG.WIHY_API_URL;
+    this.baseURL = WIHY_API_ENDPOINT;
+    this.isLocalDevelopment = API_CONFIG.WIHY_API_URL.includes('localhost');
   }
 
   /**
-   * Ask WiHy Health Intelligence a question using the v4.0.0 ASK endpoint
+   * Ask WiHy a health-related question using the unified API
    */
-  async askHealthQuestion(request: HealthQuestionRequest): Promise<HealthQuestionResponse> {
+  async askAnything(request: WihyRequest | UnifiedRequest): Promise<HealthQuestionResponse | WihyResponse | UnifiedResponse> {
     try {
-      logger.info('Making WiHy API v4.0.0 ASK request', { query: request.query });
+      logger.apiRequest('Making WiHy Unified API request', request);
       
-      const endpoint = `${this.baseURL}/ask`;
+      let requestBody: any;
+      let endpoint: string;
       
+      // Both local and remote APIs use the same /ask endpoint with HealthQuestion format
+      endpoint = this.isLocalDevelopment ? this.baseURL : `${API_CONFIG.WIHY_API_URL}/ask`;
+      
+      // Build HealthQuestion object according to OpenAPI spec
+      if ('user_context' in request) {
+        requestBody = {
+          query: request.query,
+          user_context: request.user_context || {},
+          include_nutrition: true,
+          include_biblical_wisdom: false,
+          include_charts: true
+        };
+      } else {
+        const unifiedReq = request as UnifiedRequest;
+        requestBody = {
+          query: unifiedReq.query,
+          user_context: unifiedReq.context || unifiedReq.user_context || {},
+          include_nutrition: unifiedReq.include_nutrition !== false,
+          include_biblical_wisdom: unifiedReq.include_biblical_wisdom === true,
+          include_charts: unifiedReq.include_charts !== false
+        };
+      }
+      
+      // Use fetch API to match the working example exactly with timeout
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
       
       const response = await fetch(endpoint, {
         method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        body: JSON.stringify(request),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(requestBody),
         signal: controller.signal
       });
 
       clearTimeout(timeoutId);
 
       if (!response.ok) {
-        const errorText = await response.text();
-        logger.error(`WiHy API error: ${response.status} ${response.statusText}`, { error: errorText });
-        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const data: HealthQuestionResponse = await response.json();
-      logger.info('WiHy API response received', { 
-        success: data.success, 
-        processor: data.data.processor_used,
-        processingTime: data.data.processing_time 
-      });
-      
+      const data = await response.json();
+      logger.apiResponse('WiHy Unified API response received', data);
       return data;
     } catch (error) {
-      logger.error('WiHy API request failed:', error);
-      throw this.handleError(error);
-    }
-  }
-
-  /**
-   * Check API health status
-   */
-  async checkHealth(): Promise<{ status: string; version: string }> {
-    try {
-      const response = await fetch(`${this.baseURL}/health`, {
-        method: 'GET',
-        headers: { 'Accept': 'application/json' }
-      });
-
-      if (!response.ok) {
-        throw new Error(`Health check failed: ${response.status}`);
+      logger.error('WiHy API error:', error);
+      
+      if (error instanceof Error) {
+        // Check for timeout/abort errors
+        if (error.name === 'AbortError') {
+          throw new Error('TIMEOUT_ERROR: Request timed out - services may be unavailable');
+        }
+        
+        // Check for CORS errors
+        if (error.message.includes('CORS') || 
+            error.message.includes('Access to fetch') ||
+            error.message.includes('No \'Access-Control-Allow-Origin\'')) {
+          throw new Error('CORS_ERROR: Unable to connect to WiHy services from this domain');
+        }
+        
+        // Check for network/connectivity issues
+        if (error.message.includes('fetch') || 
+            error.message.includes('network') || 
+            error.name === 'TypeError' ||
+            error.message.includes('Failed to fetch')) {
+          throw new Error('NETWORK_ERROR: Unable to connect to WiHy services');
+        }
+        
+        // Check for server errors
+        if (error.message.includes('HTTP error! status: 5')) {
+          throw new Error('SERVER_ERROR: WiHy services are temporarily unavailable');
+        }
+        
+        throw new Error(error.message || 'WiHy API request failed');
       }
-
-      return await response.json();
-    } catch (error) {
-      logger.error('WiHy API health check failed:', error);
-      throw error;
+      
+      throw new Error('Unknown error occurred while contacting WiHy API');
     }
   }
 
   /**
-   * Legacy compatibility method - converts old request format to new format
+   * Convert UnifiedResponse to legacy WihyResponse format for backward compatibility
    */
-  async askAnything(request: WihyRequest): Promise<WihyResponse> {
-    try {
-      // Convert legacy request to v4.0.0 format
-      const healthRequest: HealthQuestionRequest = {
-        query: request.query,
-        user_context: request.user_context ? {
-          age: request.user_context.age,
-          health_concerns: request.user_context.health_concerns,
-          dietary_restrictions: request.user_context.dietary_restrictions,
-          activity_level: request.user_context.activity_level
-        } : undefined
+  private convertToLegacyFormat(unifiedResponse: UnifiedResponse, originalQuery: string): WihyResponse {
+    // Handle chat service response
+    if (unifiedResponse.service_used === 'chat' && unifiedResponse.data.response) {
+      return {
+        success: unifiedResponse.success,
+        timestamp: new Date().toISOString(),
+        response_type: unifiedResponse.request_type || 'chat',
+        query: originalQuery,
+        wihy_response: {
+          query_type: unifiedResponse.request_type || 'chat',
+          query: originalQuery,
+          core_principle: unifiedResponse.data.response,
+          personalized_analysis: {
+            identified_risk_factors: [],
+            priority_health_goals: [unifiedResponse.data.response],
+            action_items: [{
+              action: unifiedResponse.data.response,
+              priority: 'medium',
+              target_illness: 'general_health',
+              evidence_level: 'ai_generated',
+              mechanism: 'chat_response',
+              timeline: 'immediate'
+            }],
+            timeline: 'immediate'
+          },
+          research_foundation: [{
+            citation_text: 'WiHy AI Chat System',
+            study_type: 'ai_response',
+            key_finding: unifiedResponse.data.response
+          }],
+          progress_tracking: {
+            key_metrics: ['general_health'],
+            reassessment_period: '1 week'
+          },
+          biblical_wisdom: []
+        },
+        message: unifiedResponse.data.response
       };
-      
-      // Call the new API
-      const response = await this.askHealthQuestion(healthRequest);
-      
-      // Convert response to legacy format for backward compatibility
-      return this.convertToLegacyFormat(response, request.query);
-      
-    } catch (error) {
-      logger.error('Legacy askAnything failed:', error);
-      throw error;
     }
-  }
 
-  /**
-   * Legacy compatibility method - general health search
-   */
-  async searchHealth(query: string, userContext?: UserContext): Promise<WihyResponse> {
-    const request: WihyRequest = {
-      query: query,
-      user_context: userContext
+    // Handle other service types (training, nutrition, etc.)
+    return {
+      success: unifiedResponse.success,
+      timestamp: new Date().toISOString(),
+      response_type: unifiedResponse.request_type || 'health',
+      query: originalQuery,
+      wihy_response: {
+        query_type: unifiedResponse.request_type || 'health',
+        query: originalQuery,
+        core_principle: unifiedResponse.data.analysis || unifiedResponse.data.response || 'Health Information',
+        personalized_analysis: {
+          identified_risk_factors: [],
+          priority_health_goals: [],
+          action_items: unifiedResponse.data.recommendations?.immediate_actions?.map((rec: string, index: number) => ({
+            action: rec,
+            priority: 'medium',
+            target_illness: 'general_health',
+            evidence_level: 'moderate',
+            mechanism: 'lifestyle_modification',
+            timeline: 'ongoing'
+          })) || unifiedResponse.data.legacy_recommendations?.map((rec: string, index: number) => ({
+            action: rec,
+            priority: 'medium',
+            target_illness: 'general_health',
+            evidence_level: 'moderate',
+            mechanism: 'lifestyle_modification',
+            timeline: 'ongoing'
+          })) || [],
+          timeline: 'ongoing'
+        },
+        research_foundation: unifiedResponse.data.sources?.map((source: string) => ({
+          citation_text: source,
+          study_type: 'research',
+          key_finding: source
+        })) || [],
+        progress_tracking: {
+          key_metrics: ['general_health'],
+          reassessment_period: '1 month'
+        },
+        biblical_wisdom: []
+      },
+      message: unifiedResponse.data.response || unifiedResponse.data.analysis || 'Health information provided'
     };
-
-    // If conversation_mode is enabled, use new API and convert to legacy format
-    if (userContext?.conversation_mode) {
-      const healthRequest: HealthQuestionRequest = {
-        query: query,
-        user_context: userContext ? {
-          age: userContext.age,
-          health_concerns: userContext.health_concerns,
-          dietary_restrictions: userContext.dietary_restrictions,
-          activity_level: userContext.activity_level
-        } : undefined
-      };
-      
-      const newResponse = await this.askHealthQuestion(healthRequest);
-      return this.convertToLegacyFormat(newResponse, query);
-    }
-
-    return this.askAnything(request);
   }
 
   /**
-   * Legacy compatibility method - nutrition search  
-   */
-  async searchNutrition(foodQuery: string, userContext?: UserContext): Promise<WihyResponse> {
-    const query = `Nutrition information for ${foodQuery}`;
-    return this.searchHealth(query, userContext);
-  }
-
-  /**
-   * Legacy compatibility method - health news (now uses general health search)
+   * Get health news articles using the unified API
    */
   async getHealthNews(categories?: string[], limit?: number): Promise<WihyResponse> {
     const query = categories && categories.length > 0 
       ? `Latest health news about ${categories.join(', ')}`
-      : 'Latest health news and wellness updates';
+      : 'Latest health news';
     
-    return this.searchHealth(query);
+    const request: UnifiedRequest = {
+      query: query,
+      request_type: 'health',
+      context: {
+        categories: categories,
+        limit: limit
+      }
+    };
+
+    const response = await this.askAnything(request);
+    if ('data' in response) {
+      // It's a UnifiedResponse, convert to legacy format
+      return this.convertToLegacyFormat(response as UnifiedResponse, query);
+    }
+    return response as WihyResponse;
   }
 
   /**
-   * Convert new API response to legacy format for backward compatibility
+   * Search for nutrition information using the unified API
    */
-  private convertToLegacyFormat(response: HealthQuestionResponse, originalQuery: string): WihyResponse {
+  async searchNutrition(foodQuery: string, userContext?: UserContext): Promise<WihyResponse> {
+    const request: UnifiedRequest = {
+      query: `Nutrition information for ${foodQuery}`,
+      request_type: 'nutrition',
+      context: userContext || {}
+    };
+
+    const response = await this.askAnything(request);
+    if ('data' in response) {
+      // It's a UnifiedResponse, convert to legacy format
+      return this.convertToLegacyFormat(response as UnifiedResponse, request.query);
+    }
+    return response as WihyResponse;
+  }
+
+  /**
+   * Scan food images, barcodes, or products using the unified API
+   */
+  async scanFood(file?: File, scanOptions?: Partial<ScanRequest>): Promise<WihyResponse | UnifiedResponse> {
+    try {
+      let endpoint: string;
+      let requestBody: any;
+      
+      if (this.isLocalDevelopment) {
+        // Local API uses /scan endpoint
+        endpoint = `${API_CONFIG.WIHY_API_URL}/scan`;
+        
+        if (file) {
+          // Convert file to base64 for the API
+          const base64 = await this.fileToBase64(file);
+          requestBody = {
+            image_base64: base64,
+            user_context: scanOptions?.user_context || {},
+            ...scanOptions
+          };
+        } else {
+          requestBody = scanOptions || {};
+        }
+      } else {
+        // Remote API - fallback to legacy image analysis
+        // This would need to be implemented based on what the remote API supports
+        throw new Error('Image scanning not yet supported on remote API');
+      }
+      
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000);
+      
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(requestBody),
+        signal: controller.signal
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      logger.apiResponse('WiHy Scan API response received', data);
+      return data;
+    } catch (error) {
+      logger.error('WiHy Scan API error:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Convert File to base64 string
+   */
+  private fileToBase64(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => {
+        const result = reader.result as string;
+        // Remove the data:image/jpeg;base64, prefix
+        const base64 = result.split(',')[1];
+        resolve(base64);
+      };
+      reader.onerror = error => reject(error);
+    });
+  }
+
+  /**
+   * Scan food image - alias for scanFood for compatibility
+   */
+  async scanFoodImage(file: File, scanOptions?: Partial<ScanRequest>): Promise<WihyResponse | UnifiedResponse> {
+    return this.scanFood(file, scanOptions);
+  }
+
+  /**
+   * Ask health question - compatibility method
+   */
+  async askHealthQuestion(request: { query: string }): Promise<HealthQuestionResponse> {
+    const unifiedRequest: UnifiedRequest = {
+      query: request.query,
+      request_type: 'health',
+      context: {}
+    };
+
+    const response = await this.askAnything(unifiedRequest);
+    
+    // Ensure we return a HealthQuestionResponse format
+    if ('success' in response && 'data' in response) {
+      return response as HealthQuestionResponse;
+    }
+    
+    // Convert WihyResponse to HealthQuestionResponse format
+    const wihyResp = response as WihyResponse;
+    const timestamp = Date.now();
+    
     return {
-      success: response.success,
-      timestamp: response.timestamp,
-      response_type: 'health_intelligence_v4',
-      query: originalQuery,
-      wihy_response: {
-        query_type: 'health_intelligence',
-        query: originalQuery,
-        core_principle: response.data.response,
-        personalized_analysis: {
-          identified_risk_factors: [],
-          priority_health_goals: response.data.health_insights.key_benefits,
-          action_items: response.data.health_insights.recommendations.map((rec: string, index: number) => ({
-            action: rec,
-            priority: 'high',
-            target_illness: 'general_health',
-            evidence_level: 'high',
-            mechanism: 'lifestyle_modification',
-            timeline: 'ongoing'
-          })),
-          timeline: 'ongoing'
+      success: wihyResp.success,
+      timestamp: new Date().toISOString(),
+      endpoint: '/health/question',
+      data: {
+        query: request.query,
+        timestamp: timestamp,
+        response: wihyResp.wihy_response?.core_principle || wihyResp.message,
+        processor_used: 'wihy_api',
+        processing_time: 100,
+        nutrition_data: {},
+        health_insights: {
+          key_benefits: [],
+          potential_risks: [],
+          recommendations: []
         },
-        research_foundation: [{
-          citation_text: `WiHy Health Intelligence v4.0.0 (${response.data.processor_used})`,
-          study_type: 'ai_analysis',
-          key_finding: response.data.response
-        }],
-        progress_tracking: {
-          key_metrics: ['health_understanding', 'wellness_improvement'],
-          reassessment_period: '2 weeks'
-        },
-        biblical_wisdom: []
-      },
-      message: response.data.response
+        biblical_wisdom: {},
+        charts_data: {
+          nutrition_breakdown: {
+            chart_type: 'pie',
+            labels: [],
+            values: [],
+            colors: []
+          },
+          health_quality: {
+            chart_type: 'bar',
+            labels: [],
+            values: [],
+            colors: []
+          }
+        }
+      }
     };
   }
 
   /**
-   * Enhanced error handling
+   * General health search using the unified API
    */
-  private handleError(error: any): Error {
-    if (error instanceof Error) {
-      // Check for timeout/abort errors
-      if (error.name === 'AbortError') {
-        return new Error('Request timed out - WiHy Health Intelligence services may be under heavy load');
-      }
-      
-      // Check for CORS errors
-      if (error.message.includes('CORS') || 
-          error.message.includes('Access to fetch') ||
-          error.message.includes('No \'Access-Control-Allow-Origin\'')) {
-        return new Error('Unable to connect to WiHy Health Intelligence from this domain');
-      }
-      
-      // Check for network/connectivity issues
-      if (error.message.includes('fetch') || 
-          error.message.includes('network') || 
-          error.name === 'TypeError' ||
-          error.message.includes('Failed to fetch')) {
-        return new Error('Network error - Unable to connect to WiHy Health Intelligence services');
-      }
-      
-      // Check for server errors
-      if (error.message.includes('HTTP error! status: 5')) {
-        return new Error('WiHy Health Intelligence services temporarily unavailable');
-      }
-      
-      return error;
-    }
-    
-    return new Error('Unknown error occurred while contacting WiHy Health Intelligence');
+  async searchHealth(query: string, userContext?: UserContext): Promise<WihyResponse | UnifiedResponse> {
+    const request: UnifiedRequest = {
+      query: query,
+      request_type: 'auto',
+      context: userContext || {}
+    };
+
+    const response = await this.askAnything(request);
+    // Return the raw response (could be legacy WihyResponse or UnifiedResponse)
+    return response as WihyResponse | UnifiedResponse;
   }
 
   /**
-   * Format response for display in the UI
+   * Enhanced analysis method for special cases (compatibility method)
    */
-  formatResponse(response: HealthQuestionResponse): string {
-    let formatted = `# WiHy Health Intelligence\n\n`;
-    
-    // Main response content (prioritize analysis summary if available)
-    if (response.analysis?.summary) {
-      formatted += response.analysis.summary;
-    } else {
-      formatted += response.data.response;
-    }
-    
-    // Add health insights if available
-    if (response.data.health_insights) {
-      if (response.data.health_insights.key_benefits?.length) {
-        formatted += `\n\n## 🌟 Key Benefits\n`;
-        response.data.health_insights.key_benefits.forEach(benefit => {
-          formatted += `- ${benefit}\n`;
-        });
+  async analyzeWithWiHy(query: string, userContext?: UserContext, source?: string): Promise<WihyResponse | UnifiedResponse> {
+    const request: UnifiedRequest = {
+      query: query,
+      request_type: 'auto',
+      context: {
+        enhanced_analysis: true,
+        source: source,
+        ...userContext
       }
-      
-      if (response.data.health_insights.potential_risks?.length) {
-        formatted += `\n\n## ⚠️ Potential Risks\n`;
-        response.data.health_insights.potential_risks.forEach(risk => {
-          formatted += `- ${risk}\n`;
-        });
-      }
-      
-      if (response.data.health_insights.recommendations?.length) {
-        formatted += `\n\n## 📋 Recommendations\n`;
-        response.data.health_insights.recommendations.forEach(rec => {
-          formatted += `- ${rec}\n`;
-        });
-      }
-    }
-    
-    // Add enhanced OpenAI analysis if available
-    if (response.analysis?.openai_analysis) {
-      const openai = response.analysis.openai_analysis;
-      
-      formatted += `\n\n## 🧠 Enhanced Scientific Analysis\n\n`;
-      formatted += openai.details;
-      
-      if (openai.sources?.length) {
-        formatted += `\n\n### 📚 Research Sources\n`;
-        openai.sources.forEach((source, index) => {
-          formatted += `${index + 1}. ${source}\n`;
-        });
-      }
-      
-      if (openai.related_topics?.length) {
-        formatted += `\n\n### 🔗 Related Topics\n`;
-        openai.related_topics.forEach(topic => {
-          formatted += `- ${topic}\n`;
-        });
-      }
-      
-      if (openai.recommendations?.length) {
-        formatted += `\n\n### 💡 Evidence-Based Recommendations\n`;
-        openai.recommendations.forEach(rec => {
-          formatted += `- ${rec}\n`;
-        });
-      }
-      
-      if (openai.medical_disclaimer) {
-        formatted += `\n\n### ⚕️ Medical Disclaimer\n`;
-        formatted += `*${openai.medical_disclaimer}*`;
-      }
-    }
-    
-    // Add confidence score if available
-    if (response.analysis?.confidence_score !== undefined) {
-      formatted += `\n\n**Confidence Score**: ${Math.round(response.analysis.confidence_score * 100)}%`;
-    }
-    
-    // Add processing info
-    const processingTime = response.processing_time || response.data.processing_time;
-    formatted += `\n\n---\n\n*Processed by ${response.data.processor_used} in ${processingTime.toFixed(2)}ms*`;
-    
-    return formatted;
+    };
+
+    const response = await this.askAnything(request);
+    return response as WihyResponse | UnifiedResponse;
   }
 
   /**
-   * Format legacy response for display
+   * Format the WiHy response for display in the existing UI
+   * This formats it to be compatible with the existing search results format
    */
-  formatWihyResponse(response: WihyResponse): string {
-    let formatted = `# ${response.wihy_response.core_principle}\n\n`;
-    
-    // Add recommendations
-    if (response.wihy_response.personalized_analysis.action_items?.length > 0) {
-      formatted += `## 📋 Recommendations\n`;
-      response.wihy_response.personalized_analysis.action_items.forEach(item => {
-        formatted += `- ${item.action}\n`;
-      });
-      formatted += '\n';
-    }
-    
-    // Add health goals
-    if (response.wihy_response.personalized_analysis.priority_health_goals?.length > 0) {
-      formatted += `## 🎯 Health Benefits\n`;
-      response.wihy_response.personalized_analysis.priority_health_goals.forEach(goal => {
-        formatted += `- ${goal}\n`;
-      });
-      formatted += '\n';
-    }
-    
-    // Add timestamp
-    formatted += `---\n\n*WiHy Health Intelligence analysis generated at: ${new Date(response.timestamp).toLocaleString()}*\n`;
-    
-    return formatted;
-  }
-
-  /**
-   * Extract recommendations from response for UI display
-   */
-  extractRecommendations(response: HealthQuestionResponse | WihyResponse): string[] {
-    if ('data' in response && response.data) {
-      // New format - check both standard and enhanced recommendations
+  formatWihyResponse(response: HealthQuestionResponse | WihyResponse | UnifiedResponse): string {
+    // Handle new HealthQuestionResponse format (OpenAPI v4.0.0)
+    if ('success' in response && 'data' in response && response.data && 'response' in response.data && 'processor_used' in response.data) {
       const healthResp = response as HealthQuestionResponse;
-      const recommendations: string[] = [];
+      const data = healthResp.data;
       
-      // Add standard recommendations
-      if (healthResp.data.health_insights.recommendations) {
-        recommendations.push(...healthResp.data.health_insights.recommendations);
+      let formatted = `# WiHy Health Intelligence\n\n`;
+      
+      // Main response content
+      formatted += data.response;
+      
+      // Add health insights if available
+      if (data.health_insights) {
+        if (data.health_insights.key_benefits?.length) {
+          formatted += `\n\n## 🌟 Key Benefits\n`;
+          data.health_insights.key_benefits.forEach(benefit => {
+            formatted += `- ${benefit}\n`;
+          });
+        }
+        
+        if (data.health_insights.potential_risks?.length) {
+          formatted += `\n\n## ⚠️ Potential Risks\n`;
+          data.health_insights.potential_risks.forEach(risk => {
+            formatted += `- ${risk}\n`;
+          });
+        }
+        
+        if (data.health_insights.recommendations?.length) {
+          formatted += `\n\n## 📋 Recommendations\n`;
+          data.health_insights.recommendations.forEach(rec => {
+            formatted += `- ${rec}\n`;
+          });
+        }
       }
       
-      // Add enhanced OpenAI recommendations if available
-      if (healthResp.analysis?.openai_analysis?.recommendations) {
-        recommendations.push(...healthResp.analysis.openai_analysis.recommendations);
-      }
+      // Add processing info
+      formatted += `\n\n---\n\n*Processed by ${data.processor_used} in ${data.processing_time.toFixed(2)}ms*`;
       
-      // Add analysis-level recommendations if available
-      if (healthResp.analysis?.recommendations) {
-        recommendations.push(...healthResp.analysis.recommendations);
-      }
-      
-      return recommendations;
-    } else {
-      // Legacy format
-      const legacyResp = response as WihyResponse;
-      return legacyResp.wihy_response.personalized_analysis.action_items?.map(item => item.action) || [];
+      return formatted;
     }
+    
+    // Handle UnifiedResponse format (legacy API)
+    if ('success' in response && 'data' in response && response.data && 'ai_response' in response.data) {
+      const unifiedResp = response as UnifiedResponse;
+      
+      let formatted = `# WiHy Health Assistant\n\n`;
+      
+      // Use the ai_response.response field which contains the actual response
+      if (unifiedResp.data.ai_response && unifiedResp.data.ai_response.response) {
+        formatted += unifiedResp.data.ai_response.response;
+      } else {
+        // Fallback to showing raw data if ai_response is not available
+        formatted += `**Data:**\n\`\`\`json\n${JSON.stringify(unifiedResp.data, null, 2)}\n\`\`\``;
+      }
+      
+      // Add service information if available
+      if (unifiedResp.data.ai_response?.service) {
+        formatted += `\n\n---\n\n*Response from ${unifiedResp.data.ai_response.service} service*`;
+        if (unifiedResp.data.ai_response.confidence) {
+          formatted += ` (Confidence: ${Math.round(unifiedResp.data.ai_response.confidence * 100)}%)`;
+        }
+      }
+      
+      return formatted;
+    }
+    
+    // Handle legacy WihyResponse format
+    const legacyResp = response as WihyResponse;
+    const { wihy_response } = legacyResp;
+    
+    let formatted = `# ${wihy_response.core_principle}\n\n`;
+    
+    // Personalized Analysis
+    if (wihy_response.personalized_analysis) {
+      formatted += `## 🎯 Personalized Health Analysis\n\n`;
+      
+      // Risk Factors
+      if (wihy_response.personalized_analysis.identified_risk_factors?.length > 0) {
+        formatted += `### Identified Risk Factors:\n`;
+        wihy_response.personalized_analysis.identified_risk_factors.forEach(risk => {
+          formatted += `- **${risk.risk_factor.replace(/_/g, ' ').toUpperCase()}**\n`;
+          formatted += `  - Associated with: ${risk.associated_illnesses.replace(/_/g, ' ')}\n`;
+          formatted += `  - Prevalence: ${risk.prevalence_rate}%\n`;
+          formatted += `  - Preventability: ${risk.preventability_score}%\n\n`;
+        });
+      }
+      
+      // Priority Goals
+      if (wihy_response.personalized_analysis.priority_health_goals?.length > 0) {
+        formatted += `### 🎯 Priority Health Goals:\n`;
+        wihy_response.personalized_analysis.priority_health_goals.forEach(goal => {
+          formatted += `- ${goal}\n`;
+        });
+        formatted += '\n';
+      }
+      
+      // Action Items
+      if (wihy_response.personalized_analysis.action_items?.length > 0) {
+        formatted += `### 📋 Action Items:\n`;
+        wihy_response.personalized_analysis.action_items.forEach((action, index) => {
+          formatted += `#### ${index + 1}. ${action.action}\n`;
+          formatted += `- **Priority:** ${action.priority}\n`;
+          formatted += `- **Target:** ${action.target_illness.replace(/_/g, ' ')}\n`;
+          formatted += `- **Evidence Level:** ${action.evidence_level}\n`;
+          formatted += `- **How it works:** ${action.mechanism}\n`;
+          formatted += `- **Timeline:** ${action.timeline}\n\n`;
+        });
+      }
+      
+      // Timeline
+      if (wihy_response.personalized_analysis.timeline) {
+        formatted += `**Implementation Timeline:** ${wihy_response.personalized_analysis.timeline}\n\n`;
+      }
+    }
+    
+    // Research Foundation
+    if (wihy_response.research_foundation?.length > 0) {
+      formatted += `## 📚 Research Foundation\n\n`;
+      wihy_response.research_foundation.forEach(research => {
+        formatted += `- **${research.citation_text}** (${research.study_type})\n`;
+        formatted += `  ${research.key_finding}\n\n`;
+      });
+    }
+    
+    // Progress Tracking
+    if (wihy_response.progress_tracking) {
+      formatted += `## 📊 Progress Tracking\n\n`;
+      formatted += `**Key Metrics to Track:**\n`;
+      wihy_response.progress_tracking.key_metrics.forEach(metric => {
+        formatted += `- ${metric}\n`;
+      });
+      formatted += `\n**Reassessment:** ${wihy_response.progress_tracking.reassessment_period}\n\n`;
+    }
+    
+    // Biblical Wisdom
+    if (wihy_response.biblical_wisdom?.length > 0) {
+      formatted += `## ✝️ Biblical Wisdom\n\n`;
+      wihy_response.biblical_wisdom.forEach(wisdom => {
+        formatted += `> ${wisdom}\n\n`;
+      });
+    }
+    
+    // Add timestamp if available (different field names in different response formats)
+    const timestamp = (response as any).timestamp || (response as any).created_at || new Date().toISOString();
+    formatted += `---\n\n*WiHy health truth analysis generated at: ${new Date(timestamp).toLocaleString()}*\n`;
+    
+    return formatted;
   }
 
   /**
-   * Extract key benefits from response for UI display
+   * Extract recommendations from WiHy response for UI display
    */
-  extractBenefits(response: HealthQuestionResponse | WihyResponse): string[] {
-    if ('data' in response && response.data) {
-      // New format
-      return (response as HealthQuestionResponse).data.health_insights.key_benefits || [];
-    } else {
-      // Legacy format  
-      const legacyResp = response as WihyResponse;
-      return legacyResp.wihy_response.personalized_analysis.priority_health_goals || [];
+  extractRecommendations(response: HealthQuestionResponse | WihyResponse | UnifiedResponse): string[] {
+    const recommendations: string[] = [];
+
+    // Handle new HealthQuestionResponse format (OpenAPI v4.0.0)
+    if ('success' in response && 'data' in response && response.data && 'health_insights' in response.data) {
+      const healthResp = response as HealthQuestionResponse;
+      if (healthResp.data.health_insights.recommendations) {
+        healthResp.data.health_insights.recommendations.forEach(r => recommendations.push(r));
+      }
+      return recommendations;
     }
+
+    if (isUnifiedResponse(response)) {
+      // Handle new structured recommendations
+      if (response.data.recommendations) {
+        const recs = response.data.recommendations;
+        if (recs.immediate_actions) recs.immediate_actions.forEach(r => recommendations.push(r));
+        if (recs.lifestyle_changes) recs.lifestyle_changes.forEach(r => recommendations.push(r));
+        if (recs.better_alternatives) recs.better_alternatives.forEach(r => recommendations.push(r));
+        if (recs.shopping_tips) recs.shopping_tips.forEach(r => recommendations.push(r));
+        if (recs.meal_planning) recs.meal_planning.forEach(r => recommendations.push(r));
+      }
+      // Handle legacy recommendations
+      if (response.data.legacy_recommendations && response.data.legacy_recommendations.length > 0) {
+        response.data.legacy_recommendations.forEach((r: string) => recommendations.push(r));
+      }
+    } else {
+      // Handle legacy WihyResponse format
+      const legacyResp = response as WihyResponse;
+      if (legacyResp.wihy_response.personalized_analysis?.action_items) {
+        legacyResp.wihy_response.personalized_analysis.action_items.forEach(action => {
+          recommendations.push(`${action.action} (${action.priority} priority)`);
+        });
+      }
+    }
+
+    return recommendations;
   }
 
   /**
-   * Extract citations from response for UI display (legacy compatibility)
+   * Extract citations from WiHy response for UI display
    */
   extractCitations(response: HealthQuestionResponse | WihyResponse | UnifiedResponse): string[] {
-    // Handle new HealthQuestionResponse format
-    if ('data' in response && response.data && 'processor_used' in response.data) {
-      const healthResp = response as HealthQuestionResponse;
-      const citations: string[] = [];
-      
-      // Add standard processor citation
-      citations.push(`WiHy Health Intelligence v4.0.0 (${healthResp.data.processor_used})`);
-      
-      // Add OpenAI sources if available
-      if (healthResp.analysis?.openai_analysis?.sources) {
-        citations.push(...healthResp.analysis.openai_analysis.sources);
-      }
-      
+    const citations: string[] = [];
+
+    // Handle new HealthQuestionResponse format (OpenAPI v4.0.0)
+    if ('success' in response && 'data' in response && response.data && 'processor_used' in response.data) {
+      // For now, the new API doesn't include specific citation fields in the schema
+      // We could parse citations from the response text if needed
       return citations;
     }
 
-    // Handle legacy WihyResponse format
-    if ('wihy_response' in response) {
+    if (isUnifiedResponse(response)) {
+      // Unified API may include sources array
+      if (response.data.sources && response.data.sources.length > 0) {
+        response.data.sources.forEach((s: string) => citations.push(s));
+      }
+    } else {
+      // Handle legacy WihyResponse format
       const legacyResp = response as WihyResponse;
-      return legacyResp.wihy_response.research_foundation?.map(research => 
-        `${research.citation_text}: ${research.key_finding}`
-      ) || [];
+      if (legacyResp.wihy_response.research_foundation) {
+        legacyResp.wihy_response.research_foundation.forEach(research => {
+          citations.push(`${research.citation_text}: ${research.key_finding}`);
+        });
+      }
     }
 
-    // Handle UnifiedResponse format
-    if ('service_used' in response) {
-      const unifiedResp = response as UnifiedResponse;
-      return unifiedResp.data.sources || [`${unifiedResp.service_used} service`];
+    return citations;
+  }
+
+  /**
+   * Format UnifiedResponse for chat display (simple format)
+   */
+  formatUnifiedResponseForChat(response: UnifiedResponse): string {
+    // Handle chat service responses
+    if (response.service_used === 'chat' && response.data.response) {
+      // For now, the API is returning very brief responses like "AI Chat response to: what is healthy"
+      // We should provide more helpful information to the user
+      const briefResponse = response.data.response;
+      
+      if (briefResponse.includes('AI Chat response to:')) {
+        // The API gave us a placeholder response, provide something more useful
+        const query = response.data.query || 'your question';
+        return `I received your question about "${query}" and I'm here to help! 
+
+The WiHy AI system is currently processing health-related queries. While the response system is being optimized, I can help you with:
+
+• Understanding health and nutrition concepts
+• Providing general wellness guidance  
+• Explaining health data and metrics
+• Offering evidence-based health insights
+
+What specific aspect of health would you like to explore further?`;
+      }
+      
+      return briefResponse;
     }
-
-    return [];
+    
+    // Handle other response types
+    if (response.data.response) {
+      return response.data.response;
+    }
+    
+    if (response.data.analysis) {
+      return response.data.analysis;
+    }
+    
+    if (response.data.training_status) {
+      let message = `🔄 ${response.data.training_status}`;
+      if (response.data.available_models && response.data.available_models.length > 0) {
+        message += `\n\n📊 Available models: ${response.data.available_models.join(', ')}`;
+      }
+      return message;
+    }
+    
+    // Fallback - show the raw data in a readable format
+    return `I received a response from the ${response.service_used} service. Here's what I found:\n\n${JSON.stringify(response.data, null, 2)}`;
   }
 
   /**
-   * Legacy compatibility - Enhanced health question (renamed method)
-   * NOTE: This method now defaults to analyse: false unless explicitly specified
+   * Format response for display - compatibility alias for formatWihyResponse
    */
-  async askEnhancedHealthQuestion(request: { query: string; context?: string; user_id?: string; analyse?: boolean }): Promise<HealthQuestionResponse> {
-    const healthRequest: HealthQuestionRequest = {
-      query: request.query,
-      analyse: request.analyse ?? false, // Default to basic analysis unless explicitly requested
-      user_context: request.context ? JSON.parse(request.context) : undefined
-    };
-    
-    return this.askHealthQuestion(healthRequest);
-  }
-
-  /**
-   * Legacy compatibility - Scan food (removed functionality, returns helpful message)
-   */
-  async scanFood(file?: File, options?: any): Promise<WihyResponse> {
-    logger.warn('scanFood method called but scanning functionality has been removed per API v4.0.0 update');
-    
-    const query = `Analyze the food in this image: general food analysis`;
-    const response = await this.searchHealth(query);
-    
-    // Add a note about the removed functionality  
-    response.message = "Food scanning functionality has been updated. For food analysis, please describe the food in your question.";
-    
-    return response;
-  }
-
-  /**
-   * Legacy compatibility - Scan food image (removed functionality, returns helpful message)
-   */
-  async scanFoodImage(file: File, context?: string): Promise<any> {
-    logger.warn('scanFoodImage method called but scanning functionality has been removed per API v4.0.0 update');
-    
-    const query = context ? `Analyze food: ${context}` : 'General food analysis and nutrition information';
-    const response = await this.searchHealth(query);
-    
-    return {
-      success: true,
-      message: "Food scanning functionality has been updated. For food analysis, please describe the food in your question.",
-      analysis: response.message,
-      recommendations: this.extractRecommendations(response)
-    };
-  }
-
-  /**
-   * Ask a health question with enhanced OpenAI analysis
-   * @param query - The health question to ask
-   * @param userContext - Optional user context for personalization
-   * @param analyse - Whether to include enhanced OpenAI analysis (default: false)
-   */
-  async askWithAnalysis(query: string, userContext?: UserContext, analyse: boolean = false): Promise<HealthQuestionResponse> {
-    const healthRequest: HealthQuestionRequest = {
-      query: query,
-      analyse: analyse,
-      user_context: userContext ? {
-        age: userContext.age,
-        health_concerns: userContext.health_concerns,
-        dietary_restrictions: userContext.dietary_restrictions,
-        activity_level: userContext.activity_level,
-        health_goals: userContext.health_concerns // Map health_concerns to health_goals for v4.0.0
-      } : undefined
-    };
-    
-    return this.askHealthQuestion(healthRequest);
-  }
-
-  /**
-   * Ask a health question with enhanced OpenAI analysis enabled
-   * @param query - The health question to ask
-   * @param userContext - Optional user context for personalization
-   */
-  async askWithEnhancedAnalysis(query: string, userContext?: UserContext): Promise<HealthQuestionResponse> {
-    return this.askWithAnalysis(query, userContext, true);
-  }
-
-  /**
-   * ENHANCED ANALYSIS - Use this method from "Analyze with WiHy" buttons
-   * This method explicitly enables the analyse flag for comprehensive AI analysis
-   * @param query - The health question to ask
-   * @param userContext - Optional user context for personalization
-   * @param source - Source component calling this method (for logging)
-   */
-  async analyzeWithWiHy(query: string, userContext?: UserContext, source?: string): Promise<HealthQuestionResponse> {
-    logger.info(`Enhanced WiHy analysis requested from ${source || 'unknown component'}`, { query });
-    
-    const healthRequest: HealthQuestionRequest = {
-      query: query,
-      analyse: true, // Always enable enhanced analysis for "Analyze with WiHy" buttons
-      user_context: userContext ? {
-        age: userContext.age,
-        health_concerns: userContext.health_concerns,
-        dietary_restrictions: userContext.dietary_restrictions,
-        activity_level: userContext.activity_level,
-        health_goals: userContext.health_concerns // Map health_concerns to health_goals for v4.0.0
-      } : undefined
-    };
-    
-    return this.askHealthQuestion(healthRequest);
+  formatResponse(response: HealthQuestionResponse | WihyResponse | UnifiedResponse): string {
+    return this.formatWihyResponse(response);
   }
 }
 
-// Export singleton instance
+// Export a singleton instance
 export const wihyAPI = new WihyAPIService();
-
-// Default export for compatibility
 export default wihyAPI;

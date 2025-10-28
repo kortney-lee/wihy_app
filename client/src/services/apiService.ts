@@ -69,18 +69,48 @@ export const processUploadedFoodImage = async (file: File): Promise<NutritionRes
     console.log('WiHy Enhanced API image analysis result:', response);
     
     // Convert WiHy response to legacy format for compatibility
+    // Handle both UnifiedResponse and WihyResponse formats
+    const isSuccessful = ('success' in response) ? response.success : true;
+    
+    // Extract relevant data based on response type
+    let foodName = 'Unknown food';
+    let confidence = 0;
+    let tags: string[] = [];
+    let analysisText = '';
+    
+    if ('data' in response && response.data) {
+      // Handle UnifiedResponse format
+      if (response.data.ai_response) {
+        analysisText = response.data.ai_response.response;
+        confidence = response.data.ai_response.confidence || 0.8;
+      }
+      foodName = response.data.response || 'Food item analyzed';
+    } else if ('wihy_response' in response && response.wihy_response) {
+      // Handle WihyResponse format
+      foodName = response.wihy_response.core_principle || 'Food item analyzed';
+      analysisText = response.wihy_response.core_principle || '';
+      confidence = 0.8;
+    } else if ('overall_assessment' in response) {
+      // Handle legacy response format (if it still exists)
+      foodName = (response as any).overall_assessment?.verdict || 'Unknown food';
+      confidence = (response as any).overall_assessment?.health_score || 0;
+      tags = (response as any).detected_foods?.map((f: any) => f.name) || [];
+    }
+    
     return {
-      success: response.success,
-      message: response.success ? 'Image analyzed successfully' : 'Image analysis failed',
-      foodName: response.overall_assessment?.verdict || 'Unknown food',
-      confidence: response.overall_assessment?.health_score || 0,
-      tags: response.detected_foods?.map(f => f.name) || [],
+      success: isSuccessful,
+      message: isSuccessful ? 'Image analyzed successfully' : 'Image analysis failed',
+      foodName,
+      confidence,
+      tags,
       nutrition: {
-        item: response.overall_assessment?.verdict || 'Unknown',
+        item: foodName,
         // Note: nutrition details would need to come from additional API calls
       },
       analysis: {
         provider: 'WiHy Enhanced Model (ml.wihy.ai)',
+        confidence: confidence,
+        tags: tags
       }
     };
     

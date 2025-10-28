@@ -61,7 +61,11 @@ Provide detailed health insights, nutritional benefits, potential risks, and rec
             'ImageUploadModal'
           );
           
-          if (wihyResult.success && wihyResult.data) {
+          // Check if the result has success property and handle both response types
+          const isSuccessful = ('success' in wihyResult) ? wihyResult.success : true;
+          const hasData = ('data' in wihyResult) ? wihyResult.data : wihyResult;
+          
+          if (isSuccessful && hasData) {
             // Format the enhanced analysis
             const enhancedAnalysis = wihyAPI.formatResponse(wihyResult);
             analysisText = `${analysisText}\n\n=== Enhanced WiHy Analysis ===\n${enhancedAnalysis}`;
@@ -72,8 +76,14 @@ Provide detailed health insights, nutritional benefits, potential risks, and rec
             const { wihyAPI } = await import('../../services/wihyAPI');
             const basicResult = await wihyAPI.scanFood(file);
             
-            if (basicResult.success && basicResult.message) {
-              analysisText = `${analysisText}\n\nBasic AI Health Analysis: ${basicResult.message}`;
+            // Handle both response types
+            const isSuccessful = ('success' in basicResult) ? basicResult.success : true;
+            const message = ('message' in basicResult) ? basicResult.message : 
+                          ('data' in basicResult && basicResult.data.ai_response) ? basicResult.data.ai_response.response : 
+                          'Analysis completed';
+            
+            if (isSuccessful && message) {
+              analysisText = `${analysisText}\n\nBasic AI Health Analysis: ${message}`;
             }
           } catch (basicError) {
             // Basic WiHy API also not available, using Vision Analysis results only

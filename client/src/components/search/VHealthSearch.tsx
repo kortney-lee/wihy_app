@@ -359,7 +359,10 @@ const VHealthSearch: React.FC = () => {
                 data: {
                   response: wihyResponse.wihy_response?.core_principle || summary,
                   ai_response: {
-                    response: wihyResponse.wihy_response?.core_principle || summary
+                    response: wihyResponse.wihy_response?.core_principle || summary,
+                    enhanced: true,
+                    service: 'wihy',
+                    confidence: 0.9
                   }
                 },
                 service_used: 'wihy'

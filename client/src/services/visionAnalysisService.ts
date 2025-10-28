@@ -261,8 +261,13 @@ class VisionAnalysisService {
       const { wihyAPI } = await import('./wihyAPI');
       const wihyResult = await wihyAPI.scanFood(imageFile);
       
-      if (wihyResult.success && wihyResult.message) {
-        wihyAnalysis = wihyResult.message;
+      if (('success' in wihyResult && wihyResult.success) || !('success' in wihyResult)) {
+        const message = ('message' in wihyResult) ? wihyResult.message : 
+                       ('data' in wihyResult && wihyResult.data.ai_response) ? wihyResult.data.ai_response.response : 
+                       null;
+        if (message) {
+          wihyAnalysis = message;
+        }
       }
     } catch (error) {
       console.log('Legacy WiHy API also unavailable');
