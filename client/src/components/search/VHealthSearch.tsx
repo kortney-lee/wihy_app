@@ -322,6 +322,7 @@ const VHealthSearch: React.FC = () => {
             navigate(`/results?q=${encodeURIComponent(queryToUse)}`, {
               state: {
                 results: searchResults,
+                apiResponse: wihyResponse, // Include the raw API response for ChatWidget
                 dataSource: 'wihy',
                 fromSearch: true
               }
@@ -491,6 +492,7 @@ const VHealthSearch: React.FC = () => {
             navigate(`/results?q=${encodeURIComponent(foodName)}`, {
               state: {
                 results: nutritionResults,
+                apiResponse: wihyResponse, // Include the raw API response for ChatWidget
                 dataSource: 'wihy',
                 fromSearch: true
               }

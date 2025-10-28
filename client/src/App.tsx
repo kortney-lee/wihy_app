@@ -105,10 +105,10 @@ const ResultsPage: React.FC = () => {
         cacheKey: cacheKey
       });
       
-      if (navigationState?.fromSearch && navigationState?.results && navigationState?.apiResponse) {
+      if (navigationState?.fromSearch && navigationState?.results) {
         logger.info('🔍 ResultsPage: Using navigation state data (no API call needed)', { query, cacheKey });
         setResults(navigationState.results.details || navigationState.results.summary || 'No results');
-        setApiResponse(navigationState.apiResponse); // Set the API response for ChatWidget
+        setApiResponse(navigationState.apiResponse || null); // Set the API response for ChatWidget (may be null for cached data)
         setDataSource(navigationState.dataSource || 'wihy');
         setCitations(navigationState.results.sources || []);
         setRecommendations(navigationState.results.recommendations || []);
