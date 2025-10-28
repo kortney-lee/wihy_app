@@ -426,18 +426,34 @@ Category: ${article.category || article.ai_category || 'Uncategorized'}`;
             data-category={article.category || article.ai_category}
             onClick={() => window.open(article.link || article.url, '_blank')}
           >
-            {/* Image Section - Using images from vHealth News API */}
+            {/* Image Section - Enhanced image handling with better fallbacks */}
             <div className="news-image">
               {(() => {
                 const imageUrl = article.image_url || article.media_url || article.media_thumb_url;
+                const hasValidImage = article.has_image && imageUrl && imageUrl !== null;
                 
-                // Use API image if available, otherwise placeholder
-                if (imageUrl) {
+                // Debug: Log image data for troubleshooting (only in development)
+                if (process.env.NODE_ENV === 'development') {
+                  console.log('🖼️ Article image debug:', {
+                    id: article.id,
+                    title: article.title?.substring(0, 50) + '...',
+                    image_url: article.image_url,
+                    has_image: article.has_image,
+                    image_status: article.image_status,
+                    image_source: article.image_source,
+                    finalImageUrl: imageUrl,
+                    hasValidImage: hasValidImage
+                  });
+                }
+                
+                // Use API image if available and valid
+                if (hasValidImage) {
                   return (
                     <img 
                       src={imageUrl} 
                       alt={article.title}
                       onError={(e) => {
+                        console.log('Image failed to load:', imageUrl);
                         // Use WiHy logo as fallback
                         (e.target as HTMLImageElement).src = getWiHyLogoFallback();
                         // Add placeholder class for styling
@@ -446,12 +462,20 @@ Category: ${article.category || article.ai_category || 'Uncategorized'}`;
                     />
                   );
                 } else {
+                  // Enhanced placeholder with better visual indication
                   return (
-                    <img 
-                      src={getWiHyLogoFallback()}
-                      alt={article.title || 'Health article'}
-                      className="placeholder-image"
-                    />
+                    <div className="news-image-placeholder">
+                      <img 
+                        src={getWiHyLogoFallback()}
+                        alt={article.title || 'Health article'}
+                        className="placeholder-image"
+                      />
+                      {article.image_status === 'missing' && (
+                        <div className="image-status-overlay">
+                          <span className="image-status-text">Image not available</span>
+                        </div>
+                      )}
+                    </div>
                   );
                 }
               })()}

@@ -186,6 +186,27 @@ class VHealthNewsClient {
     
     const data: ArticlesResponse = await response.json();
     
+    // Debug: Log API response summary (development only)
+    if (process.env.NODE_ENV === 'development') {
+      console.log('� News API Response Summary:', {
+        success: data.success,
+        totalArticles: data.articles?.length || 0,
+        articlesWithImages: data.articles?.filter(a => a.has_image && a.image_url).length || 0,
+        articlesWithoutImages: data.articles?.filter(a => !a.has_image || !a.image_url).length || 0
+      });
+      
+      // Log a sample of image statuses
+      if (data.articles && data.articles.length > 0) {
+        const imageStatuses = data.articles.slice(0, 3).map(article => ({
+          title: article.title?.substring(0, 40) + '...',
+          has_image: article.has_image,
+          image_url: article.image_url ? 'present' : 'null',
+          image_status: article.image_status
+        }));
+        console.log('📸 Sample image statuses:', imageStatuses);
+      }
+    }
+    
     // Add legacy compatibility fields to articles
     const articles = data.articles || [];
     data.articles = articles.map(article => ({
