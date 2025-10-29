@@ -10,6 +10,8 @@ import ChatWidget from '../ui/ChatWidget';
 import '../../styles/VHealthSearch.css';
 import Header from '../shared/Header';
 import Spinner from '../ui/Spinner';
+import { wihyAPI } from '../../services/wihyAPI';
+import { logger } from '../../utils/logger';
 
 /* Define default topics and resources */
 const defaultRelatedTopics = [
@@ -162,6 +164,13 @@ const SearchResults: React.FC<SearchResultsProps> = ({
   const [isSearching, setIsSearching] = useState(false);
   const [currentContext, setCurrentContext] = useState<string>('search results');
   const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1200);
+  
+  // Header search state - independent from main search
+  const [headerSearchResults, setHeaderSearchResults] = useState<string>('');
+  const [headerSearchQuery, setHeaderSearchQuery] = useState<string>('');
+  const [headerApiResponse, setHeaderApiResponse] = useState<any>(null);
+  const [isHeaderSearchLoading, setIsHeaderSearchLoading] = useState(false);
+  
   const recognitionRef = useRef<any>(null);
 
   // Handle window resize for responsive layout
@@ -293,19 +302,122 @@ const SearchResults: React.FC<SearchResultsProps> = ({
   // Check if this is a test query
   const isTestQuery = query.toLowerCase() === 'test';
 
-  // Handle new search from header
-  const handleHeaderSearch = (query: string) => {
-    console.log('🔍 HEADER SEARCH initiated:', { query });
-    // Don't manage loading here - let the parent handle it
-    onNewSearch(query);
+  // Handle new search from header - makes its own API request
+  const handleHeaderSearch = async (searchQuery: string) => {
+    console.log('🔍 HEADER SEARCH initiated:', { searchQuery });
+    
+    if (!searchQuery.trim()) return;
+    
+    setIsHeaderSearchLoading(true);
+    
+    try {
+      logger.debug('Header search: Making WiHy API call', { query: searchQuery });
+      
+      const wihyResponse = await wihyAPI.searchHealth(searchQuery);
+      
+      if (wihyResponse.success) {
+        // Extract response content
+        let summary = 'Health information provided';
+        if ('data' in wihyResponse) {
+          // New unified API response format
+          summary = (wihyResponse as any).data?.response || 
+                   (wihyResponse as any).data?.ai_response?.response || 
+                   summary;
+        } else {
+          // Legacy WihyResponse format
+          summary = (wihyResponse as any).wihy_response?.core_principle || summary;
+        }
+        
+        // Update our local state and add to chat conversation
+        setHeaderSearchResults(summary);
+        setHeaderSearchQuery(searchQuery);
+        setHeaderApiResponse(wihyResponse);
+        
+        // Add the new search to the existing chat conversation
+        handleAddToChatConversation(searchQuery, summary);
+        
+        console.log('🔍 HEADER SEARCH state updated:', {
+          query: searchQuery,
+          hasResults: !!summary,
+          timestamp: new Date().toISOString()
+        });
+        
+        logger.info('Header search completed successfully', { query: searchQuery });
+        
+        console.log('🔍 HEADER SEARCH completed:', {
+          query: searchQuery,
+          success: true,
+          hasResponse: !!summary,
+          timestamp: new Date().toISOString()
+        });
+        
+      } else {
+        throw new Error('WiHy API request failed');
+      }
+      
+    } catch (error) {
+      logger.error('Header search failed:', error);
+      setHeaderSearchResults('Sorry, there was an error processing your search. Please try again.');
+      setHeaderApiResponse(null);
+      
+      console.log('🔍 HEADER SEARCH failed:', {
+        query: searchQuery,
+        error: error.message,
+        timestamp: new Date().toISOString()
+      });
+    } finally {
+      setIsHeaderSearchLoading(false);
+    }
   };
 
   // Handle new search from ChatWidget
-  const handleChatSearch = (query: string, response: any) => {
-    console.log('🔍 ChatWidget triggered new search:', { query, response });
-    // Don't manage loading here - let the parent handle it
+  const handleChatSearch = (query: string) => {
+    console.log('🔍 ChatWidget triggered new search:', { query });
+    // Clear any header search results when using ChatWidget
+    setHeaderSearchResults('');
+    setHeaderSearchQuery('');
+    setHeaderApiResponse(null);
+    // Use the main navigation flow for ChatWidget searches
     onNewSearch(query);
   };
+
+  // Handle header search - add messages to existing conversation
+  const handleAddToChatConversation = (userMessage: string, assistantMessage: string) => {
+    console.log('🔍 ATTEMPTING TO ADD TO CHAT:', {
+      userMessage,
+      assistantMessage: assistantMessage.substring(0, 100) + '...',
+      hasAddChatMessage: !!(window as any).addChatMessage,
+      timestamp: new Date().toISOString()
+    });
+    
+    if ((window as any).addChatMessage) {
+      (window as any).addChatMessage(userMessage, assistantMessage);
+    } else {
+      console.error('🔍 addChatMessage function not available on window');
+    }
+  };
+
+  // Debug logging for state changes
+  useEffect(() => {
+    console.log('🔍 SEARCHRESULTS STATE DEBUG:', {
+      headerSearchQuery,
+      originalQuery: query,
+      hasHeaderSearchResults: !!headerSearchResults,
+      isHeaderSearchLoading,
+      chatWidgetKey: `chatwidget-${headerSearchQuery || query}`,
+      timestamp: new Date().toISOString()
+    });
+  }, [headerSearchQuery, headerSearchResults, query, isHeaderSearchLoading]);
+
+  // Clear header search results when main query changes
+  useEffect(() => {
+    if (query && headerSearchQuery && query !== headerSearchQuery) {
+      console.log('🔍 Main query changed, clearing header search results');
+      setHeaderSearchResults('');
+      setHeaderSearchQuery('');
+      setHeaderApiResponse(null);
+    }
+  }, [query, headerSearchQuery]);
 
   // 🔍 SEARCH RESULTS LOGGING: Track prop changes
   useEffect(() => {
@@ -346,8 +458,8 @@ const SearchResults: React.FC<SearchResultsProps> = ({
         />
       </div>
 
-      {/* Show spinner when loading from parent */}
-      {isLoading && (
+      {/* Show spinner when loading from parent OR header search */}
+      {(isLoading || isHeaderSearchLoading) && (
         <Spinner
           overlay={true}
           title="Analyzing with AI..."
@@ -390,15 +502,16 @@ const SearchResults: React.FC<SearchResultsProps> = ({
               {/* Chat Widget - header now included inside */}
               <div style={{ flex: 1, overflow: 'hidden' }}>
                 <ChatWidget
-                  key={`chatwidget-${query}`} // Force re-render when query changes
+                  key={`chatwidget-${query}`} // Stable key since we're adding to conversation instead of replacing
                   isOpen={true}
                   onClose={() => {}}
                   currentContext={currentContext}
                   inline={true}
-                  searchQuery={query}
+                  searchQuery={query} // Always use original query for initialization
                   onNewSearch={handleChatSearch}
+                  onAddMessage={handleAddToChatConversation}
                   searchResponse={(() => {
-                    // Extract response from apiResponse or fall back to results
+                    // Use original results for initialization, header search will be added via onAddMessage
                     let extractedResponse = '';
                     if (apiResponse?.data?.ai_response?.response) {
                       extractedResponse = apiResponse.data.ai_response.response;
@@ -408,7 +521,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({
                       extractedResponse = results;
                     }
                     
-                    console.log('🔍 SEARCHRESULTS DEBUG: Passing to ChatWidget:', {
+                    console.log('🔍 SEARCHRESULTS DEBUG: Using original results for initialization:', {
                       query,
                       extractedResponse: extractedResponse?.substring(0, 100) + '...',
                       apiResponse: !!apiResponse,
@@ -442,14 +555,14 @@ const SearchResults: React.FC<SearchResultsProps> = ({
                 overflow: 'auto',
                 paddingRight: '4px'
               }}>
-                {results && (
+                {(results || headerSearchResults) && (
                   <>
                     <div>
                       <h4 style={{ marginBottom: '12px', color: '#374151', fontSize: '14px' }}>Quality Analysis</h4>
                       <ResultQualityPie 
-                        apiResponse={apiResponse}
-                        query={query}
-                        results={results} 
+                        apiResponse={headerApiResponse || apiResponse}
+                        query={headerSearchQuery || query}
+                        results={headerSearchResults || results} 
                         dataSource={dataSource === 'wihy' ? 'vnutrition' : dataSource}
                       />
                     </div>
@@ -484,6 +597,14 @@ const SearchResults: React.FC<SearchResultsProps> = ({
         title="Upload Image"
         subtitle="Upload images for analysis"
       />
+      
+      {/* Add CSS for header search loading animation */}
+      <style>{`
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      `}</style>
     </div>
   );
 };

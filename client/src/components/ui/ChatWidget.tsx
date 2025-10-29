@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { wihyAPI } from '../../services/wihyAPI';
+import { chatService } from '../../services/chatService';
 import '../../styles/VHealthSearch.css';
 
 interface ChatMessage {
@@ -17,17 +17,18 @@ interface ChatWidgetProps {
   searchResponse?: string;
   currentContext?: string; // Current dashboard section being viewed
   inline?: boolean; // Whether to render inline or as fixed overlay
-  onNewSearch?: (query: string, response: any) => void; // Callback to update main content
+  onNewSearch?: (query: string) => void; // Callback to update main content
+  onAddMessage?: (userMessage: string, assistantMessage: string) => void; // Callback to add new messages externally
 }
 
-const ChatWidget: React.FC<ChatWidgetProps> = ({ 
-  isOpen, 
-  onClose, 
-  searchQuery, 
-  searchResponse, 
-  currentContext, 
+const ChatWidget: React.FC<ChatWidgetProps> = ({
+  isOpen,
+  onClose,
+  searchQuery,
+  searchResponse,
+  currentContext,
   inline = false,
-  onNewSearch 
+  onNewSearch
 }) => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputMessage, setInputMessage] = useState('');
@@ -36,7 +37,7 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({
   const [loadingMore, setLoadingMore] = useState(false);
   const chatThreadRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
-  
+
   // Cache measured heights so items retain size during prepend
   const heightMap = useRef<Record<string, number>>({});
   const ro = useRef<ResizeObserver>();
@@ -89,7 +90,7 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({
     // 1) Pick an anchor element (first fully visible)
     const children = Array.from(el.children) as HTMLElement[];
     const anchor =
-      children.find(c => c.getBoundingClientRect().top >= el.getBoundingClientRect().top) ??
+      children.find(c => c.getBoundingClientRect().top >= el.getBoundingClientRect().top) ??  
       (children[0] as HTMLElement);
 
     const anchorId = anchor?.dataset.id;
@@ -132,6 +133,36 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({
     }
   }, [messages.length]);
 
+  // Global message addition capability
+  useEffect(() => {
+    const addChatMessage = (userMessage: string, assistantMessage: string) => {
+      console.log('🔍 CHATWIDGET: External message addition', { userMessage, assistantMessage });
+      
+      const userMsg: ChatMessage = {
+        id: Date.now().toString() + '-user',
+        type: 'user',
+        message: userMessage,
+        timestamp: new Date()
+      };
+      
+      const aiMsg: ChatMessage = {
+        id: Date.now().toString() + '-assistant',
+        type: 'assistant',
+        message: assistantMessage,
+        timestamp: new Date()
+      };
+      
+      setMessages(prev => [...prev, userMsg, aiMsg]);
+    };
+
+    // Expose global function for external message addition
+    (window as any).addChatMessage = addChatMessage;
+
+    return () => {
+      delete (window as any).addChatMessage;
+    };
+  }, []);
+
   // Initialize conversation with search results if provided
   useEffect(() => {
     // 🔍 CHATWIDGET LOGGING: Initial data received
@@ -146,7 +177,7 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({
       currentMessagesCount: messages.length,
       shouldInitialize: !!(searchQuery && searchResponse && messages.length === 0)
     });
-    
+
     if (searchQuery && searchResponse && messages.length === 0) {
       // 🔍 CHATWIDGET LOGGING: Starting conversation initialization
       console.log('🔍 CHATWIDGET CONVERSATION INIT:', {
@@ -156,10 +187,10 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({
         searchQuery: searchQuery,
         searchResponsePreview: searchResponse.substring(0, 100) + '...'
       });
-      
+
       // Create a conversational summary instead of full response
       let conversationalSummary = searchResponse;
-      
+
       // Extract key points and make it conversational
       if (searchResponse.includes('WIHY Health')) {
         const lines = searchResponse.split('\n').filter(line => line.trim());
@@ -168,11 +199,11 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({
           .slice(0, 2)
           .map(line => line.replace(/[•-]/g, '').trim())
           .join('. ');
-          
+
         conversationalSummary = keyPoints || 'I found some helpful information for you!';
         conversationalSummary += ' What specific aspect would you like to explore further?';
       }
-      
+
       const initialMessages: ChatMessage[] = [
         {
           id: Date.now().toString() + '-user',
@@ -188,7 +219,7 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({
         }
       ];
       setMessages(initialMessages);
-      
+
       // 🔍 CHATWIDGET LOGGING: Conversation initialized
       console.log('🔍 CHATWIDGET CONVERSATION INITIALIZED:', {
         timestamp: new Date().toISOString(),
@@ -249,107 +280,114 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({
       const conversationHistory = messages.slice(-4) // Last 4 messages for context
         .map(msg => `${msg.type === 'user' ? 'User' : 'Assistant'}: ${msg.message}`)
         .join('\n');
-      
+
       // Create a focused query for conversational responses
       const contextualQuery = `Please provide a brief, conversational response (2-3 sentences max) to: ${userMessage.message}${conversationHistory ? `\n\nContext from our conversation: ${conversationHistory}` : ''}`;
 
-        const response = await wihyAPI.askAnything({
-          query: contextualQuery,
-          user_context: {
-            conversation_mode: true,
-            response_style: 'concise',
-            conversation_context: conversationHistory,
-            current_context: currentContext,
-            is_followup: messages.length > 0
-          }
-        });
+      // Use the dedicated chat service instead of wihyAPI
+      const response = await chatService.sendMessage(
+        contextualQuery,
+        {
+          conversation_mode: true,
+          response_style: 'concise',
+          conversation_context: conversationHistory,
+          current_context: currentContext,
+          is_followup: messages.length > 0
+        },
+        false
+      );
 
-        // 🔍 CHATWIDGET LOGGING: API response received
-        console.log('🔍 CHATWIDGET API RESPONSE:', {
+      // 🔍 CHATWIDGET LOGGING: API response received
+      console.log('🔍 CHATWIDGET API RESPONSE:', {
+        timestamp: new Date().toISOString(),
+        component: 'ChatWidget',
+        action: 'apiResponseReceived',
+        responseType: typeof response,
+        hasSuccess: !!(response as any)?.success,
+        hasResponse: !!(response as any)?.response,
+        userMessage: userMessage.message
+      });
+
+      // Call the callback to update the main content if provided
+      if (onNewSearch) {
+        // 🔍 CHATWIDGET LOGGING: Calling parent callback
+        console.log('🔍 CHATWIDGET PARENT CALLBACK:', {
           timestamp: new Date().toISOString(),
           component: 'ChatWidget',
-          action: 'apiResponseReceived',
-          responseType: typeof response,
-          hasSuccess: !!(response as any)?.success,
-          hasData: !!(response as any)?.data,
-          userMessage: userMessage.message
+          action: 'parentCallbackTriggered',
+          query: userMessage.message,
+          hasResponse: !!response,
+          callbackExists: !!onNewSearch
         });
 
-        // Call the callback to update the main content if provided
-        if (onNewSearch) {
-          // 🔍 CHATWIDGET LOGGING: Calling parent callback
-          console.log('🔍 CHATWIDGET PARENT CALLBACK:', {
-            timestamp: new Date().toISOString(),
-            component: 'ChatWidget',
-            action: 'parentCallbackTriggered',
-            query: userMessage.message,
-            hasResponse: !!response,
-            callbackExists: !!onNewSearch
-          });
-          
-          onNewSearch(userMessage.message, response);
-        }
+        onNewSearch(userMessage.message);
+      }
 
-        // Extract just the main response without full formatting
-        let aiResponse = '';
-        if (typeof response === 'object' && response !== null && 'success' in response && 'data' in response) {
-          const healthResp = response as any;
-          if (healthResp.data && 'response' in healthResp.data) {
-            aiResponse = healthResp.data.response;
-            
-            // Clean up the response to be more conversational
-            aiResponse = aiResponse
-              .replace(/🥗.*?\*\*/g, '') // Remove emoji headers
-              .replace(/\*\*.*?\*\*/g, '') // Remove bold formatting
-              .replace(/📋.*?:/g, '') // Remove section headers
-              .replace(/•/g, '-') // Replace bullets
-              .split('\n')
-              .filter(line => line.trim() && !line.includes('Biblical') && !line.includes('Corinthians'))
-              .slice(0, 3) // Take first 3 meaningful lines
-              .join(' ')
-              .trim();
-              
-            // If response is too long, truncate and add follow-up prompt
-            if (aiResponse.length > 200) {
-              aiResponse = aiResponse.substring(0, 200).trim() + '... What would you like to know more about?';
-            }
-          }
+      // Extract just the main response
+      let aiResponse = '';
+      if (response && typeof response === 'object') {
+        if (response.response) {
+          aiResponse = response.response;
+        } else if (response.message) {
+          aiResponse = response.message;
         } else {
-          aiResponse = wihyAPI.formatWihyResponse(response as any);
+          aiResponse = JSON.stringify(response);
         }
-        
-        // 🔍 CHATWIDGET LOGGING: AI response processed
-        console.log('🔍 CHATWIDGET AI RESPONSE PROCESSED:', {
-          timestamp: new Date().toISOString(),
-          component: 'ChatWidget',
-          action: 'aiResponseProcessed',
-          originalResponseType: typeof response,
-          finalResponseLength: aiResponse.length,
-          finalResponsePreview: aiResponse.substring(0, 100) + '...',
-          userMessage: userMessage.message
-        });
-        
-        const aiMessage: ChatMessage = {
-          id: Date.now().toString() + '-assistant',
-          type: 'assistant',
-          message: aiResponse,
-          timestamp: new Date()
-        };
+      } else if (typeof response === 'string') {
+        aiResponse = response;
+      } else {
+        aiResponse = 'I apologize, but I encountered an issue processing your request. Could you please try again?';
+      }
 
-        appendMessage(aiMessage);
-        
-        // 🔍 CHATWIDGET LOGGING: AI message added to chat
-        console.log('🔍 CHATWIDGET MESSAGE ADDED:', {
-          timestamp: new Date().toISOString(),
-          component: 'ChatWidget',
-          action: 'aiMessageAdded',
-          messageId: aiMessage.id,
-          messageLength: aiMessage.message.length,
-          totalMessagesNow: messages.length + 1,
-          userMessage: userMessage.message
-        });
-        
-      } catch (error) {
+      // Clean up the response to be more conversational
+      aiResponse = aiResponse
+        .replace(/🥗.*?\*\*/g, '') // Remove emoji headers
+        .replace(/\*\*.*?\*\*/g, '') // Remove bold formatting
+        .replace(/📋.*?:/g, '') // Remove section headers
+        .replace(/•/g, '-') // Replace bullets
+        .split('\n')
+        .filter(line => line.trim() && !line.includes('Biblical') && !line.includes('Corinthians'))
+        .slice(0, 3) // Take first 3 meaningful lines
+        .join(' ')
+        .trim();
+
+      // If response is too long, truncate and add follow-up prompt
+      if (aiResponse.length > 200) {
+        aiResponse = aiResponse.substring(0, 200).trim() + '... What would you like to know more about?';
+      }
+
+      // 🔍 CHATWIDGET LOGGING: AI response processed
+      console.log('🔍 CHATWIDGET AI RESPONSE PROCESSED:', {
+        timestamp: new Date().toISOString(),
+        component: 'ChatWidget',
+        action: 'aiResponseProcessed',
+        originalResponseType: typeof response,
+        finalResponseLength: aiResponse.length,
+        finalResponsePreview: aiResponse.substring(0, 100) + '...',
+        userMessage: userMessage.message
+      });
+
+      const aiMessage: ChatMessage = {
+        id: Date.now().toString() + '-assistant',
+        type: 'assistant',
+        message: aiResponse,
+        timestamp: new Date()
+      };
+
+      appendMessage(aiMessage);
+
+      // 🔍 CHATWIDGET LOGGING: AI message added to chat
+      console.log('🔍 CHATWIDGET MESSAGE ADDED:', {
+        timestamp: new Date().toISOString(),
+        component: 'ChatWidget',
+        action: 'aiMessageAdded',
+        messageId: aiMessage.id,
+        messageLength: aiMessage.message.length,
+        totalMessagesNow: messages.length + 1,
+        userMessage: userMessage.message
+      });
+
+    } catch (error) {
       console.error('Chat error:', error);
       const errorMessage: ChatMessage = {
         id: Date.now().toString() + '-assistant',
@@ -369,7 +407,7 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({
       handleSendMessage();
     }
   };
-  
+
   if (!isOpen) {
     return null;
   }
@@ -418,7 +456,7 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({
       </div>
 
       {/* Messages - Clean scroll pattern with viewport anchoring */}
-      <div 
+      <div
         ref={chatThreadRef}
         className="chat-thread"
         onScroll={onScroll}
@@ -432,12 +470,12 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({
           flexDirection: 'column',
           gap: '10px'
         }}>
-        
+
         {/* Loading indicator for older messages */}
         {loadingMore && hasMore && (
           <div style={{ textAlign: "center", padding: "6px 0" }}>Loading…</div>
         )}
-        
+
         {messages.length === 0 ? (
           <div style={{
             textAlign: 'center',
@@ -501,8 +539,8 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({
                   U
                 </div>
               ) : (
-                <img 
-                  src="/assets/wihyfavicon.png" 
+                <img
+                  src="/assets/wihyfavicon.png"
                   alt="WiHy"
                   style={{
                     width: '28px',
@@ -521,7 +559,7 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({
                 flexDirection: 'column',
                 gap: '4px'
               }}>
-                <div 
+                <div
                   className="bubble"
                   style={{
                     backgroundColor: message.type === 'user' ? '#10b981' : '#f3f4f6',
@@ -554,15 +592,15 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({
             </div>
           ))
         )}
-        
+
         {isLoading && (
           <div style={{
             display: 'flex',
             gap: '8px',
             alignItems: 'flex-start'
           }}>
-            <img 
-              src="/assets/wihyfavicon.png" 
+            <img
+              src="/assets/wihyfavicon.png"
               alt="WiHy"
               style={{
                 width: '28px',
@@ -633,7 +671,7 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({
           </button>
         </div>
       </div>
-      
+
       <style>{`
         @keyframes typing {
           0%, 60%, 100% {
@@ -654,7 +692,7 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({
           scrollbar-width: none; /* Firefox */
           -ms-overflow-style: none; /* Internet Explorer 10+ */
         }
-        
+
         /* Hide scrollbar for WebKit browsers */
         .chat-thread::-webkit-scrollbar {
           display: none;
@@ -675,10 +713,10 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({
         }
 
         /* Kill any legacy scrollbars on messages */
-        .chat-message::-webkit-scrollbar { 
-          display: none; 
+        .chat-message::-webkit-scrollbar {
+          display: none;
         }
-        
+
         .chat-message {
           scrollbar-width: none;
           -ms-overflow-style: none;
