@@ -63,11 +63,7 @@ class ChatService {
     userProfile?: Record<string, any>
   ): Promise<ChatResponse | null> {
     try {
-      console.log('🔍 CHAT SERVICE: Sending direct message:', {
-        message: message.substring(0, 100) + '...',
-        hasUserProfile: !!userProfile,
-        conversationId: this.conversationId
-      });
+      console.log('🔍 CHAT SERVICE: Sending message');
 
       const request: ChatRequest = {
         message: message,
@@ -89,14 +85,7 @@ class ChatService {
 
       const data: ChatResponse = await response.json();
 
-      console.log('🔍 CHAT SERVICE: Direct message response:', {
-        success: data.success,
-        modelUsed: data.model_used,
-        confidenceScore: data.confidence_score,
-        responseTime: data.response_time_ms,
-        hasCitations: !!data.citations?.length,
-        responsePreview: data.response?.substring(0, 100) + '...'
-      });
+      console.log('🔍 CHAT SERVICE: Response received');
 
       // Store conversation ID for continuity
       if (data.session_token) {

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { chatService } from '../../services/chatService';
 import '../../styles/VHealthSearch.css';
 
@@ -67,10 +67,10 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({
   };
 
   // Call this when appending a new message
-  const appendMessage = (newMessage: ChatMessage) => {
+  const appendMessage = useCallback((newMessage: ChatMessage) => {
     setMessages(prev => [...prev, newMessage]);
     requestAnimationFrame(scrollToBottomIfPinned);
-  };
+  }, []);
 
   // Scroll handler for loading older messages
   const onScroll = () => {
@@ -164,29 +164,12 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({
   }, []);
 
   // Initialize conversation with search results if provided
+  const [hasInitialized, setHasInitialized] = useState(false);
+  
   useEffect(() => {
-    // 🔍 CHATWIDGET LOGGING: Initial data received
-    console.log('🔍 CHATWIDGET INITIAL DATA:', {
-      timestamp: new Date().toISOString(),
-      component: 'ChatWidget',
-      action: 'initialDataReceived',
-      hasSearchQuery: !!searchQuery,
-      hasSearchResponse: !!searchResponse,
-      searchQuery: searchQuery,
-      searchResponseLength: searchResponse?.length || 0,
-      currentMessagesCount: messages.length,
-      shouldInitialize: !!(searchQuery && searchResponse && messages.length === 0)
-    });
-
-    if (searchQuery && searchResponse && messages.length === 0) {
-      // 🔍 CHATWIDGET LOGGING: Starting conversation initialization
-      console.log('🔍 CHATWIDGET CONVERSATION INIT:', {
-        timestamp: new Date().toISOString(),
-        component: 'ChatWidget',
-        action: 'conversationInitStart',
-        searchQuery: searchQuery,
-        searchResponsePreview: searchResponse.substring(0, 100) + '...'
-      });
+    // Only initialize once when we have the required data and haven't initialized yet
+    if (searchQuery && searchResponse && !hasInitialized) {
+      console.log('🔍 CHATWIDGET: Initializing conversation');
 
       // Create a conversational summary instead of full response
       let conversationalSummary = searchResponse;
@@ -219,19 +202,11 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({
         }
       ];
       setMessages(initialMessages);
-
-      // 🔍 CHATWIDGET LOGGING: Conversation initialized
-      console.log('🔍 CHATWIDGET CONVERSATION INITIALIZED:', {
-        timestamp: new Date().toISOString(),
-        component: 'ChatWidget',
-        action: 'conversationInitComplete',
-        messagesCreated: initialMessages.length,
-        userMessage: searchQuery,
-        assistantMessagePreview: conversationalSummary.substring(0, 100) + '...',
-        totalMessagesNow: initialMessages.length
-      });
+      setHasInitialized(true);
+      
+      console.log('🔍 CHATWIDGET: Conversation initialized with', initialMessages.length, 'messages');
     }
-  }, [searchQuery, searchResponse, messages.length]);
+  }, [searchQuery, searchResponse, hasInitialized]);
 
   // Focus input when chat opens
   useEffect(() => {
@@ -243,15 +218,7 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({
   const handleSendMessage = async () => {
     if (!inputMessage.trim() || isLoading) return;
 
-    // 🔍 CHATWIDGET LOGGING: New message being sent
-    console.log('🔍 CHATWIDGET NEW MESSAGE:', {
-      timestamp: new Date().toISOString(),
-      component: 'ChatWidget',
-      action: 'newMessageSent',
-      message: inputMessage.trim(),
-      currentContext: currentContext,
-      existingMessagesCount: messages.length
-    });
+    console.log('🔍 CHATWIDGET: Sending message:', inputMessage.trim());
 
     const userMessage: ChatMessage = {
       id: Date.now().toString() + '-user',
@@ -264,16 +231,6 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({
     appendMessage(userMessage);
     setInputMessage('');
     setIsLoading(true);
-
-    // 🔍 CHATWIDGET LOGGING: API request starting
-    console.log('🔍 CHATWIDGET API REQUEST START:', {
-      timestamp: new Date().toISOString(),
-      component: 'ChatWidget',
-      action: 'apiRequestStart',
-      userMessage: userMessage.message,
-      context: currentContext,
-      isLoading: true
-    });
 
     try {
       // Build conversation context from previous messages
@@ -297,29 +254,9 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({
         false
       );
 
-      // 🔍 CHATWIDGET LOGGING: API response received
-      console.log('🔍 CHATWIDGET API RESPONSE:', {
-        timestamp: new Date().toISOString(),
-        component: 'ChatWidget',
-        action: 'apiResponseReceived',
-        responseType: typeof response,
-        hasSuccess: !!(response as any)?.success,
-        hasResponse: !!(response as any)?.response,
-        userMessage: userMessage.message
-      });
-
       // Call the callback to update the main content if provided
       if (onNewSearch) {
-        // 🔍 CHATWIDGET LOGGING: Calling parent callback
-        console.log('🔍 CHATWIDGET PARENT CALLBACK:', {
-          timestamp: new Date().toISOString(),
-          component: 'ChatWidget',
-          action: 'parentCallbackTriggered',
-          query: userMessage.message,
-          hasResponse: !!response,
-          callbackExists: !!onNewSearch
-        });
-
+        console.log('🔍 CHATWIDGET: Triggering new search for:', userMessage.message);
         onNewSearch(userMessage.message);
       }
 
@@ -356,17 +293,6 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({
         aiResponse = aiResponse.substring(0, 200).trim() + '... What would you like to know more about?';
       }
 
-      // 🔍 CHATWIDGET LOGGING: AI response processed
-      console.log('🔍 CHATWIDGET AI RESPONSE PROCESSED:', {
-        timestamp: new Date().toISOString(),
-        component: 'ChatWidget',
-        action: 'aiResponseProcessed',
-        originalResponseType: typeof response,
-        finalResponseLength: aiResponse.length,
-        finalResponsePreview: aiResponse.substring(0, 100) + '...',
-        userMessage: userMessage.message
-      });
-
       const aiMessage: ChatMessage = {
         id: Date.now().toString() + '-assistant',
         type: 'assistant',
@@ -375,17 +301,7 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({
       };
 
       appendMessage(aiMessage);
-
-      // 🔍 CHATWIDGET LOGGING: AI message added to chat
-      console.log('🔍 CHATWIDGET MESSAGE ADDED:', {
-        timestamp: new Date().toISOString(),
-        component: 'ChatWidget',
-        action: 'aiMessageAdded',
-        messageId: aiMessage.id,
-        messageLength: aiMessage.message.length,
-        totalMessagesNow: messages.length + 1,
-        userMessage: userMessage.message
-      });
+      console.log('🔍 CHATWIDGET: Response added to chat');
 
     } catch (error) {
       console.error('Chat error:', error);

@@ -393,7 +393,8 @@ export const fetchNewsFeed = async (categories?: string[], limit?: number): Prom
     // Simple API call - no client-side filtering needed
     const response = await newsClient.getArticles({
       limit: limit || 100,
-      fresh: true
+      fresh: true, // Always get fresh articles
+      useCache: false // Disable cache to ensure fresh content
     });
     
     return {
@@ -415,7 +416,8 @@ export const getArticlesByCategory = async (category: string, limit?: number): P
     const response = await newsClient.getArticles({
       category,
       limit: limit || 100,
-      fresh: true
+      fresh: true, // Always get fresh articles
+      useCache: false // Disable cache to ensure fresh content
     });
     
     return {
@@ -441,7 +443,8 @@ export const searchNewsArticles = async (query: string, limit?: number): Promise
     // Simple search call - API handles query processing
     const response = await newsClient.getArticles({
       limit: limit || 100,
-      fresh: true
+      fresh: true, // Always get fresh articles
+      useCache: false // Disable cache to ensure fresh content
     });
     
     return {
@@ -463,8 +466,8 @@ export const getAllNews = async (limit: number = 100): Promise<{ success: boolea
     // Simple API call - server handles all filtering, categorization, and priority sorting
     const response = await newsClient.getArticles({
       limit: limit,
-      fresh: false, // Allow cache usage
-      useCache: true
+      fresh: true, // Always get fresh articles
+      useCache: false // Disable cache to ensure fresh content
     });
     
     return {
@@ -499,8 +502,8 @@ export const getPaginatedNews = async (page: number = 1, category?: string): Pro
     const response = await newsClient.getArticles({
       limit: API_FETCH_LIMIT,
       category: category,
-      fresh: false,
-      useCache: true
+      fresh: true, // Always get fresh articles
+      useCache: false // Disable cache to ensure fresh content
     });
 
     if (!response.success || !response.articles) {
@@ -561,8 +564,8 @@ export const getLazyLoadedNews = async (page: number = 1, category?: string): Pr
     const response = await newsClient.getArticles({
       limit: API_FETCH_LIMIT,
       category: category,
-      fresh: false,
-      useCache: true
+      fresh: true, // Always get fresh articles
+      useCache: false // Disable cache to ensure fresh content
     });
 
     if (!response.success || !response.articles) {
