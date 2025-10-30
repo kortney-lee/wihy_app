@@ -25,6 +25,7 @@ body {
   --vh-surface: #ffffff;
   --vh-surface-2: #f8fbff;
   --vh-ring: 0 0 0 3px rgba(26,115,232,.18);
+  --vh-header-height: 80px;
 }
 
 /* Chat widget scrollbar styles for desktop */
