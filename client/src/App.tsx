@@ -469,6 +469,7 @@ This analysis is based on peer-reviewed nutritional research and USDA food compo
       ]}
       disclaimer="This is demo data for development purposes. Always consult healthcare professionals for real medical advice."
       apiResponse={sampleApiResponse}
+      initialDemoMode={true}
     />
   );
 };
