@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import MultiAuthLogin from './MultiAuthLogin';
 import ImageUploadModal from '../ui/ImageUploadModal';
 import { wihyAPI } from '../../services/wihyAPI';
+import { chatService } from '../../services/chatService';
 import { getApiEndpoint } from '../../config/apiConfig';
 import '../../styles/VHealthSearch.css';
 import '../../styles/search-components.css';
@@ -492,6 +493,10 @@ const Header: React.FC<HeaderProps> = ({
   };
 
   const handleLogoClick = () => {
+    // Clear chat session when navigating home
+    chatService.clearSession();
+    console.log('🔍 HEADER: Cleared chat session on home navigation');
+    
     if (onLogoClick) {
       onLogoClick();
     } else {

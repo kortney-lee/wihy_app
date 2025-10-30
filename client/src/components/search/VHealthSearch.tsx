@@ -12,6 +12,7 @@ import { foodAnalysisService } from '../../services/foodAnalysisService';
 import HealthNewsFeed from '../HealthNewsFeed';
 import { getApiEndpoint } from '../../config/apiConfig';
 import { logger } from '../../utils/logger';
+import { chatService } from '../../services/chatService';
 
 const rotatingPrompts = [
   "Ask me what is healthy",
@@ -69,6 +70,14 @@ const VHealthSearch: React.FC = () => {
   // PREVENT SCROLLBARS ON LANDING PAGE
   // ================================
   useEffect(() => {
+    // Clear chat session when visiting home page
+    try {
+      chatService.clearSession();
+      console.log('🔍 VHEALTHSEARCH: Cleared chat session on home page visit');
+    } catch (error) {
+      console.error('🔍 VHEALTHSEARCH: Error clearing chat session:', error);
+    }
+    
     // Add class to body to hide scrollbars on landing page
     document.body.classList.add('landing-page-active');
     document.documentElement.classList.add('landing-page-active');

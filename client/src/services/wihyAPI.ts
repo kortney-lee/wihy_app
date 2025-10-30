@@ -1,8 +1,8 @@
 import { API_CONFIG, getApiEndpoint } from '../config/apiConfig';
 import { logger } from '../utils/logger';
 
-// Updated API endpoint to use the working configuration
-const WIHY_API_ENDPOINT = getApiEndpoint('/ask');
+// Force localhost for development
+const WIHY_API_ENDPOINT = 'http://localhost:8000/ask';
 
 // Types for the WiHy API (updated to match OpenAPI specification v4.0.0)
 export interface HealthQuestion {
@@ -279,6 +279,13 @@ class WihyAPIService {
   constructor() {
     this.baseURL = WIHY_API_ENDPOINT;
     this.isLocalDevelopment = API_CONFIG.WIHY_API_URL.includes('localhost');
+    
+    // 🔍 DEBUG: Show which endpoint is being used
+    console.log('🔍 WIHY API SERVICE INITIALIZED:', {
+      baseURL: this.baseURL,
+      isLocalDevelopment: this.isLocalDevelopment,
+      API_CONFIG_URL: API_CONFIG.WIHY_API_URL
+    });
   }
 
   /**
@@ -923,7 +930,7 @@ class WihyAPIService {
     } else {
       // Handle legacy WihyResponse format
       const legacyResp = response as WihyResponse;
-      if (legacyResp.wihy_response.personalized_analysis?.action_items) {
+      if (legacyResp.wihy_response && legacyResp.wihy_response.personalized_analysis?.action_items) {
         legacyResp.wihy_response.personalized_analysis.action_items.forEach(action => {
           recommendations.push(`${action.action} (${action.priority} priority)`);
         });
@@ -954,7 +961,7 @@ class WihyAPIService {
     } else {
       // Handle legacy WihyResponse format
       const legacyResp = response as WihyResponse;
-      if (legacyResp.wihy_response.research_foundation) {
+      if (legacyResp.wihy_response && legacyResp.wihy_response.research_foundation) {
         legacyResp.wihy_response.research_foundation.forEach(research => {
           citations.push(`${research.citation_text}: ${research.key_finding}`);
         });

@@ -65,16 +65,37 @@ class ChatService {
     try {
       console.log('🔍 CHAT SERVICE: Sending message');
 
-      const request: ChatRequest = {
-        message: message,
-        conversation_id: this.conversationId || undefined,
+      // Add unique identifier to break backend caching while preserving message meaning
+      const timestamp = Date.now();
+      const uniqueId = Math.random().toString(36).substring(7);
+      
+      // Add the unique elements at the end in a way that won't affect the AI's response
+      const uniqueMessage = `${message}\n\n[System: Request ID ${uniqueId} at ${timestamp}]`;
+      
+      // Always use /chat endpoint for ChatWidget conversations
+      const endpoint = 'chat';
+      
+      const request = {
+        message: uniqueMessage,
+        conversation_id: this.conversationId,
         user_profile: userProfile
       };
 
-      const response = await fetch(`${CHAT_API_BASE}/chat`, {
+      console.log('🔍 CHAT SERVICE: Sending unique message:', {
+        originalMessage: message,
+        uniqueMessage: uniqueMessage.substring(0, 100) + '...',
+        timestamp,
+        uniqueId,
+        endpoint: 'chat'
+      });
+
+      const response = await fetch(`${CHAT_API_BASE}/chat?t=${timestamp}&r=${uniqueId}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0'
         },
         body: JSON.stringify(request)
       });
@@ -85,9 +106,17 @@ class ChatService {
 
       const data: ChatResponse = await response.json();
 
-      console.log('🔍 CHAT SERVICE: Response received');
+      console.log('🔍 CHAT SERVICE: Response received from /chat endpoint');
+      console.log('🔍 CHAT SERVICE: Backend response structure:', {
+        hasAnalysis: !!(data as any).analysis,
+        hasSummary: !!(data as any).analysis?.summary,
+        hasRecommendations: !!(data as any).analysis?.recommendations,
+        hasResponse: !!data.response,
+        responseKeys: Object.keys(data),
+        analysisKeys: (data as any).analysis ? Object.keys((data as any).analysis) : []
+      });
 
-      // Store conversation ID for continuity
+      // Store conversation ID for continuity (if provided)
       if (data.session_token) {
         this.conversationId = data.session_token;
       }

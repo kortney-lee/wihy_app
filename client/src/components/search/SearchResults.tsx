@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, memo } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { searchCache } from '../../services/searchCache';
 import { photoStorageService } from '../../services/photoStorageService';
 import { foodAnalysisService } from '../../services/foodAnalysisService';
@@ -123,7 +123,7 @@ const convertLinksToClickable = (text: any): React.ReactNode => {
   );
 };
 
-const SearchResults: React.FC<SearchResultsProps> = memo(({
+const SearchResults: React.FC<SearchResultsProps> = ({
   query,
   results,
   onBackToSearch,
@@ -135,8 +135,15 @@ const SearchResults: React.FC<SearchResultsProps> = memo(({
   disclaimer = "",
   apiResponse
 }) => {
-  // Only log significant events, not every mount
-  console.log('🔍 SEARCH RESULTS: Rendered for query:', query);
+  // Only log on significant changes, not every render
+  const prevQueryRef = useRef<string>('');
+  
+  useEffect(() => {
+    if (query !== prevQueryRef.current) {
+      console.log('🔍 SEARCH RESULTS: New query -', query);
+      prevQueryRef.current = query;
+    }
+  }, [query]);
   
   const [input, setInput] = useState('');
   const [image, setImage] = useState<File | string | null>(null);
@@ -182,6 +189,18 @@ const SearchResults: React.FC<SearchResultsProps> = memo(({
 
   // Check if we have valid results to display
   const hasValidResults = results && results.trim() !== '' && !isLoading;
+  
+  // Set context for ChatWidget based on search results
+  useEffect(() => {
+    if (results && typeof results === 'string' && results.trim()) {
+      // Extract a meaningful summary for chat context
+      const contextSummary = results.length > 300 ? results.substring(0, 300) + '...' : results;
+      setCurrentContext(`Search results for "${query}": ${contextSummary}`);
+      console.log('🔍 SEARCH RESULTS: Updated chat context');
+    } else {
+      setCurrentContext('search results');
+    }
+  }, [results, query]);
   
   // 🔍 SEARCH RESULTS LOGGING: Track loading states
   useEffect(() => {
@@ -406,6 +425,21 @@ const SearchResults: React.FC<SearchResultsProps> = memo(({
     }
   }, [query, headerSearchQuery]);
 
+  // 🔍 SEARCH RESULTS LOGGING: Track prop changes
+  useEffect(() => {
+    console.log('🔍 SEARCH RESULTS PROPS CHANGED:', {
+      query: query,
+      timestamp: new Date().toISOString(),
+      component: 'SearchResults',
+      action: 'propsChanged',
+      isLoading: isLoading,
+      dataSource: dataSource,
+      hasResults: !!results,
+      resultsLength: results?.length || 0,
+      hasApiResponse: !!apiResponse
+    });
+  }, [query, results, isLoading, dataSource, apiResponse]);
+
   return (
     <div className="search-results-container" style={{ 
       minHeight: '100vh',
@@ -493,8 +527,12 @@ const SearchResults: React.FC<SearchResultsProps> = memo(({
                       extractedResponse = results;
                     }
                     
-                    // Simplified logging
-                    console.log('🔍 SEARCHRESULTS: Using results for ChatWidget initialization');
+                    console.log('🔍 SEARCHRESULTS DEBUG: Using original results for initialization:', {
+                      query,
+                      extractedResponse: extractedResponse?.substring(0, 100) + '...',
+                      apiResponse: !!apiResponse,
+                      results: !!results
+                    });
                     
                     return extractedResponse;
                   })()}
@@ -575,6 +613,6 @@ const SearchResults: React.FC<SearchResultsProps> = memo(({
       `}</style>
     </div>
   );
-});
+};
 
 export default SearchResults;
