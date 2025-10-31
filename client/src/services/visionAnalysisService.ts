@@ -31,8 +31,41 @@ interface VisionAnalysisResult {
   error?: string;
 }
 
-// WIHY Scanner API Configuration
-const WIHY_API_BASE = 'https://vhealth-wihy-ml-api.gentlebush-f35a13de.westus2.azurecontainerapps.io';
+// WIHY Scanner API Configuration with dev flag support
+const getWihyMLApiUrl = () => {
+  // Check for explicit environment variable first (highest priority)
+  if (process.env.REACT_APP_WIHY_ML_API_URL) {
+    return process.env.REACT_APP_WIHY_ML_API_URL;
+  }
+  
+  // Development flag - set to true to use local ML dev server, false for production
+  const USE_LOCAL_ML = process.env.REACT_APP_USE_LOCAL_ML === 'true';
+  
+  // Check if we're on localhost (local development)
+  const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+  
+  if (isLocalhost && USE_LOCAL_ML) {
+    // Local development with dev flag enabled - use localhost ML API
+    return 'http://localhost:8001'; // Assuming ML service runs on different port
+  } else {
+    // Production/deployed OR dev flag disabled - use production ML API
+    return 'https://vhealth-wihy-ml-api.gentlebush-f35a13de.westus2.azurecontainerapps.io';
+  }
+};
+
+const WIHY_API_BASE = getWihyMLApiUrl();
+
+// Debug logging for ML API
+console.log('🔍 ML API CONFIG DEBUG:', {
+  NODE_ENV: process.env.NODE_ENV,
+  REACT_APP_WIHY_ML_API_URL: process.env.REACT_APP_WIHY_ML_API_URL,
+  FINAL_ML_URL: WIHY_API_BASE,
+  HOSTNAME: window.location.hostname,
+  IS_LOCALHOST: window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1',
+  USE_LOCAL_ML: process.env.REACT_APP_USE_LOCAL_ML === 'true',
+  DETECTION_REASON: process.env.REACT_APP_WIHY_ML_API_URL ? 'ENV_VAR' : 
+    (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') && process.env.REACT_APP_USE_LOCAL_ML === 'true' ? 'LOCAL_ML_DEV' : 'PRODUCTION_ML_API'
+});
 
 class VisionAnalysisService {
   /**

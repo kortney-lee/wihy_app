@@ -7,15 +7,29 @@ Mobile browsers cannot access `localhost:8000` because localhost refers to the m
 
 ## ✅ Solutions Implemented
 
-### 1. **Dynamic API Configuration** 
-The app now automatically detects mobile browsers and uses your development machine's IP address instead of localhost.
+### 1. **Production-First Configuration (Recommended)**
+By default, all API calls go to production servers:
+- Main API: `https://ml.wihy.ai`
+- News Service: `https://services.wihy.ai`
+- ML Service: `https://vhealth-wihy-ml-api.gentlebush-f35a13de.westus2.azurecontainerapps.io`
 
-### 2. **Environment Variable Override**
-You can explicitly set the API URL using an environment variable.
+### 2. **Development Flag Override**
+Use environment variables to enable local development when needed:
+- `REACT_APP_USE_LOCAL_API=true` - Use local main API
+- `REACT_APP_USE_LOCAL_NEWS=true` - Use local news service
+- `REACT_APP_USE_LOCAL_ML=true` - Use local ML service
+
+### 3. **Environment Variable Override**
+You can explicitly set API URLs using environment variables.
 
 ## 📱 **Mobile Testing Setup**
 
-### Step 1: Find Your Development Machine's IP Address
+### Quick Start (Recommended)
+By default, mobile devices will use production APIs. No setup needed!
+
+### Development Setup (Advanced)
+
+#### Step 1: Find Your Development Machine's IP Address
 
 **Windows:**
 ```bash
@@ -29,25 +43,52 @@ ifconfig
 ```
 Look for your network interface (usually `en0` or `eth0`)
 
-### Step 2: Set Environment Variable
+#### Step 2: Set Environment Variables
 
 Create `client/.env.local` file:
 ```env
+# Enable local development
+REACT_APP_USE_LOCAL_API=true
+REACT_APP_USE_LOCAL_NEWS=true
+REACT_APP_USE_LOCAL_ML=true
+
+# Set your development machine's IP
 REACT_APP_WIHY_API_URL=http://YOUR_IP_ADDRESS:8000
+REACT_APP_NEWS_PORT=5001
+REACT_APP_WIHY_ML_API_URL=http://YOUR_IP_ADDRESS:8001
 ```
 
 **Example:**
 ```env
+REACT_APP_USE_LOCAL_API=true
+REACT_APP_USE_LOCAL_NEWS=true
+REACT_APP_USE_LOCAL_ML=true
 REACT_APP_WIHY_API_URL=http://192.168.1.100:8000
+REACT_APP_NEWS_PORT=5001
+REACT_APP_WIHY_ML_API_URL=http://192.168.1.100:8001
 ```
 
-### Step 3: Start Both Services
+### Step 3: Start Development Services (Only if using local flags)
 
 **Terminal 1 - Start API Server:**
 ```bash
 # Make sure your API server is running on port 8000
 # and accessible from your network (not just localhost)
 ```
+
+**Terminal 2 - Start News Service:**
+```bash
+# Make sure your news service is running on the configured port
+# Default: port 5001
+```
+
+**Terminal 3 - Start ML Service:**
+```bash
+# Make sure your ML service is running on the configured port
+# Default: port 8001
+```
+
+**Terminal 4 - Start React App:**
 
 **Terminal 2 - Start React App:**
 ```bash
