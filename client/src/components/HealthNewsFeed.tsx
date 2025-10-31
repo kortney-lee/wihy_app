@@ -511,6 +511,8 @@ Category: ${article.category || article.ai_category || 'Uncategorized'}`;
                 {onAnalyzeArticle && (
                   <div className="wihy-btn-wrapper" style={{
                     display: 'inline-block',
+                    flexShrink: 0,
+                    width: 'auto',
                     animation: analyzingArticle === article.id ? 'none' : 'wiH-border-sweep 2.2s linear infinite',
                     background: analyzingArticle === article.id 
                       ? 'linear-gradient(#f3f4f6, #f3f4f6)' 
