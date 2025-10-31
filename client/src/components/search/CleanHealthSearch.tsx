@@ -1,7 +1,6 @@
-// Example of the clean flow: User Question → Loading → WiHy API → ChatWidget Response
+// Example of the clean flow: User Question → Loading → WiHy API → Response
 import React, { useState } from 'react';
 import { wihyAPI } from '../../services/wihyAPI';
-import ChatWidget from '../ui/ChatWidget';
 
 interface HealthSearchProps {
   onResponse?: (response: any) => void;
@@ -90,39 +89,56 @@ const CleanHealthSearch: React.FC<HealthSearchProps> = ({ onResponse }) => {
         </div>
       )}
 
-      {/* ChatWidget with Response */}
+      {/* Response Display */}
       {showChat && response && (
-        <ChatWidget
-          isOpen={true}
-          onClose={() => setShowChat(false)}
-          currentContext={`Search: ${query}`}
-          inline={true}
-          searchQuery={query}
-          searchResponse={(() => {
-            // Extract response from WiHy API response
-            if (response?.data?.ai_response?.response) {
-              return response.data.ai_response.response;
-            } else if (response?.data?.response) {
-              // Handle JSON string responses
-              let responseText = response.data.response;
-              if (typeof responseText === 'string') {
-                try {
-                  const parsed = JSON.parse(responseText.replace(/'/g, '"'));
-                  return parsed.core_principle || parsed.message || responseText;
-                } catch {
-                  return responseText;
+        <div style={{ 
+          border: '1px solid #e5e7eb', 
+          borderRadius: '8px', 
+          padding: '16px', 
+          marginTop: '16px',
+          backgroundColor: '#f9fafb'
+        }}>
+          <h3>Response:</h3>
+          <div style={{ fontSize: '14px', lineHeight: '1.6' }}>
+            {(() => {
+              // Extract response from WiHy API response
+              if (response?.data?.ai_response?.response) {
+                return response.data.ai_response.response;
+              } else if (response?.data?.response) {
+                // Handle JSON string responses
+                let responseText = response.data.response;
+                if (typeof responseText === 'string') {
+                  try {
+                    const parsed = JSON.parse(responseText.replace(/'/g, '"'));
+                    return parsed.core_principle || parsed.message || responseText;
+                  } catch {
+                    return responseText;
+                  }
                 }
+                return responseText;
+              } else if (response?.wihy_response) {
+                return response.wihy_response.core_principle || response.wihy_response.message || 'Health information provided';
+              } else if (response?.message) {
+                return response.message;
+              } else {
+                return 'Health information received from WiHy API';
               }
-              return responseText;
-            } else if (response?.wihy_response) {
-              return response.wihy_response.core_principle || response.wihy_response.message || 'Health information provided';
-            } else if (response?.message) {
-              return response.message;
-            } else {
-              return 'Health information received from WiHy API';
-            }
-          })()}
-        />
+            })()}
+          </div>
+          <button 
+            onClick={() => setShowChat(false)}
+            style={{
+              marginTop: '12px',
+              padding: '8px 16px',
+              backgroundColor: '#f3f4f6',
+              border: '1px solid #d1d5db',
+              borderRadius: '4px',
+              cursor: 'pointer'
+            }}
+          >
+            Close
+          </button>
+        </div>
       )}
 
       {/* Debug Info (remove in production) */}

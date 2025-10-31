@@ -7,6 +7,7 @@ import {
 } from 'chart.js';
 import { Doughnut } from 'react-chartjs-2';
 import { UnifiedResponse } from '../../services/wihyAPI';
+import '../../styles/Dashboard.css';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -207,7 +208,7 @@ const ResultQualityPie: React.FC<ResultQualityPieProps> = ({
   const legendBadColor = verdict === 'BAD' ? '#EF4444' : '#E5E7EB';
 
   return (
-    <div style={{ textAlign: 'center' }}>
+    <div className="chart-section-card" style={{ textAlign: 'center' }}>
       <div style={{ position: 'relative', height: '200px', width: '200px', margin: '0 auto' }}>
         <Doughnut data={data} options={options} />
         <div
@@ -219,10 +220,10 @@ const ResultQualityPie: React.FC<ResultQualityPieProps> = ({
             textAlign: 'center',
           }}
         >
-          <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#374151' }}>
+          <div className="insight-value" style={{ fontSize: '2rem', marginBottom: '0' }}>
             {percentage}%
           </div>
-          <div style={{ fontSize: '0.875rem', color: '#6B7280' }}>
+          <div className="legend-text">
             Evidence
           </div>
         </div>
@@ -248,47 +249,26 @@ const ResultQualityPie: React.FC<ResultQualityPieProps> = ({
           </span>
         </div>
 
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'center',
-            gap: '1rem',
-            fontSize: '0.875rem'
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+        <div className="chart-legends">
+          <div className="chart-legend-item" style={{ justifyContent: 'center' }}>
             <div
-              style={{
-                width: '12px',
-                height: '12px',
-                backgroundColor: legendGoodColor,
-                borderRadius: '2px',
-              }}
+              className="legend-color"
+              style={{ backgroundColor: legendGoodColor }}
             />
-            <span>Good: {percentage}%</span>
+            <span className="legend-text">Good: {percentage}%</span>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+          <div className="chart-legend-item" style={{ justifyContent: 'center' }}>
             <div
-              style={{
-                width: '12px',
-                height: '12px',
-                backgroundColor: legendBadColor,
-                borderRadius: '2px',
-              }}
+              className="legend-color"
+              style={{ backgroundColor: legendBadColor }}
             />
-            <span>Bad: {remaining}%</span>
+            <span className="legend-text">Bad: {remaining}%</span>
           </div>
         </div>
 
         {/* Tiny rationale (first 1–2 reasons) */}
         {reasons.length > 0 && reasons[0] !== 'Loading...' && reasons[0] !== 'Waiting for results...' && (
-          <div
-            style={{
-              marginTop: '0.5rem',
-              fontSize: '0.85rem',
-              color: '#6B7280'
-            }}
-          >
+          <div className="chart-description">
             {reasons.slice(0, 2).join(' • ')}
           </div>
         )}

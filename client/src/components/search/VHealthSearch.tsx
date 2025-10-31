@@ -3,7 +3,6 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import '../../styles/VHealthSearch.css';
 import ImageUploadModal from '../ui/ImageUploadModal';
 import MultiAuthLogin from '../shared/MultiAuthLogin';
-import ChatWidget from '../ui/ChatWidget';
 import NutritionChart from '../charts/NutritionChart';
 import ResultQualityPie from '../charts/ResultQualityPie';
 import { wihyAPI, isUnifiedResponse, UnifiedResponse, WihyResponse } from '../../services/wihyAPI';
@@ -1222,15 +1221,14 @@ const VHealthSearch: React.FC = () => {
               </div>
               
               <div style={{ flex: 1, overflow: 'hidden' }}>
-                <ChatWidget
-                  key={`chatwidget-inline-${searchQuery}`}
-                  isOpen={true}
-                  onClose={() => {}}
-                  currentContext={`Search: ${searchQuery}`}
-                  inline={true}
-                  searchQuery={searchQuery}
-                  searchResponse={currentChatResponse}
-                />
+                {/* Chat functionality moved to FullScreenChat */}
+                <div style={{ 
+                  padding: '20px', 
+                  textAlign: 'center', 
+                  color: '#6b7280' 
+                }}>
+                  <p>Chat functionality is now available via the floating chat button.</p>
+                </div>
               </div>
             </div>
 

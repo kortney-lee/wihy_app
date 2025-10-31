@@ -384,6 +384,10 @@ Please try your search again in a moment! 😅`;
     }
   };
 
+  // Check if we should auto-open chat (when coming from VHealthSearch)
+  const navigationState = location.state as any;
+  const shouldAutoOpenChat = navigationState?.fromSearch === true;
+
   return (
     <SearchResults
       query={isHealthNews ? 'Latest Health News' : query}
@@ -396,6 +400,7 @@ Please try your search again in a moment! 😅`;
       recommendations={recommendations}
       disclaimer={disclaimer}
       apiResponse={apiResponse}
+      autoOpenChat={shouldAutoOpenChat}
     />
   );
 };

@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import SearchResults from './components/search/SearchResults';
 import ImageUploadModal from './components/ui/ImageUploadModal';
-import ChatWidget from './components/ui/ChatWidget';
 import NutritionChart from './components/charts/NutritionChart';
 import ResultQualityPie from './components/charts/ResultQualityPie';
 import { searchCache } from './services/searchCache';
@@ -440,16 +439,17 @@ const VHealthApp: React.FC = () => {
           padding: '20px',
           flex: '1'
         }}>
-          {/* Chat Widget */}
+          {/* Chat placeholder */}
           <div className="chat-section" style={{ flex: '1', minWidth: '300px' }}>
-            <ChatWidget
-              isOpen={true}
-              onClose={() => setIsChatOpen(false)}
-              currentContext="search results"
-              inline={true}
-              searchQuery={currentQuery}
-              searchResponse={currentChatResponse}
-            />
+            <div style={{ 
+              padding: '20px', 
+              textAlign: 'center', 
+              color: '#6b7280',
+              border: '1px solid #e5e7eb',
+              borderRadius: '8px'
+            }}>
+              <p>Chat functionality is now available via the FullScreenChat component.</p>
+            </div>
           </div>
 
           {/* Charts Section */}

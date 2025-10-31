@@ -26,6 +26,7 @@ const FullScreenChat: React.FC<FullScreenChatProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [showMobileHistory, setShowMobileHistory] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [hasActiveSession, setHasActiveSession] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -39,6 +40,22 @@ const FullScreenChat: React.FC<FullScreenChatProps> = ({
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
+
+  // Check for active session when component opens
+  useEffect(() => {
+    if (isOpen) {
+      const sessionId = chatService.getCurrentSessionId();
+      const conversationId = chatService.getConversationId();
+      // Only consider it an active session if there's a session ID or conversation ID
+      // indicating there's been previous chat interaction
+      setHasActiveSession(Boolean(sessionId || conversationId));
+      console.log('🔍 FULL SCREEN CHAT: Session check:', {
+        hasSessionId: Boolean(sessionId),
+        hasConversationId: Boolean(conversationId),
+        hasActiveSession: Boolean(sessionId || conversationId)
+      });
+    }
+  }, [isOpen]);
 
   // Initialize with provided query/response
   useEffect(() => {
@@ -131,6 +148,12 @@ const FullScreenChat: React.FC<FullScreenChatProps> = ({
       };
 
       setMessages(prev => [...prev, aiMessage]);
+
+      // After first successful message exchange, we now have an active session
+      if (!hasActiveSession) {
+        setHasActiveSession(true);
+        console.log('🔍 FULL SCREEN CHAT: Session now active after first message exchange');
+      }
     } catch (error) {
       console.error('Chat error:', error);
       const errorMessage: ChatMessage = {
@@ -154,21 +177,31 @@ const FullScreenChat: React.FC<FullScreenChatProps> = ({
 
   if (!isOpen) return null;
 
+  // Determine if we should show chat history (only if there's an active session with history)
+  const shouldShowHistory = hasActiveSession && (messages.length > 0 || (initialQuery && initialResponse));
+
   return (
     <div style={{
       position: 'fixed',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
+      top: isMobile ? '170px' : '150px', // Start higher on desktop
+      left: isMobile ? '8px' : '30px', // Smaller side margins on desktop
+      right: isMobile ? '8px' : '30px',
+      bottom: isMobile ? '20px' : '30px', // Smaller bottom margin on desktop
       backgroundColor: '#ffffff',
       zIndex: 10000,
       display: 'flex',
       flexDirection: isMobile ? 'column' : 'row',
-      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+      borderRadius: isMobile ? '12px' : '16px', // Rounded corners
+      boxShadow: '0 10px 25px rgba(0, 0, 0, 0.15)', // Nice shadow
+      border: '1px solid #e5e7eb', // Subtle border
+      overflow: 'hidden',
+      maxWidth: isMobile ? 'none' : '1200px', // Larger max width on desktop
+      maxHeight: isMobile ? 'none' : '800px', // Larger max height on desktop
+      margin: isMobile ? '0' : '0 auto' // Center on desktop
     }}>
-      {/* Mobile History Toggle */}
-      {isMobile && (
+      {/* Mobile History Toggle - only show if history exists */}
+      {isMobile && shouldShowHistory && (
         <div style={{
           position: 'absolute',
           top: '16px',
@@ -197,7 +230,8 @@ const FullScreenChat: React.FC<FullScreenChatProps> = ({
         </div>
       )}
 
-      {/* Chat History Sidebar */}
+      {/* Chat History Sidebar - only show if history exists */}
+      {shouldShowHistory && (
       <div style={{
         width: isMobile ? '100%' : '280px',
         height: isMobile ? (showMobileHistory ? '50%' : '0') : '100%',
@@ -324,13 +358,14 @@ const FullScreenChat: React.FC<FullScreenChatProps> = ({
           </div>
         </div>
       </div>
+      )}
 
       {/* Main Chat Area */}
       <div style={{
         flex: 1,
         display: 'flex',
         flexDirection: 'column',
-        height: isMobile ? (showMobileHistory ? '50%' : '100%') : '100%',
+        height: isMobile ? (shouldShowHistory && showMobileHistory ? '50%' : '100%') : '100%',
         overflow: 'hidden'
       }}>
         {/* Header */}
@@ -344,14 +379,14 @@ const FullScreenChat: React.FC<FullScreenChatProps> = ({
           flexShrink: 0
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <img
-              src="/assets/wihylogo.png"
-              alt="WiHy Health Assistant"
-              style={{
-                height: isMobile ? '32px' : '40px',
-                width: 'auto'
-              }}
-            />
+            <h1 style={{
+              margin: 0,
+              fontSize: isMobile ? '20px' : '24px',
+              fontWeight: '600',
+              color: '#1f2937'
+            }}>
+              Let's Chat
+            </h1>
           </div>
 
           <button
@@ -562,87 +597,50 @@ const FullScreenChat: React.FC<FullScreenChatProps> = ({
         </div>
 
         {/* Input */}
-        <div style={{
-          padding: isMobile ? '12px 16px' : '16px 24px',
-          borderTop: '1px solid #e5e7eb',
-          backgroundColor: '#ffffff',
-          flexShrink: 0
-        }}>
+        <div className="chat-input-area">
           <div style={{
             maxWidth: isMobile ? '100%' : '768px',
-            margin: '0 auto',
-            position: 'relative'
+            margin: '0 auto'
           }}>
-            <textarea
-              ref={inputRef}
-              value={inputMessage}
-              onChange={(e) => setInputMessage(e.target.value)}
-              onKeyPress={handleKeyPress}
-              placeholder="Ask about your health data..."
-              disabled={isLoading}
-              style={{
-                width: '100%',
-                minHeight: isMobile ? '52px' : '60px',
-                maxHeight: isMobile ? '120px' : '140px',
-                padding: isMobile ? '16px 50px 16px 20px' : '18px 60px 18px 24px',
-                border: '3px solid #fa5f06',
-                borderRadius: isMobile ? '30px' : '35px',
-                fontSize: isMobile ? '16px' : '18px',
-                lineHeight: '1.4',
-                resize: 'none',
-                outline: 'none',
-                fontFamily: 'inherit',
-                backgroundColor: isLoading ? '#f9fafb' : '#ffffff',
-                color: isLoading ? '#9ca3af' : '#1f2937',
-                boxShadow: '0 3px 12px rgba(250, 95, 6, 0.15)',
-                transition: 'all 0.2s ease'
-              }}
-              onFocus={(e) => {
-                e.target.style.boxShadow = '0 4px 16px rgba(250, 95, 6, 0.25)';
-                e.target.style.borderColor = '#fa5f06';
-              }}
-              onBlur={(e) => {
-                e.target.style.boxShadow = '0 3px 12px rgba(250, 95, 6, 0.15)';
-                e.target.style.borderColor = '#fa5f06';
-              }}
-            />
-            
-            <button
-              onClick={handleSendMessage}
-              disabled={!inputMessage.trim() || isLoading}
-              style={{
-                position: 'absolute',
-                right: isMobile ? '8px' : '10px',
-                top: '50%',
-                transform: 'translateY(-50%)',
-                width: isMobile ? '36px' : '40px',
-                height: isMobile ? '36px' : '40px',
-                borderRadius: '50%',
-                border: 'none',
-                backgroundColor: inputMessage.trim() && !isLoading ? '#10b981' : '#e5e7eb',
-                color: inputMessage.trim() && !isLoading ? 'white' : '#9ca3af',
-                cursor: inputMessage.trim() && !isLoading ? 'pointer' : 'not-allowed',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: isMobile ? '16px' : '18px',
-                transition: 'all 0.2s ease',
-                boxShadow: inputMessage.trim() && !isLoading ? '0 2px 8px rgba(16, 185, 129, 0.3)' : 'none'
-              }}
-            >
-              {isLoading ? (
-                <div style={{
-                  width: isMobile ? '14px' : '16px',
-                  height: isMobile ? '14px' : '16px',
-                  border: '2px solid currentColor',
-                  borderTop: '2px solid transparent',
-                  borderRadius: '50%',
-                  animation: 'spin 1s linear infinite'
-                }} />
-              ) : (
-                '↑'
-              )}
-            </button>
+            <div className="chat-input-wrapper">
+              <div className="search-input-container chat-input-container">
+                <textarea
+                  ref={inputRef}
+                  className="search-input"
+                  value={inputMessage}
+                  onChange={(e) => setInputMessage(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                  placeholder={isLoading ? "Processing..." : "Ask about your health data..."}
+                  rows={1}
+                  disabled={isLoading}
+                />
+              </div>
+              <button
+                onClick={handleSendMessage}
+                disabled={!inputMessage.trim() || isLoading}
+                className={`send-button ${(!inputMessage.trim() || isLoading) ? 'disabled' : 'active'}`}
+              >
+                {isLoading ? (
+                  <div style={{
+                    width: '16px',
+                    height: '16px',
+                    border: '2px solid currentColor',
+                    borderTop: '2px solid transparent',
+                    borderRadius: '50%',
+                    animation: 'spin 1s linear infinite'
+                  }} />
+                ) : (
+                  <svg 
+                    width="20" 
+                    height="20" 
+                    viewBox="0 0 24 24" 
+                    fill="currentColor"
+                  >
+                    <path d="M8.59 16.59L13.17 12L8.59 7.41L10 6l6 6-6 6-1.41-1.41z"/>
+                  </svg>
+                )}
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -677,6 +675,101 @@ const FullScreenChat: React.FC<FullScreenChatProps> = ({
         @keyframes spin {
           0% { transform: rotate(0deg); }
           100% { transform: rotate(360deg); }
+        }
+
+        /* Chat-specific input area styling */
+        .chat-input-area {
+          padding: ${isMobile ? '12px 16px' : '16px 24px'};
+          border-top: 1px solid #e5e7eb;
+          background-color: #ffffff;
+          flex-shrink: 0;
+        }
+
+        /* Wrapper for input and button positioning */
+        .chat-input-wrapper {
+          position: relative;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+
+        /* Chat input container - Simple solid styling for chat */
+        .chat-input-container {
+          width: 100% !important; /* Override the 80% width for chat context */
+          margin: 0 !important; /* Override auto margins for flexbox */
+          flex: 1; /* Allow it to grow in flexbox */
+          /* Override animated styles with solid styling */
+          background: #ffffff !important;
+          border: 2px solid #fa5f06 !important;
+          border-radius: 28px !important;
+          box-shadow: 0 2px 8px rgba(250, 95, 6, 0.1) !important;
+          animation: none !important;
+          padding: 4px;
+        }
+
+        .chat-input-container:focus-within {
+          box-shadow: 0 4px 16px rgba(250, 95, 6, 0.25);
+          border-color: #fa5f06;
+        }
+
+        /* Chat input overrides */
+        .chat-input-container .search-input {
+          width: 100%;
+          min-height: ${isMobile ? '52px' : '60px'};
+          max-height: ${isMobile ? '120px' : '140px'};
+          padding: ${isMobile ? '16px 20px' : '18px 24px'};
+          border: none;
+          border-radius: 24px;
+          font-size: ${isMobile ? '16px' : '18px'};
+          line-height: 1.4;
+          resize: none;
+          outline: none;
+          font-family: inherit;
+          background-color: #ffffff !important; /* Ensure pure white background */
+          color: #1f2937;
+        }
+
+        .chat-input-container .search-input:disabled {
+          background-color: #f9fafb;
+          color: #9ca3af;
+        }
+
+        /* Send button styling - positioned outside input, matching ChatWidget exactly */
+        .send-button {
+          position: relative;
+          right: auto;
+          top: auto;
+          transform: none;
+          color: #374151;
+          border: none;
+          border-radius: 16px;
+          padding: 12px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: all 0.2s ease;
+          flex-shrink: 0;
+          min-width: 44px;
+          height: 44px;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .send-button.active {
+          background-color: #d1d5db;
+          color: #374151;
+          cursor: pointer;
+        }
+
+        .send-button.active:hover {
+          background-color: #9ca3af;
+          color: white;
+        }
+
+        .send-button.disabled {
+          background-color: #e5e7eb;
+          color: #9ca3af;
+          cursor: not-allowed;
+          box-shadow: none;
         }
       `}</style>
     </div>
