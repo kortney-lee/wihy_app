@@ -101,3 +101,51 @@ html.landing-page-active {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
+
+/* Chat widget icon buttons */
+.chat-icon-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: opacity 0.2s ease, transform 0.1s ease;
+}
+
+.chat-icon-button:hover {
+  opacity: 0.8;
+  transform: scale(1.05);
+}
+
+.chat-icon-button:active {
+  transform: scale(0.95);
+}
+
+.chat-icon-button img {
+  display: block;
+  width: 72px;
+  height: 72px;
+}
+
+.chat-close-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: opacity 0.2s ease, transform 0.1s ease;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  color: #666;
+}
+
+.chat-close-button:hover {
+  opacity: 0.8;
+  transform: scale(1.05);
+}
+
+.chat-close-button:active {
+  transform: scale(0.95);
+}

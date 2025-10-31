@@ -27,6 +27,7 @@ const FullScreenChat: React.FC<FullScreenChatProps> = ({
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showMobileHistory, setShowMobileHistory] = useState(false);
+  const [showDesktopHistory, setShowDesktopHistory] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [hasActiveSession, setHasActiveSession] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -212,8 +213,8 @@ const FullScreenChat: React.FC<FullScreenChatProps> = ({
         transform: `translateX(${isOpen ? '0' : '100%'})`,
         transition: 'transform 0.3s ease-in-out'
       }}>
-        {/* Mobile History Toggle - only show if history exists */}
-        {isMobile && shouldShowHistory && (
+        {/* History Toggle Button - show for both mobile and desktop when history exists */}
+        {shouldShowHistory && (
           <div style={{
             position: 'absolute',
             top: '16px',
@@ -221,42 +222,45 @@ const FullScreenChat: React.FC<FullScreenChatProps> = ({
             zIndex: 101
           }}>
             <button
-              onClick={() => setShowMobileHistory(!showMobileHistory)}
+              onClick={() => {
+                if (isMobile) {
+                  setShowMobileHistory(!showMobileHistory);
+                } else {
+                  setShowDesktopHistory(!showDesktopHistory);
+                }
+              }}
               style={{
-                width: '40px',
-                height: '40px',
-                borderRadius: '8px',
+                background: 'none',
                 border: 'none',
-                backgroundColor: '#f3f4f6',
                 cursor: 'pointer',
-                display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '16px',
-              color: '#6b7280',
-              transition: 'all 0.2s ease'
-            }}
-          >
-            ☰
-          </button>
-        </div>
-      )}
+                padding: '8px',
+                fontSize: '20px',
+                color: '#666'
+              }}
+              title="Toggle History"
+            >
+              ☰
+            </button>
+          </div>
+        )}
 
-      {/* Chat History Sidebar - only show if history exists */}
-      {shouldShowHistory && (
-      <div style={{
-        width: isMobile ? '100%' : '280px',
-        height: isMobile ? (showMobileHistory ? '50%' : '0') : '100%',
-        backgroundColor: '#f9fafb',
-        borderRight: isMobile ? 'none' : '1px solid #e5e7eb',
-        borderBottom: isMobile ? '1px solid #e5e7eb' : 'none',
-        display: 'flex',
-        flexDirection: 'column',
-        overflow: 'hidden',
-        transition: isMobile ? 'height 0.3s ease' : 'none',
-        position: isMobile ? 'relative' : 'static',
-        zIndex: isMobile ? 100 : 'auto'
-      }}>
+      {/* Chat History Sidebar - only show when explicitly toggled */}
+      {shouldShowHistory && ((isMobile && showMobileHistory) || (!isMobile && showDesktopHistory)) && (
+        <div style={{
+          width: isMobile ? '100%' : '280px',
+          height: isMobile ? '50%' : '100%',
+          backgroundColor: '#f9fafb',
+          borderRight: isMobile ? 'none' : '1px solid #e5e7eb',
+          borderBottom: isMobile ? '1px solid #e5e7eb' : 'none',
+          display: 'flex',
+          flexDirection: 'column',
+          overflow: 'hidden',
+          transition: isMobile ? 'height 0.3s ease' : 'none',
+          position: isMobile ? 'relative' : 'absolute',
+          top: isMobile ? '0' : '0',
+          left: isMobile ? '0' : '0',
+          zIndex: isMobile ? 100 : 105
+        }}>
         {/* Sidebar Header */}
         <div style={{
           padding: '20px 16px',
@@ -273,26 +277,26 @@ const FullScreenChat: React.FC<FullScreenChatProps> = ({
           }}>
             Chat History
           </h2>
-          {isMobile && (
-            <button
-              onClick={() => setShowMobileHistory(false)}
-              style={{
-                width: '24px',
-                height: '24px',
-                borderRadius: '4px',
-                border: 'none',
-                backgroundColor: 'transparent',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '14px',
-                color: '#6b7280'
-              }}
-            >
-              ✕
-            </button>
-          )}
+          <button
+            onClick={() => {
+              if (isMobile) {
+                setShowMobileHistory(false);
+              } else {
+                setShowDesktopHistory(false);
+              }
+            }}
+            style={{
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              padding: '8px',
+              fontSize: '16px',
+              color: '#666'
+            }}
+            title="Close History"
+          >
+            ✕
+          </button>
         </div>
 
         {/* History List */}
@@ -378,8 +382,38 @@ const FullScreenChat: React.FC<FullScreenChatProps> = ({
         display: 'flex',
         flexDirection: 'column',
         height: isMobile ? (shouldShowHistory && showMobileHistory ? '50%' : '100%') : '100%',
-        overflow: 'hidden'
+        marginLeft: (!isMobile && shouldShowHistory && showDesktopHistory) ? '280px' : '0',
+        overflow: 'hidden',
+        transition: !isMobile ? 'margin-left 0.3s ease' : 'none'
       }}>
+        {/* Small container for hamburger menu when history is open on mobile */}
+        {isMobile && shouldShowHistory && showMobileHistory && (
+          <div style={{
+            height: '50px',
+            display: 'flex',
+            alignItems: 'center',
+            paddingLeft: '16px',
+            backgroundColor: '#ffffff',
+            borderBottom: '1px solid #e5e7eb',
+            flexShrink: 0
+          }}>
+            <button
+              onClick={() => setShowMobileHistory(false)}
+              style={{
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                padding: '8px',
+                fontSize: '20px',
+                color: '#666'
+              }}
+              title="Close History"
+            >
+              ☰
+            </button>
+          </div>
+        )}
+        
         {/* Header */}
         <div style={{
           display: 'flex',
@@ -406,56 +440,15 @@ const FullScreenChat: React.FC<FullScreenChatProps> = ({
             {onViewCharts && (
               <button
                 onClick={onViewCharts}
-                style={{
-                  padding: '8px 16px',
-                  borderRadius: '8px',
-                  border: '1px solid #d1d5db',
-                  backgroundColor: '#ffffff',
-                  cursor: 'pointer',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  color: '#374151',
-                  transition: 'all 0.2s ease'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = '#f9fafb';
-                  e.currentTarget.style.borderColor = '#9ca3af';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = '#ffffff';
-                  e.currentTarget.style.borderColor = '#d1d5db';
-                }}
+                className="chat-icon-button"
+                title="View Charts"
               >
-                📊 View Charts
+                <img 
+                  src="/assets/Chartlogo.png" 
+                  alt="View Charts"
+                />
               </button>
             )}
-
-            {/* Close button */}
-            <button
-              onClick={onClose}
-              style={{
-                width: '40px',
-                height: '40px',
-                borderRadius: '50%',
-                border: 'none',
-                backgroundColor: '#f3f4f6',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '18px',
-                color: '#6b7280',
-                transition: 'all 0.2s ease'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = '#e5e7eb';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = '#f3f4f6';
-              }}
-            >
-              ✕
-            </button>
           </div>
         </div>
 
