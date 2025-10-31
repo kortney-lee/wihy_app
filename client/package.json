@@ -23,6 +23,7 @@
   },
   "dependencies": {
     "@openfoodfacts/openfoodfacts-nodejs": "github:openfoodfacts/openfoodfacts-js",
+    "@zxing/library": "^0.21.3",
     "axios": "^1.11.0",
     "chart.js": "^4.5.1",
     "lucide-react": "^0.544.0",

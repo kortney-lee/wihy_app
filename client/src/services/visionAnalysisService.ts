@@ -1,5 +1,7 @@
 // src/services/visionAnalysisService.ts
 
+import { BrowserMultiFormatReader, NotFoundException } from '@zxing/library';
+
 interface VisionAnalysisResult {
   success: boolean;
   data?: {
@@ -68,6 +70,56 @@ console.log('🔍 ML API CONFIG DEBUG:', {
 });
 
 class VisionAnalysisService {
+  private barcodeReader: BrowserMultiFormatReader;
+  
+  constructor() {
+    this.barcodeReader = new BrowserMultiFormatReader();
+  }
+
+  /**
+   * Detect barcodes in an image file
+   */
+  private async detectBarcodes(imageFile: File): Promise<string[]> {
+    try {
+      console.log('🔍 Detecting barcodes in image...');
+      
+      // Create an image element from the file
+      const imageUrl = URL.createObjectURL(imageFile);
+      const img = new Image();
+      
+      return new Promise((resolve) => {
+        img.onload = async () => {
+          try {
+            // Try to decode barcode from the image
+            const result = await this.barcodeReader.decodeFromImageElement(img);
+            console.log('✅ Barcode detected:', result.getText());
+            URL.revokeObjectURL(imageUrl);
+            resolve([result.getText()]);
+          } catch (error) {
+            if (error instanceof NotFoundException) {
+              console.log('ℹ️ No barcodes found in image');
+            } else {
+              console.error('Barcode detection error:', error);
+            }
+            URL.revokeObjectURL(imageUrl);
+            resolve([]);
+          }
+        };
+        
+        img.onerror = () => {
+          console.error('Failed to load image for barcode detection');
+          URL.revokeObjectURL(imageUrl);
+          resolve([]);
+        };
+        
+        img.src = imageUrl;
+      });
+    } catch (error) {
+      console.error('Barcode detection failed:', error);
+      return [];
+    }
+  }
+
   /**
    * Analyze image using WIHY Scanner API
    */
@@ -78,6 +130,27 @@ class VisionAnalysisService {
       // Get basic image information
       const imageInfo = this.getImageInfo(imageFile);
       console.log('Image info:', imageInfo);
+
+      // First, try to detect barcodes in the image
+      const detectedBarcodes = await this.detectBarcodes(imageFile);
+      
+      // If we found barcodes, scan them instead of doing image analysis
+      if (detectedBarcodes.length > 0) {
+        console.log('🎯 Barcodes detected, performing barcode scan:', detectedBarcodes);
+        
+        try {
+          // Scan the first detected barcode
+          const barcodeResult = await this.scanBarcode(detectedBarcodes[0]);
+          
+          // Add the detected barcodes to the result
+          if (barcodeResult.success && barcodeResult.data) {
+            barcodeResult.data.barcodes = detectedBarcodes;
+            return barcodeResult;
+          }
+        } catch (barcodeError) {
+          console.log('Barcode scan failed, falling back to image analysis:', barcodeError);
+        }
+      }
 
       // Use WIHY Scanner API for comprehensive food analysis
       let wihyResult: any = null;
@@ -95,9 +168,19 @@ class VisionAnalysisService {
       }
 
       if (wihyResult && wihyResult.success) {
-        return this.processWihyImageResponse(wihyResult, imageInfo);
+        const processedResult = this.processWihyImageResponse(wihyResult, imageInfo);
+        // Add any detected barcodes to the image analysis result
+        if (processedResult.data && detectedBarcodes.length > 0) {
+          processedResult.data.barcodes = detectedBarcodes;
+        }
+        return processedResult;
       } else {
-        return this.fallbackAnalysis(imageFile, imageInfo);
+        const fallbackResult = await this.fallbackAnalysis(imageFile, imageInfo);
+        // Add any detected barcodes to the fallback result
+        if (fallbackResult.data && detectedBarcodes.length > 0) {
+          fallbackResult.data.barcodes = detectedBarcodes;
+        }
+        return fallbackResult;
       }
 
     } catch (error) {
@@ -543,6 +626,11 @@ class VisionAnalysisService {
 
     const { data } = result;
     const parts: string[] = [];
+
+    // Barcode detection info
+    if (data.barcodes && data.barcodes.length > 0) {
+      parts.push(`📱 Barcode detected: ${data.barcodes[0]}`);
+    }
 
     // WIHY Scanner results
     if (data.verdict) {
