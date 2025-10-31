@@ -1,44 +1,37 @@
-// Mobile-friendly API configuration
+// Unified API configuration for mobile and desktop
 const getWihyApiUrl = () => {
-  // Check for explicit environment variable first
+  // Check for explicit environment variable first (highest priority)
   if (process.env.REACT_APP_WIHY_API_URL) {
     return process.env.REACT_APP_WIHY_API_URL;
   }
   
-  // Detect mobile browser or remote access
-  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  // Check if we're on localhost (local development)
   const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
   
-  // If accessing from mobile or non-localhost, try to use the current host
-  if (isMobile || !isLocalhost) {
-    // Try to use the same host as the frontend with port 8000
-    const currentHost = window.location.hostname;
-    return `http://${currentHost}:8000`;
+  if (isLocalhost) {
+    // Local development - use localhost API with port
+    return 'http://localhost:8000';
+  } else {
+    // Production/deployed - use ml.wihy without port (standard HTTPS)
+    return 'https://ml.wihy';
   }
-  
-  // Default to localhost for desktop development
-  return 'http://localhost:8000';
 };
 
 // Environment configuration for API endpoints
 export const API_CONFIG = {
-  // WIHY API - Dynamic based on environment and device
+  // WIHY API - Unified for mobile and desktop
   WIHY_API_URL: getWihyApiUrl(),
 } as const;
 
-// Debug logging with enhanced information
+// Debug logging
 console.log('🔍 API CONFIG DEBUG:', {
   NODE_ENV: process.env.NODE_ENV,
   REACT_APP_WIHY_API_URL: process.env.REACT_APP_WIHY_API_URL,
   FINAL_URL: API_CONFIG.WIHY_API_URL,
-  USER_AGENT: navigator.userAgent,
   HOSTNAME: window.location.hostname,
-  FULL_URL: window.location.href,
-  IS_MOBILE: /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent),
   IS_LOCALHOST: window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1',
   DETECTION_REASON: process.env.REACT_APP_WIHY_API_URL ? 'ENV_VAR' : 
-    (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
-     (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1')) ? 'MOBILE_OR_REMOTE' : 'DESKTOP_LOCALHOST'
+    (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') ? 'LOCAL_DEV' : 'PRODUCTION_ML_WIHY'
 });
 
 // Dynamic endpoint helper functions
