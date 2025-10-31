@@ -91,6 +91,7 @@ const HealthNewsFeed: React.FC<NewsFeedProps> = ({
   
   const prevFetchParamsRef = useRef<{max: number}>({max: 0});
   const observerTarget = useRef<HTMLDivElement>(null);
+  const fetchingRef = useRef(false); // Prevent multiple simultaneous requests
 
   // Fetch initial articles when component mounts or maxArticles changes
   useEffect(() => {
@@ -106,35 +107,120 @@ const HealthNewsFeed: React.FC<NewsFeedProps> = ({
 
   // Ensure news loads on mobile immediately with better pagination control
   useEffect(() => {
-    // Always ensure news loads immediately if no articles
-    if (articles.length === 0 && !loading) {
+    // Only fetch initial articles if we have none and we're not already loading
+    if (articles.length === 0 && !loading && !loadingMore) {
+      console.log('📱 Initial news load triggered');
       fetchHealthNews(true);
     }
+  }, []); // Empty dependency array - only run on mount
+
+  // Separate effect for mobile-specific scroll handling
+  useEffect(() => {
+    if (!isMobile) return;
     
-    // On mobile, disable infinite scroll if user has scrolled up significantly
-    if (isMobile) {
-      const handleMobilePagination = () => {
-        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-        const windowHeight = window.innerHeight;
-        const documentHeight = document.documentElement.scrollHeight;
-        
-        // If user is near the top of the page, enable normal scrolling
-        if (scrollTop < windowHeight) {
-          setScrollDirection('up');
-        }
-      };
+    const handleMobilePagination = () => {
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      const windowHeight = window.innerHeight;
       
-      window.addEventListener('scroll', handleMobilePagination, { passive: true });
-      
-      return () => {
-        window.removeEventListener('scroll', handleMobilePagination);
-      };
-    }
-  }, [isMobile, articles.length, loading]);
+      // If user is near the top of the page, enable normal scrolling
+      if (scrollTop < windowHeight) {
+        setScrollDirection('up');
+      }
+    };
+    
+    window.addEventListener('scroll', handleMobilePagination, { passive: true });
+    
+    return () => {
+      window.removeEventListener('scroll', handleMobilePagination);
+    };
+  }, [isMobile]);
 
   // Track scroll direction for better mobile experience
   const [scrollDirection, setScrollDirection] = useState<'up' | 'down'>('down');
   const lastScrollTop = useRef(0);
+
+  // Update the fetchHealthNews function with better mobile pagination control
+  const fetchHealthNews = useCallback(async (resetPage: boolean = true) => {
+    // Prevent excessive loading on mobile when scrolling up
+    if (isMobile && !resetPage && scrollDirection === 'up') {
+      return;
+    }
+    
+    // Prevent multiple simultaneous requests using both state and ref
+    if (loading || loadingMore || fetchingRef.current) {
+      console.log('📱 Preventing duplicate request - already loading:', { loading, loadingMore, fetchingRef: fetchingRef.current });
+      return;
+    }
+    
+    fetchingRef.current = true; // Set fetching flag
+    console.log('📱 Fetching health news:', { resetPage, currentPage, hasMorePages });
+    
+    if (resetPage) {
+      setLoading(true);
+      setCurrentPage(1);
+    } else {
+      setLoadingMore(true);
+      setCurrentPage(prev => prev + 1);
+    }
+
+    try {
+      const page = resetPage ? 1 : currentPage + 1;
+      
+      // Use lazy loading system: fetch 24 results, cache for 5 mins, append 8 per page
+      const response = await getLazyLoadedNews(page);
+      
+      if (response.success && response.newArticles && response.newArticles.length > 0) {
+        if (resetPage) {
+          // First load: show first page of articles
+          setArticles(response.newArticles);
+        } else {
+          // Lazy loading: append new articles to existing ones
+          setArticles(prev => [...prev, ...response.newArticles]);
+        }
+        
+        // Use lazy loading info from the service
+        setHasMorePages(response.hasNextPage);
+        
+        if (process.env.NODE_ENV === 'development') {
+          console.log('📄 Lazy loading info:', {
+            currentPage: response.currentPage,
+            totalPages: response.totalPages,
+            totalCount: response.totalCount,
+            hasNextPage: response.hasNextPage,
+            newArticlesLoaded: response.newArticles.length,
+            totalArticlesLoaded: response.loadedCount
+          });
+        }
+      } else {
+        // Fallback: try old method if lazy loading fails
+        const fallbackResponse = await getAllNews(ARTICLES_PER_PAGE);
+        
+        if (fallbackResponse.success && fallbackResponse.articles && fallbackResponse.articles.length > 0) {
+          if (resetPage) {
+            setArticles(fallbackResponse.articles);
+          } else {
+            setArticles(prev => [...prev, ...fallbackResponse.articles]);
+          }
+          setHasMorePages(fallbackResponse.articles.length >= ARTICLES_PER_PAGE);
+        } else {
+          if (resetPage) {
+            setArticles([]);
+          }
+          setHasMorePages(false);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching health news:', error);
+      if (resetPage) {
+        setArticles([]);
+      }
+      setHasMorePages(false);
+    } finally {
+      setLoading(false);
+      setLoadingMore(false);
+      fetchingRef.current = false; // Clear fetching flag
+    }
+  }, [isMobile, scrollDirection, loading, loadingMore, currentPage, hasMorePages]);
 
   // Set up intersection observer for infinite scroll with improved mobile handling
   const handleObserver = useCallback((entries: IntersectionObserverEntry[]) => {
@@ -152,6 +238,8 @@ const HealthNewsFeed: React.FC<NewsFeedProps> = ({
         hasMorePages && 
         scrollDirection === 'down') {
       
+      console.log('📱 Intersection observer triggered - loading more articles');
+      
       // Add a small delay to ensure user intent
       setTimeout(() => {
         // Double-check conditions after delay
@@ -160,7 +248,7 @@ const HealthNewsFeed: React.FC<NewsFeedProps> = ({
         }
       }, 300);
     }
-  }, [loading, loadingMore, hasMorePages, scrollDirection]);
+  }, [loading, loadingMore, hasMorePages, scrollDirection, fetchHealthNews]);
 
   // Track scroll direction
   useEffect(() => {
@@ -214,80 +302,6 @@ const HealthNewsFeed: React.FC<NewsFeedProps> = ({
     };
   }, [handleObserver]);
 
-  // Update the fetchHealthNews function with better mobile pagination control
-
-  const fetchHealthNews = async (resetPage: boolean = true) => {
-    // Prevent excessive loading on mobile when scrolling up
-    if (isMobile && !resetPage && scrollDirection === 'up') {
-      return;
-    }
-    
-    if (resetPage) {
-      setLoading(true);
-      setCurrentPage(1);
-    } else {
-      setLoadingMore(true);
-      setCurrentPage(prev => prev + 1);
-    }
-
-    try {
-      const page = resetPage ? 1 : currentPage + 1;
-      
-      // Use lazy loading system: fetch 100 results, cache for 5 mins, append 12 per page
-      const response = await getLazyLoadedNews(page);
-      
-      if (response.success && response.newArticles && response.newArticles.length > 0) {
-        if (resetPage) {
-          // First load: show first page of articles
-          setArticles(response.newArticles);
-        } else {
-          // Lazy loading: append new articles to existing ones
-          setArticles(prev => [...prev, ...response.newArticles]);
-        }
-        
-        // Use lazy loading info from the service
-        setHasMorePages(response.hasNextPage);
-        
-        if (process.env.NODE_ENV === 'development') {
-          console.log('📄 Lazy loading info:', {
-            currentPage: response.currentPage,
-            totalPages: response.totalPages,
-            totalCount: response.totalCount,
-            hasNextPage: response.hasNextPage,
-            newArticlesLoaded: response.newArticles.length,
-            totalArticlesLoaded: response.loadedCount
-          });
-        }
-      } else {
-        // Fallback: try old method if lazy loading fails
-        const fallbackResponse = await getAllNews(ARTICLES_PER_PAGE);
-        
-        if (fallbackResponse.success && fallbackResponse.articles && fallbackResponse.articles.length > 0) {
-          if (resetPage) {
-            setArticles(fallbackResponse.articles);
-          } else {
-            setArticles(prev => [...prev, ...fallbackResponse.articles]);
-          }
-          setHasMorePages(fallbackResponse.articles.length >= ARTICLES_PER_PAGE);
-        } else {
-          if (resetPage) {
-            setArticles([]);
-          }
-          setHasMorePages(false);
-        }
-      }
-    } catch (error) {
-      console.error('Error fetching health news:', error);
-      if (resetPage) {
-        setArticles([]);
-      }
-      setHasMorePages(false);
-    } finally {
-      setLoading(false);
-      setLoadingMore(false);
-    }
-  };
-  
   // Replace the handleAnalyzeWithWihy function (lines 471-493)
 
   const handleAnalyzeWithWihy = async (article: NewsArticle, e: React.MouseEvent) => {
