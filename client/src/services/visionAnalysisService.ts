@@ -1,6 +1,6 @@
 // src/services/visionAnalysisService.ts
 
-import { BrowserMultiFormatReader, NotFoundException } from '@zxing/library';
+import { BrowserMultiFormatReader } from '@zxing/browser';
 
 interface VisionAnalysisResult {
   success: boolean;
@@ -77,47 +77,211 @@ class VisionAnalysisService {
   }
 
   /**
-   * Detect barcodes in an image file
+   * Smart detection: Analyze image to determine if it contains barcode patterns
+   */
+  private async analyzeImagePattern(imageFile: File): Promise<{ hasBarcodeLikePattern: boolean; confidence: number }> {
+    return new Promise((resolve) => {
+      const img = new Image();
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      
+      img.onload = () => {
+        if (!ctx) {
+          resolve({ hasBarcodeLikePattern: false, confidence: 0 });
+          return;
+        }
+        
+        // Set canvas size (optimize for analysis)
+        const maxSize = 800;
+        const scale = Math.min(maxSize / img.width, maxSize / img.height);
+        canvas.width = img.width * scale;
+        canvas.height = img.height * scale;
+        
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        
+        // Get image data for pattern analysis
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const data = imageData.data;
+        
+        // Analyze for barcode patterns (vertical lines, alternating dark/light patterns)
+        let verticalLineScore = 0;
+        let horizontalVariance = 0;
+        const sampleRows = 5; // Sample multiple rows
+        
+        for (let row = 0; row < sampleRows; row++) {
+          const y = Math.floor((canvas.height / (sampleRows + 1)) * (row + 1));
+          let transitions = 0;
+          let lastBrightness = 0;
+          
+          for (let x = 0; x < canvas.width; x += 2) { // Sample every 2 pixels for performance
+            const i = (y * canvas.width + x) * 4;
+            const brightness = (data[i] + data[i + 1] + data[i + 2]) / 3;
+            
+            if (Math.abs(brightness - lastBrightness) > 30) { // Threshold for transition
+              transitions++;
+            }
+            lastBrightness = brightness;
+          }
+          
+          // Barcodes typically have many transitions (vertical lines)
+          verticalLineScore += transitions;
+        }
+        
+        // Calculate confidence based on pattern analysis
+        const avgTransitions = verticalLineScore / sampleRows;
+        const confidence = Math.min(avgTransitions / 20, 1); // Normalize to 0-1
+        const hasBarcodeLikePattern = confidence > 0.3; // Threshold for barcode detection
+        
+        console.log('🔍 Pattern Analysis:', {
+          avgTransitions,
+          confidence: Math.round(confidence * 100) + '%',
+          hasBarcodeLikePattern,
+          imageSize: `${canvas.width}x${canvas.height}`
+        });
+        
+        URL.revokeObjectURL(img.src);
+        resolve({ hasBarcodeLikePattern, confidence });
+      };
+      
+      img.onerror = () => {
+        URL.revokeObjectURL(img.src);
+        resolve({ hasBarcodeLikePattern: false, confidence: 0 });
+      };
+      
+      img.src = URL.createObjectURL(imageFile);
+    });
+  }
+
+  /**
+   * Helper: Create ImageBitmap from File
+   */
+  private async createImageBitmap(file: File): Promise<ImageBitmap> {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => {
+        createImageBitmap(img)
+          .then(resolve)
+          .catch(reject);
+        URL.revokeObjectURL(img.src);
+      };
+      img.onerror = reject;
+      img.src = URL.createObjectURL(file);
+    });
+  }
+
+  /**
+   * Helper: Load image from File
+   */
+  private async loadImage(file: File): Promise<HTMLImageElement> {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => resolve(img);
+      img.onerror = reject;
+      img.src = URL.createObjectURL(file);
+    });
+  }
+
+  /**
+   * Normalize barcode to GTIN-14 format for food product lookup
+   */
+  private normalizeToGTIN14(barcode: string): string {
+    // Remove any non-digit characters
+    const digits = barcode.replace(/\D/g, '');
+    
+    // Handle different UPC/EAN formats and normalize to GTIN-14
+    switch (digits.length) {
+      case 8:  // EAN-8
+        return '000000' + digits;
+      case 12: // UPC-A
+        return '00' + digits;
+      case 13: // EAN-13
+        return '0' + digits;
+      case 14: // Already GTIN-14
+        return digits;
+      default:
+        // If not a standard food product barcode format, return as-is
+        return digits;
+    }
+  }
+
+  /**
+   * Hybrid barcode detection: Native BarcodeDetector → ZXing fallback
+   * Optimized for food product barcodes (UPC/EAN formats)
    */
   private async detectBarcodes(imageFile: File): Promise<string[]> {
-    try {
-      console.log('🔍 Detecting barcodes in image...');
-      
-      // Create an image element from the file
-      const imageUrl = URL.createObjectURL(imageFile);
-      const img = new Image();
-      
-      return new Promise((resolve) => {
-        img.onload = async () => {
-          try {
-            // Try to decode barcode from the image
-            const result = await this.barcodeReader.decodeFromImageElement(img);
-            console.log('✅ Barcode detected:', result.getText());
-            URL.revokeObjectURL(imageUrl);
-            resolve([result.getText()]);
-          } catch (error) {
-            if (error instanceof NotFoundException) {
-              console.log('ℹ️ No barcodes found in image');
-            } else {
-              console.error('Barcode detection error:', error);
-            }
-            URL.revokeObjectURL(imageUrl);
-            resolve([]);
-          }
-        };
-        
-        img.onerror = () => {
-          console.error('Failed to load image for barcode detection');
-          URL.revokeObjectURL(imageUrl);
-          resolve([]);
-        };
-        
-        img.src = imageUrl;
-      });
-    } catch (error) {
-      console.error('Barcode detection failed:', error);
+    console.log('🔍 Starting hybrid barcode detection...', {
+      fileName: imageFile.name,
+      fileSize: imageFile.size,
+      fileType: imageFile.type
+    });
+
+    // First, smart pattern detection
+    const patternAnalysis = await this.analyzeImagePattern(imageFile);
+    
+    if (!patternAnalysis.hasBarcodeLikePattern) {
+      console.log('📷 No barcode pattern detected, skipping barcode scanning');
       return [];
     }
+    
+    console.log('📊 Barcode pattern detected, proceeding with detection...');
+    
+    const detectedBarcodes: string[] = [];
+    
+    // Method 1: Try native BarcodeDetector (fast path)
+    if ('BarcodeDetector' in window) {
+      try {
+        console.log('🚀 Trying native BarcodeDetector (fast path)...');
+        
+        const barcodeDetector = new (window as any).BarcodeDetector({
+          formats: ['ean_13', 'ean_8', 'upc_a', 'upc_e'] // Food retail formats
+        });
+        
+        const barcodes = await barcodeDetector.detect(await this.createImageBitmap(imageFile));
+        
+        if (barcodes.length > 0) {
+          barcodes.forEach((barcode: any) => {
+            const normalizedBarcode = this.normalizeToGTIN14(barcode.rawValue);
+            console.log('✅ Native detector found:', barcode.rawValue, '→', normalizedBarcode);
+            detectedBarcodes.push(normalizedBarcode);
+          });
+          return [...new Set(detectedBarcodes)]; // Remove duplicates
+        }
+      } catch (nativeError) {
+        console.log('⚠️ Native BarcodeDetector failed:', nativeError.message);
+      }
+    } else {
+      console.log('ℹ️ Native BarcodeDetector not supported');
+    }
+    
+    // Method 2: ZXing fallback (reliable path) - only for food barcode formats
+    try {
+      console.log('� Falling back to ZXing detection...');
+      
+      const img = await this.loadImage(imageFile);
+      
+      // Try ZXing with timeout and format restrictions
+      const zxingPromise = this.barcodeReader.decodeFromImageElement(img);
+      const timeout = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('ZXing timeout')), 3000); // Shorter timeout
+      });
+      
+      const result = await Promise.race([zxingPromise, timeout]) as any;
+      
+      if (result && result.getText) {
+        const rawBarcode = result.getText();
+        const normalizedBarcode = this.normalizeToGTIN14(rawBarcode);
+        console.log('✅ ZXing detected:', rawBarcode, '→', normalizedBarcode);
+        detectedBarcodes.push(normalizedBarcode);
+      }
+      
+    } catch (zxingError) {
+      console.log('⚠️ ZXing detection failed:', zxingError.message || zxingError);
+    }
+    
+    const uniqueBarcodes = [...new Set(detectedBarcodes)];
+    console.log('🎯 Final detected barcodes (GTIN-14):', uniqueBarcodes);
+    
+    return uniqueBarcodes;
   }
 
   /**
@@ -131,8 +295,11 @@ class VisionAnalysisService {
       const imageInfo = this.getImageInfo(imageFile);
       console.log('Image info:', imageInfo);
 
-      // First, try to detect barcodes in the image
+      // Try hybrid barcode detection 
+      console.log('🔍 Starting hybrid barcode detection...');
       const detectedBarcodes = await this.detectBarcodes(imageFile);
+      
+      console.log('🔍 Barcode detection result:', detectedBarcodes);
       
       // If we found barcodes, scan them instead of doing image analysis
       if (detectedBarcodes.length > 0) {
@@ -141,15 +308,19 @@ class VisionAnalysisService {
         try {
           // Scan the first detected barcode
           const barcodeResult = await this.scanBarcode(detectedBarcodes[0]);
+          console.log('📊 Barcode scan result:', barcodeResult);
           
           // Add the detected barcodes to the result
           if (barcodeResult.success && barcodeResult.data) {
             barcodeResult.data.barcodes = detectedBarcodes;
+            console.log('✅ Returning barcode analysis result');
             return barcodeResult;
           }
         } catch (barcodeError) {
           console.log('Barcode scan failed, falling back to image analysis:', barcodeError);
         }
+      } else {
+        console.log('ℹ️ No barcodes detected, proceeding with regular image analysis');
       }
 
       // Use WIHY Scanner API for comprehensive food analysis

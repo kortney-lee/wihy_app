@@ -27,7 +27,7 @@
     max-width: 100vw !important;
     background: #f9f9f9 !important;
     background-image: none !important;
-    padding-top: 10px !important; /* Minimal top padding for mobile */
+    padding-top: 80px !important; /* Reduced from 160px - just enough for mobile header */
     margin: 0 !important;
     position: relative !important;
   }
@@ -141,6 +141,7 @@
     position: relative !important;
     top: auto !important;
     transform: none !important;
+    margin-top: 10px !important; /* Reduced from 20px since body padding is now smaller */
   }
   
   /* Prevent any scroll-to-top behavior */
@@ -157,7 +158,7 @@
   /* Fix any layout shifts on mobile */
   .search-landing,
   .results-page {
-    min-height: calc(100vh - 80px) !important; /* Match mobile body padding */
+    min-height: calc(100vh - 160px) !important; /* Match mobile body padding */
     margin-top: 0 !important;
     padding-top: 10px !important;
   }
@@ -213,7 +214,7 @@
 
   /* Ensure news feed integrates properly with mobile layout */
   .news-feed-container {
-    margin-top: 20px !important;
+    margin-top: 10px !important; /* Reduced from 20px to match earlier reduction */
     padding: 0 10px !important;
     max-width: 100% !important;
   }
@@ -422,7 +423,7 @@
     max-width: 100vw !important;
     overflow-x: hidden !important;
     padding: 8px 12px 20px 12px !important;
-    margin: 0 !important;
+    margin: 20px 0 0 0 !important; /* Top margin for spacing from header, no side margins */
     box-sizing: border-box !important;
   }
 
