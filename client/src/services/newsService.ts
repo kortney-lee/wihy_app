@@ -1,6 +1,8 @@
 // vHealth News API Client Integration
 // Swagger UI Documentation: https://services.wihy.ai/api/docs
 
+import { API_CONFIG } from '../config/apiConfig';
+
 export interface NewsArticle {
   // Article Identity
   id: string;
@@ -145,16 +147,33 @@ export interface Category {
   description: string;
 }
 
-// API Configuration
-const API_BASE_URL = {
-  production: 'https://services.wihy.ai',
-  development: 'http://localhost:5001'
+// News API Configuration - Uses unified API config with flexible port
+const getNewsApiUrl = () => {
+  // Check for explicit environment variable first
+  if (process.env.REACT_APP_NEWS_API_URL) {
+    return process.env.REACT_APP_NEWS_API_URL;
+  }
+  
+  // Development flag - set to true to use local dev server, false for production
+  const USE_LOCAL_DEV = process.env.REACT_APP_USE_LOCAL_NEWS === 'true';
+  
+  // Check if we're on localhost (local development on the development machine)
+  const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+  
+  if (isLocalhost && USE_LOCAL_DEV) {
+    // Local development with dev flag enabled - use localhost with flexible port
+    const defaultPort = process.env.REACT_APP_NEWS_PORT || '5001';
+    return `http://localhost:${defaultPort}`;
+  } else {
+    // Production/deployed OR dev flag disabled - always use production news service
+    return 'https://services.wihy.ai';
+  }
 };
 
 // Local cache configuration
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes in milliseconds
-const ARTICLES_PER_PAGE = 12;
-const API_FETCH_LIMIT = 100;
+const ARTICLES_PER_PAGE = 8; // Changed from 24 to 8 for smaller pagination
+const API_FETCH_LIMIT = 24; // Changed from 100 to 24 for smaller requests
 
 interface CachedData {
   articles: NewsArticle[];
@@ -203,9 +222,20 @@ class VHealthNewsClient {
   private cache: NewsCache;
 
   constructor(baseUrl?: string) {
-    // Use production by default
-    this.baseUrl = baseUrl || API_BASE_URL.production;
+    // Use unified news API URL or override
+    this.baseUrl = baseUrl || getNewsApiUrl();
     this.cache = new NewsCache();
+    
+    // Debug logging
+    console.log('🔍 NEWS API DEBUG:', {
+      baseUrl: this.baseUrl,
+      isLocalhost: window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1',
+      hostname: window.location.hostname,
+      useLocalDev: process.env.REACT_APP_USE_LOCAL_NEWS === 'true',
+      detectedEnvironment: (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') && process.env.REACT_APP_USE_LOCAL_NEWS === 'true' ? 'LOCAL_DEV' : 'PRODUCTION',
+      newsPort: process.env.REACT_APP_NEWS_PORT || '5001',
+      envOverride: process.env.REACT_APP_NEWS_API_URL || 'none'
+    });
   }
 
   async getArticles(params: {
@@ -247,9 +277,9 @@ class VHealthNewsClient {
       }
     }
 
-    // Fetch from API with increased limit for better caching
+    // Fetch from API with smaller limit for efficiency
     const queryParams = new URLSearchParams();
-    const fetchLimit = API_FETCH_LIMIT; // Always fetch 100 for better caching
+    const fetchLimit = API_FETCH_LIMIT; // Always fetch 24 for better performance
     queryParams.append('limit', fetchLimit.toString());
     
     if (params.category) queryParams.append('category', params.category);
@@ -392,7 +422,7 @@ export const fetchNewsFeed = async (categories?: string[], limit?: number): Prom
   try {
     // Simple API call - no client-side filtering needed
     const response = await newsClient.getArticles({
-      limit: limit || 100,
+      limit: limit || 8, // Changed from 24 to 8
       fresh: true, // Always get fresh articles
       useCache: false // Disable cache to ensure fresh content
     });
@@ -415,7 +445,7 @@ export const getArticlesByCategory = async (category: string, limit?: number): P
     // Simple API call with category - API handles filtering
     const response = await newsClient.getArticles({
       category,
-      limit: limit || 100,
+      limit: limit || 8, // Changed from 24 to 8
       fresh: true, // Always get fresh articles
       useCache: false // Disable cache to ensure fresh content
     });
@@ -435,14 +465,14 @@ export const getArticlesByCategory = async (category: string, limit?: number): P
 
 export const refreshNewsFeed = async (): Promise<{ success: boolean; articles: NewsArticle[] }> => {
   // Simple refresh - API handles everything
-  return await fetchNewsFeed(undefined, 100);
+  return await fetchNewsFeed(undefined, 8); // Changed from 24 to 8
 };
 
 export const searchNewsArticles = async (query: string, limit?: number): Promise<{ success: boolean; articles: NewsArticle[] }> => {
   try {
     // Simple search call - API handles query processing
     const response = await newsClient.getArticles({
-      limit: limit || 100,
+      limit: limit || 8, // Changed from 24 to 8
       fresh: true, // Always get fresh articles
       useCache: false // Disable cache to ensure fresh content
     });
@@ -461,7 +491,7 @@ export const searchNewsArticles = async (query: string, limit?: number): Promise
 };
 
 // Simple function to get all news with pagination - API handles filtering and priority
-export const getAllNews = async (limit: number = 100): Promise<{ success: boolean; articles: NewsArticle[]; count: number; sources_used: string[] }> => {
+export const getAllNews = async (limit: number = 8): Promise<{ success: boolean; articles: NewsArticle[]; count: number; sources_used: string[] }> => {
   try {
     // Simple API call - server handles all filtering, categorization, and priority sorting
     const response = await newsClient.getArticles({
@@ -498,7 +528,7 @@ export const getPaginatedNews = async (page: number = 1, category?: string): Pro
   hasPrevPage: boolean;
 }> => {
   try {
-    // Fetch full dataset (100 articles) and cache it
+    // Fetch smaller dataset (24 articles for caching) and paginate to 8 per page
     const response = await newsClient.getArticles({
       limit: API_FETCH_LIMIT,
       category: category,
@@ -560,7 +590,7 @@ export const getLazyLoadedNews = async (page: number = 1, category?: string): Pr
   loadedCount: number;
 }> => {
   try {
-    // Fetch full dataset (100 articles) and cache it
+    // Fetch smaller dataset (24 articles for caching) and paginate to 8 per page
     const response = await newsClient.getArticles({
       limit: API_FETCH_LIMIT,
       category: category,

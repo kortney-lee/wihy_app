@@ -17,6 +17,9 @@ const getWihyApiUrl = () => {
   }
 };
 
+// Add cache busting version
+const CACHE_VERSION = 'v2.0.1'; // Increment this after each deployment
+
 // Environment configuration for API endpoints
 export const API_CONFIG = {
   // WIHY API - Unified for mobile and desktop
@@ -30,6 +33,7 @@ console.log('🔍 API CONFIG DEBUG:', {
   FINAL_URL: API_CONFIG.WIHY_API_URL,
   HOSTNAME: window.location.hostname,
   IS_LOCALHOST: window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1',
+  CACHE_VERSION: CACHE_VERSION,
   DETECTION_REASON: process.env.REACT_APP_WIHY_API_URL ? 'ENV_VAR' : 
     (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') ? 'LOCAL_DEV' : 'PRODUCTION_ML_WIHY'
 });

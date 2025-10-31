@@ -10,7 +10,8 @@
     "dev:prod": "docker-compose up wihy-ui-prod",
     "docker:build": "docker build -t wihy-ui .",
     "docker:run": "docker run -p 8080:80 wihy-ui",
-    "deploy": "npm run build"
+    "deploy": "npm run build",
+    "deploy:cache-bust": "powershell -ExecutionPolicy Bypass -File deploy-with-cache-bust.ps1"
   },
   "devDependencies": {
     "@types/node": "^20.11.24",
