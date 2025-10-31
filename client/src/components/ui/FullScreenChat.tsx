@@ -13,13 +13,15 @@ interface FullScreenChatProps {
   onClose: () => void;
   initialQuery?: string;
   initialResponse?: string;
+  onViewCharts?: () => void; // Optional callback for "View Charts" button
 }
 
 const FullScreenChat: React.FC<FullScreenChatProps> = ({
   isOpen,
   onClose,
   initialQuery,
-  initialResponse
+  initialResponse,
+  onViewCharts
 }) => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputMessage, setInputMessage] = useState('');
@@ -181,43 +183,53 @@ const FullScreenChat: React.FC<FullScreenChatProps> = ({
   const shouldShowHistory = hasActiveSession && (messages.length > 0 || (initialQuery && initialResponse));
 
   return (
-    <div style={{
-      position: 'fixed',
-      top: isMobile ? '170px' : '150px', // Start higher on desktop
-      left: isMobile ? '8px' : '30px', // Smaller side margins on desktop
-      right: isMobile ? '8px' : '30px',
-      bottom: isMobile ? '20px' : '30px', // Smaller bottom margin on desktop
-      backgroundColor: '#ffffff',
-      zIndex: 10000,
-      display: 'flex',
-      flexDirection: isMobile ? 'column' : 'row',
-      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-      borderRadius: isMobile ? '12px' : '16px', // Rounded corners
-      boxShadow: '0 10px 25px rgba(0, 0, 0, 0.15)', // Nice shadow
-      border: '1px solid #e5e7eb', // Subtle border
-      overflow: 'hidden',
-      maxWidth: isMobile ? 'none' : '1200px', // Larger max width on desktop
-      maxHeight: isMobile ? 'none' : '800px', // Larger max height on desktop
-      margin: isMobile ? '0' : '0 auto' // Center on desktop
-    }}>
-      {/* Mobile History Toggle - only show if history exists */}
-      {isMobile && shouldShowHistory && (
-        <div style={{
-          position: 'absolute',
-          top: '16px',
-          left: '16px',
-          zIndex: 101
-        }}>
-          <button
-            onClick={() => setShowMobileHistory(!showMobileHistory)}
-            style={{
-              width: '40px',
-              height: '40px',
-              borderRadius: '8px',
-              border: 'none',
-              backgroundColor: '#f3f4f6',
-              cursor: 'pointer',
-              display: 'flex',
+    <>
+      {/* Backdrop overlay for both mobile and desktop */}
+      <div style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        zIndex: 9999,
+        opacity: isOpen ? 1 : 0,
+        transition: 'opacity 0.3s ease-in-out'
+      }} onClick={onClose} />
+
+      <div style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: '#ffffff',
+        zIndex: 10000,
+        display: 'flex',
+        flexDirection: 'column',
+        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+        overflow: 'hidden',
+        transform: `translateX(${isOpen ? '0' : '100%'})`,
+        transition: 'transform 0.3s ease-in-out'
+      }}>
+        {/* Mobile History Toggle - only show if history exists */}
+        {isMobile && shouldShowHistory && (
+          <div style={{
+            position: 'absolute',
+            top: '16px',
+            left: '16px',
+            zIndex: 101
+          }}>
+            <button
+              onClick={() => setShowMobileHistory(!showMobileHistory)}
+              style={{
+                width: '40px',
+                height: '40px',
+                borderRadius: '8px',
+                border: 'none',
+                backgroundColor: '#f3f4f6',
+                cursor: 'pointer',
+                display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               fontSize: '16px',
@@ -389,31 +401,62 @@ const FullScreenChat: React.FC<FullScreenChatProps> = ({
             </h1>
           </div>
 
-          <button
-            onClick={onClose}
-            style={{
-              width: '40px',
-              height: '40px',
-              borderRadius: '50%',
-              border: 'none',
-              backgroundColor: '#f3f4f6',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '18px',
-              color: '#6b7280',
-              transition: 'all 0.2s ease'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = '#e5e7eb';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = '#f3f4f6';
-            }}
-          >
-            ✕
-          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            {/* View Charts button - only show if onViewCharts is provided */}
+            {onViewCharts && (
+              <button
+                onClick={onViewCharts}
+                style={{
+                  padding: '8px 16px',
+                  borderRadius: '8px',
+                  border: '1px solid #d1d5db',
+                  backgroundColor: '#ffffff',
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  color: '#374151',
+                  transition: 'all 0.2s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = '#f9fafb';
+                  e.currentTarget.style.borderColor = '#9ca3af';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = '#ffffff';
+                  e.currentTarget.style.borderColor = '#d1d5db';
+                }}
+              >
+                📊 View Charts
+              </button>
+            )}
+
+            {/* Close button */}
+            <button
+              onClick={onClose}
+              style={{
+                width: '40px',
+                height: '40px',
+                borderRadius: '50%',
+                border: 'none',
+                backgroundColor: '#f3f4f6',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '18px',
+                color: '#6b7280',
+                transition: 'all 0.2s ease'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#e5e7eb';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = '#f3f4f6';
+              }}
+            >
+              ✕
+            </button>
+          </div>
         </div>
 
         {/* Messages Container - Single scroll area */}
@@ -773,6 +816,7 @@ const FullScreenChat: React.FC<FullScreenChatProps> = ({
         }
       `}</style>
     </div>
+    </>
   );
 };
 

@@ -479,6 +479,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({
             <FullScreenChat
               isOpen={isChatOpen}
               onClose={() => setIsChatOpen(false)}
+              onViewCharts={() => setIsChatOpen(false)} // Close chat to view charts behind it
               initialQuery={query}
               initialResponse={(() => {
                 let extractedResponse = '';
