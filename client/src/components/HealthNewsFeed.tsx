@@ -101,18 +101,53 @@ const HealthNewsFeed: React.FC<NewsFeedProps> = ({
       prevFetchParamsRef.current = {max: maxArticles};
       setCurrentPage(1); // Reset to first page when changing parameters
       setHasMorePages(true); // Reset pagination state
-      fetchHealthNews(true); // true means reset (first page)
+      // Note: fetchHealthNews will be called by the mount effect
     }
   }, [maxArticles]);
 
-  // Ensure news loads on mobile immediately with better pagination control
+  // Ensure news loads on initial mount - separate from fetchHealthNews to avoid dependency issues
   useEffect(() => {
-    // Only fetch initial articles if we have none and we're not already loading
-    if (articles.length === 0 && !loading && !loadingMore) {
-      console.log('📱 Initial news load triggered');
-      fetchHealthNews(true);
-    }
-  }, []); // Empty dependency array - only run on mount
+    console.log('📱 Component mounted - triggering initial news load');
+    // Trigger initial load directly here to avoid stale closure issues
+    const loadInitialNews = async () => {
+      if (fetchingRef.current) {
+        console.log('📱 Already fetching, skipping initial load');
+        return;
+      }
+      
+      fetchingRef.current = true;
+      setLoading(true);
+      setCurrentPage(1);
+      
+      try {
+        const response = await getLazyLoadedNews(1);
+        
+        if (response.success && response.newArticles && response.newArticles.length > 0) {
+          setArticles(response.newArticles);
+          setHasMorePages(response.hasNextPage);
+        } else {
+          // Fallback
+          const fallbackResponse = await getAllNews(ARTICLES_PER_PAGE);
+          if (fallbackResponse.success && fallbackResponse.articles) {
+            setArticles(fallbackResponse.articles);
+            setHasMorePages(fallbackResponse.articles.length >= ARTICLES_PER_PAGE);
+          } else {
+            setArticles([]);
+            setHasMorePages(false);
+          }
+        }
+      } catch (error) {
+        console.error('Error loading initial news:', error);
+        setArticles([]);
+        setHasMorePages(false);
+      } finally {
+        setLoading(false);
+        fetchingRef.current = false;
+      }
+    };
+    
+    loadInitialNews();
+  }, []); // Only run on mount
 
   // Separate effect for mobile-specific scroll handling
   useEffect(() => {
