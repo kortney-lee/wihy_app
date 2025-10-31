@@ -1,8 +1,10 @@
 import { API_CONFIG, getApiEndpoint } from '../config/apiConfig';
 import { logger } from '../utils/logger';
 
-// Force localhost for development
-const WIHY_API_ENDPOINT = 'http://localhost:8000/ask';
+// Dynamic endpoint that adapts to environment
+const getWihyApiEndpoint = (path: string = '/ask') => {
+  return getApiEndpoint(path);
+};
 
 // Types for the WiHy API (updated to match OpenAPI specification v4.0.0)
 export interface HealthQuestion {
@@ -277,7 +279,7 @@ class WihyAPIService {
   private isLocalDevelopment: boolean;
 
   constructor() {
-    this.baseURL = WIHY_API_ENDPOINT;
+    this.baseURL = getWihyApiEndpoint('/ask');
     this.isLocalDevelopment = API_CONFIG.WIHY_API_URL.includes('localhost');
     
     // 🔍 DEBUG: Show which endpoint is being used
@@ -427,12 +429,21 @@ class WihyAPIService {
           throw new Error('CORS_ERROR: Unable to connect to WiHy services from this domain');
         }
         
-        // Check for network/connectivity issues
+        // Check for network/connectivity issues (including mobile-specific issues)
         if (error.message.includes('fetch') || 
             error.message.includes('network') || 
             error.name === 'TypeError' ||
             error.message.includes('Failed to fetch')) {
-          throw new Error('NETWORK_ERROR: Unable to connect to WiHy services');
+          
+          // Provide mobile-specific guidance
+          const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+          const baseMessage = 'NETWORK_ERROR: Unable to connect to WiHy services';
+          
+          if (isMobile) {
+            throw new Error(`${baseMessage}. For mobile testing, ensure your device and development machine are on the same network, and set REACT_APP_WIHY_API_URL to your machine's IP address (e.g., http://192.168.1.100:8000).`);
+          } else {
+            throw new Error(`${baseMessage}. Check if the API server is running on the configured endpoint.`);
+          }
         }
         
         // Check for server errors

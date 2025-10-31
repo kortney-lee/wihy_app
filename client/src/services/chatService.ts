@@ -1,10 +1,12 @@
 /**
  * Chat Service - Dedicated service for ChatWidget functionality
- * Connects to http://localhost:8000 with direct chat endpoint (no session required)
+ * Connects to dynamic API endpoint that adapts to mobile/development environment
  * Sessions are optional and only used if they exist
  */
 
-const CHAT_API_BASE = 'http://localhost:8000';
+import { API_CONFIG } from '../config/apiConfig';
+
+const CHAT_API_BASE = API_CONFIG.WIHY_API_URL;
 
 export interface ChatRequest {
   message: string;
