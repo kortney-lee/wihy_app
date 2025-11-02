@@ -213,36 +213,6 @@ const FullScreenChat: React.FC<FullScreenChatProps> = ({
         transform: `translateX(${isOpen ? '0' : '100%'})`,
         transition: 'transform 0.3s ease-in-out'
       }}>
-        {/* History Toggle Button - show for both mobile and desktop when history exists */}
-        {shouldShowHistory && (
-          <div style={{
-            position: 'absolute',
-            top: '16px',
-            left: '16px',
-            zIndex: 101
-          }}>
-            <button
-              onClick={() => {
-                if (isMobile) {
-                  setShowMobileHistory(!showMobileHistory);
-                } else {
-                  setShowDesktopHistory(!showDesktopHistory);
-                }
-              }}
-              style={{
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-                padding: '8px',
-                fontSize: '20px',
-                color: '#666'
-              }}
-              title="Toggle History"
-            >
-              ☰
-            </button>
-          </div>
-        )}
 
       {/* Chat History Sidebar - only show when explicitly toggled */}
       {shouldShowHistory && ((isMobile && showMobileHistory) || (!isMobile && showDesktopHistory)) && (
@@ -386,33 +356,39 @@ const FullScreenChat: React.FC<FullScreenChatProps> = ({
         overflow: 'hidden',
         transition: !isMobile ? 'margin-left 0.3s ease' : 'none'
       }}>
-        {/* Small container for hamburger menu when history is open on mobile */}
-        {isMobile && shouldShowHistory && showMobileHistory && (
-          <div style={{
-            height: '50px',
-            display: 'flex',
-            alignItems: 'center',
-            paddingLeft: '16px',
-            backgroundColor: '#ffffff',
-            borderBottom: '1px solid #e5e7eb',
-            flexShrink: 0
-          }}>
+
+        {/* Top Navigation Bar with Toggle History */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'flex-start',
+          padding: '8px 12px',
+          backgroundColor: '#f9fafb',
+          minHeight: '40px'
+        }}>
+          {/* History Toggle Button - show for both mobile and desktop when history exists */}
+          {shouldShowHistory && (
             <button
-              onClick={() => setShowMobileHistory(false)}
+              onClick={() => {
+                if (isMobile) {
+                  setShowMobileHistory(!showMobileHistory);
+                } else {
+                  setShowDesktopHistory(!showDesktopHistory);
+                }
+              }}
               style={{
                 background: 'none',
                 border: 'none',
                 cursor: 'pointer',
-                padding: '8px',
-                fontSize: '20px',
-                color: '#666'
+                padding: '4px',
+                fontSize: '16px'
               }}
-              title="Close History"
+              title="Toggle History"
             >
               ☰
             </button>
-          </div>
-        )}
+          )}
+        </div>
         
         {/* Header */}
         <div style={{
