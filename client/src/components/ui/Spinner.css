@@ -1,0 +1,135 @@
+/* ==== Fullscreen overlay (modal) ==== */
+.spinner-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(17, 24, 39, 0.6); /* darker, matches screenshot mood */
+  display: grid;
+  place-items: center;
+  z-index: 2000;
+  backdrop-filter: blur(4px);
+}
+
+/* ==== Card container ==== */
+.spinner-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 36px 40px 28px;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow:
+    0 25px 50px -12px rgba(0,0,0,.35),
+    0 10px 20px rgba(0,0,0,.12);
+  border: 1px solid #e8f0fe;
+  width: min(640px, calc(100vw - 48px));
+  text-align: center;
+  animation: spinner-fade-in .18s ease-out;
+}
+
+/* Title + body text */
+.spinner-title {
+  margin: 8px 0 4px;
+  font-size: 24px;
+  font-weight: 700;
+  color: #111827;
+}
+.spinner-text,
+.spinner-message {
+  color: #4b5563;
+  font-size: 16px;
+  margin: 4px 0 18px;
+}
+
+/* ==== Arc Spinner (replaces GIF) ==== */
+.arc-spinner {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 4px solid transparent;
+  border-top-color: #3b82f6;  /* blue accent */
+  border-left-color: #3b82f6;
+  transform: rotate(45deg);
+  animation: spinner-rotate 1s linear infinite;
+  margin-bottom: 8px;
+}
+
+/* Keep old class for inline/legacy layouts */
+.clean-loader {
+  display: flex;
+  justify-content: center;
+  margin: 24px 0;
+}
+
+/* ==== Progress bar (determinate/indeterminate) ==== */
+.spinner-progress { width: 100%; margin-top: 6px; }
+.spinner-track {
+  height: 10px;
+  background: #e5e7eb;
+  border-radius: 999px;
+  overflow: hidden;
+}
+.spinner-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #2563eb, #3b82f6);
+  border-radius: 999px;
+  transition: width .25s ease;
+}
+/* Indeterminate pill that slides across */
+.spinner-fill.indeterminate {
+  width: 35%;
+  animation: spinner-indeterminate 1.2s ease-in-out infinite;
+}
+.spinner-percent {
+  margin-top: 10px;
+  font-size: 15px;
+  color: #374151;
+}
+
+/* ==== Keyframes ==== */
+@keyframes spinner-rotate { to { transform: rotate(405deg); } }
+@keyframes spinner-indeterminate {
+  0%   { margin-left: 0%; }
+  50%  { margin-left: 65%; }
+  100% { margin-left: 0%; }
+}
+@keyframes spinner-fade-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ==== Responsive ==== */
+@media (max-width: 480px) {
+  .spinner-container { padding: 28px 22px 22px; }
+  .spinner-title { font-size: 20px; }
+}
+
+.spinner-gif {
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.spinner-image {
+  width: 60px;          /* Adjust this size */
+  height: 60px;         /* Keep it square */
+  object-fit: contain;  /* Maintains aspect ratio */
+  border-radius: 50%;   /* Makes it circular if you want */
+}
+
+/* Alternative sizes you can try */
+.spinner-image.small {
+  width: 40px;
+  height: 40px;
+}
+
+.spinner-image.medium {
+  width: 60px;
+  height: 60px;
+}
+
+.spinner-image.large {
+  width: 80px;
+  height: 80px;
+}

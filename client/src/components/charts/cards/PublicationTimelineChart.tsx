@@ -1,0 +1,337 @@
+import React from 'react';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+  ChartOptions,
+  TimeScale,
+} from 'chart.js';
+import { Line } from 'react-chartjs-2';
+import 'chartjs-adapter-date-fns';
+import AnalyzeWithWihyButton from '../shared/AnalyzeWithWihyButton';
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+  TimeScale
+);
+
+export interface PublicationData {
+  year: number;
+  month?: number;
+  count: number;
+  studyTypes?: {
+    'Clinical Trial': number;
+    'Meta-Analysis': number;
+    'Observational': number;
+    'Review': number;
+    'Laboratory': number;
+  };
+  totalStudies?: number;
+}
+
+interface PublicationTimelineChartProps {
+  publications?: PublicationData[];
+  size?: 'small' | 'medium' | 'large';
+  showLabels?: boolean;
+  title?: string;
+  timeRange?: 'recent' | 'decade' | 'all-time';
+  showTrendline?: boolean;
+}
+
+const PublicationTimelineChart: React.FC<PublicationTimelineChartProps> = ({
+  publications = [],
+  size = 'medium',
+  showLabels = true,
+  title = 'Research Publication Timeline',
+  timeRange = 'decade',
+  showTrendline = true
+}) => {
+  // Generate sample data based on timeRange
+  const generateSampleData = (): PublicationData[] => {
+    const currentYear = new Date().getFullYear();
+    const data: PublicationData[] = [];
+    
+    switch (timeRange) {
+      case 'recent':
+        // Last 5 years
+        for (let i = 4; i >= 0; i--) {
+          const year = currentYear - i;
+          data.push({
+            year,
+            count: Math.floor(Math.random() * 50) + 10,
+            studyTypes: {
+              'Clinical Trial': Math.floor(Math.random() * 15) + 5,
+              'Meta-Analysis': Math.floor(Math.random() * 8) + 2,
+              'Observational': Math.floor(Math.random() * 20) + 5,
+              'Review': Math.floor(Math.random() * 12) + 3,
+              'Laboratory': Math.floor(Math.random() * 10) + 2
+            }
+          });
+        }
+        break;
+        
+      case 'decade':
+        // Last 10 years
+        for (let i = 9; i >= 0; i--) {
+          const year = currentYear - i;
+          data.push({
+            year,
+            count: Math.floor(Math.random() * 80) + 20,
+            studyTypes: {
+              'Clinical Trial': Math.floor(Math.random() * 25) + 5,
+              'Meta-Analysis': Math.floor(Math.random() * 15) + 3,
+              'Observational': Math.floor(Math.random() * 30) + 8,
+              'Review': Math.floor(Math.random() * 20) + 5,
+              'Laboratory': Math.floor(Math.random() * 15) + 3
+            }
+          });
+        }
+        break;
+        
+      case 'all-time':
+        // Last 20 years
+        for (let i = 19; i >= 0; i--) {
+          const year = currentYear - i;
+          data.push({
+            year,
+            count: Math.floor(Math.random() * 100) + 10,
+            studyTypes: {
+              'Clinical Trial': Math.floor(Math.random() * 30) + 5,
+              'Meta-Analysis': Math.floor(Math.random() * 20) + 2,
+              'Observational': Math.floor(Math.random() * 40) + 10,
+              'Review': Math.floor(Math.random() * 25) + 5,
+              'Laboratory': Math.floor(Math.random() * 20) + 3
+            }
+          });
+        }
+        break;
+    }
+    
+    return data;
+  };
+
+  const publicationData = publications.length > 0 ? publications : generateSampleData();
+
+  // Chart dimensions based on size
+  const dimensions = {
+    small: { width: 300, height: 180 },
+    medium: { width: 450, height: 250 },
+    large: { width: 600, height: 320 }
+  };
+
+  // Calculate trend line data using simple linear regression
+  const calculateTrendline = (data: PublicationData[]) => {
+    const n = data.length;
+    const sumX = data.reduce((sum, item, index) => sum + index, 0);
+    const sumY = data.reduce((sum, item) => sum + item.count, 0);
+    const sumXY = data.reduce((sum, item, index) => sum + index * item.count, 0);
+    const sumXX = data.reduce((sum, item, index) => sum + index * index, 0);
+
+    const slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
+    const intercept = (sumY - slope * sumX) / n;
+
+    return data.map((_, index) => slope * index + intercept);
+  };
+
+  const trendlineData = showTrendline ? calculateTrendline(publicationData) : [];
+
+  const chartData = {
+    labels: publicationData.map(p => p.year.toString()),
+    datasets: [
+      {
+        label: 'Publications per Year',
+        data: publicationData.map(p => p.count),
+        borderColor: '#3b82f6',
+        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+        pointBackgroundColor: '#3b82f6',
+        pointBorderColor: '#1d4ed8',
+        pointRadius: size === 'small' ? 3 : 4,
+        pointHoverRadius: size === 'small' ? 5 : 6,
+        tension: 0.3,
+        fill: true,
+        borderWidth: 2
+      },
+      ...(showTrendline ? [{
+        label: 'Trend',
+        data: trendlineData,
+        borderColor: '#ef4444',
+        backgroundColor: 'transparent',
+        borderDash: [5, 5],
+        pointRadius: 0,
+        tension: 0,
+        borderWidth: 2
+      }] : [])
+    ]
+  };
+
+  const options: ChartOptions<'line'> = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        display: showLabels,
+        position: 'top' as const,
+        labels: {
+          font: {
+            size: size === 'small' ? 10 : 12
+          },
+          color: '#374151'
+        }
+      },
+      title: {
+        display: showLabels,
+        text: title,
+        font: {
+          size: size === 'small' ? 12 : size === 'medium' ? 14 : 16,
+          weight: 'bold'
+        },
+        color: '#374151'
+      },
+      tooltip: {
+        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+        titleColor: '#fff',
+        bodyColor: '#fff',
+        borderColor: '#3b82f6',
+        borderWidth: 1,
+        cornerRadius: 8,
+        callbacks: {
+          label: (context) => {
+            const pub = publicationData[context.dataIndex];
+            const lines = [`${pub.count} publications in ${pub.year}`];
+            
+            if (pub.studyTypes) {
+              lines.push('', 'Study breakdown:');
+              Object.entries(pub.studyTypes).forEach(([type, count]) => {
+                if (count > 0) {
+                  lines.push(`${type}: ${count}`);
+                }
+              });
+            }
+            
+            return lines;
+          }
+        }
+      }
+    },
+    scales: {
+      x: {
+        title: {
+          display: showLabels,
+          text: 'Year',
+          font: {
+            size: size === 'small' ? 10 : 12
+          },
+          color: '#6b7280'
+        },
+        ticks: {
+          font: {
+            size: size === 'small' ? 10 : 12
+          },
+          color: '#6b7280',
+          maxTicksLimit: timeRange === 'all-time' ? 10 : undefined
+        },
+        grid: {
+          color: 'rgba(0, 0, 0, 0.1)'
+        }
+      },
+      y: {
+        title: {
+          display: showLabels,
+          text: 'Number of Publications',
+          font: {
+            size: size === 'small' ? 10 : 12
+          },
+          color: '#6b7280'
+        },
+        beginAtZero: true,
+        ticks: {
+          font: {
+            size: size === 'small' ? 10 : 12
+          },
+          color: '#6b7280'
+        },
+        grid: {
+          color: 'rgba(0, 0, 0, 0.1)'
+        }
+      }
+    },
+    interaction: {
+      intersect: false,
+      mode: 'index'
+    }
+  };
+
+  // Calculate statistics
+  const totalPublications = publicationData.reduce((sum, p) => sum + p.count, 0);
+  const avgPerYear = Math.round(totalPublications / publicationData.length);
+  const recentYears = publicationData.slice(-3);
+  const recentTotal = recentYears.reduce((sum, p) => sum + p.count, 0);
+  const recentAvg = Math.round(recentTotal / recentYears.length);
+
+  return (
+    <div style={{
+      display: "flex",
+      flexDirection: "column",
+      padding: 24,
+      borderRadius: 16,
+      background: "white",
+      border: "1px solid #e5e7eb",
+      boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
+      height: 500,
+      overflow: "hidden"
+    }}>
+      <h3 style={{ fontSize: 24, fontWeight: 600, color: "#9CA3AF", margin: 0, marginBottom: 20 }}>
+        {title}
+      </h3>
+      
+      <div style={{ flex: 1, position: 'relative' }}>
+        <Line data={chartData} options={options} />
+      </div>
+      
+      {/* Research summary */}
+      {showLabels && (
+        <div style={{ 
+          marginTop: '12px', 
+          fontSize: '12px',
+          color: '#6b7280',
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
+          gap: '8px'
+        }}>
+          <div>
+            <strong style={{ color: '#374151' }}>Total:</strong> {totalPublications} studies
+          </div>
+          <div>
+            <strong style={{ color: '#374151' }}>Avg/Year:</strong> {avgPerYear}
+          </div>
+          <div>
+            <strong style={{ color: '#374151' }}>Recent Avg:</strong> {recentAvg}
+          </div>
+          <div style={{ color: recentAvg > avgPerYear ? '#10b981' : '#ef4444' }}>
+            <strong>Trend:</strong> {recentAvg > avgPerYear ? '↗️ Increasing' : '↘️ Declining'}
+          </div>
+        </div>
+      )}
+      
+      <div style={{ display: "flex", justifyContent: "center", marginTop: 16, flexShrink: 0 }}>
+        <AnalyzeWithWihyButton
+          cardContext={`Publication timeline analysis: ${title} showing ${timeRange} data. Total publications: ${totalPublications} studies. Average per year: ${avgPerYear}. Recent average: ${recentAvg}. Trend: ${recentAvg > avgPerYear ? 'Increasing' : 'Declining'} research activity. Data spans from ${publicationData[0]?.year} to ${publicationData[publicationData.length - 1]?.year}`}
+          userQuery="Analyze this publication timeline and explain what the research trends indicate about scientific interest and evidence development in this area"
+        />
+      </div>
+    </div>
+  );
+};
+
+export default PublicationTimelineChart;

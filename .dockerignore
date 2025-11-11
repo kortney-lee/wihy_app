@@ -1,0 +1,161 @@
+# Dependencies
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Production build (will be created during build)
+client/build
+user/build
+build
+dist
+
+# Development files
+.env
+.env.local
+.env.development.local
+.env.test.local
+*.log
+
+# IDE files
+.vscode
+.idea
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Git
+.git
+# Dependencies
+**/node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Production build (will be created during build)
+client/build
+user/build
+build
+dist
+
+# Development files
+.env
+.env.local
+.env.development.local
+.env.test.local
+*.log
+
+# IDE files
+.vscode
+.idea
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Git
+.git
+.gitignore
+
+# Documentation (not needed in container)
+README.md
+DEPLOYMENT.md
+TROUBLESHOOTING.md
+SERVERLESS-DEPLOYMENT.md
+ARCHITECTURE.md
+*.md
+
+# Development tools
+.eslintrc*
+.prettierrc*
+
+# Testing
+coverage
+.nyc_output
+**/*.test.*
+**/*.spec.*
+
+# Cache
+.cache
+*.tsbuildinfo
+**/.cache
+
+# Backup files
+*.bak
+*.backup
+
+# Development services
+docker-compose.yml
+docker-compose.override.yml
+
+# Server file (not needed for serverless)
+server.ts
+
+# Azure/deployment files not needed in container
+.azure
+staticwebapp.config.json
+*.ps1
+deploy-*
+setup-*
+get-*
+test-*
+verify-*
+
+# Keep necessary deployment scripts
+!healthcheck.sh
+!nginx.conf
+!setup-ssl.sh
+
+# GitHub workflows not needed in container
+.github
+
+# Additional large files to exclude
+shared-services
+tyling
+tash*
+*.jpg
+*.png
+*.gif
+*.ico
+*.svg
+
+# Documentation (not needed in container)
+README.md
+DEPLOYMENT.md
+TROUBLESHOOTING.md
+SERVERLESS-DEPLOYMENT.md
+
+# Development tools
+.eslintrc*
+.prettierrc*
+
+# Testing
+coverage
+.nyc_output
+
+# Cache
+.cache
+*.tsbuildinfo
+
+# Backup files
+*.bak
+*.backup
+
+# Development services
+docker-compose.yml
+docker-compose.override.yml
+
+# Server file (not needed for serverless)
+server.ts
+
+# Azure/deployment files not needed in container
+.azure
+staticwebapp.config.json
+
+# GitHub workflows not needed in container
+.github

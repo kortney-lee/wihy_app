@@ -1,0 +1,369 @@
+.multi-auth-container {
+  position: relative;
+  display: inline-block;
+}
+
+.multi-auth-container.top-right {
+  position: fixed; /* Changed from absolute to fixed */
+  top: 16px; /* Match LoginButton positioning */
+  right: 16px; /* Match LoginButton positioning */
+  z-index: 10002; /* Higher than modal content */
+  pointer-events: auto !important; /* Force pointer events */
+}
+
+.login-icon {
+  background: transparent; /* Match LoginButton */
+  border: none;
+  cursor: pointer !important; /* Force cursor */
+  padding: 0; /* Remove padding to match LoginButton */
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s; /* Match LoginButton transition */
+  color: #5f6368; /* Match LoginButton color */
+  width: 40px;
+  height: 40px;
+  z-index: 1500; /* Ensure button is clickable */
+  position: relative; /* Establish stacking context */
+  pointer-events: auto !important; /* Force pointer events */
+}
+
+.login-icon:hover {
+  background-color: rgba(0, 0, 0, 0.05); /* Match LoginButton hover */
+  color: #1e293b;
+}
+
+.login-icon:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.login-icon svg {
+  width: 24px;
+  height: 24px;
+}
+
+.login-spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #e5e7eb;
+  border-top: 2px solid #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.profile-image {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.profile-initial {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 600;
+  font-size: 12px;
+}
+
+.providers-popup {
+  z-index: 10001;
+  position: fixed;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15), 0 8px 25px rgba(0, 0, 0, 0.1);
+  width: 380px;
+  max-width: 90vw;
+  max-height: 90vh;
+  overflow: hidden;
+  animation: modalSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: auto;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  
+  /* Desktop centering */
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.providers-header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 16px;
+  text-align: center;
+  position: relative;
+}
+
+.providers-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 500; /* Match LoginButton font-weight */
+  color: #202124; /* Match LoginButton color */
+}
+
+.close-button {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 22px;
+  color: #5f6368;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  top: 16px;
+  right: 16px;
+}
+
+.close-button:hover {
+  background-color: #f8f9fa;
+  color: #1e293b;
+}
+
+.providers-list {
+  padding: 0 20px; /* Reduced horizontal padding */
+  display: flex;
+  flex-direction: column;
+  gap: 12px; /* Increased spacing between buttons */
+}
+
+.provider-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 14px 18px; /* More padding for better feel */
+  border: 1px solid #dadce0; /* Match LoginButton border */
+  border-radius: 24px; /* Much more rounded */
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s ease; /* Smooth transitions */
+  font-size: 14px;
+  font-weight: 500;
+  color: #334155;
+  width: 100%;
+  text-align: center;
+}
+
+.provider-button:hover {
+  background-color: #f8f9fa; /* Match LoginButton hover */
+  border-color: #bdc3c7;
+  transform: translateY(-1px); /* Subtle lift effect */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.provider-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.providers-disclaimer {
+  padding: 0 20px 16px; /* Match updated padding */
+  font-size: 12px;
+  color: #64748b;
+  text-align: center;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.user-dropdown {
+  z-index: 10001; /* Match providers popup z-index */
+  position: absolute;
+  top: 44px; /* Match LoginButton dropdown position */
+  right: 0;
+  width: 280px; /* Match LoginButton width */
+  background: white;
+  border-radius: 8px; /* Match LoginButton border-radius */
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2); /* Match LoginButton shadow */
+  overflow: hidden;
+  animation: fadeIn 0.2s ease-out; /* Match LoginButton animation */
+  padding: 16px 0;
+  pointer-events: auto;
+}
+
+.user-info {
+  padding: 0 16px 16px;
+}
+
+.user-name {
+  font-weight: 600;
+  color: #202124; /* Match LoginButton color */
+  margin: 0 0 4px 0;
+  font-size: 14px;
+}
+
+.user-email {
+  color: #5f6368; /* Match LoginButton color */
+  margin: 0 0 4px 0;
+  font-size: 12px;
+}
+
+.user-provider {
+  color: #5f6368; /* Match LoginButton color */
+  font-size: 11px;
+  margin: 0;
+}
+
+.dropdown-divider {
+  height: 1px;
+  background-color: #dadce0; /* Match LoginButton divider */
+  margin: 0 16px 8px;
+}
+
+.dropdown-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 16px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  color: #202124; /* Match LoginButton color */
+  transition: background-color 0.2s; /* Match LoginButton transition */
+  text-align: left;
+}
+
+.dropdown-item:hover {
+  background-color: #f8f9fa; /* Match LoginButton hover */
+}
+
+.dropdown-icon {
+  width: 16px;
+  height: 16px;
+  color: #5f6368; /* Match LoginButton color */
+}
+
+.auth-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 10000;
+  pointer-events: auto;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+/* Add the fadeIn animation that LoginButton uses */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes modalSlideIn {
+  0% { 
+    opacity: 0; 
+    transform: translate(-50%, -50%) scale(0.95); 
+  }
+  100% { 
+    opacity: 1; 
+    transform: translate(-50%, -50%) scale(1); 
+  }
+}
+
+/* Hide scrollbars for header auth wrapper */
+.header-auth-wrapper {
+  scrollbar-width: none !important; /* Firefox */
+  -ms-overflow-style: none !important; /* Internet Explorer 10+ */
+  overflow: hidden !important; /* Prevent any overflow that might cause scrollbars */
+}
+
+/* Hide scrollbars for WebKit browsers */
+.header-auth-wrapper::-webkit-scrollbar {
+  display: none !important;
+}
+
+/* Also hide scrollbars for any child elements */
+.header-auth-wrapper * {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+.header-auth-wrapper *::-webkit-scrollbar {
+  display: none !important;
+}
+
+/* Mobile styles - match LoginButton responsive behavior */
+@media (max-width: 600px) {
+  .providers-popup,
+  .user-dropdown {
+    width: calc(100vw - 32px);
+    right: 16px !important;
+    left: 16px !important;
+    position: fixed;
+    top: 50% !important;
+    transform: translate(0, -50%) !important; /* Center vertically on mobile */
+    z-index: 10001 !important;
+    max-width: none !important;
+    min-width: auto !important;
+    max-height: calc(100vh - 80px) !important; /* Ensure space at top and bottom */
+    overflow-y: auto !important; /* Allow scrolling if content is too tall */
+  }
+  
+  .multi-auth-container.top-right {
+    position: fixed;
+    top: 12px;
+    right: 12px;
+    z-index: 10002 !important;
+  }
+  
+  /* Enhanced mobile modal positioning */
+  .providers-popup {
+    right: 16px !important;
+    left: 16px !important;
+    top: 50% !important;
+    transform: translate(0, -50%) !important; /* Center vertically */
+    width: calc(100vw - 32px) !important;
+    max-width: none !important;
+    min-width: auto !important;
+    max-height: calc(100vh - 80px) !important; /* Ensure disclaimer is visible */
+    overflow-y: auto !important; /* Allow scrolling */
+    margin: 0 !important;
+    z-index: 10001 !important;
+    pointer-events: auto !important;
+  }
+  
+  /* Ensure disclaimer is visible on mobile */
+  .providers-disclaimer {
+    padding: 0 20px 20px; /* Extra bottom padding on mobile */
+  }
+  
+  .auth-overlay {
+    z-index: 10000 !important;
+    pointer-events: auto !important;
+    background-color: rgba(0, 0, 0, 0.5) !important;
+    backdrop-filter: blur(4px) !important;
+    -webkit-backdrop-filter: blur(4px) !important;
+  }
+}
+
+/* Remove the body modal-open styles that were reducing opacity */
+body.modal-open {
+  overflow: hidden;
+}

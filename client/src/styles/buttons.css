@@ -1,0 +1,240 @@
+/* ---------------------------
+   Buttons
+----------------------------*/
+.search-actions,
+.search-buttons {
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+  margin-top: 24px;
+  margin-bottom: 32px;
+  width: 100%;
+  padding: 16px 20px;
+  min-height: 80px;
+  align-items: center;
+}
+
+.search-button,
+.search-btn {
+  --btn-bg: #f8f9fa;
+  --btn-text: #1f2937;
+  --btn-border: #e5e7eb;
+  --btn-shadow: rgba(0,0,0,.08);
+
+  background: var(--btn-bg);
+  color: var(--btn-text);
+  border: 1px solid var(--btn-border);
+  border-radius: 24px;
+  font-size: 14px;
+  padding: 10px 20px;
+  cursor: pointer;
+  transition: background-color .2s, color .2s, border-color .2s, box-shadow .2s, transform .06s ease;
+  min-width: 140px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(255, 255, 255, 0.8);
+}
+
+.search-button:hover,
+.search-btn:hover {
+  background: #e9eef6;
+  border-color: #d3d9e3;
+  box-shadow: 0 4px 14px rgba(255, 255, 255, 0.9);
+}
+
+.search-button:active,
+.search-btn:active {
+  background: #dbe4ef;
+  transform: translateY(1px);
+}
+
+.search-button:focus-visible,
+.search-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 2px 6px rgba(255, 255, 255, 0.8), var(--vh-ring);
+}
+
+/* Optional: give each button its own subtle accent on hover */
+.search-actions .search-btn:nth-child(1):hover { border-color: var(--vh-accent); color: var(--vh-accent); }
+.search-actions .search-btn:nth-child(2):hover { border-color: var(--vh-accent-2); color: var(--vh-accent-2); }
+
+.search-button-modal {
+  background: #1a73e8;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 0 24px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.search-button-modal:hover { background: #1557b0; }
+.search-button-modal.processing { background: #9aa0a6 !important; cursor: not-allowed !important; }
+
+.back-button {
+  width: 40px;
+  height: 40px;
+  border: none;
+  background: #f8f9fa;
+  cursor: pointer;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 15px;
+  z-index: 1400;
+}
+.back-button:hover { background-color: #e8eaed; }
+.back-button svg { width: 20px; height: 20px; fill: #5f6368; }
+
+/* Add Matrix pill effects to search buttons */
+.search-button:first-child:hover,
+.search-btn:first-child:hover {
+  background: linear-gradient(135deg, #fa5f06, #fa5f06) !important;
+  color: white !important;
+  border-color: #fa5f06 !important;
+  box-shadow: 
+    0 8px 20px rgb(255, 255, 255),
+    0 0 20px rgb(255, 255, 255) !important;
+  transform: translateY(-2px) !important;
+}
+
+.search-button:last-child:hover,
+.search-btn:last-child:hover {
+  background: linear-gradient(135deg, #4cbb17, #4cbb17) !important;
+  color: white !important;
+  border-color: #4cbb17 !important;
+  box-shadow: 
+    0 8px 20px rgba(255, 255, 255, 0.4),
+    0 0 20px rgba(255, 255, 255, 0.2) !important;
+  transform: translateY(-2px) !important;
+}
+
+/* Override the existing hover styles for Matrix effect */
+.search-actions .search-btn:nth-child(1):hover { 
+  border-color: #dc2626 !important; 
+  color: white !important; 
+}
+
+.search-actions .search-btn:nth-child(2):hover { 
+  border-color: #2563eb !important; 
+  color: white !important; 
+}
+
+/* ADD ONLY: Rotating text animation */
+.rotating-text {
+  display: inline-block;
+  transition: all 0.6s ease;
+  transform-origin: center;
+  min-width: 140px;
+  text-align: center;
+}
+
+.rotating-text.rotate {
+  transform: rotateY(360deg);
+  opacity: 0.7;
+}
+
+/* Add these styles at the end of your existing buttons.css file */
+
+/* Button color overrides for specific buttons */
+.search-btn.analyze-btn:hover {
+  background: #fa5f06 !important;
+  color: white !important;
+  border-color: #fa5f06 !important;
+  box-shadow: 0 8px 20px rgba(250, 95, 6, 0.4) !important;
+  transform: translateY(-2px) !important;
+}
+
+.search-btn.feeling-healthy-btn:hover {
+  background: #4cbb17 !important;
+  color: white !important;
+  border-color: #4cbb17 !important;
+  box-shadow: 0 8px 20px rgba(76, 187, 23, 0.4) !important;
+  transform: translateY(-2px) !important;
+}
+
+/* Looping text animation - smooth fade transition */
+.rotating-text {
+  display: inline-block;
+  transition: opacity 0.3s ease;
+  min-width: 140px;
+  text-align: center;
+}
+
+.rotating-text.rotate {
+  opacity: 0;
+}
+
+/* Enhanced feeling healthy button */
+.feeling-healthy-btn {
+  min-width: 160px !important;
+}
+
+@keyframes healthyPulse {
+  0%, 100% { box-shadow: 0 8px 20px rgba(76, 187, 23, 0.4); }
+  50% { box-shadow: 0 8px 25px rgba(76, 187, 23, 0.6); }
+}
+
+.feeling-healthy-btn:hover {
+  animation: healthyPulse 2s infinite;
+}
+
+/* Add at the end of your existing CSS */
+
+/* Category filter buttons */
+.category-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 20px;
+  justify-content: center;
+}
+
+.category-btn {
+  padding: 8px 16px;
+  border: 2px solid #e5e7eb;
+  border-radius: 20px;
+  background: white;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.category-btn:hover {
+  border-color: #4cbb17;
+  color: #4cbb17;
+  transform: translateY(-1px);
+}
+
+.category-btn.active {
+  background: #4cbb17 !important;
+  color: white !important;
+  border-color: #4cbb17 !important;
+  box-shadow: 0 4px 12px rgba(76, 187, 23, 0.3);
+}
+
+/* Analyze article button */
+.analyze-article-btn {
+  background: linear-gradient(135deg, #fa5f06, #e55205);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 16px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  margin-top: 10px;
+}
+
+.analyze-article-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(250, 95, 6, 0.4);
+}

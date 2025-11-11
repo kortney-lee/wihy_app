@@ -1,0 +1,34 @@
+{
+  "extends": [
+    "react-app",
+    "react-app/jest"
+  ],
+  "rules": {
+    // CSS constraints temporarily disabled for faster development
+    // "no-restricted-syntax": [
+    //   "warn",
+    //   {
+    //     "selector": "JSXAttribute[name.name='className'] Literal[value=/^(?!\\{)[a-zA-Z-]/]",
+    //     "message": "Direct className strings are not allowed. Use CSS_CLASSES constants from 'src/constants/cssConstants' instead to prevent CSS breakage."
+    //   },
+    //   {
+    //     "selector": "JSXAttribute[name.name='className'] TemplateLiteral",
+    //     "message": "Template literals in className are discouraged. Use CSS_CLASSES constants with conditional logic instead."
+    //   }
+    // ]
+  },
+  "overrides": [
+    {
+      "files": ["**/*.ts", "**/*.tsx"],
+      "rules": {
+        "@typescript-eslint/no-unused-vars": [
+          "warn",
+          {
+            "argsIgnorePattern": "^_",
+            "varsIgnorePattern": "^_"
+          }
+        ]
+      }
+    }
+  ]
+}
