@@ -410,8 +410,8 @@ const HealthDashboardGrid: React.FC<HealthDashboardGridProps> = ({
             
             {/* Special wide row for Vitamin Content and Nutrition Analysis (taller cards side by side) */}
             {(() => {
-              const vitaminCard = gridCardItems.find(card => card.chartType === 'VITAMIN_CONTENT');
-              const nutritionCard = gridCardItems.find(card => card.chartType === 'NUTRITION');
+              const vitaminCard = gridCardItems.find(card => card.chartType === ChartType.VITAMIN_CONTENT);
+              const nutritionCard = gridCardItems.find(card => card.chartType === ChartType.NUTRITION);
               const wideRowCards = [vitaminCard, nutritionCard].filter(Boolean);
               
               if (wideRowCards.length > 0) {
@@ -431,7 +431,7 @@ const HealthDashboardGrid: React.FC<HealthDashboardGridProps> = ({
             {/* Subsequent rows: 2 cards each (excluding the wide row cards) */}
             {(() => {
               const remainingCards = gridCardItems.slice(3).filter(card => 
-                card.chartType !== 'VITAMIN_CONTENT' && card.chartType !== 'NUTRITION'
+                card.chartType !== ChartType.VITAMIN_CONTENT && card.chartType !== ChartType.NUTRITION
               );
               
               if (remainingCards.length > 0) {
