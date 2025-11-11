@@ -232,7 +232,7 @@ const HealthDashboardGrid: React.FC<HealthDashboardGridProps> = ({
       ChartType.HEART_RATE,
       ChartType.HYDRATION_CHART,
       ChartType.CALORIES_CHART,
-      // ChartType.NUTRITION_TRACKING, // Removed - should be grid card in insights
+      // ChartType.NUTRITION_TRACKING, // Now NutritionTrackingCard - grid card for dashboard layout
       // ChartType.MOOD_CHART, // Removed - should be grid card in insights  
       ChartType.BMI_BODY_FAT,
       ChartType.HEALTH_RISK_CHART,
@@ -322,7 +322,7 @@ const HealthDashboardGrid: React.FC<HealthDashboardGridProps> = ({
       { id: 'card-13', title: 'Calories', chartType: ChartType.CALORIES, priority: 50 },
       { id: 'card-calories-chart', title: 'Calories Chart', chartType: ChartType.CALORIES_CHART, priority: 51 },
       { id: 'card-15', title: 'Nutrition', chartType: ChartType.NUTRITION, priority: 45 },
-      { id: 'card-nutrition-tracking', title: 'Nutrition Tracking - Macronutrients', chartType: ChartType.NUTRITION_TRACKING, priority: 46 },
+      { id: 'card-nutrition-tracking', title: 'Nutrition Tracking', chartType: ChartType.NUTRITION_TRACKING, priority: 46 },
       { id: 'card-14', title: 'Nutrition Grade', chartType: ChartType.NUTRITION_GRADE_BADGE, priority: 48 },
       { id: 'card-16', title: 'Macronutrient Breakdown', chartType: ChartType.MACRONUTRIENTS, priority: 40 },
       
