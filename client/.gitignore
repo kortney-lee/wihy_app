@@ -1,0 +1,165 @@
+# Dependencies - Critical: Prevent committing node_modules
+node_modules/
+**/node_modules/
+*/node_modules/
+client/node_modules/
+node_modules/**
+**/node_modules/**
+
+# Note: We DO commit package-lock.json for Docker build reproducibility
+
+# Build outputs
+build/
+dist/
+**/build/
+**/dist/
+client/build/
+client/build/**
+
+# Yarn files
+yarn.lock
+.yarn/
+.yarnrc.yml
+
+# Environment files - Selectively allow public config, block secrets
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+**/.env.local
+**/.env.development.local
+**/.env.test.local
+**/.env.production.local
+client/.env.local
+client/.env.development.local
+client/.env.test.local
+
+# Block any .env files with "secret", "key", or "token" in name
+*.secret.env
+*.key.env
+*.token.env
+.env.secrets
+.env.keys
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.log
+
+# IDE/Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Cache files - IMPORTANT: Prevent large cache files from being committed
+**/.cache/
+**/node_modules/.cache/
+**/.eslintcache
+
+# TypeScript build info files
+*.tsbuildinfo
+**/tsconfig.tsbuildinfo
+*.tsbuildinfo
+client/node_modules/.cache/
+client/node_modules/.cache/**
+.cache/
+*.cache
+
+# Large binary files and packages
+*.pack
+*.tgz
+*.tar.gz
+*.zip
+*.rar
+*.7z
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Azure
+.azure/
+
+# Virtual environments
+.venv/
+venv/
+env/
+wihy-model/.venv/
+
+# PyTorch and large model files
+*.dll
+*.lib
+*.so
+*.dylib
+*.pth
+*.pkl
+*.h5
+*.hdf5
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Coverage reports
+coverage/
+.nyc_output/
+*.lcov
+
+# Temporary files
+tmp/
+temp/
+.tmp/
+.temp/
+
+# Large files over 50MB (GitHub's limit)
+*.iso
+*.dmg
+*.img
+*.bin
+
+# ML model directory
+wihy-model/
+
+# Virtual environments
+.venv/
+venv/
+env/
+**/.venv/
+*/.venv/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Large binary files
+*.dll
+*.lib
+*.so
+*.bin
+
+# pytest cache
+.pytest_cache/
+services/nutrition-facts-api/venv/
+node_modules
+node_modules
+node_modules
+node_modules
+node_modules
+node_modules
+node_modules
+node_modules

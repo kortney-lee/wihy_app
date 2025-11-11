@@ -16,50 +16,60 @@ import {
 } from 'recharts';
 import AnalyzeWithWihyButton from '../shared/AnalyzeWithWihyButton';
 
-// Unified card styling
-const cardChrome = {
+/* ================= Unified card styling ================= */
+
+const cardChrome: React.CSSProperties = {
   display: "flex",
-  flexDirection: "column" as const,
+  flexDirection: "column",
   padding: 24,
   borderRadius: 16,
   background: "white",
   border: "1px solid #e5e7eb",
+  boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
   height: 420,
-  overflow: "hidden" as const,
+  overflow: "hidden",
 };
 
-const titleStyle = {
+const titleStyle: React.CSSProperties = {
+  margin: "0 0 20px 0",
   fontSize: 24,
   fontWeight: 600,
   color: "#9CA3AF",
-  margin: 0,
-  marginBottom: 20,
 };
 
-const sectionGrow = {
+const sectionGrow: React.CSSProperties = {
   display: "flex",
-  flexDirection: "column" as const,
+  flexDirection: "column",
   alignItems: "center",
   justifyContent: "center",
   flex: 1,
-  gap: 8,
-  overflow: "hidden" as const,
+  overflow: "hidden",
   minHeight: 0,
 };
 
-const footerRow = {
+const footerRow: React.CSSProperties = {
   display: "flex",
   justifyContent: "center",
   marginTop: 16,
   flexShrink: 0,
 };
 
-const CardShell = ({ title, children }: { title: string; children: React.ReactNode }) => (
-  <section style={cardChrome}>
-    <h3 style={titleStyle}>{title}</h3>
-    <div style={sectionGrow}>{children}</div>
-  </section>
-);
+/* ================= Card shell ================= */
+
+function CardShell({
+  title = "",
+  children,
+}: {
+  title?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section style={cardChrome}>
+      <h3 style={titleStyle}>{title}</h3>
+      <div style={sectionGrow}>{children}</div>
+    </section>
+  );
+}
 
 interface StepsChartProps {
   period?: 'day' | 'week' | 'month';
@@ -104,80 +114,73 @@ const StepsChart: React.FC<StepsChartProps> = ({
     }
   }, [period, goal]);
 
-  const currentSteps = chartData[chartData.length - 1]?.steps || 0;
-  const isGoalMet = currentSteps >= goal;
+  // Calculate total steps for the period
+  const totalSteps = chartData.reduce((sum, day) => sum + day.steps, 0);
+  const totalGoal = period === 'month' ? goal * 7 * 4 : goal * 7; // Weekly goal * days
+  const isGoalMet = totalSteps >= totalGoal;
+
+  const progressPercentage = Math.min(100, (totalSteps / totalGoal) * 100);
+  
+  // Determine color based on progress
+  const getProgressColor = (progress: number): string => {
+    if (progress >= 100) return '#10B981'; // Green - Goal achieved
+    if (progress >= 75) return '#F59E0B';  // Yellow - Close to goal
+    if (progress >= 50) return '#3B82F6';  // Blue - Halfway
+    return '#EF4444'; // Red - Needs improvement
+  };
+
+  const getProgressLabel = (progress: number): string => {
+    if (progress >= 100) return 'Goal Achieved';
+    if (progress >= 75) return 'Almost There';
+    if (progress >= 50) return 'Halfway';
+    return 'Keep Moving';
+  };
+
+  const progressColor = getProgressColor(progressPercentage);
+  const progressLabel = getProgressLabel(progressPercentage);
 
   return (
     <CardShell title="Steps History">
-      {/* Current Steps Display */}
-      <div style={{ textAlign: "center", marginBottom: "16px" }}>
+      {/* Main Value Display */}
+      <div style={{ textAlign: "center", marginBottom: "24px" }}>
         <div style={{ 
-          fontSize: 32, 
+          fontSize: 48, 
           fontWeight: 700, 
-          color: isGoalMet ? '#10b981' : '#f59e0b',
-          lineHeight: 1.1,
-          marginBottom: "4px"
+          color: progressColor,
+          lineHeight: 1.5,
+          marginBottom: "8px"
         }}>
-          {currentSteps.toLocaleString()}
+          {totalSteps.toLocaleString()}
         </div>
         <div style={{
           fontSize: 14,
           color: '#9ca3af',
           fontWeight: 400
         }}>
-          steps today
+          steps this week
         </div>
       </div>
-      
-      {/* Larger Chart */}
-      <div style={{ width: "100%", height: "240px", overflow: "hidden" }}>
-        <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={chartData} margin={{ top: 10, right: 15, left: 15, bottom: 10 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="rgba(148, 163, 184, 0.1)" />
-            <XAxis 
-              dataKey="time" 
-              tick={{ fontSize: 12, fill: '#64748b' }}
-              axisLine={false}
-            />
-            <YAxis 
-              tick={{ fontSize: 12, fill: '#64748b' }}
-              tickFormatter={(value) => {
-                if (value >= 1000) return `${(value / 1000).toFixed(0)}k`;
-                return value.toString();
-              }}
-            />
-            <Tooltip 
-              contentStyle={{
-                backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                border: '1px solid #10b981',
-                borderRadius: '8px',
-                color: '#fff'
-              }}
-              formatter={(value, name) => [
-                `${value.toLocaleString()} steps`,
-                name === 'steps' ? 'Steps' : 'Goal'
-              ]}
-            />
-            <Line 
-              type="monotone" 
-              dataKey="steps" 
-              stroke="#10b981" 
-              strokeWidth={3}
-              dot={{ fill: '#10b981', strokeWidth: 2, r: 4 }}
-              activeDot={{ r: 6 }}
-              name="Steps"
-            />
-            <Line 
-              type="monotone" 
-              dataKey="goal" 
-              stroke="#f59e0b" 
-              strokeWidth={2}
-              strokeDasharray="5 5"
-              dot={false}
-              name="Goal"
-            />
-          </LineChart>
-        </ResponsiveContainer>
+
+      {/* Progress Bar */}
+      <div style={{ width: "100%", maxWidth: "200px", marginBottom: "16px" }}>
+        <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '8px', textAlign: 'center' }}>
+          Weekly Goal: {totalGoal.toLocaleString()} steps
+        </div>
+        <div style={{
+          width: '100%',
+          height: '12px',
+          backgroundColor: '#f3f4f6',
+          borderRadius: '6px',
+          overflow: 'hidden'
+        }}>
+          <div style={{
+            width: `${progressPercentage}%`,
+            height: '100%',
+            background: progressColor,
+            borderRadius: '6px',
+            transition: 'width 0.8s ease'
+          }} />
+        </div>
       </div>
 
       {/* Status Pill */}
@@ -191,9 +194,9 @@ const StepsChart: React.FC<StepsChartProps> = ({
             borderRadius: 9999,
             fontWeight: 600,
             fontSize: 14,
-            color: isGoalMet ? '#10b981' : '#f59e0b',
-            backgroundColor: isGoalMet ? '#10b98120' : '#f59e0b20',
-            border: `1px solid ${isGoalMet ? '#10b98133' : '#f59e0b33'}`,
+            color: progressColor,
+            backgroundColor: `${progressColor}20`,
+            border: `1px solid ${progressColor}33`,
           }}
         >
           <span
@@ -205,14 +208,14 @@ const StepsChart: React.FC<StepsChartProps> = ({
               opacity: 0.85,
             }}
           />
-          {isGoalMet ? 'Goal Achieved!' : `${(goal - currentSteps).toLocaleString()} to go`}
+          {progressLabel} • {Math.round(progressPercentage)}%
         </span>
       </div>
-      
+
       <div style={footerRow}>
         <AnalyzeWithWihyButton
-          cardContext={`Steps Chart: Current steps ${currentSteps.toLocaleString()}, goal ${goal.toLocaleString()} (${period} view). Goal ${isGoalMet ? 'achieved' : 'not yet reached'}. Step tracking for fitness and activity monitoring.`}
-          userQuery="Analyze my step patterns and provide insights about my daily activity levels and recommendations for reaching my step goals"
+          cardContext={`Steps tracking: Currently at ${totalSteps.toLocaleString()} steps out of ${totalGoal.toLocaleString()} weekly goal (${progressPercentage.toFixed(1)}% progress). Status: ${progressLabel}. This represents 7-day step history and physical activity trends.`}
+          userQuery="Analyze my weekly step patterns and provide insights about my physical activity levels and recommendations for improvement"
         />
       </div>
     </CardShell>
