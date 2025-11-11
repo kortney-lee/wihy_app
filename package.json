@@ -1,0 +1,30 @@
+{
+  "name": "vhealth",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "cd client && npm start",
+    "build": "cd client && npm run build",
+    "test": "cd client && npm test",
+    "dev": "docker-compose up wihy-ui-dev",
+    "dev:prod": "docker-compose up wihy-ui-prod",
+    "docker:build": "docker build -t wihy-ui .",
+    "docker:run": "docker run -p 8080:80 wihy-ui",
+    "deploy": "npm run build",
+    "deploy:cache-bust": "powershell -ExecutionPolicy Bypass -File deploy-with-cache-bust.ps1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.24",
+    "concurrently": "^8.2.2",
+    "typescript": "^4.9.5"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5"
+  },
+  "description": "vhealth is a React application designed to provide a comprehensive health management platform. This application allows users to track their health metrics, manage appointments, and access health-related resources.",
+  "main": "config-overrides.js",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs"
+}

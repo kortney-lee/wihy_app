@@ -1,0 +1,643 @@
+/* Import styles in proper order - search components should override base */
+@import '../../styles/search-components.css';
+@import '../../styles/buttons.css';
+@import '../../styles/base.css';
+@import '../../styles/modals.css';
+@import '../../styles/responsive.css';
+@import '../../styles/utilities.css';
+
+/* Import other component styles */
+@import './MultiAuthLogin.css';
+
+/* Header-specific styles below - keep all of these */
+.vhealth-header {
+  background: #fff;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Landing page header (centered layout) */
+.vhealth-header.landing {
+  min-height: 40vh;
+  background: transparent;
+  text-align: center;
+  position: relative;
+}
+
+.vhealth-header.landing .vhealth-topbar {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  background: transparent;
+  border-bottom: none;
+}
+
+.vhealth-header.landing .vhealth-mainbar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 40vh;
+  padding-top: 60px; /* Account for topbar */
+}
+
+/* Results page header (horizontal layout) */
+.vhealth-header.results {
+  border-bottom: 1px solid #e8eaed;
+  min-height: auto;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background: #ffffff;
+  width: 100%;
+}
+
+.vhealth-header.results .vhealth-mainbar {
+  flex-direction: row;
+  align-items: center;
+  gap: 20px;
+  padding: 10px 16px;
+}
+
+/* Logo Container */
+.vhealth-logo-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.vhealth-logo {
+  object-fit: contain;
+  transition: opacity 0.2s ease;
+}
+
+.vhealth-logo:hover {
+  opacity: 0.8;
+}
+
+/* Landing page logo */
+.vhealth-header.landing .vhealth-logo {
+  width: 600px !important;
+  height: auto !important;
+  margin-bottom: 2rem;
+}
+
+/* Results page logo */
+.vhealth-header.results .vhealth-logo {
+  height: 80px !important;
+  width: auto !important;
+  max-width: 300px !important;
+}
+
+/* Search Section */
+.vhealth-search-section {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.vhealth-header.landing .vhealth-search-section {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.vhealth-header.results .vhealth-search-section {
+  flex: 1;
+  max-width: none;
+}
+
+.vhealth-search-form {
+  width: 100%;
+}
+
+/* User Section - now handled by topbar styles */
+
+/* Ensure proper centering in landing page */
+.vhealth-header.landing .vhealth-search-section {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+.vhealth-header.landing .vhealth-search-form {
+  width: 100%;
+  max-width: 600px;
+  display: flex;
+  justify-content: center;
+}
+
+/* Ensure logo and search are properly aligned */
+.vhealth-header.results {
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  /* Fix the main bar layout for mobile - stack logo above search */
+  .vhealth-header.results .vhealth-mainbar {
+    flex-direction: column !important;
+    gap: 15px;
+    padding: 15px;
+    align-items: center;
+  }
+
+  /* Logo should be centered and sized appropriately */
+  .vhealth-header.results .vhealth-logo-container {
+    order: 1;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+
+  .vhealth-header.results .vhealth-logo {
+    height: 60px !important;
+    max-width: 250px !important;
+  }
+
+  /* Search section should be full width and below logo */
+  .vhealth-header.results .vhealth-search-section {
+    order: 2;
+    width: 100% !important;
+    margin: 0;
+  }
+
+  /* Landing page adjustments */
+  .vhealth-header.landing .vhealth-logo {
+    width: 500px !important;
+  }
+
+  .vhealth-header.landing .vhealth-mainbar {
+    padding: 20px;
+  }
+
+  /* Search input container should fill available width */
+  /* Simplified - let the general rule handle animation */
+  .vhealth-header .search-input-container {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 auto;
+  }
+
+  /* Ensure search form takes full width */
+  .vhealth-header.results .vhealth-search-form {
+    width: 100%;
+  }
+
+  /* Adjust search input text size for mobile */
+  .vhealth-header .search-input {
+    font-size: 16px !important; /* Prevent zoom on iOS */
+  }
+}
+
+@media (max-width: 480px) {
+  /* Even smaller logo for very small screens */
+  .vhealth-header.landing .vhealth-logo {
+    width: 90% !important;
+    max-width: 320px !important;
+  }
+
+  .vhealth-header.results .vhealth-logo {
+    height: 36px !important;
+    max-width: 180px !important;
+  }
+
+  /* More compact padding */
+  .vhealth-header.results .vhealth-mainbar {
+    padding: 10px;
+    gap: 10px;
+  }
+
+  .vhealth-header.landing .vhealth-mainbar {
+    padding: 15px;
+  }
+
+  /* Ensure search input doesn't cause zoom on iOS */
+  .vhealth-header .search-input {
+    font-size: 16px !important;
+    padding: 12px 50px 12px 16px !important;
+  }
+
+  .vhealth-header .search-input::placeholder {
+    font-size: 16px !important;
+    color: #9aa0a6 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  /* Adjust search icons for smaller screens */
+  .vhealth-header .search-icons {
+    right: 6px;
+  }
+
+  .vhealth-header .icon-button {
+    width: 28px;
+    height: 28px;
+  }
+
+  .vhealth-header .icon-button svg {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+/* ================================
+   REMOVE ALL ICON BUTTON OVERRIDES
+   Let the imported styles handle this
+================================ */
+
+/* Only override container positioning if needed */
+.vhealth-header .search-input-container {
+  position: relative !important;
+  width: 100% !important;
+  max-width: 800px !important;
+  margin: 0 auto !important;
+  padding: 4px !important; /* Add padding to contain border effects */
+  border-radius: 28px !important; /* Match the main search container */
+  box-shadow: none !important; /* Remove shadow on header */
+  /* Ensure animation is always applied to header search bars */
+  animation: wiH-border-sweep 2.2s linear infinite !important;
+  background:
+    linear-gradient(#fff, #fff) padding-box,
+    linear-gradient(90deg, #fa5f06, #ffffff, #C0C0C0, #4cbb17, #1a73e8) border-box !important;
+  background-size: 100% 100%, 200% 100% !important;
+  background-clip: border-box !important;
+  border: 2px solid transparent !important;
+}
+
+/* Landing page search input - larger font */
+.vhealth-header.landing .search-input {
+  font-size: 18px !important;
+}
+
+/* Results page search input - standard font */
+.vhealth-header.results .search-input {
+  font-size: 16px !important;
+}
+
+/* Ensure proper padding for the search input */
+.vhealth-header .search-input {
+  padding-right: 110px !important; /* Space for icons */
+  padding-left: 16px !important;
+}
+
+/* Mobile responsiveness for search input only */
+@media (max-width: 768px) {
+  .vhealth-header .search-input {
+    padding-right: 90px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .vhealth-header .search-input {
+    padding-right: 80px !important;
+  }
+}
+
+/* ================================
+   NEW LAYOUT STYLES
+   Top bar + Main bar structure
+================================ */
+
+/* Layout shell - override any existing flex styles */
+.vhealth-header {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px;              /* space between topbar and mainbar */
+  align-items: stretch !important;
+  justify-content: flex-start !important;
+}
+
+/* Top bar container */
+.vhealth-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 8px 16px 0;     /* tuck it up tight */
+  border-bottom: 0 !important;   /* remove the dividing line */
+  background: transparent;       /* no strip background */
+}
+
+/* Cluster that holds login (no notifications for client) */
+.vhealth-topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: nowrap;
+  height: auto;
+}
+
+/* Main bar to hold logo + search */
+.vhealth-mainbar {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 0 16px 16px;
+  /* no borders here either */
+  border-top: 0 !important;
+}
+
+/* Login button positioning */
+.header-auth-wrapper {
+  display: inline-flex;
+  align-items: center;
+  flex: 0 0 auto;
+  vertical-align: middle;
+  align-self: center;
+}
+
+/* Login wrapper styling */
+.header-auth-wrapper {
+  max-width: none;
+  white-space: nowrap;
+  margin: 0;
+  padding: 0;
+  height: 36px;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+/* Nuke any margins a nested login component might add */
+.header-auth-wrapper > * {
+  display: inline-flex;
+  margin: 0 !important;
+  vertical-align: middle;
+}
+
+/* Responsive: stack search under logo nicely */
+@media (min-width: 768px) {
+  .vhealth-mainbar {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+}
+
+/* ================================
+   FIXED HEADER LAYOUT
+   Make entire header stick to top
+================================ */
+
+/* Make the entire header fixed at top */
+.vhealth-header {
+  position: fixed !important;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 2000;            /* ensure it stays above all content */
+  background: #fff !important;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05); /* subtle separation shadow */
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  justify-content: flex-start !important;
+  gap: 8px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Keep topbar + mainbar both inside the fixed header */
+.vhealth-topbar {
+  position: relative !important; /* no need for sticky now */
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding: 8px 16px;
+  background: transparent;
+  border: 0;
+  z-index: 2001;
+}
+
+.vhealth-mainbar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 0 16px 16px;
+  width: 100%;
+  background: #fff;
+}
+
+/* Login side, always inline (no notifications for client) */
+.vhealth-topbar-right {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+/* Login button styling */
+.header-auth-wrapper {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  height: 36px;
+  flex: 0 0 auto;
+  vertical-align: middle;
+  box-sizing: border-box;
+}
+
+/* Make sure MultiAuthLogin stays compact */
+.header-auth-wrapper > * {
+  display: inline-flex !important;
+  margin: 0 !important;
+  position: static !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-sizing: border-box !important;
+}
+
+/* ================================
+   NEW FIXED HEADER LAYOUT
+   Top bar + Main bar structure
+================================ */
+
+/* Ensure no conflicting backgrounds */
+html, body {
+  margin: 0;
+  padding: 0;
+  background-color: #ffffff !important;
+  overflow-x: hidden;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* Make the entire header fixed at top */
+.vhealth-header {
+  position: fixed !important;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 2000;
+  background-color: #ffffff !important;
+  background: #ffffff !important;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  justify-content: flex-start !important;
+  gap: 8px;
+  width: 100vw;
+  max-width: 100%;
+  box-sizing: border-box;
+  padding: 0 !important;
+  margin: 0 !important;
+  overflow-x: hidden;
+}
+
+/* Prevent page content from hiding under the fixed header */
+body {
+  padding-top: 160px;
+  overflow-x: hidden; /* Prevent horizontal scroll */
+  background: #ffffff;
+}
+
+/* Top bar container - only login for client */
+.vhealth-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 8px 16px 0;
+  background-color: #ffffff !important;
+  background: #ffffff !important;
+  border: 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Login wrapper */
+.vhealth-topbar-right {
+  display: flex;
+  align-items: center;
+}
+
+/* Main bar to hold logo + search */
+.vhealth-mainbar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 0 16px 16px;
+  width: 100%;
+  background-color: #ffffff !important;
+  background: #ffffff !important;
+  box-sizing: border-box;
+}
+
+/* Login button styling */
+.header-auth-wrapper {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 36px;
+  white-space: nowrap;
+  margin: 0;
+  padding: 0;
+}
+
+/* Make sure MultiAuthLogin stays compact */
+.header-auth-wrapper > * {
+  display: inline-flex !important;
+  margin: 0 !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* Responsive adjustments */
+@media (min-width: 768px) {
+  .vhealth-mainbar {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+}
+
+/* Landing page specific adjustments */
+.vhealth-header.landing .vhealth-mainbar {
+  min-height: calc(40vh - 60px); /* Account for topbar */
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.vhealth-header.landing .vhealth-logo-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+.vhealth-header.landing .vhealth-search-section {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+/* Results page specific adjustments */
+.vhealth-header.results .vhealth-mainbar {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 10px 16px;
+  min-height: auto;
+}
+
+.vhealth-header.results .vhealth-logo-container {
+  flex-shrink: 0;
+}
+
+.vhealth-header.results .vhealth-search-section {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  margin: 0 20px;
+}
+
+/* ================================
+   FORCE ANIMATION - SUPER SPECIFIC RULES
+   These must be at the end to override everything
+================================ */
+
+/* Define keyframes locally to ensure they're available */
+@keyframes wiH-border-sweep {
+  0%   { background-position: 0 0, 0% 0; }
+  100% { background-position: 0 0, 200% 0; }
+}
+
+/* Ultra-specific selectors to force animation */
+header.vhealth-header.results .vhealth-search-section .vhealth-search-form .search-input-container,
+header.vhealth-header.landing .vhealth-search-section .vhealth-search-form .search-input-container,
+.vhealth-header.results .vhealth-search-section .vhealth-search-form .search-input-container,
+.vhealth-header.landing .vhealth-search-section .vhealth-search-form .search-input-container,
+.vhealth-header .vhealth-search-section .search-input-container,
+.vhealth-header .search-input-container {
+  animation: wiH-border-sweep 2.2s linear infinite !important;
+  background:
+    linear-gradient(#fff, #fff) padding-box,
+    linear-gradient(90deg, #fa5f06, #ffffff, #C0C0C0, #4cbb17, #1a73e8) border-box !important;
+  background-size: 100% 100%, 200% 100% !important;
+  background-clip: border-box !important;
+  border: 2px solid transparent !important;
+  border-radius: 28px !important;
+  padding: 4px !important;
+  box-shadow: none !important; /* Remove shadow on header */
+}
+
+/* Hide login button on scroll */
+.header-auth-wrapper.hidden-on-scroll {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  display: none !important;
+}

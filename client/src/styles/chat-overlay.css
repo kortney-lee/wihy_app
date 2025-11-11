@@ -1,0 +1,274 @@
+/* ===========================
+   WIHY Chat Overlay CSS
+   Complete styling for chat overlays and full-screen chat
+   =========================== */
+
+/* ===========================
+   INDUSTRY-STANDARD SCROLLBAR HANDLING
+   =========================== */
+
+/* Hide scrollbars for all chat-related elements */
+.chat-overlay *::-webkit-scrollbar {
+  width: 0px !important;
+  height: 0px !important;
+  background: transparent !important;
+}
+
+.chat-overlay * {
+  scrollbar-width: none !important; /* Firefox */
+  -ms-overflow-style: none !important; /* Internet Explorer 10+ */
+}
+
+/* Ensure smooth scrolling for all chat elements */
+.chat-overlay * {
+  scroll-behavior: smooth !important;
+}
+
+/* Custom invisible scrollbar for WebKit browsers */
+.chat-container::-webkit-scrollbar {
+  width: 0px;
+  background: transparent;
+}
+
+.chat-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.chat-container::-webkit-scrollbar-thumb {
+  background: transparent;
+  border-radius: 0px;
+}
+
+/* ===========================
+   CHAT OVERLAY FOCUS STATES
+   =========================== */
+
+/* Enhanced focus states for better UX - but preserve existing input styles */
+.chat-overlay input:focus:not(.search-input),
+.chat-overlay textarea:focus:not(.search-input) {
+  outline: 2px solid #10b981 !important;
+  outline-offset: 2px !important;
+  border-color: #10b981 !important;
+}
+
+/* Preserve existing search input styling - remove double borders */
+.chat-overlay .search-input {
+  border: 2px solid #fa5f06 !important;
+  border-radius: 28px !important;
+  background: #ffffff !important;
+  box-shadow: 0 2px 8px rgba(250, 95, 6, 0.1) !important;
+}
+
+.chat-overlay .search-input:focus {
+  outline: none !important;
+  border-color: #fa5f06 !important;
+  box-shadow: 0 2px 8px rgba(250, 95, 6, 0.2) !important;
+}
+
+/* Remove double border from chat input container */
+.chat-overlay .chat-input-container {
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+
+/* Ensure chat input area has proper styling */
+.chat-overlay .chat-input-area {
+  padding: 16px !important;
+  border-top: 1px solid #e5e7eb !important;
+  background-color: #ffffff !important;
+}
+
+/* Ensure search input container doesn't add extra border */
+.chat-overlay .search-input-container {
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+
+/* ===========================
+   CHAT MESSAGES AND LAYOUT
+   =========================== */
+
+/* Ensure chat messages and history are visible */
+.chat-overlay .chat-thread {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 10px !important;
+  padding: 12px 16px !important;
+  height: 100% !important;
+  overflow-y: auto !important;
+}
+
+.chat-overlay .chat-message {
+  display: flex !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+/* Ensure chat widget components are visible */
+.chat-overlay .chat-widget > div {
+  display: flex !important;
+  flex-direction: column !important;
+  height: 100% !important;
+}
+
+/* Make sure messages container is visible */
+.chat-overlay [style*="height: calc(100vh - 240px)"] {
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+/* ===========================
+   CHAT CONTAINER EFFECTS
+   =========================== */
+
+/* Gradient fade effect at top and bottom of chat */
+.chat-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 20px;
+  background: linear-gradient(to bottom, rgba(255,255,255,1), rgba(255,255,255,0));
+  pointer-events: none;
+  z-index: 10;
+}
+
+.chat-container::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 20px;
+  background: linear-gradient(to top, rgba(255,255,255,1), rgba(255,255,255,0));
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* ===========================
+   BUTTON AND INTERACTION EFFECTS
+   =========================== */
+
+/* Improved button hover effects */
+.chat-overlay button {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.chat-overlay button:hover {
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Professional loading states */
+.chat-overlay .loading-indicator {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* ===========================
+   SELECTION AND TYPOGRAPHY
+   =========================== */
+
+/* Custom selection colors */
+.chat-overlay ::selection {
+  background-color: #10b981;
+  color: white;
+}
+
+.chat-overlay ::-moz-selection {
+  background-color: #10b981;
+  color: white;
+}
+
+/* Improved typography */
+.chat-overlay {
+  font-feature-settings: "kern" 1, "liga" 1;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ===========================
+   ACCESSIBILITY IMPROVEMENTS
+   =========================== */
+
+/* Accessibility improvements */
+.chat-overlay button:focus-visible {
+  outline: 2px solid #10b981;
+  outline-offset: 2px;
+}
+
+/* ===========================
+   CHAT PANEL STYLING
+   =========================== */
+
+/* Subtle shadow for chat panel */
+.chat-panel {
+  box-shadow: 
+    0 25px 50px -12px rgba(0, 0, 0, 0.25),
+    0 0 0 1px rgba(255, 255, 255, 0.05);
+}
+
+/* Professional backdrop blur effect */
+.chat-backdrop {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+/* ===========================
+   MOBILE-SPECIFIC IMPROVEMENTS
+   =========================== */
+
+/* Mobile-specific improvements */
+@media (max-width: 768px) {
+  .chat-overlay {
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
+  
+  .chat-overlay input,
+  .chat-overlay textarea {
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
+  
+  /* Mobile chat panel takes full width */
+  .chat-panel {
+    width: 100vw !important;
+    border-radius: 0 !important;
+  }
+  
+  /* Ensure mobile starts at top */
+  .chat-container {
+    padding-top: 20px !important;
+  }
+  
+  /* Mobile-specific input styling fixes */
+  .chat-overlay .search-input {
+    border: 2px solid #fa5f06 !important;
+    border-radius: 28px !important;
+    background: #ffffff !important;
+    box-shadow: 0 2px 8px rgba(250, 95, 6, 0.1) !important;
+  }
+  
+  /* Remove double border on mobile */
+  .chat-overlay .chat-input-container {
+    background: transparent !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+  }
+  
+  .chat-overlay .search-input-container {
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+  }
+}

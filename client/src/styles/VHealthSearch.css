@@ -1,0 +1,14 @@
+/* Import all modular CSS files */
+@import './base.css';
+@import '../components/shared/MultiAuthLogin.css';
+@import './search-components.css';
+@import './buttons.css';
+@import './results-page.css';
+@import './cards.css';
+@import './modals.css';
+@import './responsive.css';
+@import './utilities.css';
+@import './mobile-fixes.css';
+/* Import Header.css LAST so it can override other styles */
+@import '../components/shared/Header.css';
+

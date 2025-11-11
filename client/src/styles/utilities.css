@@ -1,0 +1,78 @@
+/* ---------------------------
+   Logo Overrides & Utilities
+----------------------------*/
+.search-landing .logo-container {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  margin: 0 0 2rem 0 !important;
+  width: 100% !important;
+}
+
+.search-landing .logo-container .search-logo-image,
+img[src*="whatishealthylogo"] {
+  width: 600px !important;
+  height: auto !important;
+  object-fit: contain !important;
+  display: block !important;
+  margin: 0 auto !important;
+  padding: 0 !important;
+}
+
+@media (max-width: 768px) {
+  .search-landing .logo-container .search-logo-image,
+  img[src*="whatishealthylogo"] { 
+    width: 500px !important; 
+  }
+}
+
+@media (max-width: 480px) {
+  .search-landing .logo-container .search-logo-image,
+  img[src*="whatishealthylogo"] { 
+    width: 90% !important; 
+    max-width: 320px !important; 
+  }
+}
+
+/* ---------------------------
+   Inline Links
+----------------------------*/
+.inline-link {
+  color: #1a73e8;
+  text-decoration: underline;
+  word-break: break-word;
+  transition: color 0.2s;
+}
+
+.inline-link:hover { color: #1557b0; text-decoration: none; }
+.inline-link:visited { color: #9c27b0; }
+
+/* Login button containers */
+.login-button-container { position: absolute; top: 20px; right: 20px; }
+.results-login-button { position: relative; z-index: 1600; }
+
+/* ---------------------------
+   Dark Mode
+----------------------------*/
+@media (prefers-color-scheme: dark) {
+  .health-info-card {
+    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+    border-color: #404040;
+  }
+  .related-topics-card,
+  .resources-card {
+    background: #2d2d2d;
+    border-color: #404040;
+    color: #e0e0e0;
+  }
+  .health-info-content {
+    background: #2d2d2d;
+    border-color: #404040;
+    color: #e0e0e0;
+  }
+  .resources-list a {
+    background: #404040;
+    color: #4fc3f7;
+  }
+  .resources-list a:hover { background: #505050; }
+}
