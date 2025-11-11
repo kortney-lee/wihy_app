@@ -44,12 +44,19 @@ const footerRow: React.CSSProperties = {
 function CardShell({
   title = "",
   children,
+  height,
 }: {
   title?: string;
   children: React.ReactNode;
+  height?: number;
 }) {
+  const dynamicCardChrome = {
+    ...cardChrome,
+    ...(height && { height })
+  };
+  
   return (
-    <section style={cardChrome}>
+    <section style={dynamicCardChrome}>
       <h3 style={titleStyle}>{title}</h3>
       <div style={sectionGrow}>{children}</div>
     </section>
@@ -72,9 +79,10 @@ interface NutritionAnalysisCardProps {
       fat?: number;
     };
   };
+  height?: number;
 }
 
-const NutritionAnalysisCard: React.FC<NutritionAnalysisCardProps> = ({ data }) => {
+const NutritionAnalysisCard: React.FC<NutritionAnalysisCardProps> = ({ data, height }) => {
   const nutrition = {
     calories: data?.calories || 1850,
     protein: data?.protein || 125,
@@ -93,7 +101,7 @@ const NutritionAnalysisCard: React.FC<NutritionAnalysisCardProps> = ({ data }) =
   };
 
   // Calculate percentage of goals met
-  const getProgress = (current: number, goal: number) => {
+  const _getProgress = (current: number, goal: number) => {
     return Math.min((current / goal) * 100, 100);
   };
 
@@ -129,7 +137,7 @@ const NutritionAnalysisCard: React.FC<NutritionAnalysisCardProps> = ({ data }) =
   ];
 
   return (
-    <CardShell title="Nutrition Analysis">
+    <CardShell title="Nutrition Analysis" height={height}>
 
       {/* Macronutrients Visual Representation */}
       <div className="mb-4" style={{ height: '200px', width: '100%' }}>
