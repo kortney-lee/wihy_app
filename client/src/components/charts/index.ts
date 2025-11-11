@@ -28,7 +28,7 @@ export { default as ExerciseChart } from './individual/ExerciseChart';
 export { default as HeartRateChart } from './individual/HeartRateChart';
 export { default as HydrationChart } from './individual/HydrationChart';
 export { default as MoodChart } from './individual/MoodChart';
-export { default as NutritionTrackingChart } from './individual/NutritionTrackingChart';
+export { default as NutritionTrackingCard } from './individual/NutritionTrackingCard';
 export { default as ProgressRing } from './individual/ProgressRing';
 export { default as StepsChart } from './individual/StepsChart';
 

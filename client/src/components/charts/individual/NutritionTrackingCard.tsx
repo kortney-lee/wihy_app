@@ -15,17 +15,17 @@ import {
 import { Bar, Doughnut, Line } from 'react-chartjs-2';
 import AnalyzeWithWihyButton from '../shared/AnalyzeWithWihyButton';
 
-// Self-contained styling for NutritionTrackingChart
-const nutritionTrackingChartStyles = {
+// Self-contained styling for NutritionTrackingCard
+const nutritionTrackingCardStyles = {
   container: {
     display: "flex" as const,
     flexDirection: "column" as const,
-    padding: 24,
+    padding: 20,
     borderRadius: 16,
     background: "white",
     border: "1px solid #e5e7eb",
     boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
-    height: 400,
+    height: 320,
     overflow: "hidden" as const,
   }
 };
@@ -50,7 +50,7 @@ interface NutrientData {
   category: 'macros' | 'vitamins' | 'minerals';
 }
 
-interface NutritionTrackingChartProps {
+interface NutritionTrackingCardProps {
   data?: NutrientData[];
   type?: 'macros' | 'micronutrients' | 'daily_intake' | 'calories';
   showDailyValues?: boolean;
@@ -58,7 +58,7 @@ interface NutritionTrackingChartProps {
   showLabels?: boolean;
 }
 
-const NutritionTrackingChart: React.FC<NutritionTrackingChartProps> = ({ 
+const NutritionTrackingCard: React.FC<NutritionTrackingCardProps> = ({ 
   data = [], 
   type = 'macros',
   showDailyValues = true,
@@ -168,7 +168,7 @@ const NutritionTrackingChart: React.FC<NutritionTrackingChartProps> = ({
     };
 
     return (
-      <div style={nutritionTrackingChartStyles.container}>
+      <div style={nutritionTrackingCardStyles.container}>
         {showLabels && (
           <h3 style={{ fontSize: 24, fontWeight: 600, color: "#9CA3AF", margin: 0, marginBottom: 20 }}>{title} - Macronutrients</h3>
         )}
@@ -297,7 +297,7 @@ const NutritionTrackingChart: React.FC<NutritionTrackingChartProps> = ({
     };
 
     return (
-      <div style={nutritionTrackingChartStyles.container}>
+      <div style={nutritionTrackingCardStyles.container}>
         {showLabels && (
           <h3 style={{ fontSize: 24, fontWeight: 600, color: "#9CA3AF", margin: 0, marginBottom: 20 }}>{title} - Micronutrients</h3>
         )}
@@ -431,7 +431,7 @@ const NutritionTrackingChart: React.FC<NutritionTrackingChartProps> = ({
   const targetPercent = ((averageIntake / targetIntake) * 100).toFixed(1);
 
   return (
-    <div style={nutritionTrackingChartStyles.container}>
+    <div style={nutritionTrackingCardStyles.container}>
       {showLabels && (
         <h3 style={{ fontSize: 24, fontWeight: 600, color: "#9CA3AF", margin: 0, marginBottom: 20 }}>{title} - Daily Intake</h3>
       )}
@@ -475,4 +475,4 @@ const NutritionTrackingChart: React.FC<NutritionTrackingChartProps> = ({
   );
 };
 
-export default NutritionTrackingChart;
+export default NutritionTrackingCard;
