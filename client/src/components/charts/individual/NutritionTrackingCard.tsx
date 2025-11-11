@@ -15,20 +15,49 @@ import {
 import { Bar, Doughnut, Line } from 'react-chartjs-2';
 import AnalyzeWithWihyButton from '../shared/AnalyzeWithWihyButton';
 
-// Self-contained styling for NutritionTrackingCard
-const nutritionTrackingCardStyles = {
-  container: {
-    display: "flex" as const,
-    flexDirection: "column" as const,
-    padding: 20,
-    borderRadius: 16,
-    background: "white",
-    border: "1px solid #e5e7eb",
-    boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
-    height: 320,
-    overflow: "hidden" as const,
-  }
+// Unified card styling
+const cardChrome = {
+  display: "flex",
+  flexDirection: "column" as const,
+  padding: 24,
+  borderRadius: 16,
+  background: "white",
+  border: "1px solid #e5e7eb",
+  height: 420,
+  overflow: "hidden" as const,
 };
+
+const titleStyle = {
+  fontSize: 24,
+  fontWeight: 600,
+  color: "#9CA3AF",
+  margin: 0,
+  marginBottom: 20,
+};
+
+const sectionGrow = {
+  display: "flex",
+  flexDirection: "column" as const,
+  alignItems: "center",
+  justifyContent: "center",
+  flex: 1,
+  overflow: "hidden" as const,
+  minHeight: 0,
+};
+
+const footerRow = {
+  display: "flex",
+  justifyContent: "center",
+  marginTop: 16,
+  flexShrink: 0,
+};
+
+const CardShell = ({ title, children }: { title: string; children: React.ReactNode }) => (
+  <section style={cardChrome}>
+    <h3 style={titleStyle}>{title}</h3>
+    <div style={sectionGrow}>{children}</div>
+  </section>
+);
 
 ChartJS.register(
   CategoryScale,
@@ -168,24 +197,18 @@ const NutritionTrackingCard: React.FC<NutritionTrackingCardProps> = ({
     };
 
     return (
-      <div style={nutritionTrackingCardStyles.container}>
-        {showLabels && (
-          <h3 style={{ fontSize: 24, fontWeight: 600, color: "#9CA3AF", margin: 0, marginBottom: 20 }}>{title} - Macronutrients</h3>
-        )}
-        
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", flex: 1, overflow: "hidden", minHeight: 0 }}>
-          <div style={{ width: '100%', height: '100%', maxWidth: '280px', maxHeight: '280px' }}>
-            <Doughnut data={macrosData} options={macrosOptions} />
-          </div>
+      <CardShell title={showLabels ? `${title} - Macronutrients` : "Macronutrients"}>
+        <div style={{ width: '100%', height: '100%', maxWidth: '280px', maxHeight: '280px' }}>
+          <Doughnut data={macrosData} options={macrosOptions} />
         </div>
         
-        <div style={{ display: "flex", justifyContent: "center", marginTop: 16, flexShrink: 0 }}>
+        <div style={footerRow}>
           <AnalyzeWithWihyButton
             cardContext={`Macronutrient breakdown: ${nutritionData.map(n => `${n.name} ${n.value}${n.unit}`).join(', ')}. Daily values tracked for nutrition analysis.`}
             userQuery="Analyze my macronutrient distribution and suggest optimal ratios for my health goals"
           />
         </div>
-      </div>
+      </CardShell>
     );
   }
 
@@ -297,18 +320,12 @@ const NutritionTrackingCard: React.FC<NutritionTrackingCardProps> = ({
     };
 
     return (
-      <div style={nutritionTrackingCardStyles.container}>
-        {showLabels && (
-          <h3 style={{ fontSize: 24, fontWeight: 600, color: "#9CA3AF", margin: 0, marginBottom: 20 }}>{title} - Micronutrients</h3>
-        )}
-        
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", flex: 1, overflow: "hidden", minHeight: 0 }}>
-          <div style={{ width: '100%', height: '100%', maxWidth: '280px', maxHeight: '280px' }}>
-            <Bar data={micronutrientsData} options={micronutrientsOptions} />
-          </div>
+      <CardShell title={showLabels ? `${title} - Micronutrients` : "Micronutrients"}>
+        <div style={{ width: '100%', height: '100%', maxWidth: '280px', maxHeight: '280px' }}>
+          <Bar data={micronutrientsData} options={micronutrientsOptions} />
         </div>
         
-        <div style={{ display: "flex", justifyContent: "center", marginTop: 16, flexShrink: 0 }}>
+        <div style={footerRow}>
           <AnalyzeWithWihyButton
             cardContext={`Micronutrient status: ${nutritionData.map(n => {
               const percentage = n.daily_value ? ((n.value / n.daily_value) * 100).toFixed(1) : 'N/A';
@@ -317,7 +334,7 @@ const NutritionTrackingCard: React.FC<NutritionTrackingCardProps> = ({
             userQuery="Analyze my micronutrient intake and identify deficiencies or areas for improvement"
           />
         </div>
-      </div>
+      </CardShell>
     );
   }
 
@@ -431,15 +448,9 @@ const NutritionTrackingCard: React.FC<NutritionTrackingCardProps> = ({
   const targetPercent = ((averageIntake / targetIntake) * 100).toFixed(1);
 
   return (
-    <div style={nutritionTrackingCardStyles.container}>
-      {showLabels && (
-        <h3 style={{ fontSize: 24, fontWeight: 600, color: "#9CA3AF", margin: 0, marginBottom: 20 }}>{title} - Daily Intake</h3>
-      )}
-      
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", flex: 1, overflow: "hidden", minHeight: 0 }}>
-        <div style={{ width: '100%', height: '100%', maxWidth: '280px', maxHeight: '280px' }}>
-          <Line data={dailyIntakeData} options={dailyIntakeOptions} />
-        </div>
+    <CardShell title={showLabels ? `${title} - Daily Intake` : "Daily Intake"}>
+      <div style={{ width: '100%', height: '100%', maxWidth: '280px', maxHeight: '280px' }}>
+        <Line data={dailyIntakeData} options={dailyIntakeOptions} />
       </div>
 
       {/* Nutrition summary */}
@@ -465,13 +476,13 @@ const NutritionTrackingCard: React.FC<NutritionTrackingCardProps> = ({
         </div>
       </div>
       
-      <div style={{ display: "flex", justifyContent: "center", marginTop: 16, flexShrink: 0 }}>
+      <div style={footerRow}>
         <AnalyzeWithWihyButton
           cardContext={`Nutrition Tracking: Average daily intake ${Math.round(averageIntake)}${nutritionData[0]?.unit} vs target ${targetIntake}${nutritionData[0]?.unit} (${targetPercent}%). Weekly pattern analysis.`}
           userQuery="Analyze my nutrition intake patterns and provide recommendations for better nutritional balance"
         />
       </div>
-    </div>
+    </CardShell>
   );
 };
 
