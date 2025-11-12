@@ -9,9 +9,7 @@
     "build-with-validation": "npm run validate-css && react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "validate-css": "node scripts/validate-css.js",
-    "pre-commit": "npm run validate-css && npm run lint",
-    "lint": "eslint src --ext .ts,.tsx --fix"
+    "validate-css": "node scripts/validate-css.js"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.9.1",

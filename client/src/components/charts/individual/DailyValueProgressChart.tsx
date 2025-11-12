@@ -101,199 +101,113 @@ const DailyValueProgressChart: React.FC<DailyValueProgressChartProps> = ({
     <div style={{
       display: "flex",
       flexDirection: "column",
-      padding: 24,
+      padding: window.innerWidth <= 768 ? 16 : 24,
       borderRadius: 16,
       background: "white",
       border: "1px solid #e5e7eb",
       boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
-      height: 400,
-      overflow: "hidden"
+      overflow: "visible"
     }}>
       {/* Title */}
       {showLabels && (
         <h3 style={{
-          fontSize: 24,
+          fontSize: window.innerWidth <= 768 ? 20 : 24,
           fontWeight: 600,
           color: "#9CA3AF",
           margin: 0,
-          marginBottom: 20,
+          marginBottom: window.innerWidth <= 768 ? 12 : 20,
           textAlign: 'center'
         }}>
           {title}
         </h3>
       )}
 
-      {/* Progress bars by category */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: showCategories ? '20px' : '0' }}>
-        {Object.entries(groupedNutrients).map(([category, categoryNutrients]) => (
-          <div key={category}>
-            {/* Category header */}
-            {showCategories && category !== 'all' && (
+      {/* Simple horizontal bar chart like Vitamin & Mineral Content */}
+      <div style={{ 
+        display: 'flex', 
+        flexDirection: 'column', 
+        gap: '12px',
+        flex: 1,
+        overflow: 'visible'
+      }}>
+        {nutrientData.map((nutrient, index) => (
+          <div key={nutrient.name} style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            {/* Nutrient name - flexible width for full text */}
+            <div style={{
+              minWidth: window.innerWidth <= 768 ? '80px' : '100px',
+              fontSize: window.innerWidth <= 768 ? '12px' : '14px',
+              fontWeight: '500',
+              color: '#374151',
+              textAlign: 'left',
+              flexShrink: 0
+            }}>
+              {nutrient.name}
+            </div>
+            
+            {/* Progress bar container */}
+            <div style={{
+              flex: 1,
+              height: '20px',
+              backgroundColor: '#f3f4f6',
+              borderRadius: '4px',
+              position: 'relative',
+              overflow: 'hidden'
+            }}>
+              {/* Progress fill */}
               <div style={{
-                fontSize: fontSize[size].label,
-                fontWeight: '600',
-                color: getCategoryColor(category),
-                marginBottom: '8px',
-                textTransform: 'capitalize',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px'
-              }}>
-                <div 
-                  style={{
-                    width: '12px',
-                    height: '12px',
-                    backgroundColor: getCategoryColor(category),
-                    borderRadius: '2px'
-                  }}
-                />
-                {category === 'macronutrient' ? 'Macronutrients' : `${category}s`}
-              </div>
-            )}
-
-            {/* Progress bars for this category */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: `${gap}px` }}>
-              {categoryNutrients.map((nutrient, _index) => (
-                <div key={nutrient.name} style={{ position: 'relative' }}>
-                  {/* Nutrient name and values */}
-                  <div style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    marginBottom: '4px'
-                  }}>
-                    <div style={{
-                      fontSize: fontSize[size].label,
-                      fontWeight: '500',
-                      color: '#374151'
-                    }}>
-                      {nutrient.name}
-                      {nutrient.isEssential && <span style={{ color: '#ef4444' }}>*</span>}
-                    </div>
-                    <div style={{
-                      fontSize: fontSize[size].value,
-                      color: '#6b7280'
-                    }}>
-                      {nutrient.current}{nutrient.unit} / {nutrient.target}{nutrient.unit} ({nutrient.percentage}%)
-                    </div>
-                  </div>
-
-                  {/* Progress bar background */}
-                  <div style={{
-                    width: '100%',
-                    height: `${barHeight}px`,
-                    backgroundColor: '#f3f4f6',
-                    borderRadius: '6px',
-                    position: 'relative',
-                    overflow: 'hidden'
-                  }}>
-                    {/* Progress fill */}
-                    <div style={{
-                      width: `${Math.min(nutrient.percentage, 100)}%`,
-                      height: '100%',
-                      backgroundColor: getProgressColor(nutrient.percentage, nutrient.category),
-                      borderRadius: '6px',
-                      transition: 'width 0.3s ease',
-                      position: 'relative'
-                    }}>
-                      {/* Gradient overlay for visual appeal */}
-                      <div style={{
-                        position: 'absolute',
-                        top: 0,
-                        left: 0,
-                        width: '100%',
-                        height: '50%',
-                        background: 'linear-gradient(to bottom, rgba(255,255,255,0.2), transparent)',
-                        borderRadius: '6px 6px 0 0'
-                      }} />
-                    </div>
-
-                    {/* Target line at 100% */}
-                    {showTargetLines && (
-                      <div style={{
-                        position: 'absolute',
-                        left: '100%',
-                        top: 0,
-                        width: '2px',
-                        height: '100%',
-                        backgroundColor: '#374151',
-                        transform: 'translateX(-1px)'
-                      }} />
-                    )}
-
-                    {/* Excess indicator (if over 100%) */}
-                    {nutrient.percentage > 100 && (
-                      <div style={{
-                        position: 'absolute',
-                        right: '4px',
-                        top: '50%',
-                        transform: 'translateY(-50%)',
-                        fontSize: fontSize[size].value,
-                        color: '#374151',
-                        fontWeight: 'bold'
-                      }}>
-                        +{nutrient.percentage - 100}%
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Deficiency warning */}
-                  {highlightDeficiencies && nutrient.percentage < 50 && nutrient.isEssential && (
-                    <div style={{
-                      fontSize: fontSize[size].value,
-                      color: '#ef4444',
-                      marginTop: '2px'
-                    }}>
-                      ⚠️ Below recommended intake
-                    </div>
-                  )}
-                </div>
-              ))}
+                width: `${Math.min(nutrient.percentage, 100)}%`,
+                height: '100%',
+                backgroundColor: getProgressColor(nutrient.percentage, nutrient.category),
+                borderRadius: '4px',
+                transition: 'width 0.3s ease'
+              }} />
             </div>
           </div>
         ))}
-      </div>
-
-      {/* Summary statistics */}
-      {showLabels && (
+        
+        {/* Percentage scale at bottom */}
         <div style={{
-          marginTop: '20px',
-          padding: '12px',
-          backgroundColor: '#f9fafb',
-          borderRadius: '8px',
-          fontSize: fontSize[size].value,
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginTop: '8px',
+          marginLeft: window.innerWidth <= 768 ? '96px' : '116px', // Align with bars
+          fontSize: '12px',
           color: '#6b7280'
         }}>
-          <div style={{ 
-            display: 'grid', 
-            gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', 
-            gap: '8px' 
-          }}>
-            <div>
-              <strong style={{ color: '#374151' }}>Total Nutrients:</strong> {nutrientData.length}
-            </div>
-            <div>
-              <strong style={{ color: '#374151' }}>Meeting Target:</strong> {nutrientData.filter(n => n.percentage >= 100).length}
-            </div>
-            <div>
-              <strong style={{ color: '#374151' }}>Deficient:</strong> {nutrientData.filter(n => n.percentage < 50).length}
-            </div>
-            <div>
-              <strong style={{ color: '#374151' }}>Avg Progress:</strong> {Math.round(nutrientData.reduce((sum, n) => sum + n.percentage, 0) / nutrientData.length)}%
-            </div>
-          </div>
-          
-          {nutrientData.some(n => n.isEssential) && (
-            <div style={{ marginTop: '8px', fontSize: '9px', color: '#9ca3af' }}>
-              * Essential nutrients require special attention if deficient
-            </div>
-          )}
+          <span>0%</span>
+          <span>20%</span>
+          <span>40%</span>
+          <span>60%</span>
+          <span>80%</span>
+          <span>100%</span>
+          <span>110%</span>
         </div>
-      )}
+        
+        {/* Summary like in Image 2 */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          marginTop: '16px',
+          marginLeft: window.innerWidth <= 768 ? '96px' : '116px',
+          fontSize: '14px',
+          color: '#10b981'
+        }}>
+          <div style={{
+            width: '12px',
+            height: '12px',
+            backgroundColor: '#10b981',
+            borderRadius: '2px'
+          }} />
+          {nutrientData.filter(n => n.percentage >= 100).length} nutrients meeting DV
+        </div>
+      </div>
+
       
-      <div style={{ display: "flex", justifyContent: "center", marginTop: 16, flexShrink: 0 }}>
+      <div style={{ display: "flex", justifyContent: "center", marginTop: 24, flexShrink: 0 }}>
         <AnalyzeWithWihyButton
-          cardContext={`Daily Value Progress: ${title} showing ${nutrientData.length} nutrients tracked. Deficient nutrients: ${nutrientData.filter(n => n.percentage < 100).length}. Essential nutrients present: ${nutrientData.filter(n => n.isEssential).length}. Nutrient details: ${nutrientData.map(n => `${n.name}: ${n.current}${n.unit} (${n.percentage}% of ${n.target}${n.unit})`).join(', ')}.`}
+          cardContext={`Daily Value Progress: ${title} showing ${nutrientData.length} nutrients tracked. Meeting DV: ${nutrientData.filter(n => n.percentage >= 100).length}. Nutrient details: ${nutrientData.map(n => `${n.name}: ${n.percentage}%`).join(', ')}.`}
           userQuery="Analyze my daily nutrient intake progress and identify any deficiencies or areas where I can improve my nutrition"
         />
       </div>
