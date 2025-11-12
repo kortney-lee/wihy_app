@@ -5,7 +5,7 @@ FROM node:18-alpine AS builder
 WORKDIR /app/client
 
 # Copy only package files first for better layer caching
-COPY client/package*.json ./
+COPY client/package*.json client/package-lock.json ./
 
 # Install dependencies
 RUN npm ci --no-audit --no-fund
