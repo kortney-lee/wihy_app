@@ -2,8 +2,10 @@ import React, { useState, useEffect, useRef } from 'react';
 import { searchCache } from '../../services/searchCache';
 import { universalSearchService } from '../../services/universalSearchService';
 import ImageUploadModal from '../ui/ImageUploadModal';
-import NovaChart from '../charts/cards/NovaChart';
 import NutritionChart from '../charts/cards/NutritionChart';
+import ResearchQualityGauge from '../charts/cards/ResearchQualityGauge';
+import ResultQualityPie from '../charts/cards/ResultQualityPie';
+import MembersCard from '../charts/individual/MembersCard';
 import AnalyzeWithWihyButton from '../charts/shared/AnalyzeWithWihyButton';
 import DashboardCharts from '../charts/grids/DashboardCharts';
 import QuickInsights from '../charts/cards/QuickInsights';
@@ -743,6 +745,8 @@ const SearchResults: React.FC<SearchResultsProps> = ({
                   {/* Health Snapshot Cards */}
                   <div style={{ marginBottom: getResponsiveSpacing() }}>
                     <QuickInsights 
+                      memberCardType="bronze"
+                      memberName="Health Enthusiast"
                       data={{
                         id: 'quick-insights',
                         title: 'Quick Insights',
@@ -761,6 +765,66 @@ const SearchResults: React.FC<SearchResultsProps> = ({
                     />
                   </div>
 
+                  {/* Quality Insights Section */}
+                  <div style={{ marginBottom: getResponsiveSpacing() }}>
+                    <div style={{ 
+                      display: 'grid', 
+                      gridTemplateColumns: '1fr 1fr', 
+                      gap: '20px'
+                    }}>
+                      <ResearchQualityGauge 
+                        score={75}
+                        studyCount={42}
+                        evidenceLevel="II"
+                      />
+                      <ResultQualityPie 
+                        apiResponse={apiResponse}
+                        query={query}
+                        results={results}
+                        dataSource={dataSource}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Awards & Achievements Section */}
+                  <div style={{ marginBottom: getResponsiveSpacing() }}>
+                    <h2 style={{
+                      fontSize: '20px',
+                      fontWeight: '600',
+                      color: '#374151',
+                      marginBottom: '16px',
+                      textAlign: 'left'
+                    }}>
+                      Awards & Achievements
+                    </h2>
+                    <div style={{ 
+                      display: 'grid', 
+                      gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', 
+                      gap: '20px'
+                    }}>
+                      <MembersCard 
+                        memberCardType="bronze"
+                        memberName="Health Enthusiast"
+                      />
+                      <MembersCard 
+                        memberCardType="silver"
+                        memberName="Health Enthusiast"
+                      />
+                      <MembersCard 
+                        memberCardType="gold"
+                        memberName="Health Enthusiast"
+                      />
+                      <MembersCard 
+                        memberCardType="platinum"
+                        memberName="Health Enthusiast"
+                      />
+                      <MembersCard 
+                        memberCardType="green"
+                        memberName="Health Enthusiast"
+                      />
+                    </div>
+                  </div>
+
                   {/* Additional Overview Cards */}
                   <div style={{ 
                     display: 'grid', 
@@ -768,10 +832,6 @@ const SearchResults: React.FC<SearchResultsProps> = ({
                     gap: '20px', 
                     marginBottom: getResponsiveSpacing() 
                   }}>
-                    <NovaChart 
-                      apiResponse={apiResponse}
-                      query={query}
-                    />
                     <NutritionChart 
                       apiResponse={apiResponse}
                       query={query}
