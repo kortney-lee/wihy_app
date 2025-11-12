@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { searchCache } from '../../services/searchCache';
-import { universalSearchService } from '../../services/universalSearchService';
 import ImageUploadModal from '../ui/ImageUploadModal';
 import NutritionChart from '../charts/cards/NutritionChart';
 import ResearchQualityGauge from '../charts/cards/ResearchQualityGauge';
@@ -20,7 +19,6 @@ import '../../styles/chat-overlay.css';
 import Header from '../shared/Header';
 import { extractHealthMetrics, extractBMIData, extractNutritionData, extractHealthRiskData } from '../../utils/healthDataExtractor';
 import Spinner from '../ui/Spinner';
-import { wihyAPI } from '../../services/wihyAPI';
 import { logger } from '../../utils/logger';
 
 // Tab type definition - matches chartTypes.ts tabView values
@@ -503,12 +501,31 @@ const SearchResults: React.FC<SearchResultsProps> = ({
     try {
       logger.debug('SearchResults: Header search initiated', { query: searchQuery });
       
-      // Use wihyAPI directly for header searches
-      const response = await wihyAPI.askHealthQuestion({ query: searchQuery });
+      // Use Universal Search API for header searches
+      const response = await fetch('https://ml.wihy.ai/search/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          query: searchQuery,
+          type: 'auto',
+          options: {
+            include_charts: true,
+            include_recommendations: true
+          }
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`Header search failed: ${response.statusText}`);
+      }
+
+      const universalResult = await response.json();
       
-      if (response && response.data) {
-        setHeaderSearchResults(JSON.stringify(response.data));
-        setHeaderApiResponse(response);
+      if (universalResult.success && universalResult.results) {
+        setHeaderSearchResults(JSON.stringify(universalResult.results));
+        setHeaderApiResponse(universalResult);
         logger.info('SearchResults: Header search completed', { query: searchQuery });
       } else {
         setHeaderSearchResults('No results found.');
@@ -532,11 +549,30 @@ const SearchResults: React.FC<SearchResultsProps> = ({
     try {
       logger.debug('SearchResults: Making Universal Search API call', { 
         query: searchQuery, 
-        endpoint: 'https://services.wihy.ai/api/search' 
+        endpoint: 'https://ml.wihy.ai/search/' 
       });
       
-      // Call Universal Search API directly 
-      const universalResult = await universalSearchService.quickSearch(searchQuery);
+      // Call Universal Search API directly using new endpoint
+      const response = await fetch('https://ml.wihy.ai/search/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          query: searchQuery,
+          type: 'auto',
+          options: {
+            include_charts: true,
+            include_recommendations: true
+          }
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`Search failed: ${response.statusText}`);
+      }
+
+      const universalResult = await response.json();
       
       if (universalResult.success && universalResult.results) {
         console.log('🔍 Universal Search API response received:', universalResult);
