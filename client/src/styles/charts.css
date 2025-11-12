@@ -634,23 +634,25 @@
   }
   
   .dashboard-chart-card {
-    padding: 16px;
+    padding: 12px;
+    margin-bottom: 12px;
   }
   
   .dashboard-chart-card h3 {
-    font-size: 16px;
+    font-size: 18px;
+    margin-bottom: 16px;
   }
 
   .health-metrics-grid {
     grid-template-columns: 1fr;
-    gap: 16px;
-    margin-bottom: 30px;
+    gap: 12px;
+    margin-bottom: 20px;
   }
 
   .chart-sections-grid {
     grid-template-columns: 1fr;
-    gap: 16px;
-    margin-bottom: 30px;
+    gap: 12px;
+    margin-bottom: 20px;
   }
 
   .chart-section-card {
@@ -658,44 +660,81 @@
   }
 
   .quick-insights-card {
-    padding: 24px;
+    padding: 20px;
   }
 
   .quick-insights-title {
     font-size: 20px;
-    margin-bottom: 24px;
+    margin-bottom: 20px;
   }
 
   .insights-grid {
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 24px;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 20px;
   }
 
   .insight-value {
-    font-size: 36px;
+    font-size: 32px;
   }
 
   .insight-label {
-    font-size: 14px;
+    font-size: 13px;
+  }
+  
+  /* Responsive chart controls */
+  .dashboard-chart-card .chart-controls {
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 12px;
+  }
+  
+  .dashboard-chart-card .chart-controls button {
+    padding: 6px 10px;
+    font-size: 11px;
+    min-height: 32px;
   }
 }
 
 /* Very Small Screens */
 @media (max-width: 480px) {
   .health-metric-card {
-    padding: 16px;
+    padding: 12px;
   }
   
   .chart-section-card {
-    padding: 16px;
+    padding: 12px;
   }
   
   .quick-insights-card {
     padding: 16px;
   }
   
+  .dashboard-chart-card {
+    padding: 12px;
+    margin-bottom: 12px;
+  }
+  
+  .dashboard-chart-card h3 {
+    font-size: 16px;
+    margin-bottom: 12px;
+  }
+  
+  .insights-grid {
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 16px;
+  }
+  
   .insight-value {
-    font-size: 28px;
+    font-size: 24px;
+  }
+  
+  .insight-label {
+    font-size: 12px;
+  }
+  
+  .chart-container {
+    height: 180px;
+    padding: 8px;
   }
 }
 

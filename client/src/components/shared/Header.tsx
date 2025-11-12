@@ -100,7 +100,9 @@ const Header: React.FC<HeaderProps> = ({
 
     const apply = () => {
       const h = Math.ceil(header.getBoundingClientRect().height);
-      document.documentElement.style.setProperty('--vh-header-height', `${h}px`);
+      // Override with 156px instead of calculated height to reduce white space
+      const adjustedHeight = h > 200 ? 156 : h; // Use 156px for large headers, actual height for smaller ones
+      document.documentElement.style.setProperty('--vh-header-height', `${adjustedHeight}px`);
     };
 
     // Run once now
