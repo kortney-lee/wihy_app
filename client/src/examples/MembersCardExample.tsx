@@ -32,7 +32,6 @@ const MembersCardExample: React.FC = () => {
             key={index}
             memberCardType={member.memberCardType}
             memberName={member.memberName}
-            hasAnyAwards={true}
           />
         ))}
       </div>
@@ -49,7 +48,6 @@ const MembersCardExample: React.FC = () => {
 <MembersCard 
   memberCardType="gold"
   memberName="John Doe"
-  hasAnyAwards={true}
 />
 
 // Available member card types:
