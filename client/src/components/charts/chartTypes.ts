@@ -35,6 +35,9 @@ export enum ChartType {
   DOPAMINE = 'DOPAMINE',
   MOOD_CHART = 'MOOD_CHART',
 
+  // Membership and user status
+  MEMBERS_CARD = 'MEMBERS_CARD',
+
   // Priority 20-30: Research and analysis
   NOVA_SCORE = 'NOVA_SCORE',
   RESEARCH_QUALITY = 'RESEARCH_QUALITY',
@@ -332,6 +335,17 @@ export const CHART_TYPE_CONFIGS: Record<ChartType, ChartTypeConfig> = {
     category: 'mind',
     tabView: ['insights'],
     description: 'Mood, energy, and stress trends for behavioral coaching'
+  },
+
+  // --- MEMBERSHIP & USER STATUS ---
+  [ChartType.MEMBERS_CARD]: {
+    type: ChartType.MEMBERS_CARD,
+    label: 'Membership Status',
+    priority: 95,
+    requiresData: false,
+    category: 'health',
+    tabView: ['overview', 'charts'],
+    description: 'Display member badge and benefits based on membership tier'
   },
 
   // --- RESEARCH: MULTI-TAB NOVA + RESEARCH ---

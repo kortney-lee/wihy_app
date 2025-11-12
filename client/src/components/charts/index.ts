@@ -42,6 +42,7 @@ export { default as ActiveMinutesCard } from './individual/ActiveMinutesCard';
 export { default as BMIDomainCard } from './individual/BMIDomainCard';
 export { default as HealthRiskCard } from './individual/HealthRiskCard';
 export { default as NutritionAnalysisCard } from './individual/NutritionAnalysisCard';
+export { default as MembersCard } from './individual/MembersCard';
 export { default as QuickInsights } from './cards/QuickInsights';
 export { default as GenericHealthCard } from './cards/GenericHealthCard';
 

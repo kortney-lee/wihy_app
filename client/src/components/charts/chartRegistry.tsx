@@ -41,6 +41,7 @@ import BMIDomainCard from './individual/BMIDomainCard';
 import HealthRiskCard from './individual/HealthRiskCard';
 import NutritionAnalysisCard from './individual/NutritionAnalysisCard';
 import BloodPressureChart from './individual/BloodPressureChart';
+import MembersCard from './individual/MembersCard';
 
 /**
  * Chart component registry - maps chart types to their React components
@@ -65,6 +66,7 @@ export const CHART_COMPONENT_REGISTRY: Record<ChartType, React.ComponentType<any
   [ChartType.CALORIES_CHART]: CaloriesChart,
   [ChartType.DOPAMINE]: DopamineChart,
   [ChartType.MOOD_CHART]: MoodChart,
+  [ChartType.MEMBERS_CARD]: MembersCard,
   [ChartType.NUTRITION]: NutritionAnalysisCard,
   [ChartType.NUTRITION_TRACKING]: NutritionTrackingCard,
   [ChartType.MACRONUTRIENTS]: MacronutrientPieChart,
@@ -104,6 +106,7 @@ export const DETAILED_CHART_REGISTRY: Record<ChartType, React.ComponentType<any>
   [ChartType.CALORIES_CHART]: CaloriesChart,
   [ChartType.DOPAMINE]: DopamineChart,
   [ChartType.MOOD_CHART]: MoodChart,
+  [ChartType.MEMBERS_CARD]: MembersCard,
   [ChartType.NUTRITION]: NutritionChart,
   [ChartType.NUTRITION_TRACKING]: NutritionTrackingCard,
   [ChartType.MACRONUTRIENTS]: MacronutrientPieChart,
