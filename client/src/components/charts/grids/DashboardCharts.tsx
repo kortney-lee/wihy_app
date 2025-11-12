@@ -12,6 +12,7 @@ interface DashboardChartsProps {
   isInsightsLayout?: boolean;
   isResearchLayout?: boolean;
   isNutritionLayout?: boolean;
+  onAnalyze?: (userMessage: string, assistantMessage: string) => void;
 }
 
 const DashboardCharts: React.FC<DashboardChartsProps> = ({ 
@@ -21,7 +22,8 @@ const DashboardCharts: React.FC<DashboardChartsProps> = ({
   excludeChartTypes = [],
   isInsightsLayout = false,
   isResearchLayout = false,
-  isNutritionLayout = false
+  isNutritionLayout = false,
+  onAnalyze
 }) => {
   return (
     <div className="health-dashboard-content">
@@ -35,6 +37,7 @@ const DashboardCharts: React.FC<DashboardChartsProps> = ({
         isResearchLayout={isResearchLayout}
         isNutritionLayout={isNutritionLayout}
         className="chart-sections-grid"
+        onAnalyze={onAnalyze}
       />
     </div>
   );

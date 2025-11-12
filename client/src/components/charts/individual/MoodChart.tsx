@@ -67,10 +67,12 @@ ChartJS.register(
 
 interface MoodChartProps {
   period?: 'day' | 'week' | 'month';
+  onAnalyze?: (userMessage: string, assistantMessage: string) => void;
 }
 
 const MoodChart: React.FC<MoodChartProps> = ({
-  period = 'week'
+  period = 'week',
+  onAnalyze
 }) => {
   // Generate mood data based on period
   const generateData = () => {
@@ -233,6 +235,7 @@ const MoodChart: React.FC<MoodChartProps> = ({
         <AnalyzeWithWihyButton
           cardContext={`Mood Chart: Showing mood, energy, and stress levels over ${period} period. Average mood rating: ${averageMood}/10. Tracks emotional well-being and mental health indicators for holistic wellness monitoring.`}
           userQuery="Analyze my mood patterns and emotional well-being, providing insights about stress management and mental health recommendations"
+          onAnalyze={onAnalyze}
         />
       </div>
     </div>

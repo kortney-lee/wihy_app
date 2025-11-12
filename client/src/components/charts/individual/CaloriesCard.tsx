@@ -52,12 +52,14 @@ interface CaloriesCardProps {
   consumedCalories?: number;
   burnedCalories?: number;
   unit?: string;
+  onAnalyze?: (userMessage: string, assistantMessage: string) => void;
 }
 
 const CaloriesCard: React.FC<CaloriesCardProps> = ({
   consumedCalories = 2100,
   burnedCalories = 2450,
-  unit = 'kcal'
+  unit = 'kcal',
+  onAnalyze
 }) => {
   const netCalories = burnedCalories - consumedCalories;
   const maxCalories = Math.max(consumedCalories, burnedCalories);
@@ -166,6 +168,7 @@ const CaloriesCard: React.FC<CaloriesCardProps> = ({
         <AnalyzeWithWihyButton
           cardContext={`Calories: Consumed ${consumedCalories} ${unit}, Burned ${burnedCalories} ${unit}, Net ${netCalories} ${unit} ${netCalories > 0 ? 'deficit' : 'surplus'}`}
           userQuery="Analyze my calorie balance and metabolism"
+          onAnalyze={onAnalyze}
         />
       </div>
     </CardShell>

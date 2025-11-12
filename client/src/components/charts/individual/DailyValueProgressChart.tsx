@@ -21,6 +21,7 @@ interface DailyValueProgressChartProps {
   showCategories?: boolean;
   highlightDeficiencies?: boolean;
   showTargetLines?: boolean;
+  onAnalyze?: (userMessage: string, assistantMessage: string) => void;
 }
 
 const DailyValueProgressChart: React.FC<DailyValueProgressChartProps> = ({
@@ -30,7 +31,8 @@ const DailyValueProgressChart: React.FC<DailyValueProgressChartProps> = ({
   title = 'Daily Value Progress',
   showCategories = true,
   highlightDeficiencies = true,
-  showTargetLines = true
+  showTargetLines = true,
+  onAnalyze
 }) => {
   // Default sample data with various nutrients
   const defaultNutrients: NutrientProgress[] = [
@@ -209,6 +211,7 @@ const DailyValueProgressChart: React.FC<DailyValueProgressChartProps> = ({
         <AnalyzeWithWihyButton
           cardContext={`Daily Value Progress: ${title} showing ${nutrientData.length} nutrients tracked. Meeting DV: ${nutrientData.filter(n => n.percentage >= 100).length}. Nutrient details: ${nutrientData.map(n => `${n.name}: ${n.percentage}%`).join(', ')}.`}
           userQuery="Analyze my daily nutrient intake progress and identify any deficiencies or areas where I can improve my nutrition"
+          onAnalyze={onAnalyze}
         />
       </div>
     </div>

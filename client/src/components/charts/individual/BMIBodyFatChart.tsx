@@ -71,9 +71,10 @@ ChartJS.register(
 
 interface BMIBodyFatChartProps {
   period?: 'day' | 'week' | 'month';
+  onAnalyze?: (userMessage: string, assistantMessage: string) => void;
 }
 
-const BMIBodyFatChart: React.FC<BMIBodyFatChartProps> = ({ period = 'week' }) => {
+const BMIBodyFatChart: React.FC<BMIBodyFatChartProps> = ({ period = 'week', onAnalyze }) => {
   // Generate BMI and Body Fat data based on period
   const generateData = () => {
     switch (period) {
@@ -246,6 +247,7 @@ const BMIBodyFatChart: React.FC<BMIBodyFatChartProps> = ({ period = 'week' }) =>
         <AnalyzeWithWihyButton
           cardContext={`BMI and Body Fat Chart: Tracking data over ${period} period. Shows trends in BMI and body fat percentage for body composition analysis and health monitoring.`}
           userQuery="Analyze my BMI and body fat trends, explain what these measurements mean for my health and body composition goals"
+          onAnalyze={onAnalyze}
         />
       </div>
     </div>

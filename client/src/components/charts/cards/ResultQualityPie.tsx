@@ -17,6 +17,7 @@ interface ResultQualityPieProps {
   results?: string;
   dataSource?: "error" | "openai" | "local" | "vnutrition" | "wihy";
   citations?: string[];
+  onAnalyze?: (userMessage: string, assistantMessage: string) => void;
 }
 
 /* ====================== Evidence Confidence (Gated) ====================== */
@@ -103,7 +104,8 @@ const ResultQualityPie: React.FC<ResultQualityPieProps> = ({
   query,
   results,
   dataSource,
-  citations
+  citations,
+  onAnalyze
 }) => {
   const [evaluation, setEvaluation] = useState<{
     score: number;
@@ -304,6 +306,7 @@ const ResultQualityPie: React.FC<ResultQualityPieProps> = ({
         <AnalyzeWithWihyButton
           cardContext={`Result quality analysis: ${percentage}% good sources, ${remaining}% poor sources. Data source: ${dataSource}. Quality reasons: ${reasons.filter(r => r !== 'Loading...' && r !== 'Waiting for results...').join(', ')}. Query: "${query}"`}
           userQuery="Analyze the quality of these search results and explain how source credibility affects the reliability of health information"
+          onAnalyze={onAnalyze}
         />
       </div>
     </div>

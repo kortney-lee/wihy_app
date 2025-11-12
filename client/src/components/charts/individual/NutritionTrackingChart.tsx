@@ -56,6 +56,7 @@ interface NutritionTrackingChartProps {
   showDailyValues?: boolean;
   title?: string;
   showLabels?: boolean;
+  onAnalyze?: (userMessage: string, assistantMessage: string) => void;
 }
 
 const NutritionTrackingChart: React.FC<NutritionTrackingChartProps> = ({ 
@@ -63,7 +64,8 @@ const NutritionTrackingChart: React.FC<NutritionTrackingChartProps> = ({
   type = 'macros',
   showDailyValues = true,
   title = 'Nutrition Tracking',
-  showLabels = true
+  showLabels = true,
+  onAnalyze
 }) => {
   const generateData = (): NutrientData[] => {
     if (data.length > 0) return data;
@@ -183,6 +185,7 @@ const NutritionTrackingChart: React.FC<NutritionTrackingChartProps> = ({
           <AnalyzeWithWihyButton
             cardContext={`Macronutrient breakdown: ${nutritionData.map(n => `${n.name} ${n.value}${n.unit}`).join(', ')}. Daily values tracked for nutrition analysis.`}
             userQuery="Analyze my macronutrient distribution and suggest optimal ratios for my health goals"
+            onAnalyze={onAnalyze}
           />
         </div>
       </div>
@@ -315,6 +318,7 @@ const NutritionTrackingChart: React.FC<NutritionTrackingChartProps> = ({
               return `${n.name} ${percentage}% DV`;
             }).join(', ')}.`}
             userQuery="Analyze my micronutrient intake and identify deficiencies or areas for improvement"
+            onAnalyze={onAnalyze}
           />
         </div>
       </div>
@@ -471,6 +475,7 @@ const NutritionTrackingChart: React.FC<NutritionTrackingChartProps> = ({
         <AnalyzeWithWihyButton
           cardContext={`Nutrition Tracking: Average daily intake ${Math.round(averageIntake)}${nutritionData[0]?.unit} vs target ${targetIntake}${nutritionData[0]?.unit} (${targetPercent}%). Weekly pattern analysis.`}
           userQuery="Analyze my nutrition intake patterns and provide recommendations for better nutritional balance"
+          onAnalyze={onAnalyze}
         />
       </div>
     </div>

@@ -40,6 +40,7 @@ interface QuickInsightsProps {
   className?: string;
   memberCardType?: MemberCardType;
   memberName?: string;
+  onAnalyze?: (userMessage: string, assistantMessage: string) => void;
 }
 
 /**
@@ -50,7 +51,8 @@ const QuickInsights: React.FC<QuickInsightsProps> = ({
   data, 
   className = '', 
   memberCardType = 'bronze', 
-  memberName = 'Health Enthusiast' 
+  memberName = 'Health Enthusiast',
+  onAnalyze
 }) => {
   // Default configuration for QuickInsights
   const defaultLinks = [
@@ -114,6 +116,7 @@ const QuickInsights: React.FC<QuickInsightsProps> = ({
         <AnalyzeWithWihyButton
           cardContext={`Health overview for ${memberName} (${memberBadge.title} Member): Overall health score is ${healthScore}/100. Last updated: ${lastUpdate}. Current stats: Steps ${data?.data?.steps || '8432'}, Sleep ${data?.data?.sleep || '7.5h'}, Calories ${data?.data?.calories || '1842'}. Member status: ${memberBadge.title}. Current alerts: ${data?.data?.alerts || 0}, Recommendations: ${data?.data?.recommendations || 3}`}
           userQuery="Analyze my current health overview and provide personalized recommendations based on my health score, member status, and available data"
+          onAnalyze={onAnalyze}
         />
       </div>
     </div>

@@ -84,6 +84,7 @@ interface HydrationChartProps {
   type?: 'daily' | 'hourly' | 'weekly' | 'sources';
   title?: string;
   showLabels?: boolean;
+  onAnalyze?: (userMessage: string, assistantMessage: string) => void;
 }
 
 const HydrationChart: React.FC<HydrationChartProps> = ({ 
@@ -91,7 +92,8 @@ const HydrationChart: React.FC<HydrationChartProps> = ({
   target = 2000, // 2 liters default
   type = 'daily',
   title = 'Hydration Tracking',
-  showLabels = true
+  showLabels = true,
+  onAnalyze
 }) => {
   const generateData = (): HydrationData[] => {
     if (data.length > 0) return data;
@@ -208,6 +210,7 @@ const HydrationChart: React.FC<HydrationChartProps> = ({
           <AnalyzeWithWihyButton
             cardContext={`Hydration Sources: Water (65%), Coffee (15%), Tea (12%), Sports drinks (5%), Other (3%). Daily target: ${target}ml.`}
             userQuery="Analyze my hydration sources and suggest optimal fluid intake strategies"
+            onAnalyze={onAnalyze}
           />
         </div>
       </div>
@@ -318,6 +321,7 @@ const HydrationChart: React.FC<HydrationChartProps> = ({
           <AnalyzeWithWihyButton
             cardContext={`Hourly Hydration: Total intake ${hydrationData.reduce((sum, d) => sum + d.intake, 0)}ml of ${target}ml target. Peak hours and intake patterns tracked.`}
             userQuery="Analyze my hourly hydration patterns and suggest optimal timing for fluid intake"
+            onAnalyze={onAnalyze}
           />
         </div>
       </div>
@@ -480,6 +484,7 @@ const HydrationChart: React.FC<HydrationChartProps> = ({
         <AnalyzeWithWihyButton
           cardContext={`Hydration Tracking: ${type} view showing average ${Math.round(averageIntake)}ml intake vs ${target}ml target (${targetPercent}%). Total tracked: ${totalIntake}ml.`}
           userQuery="Analyze my hydration patterns and provide recommendations for optimal daily fluid intake"
+          onAnalyze={onAnalyze}
         />
       </div>
     </div>

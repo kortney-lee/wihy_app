@@ -21,6 +21,7 @@ interface ResearchQualityGaugeProps {
   evidenceLevel?: 'I' | 'II' | 'III' | 'IV'; // Evidence hierarchy
   size?: 'small' | 'medium' | 'large';
   showDetails?: boolean;
+  onAnalyze?: (userMessage: string, assistantMessage: string) => void;
 }
 
 const ResearchQualityGauge: React.FC<ResearchQualityGaugeProps> = ({
@@ -28,7 +29,8 @@ const ResearchQualityGauge: React.FC<ResearchQualityGaugeProps> = ({
   studyCount,
   evidenceLevel,
   size = 'medium',
-  showDetails = true
+  showDetails = true,
+  onAnalyze
 }) => {
   // Handle missing props with sample data
   const defaultScore = score !== undefined ? score : 75; // Default to 75 for demo purposes
@@ -226,6 +228,7 @@ const ResearchQualityGauge: React.FC<ResearchQualityGaugeProps> = ({
         <AnalyzeWithWihyButton
           cardContext={`Research quality analysis: Quality score ${clampedScore}/100 (${getQualityLabel(clampedScore)}). ${defaultStudyCount} studies analyzed. Evidence level ${defaultEvidenceLevel} (${getEvidenceLevelDescription(defaultEvidenceLevel)})`}
           userQuery="Analyze this research quality data and explain what it means for the reliability of health recommendations"
+          onAnalyze={onAnalyze}
         />
       </div>
     </div>

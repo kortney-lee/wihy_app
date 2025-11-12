@@ -151,9 +151,10 @@ interface HealthRiskCardProps {
     factors?: string[];
     recommendations?: string[];
   };
+  onAnalyze?: (userMessage: string, assistantMessage: string) => void;
 }
 
-const HealthRiskCard: React.FC<HealthRiskCardProps> = ({ data }) => {
+const HealthRiskCard: React.FC<HealthRiskCardProps> = ({ data, onAnalyze }) => {
   const riskScore = Math.max(0, Math.min(100, data?.riskScore ?? 25));
   const factors =
     data?.factors ?? ["Regular exercise", "Balanced diet", "Normal BMI"];
@@ -229,6 +230,7 @@ const HealthRiskCard: React.FC<HealthRiskCardProps> = ({ data }) => {
             ", "
           )}. Recommendations: ${recommendations.join(", ")}.`}
           userQuery="Analyze my health risk assessment and provide detailed insights about my risk factors and personalized recommendations for improvement"
+          onAnalyze={onAnalyze}
         />
       </div>
     </CardShell>

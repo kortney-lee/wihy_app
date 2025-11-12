@@ -60,12 +60,14 @@ interface CurrentWeightCardProps {
   currentWeight?: number;
   goalWeight?: number;
   unit?: string;
+  onAnalyze?: (userMessage: string, assistantMessage: string) => void;
 }
 
 const CurrentWeightCard: React.FC<CurrentWeightCardProps> = ({
   currentWeight = 68.5,
   goalWeight = 65,
-  unit = 'kg'
+  unit = 'kg',
+  onAnalyze
 }) => {
   const difference = currentWeight - goalWeight;
   const isOverGoal = difference > 0;
@@ -155,6 +157,7 @@ const CurrentWeightCard: React.FC<CurrentWeightCardProps> = ({
         <AnalyzeWithWihyButton
           cardContext={`Current Weight: ${currentWeight} ${unit}, Goal: ${goalWeight} ${unit}. Difference: ${difference > 0 ? '+' : ''}${difference.toFixed(1)} ${unit}. Status: ${weightLabel}.`}
           userQuery="Analyze my weight progress and provide personalized guidance for reaching my weight goal"
+          onAnalyze={onAnalyze}
         />
       </div>
     </CardShell>

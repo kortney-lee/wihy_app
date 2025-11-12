@@ -15,6 +15,7 @@ ChartJS.register(ArcElement, Tooltip, Legend);
 interface NovaChartProps {
   apiResponse?: UnifiedResponse | any;
   query?: string;
+  onAnalyze?: (userMessage: string, assistantMessage: string) => void;
 }
 
 // Extract nova/processing data from unified API response
@@ -57,7 +58,7 @@ const extractNovaData = (apiResponse?: UnifiedResponse | any) => {
   return null;
 };
 
-const NovaChart: React.FC<NovaChartProps> = ({ apiResponse, query }) => {
+const NovaChart: React.FC<NovaChartProps> = ({ apiResponse, query, onAnalyze }) => {
   // Extract nova data using new unified approach
   let novaData = extractNovaData(apiResponse);
 
@@ -193,6 +194,7 @@ NOVA Score Analysis:
 Please provide detailed analysis of this NOVA score and its health implications.
           `.trim()}
           userQuery={`Analyze this NOVA score: ${query || 'food item'}`}
+          onAnalyze={onAnalyze}
         />
       </div>
     </div>

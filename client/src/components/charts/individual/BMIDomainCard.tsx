@@ -63,9 +63,10 @@ function CardShell({
 
 interface BMIDomainCardProps {
   data?: { bmi?: number; category?: string; healthScore?: number; goal?: number };
+  onAnalyze?: (userMessage: string, assistantMessage: string) => void;
 }
 
-const BMIDomainCard: React.FC<BMIDomainCardProps> = ({ data }) => {
+const BMIDomainCard: React.FC<BMIDomainCardProps> = ({ data, onAnalyze }) => {
   const bmi = data?.bmi ?? 23.1;
   const healthScore = data?.healthScore ?? 85;
 
@@ -193,6 +194,7 @@ const BMIDomainCard: React.FC<BMIDomainCardProps> = ({ data }) => {
         <AnalyzeWithWihyButton
           cardContext={`BMI Domain Analysis: Current BMI is ${bmi} kg/m² (${zone.label}), Health Score: ${healthScore}/100.`}
           userQuery="Analyze my BMI domain position and explain what this means for my health, fitness goals, and provide recommendations for improvement"
+          onAnalyze={onAnalyze}
         />
       </div>
     </CardShell>

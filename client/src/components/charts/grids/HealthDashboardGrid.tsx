@@ -13,6 +13,7 @@ interface HealthDashboardGridProps {
   isInsightsLayout?: boolean;
   isResearchLayout?: boolean;
   isNutritionLayout?: boolean;
+  onAnalyze?: (userMessage: string, assistantMessage: string) => void;
 }
 
 const gridStyles = {
@@ -169,7 +170,8 @@ const HealthDashboardGrid: React.FC<HealthDashboardGridProps> = ({
   excludeChartTypes = [],
   isInsightsLayout = false,
   isResearchLayout = false,
-  isNutritionLayout = false
+  isNutritionLayout = false,
+  onAnalyze
 }) => {
   const [selectedPeriod] = useState(period);
   const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1200);
@@ -193,6 +195,7 @@ const HealthDashboardGrid: React.FC<HealthDashboardGridProps> = ({
               data={cardData.data}
               config={cardData.config}
               height={height}
+              onAnalyze={onAnalyze}
               {...(cardData.config || {})}
             />
           ) : (

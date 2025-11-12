@@ -156,13 +156,15 @@ interface HealthScoreGaugeProps {
   label?: string;
   size?: 'small' | 'medium' | 'large';
   showLabel?: boolean;
+  onAnalyze?: (userMessage: string, assistantMessage: string) => void;
 }
 
 const HealthScoreGauge: React.FC<HealthScoreGaugeProps> = ({
   score = 75,
   label = 'Health Score',
   size = 'medium',
-  showLabel = true
+  showLabel = true,
+  onAnalyze
 }) => {
   // Clamp score between 0-100
   const clampedScore = Math.max(0, Math.min(100, score));
@@ -240,6 +242,7 @@ const HealthScoreGauge: React.FC<HealthScoreGaugeProps> = ({
         <AnalyzeWithWihyButton
           cardContext={`Health Score Gauge: Overall health score is ${clampedScore}/100. Status: ${currentScoreLabel}. ${label} assessment for comprehensive health evaluation.`}
           userQuery="Analyze my health score and explain what it means for my overall wellness, including specific areas for improvement"
+          onAnalyze={onAnalyze}
         />
       </div>
     </CardShell>

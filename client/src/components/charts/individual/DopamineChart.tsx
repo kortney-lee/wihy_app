@@ -68,13 +68,15 @@ interface DopamineChartProps {
   chartType?: 'levels' | 'triggers' | 'activities';
   title?: string;
   showLabels?: boolean;
+  onAnalyze?: (userMessage: string, assistantMessage: string) => void;
 }
 
 const DopamineChart: React.FC<DopamineChartProps> = ({ 
   period = 'week', 
   chartType = 'levels',
   title = 'Dopamine Tracking',
-  showLabels = true
+  showLabels = true,
+  onAnalyze
 }) => {
   const generateData = () => {
     switch (period) {
@@ -207,6 +209,7 @@ const DopamineChart: React.FC<DopamineChartProps> = ({
           <AnalyzeWithWihyButton
             cardContext={`Dopamine Triggers Chart: Tracking trigger frequency over ${period} period. Shows neurotransmitter trigger patterns for mental health analysis.`}
             userQuery="Analyze my dopamine trigger patterns and explain how different activities affect my mood and motivation"
+            onAnalyze={onAnalyze}
           />
         </div>
       </div>
@@ -301,6 +304,7 @@ const DopamineChart: React.FC<DopamineChartProps> = ({
           <AnalyzeWithWihyButton
             cardContext={`Dopamine Activities Chart: Tracking activity time over ${period} period. Shows time spent on dopamine-triggering activities for wellness analysis.`}
             userQuery="Analyze my dopamine-related activity patterns and suggest optimizations for better mental wellness"
+            onAnalyze={onAnalyze}
           />
         </div>
       </div>
@@ -435,6 +439,7 @@ const DopamineChart: React.FC<DopamineChartProps> = ({
         <AnalyzeWithWihyButton
           cardContext={`Dopamine Chart: Tracking ${chartType} over ${period} period. Shows neurotransmitter patterns and mood-related metrics for mental health and wellness analysis.`}
           userQuery="Analyze my dopamine patterns and explain how they relate to my mood, motivation, and overall mental wellness"
+          onAnalyze={onAnalyze}
         />
       </div>
     </div>

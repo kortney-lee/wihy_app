@@ -80,9 +80,10 @@ interface NutritionAnalysisCardProps {
     };
   };
   height?: number;
+  onAnalyze?: (userMessage: string, assistantMessage: string) => void;
 }
 
-const NutritionAnalysisCard: React.FC<NutritionAnalysisCardProps> = ({ data, height }) => {
+const NutritionAnalysisCard: React.FC<NutritionAnalysisCardProps> = ({ data, height, onAnalyze }) => {
   const nutrition = {
     calories: data?.calories || 1850,
     protein: data?.protein || 125,
@@ -236,6 +237,7 @@ const NutritionAnalysisCard: React.FC<NutritionAnalysisCardProps> = ({ data, hei
         <AnalyzeWithWihyButton
           cardContext={`Nutrition Analysis: Consumed ${nutrition.calories} kcal (goal: ${goals.calories}), Protein: ${nutrition.protein}g (goal: ${goals.protein}g), Carbs: ${nutrition.carbs}g (goal: ${goals.carbs}g), Fat: ${nutrition.fat}g (goal: ${goals.fat}g), Fiber: ${nutrition.fiber}g, Sugar: ${nutrition.sugar}g, Sodium: ${nutrition.sodium}mg. Calories remaining: ${goals.calories - nutrition.calories}. Protein percentage: ${Math.round((nutrition.protein * 4 / nutrition.calories) * 100)}%.`}
           userQuery="Analyze my detailed nutrition intake and provide insights about my macronutrient balance, goal progress, and dietary recommendations"
+          onAnalyze={onAnalyze}
         />
       </div>
     </CardShell>

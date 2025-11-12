@@ -71,10 +71,12 @@ ChartJS.register(
 
 interface HeartRateChartProps {
   period?: 'day' | 'week' | 'month';
+  onAnalyze?: (userMessage: string, assistantMessage: string) => void;
 }
 
 const HeartRateChart: React.FC<HeartRateChartProps> = ({
-  period = 'week'
+  period = 'week',
+  onAnalyze
 }) => {
   // Generate heart rate data based on period
   const generateData = () => {
@@ -235,6 +237,7 @@ const HeartRateChart: React.FC<HeartRateChartProps> = ({
         <AnalyzeWithWihyButton
           cardContext={`Heart Rate Chart: Showing heart rate trends over ${period} period. Tracks resting, active, and maximum heart rate patterns for cardiovascular health monitoring and fitness optimization.`}
           userQuery="Analyze my heart rate patterns and provide insights about my cardiovascular health, fitness level, and training recommendations"
+          onAnalyze={onAnalyze}
         />
       </div>
     </div>

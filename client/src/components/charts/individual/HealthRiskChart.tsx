@@ -73,13 +73,15 @@ interface HealthRiskChartProps {
   chartType?: 'risk-factors' | 'risk-score' | 'prevention' | 'categories';
   title?: string;
   showLabels?: boolean;
+  onAnalyze?: (userMessage: string, assistantMessage: string) => void;
 }
 
 const HealthRiskChart: React.FC<HealthRiskChartProps> = ({ 
   period = 'week', 
   chartType = 'risk-factors',
   title = 'Health Risk Assessment',
-  showLabels = true
+  showLabels = true,
+  onAnalyze
 }) => {
   const generateData = () => {
     switch (period) {
@@ -181,6 +183,7 @@ const HealthRiskChart: React.FC<HealthRiskChartProps> = ({
           <AnalyzeWithWihyButton
             cardContext={`Health Risk Categories: Distribution showing ${35}% low risk, ${40}% moderate risk, ${20}% high risk, ${5}% critical risk factors.`}
             userQuery="Analyze my health risk categories and provide recommendations to reduce high-risk factors"
+            onAnalyze={onAnalyze}
           />
         </div>
       </div>
@@ -291,6 +294,7 @@ const HealthRiskChart: React.FC<HealthRiskChartProps> = ({
           <AnalyzeWithWihyButton
             cardContext={`Health Risk Factors: ${riskFactors.join(', ')} with levels ${riskLevels.join(', ')} respectively. Higher numbers indicate greater risk.`}
             userQuery="Analyze my health risk factors and provide specific recommendations to reduce my highest risks"
+            onAnalyze={onAnalyze}
           />
         </div>
       </div>
@@ -384,6 +388,7 @@ const HealthRiskChart: React.FC<HealthRiskChartProps> = ({
           <AnalyzeWithWihyButton
             cardContext={`Health Prevention Actions: Tracking ${preventionActions.reduce((a, b) => a + b, 0)} total prevention actions over ${period} period.`}
             userQuery="Analyze my health prevention efforts and suggest additional preventive measures I should consider"
+            onAnalyze={onAnalyze}
           />
         </div>
       </div>
@@ -523,6 +528,7 @@ const HealthRiskChart: React.FC<HealthRiskChartProps> = ({
         <AnalyzeWithWihyButton
           cardContext={`Health Risk Score: Tracking overall risk score over ${period} period. Current average: ${(riskScores.reduce((a, b) => a + b, 0) / riskScores.length).toFixed(1)}/10. Lower scores indicate better health.`}
           userQuery="Analyze my health risk score trends and provide recommendations to lower my overall health risks"
+          onAnalyze={onAnalyze}
         />
       </div>
     </div>

@@ -27,6 +27,7 @@ interface StudyTypeDistributionChartProps {
   chartStyle?: 'pie' | 'doughnut';
   showPercentages?: boolean;
   showLegend?: boolean;
+  onAnalyze?: (userMessage: string, assistantMessage: string) => void;
 }
 
 const StudyTypeDistributionChart: React.FC<StudyTypeDistributionChartProps> = ({
@@ -36,7 +37,8 @@ const StudyTypeDistributionChart: React.FC<StudyTypeDistributionChartProps> = ({
   title = 'Study Type Distribution',
   chartStyle = 'doughnut',
   showPercentages = true,
-  showLegend = true
+  showLegend = true,
+  onAnalyze
 }) => {
   // Default sample data representing typical research distribution
   const defaultStudyTypes: StudyTypeData[] = [
@@ -262,6 +264,7 @@ const StudyTypeDistributionChart: React.FC<StudyTypeDistributionChartProps> = ({
         <AnalyzeWithWihyButton
           cardContext={`Study type analysis: ${title} - Total studies: ${totalStudies}. High evidence studies: ${highEvidenceStudies} (${highEvidencePercentage}%). Quality rating: ${highEvidencePercentage >= 50 ? 'Strong' : 'Mixed'}. Most common type: ${studyData[0]?.type || 'N/A'}. Distribution: ${studyData.map(study => `${study.type}: ${study.count} studies (${study.percentage}%)`).join(', ')}`}
           userQuery="Analyze this study type distribution and explain how different research methodologies affect the strength of evidence"
+          onAnalyze={onAnalyze}
         />
       </div>
     </div>

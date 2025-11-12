@@ -25,12 +25,14 @@ interface ExerciseChartProps {
   data?: ExerciseData[];
   type?: 'line' | 'bar' | 'mixed';
   timeRange?: '7d' | '30d' | '90d';
+  onAnalyze?: (userMessage: string, assistantMessage: string) => void;
 }
 
 export const ExerciseChart: React.FC<ExerciseChartProps> = ({ 
   data = [], 
   type = 'mixed',
-  timeRange = '7d'
+  timeRange = '7d',
+  onAnalyze
 }) => {
   const mockData = useMemo(() => {
     if (data.length > 0) return data;

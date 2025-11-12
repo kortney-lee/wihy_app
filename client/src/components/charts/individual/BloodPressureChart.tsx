@@ -71,10 +71,12 @@ ChartJS.register(
 
 interface BloodPressureChartProps {
   period?: 'day' | 'week' | 'month';
+  onAnalyze?: (userMessage: string, assistantMessage: string) => void;
 }
 
 const BloodPressureChart: React.FC<BloodPressureChartProps> = ({ 
-  period = 'week'
+  period = 'week',
+  onAnalyze
 }) => {
   // Blood pressure data generation based on period
   const generateData = () => {
@@ -222,6 +224,7 @@ const BloodPressureChart: React.FC<BloodPressureChartProps> = ({
         <AnalyzeWithWihyButton
           cardContext={`Blood Pressure Chart: Showing systolic and diastolic blood pressure trends over ${period} period. Tracks cardiovascular health indicators for hypertension monitoring and heart health assessment.`}
           userQuery="Analyze my blood pressure patterns and provide insights about my cardiovascular health, risk factors, and lifestyle recommendations"
+          onAnalyze={onAnalyze}
         />
       </div>
     </CardShell>

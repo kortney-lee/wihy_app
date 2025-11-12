@@ -20,6 +20,7 @@ interface ProgressRingProps {
   unit?: string;
   color?: string;
   size?: 'small' | 'medium' | 'large';
+  onAnalyze?: (userMessage: string, assistantMessage: string) => void;
 }
 
 const ProgressRing: React.FC<ProgressRingProps> = ({
@@ -28,7 +29,8 @@ const ProgressRing: React.FC<ProgressRingProps> = ({
   label = 'Progress',
   unit = '%',
   color = '#10b981',
-  size = 'medium'
+  size = 'medium',
+  onAnalyze
 }) => {
   // Ensure value is within bounds
   const clampedValue = Math.max(0, Math.min(maxValue, value));
@@ -124,6 +126,7 @@ const ProgressRing: React.FC<ProgressRingProps> = ({
       <AnalyzeWithWihyButton
         cardContext={`Progress Ring: ${label} showing ${clampedValue}${unit} out of ${maxValue}${unit} (${Math.round(progressPercent)}% completion). Current performance indicator for goal tracking and progress monitoring.`}
         userQuery={`Analyze my ${label.toLowerCase()} progress and provide insights about goal achievement and recommendations for improvement`}
+        onAnalyze={onAnalyze}
       />
     </div>
   );

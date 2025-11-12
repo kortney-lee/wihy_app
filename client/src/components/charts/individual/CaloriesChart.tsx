@@ -67,11 +67,13 @@ ChartJS.register(
 interface CaloriesChartProps {
   period?: 'day' | 'week' | 'month';
   goal?: number;
+  onAnalyze?: (userMessage: string, assistantMessage: string) => void;
 }
 
 const CaloriesChart: React.FC<CaloriesChartProps> = ({ 
   period = 'week',
-  goal = 500
+  goal = 500,
+  onAnalyze
 }) => {
   // Generate calorie data based on period
   const generateData = () => {
@@ -204,6 +206,7 @@ const CaloriesChart: React.FC<CaloriesChartProps> = ({
         <AnalyzeWithWihyButton
           cardContext={`Calories Chart: Total burned ${totalCalories} calories, average ${averageCalories} per ${period === 'day' ? 'hour' : 'day'}, goal ${targetGoal} calories (${period} view). Performance ${isGoalMet ? 'exceeds' : 'below'} target.`}
           userQuery="Analyze my calorie burn patterns and provide insights about my energy expenditure and recommendations for optimizing my workout intensity"
+          onAnalyze={onAnalyze}
         />
       </div>
     </div>

@@ -72,11 +72,13 @@ ChartJS.register(
 interface SleepChartProps {
   period?: 'day' | 'week' | 'month';
   chartType?: 'duration' | 'quality';
+  onAnalyze?: (userMessage: string, assistantMessage: string) => void;
 }
 
 const SleepChart: React.FC<SleepChartProps> = ({ 
   period = 'week', 
-  chartType = 'duration' 
+  chartType = 'duration',
+  onAnalyze
 }) => {
   const generateData = () => {
     switch (period) {
@@ -186,6 +188,7 @@ const SleepChart: React.FC<SleepChartProps> = ({
           <AnalyzeWithWihyButton
             cardContext={`Sleep Quality Chart: Distribution showing ${qualityDistribution[2]} good nights, ${qualityDistribution[1]} fair nights, ${qualityDistribution[0]} poor night. Sleep quality analysis over ${period} period.`}
             userQuery="Analyze my sleep quality patterns and provide insights about improving sleep quality and duration"
+            onAnalyze={onAnalyze}
           />
         </div>
       </div>
@@ -353,6 +356,7 @@ const SleepChart: React.FC<SleepChartProps> = ({
         <AnalyzeWithWihyButton
           cardContext={`Sleep Chart: Tracking ${chartType} over ${period} period. Shows sleep patterns, quality metrics, and duration trends for sleep health analysis and improvement recommendations.`}
           userQuery="Analyze my sleep patterns and provide insights about my sleep quality, duration, and recommendations for better rest"
+          onAnalyze={onAnalyze}
         />
       </div>
     </div>
