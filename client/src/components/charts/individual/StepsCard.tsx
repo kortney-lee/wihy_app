@@ -74,11 +74,13 @@ function CardShell({
 interface StepsChartProps {
   period?: 'day' | 'week' | 'month';
   goal?: number;
+  onAnalyze?: (userMessage: string, assistantMessage: string) => void;
 }
 
 const StepsChart: React.FC<StepsChartProps> = ({ 
   period = 'week',
-  goal = 10000
+  goal = 10000,
+  onAnalyze
 }) => {
   // Generate sample data based on period
   const chartData = useMemo(() => {
@@ -216,6 +218,7 @@ const StepsChart: React.FC<StepsChartProps> = ({
         <AnalyzeWithWihyButton
           cardContext={`Steps tracking: Currently at ${totalSteps.toLocaleString()} steps out of ${totalGoal.toLocaleString()} weekly goal (${progressPercentage.toFixed(1)}% progress). Status: ${progressLabel}. This represents 7-day step history and physical activity trends.`}
           userQuery="Analyze my weekly step patterns and provide insights about my physical activity levels and recommendations for improvement"
+          onAnalyze={onAnalyze}
         />
       </div>
     </CardShell>

@@ -47,6 +47,7 @@ interface PublicationTimelineChartProps {
   title?: string;
   timeRange?: 'recent' | 'decade' | 'all-time';
   showTrendline?: boolean;
+  onAnalyze?: (userMessage: string, assistantMessage: string) => void;
 }
 
 const PublicationTimelineChart: React.FC<PublicationTimelineChartProps> = ({
@@ -55,7 +56,8 @@ const PublicationTimelineChart: React.FC<PublicationTimelineChartProps> = ({
   showLabels = true,
   title = 'Research Publication Timeline',
   timeRange = 'decade',
-  showTrendline = true
+  showTrendline = true,
+  onAnalyze
 }) => {
   // Generate sample data based on timeRange
   const generateSampleData = (): PublicationData[] => {
@@ -328,6 +330,7 @@ const PublicationTimelineChart: React.FC<PublicationTimelineChartProps> = ({
         <AnalyzeWithWihyButton
           cardContext={`Publication timeline analysis: ${title} showing ${timeRange} data. Total publications: ${totalPublications} studies. Average per year: ${avgPerYear}. Recent average: ${recentAvg}. Trend: ${recentAvg > avgPerYear ? 'Increasing' : 'Declining'} research activity. Data spans from ${publicationData[0]?.year} to ${publicationData[publicationData.length - 1]?.year}`}
           userQuery="Analyze this publication timeline and explain what the research trends indicate about scientific interest and evidence development in this area"
+          onAnalyze={onAnalyze}
         />
       </div>
     </div>

@@ -70,11 +70,13 @@ ChartJS.register(
 interface ActivityChartProps {
   period?: 'day' | 'week' | 'month';
   chartType?: 'steps' | 'distance' | 'calories' | 'activity' | 'hydration';
+  onAnalyze?: (userMessage: string, assistantMessage: string) => void;
 }
 
 const ActivityChart: React.FC<ActivityChartProps> = ({ 
   period = 'week', 
-  chartType = 'steps' 
+  chartType = 'steps',
+  onAnalyze
 }) => {
   // Sample data generation based on period
   const generateData = () => {
@@ -547,6 +549,7 @@ const ActivityChart: React.FC<ActivityChartProps> = ({
         <AnalyzeWithWihyButton
           cardContext={`Activity Chart: Showing ${chartType} data over ${period} period. Chart displays trends and patterns in daily activity metrics for health tracking and goal achievement.`}
           userQuery="Analyze my activity chart data and provide insights about my activity patterns, trends, and recommendations for improvement"
+          onAnalyze={onAnalyze}
         />
       </div>
     </CardShell>

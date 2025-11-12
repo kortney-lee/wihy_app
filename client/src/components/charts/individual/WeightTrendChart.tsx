@@ -71,9 +71,10 @@ ChartJS.register(
 
 interface WeightTrendChartProps {
   period?: 'day' | 'week' | 'month';
+  onAnalyze?: (userMessage: string, assistantMessage: string) => void;
 }
 
-const WeightTrendChart: React.FC<WeightTrendChartProps> = ({ period = 'week' }) => {
+const WeightTrendChart: React.FC<WeightTrendChartProps> = ({ period = 'week', onAnalyze }) => {
   // Weight data generation based on period
   const generateData = () => {
     switch (period) {
@@ -216,6 +217,7 @@ const WeightTrendChart: React.FC<WeightTrendChartProps> = ({ period = 'week' }) 
         <AnalyzeWithWihyButton
           cardContext={`Weight Trend Chart: Current weight is ${currentWeight} kg, goal weight is ${goalWeight} kg. Tracking weight changes over ${period} period showing fluctuations, trends, and patterns for weight management.`}
           userQuery="Analyze my weight trend patterns and provide insights about my weight management progress and recommendations"
+          onAnalyze={onAnalyze}
         />
       </div>
     </div>

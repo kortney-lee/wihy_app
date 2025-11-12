@@ -21,6 +21,7 @@ interface GenericHealthCardProps {
   data?: any;
   title?: string;
   className?: string;
+  onAnalyze?: (userMessage: string, assistantMessage: string) => void;
 }
 
 /**
@@ -30,7 +31,8 @@ const GenericHealthCard: React.FC<GenericHealthCardProps> = ({
   chartType, 
   data, 
   title, 
-  className 
+  className,
+  onAnalyze
 }) => {
   // Map chart types to their corresponding components
   const renderChart = () => {
@@ -89,6 +91,7 @@ const GenericHealthCard: React.FC<GenericHealthCardProps> = ({
               <AnalyzeWithWihyButton
                 cardContext={`Health chart analysis: ${title || chartType.replace('_', ' ')} chart with data: ${data ? JSON.stringify(data) : 'No data available'}`}
                 userQuery="Analyze this health data and provide insights about what it means for my overall health"
+                onAnalyze={onAnalyze}
               />
             </div>
           </div>
@@ -107,6 +110,7 @@ const GenericHealthCard: React.FC<GenericHealthCardProps> = ({
               <AnalyzeWithWihyButton
                 cardContext={`Unknown health chart: Chart type "${chartType}" is not recognized. ${data ? `Available data: ${JSON.stringify(data)}` : 'No data available'}`}
                 userQuery="Help me understand what this health data means and how I can use it"
+                onAnalyze={onAnalyze}
               />
             </div>
           </div>

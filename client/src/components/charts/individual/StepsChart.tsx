@@ -133,11 +133,13 @@ const CardShell = ({ title, children }: { title: string; children: React.ReactNo
 interface StepsCardProps {
   currentSteps?: number;
   goalSteps?: number;
+  onAnalyze?: (userMessage: string, assistantMessage: string) => void;
 }
 
 const StepsCard: React.FC<StepsCardProps> = ({
   currentSteps = 8543,
-  goalSteps = 10000
+  goalSteps = 10000,
+  onAnalyze
 }) => {
   const progressPercentage = Math.min(100, (currentSteps / goalSteps) * 100);
   
@@ -228,6 +230,7 @@ const StepsCard: React.FC<StepsCardProps> = ({
         <AnalyzeWithWihyButton
           cardContext={`Steps Today: ${currentSteps.toLocaleString()} / ${goalSteps.toLocaleString()} (${Math.round(progressPercentage)}% complete). Status: ${progressLabel}.`}
           userQuery="Analyze my daily step count and activity patterns"
+          onAnalyze={onAnalyze}
         />
       </div>
     </CardShell>

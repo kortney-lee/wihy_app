@@ -79,6 +79,7 @@ interface VitaminContentChartProps {
   title?: string;
   highlightDeficiency?: boolean;
   height?: number;
+  onAnalyze?: (userMessage: string, assistantMessage: string) => void;
 }
 
 const VitaminContentChart: React.FC<VitaminContentChartProps> = ({
@@ -87,7 +88,8 @@ const VitaminContentChart: React.FC<VitaminContentChartProps> = ({
   showLabels = true,
   title = 'Vitamin & Mineral Content',
   highlightDeficiency = true,
-  height = 400
+  height = 400,
+  onAnalyze
 }) => {
   // Default sample data
   const defaultVitamins: VitaminData[] = [
@@ -232,6 +234,7 @@ const VitaminContentChart: React.FC<VitaminContentChartProps> = ({
         <AnalyzeWithWihyButton
           cardContext={`Vitamin Content Analysis: ${title} showing ${vitaminData.length} vitamins tracked. Deficient vitamins: ${vitaminData.filter(v => v.percentage < 100).length}. Adequate vitamins: ${vitaminData.filter(v => v.percentage >= 100).length}. Vitamin details: ${vitaminData.map(v => `${v.name}: ${v.current}${v.unit} (${v.percentage}% DV)`).join(', ')}.`}
           userQuery="Analyze my vitamin intake and identify any deficiencies or areas where I can improve my micronutrient consumption"
+          onAnalyze={onAnalyze}
         />
       </div>
     </div>

@@ -67,6 +67,7 @@ interface NutritionGradeBadgeProps {
   size?: 'small' | 'medium' | 'large';
   showDescription?: boolean;
   category?: string; // e.g., "Overall", "Protein", "Vitamins"
+  onAnalyze?: (userMessage: string, assistantMessage: string) => void;
 }
 
 const NutritionGradeBadge: React.FC<NutritionGradeBadgeProps> = ({
@@ -74,7 +75,8 @@ const NutritionGradeBadge: React.FC<NutritionGradeBadgeProps> = ({
   score,
   size = 'medium',
   showDescription = true,
-  category = 'Nutrition'
+  category = 'Nutrition',
+  onAnalyze
 }) => {
   // Provide demo data if no grade is provided (for dashboard display)
   const defaultGrade = 'B+';
@@ -205,6 +207,7 @@ const NutritionGradeBadge: React.FC<NutritionGradeBadgeProps> = ({
         <AnalyzeWithWihyButton
           cardContext={`Nutrition grade assessment: ${category} grade is ${normalizedGrade}${displayScore !== undefined ? ` with a score of ${displayScore}/100` : ''}. Grade description: ${description}`}
           userQuery="Analyze this nutrition grade and explain what it means for overall health and dietary choices"
+          onAnalyze={onAnalyze}
         />
       </div>
     </CardShell>

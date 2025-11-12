@@ -74,6 +74,7 @@ interface MembersCardProps {
   memberCardType?: MemberCardType;
   memberName?: string;
   awards?: Award[];
+  onAnalyze?: (userMessage: string, assistantMessage: string) => void;
 }
 
 // Badge configuration mapping
@@ -118,7 +119,8 @@ const badgeConfig = {
 const MembersCard: React.FC<MembersCardProps> = ({ 
   memberCardType = 'bronze', // Default to bronze badge to ensure display
   memberName = 'Health Enthusiast',
-  awards = []
+  awards = [],
+  onAnalyze
 }) => {
   // Determine primary display (membership card or first award)
   const primaryAward = memberCardType ? {
@@ -176,6 +178,7 @@ const MembersCard: React.FC<MembersCardProps> = ({
         <AnalyzeWithWihyButton
           cardContext={`Awards: ${displayAward.title}. Total awards: ${totalAwardsCount}. Member: ${memberName}.`}
           userQuery="Show me all my awards and achievements"
+          onAnalyze={onAnalyze}
         />
       </div>
     </CardShell>

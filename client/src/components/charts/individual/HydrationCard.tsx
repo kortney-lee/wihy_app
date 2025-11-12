@@ -136,12 +136,14 @@ interface HydrationCardProps {
   currentHydration?: number;
   goalHydration?: number;
   unit?: string;
+  onAnalyze?: (userMessage: string, assistantMessage: string) => void;
 }
 
 const HydrationCard: React.FC<HydrationCardProps> = ({
   currentHydration = 2.1,
   goalHydration = 2.5,
-  unit = 'L'
+  unit = 'L',
+  onAnalyze
 }) => {
   const progressPercentage = Math.min(100, (currentHydration / goalHydration) * 100);
   
@@ -232,6 +234,7 @@ const HydrationCard: React.FC<HydrationCardProps> = ({
         <AnalyzeWithWihyButton
           cardContext={`Hydration: ${currentHydration} ${unit} / ${goalHydration} ${unit} (${Math.round(progressPercentage)}% complete). Status: ${progressLabel}.`}
           userQuery="Analyze my hydration levels and water intake patterns"
+          onAnalyze={onAnalyze}
         />
       </div>
     </CardShell>

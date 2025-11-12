@@ -796,6 +796,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({
                     <QuickInsights 
                       memberCardType="bronze"
                       memberName="Health Enthusiast"
+                      onAnalyze={handleAddToChatConversation}
                       data={{
                         id: 'quick-insights',
                         title: 'Quick Insights',
@@ -825,12 +826,14 @@ const SearchResults: React.FC<SearchResultsProps> = ({
                         score={75}
                         studyCount={42}
                         evidenceLevel="II"
+                        onAnalyze={handleAddToChatConversation}
                       />
                       <ResultQualityPie 
                         apiResponse={apiResponse}
                         query={query}
                         results={results}
                         dataSource={dataSource}
+                        onAnalyze={handleAddToChatConversation}
                       />
                     </div>
                   </div>
@@ -845,22 +848,27 @@ const SearchResults: React.FC<SearchResultsProps> = ({
                       <MembersCard 
                         memberCardType="bronze"
                         memberName="Health Enthusiast"
+                        onAnalyze={handleAddToChatConversation}
                       />
                       <MembersCard 
                         memberCardType="silver"
                         memberName="Health Enthusiast"
+                        onAnalyze={handleAddToChatConversation}
                       />
                       <MembersCard 
                         memberCardType="gold"
                         memberName="Health Enthusiast"
+                        onAnalyze={handleAddToChatConversation}
                       />
                       <MembersCard 
                         memberCardType="platinum"
                         memberName="Health Enthusiast"
+                        onAnalyze={handleAddToChatConversation}
                       />
                       <MembersCard 
                         memberCardType="green"
                         memberName="Health Enthusiast"
+                        onAnalyze={handleAddToChatConversation}
                       />
                     </div>
                   </div>
@@ -875,6 +883,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({
                     <NutritionChart 
                       apiResponse={apiResponse}
                       query={query}
+                      onAnalyze={handleAddToChatConversation}
                     />
                   </div>
                   
@@ -885,6 +894,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({
                       maxCards={calculateMaxCards()} 
                       showAllCharts={true}
                       excludeChartTypes={getExcludedChartTypes()}
+                      onAnalyze={handleAddToChatConversation}
                     />
                   </div>
                 </>
@@ -908,6 +918,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({
                       maxCards={calculateMaxCards()} 
                       showAllCharts={true}
                       excludeChartTypes={getExcludedChartTypes()}
+                      onAnalyze={handleAddToChatConversation}
                     />
                   </div>
                 </>
@@ -932,6 +943,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({
                       showAllCharts={true}
                       excludeChartTypes={getExcludedChartTypes()}
                       isResearchLayout={true}
+                      onAnalyze={handleAddToChatConversation}
                     />
                   </div>
                 </>
@@ -956,6 +968,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({
                       showAllCharts={true}
                       excludeChartTypes={getExcludedChartTypes()}
                       isNutritionLayout={true}
+                      onAnalyze={handleAddToChatConversation}
                     />
                   </div>
                 </>
@@ -980,6 +993,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({
                       showAllCharts={true}
                       excludeChartTypes={getExcludedChartTypes()}
                       isInsightsLayout={true}
+                      onAnalyze={handleAddToChatConversation}
                     />
                   </div>
                 </>

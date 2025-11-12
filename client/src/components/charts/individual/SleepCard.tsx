@@ -60,12 +60,14 @@ interface SleepCardProps {
   sleepHours?: number;
   sleepQuality?: number;
   unit?: string;
+  onAnalyze?: (userMessage: string, assistantMessage: string) => void;
 }
 
 const SleepCard: React.FC<SleepCardProps> = ({
   sleepHours = 7.2,
   sleepQuality = 82,
-  unit = 'hrs'
+  unit = 'hrs',
+  onAnalyze
 }) => {
   // Determine color based on sleep quality
   const getSleepColor = (quality: number): string => {
@@ -165,6 +167,7 @@ const SleepCard: React.FC<SleepCardProps> = ({
         <AnalyzeWithWihyButton
           cardContext={`Sleep tracking: Slept ${sleepHours} ${unit} with ${sleepQuality}% quality score. Status: ${sleepLabel}. Sleep quality and duration metrics for health assessment.`}
           userQuery="Analyze my sleep patterns and provide insights about sleep quality, duration, and recommendations for better rest"
+          onAnalyze={onAnalyze}
         />
       </div>
     </CardShell>

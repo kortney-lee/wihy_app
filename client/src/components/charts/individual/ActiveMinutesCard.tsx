@@ -60,12 +60,14 @@ interface ActiveMinutesCardProps {
   currentMinutes?: number;
   goalMinutes?: number;
   unit?: string;
+  onAnalyze?: (userMessage: string, assistantMessage: string) => void;
 }
 
 const ActiveMinutesCard: React.FC<ActiveMinutesCardProps> = ({
   currentMinutes = 45,
   goalMinutes = 60,
-  unit = 'min'
+  unit = 'min',
+  onAnalyze
 }) => {
   const progressPercentage = Math.min(100, (currentMinutes / goalMinutes) * 100);
   
@@ -164,6 +166,7 @@ const ActiveMinutesCard: React.FC<ActiveMinutesCardProps> = ({
         <AnalyzeWithWihyButton
           cardContext={`Active Minutes tracking: Currently at ${currentMinutes} ${unit} out of ${goalMinutes} ${unit} goal (${progressPercentage.toFixed(1)}% progress). Status: ${progressLabel}. This represents physical activity and fitness engagement.`}
           userQuery="Analyze my active minutes data and provide insights about my physical activity levels and recommendations for improvement"
+          onAnalyze={onAnalyze}
           style={{
             fontSize: '12px',
             padding: '8px 12px',

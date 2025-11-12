@@ -29,6 +29,7 @@ ChartJS.register(ArcElement, Tooltip, Legend);
 interface NutritionChartProps {
   apiResponse?: UnifiedResponse | any;
   query?: string;
+  onAnalyze?: (userMessage: string, assistantMessage: string) => void;
 }
 
 // Extract nutrition data from unified API response only
@@ -80,7 +81,7 @@ const extractNutritionData = (apiResponse?: UnifiedResponse | any) => {
   return null;
 };
 
-const NutritionChart: React.FC<NutritionChartProps> = ({ apiResponse, query }) => {
+const NutritionChart: React.FC<NutritionChartProps> = ({ apiResponse, query, onAnalyze }) => {
   // Extract nutrition data using new unified approach
   const nutritionData = extractNutritionData(apiResponse);
 
@@ -148,6 +149,7 @@ const NutritionChart: React.FC<NutritionChartProps> = ({ apiResponse, query }) =
           <AnalyzeWithWihyButton
             cardContext={`Nutrition breakdown: ${chartData.labels.join(', ')} with values ${chartData.values.join(', ')}% respectively.`}
             userQuery="Analyze this nutrition breakdown and provide insights about the nutritional balance"
+            onAnalyze={onAnalyze}
           />
         </div>
       </div>
@@ -270,6 +272,7 @@ const NutritionChart: React.FC<NutritionChartProps> = ({ apiResponse, query }) =
         <AnalyzeWithWihyButton
           cardContext={`Nutrition analysis: ${calories} calories total with macronutrient breakdown - Protein: ${total > 0 ? Math.round((protein / total) * 100) : 0}%, Carbs: ${total > 0 ? Math.round((carbs / total) * 100) : 0}%, Fat: ${total > 0 ? Math.round((fat / total) * 100) : 0}%. Additional nutrition data: ${JSON.stringify(nutritionFacts)}`}
           userQuery="Analyze this nutrition data and provide insights about the macronutrient balance and overall nutritional value"
+          onAnalyze={onAnalyze}
         />
       </div>
     </div>

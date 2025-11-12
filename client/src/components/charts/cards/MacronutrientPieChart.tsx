@@ -29,6 +29,7 @@ interface MacronutrientPieChartProps {
   showLegend?: boolean;
   showCenter?: boolean;
   title?: string;
+  onAnalyze?: (userMessage: string, assistantMessage: string) => void;
 }
 
 const MacronutrientPieChart: React.FC<MacronutrientPieChartProps> = ({
@@ -37,7 +38,8 @@ const MacronutrientPieChart: React.FC<MacronutrientPieChartProps> = ({
   size = 'medium',
   showLegend = true,
   showCenter = true,
-  title = 'Macronutrient Breakdown'
+  title = 'Macronutrient Breakdown',
+  onAnalyze
 }) => {
   // Provide default data if none is provided
   const defaultData: MacronutrientData = {
@@ -258,6 +260,7 @@ const MacronutrientPieChart: React.FC<MacronutrientPieChartProps> = ({
         <AnalyzeWithWihyButton
           cardContext={`Macronutrient analysis: ${title} showing ${displayMode} breakdown - Protein: ${Math.round((displayValues.protein / displayValues.total) * 100)}% (${displayValues.protein}${displayMode === 'grams' ? 'g' : displayMode === 'calories' ? ' cal' : '%'}), Carbs: ${Math.round((displayValues.carbs / displayValues.total) * 100)}% (${displayValues.carbs}${displayMode === 'grams' ? 'g' : displayMode === 'calories' ? ' cal' : '%'}), Fat: ${Math.round((displayValues.fat / displayValues.total) * 100)}% (${displayValues.fat}${displayMode === 'grams' ? 'g' : displayMode === 'calories' ? ' cal' : '%'})`}
           userQuery="Analyze this macronutrient breakdown and provide insights about the protein, carbohydrate, and fat distribution"
+          onAnalyze={onAnalyze}
         />
       </div>
     </div>
