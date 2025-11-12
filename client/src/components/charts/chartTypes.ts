@@ -340,12 +340,12 @@ export const CHART_TYPE_CONFIGS: Record<ChartType, ChartTypeConfig> = {
   // --- MEMBERSHIP & USER STATUS ---
   [ChartType.MEMBERS_CARD]: {
     type: ChartType.MEMBERS_CARD,
-    label: 'Membership Status',
+    label: 'Awards & Achievements',
     priority: 95,
-    requiresData: false,
+    requiresData: true, // Only show if user has awards/membership
     category: 'health',
     tabView: ['overview', 'charts'],
-    description: 'Display member badge and benefits based on membership tier'
+    description: 'Display user awards, achievements, and membership badges - only shown for users with earned awards'
   },
 
   // --- RESEARCH: MULTI-TAB NOVA + RESEARCH ---

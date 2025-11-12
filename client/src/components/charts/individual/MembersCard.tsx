@@ -60,9 +60,21 @@ function CardShell({
 
 export type MemberCardType = 'bronze' | 'silver' | 'gold' | 'platinum' | 'green';
 
+interface Award {
+  type: 'membership' | 'achievement' | 'milestone' | 'special';
+  id: string;
+  title: string;
+  image: string;
+  color: string;
+  dateEarned?: string;
+  description?: string;
+}
+
 interface MembersCardProps {
   memberCardType?: MemberCardType;
   memberName?: string;
+  awards?: Award[];
+  hasAnyAwards?: boolean;
   data?: any;
 }
 
@@ -106,76 +118,70 @@ const badgeConfig = {
 };
 
 const MembersCard: React.FC<MembersCardProps> = ({ 
-  memberCardType = 'bronze', 
+  memberCardType = 'bronze', // Default to bronze badge to ensure display
   memberName = 'Health Enthusiast',
+  awards = [],
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  hasAnyAwards = true, // Default to true to show badge
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   data 
 }) => {
-  const badge = badgeConfig[memberCardType];
+  // Determine primary display (membership card or first award)
+  const primaryAward = memberCardType ? {
+    type: 'membership' as const,
+    id: memberCardType,
+    title: badgeConfig[memberCardType].title,
+    image: badgeConfig[memberCardType].image,
+    color: badgeConfig[memberCardType].color,
+    description: badgeConfig[memberCardType].description
+  } : awards[0];
 
-  const badgeImageStyle: React.CSSProperties = {
-    width: '180px',
-    height: '180px',
-    objectFit: 'contain',
-    marginBottom: '16px',
-    borderRadius: '12px',
-    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+  // Fallback to bronze if nothing is provided
+  const displayAward = primaryAward || {
+    type: 'membership' as const,
+    id: 'bronze',
+    title: badgeConfig.bronze.title,
+    image: badgeConfig.bronze.image,
+    color: badgeConfig.bronze.color,
+    description: badgeConfig.bronze.description
   };
 
-  const memberTitleStyle: React.CSSProperties = {
-    fontSize: '20px',
-    fontWeight: 600,
-    color: badge.color,
-    margin: '0 0 8px 0',
-    textAlign: 'center',
-  };
-
-  const memberDescriptionStyle: React.CSSProperties = {
-    fontSize: '14px',
-    color: '#6b7280',
-    margin: '0 0 16px 0',
-    textAlign: 'center',
-  };
-
-  const memberNameStyle: React.CSSProperties = {
-    fontSize: '16px',
-    fontWeight: 500,
-    color: '#374151',
-    margin: '0 0 12px 0',
-    textAlign: 'center',
-  };
-
-  const benefitsStyle: React.CSSProperties = {
-    fontSize: '12px',
-    color: '#6b7280',
-    textAlign: 'center',
-    lineHeight: 1.4,
-  };
+  const totalAwardsCount = (memberCardType ? 1 : 0) + awards.length;
 
   return (
-    <CardShell title="Membership Status">
+    <CardShell title="Awards & Achievements">
       <img 
-        src={badge.image} 
-        alt={badge.title}
-        style={badgeImageStyle}
+        src={displayAward.image} 
+        alt={displayAward.title}
+        style={{
+          width: '120px',
+          height: '120px',
+          objectFit: 'contain'
+        }}
         onError={(e) => {
-          console.warn(`Failed to load badge image: ${badge.image}`);
-          // Fallback to a placeholder or hide the image
+          console.warn(`Failed to load award image: ${displayAward.image}`);
           e.currentTarget.style.display = 'none';
         }}
       />
       
-      <div style={memberNameStyle}>{memberName}</div>
-      <div style={memberTitleStyle}>{badge.title}</div>
-      <div style={memberDescriptionStyle}>{badge.description}</div>
-      
-      <div style={benefitsStyle}>
-        {badge.benefits.join(' • ')}
+      <div style={{ textAlign: 'center', marginTop: '16px' }}>
+        <div style={{ fontSize: '18px', fontWeight: 600, color: displayAward.color }}>
+          {displayAward.title}
+        </div>
+        <div style={{ fontSize: '14px', color: '#6b7280', marginTop: '4px' }}>
+          {memberName}
+        </div>
+        {totalAwardsCount > 1 && (
+          <div style={{ fontSize: '12px', color: '#9ca3af', marginTop: '8px' }}>
+            +{totalAwardsCount - 1} more award{totalAwardsCount > 2 ? 's' : ''}
+          </div>
+        )}
       </div>
 
       <div style={footerRow}>
         <AnalyzeWithWihyButton
-          cardContext={`Member Status: ${badge.title} (${badge.description}). Member: ${memberName}. Benefits: ${badge.benefits.join(', ')}.`}
-          userQuery="Tell me more about my membership benefits and how to make the most of my health tracking journey"
+          cardContext={`Awards: ${displayAward.title}. Total awards: ${totalAwardsCount}. Member: ${memberName}.`}
+          userQuery="Show me all my awards and achievements"
         />
       </div>
     </CardShell>
