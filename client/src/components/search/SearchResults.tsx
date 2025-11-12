@@ -200,22 +200,30 @@ const SearchResults: React.FC<SearchResultsProps> = ({
   const chatRef = useRef<FullScreenChatRef>(null);
   const [activeTab, setActiveTab] = useState<SearchTab>('overview');
 
-  // Tab bar styles
+  // Tab bar styles - Good button sizes without container background
   const tabBarStyles = {
     tab: {
-      padding: '8px 14px',
-      borderRadius: 9999,
-      fontSize: 14,
+      padding: '12px 20px',
+      borderRadius: '24px',
+      fontSize: '15px',
       fontWeight: 600 as const,
       cursor: 'pointer',
-      border: 'none'
+      border: 'none',
+      transition: 'all 0.2s ease',
+      outline: 'none',
+      whiteSpace: 'nowrap' as const,
+      userSelect: 'none' as const
     },
     tabActive: {
       background: '#111827',
-      color: '#fff'
+      color: '#ffffff'
     },
     tabInactive: {
       background: '#f3f4f6',
+      color: '#111827'
+    },
+    tabHover: {
+      background: '#e5e7eb',
       color: '#111827'
     }
   };
@@ -707,11 +715,11 @@ const SearchResults: React.FC<SearchResultsProps> = ({
               justifyContent: 'center', 
               alignItems: 'center', 
               marginTop: '80px',
-              marginBottom: '16px' 
+              marginBottom: '24px' 
             }}>
               <div className="results-tabs" style={{
                 display: 'flex',
-                gap: 8,
+                gap: '8px',
                 alignItems: 'center'
               }}>
                 {TABS.map(tab => {
@@ -720,6 +728,25 @@ const SearchResults: React.FC<SearchResultsProps> = ({
                     <button
                       key={tab.value}
                       onClick={() => setActiveTab(tab.value)}
+                      onMouseEnter={(e) => {
+                        if (!active) {
+                          const target = e.target as HTMLButtonElement;
+                          Object.assign(target.style, {
+                            ...tabBarStyles.tab,
+                            ...tabBarStyles.tabInactive,
+                            ...tabBarStyles.tabHover
+                          });
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (!active) {
+                          const target = e.target as HTMLButtonElement;
+                          Object.assign(target.style, {
+                            ...tabBarStyles.tab,
+                            ...tabBarStyles.tabInactive
+                          });
+                        }
+                      }}
                       style={{
                         ...tabBarStyles.tab,
                         ...(active ? tabBarStyles.tabActive : tabBarStyles.tabInactive)
@@ -788,15 +815,6 @@ const SearchResults: React.FC<SearchResultsProps> = ({
 
                   {/* Awards & Achievements Section */}
                   <div style={{ marginBottom: getResponsiveSpacing() }}>
-                    <h2 style={{
-                      fontSize: '20px',
-                      fontWeight: '600',
-                      color: '#374151',
-                      marginBottom: '16px',
-                      textAlign: 'left'
-                    }}>
-                      Awards & Achievements
-                    </h2>
                     <div style={{ 
                       display: 'grid', 
                       gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', 
