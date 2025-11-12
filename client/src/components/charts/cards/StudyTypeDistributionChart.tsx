@@ -221,7 +221,7 @@ const StudyTypeDistributionChart: React.FC<StudyTypeDistributionChartProps> = ({
       background: "white",
       border: "1px solid #e5e7eb",
       boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
-      height: 500,
+      height: window.innerWidth <= 768 ? 650 : 500, // Much taller on mobile for text content
       overflow: "hidden"
     }}>
       <h3 style={{ fontSize: 24, fontWeight: 600, color: "#9CA3AF", margin: 0, marginBottom: 20 }}>
@@ -229,35 +229,6 @@ const StudyTypeDistributionChart: React.FC<StudyTypeDistributionChartProps> = ({
       </h3>
       
       <div style={{ flex: 1, position: 'relative' }}>
-        {/* Center text for doughnut chart */}
-        {chartStyle === 'doughnut' && (
-          <div
-            style={{
-              position: 'absolute',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-              textAlign: 'center',
-              pointerEvents: 'none',
-              zIndex: 1
-            }}
-          >
-            <div style={{ 
-              fontSize: '20px',
-              fontWeight: 'bold',
-              color: '#374151'
-            }}>
-              {totalStudies}
-            </div>
-            <div style={{ 
-              fontSize: '12px',
-              color: '#6b7280'
-            }}>
-              Total Studies
-            </div>
-          </div>
-        )}
-        
         <ChartComponent data={chartData} options={options} />
       </div>
       
@@ -265,11 +236,12 @@ const StudyTypeDistributionChart: React.FC<StudyTypeDistributionChartProps> = ({
       {showLabels && (
         <div style={{ 
           marginTop: '12px', 
-          fontSize: '12px',
+          fontSize: window.innerWidth <= 768 ? '11px' : '12px',
           color: '#6b7280',
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
-          gap: '8px'
+          gridTemplateColumns: window.innerWidth <= 768 ? '1fr' : 'repeat(auto-fit, minmax(120px, 1fr))',
+          gap: window.innerWidth <= 768 ? '6px' : '8px',
+          textAlign: window.innerWidth <= 768 ? 'center' : 'left'
         }}>
           <div>
             <strong style={{ color: '#374151' }}>Total Studies:</strong> {totalStudies}

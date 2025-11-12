@@ -169,7 +169,7 @@ const MacronutrientPieChart: React.FC<MacronutrientPieChartProps> = ({
       background: "white",
       border: "1px solid #e5e7eb",
       boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
-      height: 400,
+      height: window.innerWidth <= 768 ? 550 : 400,
       overflow: "hidden",
       textAlign: 'center'
     }}>

@@ -6,8 +6,9 @@
     min-height: 100vh;
     display: flex;
     flex-direction: column;
-    padding-top: var(--vh-header-height);
+    padding-top: calc(var(--vh-header-height) * 0.75); /* Use 75% of header height to reduce white space */
     overflow: hidden;
+    background-color: #f0f7ff; /* Match the light blue background of other dashboard elements */
   }
 }
 
@@ -25,6 +26,7 @@
   .dashboard-main-content {
     padding: 4px 8px;
     align-items: center;
+    min-height: calc(100vh - (var(--vh-header-height) * 0.75)); /* Use 75% of header height */
   }
 }
 
@@ -51,6 +53,7 @@
   .dashboard-grid {
     grid-template-columns: 1fr;
     grid-template-rows: 1fr 300px;
+    min-height: calc(100vh - (var(--vh-header-height) * 0.75) - 40px); /* Use 75% of header height */
   }
 }
 
