@@ -74,8 +74,6 @@ interface MembersCardProps {
   memberCardType?: MemberCardType;
   memberName?: string;
   awards?: Award[];
-  hasAnyAwards?: boolean;
-  data?: any;
 }
 
 // Badge configuration mapping
@@ -120,11 +118,7 @@ const badgeConfig = {
 const MembersCard: React.FC<MembersCardProps> = ({ 
   memberCardType = 'bronze', // Default to bronze badge to ensure display
   memberName = 'Health Enthusiast',
-  awards = [],
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  hasAnyAwards = true, // Default to true to show badge
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  data 
+  awards = []
 }) => {
   // Determine primary display (membership card or first award)
   const primaryAward = memberCardType ? {
