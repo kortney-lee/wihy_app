@@ -23,7 +23,7 @@
 
 @media (max-width: 768px) {
   .dashboard-main-content {
-    padding: 8px 12px;
+    padding: 4px 8px;
     align-items: center;
   }
 }
@@ -116,6 +116,12 @@
   background-color: #f0f7ff; /* Very light blue background */
 }
 
+@media (max-width: 768px) {
+  .health-dashboard-content {
+    padding: 5px 8px 0 8px;
+  }
+}
+
 .dashboard-title {
   font-size: 28px;
   font-weight: 600;
@@ -127,8 +133,9 @@
 
 @media (max-width: 768px) {
   .dashboard-title {
-    font-size: 24px;
-    margin-bottom: 20px;
+    font-size: 22px;
+    margin-bottom: 12px;
+    margin-top: 8px;
   }
 }
 
@@ -402,6 +409,26 @@
 .floating-chat-button:hover {
   transform: scale(1.1);
   box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+}
+
+@media (max-width: 768px) {
+  .floating-chat-button {
+    bottom: 16px;
+    right: 16px;
+    width: 56px;
+    height: 56px;
+    font-size: 22px;
+  }
+}
+
+@media (max-width: 480px) {
+  .floating-chat-button {
+    bottom: 12px;
+    right: 12px;
+    width: 52px;
+    height: 52px;
+    font-size: 20px;
+  }
 }
 
 /* Analysis Charts Sidebar */

@@ -200,19 +200,23 @@ const SearchResults: React.FC<SearchResultsProps> = ({
   const chatRef = useRef<FullScreenChatRef>(null);
   const [activeTab, setActiveTab] = useState<SearchTab>('overview');
 
-  // Tab bar styles - Good button sizes without container background
+  // Tab bar styles - Responsive with mobile-friendly touch targets
   const tabBarStyles = {
     tab: {
-      padding: '12px 20px',
-      borderRadius: '24px',
-      fontSize: '15px',
+      padding: windowWidth < 768 ? '10px 16px' : '12px 20px',
+      borderRadius: windowWidth < 768 ? '20px' : '24px',
+      fontSize: windowWidth < 768 ? '14px' : '15px',
       fontWeight: 600 as const,
       cursor: 'pointer',
       border: 'none',
       transition: 'all 0.2s ease',
       outline: 'none',
       whiteSpace: 'nowrap' as const,
-      userSelect: 'none' as const
+      userSelect: 'none' as const,
+      minHeight: windowWidth < 768 ? '44px' : 'auto', // Minimum touch target size
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center'
     },
     tabActive: {
       background: '#111827',
@@ -290,8 +294,11 @@ const SearchResults: React.FC<SearchResultsProps> = ({
   };
   
   const getResponsiveSpacing = () => {
-    // Responsive spacing based on screen size
-    return windowWidth < 768 ? '16px' : '32px';
+    // Compact spacing for mobile to reduce white space
+    if (windowWidth < 480) return '8px'; // Very small mobile
+    if (windowWidth < 768) return '12px'; // Mobile
+    if (windowWidth < 1024) return '20px'; // Tablet
+    return '32px'; // Desktop
   };
 
   // Filter charts based on active tab using the proper function from chartTypes.ts
@@ -714,13 +721,18 @@ const SearchResults: React.FC<SearchResultsProps> = ({
               display: 'flex', 
               justifyContent: 'center', 
               alignItems: 'center', 
-              marginTop: '80px',
-              marginBottom: '24px' 
+              marginTop: windowWidth < 768 ? '0px' : '80px',
+              marginBottom: windowWidth < 768 ? '12px' : '24px',
+              padding: windowWidth < 768 ? '0 8px' : '0',
+              paddingTop: windowWidth < 768 ? '20px' : '0'
             }}>
               <div className="results-tabs" style={{
                 display: 'flex',
-                gap: '8px',
-                alignItems: 'center'
+                gap: windowWidth < 768 ? '6px' : '8px',
+                alignItems: 'center',
+                flexWrap: windowWidth < 768 ? 'wrap' : 'nowrap',
+                justifyContent: 'center',
+                maxWidth: '100%'
               }}>
                 {TABS.map(tab => {
                   const active = activeTab === tab.value;
@@ -760,12 +772,22 @@ const SearchResults: React.FC<SearchResultsProps> = ({
             </div>
 
             {/* Live Dashboard */}
-            <div className="health-dashboard-content">
+            <div className="health-dashboard-content" style={{
+              padding: windowWidth < 768 ? '5px 8px 0 8px' : '10px 20px',
+              maxWidth: '100%',
+              overflowX: 'hidden'
+            }}>
               {/* Tab-specific content */}
               {activeTab === 'overview' && (
                 <>
                   {/* Dashboard Header */}
-                  <h1 className="dashboard-title">
+                  <h1 className="dashboard-title" style={{
+                    fontSize: windowWidth < 768 ? '22px' : '28px',
+                    textAlign: windowWidth < 768 ? 'center' : 'left',
+                    marginBottom: windowWidth < 768 ? '12px' : '15px',
+                    marginTop: windowWidth < 768 ? '8px' : '10px',
+                    padding: windowWidth < 768 ? '0 8px' : '0'
+                  }}>
                     Your Health Snapshot
                   </h1>
                   
@@ -796,8 +818,8 @@ const SearchResults: React.FC<SearchResultsProps> = ({
                   <div style={{ marginBottom: getResponsiveSpacing() }}>
                     <div style={{ 
                       display: 'grid', 
-                      gridTemplateColumns: '1fr 1fr', 
-                      gap: '20px'
+                      gridTemplateColumns: windowWidth < 768 ? '1fr' : '1fr 1fr', 
+                      gap: windowWidth < 768 ? '16px' : '20px'
                     }}>
                       <ResearchQualityGauge 
                         score={75}
@@ -817,8 +839,8 @@ const SearchResults: React.FC<SearchResultsProps> = ({
                   <div style={{ marginBottom: getResponsiveSpacing() }}>
                     <div style={{ 
                       display: 'grid', 
-                      gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', 
-                      gap: '20px'
+                      gridTemplateColumns: windowWidth < 480 ? '1fr' : windowWidth < 768 ? 'repeat(2, 1fr)' : 'repeat(auto-fit, minmax(280px, 1fr))', 
+                      gap: windowWidth < 768 ? '16px' : '20px'
                     }}>
                       <MembersCard 
                         memberCardType="bronze"
@@ -846,8 +868,8 @@ const SearchResults: React.FC<SearchResultsProps> = ({
                   {/* Additional Overview Cards */}
                   <div style={{ 
                     display: 'grid', 
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', 
-                    gap: '20px', 
+                    gridTemplateColumns: windowWidth < 768 ? '1fr' : 'repeat(auto-fit, minmax(300px, 1fr))', 
+                    gap: windowWidth < 768 ? '16px' : '20px', 
                     marginBottom: getResponsiveSpacing() 
                   }}>
                     <NutritionChart 
@@ -870,7 +892,13 @@ const SearchResults: React.FC<SearchResultsProps> = ({
 
               {activeTab === 'charts' && (
                 <>
-                  <h1 className="dashboard-title">
+                  <h1 className="dashboard-title" style={{
+                    fontSize: windowWidth < 768 ? '22px' : '28px',
+                    textAlign: windowWidth < 768 ? 'center' : 'left',
+                    marginBottom: windowWidth < 768 ? '12px' : '15px',
+                    marginTop: windowWidth < 768 ? '8px' : '10px',
+                    padding: windowWidth < 768 ? '0 8px' : '0'
+                  }}>
                     Activity & Movement Trends
                   </h1>
                   
@@ -887,7 +915,13 @@ const SearchResults: React.FC<SearchResultsProps> = ({
 
               {activeTab === 'research' && (
                 <>
-                  <h1 className="dashboard-title">
+                  <h1 className="dashboard-title" style={{
+                    fontSize: windowWidth < 768 ? '22px' : '28px',
+                    textAlign: windowWidth < 768 ? 'center' : 'left',
+                    marginBottom: windowWidth < 768 ? '12px' : '15px',
+                    marginTop: windowWidth < 768 ? '8px' : '10px',
+                    padding: windowWidth < 768 ? '0 8px' : '0'
+                  }}>
                     Research & Analysis
                   </h1>
                   
@@ -905,7 +939,13 @@ const SearchResults: React.FC<SearchResultsProps> = ({
 
               {activeTab === 'nutrition' && (
                 <>
-                  <h1 className="dashboard-title">
+                  <h1 className="dashboard-title" style={{
+                    fontSize: windowWidth < 768 ? '22px' : '28px',
+                    textAlign: windowWidth < 768 ? 'center' : 'left',
+                    marginBottom: windowWidth < 768 ? '12px' : '15px',
+                    marginTop: windowWidth < 768 ? '8px' : '10px',
+                    padding: windowWidth < 768 ? '0 8px' : '0'
+                  }}>
                     Nutrition & Diet Analysis
                   </h1>
                   
@@ -923,7 +963,13 @@ const SearchResults: React.FC<SearchResultsProps> = ({
 
               {activeTab === 'insights' && (
                 <>
-                  <h1 className="dashboard-title">
+                  <h1 className="dashboard-title" style={{
+                    fontSize: windowWidth < 768 ? '22px' : '28px',
+                    textAlign: windowWidth < 768 ? 'center' : 'left',
+                    marginBottom: windowWidth < 768 ? '12px' : '15px',
+                    marginTop: windowWidth < 768 ? '8px' : '10px',
+                    padding: windowWidth < 768 ? '0 8px' : '0'
+                  }}>
                     Mind & Behavior Insights
                   </h1>
                   
