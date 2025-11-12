@@ -657,6 +657,8 @@
 
   .chart-section-card {
     padding: 16px;
+    min-height: 500px; /* Make chart cards taller to show all items */
+    height: auto; /* Allow automatic expansion for content */
   }
 
   .quick-insights-card {
@@ -703,6 +705,8 @@
   
   .chart-section-card {
     padding: 12px;
+    min-height: 480px; /* Ensure adequate height for very small screens too */
+    height: auto;
   }
   
   .quick-insights-card {
