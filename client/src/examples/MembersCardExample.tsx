@@ -32,6 +32,7 @@ const MembersCardExample: React.FC = () => {
             key={index}
             memberCardType={member.memberCardType}
             memberName={member.memberName}
+            hasAnyAwards={true}
           />
         ))}
       </div>
@@ -44,10 +45,11 @@ const MembersCardExample: React.FC = () => {
           borderRadius: '8px',
           overflow: 'auto'
         }}>
-{`// Basic usage
+{`// Basic usage - flexible for awards and membership
 <MembersCard 
   memberCardType="gold"
   memberName="John Doe"
+  hasAnyAwards={true}
 />
 
 // Available member card types:
@@ -62,7 +64,9 @@ const MembersCardExample: React.FC = () => {
 /assets/WihyBadgesSilver_2.png
 /assets/WihyBadgesGold_3.png
 /assets/WihyBadgesPlatinum__4.png
-/assets/WihyBadgesGreen_5.png`}
+/assets/WihyBadgesGreen_5.png
+
+// Now supports future awards expansion with Award interface`}
         </pre>
       </div>
     </div>

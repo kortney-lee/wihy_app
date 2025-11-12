@@ -248,6 +248,7 @@ const HealthDashboardGrid: React.FC<HealthDashboardGridProps> = ({
   const isFullWidthCard = (chartType: ChartType): boolean => {
     const fullWidthCards = [
       ChartType.QUICK_INSIGHTS,
+      ChartType.MEMBERS_CARD,
       // Add other card types that should be full-width here
     ];
     return fullWidthCards.includes(chartType);
@@ -288,7 +289,7 @@ const HealthDashboardGrid: React.FC<HealthDashboardGridProps> = ({
       { id: 'card-1', title: 'Quick Insights', chartType: ChartType.QUICK_INSIGHTS, priority: 100 },
       
       // Priority 80-90: Essential health metrics
-      { id: 'card-members', title: 'Membership Status', chartType: ChartType.MEMBERS_CARD, priority: 95 },
+      { id: 'card-members', title: 'Awards & Achievements', chartType: ChartType.MEMBERS_CARD, priority: 95 },
       { id: 'card-2', title: 'BMI Analysis', chartType: ChartType.BMI_DOMAIN, priority: 90 },
       { id: 'card-3', title: 'Health Score', chartType: ChartType.HEALTH_SCORE, priority: 85 },
       { id: 'card-4', title: 'Health Risk Analysis', chartType: ChartType.HEALTH_RISK, priority: 80 },
