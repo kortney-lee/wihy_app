@@ -458,12 +458,38 @@
 }
 
 .news-meta {
-  display: flex;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-rows: auto auto;
   align-items: center;
-  gap: 8px;
+  gap: 8px 12px;
   margin-bottom: 12px;
   font-size: 12px;
-  flex-wrap: wrap;
+}
+
+/* [ Analyze Button ] [    Category ]
+   [                ] [       Time  ] */
+
+/* Top-left: Analyze button */
+.news-meta .wihy-btn-wrapper {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+/* Top-right: Category */
+.news-meta .news-category {
+  grid-column: 2;
+  grid-row: 1;
+  justify-self: end;
+}
+
+/* Bottom-right: Time */
+.news-meta .news-time {
+  grid-column: 2;
+  grid-row: 2;
+  justify-self: end;
+  font-size: 11px;
+  color: #94a3b8;
 }
 
 /* Source Styling */
