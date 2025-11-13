@@ -249,8 +249,6 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
       
       // Use Wihy Services API for comprehensive food scanning
       const scanResult = await wihyScanningService.scanImage(file, {
-        include_charts: true,
-        include_ingredients: true,
         health_goals: ['nutrition_analysis', 'health_insights'],
         dietary_restrictions: []
       });
@@ -354,8 +352,6 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
     
     try {
       const searchResult = await wihyScanningService.scanProductName(productName, {
-        include_charts: true,
-        include_ingredients: true,
         health_goals: ['nutrition_analysis'],
         dietary_restrictions: []
       });

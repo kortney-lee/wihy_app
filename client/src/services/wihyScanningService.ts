@@ -1,16 +1,25 @@
 // Wihy Services API Scanning Integration
-// Integrates with https://services.wihy.ai for comprehensive food scanning
+// Uses Universal Search API for comprehensive food scanning with rich business logic
+
+import { universalSearchService, UniversalSearchResponse } from './universalSearchService';
 
 export interface ScanRequest {
-  // Input types based on Wihy Services API
   barcode?: string;
   product_name?: string;
   image?: string; // Base64 encoded image data
-  user_context?: {
-    include_charts?: boolean;
-    include_ingredients?: boolean;
+  context?: {
     health_goals?: string[];
     dietary_restrictions?: string[];
+    age?: number;
+    weight?: number;
+    gender?: string;
+    background?: string;
+    interests?: string[];
+  };
+  options?: {
+    include_charts?: boolean;
+    include_recommendations?: boolean;
+    limit?: number;
   };
 }
 
@@ -123,24 +132,21 @@ class WihyScanningService {
   private readonly baseUrl = 'https://services.wihy.ai';
   
   /**
-   * Test API connectivity
+   * Test API connectivity via Universal Search API
    */
   async testConnection(): Promise<{ available: boolean; error?: string }> {
     try {
-      console.log('🔍 Testing WiHy Scanning API connectivity...');
-      const response = await fetch(`${this.baseUrl}/health`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        }
-      });
+      console.log('🔍 Testing WiHy Scanning API connectivity via Universal Search...');
       
-      if (response.ok) {
-        console.log('✅ WiHy Scanning API is available');
+      // Test Universal Search API since that's what handles the business logic
+      const universalSearchTest = await universalSearchService.testConnection();
+      
+      if (universalSearchTest.available) {
+        console.log('✅ Universal Search API available for scanning');
         return { available: true };
       } else {
-        console.warn(`⚠️ WiHy Scanning API returned ${response.status}`);
-        return { available: false, error: `HTTP ${response.status}` };
+        console.warn('⚠️ Universal Search API not available:', universalSearchTest.error);
+        return { available: false, error: universalSearchTest.error };
       }
     } catch (error) {
       console.error('❌ WiHy Scanning API connectivity test failed:', error);
@@ -169,7 +175,7 @@ class WihyScanningService {
   /**
    * Scan food by image using the correct WIHY Scanner API endpoint
    */
-  async scanImage(image: File | string, userContext?: ScanRequest['user_context']): Promise<ScanResult> {
+  async scanImage(image: File | string, userContext?: ScanRequest['context']): Promise<ScanResult> {
     try {
       let imageData: string;
       
@@ -261,139 +267,163 @@ class WihyScanningService {
   }
 
   /**
-   * Scan food by barcode using the correct WIHY Scanner API endpoint
+   * Scan food by barcode using Universal Search API with full business logic
    */
   async scanBarcode(barcode: string, userContext?: any): Promise<BarcodeScanResult> {
     try {
-      console.log('🔍 WiHy Scanning API - barcode scan:', barcode);
+      console.log('🔍 WiHy Scanning API - barcode scan via Universal Search:', barcode);
 
-      // Use the correct GET endpoint with barcode in URL and user context as query parameter
-      let url = `${this.baseUrl}/api/scan/barcode/${encodeURIComponent(barcode)}`;
-
-      // Add user context as query parameter if provided
-      if (userContext) {
-        const userContextParam = encodeURIComponent(JSON.stringify({
+      // Use Universal Search API for barcode scanning with rich business logic
+      const universalSearchResult = await universalSearchService.search({
+        query: barcode,
+        type: 'barcode',
+        context: {
           health_goals: ['nutrition_analysis'],
           dietary_restrictions: [],
           ...userContext
-        }));
-        url += `?userContext=${userContextParam}`;
-      }
-
-      const response = await fetch(url, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
+        },
+        options: {
+          include_charts: true,
+          include_recommendations: true,
+          limit: 1
         }
       });
 
-      if (!response.ok) {
-        if (response.status === 404) {
-          return {
-            success: false,
-            error: 'Product not found in database'
-          };
-        }
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
-
-      const data = await response.json();
-      console.log('✅ WiHy Scanning API - barcode response:', data);
-
-      // Check if we have valid analysis data (API doesn't return a success field when successful)
-      const hasValidData = data.analysis || data.product_info || data.nutrition_facts;
-
-      return {
-        success: hasValidData,
-        analysis: data.analysis,
-        health_score: data.health_score,
-        nova_group: data.nova_group,
-        product: data.product_info,
-        nutrition: data.nutrition_facts,
-        health_analysis: {
-          alerts: data.health_alerts || [],
-          recommendations: data.analysis?.recommendations || [],
-          processing_level: {
-            nova_group: data.nova_group || 0,
-            description: `NOVA Group ${data.nova_group || 0}`,
-            details: data.analysis?.summary || ''
+      if (universalSearchResult.success && universalSearchResult.results.metadata) {
+        const metadata = universalSearchResult.results.metadata;
+        
+        // Transform Universal Search response to BarcodeScanResult format
+        const transformedResult: BarcodeScanResult = {
+          success: true,
+          analysis: {
+            summary: universalSearchResult.results.summary || 
+                    `${metadata.product_name} - Health Score: ${metadata.health_score}/100`,
+            recommendations: universalSearchResult.recommendations || [],
+            confidence_score: universalSearchResult.results.confidence_score || 0.8,
+            charts: universalSearchResult.charts
+          },
+          health_score: metadata.health_score,
+          nova_group: metadata.nova_group,
+          product: {
+            name: metadata.product_name,
+            brand: metadata.brand,
+            barcode: metadata.barcode || barcode,
+            categories: metadata.categories,
+            nova_group: metadata.nova_group,
+            image_url: undefined // Not provided in current contract
+          },
+          nutrition: {
+            score: metadata.nutrition_score,
+            grade: metadata.grade,
+            per_100g: {
+              energy_kcal: metadata.nutrition_facts.calories,
+              fat: metadata.nutrition_facts.fat,
+              saturated_fat: metadata.nutrition_facts.saturated_fat,
+              carbohydrates: metadata.nutrition_facts.carbohydrates,
+              sugars: metadata.nutrition_facts.sugars,
+              fiber: metadata.nutrition_facts.fiber,
+              proteins: metadata.nutrition_facts.protein,
+              salt: metadata.nutrition_facts.salt,
+              sodium: metadata.nutrition_facts.sodium
+            },
+            daily_values: {
+              energy: metadata.nutrition_analysis.daily_value_percentages.calories,
+              fat: metadata.nutrition_analysis.daily_value_percentages.fat,
+              saturated_fat: metadata.nutrition_analysis.daily_value_percentages.saturated_fat
+            }
+          },
+          health_analysis: {
+            alerts: metadata.nutrition_analysis.health_alerts.map(alert => ({
+              type: alert.type,
+              message: alert.message,
+              severity: alert.level
+            })),
+            recommendations: metadata.nutrition_analysis.areas_of_concern.map(concern => concern.recommendation),
+            processing_level: {
+              nova_group: metadata.nova_group,
+              description: metadata.nova_description,
+              details: metadata.processing_level
+            }
+          },
+          scan_metadata: {
+            scan_id: `scan_${Date.now()}`,
+            timestamp: universalSearchResult.timestamp,
+            confidence_score: universalSearchResult.results.confidence_score || 0.8,
+            data_sources: ['universal_search_api', 'openfoodfacts']
           }
-        },
-        scan_metadata: {
-          scan_id: data.scan_id || '',
-          timestamp: data.timestamp || new Date().toISOString(),
-          confidence_score: data.analysis?.confidence_score || 0,
-          data_sources: data.data_sources || []
-        }
-      };
+        };
+
+        console.log('✅ Universal Search barcode scan successful');
+        return transformedResult;
+      } else {
+        return {
+          success: false,
+          error: universalSearchResult.error || 'No barcode data found'
+        } as BarcodeScanResult;
+      }
 
     } catch (error) {
       console.error('❌ WiHy Scanning API - barcode scan error:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Barcode scanning failed'
-      };
+      } as BarcodeScanResult;
     }
   }
 
   /**
-   * Scan food by product name using the correct WIHY Scanner API endpoint
+   * Scan food by product name using Universal Search API with full business logic
    */
-  async scanProductName(productName: string, userContext?: ScanRequest['user_context']): Promise<ScanResult> {
+  async scanProductName(productName: string, userContext?: ScanRequest['context']): Promise<ScanResult> {
     try {
-      console.log('🔍 WiHy Scanning API - product name scan:', productName);
+      console.log('🔍 WiHy Scanning API - product name scan via Universal Search:', productName);
 
-      // Encode product name for URL and user context as query parameter
-      const encodedProductName = encodeURIComponent(productName);
-      let url = `${this.baseUrl}/api/scan/product/${encodedProductName}`;
-
-      // Add user context as query parameter if provided
-      if (userContext) {
-        const userContextParam = encodeURIComponent(JSON.stringify({
+      // Use Universal Search API for food name searching with rich business logic
+      const universalSearchResult = await universalSearchService.search({
+        query: productName,
+        type: 'food',
+        context: {
           health_goals: ['nutrition_analysis'],
           dietary_restrictions: [],
           ...userContext
-        }));
-        url += `?userContext=${userContextParam}`;
-      }
-
-      const response = await fetch(url, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
+        },
+        options: {
+          include_charts: true,
+          include_recommendations: true,
+          limit: 1
         }
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      if (universalSearchResult.success) {
+        const transformedResult: ScanResult = {
+          success: true,
+          analysis: {
+            summary: universalSearchResult.results.summary || 
+                    `Analysis for ${productName}`,
+            recommendations: universalSearchResult.recommendations || [],
+            confidence_score: universalSearchResult.results.confidence_score || 0.7,
+            charts: universalSearchResult.charts,
+            metadata: universalSearchResult.results.metadata
+          },
+          timestamp: universalSearchResult.timestamp,
+          processing_time: universalSearchResult.processing_time_ms
+        };
+
+        console.log('✅ Universal Search product name scan successful');
+        return transformedResult;
+      } else {
+        return {
+          success: false,
+          error: universalSearchResult.error || 'No product data found',
+          timestamp: new Date().toISOString()
+        };
       }
-
-      const data = await response.json();
-      console.log('✅ WiHy Scanning API - product response:', data);
-
-      return {
-        success: data.success,
-        analysis: {
-          summary: data.analysis?.summary || `${productName} analysis`,
-          recommendations: data.analysis?.recommendations || [],
-          confidence_score: data.analysis?.confidence_score || 0,
-          charts: data.charts_data,
-          metadata: {
-            health_score: data.health_score,
-            nova_group: data.nova_group,
-            product_info: data.product_info,
-            nutrition_facts: data.nutrition_facts
-          }
-        },
-        timestamp: data.timestamp || new Date().toISOString(),
-        processing_time: data.processing_time
-      };
 
     } catch (error) {
       console.error('❌ WiHy Scanning API - product name scan error:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Product name scanning failed',
+        error: error instanceof Error ? error.message : 'Product scanning failed',
         timestamp: new Date().toISOString()
       };
     }
