@@ -278,7 +278,7 @@ class UniversalSearchService {
   async testConnection(): Promise<{ available: boolean; error?: string }> {
     try {
       console.log('🔍 Testing Universal Search API connectivity...');
-      const response = await fetch(`${this.baseUrl}/api/search`, {
+      const response = await fetch(`${this.baseUrl}/search`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -311,7 +311,7 @@ class UniversalSearchService {
   async search(request: UniversalSearchRequest): Promise<UniversalSearchResponse> {
     try {
       console.log('🔍 Universal Search API - starting search');
-      console.log('📡 API Endpoint:', `${this.baseUrl}/api/search`);
+      console.log('📡 API Endpoint:', `${this.baseUrl}/search`);
       console.log('📤 Request payload:', {
         query: request.query,
         type: request.type || 'auto',
@@ -319,7 +319,7 @@ class UniversalSearchService {
         options: request.options
       });
 
-      const response = await fetch(`${this.baseUrl}/api/search`, {
+      const response = await fetch(`${this.baseUrl}/search`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
