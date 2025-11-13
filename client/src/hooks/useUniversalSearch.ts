@@ -100,11 +100,9 @@ export const useUniversalSearch = (options: UseUniversalSearchOptions = {}) => {
     const fullRequest: UniversalSearchRequest = {
       ...request,
       options: { ...defaultOptions, ...request.options },
-      context: { 
-        user_preferences: {
-          ...defaultContext.user_preferences,
-          ...request.context?.user_preferences
-        }
+      context: {
+        ...defaultContext,
+        ...request.context
       }
     };
 
@@ -198,22 +196,18 @@ export const useUniversalSearch = (options: UseUniversalSearchOptions = {}) => {
    */
   const searchHealth = useCallback(async (
     query: string, 
-    healthGoals?: string[], 
+    healthGoals?: string[],
     background?: string
   ): Promise<UniversalSearchResponse> => {
     return search({
       query,
       type: 'health',
       context: {
-        user_preferences: {
-          health_goals: healthGoals || ['general_health'],
-          background: background || 'general_public'
-        }
+        health_goals: healthGoals || ['general_health'],
+        background: background || 'general_public'
       }
     });
-  }, [search]);
-
-  /**
+  }, [search]);  /**
    * Research-focused search with enhanced AI analysis
    */
   const searchResearch = useCallback(async (
@@ -224,11 +218,9 @@ export const useUniversalSearch = (options: UseUniversalSearchOptions = {}) => {
       query,
       type: 'research',
       context: {
-        user_preferences: {
-          background: userBackground || 'general_public',
-          health_goals: ['research_information'],
-          interests: ['clinical_trials', 'evidence_based_medicine']
-        }
+        background: userBackground || 'general_public',
+        health_goals: ['research_information'],
+        interests: ['clinical_trials', 'evidence_based_medicine']
       },
       options: {
         ...defaultOptions,
@@ -249,10 +241,8 @@ export const useUniversalSearch = (options: UseUniversalSearchOptions = {}) => {
       query,
       type: 'food',
       context: {
-        user_preferences: {
-          dietary_restrictions: dietaryRestrictions || [],
-          health_goals: healthGoals || ['nutrition_analysis']
-        }
+        dietary_restrictions: dietaryRestrictions || [],
+        health_goals: healthGoals || ['nutrition_analysis']
       }
     });
   }, [search]);

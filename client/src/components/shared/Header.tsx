@@ -273,7 +273,6 @@ const Header: React.FC<HeaderProps> = ({
           query: universalResponse.query,
           detected_type: universalResponse.detected_type,
           processing_time: universalResponse.processing_time_ms,
-          ai_processing_time: universalResponse.ai_processing_time_ms,
           timestamp: universalResponse.timestamp,
           
           // Format for results page display
@@ -285,13 +284,10 @@ const Header: React.FC<HeaderProps> = ({
           // Raw results for advanced components
           raw_results: universalResponse.results,
           
-          // Enhanced AI insights
-          ai_enhancement: universalResponse.results.ai_enhancement,
-          
           // Metadata
           data_source: 'universal_search_api',
-          has_ai_enhancement: !!universalResponse.results.ai_enhancement,
-          confidence_score: universalResponse.results.ai_enhancement?.confidence || 0
+          has_charts: !!universalResponse.charts,
+          recommendations: universalResponse.recommendations || []
         };
 
         console.log('✅ Universal Search successful with enhanced formatting');

@@ -9,19 +9,22 @@ import { API_CONFIG } from '../config/apiConfig';
 
 export interface UniversalSearchRequest {
   query: string;
-  type?: 'auto' | 'food' | 'research' | 'news' | 'recipe' | 'health' | 'meal_education';
+  type?: 'auto' | 'barcode' | 'food' | 'research' | 'news' | 'recipe' | 'health' | 'meal_education';
   context?: {
-    user_preferences?: {
-      health_goals?: string[];
-      dietary_restrictions?: string[];
-      background?: string;
-      interests?: string[];
-    };
+    health_goals?: string[];
+    dietary_restrictions?: string[];
+    age?: number;
+    weight?: number;
+    gender?: string;
+    background?: string;
+    interests?: string[];
   };
   options?: {
     limit?: number;
+    maxResults?: number;
     include_charts?: boolean;
     include_recommendations?: boolean;
+    include_ai_enhancement?: boolean;
   };
 }
 
@@ -30,61 +33,228 @@ export interface UniversalSearchResponse {
   query: string;
   detected_type: string;
   processing_time_ms: number;
-  ai_processing_time_ms?: number;
   timestamp: string;
   results: {
-    // Basic data from appropriate service
-    articles?: any[];
-    total_research_count?: number;
-    returned_count?: number;
+    // Research results
+    articles?: Array<{
+      id: string;
+      title: string;
+      authors: string;
+      journal: string;
+      publicationYear: number;
+      evidenceLevel: string;
+      links: {
+        pmcWebsite: string;
+        pdfDownload: string;
+      };
+    }>;
+    total_found?: number;
     quality_score?: number;
     evidence_level?: string;
+    quality_assessment?: {
+      methodology_score: number;
+      sample_size_adequacy: string;
+      bias_risk: string;
+      statistical_power: string;
+    };
+    outcomes?: {
+      primary_outcomes: string[];
+      secondary_outcomes: string[];
+      safety_outcomes: string[];
+    };
+    total_research_count?: number;
+    returned_count?: number;
     
-    // Food/nutrition data
-    nutrition_facts?: any;
-    health_score?: number;
-    nova_group?: number;
+    // Food/Barcode analysis results
+    summary?: string;
+    confidence_score?: number;
+    metadata?: {
+      scan_type: 'barcode' | 'food_name';
+      product_name: string;
+      brand: string;
+      categories: string[];
+      barcode?: string;
+      nova_group: number;
+      nova_description: string;
+      processing_level: string;
+      health_score: number;
+      nutrition_score: number;
+      grade: string;
+      grade_description: string;
+      health_category: string;
+      
+      nutrition_facts: {
+        calories: number;
+        protein: number;
+        carbohydrates: number;
+        fat: number;
+        saturated_fat: number;
+        fiber: number;
+        sugars: number;
+        sodium: number;
+        salt: number;
+      };
+      
+      nutrition_analysis: {
+        overall_score: number;
+        component_scores: {
+          protein: number;
+          fiber: number;
+          sugars: number;
+          sodium: number;
+          saturated_fat: number;
+          calorie_density: number;
+          fat_balance: number;
+        };
+        daily_value_percentages: {
+          calories: number;
+          protein: number;
+          carbohydrates: number;
+          fat: number;
+          saturated_fat: number;
+          fiber: number;
+          sugars: number;
+          sodium: number;
+        };
+        health_alerts: Array<{
+          type: string;
+          level: 'warning' | 'info' | 'critical';
+          message: string;
+          recommendation: string;
+        }>;
+        positive_aspects: Array<{
+          aspect: string;
+          message: string;
+          benefit: string;
+        }>;
+        areas_of_concern: Array<{
+          concern: string;
+          message: string;
+          impact: string;
+          recommendation: string;
+        }>;
+        serving_recommendations: {
+          suggested_serving_size: string;
+          frequency: 'daily' | 'weekly' | 'rarely';
+          daily_limit: string | null;
+          pairing_suggestions: string[];
+          timing_recommendations: string[];
+        };
+      };
+      
+      additives: {
+        total_count: number;
+        concerning_additives: string[];
+        safety_level: 'safe' | 'concerning' | 'avoid';
+      };
+      allergens: string[];
+      labels: string[];
+    };
     
-    // News data
-    news_articles?: any[];
+    // News results
+    news_articles?: Array<{
+      title: string;
+      description: string;
+      url: string;
+      source: string;
+      publishedAt: string;
+      imageUrl: string;
+      category: string;
+    }>;
     
-    // Recipe data
-    recipes?: any[];
+    // Recipe results
+    type?: string;
+    message?: string;
+    example?: {
+      ingredients: string[];
+      instructions: string[];
+    };
+    endpoints?: {
+      parse_recipe: string;
+      parse_ingredient: string;
+      nutrition_summary: string;
+    };
     
-    // Meal education data
-    meals_found?: any[];
-    chart_data?: any;
-    educational_summary?: {
+    // Health assessment results
+    risk_assessment?: {
+      overallRiskLevel: 'low' | 'moderate' | 'high' | 'critical';
+      healthScore: number;
+      carcinogenicRisk: boolean;
+      riskFactors: string[];
+      protectiveFactors: string[];
+    };
+    health_warnings?: Array<{
+      type: string;
+      severity: 'low' | 'moderate' | 'high' | 'critical';
       message: string;
-      key_insights: string[];
+      recommendation: string;
+    }>;
+    prevention_strategies?: Array<{
+      strategy: string;
+      effectiveness: string;
+      evidence_level: string;
+    }>;
+    medical_disclaimer?: string;
+    
+    // Meal education results
+    meals_found?: Array<{
+      name: string;
+      category: string;
+      description: string;
+      nutrition_profile: any;
+      health_score: number;
+      recommendations: string[];
+    }>;
+    education_summary?: {
+      topic: string;
+      key_points: string[];
+      nutritional_insights: string[];
+      health_implications: string[];
       recommendations: string[];
     };
-    
-    // AI Enhancement (the key addition)
-    ai_enhancement?: {
-      research_summary?: string;
-      key_findings?: string[];
-      evidence_strength?: {
-        overall_quality: string;
-        confidence_level: string;
-        study_limitations: string;
-      };
-      practical_implications?: string[];
-      consumer_action?: {
-        immediate_steps: string[];
-        discussion_points: string[];
-      };
-      research_context?: {
-        study_scope: string;
-        recent_developments: string;
-        consensus_level: string;
-      };
-      clinical_significance?: string;
-      medical_disclaimers?: string[];
-      follow_up_research?: string;
-      confidence: number;
-    };
+    total_meals?: number;
   };
+  recommendations?: string[];
+  charts?: {
+    macronutrient_breakdown?: {
+      type: 'pie';
+      data: {
+        labels: string[];
+        datasets: Array<{
+          data: number[];
+          backgroundColor: string[];
+          borderColor: string[];
+          borderWidth: number;
+          hoverOffset: number;
+        }>;
+      };
+      options: {
+        responsive: boolean;
+        maintainAspectRatio: boolean;
+        plugins: {
+          legend: {
+            position: string;
+            labels: {
+              padding: number;
+              usePointStyle: boolean;
+            };
+          };
+        };
+      };
+    };
+    health_score_gauge?: {
+      type: 'gauge';
+      title: string;
+      value: number;
+      max_value: number;
+      color: string;
+      verdict: string;
+    };
+    generated_by?: string;
+    chart_count?: number;
+  };
+  context_used?: any;
+  options_used?: any;
   error?: string;
 }
 
@@ -108,11 +278,15 @@ class UniversalSearchService {
   async testConnection(): Promise<{ available: boolean; error?: string }> {
     try {
       console.log('🔍 Testing Universal Search API connectivity...');
-      const response = await fetch(`${this.baseUrl}/search/health`, {
-        method: 'GET',
+      const response = await fetch(`${this.baseUrl}/api/search`, {
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-        }
+        },
+        body: JSON.stringify({
+          query: 'test connection',
+          type: 'auto'
+        })
       });
       
       if (response.ok) {
@@ -137,7 +311,7 @@ class UniversalSearchService {
   async search(request: UniversalSearchRequest): Promise<UniversalSearchResponse> {
     try {
       console.log('🔍 Universal Search API - starting search');
-      console.log('📡 API Endpoint:', `${this.baseUrl}/search/`);
+      console.log('📡 API Endpoint:', `${this.baseUrl}/api/search`);
       console.log('📤 Request payload:', {
         query: request.query,
         type: request.type || 'auto',
@@ -145,7 +319,7 @@ class UniversalSearchService {
         options: request.options
       });
 
-      const response = await fetch(`${this.baseUrl}/search/`, {
+      const response = await fetch(`${this.baseUrl}/api/search`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -187,10 +361,10 @@ class UniversalSearchService {
       const hasValidData = data.results && (
         data.results.articles || 
         data.results.news_articles || 
-        data.results.recipes || 
+        data.results.example || 
         data.results.meals_found || 
-        data.results.nutrition_facts ||
-        data.results.ai_enhancement
+        data.results.metadata ||
+        data.results.summary
       );
       
       const apiSuccess = data.success !== false && hasValidData;
@@ -200,9 +374,12 @@ class UniversalSearchService {
         query: data.query || request.query,
         detected_type: data.detected_type || request.type || 'auto',
         processing_time_ms: data.processing_time_ms || 0,
-        ai_processing_time_ms: data.ai_processing_time_ms,
         timestamp: data.timestamp || new Date().toISOString(),
         results: data.results || {},
+        recommendations: data.recommendations || [],
+        charts: data.charts || {},
+        context_used: data.context_used || {},
+        options_used: data.options_used || {},
         error: apiSuccess ? undefined : (data.error || 'No valid data returned')
       };
       
@@ -243,11 +420,9 @@ class UniversalSearchService {
       query,
       type: 'research',
       context: {
-        user_preferences: {
-          background: userBackground || 'general_public',
-          health_goals: ['research_information'],
-          interests: ['clinical_trials', 'evidence_based_medicine']
-        }
+        background: userBackground || 'general_public',
+        health_goals: ['research_information'],
+        interests: ['clinical_trials', 'evidence_based_medicine']
       },
       options: {
         include_charts: true,
@@ -265,11 +440,9 @@ class UniversalSearchService {
       query,
       type: 'food',
       context: {
-        user_preferences: {
-          dietary_restrictions: dietaryRestrictions || [],
-          health_goals: healthGoals || ['nutrition_analysis'],
-          interests: ['nutrition', 'food_safety']
-        }
+        dietary_restrictions: dietaryRestrictions || [],
+        health_goals: healthGoals || ['nutrition_analysis'],
+        interests: ['nutrition', 'food_safety']
       },
       options: {
         include_charts: true,
@@ -287,11 +460,9 @@ class UniversalSearchService {
       query,
       type: 'health',
       context: {
-        user_preferences: {
-          health_goals: healthGoals || ['general_health'],
-          background: background || 'general_public',
-          interests: ['prevention', 'treatment_options', 'lifestyle']
-        }
+        health_goals: healthGoals || ['general_health'],
+        background: background || 'general_public',
+        interests: ['prevention', 'treatment_options', 'lifestyle']
       },
       options: {
         include_charts: true,
@@ -309,9 +480,7 @@ class UniversalSearchService {
       query,
       type: 'news',
       context: {
-        user_preferences: {
-          interests: ['health_news', 'medical_breakthroughs', 'public_health']
-        }
+        interests: ['health_news', 'medical_breakthroughs', 'public_health']
       },
       options: {
         include_charts: false,
@@ -329,10 +498,8 @@ class UniversalSearchService {
       query,
       type: 'meal_education',
       context: {
-        user_preferences: {
-          health_goals: ['nutrition_education'],
-          interests: ['food_ingredients', 'nutritional_quality']
-        }
+        health_goals: ['nutrition_education'],
+        interests: ['food_ingredients', 'nutritional_quality']
       },
       options: {
         include_charts: true,
@@ -371,7 +538,7 @@ class UniversalSearchService {
         const universalResult = await this.search({
           query,
           type: type as any,
-          context: { user_preferences: userContext },
+          context: userContext,
           options: {
             include_charts: true,
             include_recommendations: true,
@@ -451,50 +618,79 @@ class UniversalSearchService {
       };
     }
 
-    const aiEnhancement = result.results.ai_enhancement;
+    // Extract relevant data based on detected type
+    let summary = '';
+    let key_findings: string[] = [];
+    let recommendations: string[] = result.recommendations || [];
+
+    switch (result.detected_type) {
+      case 'barcode':
+      case 'food':
+        if (result.results.metadata) {
+          summary = result.results.summary || 
+                   `${result.results.metadata.product_name} - Health Score: ${result.results.metadata.health_score}/100`;
+          key_findings = [
+            `Grade: ${result.results.metadata.grade} (${result.results.metadata.grade_description})`,
+            `Processing Level: ${result.results.metadata.processing_level}`,
+            `NOVA Group: ${result.results.metadata.nova_group} (${result.results.metadata.nova_description})`
+          ];
+          if (result.results.metadata.nutrition_analysis?.health_alerts) {
+            key_findings.push(...result.results.metadata.nutrition_analysis.health_alerts.map(alert => alert.message));
+          }
+        }
+        break;
+      
+      case 'research':
+        summary = `Found ${result.results.total_found || 0} research articles`;
+        if (result.results.evidence_level) {
+          summary += ` with ${result.results.evidence_level} evidence level`;
+        }
+        if (result.results.articles && result.results.articles.length > 0) {
+          key_findings = result.results.articles.slice(0, 3).map(article => 
+            `${article.title} (${article.journal}, ${article.publicationYear})`
+          );
+        }
+        break;
+      
+      case 'health':
+        if (result.results.risk_assessment) {
+          summary = `Health Risk Level: ${result.results.risk_assessment.overallRiskLevel}`;
+          key_findings = result.results.risk_assessment.riskFactors || [];
+          if (result.results.prevention_strategies) {
+            recommendations.push(...result.results.prevention_strategies.map(s => s.strategy));
+          }
+        }
+        break;
+      
+      case 'news':
+        summary = `Found ${result.results.total_found || 0} recent health news articles`;
+        if (result.results.news_articles && result.results.news_articles.length > 0) {
+          key_findings = result.results.news_articles.slice(0, 3).map(article => article.title);
+        }
+        break;
+      
+      case 'meal_education':
+        if (result.results.education_summary) {
+          summary = result.results.education_summary.topic || 'Meal education information';
+          key_findings = result.results.education_summary.key_points || [];
+          recommendations = result.results.education_summary.recommendations || [];
+        }
+        break;
+      
+      default:
+        summary = 'Search completed successfully';
+    }
     
     return {
       type: 'universal_search',
       query: result.query,
       detected_type: result.detected_type,
       timestamp: result.timestamp,
-      
-      // Core content
-      summary: aiEnhancement?.research_summary || 
-               aiEnhancement?.clinical_significance || 
-               result.results.educational_summary?.message ||
-               'Search completed successfully',
-      
-      // Key findings
-      key_findings: aiEnhancement?.key_findings || 
-                   result.results.educational_summary?.key_insights || 
-                   [],
-      
-      // Actionable recommendations
-      recommendations: aiEnhancement?.consumer_action?.immediate_steps ||
-                      aiEnhancement?.practical_implications ||
-                      result.results.educational_summary?.recommendations ||
-                      [],
-      
-      // Discussion points for healthcare providers
-      discussion_points: aiEnhancement?.consumer_action?.discussion_points || [],
-      
-      // Evidence and context
-      evidence_strength: aiEnhancement?.evidence_strength,
-      research_context: aiEnhancement?.research_context,
-      
-      // Medical disclaimers
-      disclaimers: aiEnhancement?.medical_disclaimers || [],
-      
-      // Raw data for advanced users
+      summary,
+      key_findings,
+      recommendations,
       raw_results: result.results,
-      
-      // Confidence score
-      confidence: aiEnhancement?.confidence || 0,
-      
-      // Processing metrics
-      processing_time: result.processing_time_ms,
-      ai_processing_time: result.ai_processing_time_ms
+      processing_time: result.processing_time_ms
     };
   }
 
@@ -506,55 +702,118 @@ class UniversalSearchService {
       return result.error || 'Search failed';
     }
 
-    const ai = result.results.ai_enhancement;
-    const education = result.results.educational_summary;
-    
     let formatted = '';
     
-    // Title and summary
-    if (ai?.research_summary) {
-      formatted += `🔬 Research Summary:\n${ai.research_summary}\n\n`;
-    } else if (ai?.clinical_significance) {
-      formatted += `🏥 Clinical Significance:\n${ai.clinical_significance}\n\n`;
-    } else if (education?.message) {
-      formatted += `📚 Educational Insights:\n${education.message}\n\n`;
+    // Format based on detected type
+    switch (result.detected_type) {
+      case 'barcode':
+      case 'food':
+        if (result.results.metadata) {
+          formatted += `🍎 Product Analysis: ${result.results.metadata.product_name}\n`;
+          formatted += `📊 Health Score: ${result.results.metadata.health_score}/100 (Grade ${result.results.metadata.grade})\n`;
+          formatted += `🏭 Processing Level: ${result.results.metadata.processing_level}\n`;
+          
+          if (result.results.metadata.nutrition_analysis?.positive_aspects) {
+            formatted += `\n✅ Positive Aspects:\n`;
+            formatted += result.results.metadata.nutrition_analysis.positive_aspects
+              .map(aspect => `• ${aspect.message}`)
+              .join('\n') + '\n';
+          }
+          
+          if (result.results.metadata.nutrition_analysis?.areas_of_concern) {
+            formatted += `\n⚠️ Areas of Concern:\n`;
+            formatted += result.results.metadata.nutrition_analysis.areas_of_concern
+              .map(concern => `• ${concern.message}`)
+              .join('\n') + '\n';
+          }
+        }
+        break;
+      
+      case 'research':
+        formatted += `🔬 Research Results: Found ${result.results.total_found || 0} articles\n`;
+        if (result.results.evidence_level) {
+          formatted += `� Evidence Level: ${result.results.evidence_level}\n`;
+        }
+        if (result.results.articles && result.results.articles.length > 0) {
+          formatted += `\n� Key Studies:\n`;
+          formatted += result.results.articles.slice(0, 3)
+            .map(article => `• ${article.title} (${article.journal}, ${article.publicationYear})`)
+            .join('\n') + '\n';
+        }
+        break;
+      
+      case 'health':
+        if (result.results.risk_assessment) {
+          formatted += `🏥 Health Assessment\n`;
+          formatted += `🎯 Risk Level: ${result.results.risk_assessment.overallRiskLevel}\n`;
+          formatted += `📊 Health Score: ${result.results.risk_assessment.healthScore}/100\n`;
+          
+          if (result.results.risk_assessment.riskFactors.length > 0) {
+            formatted += `\n⚠️ Risk Factors:\n`;
+            formatted += result.results.risk_assessment.riskFactors
+              .map(factor => `• ${factor}`)
+              .join('\n') + '\n';
+          }
+          
+          if (result.results.prevention_strategies && result.results.prevention_strategies.length > 0) {
+            formatted += `\n💡 Prevention Strategies:\n`;
+            formatted += result.results.prevention_strategies
+              .map(strategy => `• ${strategy.strategy}`)
+              .join('\n') + '\n';
+          }
+        }
+        break;
+      
+      case 'news':
+        formatted += `📰 Health News: Found ${result.results.total_found || 0} articles\n\n`;
+        if (result.results.news_articles && result.results.news_articles.length > 0) {
+          formatted += result.results.news_articles.slice(0, 3)
+            .map(article => `📌 ${article.title}\n${article.description}\n`)
+            .join('\n');
+        }
+        break;
+      
+      case 'meal_education':
+        if (result.results.education_summary) {
+          formatted += `📚 Meal Education: ${result.results.education_summary.topic}\n\n`;
+          
+          if (result.results.education_summary.key_points.length > 0) {
+            formatted += `🔍 Key Points:\n`;
+            formatted += result.results.education_summary.key_points
+              .map(point => `• ${point}`)
+              .join('\n') + '\n\n';
+          }
+          
+          if (result.results.education_summary.nutritional_insights.length > 0) {
+            formatted += `� Nutritional Insights:\n`;
+            formatted += result.results.education_summary.nutritional_insights
+              .map(insight => `• ${insight}`)
+              .join('\n') + '\n\n';
+          }
+        }
+        break;
+      
+      default:
+        formatted += `✅ Search completed for: ${result.query}\n`;
+        if (result.results.summary) {
+          formatted += `📋 ${result.results.summary}\n`;
+        }
     }
     
-    // Key findings
-    if (ai?.key_findings && ai.key_findings.length > 0) {
-      formatted += `🔍 Key Findings:\n`;
-      formatted += ai.key_findings.map(finding => `• ${finding}`).join('\n');
+    // Add recommendations if available
+    if (result.recommendations && result.recommendations.length > 0) {
+      formatted += `\n🎯 Recommendations:\n`;
+      formatted += result.recommendations.map(rec => `• ${rec}`).join('\n');
       formatted += '\n\n';
     }
     
-    // Practical implications
-    if (ai?.practical_implications && ai.practical_implications.length > 0) {
-      formatted += `💡 Practical Implications:\n`;
-      formatted += ai.practical_implications.map(impl => `• ${impl}`).join('\n');
-      formatted += '\n\n';
-    }
-    
-    // Consumer actions
-    if (ai?.consumer_action?.immediate_steps && ai.consumer_action.immediate_steps.length > 0) {
-      formatted += `🎯 Immediate Actions:\n`;
-      formatted += ai.consumer_action.immediate_steps.map(step => `• ${step}`).join('\n');
-      formatted += '\n\n';
-    }
-    
-    // Evidence quality
-    if (ai?.evidence_strength) {
-      formatted += `📊 Evidence Quality: ${ai.evidence_strength.overall_quality}\n`;
-      if (ai.confidence) {
-        formatted += `🎯 Confidence: ${Math.round(ai.confidence * 100)}%\n`;
-      }
-      formatted += '\n';
+    // Add medical disclaimer for health-related queries
+    if (result.results.medical_disclaimer) {
+      formatted += `⚕️ Medical Disclaimer: ${result.results.medical_disclaimer}\n\n`;
     }
     
     // Data source
-    formatted += `📋 Data from: Universal Search API (${result.detected_type})\n`;
-    if (result.ai_processing_time_ms) {
-      formatted += `🤖 AI Enhanced (${result.ai_processing_time_ms}ms processing)`;
-    }
+    formatted += `📋 Data from: Universal Search API (${result.detected_type})`;
 
     return formatted.trim();
   }
