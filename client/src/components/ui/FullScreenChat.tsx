@@ -14,6 +14,8 @@ interface FullScreenChatProps {
   initialQuery?: string;
   initialResponse?: string | any; // Allow both string and structured barcode scan data
   onViewCharts?: () => void; // Optional callback for "View Charts" button
+  apiResponseData?: any; // Universal Search API response data for chart generation
+  onGenerateCharts?: (apiData: any) => void; // Callback to generate charts from API data
 }
 
 // Add interface for ref methods
@@ -26,7 +28,9 @@ const FullScreenChat = forwardRef<FullScreenChatRef, FullScreenChatProps>(({
   onClose,
   initialQuery,
   initialResponse,
-  onViewCharts
+  onViewCharts,
+  apiResponseData,
+  onGenerateCharts
 }, ref) => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputMessage, setInputMessage] = useState('');
@@ -35,6 +39,7 @@ const FullScreenChat = forwardRef<FullScreenChatRef, FullScreenChatProps>(({
   const [showDesktopHistory, setShowDesktopHistory] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [hasActiveSession, setHasActiveSession] = useState(false);
+  const [hasChartData, setHasChartData] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -57,13 +62,22 @@ const FullScreenChat = forwardRef<FullScreenChatRef, FullScreenChatProps>(({
       // Only consider it an active session if there's a session ID or conversation ID
       // indicating there's been previous chat interaction
       setHasActiveSession(Boolean(sessionId || conversationId));
+      
+      // Check if we have chart data from API response or initial response
+      setHasChartData(Boolean(apiResponseData || (
+        typeof initialResponse === 'object' && 
+        initialResponse && 
+        (initialResponse.success || initialResponse.type === 'barcode_analysis')
+      )));
+      
       console.log('🔍 FULL SCREEN CHAT: Session check:', {
         hasSessionId: Boolean(sessionId),
         hasConversationId: Boolean(conversationId),
-        hasActiveSession: Boolean(sessionId || conversationId)
+        hasActiveSession: Boolean(sessionId || conversationId),
+        hasChartData: Boolean(apiResponseData || (typeof initialResponse === 'object' && initialResponse))
       });
     }
-  }, [isOpen]);
+  }, [isOpen, apiResponseData, initialResponse]);
 
   // Expose methods via ref
   useImperativeHandle(ref, () => ({
@@ -110,6 +124,11 @@ const FullScreenChat = forwardRef<FullScreenChatRef, FullScreenChatProps>(({
           // Add confidence score if available
           if (assistantMessage.confidence) {
             formattedMessage += `\n**Confidence:** ${Math.round(assistantMessage.confidence * 100)}%`;
+          }
+
+          // Store API response data for chart generation
+          if (onGenerateCharts && assistantMessage.results) {
+            onGenerateCharts(assistantMessage);
           }
         } else if (assistantMessage.type === 'legacy_search' || assistantMessage.type === 'cached_search') {
           // Handle legacy/cached search responses
@@ -164,43 +183,98 @@ const FullScreenChat = forwardRef<FullScreenChatRef, FullScreenChatProps>(({
     if (initialQuery && initialResponse) {
       let responseMessage: string;
       
-      // Handle structured barcode scan data
-      if (typeof initialResponse === 'object' && initialResponse.type === 'barcode_analysis') {
-        const barcodeData = initialResponse.data;
+      // Handle Universal Search API response format or structured barcode scan data
+      if (typeof initialResponse === 'object' && (
+          initialResponse.type === 'barcode_analysis' || 
+          initialResponse.detected_type === 'barcode' ||
+          initialResponse.success && initialResponse.results
+      )) {
         
-        // Format the comprehensive analysis for display
-        responseMessage = `**${barcodeData.product_info?.name || 'Product'} Analysis**\n\n`;
-        
-        if (barcodeData.analysis?.summary) {
-          responseMessage += `${barcodeData.analysis.summary}\n\n`;
-        }
-        
-        if (barcodeData.health_score) {
-          responseMessage += `**Health Score:** ${barcodeData.health_score}/100\n`;
-        }
-        
-        if (barcodeData.nova_group) {
-          responseMessage += `**Processing Level:** NOVA Group ${barcodeData.nova_group}\n\n`;
-        }
-        
-        if (barcodeData.analysis?.recommendations?.length > 0) {
-          responseMessage += `**Recommendations:**\n`;
-          barcodeData.analysis.recommendations.forEach((rec: string) => {
-            responseMessage += `• ${rec}\n`;
-          });
-          responseMessage += '\n';
-        }
-        
-        if (barcodeData.nutrition_facts) {
-          const nutrition = barcodeData.nutrition_facts;
-          responseMessage += `**Nutrition Facts (per ${nutrition.serving_size || '100g'}):**\n`;
-          responseMessage += `• Calories: ${nutrition.calories}\n`;
-          responseMessage += `• Protein: ${nutrition.protein_g}g\n`;
-          responseMessage += `• Carbohydrates: ${nutrition.carbohydrates_g}g\n`;
-          responseMessage += `• Fat: ${nutrition.fat_g}g\n`;
-          if (nutrition.fiber_g > 0) responseMessage += `• Fiber: ${nutrition.fiber_g}g\n`;
-          if (nutrition.sugar_g > 0) responseMessage += `• Sugar: ${nutrition.sugar_g}g\n`;
-          if (nutrition.sodium_mg > 0) responseMessage += `• Sodium: ${nutrition.sodium_mg}mg\n`;
+        // Handle legacy barcode analysis format
+        if (initialResponse.type === 'barcode_analysis') {
+          const barcodeData = initialResponse.data;
+          
+          // Format the comprehensive analysis for display
+          responseMessage = `**${barcodeData.product_info?.name || 'Product'} Analysis**\n\n`;
+          
+          if (barcodeData.analysis?.summary) {
+            responseMessage += `${barcodeData.analysis.summary}\n\n`;
+          }
+          
+          if (barcodeData.health_score) {
+            responseMessage += `**Health Score:** ${barcodeData.health_score}/100\n`;
+          }
+          
+          if (barcodeData.nova_group) {
+            responseMessage += `**Processing Level:** NOVA Group ${barcodeData.nova_group}\n\n`;
+          }
+          
+          if (barcodeData.analysis?.recommendations?.length > 0) {
+            responseMessage += `**Recommendations:**\n`;
+            barcodeData.analysis.recommendations.forEach((rec: string) => {
+              responseMessage += `• ${rec}\n`;
+            });
+            responseMessage += '\n';
+          }
+          
+          if (barcodeData.nutrition_facts) {
+            const nutrition = barcodeData.nutrition_facts;
+            responseMessage += `**Nutrition Facts (per ${nutrition.serving_size || '100g'}):**\n`;
+            responseMessage += `• Calories: ${nutrition.calories}\n`;
+            responseMessage += `• Protein: ${nutrition.protein_g}g\n`;
+            responseMessage += `• Carbohydrates: ${nutrition.carbohydrates_g}g\n`;
+            responseMessage += `• Fat: ${nutrition.fat_g}g\n`;
+            if (nutrition.fiber_g > 0) responseMessage += `• Fiber: ${nutrition.fiber_g}g\n`;
+            if (nutrition.sugar_g > 0) responseMessage += `• Sugar: ${nutrition.sugar_g}g\n`;
+            if (nutrition.sodium_mg > 0) responseMessage += `• Sodium: ${nutrition.sodium_mg}mg\n`;
+          }
+        } 
+        // Handle Universal Search API format
+        else if (initialResponse.success && initialResponse.results) {
+          const results = initialResponse.results;
+          const metadata = results.metadata;
+          
+          responseMessage = `**${metadata?.product_name || 'Product'} Analysis**\n\n`;
+          
+          if (results.summary) {
+            responseMessage += `${results.summary}\n\n`;
+          }
+          
+          if (metadata?.health_score) {
+            responseMessage += `**Health Score:** ${metadata.health_score}/100 (${metadata.grade})\n`;
+          }
+          
+          if (metadata?.nova_group) {
+            responseMessage += `**Processing Level:** NOVA Group ${metadata.nova_group} - ${metadata.processing_level}\n\n`;
+          }
+          
+          if (initialResponse.recommendations?.length > 0) {
+            responseMessage += `**Recommendations:**\n`;
+            initialResponse.recommendations.forEach((rec: string) => {
+              responseMessage += `• ${rec}\n`;
+            });
+            responseMessage += '\n';
+          }
+          
+          if (metadata?.nutrition_facts) {
+            const nutrition = metadata.nutrition_facts;
+            responseMessage += `**Nutrition Facts (per 100g):**\n`;
+            responseMessage += `• Calories: ${nutrition.calories}\n`;
+            responseMessage += `• Protein: ${nutrition.protein}g\n`;
+            responseMessage += `• Carbohydrates: ${nutrition.carbohydrates}g\n`;
+            responseMessage += `• Fat: ${nutrition.fat}g\n`;
+            if (nutrition.fiber > 0) responseMessage += `• Fiber: ${nutrition.fiber}g\n`;
+            if (nutrition.sugars > 0) responseMessage += `• Sugars: ${nutrition.sugars}g\n`;
+            if (nutrition.sodium > 0) responseMessage += `• Sodium: ${nutrition.sodium}mg\n`;
+          }
+
+          // Store the Universal Search API response for chart generation
+          if (onGenerateCharts) {
+            onGenerateCharts(initialResponse);
+          }
+          
+          // Update chart availability indicator
+          setHasChartData(true);
         }
       } else {
         // Handle traditional string response
@@ -259,18 +333,109 @@ const FullScreenChat = forwardRef<FullScreenChatRef, FullScreenChatProps>(({
       
       // Handle the new API response structure
       if (response && typeof response === 'object') {
-        // Check if it's the new ChatResponse format (from /ask endpoint)
-        if ('response' in response && 'type' in response && 'source' in response) {
-          // New API structure with response, type, source, confidence
-          const chatResp = response as any; // Type assertion since we checked the properties
-          aiResponse = chatResp.response;
+        // Check if it's Universal Search API response
+        if ('success' in response && 'results' in response && response.success) {
+          const universalResp = response as any;
+          aiResponse = universalResp.results?.summary || 'Analysis completed successfully.';
+          
+          // Add rich formatting for Universal Search responses
+          if (universalResp.results?.metadata) {
+            const meta = universalResp.results.metadata;
+            aiResponse += `\n\n**Product:** ${meta.product_name || 'Unknown'}`;
+            if (meta.health_score) {
+              aiResponse += `\n**Health Score:** ${meta.health_score}/100 (${meta.grade})`;
+            }
+            if (meta.nova_group) {
+              aiResponse += `\n**Processing Level:** NOVA ${meta.nova_group} - ${meta.processing_level}`;
+            }
+          }
+          
+          if (universalResp.recommendations?.length > 0) {
+            aiResponse += '\n\n**Recommendations:**\n';
+            universalResp.recommendations.forEach((rec: string) => {
+              aiResponse += `• ${rec}\n`;
+            });
+          }
+          
+          // Trigger chart generation if callback is available
+          if (onGenerateCharts) {
+            onGenerateCharts(universalResp);
+          }
+          
+          // Update chart data availability
+          setHasChartData(true);
+          
           metadata = {
-            type: chatResp.type || 'unknown',
-            source: chatResp.source || 'unknown',
+            type: universalResp.detected_type || 'universal_search',
+            source: 'universal_search_api',
+            confidence: universalResp.results?.confidence_score || 0,
+            processing_time: universalResp.processing_time_ms || 0
+          };
+        }
+        // Check if it's the /ask endpoint ChatResponse format
+        else if ('response' in response && 'type' in response && 'source' in response) {
+          const chatResp = response as any;
+          aiResponse = chatResp.response;
+          
+          // Check if the /ask response contains Universal Search data
+          if (chatResp.data && typeof chatResp.data === 'object' && chatResp.data.success) {
+            // The /ask endpoint returned Universal Search data
+            const universalData = chatResp.data;
+            
+            // Enhance the response with structured data if available
+            if (universalData.results?.metadata) {
+              const meta = universalData.results.metadata;
+              if (meta.product_name && !aiResponse.includes(meta.product_name)) {
+                aiResponse += `\n\n**Product:** ${meta.product_name}`;
+              }
+              if (meta.health_score && !aiResponse.includes('Health Score')) {
+                aiResponse += `\n**Health Score:** ${meta.health_score}/100 (${meta.grade})`;
+              }
+              if (meta.nova_group && !aiResponse.includes('NOVA')) {
+                aiResponse += `\n**Processing Level:** NOVA ${meta.nova_group} - ${meta.processing_level}`;
+              }
+            }
+            
+            if (universalData.recommendations?.length > 0 && !aiResponse.includes('Recommendations:')) {
+              aiResponse += '\n\n**Recommendations:**\n';
+              universalData.recommendations.forEach((rec: string) => {
+                aiResponse += `• ${rec}\n`;
+              });
+            }
+            
+            // Trigger chart generation with the embedded Universal Search data
+            if (onGenerateCharts) {
+              onGenerateCharts(universalData);
+            }
+            
+            // Update chart availability
+            setHasChartData(true);
+          }
+          // Check if response contains chartable information (keywords that suggest data)
+          else if (aiResponse && (
+            aiResponse.toLowerCase().includes('nutrition') ||
+            aiResponse.toLowerCase().includes('health score') ||
+            aiResponse.toLowerCase().includes('calories') ||
+            aiResponse.toLowerCase().includes('protein') ||
+            aiResponse.toLowerCase().includes('research') ||
+            aiResponse.toLowerCase().includes('study')
+          )) {
+            // Response contains health/nutrition content but no structured data
+            // Set minimal chart availability for text-based responses
+            setHasChartData(false); // No structured data for charts
+          }
+          
+          metadata = {
+            type: chatResp.type || 'ask_endpoint',
+            source: chatResp.source || 'ask_api',
             confidence: chatResp.confidence || 0,
             processing_time: chatResp.processing_time || 0
           };
-          console.log('🔍 FULL SCREEN CHAT: New API response metadata:', metadata);
+          console.log('🔍 FULL SCREEN CHAT: Ask endpoint response:', {
+            hasUniversalData: Boolean(chatResp.data?.success),
+            responseLength: aiResponse.length,
+            metadata
+          });
         } else if ('data' in response && typeof response.data === 'string') {
           aiResponse = response.data;
         } else if ('analysis' in response && typeof response.analysis === 'string') {
@@ -574,32 +739,66 @@ const FullScreenChat = forwardRef<FullScreenChatRef, FullScreenChatProps>(({
 
           {/* Right side - View Charts Button */}
           {onViewCharts && (
-            <button
-              onClick={onViewCharts}
-              className="chat-icon-button"
-              title="View Charts"
-              style={{
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-                padding: '4px',
-                borderRadius: '4px',
-                transition: 'all 0.2s ease',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}
-            >
-              <img 
-                src="/assets/Chartlogo.png" 
-                alt="View Charts"
+            <div style={{ position: 'relative' }}>
+              <button
+                onClick={onViewCharts}
+                className="chat-icon-button"
+                title={hasChartData ? "View Interactive Charts" : "Charts (No data available)"}
                 style={{
-                  width: '64px',
-                  height: '64px',
-                  objectFit: 'contain'
+                  background: 'none',
+                  border: 'none',
+                  cursor: hasChartData ? 'pointer' : 'default',
+                  padding: '4px',
+                  borderRadius: '4px',
+                  transition: 'all 0.2s ease',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  opacity: hasChartData ? 1 : 0.5
                 }}
-              />
-            </button>
+                disabled={!hasChartData}
+              >
+                <img 
+                  src="/assets/Chartlogo.png" 
+                  alt="View Charts"
+                  style={{
+                    width: '64px',
+                    height: '64px',
+                    objectFit: 'contain'
+                  }}
+                />
+              </button>
+              
+              {/* Chart availability indicator */}
+              {hasChartData && (
+                <div style={{
+                  position: 'absolute',
+                  top: '8px',
+                  right: '8px',
+                  width: '12px',
+                  height: '12px',
+                  borderRadius: '50%',
+                  backgroundColor: '#10b981',
+                  border: '2px solid white',
+                  boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
+                }} />
+              )}
+              
+              {/* No data indicator */}
+              {!hasChartData && (
+                <div style={{
+                  position: 'absolute',
+                  bottom: '-2px',
+                  right: '8px',
+                  fontSize: '10px',
+                  color: '#9ca3af',
+                  fontWeight: '500',
+                  textAlign: 'center'
+                }}>
+                  No data
+                </div>
+              )}
+            </div>
           )}
         </div>
         
