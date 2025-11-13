@@ -20,7 +20,6 @@ export interface UniversalSearchRequest {
   };
   options?: {
     limit?: number;
-    include_ai_enhancement?: boolean;
     include_charts?: boolean;
     include_recommendations?: boolean;
   };
@@ -101,7 +100,7 @@ export interface SearchHistory {
 // ================================
 
 class UniversalSearchService {
-  private readonly baseUrl = 'https://services.wihy.ai';
+  private readonly baseUrl = 'https://ml.wihy.ai';
   
   /**
    * Test API connectivity for Universal Search
@@ -109,7 +108,7 @@ class UniversalSearchService {
   async testConnection(): Promise<{ available: boolean; error?: string }> {
     try {
       console.log('🔍 Testing Universal Search API connectivity...');
-      const response = await fetch(`${this.baseUrl}/health`, {
+      const response = await fetch(`${this.baseUrl}/search/health`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -138,7 +137,7 @@ class UniversalSearchService {
   async search(request: UniversalSearchRequest): Promise<UniversalSearchResponse> {
     try {
       console.log('🔍 Universal Search API - starting search');
-      console.log('📡 API Endpoint:', `${this.baseUrl}/api/search`);
+      console.log('📡 API Endpoint:', `${this.baseUrl}/search/`);
       console.log('📤 Request payload:', {
         query: request.query,
         type: request.type || 'auto',
@@ -146,7 +145,7 @@ class UniversalSearchService {
         options: request.options
       });
 
-      const response = await fetch(`${this.baseUrl}/api/search`, {
+      const response = await fetch(`${this.baseUrl}/search/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -157,7 +156,6 @@ class UniversalSearchService {
           context: request.context || {},
           options: {
             limit: 10,
-            include_ai_enhancement: true,
             include_charts: true,
             include_recommendations: true,
             ...request.options
@@ -230,7 +228,6 @@ class UniversalSearchService {
       query,
       type: type as any || 'auto',
       options: {
-        include_ai_enhancement: true,
         include_charts: true,
         include_recommendations: true,
         limit: 10
@@ -253,7 +250,6 @@ class UniversalSearchService {
         }
       },
       options: {
-        include_ai_enhancement: true,
         include_charts: true,
         include_recommendations: true,
         limit: 15
@@ -276,7 +272,6 @@ class UniversalSearchService {
         }
       },
       options: {
-        include_ai_enhancement: true,
         include_charts: true,
         include_recommendations: true,
         limit: 10
@@ -299,7 +294,6 @@ class UniversalSearchService {
         }
       },
       options: {
-        include_ai_enhancement: true,
         include_charts: true,
         include_recommendations: true,
         limit: 12
@@ -320,7 +314,6 @@ class UniversalSearchService {
         }
       },
       options: {
-        include_ai_enhancement: true,
         include_charts: false,
         include_recommendations: true,
         limit: 8
@@ -342,7 +335,6 @@ class UniversalSearchService {
         }
       },
       options: {
-        include_ai_enhancement: true,
         include_charts: true,
         include_recommendations: true,
         limit: 10
@@ -381,7 +373,6 @@ class UniversalSearchService {
           type: type as any,
           context: { user_preferences: userContext },
           options: {
-            include_ai_enhancement: true,
             include_charts: true,
             include_recommendations: true,
             limit: 10
