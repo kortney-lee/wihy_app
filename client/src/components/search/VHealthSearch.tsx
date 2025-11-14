@@ -1117,16 +1117,16 @@ const VHealthSearch: React.FC = () => {
         />
       )}
       
-      {/* AUTHENTICATION COMPONENT - Top-right login/logout */}
+      {/* AUTHENTICATION COMPONENT - Moves with page for unified experience */}
       <div style={{
-        position: 'fixed',
+        position: 'absolute',
         top: '20px',
         right: '20px',
-        zIndex: 1000,
-        opacity: isScrolled ? 0 : 1,
-        visibility: isScrolled ? 'hidden' : 'visible',
-        pointerEvents: isScrolled ? 'none' : 'auto',
-        transition: 'all 0.2s ease'
+        zIndex: 10002,
+        // Always visible - moves with page content for unified mobile experience
+        opacity: 1,
+        visibility: 'visible',
+        pointerEvents: 'auto'
       }}>
         <MultiAuthLogin className="main-login-button" />
       </div>
@@ -1330,36 +1330,56 @@ const VHealthSearch: React.FC = () => {
         </div>
       </div>
       
-      {/* HEALTH NEWS FEED - Shows when "I'm Feeling Healthy" is active */}
+      {/* HEALTH NEWS FEED - Flows naturally as part of the main page */}
       {showFeelingHealthyContent && (
         <div 
           className="feeling-healthy-section"
-          onClick={() => {
-            // Close news feed when clicking anywhere in the white space
-            setShowFeelingHealthyContent(false);
-          }}
           style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'rgba(255, 255, 255, 0.95)',
-            backdropFilter: 'blur(2px)',
-            zIndex: 1000,
-            overflow: 'auto',
-            cursor: 'pointer'
+            // Natural page flow - no overlay, part of the main document
+            position: 'relative',
+            width: '100%',
+            marginTop: '40px',
+            paddingBottom: '60px',
+            backgroundColor: 'transparent',
+            zIndex: 1
           }}
         >
-          <div 
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              maxWidth: '1200px',
-              margin: '40px auto',
-              padding: '20px',
-              cursor: 'default'
-            }}
-          >
+          {/* Simple back button for mobile UX */}
+          <div style={{
+            textAlign: 'center',
+            marginBottom: '20px'
+          }}>
+            <button
+              onClick={() => setShowFeelingHealthyContent(false)}
+              style={{
+                background: 'rgba(255, 255, 255, 0.9)',
+                border: '1px solid #e5e7eb',
+                borderRadius: '20px',
+                padding: '8px 16px',
+                fontSize: '14px',
+                color: '#6b7280',
+                cursor: 'pointer',
+                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+                transition: 'all 0.2s ease'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = 'rgba(255, 255, 255, 1)';
+                e.currentTarget.style.color = '#374151';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.9)';
+                e.currentTarget.style.color = '#6b7280';
+              }}
+            >
+              ← Back to Search
+            </button>
+          </div>
+          
+          <div style={{
+            maxWidth: '1200px',
+            margin: '0 auto',
+            padding: '0 20px'
+          }}>
             <HealthNewsFeed 
               maxArticles={6}
               setSearchQuery={setSearchQuery}

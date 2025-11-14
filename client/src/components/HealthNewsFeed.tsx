@@ -151,41 +151,15 @@ const HealthNewsFeed: React.FC<NewsFeedProps> = ({
     loadInitialNews();
   }, []); // Only run on mount
 
-  // Separate effect for mobile-specific scroll handling
-  useEffect(() => {
-    if (!isMobile) return;
-    
-    const handleMobilePagination = () => {
-      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-      const windowHeight = window.innerHeight;
-      
-      // If user is near the top of the page, enable normal scrolling
-      if (scrollTop < windowHeight) {
-        setScrollDirection('up');
-      }
-    };
-    
-    window.addEventListener('scroll', handleMobilePagination, { passive: true });
-    
-    return () => {
-      window.removeEventListener('scroll', handleMobilePagination);
-    };
-  }, [isMobile]);
+  // Simplified mobile scroll handling - remove competing scroll listeners
+  // Mobile pagination is handled by intersection observer only
 
-  // Track scroll direction for better mobile experience
-  const [scrollDirection, setScrollDirection] = useState<'up' | 'down'>('down');
-  const lastScrollTop = useRef(0);
+  // Removed scroll direction tracking for smoother mobile performance
 
-  // Update the fetchHealthNews function with better mobile pagination control
+  // Simplified fetchHealthNews function for smoother mobile experience
   const fetchHealthNews = useCallback(async (resetPage: boolean = true) => {
-    // Prevent excessive loading on mobile when scrolling up
-    if (isMobile && !resetPage && scrollDirection === 'up') {
-      return;
-    }
-    
-    // Prevent multiple simultaneous requests using both state and ref
+    // Simple duplicate request prevention
     if (loading || loadingMore || fetchingRef.current) {
-      console.log('📱 Preventing duplicate request - already loading:', { loading, loadingMore, fetchingRef: fetchingRef.current });
       return;
     }
     
@@ -257,85 +231,37 @@ const HealthNewsFeed: React.FC<NewsFeedProps> = ({
       setLoadingMore(false);
       fetchingRef.current = false; // Clear fetching flag
     }
-  }, [isMobile, scrollDirection, loading, loadingMore, currentPage, hasMorePages]);
+  }, [loading, loadingMore, currentPage, hasMorePages]);
 
-  // Set up intersection observer for infinite scroll with improved mobile handling
+  // Simplified intersection observer for smooth mobile scrolling
   const handleObserver = useCallback((entries: IntersectionObserverEntry[]) => {
     const [target] = entries;
     
-    // Only trigger pagination if:
-    // 1. Element is intersecting
-    // 2. Not currently loading
-    // 3. Has more pages
-    // 4. User is scrolling down (not up)
-    // 5. Add a small delay to prevent rapid triggering
-    if (target.isIntersecting && 
-        !loading && 
-        !loadingMore && 
-        hasMorePages && 
-        scrollDirection === 'down') {
-      
-      console.log('📱 Intersection observer triggered - loading more articles');
-      
-      // Add a small delay to ensure user intent
-      setTimeout(() => {
-        // Double-check conditions after delay
-        if (!loading && !loadingMore && hasMorePages) {
-          fetchHealthNews(false); // false means don't reset, load more
-        }
-      }, 300);
+    // Simple trigger logic - no complex debouncing that causes stuttering
+    if (target.isIntersecting && !loading && !loadingMore && hasMorePages) {
+      fetchHealthNews(false); // false means don't reset, load more
     }
-  }, [loading, loadingMore, hasMorePages, scrollDirection, fetchHealthNews]);
+  }, [loading, loadingMore, hasMorePages, fetchHealthNews]);
 
-  // Track scroll direction
-  useEffect(() => {
-    const handleScroll = () => {
-      const currentScrollTop = window.pageYOffset || document.documentElement.scrollTop;
-      
-      if (currentScrollTop > lastScrollTop.current + 50) {
-        // Scrolling down with some threshold to avoid jitter
-        setScrollDirection('down');
-      } else if (currentScrollTop < lastScrollTop.current - 50) {
-        // Scrolling up with some threshold
-        setScrollDirection('up');
-      }
-      
-      lastScrollTop.current = currentScrollTop;
-    };
-
-    // Throttle scroll events for better performance
-    let ticking = false;
-    const throttledHandleScroll = () => {
-      if (!ticking) {
-        requestAnimationFrame(() => {
-          handleScroll();
-          ticking = false;
-        });
-        ticking = true;
-      }
-    };
-
-    window.addEventListener('scroll', throttledHandleScroll, { passive: true });
-    
-    return () => {
-      window.removeEventListener('scroll', throttledHandleScroll);
-    };
-  }, []);
+  // Remove scroll direction tracking to eliminate choppy behavior
+  // Intersection observer handles pagination smoothly without scroll interference
 
   useEffect(() => {
     const element = observerTarget.current;
+    if (!element) return;
+    
     const option = {
       root: null,
-      rootMargin: '100px', // Increased margin to give more buffer
-      threshold: 0.1,
+      rootMargin: '150px', // Reduced margin for better mobile performance
+      threshold: 0.1, // Higher threshold for more predictable triggering
     };
     
     const observer = new IntersectionObserver(handleObserver, option);
-    
-    if (element) observer.observe(element);
+    observer.observe(element);
     
     return () => {
-      if (element) observer.unobserve(element);
+      observer.unobserve(element);
+      observer.disconnect();
     };
   }, [handleObserver]);
 
@@ -547,8 +473,8 @@ Category: ${article.category || article.ai_category || 'Uncategorized'}`;
           ref={observerTarget} 
           className="intersection-observer-target"
           style={{ 
-            height: '200px', // Increased height for better mobile detection
-            margin: '40px 0', 
+            height: '50px', // Smaller height for better mobile performance
+            margin: '20px 0', 
             visibility: 'hidden',
             pointerEvents: 'none' // Prevent any interaction with this element
           }}
