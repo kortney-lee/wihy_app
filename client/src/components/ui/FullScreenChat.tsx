@@ -741,22 +741,27 @@ const FullScreenChat = forwardRef<FullScreenChatRef, FullScreenChatProps>(({
           {onViewCharts && (
             <div style={{ position: 'relative' }}>
               <button
-                onClick={onViewCharts}
+                onClick={() => {
+                  if (hasChartData) {
+                    onViewCharts();
+                  } else {
+                    onClose(); // Navigate back to search screen when no chart data
+                  }
+                }}
                 className="chat-icon-button"
-                title={hasChartData ? "View Interactive Charts" : "Charts (No data available)"}
+                title={hasChartData ? "View Interactive Charts" : "Back to Search Screen"}
                 style={{
                   background: 'none',
                   border: 'none',
-                  cursor: hasChartData ? 'pointer' : 'default',
+                  cursor: 'pointer',
                   padding: '4px',
                   borderRadius: '4px',
                   transition: 'all 0.2s ease',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  opacity: hasChartData ? 1 : 0.5
+                  opacity: hasChartData ? 1 : 0.7
                 }}
-                disabled={!hasChartData}
               >
                 <img 
                   src="/assets/Chartlogo.png" 
@@ -784,18 +789,18 @@ const FullScreenChat = forwardRef<FullScreenChatRef, FullScreenChatProps>(({
                 }} />
               )}
               
-              {/* No data indicator */}
+              {/* Back indicator - clickable to return to search */}
               {!hasChartData && (
                 <div style={{
                   position: 'absolute',
                   bottom: '-2px',
                   right: '8px',
-                  fontSize: '10px',
-                  color: '#9ca3af',
+                  fontSize: '9px',
+                  color: '#6b7280',
                   fontWeight: '500',
                   textAlign: 'center'
                 }}>
-                  No data
+                  ← Back
                 </div>
               )}
             </div>
