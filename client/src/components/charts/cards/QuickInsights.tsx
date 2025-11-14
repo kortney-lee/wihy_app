@@ -54,16 +54,32 @@ const QuickInsights: React.FC<QuickInsightsProps> = ({
   memberName = 'Health Enthusiast',
   onAnalyze
 }) => {
-  // Default configuration for QuickInsights
-  const defaultLinks = [
-    { label: 'Health Dashboard', href: '/health', icon: '🏥' },
-    { label: 'Nutrition Analysis', href: '/nutrition', icon: '🍎' },
-    { label: 'Activity Tracking', href: '/activity', icon: '🏃' },
-    { label: 'Research Portal', href: '/research', icon: '📊' }
-  ];
-
-  const links = data?.links || defaultLinks;
-  const healthScore = data?.data?.healthScore || 75; // Default health score
+  // Extract insights data from API response or use defaults
+  // Insight 1: Overall Health/Quality Score (0-100)
+  const healthScore = data?.data?.healthScore || 
+                     data?.data?.health_score || 
+                     data?.data?.overallScore || 
+                     75; // Default health score
+  
+  // Insight 2: Processing Level/Evidence Grade
+  const processingLevel = data?.data?.processingLevel || 
+                         data?.data?.processing_level || 
+                         data?.data?.grade || 
+                         data?.data?.novaGroup ? `NOVA ${data.data.novaGroup}` : 
+                         'B+'; // Default grade
+  
+  // Insight 3: Recommendation Frequency/Action
+  const recommendations = data?.data?.recommendations || 
+                         data?.data?.recommendationCount || 
+                         3; // Default recommendation count
+  
+  // Insight 4: Alternative/Improvement Score
+  const improvementScore = data?.data?.improvementScore || 
+                          data?.data?.alternativeScore || 
+                          data?.data?.confidenceScore ? Math.round(data.data.confidenceScore * 100) :
+                          data?.data?.confidence ? Math.round(data.data.confidence * 100) :
+                          85; // Default improvement score
+  
   const lastUpdate = data?.data?.lastUpdate || new Date().toLocaleDateString();
   
   // Get member badge info
@@ -94,21 +110,29 @@ const QuickInsights: React.FC<QuickInsightsProps> = ({
           </div>
           <div className="insight-label">Member Status</div>
         </div>
+        
+        {/* Insight 1: Overall Health/Quality Score (0-100) */}
         <div className="insight-item">
           <div className="insight-value health-score">{healthScore}</div>
-          <div className="insight-label">Overall Health Score</div>
+          <div className="insight-label">Health Score</div>
         </div>
+        
+        {/* Insight 2: Processing Level/Evidence Grade */}
         <div className="insight-item">
-          <div className="insight-value sleep-quality">{data?.data?.sleep || '7.5h'}</div>
-          <div className="insight-label">Avg Sleep Quality</div>
+          <div className="insight-value processing-level">{processingLevel}</div>
+          <div className="insight-label">Quality Grade</div>
         </div>
+        
+        {/* Insight 3: Recommendation Frequency/Action */}
         <div className="insight-item">
-          <div className="insight-value daily-steps">{((parseInt(data?.data?.steps || '8432') / 1000).toFixed(1))}k</div>
-          <div className="insight-label">Daily Steps (Avg)</div>
+          <div className="insight-value recommendations-count">{recommendations}</div>
+          <div className="insight-label">Recommendations</div>
         </div>
+        
+        {/* Insight 4: Alternative/Improvement Score */}
         <div className="insight-item">
-          <div className="insight-value personal-bests">{Math.floor(healthScore / 20)}</div>
-          <div className="insight-label">Personal Bests This Month</div>
+          <div className="insight-value improvement-score">{improvementScore}%</div>
+          <div className="insight-label">Improvement Score</div>
         </div>
       </div>
       
