@@ -90,29 +90,7 @@ const ResultsPage: React.FC = () => {
     return navigation?.type === 'back_forward';
   };
 
-  // Detect page refresh and clear query string
-  const isPageRefresh = () => {
-    const navigation = (window as any).performance?.getEntriesByType?.('navigation')?.[0];
-    return navigation?.type === 'reload';
-  };
 
-  // Clear query string on page refresh - smart routing
-  useEffect(() => {
-    if (isPageRefresh() && (query || searchParams.toString())) {
-      const currentPath = window.location.pathname;
-      console.log('🔄 Page refresh detected - clearing query parameters', { currentPath, query });
-      
-      // If on results page with query, go back to home for fresh search
-      // If on home page with query params, just clear them and stay
-      if (currentPath === '/results' && query) {
-        console.log('🏠 Redirecting from results page to home for fresh search');
-        navigate('/', { replace: true });
-      } else {
-        console.log('🧹 Clearing query parameters but staying on current route');
-        navigate(currentPath, { replace: true });
-      }
-    }
-  }, []); // Empty dependency array - only run on mount
 
   // Fetch results when query changes
   useEffect(() => {
