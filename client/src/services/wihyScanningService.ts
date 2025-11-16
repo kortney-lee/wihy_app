@@ -173,7 +173,7 @@ class WihyScanningService {
   }
 
   /**
-   * Scan food by image using the correct WIHY Scanner API endpoint
+   * Scan food by image using Universal Search API with /ask endpoint
    */
   async scanImage(image: File | string, userContext?: ScanRequest['context']): Promise<ScanResult> {
     try {
@@ -185,8 +185,8 @@ class WihyScanningService {
         imageData = image;
       }
 
-      console.log('🔍 WiHy Scanning API - image scan');
-      console.log('📡 API Endpoint:', `${this.baseUrl}/api/scan`);
+      console.log('🔍 WiHy Scanning API - image scan via Universal Search');
+      console.log('📡 API Endpoint: Using Universal Search /ask endpoint');
       console.log('📤 Request payload:', {
         imageDataLength: imageData.length,
         context: image instanceof File ? `Image analysis: ${image.name}` : 'Image analysis',
@@ -197,7 +197,7 @@ class WihyScanningService {
         }
       });
 
-      // For image analysis, we still use POST /api/scan since it requires image data
+      // First, get basic image analysis from the scanner API
       const response = await fetch(`${this.baseUrl}/api/scan`, {
         method: 'POST',
         headers: {
@@ -215,45 +215,93 @@ class WihyScanningService {
       });
 
       if (!response.ok) {
-        console.error(`❌ WiHy Scanning API - HTTP Error: ${response.status} ${response.statusText}`);
-        console.error('📡 Response headers:', Object.fromEntries(response.headers.entries()));
-        
-        // Try to get error details from response body
-        let errorDetails = '';
-        try {
-          const errorData = await response.text();
-          errorDetails = errorData;
-          console.error('📄 Error response body:', errorData);
-        } catch (e) {
-          console.error('❌ Could not read error response body');
-        }
-        
-        throw new Error(`HTTP ${response.status}: ${response.statusText}${errorDetails ? ` - ${errorDetails}` : ''}`);
+        console.error(`❌ WiHy Scanner API - HTTP Error: ${response.status} ${response.statusText}`);
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
 
-      const data = await response.json();
-      console.log('✅ WiHy Scanning API - image response:', data);
+      const scannerData = await response.json();
+      console.log('✅ WiHy Scanner API - initial image response:', scannerData);
 
+      // Extract food/product information from scanner response
+      let detectedFood = '';
+      if (scannerData.product_info?.name) {
+        detectedFood = scannerData.product_info.name;
+      } else if (scannerData.analysis?.summary) {
+        detectedFood = scannerData.analysis.summary;
+      } else {
+        detectedFood = 'Food item from image';
+      }
+
+      console.log('🔍 Detected food item:', detectedFood);
+
+      // Now send the detected food information to Universal Search via /ask endpoint for comprehensive analysis
+      const universalSearchResult = await universalSearchService.search({
+        query: `Provide comprehensive health analysis for: ${detectedFood}`,
+        type: 'food',
+        context: {
+          health_goals: ['nutrition_analysis'],
+          dietary_restrictions: [],
+          ...userContext
+        },
+        options: {
+          include_charts: true,
+          include_recommendations: true,
+          limit: 1
+        }
+      });
+
+      // Check if Universal Search was successful and merge with scanner data
+      if (universalSearchResult.success) {
+        console.log('✅ Universal Search enhancement successful');
+        
+        // Merge scanner data with Universal Search analysis
+        const enhancedResult: ScanResult = {
+          success: true,
+          analysis: {
+            summary: universalSearchResult.results.summary || scannerData.analysis?.summary || 'Image analysis completed',
+            recommendations: universalSearchResult.recommendations || scannerData.analysis?.recommendations || [],
+            confidence_score: scannerData.analysis?.confidence_score || scannerData.confidence_score || 0,
+            charts: universalSearchResult.charts || scannerData.charts_data,
+            metadata: {
+              health_score: scannerData.health_score,
+              nova_group: scannerData.nova_group,
+              product_info: scannerData.product_info,
+              nutrition_facts: scannerData.nutrition_facts,
+              // Add Universal Search enhancements
+              universal_search: universalSearchResult.results
+            }
+          },
+          timestamp: scannerData.timestamp || new Date().toISOString(),
+          processing_time: scannerData.processing_time
+        };
+        
+        console.log('✅ WiHy Scanning API - enhanced image scan via Universal Search:', enhancedResult);
+        return enhancedResult;
+      }
+
+      // Fallback: Use scanner data only if Universal Search fails
+      console.log('⚠️ Universal Search enhancement failed, using scanner data only');
+      
       // The API might not return a success field, so determine success based on data presence
-      const hasAnalysisData = data.analysis || data.health_score || data.product_info || data.charts_data;
-      const apiSuccess = data.success !== false && hasAnalysisData; // Treat as success unless explicitly false
+      const hasAnalysisData = scannerData.analysis || scannerData.health_score || scannerData.product_info || scannerData.charts_data;
+      const apiSuccess = scannerData.success !== false && hasAnalysisData; // Treat as success unless explicitly false
 
       return {
         success: apiSuccess,
         analysis: {
-          summary: data.analysis?.summary || data.description || 'Image analysis completed',
-          recommendations: data.analysis?.recommendations || data.recommendations || [],
-          confidence_score: data.analysis?.confidence_score || data.confidence_score || 0,
-          charts: data.charts_data || data.charts,
+          summary: scannerData.analysis?.summary || scannerData.description || 'Image analysis completed',
+          recommendations: scannerData.analysis?.recommendations || scannerData.recommendations || [],
+          confidence_score: scannerData.analysis?.confidence_score || scannerData.confidence_score || 0,
+          charts: scannerData.charts_data || scannerData.charts,
           metadata: {
-            health_score: data.health_score,
-            nova_group: data.nova_group,
-            product_info: data.product_info,
-            nutrition_facts: data.nutrition_facts
+            health_score: scannerData.health_score,
+            nova_group: scannerData.nova_group,
+            product_info: scannerData.product_info,
+            nutrition_facts: scannerData.nutrition_facts
           }
         },
-        timestamp: data.timestamp || new Date().toISOString(),
-        processing_time: data.processing_time
+        timestamp: scannerData.timestamp || new Date().toISOString(),
+        processing_time: scannerData.processing_time
       };
       
     } catch (error) {
