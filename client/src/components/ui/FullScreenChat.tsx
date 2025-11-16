@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect, useImperativeHandle, forwardRef } from 'react';
 import { chatService } from '../../services/chatService';
+import '../../styles/mobile-fixes.css';
 
 interface ChatMessage {
   id: string;
@@ -522,7 +523,7 @@ const FullScreenChat = forwardRef<FullScreenChatRef, FullScreenChatProps>(({
         transition: 'opacity 0.3s ease-in-out'
       }} onClick={onClose} />
 
-      <div style={{
+      <div className="fullscreen-chat-container" style={{
         position: 'fixed',
         top: 0,
         left: 0,

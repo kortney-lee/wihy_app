@@ -23,11 +23,16 @@ export const searchFoodDatabase = async (query: string) => {
   try {
     logger.apiRequest('Food Database Search', { query });
     
-    const response = await fetch(`${API_BASE_URL}/api/food/search?q=${encodeURIComponent(query)}`, {
-      method: 'GET',
+    const response = await fetch(`${API_BASE_URL}/ask`, {
+      method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
+      body: JSON.stringify({
+        query: query,
+        type: 'food',
+        user_context: {}
+      })
     });
 
     if (!response.ok) {
@@ -322,9 +327,19 @@ Please try your search again in a moment! 😅`;
         // Try nutrition database for food-related queries
         try {
           logger.debug('Fallback: Trying nutrition database');
-          logger.debug('API URL', { url: `${API_BASE_URL}/api/search/food?q=${encodeURIComponent(query)}` });
+          logger.debug('API URL', { url: `${API_BASE_URL}/ask` });
           
-          const nutritionResponse = await fetch(`${API_BASE_URL}/api/search/food?q=${encodeURIComponent(query)}`);
+          const nutritionResponse = await fetch(`${API_BASE_URL}/ask`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              query: query,
+              type: 'nutrition',
+              user_context: {}
+            })
+          });
           
           if (nutritionResponse.ok) {
             const nutritionData = await nutritionResponse.json();

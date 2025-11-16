@@ -41,6 +41,7 @@ const VHealthSearch: React.FC = () => {
   const [loadingMessage, setLoadingMessage] = useState('Searching...');
   const [showFeelingHealthyContent, setShowFeelingHealthyContent] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const [placeholder, setPlaceholder] = useState(rotatingPrompts[0]);
   
   // Results display state (like VHealthApp)
@@ -403,6 +404,7 @@ const VHealthSearch: React.FC = () => {
         const isLocalResponse = !('success' in wihyResponse) && 'analysis' in wihyResponse;
         const isRagResponse = 'type' in wihyResponse && 'response' in wihyResponse;
         const isTestDataResponse = wihyResponse.dataSource === 'test_generator';
+        const isErrorResponse = wihyResponse.type === 'error' || wihyResponse.success === false;
         
         // 🔍 MAIN SEARCH LOGGING: Response format check
         console.log('🔍 MAIN SEARCH RESPONSE FORMAT CHECK:', {
@@ -417,8 +419,34 @@ const VHealthSearch: React.FC = () => {
           isValidProductionResponse: isProductionResponse,
           isValidRagResponse: isRagResponse,
           isTestDataResponse: isTestDataResponse,
+          isErrorResponse: isErrorResponse,
           dataSource: (wihyResponse as any).dataSource
         });
+        
+        // Handle API error responses
+        if (isErrorResponse) {
+          const errorResp = wihyResponse as any;
+          console.error('🔍 API ERROR RESPONSE:', {
+            error: errorResp.results?.error || errorResp.response,
+            query: queryToUse,
+            timestamp: new Date().toISOString(),
+            processingTime: errorResp.processing_time_ms
+          });
+          
+          // Create user-friendly error message
+          let userMessage = 'Hmm, our AI had trouble with that question 🤔';
+          const errorMsg = errorResp.results?.error || errorResp.response || '';
+          
+          if (errorMsg.includes('NoneType') || errorMsg.includes('iterable')) {
+            userMessage = 'Our AI is having a thinking moment 🧠 Try rephrasing your question!';
+          } else if (errorMsg.includes('timeout') || errorMsg.includes('processing')) {
+            userMessage = 'That question was a bit too complex! Try something simpler 🎯';
+          } else if (errorResp.confidence === 0.0) {
+            userMessage = 'I need more specific health-related details to help you 🔍';
+          }
+          
+          throw new Error(`API_ERROR: ${userMessage}`);
+        }
         
         if (isProductionResponse || isLocalResponse || isRagResponse || isTestDataResponse) {
           // Handle both unified and legacy response formats
@@ -635,7 +663,11 @@ const VHealthSearch: React.FC = () => {
       // Check for specific error types
       const errorMessage = error.message || '';
       
-      if (errorMessage.includes('CORS_ERROR')) {
+      if (errorMessage.includes('API_ERROR:')) {
+        // Extract user-friendly message from API error
+        const userMessage = errorMessage.replace('API_ERROR: ', '');
+        setLoadingMessage(userMessage);
+      } else if (errorMessage.includes('CORS_ERROR')) {
         setLoadingMessage('Configuration issue! 🔧 Our team is working on this - please try again later!');
       } else if (errorMessage.includes('NETWORK_ERROR') || errorMessage.includes('TIMEOUT_ERROR')) {
         setLoadingMessage('Oops! Our servers are taking a coffee break ☕ Come back in a few minutes!');
@@ -947,8 +979,9 @@ const VHealthSearch: React.FC = () => {
   // Auto-show news feed on mobile devices
   useEffect(() => {
     const checkMobile = () => {
-      const isMobile = window.innerWidth <= 768 || 'ontouchstart' in window;
-      if (isMobile && !showFeelingHealthyContent) {
+      const isMobileDevice = window.innerWidth <= 768 || 'ontouchstart' in window;
+      setIsMobile(isMobileDevice);
+      if (isMobileDevice && !showFeelingHealthyContent) {
         setShowFeelingHealthyContent(true);
       }
     };
@@ -1117,18 +1150,18 @@ const VHealthSearch: React.FC = () => {
         />
       )}
       
-      {/* AUTHENTICATION COMPONENT - Moves with page for unified experience */}
+      {/* AUTHENTICATION COMPONENT - Top-right login/logout */}
       <div style={{
-        position: 'absolute',
+        position: 'fixed',
         top: '20px',
         right: '20px',
-        zIndex: 10002,
-        // Always visible - moves with page content for unified mobile experience
-        opacity: 1,
-        visibility: 'visible',
-        pointerEvents: 'auto'
+        zIndex: 1000,
+        opacity: (isScrolled && !isMobile) ? 0 : 1,
+        visibility: (isScrolled && !isMobile) ? 'hidden' : 'visible',
+        pointerEvents: (isScrolled && !isMobile) ? 'none' : 'auto',
+        transition: 'all 0.2s ease'
       }}>
-        <MultiAuthLogin className="main-login-button" />
+        <MultiAuthLogin className="main-login-button" position="top-right" />
       </div>
 
       {/* MAIN SEARCH INTERFACE */}
@@ -1330,56 +1363,36 @@ const VHealthSearch: React.FC = () => {
         </div>
       </div>
       
-      {/* HEALTH NEWS FEED - Flows naturally as part of the main page */}
+      {/* HEALTH NEWS FEED - Shows when "I'm Feeling Healthy" is active */}
       {showFeelingHealthyContent && (
         <div 
           className="feeling-healthy-section"
+          onClick={() => {
+            // Close news feed when clicking anywhere in the white space
+            setShowFeelingHealthyContent(false);
+          }}
           style={{
-            // Natural page flow - no overlay, part of the main document
-            position: 'relative',
-            width: '100%',
-            marginTop: '40px',
-            paddingBottom: '60px',
-            backgroundColor: 'transparent',
-            zIndex: 1
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(255, 255, 255, 0.95)',
+            backdropFilter: 'blur(2px)',
+            zIndex: 1000,
+            overflow: 'auto',
+            cursor: 'pointer'
           }}
         >
-          {/* Simple back button for mobile UX */}
-          <div style={{
-            textAlign: 'center',
-            marginBottom: '20px'
-          }}>
-            <button
-              onClick={() => setShowFeelingHealthyContent(false)}
-              style={{
-                background: 'rgba(255, 255, 255, 0.9)',
-                border: '1px solid #e5e7eb',
-                borderRadius: '20px',
-                padding: '8px 16px',
-                fontSize: '14px',
-                color: '#6b7280',
-                cursor: 'pointer',
-                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
-                transition: 'all 0.2s ease'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = 'rgba(255, 255, 255, 1)';
-                e.currentTarget.style.color = '#374151';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.9)';
-                e.currentTarget.style.color = '#6b7280';
-              }}
-            >
-              ← Back to Search
-            </button>
-          </div>
-          
-          <div style={{
-            maxWidth: '1200px',
-            margin: '0 auto',
-            padding: '0 20px'
-          }}>
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              maxWidth: '1200px',
+              margin: '40px auto',
+              padding: '20px',
+              cursor: 'default'
+            }}
+          >
             <HealthNewsFeed 
               maxArticles={6}
               setSearchQuery={setSearchQuery}
