@@ -59,7 +59,17 @@ export const useChartData = (query: string) => {
       setError(null);
       
       try {
-        const response = await fetch(getApiEndpoint(`/search/${encodeURIComponent(query)}/charts`));
+        const response = await fetch(getApiEndpoint('/ask'), {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            query: query,
+            include_charts: true,
+            user_context: {}
+          })
+        });
         const data = await response.json();
 
         if (data.success && data.data.totalFoods > 0) {

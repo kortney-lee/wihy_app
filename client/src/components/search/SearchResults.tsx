@@ -502,7 +502,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({
       logger.debug('SearchResults: Header search initiated', { query: searchQuery });
       
       // Use Universal Search API for header searches
-      const response = await fetch('https://ml.wihy.ai/search', {
+      const response = await fetch('https://ml.wihy.ai/ask', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -549,11 +549,11 @@ const SearchResults: React.FC<SearchResultsProps> = ({
     try {
       logger.debug('SearchResults: Making Universal Search API call', { 
         query: searchQuery, 
-        endpoint: 'https://ml.wihy.ai/search' 
+        endpoint: 'https://ml.wihy.ai/ask' 
       });
       
       // Call Universal Search API directly using new endpoint
-      const response = await fetch('https://ml.wihy.ai/search', {
+      const response = await fetch('https://ml.wihy.ai/ask', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
