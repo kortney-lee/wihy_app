@@ -43,7 +43,24 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
 
   const fileInputRef = useRef<HTMLInputElement>(null);        // desktop & mobile (library/file)
   const cameraInputRef = useRef<HTMLInputElement>(null);      // mobile (camera)
+  const lastProcessingTime = useRef<number>(0);               // prevent rapid successive calls
   const isMobile = isMobileDevice();
+
+  // Helper to prevent rapid successive processing calls
+  const canProcess = () => {
+    const now = Date.now();
+    const timeSinceLastProcess = now - lastProcessingTime.current;
+    const MIN_PROCESS_INTERVAL = 2000; // 2 seconds between processing attempts
+    
+    if (timeSinceLastProcess < MIN_PROCESS_INTERVAL) {
+      console.log('⏰ Processing too soon, ignoring request. Please wait before trying again.');
+      // Could add toast notification here if needed
+      return false;
+    }
+    
+    lastProcessingTime.current = now;
+    return true;
+  };
 
   // Handle camera access with fallback
   const handleCameraClick = async () => {
@@ -170,6 +187,8 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
 
         // Handle capture
         captureBtn.onclick = () => {
+          if (isProcessing || !canProcess()) return; // Prevent multiple/rapid captures
+          
           const canvas = document.createElement('canvas');
           const context = canvas.getContext('2d');
           
@@ -293,15 +312,32 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
   // --- handlers ---
   const onFilePicked = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) await processFile(file);
+    if (file) {
+      if (isProcessing || !canProcess()) return; // Prevent multiple/rapid processing
+      setIsProcessing(true);
+      try {
+        await processFile(file);
+      } finally {
+        setIsProcessing(false);
+      }
+    }
     e.target.value = '';
   };
 
   const handleDrop = async (e: React.DragEvent) => {
-    e.preventDefault(); setIsDragging(false);
+    e.preventDefault(); 
+    setIsDragging(false);
     if (!e.dataTransfer.files?.length) return;
     const f = Array.from(e.dataTransfer.files).find(x => x.type.startsWith('image/'));
-    if (f) await processFile(f);
+    if (f) {
+      if (isProcessing || !canProcess()) return; // Prevent multiple/rapid processing
+      setIsProcessing(true);
+      try {
+        await processFile(f);
+      } finally {
+        setIsProcessing(false);
+      }
+    }
   };
 
   // Separate handler for barcode scanning
@@ -408,7 +444,7 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
 
   // Main input handler that routes to appropriate specialized handler
   const handleUrlUpload = useCallback(async () => {
-    if (!imageUrl.trim()) return;
+    if (!imageUrl.trim() || isProcessing || !canProcess()) return;
     setIsProcessing(true);
     
     try {
@@ -487,20 +523,21 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
                     alignItems: 'center', 
                     justifyContent: 'center', 
                     gap: '8px',
-                    background: '#4cbb17',
-                    color: 'white',
+                    background: isProcessing ? '#cccccc' : '#4cbb17',
+                    color: isProcessing ? '#666' : 'white',
                     border: 'none',
                     borderRadius: '24px',
                     padding: '16px 20px',
                     fontSize: '16px',
                     fontWeight: '600',
-                    transition: 'all 0.2s ease'
+                    transition: 'all 0.2s ease',
+                    cursor: isProcessing ? 'not-allowed' : 'pointer'
                   }}
                 >
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M9.4 10.5l4.77-8.26C13.47 2.09 12.75 2 12 2c-2.4 0-4.6.85-6.32 2.25l3.66 6.35.06-.1zM21.54 9c-.92-2.92-3.15-5.26-6-6.34L11.88 9h9.66zm.26 1h-7.49l.29.5 4.76 8.25C21 16.97 22 14.61 22 12c0-.69-.07-1.35-.2-2zM8.54 12l-3.9-6.75C3.01 7.03 2 9.39 2 12c0 .69.07 1.35.2 2h7.49l-1.15-2zm-6.08 3c.92 2.92 3.15 5.26 6 6.34L12.12 15H2.46zm11.27 0l-3.9 6.76c.7.15 1.42.24 2.17.24 2.4 0 4.6-.85 6.32-2.25L14.73 15z"/>
                   </svg>
-                  Use Camera
+                  {isProcessing ? 'Processing...' : 'Use Camera'}
                 </button>
                 <button 
                   className="simple-search-button" 
@@ -512,20 +549,21 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
                     alignItems: 'center', 
                     justifyContent: 'center', 
                     gap: '8px',
-                    background: '#f8f9fa',
-                    color: '#5f6368',
-                    border: '1px solid #e5e7eb',
+                    background: isProcessing ? '#f5f5f5' : '#f8f9fa',
+                    color: isProcessing ? '#999' : '#5f6368',
+                    border: `1px solid ${isProcessing ? '#ddd' : '#e5e7eb'}`,
                     borderRadius: '24px',
                     padding: '16px 20px',
                     fontSize: '16px',
                     fontWeight: '600',
-                    transition: 'all 0.2s ease'
+                    transition: 'all 0.2s ease',
+                    cursor: isProcessing ? 'not-allowed' : 'pointer'
                   }}
                 >
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
                   </svg>
-                  Upload from Files
+                  {isProcessing ? 'Processing...' : 'Upload from Files'}
                 </button>
               </>
             )}
