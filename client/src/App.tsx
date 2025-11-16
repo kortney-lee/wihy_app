@@ -7,7 +7,6 @@ import TestChartsPage from './pages/TestChartsPage';
 import ComprehensiveHealthDashboard from './pages/ComprehensiveHealthDashboard';
 import TestDashboardGrid from './pages/TestDashboardGrid';
 import TestIndividualComponents from './pages/TestIndividualComponents';
-// import openaiAPI from './services/openaiAPI';
 import { wihyAPI } from './services/wihyAPI';
 import { searchCache } from './services/searchCache';
 import { fetchNewsFeed, refreshNewsFeed, searchNewsArticles } from './services/newsService';

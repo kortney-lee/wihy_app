@@ -7,7 +7,6 @@ import NutritionChart from '../charts/cards/NutritionChart';
 import ResultQualityPie from '../charts/cards/ResultQualityPie';
 import { wihyAPI, isUnifiedResponse, UnifiedResponse, WihyResponse } from '../../services/wihyAPI';
 import { searchCache } from '../../services/searchCache';
-import { foodAnalysisService } from '../../services/foodAnalysisService';
 import HealthNewsFeed from '../HealthNewsFeed';
 import { getApiEndpoint } from '../../config/apiConfig';
 import { logger } from '../../utils/logger';
@@ -404,7 +403,6 @@ const VHealthSearch: React.FC = () => {
         const isLocalResponse = !('success' in wihyResponse) && 'analysis' in wihyResponse;
         const isRagResponse = 'type' in wihyResponse && 'response' in wihyResponse;
         const isTestDataResponse = wihyResponse.dataSource === 'test_generator';
-        const isErrorResponse = wihyResponse.type === 'error' || wihyResponse.success === false;
         
         // 🔍 MAIN SEARCH LOGGING: Response format check
         console.log('🔍 MAIN SEARCH RESPONSE FORMAT CHECK:', {
@@ -419,34 +417,8 @@ const VHealthSearch: React.FC = () => {
           isValidProductionResponse: isProductionResponse,
           isValidRagResponse: isRagResponse,
           isTestDataResponse: isTestDataResponse,
-          isErrorResponse: isErrorResponse,
           dataSource: (wihyResponse as any).dataSource
         });
-        
-        // Handle API error responses
-        if (isErrorResponse) {
-          const errorResp = wihyResponse as any;
-          console.error('🔍 API ERROR RESPONSE:', {
-            error: errorResp.results?.error || errorResp.response,
-            query: queryToUse,
-            timestamp: new Date().toISOString(),
-            processingTime: errorResp.processing_time_ms
-          });
-          
-          // Create user-friendly error message
-          let userMessage = 'Hmm, our AI had trouble with that question 🤔';
-          const errorMsg = errorResp.results?.error || errorResp.response || '';
-          
-          if (errorMsg.includes('NoneType') || errorMsg.includes('iterable')) {
-            userMessage = 'Our AI is having a thinking moment 🧠 Try rephrasing your question!';
-          } else if (errorMsg.includes('timeout') || errorMsg.includes('processing')) {
-            userMessage = 'That question was a bit too complex! Try something simpler 🎯';
-          } else if (errorResp.confidence === 0.0) {
-            userMessage = 'I need more specific health-related details to help you 🔍';
-          }
-          
-          throw new Error(`API_ERROR: ${userMessage}`);
-        }
         
         if (isProductionResponse || isLocalResponse || isRagResponse || isTestDataResponse) {
           // Handle both unified and legacy response formats
@@ -663,11 +635,7 @@ const VHealthSearch: React.FC = () => {
       // Check for specific error types
       const errorMessage = error.message || '';
       
-      if (errorMessage.includes('API_ERROR:')) {
-        // Extract user-friendly message from API error
-        const userMessage = errorMessage.replace('API_ERROR: ', '');
-        setLoadingMessage(userMessage);
-      } else if (errorMessage.includes('CORS_ERROR')) {
+      if (errorMessage.includes('CORS_ERROR')) {
         setLoadingMessage('Configuration issue! 🔧 Our team is working on this - please try again later!');
       } else if (errorMessage.includes('NETWORK_ERROR') || errorMessage.includes('TIMEOUT_ERROR')) {
         setLoadingMessage('Oops! Our servers are taking a coffee break ☕ Come back in a few minutes!');
