@@ -55,6 +55,25 @@ const VHealthSearch: React.FC = () => {
   const abortControllerRef = useRef<AbortController | null>(null);
 
   // ================================
+  // PAGE REFRESH DETECTION - Clear query parameters on refresh
+  // ================================
+  useEffect(() => {
+    const navigation = (window as any).performance?.getEntriesByType?.('navigation')?.[0];
+    const isPageRefresh = navigation?.type === 'reload';
+    
+    if (isPageRefresh && searchParams.toString()) {
+      const currentPath = window.location.pathname;
+      console.log('🔄 VHealthSearch: Page refresh detected - clearing query parameters', { currentPath });
+      
+      // Always clear query parameters but stay on current route for search component
+      // This handles home page refreshes with query params
+      console.log('🧹 Clearing query parameters but staying on current route');
+      navigate(currentPath, { replace: true });
+      return;
+    }
+  }, []); // Empty dependency array - only run on mount
+
+  // ================================
   // HANDLE URL SEARCH PARAMETERS (Optional auto-population, no auto-search)
   // ================================
   useEffect(() => {
