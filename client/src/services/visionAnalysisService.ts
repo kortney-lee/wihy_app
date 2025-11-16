@@ -1,6 +1,6 @@
 // src/services/visionAnalysisService.ts
 
-import { BrowserMultiFormatReader } from '@zxing/browser';
+import { quaggaBarcodeScanner } from './quaggaBarcodeScanner';
 
 interface VisionAnalysisResult {
   success: boolean;
@@ -70,10 +70,8 @@ console.log('🔍 WIHY SCANNER API CONFIG DEBUG:', {
 });
 
 class VisionAnalysisService {
-  private barcodeReader: BrowserMultiFormatReader;
-  
   constructor() {
-    this.barcodeReader = new BrowserMultiFormatReader();
+    // QuaggaJS scanner is now handled by the dedicated service
   }
 
   /**
@@ -205,7 +203,7 @@ class VisionAnalysisService {
   }
 
   /**
-   * Hybrid barcode detection: Native BarcodeDetector → ZXing fallback
+   * Hybrid barcode detection: Native BarcodeDetector → QuaggaJS fallback
    * Optimized for food product barcodes (UPC/EAN formats)
    */
   private async detectBarcodes(imageFile: File): Promise<string[]> {
@@ -253,29 +251,22 @@ class VisionAnalysisService {
       console.log('ℹ️ Native BarcodeDetector not supported');
     }
     
-    // Method 2: ZXing fallback (reliable path) - only for food barcode formats
+    // Method 2: QuaggaJS fallback (reliable cross-browser solution)
     try {
-      console.log('� Falling back to ZXing detection...');
+      console.log('🔍 Falling back to QuaggaJS detection...');
       
-      const img = await this.loadImage(imageFile);
+      const quaggaResult = await quaggaBarcodeScanner.scanImageFile(imageFile);
       
-      // Try ZXing with timeout and format restrictions
-      const zxingPromise = this.barcodeReader.decodeFromImageElement(img);
-      const timeout = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('ZXing timeout')), 3000); // Shorter timeout
-      });
-      
-      const result = await Promise.race([zxingPromise, timeout]) as any;
-      
-      if (result && result.getText) {
-        const rawBarcode = result.getText();
-        const normalizedBarcode = this.normalizeToGTIN14(rawBarcode);
-        console.log('✅ ZXing detected:', rawBarcode, '→', normalizedBarcode);
-        detectedBarcodes.push(normalizedBarcode);
+      if (quaggaResult.success && quaggaResult.barcodes.length > 0) {
+        for (const barcode of quaggaResult.barcodes) {
+          const normalizedBarcode = this.normalizeToGTIN14(barcode);
+          detectedBarcodes.push(normalizedBarcode);
+          console.log('✅ QuaggaJS detected:', barcode, '→', normalizedBarcode);
+        }
       }
       
-    } catch (zxingError) {
-      console.log('⚠️ ZXing detection failed:', zxingError.message || zxingError);
+    } catch (quaggaError) {
+      console.log('⚠️ QuaggaJS detection failed:', quaggaError.message || quaggaError);
     }
     
     const uniqueBarcodes = [...new Set(detectedBarcodes)];
