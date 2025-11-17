@@ -118,6 +118,66 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
           left: 0;
         `;
         
+        // Create animated scanner overlay
+        const scannerOverlay = document.createElement('div');
+        scannerOverlay.style.cssText = `
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          width: 250px;
+          height: 250px;
+          transform: translate(-50%, -50%);
+          border: 2px solid #00ff00;
+          border-radius: 12px;
+          z-index: 10001;
+          pointer-events: none;
+          box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+        `;
+        
+        // Create corner indicators
+        const corners = ['top-left', 'top-right', 'bottom-left', 'bottom-right'];
+        corners.forEach(corner => {
+          const cornerDiv = document.createElement('div');
+          cornerDiv.style.cssText = `
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #00ff00;
+            ${corner.includes('top') ? 'top: -2px;' : 'bottom: -2px;'}
+            ${corner.includes('left') ? 'left: -2px;' : 'right: -2px;'}
+            ${corner.includes('top') && corner.includes('left') ? 'border-right: none; border-bottom: none;' : ''}
+            ${corner.includes('top') && corner.includes('right') ? 'border-left: none; border-bottom: none;' : ''}
+            ${corner.includes('bottom') && corner.includes('left') ? 'border-right: none; border-top: none;' : ''}
+            ${corner.includes('bottom') && corner.includes('right') ? 'border-left: none; border-top: none;' : ''}
+          `;
+          scannerOverlay.appendChild(cornerDiv);
+        });
+        
+        // Create animated scan line
+        const scanLine = document.createElement('div');
+        scanLine.style.cssText = `
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          height: 2px;
+          background: linear-gradient(90deg, transparent, #ff0000, transparent);
+          animation: scanAnimation 2s ease-in-out infinite;
+          box-shadow: 0 0 10px #ff0000;
+        `;
+        scannerOverlay.appendChild(scanLine);
+        
+        // Add CSS animation for scan line
+        const style = document.createElement('style');
+        style.textContent = `
+          @keyframes scanAnimation {
+            0% { top: 0; opacity: 1; }
+            50% { opacity: 1; }
+            100% { top: calc(100% - 2px); opacity: 1; }
+          }
+        `;
+        document.head.appendChild(style);
+        
         // Create button container with better mobile positioning
         const buttonContainer = document.createElement('div');
         buttonContainer.style.cssText = `
@@ -223,6 +283,7 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
         buttonContainer.appendChild(captureBtn);
         buttonContainer.appendChild(closeBtn);
         modal.appendChild(video);
+        modal.appendChild(scannerOverlay);  // Add animated scanner overlay
         modal.appendChild(buttonContainer);
         document.body.appendChild(modal);
         
