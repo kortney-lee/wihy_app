@@ -7,6 +7,7 @@ import TestChartsPage from './pages/TestChartsPage';
 import ComprehensiveHealthDashboard from './pages/ComprehensiveHealthDashboard';
 import TestDashboardGrid from './pages/TestDashboardGrid';
 import TestIndividualComponents from './pages/TestIndividualComponents';
+import AboutPage from './pages/AboutPage';
 import { wihyAPI } from './services/wihyAPI';
 import { searchCache } from './services/searchCache';
 import { fetchNewsFeed, refreshNewsFeed, searchNewsArticles } from './services/newsService';
@@ -505,6 +506,7 @@ const App: React.FC = () => {
       <Routes>
         <Route path="/" element={<VHealthSearch />} />
         <Route path="/results" element={<ResultsPage />} />
+        <Route path="/about" element={<AboutPage />} />
         <Route path="/test" element={<TestChartsPage />} />
         <Route path="/test-grid" element={<TestDashboardGrid />} />
         <Route path="/test-individual" element={<TestIndividualComponents />} />
