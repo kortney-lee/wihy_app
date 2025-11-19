@@ -93,13 +93,16 @@ export const FeatureCard: React.FC<FeatureCardProps> = ({
 }) => {
   const cardStyle: React.CSSProperties = {
     ...cardChrome,
-    height: 420,
+    height: 520,
     textAlign: 'center',
     background: isPrimary ? 'linear-gradient(135deg, #ffffff 0%, #f8fbff 100%)' : 'white',
     border: isPrimary ? '1px solid #e8f0fe' : '1px solid #e5e7eb',
     borderRadius: '16px',
-    padding: '2rem',
-    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+    padding: iconComponent ? '0' : '2rem',
+    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+    display: 'flex',
+    flexDirection: 'column',
+    minWidth: '380px'
   };
 
   if (isPrimary) {
@@ -119,35 +122,54 @@ export const FeatureCard: React.FC<FeatureCardProps> = ({
         }} />
       )}
       
-      <div style={{
-        fontSize: iconComponent ? '1rem' : '36px',
-        marginBottom: '1.5rem',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center'
-      }}>
-        {iconComponent || icon}
-      </div>
-      
-      <h3 style={{
-        fontSize: '1.25rem',
-        fontWeight: 600,
-        color: 'var(--vh-ink)',
-        marginBottom: '1rem'
-      }}>
-        {title}
-      </h3>
-      
-      <p style={{
-        color: 'var(--vh-muted)',
-        lineHeight: 1.6,
-        marginBottom: metrics.length > 0 ? '1.5rem' : 0
-      }}>
-        {description}
-      </p>
-      
-      {metrics.length > 0 && (
+      {iconComponent ? (
         <div style={{
+          width: '100%',
+          height: '200px',
+          overflow: 'hidden',
+          background: 'linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%)',
+          position: 'relative',
+          marginBottom: '1rem'
+        }}>
+          {iconComponent}
+        </div>
+      ) : (
+        <div style={{
+          fontSize: '36px',
+          marginBottom: '1.5rem',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center'
+        }}>
+          {icon}
+        </div>
+      )}
+      
+      <div style={{
+        padding: iconComponent ? '1.5rem' : '0',
+        display: 'flex',
+        flexDirection: 'column',
+        flex: 1
+      }}>
+        <h3 style={{
+          fontSize: '1.25rem',
+          fontWeight: 600,
+          color: 'var(--vh-ink)',
+          marginBottom: '1rem'
+        }}>
+          {title}
+        </h3>
+        
+        <p style={{
+          color: 'var(--vh-muted)',
+          lineHeight: 1.6,
+          marginBottom: metrics.length > 0 ? '1.5rem' : 0
+        }}>
+          {description}
+        </p>
+        
+        {metrics.length > 0 && (
+          <div style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(2, 1fr)',
           gap: '1rem',
@@ -158,13 +180,13 @@ export const FeatureCard: React.FC<FeatureCardProps> = ({
               <div style={{
                 fontSize: '1.5rem',
                 fontWeight: 700,
-                color: 'var(--vh-accent)'
+                color: '#4cbb17'
               }}>
                 {metric.value}
               </div>
               <div style={{
                 fontSize: '0.875rem',
-                color: 'var(--vh-muted)'
+                color: '#000000'
               }}>
                 {metric.label}
               </div>
@@ -172,6 +194,7 @@ export const FeatureCard: React.FC<FeatureCardProps> = ({
           ))}
         </div>
       )}
+      </div>
     </div>
   );
 };
