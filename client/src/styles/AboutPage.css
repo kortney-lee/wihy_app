@@ -583,7 +583,6 @@ body {
 /* =========================
    CONTENT SECTIONS
    ========================= */
-.platform-section,
 .demo-section,
 .tech-section,
 .market-section,
@@ -594,6 +593,7 @@ body {
 
 .platform-section {
   background: var(--vh-surface);
+  padding: 0 0 4rem 0;
 }
 
 .demo-section {
