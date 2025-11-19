@@ -223,18 +223,43 @@ I will translate complex health and nutrition science into simple steps you can 
 
           <div className="platform-grid">
             <FeatureCard
-              icon="🤖"
+              iconComponent={
+                <img 
+                  src="/assets/Advanced_AI_Engine.gif" 
+                  alt="AI Engine Analysis Demo"
+                  style={{
+                    width: '180px',
+                    height: '120px',
+                    objectFit: 'cover',
+                    borderRadius: '12px',
+                    border: '1px solid #e5e7eb',
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
+                  }}
+                />
+              }
               title="Advanced AI Engine"
               description="Health-focused LLM tuned on nutrition science, medical research, and real-world food data. Provides contextual answers backed by evidence."
               metrics={[
                 { label: 'Accuracy', value: '99.7%' },
                 { label: 'Data Points', value: '2.1M+' }
               ]}
-              isPrimary={true}
             />
 
             <FeatureCard
-              icon="📱"
+              iconComponent={
+                <img 
+                  src="/assets/Universal_Scanning.gif" 
+                  alt="Universal Scanning Demo"
+                  style={{
+                    width: '180px',
+                    height: '120px',
+                    objectFit: 'cover',
+                    borderRadius: '12px',
+                    border: '1px solid #e5e7eb',
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
+                  }}
+                />
+              }
               title="Universal Scanning"
               description="Barcode, image, and ingredient analysis in real time. Instantly decode any product or plate with a full breakdown and health score."
               metrics={[
@@ -244,7 +269,20 @@ I will translate complex health and nutrition science into simple steps you can 
             />
 
             <FeatureCard
-              icon="📊"
+              iconComponent={
+                <img 
+                  src="/assets/Predictive_Analytics.gif" 
+                  alt="Predictive Analytics Dashboard"
+                  style={{
+                    width: '180px',
+                    height: '120px',
+                    objectFit: 'cover',
+                    borderRadius: '12px',
+                    border: '1px solid #e5e7eb',
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
+                  }}
+                />
+              }
               title="Predictive Analytics"
               description="Dashboards that connect food, sleep, movement, and mood. See patterns, projections, and recommended next actions."
               metrics={[
@@ -254,7 +292,20 @@ I will translate complex health and nutrition science into simple steps you can 
             />
 
             <FeatureCard
-              icon="📚"
+              iconComponent={
+                <img 
+                  src="/assets/Research_Integration.gif" 
+                  alt="Research Integration Network"
+                  style={{
+                    width: '180px',
+                    height: '120px',
+                    objectFit: 'cover',
+                    borderRadius: '12px',
+                    border: '1px solid #e5e7eb',
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
+                  }}
+                />
+              }
               title="Research Integration"
               description="Continuously synced with current nutrition research, clinical guidelines, and public health data so answers stay current."
               metrics={[

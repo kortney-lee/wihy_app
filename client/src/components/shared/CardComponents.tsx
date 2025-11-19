@@ -73,7 +73,8 @@ export const CardShell: React.FC<CardShellProps> = ({
 
 // Feature Card component (for About page sections)
 interface FeatureCardProps {
-  icon: string;
+  icon?: string;
+  iconComponent?: React.ReactNode;
   title: string;
   description: string;
   metrics?: Array<{ label: string; value: string }>;
@@ -83,6 +84,7 @@ interface FeatureCardProps {
 
 export const FeatureCard: React.FC<FeatureCardProps> = ({
   icon,
+  iconComponent,
   title,
   description,
   metrics = [],
@@ -91,10 +93,13 @@ export const FeatureCard: React.FC<FeatureCardProps> = ({
 }) => {
   const cardStyle: React.CSSProperties = {
     ...cardChrome,
-    height: 320,
+    height: 420,
     textAlign: 'center',
     background: isPrimary ? 'linear-gradient(135deg, #ffffff 0%, #f8fbff 100%)' : 'white',
-    border: isPrimary ? '1px solid #e8f0fe' : '1px solid #e5e7eb'
+    border: isPrimary ? '1px solid #e8f0fe' : '1px solid #e5e7eb',
+    borderRadius: '16px',
+    padding: '2rem',
+    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
   };
 
   if (isPrimary) {
@@ -115,10 +120,13 @@ export const FeatureCard: React.FC<FeatureCardProps> = ({
       )}
       
       <div style={{
-        fontSize: '36px',
-        marginBottom: '1.5rem'
+        fontSize: iconComponent ? '1rem' : '36px',
+        marginBottom: '1.5rem',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center'
       }}>
-        {icon}
+        {iconComponent || icon}
       </div>
       
       <h3 style={{
