@@ -4,6 +4,14 @@
 @import './VHealthSearch.css';
 
 /* =========================
+   GLOBAL HEADING COLORS
+   ========================= */
+.about-page-wrapper h1,
+.about-page-wrapper h2 {
+  color: #4cbb17 !important;
+}
+
+/* =========================
    BODY RESET
    ========================= */
 body {
@@ -121,7 +129,7 @@ body {
   font-size: 3.5rem;
   font-weight: 700;
   margin: 0 !important;
-  padding: 0 2rem !important;
+  padding: 1rem 2rem !important;
   opacity: 0;
   transform: translateY(30px);
   transition: all 0.8s ease;
@@ -133,10 +141,15 @@ body {
 }
 
 .gradient-text {
-  background: linear-gradient(135deg, #4cbb17, #4cbb17);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: #4cbb17 !important;
+  background: none !important;
+  -webkit-text-fill-color: #4cbb17 !important;
+  -webkit-background-clip: initial !important;
+  background-clip: initial !important;
+}
+
+.main-page-title.gradient-text {
+  color: #4cbb17 !important;
 }
 
 .hero-badge {
@@ -190,6 +203,35 @@ body {
   background-image: none !important;
 }
 
+.hero-content-block {
+  margin-bottom: 2rem;
+}
+
+.hero-content-block:last-child {
+  margin-bottom: 0;
+}
+
+.hero-subtitle {
+  font-weight: 700 !important;
+  color: #000000 !important;
+}
+
+.hero-unification-points ul {
+  list-style-type: disc !important;
+  list-style-position: outside !important;
+  padding-left: 1.5rem !important;
+  margin: 1rem 0 !important;
+}
+
+.hero-unification-points li {
+  margin-bottom: 0.5rem;
+  line-height: 1.5;
+}
+
+.hero-subtitle {
+  font-weight: 700 !important;
+}
+
 .badge-dot {
   width: 8px;
   height: 8px;
@@ -227,7 +269,7 @@ body {
 .hero-container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 4rem 2rem 8rem;
+  padding: 4rem 2rem 2rem;
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 4rem;
@@ -1246,9 +1288,12 @@ body {
    ========================= */
 .platform-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 32px;
+  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+  gap: 24px;
   margin-top: 40px;
+  max-width: 1400px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .market-stats {
