@@ -23,6 +23,8 @@ const AboutPage: React.FC = () => {
 
   useEffect(() => {
     setIsLoaded(true);
+    // Scroll to top when component mounts
+    window.scrollTo(0, 0);
   }, []);
 
   // Simple automation: show popup after scroll or a short delay
@@ -151,8 +153,9 @@ const AboutPage: React.FC = () => {
           <div className="hero-container">
             <div className="hero-left">
               <div className={`hero-badge ${isLoaded ? 'animate-in' : ''}`}>
-                <span className="badge-dot"></span>
-                Series Seed • Health Tech • AI Platform
+                <span>Series Seed</span>
+                <span>Health Tech</span>
+                <span>AI Platform</span>
               </div>
               
               <p className={`hero-subtitle ${isLoaded ? 'animate-in delay-1' : ''}`}>

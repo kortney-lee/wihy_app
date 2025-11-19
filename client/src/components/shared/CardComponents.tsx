@@ -115,7 +115,7 @@ export const FeatureCard: React.FC<FeatureCardProps> = ({
       )}
       
       <div style={{
-        fontSize: '48px',
+        fontSize: '36px',
         marginBottom: '1.5rem'
       }}>
         {icon}
