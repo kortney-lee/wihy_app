@@ -1,27 +1,29 @@
 /* AboutPage.css - Clean consolidated version */
 
-/* Import existing design system components */
-@import './base.css';
-@import './buttons.css';
+/* Import complete design system */
+@import './VHealthSearch.css';
 
 /* =========================
-   ABOUTPAGE LAYOUT OVERRIDES
+   BODY RESET
    ========================= */
 body {
   margin: 0 !important;
   padding: 0 !important;
 }
 
+/* =========================
+   ABOUT PAGE LAYOUT
+   ========================= */
 .about-page-wrapper {
-  margin: 0 !important;
-  padding: 0 !important;
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
 }
 
 .hero-header {
-  margin-top: 0 !important;
-  padding-top: 80px !important;
   background: var(--vh-surface);
   position: relative;
+  padding-top: 2rem;
 }
 
 .hero-header::before {
@@ -57,7 +59,40 @@ body {
   align-items: center;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 1rem 2rem;
+  padding: 0.75rem 1.5rem;
+}
+
+.nav-brand {
+  display: flex;
+  align-items: center;
+}
+
+.nav-logo {
+  height: 40px;
+  width: auto;
+}
+
+.mobile-nav-toggle {
+  display: none;
+  flex-direction: column;
+  gap: 4px;
+  border: none;
+  background: transparent;
+  padding: 4px;
+  cursor: pointer;
+}
+
+.mobile-nav-toggle span {
+  width: 20px;
+  height: 2px;
+  background: var(--vh-ink);
+  border-radius: 999px;
+}
+
+.nav-links {
+  display: flex;
+  gap: 1.25rem;
+  align-items: center;
 }
 
 .logo-section {
@@ -90,20 +125,7 @@ body {
   color: var(--vh-accent);
 }
 
-.cta-nav {
-  background: var(--vh-accent);
-  color: white !important;
-  padding: 0.75rem 1.5rem;
-  border-radius: 8px;
-  text-decoration: none;
-  font-weight: 600;
-  transition: all 0.2s ease;
-}
 
-.cta-nav:hover {
-  background: var(--vh-accent-dark);
-  transform: translateY(-1px);
-}
 
 /* =========================
    HERO CONTENT
@@ -124,7 +146,7 @@ body {
 }
 
 .gradient-text {
-  background: linear-gradient(135deg, var(--vh-accent), #2563eb);
+  background: linear-gradient(135deg, #4cbb17, #4cbb17);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -189,12 +211,34 @@ body {
 .hero-container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 4rem 2rem;
+  padding: 4rem 2rem 8rem;
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 4rem;
   align-items: flex-start;
   min-height: 700px;
+}
+
+.hero-right {
+  position: relative;
+  border-radius: 24px;
+  padding: 1rem;
+  box-shadow: 
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 10px 25px -3px rgba(0, 0, 0, 0.2),
+    0 20px 40px -4px rgba(0, 0, 0, 0.25),
+    0 40px 80px -8px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+  transform: translateY(0);
+}
+
+.hero-right:hover {
+  transform: translateY(-8px);
+  box-shadow: 
+    0 -6px 8px -1px rgba(0, 0, 0, 0.18),
+    0 -15px 35px -3px rgba(0, 0, 0, 0.25),
+    0 30px 60px -4px rgba(255, 255, 255, 0.95),
+    0 60px 120px -8px rgba(255, 255, 255, 1);
 }
 
 .hero-content {
@@ -242,6 +286,7 @@ body {
   opacity: 0;
   transform: translateY(20px);
   transition: all 0.6s ease 0.8s;
+  justify-content: center;
 }
 
 .hero-actions.animate-in {
@@ -260,8 +305,14 @@ body {
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
+.main-page-kicker {
+  margin-top: 0.75rem;
+  font-size: 1rem;
+  color: var(--vh-muted);
+}
+
 /* =========================
-   CHAT FRAME
+   MOBILE APP FRAME
    ========================= */
 .chat-frame-container-wrapper {
   background: var(--vh-surface);
@@ -270,17 +321,121 @@ body {
 }
 
 .chat-frame-container {
-  max-width: 600px;
+  max-width: 388px;
   margin: 0 auto;
   position: relative;
 }
 
 .chat-frame {
-  background: #2c2c2e;
-  border-radius: 20px;
+  background: #1a1a1a;
+  border-radius: 35px;
   overflow: hidden;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-  border: 1px solid #3a3a3c;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4);
+  border: 8px solid #1a1a1a;
+  position: relative;
+}
+
+/* Mobile Device Frame Styling */
+.mobile-device-frame {
+  background: #1a1a1a;
+  border-radius: 35px;
+  padding: 8px;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4);
+}
+
+.mobile-device-header {
+  background: #1a1a1a;
+  height: 30px;
+  border-radius: 20px 20px 0 0;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mobile-notch {
+  width: 120px;
+  height: 20px;
+  background: #000;
+  border-radius: 0 0 15px 15px;
+  position: absolute;
+  top: 0;
+}
+
+/* Mobile Status Bar */
+.mobile-frame-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  pointer-events: none;
+}
+
+.mobile-status-bar {
+  background: linear-gradient(180deg, rgba(0,0,0,0.8) 0%, transparent 100%);
+  color: white;
+  padding: 8px 20px 25px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 25px 25px 0 0;
+}
+
+.mobile-time {
+  font-weight: 700;
+}
+
+.mobile-indicators {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.signal-strength {
+  display: flex;
+  gap: 2px;
+}
+
+.signal-strength span {
+  width: 3px;
+  height: 8px;
+  background: white;
+  border-radius: 1px;
+}
+
+.signal-strength span:nth-child(1) { height: 4px; opacity: 1; }
+.signal-strength span:nth-child(2) { height: 6px; opacity: 1; }
+.signal-strength span:nth-child(3) { height: 8px; opacity: 1; }
+.signal-strength span:nth-child(4) { height: 10px; opacity: 0.6; }
+
+.wifi-icon {
+  font-size: 12px;
+}
+
+.battery {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* Mobile App Frame */
+.mobile-app-frame {
+  display: block;
+  background: white;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .chat-frame-container {
+    max-width: 280px;
+  }
+  
+  .mobile-status-bar {
+    padding: 6px 15px 20px;
+    font-size: 12px;
+  }
 }
 
 .chat-frame-header {
@@ -311,15 +466,17 @@ body {
 
 .chat-frame-content {
   position: relative;
-  height: 600px;
+  height: 648px;
   background: white;
+  border-radius: 28px;
+  overflow: hidden;
 }
 
 .chat-iframe-container {
   height: 100%;
   width: 100%;
   position: relative;
-  border-radius: 0 0 20px 20px;
+  border-radius: 20px;
   overflow: hidden;
 }
 
@@ -411,15 +568,66 @@ body {
    CONTENT SECTIONS
    ========================= */
 .platform-section,
+.demo-section,
 .tech-section,
 .market-section,
 .leadership-section,
 .investment-section {
   padding: 4rem 0;
+}
+
+.platform-section {
   background: var(--vh-surface);
 }
 
+.demo-section {
+  background: var(--vh-surface-2);
+  padding: 4rem 0;
+}
+
+.demo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 24px;
+  margin-bottom: 2rem;
+}
+
+.demo-cta {
+  text-align: center;
+  margin-top: 2rem;
+}
+
+.hero-secondary-btn {
+  padding: 0.75rem 1.5rem;
+  border-radius: 999px;
+  border: 1px solid var(--vh-accent);
+  background: rgba(255, 255, 255, 0.8);
+  color: var(--vh-accent);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.hero-secondary-btn:hover {
+  background: var(--vh-accent);
+  color: #ffffff;
+  box-shadow: 0 6px 18px rgba(37, 99, 235, 0.4);
+  transform: translateY(-1px);
+}
+
 .tech-section {
+  background: var(--vh-surface);
+}
+
+.market-section {
+  background: var(--vh-surface-2);
+}
+
+.leadership-section {
+  background: var(--vh-surface);
+}
+
+.investment-section {
   background: var(--vh-surface-2);
 }
 
@@ -1110,3 +1318,365 @@ body {
   color: white;
 }
 
+/* =========================
+   FLOATING POPUP AND MOBILE STICKY CTA
+   ========================= */
+.floating-popup {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  max-width: 340px;
+  background: #020617;
+  color: #f9fafb;
+  padding: 18px 20px 18px;
+  border-radius: 18px;
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.6);
+  z-index: 1200;
+  animation: slideUpFade 0.4s ease forwards;
+}
+
+.floating-popup-header {
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.floating-popup-text {
+  font-size: 0.85rem;
+  line-height: 1.5;
+  margin-bottom: 12px;
+  color: rgba(249, 250, 251, 0.85);
+}
+
+.floating-popup-cta {
+  width: 100%;
+  border: none;
+  border-radius: 999px;
+  padding: 0.6rem 1rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  background: linear-gradient(135deg, var(--vh-accent), #4cbb17);
+  color: #ffffff;
+  box-shadow: 0 10px 25px rgba(76, 187, 23, 0.6);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.floating-popup-cta:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 16px 40px rgba(37, 99, 235, 0.7);
+}
+
+.floating-popup-close {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  border: none;
+  background: rgba(15, 23, 42, 0.7);
+  color: rgba(249, 250, 251, 0.9);
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@keyframes slideUpFade {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 16px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+/* Mobile sticky CTA */
+.mobile-sticky-cta {
+  display: none;
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 0.75rem 1.25rem calc(0.75rem + env(safe-area-inset-bottom));
+  background: rgba(255, 255, 255, 0.98);
+  border-top: 1px solid rgba(15, 23, 42, 0.06);
+  z-index: 1100;
+  backdrop-filter: blur(12px);
+}
+
+.mobile-sticky-cta-btn {
+  width: 100%;
+  border-radius: 999px;
+  border: none;
+  padding: 0.85rem 1.25rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  background: linear-gradient(135deg, var(--vh-accent), #4cbb17);
+  color: #ffffff;
+  box-shadow: 0 10px 25px rgba(76, 187, 23, 0.45);
+  cursor: pointer;
+}
+
+/* =========================
+   RESPONSIVE UPDATES
+   ========================= */
+@media (max-width: 1024px) {
+  .hero-container {
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+    padding: 3rem 1.5rem 3.5rem;
+    min-height: auto;
+  }
+
+  .hero-right {
+    order: -1; /* show device / chat first on tablet */
+  }
+
+  .main-title-section {
+    padding: 2.5rem 1.5rem 3rem !important;
+    margin: 0 1.5rem !important;
+  }
+
+  .main-page-title {
+    font-size: 2.6rem;
+    padding: 0 !important;
+  }
+
+  .tech-content,
+  .investment-content {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+
+  .founder-spotlight {
+    grid-template-columns: 1fr;
+    text-align: left;
+  }
+
+  .hero-stats {
+    gap: 1.5rem;
+  }
+
+  .nav-links {
+    gap: 1rem;
+  }
+}
+
+@media (max-width: 900px) {
+  .mobile-nav-toggle {
+    display: flex;
+  }
+
+  .nav-links {
+    position: absolute;
+    top: 56px;
+    right: 1.5rem;
+    flex-direction: column;
+    align-items: flex-start;
+    background: #ffffff;
+    padding: 0.75rem 1rem;
+    border-radius: 12px;
+    box-shadow: 0 18px 40px rgba(15, 23, 42, 0.18);
+    display: none;
+    min-width: 210px;
+    z-index: 1100;
+  }
+
+  .nav-links.open {
+    display: flex;
+  }
+
+  .top-nav {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  }
+}
+
+@media (max-width: 768px) {
+  .section-container {
+    padding: 0 1.5rem;
+  }
+
+  .hero-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .market-stats,
+  .market-trends,
+  .platform-grid,
+  .demo-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .main-page-title {
+    font-size: 2.2rem;
+  }
+
+  .hero-subtitle {
+    font-size: 1.05rem;
+  }
+
+  .hero-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .floating-popup {
+    display: none; /* avoid clashing with mobile sticky CTA */
+  }
+
+  .mobile-sticky-cta {
+    display: block;
+  }
+}
+
+/* About Page Specific Kelly Green Overrides */
+.stat-number {
+  color: #4cbb17 !important;
+}
+
+.market-stat .stat-large {
+  color: #4cbb17 !important;
+}
+
+.metric-value {
+  color: #4cbb17 !important;
+}
+
+.nav-link:hover {
+  color: #4cbb17 !important;
+}
+
+.overlay-content {
+  color: #4cbb17 !important;
+}
+
+/* Override all elements using var(--vh-accent) for color on About page */
+.hero-badge .badge-text,
+.hero-title .highlight,
+.section-title .highlight,
+.feature-icon,
+.stat-highlight,
+.metric-highlight,
+.cta-secondary,
+.tech-highlight,
+.benefit-number,
+.testimonial-highlight,
+.footer-highlight {
+  color: #4cbb17 !important;
+}
+
+/* Background colors using accent */
+.hero-badge,
+.feature-card:hover .feature-icon,
+.cta-secondary:hover,
+.tech-card:hover .tech-icon {
+  background-color: #4cbb17 !important;
+}
+
+/* Border colors using accent */
+.cta-secondary,
+.feature-card:hover,
+.tech-card:hover {
+  border-color: #4cbb17 !important;
+}
+
+/* Override inline styles in MetricCard and HighlightCard components */
+.market-stats [style*="color: var(--vh-accent)"],
+.market-trends [style*="color: var(--vh-accent)"] {
+  color: #4cbb17 !important;
+}
+
+/* Target all number elements with blue color on About page */
+.market-stats div[style*="fontSize: '2.5rem'"],
+.market-trends div[style*="fontSize: '2rem'"] {
+  color: #4cbb17 !important;
+}
+
+/* =========================
+   FIX EMBEDDED CHAT LAYOUT SHIFTS - MINIMAL APPROACH
+   ========================= */
+
+/* Simple fix: Force scrollbar to prevent layout shifts */
+html {
+  overflow-y: scroll;
+}
+
+/* Fix textarea auto-resize and focus behavior causing visual shifts in embedded chat */
+.about-page-wrapper .search-input {
+  height: 40px !important;
+  min-height: 40px !important;
+  max-height: 40px !important;
+  resize: none !important;
+  overflow-y: hidden !important;
+}
+
+/* Prevent chat container from expanding when input is focused */
+/* Chat container dimensions removed - using original chat sizing */
+
+/* Force stable document width to prevent scrollbar-related shifts */
+body {
+  overflow-y: scroll !important;
+  width: calc(100% - 0px) !important;
+}
+
+/* COMPREHENSIVE SCROLL ISOLATION FOR EMBEDDED CHAT */
+
+/* Step 1: Disable ALL scroll-into-view behavior on AboutPage */
+.about-page-wrapper,
+.about-page-wrapper * {
+  scroll-behavior: auto !important;
+  scroll-margin: 0 !important;
+  scroll-padding: 0 !important;
+}
+
+/* Step 2: Create isolated scroll containers for chat */
+.about-page-wrapper .chat-frame-container {
+  /* Critical: Create new stacking context and scroll container */
+  transform: translateZ(0) !important;
+  contain: layout style paint !important;
+  isolation: isolate !important;
+  
+  /* Prevent any overflow from affecting parent */
+  position: relative !important;
+  /* Remove height constraints - let chat use original dimensions */
+  
+  /* Block scroll propagation */
+  overscroll-behavior: contain !important;
+}
+
+/* Step 3: Contain all chat content */
+.about-page-wrapper .chat-frame-content,
+.about-page-wrapper .chat-messages,
+.about-page-wrapper .message-list {
+  /* Create isolated scroll area */
+  contain: layout style paint !important;
+  /* Allow normal scrolling within chat */
+  
+  /* Prevent scroll from bubbling up */
+  overscroll-behavior: contain !important;
+}
+
+/* Step 4: Critical - Override scrollIntoView on all chat elements */
+.about-page-wrapper .chat-frame-container *,
+.about-page-wrapper .search-input,
+.about-page-wrapper textarea,
+.about-page-wrapper .message,
+.about-page-wrapper .chat-message {
+  /* Force scroll behavior to be contained */
+  scroll-behavior: auto !important;
+  scroll-margin: 0 !important;
+  scroll-padding: 0 !important;
+}
+
+/* Step 5: Prevent focus from causing page scroll */
+.about-page-wrapper .search-input:focus,
+.about-page-wrapper textarea:focus {
+  scroll-margin: 0 !important;
+  scroll-snap-align: none !important;
+}

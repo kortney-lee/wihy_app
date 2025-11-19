@@ -1,14 +1,19 @@
 /* Dashboard Component Styles */
 
-/* Main Container - only for mobile */
+/* Main Container - for all screen sizes when header is fixed */
+.dashboard-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding-top: var(--vh-header-height); /* Full header height for proper spacing */
+  overflow: hidden;
+  background-color: #f0f7ff; /* Match the light blue background of other dashboard elements */
+}
+
+/* Mobile adjustments to reduce white space */
 @media (max-width: 768px) {
   .dashboard-container {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    padding-top: calc(var(--vh-header-height) * 0.75); /* Use 75% of header height to reduce white space */
-    overflow: hidden;
-    background-color: #f0f7ff; /* Match the light blue background of other dashboard elements */
+    padding-top: calc(var(--vh-header-height) * 0.75); /* Use 75% of header height to reduce white space on mobile */
   }
 }
 
