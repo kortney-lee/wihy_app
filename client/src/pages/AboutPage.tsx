@@ -1,17 +1,107 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import Header from '../components/shared/Header';
+import FullScreenChat from '../components/ui/FullScreenChat';
+import { FeatureCard, MetricCard, HighlightCard } from '../components/shared/CardComponents';
+import { CTAButton, NavLink } from '../components/shared/ButtonComponents';
+import MacronutrientPieChart from '../components/charts/cards/MacronutrientPieChart';
+import NovaChart from '../components/charts/cards/NovaChart';
+import PublicationTimelineChart from '../components/charts/cards/PublicationTimelineChart';
 import '../styles/AboutPage.css';
 import '../styles/MobileAboutPage.css';
 import '../styles/InvestorSections.css';
-import FullScreenChat from '../components/ui/FullScreenChat';
 
 const AboutPage: React.FC = () => {
   const currentYear = new Date().getFullYear();
   const [isLoaded, setIsLoaded] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
-  const [isDemoActive, setIsDemoActive] = useState(false);
+  const [isNavOpen, setIsNavOpen] = useState(false);
+  const [showWaitlistPopup, setShowWaitlistPopup] = useState(false);
+  const [hasDismissedPopup, setHasDismissedPopup] = useState(false);
+  
+  // Ref to monitor the chat container specifically
+  const chatContainerRef = React.useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setIsLoaded(true);
+  }, []);
+
+  // Simple automation: show popup after scroll or a short delay
+  useEffect(() => {
+    if (hasDismissedPopup) return;
+
+    const onScroll = () => {
+      if (window.scrollY > 400) {
+        setShowWaitlistPopup(true);
+      }
+    };
+
+    window.addEventListener('scroll', onScroll);
+
+    const timer = window.setTimeout(() => {
+      setShowWaitlistPopup(true);
+    }, 10000); // 10s
+
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      window.clearTimeout(timer);
+    };
+  }, [hasDismissedPopup]);
+
+  const handleDismissPopup = () => {
+    setShowWaitlistPopup(false);
+    setHasDismissedPopup(true);
+  };
+
+  // Prevent embedded chat from scrolling the page while allowing internal chat scrolling
+  useEffect(() => {
+    // Override scrollIntoView to prevent chat from scrolling the page
+    const originalScrollIntoView = Element.prototype.scrollIntoView;
+    Element.prototype.scrollIntoView = function(options) {
+      // Check if this element or any parent has chat-related classes
+      const isInsideChatContainer = this.closest('.chat-frame-container, .about-page-wrapper .chat-frame-content, .search-input');
+      
+      if (isInsideChatContainer) {
+        // Check if this is likely the messagesEndRef (empty div at end of messages)
+        const isLikelyMessagesEndRef = (
+          this.tagName === 'DIV' && 
+          !this.className && 
+          !this.textContent?.trim() &&
+          this.previousElementSibling // Has previous elements (messages)
+        );
+        
+        if (isLikelyMessagesEndRef) {
+          // Find the scrollable chat container and scroll within it
+          const scrollableContainer = this.closest('.chat-messages, .message-list, .messages-container, [class*="messages"], [class*="chat-content"]');
+          
+          if (scrollableContainer && scrollableContainer.scrollTop !== undefined) {
+            // Scroll within chat container instead of page
+            scrollableContainer.scrollTop = scrollableContainer.scrollHeight;
+            return;
+          }
+          
+          // Fallback: try to find any scrollable parent within chat
+          let parent = this.parentElement;
+          while (parent && isInsideChatContainer) {
+            const style = window.getComputedStyle(parent);
+            if (style.overflowY === 'auto' || style.overflowY === 'scroll' || parent.scrollHeight > parent.clientHeight) {
+              parent.scrollTop = parent.scrollHeight;
+              return;
+            }
+            parent = parent.parentElement;
+          }
+        }
+        
+        return; // Block the scroll call for chat elements
+      }
+      
+      // Allow normal scrollIntoView for non-chat elements
+      return originalScrollIntoView.call(this, options);
+    };
+
+    return () => {
+      // Restore original scrollIntoView function
+      Element.prototype.scrollIntoView = originalScrollIntoView;
+    };
   }, []);
 
   return (
@@ -20,17 +110,29 @@ const AboutPage: React.FC = () => {
       <header className="hero-header">
         <nav className="top-nav">
           <div className="nav-container">
-            <div className="logo-section">
-              <img src="/assets/wihylogo.png" alt="WIHY.ai" className="main-logo" />
+            <div className="nav-brand">
+              <img src="/assets/wihylogo.png" alt="WIHY.ai" className="nav-logo" />
             </div>
-            
-            <div className="nav-links">
-              <a href="#platform" className="nav-link">Platform</a>
-              <a href="#technology" className="nav-link">Technology</a>
-              <a href="#market" className="nav-link">Market</a>
-              <a href="#founder" className="nav-link">Leadership</a>
-              <a href="#investment" className="nav-link">Investment</a>
-              <a href="/" className="cta-nav">Launch Platform</a>
+
+            <button
+              className="mobile-nav-toggle"
+              onClick={() => setIsNavOpen(open => !open)}
+              aria-label="Toggle navigation"
+            >
+              <span />
+              <span />
+              <span />
+            </button>
+
+            <div className={`nav-links ${isNavOpen ? 'open' : ''}`}>
+              <NavLink href="#platform">Platform</NavLink>
+              <NavLink href="#technology">Technology</NavLink>
+              <NavLink href="#market">Market</NavLink>
+              <NavLink href="#founder">Leadership</NavLink>
+              <NavLink href="#investment">Investment</NavLink>
+              <CTAButton href="/" primary>
+                Launch Platform
+              </CTAButton>
             </div>
           </div>
         </nav>
@@ -40,6 +142,9 @@ const AboutPage: React.FC = () => {
           <h1 className={`main-page-title ${isLoaded ? 'animate-in' : ''}`}>
             <span className="gradient-text">The Future of Health Intelligence</span>
           </h1>
+          <p className="main-page-kicker">
+            Scan food. Decode research. Turn confusing health data into clear actions.
+          </p>
         </div>
 
         <div className="hero-content">
@@ -51,8 +156,8 @@ const AboutPage: React.FC = () => {
               </div>
               
               <p className={`hero-subtitle ${isLoaded ? 'animate-in delay-1' : ''}`}>
-                WIHY.ai transforms how people understand food, health, and nutrition through advanced AI, 
-                real-time scanning, and personalized intelligence. We're building the definitive platform 
+                WIHY.ai transforms how people understand food, health, and nutrition through advanced AI,
+                real-time scanning, and personalized intelligence. We are building the definitive platform
                 where "What Is Healthy?" gets a clear, evidence-based answer.
               </p>
 
@@ -72,69 +177,31 @@ const AboutPage: React.FC = () => {
               </div>
 
               <div className={`hero-actions ${isLoaded ? 'animate-in delay-4' : ''}`}>
-                <a href="#investment" className="btn-primary-large">
+                <CTAButton href="#investment" primary>
                   View Investment Opportunity
-                </a>
-                <a href="#platform" className="btn-secondary-large">
-                  Explore Platform
-                </a>
-              </div> {/* End hero-actions */}
+                </CTAButton>
+              </div>
             </div> {/* End hero-left */}
 
             <div className="hero-right">
-              <div className={`chat-frame-container ${isLoaded ? 'animate-in delay-2' : ''}`}>
-                <div className="chat-frame-header">
-                  <div className="frame-controls">
-                    <span className="control red"></span>
-                    <span className="control yellow"></span>
-                    <span className="control green"></span>
-                  </div>
-                  <div className="frame-title">
-                    <span className="frame-icon">💬</span>
-                    Live WIHY AI Demo
-                  </div>
-                </div>
-                
+              <div 
+                ref={chatContainerRef}
+                className={`chat-frame-container ${isLoaded ? 'animate-in delay-2' : ''}`}
+              >
                 <div className="chat-frame-content">
-                  <div className="chat-iframe-container">
-                    {/* Embedded FullScreenChat */}
-                    <div className="embedded-chat" style={{
-                      pointerEvents: isDemoActive ? 'auto' : 'none',
-                      opacity: isDemoActive ? 1 : 0.8
-                    }}>
-                      <FullScreenChat
-                        isOpen={true}
-                        onClose={() => {}}
-                        initialQuery="Tell me about healthy nutrition choices"
-                        initialResponse="I'm here to help you make informed health decisions! Ask me about nutrition, food analysis, exercise, or any health-related questions you have."
-                      />
-                    </div>
-                    
-                    {/* Clickable overlay with chat icon - only show when demo is not active */}
-                    {!isDemoActive && (
-                      <div className="chat-overlay" onClick={() => setIsDemoActive(true)}>
-                        <div className="overlay-content">
-                          <div className="chat-icon">💬</div>
-                          <div className="overlay-text">Click to Demo</div>
-                        </div>
-                      </div>
-                    )}
-                    
-                    {/* Demo control - show when active */}
-                    {isDemoActive && (
-                      <div className="demo-controls">
-                        <button 
-                          className="demo-close-btn" 
-                          onClick={() => setIsDemoActive(false)}
-                          title="Close Demo"
-                        >
-                          ×
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                </div> {/* End chat-frame-content */}
-              </div> {/* End chat-frame-container */}
+                  {/* Embedded preview of the chat experience */}
+                  <FullScreenChat
+                    isOpen={true}
+                    onClose={() => {}}
+                    initialQuery="What can you help me with?"
+                    initialResponse={`Hey there, I am WIHY – your health intelligence engine connected to 30+ million research articles.
+
+Tell me what you are eating, how you are sleeping, or what you are worried about.
+
+I will translate complex health and nutrition science into simple steps you can act on today.`}
+                  />
+                </div>
+              </div>
             </div> {/* End hero-right */}
           </div> {/* End hero-container */}
         </div> {/* End hero-content */}
@@ -146,63 +213,52 @@ const AboutPage: React.FC = () => {
           <div className="section-header">
             <h2 className="section-title">Revolutionary Health Intelligence Platform</h2>
             <p className="section-subtitle">
-              WIHY.ai combines cutting-edge AI, real-time scanning technology, and comprehensive health analytics 
-              to create the world's most advanced nutrition intelligence platform.
+              WIHY.ai combines cutting-edge AI, real-time scanning, and comprehensive health analytics
+              to create a nutrition intelligence layer that sits on top of everyday decisions.
             </p>
           </div>
 
           <div className="platform-grid">
-            <div className="platform-card primary">
-              <div className="card-icon">�</div>
-              <h3 className="card-title">Advanced AI Engine</h3>
-              <p className="card-description">
-                Proprietary health-focused LLM trained on nutrition science, medical research, and real-world dietary data. 
-                Provides contextual, personalized responses backed by evidence.
-              </p>
-              <div className="card-metrics">
-                <span className="metric">99.7% Accuracy</span>
-                <span className="metric">2.1M+ Data Points</span>
-              </div>
-            </div>
+            <FeatureCard
+              icon="🤖"
+              title="Advanced AI Engine"
+              description="Health-focused LLM tuned on nutrition science, medical research, and real-world food data. Provides contextual answers backed by evidence."
+              metrics={[
+                { label: 'Accuracy', value: '99.7%' },
+                { label: 'Data Points', value: '2.1M+' }
+              ]}
+              isPrimary={true}
+            />
 
-            <div className="platform-card">
-              <div className="card-icon">📱</div>
-              <h3 className="card-title">Universal Scanning</h3>
-              <p className="card-description">
-                Real-time barcode scanning, image recognition, and ingredient analysis. 
-                Instantly decode any food product or meal with comprehensive nutritional breakdown.
-              </p>
-              <div className="card-metrics">
-                <span className="metric">500K+ Products</span>
-                <span className="metric">0.3s Scan Time</span>
-              </div>
-            </div>
+            <FeatureCard
+              icon="📱"
+              title="Universal Scanning"
+              description="Barcode, image, and ingredient analysis in real time. Instantly decode any product or plate with a full breakdown and health score."
+              metrics={[
+                { label: 'Products', value: '500K+' },
+                { label: 'Scan Time', value: '0.3s' }
+              ]}
+            />
 
-            <div className="platform-card">
-              <div className="card-icon">📊</div>
-              <h3 className="card-title">Predictive Analytics</h3>
-              <p className="card-description">
-                Personal health dashboards with predictive modeling, trend analysis, and 
-                actionable insights based on individual dietary patterns and health goals.
-              </p>
-              <div className="card-metrics">
-                <span className="metric">15+ Health Metrics</span>
-                <span className="metric">Real-time Updates</span>
-              </div>
-            </div>
+            <FeatureCard
+              icon="📊"
+              title="Predictive Analytics"
+              description="Dashboards that connect food, sleep, movement, and mood. See patterns, projections, and recommended next actions."
+              metrics={[
+                { label: 'Health Metrics', value: '15+' },
+                { label: 'Updates', value: 'Real-time' }
+              ]}
+            />
 
-            <div className="platform-card">
-              <div className="card-icon">�</div>
-              <h3 className="card-title">Research Integration</h3>
-              <p className="card-description">
-                Continuous integration with latest nutrition research, clinical studies, and 
-                health guidelines from leading medical institutions worldwide.
-              </p>
-              <div className="card-metrics">
-                <span className="metric">10K+ Studies</span>
-                <span className="metric">Daily Updates</span>
-              </div>
-            </div>
+            <FeatureCard
+              icon="📚"
+              title="Research Integration"
+              description="Continuously synced with current nutrition research, clinical guidelines, and public health data so answers stay current."
+              metrics={[
+                { label: 'Studies', value: '10K+' },
+                { label: 'Updates', value: 'Daily' }
+              ]}
+            />
           </div>
         </div>
       </section>
@@ -212,29 +268,29 @@ const AboutPage: React.FC = () => {
         <div className="section-container">
           <div className="tech-content">
             <div className="tech-left">
-              <h2 className="tech-title">Built for Scale & Intelligence</h2>
+              <h2 className="tech-title">Built for Scale and Intelligence</h2>
               <div className="tech-features">
                 <div className="tech-feature">
                   <div className="tech-icon">⚡</div>
                   <div className="tech-info">
                     <h4>Lightning Fast Processing</h4>
-                    <p>Cloud-native architecture processing 10K+ queries per second with sub-300ms response times</p>
+                    <p>Cloud-native architecture handling thousands of queries per second with sub-300ms responses.</p>
                   </div>
                 </div>
-                
+
                 <div className="tech-feature">
-                  <div className="tech-icon">�</div>
+                  <div className="tech-icon">🛡️</div>
                   <div className="tech-info">
-                    <h4>Enterprise Security</h4>
-                    <p>SOC 2 compliant with end-to-end encryption, HIPAA ready for healthcare integrations</p>
+                    <h4>Enterprise-Grade Security</h4>
+                    <p>SOC 2 aligned design, end-to-end encryption, and HIPAA-ready pathways for healthcare partners.</p>
                   </div>
                 </div>
-                
+
                 <div className="tech-feature">
                   <div className="tech-icon">🌐</div>
                   <div className="tech-info">
                     <h4>Global Reach</h4>
-                    <p>Multi-language support, regional nutrition databases, and culturally aware recommendations</p>
+                    <p>Regional nutrition databases and culturally aware recommendations tuned for real communities.</p>
                   </div>
                 </div>
               </div>
@@ -243,7 +299,7 @@ const AboutPage: React.FC = () => {
             <div className="tech-right">
               <div className="tech-stack">
                 <div className="stack-category">
-                  <h4>AI & ML</h4>
+                  <h4>AI and ML</h4>
                   <div className="stack-items">
                     <span>Custom LLM</span>
                     <span>Computer Vision</span>
@@ -251,21 +307,21 @@ const AboutPage: React.FC = () => {
                     <span>Predictive Models</span>
                   </div>
                 </div>
-                
+
                 <div className="stack-category">
                   <h4>Infrastructure</h4>
                   <div className="stack-items">
-                    <span>Cloud Native</span>
+                    <span>Azure Cloud</span>
                     <span>Auto-scaling</span>
-                    <span>Edge Computing</span>
-                    <span>Real-time APIs</span>
+                    <span>Edge APIs</span>
+                    <span>Observability</span>
                   </div>
                 </div>
-                
+
                 <div className="stack-category">
                   <h4>Data</h4>
                   <div className="stack-items">
-                    <span>Nutrition DB</span>
+                    <span>Nutrition Graph</span>
                     <span>Research Engine</span>
                     <span>User Analytics</span>
                     <span>Health Metrics</span>
@@ -277,48 +333,69 @@ const AboutPage: React.FC = () => {
         </div>
       </section>
 
+      {/* Platform Demo Section */}
+      <section id="demo" className="demo-section">
+        <div className="section-container">
+          <div className="section-header">
+            <h2 className="section-title">Experience WIHY.ai in Action</h2>
+            <p className="section-subtitle">
+              Live charts, NOVA scores, and research timelines show how WIHY turns noisy data into clear guidance.
+            </p>
+          </div>
+
+          <div className="demo-grid">
+            <MacronutrientPieChart
+              data={{ protein: 25, carbohydrates: 45, fat: 30 }}
+              title="Macronutrient Analysis"
+              displayMode="percentage"
+            />
+            <NovaChart query="Sample Food Item" />
+            <PublicationTimelineChart timeRange="decade" title="Research Timeline" />
+          </div>
+
+          <div className="demo-cta">
+            <CTAButton primary href="/" size="large">
+              Try WIHY.ai Now – Free
+            </CTAButton>
+          </div>
+        </div>
+      </section>
+
       {/* Market Opportunity */}
       <section id="market" className="market-section">
         <div className="section-container">
           <div className="market-header">
             <h2 className="section-title">Massive Market Opportunity</h2>
             <p className="section-subtitle">
-              The convergence of health awareness, AI advancement, and digital transformation creates 
-              an unprecedented opportunity in the $4.2T global wellness market.
+              Health awareness, AI, and digital care are converging into a multi-trillion-dollar landscape.
             </p>
           </div>
 
           <div className="market-stats">
-            <div className="market-stat">
-              <div className="stat-large">$4.2T</div>
-              <div className="stat-desc">Global Wellness Market</div>
-              <div className="stat-growth">+7.8% CAGR</div>
-            </div>
-            <div className="market-stat">
-              <div className="stat-large">$127B</div>
-              <div className="stat-desc">Digital Health Market</div>
-              <div className="stat-growth">+25% CAGR</div>
-            </div>
-            <div className="market-stat">
-              <div className="stat-large">$2.1B</div>
-              <div className="stat-desc">AI Nutrition Market</div>
-              <div className="stat-growth">+42% CAGR</div>
-            </div>
+            <MetricCard
+              value="$4.2T"
+              label="Global Wellness Market"
+              growth="+7.8% CAGR"
+              valueColor="#4cbb17"
+            />
+            <MetricCard
+              value="$127B"
+              label="Digital Health Market"
+              growth="+25% CAGR"
+              valueColor="#4cbb17"
+            />
+            <MetricCard
+              value="$2.1B"
+              label="AI Nutrition Market"
+              growth="+42% CAGR"
+              valueColor="#4cbb17"
+            />
           </div>
 
           <div className="market-trends">
-            <div className="trend-item">
-              <div className="trend-number">89%</div>
-              <div className="trend-text">of consumers want personalized nutrition advice</div>
-            </div>
-            <div className="trend-item">
-              <div className="trend-number">73%</div>
-              <div className="trend-text">struggle to understand food labels</div>
-            </div>
-            <div className="trend-item">
-              <div className="trend-number">65%</div>
-              <div className="trend-text">use mobile apps for health decisions</div>
-            </div>
+            <HighlightCard number="89%" text="of consumers want personalized nutrition advice." numberColor="#4cbb17" />
+            <HighlightCard number="73%" text="struggle to understand food labels today." numberColor="#4cbb17" />
+            <HighlightCard number="65%" text="use mobile apps when making health decisions." numberColor="#4cbb17" />
           </div>
         </div>
       </section>
@@ -329,24 +406,25 @@ const AboutPage: React.FC = () => {
           <div className="leadership-header">
             <h2 className="section-title">Visionary Leadership</h2>
             <p className="section-subtitle">
-              Led by experienced entrepreneurs and health technology experts with proven track records 
-              in scaling consumer health platforms.
+              Led by operators who live at the intersection of health, systems design, and community.
             </p>
           </div>
 
           <div className="founder-spotlight">
             <div className="founder-image">
               <div className="founder-photo">
-                <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face&auto=format&q=80" 
-                     alt="Kortney O. Lee, Founder & CEO" 
-                     className="founder-photo-img" />
+                <img
+                  src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face&auto=format&q=80"
+                  alt="Kortney O. Lee, Founder and CEO"
+                  className="founder-photo-img"
+                />
               </div>
             </div>
-            
+
             <div className="founder-details">
               <h3 className="founder-name">Kortney O. Lee</h3>
-              <div className="founder-title">Founder & CEO</div>
-              
+              <div className="founder-title">Founder and CEO</div>
+
               <div className="founder-credentials">
                 <div className="credential">
                   <span className="credential-icon">🎓</span>
@@ -358,16 +436,16 @@ const AboutPage: React.FC = () => {
                 </div>
                 <div className="credential">
                   <span className="credential-icon">🏗️</span>
-                  Systems & Operations Expert • Community Health Advocate
+                  Systems and Operations Architect • Community Health Advocate
                 </div>
               </div>
 
               <div className="founder-vision">
                 <h4>Mission-Driven Vision</h4>
                 <p>
-                  "WIHY.ai emerged from a fundamental question I encountered repeatedly in real kitchens, 
-                  classrooms, and communities: 'What is healthy, really, and why is it so hard to achieve 
-                  every day?' We're building the definitive answer to that question."
+                  "WIHY.ai came from the same question I kept hearing in homes, schools, and clinics:
+                  what is actually healthy, and why is it so hard to live that way? We are building
+                  the engine that finally answers that question with clarity and data."
                 </p>
               </div>
             </div>
@@ -382,44 +460,43 @@ const AboutPage: React.FC = () => {
             <div className="investment-left">
               <h2 className="investment-title">Investment Opportunity</h2>
               <p className="investment-subtitle">
-                Join us in revolutionizing how the world understands health and nutrition. 
-                WIHY.ai is positioned to capture significant market share in the rapidly growing 
-                health technology sector.
+                WIHY.ai is positioned as the intelligence layer for food and everyday health decisions,
+                with a path into employers, schools, and clinical partners.
               </p>
 
               <div className="investment-highlights">
                 <div className="highlight">
                   <div className="highlight-icon">🎯</div>
                   <div className="highlight-content">
-                    <h4>Series Seed Round</h4>
-                    <p>Scaling platform, expanding team, accelerating growth</p>
+                    <h4>Seed Round</h4>
+                    <p>Scaling the core platform, expanding the team, and deepening data integrations.</p>
                   </div>
                 </div>
-                
+
                 <div className="highlight">
                   <div className="highlight-icon">🚀</div>
                   <div className="highlight-content">
-                    <h4>Proven Traction</h4>
-                    <p>Growing user base, strong engagement metrics, positive feedback</p>
+                    <h4>Product Traction</h4>
+                    <p>High engagement across scanning, chat, and dashboards in early pilots.</p>
                   </div>
                 </div>
-                
+
                 <div className="highlight">
                   <div className="highlight-icon">🌟</div>
                   <div className="highlight-content">
                     <h4>Scalable Technology</h4>
-                    <p>Cloud-native platform ready for global expansion</p>
+                    <p>Modular architecture ready to support consumer, enterprise, and health system use cases.</p>
                   </div>
                 </div>
               </div>
 
               <div className="investment-cta">
-                <a href="mailto:investors@wihy.ai" className="btn-investment">
+                <CTAButton href="mailto:investors@wihy.ai" primary>
                   Request Investment Deck
-                </a>
-                <a href="mailto:support@wihy.ai" className="btn-contact">
+                </CTAButton>
+                <CTAButton href="mailto:support@wihy.ai" primary={false}>
                   Schedule Meeting
-                </a>
+                </CTAButton>
               </div>
             </div>
 
@@ -430,31 +507,31 @@ const AboutPage: React.FC = () => {
                 <div className="metric-item">
                   <div className="metric-label">User Growth</div>
                   <div className="metric-bar">
-                    <div className="metric-fill" style={{width: '78%'}}></div>
+                    <div className="metric-fill" style={{ width: '78%' }}></div>
                   </div>
                   <div className="metric-value">+78% MoM</div>
                 </div>
-                
+
                 <div className="metric-item">
                   <div className="metric-label">User Engagement</div>
                   <div className="metric-bar">
-                    <div className="metric-fill" style={{width: '92%'}}></div>
+                    <div className="metric-fill" style={{ width: '92%' }}></div>
                   </div>
                   <div className="metric-value">92% Active</div>
                 </div>
-                
+
                 <div className="metric-item">
                   <div className="metric-label">Platform Accuracy</div>
                   <div className="metric-bar">
-                    <div className="metric-fill" style={{width: '97%'}}></div>
+                    <div className="metric-fill" style={{ width: '97%' }}></div>
                   </div>
                   <div className="metric-value">97.3%</div>
                 </div>
-                
+
                 <div className="metric-item">
                   <div className="metric-label">Market Penetration</div>
                   <div className="metric-bar">
-                    <div className="metric-fill" style={{width: '15%'}}></div>
+                    <div className="metric-fill" style={{ width: '15%' }}></div>
                   </div>
                   <div className="metric-value">Early Stage</div>
                 </div>
@@ -476,11 +553,11 @@ const AboutPage: React.FC = () => {
               </div>
             </div>
             <p className="footer-disclaimer">
-              © {currentYear} WIHY.ai. All rights reserved. This presentation contains forward-looking statements. 
-              For education and information only. Not a substitute for professional medical advice.
+              © {currentYear} WIHY.ai. All rights reserved. This page is for education and information only
+              and is not a substitute for professional medical advice.
             </p>
           </div>
-          
+
           <div className="footer-right">
             <div className="footer-contact">
               <h4>Investor Relations</h4>
@@ -491,12 +568,51 @@ const AboutPage: React.FC = () => {
         </div>
       </footer>
 
-      {/* Embedded Chat Component */}
+      {/* Floating automation popup (desktop/tablet) */}
+      {showWaitlistPopup && !hasDismissedPopup && (
+        <div className="floating-popup">
+          <button
+            type="button"
+            className="floating-popup-close"
+            onClick={handleDismissPopup}
+            aria-label="Close popup"
+          >
+            ×
+          </button>
+          <div className="floating-popup-header">See WIHY.ai explain your last meal</div>
+          <p className="floating-popup-text">
+            Open a live demo and ask WIHY to analyze what you ate today. Watch the intelligence engine work in real time.
+          </p>
+          <button
+            type="button"
+            className="floating-popup-cta"
+            onClick={() => {
+              setIsChatOpen(true);
+              setShowWaitlistPopup(false);
+            }}
+          >
+            Start a 30-second demo
+          </button>
+        </div>
+      )}
+
+      {/* Mobile sticky CTA */}
+      <div className="mobile-sticky-cta">
+        <button
+          type="button"
+          className="mobile-sticky-cta-btn"
+          onClick={() => setIsChatOpen(true)}
+        >
+          Ask WIHY about my food
+        </button>
+      </div>
+
+      {/* Full-screen chat trigger */}
       <FullScreenChat
         isOpen={isChatOpen}
         onClose={() => setIsChatOpen(false)}
-        initialQuery="Tell me about healthy nutrition choices"
-        initialResponse="I'm here to help you make informed health decisions! Ask me about nutrition, food analysis, exercise, or any health-related questions you have."
+        initialQuery="Tell me about healthy nutrition choices."
+        initialResponse="I am here to help you turn what you eat, how you sleep, and how you move into a simple plan you can follow. Tell me what you are doing today and I will walk you through the next best step."
       />
     </div>
   );
