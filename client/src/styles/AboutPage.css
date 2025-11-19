@@ -814,7 +814,7 @@ body {
    ========================= */
 .hero-stats {
   display: grid;
-  grid-template-columns: repeat(3, minmax(160px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: 1rem;
   margin: 5rem 0;
   padding: 1.5rem;
@@ -1491,6 +1491,20 @@ body {
 /* =========================
    RESPONSIVE UPDATES
    ========================= */
+/* Tablet and smaller screens */
+@media (max-width: 1200px) {
+  .hero-stats {
+    grid-template-columns: 1fr !important;
+    gap: 1.5rem;
+    margin: 3rem 0;
+    max-width: 600px;
+  }
+  
+  .stat {
+    padding: 2rem 1.5rem;
+  }
+}
+
 @media (max-width: 1024px) {
   .hero-container {
     grid-template-columns: 1fr;
