@@ -654,24 +654,28 @@ body {
 
 .demo-section {
   background: var(--vh-surface-2);
+  padding: 0;
 }
 
 .tech-section {
   background: #ffffff;
+  padding: 0;
 }
 
 /* MARKET SECTION WITH GRADIENT BACKGROUND */
 .market-section {
   background: linear-gradient(135deg, #f8faff 0%, #e8f4f8 100%);
-  padding: 4rem 0;
+  padding: 0;
 }
 
 .leadership-section {
   background: var(--vh-surface-2);
+  padding: 0;
 }
 
 .investment-section {
   background: #ffffff;
+  padding: 0 0 4rem 0;
 }
 
 .experience-section {
@@ -681,12 +685,12 @@ body {
 
 .metrics-section {
   background: var(--vh-surface-2);
-  padding: 4rem 0;
+  padding: 0;
 }
 
 .platform-section {
   background: var(--vh-surface-2);
-  padding: 4rem 0;
+  padding: 0;
 }
 
 /* =========================
@@ -710,7 +714,7 @@ body {
 .section-container-gradient-inner {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 2rem;
+  padding: 4rem 2rem;
   background: linear-gradient(135deg, #f8faff 0%, #e8f4f8 100%);
 }
 
