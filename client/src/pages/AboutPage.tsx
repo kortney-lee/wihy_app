@@ -166,39 +166,31 @@ const AboutPage: React.FC = () => {
               
               <div className="hero-content-block">
                 <div className="main-page-benefits">
-                  <p>Scan food. No more manual tracking, no more calorie counting, no more guesswork.</p>
+                  <p>Scan food. No more manual tracking or calorie counting.</p>
                   <p>Decode research. Understand the science behind every health decision.</p>
-                  <p>Translate 35+ million peer-reviewed studies into clear, personalized guidance.</p>
+                  <p>Translate 35 million peer-reviewed studies into clear, personalized guidance.</p>
                 </div>
               </div>
               
               <div className="hero-content-block">
                 <p className={`hero-subtitle ${isLoaded ? 'animate-in delay-1' : ''}`}>
-                  WIHY.ai is the first health intelligence system to unify:
+                  WIHY.ai unifies global medical research, government-verified health data, real-time food intelligence, and predictive analytics into one system for consumers, enterprises, and healthcare organizations.
+                </p>
+              </div>
+
+              <div className="hero-content-block">
+                <p className={`hero-subtitle ${isLoaded ? 'animate-in delay-1' : ''}`}>
+                  WIHY.ai is the first health intelligence system to combine:
                 </p>
                 
                 <div className={`hero-unification-points ${isLoaded ? 'animate-in delay-2' : ''}`}>
                   <ul>
                     <li>Global medical and nutrition research</li>
                     <li>Government-verified health data</li>
-                    <li>Real-time food intelligence</li>
-                    <li>Predictive analytics into one comprehensive platform for consumers, enterprises, and healthcare organizations.</li>
+                    <li>Real-time food and ingredient intelligence</li>
+                    <li>Predictive analytics</li>
                   </ul>
-                </div>
-              </div>
-
-              <div className={`hero-stats ${isLoaded ? 'animate-in delay-3' : ''}`}>
-                <div className="stat">
-                  <div className="stat-number">$4.2T</div>
-                  <div className="stat-label">Global Wellness Market</div>
-                </div>
-                <div className="stat">
-                  <div className="stat-number">35M+</div>
-                  <div className="stat-label">Research Studies</div>
-                </div>
-                <div className="stat">
-                  <div className="stat-number">99.9%</div>
-                  <div className="stat-label">System Uptime</div>
+                  <p>into a single platform designed to support personal, institutional, and population health decisions.</p>
                 </div>
               </div>
 
@@ -233,15 +225,35 @@ I will translate complex health and nutrition science into simple steps you can 
         </div> {/* End hero-content */}
       </header>
 
+      {/* Key Metrics Section */}
+      <section className="metrics-section">
+        <div className="section-container">
+          <div className={`hero-stats ${isLoaded ? 'animate-in delay-3' : ''}`}>
+            <div className="stat">
+              <div className="stat-number">$4.2T</div>
+              <div className="stat-label">Global Wellness Market</div>
+            </div>
+            <div className="stat">
+              <div className="stat-number">35M+</div>
+              <div className="stat-label">Research Studies</div>
+            </div>
+            <div className="stat">
+              <div className="stat-number">99.9%</div>
+              <div className="stat-label">System Uptime</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Platform Overview */}
       <section id="platform" className="platform-section">
         <div className="section-container">
           <div className="section-header">
             <h2 className="section-title">Revolutionary Health Intelligence Platform</h2>
             <p className="section-subtitle">
-              WIHY.ai sits at the intersection of personal health, AI-driven precision nutrition, and real-time scientific research translation. It delivers the intelligence layer that makes food, lifestyle, clinical, and population health decisions clear.
+              WIHY.ai combines real-time research translation, precision nutrition, and personal health insights into a unified intelligence layer that clarifies food, lifestyle, and clinical decisions.
             </p>
-            <h3 className="section-subsection-title">Core Capabilities — Platform Highlights</h3>
+            <h3 className="section-subsection-title">Core Capabilities</h3>
           </div>
 
           <div className="platform-grid">
@@ -259,17 +271,17 @@ I will translate complex health and nutrition science into simple steps you can 
                 />
               }
               title="Advanced AI Engine"
-              description="A health-specialized LLM trained on nutrition science, biomedical research, and verified government datasets. Not a generic chatbot. A domain-specific reasoning engine built for accuracy, transparency, and clinical relevance."
+              description="A health-specialized LLM trained on nutrition science, biomedical research, and verified government datasets. Built for accuracy, transparency, and clinical relevance."
               metrics={[
-                { label: 'Studies', value: '35M+' },
-                { label: 'Evidence', value: 'Graded' }
+                { label: 'indexed studies', value: '35M+' },
+                { label: 'Evidence graded for', value: 'quality' }
               ]}
             />
 
             <FeatureCard
               iconComponent={
                 <img 
-                  src="/assets/Universal_Scanning.gif" 
+                  src="/assets/Unviersal_Scanning.gif" 
                   alt="Universal Scanning Demo"
                   style={{
                     width: '100%',
@@ -280,10 +292,10 @@ I will translate complex health and nutrition science into simple steps you can 
                 />
               }
               title="Universal Scanning"
-              description="Instant analysis of food and ingredients through barcode decoding, food photography, ingredient-level OCR, receipt parsing, and product verification from authoritative sources."
+              description="Instant analysis of food and ingredients using barcode decoding, food photography, ingredient OCR, receipt parsing, and global product verification."
               metrics={[
-                { label: 'Products', value: '4.1M+' },
-                { label: 'Countries', value: '200+' }
+                { label: 'products', value: '4.1M+' },
+                { label: 'countries', value: '200+' }
               ]}
             />
 
@@ -301,10 +313,10 @@ I will translate complex health and nutrition science into simple steps you can 
                 />
               }
               title="Predictive Analytics"
-              description="Connects food, sleep, activity, hydration, symptoms, and biomarkers. Identifies behavior patterns, forecasts risk, and generates personalized next steps."
+              description="Connects food, sleep, activity, hydration, symptoms, and biomarkers. Identifies patterns, forecasts risk, and generates personalized recommendations."
               metrics={[
-                { label: 'Metrics', value: '15+' },
-                { label: 'Modeling', value: 'Real-time' }
+                { label: 'health metrics', value: '15+' },
+                { label: 'Real-time', value: 'modeling' }
               ]}
             />
 
@@ -322,10 +334,10 @@ I will translate complex health and nutrition science into simple steps you can 
                 />
               }
               title="Research Integration"
-              description="Continuous synchronization with the world's largest nutrition and health datasets: PubMed, FDA, USDA, OpenFoodFacts, and CDC population health surveillance."
+              description="Continuous synchronization with global nutrition and health sources including PubMed, FDA, USDA, OpenFoodFacts, and CDC surveillance datasets."
               metrics={[
-                { label: 'Daily Updates', value: '10K+' },
-                { label: 'Data Sources', value: 'Global' }
+                { label: 'daily updates', value: '10K+' },
+                { label: 'Global data', value: 'coverage' }
               ]}
             />
           </div>
@@ -335,9 +347,18 @@ I will translate complex health and nutrition science into simple steps you can 
       {/* Technology Section */}
       <section id="technology" className="tech-section">
         <div className="section-container">
+          {/* Technical Architecture Title - Centered */}
+          <div className="tech-architecture-title">
+            <h3 className="section-title centered">Technical Architecture</h3>
+            <p className="section-subtitle centered">
+              A distributed, modular architecture designed for precision, scale, and explainable AI.
+            </p>
+          </div>
+
           <div className="tech-content">
             <div className="tech-left">
               <h2 className="tech-title">Built for Scale and Intelligence</h2>
+              <p className="tech-subtitle">WIHY.ai is engineered to deliver fast, reliable, and verifiable insights for enterprise, clinical, and consumer use.</p>
               <div className="tech-features">
                 <div className="tech-feature">
                   <div className="tech-icon">⚡</div>
@@ -370,30 +391,30 @@ I will translate complex health and nutrition science into simple steps you can 
                 <div className="stack-category">
                   <h4>AI and ML</h4>
                   <div className="stack-items">
-                    <span>Custom LLM</span>
-                    <span>Computer Vision</span>
-                    <span>NLP Engine</span>
-                    <span>Predictive Models</span>
+                    <span className="highlighted-item">Custom LLMs for health reasoning</span>
+                    <span className="highlighted-item">Nutrition and ingredient scoring models</span>
+                    <span className="highlighted-item">FDA pharmacology interpretation</span>
+                    <span className="highlighted-item">Computer vision models for food identification</span>
                   </div>
                 </div>
 
                 <div className="stack-category">
                   <h4>Infrastructure</h4>
                   <div className="stack-items">
-                    <span>Azure Cloud</span>
-                    <span>Auto-scaling</span>
-                    <span>Edge APIs</span>
-                    <span>Observability</span>
+                    <span className="highlighted-item">Azure cloud deployment</span>
+                    <span className="highlighted-item">Auto-scaling containers</span>
+                    <span className="highlighted-item">Edge APIs for low-latency inference</span>
+                    <span className="highlighted-item">Full observability and monitoring</span>
                   </div>
                 </div>
 
                 <div className="stack-category">
                   <h4>Data</h4>
                   <div className="stack-items">
-                    <span>Nutrition Graph</span>
-                    <span>Research Engine</span>
-                    <span>User Analytics</span>
-                    <span>Health Metrics</span>
+                    <span className="highlighted-item">Nutrition knowledge graph</span>
+                    <span className="highlighted-item">Research ingestion engine</span>
+                    <span className="highlighted-item">User analytics</span>
+                    <span className="highlighted-item">Health metric processing</span>
                   </div>
                 </div>
               </div>
@@ -402,107 +423,63 @@ I will translate complex health and nutrition science into simple steps you can 
 
           {/* Enhanced Technical Architecture Section */}
           <div className="tech-architecture-detailed">
-            <div className="section-header">
-              <h3 className="section-title">Technical Architecture — Enterprise and ML Focus</h3>
-              <p className="section-subtitle">
-                A modular, distributed architecture built for precision, scale, and verifiable AI.
-              </p>
-            </div>
-
             <div className="tech-stack-overview">
               <h4>WIHY Health Intelligence Stack</h4>
               
-              <div className="stack-layer">
-                <h5>1. Research Harvesting Layer</h5>
-                <ul>
-                  <li>Automated ingestion from PubMed, PMC, FDA, USDA, NIH, NASS, CDC</li>
-                  <li>Real-time delta updates</li>
-                  <li>Multi-language ingestion across 195+ countries</li>
-                </ul>
-              </div>
+              <div className="tech-stack-cards">
+                <FeatureCard
+                  title="1. Research Harvesting Layer"
+                  description="Automated ingestion from PubMed, PMC, FDA, USDA, NIH, NASS, and CDC with real-time delta updates and multi-language ingestion across 195+ countries."
+                  metrics={[
+                    { label: 'Sources', value: '7+' },
+                    { label: 'Countries', value: '195+' }
+                  ]}
+                />
 
-              <div className="stack-layer">
-                <h5>2. Quality Curation Pipeline</h5>
-                <ul>
-                  <li>AI-based credibility scoring</li>
-                  <li>Study design, population size, and effect-strength evaluation</li>
-                  <li>Evidence grading from low to high confidence</li>
-                  <li>Industry and commercial bias removal</li>
-                </ul>
-              </div>
+                <FeatureCard
+                  title="2. Quality Curation Pipeline"
+                  description="AI-based credibility scoring, evaluation of study design, sample size, and effect strength with evidence grading from low to high confidence and removal of commercial bias."
+                  metrics={[
+                    { label: 'AI Scoring', value: 'Auto' },
+                    { label: 'Bias', value: 'Removed' }
+                  ]}
+                />
 
-              <div className="stack-layer">
-                <h5>3. Data Normalization and Nutrition Graph</h5>
-                <ul>
-                  <li>Unified ingredient, nutrient, additive, allergen, and contamination mapping</li>
-                  <li>Biological pathway links connecting foods, symptoms, conditions, and clinical research</li>
-                  <li>4.1M+ food products linked to verified sources</li>
-                </ul>
-              </div>
+                <FeatureCard
+                  title="3. Data Normalization and Nutrition Graph"
+                  description="Unified mapping of ingredients, nutrients, additives, allergens, and contaminants with links connecting foods to symptoms, conditions, and research. 4.1M+ food products tied to verified sources."
+                  metrics={[
+                    { label: 'Products', value: '4.1M+' },
+                    { label: 'Verified', value: '100%' }
+                  ]}
+                />
 
-              <div className="stack-layer">
-                <h5>4. Domain-Specific Model Training</h5>
-                <ul>
-                  <li>Custom LLMs trained on curated biomedical datasets</li>
-                  <li>Nutrition-focused scoring models</li>
-                  <li>FDA pharmacology interpretation models</li>
-                  <li>Food-vision models for identification and ingredient inference</li>
-                </ul>
-              </div>
+                <FeatureCard
+                  title="4. Domain-Specific Model Training"
+                  description="Custom LLMs trained on curated biomedical datasets, nutrition scoring and risk interpretation models, and vision models for ingredient-level detection."
+                  metrics={[
+                    { label: 'Custom LLMs', value: 'Multi' },
+                    { label: 'Datasets', value: 'Curated' }
+                  ]}
+                />
 
-              <div className="stack-layer">
-                <h5>5. Prediction and Reasoning Engine</h5>
-                <ul>
-                  <li>Behavioral pattern detection</li>
-                  <li>Forecasting for metabolic markers, inflammation, cravings, and energy</li>
-                  <li>Multi-source fusion for holistic risk scoring</li>
-                </ul>
-              </div>
+                <FeatureCard
+                  title="5. Prediction and Reasoning Engine"
+                  description="Behavioral pattern detection, forecasting for metabolic markers and dietary impact, and multi-source fusion for holistic risk scoring."
+                  metrics={[
+                    { label: 'Patterns', value: 'Real-time' },
+                    { label: 'Markers', value: 'Multi' }
+                  ]}
+                />
 
-              <div className="stack-layer">
-                <h5>6. Deployment and Operations</h5>
-                <ul>
-                  <li>Distributed cloud training using Azure ML and auto-scaling containers</li>
-                  <li>Full model versioning and rollback</li>
-                  <li>SOC 2 aligned and HIPAA-ready</li>
-                  <li>99.9% uptime with redundant compute clusters</li>
-                  <li>Sub-300ms inference latency</li>
-                </ul>
-              </div>
-            </div>
-
-            <div className="tech-highlights-detailed">
-              <h4>Built for Scale, Accuracy, and Compliance</h4>
-              
-              <div className="tech-features-grid">
-                <div className="tech-feature-detailed">
-                  <h5>Enterprise-Grade Security</h5>
-                  <ul>
-                    <li>End-to-end encryption</li>
-                    <li>SOC 2 aligned</li>
-                    <li>Secure multi-tenant data isolation</li>
-                    <li>Pseudonymized user data</li>
-                    <li>HIPAA-ready clinical pathways</li>
-                  </ul>
-                </div>
-
-                <div className="tech-feature-detailed">
-                  <h5>Global Reach</h5>
-                  <ul>
-                    <li>Multi-language research translation</li>
-                    <li>International product databases</li>
-                    <li>Region-aware nutritional guidance</li>
-                  </ul>
-                </div>
-
-                <div className="tech-feature-detailed">
-                  <h5>Performance</h5>
-                  <ul>
-                    <li>Thousands of queries per second</li>
-                    <li>Distributed accelerators for LLM and computer vision</li>
-                    <li>Real-time ingestion and update pipelines</li>
-                  </ul>
-                </div>
+                <FeatureCard
+                  title="6. Deployment and Operations"
+                  description="Azure ML for distributed training, automated versioning and rollback, SOC 2 aligned design, 99.9 percent uptime, and sub-300ms inference latency."
+                  metrics={[
+                    { label: 'Uptime', value: '99.9%' },
+                    { label: 'Latency', value: '<300ms' }
+                  ]}
+                />
               </div>
             </div>
           </div>
@@ -513,9 +490,9 @@ I will translate complex health and nutrition science into simple steps you can 
       <section id="demo" className="demo-section">
         <div className="section-container">
           <div className="section-header">
-            <h2 className="section-title">Live Intelligence Demonstrations</h2>
+            <h2 className="section-title">See WIHY Live</h2>
             <p className="section-subtitle">
-              Real-time analysis powered by verified data and continuous research integration.
+              Experience real-time analysis powered by verified data and continuous research integration.
             </p>
           </div>
 
@@ -526,23 +503,23 @@ I will translate complex health and nutrition science into simple steps you can 
                 title="Macronutrient Analysis"
                 displayMode="percentage"
               />
-              <p className="demo-description">Real-time breakdowns powered by verified nutrition data.</p>
+              <p className="demo-description">Instant nutrient breakdowns powered by verified data.</p>
             </div>
 
             <div className="demo-card">
               <NovaChart query="Sample Food Item" />
-              <p className="demo-description">Accurate classification using ingredient-level decomposition.</p>
+              <p className="demo-description">Precise classification through ingredient-level analysis.</p>
             </div>
 
             <div className="demo-card">
               <PublicationTimelineChart timeRange="decade" title="Research Timeline" />
-              <p className="demo-description">Evidence timelines across decades, refreshed continuously.</p>
+              <p className="demo-description">Research timelines across decades, updated in real-time.</p>
             </div>
           </div>
 
           <div className="analyze-with-wihy">
-            <h3>Analyze With WIHY</h3>
-            <p>Upload any food photo. Scan any barcode. Paste any research link. WIHY delivers the science instantly.</p>
+            <h3>Experience WIHY Intelligence</h3>
+            <p>Upload food photos. Scan barcodes. Share research links. WIHY delivers instant science.</p>
             
             <div className="demo-cta">
               <CTAButton primary href="/">
@@ -557,9 +534,9 @@ I will translate complex health and nutrition science into simple steps you can 
       <section id="market" className="market-section">
         <div className="section-container">
           <div className="market-header">
-            <h2 className="section-title">Market Opportunity and Strategic Positioning</h2>
+            <h2 className="section-title">Market Opportunity</h2>
             <p className="section-subtitle">
-              WIHY.ai sits at the center of three rapidly accelerating markets.
+              WIHY sits at the convergence of three rapidly expanding markets.
             </p>
           </div>
 
@@ -585,13 +562,13 @@ I will translate complex health and nutrition science into simple steps you can 
           </div>
 
           <div className="consumer-demand">
-            <h3>Consumer Demand</h3>
+            <h3>Market Reality</h3>
             <div className="market-trends">
-              <HighlightCard number="89%" text="want personalized nutrition" numberColor="#4cbb17" />
-              <HighlightCard number="73%" text="cannot interpret food labels" numberColor="#4cbb17" />
-              <HighlightCard number="65%" text="rely on mobile health apps" numberColor="#4cbb17" />
+              <HighlightCard number="89%" text="want personalized nutrition guidance" numberColor="#4cbb17" />
+              <HighlightCard number="73%" text="struggle to interpret food labels" numberColor="#4cbb17" />
+              <HighlightCard number="65%" text="use mobile health applications" numberColor="#4cbb17" />
             </div>
-            <p className="market-conclusion">WIHY becomes the intelligence layer powering all of them.</p>
+            <p className="market-conclusion">WIHY becomes the intelligence backbone for all of them.</p>
           </div>
         </div>
       </section>
@@ -615,26 +592,26 @@ I will translate complex health and nutrition science into simple steps you can 
             </div>
 
             <div className="founder-details">
-              <h3 className="founder-name">Kortney O. Lee — Founder and CEO</h3>
+              <h3 className="founder-name">Kortney O. Lee — Founder & CEO</h3>
               
               <div className="founder-credentials">
                 <div className="credential">
                   <span className="credential-icon">🎓</span>
-                  MBA • Historian • Systems Architect
+                  MBA • Historian • Systems Designer
                 </div>
                 <div className="credential">
                   <span className="credential-icon">📚</span>
-                  Author of What Is Healthy? And Why Is It So Hard to Achieve?
+                  Author: "What Is Healthy? And Why Is It So Hard to Achieve?"
                 </div>
                 <div className="credential">
                   <span className="credential-icon">🏗️</span>
-                  Community Health Innovator
+                  Community Health Advocate
                 </div>
               </div>
 
               <div className="founder-vision">
                 <blockquote>
-                  "We built WIHY to answer the hardest question in health with clarity, truth, and evidence."
+                  "We built WIHY to answer the hardest question in health: clarity, truth, and evidence."
                 </blockquote>
               </div>
             </div>
@@ -649,32 +626,32 @@ I will translate complex health and nutrition science into simple steps you can 
             <div className="investment-left">
               <h2 className="investment-title">Investment Opportunity</h2>
               <p className="investment-subtitle">
-                WIHY.ai is positioned as the intelligence layer for food and everyday health decisions,
-                with a path into employers, schools, and clinical partners.
+                WIHY is positioned as the intelligence backbone for food and health decisions,
+                with clear paths into enterprise, education, and clinical markets.
               </p>
 
               <div className="investment-highlights">
                 <div className="highlight">
                   <div className="highlight-icon">🎯</div>
                   <div className="highlight-content">
-                    <h4>Seed Round</h4>
-                    <p>Funds will accelerate model expansion, data integration, enterprise partnerships, clinical validation, and national school and employer deployments.</p>
+                    <h4>Seed Funding</h4>
+                    <p>Accelerate model expansion, data integration, enterprise partnerships, clinical validation, and national deployments.</p>
                   </div>
                 </div>
 
                 <div className="highlight">
                   <div className="highlight-icon">🚀</div>
                   <div className="highlight-content">
-                    <h4>Product Traction</h4>
-                    <p>High engagement in scanning and chat. Early adoption pipeline across healthcare and education.</p>
+                    <h4>Market Traction</h4>
+                    <p>Strong user engagement across scanning and chat features. Growing enterprise and education pipeline.</p>
                   </div>
                 </div>
 
                 <div className="highlight">
                   <div className="highlight-icon">🌟</div>
                   <div className="highlight-content">
-                    <h4>Scalable Technology</h4>
-                    <p>Modular architecture ready to support consumer, enterprise, and health system use cases.</p>
+                    <h4>Proven Architecture</h4>
+                    <p>Modular platform ready for consumer, enterprise, and healthcare integration.</p>
                   </div>
                 </div>
               </div>
@@ -765,8 +742,8 @@ I will translate complex health and nutrition science into simple steps you can 
           </div>
 
           <div className="final-message">
-            <h2>WIHY.ai — Where Science Meets Understanding</h2>
-            <p>Transforming health from reactive treatment to proactive intelligence.</p>
+            <h2>WIHY — Where Science Meets Understanding</h2>
+            <p>Transforming health from reactive care to proactive intelligence.</p>
           </div>
         </div>
       </section>
@@ -776,14 +753,14 @@ I will translate complex health and nutrition science into simple steps you can 
         <div className="footer-container">
           <div className="footer-left">
             <div className="footer-logo">
-              <img src="/assets/wihylogo.png" alt="WIHY.ai" className="footer-logo-img" />
+              <img src="/assets/wihylogo.png" alt="WIHY" className="footer-logo-img" />
               <div className="footer-logo-text">
-                <span className="footer-brand">WIHY.ai</span>
+                <span className="footer-brand">WIHY</span>
                 <span className="footer-tagline">Health Intelligence Platform</span>
               </div>
             </div>
             <p className="footer-disclaimer">
-              © {currentYear} WIHY.ai. All rights reserved. This page is for education and information only
+              © {currentYear} WIHY. All rights reserved. This page is for education and information only
               and is not a substitute for professional medical advice.
             </p>
           </div>
@@ -809,9 +786,9 @@ I will translate complex health and nutrition science into simple steps you can 
           >
             ×
           </button>
-          <div className="floating-popup-header">See WIHY.ai explain your last meal</div>
+          <div className="floating-popup-header">See WIHY explain your last meal</div>
           <p className="floating-popup-text">
-            Open a live demo and ask WIHY to analyze what you ate today. Watch the intelligence engine work in real time.
+            Open a live demo and ask WIHY to analyze what you ate today. Watch the intelligence engine work in real-time.
           </p>
           <button
             type="button"
