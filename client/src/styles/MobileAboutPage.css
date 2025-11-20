@@ -71,14 +71,41 @@
   
   /* Hero Typography */
   .main-page-title {
-    font-size: 2.5rem;
+    font-size: 1.2rem;
     line-height: 1.2;
-    margin-bottom: 1rem;
+    margin-bottom: 0.5rem;
+    text-align: center;
+    font-weight: 500;
   }
   
-  .hero-subtitle {
-    font-size: 1.1rem;
+  .main-page-subtitle {
+    font-size: 2.5rem;
+    line-height: 1.2;
     margin-bottom: 1.5rem;
+    text-align: center;
+    font-weight: 700;
+  }
+  
+  /* Center all hero content */
+  .hero-content-block {
+    text-align: center;
+  }
+  
+  .main-page-tagline {
+    text-align: center;
+  }
+  
+  .main-page-benefits {
+    text-align: center;
+  }
+  
+  .hero-unification-points {
+    text-align: center;
+  }
+  
+  .hero-unification-points ul {
+    list-style-position: inside;
+    text-align: center;
   }
   
   .hero-badge {
@@ -162,9 +189,40 @@
     margin-bottom: 20px !important;
   }
   
+  /* Make chat fullscreen within the iframe */
+  .chat-frame-container {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  
+  .chat-frame-content {
+    width: 100% !important;
+    height: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  
+  /* Ensure FullScreenChat takes full iframe space */
+  .chat-frame-container .fullscreen-chat-container {
+    position: relative !important;
+    width: 100% !important;
+    height: 100% !important;
+    max-width: none !important;
+    max-height: none !important;
+    left: auto !important;
+    right: auto !important;
+    top: auto !important;
+    bottom: auto !important;
+    transform: none !important;
+  }
+  
   .chat-frame {
     border-radius: 12px;
     overflow: hidden;
+    max-width: 100% !important;
   }
   
   .chat-frame-header {
