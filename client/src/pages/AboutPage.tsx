@@ -247,7 +247,7 @@ I will translate complex health and nutrition science into simple steps you can 
 
       {/* Platform Overview */}
       <section id="platform" className="platform-section">
-        <div className="section-container">
+        <div className="section-container-gradient">
           <div className="section-header">
             <h2 className="section-title">Revolutionary Health Intelligence Platform</h2>
             <p className="section-subtitle">
@@ -425,6 +425,9 @@ I will translate complex health and nutrition science into simple steps you can 
           <div className="tech-architecture-detailed">
             <div className="tech-stack-overview">
               <h4>WIHY Health Intelligence Stack</h4>
+              <p className="tech-stack-subtitle">
+                A comprehensive architecture powering real-time health intelligence through advanced AI and data processing.
+              </p>
               
               <div className="tech-stack-cards">
                 <FeatureCard
@@ -488,7 +491,7 @@ I will translate complex health and nutrition science into simple steps you can 
 
       {/* Live Intelligence Demonstrations */}
       <section id="demo" className="demo-section">
-        <div className="section-container">
+        <div className="section-container-gradient">
           <div className="section-header">
             <h2 className="section-title">See WIHY Live</h2>
             <p className="section-subtitle">
@@ -517,6 +520,12 @@ I will translate complex health and nutrition science into simple steps you can 
             </div>
           </div>
 
+        </div>
+      </section>
+
+      {/* Experience WIHY Intelligence */}
+      <section id="experience-wihy" className="experience-section">
+        <div className="section-container">
           <div className="analyze-with-wihy">
             <h3>Experience WIHY Intelligence</h3>
             <p>Upload food photos. Scan barcodes. Share research links. WIHY delivers instant science.</p>
@@ -621,7 +630,7 @@ I will translate complex health and nutrition science into simple steps you can 
 
       {/* Investment Opportunity */}
       <section id="investment" className="investment-section">
-        <div className="section-container">
+        <div className="section-container-gradient">
           <div className="investment-content">
             <div className="investment-left">
               <h2 className="investment-title">Investment Opportunity</h2>
