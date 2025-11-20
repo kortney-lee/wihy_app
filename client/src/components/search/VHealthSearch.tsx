@@ -1145,7 +1145,7 @@ const VHealthSearch: React.FC = () => {
               className="search-logo-image"
               onError={() => setImageError(true)}
               onLoad={() => setImageError(false)}
-              onClick={() => navigate('/')}
+              onClick={() => navigate('/about')}
               style={{ cursor: 'pointer' }}
             />
           ) : (

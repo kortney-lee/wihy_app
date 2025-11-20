@@ -654,15 +654,15 @@ const Header: React.FC<HeaderProps> = ({
   };
 
   const handleLogoClick = () => {
-    // Clear chat session when navigating home
+    // Clear chat session when navigating to about page
     chatService.clearSession();
-    console.log('🔍 HEADER: Cleared chat session on home navigation');
+    console.log('🔍 HEADER: Cleared chat session on about page navigation');
     
     if (onLogoClick) {
       onLogoClick();
     } else {
-      // Default behavior: navigate to home page
-      navigate('/');
+      // Default behavior: navigate to about page
+      navigate('/about');
     }
   };
 
