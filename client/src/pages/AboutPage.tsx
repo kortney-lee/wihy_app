@@ -247,7 +247,7 @@ I will translate complex health and nutrition science into simple steps you can 
 
       {/* Platform Overview */}
       <section id="platform" className="platform-section">
-        <div className="section-container-gradient">
+        <div className="section-container-gradient-inner">
           <div className="section-header">
             <h2 className="section-title">Revolutionary Health Intelligence Platform</h2>
             <p className="section-subtitle">
@@ -421,77 +421,13 @@ I will translate complex health and nutrition science into simple steps you can 
             </div>
           </div>
 
-          {/* Enhanced Technical Architecture Section */}
-          <div className="tech-architecture-detailed">
-            <div className="tech-stack-overview">
-              <h4>WIHY Health Intelligence Stack</h4>
-              <p className="tech-stack-subtitle">
-                A comprehensive architecture powering real-time health intelligence through advanced AI and data processing.
-              </p>
-              
-              <div className="tech-stack-cards">
-                <FeatureCard
-                  title="1. Research Harvesting Layer"
-                  description="Automated ingestion from PubMed, PMC, FDA, USDA, NIH, NASS, and CDC with real-time delta updates and multi-language ingestion across 195+ countries."
-                  metrics={[
-                    { label: 'Sources', value: '7+' },
-                    { label: 'Countries', value: '195+' }
-                  ]}
-                />
 
-                <FeatureCard
-                  title="2. Quality Curation Pipeline"
-                  description="AI-based credibility scoring, evaluation of study design, sample size, and effect strength with evidence grading from low to high confidence and removal of commercial bias."
-                  metrics={[
-                    { label: 'AI Scoring', value: 'Auto' },
-                    { label: 'Bias', value: 'Removed' }
-                  ]}
-                />
-
-                <FeatureCard
-                  title="3. Data Normalization and Nutrition Graph"
-                  description="Unified mapping of ingredients, nutrients, additives, allergens, and contaminants with links connecting foods to symptoms, conditions, and research. 4.1M+ food products tied to verified sources."
-                  metrics={[
-                    { label: 'Products', value: '4.1M+' },
-                    { label: 'Verified', value: '100%' }
-                  ]}
-                />
-
-                <FeatureCard
-                  title="4. Domain-Specific Model Training"
-                  description="Custom LLMs trained on curated biomedical datasets, nutrition scoring and risk interpretation models, and vision models for ingredient-level detection."
-                  metrics={[
-                    { label: 'Custom LLMs', value: 'Multi' },
-                    { label: 'Datasets', value: 'Curated' }
-                  ]}
-                />
-
-                <FeatureCard
-                  title="5. Prediction and Reasoning Engine"
-                  description="Behavioral pattern detection, forecasting for metabolic markers and dietary impact, and multi-source fusion for holistic risk scoring."
-                  metrics={[
-                    { label: 'Patterns', value: 'Real-time' },
-                    { label: 'Markers', value: 'Multi' }
-                  ]}
-                />
-
-                <FeatureCard
-                  title="6. Deployment and Operations"
-                  description="Azure ML for distributed training, automated versioning and rollback, SOC 2 aligned design, 99.9 percent uptime, and sub-300ms inference latency."
-                  metrics={[
-                    { label: 'Uptime', value: '99.9%' },
-                    { label: 'Latency', value: '<300ms' }
-                  ]}
-                />
-              </div>
-            </div>
-          </div>
         </div>
       </section>
 
       {/* Live Intelligence Demonstrations */}
       <section id="demo" className="demo-section">
-        <div className="section-container-gradient">
+        <div className="section-container-gradient-inner">
           <div className="section-header">
             <h2 className="section-title">See WIHY Live</h2>
             <p className="section-subtitle">
@@ -523,18 +459,90 @@ I will translate complex health and nutrition science into simple steps you can 
         </div>
       </section>
 
-      {/* Experience WIHY Intelligence */}
-      <section id="experience-wihy" className="experience-section">
-        <div className="section-container">
-          <div className="analyze-with-wihy">
-            <h3>Experience WIHY Intelligence</h3>
-            <p>Upload food photos. Scan barcodes. Share research links. WIHY delivers instant science.</p>
-            
-            <div className="demo-cta">
-              <CTAButton primary href="/">
-                Try WIHY.ai Now – Free
-              </CTAButton>
+      {/* WIHY Health Intelligence Stack Section */}
+      <section id="intelligence-stack" className="section-container">
+        <div className="container">
+          <div className="section-header">
+            <h2 className="section-title">WIHY Health Intelligence Stack</h2>
+            <p className="section-subtitle">
+              A comprehensive architecture powering real-time health intelligence through advanced AI and data processing.
+            </p>
+          </div>
+          
+          <div className="tech-stack-overview">
+            <div className="tech-stack-cards">
+              <FeatureCard
+                title="1. Research Harvesting Layer"
+                description="Automated ingestion from PubMed, PMC, FDA, USDA, NIH, NASS, and CDC with real-time delta updates and multi-language ingestion across 195+ countries."
+                metrics={[
+                  { label: 'Sources', value: '7+' },
+                  { label: 'Countries', value: '195+' }
+                ]}
+              />
+
+              <FeatureCard
+                title="2. Quality Curation Pipeline"
+                description="AI-based credibility scoring, evaluation of study design, sample size, and effect strength with evidence grading from low to high confidence and removal of commercial bias."
+                metrics={[
+                  { label: 'AI Scoring', value: 'Auto' },
+                  { label: 'Bias', value: 'Removed' }
+                ]}
+              />
+
+              <FeatureCard
+                title="3. Data Normalization and Nutrition Graph"
+                description="Unified mapping of ingredients, nutrients, additives, allergens, and contaminants with links connecting foods to symptoms, conditions, and research. 4.1M+ food products tied to verified sources."
+                metrics={[
+                  { label: 'Products', value: '4.1M+' },
+                  { label: 'Verified', value: '100%' }
+                ]}
+              />
+
+              <FeatureCard
+                title="4. Domain-Specific Model Training"
+                description="Custom LLMs trained on curated biomedical datasets, nutrition scoring and risk interpretation models, and vision models for ingredient-level detection."
+                metrics={[
+                  { label: 'Custom LLMs', value: 'Multi' },
+                  { label: 'Datasets', value: 'Curated' }
+                ]}
+              />
+
+              <FeatureCard
+                title="5. Prediction and Reasoning Engine"
+                description="Behavioral pattern detection, forecasting for metabolic markers and dietary impact, and multi-source fusion for holistic risk scoring."
+                metrics={[
+                  { label: 'Patterns', value: 'Real-time' },
+                  { label: 'Markers', value: 'Multi' }
+                ]}
+              />
+
+              <FeatureCard
+                title="6. Deployment and Operations"
+                description="Azure ML for distributed training, automated versioning and rollback, SOC 2 aligned design, 99.9 percent uptime, and sub-300ms inference latency."
+                metrics={[
+                  { label: 'Uptime', value: '99.9%' },
+                  { label: 'Latency', value: '<300ms' }
+                ]}
+              />
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Experience WIHY Intelligence */}
+      <section id="experience-wihy" className="section-container-gradient">
+        <div className="container">
+          <div className="section-header">
+            <h2 className="section-title">Experience WIHY Intelligence</h2>
+            <p className="section-subtitle">
+              Upload food photos. Scan barcodes. Share research links. WIHY delivers instant science.
+            </p>
+          </div>
+          
+          <div className="demo-cta">
+            <CTAButton primary href="/">
+              Try WIHY.ai Now – Free
+            </CTAButton>
           </div>
         </div>
       </section>
@@ -630,7 +638,7 @@ I will translate complex health and nutrition science into simple steps you can 
 
       {/* Investment Opportunity */}
       <section id="investment" className="investment-section">
-        <div className="section-container-gradient">
+        <div className="section-container-gradient-inner">
           <div className="investment-content">
             <div className="investment-left">
               <h2 className="investment-title">Investment Opportunity</h2>
