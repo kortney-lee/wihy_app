@@ -24,6 +24,7 @@
   font-size: 48px !important;
   font-weight: 700;
   color: #4cbb17 !important;
+  text-align: center;
 }
 
 .analyze-with-wihy h3 {
@@ -685,14 +686,14 @@ body {
   padding: 4rem 0;
 }
 
-.platform-section {
-  background: var(--vh-surface);
-  padding: 0 0 4rem 0;
+.metrics-section {
+  background: #ffffff;
+  padding: 2rem 0 2rem 0;
 }
 
-.demo-section {
+.platform-section {
   background: var(--vh-surface-2);
-  padding: 4rem 0;
+  padding: 4rem 0 4rem 0;
 }
 
 .demo-grid {
@@ -726,19 +727,28 @@ body {
 }
 
 .tech-section {
-  background: var(--vh-surface);
+  background: #ffffff;
+  padding: 4rem 0;
+}
+
+.demo-section {
+  background: var(--vh-surface-2);
+  padding: 4rem 0;
 }
 
 .market-section {
-  background: var(--vh-surface-2);
+  background: #ffffff;
+  padding: 4rem 0;
 }
 
 .leadership-section {
-  background: var(--vh-surface);
+  background: var(--vh-surface-2);
+  padding: 4rem 0;
 }
 
 .investment-section {
-  background: var(--vh-surface-2);
+  background: #ffffff;
+  padding: 4rem 0;
 }
 
 .section-container {
