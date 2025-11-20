@@ -1789,7 +1789,89 @@ body {
   }
 }
 
-
+/* Mobile Styles - 768px and below */
+@media (max-width: 768px) {
+  /* Mobile Typography Hierarchy */
+  .main-page-title {
+    font-size: 2.2rem !important;
+    line-height: 1.2 !important;
+    margin-bottom: 0.5rem !important;
+    text-align: center !important;
+    font-weight: 700 !important;
+  }
+  
+  .main-page-subtitle {
+    font-size: 2.2rem !important;
+    line-height: 1.2 !important;
+    margin-bottom: 1.5rem !important;
+    text-align: center !important;
+    font-weight: 700 !important;
+  }
+  
+  /* Center all hero content */
+  .hero-content-block {
+    text-align: center !important;
+  }
+  
+  .main-page-tagline {
+    text-align: center !important;
+  }
+  
+  .main-page-benefits {
+    text-align: center !important;
+  }
+  
+  .hero-unification-points {
+    text-align: center !important;
+  }
+  
+  .hero-unification-points ul {
+    list-style-position: outside !important;
+    text-align: left !important;
+    display: inline-block !important;
+    margin: 0 auto !important;
+    padding-left: 20px !important;
+  }
+  
+  .hero-unification-points p {
+    text-align: center !important;
+  }
+  
+  /* Platform Cards - Mobile Fixes */
+  .platform-grid {
+    grid-template-columns: 1fr !important;
+    gap: 1.5rem !important;
+    margin: 2rem auto !important;
+    padding: 0 1rem !important;
+  }
+  
+  /* Feature Cards - Mobile Responsive */
+  .feature-card,
+  .platform-card {
+    padding: 1.5rem !important;
+    margin: 0 !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  
+  .feature-card .card-content,
+  .platform-card .card-content {
+    padding: 0 !important;
+  }
+  
+  .feature-card .card-description,
+  .platform-card .card-description {
+    font-size: 0.9rem !important;
+    line-height: 1.5 !important;
+    margin: 0.5rem 0 !important;
+  }
+  
+  .feature-card .card-metrics,
+  .platform-card .card-metrics {
+    margin-top: 1rem !important;
+    gap: 0.5rem !important;
+  }
+}
 
 /* =========================
    KELLY GREEN COLOR OVERRIDES
