@@ -18,44 +18,10 @@ import AnalyzeWithWihyButton from '../shared/AnalyzeWithWihyButton';
 
 // Self-contained styling for HydrationChart
 const hydrationChartStyles = {
-  container: {
-    display: "flex" as const,
-    flexDirection: "column" as const,
-    padding: 20,
-    borderRadius: 16,
-    background: "white",
-    border: "1px solid #e5e7eb",
-    boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
-    gridColumn: "1 / -1", // Full width spanning
-    height: "auto",
-    minHeight: 280,
-    maxHeight: 350,
-    width: "100%",
-    overflow: "hidden" as const,
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: 600,
-    color: "#374151",
-    margin: 0,
-    marginBottom: 20,
-    textAlign: "left" as const,
-  },
-  chartContainer: {
-    flex: 1,
-    display: "flex",
-    flexDirection: "column" as const,
-    justifyContent: "center",
-    minHeight: 180,
-    maxHeight: 220,
-    marginBottom: 12,
-  },
-  footerRow: {
-    display: "flex",
-    justifyContent: "center",
-    marginTop: 16,
-    flexShrink: 0,
-  }
+  container: "flex flex-col p-5 rounded-2xl bg-white border border-gray-200 shadow-md col-span-full h-auto min-h-[280px] max-h-[350px] w-full overflow-hidden",
+  title: "text-lg font-semibold text-gray-700 m-0 mb-5 text-left",
+  chartContainer: "flex-1 flex flex-col justify-center min-h-[180px] max-h-[220px] mb-3",
+  footerRow: "flex justify-center mt-4 flex-shrink-0"
 };
 
 ChartJS.register(
@@ -197,16 +163,16 @@ const HydrationChart: React.FC<HydrationChartProps> = ({
     };
 
     return (
-      <div style={hydrationChartStyles.container}>
+      <div className={hydrationChartStyles.container}>
         {showLabels && (
-          <h3 style={hydrationChartStyles.title}>{title} - Sources</h3>
+          <h3 className={hydrationChartStyles.title}>{title}</h3>
         )}
         
-        <div style={hydrationChartStyles.chartContainer}>
+        <div className={hydrationChartStyles.chartContainer}>
           <Doughnut data={sourcesData} options={sourcesOptions} />
         </div>
         
-        <div style={hydrationChartStyles.footerRow}>
+        <div className={hydrationChartStyles.footerRow}>
           <AnalyzeWithWihyButton
             cardContext={`Hydration Sources: Water (65%), Coffee (15%), Tea (12%), Sports drinks (5%), Other (3%). Daily target: ${target}ml.`}
             userQuery="Analyze my hydration sources and suggest optimal fluid intake strategies"
@@ -308,16 +274,16 @@ const HydrationChart: React.FC<HydrationChartProps> = ({
     };
 
     return (
-      <div style={hydrationChartStyles.container}>
+      <div className={hydrationChartStyles.container}>
         {showLabels && (
-          <h3 style={hydrationChartStyles.title}>{title} - Hourly Intake</h3>
+          <h3 className={hydrationChartStyles.title}>{title} - Hourly Intake</h3>
         )}
         
-        <div style={hydrationChartStyles.chartContainer}>
-          <Bar data={hourlyData} options={hourlyOptions} />
+        <div className={hydrationChartStyles.chartContainer}>
+          <Bar data={hourlyData} options={hourlyOptions as any} />
         </div>
         
-        <div style={hydrationChartStyles.footerRow}>
+        <div className={hydrationChartStyles.footerRow}>
           <AnalyzeWithWihyButton
             cardContext={`Hourly Hydration: Total intake ${hydrationData.reduce((sum, d) => sum + d.intake, 0)}ml of ${target}ml target. Peak hours and intake patterns tracked.`}
             userQuery="Analyze my hourly hydration patterns and suggest optimal timing for fluid intake"
@@ -448,14 +414,14 @@ const HydrationChart: React.FC<HydrationChartProps> = ({
   const targetPercent = ((averageIntake / target) * 100).toFixed(1);
 
   return (
-    <div style={hydrationChartStyles.container}>
+    <div className={hydrationChartStyles.container}>
       {showLabels && (
-        <h3 style={hydrationChartStyles.title}>
+        <h3 className={hydrationChartStyles.title}>
           {title} - {type.charAt(0).toUpperCase() + type.slice(1)} Progress
         </h3>
       )}
       
-      <div style={hydrationChartStyles.chartContainer}>
+      <div className={hydrationChartStyles.chartContainer}>
         <Line data={progressData} options={progressOptions} />
       </div>
 
@@ -480,7 +446,7 @@ const HydrationChart: React.FC<HydrationChartProps> = ({
         </div>
       </div>
       
-      <div style={hydrationChartStyles.footerRow}>
+      <div className={hydrationChartStyles.footerRow}>
         <AnalyzeWithWihyButton
           cardContext={`Hydration Tracking: ${type} view showing average ${Math.round(averageIntake)}ml intake vs ${target}ml target (${targetPercent}%). Total tracked: ${totalIntake}ml.`}
           userQuery="Analyze my hydration patterns and provide recommendations for optimal daily fluid intake"

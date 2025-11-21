@@ -8,7 +8,7 @@ import AnalyzeWithWihyButton from '../shared/AnalyzeWithWihyButton';
 
 /* ================= Unified card styling ================= */
 
-const CARD_HEIGHT = 420; // consistent height to prevent scroll
+const CARD_HEIGHT = 420; // consistent height for grid alignment
 
 const cardChrome: React.CSSProperties = {
   position: "relative",

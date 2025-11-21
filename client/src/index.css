@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 :root {
   /* Default fallback; will be updated by JS */
   --vh-header-height: 80px;

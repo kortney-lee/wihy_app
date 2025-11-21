@@ -15,43 +15,6 @@ import {
 import { Bar } from 'react-chartjs-2';
 import AnalyzeWithWihyButton from '../shared/AnalyzeWithWihyButton';
 
-// Self-contained styling for CaloriesChart
-const caloriesChartStyles = {
-  container: {
-    display: "flex" as const,
-    flexDirection: "column" as const,
-    padding: 24,
-    borderRadius: 16,
-    background: "white",
-    border: "1px solid #e5e7eb",
-    boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
-    height: 400,
-    overflow: "hidden" as const,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 600,
-    color: "#9CA3AF",
-    margin: 0,
-    marginBottom: 20,
-    textAlign: "center" as const,
-  },
-  chartContainer: {
-    flex: 1,
-    display: "flex",
-    flexDirection: "column" as const,
-    justifyContent: "center",
-    minHeight: 200,
-    marginBottom: 16,
-  },
-  footerRow: {
-    display: "flex",
-    justifyContent: "center",
-    marginTop: 16,
-    flexShrink: 0,
-  }
-};
-
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -195,14 +158,14 @@ const CaloriesChart: React.FC<CaloriesChartProps> = ({
   };
 
   return (
-    <div style={caloriesChartStyles.container}>
-      <h3 style={caloriesChartStyles.title}>Calories Burned</h3>
+    <div className="flex flex-col p-6 rounded-2xl bg-white border border-gray-200 shadow-md h-[400px] overflow-hidden">
+      <h3 className="text-xl font-semibold text-gray-400 m-0 mb-3 text-center">Calories Burned</h3>
       
-      <div style={caloriesChartStyles.chartContainer}>
+      <div className="flex-1 flex flex-col justify-center min-h-[180px] mb-2">
         <Bar data={data} options={options} />
       </div>
       
-      <div style={caloriesChartStyles.footerRow}>
+      <div className="flex justify-center mt-2 flex-shrink-0">
         <AnalyzeWithWihyButton
           cardContext={`Calories Chart: Total burned ${totalCalories} calories, average ${averageCalories} per ${period === 'day' ? 'hour' : 'day'}, goal ${targetGoal} calories (${period} view). Performance ${isGoalMet ? 'exceeds' : 'below'} target.`}
           userQuery="Analyze my calorie burn patterns and provide insights about my energy expenditure and recommendations for optimizing my workout intensity"

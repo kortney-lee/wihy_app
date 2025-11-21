@@ -150,8 +150,8 @@ const MembersCard: React.FC<MembersCardProps> = ({
         src={displayAward.image} 
         alt={displayAward.title}
         style={{
-          width: '120px',
-          height: '120px',
+          width: '100px',
+          height: '100px',
           objectFit: 'contain'
         }}
         onError={(e) => {

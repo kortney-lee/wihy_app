@@ -126,105 +126,59 @@ const ResearchQualityGauge: React.FC<ResearchQualityGaugeProps> = ({
   };
 
   return (
-    <div style={{
-      display: "flex",
-      flexDirection: "column",
-      padding: 24,
-      borderRadius: 16,
-      background: "white",
-      border: "1px solid #e5e7eb",
-      boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
-      height: 500,
-      overflow: "hidden"
-    }}>
-      <h3 style={{ fontSize: 24, fontWeight: 600, color: "#9CA3AF", margin: 0, marginBottom: 20 }}>
+    <div className="flex flex-col p-6 rounded-2xl bg-white border border-gray-200 shadow-md h-[420px] overflow-hidden">
+      <h3 className="text-xl font-semibold text-vh-muted mb-3">
         Research Quality
       </h3>
       
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", flex: 1, overflow: "hidden", minHeight: 0 }}>
-        <div style={{ 
-          position: 'relative', 
-          width: '100%',
-          height: '100%',
-          maxWidth: '280px',
-          maxHeight: '280px'
-        }}>
-        <Doughnut data={data} options={options} />
-        
-        {/* Center text overlay */}
-        <div style={{
-          position: 'absolute',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          textAlign: 'center'
-        }}>
-          <div style={{
-            fontSize: size === 'small' ? '20px' : size === 'large' ? '32px' : '26px',
-            fontWeight: 'bold',
-            color: qualityColor,
-            lineHeight: '1.5'
-          }}>
-            {clampedScore}
-          </div>
-          <div style={{
-            fontSize: size === 'small' ? '10px' : size === 'large' ? '14px' : '12px',
-            color: '#6B7280',
-            marginTop: '2px'
-          }}>
-            /100
-          </div>
-        </div>
-        </div>
-      </div>
-      
-      {/* Quality label */}
-      <div style={{ 
-        marginTop: '10px',
-        fontSize: size === 'small' ? '12px' : '14px',
-        color: qualityColor,
-        fontWeight: '600',
-        textAlign: 'center'
-      }}>
-        {qualityLabel} Evidence
-      </div>
-
-      {/* Additional research details */}
-      {showDetails && (
-        <div style={{ 
-          marginTop: '10px',
-          fontSize: size === 'small' ? '11px' : '12px',
-          color: '#6B7280',
-          textAlign: 'center'
-        }}>
-          <div style={{ marginBottom: '4px' }}>
-            📊 {defaultStudyCount} studies analyzed
-          </div>
+      <div className="flex-1 flex flex-col justify-center overflow-hidden min-h-0">
+        <div className="relative h-36 w-36 mx-auto">
+          <Doughnut data={data} options={options} />
           
-          <div style={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'center',
-            gap: '4px'
-          }}>
-            <span style={{
-              backgroundColor: getEvidenceLevelColor(defaultEvidenceLevel),
-              color: 'white',
-              padding: '2px 6px',
-              borderRadius: '4px',
-              fontSize: '10px',
-              fontWeight: 'bold'
-            }}>
-              Level {defaultEvidenceLevel}
-            </span>
-            <span style={{ fontSize: '10px' }}>
-              {getEvidenceLevelDescription(defaultEvidenceLevel)}
-            </span>
+          {/* Center text overlay */}
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center">
+            <div 
+              className="text-2xl font-bold"
+              style={{ color: qualityColor }}
+            >
+              {clampedScore}
+            </div>
+            <div className="text-xs text-gray-500">
+              /100
+            </div>
           </div>
         </div>
-      )}
+
+        <div className="mt-4">
+          {/* Quality label */}
+          <div 
+            className="font-semibold text-center text-base mb-2"
+            style={{ color: qualityColor }}
+          >
+            {qualityLabel} Evidence
+          </div>
+
+          {/* Additional research details */}
+          {showDetails && (
+            <div className="text-gray-500 text-center text-xs mb-3">
+              <div className="mb-1">
+                📊 {defaultStudyCount} studies
+              </div>
+              
+              <div className="flex items-center justify-center gap-1">
+                <span 
+                  className="text-white px-1.5 py-0.5 rounded text-xs font-bold"
+                  style={{ backgroundColor: getEvidenceLevelColor(defaultEvidenceLevel) }}
+                >
+                  Level {defaultEvidenceLevel}
+                </span>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
       
-      <div style={{ display: "flex", justifyContent: "center", marginTop: 16, flexShrink: 0 }}>
+      <div className="flex justify-center mt-2 flex-shrink-0">
         <AnalyzeWithWihyButton
           cardContext={`Research quality analysis: Quality score ${clampedScore}/100 (${getQualityLabel(clampedScore)}). ${defaultStudyCount} studies analyzed. Evidence level ${defaultEvidenceLevel} (${getEvidenceLevelDescription(defaultEvidenceLevel)})`}
           userQuery="Analyze this research quality data and explain what it means for the reliability of health recommendations"

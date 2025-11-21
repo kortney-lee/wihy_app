@@ -1,50 +1,10 @@
 import React from 'react';
 import AnalyzeWithWihyButton from '../shared/AnalyzeWithWihyButton';
 
-// Unified card styling
-const cardChrome = {
-  display: "flex",
-  flexDirection: "column" as const,
-  padding: 24,
-  borderRadius: 16,
-  background: "white",
-  border: "1px solid #e5e7eb",
-  boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
-  height: 420,
-  overflow: "hidden" as const,
-};
-
-const titleStyle = {
-  fontSize: 24,
-  fontWeight: 600,
-  color: "#9CA3AF",
-  margin: 0,
-  marginBottom: 20,
-  textAlign: "center" as const,
-};
-
-const sectionGrow = {
-  display: "flex",
-  flexDirection: "column" as const,
-  alignItems: "center",
-  justifyContent: "center",
-  flex: 1,
-  gap: 8,
-  overflow: "hidden" as const,
-  minHeight: 0,
-};
-
-const footerRow = {
-  display: "flex",
-  justifyContent: "center",
-  marginTop: 16,
-  flexShrink: 0,
-};
-
 const CardShell = ({ title, children }: { title: string; children: React.ReactNode }) => (
-  <section style={cardChrome}>
-    <h3 style={titleStyle}>{title}</h3>
-    <div style={sectionGrow}>{children}</div>
+  <section className="flex flex-col p-6 rounded-2xl bg-white border border-gray-200 shadow-md h-[420px] overflow-hidden">
+    <h3 className="text-xl font-semibold text-gray-400 m-0 mb-3 text-center">{title}</h3>
+    <div className="flex flex-col items-center justify-center flex-1 gap-1 overflow-hidden min-h-0">{children}</div>
   </section>
 );
 
@@ -70,101 +30,50 @@ const CaloriesCard: React.FC<CaloriesCardProps> = ({
     <CardShell title="Calories Today">
 
       {/* Main Value Display */}
-      <div style={{ textAlign: "center", marginBottom: "16px" }}>
-        <div style={{ 
-          fontSize: 24, 
-          fontWeight: 400, 
-          color: '#1f2937',
-          lineHeight: 1.5,
-          marginBottom: "2px"
-        }}>
+      <div className="flex flex-col items-center min-w-0 overflow-hidden mb-3">
+        <div className="text-xl lg:text-2xl font-normal text-gray-800 leading-tight mb-1 truncate">
           {consumedCalories.toLocaleString()}
         </div>
-        <div style={{
-          fontSize: 14,
-          color: '#9ca3af',
-          fontWeight: 400
-        }}>
+        <div className="text-sm text-gray-400 font-normal">
           {unit} consumed
         </div>
       </div>
 
       {/* Simple Bar Display */}
-      <div style={{ width: "100%", maxWidth: "200px", marginBottom: "16px" }}>
+      <div className="w-full max-w-[180px] mb-2">
         {/* Consumed vs Burned Bars */}
-        <div style={{ marginBottom: '8px' }}>
-          <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '4px', textAlign: 'left' }}>
+        <div className="mb-1.5">
+          <div className="text-xs text-gray-500 mb-0.5 text-left">
             Consumed
           </div>
-          <div style={{
-            width: '100%',
-            height: '12px',
-            backgroundColor: '#f3f4f6',
-            borderRadius: '6px',
-            overflow: 'hidden'
-          }}>
-            <div style={{
-              width: `${consumedWidth}%`,
-              height: '100%',
-              background: '#3b82f6',
-              borderRadius: '6px',
-              transition: 'width 0.8s ease'
-            }} />
+          <div className="w-full h-2.5 bg-gray-100 rounded-md overflow-hidden">
+            <div className="h-full bg-blue-500 rounded-md transition-all duration-700 ease-in-out" style={{width: `${consumedWidth}%`}} />
           </div>
         </div>
 
-        <div style={{ marginBottom: '8px' }}>
-          <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '4px', textAlign: 'left' }}>
+        <div className="mb-1.5">
+          <div className="text-xs text-gray-500 mb-0.5 text-left">
             Burned: {burnedCalories.toLocaleString()} {unit}
           </div>
-          <div style={{
-            width: '100%',
-            height: '12px',
-            backgroundColor: '#f3f4f6',
-            borderRadius: '6px',
-            overflow: 'hidden'
-          }}>
-            <div style={{
-              width: `${burnedWidth}%`,
-              height: '100%',
-              background: '#10b981',
-              borderRadius: '6px',
-              transition: 'width 0.8s ease'
-            }} />
+          <div className="w-full h-2.5 bg-gray-100 rounded-md overflow-hidden">
+            <div className="h-full bg-green-500 rounded-md transition-all duration-700 ease-in-out" style={{width: `${burnedWidth}%`}} />
           </div>
         </div>
       </div>
 
       {/* Status Pill */}
-      <div style={{ textAlign: "center" }}>
-        <span
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: 8,
-            padding: "8px 16px",
-            borderRadius: 9999,
-            fontWeight: 600,
-            fontSize: 14,
-            color: netCalories > 0 ? '#059669' : '#dc2626',
-            backgroundColor: netCalories > 0 ? '#05966920' : '#dc262620',
-            border: `1px solid ${netCalories > 0 ? '#05966933' : '#dc262633'}`,
-          }}
-        >
-          <span
-            style={{
-              width: 8,
-              height: 8,
-              borderRadius: 9999,
-              background: "currentColor",
-              opacity: 0.85,
-            }}
-          />
+      <div className="text-center">
+        <span className={`inline-flex items-center gap-2 px-4 py-2 rounded-full font-semibold text-sm ${
+          netCalories > 0 
+            ? 'text-green-700 bg-green-500 bg-opacity-20 border border-green-500 border-opacity-20'
+            : 'text-red-700 bg-red-500 bg-opacity-20 border border-red-500 border-opacity-20'
+        }`}>
+          <span className="w-2 h-2 rounded-full bg-current opacity-85" />
           Net: {netCalories > 0 ? '+' : ''}{netCalories} {unit}
         </span>
       </div>
 
-      <div style={footerRow}>
+      <div className="flex justify-center mt-2 flex-shrink-0">
         <AnalyzeWithWihyButton
           cardContext={`Calories: Consumed ${consumedCalories} ${unit}, Burned ${burnedCalories} ${unit}, Net ${netCalories} ${unit} ${netCalories > 0 ? 'deficit' : 'surplus'}`}
           userQuery="Analyze my calorie balance and metabolism"

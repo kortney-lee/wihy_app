@@ -1,43 +1,20 @@
 import React from "react";
 import AnalyzeWithWihyButton from "../shared/AnalyzeWithWihyButton";
 
-/* ================= Unified card styling ================= */
-
-const cardChrome: React.CSSProperties = {
-  display: "flex",
-  flexDirection: "column",
-  padding: 24,
-  borderRadius: 16,
-  background: "white",
-  border: "1px solid #e5e7eb",
-  boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
-  height: 400,
-  overflow: "hidden",
-};
-
-const titleStyle: React.CSSProperties = {
-  margin: "0 0 12px 0",
-  fontSize: 24,
-  fontWeight: 600,
-  color: "#9CA3AF",
-};
-
-const sectionGrow: React.CSSProperties = {
-  display: "flex",
-  flexDirection: "column",
-  alignItems: "center",
-  justifyContent: "center",
-  flex: 1,
-  overflow: "hidden",
-  minHeight: 0,
-};
-
-const footerRow: React.CSSProperties = {
-  display: "flex",
-  justifyContent: "center",
-  marginTop: 16,
-  flexShrink: 0,
-};
+function CardShell({
+  title = "",
+  children,
+}: {
+  title?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="flex flex-col p-6 rounded-2xl bg-white border border-gray-200 shadow-md h-[420px] overflow-hidden">
+      <h3 className="text-xl font-semibold text-gray-400 m-0 mb-3">{title}</h3>
+      <div className="flex flex-col items-center justify-center flex-1 overflow-hidden min-h-0 gap-2">{children}</div>
+    </section>
+  );
+}
 
 /* ================= Donut (full circle) ================= */
 
@@ -125,22 +102,7 @@ function Donut({
   );
 }
 
-/* ================= Card shell ================= */
 
-function CardShell({
-  title = "",
-  children,
-}: {
-  title?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <section style={cardChrome}>
-      <h3 style={titleStyle}>{title}</h3>
-      <div style={sectionGrow}>{children}</div>
-    </section>
-  );
-}
 
 /* ================= Example: Health Risk ================= */
 
@@ -179,16 +141,17 @@ const HealthRiskCard: React.FC<HealthRiskCardProps> = ({ data, onAnalyze }) => {
         value={riskScore}
         color={scoreColor}
         track="#f3f4f6"
-        stroke={12}
-        size={160}
+        stroke={10}
+        size={140}
         label={
-          <div style={{ whiteSpace: "nowrap" }}>
+          <div className="whitespace-nowrap">
             <span
-              style={{ fontSize: 32, fontWeight: 700, color: scoreColor }}
+              className="text-xl font-bold"
+              style={{ color: scoreColor }}
             >
               {riskScore}
             </span>
-            <span style={{ fontSize: 14, color: "#6b7280", marginLeft: 4 }}>
+            <span className="text-sm text-gray-500 ml-1">
               /100
             </span>
           </div>
@@ -196,35 +159,26 @@ const HealthRiskCard: React.FC<HealthRiskCardProps> = ({ data, onAnalyze }) => {
       />
 
       {/* Pill */}
-      <div style={{ textAlign: "center", flexShrink: 0, paddingTop: 16, paddingBottom: 4 }}>
+      <div className="text-center flex-shrink-0 pt-3 pb-1">
         <span
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-full font-semibold text-sm"
           style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: 8,
-            padding: "8px 16px", // slightly larger padding
-            borderRadius: 9999,
-            fontWeight: 600,
-            fontSize: 14,
             color: scoreColor,
             backgroundColor: `${scoreColor}20`,
             border: `1px solid ${scoreColor}33`,
           }}
         >
           <span
+            className="w-2 h-2 rounded-full opacity-85"
             style={{
-              width: 8,
-              height: 8,
-              borderRadius: 9999,
               background: "currentColor",
-              opacity: 0.85,
             }}
           />
           {currentRiskZone} Risk
         </span>
       </div>
 
-      <div style={footerRow}>
+      <div className="flex justify-center mt-2">
         <AnalyzeWithWihyButton
           cardContext={`Health Risk Analysis: ${currentRiskZone} risk level with ${riskScore}/100 score. Key factors: ${factors.join(
             ", "

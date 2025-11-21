@@ -6,51 +6,16 @@ import {
   PointElement,
   LineElement,
   BarElement,
+  ArcElement,
   Title,
   Tooltip,
   Legend,
   ChartOptions,
 } from 'chart.js';
-import { Line, Bar } from 'react-chartjs-2';
+import { Line, Bar, Doughnut } from 'react-chartjs-2';
 import AnalyzeWithWihyButton from '../shared/AnalyzeWithWihyButton';
 
-// Self-contained styling for DopamineChart
-const dopamineChartStyles = {
-  container: {
-    display: "flex" as const,
-    flexDirection: "column" as const,
-    padding: 24,
-    borderRadius: 16,
-    background: "white",
-    border: "1px solid #e5e7eb",
-    boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
-    height: 400,
-    width: "100%",
-    overflow: "hidden" as const,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 600,
-    color: "#9CA3AF",
-    margin: 0,
-    marginBottom: 20,
-    textAlign: "left" as const,
-  },
-  chartContainer: {
-    flex: 1,
-    display: "flex",
-    flexDirection: "column" as const,
-    justifyContent: "center",
-    height: 280,
-    marginBottom: 16,
-  },
-  footerRow: {
-    display: "flex",
-    justifyContent: "center",
-    marginTop: 16,
-    flexShrink: 0,
-  }
-};
+// Converted to use Tailwind CSS classes
 
 ChartJS.register(
   CategoryScale,
@@ -58,6 +23,7 @@ ChartJS.register(
   PointElement,
   LineElement,
   BarElement,
+  ArcElement,
   Title,
   Tooltip,
   Legend
@@ -196,16 +162,16 @@ const DopamineChart: React.FC<DopamineChartProps> = ({
     };
 
     return (
-      <div style={dopamineChartStyles.container}>
+      <div className="flex flex-col p-6 rounded-2xl bg-white border border-gray-200 shadow-md h-[400px] w-full overflow-hidden">
         {showLabels && (
-          <h3 style={dopamineChartStyles.title}>{title} - Triggers</h3>
+          <h3 className="text-xl font-semibold text-gray-400 m-0 mb-5 text-left">{title} - Triggers</h3>
         )}
         
-        <div style={dopamineChartStyles.chartContainer}>
+        <div className="flex-1 flex flex-col justify-center h-[280px] mb-4">
           <Bar data={triggersData} options={triggersOptions} />
         </div>
         
-        <div style={dopamineChartStyles.footerRow}>
+        <div className="flex justify-center mt-4 flex-shrink-0">
           <AnalyzeWithWihyButton
             cardContext={`Dopamine Triggers Chart: Tracking trigger frequency over ${period} period. Shows neurotransmitter trigger patterns for mental health analysis.`}
             userQuery="Analyze my dopamine trigger patterns and explain how different activities affect my mood and motivation"
@@ -291,16 +257,16 @@ const DopamineChart: React.FC<DopamineChartProps> = ({
     };
 
     return (
-      <div style={dopamineChartStyles.container}>
+      <div className="flex flex-col p-6 rounded-2xl bg-white border border-gray-200 shadow-md h-[400px] w-full overflow-hidden">
         {showLabels && (
-          <h3 style={dopamineChartStyles.title}>{title} - Activities</h3>
+          <h3 className="text-xl font-semibold text-gray-400 m-0 mb-5 text-left">{title} - Activities</h3>
         )}
         
-        <div style={dopamineChartStyles.chartContainer}>
-          <Bar data={activitiesData} options={activitiesOptions} />
+        <div className="flex-1 flex flex-col justify-center h-[280px] mb-4">
+          <Doughnut data={activitiesData} options={activitiesOptions as any} />
         </div>
         
-        <div style={dopamineChartStyles.footerRow}>
+        <div className="flex justify-center mt-4 flex-shrink-0">
           <AnalyzeWithWihyButton
             cardContext={`Dopamine Activities Chart: Tracking activity time over ${period} period. Shows time spent on dopamine-triggering activities for wellness analysis.`}
             userQuery="Analyze my dopamine-related activity patterns and suggest optimizations for better mental wellness"
@@ -426,16 +392,16 @@ const DopamineChart: React.FC<DopamineChartProps> = ({
   };
 
   return (
-    <div style={dopamineChartStyles.container}>
+    <div className="flex flex-col p-6 rounded-2xl bg-white border border-gray-200 shadow-md h-[400px] w-full overflow-hidden">
       {showLabels && (
-        <h3 style={dopamineChartStyles.title}>{title} - Levels</h3>
+        <h3 className="text-xl font-semibold text-gray-400 m-0 mb-5 text-left">{title} - Levels</h3>
       )}
       
-      <div style={dopamineChartStyles.chartContainer}>
+      <div className="flex-1 flex flex-col justify-center h-[280px] mb-4">
         <Line data={data} options={options} />
       </div>
       
-      <div style={dopamineChartStyles.footerRow}>
+      <div className="flex justify-center mt-4 flex-shrink-0">
         <AnalyzeWithWihyButton
           cardContext={`Dopamine Chart: Tracking ${chartType} over ${period} period. Shows neurotransmitter patterns and mood-related metrics for mental health and wellness analysis.`}
           userQuery="Analyze my dopamine patterns and explain how they relate to my mood, motivation, and overall mental wellness"

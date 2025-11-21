@@ -58,76 +58,70 @@ const ProgressRing: React.FC<ProgressRingProps> = ({
   ], [progressPercent, color]);
 
   return (
-    <div className="dashboard-chart-card">
-      <h3 className="chart-section-title">{label}</h3>
+    <div className="flex flex-col p-6 rounded-2xl bg-white border border-gray-200 shadow-md h-[420px] overflow-hidden">
+      <h3 className="text-xl font-semibold text-gray-400 mb-3">{label}</h3>
       
-      <div className="chart-container" style={{ 
-        width: dimensions[size].width, 
-        height: dimensions[size].height,
-        margin: '0 auto'
-      }}>
-        <ResponsiveContainer width="100%" height="100%">
-          <PieChart>
-            <Pie
-              data={progressData}
-              cx="50%"
-              cy="50%"
-              innerRadius="60%"
-              outerRadius="90%"
-              startAngle={90}
-              endAngle={-270}
-              dataKey="value"
-              stroke="none"
+      <div className="flex flex-col items-center justify-center flex-1">
+        <div 
+          className="relative mx-auto" 
+          style={{ 
+            width: dimensions[size].width, 
+            height: dimensions[size].height
+          }}
+        >
+          <ResponsiveContainer width="100%" height="100%">
+            <PieChart>
+              <Pie
+                data={progressData}
+                cx="50%"
+                cy="50%"
+                innerRadius="60%"
+                outerRadius="90%"
+                startAngle={90}
+                endAngle={-270}
+                dataKey="value"
+                stroke="none"
+              >
+                {progressData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={entry.fill} />
+                ))}
+              </Pie>
+            </PieChart>
+          </ResponsiveContainer>
+          
+          {/* Center text overlay */}
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center pointer-events-none">
+            <div 
+              className={`font-bold leading-none ${
+                size === 'small' ? 'text-2xl' : size === 'large' ? 'text-4xl' : 'text-3xl'
+              }`}
+              style={{ color: color }}
             >
-              {progressData.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={entry.fill} />
-              ))}
-            </Pie>
-          </PieChart>
-        </ResponsiveContainer>
-        
-        {/* Center text overlay */}
-        <div style={{
-          position: 'absolute',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          textAlign: 'center',
-          pointerEvents: 'none'
-        }}>
-          <div className="insight-value" style={{
-            fontSize: size === 'small' ? '24px' : size === 'large' ? '36px' : '30px',
-            fontWeight: 'bold',
-            color: color,
-            lineHeight: '1'
-          }}>
-            {clampedValue}
+              {clampedValue}
+            </div>
+            <div className={`text-gray-500 mt-0.5 ${
+              size === 'small' ? 'text-xs' : size === 'large' ? 'text-base' : 'text-sm'
+            }`}>
+              {unit}
+            </div>
           </div>
-          <div style={{
-            fontSize: size === 'small' ? '12px' : size === 'large' ? '16px' : '14px',
-            color: '#6b7280',
-            marginTop: '2px'
-          }}>
-            {unit}
-          </div>
+        </div>
+      
+        {/* Progress status */}
+        <div className={`text-center mt-3 text-gray-500 ${
+          size === 'small' ? 'text-xs' : 'text-sm'
+        }`}>
+          {Math.round(progressPercent)}% of {maxValue}{unit} goal
         </div>
       </div>
       
-      {/* Progress status */}
-      <div style={{ 
-        textAlign: 'center',
-        marginTop: '10px',
-        fontSize: size === 'small' ? '12px' : '14px',
-        color: '#6b7280'
-      }}>
-        {Math.round(progressPercent)}% of {maxValue}{unit} goal
+      <div className="flex justify-center mt-2 flex-shrink-0">
+        <AnalyzeWithWihyButton
+          cardContext={`Progress Ring: ${label} showing ${clampedValue}${unit} out of ${maxValue}${unit} (${Math.round(progressPercent)}% completion). Current performance indicator for goal tracking and progress monitoring.`}
+          userQuery={`Analyze my ${label.toLowerCase()} progress and provide insights about goal achievement and recommendations for improvement`}
+          onAnalyze={onAnalyze}
+        />
       </div>
-      
-      <AnalyzeWithWihyButton
-        cardContext={`Progress Ring: ${label} showing ${clampedValue}${unit} out of ${maxValue}${unit} (${Math.round(progressPercent)}% completion). Current performance indicator for goal tracking and progress monitoring.`}
-        userQuery={`Analyze my ${label.toLowerCase()} progress and provide insights about goal achievement and recommendations for improvement`}
-        onAnalyze={onAnalyze}
-      />
     </div>
   );
 };

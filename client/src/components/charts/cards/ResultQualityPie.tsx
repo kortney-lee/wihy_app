@@ -210,99 +210,61 @@ const ResultQualityPie: React.FC<ResultQualityPieProps> = ({
   const legendBadColor = verdict === 'BAD' ? '#EF4444' : '#E5E7EB';
 
   return (
-    <div 
-      style={{ 
-        padding: 24,
-        borderRadius: 16,
-        border: "1px solid #e5e7eb",
-        backgroundColor: "#fff",
-        boxShadow: "0 4px 8px rgba(0,0,0,0.1)",
-        height: 500,
-        display: "flex",
-        flexDirection: "column",
-        textAlign: 'center'
-      }}
-    >
-      <h3 style={{ fontSize: 24, fontWeight: 600, color: "#9CA3AF", margin: "0 0 20px 0" }}>
+    <div className="p-6 rounded-2xl border border-gray-200 bg-white shadow-lg h-[420px] flex flex-col text-center overflow-hidden">
+      <h3 className="text-xl font-semibold text-vh-muted mb-3">
         Result Quality
       </h3>
       
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-        <div style={{ position: 'relative', height: '200px', width: '200px', margin: '0 auto' }}>
+      <div className="flex-1 flex flex-col justify-center">
+        <div className="relative h-36 w-36 mx-auto">
           <Doughnut data={data} options={options} />
-          <div
-            style={{
-              position: 'absolute',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-              textAlign: 'center',
-            }}
-          >
-            <div style={{ fontSize: '2rem', marginBottom: '0', fontWeight: 'bold', color: '#374151' }}>
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center">
+            <div className="text-2xl mb-0 font-bold text-gray-700">
               {percentage}%
             </div>
-            <div style={{ fontSize: '12px', color: '#6b7280' }}>
+            <div className="text-xs text-gray-500">
               Evidence
             </div>
           </div>
         </div>
 
-        <div style={{ marginTop: '1rem' }}>
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              marginBottom: '0.5rem'
-            }}
-          >
-            <span
-              style={{
-                fontWeight: 500,
-                color: ringColor,
-                fontSize: '1rem'
-              }}
+        <div className="mt-4">
+          <div className="flex items-center justify-center mb-2">
+            <span 
+              className="font-medium text-base"
+              style={{ color: ringColor }}
             >
               {verdictLabel}
             </span>
           </div>
 
-          <div style={{ display: 'flex', justifyContent: 'center', gap: '16px', marginBottom: '12px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <div
-                style={{ 
-                  width: '12px', 
-                  height: '12px', 
-                  borderRadius: '50%', 
-                  backgroundColor: legendGoodColor 
-                }}
+          <div className="flex justify-center gap-4 mb-3">
+            <div className="flex items-center gap-1">
+              <div 
+                className="w-3 h-3 rounded-full"
+                style={{ backgroundColor: legendGoodColor }}
               />
-              <span style={{ fontSize: '12px', color: '#6b7280' }}>Good: {percentage}%</span>
+              <span className="text-xs text-gray-500">Good: {percentage}%</span>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <div
-                style={{ 
-                  width: '12px', 
-                  height: '12px', 
-                  borderRadius: '50%', 
-                  backgroundColor: legendBadColor 
-                }}
+            <div className="flex items-center gap-1">
+              <div 
+                className="w-3 h-3 rounded-full"
+                style={{ backgroundColor: legendBadColor }}
               />
-              <span style={{ fontSize: '12px', color: '#6b7280' }}>Bad: {remaining}%</span>
+              <span className="text-xs text-gray-500">Bad: {remaining}%</span>
             </div>
           </div>
 
           {/* Tiny rationale (first 1–2 reasons) */}
           {reasons.length > 0 && reasons[0] !== 'Loading...' && reasons[0] !== 'Waiting for results...' && (
-            <div style={{ fontSize: '11px', color: '#6b7280', marginBottom: '12px' }}>
+            <div className="text-xs text-gray-500 mb-3">
               {reasons.slice(0, 2).join(' • ')}
             </div>
           )}
         </div>
       </div>
       
-      <div style={{ display: "flex", justifyContent: "center", marginTop: 16, flexShrink: 0 }}>
+      <div className="flex justify-center mt-2 flex-shrink-0">
         <AnalyzeWithWihyButton
           cardContext={`Result quality analysis: ${percentage}% good sources, ${remaining}% poor sources. Data source: ${dataSource}. Quality reasons: ${reasons.filter(r => r !== 'Loading...' && r !== 'Waiting for results...').join(', ')}. Query: "${query}"`}
           userQuery="Analyze the quality of these search results and explain how source credibility affects the reliability of health information"

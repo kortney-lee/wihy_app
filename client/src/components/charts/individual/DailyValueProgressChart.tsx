@@ -100,38 +100,16 @@ const DailyValueProgressChart: React.FC<DailyValueProgressChartProps> = ({
   };
 
   return (
-    <div style={{
-      display: "flex",
-      flexDirection: "column",
-      padding: window.innerWidth <= 768 ? 16 : 24,
-      borderRadius: 16,
-      background: "white",
-      border: "1px solid #e5e7eb",
-      boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
-      overflow: "visible"
-    }}>
+    <div className="flex flex-col p-4 md:p-6 rounded-2xl bg-white border border-gray-200 shadow-md overflow-visible">
       {/* Title */}
       {showLabels && (
-        <h3 style={{
-          fontSize: window.innerWidth <= 768 ? 20 : 24,
-          fontWeight: 600,
-          color: "#9CA3AF",
-          margin: 0,
-          marginBottom: window.innerWidth <= 768 ? 12 : 20,
-          textAlign: 'center'
-        }}>
+        <h3 className="text-xl md:text-2xl font-semibold text-gray-400 m-0 mb-3 md:mb-5 text-center">
           {title}
         </h3>
       )}
 
       {/* Simple horizontal bar chart like Vitamin & Mineral Content */}
-      <div style={{ 
-        display: 'flex', 
-        flexDirection: 'column', 
-        gap: '12px',
-        flex: 1,
-        overflow: 'visible'
-      }}>
+      <div className="flex flex-col gap-3 flex-1 overflow-visible">
         {nutrientData.map((nutrient, index) => (
           <div key={nutrient.name} style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
             {/* Nutrient name - flexible width for full text */}
@@ -168,15 +146,7 @@ const DailyValueProgressChart: React.FC<DailyValueProgressChartProps> = ({
         ))}
         
         {/* Percentage scale at bottom */}
-        <div style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginTop: '8px',
-          marginLeft: window.innerWidth <= 768 ? '96px' : '116px', // Align with bars
-          fontSize: '12px',
-          color: '#6b7280'
-        }}>
+        <div className="flex justify-between items-center mt-2 ml-24 md:ml-[116px] text-xs text-gray-500">
           <span>0%</span>
           <span>20%</span>
           <span>40%</span>
@@ -187,27 +157,14 @@ const DailyValueProgressChart: React.FC<DailyValueProgressChartProps> = ({
         </div>
         
         {/* Summary like in Image 2 */}
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '8px',
-          marginTop: '16px',
-          marginLeft: window.innerWidth <= 768 ? '96px' : '116px',
-          fontSize: '14px',
-          color: '#10b981'
-        }}>
-          <div style={{
-            width: '12px',
-            height: '12px',
-            backgroundColor: '#10b981',
-            borderRadius: '2px'
-          }} />
+        <div className="flex items-center gap-2 mt-4 ml-24 md:ml-[116px] text-sm text-green-500">
+          <div className="w-3 h-3 bg-green-500 rounded-sm" />
           {nutrientData.filter(n => n.percentage >= 100).length} nutrients meeting DV
         </div>
       </div>
 
       
-      <div style={{ display: "flex", justifyContent: "center", marginTop: 24, flexShrink: 0 }}>
+      <div className="flex justify-center mt-6 flex-shrink-0">
         <AnalyzeWithWihyButton
           cardContext={`Daily Value Progress: ${title} showing ${nutrientData.length} nutrients tracked. Meeting DV: ${nutrientData.filter(n => n.percentage >= 100).length}. Nutrient details: ${nutrientData.map(n => `${n.name}: ${n.percentage}%`).join(', ')}.`}
           userQuery="Analyze my daily nutrient intake progress and identify any deficiencies or areas where I can improve my nutrition"

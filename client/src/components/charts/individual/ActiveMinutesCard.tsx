@@ -1,44 +1,6 @@
 import React from 'react';
 import AnalyzeWithWihyButton from '../shared/AnalyzeWithWihyButton';
 
-/* ================= Unified card styling ================= */
-
-const cardChrome: React.CSSProperties = {
-  display: "flex",
-  flexDirection: "column",
-  padding: 24,
-  borderRadius: 16,
-  background: "white",
-  border: "1px solid #e5e7eb",
-  boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
-  height: 420,
-  overflow: "hidden",
-};
-
-const titleStyle: React.CSSProperties = {
-  margin: "0 0 20px 0",
-  fontSize: 24,
-  fontWeight: 600,
-  color: "#9CA3AF",
-};
-
-const sectionGrow: React.CSSProperties = {
-  display: "flex",
-  flexDirection: "column",
-  alignItems: "center",
-  justifyContent: "center",
-  flex: 1,
-  overflow: "hidden",
-  minHeight: 0,
-};
-
-const footerRow: React.CSSProperties = {
-  display: "flex",
-  justifyContent: "center",
-  marginTop: 16,
-  flexShrink: 0,
-};
-
 /* ================= Card shell ================= */
 
 function CardShell({
@@ -49,9 +11,9 @@ function CardShell({
   children: React.ReactNode;
 }) {
   return (
-    <section style={cardChrome}>
-      <h3 style={titleStyle}>{title}</h3>
-      <div style={sectionGrow}>{children}</div>
+    <section className="flex flex-col p-6 rounded-2xl bg-white border border-gray-200 shadow-md h-[420px] overflow-hidden">
+      <h3 className="text-xl font-semibold text-gray-400 m-0 mb-3 text-left">{title}</h3>
+      <div className="flex flex-col items-center justify-center flex-1 overflow-hidden min-h-0">{children}</div>
     </section>
   );
 }
@@ -92,88 +54,58 @@ const ActiveMinutesCard: React.FC<ActiveMinutesCardProps> = ({
   return (
     <CardShell title="Active Minutes">
       {/* Main Value Display */}
-      <div style={{ textAlign: "center", marginBottom: "24px" }}>
-        <div style={{ 
-          fontSize: 48, 
-          fontWeight: 700, 
-          color: progressColor,
-          lineHeight: 1.5,
-          marginBottom: "8px"
-        }}>
+      <div className="flex flex-col items-center min-w-0 overflow-hidden text-center mb-3">
+        <div 
+          className="text-3xl lg:text-4xl font-bold mb-1 truncate"
+          style={{ color: progressColor }}
+        >
           {currentMinutes}
         </div>
-        <div style={{
-          fontSize: 14,
-          color: '#9ca3af',
-          fontWeight: 400
-        }}>
+        <div className="text-xs text-gray-400 font-normal truncate">
           {unit} active today
         </div>
       </div>
 
       {/* Progress Bar */}
-      <div style={{ width: "100%", maxWidth: "200px", marginBottom: "16px" }}>
-        <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '8px', textAlign: 'center' }}>
+      <div className="w-full max-w-[200px] mb-2">
+        <div className="text-xs text-gray-500 mb-1 text-center">
           Goal: {goalMinutes} {unit}
         </div>
-        <div style={{
-          width: '100%',
-          height: '12px',
-          backgroundColor: '#f3f4f6',
-          borderRadius: '6px',
-          overflow: 'hidden'
-        }}>
-          <div style={{
-            width: `${progressPercentage}%`,
-            height: '100%',
-            background: progressColor,
-            borderRadius: '6px',
-            transition: 'width 0.8s ease'
-          }} />
+        <div className="w-full h-3 bg-gray-100 rounded-md overflow-hidden">
+          <div 
+            className="h-full rounded-md transition-all duration-700 ease-out"
+            style={{
+              width: `${progressPercentage}%`,
+              backgroundColor: progressColor
+            }}
+          />
         </div>
       </div>
 
       {/* Status Pill */}
-      <div style={{ textAlign: "center" }}>
+      <div className="text-center">
         <span
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-full font-semibold text-sm"
           style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: 8,
-            padding: "8px 16px",
-            borderRadius: 9999,
-            fontWeight: 600,
-            fontSize: 14,
             color: progressColor,
             backgroundColor: `${progressColor}20`,
-            border: `1px solid ${progressColor}33`,
+            borderColor: `${progressColor}33`,
+            borderWidth: '1px'
           }}
         >
           <span
-            style={{
-              width: 8,
-              height: 8,
-              borderRadius: 9999,
-              background: "currentColor",
-              opacity: 0.85,
-            }}
+            className="w-2 h-2 rounded-full opacity-85"
+            style={{ backgroundColor: progressColor }}
           />
           {progressLabel} • {Math.round(progressPercentage)}%
         </span>
       </div>
 
-      <div style={footerRow}>
+      <div className="flex justify-center mt-2 flex-shrink-0">
         <AnalyzeWithWihyButton
           cardContext={`Active Minutes tracking: Currently at ${currentMinutes} ${unit} out of ${goalMinutes} ${unit} goal (${progressPercentage.toFixed(1)}% progress). Status: ${progressLabel}. This represents physical activity and fitness engagement.`}
           userQuery="Analyze my active minutes data and provide insights about my physical activity levels and recommendations for improvement"
           onAnalyze={onAnalyze}
-          style={{
-            fontSize: '12px',
-            padding: '8px 12px',
-            width: 'auto',
-            minWidth: '140px',
-            maxWidth: '200px'
-          }}
         />
       </div>
     </CardShell>

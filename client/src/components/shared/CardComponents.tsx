@@ -1,11 +1,51 @@
 /**
- * Reusable Card Components - Following established design patterns
- * Used throughout the application for consistent styling
+ * Reusable Card Components - Now powered by Tailwind CSS
+ * Demonstrates modern utility-first approach with your existing design tokens
  */
 
 import React from 'react';
 
-// Standard card styling from existing chart components
+// Tailwind CSS classes for reusable card styling
+export const cardClasses = {
+  // Base card variants
+  base: "flex flex-col p-6 rounded-2xl bg-white border border-gray-200 shadow-card overflow-hidden",
+  elevated: "flex flex-col p-6 rounded-2xl bg-white border border-gray-200 shadow-card-hover overflow-hidden hover:shadow-lg transition-all duration-300",
+  primary: "flex flex-col p-6 rounded-2xl bg-gradient-to-br from-white to-vh-surface-2 border border-blue-100 shadow-card-hover overflow-hidden",
+  
+  // Feature card variants
+  feature: "flex flex-col rounded-2xl bg-white border border-gray-200 shadow-card-hover overflow-hidden min-w-[380px] h-[520px] text-center transition-all duration-300",
+  featurePrimary: "flex flex-col rounded-2xl bg-gradient-to-br from-white to-vh-surface-2 border border-blue-100 shadow-card-hover overflow-hidden min-w-[380px] h-[520px] text-center relative transition-all duration-300",
+  
+  // Metric card
+  metric: "flex flex-col p-6 rounded-2xl bg-white border border-gray-200 shadow-card overflow-hidden h-40 text-center transition-all duration-300 hover:shadow-card-hover",
+  
+  // Highlight card
+  highlight: "flex flex-row items-center gap-4 p-6 rounded-2xl bg-white border border-gray-200 shadow-card overflow-hidden h-36 transition-all duration-300 hover:shadow-card-hover",
+  
+  // Typography
+  title: "mb-5 text-2xl font-semibold text-gray-400",
+  featureTitle: "text-xl font-semibold text-vh-ink mb-4",
+  featureDescription: "text-vh-muted leading-relaxed",
+  metricValue: "text-4xl font-bold mb-2",
+  metricLabel: "text-base text-vh-muted",
+  metricGrowth: "text-sm text-vh-accent-2 font-medium",
+  highlightNumber: "text-2xl font-bold min-w-[80px]",
+  highlightText: "text-base text-vh-ink leading-relaxed",
+  
+  // Layout
+  content: "flex flex-col items-center justify-center flex-1 overflow-hidden min-h-0",
+  footer: "flex justify-center mt-4 flex-shrink-0",
+  featureContent: "p-8 flex-1 flex flex-col",
+  featureContentWithIcon: "p-6 flex-1 flex flex-col",
+  featureIcon: "flex items-center justify-center text-4xl mb-8",
+  featureIconComponent: "w-full h-48 overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 relative mb-4",
+  metricsGrid: "grid grid-cols-2 gap-4 mt-auto",
+  
+  // Primary card accent
+  primaryAccent: "absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-vh-accent via-blue-400 to-vh-accent-2"
+};
+
+// Legacy inline styles (kept for backward compatibility)
 export const cardChrome: React.CSSProperties = {
   display: "flex",
   flexDirection: "column",
@@ -41,13 +81,15 @@ export const footerRow: React.CSSProperties = {
   flexShrink: 0,
 };
 
-// Card Shell component (reusable)
+// Card Shell component (reusable) - Now with Tailwind support
 interface CardShellProps {
   title?: string;
   children: React.ReactNode;
   height?: number | string;
   className?: string;
   style?: React.CSSProperties;
+  variant?: 'default' | 'elevated' | 'primary';
+  useTailwind?: boolean; // Toggle between Tailwind and inline styles
 }
 
 export const CardShell: React.FC<CardShellProps> = ({
@@ -55,20 +97,42 @@ export const CardShell: React.FC<CardShellProps> = ({
   children,
   height = 420,
   className = "",
-  style = {}
+  style = {},
+  variant = 'default',
+  useTailwind = true // Default to Tailwind for new components
 }) => {
-  const dynamicCardChrome = {
-    ...cardChrome,
-    ...(height && { height }),
-    ...style
-  };
+  if (useTailwind) {
+    // Modern Tailwind approach
+    const cardVariantClass = variant === 'elevated' ? cardClasses.elevated :
+                           variant === 'primary' ? cardClasses.primary :
+                           cardClasses.base;
+    
+    const heightStyle = height ? { height } : {};
+    
+    return (
+      <section 
+        className={`${cardVariantClass} ${className}`}
+        style={{ ...heightStyle, ...style }}
+      >
+        {title && <h3 className={cardClasses.title}>{title}</h3>}
+        <div className={cardClasses.content}>{children}</div>
+      </section>
+    );
+  } else {
+    // Legacy inline styles approach (for backward compatibility)
+    const dynamicCardChrome = {
+      ...cardChrome,
+      ...(height && { height }),
+      ...style
+    };
 
-  return (
-    <section className={className} style={dynamicCardChrome}>
-      {title && <h3 style={titleStyle}>{title}</h3>}
-      <div style={sectionGrow}>{children}</div>
-    </section>
-  );
+    return (
+      <section className={className} style={dynamicCardChrome}>
+        {title && <h3 style={titleStyle}>{title}</h3>}
+        <div style={sectionGrow}>{children}</div>
+      </section>
+    );
+  }
 };
 
 // Feature Card component (for About page sections)
@@ -91,109 +155,48 @@ export const FeatureCard: React.FC<FeatureCardProps> = ({
   className = "",
   isPrimary = false
 }) => {
-  const cardStyle: React.CSSProperties = {
-    ...cardChrome,
-    height: 520,
-    textAlign: 'center',
-    background: isPrimary ? 'linear-gradient(135deg, #ffffff 0%, #f8fbff 100%)' : 'white',
-    border: isPrimary ? '1px solid #e8f0fe' : '1px solid #e5e7eb',
-    borderRadius: '16px',
-    padding: iconComponent ? '0' : '2rem',
-    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-    display: 'flex',
-    flexDirection: 'column',
-    minWidth: '380px'
-  };
-
-  if (isPrimary) {
-    cardStyle.position = 'relative';
-  }
+  const cardClass = isPrimary ? cardClasses.featurePrimary : cardClasses.feature;
+  const contentClass = iconComponent ? cardClasses.featureContentWithIcon : cardClasses.featureContent;
 
   return (
-    <div className={className} style={cardStyle}>
+    <div className={`${cardClass} ${className}`}>
       {isPrimary && (
-        <div style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          height: 4,
-          background: 'linear-gradient(90deg, #1a73e8, #4285f4, #34a853)'
-        }} />
+        <div className={cardClasses.primaryAccent} />
       )}
       
       {iconComponent ? (
-        <div style={{
-          width: '100%',
-          height: '200px',
-          overflow: 'hidden',
-          background: 'linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%)',
-          position: 'relative',
-          marginBottom: '1rem'
-        }}>
+        <div className={cardClasses.featureIconComponent}>
           {iconComponent}
         </div>
-      ) : (
-        <div style={{
-          fontSize: '36px',
-          marginBottom: '2rem',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center'
-        }}>
+      ) : icon ? (
+        <div className={cardClasses.featureIcon}>
           {icon}
         </div>
-      )}
+      ) : null}
       
-      <div style={{
-        padding: iconComponent ? '1.5rem' : '0',
-        display: 'flex',
-        flexDirection: 'column',
-        flex: 1
-      }}>
-        <h3 style={{
-          fontSize: '1.25rem',
-          fontWeight: 600,
-          color: 'var(--vh-ink)',
-          marginBottom: '1rem'
-        }}>
+      <div className={contentClass}>
+        <h3 className={cardClasses.featureTitle}>
           {title}
         </h3>
         
-        <p style={{
-          color: 'var(--vh-muted)',
-          lineHeight: 1.6,
-          marginBottom: metrics.length > 0 ? '1.5rem' : 0
-        }}>
+        <p className={`${cardClasses.featureDescription} ${metrics.length > 0 ? 'mb-6' : ''}`}>
           {description}
         </p>
         
         {metrics.length > 0 && (
-          <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(2, 1fr)',
-          gap: '1rem',
-          marginTop: 'auto'
-        }}>
-          {metrics.map((metric, index) => (
-            <div key={index}>
-              <div style={{
-                fontSize: '1.5rem',
-                fontWeight: 700,
-                color: '#4cbb17'
-              }}>
-                {metric.value}
+          <div className={cardClasses.metricsGrid}>
+            {metrics.map((metric, index) => (
+              <div key={index}>
+                <div className="text-2xl font-bold text-vh-accent-2">
+                  {metric.value}
+                </div>
+                <div className="text-sm text-vh-ink">
+                  {metric.label}
+                </div>
               </div>
-              <div style={{
-                fontSize: '0.875rem',
-                color: '#000000'
-              }}>
-                {metric.label}
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -213,36 +216,21 @@ export const MetricCard: React.FC<MetricCardProps> = ({
   label,
   growth,
   className = "",
-  valueColor = 'var(--vh-accent)'
+  valueColor = 'text-vh-accent'
 }) => {
+  // Convert CSS color to Tailwind class if it's a CSS custom property
+  const valueColorClass = valueColor.startsWith('var(') ? 'text-vh-accent' : valueColor;
+  
   return (
-    <div className={className} style={{
-      ...cardChrome,
-      height: 160,
-      textAlign: 'center',
-      transition: 'all 0.3s ease'
-    }}>
-      <div style={{
-        fontSize: '2.5rem',
-        fontWeight: 700,
-        color: valueColor,
-        marginBottom: '0.5rem'
-      }}>
+    <div className={`${cardClasses.metric} ${className}`}>
+      <div className={`${cardClasses.metricValue} ${valueColorClass}`}>
         {value}
       </div>
-      <div style={{
-        fontSize: '1rem',
-        color: 'var(--vh-muted)',
-        marginBottom: growth ? '0.25rem' : 0
-      }}>
+      <div className={`${cardClasses.metricLabel} ${growth ? 'mb-1' : ''}`}>
         {label}
       </div>
       {growth && (
-        <div style={{
-          fontSize: '0.875rem',
-          color: 'var(--vh-accent-2)',
-          fontWeight: 500
-        }}>
+        <div className={cardClasses.metricGrowth}>
           {growth}
         </div>
       )}
@@ -262,30 +250,17 @@ export const HighlightCard: React.FC<HighlightCardProps> = ({
   number,
   text,
   className = "",
-  numberColor = 'var(--vh-accent)'
+  numberColor = 'text-vh-accent'
 }) => {
+  // Convert CSS color to Tailwind class if it's a CSS custom property
+  const numberColorClass = numberColor.startsWith('var(') ? 'text-vh-accent' : numberColor;
+  
   return (
-    <div className={className} style={{
-      ...cardChrome,
-      height: 140,
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: '1rem',
-      transition: 'all 0.3s ease'
-    }}>
-      <div style={{
-        fontSize: '2rem',
-        fontWeight: 700,
-        color: numberColor,
-        minWidth: '80px'
-      }}>
+    <div className={`${cardClasses.highlight} ${className}`}>
+      <div className={`${cardClasses.highlightNumber} ${numberColorClass}`}>
         {number}
       </div>
-      <div style={{
-        fontSize: '1rem',
-        color: 'var(--vh-ink)',
-        lineHeight: 1.4
-      }}>
+      <div className={cardClasses.highlightText}>
         {text}
       </div>
     </div>

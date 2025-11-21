@@ -15,48 +15,6 @@ import {
 import { Line } from 'react-chartjs-2';
 import AnalyzeWithWihyButton from '../shared/AnalyzeWithWihyButton';
 
-// Self-contained styling for BMIBodyFatChart
-const bmiBodyFatChartStyles = {
-  container: {
-    display: "flex" as const,
-    flexDirection: "column" as const,
-    padding: 20,
-    borderRadius: 16,
-    background: "white",
-    border: "1px solid #e5e7eb",
-    boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
-    gridColumn: "1 / -1", // Full width spanning
-    height: "auto",
-    minHeight: 280,
-    maxHeight: 350,
-    width: "100%",
-    overflow: "hidden" as const,
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: 600,
-    color: "#374151",
-    margin: 0,
-    marginBottom: 20,
-    textAlign: "left" as const,
-  },
-  chartContainer: {
-    flex: 1,
-    display: "flex",
-    flexDirection: "column" as const,
-    justifyContent: "center",
-    minHeight: 180,
-    maxHeight: 220,
-    marginBottom: 12,
-  },
-  footerRow: {
-    display: "flex",
-    justifyContent: "center",
-    marginTop: 16,
-    flexShrink: 0,
-  }
-};
-
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -236,14 +194,14 @@ const BMIBodyFatChart: React.FC<BMIBodyFatChartProps> = ({ period = 'week', onAn
   };
 
   return (
-    <div style={bmiBodyFatChartStyles.container}>
-      <h3 style={bmiBodyFatChartStyles.title}>BMI & Body Fat Trends</h3>
+    <div className="flex flex-col p-5 rounded-2xl bg-white border border-gray-200 shadow-md col-span-full h-auto min-h-[280px] max-h-[350px] w-full overflow-hidden">
+      <h3 className="text-lg font-semibold text-gray-700 m-0 mb-5 text-left">BMI & Body Fat Trends</h3>
       
-      <div style={bmiBodyFatChartStyles.chartContainer}>
+      <div className="flex-1 flex flex-col justify-center min-h-[180px] max-h-[220px] mb-3">
         <Line data={data} options={options} />
       </div>
       
-      <div style={bmiBodyFatChartStyles.footerRow}>
+      <div className="flex justify-center mt-4 flex-shrink-0">
         <AnalyzeWithWihyButton
           cardContext={`BMI and Body Fat Chart: Tracking data over ${period} period. Shows trends in BMI and body fat percentage for body composition analysis and health monitoring.`}
           userQuery="Analyze my BMI and body fat trends, explain what these measurements mean for my health and body composition goals"

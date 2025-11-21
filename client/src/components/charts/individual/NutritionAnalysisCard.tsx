@@ -1,43 +1,7 @@
 import React from 'react';
 import AnalyzeWithWihyButton from '../shared/AnalyzeWithWihyButton';
 
-/* ================= Unified card styling ================= */
-
-const cardChrome: React.CSSProperties = {
-  display: "flex",
-  flexDirection: "column",
-  padding: 24,
-  borderRadius: 16,
-  background: "white",
-  border: "1px solid #e5e7eb",
-  boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
-  height: 420,
-  overflow: "hidden",
-};
-
-const titleStyle: React.CSSProperties = {
-  margin: "0 0 20px 0",
-  fontSize: 24,
-  fontWeight: 600,
-  color: "#9CA3AF",
-};
-
-const sectionGrow: React.CSSProperties = {
-  display: "flex",
-  flexDirection: "column",
-  alignItems: "center",
-  justifyContent: "center",
-  flex: 1,
-  overflow: "hidden",
-  minHeight: 0,
-};
-
-const footerRow: React.CSSProperties = {
-  display: "flex",
-  justifyContent: "center",
-  marginTop: 16,
-  flexShrink: 0,
-};
+/* ================= Converted to use Tailwind CSS ================= */
 
 /* ================= Card shell ================= */
 
@@ -50,15 +14,10 @@ function CardShell({
   children: React.ReactNode;
   height?: number;
 }) {
-  const dynamicCardChrome = {
-    ...cardChrome,
-    ...(height && { height })
-  };
-  
   return (
-    <section style={dynamicCardChrome}>
-      <h3 style={titleStyle}>{title}</h3>
-      <div style={sectionGrow}>{children}</div>
+    <section className={`flex flex-col p-6 rounded-2xl bg-white border border-gray-200 shadow-md overflow-hidden ${height ? '' : 'h-[420px]'}`} style={height ? { height } : {}}>
+      <h3 className="m-0 mb-5 text-xl font-semibold text-gray-400">{title}</h3>
+      <div className="flex flex-col items-center justify-center flex-1 overflow-hidden min-h-0">{children}</div>
     </section>
   );
 }
@@ -233,7 +192,7 @@ const NutritionAnalysisCard: React.FC<NutritionAnalysisCardProps> = ({ data, hei
         </div>
       </div>
 
-      <div style={footerRow}>
+      <div className="flex justify-center mt-4 flex-shrink-0">
         <AnalyzeWithWihyButton
           cardContext={`Nutrition Analysis: Consumed ${nutrition.calories} kcal (goal: ${goals.calories}), Protein: ${nutrition.protein}g (goal: ${goals.protein}g), Carbs: ${nutrition.carbs}g (goal: ${goals.carbs}g), Fat: ${nutrition.fat}g (goal: ${goals.fat}g), Fiber: ${nutrition.fiber}g, Sugar: ${nutrition.sugar}g, Sodium: ${nutrition.sodium}mg. Calories remaining: ${goals.calories - nutrition.calories}. Protein percentage: ${Math.round((nutrition.protein * 4 / nutrition.calories) * 100)}%.`}
           userQuery="Analyze my detailed nutrition intake and provide insights about my macronutrient balance, goal progress, and dietary recommendations"
