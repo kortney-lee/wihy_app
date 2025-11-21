@@ -109,24 +109,24 @@ const AboutPage: React.FC = () => {
   return (
     <div className="about-page-wrapper">
       {/* Hero Header */}
-      <header className="hero-header">
-        <nav className="top-nav">
-          <div className="nav-container">
-            <div className="nav-brand">
-              <img src="/assets/wihylogo.png" alt="WIHY.ai" className="nav-logo" />
+      <header className="bg-transparent relative pt-8">
+        <nav className="fixed top-0 left-0 right-0 bg-white/95 backdrop-blur-sm z-50 border-b border-black/10">
+          <div className="flex justify-between items-center max-w-6xl mx-auto px-6 py-3">
+            <div className="flex items-center">
+              <img src="/assets/wihylogo.png" alt="WIHY.ai" className="h-10 w-auto" />
             </div>
 
             <button
-              className="mobile-nav-toggle"
+              className="hidden flex-col gap-1 border-0 bg-transparent p-1 cursor-pointer md:flex"
               onClick={() => setIsNavOpen(open => !open)}
               aria-label="Toggle navigation"
             >
-              <span />
-              <span />
-              <span />
+              <span className="w-5 h-0.5 bg-vh-ink rounded-full" />
+              <span className="w-5 h-0.5 bg-vh-ink rounded-full" />
+              <span className="w-5 h-0.5 bg-vh-ink rounded-full" />
             </button>
 
-            <div className={`nav-links ${isNavOpen ? 'open' : ''}`}>
+            <div className={`flex gap-5 items-center list-none m-0 p-0 ${isNavOpen ? 'open' : ''}`}>
               <NavLink href="#platform">Platform</NavLink>
               <NavLink href="#technology">Technology</NavLink>
               <NavLink href="#market">Market</NavLink>
@@ -140,73 +140,73 @@ const AboutPage: React.FC = () => {
         </nav>
 
         {/* Main Title Block */}
-        <div className="main-title-section">
-          <h1 className={`main-page-title gradient-text ${isLoaded ? 'animate-in' : ''}`}>
+        <div className="text-center py-20 px-16 mx-auto bg-transparent max-w-6xl">
+          <h1 className={`text-6xl font-bold m-0 p-4 opacity-0 translate-y-8 transition-all duration-700 ease-out text-wihy-green ${isLoaded ? 'opacity-100 translate-y-0' : ''}`}>
             The Health Intelligence Platform
           </h1>
         </div>
 
-        <div className="hero-content">
-          <div className="hero-container">
-            <div className="hero-left">
-              <div className={`hero-badge ${isLoaded ? 'animate-in' : ''}`}>
-                <span>Series Seed</span>
-                <span>Health Tech</span>
-                <span>AI Platform</span>
+        <div className="py-8">
+          <div className="max-w-6xl mx-auto px-8 py-16 grid grid-cols-1 lg:grid-cols-2 gap-16 items-start min-h-[700px] bg-hero-gradient">
+            <div className="flex flex-col justify-start">
+              <div className={`flex items-center justify-center gap-2 bg-transparent p-0 mx-auto mb-8 opacity-0 translate-y-5 transition-all duration-500 ease-out w-full relative z-10 ${isLoaded ? 'opacity-100 translate-y-0' : ''}`}>
+                <span className="py-1.5 px-3 bg-white border border-gray-200 rounded-2xl text-sm font-medium text-gray-500 shadow-sm">Series Seed</span>
+                <span className="py-1.5 px-3 bg-white border border-gray-200 rounded-2xl text-sm font-medium text-gray-500 shadow-sm">Health Tech</span>
+                <span className="py-1.5 px-3 bg-white border border-gray-200 rounded-2xl text-sm font-medium text-gray-500 shadow-sm">AI Platform</span>
               </div>
               
-              <div className="hero-content-block">
-                <h2 className="main-page-subtitle">
+              <div className="mb-8">
+                <h2 className="text-5xl font-bold text-black text-left mb-6 leading-tight">
                   The Future of Health Intelligence
                 </h2>
-                <p className="main-page-tagline">
+                <p className="text-xl text-gray-700 leading-relaxed">
                   Ask. Seek. Get answers.
                 </p>
               </div>
               
-              <div className="hero-content-block">
-                <div className="main-page-benefits">
-                  <p>Scan food. No more manual tracking or calorie counting.</p>
-                  <p>Decode research. Understand the science behind every health decision.</p>
-                  <p>Translate 35 million peer-reviewed studies into clear, personalized guidance.</p>
+              <div className="mb-8">
+                <div className="text-left space-y-3">
+                  <p className="text-lg text-gray-700 leading-relaxed">Scan food. No more manual tracking or calorie counting.</p>
+                  <p className="text-lg text-gray-700 leading-relaxed">Decode research. Understand the science behind every health decision.</p>
+                  <p className="text-lg text-gray-700 leading-relaxed">Translate 35 million peer-reviewed studies into clear, personalized guidance.</p>
                 </div>
               </div>
               
-              <div className="hero-content-block">
-                <p className={`hero-subtitle ${isLoaded ? 'animate-in delay-1' : ''}`}>
+              <div className="mb-8">
+                <p className={`font-bold text-black text-lg leading-relaxed mb-8 opacity-0 translate-y-5 transition-all duration-500 ease-out delay-300 ${isLoaded ? 'opacity-100 translate-y-0' : ''}`}>
                   WIHY.ai unifies global medical research, government-verified health data, real-time food intelligence, and predictive analytics into one system for consumers, enterprises, and healthcare organizations.
                 </p>
               </div>
 
-              <div className="hero-content-block">
-                <p className={`hero-subtitle ${isLoaded ? 'animate-in delay-1' : ''}`}>
+              <div className="mb-8">
+                <p className={`font-bold text-black text-lg leading-relaxed mb-8 opacity-0 translate-y-5 transition-all duration-500 ease-out delay-300 ${isLoaded ? 'opacity-100 translate-y-0' : ''}`}>
                   WIHY.ai is the first health intelligence system to combine:
                 </p>
                 
-                <div className={`hero-unification-points ${isLoaded ? 'animate-in delay-2' : ''}`}>
-                  <ul>
-                    <li>Global medical and nutrition research</li>
-                    <li>Government-verified health data</li>
-                    <li>Real-time food and ingredient intelligence</li>
-                    <li>Predictive analytics</li>
+                <div className={`text-left opacity-0 translate-y-5 transition-all duration-500 ease-out delay-500 ${isLoaded ? 'opacity-100 translate-y-0' : ''}`}>
+                  <ul className="list-disc list-outside pl-6 my-4 space-y-2">
+                    <li className="mb-2 leading-relaxed text-gray-700">Global medical and nutrition research</li>
+                    <li className="mb-2 leading-relaxed text-gray-700">Government-verified health data</li>
+                    <li className="mb-2 leading-relaxed text-gray-700">Real-time food and ingredient intelligence</li>
+                    <li className="mb-2 leading-relaxed text-gray-700">Predictive analytics</li>
                   </ul>
-                  <p>into a single platform designed to support personal, institutional, and population health decisions.</p>
+                  <p className="text-gray-700 leading-relaxed text-center">into a single platform designed to support personal, institutional, and population health decisions.</p>
                 </div>
               </div>
 
-              <div className={`hero-actions ${isLoaded ? 'animate-in delay-4' : ''}`}>
+              <div className={`flex gap-4 mt-12 opacity-0 translate-y-5 transition-all duration-500 ease-out delay-700 justify-center ${isLoaded ? 'opacity-100 translate-y-0' : ''}`}>
                 <CTAButton href="#investment" primary>
                   View Investment Opportunity
                 </CTAButton>
               </div>
             </div> {/* End hero-left */}
 
-            <div className="hero-right">
+            <div className="relative rounded-3xl p-4 shadow-wihy transition-all duration-300 transform hover:-translate-y-2 hover:shadow-wihy-hover">
               <div 
                 ref={chatContainerRef}
-                className={`chat-frame-container ${isLoaded ? 'animate-in delay-2' : ''}`}
+                className={`max-w-md mx-auto relative ${isLoaded ? 'opacity-100 translate-y-0 transition-all duration-500 delay-500' : 'opacity-0 translate-y-8'}`}
               >
-                <div className="chat-frame-content">
+                <div className="w-full h-full p-0 m-0">
                   {/* Embedded preview of the chat experience */}
                   <FullScreenChat
                     isOpen={true}
@@ -226,38 +226,38 @@ I will translate complex health and nutrition science into simple steps you can 
       </header>
 
       {/* Key Metrics Section */}
-      <section className="metrics-section">
-        <div className="section-container">
-          <div className={`hero-stats ${isLoaded ? 'animate-in delay-3' : ''}`}>
-            <div className="stat">
-              <div className="stat-number">$4.2T</div>
-              <div className="stat-label">Global Wellness Market</div>
+      <section className="bg-wihy-surface-2 py-0">
+        <div className="max-w-7xl mx-auto px-8 py-16">
+          <div className={`flex justify-center items-center gap-16 mx-auto px-8 py-16 opacity-0 translate-y-5 transition-all duration-500 ease-out delay-500 max-w-7xl w-full flex-wrap ${isLoaded ? 'opacity-100 translate-y-0' : ''}`}>
+            <div className="bg-gradient-to-br from-white to-blue-50 rounded-3xl border border-gray-100 p-8 text-center shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 min-w-[280px] flex-1 max-w-xs relative">
+              <div className="text-4xl font-bold text-wihy-green mb-2">$4.2T</div>
+              <div className="text-base text-gray-600 font-medium">Global Wellness Market</div>
             </div>
-            <div className="stat">
-              <div className="stat-number">35M+</div>
-              <div className="stat-label">Research Studies</div>
+            <div className="bg-gradient-to-br from-white to-blue-50 rounded-3xl border border-gray-100 p-8 text-center shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 min-w-[280px] flex-1 max-w-xs relative">
+              <div className="text-4xl font-bold text-wihy-green mb-2">35M+</div>
+              <div className="text-base text-gray-600 font-medium">Research Studies</div>
             </div>
-            <div className="stat">
-              <div className="stat-number">99.9%</div>
-              <div className="stat-label">System Uptime</div>
+            <div className="bg-gradient-to-br from-white to-blue-50 rounded-3xl border border-gray-100 p-8 text-center shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 min-w-[280px] flex-1 max-w-xs relative">
+              <div className="text-4xl font-bold text-wihy-green mb-2">99.9%</div>
+              <div className="text-base text-gray-600 font-medium">System Uptime</div>
             </div>
           </div>
         </div>
       </section>
 
       {/* Platform Overview */}
-      <section id="platform" className="platform-section">
-        <div className="section-container-gradient-inner">
-          <div className="section-header">
-            <h2 className="section-title">Revolutionary Health Intelligence Platform</h2>
-            <p className="section-subtitle">
+      <section id="platform" className="bg-wihy-surface-2 py-0">
+        <div className="bg-section-gradient py-16">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl lg:text-5xl font-bold text-wihy-green text-center mb-6">Revolutionary Health Intelligence Platform</h2>
+            <p className="text-xl text-gray-600 text-center max-w-4xl mx-auto leading-relaxed">
               WIHY.ai combines real-time research translation, precision nutrition, and personal health insights into a unified intelligence layer that clarifies food, lifestyle, and clinical decisions.
             </p>
-            <h3 className="section-subsection-title">Core Capabilities</h3>
+            <h3 className="text-2xl font-semibold text-gray-900 text-center mt-8 mb-8">Core Capabilities</h3>
           </div>
 
-          <div className="platform-grid">
-            <div className="platform-card-wrapper">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-12 max-w-6xl mx-auto px-8">
+            <div className="p-4">
               <FeatureCard
                 iconComponent={
                   <img 
@@ -280,7 +280,7 @@ I will translate complex health and nutrition science into simple steps you can 
               />
             </div>
 
-            <div className="platform-card-wrapper">
+            <div className="p-4">
               <FeatureCard
                 iconComponent={
                   <img 
@@ -303,7 +303,7 @@ I will translate complex health and nutrition science into simple steps you can 
               />
             </div>
 
-            <div className="platform-card-wrapper">
+            <div className="p-4">
               <FeatureCard
                 iconComponent={
                   <img 
@@ -326,7 +326,7 @@ I will translate complex health and nutrition science into simple steps you can 
               />
             </div>
 
-            <div className="platform-card-wrapper">
+            <div className="p-4">
               <FeatureCard
                 iconComponent={
                   <img 
@@ -353,76 +353,76 @@ I will translate complex health and nutrition science into simple steps you can 
       </section>
 
       {/* Technology Section */}
-      <section id="technology" className="tech-section">
-        <div className="section-container">
+      <section id="technology" className="bg-white py-0">
+        <div className="max-w-7xl mx-auto px-8 py-16">
           {/* Technical Architecture Title - Centered */}
-          <div className="tech-architecture-title">
-            <h3 className="section-title centered">Technical Architecture</h3>
-            <p className="section-subtitle centered">
+          <div className="text-center mb-12">
+            <h3 className="text-4xl lg:text-5xl font-bold text-wihy-green text-center mb-4">Technical Architecture</h3>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
               A distributed, modular architecture designed for precision, scale, and explainable AI.
             </p>
           </div>
 
-          <div className="tech-content">
-            <div className="tech-left">
-              <h2 className="tech-title">Built for Scale and Intelligence</h2>
-              <p className="tech-subtitle">WIHY.ai is engineered to deliver fast, reliable, and verifiable insights for enterprise, clinical, and consumer use.</p>
-              <div className="tech-features">
-                <div className="tech-feature">
-                  <div className="tech-icon">⚡</div>
-                  <div className="tech-info">
-                    <h4>Lightning Fast Processing</h4>
-                    <p>Cloud-native architecture handling thousands of queries per second with sub-300ms responses.</p>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
+            <div className="order-2 lg:order-1">
+              <h2 className="text-3xl font-bold text-gray-900 mb-6">Built for Scale and Intelligence</h2>
+              <p className="text-lg text-gray-600 leading-relaxed mb-8">WIHY.ai is engineered to deliver fast, reliable, and verifiable insights for enterprise, clinical, and consumer use.</p>
+              <div className="space-y-8">
+                <div className="flex items-start gap-6 p-6 bg-white rounded-2xl border border-gray-100 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+                  <div className="text-3xl flex-shrink-0">⚡</div>
+                  <div className="flex-1">
+                    <h4 className="text-lg font-semibold text-gray-900 mb-2">Lightning Fast Processing</h4>
+                    <p className="text-gray-600 leading-relaxed">Cloud-native architecture handling thousands of queries per second with sub-300ms responses.</p>
                   </div>
                 </div>
 
-                <div className="tech-feature">
-                  <div className="tech-icon">🛡️</div>
-                  <div className="tech-info">
-                    <h4>Enterprise-Grade Security</h4>
-                    <p>SOC 2 aligned design, end-to-end encryption, and HIPAA-ready pathways for healthcare partners.</p>
+                <div className="flex items-start gap-6 p-6 bg-white rounded-2xl border border-gray-100 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+                  <div className="text-3xl flex-shrink-0">🛡️</div>
+                  <div className="flex-1">
+                    <h4 className="text-lg font-semibold text-gray-900 mb-2">Enterprise-Grade Security</h4>
+                    <p className="text-gray-600 leading-relaxed">SOC 2 aligned design, end-to-end encryption, and HIPAA-ready pathways for healthcare partners.</p>
                   </div>
                 </div>
 
-                <div className="tech-feature">
-                  <div className="tech-icon">🌐</div>
-                  <div className="tech-info">
-                    <h4>Global Reach</h4>
-                    <p>Regional nutrition databases and culturally aware recommendations tuned for real communities.</p>
+                <div className="flex items-start gap-6 p-6 bg-white rounded-2xl border border-gray-100 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+                  <div className="text-3xl flex-shrink-0">🌐</div>
+                  <div className="flex-1">
+                    <h4 className="text-lg font-semibold text-gray-900 mb-2">Global Reach</h4>
+                    <p className="text-gray-600 leading-relaxed">Regional nutrition databases and culturally aware recommendations tuned for real communities.</p>
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="tech-right">
-              <div className="tech-stack">
-                <div className="stack-category">
-                  <h4>AI and ML</h4>
-                  <div className="stack-items">
-                    <span className="highlighted-item">Custom LLMs for health reasoning</span>
-                    <span className="highlighted-item">Nutrition and ingredient scoring models</span>
-                    <span className="highlighted-item">FDA pharmacology interpretation</span>
-                    <span className="highlighted-item">Computer vision models for food identification</span>
+            <div className="order-1 lg:order-2">
+              <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-8 rounded-3xl border border-gray-200 shadow-lg space-y-8">
+                <div className="space-y-4">
+                  <h4 className="text-xl font-bold text-wihy-green mb-4">AI and ML</h4>
+                  <div className="flex flex-wrap gap-2">
+                    <span className="bg-wihy-blue-light text-vh-accent px-3 py-1 rounded-xl text-sm font-medium border border-gray-200">Custom LLMs for health reasoning</span>
+                    <span className="bg-wihy-blue-light text-vh-accent px-3 py-1 rounded-xl text-sm font-medium border border-gray-200">Nutrition and ingredient scoring models</span>
+                    <span className="bg-wihy-blue-light text-vh-accent px-3 py-1 rounded-xl text-sm font-medium border border-gray-200">FDA pharmacology interpretation</span>
+                    <span className="bg-wihy-blue-light text-vh-accent px-3 py-1 rounded-xl text-sm font-medium border border-gray-200">Computer vision models for food identification</span>
                   </div>
                 </div>
 
-                <div className="stack-category">
-                  <h4>Infrastructure</h4>
-                  <div className="stack-items">
-                    <span className="highlighted-item">Azure cloud deployment</span>
-                    <span className="highlighted-item">Auto-scaling containers</span>
-                    <span className="highlighted-item">Edge APIs for low-latency inference</span>
-                    <span className="highlighted-item">Full observability and monitoring</span>
+                <div className="space-y-4">
+                  <h4 className="text-xl font-bold text-wihy-green mb-4">Infrastructure</h4>
+                  <div className="flex flex-wrap gap-2">
+                    <span className="bg-wihy-blue-light text-vh-accent px-3 py-1 rounded-xl text-sm font-medium border border-gray-200">Azure cloud deployment</span>
+                    <span className="bg-wihy-blue-light text-vh-accent px-3 py-1 rounded-xl text-sm font-medium border border-gray-200">Auto-scaling containers</span>
+                    <span className="bg-wihy-blue-light text-vh-accent px-3 py-1 rounded-xl text-sm font-medium border border-gray-200">Edge APIs for low-latency inference</span>
+                    <span className="bg-wihy-blue-light text-vh-accent px-3 py-1 rounded-xl text-sm font-medium border border-gray-200">Full observability and monitoring</span>
                   </div>
                 </div>
 
-                <div className="stack-category">
-                  <h4>Data</h4>
-                  <div className="stack-items">
-                    <span className="highlighted-item">Nutrition knowledge graph</span>
-                    <span className="highlighted-item">Research ingestion engine</span>
-                    <span className="highlighted-item">User analytics</span>
-                    <span className="highlighted-item">Health metric processing</span>
+                <div className="space-y-4">
+                  <h4 className="text-xl font-bold text-wihy-green mb-4">Data</h4>
+                  <div className="flex flex-wrap gap-2">
+                    <span className="bg-wihy-blue-light text-vh-accent px-3 py-1 rounded-xl text-sm font-medium border border-gray-200">Nutrition knowledge graph</span>
+                    <span className="bg-wihy-blue-light text-vh-accent px-3 py-1 rounded-xl text-sm font-medium border border-gray-200">Research ingestion engine</span>
+                    <span className="bg-wihy-blue-light text-vh-accent px-3 py-1 rounded-xl text-sm font-medium border border-gray-200">User analytics</span>
+                    <span className="bg-wihy-blue-light text-vh-accent px-3 py-1 rounded-xl text-sm font-medium border border-gray-200">Health metric processing</span>
                   </div>
                 </div>
               </div>
