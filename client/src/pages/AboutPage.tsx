@@ -481,6 +481,18 @@ I will translate complex health and nutrition science into simple steps you can 
             <div className="tech-stack-cards">
               <div className="tech-card-wrapper">
                 <FeatureCard
+                  iconComponent={
+                    <img 
+                      src="/assets/Research_Harvesting_Layer.png" 
+                      alt="Research Harvesting Layer Architecture"
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover',
+                        borderRadius: '8px'
+                      }}
+                    />
+                  }
                   title="1. Research Harvesting Layer"
                   description="Automated ingestion from PubMed, PMC, FDA, USDA, NIH, NASS, and CDC with real-time delta updates and multi-language ingestion across 195+ countries."
                   metrics={[
@@ -492,6 +504,18 @@ I will translate complex health and nutrition science into simple steps you can 
 
               <div className="tech-card-wrapper">
                 <FeatureCard
+                  iconComponent={
+                    <img 
+                      src="/assets/Curation_Pipeline.png" 
+                      alt="Quality Curation Pipeline"
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover',
+                        borderRadius: '8px'
+                      }}
+                    />
+                  }
                   title="2. Quality Curation Pipeline"
                   description="AI-based credibility scoring, evaluation of study design, sample size, and effect strength with evidence grading from low to high confidence and removal of commercial bias."
                   metrics={[
@@ -503,6 +527,18 @@ I will translate complex health and nutrition science into simple steps you can 
 
               <div className="tech-card-wrapper">
                 <FeatureCard
+                  iconComponent={
+                    <img 
+                      src="/assets/Nutrition_Graph.png" 
+                      alt="Data Normalization and Nutrition Graph"
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover',
+                        borderRadius: '8px'
+                      }}
+                    />
+                  }
                   title="3. Data Normalization and Nutrition Graph"
                   description="Unified mapping of ingredients, nutrients, additives, allergens, and contaminants with links connecting foods to symptoms, conditions, and research. 4.1M+ food products tied to verified sources."
                   metrics={[
@@ -514,6 +550,18 @@ I will translate complex health and nutrition science into simple steps you can 
 
               <div className="tech-card-wrapper">
                 <FeatureCard
+                  iconComponent={
+                    <img 
+                      src="/assets/Model_Training.png" 
+                      alt="Domain-Specific Model Training"
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover',
+                        borderRadius: '8px'
+                      }}
+                    />
+                  }
                   title="4. Domain-Specific Model Training"
                   description="Custom LLMs trained on curated biomedical datasets, nutrition scoring and risk interpretation models, and vision models for ingredient-level detection."
                   metrics={[
@@ -525,6 +573,18 @@ I will translate complex health and nutrition science into simple steps you can 
 
               <div className="tech-card-wrapper">
                 <FeatureCard
+                  iconComponent={
+                    <img 
+                      src="/assets/Prediction_Reasoning.png" 
+                      alt="Prediction and Reasoning Engine"
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover',
+                        borderRadius: '8px'
+                      }}
+                    />
+                  }
                   title="5. Prediction and Reasoning Engine"
                   description="Behavioral pattern detection, forecasting for metabolic markers and dietary impact, and multi-source fusion for holistic risk scoring."
                   metrics={[
@@ -536,6 +596,18 @@ I will translate complex health and nutrition science into simple steps you can 
 
               <div className="tech-card-wrapper">
                 <FeatureCard
+                  iconComponent={
+                    <img 
+                      src="/assets/Development_ops.png" 
+                      alt="Deployment and Operations"
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover',
+                        borderRadius: '8px'
+                      }}
+                    />
+                  }
                   title="6. Deployment and Operations"
                   description="Azure ML for distributed training, automated versioning and rollback, SOC 2 aligned design, 99.9 percent uptime, and sub-300ms inference latency."
                   metrics={[
