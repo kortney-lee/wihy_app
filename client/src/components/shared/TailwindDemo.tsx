@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { cardClasses, CardShell } from './CardComponents';
+import { CardShell } from './CardComponents';
 
 interface TailwindDemoProps {
   className?: string;
@@ -30,7 +30,6 @@ export const TailwindDemo: React.FC<TailwindDemoProps> = ({ className = "" }) =>
         {/* Old Approach - Inline Styles */}
         <CardShell 
           title="❌ Old: Inline Styles" 
-          useTailwind={false}
           className="h-auto"
         >
           <div className="space-y-4 text-sm">
@@ -57,8 +56,6 @@ export const TailwindDemo: React.FC<TailwindDemoProps> = ({ className = "" }) =>
         {/* New Approach - Tailwind */}
         <CardShell 
           title="✅ New: Tailwind Classes" 
-          variant="primary"
-          useTailwind={true}
           className="h-auto"
         >
           <div className="space-y-4 text-sm">
