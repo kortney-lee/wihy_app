@@ -20,6 +20,20 @@ module.exports = {
         'wihy-blue-soft': '#e8f4f8',
         'wihy-orange': '#fa5f06',
         
+        // Green variants for consistent theming
+        green: {
+          50: '#f0fdf4',
+          100: '#dcfce7',
+          200: '#bbf7d0',
+          300: '#86efac',
+          400: '#4ade80',
+          500: '#22c55e',
+          600: '#4cbb17', // Main WIHY green
+          700: '#15803d',
+          800: '#166534',
+          900: '#14532d',
+        },
+        
         // Additional color mappings for convenience
         primary: '#1a73e8',
         secondary: '#34a853',
@@ -51,6 +65,17 @@ module.exports = {
         'slide-up': 'slideUp 0.6s ease-out forwards',
         'typing': 'typing 1.4s ease-in-out infinite',
         'spin': 'spin 1s linear infinite',
+      },
+      animationDelay: {
+        '0': '0ms',
+        '75': '75ms',
+        '100': '100ms',
+        '150': '150ms',
+        '200': '200ms',
+        '300': '300ms',
+        '500': '500ms',
+        '700': '700ms',
+        '1000': '1000ms',
       },
       keyframes: {
         fadeIn: {
