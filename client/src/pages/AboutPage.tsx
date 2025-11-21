@@ -845,62 +845,54 @@ I will translate complex health and nutrition science into simple steps you can 
       {/* Investment Opportunity */}
       <section id="investment" className="investment-section">
         <div className="section-container-gradient-inner">
-          <div className="investment-content">
-            <div className="investment-left">
-              <h2 className="investment-title">Investment Opportunity</h2>
-              <p className="investment-subtitle">
-                WIHY is positioned as the intelligence backbone for food and health decisions,
-                with clear paths into enterprise, education, and clinical markets.
-              </p>
+          <div className="investment-left">
+            <h2 className="investment-title">Investment Opportunity</h2>
+            <p className="investment-subtitle">
+              WIHY is positioned as the intelligence backbone for food and health decisions,
+              with clear paths into enterprise, education, and clinical markets.
+            </p>
 
-              <div className="investment-highlights">
-                <div className="highlight">
-                  <div className="highlight-icon">🎯</div>
-                  <div className="highlight-content">
-                    <h4>Seed Funding</h4>
-                    <p>Accelerate model expansion, data integration, enterprise partnerships, clinical validation, and national deployments.</p>
-                  </div>
-                </div>
-
-                <div className="highlight">
-                  <div className="highlight-icon">🚀</div>
-                  <div className="highlight-content">
-                    <h4>Market Traction</h4>
-                    <p>Strong user engagement across scanning and chat features. Growing enterprise and education pipeline.</p>
-                  </div>
-                </div>
-
-                <div className="highlight">
-                  <div className="highlight-icon">🌟</div>
-                  <div className="highlight-content">
-                    <h4>Proven Architecture</h4>
-                    <p>Modular platform ready for consumer, enterprise, and healthcare integration.</p>
-                  </div>
+            <div className="investment-highlights">
+              <div className="highlight">
+                <div className="highlight-icon">🎯</div>
+                <div className="highlight-content">
+                  <h4>Seed Funding</h4>
+                  <p>Accelerate model expansion, data integration, enterprise partnerships, clinical validation, and national deployments.</p>
                 </div>
               </div>
 
-              <div className="investment-cta">
-                <CTAButton href="mailto:investors@wihy.ai" primary>
-                  Request Investment Deck
-                </CTAButton>
-                <CTAButton href="mailto:support@wihy.ai" primary={false}>
-                  Schedule Meeting
-                </CTAButton>
+              <div className="highlight">
+                <div className="highlight-icon">🚀</div>
+                <div className="highlight-content">
+                  <h4>Market Traction</h4>
+                  <p>Strong user engagement across scanning and chat features. Growing enterprise and education pipeline.</p>
+                </div>
+              </div>
+
+              <div className="highlight">
+                <div className="highlight-icon">🌟</div>
+                <div className="highlight-content">
+                  <h4>Proven Architecture</h4>
+                  <p>Modular platform ready for consumer, enterprise, and healthcare integration.</p>
+                </div>
               </div>
             </div>
 
-            <div className="investment-right">
-              <p className="investment-outcomes-intro">
-                Proven outcomes based on internal testing, prototype feedback, and designed capabilities.
-              </p>
+            <div className="investment-cta-centered">
+              <CTAButton href="mailto:investors@wihy.ai" primary>
+                Request Investment Deck
+              </CTAButton>
+              <CTAButton href="mailto:support@wihy.ai" primary>
+                Schedule Meeting
+              </CTAButton>
             </div>
           </div>
-
-
-
           <div className="final-message">
             <h2>WIHY — Where Science Meets Understanding</h2>
             <p>Transforming health from reactive care to proactive intelligence.</p>
+            <p className="investment-outcomes-intro">
+              Proven outcomes based on internal testing, prototype feedback, and designed capabilities.
+            </p>
           </div>
         </div>
       </section>

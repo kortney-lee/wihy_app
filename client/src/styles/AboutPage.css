@@ -1175,14 +1175,16 @@ body {
 /* Highlight Cards */
 .highlight {
   display: flex;
-  align-items: flex-start;
-  gap: 16px;
-  padding: 24px;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  flex: 1;
+  min-width: 120px;
+  padding: 20px 16px;
   border-radius: 16px;
   background: white;
   border: 1px solid #e5e7eb;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  margin-bottom: 16px;
   transition: all 0.3s ease;
 }
 
@@ -1192,19 +1194,19 @@ body {
 }
 
 .highlight-icon {
-  font-size: 2rem;
-  flex-shrink: 0;
+  font-size: 2.5rem;
+  margin-bottom: 12px;
 }
 
 .highlight-content h4 {
   font-size: 16px;
   font-weight: 600;
   color: var(--vh-ink);
-  margin: 0 0 4px 0;
+  margin: 0 0 8px 0;
 }
 
 .highlight-content p {
-  font-size: 14px;
+  font-size: 13px;
   color: var(--vh-muted);
   margin: 0;
   line-height: 1.4;
@@ -1297,9 +1299,10 @@ body {
 
 .investment-highlights {
   display: flex;
-  flex-direction: column;
-  gap: 20px;
+  flex-direction: row;
+  gap: 16px;
   margin: 24px 0;
+  flex-wrap: wrap;
 }
 
 .tech-content {
@@ -1322,6 +1325,27 @@ body {
 .investment-left {
   max-width: 450px;
   width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.final-message {
+  text-align: center;
+  margin-top: 48px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.investment-cta-centered {
+  display: flex;
+  flex-direction: row;
+  gap: 16px;
+  align-items: center;
+  justify-content: center;
+  margin-top: 32px;
 }
 
 /* =========================
