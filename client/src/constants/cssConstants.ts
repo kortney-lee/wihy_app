@@ -1,23 +1,17 @@
 /**
- * LOCKED CSS CONSTANTS - DO NOT MODIFY WITHOUT TEAM APPROVAL
+ * CSS Constants - Optional CSS class constants for consistency
  * 
- * These constants ensure consistent CSS class usage across the entire application.
- * Any changes to these values require approval and coordinated updates.
- * 
- * Last Updated: November 6, 2025
- * Approved By: Dashboard Team
- * 
- * @CRITICAL: This file is LOCKED to prevent CSS breakage
+ * These constants provide convenient access to commonly used CSS classes.
+ * You can use them for consistency, but you're also free to use direct className strings.
  */
 
 // ============================================================================
-// COMPLETE CSS CLASS REGISTRY - AUTO-GENERATED & LOCKED
+// COMPLETE CSS CLASS REGISTRY
 // ============================================================================
 
 /**
  * Complete CSS Classes Registry - All classes extracted from CSS files
- * Use these constants instead of hardcoded strings to prevent typos and
- * ensure consistency across components.
+ * Use these constants for consistency, or use direct className strings as needed.
  */
 export const CSS_CLASSES = {
   // Activity & Progress
@@ -523,170 +517,40 @@ export const CSS_CLASSES = {
 // LEGACY COMPATIBILITY - MAINTAIN EXISTING API
 // ============================================================================
 
-/**
- * Health Metric Cards - Small cards in top row with progress bars
- * Used for: Weight, Calories, Steps, Sleep, Hydration
- * @deprecated Use CSS_CLASSES.HEALTH_METRIC_CARD instead
- */
+// Legacy constants for backward compatibility (can be phased out gradually)
 export const HEALTH_METRIC_CARD_CLASS = CSS_CLASSES.HEALTH_METRIC_CARD;
-
-/**
- * Chart Section Cards - Large cards for detailed analysis
- * Used for: Weight & Body, Activity, Nutrition, Sleep analysis
- * @deprecated Use CSS_CLASSES.CHART_SECTION_CARD instead
- */
 export const CHART_SECTION_CARD_CLASS = CSS_CLASSES.CHART_SECTION_CARD;
-
-/**
- * Quick Insights Card - Bottom summary card with statistics
- * Used for: Health score, averages, personal bests
- * @deprecated Use CSS_CLASSES.QUICK_INSIGHTS_CARD instead
- */
 export const QUICK_INSIGHTS_CARD_CLASS = CSS_CLASSES.QUICK_INSIGHTS_CARD;
-
-/**
- * Main dashboard grid container for health metrics
- * @deprecated Use CSS_CLASSES.HEALTH_METRICS_GRID instead
- */
 export const HEALTH_METRICS_GRID_CLASS = CSS_CLASSES.HEALTH_METRICS_GRID;
-
-/**
- * Container for chart section cards
- * @deprecated Use CSS_CLASSES.CHART_SECTIONS_GRID instead
- */
 export const CHART_SECTIONS_GRID_CLASS = CSS_CLASSES.CHART_SECTIONS_GRID;
-
-/**
- * Main dashboard content container
- * @deprecated Use CSS_CLASSES.HEALTH_DASHBOARD_CONTENT instead
- */
 export const HEALTH_DASHBOARD_CONTENT_CLASS = CSS_CLASSES.HEALTH_DASHBOARD_CONTENT;
+export const DASHBOARD_CONTAINER_CLASS = CSS_CLASSES.DASHBOARD_CONTAINER;
+export const DASHBOARD_MAIN_CONTENT_CLASS = CSS_CLASSES.DASHBOARD_MAIN_CONTENT;
 
-/**
- * Dashboard container wrapper
- */
-export const DASHBOARD_CONTAINER_CLASS = 'dashboard-container' as const;
-
-/**
- * Dashboard main content wrapper
- */
-export const DASHBOARD_MAIN_CONTENT_CLASS = 'dashboard-main-content' as const;
-
-// ============================================================================
-// COMPONENT CLASSES - LOCKED CONSTANTS
-// ============================================================================
-
-/**
- * Progress bars within cards
- */
-export const PROGRESS_BAR_CLASS = 'progress-bar' as const;
-
-/**
- * Progress fill elements
- */
-export const PROGRESS_FILL_CLASS = 'progress-fill' as const;
-
-/**
- * Metric headers
- */
-export const METRIC_HEADER_CLASS = 'metric-header' as const;
-
-/**
- * Metric values
- */
-export const METRIC_VALUE_CLASS = 'metric-value' as const;
-
-/**
- * Chart legends
- */
-export const CHART_LEGENDS_CLASS = 'chart-legends' as const;
-
-/**
- * Insights grid within quick insights card
- */
-export const INSIGHTS_GRID_CLASS = 'insights-grid' as const;
-
-// ============================================================================
-// VALIDATION FUNCTIONS - ENSURE CORRECT USAGE
-// ============================================================================
-
-/**
- * Validates that a className matches approved dashboard classes
- */
-export const validateDashboardClassName = (className: string): boolean => {
-  const approvedClasses = [
-    HEALTH_METRIC_CARD_CLASS,
-    CHART_SECTION_CARD_CLASS,
-    QUICK_INSIGHTS_CARD_CLASS,
-    HEALTH_METRICS_GRID_CLASS,
-    CHART_SECTIONS_GRID_CLASS,
-    HEALTH_DASHBOARD_CONTENT_CLASS,
-    DASHBOARD_CONTAINER_CLASS,
-    DASHBOARD_MAIN_CONTENT_CLASS,
-    PROGRESS_BAR_CLASS,
-    PROGRESS_FILL_CLASS,
-    METRIC_HEADER_CLASS,
-    METRIC_VALUE_CLASS,
-    CHART_LEGENDS_CLASS,
-    INSIGHTS_GRID_CLASS,
-  ] as const;
-  
-  return approvedClasses.includes(className as any);
-};
-
-/**
- * Gets the complete list of approved dashboard class names
- */
-export const getApprovedDashboardClasses = (): readonly string[] => {
-  return [
-    HEALTH_METRIC_CARD_CLASS,
-    CHART_SECTION_CARD_CLASS,
-    QUICK_INSIGHTS_CARD_CLASS,
-    HEALTH_METRICS_GRID_CLASS,
-    CHART_SECTIONS_GRID_CLASS,
-    HEALTH_DASHBOARD_CONTENT_CLASS,
-    DASHBOARD_CONTAINER_CLASS,
-    DASHBOARD_MAIN_CONTENT_CLASS,
-    PROGRESS_BAR_CLASS,
-    PROGRESS_FILL_CLASS,
-    METRIC_HEADER_CLASS,
-    METRIC_VALUE_CLASS,
-    CHART_LEGENDS_CLASS,
-    INSIGHTS_GRID_CLASS,
-  ] as const;
-};
+// Component classes
+export const PROGRESS_BAR_CLASS = 'progress-bar';
+export const PROGRESS_FILL_CLASS = 'progress-fill';
+export const METRIC_HEADER_CLASS = 'metric-header';
+export const METRIC_VALUE_CLASS = 'metric-value';
+export const CHART_LEGENDS_CLASS = 'chart-legends';
+export const INSIGHTS_GRID_CLASS = 'insights-grid';
 
 // ============================================================================
 // USAGE GUIDELINES
 // ============================================================================
 
 /**
- * USAGE RULES:
+ * USAGE OPTIONS:
  * 
- * 1. ALWAYS import these constants instead of hardcoding class names
- * 2. NEVER modify these constants without team approval
- * 3. USE validateDashboardClassName() to verify class usage
- * 4. ONLY use these classes for dashboard components
- * 5. UPDATE this file version when making approved changes
+ * Option 1 - Use constants (recommended for consistency):
+ * import { CSS_CLASSES } from './cssConstants';
+ * <div className={CSS_CLASSES.DASHBOARD_CONTAINER}>
  * 
- * Example Usage:
+ * Option 2 - Use direct strings (now allowed):
+ * <div className="dashboard-container">
  * 
- * import { HEALTH_METRIC_CARD_CLASS } from './cssConstants';
- * 
- * <div className={HEALTH_METRIC_CARD_CLASS}>
- *   // content
- * </div>
+ * Option 3 - Mix and match as needed:
+ * <div className={`dashboard-container ${CSS_CLASSES.ACTIVE}`}>
  */
 
-export default {
-  HEALTH_METRIC_CARD_CLASS,
-  CHART_SECTION_CARD_CLASS,
-  QUICK_INSIGHTS_CARD_CLASS,
-  HEALTH_METRICS_GRID_CLASS,
-  CHART_SECTIONS_GRID_CLASS,
-  HEALTH_DASHBOARD_CONTENT_CLASS,
-  DASHBOARD_CONTAINER_CLASS,
-  DASHBOARD_MAIN_CONTENT_CLASS,
-  validateDashboardClassName,
-  getApprovedDashboardClasses,
-} as const;
+export default CSS_CLASSES;

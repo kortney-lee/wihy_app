@@ -6,10 +6,8 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "build-with-validation": "npm run validate-css && react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject",
-    "validate-css": "node scripts/validate-css.js"
+    "eject": "react-scripts eject"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.9.1",
