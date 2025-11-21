@@ -92,13 +92,6 @@ const MacronutrientPieChart: React.FC<MacronutrientPieChartProps> = ({
   };
 
   const displayValues = calculateDisplayValues();
-  
-  // Chart dimensions based on size
-  const dimensions = {
-    small: { width: 200, height: 200 },
-    medium: { width: 300, height: 300 },
-    large: { width: 400, height: 400 }
-  };
 
   // Macronutrient color scheme
   const colors = {
@@ -163,100 +156,60 @@ const MacronutrientPieChart: React.FC<MacronutrientPieChartProps> = ({
   };
 
   return (
-    <div style={{
-      display: "flex",
-      flexDirection: "column",
-      padding: 24,
-      borderRadius: 16,
-      background: "white",
-      border: "1px solid #e5e7eb",
-      boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
-      height: window.innerWidth <= 768 ? 550 : 400,
-      overflow: "hidden",
-      textAlign: 'center'
-    }}>
-      <h3 style={{ 
-        fontSize: 24,
-        fontWeight: 600,
-        color: "#9CA3AF",
-        margin: 0,
-        marginBottom: 20
-      }}>
+    <div className="flex flex-col p-6 rounded-2xl bg-white border border-gray-200 shadow-md h-96 md:h-80 overflow-hidden text-center">
+      <h3 className="text-2xl font-semibold text-vh-muted mb-5">
         {title}
       </h3>
       
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", flex: 1, overflow: "hidden", minHeight: 0 }}>
-        <div style={{ 
-          position: 'relative',
-          width: '100%',
-          height: '100%',
-          maxWidth: '280px',
-          maxHeight: '280px'
-        }}>
+      <div className="flex flex-col items-center justify-center flex-1 overflow-hidden min-h-0">
+        <div className="relative w-full h-full max-w-[280px] max-h-[280px]">
           <Pie data={chartData} options={options} />
           
           {/* Center total display */}
           {showCenter && displayMode !== 'percentage' && (
-            <div style={{
-              position: 'absolute',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-              textAlign: 'center',
-              pointerEvents: 'none'
-            }}>
-              <div style={{
-                fontSize: size === 'small' ? '16px' : size === 'large' ? '24px' : '20px',
-                fontWeight: 'bold',
-                color: '#374151',
-                lineHeight: '1'
-              }}>
+            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center pointer-events-none">
+              <div className={`font-bold text-gray-700 leading-none ${
+                size === 'small' ? 'text-base' : size === 'large' ? 'text-2xl' : 'text-xl'
+              }`}>
                 {displayValues.total}
+              </div>
+              <div className={`text-gray-500 mt-0.5 ${
+                size === 'small' ? 'text-xs' : size === 'large' ? 'text-base' : 'text-sm'
+              }`}>
+                total {displayValues.unit}
+              </div>
             </div>
-            <div style={{
-              fontSize: size === 'small' ? '12px' : size === 'large' ? '16px' : '14px',
-              color: '#6B7280',
-              marginTop: '2px'
-            }}>
-              total {displayValues.unit}
-            </div>
-          </div>
-        )}
+          )}
         </div>
       </div>
 
       {/* Nutritional insights */}
-      <div style={{ 
-        marginTop: '15px',
-        fontSize: size === 'small' ? '12px' : '14px',
-        color: '#6B7280',
-        textAlign: 'left',
-        maxWidth: '280px',
-        margin: '15px auto 0'
-      }}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ color: colors.protein, fontWeight: 'bold' }}>
+      <div className={`mt-4 text-gray-500 text-left max-w-[280px] mx-auto ${
+        size === 'small' ? 'text-xs' : 'text-sm'
+      }`}>
+        <div className="grid grid-cols-3 gap-2">
+          <div className="text-center">
+            <div className="font-bold" style={{ color: colors.protein }}>
               {Math.round((displayValues.protein / displayValues.total) * 100)}%
             </div>
-            <div style={{ fontSize: '11px' }}>Protein</div>
+            <div className="text-xs">Protein</div>
           </div>
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ color: colors.carbs, fontWeight: 'bold' }}>
+          <div className="text-center">
+            <div className="font-bold" style={{ color: colors.carbs }}>
               {Math.round((displayValues.carbs / displayValues.total) * 100)}%
             </div>
-            <div style={{ fontSize: '11px' }}>Carbs</div>
+            <div className="text-xs">Carbs</div>
           </div>
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ color: colors.fat, fontWeight: 'bold' }}>
+          <div className="text-center">
+            <div className="font-bold" style={{ color: colors.fat }}>
               {Math.round((displayValues.fat / displayValues.total) * 100)}%
             </div>
-            <div style={{ fontSize: '11px' }}>Fat</div>
+            <div className="text-xs">Fat</div>
           </div>
         </div>
       </div>
       
-      <div style={{ display: "flex", justifyContent: "center", marginTop: 16, flexShrink: 0 }}>
+      <div className="flex justify-center mt-4 flex-shrink-0">
         <AnalyzeWithWihyButton
           cardContext={`Macronutrient analysis: ${title} showing ${displayMode} breakdown - Protein: ${Math.round((displayValues.protein / displayValues.total) * 100)}% (${displayValues.protein}${displayMode === 'grams' ? 'g' : displayMode === 'calories' ? ' cal' : '%'}), Carbs: ${Math.round((displayValues.carbs / displayValues.total) * 100)}% (${displayValues.carbs}${displayMode === 'grams' ? 'g' : displayMode === 'calories' ? ' cal' : '%'}), Fat: ${Math.round((displayValues.fat / displayValues.total) * 100)}% (${displayValues.fat}${displayMode === 'grams' ? 'g' : displayMode === 'calories' ? ' cal' : '%'})`}
           userQuery="Analyze this macronutrient breakdown and provide insights about the protein, carbohydrate, and fat distribution"

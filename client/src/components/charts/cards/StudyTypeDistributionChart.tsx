@@ -215,52 +215,34 @@ const StudyTypeDistributionChart: React.FC<StudyTypeDistributionChartProps> = ({
   const ChartComponent = chartStyle === 'pie' ? Pie : Doughnut;
 
   return (
-    <div style={{
-      display: "flex",
-      flexDirection: "column",
-      padding: 24,
-      borderRadius: 16,
-      background: "white",
-      border: "1px solid #e5e7eb",
-      boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
-      height: window.innerWidth <= 768 ? 650 : 500, // Much taller on mobile for text content
-      overflow: "hidden"
-    }}>
-      <h3 style={{ fontSize: 24, fontWeight: 600, color: "#9CA3AF", margin: 0, marginBottom: 20 }}>
+    <div className="flex flex-col p-6 rounded-2xl bg-white border border-gray-200 shadow-md h-[650px] md:h-[500px] overflow-hidden">
+      <h3 className="text-2xl font-semibold text-vh-muted mb-5">
         {title}
       </h3>
       
-      <div style={{ flex: 1, position: 'relative' }}>
+      <div className="flex-1 relative">
         <ChartComponent data={chartData} options={options} />
       </div>
       
       {/* Evidence quality summary */}
       {showLabels && (
-        <div style={{ 
-          marginTop: '12px', 
-          fontSize: window.innerWidth <= 768 ? '11px' : '12px',
-          color: '#6b7280',
-          display: 'grid',
-          gridTemplateColumns: window.innerWidth <= 768 ? '1fr' : 'repeat(auto-fit, minmax(120px, 1fr))',
-          gap: window.innerWidth <= 768 ? '6px' : '8px',
-          textAlign: window.innerWidth <= 768 ? 'center' : 'left'
-        }}>
+        <div className="mt-3 text-xs md:text-xs text-gray-500 grid grid-cols-1 md:grid-cols-[repeat(auto-fit,minmax(120px,1fr))] gap-1.5 md:gap-2 text-center md:text-left">
           <div>
-            <strong style={{ color: '#374151' }}>Total Studies:</strong> {totalStudies}
+            <strong className="text-gray-700">Total Studies:</strong> {totalStudies}
           </div>
           <div>
-            <strong style={{ color: '#374151' }}>High Evidence:</strong> {highEvidenceStudies} ({highEvidencePercentage}%)
+            <strong className="text-gray-700">High Evidence:</strong> {highEvidenceStudies} ({highEvidencePercentage}%)
           </div>
-          <div style={{ color: highEvidencePercentage >= 50 ? '#10b981' : '#f59e0b' }}>
+          <div className={highEvidencePercentage >= 50 ? 'text-green-500' : 'text-yellow-500'}>
             <strong>Quality:</strong> {highEvidencePercentage >= 50 ? '✅ Strong' : '⚠️ Mixed'}
           </div>
           <div>
-            <strong style={{ color: '#374151' }}>Most Common:</strong> {studyData[0]?.type || 'N/A'}
+            <strong className="text-gray-700">Most Common:</strong> {studyData[0]?.type || 'N/A'}
           </div>
         </div>
       )}
       
-      <div style={{ display: "flex", justifyContent: "center", marginTop: 16, flexShrink: 0 }}>
+      <div className="flex justify-center mt-4 flex-shrink-0">
         <AnalyzeWithWihyButton
           cardContext={`Study type analysis: ${title} - Total studies: ${totalStudies}. High evidence studies: ${highEvidenceStudies} (${highEvidencePercentage}%). Quality rating: ${highEvidencePercentage >= 50 ? 'Strong' : 'Mixed'}. Most common type: ${studyData[0]?.type || 'N/A'}. Distribution: ${studyData.map(study => `${study.type}: ${study.count} studies (${study.percentage}%)`).join(', ')}`}
           userQuery="Analyze this study type distribution and explain how different research methodologies affect the strength of evidence"

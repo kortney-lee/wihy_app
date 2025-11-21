@@ -15,43 +15,21 @@ import {
 import { Line } from 'react-chartjs-2';
 import AnalyzeWithWihyButton from '../shared/AnalyzeWithWihyButton';
 
-// Self-contained styling for MoodChart
-const moodChartStyles = {
-  container: {
-    display: "flex" as const,
-    flexDirection: "column" as const,
-    padding: 24,
-    borderRadius: 16,
-    background: "white",
-    border: "1px solid #e5e7eb",
-    boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
-    height: 400,
-    width: "100%",
-    overflow: "hidden" as const,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 600,
-    color: "#9CA3AF",
-    margin: 0,
-    marginBottom: 20,
-    textAlign: "left" as const,
-  },
-  chartContainer: {
-    flex: 1,
-    display: "flex",
-    flexDirection: "column" as const,
-    justifyContent: "center",
-    height: 280,
-    marginBottom: 16,
-  },
-  footerRow: {
-    display: "flex",
-    justifyContent: "center",
-    marginTop: 16,
-    flexShrink: 0,
-  }
-};
+function CardShell({
+  title = "",
+  children,
+}: {
+  title?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="flex flex-col p-6 rounded-2xl bg-white border border-gray-200 shadow-md h-[420px] overflow-hidden">
+      <h3 className="text-xl font-semibold text-gray-400 m-0 mb-3">{title}</h3>
+      <div className="flex flex-col flex-1 overflow-hidden min-h-0">{children}</div>
+    </section>
+  );
+}
+
 
 ChartJS.register(
   CategoryScale,
@@ -224,21 +202,19 @@ const MoodChart: React.FC<MoodChartProps> = ({
   };
 
   return (
-    <div style={moodChartStyles.container}>
-      <h3 style={moodChartStyles.title}>Mood & Well-being</h3>
-      
-      <div style={moodChartStyles.chartContainer}>
+    <CardShell title="Mood & Well-being">
+      <div className="flex-1 flex flex-col justify-center min-h-0 mb-3">
         <Line data={data} options={options} />
       </div>
       
-      <div style={moodChartStyles.footerRow}>
+      <div className="flex justify-center mt-auto flex-shrink-0">
         <AnalyzeWithWihyButton
           cardContext={`Mood Chart: Showing mood, energy, and stress levels over ${period} period. Average mood rating: ${averageMood}/10. Tracks emotional well-being and mental health indicators for holistic wellness monitoring.`}
           userQuery="Analyze my mood patterns and emotional well-being, providing insights about stress management and mental health recommendations"
           onAnalyze={onAnalyze}
         />
       </div>
-    </div>
+    </CardShell>
   );
 };
 

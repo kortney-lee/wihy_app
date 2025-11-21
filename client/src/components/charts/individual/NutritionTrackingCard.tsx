@@ -15,47 +15,12 @@ import {
 import { Bar, Doughnut, Line } from 'react-chartjs-2';
 import AnalyzeWithWihyButton from '../shared/AnalyzeWithWihyButton';
 
-// Unified card styling
-const cardChrome = {
-  display: "flex",
-  flexDirection: "column" as const,
-  padding: 24,
-  borderRadius: 16,
-  background: "white",
-  border: "1px solid #e5e7eb",
-  height: 420,
-  overflow: "hidden" as const,
-};
-
-const titleStyle = {
-  fontSize: 24,
-  fontWeight: 600,
-  color: "#9CA3AF",
-  margin: 0,
-  marginBottom: 20,
-};
-
-const sectionGrow = {
-  display: "flex",
-  flexDirection: "column" as const,
-  alignItems: "center",
-  justifyContent: "center",
-  flex: 1,
-  overflow: "hidden" as const,
-  minHeight: 0,
-};
-
-const footerRow = {
-  display: "flex",
-  justifyContent: "center",
-  marginTop: 16,
-  flexShrink: 0,
-};
+// Converted to use Tailwind CSS classes
 
 const CardShell = ({ title, children }: { title: string; children: React.ReactNode }) => (
-  <section style={cardChrome}>
-    <h3 style={titleStyle}>{title}</h3>
-    <div style={sectionGrow}>{children}</div>
+  <section className="flex flex-col p-6 rounded-2xl bg-white border border-gray-200 h-[420px] overflow-hidden">
+    <h3 className="text-xl font-semibold text-gray-400 m-0 mb-5">{title}</h3>
+    <div className="flex flex-col items-center justify-center flex-1 overflow-hidden min-h-0">{children}</div>
   </section>
 );
 
@@ -204,7 +169,7 @@ const NutritionTrackingCard: React.FC<NutritionTrackingCardProps> = ({
           <Doughnut data={macrosData} options={macrosOptions} />
         </div>
         
-        <div style={footerRow}>
+        <div className="flex justify-center mt-4 flex-shrink-0">
           <AnalyzeWithWihyButton
             cardContext={`Macronutrient breakdown: ${nutritionData.map(n => `${n.name} ${n.value}${n.unit}`).join(', ')}. Daily values tracked for nutrition analysis.`}
             userQuery="Analyze my macronutrient distribution and suggest optimal ratios for my health goals"
@@ -324,11 +289,11 @@ const NutritionTrackingCard: React.FC<NutritionTrackingCardProps> = ({
 
     return (
       <CardShell title={showLabels ? `${title} - Micronutrients` : "Micronutrients"}>
-        <div style={{ width: '100%', height: '100%', maxWidth: '280px', maxHeight: '280px' }}>
+        <div className="w-full h-full max-w-[280px] max-h-[280px]">
           <Bar data={micronutrientsData} options={micronutrientsOptions} />
         </div>
         
-        <div style={footerRow}>
+        <div className="flex justify-center mt-4 flex-shrink-0">
           <AnalyzeWithWihyButton
             cardContext={`Micronutrient status: ${nutritionData.map(n => {
               const percentage = n.daily_value ? ((n.value / n.daily_value) * 100).toFixed(1) : 'N/A';
@@ -480,7 +445,7 @@ const NutritionTrackingCard: React.FC<NutritionTrackingCardProps> = ({
         </div>
       </div>
       
-      <div style={footerRow}>
+      <div className="flex justify-center mt-4 flex-shrink-0">
         <AnalyzeWithWihyButton
           cardContext={`Nutrition Tracking: Average daily intake ${Math.round(averageIntake)}${nutritionData[0]?.unit} vs target ${targetIntake}${nutritionData[0]?.unit} (${targetPercent}%). Weekly pattern analysis.`}
           userQuery="Analyze my nutrition intake patterns and provide recommendations for better nutritional balance"

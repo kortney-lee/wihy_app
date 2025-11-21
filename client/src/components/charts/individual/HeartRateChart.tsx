@@ -15,47 +15,21 @@ import {
 import { Line } from 'react-chartjs-2';
 import AnalyzeWithWihyButton from '../shared/AnalyzeWithWihyButton';
 
-// Self-contained styling for HeartRateChart
-const heartRateChartStyles = {
-  container: {
-    display: "flex" as const,
-    flexDirection: "column" as const,
-    padding: 20,
-    borderRadius: 16,
-    background: "white",
-    border: "1px solid #e5e7eb",
-    boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
-    gridColumn: "1 / -1", // Full width spanning
-    height: "auto",
-    minHeight: 280,
-    maxHeight: 350,
-    width: "100%",
-    overflow: "hidden" as const,
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: 600,
-    color: "#374151",
-    margin: 0,
-    marginBottom: 20,
-    textAlign: "left" as const,
-  },
-  chartContainer: {
-    flex: 1,
-    display: "flex",
-    flexDirection: "column" as const,
-    justifyContent: "center",
-    minHeight: 180,
-    maxHeight: 220,
-    marginBottom: 12,
-  },
-  footerRow: {
-    display: "flex",
-    justifyContent: "center",
-    marginTop: 16,
-    flexShrink: 0,
-  }
-};
+function CardShell({
+  title = "",
+  children,
+}: {
+  title?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="flex flex-col p-6 rounded-2xl bg-white border border-gray-200 shadow-md h-[420px] overflow-hidden">
+      <h3 className="text-xl font-semibold text-gray-400 m-0 mb-3">{title}</h3>
+      <div className="flex flex-col flex-1 overflow-hidden min-h-0">{children}</div>
+    </section>
+  );
+}
+
 
 ChartJS.register(
   CategoryScale,
@@ -226,21 +200,19 @@ const HeartRateChart: React.FC<HeartRateChartProps> = ({
   };
 
   return (
-    <div style={heartRateChartStyles.container}>
-      <h3 style={heartRateChartStyles.title}>Heart Rate Trends</h3>
-      
-      <div style={heartRateChartStyles.chartContainer}>
+    <CardShell title="Heart Rate Trends">
+      <div className="flex-1 flex flex-col justify-center min-h-0 mb-3">
         <Line data={data} options={options} />
       </div>
       
-      <div style={heartRateChartStyles.footerRow}>
+      <div className="flex justify-center mt-auto flex-shrink-0">
         <AnalyzeWithWihyButton
           cardContext={`Heart Rate Chart: Showing heart rate trends over ${period} period. Tracks resting, active, and maximum heart rate patterns for cardiovascular health monitoring and fitness optimization.`}
           userQuery="Analyze my heart rate patterns and provide insights about my cardiovascular health, fitness level, and training recommendations"
           onAnalyze={onAnalyze}
         />
       </div>
-    </div>
+    </CardShell>
   );
 };
 

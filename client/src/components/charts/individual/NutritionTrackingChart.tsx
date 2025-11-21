@@ -17,17 +17,7 @@ import AnalyzeWithWihyButton from '../shared/AnalyzeWithWihyButton';
 
 // Self-contained styling for NutritionTrackingChart
 const nutritionTrackingChartStyles = {
-  container: {
-    display: "flex" as const,
-    flexDirection: "column" as const,
-    padding: 24,
-    borderRadius: 16,
-    background: "white",
-    border: "1px solid #e5e7eb",
-    boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
-    height: 400,
-    overflow: "hidden" as const,
-  }
+  container: "flex flex-col p-6 rounded-2xl bg-white border border-gray-200 shadow-md h-[400px] overflow-hidden"
 };
 
 ChartJS.register(
@@ -170,18 +160,18 @@ const NutritionTrackingChart: React.FC<NutritionTrackingChartProps> = ({
     };
 
     return (
-      <div style={nutritionTrackingChartStyles.container}>
+      <div className={nutritionTrackingChartStyles.container}>
         {showLabels && (
-          <h3 style={{ fontSize: 24, fontWeight: 600, color: "#9CA3AF", margin: 0, marginBottom: 20 }}>{title} - Macronutrients</h3>
+          <h3 className="text-2xl font-semibold text-gray-400 m-0 mb-5">{title} - Macronutrients</h3>
         )}
         
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", flex: 1, overflow: "hidden", minHeight: 0 }}>
-          <div style={{ width: '100%', height: '100%', maxWidth: '280px', maxHeight: '280px' }}>
+        <div className="flex flex-col items-center justify-center flex-1 overflow-hidden min-h-0">
+          <div className="w-full h-full max-w-[280px] max-h-[280px]">
             <Doughnut data={macrosData} options={macrosOptions} />
           </div>
         </div>
         
-        <div style={{ display: "flex", justifyContent: "center", marginTop: 16, flexShrink: 0 }}>
+        <div className="flex justify-center mt-4 flex-shrink-0">
           <AnalyzeWithWihyButton
             cardContext={`Macronutrient breakdown: ${nutritionData.map(n => `${n.name} ${n.value}${n.unit}`).join(', ')}. Daily values tracked for nutrition analysis.`}
             userQuery="Analyze my macronutrient distribution and suggest optimal ratios for my health goals"
@@ -300,18 +290,18 @@ const NutritionTrackingChart: React.FC<NutritionTrackingChartProps> = ({
     };
 
     return (
-      <div style={nutritionTrackingChartStyles.container}>
+      <div className={nutritionTrackingChartStyles.container}>
         {showLabels && (
-          <h3 style={{ fontSize: 24, fontWeight: 600, color: "#9CA3AF", margin: 0, marginBottom: 20 }}>{title} - Micronutrients</h3>
+          <h3 className="text-2xl font-semibold text-gray-400 m-0 mb-5">{title} - Micronutrients</h3>
         )}
         
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", flex: 1, overflow: "hidden", minHeight: 0 }}>
-          <div style={{ width: '100%', height: '100%', maxWidth: '280px', maxHeight: '280px' }}>
+        <div className="flex flex-col items-center justify-center flex-1 overflow-hidden min-h-0">
+          <div className="w-full h-full max-w-[280px] max-h-[280px]">
             <Bar data={micronutrientsData} options={micronutrientsOptions} />
           </div>
         </div>
         
-        <div style={{ display: "flex", justifyContent: "center", marginTop: 16, flexShrink: 0 }}>
+        <div className="flex justify-center mt-4 flex-shrink-0">
           <AnalyzeWithWihyButton
             cardContext={`Micronutrient status: ${nutritionData.map(n => {
               const percentage = n.daily_value ? ((n.value / n.daily_value) * 100).toFixed(1) : 'N/A';
@@ -437,9 +427,9 @@ const NutritionTrackingChart: React.FC<NutritionTrackingChartProps> = ({
   const targetPercent = ((averageIntake / targetIntake) * 100).toFixed(1);
 
   return (
-    <div style={nutritionTrackingChartStyles.container}>
+    <div className={nutritionTrackingChartStyles.container}>
       {showLabels && (
-        <h3 style={{ fontSize: 24, fontWeight: 600, color: "#9CA3AF", margin: 0, marginBottom: 20 }}>{title} - Daily Intake</h3>
+        <h3 className="text-2xl font-semibold text-gray-400 m-0 mb-5">{title} - Daily Intake</h3>
       )}
       
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", flex: 1, overflow: "hidden", minHeight: 0 }}>

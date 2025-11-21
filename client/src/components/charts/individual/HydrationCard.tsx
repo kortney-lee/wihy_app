@@ -1,44 +1,6 @@
 import React from 'react';
 import AnalyzeWithWihyButton from '../shared/AnalyzeWithWihyButton';
 
-// Unified card styling
-const cardChrome = {
-  display: "flex",
-  flexDirection: "column" as const,
-  padding: 24,
-  borderRadius: 16,
-  background: "white",
-  border: "1px solid #e5e7eb",
-  height: 420,
-  overflow: "hidden" as const,
-};
-
-const titleStyle = {
-  fontSize: 24,
-  fontWeight: 600,
-  color: "#9CA3AF",
-  margin: 0,
-  marginBottom: 20,
-};
-
-const sectionGrow = {
-  display: "flex",
-  flexDirection: "column" as const,
-  alignItems: "center",
-  justifyContent: "center",
-  flex: 1,
-  gap: 8,
-  overflow: "hidden" as const,
-  minHeight: 0,
-};
-
-const footerRow = {
-  display: "flex",
-  justifyContent: "center",
-  marginTop: 16,
-  flexShrink: 0,
-};
-
 /* ================= Donut (full circle) ================= */
 
 function Donut({
@@ -68,7 +30,9 @@ function Donut({
         width: size,
         height: size,
         flexShrink: 0,
-        overflow: "hidden", // ensures no scroll
+        overflow: "hidden",
+        maxWidth: size,
+        maxHeight: size,
       }}
     >
       <svg
@@ -126,9 +90,9 @@ function Donut({
 }
 
 const CardShell = ({ title, children }: { title: string; children: React.ReactNode }) => (
-  <section style={cardChrome}>
-    <h3 style={titleStyle}>{title}</h3>
-    <div style={sectionGrow}>{children}</div>
+  <section className="flex flex-col p-6 rounded-2xl bg-white border border-gray-200 shadow-md h-[420px] overflow-hidden">
+    <h3 className="text-xl font-semibold text-gray-400 m-0 mb-3">{title}</h3>
+    <div className="flex flex-col items-center justify-center flex-1 gap-1 overflow-hidden min-h-0">{children}</div>
   </section>
 );
 
@@ -177,15 +141,15 @@ const HydrationCard: React.FC<HydrationCardProps> = ({
         value={progressPercentage}
         color={progressColor}
         track="#f3f4f6"
-        stroke={12}
-        size={180}
+        stroke={10}
+        size={160}
         label={
-          <div style={{ whiteSpace: "nowrap", textAlign: "center" }}>
+          <div style={{ whiteSpace: "nowrap", textAlign: "center", overflow: "hidden" }}>
             <div style={{
-              fontSize: 24,
+              fontSize: 20,
               fontWeight: 400,
               color: progressColor,
-              lineHeight: 2,
+              lineHeight: 1.5,
               marginBottom: "2px"
             }}>
               {currentHydration}
@@ -203,34 +167,17 @@ const HydrationCard: React.FC<HydrationCardProps> = ({
 
       {/* Status Pill */}
       <div style={{ textAlign: "center" }}>
-        <span
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: 8,
-            padding: "8px 16px",
-            borderRadius: 9999,
-            fontWeight: 600,
-            fontSize: 14,
-            color: progressColor,
-            backgroundColor: `${progressColor}20`,
-            border: `1px solid ${progressColor}33`,
-          }}
-        >
-          <span
-            style={{
-              width: 8,
-              height: 8,
-              borderRadius: 9999,
-              background: "currentColor",
-              opacity: 0.85,
-            }}
-          />
+        <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full font-semibold text-sm" style={{
+          color: progressColor,
+          backgroundColor: `${progressColor}20`,
+          border: `1px solid ${progressColor}33`
+        }}>
+          <span className="w-2 h-2 rounded-full bg-current opacity-85" />
           {progressLabel}
         </span>
       </div>
 
-      <div style={footerRow}>
+      <div className="flex justify-center flex-shrink-0">
         <AnalyzeWithWihyButton
           cardContext={`Hydration: ${currentHydration} ${unit} / ${goalHydration} ${unit} (${Math.round(progressPercentage)}% complete). Status: ${progressLabel}.`}
           userQuery="Analyze my hydration levels and water intake patterns"

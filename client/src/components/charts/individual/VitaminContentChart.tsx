@@ -17,39 +17,11 @@ import AnalyzeWithWihyButton from '../shared/AnalyzeWithWihyButton';
 
 // Self-contained styling for VitaminContentChart
 const vitaminContentChartStyles = {
-  container: (height: number = 400) => ({
-    display: "flex" as const,
-    flexDirection: "column" as const,
-    padding: 24,
-    borderRadius: 16,
-    background: "white",
-    border: "1px solid #e5e7eb",
-    boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
-    height,
-    overflow: "hidden" as const,
-  }),
-  title: {
-    fontSize: 24,
-    fontWeight: 600,
-    color: "#9CA3AF",
-    margin: 0,
-    marginBottom: 20,
-    textAlign: "center" as const,
-  },
-  chartContainer: {
-    flex: 1,
-    display: "flex",
-    flexDirection: "column" as const,
-    justifyContent: "center",
-    minHeight: 200,
-    marginBottom: 16,
-  },
-  footerRow: {
-    display: "flex",
-    justifyContent: "center",
-    marginTop: 16,
-    flexShrink: 0,
-  }
+  container: (height: number = 400) => `flex flex-col p-6 rounded-2xl bg-white border border-gray-200 shadow-md overflow-hidden`,
+  getContainerHeight: (height: number = 400) => ({ height }),
+  title: "text-2xl font-semibold text-gray-400 m-0 mb-5 text-center",
+  chartContainer: "flex-1 flex flex-col justify-center min-h-[200px] mb-4",
+  footerRow: "flex justify-center mt-4 flex-shrink-0"
 };
 
 ChartJS.register(
@@ -201,36 +173,32 @@ const VitaminContentChart: React.FC<VitaminContentChartProps> = ({
   };
 
   return (
-    <div style={vitaminContentChartStyles.container(height)}>
+    <div className={vitaminContentChartStyles.container(height)} style={vitaminContentChartStyles.getContainerHeight(height)}>
       {showLabels && (
-        <h3 style={vitaminContentChartStyles.title}>{title}</h3>
+        <h3 className={vitaminContentChartStyles.title}>{title}</h3>
       )}
       
-      <div style={vitaminContentChartStyles.chartContainer}>
+      <div className={vitaminContentChartStyles.chartContainer}>
         <Bar data={data} options={options} />
       </div>
       
       {/* Deficiency warnings */}
       {highlightDeficiency && (
-        <div style={{ 
-          marginTop: 8, 
-          fontSize: size === 'small' ? 10 : 12,
-          color: '#6b7280'
-        }}>
+        <div className={`mt-2 ${size === 'small' ? 'text-xs' : 'text-sm'} text-gray-500`}>
           {vitaminData.filter(v => v.percentage < 50).length > 0 && (
-            <div style={{ color: '#ef4444', fontWeight: 500 }}>
+            <div className="text-red-500 font-medium">
               ⚠️ {vitaminData.filter(v => v.percentage < 50).length} nutrients below 50% DV
             </div>
           )}
           {vitaminData.filter(v => v.percentage >= 100).length > 0 && (
-            <div style={{ color: '#10b981', fontWeight: 500 }}>
+            <div className="text-green-500 font-medium">
               ✅ {vitaminData.filter(v => v.percentage >= 100).length} nutrients meeting DV
             </div>
           )}
         </div>
       )}
       
-      <div style={vitaminContentChartStyles.footerRow}>
+      <div className={vitaminContentChartStyles.footerRow}>
         <AnalyzeWithWihyButton
           cardContext={`Vitamin Content Analysis: ${title} showing ${vitaminData.length} vitamins tracked. Deficient vitamins: ${vitaminData.filter(v => v.percentage < 100).length}. Adequate vitamins: ${vitaminData.filter(v => v.percentage >= 100).length}. Vitamin details: ${vitaminData.map(v => `${v.name}: ${v.current}${v.unit} (${v.percentage}% DV)`).join(', ')}.`}
           userQuery="Analyze my vitamin intake and identify any deficiencies or areas where I can improve my micronutrient consumption"

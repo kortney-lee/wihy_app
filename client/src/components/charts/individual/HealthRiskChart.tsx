@@ -15,46 +15,7 @@ import {
 import { Bar, Doughnut, Line } from 'react-chartjs-2';
 import AnalyzeWithWihyButton from '../shared/AnalyzeWithWihyButton';
 
-// Self-contained styling for HealthRiskChart
-const healthRiskChartStyles = {
-  container: {
-    display: "flex" as const,
-    flexDirection: "column" as const,
-    padding: 20,
-    borderRadius: 16,
-    background: "white",
-    border: "1px solid #e5e7eb",
-    boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
-    height: "auto",
-    minHeight: 280,
-    maxHeight: 350,
-    width: "100%",
-    overflow: "hidden" as const,
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: 600,
-    color: "#374151",
-    margin: 0,
-    marginBottom: 20,
-    textAlign: "left" as const,
-  },
-  chartContainer: {
-    flex: 1,
-    display: "flex",
-    flexDirection: "column" as const,
-    justifyContent: "center",
-    minHeight: 180,
-    maxHeight: 220,
-    marginBottom: 12,
-  },
-  footerRow: {
-    display: "flex",
-    justifyContent: "center",
-    marginTop: 16,
-    flexShrink: 0,
-  }
-};
+// Converted to use Tailwind CSS classes
 
 ChartJS.register(
   CategoryScale,
@@ -170,16 +131,16 @@ const HealthRiskChart: React.FC<HealthRiskChartProps> = ({
     };
 
     return (
-      <div style={healthRiskChartStyles.container}>
+      <div className="flex flex-col p-5 rounded-2xl bg-white border border-gray-200 shadow-md h-auto min-h-[280px] max-h-[350px] w-full overflow-hidden">
         {showLabels && (
-          <h3 style={healthRiskChartStyles.title}>{title} - Categories</h3>
+          <h3 className="text-lg font-semibold text-gray-700 m-0 mb-5 text-left">{title} - Categories</h3>
         )}
         
-        <div style={healthRiskChartStyles.chartContainer}>
+        <div className="flex-1 flex flex-col justify-center min-h-[180px] max-h-[220px] mb-3">
           <Doughnut data={categoriesData} options={categoriesOptions} />
         </div>
         
-        <div style={healthRiskChartStyles.footerRow}>
+        <div className="flex justify-center mt-4 flex-shrink-0">
           <AnalyzeWithWihyButton
             cardContext={`Health Risk Categories: Distribution showing ${35}% low risk, ${40}% moderate risk, ${20}% high risk, ${5}% critical risk factors.`}
             userQuery="Analyze my health risk categories and provide recommendations to reduce high-risk factors"
@@ -281,16 +242,16 @@ const HealthRiskChart: React.FC<HealthRiskChartProps> = ({
     };
 
     return (
-      <div style={healthRiskChartStyles.container}>
+      <div className="flex flex-col p-5 rounded-2xl bg-white border border-gray-200 shadow-md h-auto min-h-[280px] max-h-[350px] w-full overflow-hidden">
         {showLabels && (
-          <h3 style={healthRiskChartStyles.title}>{title} - Risk Factors</h3>
+          <h3 className="text-lg font-semibold text-gray-700 m-0 mb-5 text-left">{title} - Risk Factors</h3>
         )}
         
-        <div style={healthRiskChartStyles.chartContainer}>
+        <div className="flex-1 flex flex-col justify-center min-h-[180px] max-h-[220px] mb-3">
           <Bar data={riskFactorsData} options={riskFactorsOptions} />
         </div>
         
-        <div style={healthRiskChartStyles.footerRow}>
+        <div className="flex justify-center mt-4 flex-shrink-0">
           <AnalyzeWithWihyButton
             cardContext={`Health Risk Factors: ${riskFactors.join(', ')} with levels ${riskLevels.join(', ')} respectively. Higher numbers indicate greater risk.`}
             userQuery="Analyze my health risk factors and provide specific recommendations to reduce my highest risks"
@@ -375,16 +336,16 @@ const HealthRiskChart: React.FC<HealthRiskChartProps> = ({
     };
 
     return (
-      <div style={healthRiskChartStyles.container}>
+      <div className="flex flex-col p-5 rounded-2xl bg-white border border-gray-200 shadow-md h-auto min-h-[280px] max-h-[350px] w-full overflow-hidden">
         {showLabels && (
-          <h3 style={healthRiskChartStyles.title}>{title} - Prevention</h3>
+          <h3 className="text-lg font-semibold text-gray-700 m-0 mb-5 text-left">{title} - Prevention</h3>
         )}
         
-        <div style={healthRiskChartStyles.chartContainer}>
+        <div className="flex-1 flex flex-col justify-center min-h-[180px] max-h-[220px] mb-3">
           <Bar data={preventionData} options={preventionOptions} />
         </div>
         
-        <div style={healthRiskChartStyles.footerRow}>
+        <div className="flex justify-center mt-4 flex-shrink-0">
           <AnalyzeWithWihyButton
             cardContext={`Health Prevention Actions: Tracking ${preventionActions.reduce((a, b) => a + b, 0)} total prevention actions over ${period} period.`}
             userQuery="Analyze my health prevention efforts and suggest additional preventive measures I should consider"
@@ -515,16 +476,16 @@ const HealthRiskChart: React.FC<HealthRiskChartProps> = ({
   };
 
   return (
-    <div style={healthRiskChartStyles.container}>
+    <div className="flex flex-col p-5 rounded-2xl bg-white border border-gray-200 shadow-md h-auto min-h-[280px] max-h-[350px] w-full overflow-hidden">
       {showLabels && (
-        <h3 style={healthRiskChartStyles.title}>{title} - Score Trend</h3>
+        <h3 className="text-lg font-semibold text-gray-700 m-0 mb-5 text-left">{title} - Score Trend</h3>
       )}
       
-      <div style={healthRiskChartStyles.chartContainer}>
+      <div className="flex-1 flex flex-col justify-center min-h-[180px] max-h-[220px] mb-3">
         <Line data={data} options={options} />
       </div>
       
-      <div style={healthRiskChartStyles.footerRow}>
+      <div className="flex justify-center mt-4 flex-shrink-0">
         <AnalyzeWithWihyButton
           cardContext={`Health Risk Score: Tracking overall risk score over ${period} period. Current average: ${(riskScores.reduce((a, b) => a + b, 0) / riskScores.length).toFixed(1)}/10. Lower scores indicate better health.`}
           userQuery="Analyze my health risk score trends and provide recommendations to lower my overall health risks"

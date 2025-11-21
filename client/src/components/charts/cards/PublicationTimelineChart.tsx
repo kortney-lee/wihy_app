@@ -282,51 +282,34 @@ const PublicationTimelineChart: React.FC<PublicationTimelineChartProps> = ({
   const recentAvg = Math.round(recentTotal / recentYears.length);
 
   return (
-    <div style={{
-      display: "flex",
-      flexDirection: "column",
-      padding: 24,
-      borderRadius: 16,
-      background: "white",
-      border: "1px solid #e5e7eb",
-      boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
-      height: 500,
-      overflow: "hidden"
-    }}>
-      <h3 style={{ fontSize: 24, fontWeight: 600, color: "#9CA3AF", margin: 0, marginBottom: 20 }}>
+    <div className="flex flex-col p-6 rounded-2xl bg-white border border-gray-200 shadow-md h-[500px] overflow-hidden">
+      <h3 className="text-2xl font-semibold text-vh-muted mb-5">
         {title}
       </h3>
       
-      <div style={{ flex: 1, position: 'relative' }}>
+      <div className="flex-1 relative">
         <Line data={chartData} options={options} />
       </div>
       
       {/* Research summary */}
       {showLabels && (
-        <div style={{ 
-          marginTop: '12px', 
-          fontSize: '12px',
-          color: '#6b7280',
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
-          gap: '8px'
-        }}>
+        <div className="mt-3 text-xs text-gray-500 grid grid-cols-[repeat(auto-fit,minmax(120px,1fr))] gap-2">
           <div>
-            <strong style={{ color: '#374151' }}>Total:</strong> {totalPublications} studies
+            <strong className="text-gray-700">Total:</strong> {totalPublications} studies
           </div>
           <div>
-            <strong style={{ color: '#374151' }}>Avg/Year:</strong> {avgPerYear}
+            <strong className="text-gray-700">Avg/Year:</strong> {avgPerYear}
           </div>
           <div>
-            <strong style={{ color: '#374151' }}>Recent Avg:</strong> {recentAvg}
+            <strong className="text-gray-700">Recent Avg:</strong> {recentAvg}
           </div>
-          <div style={{ color: recentAvg > avgPerYear ? '#10b981' : '#ef4444' }}>
+          <div className={recentAvg > avgPerYear ? 'text-green-500' : 'text-red-500'}>
             <strong>Trend:</strong> {recentAvg > avgPerYear ? '↗️ Increasing' : '↘️ Declining'}
           </div>
         </div>
       )}
       
-      <div style={{ display: "flex", justifyContent: "center", marginTop: 16, flexShrink: 0 }}>
+      <div className="flex justify-center mt-4 flex-shrink-0">
         <AnalyzeWithWihyButton
           cardContext={`Publication timeline analysis: ${title} showing ${timeRange} data. Total publications: ${totalPublications} studies. Average per year: ${avgPerYear}. Recent average: ${recentAvg}. Trend: ${recentAvg > avgPerYear ? 'Increasing' : 'Declining'} research activity. Data spans from ${publicationData[0]?.year} to ${publicationData[publicationData.length - 1]?.year}`}
           userQuery="Analyze this publication timeline and explain what the research trends indicate about scientific interest and evidence development in this area"

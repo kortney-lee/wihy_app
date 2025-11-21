@@ -26,7 +26,7 @@ const sectionGrow = {
   alignItems: "center",
   justifyContent: "center",
   flex: 1,
-  gap: 12,
+  gap: 8,
   overflow: "hidden" as const,
   minHeight: 0,
 };
@@ -34,7 +34,7 @@ const sectionGrow = {
 const footerRow = {
   display: "flex",
   justifyContent: "center",
-  marginTop: 20,
+  marginTop: 4,
 };
 
 /* ================= Donut (full circle) ================= */
@@ -66,7 +66,9 @@ function Donut({
         width: size,
         height: size,
         flexShrink: 0,
-        overflow: "hidden", // ensures no scroll
+        overflow: "hidden",
+        maxWidth: size,
+        maxHeight: size,
       }}
     >
       <svg
@@ -173,15 +175,15 @@ const StepsCard: React.FC<StepsCardProps> = ({
         value={progressPercentage}
         color={progressColor}
         track="#f3f4f6"
-        stroke={12}
-        size={180}
+        stroke={10}
+        size={160}
         label={
-          <div style={{ whiteSpace: "nowrap", textAlign: "center" }}>
+          <div style={{ whiteSpace: "nowrap", textAlign: "center", overflow: "hidden" }}>
             <div style={{
-              fontSize: 24,
+              fontSize: 20,
               fontWeight: 400,
               color: progressColor,
-              lineHeight: 2,
+              lineHeight: 1.5,
               marginBottom: "2px"
             }}>
               {currentSteps.toLocaleString()}

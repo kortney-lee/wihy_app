@@ -1,7 +1,5 @@
 import React from 'react';
 import { CardData } from '../cardConfig';
-import '../../../styles/Dashboard.css';
-import '../../../styles/charts.css';
 import AnalyzeWithWihyButton from '../shared/AnalyzeWithWihyButton';
 
 // Member badge configuration (shared with MembersCard)
@@ -86,57 +84,54 @@ const QuickInsights: React.FC<QuickInsightsProps> = ({
   const memberBadge = badgeConfig[memberCardType];
 
   return (
-    <div className={`quick-insights-card ${className}`}>
-      <h3 className="quick-insights-title">
+    <div className={`bg-white rounded-2xl p-6 shadow-md border border-gray-100 overflow-hidden ${className}`}>
+      <h3 className="text-xl font-semibold text-gray-800 mb-6 flex items-center">
         📊 {data?.title || 'Quick Insights'}
       </h3>
-      <div className="insights-grid">
-        <div className="insight-item">
-          <div className="member-badge-container">
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-6 text-center">
+        <div className="flex flex-col items-center min-w-0 overflow-hidden">
+          <div className="flex flex-col items-center">
             <img 
               src={memberBadge.image} 
               alt={memberBadge.title}
-              className="member-badge-image"
-              style={{
-                width: '64px',
-                height: '64px',
-                objectFit: 'contain',
-                marginBottom: '8px'
-              }}
+              className="w-12 h-12 object-contain mb-2"
             />
-            <div className="insight-value" style={{ color: memberBadge.color, fontSize: '18px', fontWeight: '600' }}>
+            <div 
+              className="text-sm font-semibold mb-1 truncate"
+              style={{ color: memberBadge.color }}
+            >
               {memberBadge.title}
             </div>
           </div>
-          <div className="insight-label">Member Status</div>
+          <div className="text-xs text-gray-500">Member Status</div>
         </div>
         
         {/* Insight 1: Overall Health/Quality Score (0-100) */}
-        <div className="insight-item">
-          <div className="insight-value health-score">{healthScore}</div>
-          <div className="insight-label">Health Score</div>
+        <div className="flex flex-col items-center min-w-0 overflow-hidden">
+          <div className="text-3xl lg:text-4xl font-bold mb-1 text-vh-accent truncate">{healthScore}</div>
+          <div className="text-xs text-gray-500">Health Score</div>
         </div>
         
         {/* Insight 2: Processing Level/Evidence Grade */}
-        <div className="insight-item">
-          <div className="insight-value processing-level">{processingLevel}</div>
-          <div className="insight-label">Quality Grade</div>
+        <div className="flex flex-col items-center min-w-0 overflow-hidden">
+          <div className="text-3xl lg:text-4xl font-bold mb-1 text-vh-accent-2 truncate">{processingLevel}</div>
+          <div className="text-xs text-gray-500">Quality Grade</div>
         </div>
         
         {/* Insight 3: Recommendation Frequency/Action */}
-        <div className="insight-item">
-          <div className="insight-value recommendations-count">{recommendations}</div>
-          <div className="insight-label">Recommendations</div>
+        <div className="flex flex-col items-center min-w-0 overflow-hidden">
+          <div className="text-3xl lg:text-4xl font-bold mb-1 text-orange-500 truncate">{recommendations}</div>
+          <div className="text-xs text-gray-500">Recommendations</div>
         </div>
         
         {/* Insight 4: Alternative/Improvement Score */}
-        <div className="insight-item">
-          <div className="insight-value improvement-score">{improvementScore}%</div>
-          <div className="insight-label">Improvement Score</div>
+        <div className="flex flex-col items-center min-w-0 overflow-hidden">
+          <div className="text-3xl lg:text-4xl font-bold mb-1 text-green-500 truncate">{improvementScore}%</div>
+          <div className="text-xs text-gray-500">Improvement Score</div>
         </div>
       </div>
       
-      <div style={{ display: "flex", justifyContent: "center", marginTop: 16, flexShrink: 0 }}>
+      <div className="flex justify-center mt-4 flex-shrink-0">
         <AnalyzeWithWihyButton
           cardContext={`Health overview for ${memberName} (${memberBadge.title} Member): Overall health score is ${healthScore}/100. Last updated: ${lastUpdate}. Current stats: Steps ${data?.data?.steps || '8432'}, Sleep ${data?.data?.sleep || '7.5h'}, Calories ${data?.data?.calories || '1842'}. Member status: ${memberBadge.title}. Current alerts: ${data?.data?.alerts || 0}, Recommendations: ${data?.data?.recommendations || 3}`}
           userQuery="Analyze my current health overview and provide personalized recommendations based on my health score, member status, and available data"

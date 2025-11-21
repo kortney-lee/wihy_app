@@ -1,44 +1,6 @@
 import React from 'react';
 import AnalyzeWithWihyButton from '../shared/AnalyzeWithWihyButton';
 
-/* ================= Unified card styling ================= */
-
-const cardChrome: React.CSSProperties = {
-  display: "flex",
-  flexDirection: "column",
-  padding: 24,
-  borderRadius: 16,
-  background: "white",
-  border: "1px solid #e5e7eb",
-  boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
-  height: 420,
-  overflow: "hidden",
-};
-
-const titleStyle: React.CSSProperties = {
-  margin: "0 0 20px 0",
-  fontSize: 24,
-  fontWeight: 600,
-  color: "#9CA3AF",
-};
-
-const sectionGrow: React.CSSProperties = {
-  display: "flex",
-  flexDirection: "column",
-  alignItems: "center",
-  justifyContent: "center",
-  flex: 1,
-  overflow: "hidden",
-  minHeight: 0,
-};
-
-const footerRow: React.CSSProperties = {
-  display: "flex",
-  justifyContent: "center",
-  marginTop: 16,
-  flexShrink: 0,
-};
-
 /* ================= Card shell ================= */
 
 function CardShell({
@@ -49,9 +11,9 @@ function CardShell({
   children: React.ReactNode;
 }) {
   return (
-    <section style={cardChrome}>
-      <h3 style={titleStyle}>{title}</h3>
-      <div style={sectionGrow}>{children}</div>
+    <section className="flex flex-col p-6 rounded-2xl bg-white border border-gray-200 shadow-md h-[420px] overflow-hidden">
+      <h3 className="m-0 mb-3 text-xl font-semibold text-gray-400">{title}</h3>
+      <div className="flex flex-col items-center justify-center flex-1 overflow-hidden min-h-0">{children}</div>
     </section>
   );
 }
@@ -95,65 +57,38 @@ const CurrentWeightCard: React.FC<CurrentWeightCardProps> = ({
   return (
     <CardShell title="Current Weight">
       {/* Main Value Display */}
-      <div style={{ textAlign: "center", marginBottom: "24px" }}>
-        <div style={{ 
-          fontSize: 48, 
-          fontWeight: 700, 
-          color: weightColor,
-          lineHeight: 1.5,
-          marginBottom: "8px"
-        }}>
+      <div className="flex flex-col items-center min-w-0 overflow-hidden text-center mb-3">
+        <div className="text-3xl lg:text-4xl font-bold mb-1 truncate" style={{color: weightColor}}>
           {currentWeight}
         </div>
-        <div style={{
-          fontSize: 14,
-          color: '#9ca3af',
-          fontWeight: 400
-        }}>
+        <div className="text-xs text-gray-400 font-normal truncate">
           {unit} current weight
         </div>
       </div>
 
       {/* Goal Comparison */}
-      <div style={{ width: "100%", maxWidth: "200px", marginBottom: "16px", textAlign: "center" }}>
-        <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '8px' }}>
+      <div className="w-full max-w-[200px] mb-2 text-center">
+        <div className="text-xs text-gray-500 mb-0.5">
           Goal: {goalWeight} {unit}
         </div>
-        <div style={{ fontSize: '14px', fontWeight: 600, color: weightColor }}>
+        <div className="text-sm font-semibold" style={{color: weightColor}}>
           {isOverGoal ? '+' : ''}{difference.toFixed(1)} {unit} {isOverGoal ? 'above' : difference < 0 ? 'below' : 'at'} goal
         </div>
       </div>
 
       {/* Status Pill */}
-      <div style={{ textAlign: "center" }}>
-        <span
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: 8,
-            padding: "8px 16px",
-            borderRadius: 9999,
-            fontWeight: 600,
-            fontSize: 14,
-            color: weightColor,
-            backgroundColor: `${weightColor}20`,
-            border: `1px solid ${weightColor}33`,
-          }}
-        >
-          <span
-            style={{
-              width: 8,
-              height: 8,
-              borderRadius: 9999,
-              background: "currentColor",
-              opacity: 0.85,
-            }}
-          />
+      <div className="text-center">
+        <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full font-semibold text-sm" style={{
+          color: weightColor,
+          backgroundColor: `${weightColor}20`,
+          border: `1px solid ${weightColor}33`
+        }}>
+          <span className="w-2 h-2 rounded-full bg-current opacity-85" />
           {weightLabel}
         </span>
       </div>
 
-      <div style={footerRow}>
+      <div className="flex justify-center mt-2 flex-shrink-0">
         <AnalyzeWithWihyButton
           cardContext={`Current Weight: ${currentWeight} ${unit}, Goal: ${goalWeight} ${unit}. Difference: ${difference > 0 ? '+' : ''}${difference.toFixed(1)} ${unit}. Status: ${weightLabel}.`}
           userQuery="Analyze my weight progress and provide personalized guidance for reaching my weight goal"

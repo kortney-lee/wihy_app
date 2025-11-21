@@ -8,6 +8,7 @@ import ComprehensiveHealthDashboard from './pages/ComprehensiveHealthDashboard';
 import TestDashboardGrid from './pages/TestDashboardGrid';
 import TestIndividualComponents from './pages/TestIndividualComponents';
 import AboutPage from './pages/AboutPage';
+import TailwindDemoPage from './pages/TailwindDemoPage';
 import { wihyAPI } from './services/wihyAPI';
 import { searchCache } from './services/searchCache';
 import { fetchNewsFeed, refreshNewsFeed, searchNewsArticles } from './services/newsService';
@@ -511,6 +512,7 @@ const App: React.FC = () => {
         <Route path="/test-grid" element={<TestDashboardGrid />} />
         <Route path="/test-individual" element={<TestIndividualComponents />} />
         <Route path="/health-dashboard" element={<ComprehensiveHealthDashboard />} />
+        <Route path="/tailwind-demo" element={<TailwindDemoPage />} />
         {/* Demo route - only available in development */}
         {process.env.NODE_ENV === 'development' && (
           <Route path="/demo" element={<DemoResultsPage />} />

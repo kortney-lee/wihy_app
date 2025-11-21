@@ -9,21 +9,6 @@ import { Doughnut } from 'react-chartjs-2';
 import { UnifiedResponse } from '../../../services/wihyAPI';
 import AnalyzeWithWihyButton from '../shared/AnalyzeWithWihyButton';
 
-// Self-contained styling for NutritionChart
-const nutritionChartStyles = {
-  container: {
-    display: "flex" as const,
-    flexDirection: "column" as const,
-    padding: 24,
-    borderRadius: 16,
-    background: "white",
-    border: "1px solid #e5e7eb",
-    boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
-    height: 400,
-    overflow: "hidden" as const,
-  }
-};
-
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 interface NutritionChartProps {
@@ -138,14 +123,14 @@ const NutritionChart: React.FC<NutritionChartProps> = ({ apiResponse, query, onA
     };
 
     return (
-      <div style={nutritionChartStyles.container}>
-        <h3 style={{ fontSize: 24, fontWeight: 600, color: "#9CA3AF", margin: 0, marginBottom: 20 }}>Nutrition Breakdown</h3>
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", flex: 1, overflow: "hidden", minHeight: 0 }}>
-          <div style={{ width: '100%', height: '100%', maxWidth: '280px', maxHeight: '280px' }}>
+      <div className="flex flex-col p-6 rounded-2xl bg-white border border-gray-200 shadow-md h-96 overflow-hidden">
+        <h3 className="text-2xl font-semibold text-vh-muted mb-5">Nutrition Breakdown</h3>
+        <div className="flex flex-col items-center justify-center flex-1 overflow-hidden min-h-0">
+          <div className="w-full h-full max-w-[280px] max-h-[280px]">
             <Doughnut data={data} options={options} />
           </div>
         </div>
-        <div style={{ display: "flex", justifyContent: "center", marginTop: 16, flexShrink: 0 }}>
+        <div className="flex justify-center mt-4 flex-shrink-0">
           <AnalyzeWithWihyButton
             cardContext={`Nutrition breakdown: ${chartData.labels.join(', ')} with values ${chartData.values.join(', ')}% respectively.`}
             userQuery="Analyze this nutrition breakdown and provide insights about the nutritional balance"
@@ -243,32 +228,24 @@ const NutritionChart: React.FC<NutritionChartProps> = ({ apiResponse, query, onA
   };
 
   return (
-    <div style={nutritionChartStyles.container}>
-      <h3 style={{ fontSize: 24, fontWeight: 600, color: "#9CA3AF", margin: 0, marginBottom: 20 }}>Macronutrient Breakdown</h3>
+    <div className="flex flex-col p-6 rounded-2xl bg-white border border-gray-200 shadow-md h-96 overflow-hidden">
+      <h3 className="text-2xl font-semibold text-vh-muted mb-5">Macronutrient Breakdown</h3>
       
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", flex: 1, overflow: "hidden", minHeight: 0 }}>
-        <div style={{ position: 'relative', width: '100%', height: '100%', maxWidth: '280px', maxHeight: '280px' }}>
+      <div className="flex flex-col items-center justify-center flex-1 overflow-hidden min-h-0">
+        <div className="relative w-full h-full max-w-[280px] max-h-[280px]">
           <Doughnut data={data} options={optionsWithLegend} />
-          <div
-            style={{
-              position: 'absolute',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-              textAlign: 'center',
-            }}
-          >
-            <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#374151' }}>
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center">
+            <div className="text-2xl font-bold text-gray-700">
               {calories}
             </div>
-            <div style={{ fontSize: '0.8rem', color: '#6B7280' }}>
+            <div className="text-xs text-gray-500">
               Calories
             </div>
           </div>
         </div>
       </div>
       
-      <div style={{ display: "flex", justifyContent: "center", marginTop: 16, flexShrink: 0 }}>
+      <div className="flex justify-center mt-4 flex-shrink-0">
         <AnalyzeWithWihyButton
           cardContext={`Nutrition analysis: ${calories} calories total with macronutrient breakdown - Protein: ${total > 0 ? Math.round((protein / total) * 100) : 0}%, Carbs: ${total > 0 ? Math.round((carbs / total) * 100) : 0}%, Fat: ${total > 0 ? Math.round((fat / total) * 100) : 0}%. Additional nutrition data: ${JSON.stringify(nutritionFacts)}`}
           userQuery="Analyze this nutrition data and provide insights about the macronutrient balance and overall nutritional value"

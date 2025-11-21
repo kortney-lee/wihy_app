@@ -111,79 +111,44 @@ const NovaChart: React.FC<NovaChartProps> = ({ apiResponse, query, onAnalyze }) 
   };
 
   return (
-    <div style={{
-      display: "flex",
-      flexDirection: "column",
-      padding: 24,
-      borderRadius: 16,
-      background: "white",
-      border: "1px solid #e5e7eb",
-      boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
-      height: 500,
-      overflow: "hidden"
-    }}>
-      <h3 style={{ fontSize: 24, fontWeight: 600, color: "#9CA3AF", margin: 0, marginBottom: 20 }}>
+    <div className="flex flex-col p-6 rounded-2xl bg-white border border-gray-200 shadow-md h-[650px] md:h-[500px] overflow-hidden">
+      <h3 className="text-2xl font-semibold text-vh-muted mb-5">
         NOVA Food Processing
       </h3>
       
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", flex: 1, overflow: "hidden", minHeight: 0, textAlign: 'center' }}>
-        <div style={{ position: 'relative', height: '200px', width: '200px', margin: '0 auto' }}>
+      <div className="flex-1 flex flex-col justify-center overflow-hidden min-h-0">
+        <div className="relative h-36 w-36 mx-auto">
           <Doughnut data={data} options={options} />
-          <div
-            style={{
-              position: 'absolute',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-              textAlign: 'center',
-            }}
-          >
-            <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#374151' }}>
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center">
+            <div className="text-2xl font-bold text-gray-700">
               {novaScore}
             </div>
-            <div style={{ fontSize: '0.875rem', color: '#6B7280' }}>
+            <div className="text-xs text-gray-500">
               NOVA
             </div>
           </div>
         </div>
-        
-        <div style={{ marginTop: '1rem' }}>
-          <div style={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'center',
-            marginBottom: '0.5rem' 
-          }}>
+
+        <div className="mt-4">
+          <div className="flex items-center justify-center mb-2">
             <div
+              className="w-4 h-4 rounded mr-2"
               style={{
-                width: '16px',
-                height: '16px',
                 backgroundColor: novaColors[novaScore as keyof typeof novaColors],
-                borderRadius: '3px',
-                marginRight: '0.5rem',
               }}
             />
-            <span style={{ 
-              fontWeight: '600', 
-              color: '#374151',
-              fontSize: '1rem'
-            }}>
+            <span className="font-semibold text-gray-700 text-base">
               Group {novaScore}
             </span>
           </div>
           
-          <div style={{ 
-            fontSize: '0.875rem',
-            color: '#374151',
-            fontStyle: 'italic',
-            marginBottom: '1rem'
-          }}>
+          <div className="text-sm text-gray-700 italic mb-3">
             {processedLevel}
           </div>
         </div>
       </div>
       
-      <div style={{ display: "flex", justifyContent: "center", marginTop: 16, flexShrink: 0 }}>
+      <div className="flex justify-center mt-2 flex-shrink-0">
         <AnalyzeWithWihyButton
           cardContext={`
 NOVA Score Analysis:

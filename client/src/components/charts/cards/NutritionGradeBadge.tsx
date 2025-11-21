@@ -6,44 +6,6 @@
 import React from 'react';
 import AnalyzeWithWihyButton from '../shared/AnalyzeWithWihyButton';
 
-/* ================= Unified card styling ================= */
-
-const cardChrome: React.CSSProperties = {
-  display: "flex",
-  flexDirection: "column",
-  padding: 24,
-  borderRadius: 16,
-  background: "white",
-  border: "1px solid #e5e7eb",
-  boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
-  height: 420,
-  overflow: "hidden",
-};
-
-const titleStyle: React.CSSProperties = {
-  margin: "0 0 20px 0",
-  fontSize: 24,
-  fontWeight: 600,
-  color: "#9CA3AF",
-};
-
-const sectionGrow: React.CSSProperties = {
-  display: "flex",
-  flexDirection: "column",
-  alignItems: "center",
-  justifyContent: "center",
-  flex: 1,
-  overflow: "hidden",
-  minHeight: 0,
-};
-
-const footerRow: React.CSSProperties = {
-  display: "flex",
-  justifyContent: "center",
-  marginTop: 16,
-  flexShrink: 0,
-};
-
 /* ================= Card shell ================= */
 
 function CardShell({
@@ -54,9 +16,9 @@ function CardShell({
   children: React.ReactNode;
 }) {
   return (
-    <section style={cardChrome}>
-      <h3 style={titleStyle}>{title}</h3>
-      <div style={sectionGrow}>{children}</div>
+    <section className="flex flex-col p-6 rounded-2xl bg-white border border-gray-200 shadow-md h-[420px] overflow-hidden">
+      <h3 className="mb-5 text-2xl font-semibold text-vh-muted">{title}</h3>
+      <div className="flex flex-col items-center justify-center flex-1 overflow-hidden min-h-0">{children}</div>
     </section>
   );
 }
@@ -158,52 +120,44 @@ const NutritionGradeBadge: React.FC<NutritionGradeBadgeProps> = ({
     <CardShell title={`${category} Grade`}>
 
       {/* Grade Badge */}
-      <div style={{
-        width: config.badgeSize,
-        height: config.badgeSize,
-        backgroundColor: colors.bg,
-        border: `2px solid ${colors.border}`,
-        borderRadius: '12px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        margin: '0 auto',
-        boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
-      }}>
-        <span style={{
-          fontSize: config.fontSize,
-          fontWeight: 'bold',
-          color: colors.text
-        }}>
+      <div
+        className={`flex items-center justify-center mx-auto rounded-xl border-2 shadow-sm ${
+          size === 'small' ? 'w-10 h-10' : size === 'large' ? 'w-20 h-20' : 'w-16 h-16'
+        }`}
+        style={{
+          backgroundColor: colors.bg,
+          borderColor: colors.border,
+        }}
+      >
+        <span
+          className={`font-bold ${
+            size === 'small' ? 'text-base' : size === 'large' ? 'text-3xl' : 'text-2xl'
+          }`}
+          style={{ color: colors.text }}
+        >
           {normalizedGrade}
         </span>
       </div>
 
       {/* Optional Score */}
       {displayScore !== undefined && (
-        <div style={{
-          fontSize: config.descSize,
-          color: '#6B7280',
-          marginTop: '4px'
-        }}>
+        <div className={`text-gray-500 mt-1 ${
+          size === 'small' ? 'text-xs' : size === 'large' ? 'text-sm' : 'text-xs'
+        }`}>
           {displayScore}/100
         </div>
       )}
 
       {/* Description */}
       {showDescription && (
-        <div style={{
-          fontSize: config.descSize,
-          color: '#374151',
-          marginTop: '8px',
-          maxWidth: '200px',
-          margin: '8px auto 0'
-        }}>
+        <div className={`text-gray-700 mt-2 max-w-[200px] mx-auto text-center ${
+          size === 'small' ? 'text-xs' : size === 'large' ? 'text-sm' : 'text-xs'
+        }`}>
           {description}
         </div>
       )}
 
-      <div style={footerRow}>
+      <div className="flex justify-center mt-4 flex-shrink-0">
         <AnalyzeWithWihyButton
           cardContext={`Nutrition grade assessment: ${category} grade is ${normalizedGrade}${displayScore !== undefined ? ` with a score of ${displayScore}/100` : ''}. Grade description: ${description}`}
           userQuery="Analyze this nutrition grade and explain what it means for overall health and dietary choices"

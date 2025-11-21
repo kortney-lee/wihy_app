@@ -15,46 +15,6 @@ import {
 import { Line, Bar, Doughnut } from 'react-chartjs-2';
 import AnalyzeWithWihyButton from '../shared/AnalyzeWithWihyButton';
 
-// Self-contained styling for ActivityChart
-const activityChartStyles = {
-  container: {
-    display: "flex" as const,
-    flexDirection: "column" as const,
-    padding: 24,
-    borderRadius: 16,
-    background: "white",
-    border: "1px solid #e5e7eb",
-    boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
-    gridColumn: "1 / -1", // Full width spanning
-    height: "auto",
-    minHeight: 300,
-    width: "100%",
-    overflow: "hidden" as const,
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: 600,
-    color: "#374151",
-    margin: 0,
-    marginBottom: 20,
-    textAlign: "left" as const,
-  },
-  chartContainer: {
-    flex: 1,
-    display: "flex",
-    flexDirection: "column" as const,
-    justifyContent: "center",
-    minHeight: 200,
-    marginBottom: 16,
-  },
-  footerRow: {
-    display: "flex",
-    justifyContent: "center",
-    marginTop: 16,
-    flexShrink: 0,
-  }
-};
-
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -170,7 +130,7 @@ const ActivityChart: React.FC<ActivityChartProps> = ({
     };
 
     return (
-      <div style={{ height: '200px', width: '100%' }}>
+      <div className="h-[200px] w-full">
         <Doughnut data={activityData} options={activityOptions} />
       </div>
     );
@@ -262,7 +222,7 @@ const ActivityChart: React.FC<ActivityChartProps> = ({
     };
 
     return (
-      <div style={{ height: '200px', width: '100%' }}>
+      <div className="h-[200px] w-full">
         <Bar data={hydrationData} options={hydrationOptions} />
       </div>
     );
@@ -347,7 +307,7 @@ const ActivityChart: React.FC<ActivityChartProps> = ({
     };
 
     return (
-      <div style={{ height: '200px', width: '100%' }}>
+      <div className="h-[200px] w-full">
         <Line data={data} options={options} />
       </div>
     );
@@ -427,7 +387,7 @@ const ActivityChart: React.FC<ActivityChartProps> = ({
     };
 
     return (
-      <div style={{ height: '200px', width: '100%' }}>
+      <div className="h-[200px] w-full">
         <Bar data={data} options={options} />
       </div>
     );
@@ -533,19 +493,19 @@ const ActivityChart: React.FC<ActivityChartProps> = ({
 
   // Internal CardShell component
   const CardShell = ({ title, children }: { title: string; children: React.ReactNode }) => (
-    <section style={activityChartStyles.container}>
-      <h3 style={activityChartStyles.title}>{title}</h3>
-      <div style={activityChartStyles.chartContainer}>{children}</div>
+    <section className="flex flex-col p-6 rounded-2xl bg-white border border-gray-200 shadow-md col-span-full h-auto min-h-[300px] w-full overflow-hidden">
+      <h3 className="text-lg font-semibold text-gray-700 m-0 mb-5 text-left">{title}</h3>
+      <div className="flex-1 flex flex-col justify-center min-h-[200px] mb-4">{children}</div>
     </section>
   );
 
   return (
     <CardShell title="Steps & Activity Trends">
-      <div style={{ height: '240px', width: '100%' }}>
+      <div className="h-[240px] w-full">
         <Line data={data} options={options} />
       </div>
       
-      <div style={activityChartStyles.footerRow}>
+      <div className="flex justify-center mt-4 flex-shrink-0">
         <AnalyzeWithWihyButton
           cardContext={`Activity Chart: Showing ${chartType} data over ${period} period. Chart displays trends and patterns in daily activity metrics for health tracking and goal achievement.`}
           userQuery="Analyze my activity chart data and provide insights about my activity patterns, trends, and recommendations for improvement"

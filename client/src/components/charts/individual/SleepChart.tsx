@@ -17,44 +17,10 @@ import AnalyzeWithWihyButton from '../shared/AnalyzeWithWihyButton';
 
 // Self-contained styling for SleepChart
 const sleepChartStyles = {
-  container: {
-    display: "flex" as const,
-    flexDirection: "column" as const,
-    padding: 20,
-    borderRadius: 16,
-    background: "white",
-    border: "1px solid #e5e7eb",
-    boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
-    gridColumn: "1 / -1", // Full width spanning
-    height: "auto",
-    minHeight: 280,
-    maxHeight: 350,
-    width: "100%",
-    overflow: "hidden" as const,
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: 600,
-    color: "#374151",
-    margin: 0,
-    marginBottom: 20,
-    textAlign: "left" as const,
-  },
-  chartContainer: {
-    flex: 1,
-    display: "flex",
-    flexDirection: "column" as const,
-    justifyContent: "center",
-    minHeight: 180,
-    maxHeight: 220,
-    marginBottom: 12,
-  },
-  footerRow: {
-    display: "flex",
-    justifyContent: "center",
-    marginTop: 16,
-    flexShrink: 0,
-  }
+  container: "flex flex-col p-5 rounded-2xl bg-white border border-gray-200 shadow-md col-span-full h-auto min-h-[280px] max-h-[350px] w-full overflow-hidden",
+  title: "text-lg font-semibold text-gray-700 m-0 mb-5 text-left",
+  chartContainer: "flex-1 flex flex-col justify-center min-h-[180px] max-h-[220px] mb-3",
+  footerRow: "flex justify-center mt-4 flex-shrink-0"
 };
 
 ChartJS.register(
@@ -177,14 +143,14 @@ const SleepChart: React.FC<SleepChartProps> = ({
     };
 
     return (
-      <div style={sleepChartStyles.container}>
-        <h3 style={sleepChartStyles.title}>Sleep Quality Distribution</h3>
+      <div className={sleepChartStyles.container}>
+        <h3 className={sleepChartStyles.title}>Sleep Quality Distribution</h3>
         
-        <div style={sleepChartStyles.chartContainer}>
+        <div className={sleepChartStyles.chartContainer}>
           <Bar data={qualityData} options={qualityOptions} />
         </div>
         
-        <div style={sleepChartStyles.footerRow}>
+        <div className={sleepChartStyles.footerRow}>
           <AnalyzeWithWihyButton
             cardContext={`Sleep Quality Chart: Distribution showing ${qualityDistribution[2]} good nights, ${qualityDistribution[1]} fair nights, ${qualityDistribution[0]} poor night. Sleep quality analysis over ${period} period.`}
             userQuery="Analyze my sleep quality patterns and provide insights about improving sleep quality and duration"
@@ -345,14 +311,14 @@ const SleepChart: React.FC<SleepChartProps> = ({
   };
 
   return (
-    <div style={sleepChartStyles.container}>
-      <h3 style={sleepChartStyles.title}>Sleep Analysis</h3>
+    <div className={sleepChartStyles.container}>
+      <h3 className={sleepChartStyles.title}>Sleep Analysis</h3>
       
-      <div style={sleepChartStyles.chartContainer}>
+      <div className={sleepChartStyles.chartContainer}>
         <Line data={data} options={options} />
       </div>
       
-      <div style={sleepChartStyles.footerRow}>
+      <div className={sleepChartStyles.footerRow}>
         <AnalyzeWithWihyButton
           cardContext={`Sleep Chart: Tracking ${chartType} over ${period} period. Shows sleep patterns, quality metrics, and duration trends for sleep health analysis and improvement recommendations.`}
           userQuery="Analyze my sleep patterns and provide insights about my sleep quality, duration, and recommendations for better rest"

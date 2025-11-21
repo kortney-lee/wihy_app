@@ -147,49 +147,39 @@ export const ExerciseChart: React.FC<ExerciseChartProps> = ({
   };
 
   return (
-    <div className="dashboard-chart-card">
-      <div className="chart-section-title">Exercise Tracking</div>
+    <div className="flex flex-col p-6 rounded-2xl bg-white border border-gray-200 shadow-md h-[420px] overflow-hidden">
+      <h3 className="text-2xl font-semibold text-gray-400 m-0 mb-5 text-center">Exercise Tracking</h3>
       
       <ResponsiveContainer width="100%" height={300}>
         {renderChart()}
       </ResponsiveContainer>
 
-      <div className="chart-info-section">
-        <div className="chart-info-title">Performance Summary</div>
-        
-        <div className="chart-info-section">
-          <div className="chart-info-title">Key Metrics</div>
-          <div className="chart-info-list">
-            <div className="chart-info-item">
-              <span className="chart-info-label">Average Duration:</span>
-              <span className="chart-info-value">{averages.duration} minutes</span>
+      <div className="mt-4 text-sm text-gray-600">
+        <div className="mb-3">
+          <div className="font-semibold text-gray-700 mb-2">Key Metrics</div>
+          <div className="space-y-1">
+            <div className="flex justify-between">
+              <span>Average Duration:</span>
+              <span className="font-medium">{averages.duration} minutes</span>
             </div>
-            <div className="chart-info-item">
-              <span className="chart-info-label">Average Calories:</span>
-              <span className="chart-info-value">{averages.calories} cal/session</span>
+            <div className="flex justify-between">
+              <span>Average Calories:</span>
+              <span className="font-medium">{averages.calories} cal/session</span>
             </div>
-            <div className="chart-info-item">
-              <span className="chart-info-label">Average Intensity:</span>
-              <span className="chart-info-value">{averages.intensity}/10</span>
+            <div className="flex justify-between">
+              <span>Average Intensity:</span>
+              <span className="font-medium">{averages.intensity}/10</span>
             </div>
           </div>
         </div>
 
-        <div className="recommendations-section">
-          <div className="chart-info-title">Recommendations</div>
-          <div className="chart-info-list">
-            <div className="chart-info-item">
-              • Aim for 150+ minutes moderate activity weekly
-            </div>
-            <div className="chart-info-item">
-              • Include strength training 2-3 times per week
-            </div>
-            <div className="chart-info-item">
-              • Maintain consistent workout schedule
-            </div>
-            <div className="chart-info-item">
-              • Monitor intensity to avoid overtraining
-            </div>
+        <div className="mt-4">
+          <div className="font-semibold text-gray-700 mb-2">Recommendations</div>
+          <div className="space-y-1 text-xs">
+            <div>• Aim for 150+ minutes moderate activity weekly</div>
+            <div>• Include strength training 2-3 times per week</div>
+            <div>• Maintain consistent workout schedule</div>
+            <div>• Monitor intensity to avoid overtraining</div>
           </div>
         </div>
       </div>
