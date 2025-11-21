@@ -18,6 +18,7 @@ module.exports = {
         'wihy-green': '#4cbb17',
         'wihy-blue-light': '#f8faff',
         'wihy-blue-soft': '#e8f4f8',
+        'wihy-orange': '#fa5f06',
         
         // Additional color mappings for convenience
         primary: '#1a73e8',
@@ -48,6 +49,8 @@ module.exports = {
         'fade-in': 'fadeIn 0.6s ease-out forwards',
         'fade-in-up': 'fadeInUp 0.6s ease-out forwards',
         'slide-up': 'slideUp 0.6s ease-out forwards',
+        'typing': 'typing 1.4s ease-in-out infinite',
+        'spin': 'spin 1s linear infinite',
       },
       keyframes: {
         fadeIn: {
@@ -61,6 +64,20 @@ module.exports = {
         slideUp: {
           '0%': { opacity: '0', transform: 'translateY(20px)' },
           '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+        typing: {
+          '0%, 60%, 100%': {
+            transform: 'translateY(0)',
+            opacity: '0.4',
+          },
+          '30%': {
+            transform: 'translateY(-6px)',
+            opacity: '1',
+          }
+        },
+        spin: {
+          '0%': { transform: 'rotate(0deg)' },
+          '100%': { transform: 'rotate(360deg)' },
         }
       },
       spacing: {
@@ -69,6 +86,7 @@ module.exports = {
         '22': '5.5rem',
         '26': '6.5rem',
         '30': '7.5rem',
+        '70': '17.5rem', // 280px for sidebar width
       },
       maxWidth: {
         '8xl': '88rem',

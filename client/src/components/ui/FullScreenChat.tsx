@@ -511,65 +511,31 @@ const FullScreenChat = forwardRef<FullScreenChatRef, FullScreenChatProps>(({
   return (
     <>
       {/* Backdrop overlay for both mobile and desktop */}
-      <div style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-        zIndex: 9999,
-        opacity: isOpen ? 1 : 0,
-        transition: 'opacity 0.3s ease-in-out'
-      }} onClick={onClose} />
+      <div 
+        className={`fixed inset-0 bg-black/50 z-[9999] transition-opacity duration-300 ease-in-out ${
+          isOpen ? 'opacity-100' : 'opacity-0'
+        }`}
+        onClick={onClose} 
+      />
 
-      <div className="fullscreen-chat-container" style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        width: isMobile ? '100vw' : 'auto',
-        height: isMobile ? '100vh' : 'auto',
-        backgroundColor: '#ffffff',
-        zIndex: 10000,
-        display: 'flex',
-        flexDirection: 'column',
-        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-        overflow: 'hidden',
-        transform: `translateX(${isOpen ? '0' : '100%'})`,
-        transition: 'transform 0.3s ease-in-out'
-      }}>
+      <div 
+        className={`fullscreen-chat-container fixed inset-0 ${
+          isMobile ? 'w-screen h-screen' : 'w-auto h-auto'
+        } bg-white z-[10000] flex flex-col font-sans overflow-hidden transform transition-transform duration-300 ease-in-out ${
+          isOpen ? 'translate-x-0' : 'translate-x-full'
+        }`}
+      >
 
       {/* Chat History Sidebar - show when explicitly toggled */}
       {((isMobile && showMobileHistory) || (!isMobile && showDesktopHistory)) && (
-        <div style={{
-          width: isMobile ? '100%' : '280px',
-          height: '100%',
-          backgroundColor: '#f8faff',
-          borderRight: '1px solid #e5e7eb',
-          display: 'flex',
-          flexDirection: 'column',
-          overflow: 'hidden',
-          position: 'absolute',
-          top: '0',
-          left: '0',
-          zIndex: isMobile ? 100 : 105
-        }}>
+        <div className={`${
+          isMobile ? 'w-full' : 'w-70'
+        } h-full bg-slate-50 border-r border-gray-200 flex flex-col overflow-hidden absolute top-0 left-0 ${
+          isMobile ? 'z-[100]' : 'z-[105]'
+        }`}>
         {/* Sidebar Header */}
-        <div style={{
-          padding: '20px 16px',
-          borderBottom: '1px solid #e5e7eb',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between'
-        }}>
-          <h2 style={{
-            margin: 0,
-            fontSize: '16px',
-            fontWeight: '600',
-            color: '#1f2937'
-          }}>
+        <div className="p-5 px-4 border-b border-gray-200 flex items-center justify-between">
+          <h2 className="m-0 text-base font-semibold text-gray-800">
             Chat History
           </h2>
           <button
@@ -580,14 +546,7 @@ const FullScreenChat = forwardRef<FullScreenChatRef, FullScreenChatProps>(({
                 setShowDesktopHistory(false);
               }
             }}
-            style={{
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              padding: '8px',
-              fontSize: '16px',
-              color: '#666'
-            }}
+            className="bg-transparent border-none cursor-pointer p-2 text-base text-gray-500 hover:text-gray-700"
             title="Close History"
           >
             ✕
@@ -595,67 +554,24 @@ const FullScreenChat = forwardRef<FullScreenChatRef, FullScreenChatProps>(({
         </div>
 
         {/* History List */}
-        <div style={{
-          flex: 1,
-          overflow: 'hidden'
-        }}>
-          <div style={{
-            padding: '8px',
-            height: '100%',
-            overflowY: 'auto',
-            overflowX: 'hidden'
-          }}>
+        <div className="flex-1 overflow-hidden">
+          <div className="p-2 h-full overflow-y-auto overflow-x-hidden">
             {/* Current Chat */}
             {shouldShowHistory ? (
-              <div style={{
-                padding: '12px',
-                marginBottom: '8px',
-                backgroundColor: '#ffffff',
-                borderRadius: '8px',
-                border: '1px solid #e5e7eb',
-                cursor: 'pointer'
-              }}>
-                <div style={{
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  color: '#1f2937',
-                  marginBottom: '4px',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap'
-                }}>
+              <div className="p-3 mb-2 bg-white rounded-lg border border-gray-200 cursor-pointer hover:bg-gray-50 transition-colors duration-200">
+                <div className="text-sm font-medium text-gray-800 mb-1 overflow-hidden text-ellipsis whitespace-nowrap">
                   {initialQuery || 'Current Chat'}
                 </div>
-                <div style={{
-                  fontSize: '12px',
-                  color: '#6b7280'
-                }}>
+                <div className="text-xs text-gray-500">
                   Active now
                 </div>
               </div>
             ) : (
-              <div style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                height: '100%',
-                textAlign: 'center',
-                padding: '20px'
-              }}>
-                <div style={{
-                  fontSize: '16px',
-                  fontWeight: '500',
-                  color: '#374151',
-                  marginBottom: '8px'
-                }}>
+              <div className="flex flex-col items-center justify-center h-full text-center p-5">
+                <div className="text-base font-medium text-gray-700 mb-2">
                   No Chat History
                 </div>
-                <div style={{
-                  fontSize: '14px',
-                  color: '#6b7280',
-                  lineHeight: '1.5'
-                }}>
+                <div className="text-sm text-gray-500 leading-6">
                   Create an account or login to start tracking your chat history
                 </div>
               </div>
@@ -663,33 +579,14 @@ const FullScreenChat = forwardRef<FullScreenChatRef, FullScreenChatProps>(({
 
             {/* Previous Chats */}
             {shouldShowHistory && ['Health and nutrition basics', 'Exercise routine planning', 'Sleep optimization tips', 'Stress management techniques'].map((chat, index) => (
-              <div key={index} style={{
-                padding: '12px',
-                marginBottom: '8px',
-                borderRadius: '8px',
-                cursor: 'pointer',
-                transition: 'background-color 0.2s ease'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = '#f3f4f6';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = 'transparent';
-              }}>
-                <div style={{
-                  fontSize: '14px',
-                  color: '#374151',
-                  marginBottom: '4px',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap'
-                }}>
+              <div 
+                key={index} 
+                className="p-3 mb-2 rounded-lg cursor-pointer transition-colors duration-200 hover:bg-gray-100"
+              >
+                <div className="text-sm text-gray-700 mb-1 overflow-hidden text-ellipsis whitespace-nowrap">
                   {chat}
                 </div>
-                <div style={{
-                  fontSize: '12px',
-                  color: '#9ca3af'
-                }}>
+                <div className="text-xs text-gray-400">
                   {index + 1} days ago
                 </div>
               </div>
@@ -700,23 +597,10 @@ const FullScreenChat = forwardRef<FullScreenChatRef, FullScreenChatProps>(({
       )}
 
       {/* Main Chat Area */}
-      <div style={{
-        flex: 1,
-        display: 'flex',
-        flexDirection: 'column',
-        height: '100%',
-        overflow: 'hidden'
-      }}>
+      <div className="flex-1 flex flex-col h-full overflow-hidden">
 
         {/* Top Navigation Bar with Toggle History and View Charts */}
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '8px 12px',
-          backgroundColor: '#f8faff',
-          minHeight: '40px'
-        }}>
+        <div className="flex items-center justify-between px-3 py-2 bg-slate-50 min-h-[40px]">
           {/* Left side - Toggle History Button */}
           <button
             onClick={() => {
@@ -726,13 +610,7 @@ const FullScreenChat = forwardRef<FullScreenChatRef, FullScreenChatProps>(({
                 setShowDesktopHistory(!showDesktopHistory);
               }
             }}
-            style={{
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              padding: '4px',
-              fontSize: '24px'
-            }}
+            className="bg-transparent border-none cursor-pointer p-1 text-2xl hover:text-gray-600 transition-colors duration-200"
             title="Toggle History"
           >
             ☰
@@ -740,7 +618,7 @@ const FullScreenChat = forwardRef<FullScreenChatRef, FullScreenChatProps>(({
 
           {/* Right side - View Charts Button */}
           {onViewCharts && (
-            <div style={{ position: 'relative' }}>
+            <div className="relative">
               <button
                 onClick={() => {
                   if (hasChartData) {
@@ -749,58 +627,26 @@ const FullScreenChat = forwardRef<FullScreenChatRef, FullScreenChatProps>(({
                     onClose(); // Navigate back to search screen when no chart data
                   }
                 }}
-                className="chat-icon-button"
                 title={hasChartData ? "View Interactive Charts" : "Back to Search Screen"}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  cursor: 'pointer',
-                  padding: '4px',
-                  borderRadius: '4px',
-                  transition: 'all 0.2s ease',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  opacity: hasChartData ? 1 : 0.7
-                }}
+                className={`chat-icon-button bg-transparent border-none cursor-pointer p-1 rounded transition-all duration-200 flex items-center justify-center ${
+                  hasChartData ? 'opacity-100' : 'opacity-70'
+                } hover:opacity-90`}
               >
                 <img 
                   src="/assets/Chartlogo.png" 
                   alt="View Charts"
-                  style={{
-                    width: '64px',
-                    height: '64px',
-                    objectFit: 'contain'
-                  }}
+                  className="w-16 h-16 object-contain"
                 />
               </button>
               
               {/* Chart availability indicator */}
               {hasChartData && (
-                <div style={{
-                  position: 'absolute',
-                  top: '8px',
-                  right: '8px',
-                  width: '12px',
-                  height: '12px',
-                  borderRadius: '50%',
-                  backgroundColor: '#10b981',
-                  border: '2px solid white',
-                  boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
-                }} />
+                <div className="absolute top-2 right-2 w-3 h-3 rounded-full bg-emerald-500 border-2 border-white shadow-sm" />
               )}
               
               {/* Back indicator - clickable to return to search */}
               {!hasChartData && (
-                <div style={{
-                  position: 'absolute',
-                  bottom: '-2px',
-                  right: '8px',
-                  fontSize: '9px',
-                  color: '#6b7280',
-                  fontWeight: '500',
-                  textAlign: 'center'
-                }}>
+                <div className="absolute -bottom-0.5 right-2 text-[9px] text-gray-500 font-medium text-center">
                   ← Back
                 </div>
               )}
@@ -809,92 +655,47 @@ const FullScreenChat = forwardRef<FullScreenChatRef, FullScreenChatProps>(({
         </div>
         
         {/* Header */}
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: isMobile ? '8px 16px' : '12px 24px',
-          borderBottom: '1px solid #e5e7eb',
-          backgroundColor: '#ffffff',
-          flexShrink: 0
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', width: 'fit-content' }}>
-            <h1 style={{
-              margin: 0,
-              fontSize: isMobile ? '16px' : '18px',
-              fontWeight: '600',
-              color: '#1f2937',
-              whiteSpace: 'nowrap'
-            }}>
+        <div className={`flex items-center justify-between ${
+          isMobile ? 'px-4 py-2' : 'px-6 py-3'
+        } border-b border-gray-200 bg-white flex-shrink-0`}>
+          <div className="flex items-center gap-3 w-fit">
+            <h1 className={`m-0 ${
+              isMobile ? 'text-base' : 'text-lg'
+            } font-semibold text-gray-800 whitespace-nowrap`}>
               Ask WiHY{' '}
-              <span style={{
-                fontSize: isMobile ? '12px' : '14px',
-                fontWeight: '500',
-                color: '#6b7280'
-              }}>
+              <span className={`${
+                isMobile ? 'text-xs' : 'text-sm'
+              } font-medium text-gray-500`}>
                 (pro·nounced why)
               </span>
             </h1>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div className="flex items-center gap-3">
             {/* Header actions can be added here if needed */}
           </div>
         </div>
 
         {/* Messages Container - Single scroll area */}
-        <div style={{
-          flex: 1,
-          display: 'flex',
-          flexDirection: 'column',
-          overflow: 'hidden'
-        }}>
-          <div style={{
-            flex: 1,
-            overflowY: 'auto',
-            overflowX: 'hidden',
-            padding: isMobile ? '16px' : '24px',
-            maxWidth: isMobile ? '100%' : '768px',
-            margin: '0 auto',
-            width: '100%',
-            scrollBehavior: 'smooth'
-          }}>
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <div className={`flex-1 overflow-y-auto overflow-x-hidden ${
+            isMobile ? 'p-4' : 'p-6'
+          } max-w-full ${isMobile ? '' : 'md:max-w-3xl'} mx-auto w-full scroll-smooth`}>
             {messages.length === 0 ? (
-              <div style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                height: '60vh',
-                textAlign: 'center',
-                color: '#6b7280'
-              }}>
-                <div style={{
-                  width: isMobile ? '48px' : '64px',
-                  height: isMobile ? '48px' : '64px',
-                  borderRadius: '16px',
-                  backgroundColor: '#f3f4f6',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: isMobile ? '20px' : '24px',
-                  marginBottom: '16px'
-                }}>
+              <div className="flex flex-col items-center justify-center h-[60vh] text-center text-gray-500">
+                <div className={`${
+                  isMobile ? 'w-12 h-12 text-xl' : 'w-16 h-16 text-2xl'
+                } rounded-2xl bg-gray-100 flex items-center justify-center mb-4`}>
                   💬
                 </div>
-                <h3 style={{
-                  fontSize: isMobile ? '18px' : '20px',
-                  fontWeight: '600',
-                  color: '#1f2937',
-                  margin: '0 0 8px 0'
-                }}>
+                <h3 className={`${
+                  isMobile ? 'text-lg' : 'text-xl'
+                } font-semibold text-gray-800 m-0 mb-2`}>
                   How can I help you today?
                 </h3>
-                <p style={{
-                  fontSize: isMobile ? '14px' : '16px',
-                  margin: 0,
-                  maxWidth: isMobile ? '300px' : '400px'
-                }}>
+                <p className={`${
+                  isMobile ? 'text-sm max-w-[300px]' : 'text-base max-w-sm'
+                } m-0`}>
                   Ask me anything about health, nutrition, exercise, or wellness. I'm here to provide evidence-based guidance.
                 </p>
               </div>
@@ -902,54 +703,33 @@ const FullScreenChat = forwardRef<FullScreenChatRef, FullScreenChatProps>(({
               messages.map((message) => (
                 <div
                   key={message.id}
-                  style={{
-                    display: 'flex',
-                    gap: isMobile ? '12px' : '16px',
-                    marginBottom: isMobile ? '16px' : '24px',
-                    alignItems: 'flex-start'
-                  }}
+                  className={`flex ${
+                    isMobile ? 'gap-3 mb-4' : 'gap-4 mb-6'
+                  } items-start`}
                 >
-                  <div style={{
-                    width: isMobile ? '28px' : '32px',
-                    height: isMobile ? '28px' : '32px',
-                    borderRadius: '50%',
-                    backgroundColor: message.type === 'user' ? '#10b981' : '#f3f4f6',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: message.type === 'user' ? 'white' : '#6b7280',
-                    fontSize: isMobile ? '12px' : '14px',
-                    fontWeight: 'bold',
-                    flexShrink: 0
-                  }}>
+                  <div className={`${
+                    isMobile ? 'w-7 h-7 text-xs' : 'w-8 h-8 text-sm'
+                  } rounded-full ${
+                    message.type === 'user' ? 'bg-emerald-500 text-white' : 'bg-gray-100 text-gray-500'
+                  } flex items-center justify-center font-bold flex-shrink-0`}>
                     {message.type === 'user' ? 'U' : (
                       <img
                         src="/assets/wihyfavicon.png"
                         alt="WiHy"
-                        style={{ 
-                          width: isMobile ? '16px' : '20px', 
-                          height: isMobile ? '16px' : '20px', 
-                          borderRadius: '4px' 
-                        }}
+                        className={`${
+                          isMobile ? 'w-4 h-4' : 'w-5 h-5'
+                        } rounded`}
                       />
                     )}
                   </div>
                   
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{
-                      fontSize: isMobile ? '14px' : '16px',
-                      lineHeight: '1.6',
-                      color: '#1f2937',
-                      whiteSpace: 'pre-wrap',
-                      wordWrap: 'break-word'
-                    }}>
+                  <div className="flex-1 min-w-0">
+                    <div className={`${
+                      isMobile ? 'text-sm' : 'text-base'
+                    } leading-relaxed text-gray-800 whitespace-pre-wrap break-words`}>
                       {message.message}
                     </div>
-                    <div style={{
-                      fontSize: '12px',
-                      color: '#9ca3af',
-                      marginTop: '8px'
-                    }}>
+                    <div className="text-xs text-gray-400 mt-2">
                       {formatTime(message.timestamp)}
                     </div>
                   </div>
@@ -958,62 +738,27 @@ const FullScreenChat = forwardRef<FullScreenChatRef, FullScreenChatProps>(({
             )}
 
             {isLoading && (
-              <div style={{
-                display: 'flex',
-                gap: isMobile ? '12px' : '16px',
-                marginBottom: isMobile ? '16px' : '24px',
-                alignItems: 'flex-start'
-              }}>
-                <div style={{
-                  width: isMobile ? '28px' : '32px',
-                  height: isMobile ? '28px' : '32px',
-                  borderRadius: '50%',
-                  backgroundColor: '#f3f4f6',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  flexShrink: 0
-                }}>
+              <div className={`flex ${
+                isMobile ? 'gap-3 mb-4' : 'gap-4 mb-6'
+              } items-start`}>
+                <div className={`${
+                  isMobile ? 'w-7 h-7' : 'w-8 h-8'
+                } rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0`}>
                   <img
                     src="/assets/wihyfavicon.png"
                     alt="WiHy"
-                    style={{ 
-                      width: isMobile ? '16px' : '20px', 
-                      height: isMobile ? '16px' : '20px', 
-                      borderRadius: '4px' 
-                    }}
+                    className={`${
+                      isMobile ? 'w-4 h-4' : 'w-5 h-5'
+                    } rounded`}
                   />
                 </div>
                 
-                <div style={{
-                  display: 'flex',
-                  gap: '4px',
-                  alignItems: 'center',
-                  padding: isMobile ? '8px 12px' : '12px 16px',
-                  backgroundColor: '#f9fafb',
-                  borderRadius: '12px'
-                }}>
-                  <div style={{
-                    width: '8px',
-                    height: '8px',
-                    borderRadius: '50%',
-                    backgroundColor: '#9ca3af',
-                    animation: 'typing 1.4s ease-in-out infinite'
-                  }} />
-                  <div style={{
-                    width: '8px',
-                    height: '8px',
-                    borderRadius: '50%',
-                    backgroundColor: '#9ca3af',
-                    animation: 'typing 1.4s ease-in-out infinite 0.2s'
-                  }} />
-                  <div style={{
-                    width: '8px',
-                    height: '8px',
-                    borderRadius: '50%',
-                    backgroundColor: '#9ca3af',
-                    animation: 'typing 1.4s ease-in-out infinite 0.4s'
-                  }} />
+                <div className={`flex gap-1 items-center ${
+                  isMobile ? 'px-3 py-2' : 'px-4 py-3'
+                } bg-gray-50 rounded-xl`}>
+                  <div className="w-2 h-2 rounded-full bg-gray-400 animate-typing" />
+                  <div className="w-2 h-2 rounded-full bg-gray-400 animate-typing [animation-delay:0.2s]" />
+                  <div className="w-2 h-2 rounded-full bg-gray-400 animate-typing [animation-delay:0.4s]" />
                 </div>
               </div>
             )}
@@ -1023,12 +768,13 @@ const FullScreenChat = forwardRef<FullScreenChatRef, FullScreenChatProps>(({
         </div>
 
         {/* Input */}
-        <div className="chat-input-area">
-          <div style={{
-            maxWidth: isMobile ? '100%' : '768px',
-            margin: '0 auto'
-          }}>
-            <div className="chat-input-wrapper">
+        <div className={`border-t border-gray-200 bg-white flex-shrink-0 ${
+          isMobile ? 'px-4 py-3' : 'px-6 py-4'
+        }`}>
+          <div className={`${
+            isMobile ? 'max-w-full' : 'max-w-3xl'
+          } mx-auto`}>
+            <div className="relative flex items-center gap-2">
               <div className="search-input-container chat-input-container">
                 <textarea
                   ref={inputRef}
@@ -1047,14 +793,7 @@ const FullScreenChat = forwardRef<FullScreenChatRef, FullScreenChatProps>(({
                 className={`send-button ${(!inputMessage.trim() || isLoading) ? 'disabled' : 'active'}`}
               >
                 {isLoading ? (
-                  <div style={{
-                    width: '16px',
-                    height: '16px',
-                    border: '2px solid currentColor',
-                    borderTop: '2px solid transparent',
-                    borderRadius: '50%',
-                    animation: 'spin 1s linear infinite'
-                  }} />
+                  <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
                 ) : (
                   <svg 
                     width="20" 
@@ -1087,37 +826,7 @@ const FullScreenChat = forwardRef<FullScreenChatRef, FullScreenChatProps>(({
           scrollbar-width: none;
         }
 
-        @keyframes typing {
-          0%, 60%, 100% {
-            transform: translateY(0);
-            opacity: 0.4;
-          }
-          30% {
-            transform: translateY(-6px);
-            opacity: 1;
-          }
-        }
 
-        @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
-        }
-
-        /* Chat-specific input area styling */
-        .chat-input-area {
-          padding: ${isMobile ? '12px 16px' : '16px 24px'};
-          border-top: 1px solid #e5e7eb;
-          background-color: #ffffff;
-          flex-shrink: 0;
-        }
-
-        /* Wrapper for input and button positioning */
-        .chat-input-wrapper {
-          position: relative;
-          display: flex;
-          align-items: center;
-          gap: 8px;
-        }
 
         /* Chat input container - Simple solid styling for chat */
         .chat-input-container {
