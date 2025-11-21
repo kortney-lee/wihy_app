@@ -8,8 +8,7 @@ import {
   CardShell, 
   FeatureCard, 
   MetricCard, 
-  HighlightCard, 
-  cardClasses 
+  HighlightCard
 } from './CardComponents';
 
 const CardDemo: React.FC = () => {
@@ -33,7 +32,7 @@ const CardDemo: React.FC = () => {
           <h2 className="text-2xl font-semibold text-vh-ink mb-6">CardShell Components</h2>
           <div className="grid md:grid-cols-3 gap-6">
             
-            <CardShell title="Default Card" variant="default" useTailwind={true}>
+            <CardShell title="Default Card">
               <div className="text-center">
                 <div className="text-6xl mb-4">📊</div>
                 <p className="text-vh-muted">
@@ -42,7 +41,7 @@ const CardDemo: React.FC = () => {
               </div>
             </CardShell>
 
-            <CardShell title="Elevated Card" variant="elevated" useTailwind={true}>
+            <CardShell title="Elevated Card">
               <div className="text-center">
                 <div className="text-6xl mb-4">⭐</div>
                 <p className="text-vh-muted">
@@ -51,7 +50,7 @@ const CardDemo: React.FC = () => {
               </div>
             </CardShell>
 
-            <CardShell title="Primary Card" variant="primary" useTailwind={true}>
+            <CardShell title="Primary Card">
               <div className="text-center">
                 <div className="text-6xl mb-4">🚀</div>
                 <p className="text-vh-muted">
