@@ -710,7 +710,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({
       )}
       
       {/* Main Content Area with Dashboard Layout */}
-      <div className={CSS_CLASSES.DASHBOARD_CONTAINER} style={{ paddingTop: windowWidth < 768 ? '180px' : '80px' }}>
+      <div className={CSS_CLASSES.DASHBOARD_CONTAINER} style={{ paddingTop: windowWidth < 768 ? '200px' : '100px' }}>
         <div className={CSS_CLASSES.DASHBOARD_MAIN_CONTENT}>
         
         {hasValidResults ? (
