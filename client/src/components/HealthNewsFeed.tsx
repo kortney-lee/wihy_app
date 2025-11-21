@@ -3,7 +3,6 @@ import { getAllNews, getLazyLoadedNews, NewsArticle, ARTICLES_PER_PAGE } from '.
 import { useNavigate } from 'react-router-dom';
 // import { getApiEndpoint } from '../config/apiConfig';
 import { CSS_CLASSES } from '../constants/cssConstants';
-import { combineClasses } from '../utils/cssUtils';
 import './HealthNewsFeed.css';
 
 // Update the props interface to receive the search functions
