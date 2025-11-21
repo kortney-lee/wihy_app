@@ -380,7 +380,8 @@
   }
   
   .footer-tagline,
-  .footer-disclaimer {
+  .footer-disclaimer,
+  .footer-copyright {
     font-size: 0.8rem;
   }
 }

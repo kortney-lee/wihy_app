@@ -693,7 +693,7 @@ I will translate complex health and nutrition science into simple steps you can 
             <div className="founder-image">
               <div className="founder-photo">
                 <img
-                  src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face&auto=format&q=80"
+                  src="/assets/Leaderphoto.jpg"
                   alt="Kortney O. Lee, Founder and CEO"
                   className="founder-photo-img"
                 />
@@ -973,24 +973,19 @@ I will translate complex health and nutrition science into simple steps you can 
       <footer className="investor-footer">
         <div className="footer-container">
           <div className="footer-left">
-            <div className="footer-logo">
-              <img src="/assets/wihylogo.png" alt="WIHY" className="footer-logo-img" />
-              <div className="footer-logo-text">
-                <span className="footer-brand">WIHY</span>
-                <span className="footer-tagline">Health Intelligence Platform</span>
-              </div>
-            </div>
-            <p className="footer-disclaimer">
-              © {currentYear} WIHY. All rights reserved. This page is for education and information only
-              and is not a substitute for professional medical advice.
-            </p>
+            <img src="/assets/wihylogo.png" alt="WIHY" className="footer-logo-img" />
+          </div>
+
+          <div className="footer-center">
+            <div className="footer-copyright">© {currentYear} WIHY. All rights reserved.</div>
+            <div className="footer-disclaimer">This page is for education and information only and is not a substitute for professional medical advice.</div>
           </div>
 
           <div className="footer-right">
             <div className="footer-contact">
-              <h4>Investor Relations</h4>
-              <a href="mailto:investors@wihy.ai">investors@wihy.ai</a>
-              <a href="mailto:support@wihy.ai">support@wihy.ai</a>
+              <div className="contact-title">Investor Relations</div>
+              <a href="mailto:info@vowel.org">info@vowel.org</a>
+              <a href="mailto:kortney@wihy.ai">kortney@wihy.ai</a>
             </div>
           </div>
         </div>
