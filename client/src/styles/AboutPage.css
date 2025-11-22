@@ -754,6 +754,10 @@ body {
   margin-bottom: 2rem;
 }
 
+.demo-description {
+  text-align: center;
+}
+
 .demo-cta {
   text-align: center;
   margin-top: 2rem;

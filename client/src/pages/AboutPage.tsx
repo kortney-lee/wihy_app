@@ -3,8 +3,8 @@ import Header from '../components/shared/Header';
 import FullScreenChat from '../components/ui/FullScreenChat';
 import { FeatureCard, MetricCard, HighlightCard } from '../components/shared/CardComponents';
 import { CTAButton, NavLink } from '../components/shared/ButtonComponents';
-import MacronutrientPieChart from '../components/charts/cards/MacronutrientPieChart';
-import NovaChart from '../components/charts/cards/NovaChart';
+import ResearchQualityGauge from '../components/charts/cards/ResearchQualityGauge';
+import StudyTypeDistributionChart from '../components/charts/cards/StudyTypeDistributionChart';
 import PublicationTimelineChart from '../components/charts/cards/PublicationTimelineChart';
 import '../styles/AboutPage.css';
 import '../styles/MobileAboutPage.css';
@@ -445,22 +445,23 @@ I will translate complex health and nutrition science into simple steps you can 
 
           <div className="demo-grid">
             <div className="demo-card">
-              <MacronutrientPieChart
-                data={{ protein: 25, carbohydrates: 45, fat: 30 }}
-                title="Macronutrient Analysis"
-                displayMode="percentage"
+              <ResearchQualityGauge
+                score={85}
+                studyCount={42}
+                evidenceLevel="II"
               />
-              <p className="demo-description">Instant nutrient breakdowns powered by verified data.</p>
+              <p className="demo-description">  Research quality scored from peer-reviewed studies, weighted by strength of evidence.</p>
             </div>
 
             <div className="demo-card">
-              <NovaChart query="Sample Food Item" />
-              <p className="demo-description">Precise classification through ingredient-level analysis.</p>
+              <StudyTypeDistributionChart />
+              <p className="demo-description">  Study types visualized to highlight how evidence is distributed across clinical, observational, and lab research.</p>
             </div>
 
             <div className="demo-card">
               <PublicationTimelineChart timeRange="decade" title="Research Timeline" />
-              <p className="demo-description">Research timelines across decades, updated in real-time.</p>
+              <p className="demo-description">   Publication trends over time to track how evidence is growing.
+</p>
             </div>
           </div>
 
