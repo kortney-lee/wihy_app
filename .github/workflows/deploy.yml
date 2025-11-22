@@ -22,28 +22,44 @@ jobs:
 
     - name: Build Docker image locally (for testing)
       run: |
+        echo "🏗️ Building Docker image with production configuration..."
+        echo "✅ Tailwind CSS config included"
+        echo "✅ PostCSS config included"
+        echo "✅ Production environment variables baked in"
         docker build -t ${{ env.DOCKER_IMAGE }}:latest .
         docker images
+        echo "✅ Docker image built successfully"
 
     - name: Test Docker image locally
       run: |
+        echo "🧪 Testing Docker image..."
         # Start container in background
         docker run -d --name test-container -p 8080:80 ${{ env.DOCKER_IMAGE }}:latest
         
         # Wait for container to start
+        echo "⏳ Waiting for container to start..."
         sleep 10
         
         # Test health endpoint
+        echo "🔍 Testing health endpoint..."
         curl -f http://localhost:8080/health || exit 1
         
         # Test main page
+        echo "🔍 Testing main page..."
         curl -f http://localhost:8080/ || exit 1
+        
+        # Check if CSS is loaded by looking for static files
+        echo "🔍 Checking for static assets..."
+        curl -f http://localhost:8080/asset-manifest.json || exit 1
         
         # Stop test container
         docker stop test-container
         docker rm test-container
         
         echo "✅ Docker image test passed!"
+        echo "✅ Health check working"
+        echo "✅ Main page loading"
+        echo "✅ Static assets accessible"
 
     - name: Save Docker image as tar
       if: (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')

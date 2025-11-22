@@ -61,6 +61,43 @@ PORT=3001 npm start
 ```
 Access at: **http://localhost:3001**
 
+### 🐳 Docker Deployment
+
+#### Build and Run Locally
+```bash
+# Build the Docker image
+docker build -t wihy-ui .
+
+# Run the container
+docker run -d -p 3030:80 --name wihy-ui-app wihy-ui
+
+# Access at http://localhost:3030
+```
+
+#### Docker Image Features
+- ✅ **Multi-stage build** for optimized image size
+- ✅ **Production environment variables** baked into build
+- ✅ **Tailwind CSS** and PostCSS configuration included
+- ✅ **Nginx** web server with SPA routing support
+- ✅ **Health check** endpoint at `/health`
+- ✅ **Gzip compression** enabled for assets
+- ✅ **Security headers** configured
+
+#### Docker Management
+```bash
+# Stop container
+docker stop wihy-ui-app
+
+# Remove container
+docker rm wihy-ui-app
+
+# View logs
+docker logs wihy-ui-app
+
+# Check health
+curl http://localhost:3030/health
+```
+
 ### 🎯 What Each Application Does
 
 #### **Main Health App** (localhost:3000)
