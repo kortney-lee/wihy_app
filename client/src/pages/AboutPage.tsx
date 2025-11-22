@@ -445,22 +445,18 @@ I will translate complex health and nutrition science into simple steps you can 
 
           <div className="demo-grid">
             <div className="demo-card">
-              <ResearchQualityGauge
-                score={85}
-                studyCount={42}
-                evidenceLevel="II"
-              />
-              <p className="demo-description">  Research quality scored from peer-reviewed studies, weighted by strength of evidence.</p>
+              <ResearchQualityGauge />
+              <p className="demo-description">Research quality scored from peer-reviewed studies, weighted by strength of evidence.</p>
             </div>
 
             <div className="demo-card">
               <StudyTypeDistributionChart />
-              <p className="demo-description">  Study types visualized to highlight how evidence is distributed across clinical, observational, and lab research.</p>
+              <p className="demo-description">Study types visualized to highlight how evidence is distributed across clinical, observational, and lab research.</p>
             </div>
 
             <div className="demo-card">
               <PublicationTimelineChart timeRange="decade" title="Research Timeline" />
-              <p className="demo-description">   Publication trends over time to track how evidence is growing.
+              <p className="demo-description">Publication trends over time to track how evidence is growing.
 </p>
             </div>
           </div>
