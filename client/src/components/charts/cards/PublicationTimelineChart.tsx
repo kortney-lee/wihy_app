@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -47,6 +47,7 @@ interface PublicationTimelineChartProps {
   title?: string;
   timeRange?: 'recent' | 'decade' | 'all-time';
   showTrendline?: boolean;
+  categories?: Record<string, string[]>; // Custom research categories for API
   onAnalyze?: (userMessage: string, assistantMessage: string) => void;
 }
 
@@ -57,8 +58,71 @@ const PublicationTimelineChart: React.FC<PublicationTimelineChartProps> = ({
   title = 'Research Publication Timeline',
   timeRange = 'decade',
   showTrendline = true,
+  categories,
   onAnalyze
 }) => {
+  const [apiData, setApiData] = useState<PublicationData[] | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch data from Analytics Service API
+  useEffect(() => {
+    if (publications.length === 0) {
+      const fetchAnalytics = async () => {
+        console.log('[PublicationTimelineChart] Starting API fetch...');
+        setLoading(true);
+        setError(null);
+        try {
+          const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+          console.log('[PublicationTimelineChart] API URL:', apiUrl);
+          console.log('[PublicationTimelineChart] Categories:', categories);
+          
+          const response = await fetch(`${apiUrl}/api/analytics/dashboard`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              researchCategories: categories
+            })
+          });
+          
+          console.log('[PublicationTimelineChart] Response status:', response.status);
+          
+          if (!response.ok) {
+            throw new Error(`API error: ${response.status}`);
+          }
+          
+          const data = await response.json();
+          console.log('[PublicationTimelineChart] API response:', data);
+          
+          // Extract publication timeline from analytics
+          const timelineData = data.publicationTimeline || [];
+          const formattedData: PublicationData[] = timelineData.map((item: any) => ({
+            year: item.year,
+            month: item.month,
+            count: item.count,
+            studyTypes: item.studyTypes,
+            totalStudies: item.totalStudies
+          }));
+          
+          setApiData(formattedData.length > 0 ? formattedData : null);
+        } catch (err) {
+          console.error('[PublicationTimelineChart] Failed to fetch analytics:', err);
+          setError('Failed to load publication timeline');
+          setApiData(null);
+        } finally {
+          console.log('[PublicationTimelineChart] Fetch complete');
+          setLoading(false);
+        }
+      };
+      
+      fetchAnalytics();
+    } else {
+      console.log('[PublicationTimelineChart] Using provided publications prop');
+    }
+  }, [publications.length, categories]);
+
   // Generate sample data based on timeRange
   const generateSampleData = (): PublicationData[] => {
     const currentYear = new Date().getFullYear();
@@ -123,7 +187,7 @@ const PublicationTimelineChart: React.FC<PublicationTimelineChartProps> = ({
     return data;
   };
 
-  const publicationData = publications.length > 0 ? publications : generateSampleData();
+  const publicationData = publications.length > 0 ? publications : (apiData || generateSampleData());
 
   // Chart dimensions based on size
   const dimensions = {
@@ -284,8 +348,12 @@ const PublicationTimelineChart: React.FC<PublicationTimelineChartProps> = ({
   return (
     <div className="flex flex-col p-6 rounded-2xl bg-white border border-gray-200 shadow-md h-[500px] overflow-hidden">
       <h3 className="text-2xl font-semibold text-vh-muted mb-5">
-        {title}
+        {title} {loading && <span className="text-sm text-gray-400">(Loading...)</span>}
       </h3>
+      
+      {error && (
+        <div className="text-xs text-red-500 mb-2">{error}</div>
+      )}
       
       <div className="flex-1 relative">
         <Line data={chartData} options={options} />
