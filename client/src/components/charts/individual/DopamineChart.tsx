@@ -162,7 +162,7 @@ const DopamineChart: React.FC<DopamineChartProps> = ({
     };
 
     return (
-      <div className="flex flex-col p-6 rounded-2xl bg-white border border-gray-200 shadow-md h-[400px] w-full overflow-hidden">
+      <div className="flex flex-col p-6 rounded-2xl bg-white border border-gray-200 shadow-md h-[420px] w-full overflow-hidden">
         {showLabels && (
           <h3 className="text-xl font-semibold text-gray-400 m-0 mb-5 text-left">{title} - Triggers</h3>
         )}
@@ -257,7 +257,7 @@ const DopamineChart: React.FC<DopamineChartProps> = ({
     };
 
     return (
-      <div className="flex flex-col p-6 rounded-2xl bg-white border border-gray-200 shadow-md h-[400px] w-full overflow-hidden">
+      <div className="flex flex-col p-6 rounded-2xl bg-white border border-gray-200 shadow-md h-[420px] w-full overflow-hidden">
         {showLabels && (
           <h3 className="text-xl font-semibold text-gray-400 m-0 mb-5 text-left">{title} - Activities</h3>
         )}
@@ -392,7 +392,7 @@ const DopamineChart: React.FC<DopamineChartProps> = ({
   };
 
   return (
-    <div className="flex flex-col p-6 rounded-2xl bg-white border border-gray-200 shadow-md h-[400px] w-full overflow-hidden">
+    <div className="flex flex-col p-6 rounded-2xl bg-white border border-gray-200 shadow-md h-[420px] w-full overflow-hidden">
       {showLabels && (
         <h3 className="text-xl font-semibold text-gray-400 m-0 mb-5 text-left">{title} - Levels</h3>
       )}
