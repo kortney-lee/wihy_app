@@ -2,8 +2,8 @@
 
 /* Market Opportunity Section */
 .market-section {
-  background: linear-gradient(135deg, #f8faff 0%, #e8f4f8 100%);
-  padding: 4rem 0;
+  background: #ffffff;
+  padding: 0 0 4rem 0;
 }
 
 .market-header {
@@ -79,8 +79,8 @@
 
 /* Leadership Section */
 .leadership-section {
-  padding: 4rem 0;
-  background: white;
+  background: linear-gradient(135deg, #f8faff 0%, #e8f4f8 100%);
+  padding: 0 0 4rem 0;
 }
 
 .leadership-header {
@@ -171,7 +171,7 @@
 .investment-section {
   background: linear-gradient(135deg, #f8faff 0%, #e8f4f8 100%);
   color: var(--vh-ink);
-  padding: 4rem 0;
+  padding: 0 0 4rem 0;
 }
 
 .investment-content {
