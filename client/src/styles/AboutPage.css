@@ -1,7 +1,7 @@
 /* AboutPage.css - Clean consolidated version */
 
-/* SF Pro Display Font Import */
-@import url('https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@100;200;300;400;500;600;700;800;900&display=swap');
+/* SF Pro Display Font - Using web-safe fallbacks instead of external CDN */
+/* Removed Google Fonts CDN import to fix production deployment issues */
 
 /* Import complete design system */
 @import './VHealthSearch.css';
@@ -71,7 +71,7 @@ body {
    ========================= */
 .about-page-wrapper,
 .about-page-wrapper * {
-  font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif !important;
 }
 
 /* =========================
