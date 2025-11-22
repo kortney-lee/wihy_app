@@ -128,6 +128,7 @@ jobs:
         echo "Registry: wihymlregistry"
         echo "Image: ${{ env.IMAGE_NAME }}"
         echo "SHA: ${{ github.sha }}"
+        echo "✅ Includes: Tailwind CSS, PostCSS, Production ENV vars"
         
         # Test ACR connectivity first
         echo "Testing ACR connectivity..."

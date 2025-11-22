@@ -10,10 +10,25 @@ COPY client/package*.json client/package-lock.json ./
 # Install dependencies
 RUN npm ci --no-audit --no-fund
 
-# Copy client source code
+# Copy client source code and configuration files
 COPY client/src ./src
 COPY client/public ./public
 COPY client/tsconfig.json ./tsconfig.json
+COPY client/.env.production ./.env.production
+COPY client/tailwind.config.js ./tailwind.config.js
+COPY client/postcss.config.js ./postcss.config.js
+
+# Set environment variables for build
+ENV NODE_ENV=production
+ENV REACT_APP_API_BASE_URL=https://wihy-api.azurewebsites.net/api
+ENV REACT_APP_WIHY_API_URL=https://ml.wihy.ai
+ENV REACT_APP_OPENFOODFACTS_API_URL=https://world.openfoodfacts.org
+ENV REACT_APP_ENVIRONMENT=production
+ENV REACT_APP_DEPLOYMENT_TYPE=container
+ENV REACT_APP_SERVERLESS=true
+ENV REACT_APP_DEBUG_MODE=false
+ENV REACT_APP_ENABLE_ANALYTICS=true
+ENV REACT_APP_ENABLE_CACHING=true
 
 # Build the application
 RUN npm run build
