@@ -22,15 +22,17 @@ import Spinner from '../ui/Spinner';
 import { logger } from '../../utils/logger';
 
 // Tab type definition - matches chartTypes.ts tabView values
-type SearchTab = 'overview' | 'charts' | 'nutrition' | 'research' | 'insights';
+type SearchTab = 'overview' | 'charts' | 'consumption' | 'research' | 'insights' | 'wellness' | 'fitness';
 
 // Tab configuration
 const TAB_CONFIG = {
   overview: { label: 'Overview', value: 'overview' as SearchTab },
   charts: { label: 'My Progress', value: 'charts' as SearchTab },
-  nutrition: { label: 'Nutrition', value: 'nutrition' as SearchTab },
+  consumption: { label: 'Consumption', value: 'consumption' as SearchTab },
   research: { label: 'Research', value: 'research' as SearchTab },
-  insights: { label: 'Insights', value: 'insights' as SearchTab }
+  insights: { label: 'Insights', value: 'insights' as SearchTab },
+  wellness: { label: 'Wellness', value: 'wellness' as SearchTab },
+  fitness: { label: 'Fitness', value: 'fitness' as SearchTab }
 };
 
 const TABS = Object.values(TAB_CONFIG);
@@ -827,104 +829,8 @@ const SearchResults: React.FC<SearchResultsProps> = ({
                     Your Health Snapshot
                   </h1>
                   
-                  {/* Health Snapshot Cards */}
-                  <div style={{ marginBottom: getResponsiveSpacing() }}>
-                    <QuickInsights 
-                      memberCardType="bronze"
-                      memberName="Health Enthusiast"
-                      onAnalyze={handleAddToChatConversation}
-                      data={{
-                        id: 'quick-insights',
-                        title: 'Quick Insights',
-                        chartType: 'QUICK_INSIGHTS' as any,
-                        data: {
-                          healthScore: healthMetrics.healthScore,
-                          steps: healthMetrics.steps.current.toString(),
-                          calories: healthMetrics.calories.consumed.toString(),
-                          sleep: `${healthMetrics.sleep.hours}h`,
-                          bmi: bmiData.bmi.toFixed(1),
-                          lastUpdate: new Date().toLocaleDateString(),
-                          alerts: calculateAlerts(),
-                          recommendations: calculateRecommendations()
-                        }
-                      }}
-                    />
-                  </div>
-
-                  {/* Quality Insights Section */}
-                  <div style={{ marginBottom: getResponsiveSpacing() }}>
-                    <div style={{ 
-                      display: 'grid', 
-                      gridTemplateColumns: windowWidth < 768 ? '1fr' : '1fr 1fr', 
-                      gap: windowWidth < 768 ? '16px' : '20px'
-                    }}>
-                      <ResearchQualityGauge 
-                        score={75}
-                        studyCount={42}
-                        evidenceLevel="II"
-                        onAnalyze={handleAddToChatConversation}
-                      />
-                      <ResultQualityPie 
-                        apiResponse={apiResponse}
-                        query={query}
-                        results={results}
-                        dataSource={dataSource}
-                        onAnalyze={handleAddToChatConversation}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Awards & Achievements Section */}
-                  <div style={{ marginBottom: getResponsiveSpacing() }}>
-                    <div style={{ 
-                      display: 'grid', 
-                      gridTemplateColumns: windowWidth < 480 ? '1fr' : windowWidth < 768 ? 'repeat(2, 1fr)' : 'repeat(auto-fit, minmax(280px, 1fr))', 
-                      gap: windowWidth < 768 ? '16px' : '20px'
-                    }}>
-                      <MembersCard 
-                        memberCardType="bronze"
-                        memberName="Health Enthusiast"
-                        onAnalyze={handleAddToChatConversation}
-                      />
-                      <MembersCard 
-                        memberCardType="silver"
-                        memberName="Health Enthusiast"
-                        onAnalyze={handleAddToChatConversation}
-                      />
-                      <MembersCard 
-                        memberCardType="gold"
-                        memberName="Health Enthusiast"
-                        onAnalyze={handleAddToChatConversation}
-                      />
-                      <MembersCard 
-                        memberCardType="platinum"
-                        memberName="Health Enthusiast"
-                        onAnalyze={handleAddToChatConversation}
-                      />
-                      <MembersCard 
-                        memberCardType="green"
-                        memberName="Health Enthusiast"
-                        onAnalyze={handleAddToChatConversation}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Additional Overview Cards */}
-                  <div style={{ 
-                    display: 'grid', 
-                    gridTemplateColumns: windowWidth < 768 ? '1fr' : 'repeat(auto-fit, minmax(300px, 1fr))', 
-                    gap: windowWidth < 768 ? '16px' : '20px', 
-                    marginBottom: getResponsiveSpacing() 
-                  }}>
-                    <NutritionChart 
-                      apiResponse={apiResponse}
-                      query={query}
-                      onAnalyze={handleAddToChatConversation}
-                    />
-                  </div>
-                  
-                  {/* Overview Charts */}
-                  <div style={{ marginTop: `calc(${getResponsiveSpacing()} + 16px)` }}>
+                  {/* Overview displays only 6 charts via DashboardCharts */}
+                  <div style={{ marginTop: '8px' }}>
                     <DashboardCharts 
                       period={getDashboardPeriod()} 
                       maxCards={calculateMaxCards()} 
@@ -985,7 +891,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({
                 </>
               )}
 
-              {activeTab === 'nutrition' && (
+              {activeTab === 'consumption' && (
                 <>
                   <h1 className="dashboard-title" style={{
                     fontSize: windowWidth < 768 ? '22px' : '28px',
@@ -1029,6 +935,54 @@ const SearchResults: React.FC<SearchResultsProps> = ({
                       showAllCharts={true}
                       excludeChartTypes={getExcludedChartTypes()}
                       isInsightsLayout={true}
+                      onAnalyze={handleAddToChatConversation}
+                    />
+                  </div>
+                </>
+              )}
+
+              {activeTab === 'wellness' && (
+                <>
+                  <h1 className="dashboard-title" style={{
+                    fontSize: windowWidth < 768 ? '22px' : '28px',
+                    textAlign: windowWidth < 768 ? 'center' : 'left',
+                    marginBottom: windowWidth < 768 ? '12px' : '15px',
+                    marginTop: windowWidth < 768 ? '8px' : '10px',
+                    padding: windowWidth < 768 ? '0 8px' : '0'
+                  }}>
+                    Wellness & Recovery
+                  </h1>
+                  
+                  <div style={{ marginTop: '8px' }}>
+                    <DashboardCharts 
+                      period={getDashboardPeriod()} 
+                      maxCards={calculateMaxCards()} 
+                      showAllCharts={true}
+                      excludeChartTypes={getExcludedChartTypes()}
+                      onAnalyze={handleAddToChatConversation}
+                    />
+                  </div>
+                </>
+              )}
+
+              {activeTab === 'fitness' && (
+                <>
+                  <h1 className="dashboard-title" style={{
+                    fontSize: windowWidth < 768 ? '22px' : '28px',
+                    textAlign: windowWidth < 768 ? 'center' : 'left',
+                    marginBottom: windowWidth < 768 ? '12px' : '15px',
+                    marginTop: windowWidth < 768 ? '8px' : '10px',
+                    padding: windowWidth < 768 ? '0 8px' : '0'
+                  }}>
+                    Fitness & Performance
+                  </h1>
+                  
+                  <div style={{ marginTop: '8px' }}>
+                    <DashboardCharts 
+                      period={getDashboardPeriod()} 
+                      maxCards={calculateMaxCards()} 
+                      showAllCharts={true}
+                      excludeChartTypes={getExcludedChartTypes()}
                       onAnalyze={handleAddToChatConversation}
                     />
                   </div>

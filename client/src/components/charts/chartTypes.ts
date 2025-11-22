@@ -62,20 +62,23 @@ export interface ChartTypeConfig {
   label: string;
   priority: number;
   requiresData: boolean;
-  category: 'health' | 'activity' | 'nutrition' | 'research' | 'mind';
-  tabView: ('overview' | 'charts' | 'nutrition' | 'research' | 'insights')[];
+  category: 'health' | 'activity' | 'nutrition' | 'research' | 'mind' | 'wellness' | 'fitness';
+  tabView: ('overview' | 'charts' | 'consumption' | 'research' | 'insights' | 'wellness' | 'fitness')[];
   description?: string;
 }
 
 /**
  * Complete chart type configurations organized by tab:
- * 📊 My Progress: General health + activity + daily tracking visuals
- * 🥗 Nutrition: All diet, macro/micro, and food classification data  
- * 💡 Insights: Behavioral, mood, coaching, and adaptive guidance layer
+ * 📊 Overview: Entry point with 6 essential health indicators
+ * 📈 My Progress: Empty - no charts assigned
+ * 🥗 Consumption: All diet, macro/micro, and food classification data  
+ * 🧘 Wellness: Sleep, hydration, body composition, mood, dopamine
+ * 💪 Fitness: Activity, steps, active minutes, heart rate
+ * 💡 Insights: Risk analysis, nutrition tracking, mood, dopamine
  * 🔬 Research: Evidence, literature, and study quality
  */
 export const CHART_TYPE_CONFIGS: Record<ChartType, ChartTypeConfig> = {
-  // --- OVERVIEW (keep minimal; gate via Search) ---
+  // --- OVERVIEW (minimal entry point) ---
   [ChartType.QUICK_INSIGHTS]: {
     type: ChartType.QUICK_INSIGHTS,
     label: 'Quick Insights',
@@ -83,7 +86,7 @@ export const CHART_TYPE_CONFIGS: Record<ChartType, ChartTypeConfig> = {
     requiresData: false, // render even with partial context
     category: 'health',
     tabView: ['overview'],
-    description: 'Essential health overview and quick navigation'
+    description: 'Entry point summary with key health indicators'
   },
 
   // --- HEALTH: MY PROGRESS + INSIGHTS ---
@@ -93,8 +96,8 @@ export const CHART_TYPE_CONFIGS: Record<ChartType, ChartTypeConfig> = {
     priority: 85,
     requiresData: true,
     category: 'health',
-    tabView: ['charts'],
-    description: 'Body Mass Index analysis and health domain insights'
+    tabView: ['overview'],
+    description: 'Weight category context and BMI analysis'
   },
   [ChartType.HEALTH_RISK]: {
     type: ChartType.HEALTH_RISK,
@@ -108,11 +111,11 @@ export const CHART_TYPE_CONFIGS: Record<ChartType, ChartTypeConfig> = {
   [ChartType.HEALTH_SCORE]: {
     type: ChartType.HEALTH_SCORE,
     label: 'Health Score',
-    priority: 79,
+    priority: 90,
     requiresData: true,
     category: 'health',
-    tabView: ['charts'],
-    description: 'Overall health score gauge and metrics'
+    tabView: ['overview'],
+    description: 'Global health gauge and overall wellness score'
   },
   [ChartType.CURRENT_WEIGHT]: {
     type: ChartType.CURRENT_WEIGHT,
@@ -120,7 +123,7 @@ export const CHART_TYPE_CONFIGS: Record<ChartType, ChartTypeConfig> = {
     priority: 78,
     requiresData: true,
     category: 'health',
-    tabView: ['charts'],
+    tabView: [],
     description: 'Current weight and goal tracking'
   },
   [ChartType.WEIGHT_TREND]: {
@@ -129,7 +132,7 @@ export const CHART_TYPE_CONFIGS: Record<ChartType, ChartTypeConfig> = {
     priority: 75,
     requiresData: true,
     category: 'health',
-    tabView: ['charts'],
+    tabView: [],
     description: 'Weight progression over time'
   },
   [ChartType.BLOOD_PRESSURE]: {
@@ -138,7 +141,7 @@ export const CHART_TYPE_CONFIGS: Record<ChartType, ChartTypeConfig> = {
     priority: 76,
     requiresData: true,
     category: 'health',
-    tabView: ['charts'],
+    tabView: [],
     description: 'Systolic and diastolic blood pressure monitoring'
   },
   [ChartType.BMI_BODY_FAT]: {
@@ -147,7 +150,7 @@ export const CHART_TYPE_CONFIGS: Record<ChartType, ChartTypeConfig> = {
     priority: 73,
     requiresData: true,
     category: 'health',
-    tabView: ['charts'],
+    tabView: ['wellness'],
     description: 'BMI and body fat percentage analysis'
   },
   [ChartType.HEALTH_RISK_CHART]: {
@@ -156,7 +159,7 @@ export const CHART_TYPE_CONFIGS: Record<ChartType, ChartTypeConfig> = {
     priority: 81,
     requiresData: true,
     category: 'health',
-    tabView: ['charts'],
+    tabView: [],
     description: 'Detailed health risk assessment chart'
   },
 
@@ -167,7 +170,7 @@ export const CHART_TYPE_CONFIGS: Record<ChartType, ChartTypeConfig> = {
     priority: 72,
     requiresData: true,
     category: 'activity',
-    tabView: ['charts'],
+    tabView: ['fitness'],
     description: 'Comprehensive activity metrics and daily tracking visuals'
   },
   [ChartType.STEPS]: {
@@ -176,7 +179,7 @@ export const CHART_TYPE_CONFIGS: Record<ChartType, ChartTypeConfig> = {
     priority: 70,
     requiresData: true,
     category: 'activity',
-    tabView: ['charts'],
+    tabView: ['fitness'],
     description: 'Step count tracking and goals'
   },
   [ChartType.STEPS_CHART]: {
@@ -185,7 +188,7 @@ export const CHART_TYPE_CONFIGS: Record<ChartType, ChartTypeConfig> = {
     priority: 68,
     requiresData: true,
     category: 'activity',
-    tabView: ['charts'],
+    tabView: ['fitness'],
     description: 'Step count trends and historical analysis'
   },
   [ChartType.ACTIVE_MINUTES]: {
@@ -194,7 +197,7 @@ export const CHART_TYPE_CONFIGS: Record<ChartType, ChartTypeConfig> = {
     priority: 65,
     requiresData: true,
     category: 'activity',
-    tabView: ['charts'],
+    tabView: ['fitness'],
     description: 'Daily active minutes and exercise tracking'
   },
   [ChartType.SLEEP]: {
@@ -203,7 +206,7 @@ export const CHART_TYPE_CONFIGS: Record<ChartType, ChartTypeConfig> = {
     priority: 60,
     requiresData: true,
     category: 'activity',
-    tabView: ['charts'],
+    tabView: ['wellness'],
     description: 'Sleep quality and duration summary'
   },
   [ChartType.SLEEP_CHART]: {
@@ -212,7 +215,7 @@ export const CHART_TYPE_CONFIGS: Record<ChartType, ChartTypeConfig> = {
     priority: 62,
     requiresData: true,
     category: 'activity',
-    tabView: ['charts'],
+    tabView: ['wellness'],
     description: 'Detailed sleep pattern analysis'
   },
   [ChartType.HYDRATION]: {
@@ -221,7 +224,7 @@ export const CHART_TYPE_CONFIGS: Record<ChartType, ChartTypeConfig> = {
     priority: 55,
     requiresData: true,
     category: 'activity',
-    tabView: ['charts'],
+    tabView: ['wellness', 'consumption'],
     description: 'Daily water intake summary'
   },
   [ChartType.HYDRATION_CHART]: {
@@ -230,7 +233,7 @@ export const CHART_TYPE_CONFIGS: Record<ChartType, ChartTypeConfig> = {
     priority: 65,
     requiresData: true,
     category: 'activity',
-    tabView: ['charts'],
+    tabView: ['wellness', 'consumption'],
     description: 'Daily hydration tracking and analysis'
   },
   [ChartType.HEART_RATE]: {
@@ -239,7 +242,7 @@ export const CHART_TYPE_CONFIGS: Record<ChartType, ChartTypeConfig> = {
     priority: 68,
     requiresData: true,
     category: 'activity',
-    tabView: ['charts'],
+    tabView: ['fitness'],
     description: 'Heart rate monitoring and zone analysis'
   },
 
@@ -247,11 +250,11 @@ export const CHART_TYPE_CONFIGS: Record<ChartType, ChartTypeConfig> = {
   [ChartType.CALORIES]: {
     type: ChartType.CALORIES,
     label: 'Calories (Card)',
-    priority: 50,
+    priority: 80,
     requiresData: true,
     category: 'nutrition',
-    tabView: ['nutrition', 'charts'],
-    description: 'Caloric intake vs expenditure summary - shared between My Progress and Nutrition'
+    tabView: ['overview', 'consumption'],
+    description: "Today's caloric intake vs target - simple card view"
   },
   [ChartType.CALORIES_CHART]: {
     type: ChartType.CALORIES_CHART,
@@ -259,8 +262,8 @@ export const CHART_TYPE_CONFIGS: Record<ChartType, ChartTypeConfig> = {
     priority: 55,
     requiresData: true,
     category: 'nutrition',
-    tabView: ['nutrition', 'charts'],
-    description: 'Calorie burn and intake analysis - shared between My Progress and Nutrition'
+    tabView: ['consumption'],
+    description: 'Calorie burn and intake analysis'
   },
   [ChartType.NUTRITION]: {
     type: ChartType.NUTRITION,
@@ -268,8 +271,8 @@ export const CHART_TYPE_CONFIGS: Record<ChartType, ChartTypeConfig> = {
     priority: 45,
     requiresData: true,
     category: 'nutrition',
-    tabView: ['nutrition', 'charts'],
-    description: 'Comprehensive nutritional analysis - shared between My Progress and Nutrition'
+    tabView: ['consumption'],
+    description: 'Comprehensive nutritional analysis'
   },
   [ChartType.NUTRITION_TRACKING]: {
     type: ChartType.NUTRITION_TRACKING,
@@ -277,7 +280,7 @@ export const CHART_TYPE_CONFIGS: Record<ChartType, ChartTypeConfig> = {
     priority: 52,
     requiresData: true,
     category: 'nutrition',
-    tabView: ['nutrition', 'insights'],
+    tabView: ['consumption', 'insights'],
     description: 'Longitudinal intake trends for behavioral and adaptive guidance'
   },
   [ChartType.MACRONUTRIENTS]: {
@@ -286,7 +289,7 @@ export const CHART_TYPE_CONFIGS: Record<ChartType, ChartTypeConfig> = {
     priority: 40,
     requiresData: true,
     category: 'nutrition',
-    tabView: ['nutrition', 'insights'],
+    tabView: ['consumption', 'insights'],
     description: 'Habit-linked macro balance for behavioral coaching'
   },
   [ChartType.VITAMIN_CONTENT]: {
@@ -295,7 +298,7 @@ export const CHART_TYPE_CONFIGS: Record<ChartType, ChartTypeConfig> = {
     priority: 15,
     requiresData: true,
     category: 'nutrition',
-    tabView: ['nutrition'],
+    tabView: ['consumption'],
     description: 'Micronutrient content and food classification data'
   },
   [ChartType.DAILY_VALUE_PROGRESS]: {
@@ -304,17 +307,17 @@ export const CHART_TYPE_CONFIGS: Record<ChartType, ChartTypeConfig> = {
     priority: 10,
     requiresData: true,
     category: 'nutrition',
-    tabView: ['nutrition'],
+    tabView: ['consumption'],
     description: 'Percent DV progress across macro/micro nutrients'
   },
   [ChartType.NUTRITION_GRADE_BADGE]: {
     type: ChartType.NUTRITION_GRADE_BADGE,
     label: 'Nutrition Grade',
-    priority: 48,
+    priority: 75,
     requiresData: true,
     category: 'nutrition',
-    tabView: ['nutrition', 'charts'],
-    description: 'Nutrition quality grade badge - shared between My Progress and Nutrition'
+    tabView: ['overview', 'consumption'],
+    description: "Quality badge for today's nutrition - overview summary"
   },
 
   // --- MIND/BEHAVIOR: INSIGHTS ---
@@ -322,9 +325,9 @@ export const CHART_TYPE_CONFIGS: Record<ChartType, ChartTypeConfig> = {
     type: ChartType.DOPAMINE,
     label: 'Dopamine Levels',
     priority: 35,
-    requiresData: false, // can render with modeled/estimated series
+    requiresData: false,
     category: 'mind',
-    tabView: ['insights'],
+    tabView: ['insights', 'wellness'],
     description: 'Behavioral reward & craving patterns for adaptive guidance'
   },
   [ChartType.MOOD_CHART]: {
@@ -333,7 +336,7 @@ export const CHART_TYPE_CONFIGS: Record<ChartType, ChartTypeConfig> = {
     priority: 38,
     requiresData: false,
     category: 'mind',
-    tabView: ['insights'],
+    tabView: ['insights', 'wellness'],
     description: 'Mood, energy, and stress trends for behavioral coaching'
   },
 
@@ -342,10 +345,10 @@ export const CHART_TYPE_CONFIGS: Record<ChartType, ChartTypeConfig> = {
     type: ChartType.MEMBERS_CARD,
     label: 'Awards & Achievements',
     priority: 95,
-    requiresData: true, // Only show if user has awards/membership
+    requiresData: true,
     category: 'health',
-    tabView: ['overview', 'charts'],
-    description: 'Display user awards, achievements, and membership badges - only shown for users with earned awards'
+    tabView: ['overview'],
+    description: 'Awards and status - green badge only in overview'
   },
 
   // --- RESEARCH: MULTI-TAB NOVA + RESEARCH ---
@@ -355,8 +358,8 @@ export const CHART_TYPE_CONFIGS: Record<ChartType, ChartTypeConfig> = {
     priority: 20,
     requiresData: true,
     category: 'research',
-    tabView: ['charts', 'nutrition', 'research'], // My Progress (badge view), Nutrition (full data), Research (evidence)
-    description: 'Food processing classification - badge view in My Progress, full data in Nutrition, evidence in Research'
+    tabView: ['consumption'],
+    description: 'Food processing classification'
   },
   [ChartType.RESEARCH_QUALITY]: {
     type: ChartType.RESEARCH_QUALITY,
@@ -418,7 +421,7 @@ export function getChartTypesByCategory(
  * Get chart types by tab view (Search-level grouping)
  */
 export function getChartTypesByTab(
-  tab: 'overview' | 'charts' | 'nutrition' | 'research' | 'insights' | 'all'
+  tab: 'overview' | 'charts' | 'consumption' | 'research' | 'insights' | 'wellness' | 'fitness' | 'all'
 ): ChartTypeConfig[] {
   if (tab === 'all') return getChartTypesByPriority();
   return Object.values(CHART_TYPE_CONFIGS)

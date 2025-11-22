@@ -156,8 +156,8 @@ const MacronutrientPieChart: React.FC<MacronutrientPieChartProps> = ({
   };
 
   return (
-    <div className="flex flex-col p-6 rounded-2xl bg-white border border-gray-200 shadow-md h-96 md:h-80 overflow-hidden text-center">
-      <h3 className="text-2xl font-semibold text-vh-muted mb-5">
+    <div className="flex flex-col p-6 rounded-2xl bg-white border border-gray-200 h-[420px] overflow-hidden text-center">
+      <h3 className="text-xl font-semibold text-gray-400 mb-5">
         {title}
       </h3>
       
