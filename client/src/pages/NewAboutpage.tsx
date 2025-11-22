@@ -6,7 +6,6 @@ import { CTAButton, NavLink } from '../components/shared/ButtonComponents';
 import MacronutrientPieChart from '../components/charts/cards/MacronutrientPieChart';
 import NovaChart from '../components/charts/cards/NovaChart';
 import PublicationTimelineChart from '../components/charts/cards/PublicationTimelineChart';
-import '../styles/wihy-tailwind.css';
 
 const NewAboutpage: React.FC = () => {
   const currentYear = new Date().getFullYear();
