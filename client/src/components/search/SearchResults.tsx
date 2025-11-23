@@ -11,6 +11,7 @@ import QuickInsights from '../charts/cards/QuickInsights';
 import BloodPressureChart from '../charts/individual/BloodPressureChart';
 import { ChartType, CHART_TYPE_CONFIGS, getChartTypesByPriority, getChartTypesByTab } from '../charts/chartTypes';
 import FullScreenChat, { FullScreenChatRef } from '../ui/FullScreenChat';
+import MyProgressDashboard, { WihyCoachModel } from '../dashboard/MyProgressDashboard';
 import { CSS_CLASSES } from '../../constants/cssConstants';
 import '../../styles/VHealthSearch.css';
 import '../../styles/Dashboard.css';
@@ -199,6 +200,88 @@ const SearchResults: React.FC<SearchResultsProps> = ({
   const [isChatOpen, setIsChatOpen] = useState(false);
   const chatRef = useRef<FullScreenChatRef>(null);
   const [activeTab, setActiveTab] = useState<SearchTab>('overview');
+
+  // Mock coach data for My Progress tab
+  const mockCoachData: WihyCoachModel = {
+    summary: "You're on track with your fitness goals today!",
+    motivation: "Keep up the great work! 💪",
+    priorities: [
+      { id: "p1", title: "Morning Workout", icon: "🏃", description: "30 min cardio" },
+      { id: "p2", title: "Hydration Goal", icon: "💧", description: "8 cups today" },
+      { id: "p3", title: "Balanced Meals", icon: "🥗", description: "Track macros" }
+    ],
+    actions: [
+      { 
+        id: "a1", 
+        type: "workout", 
+        title: "Complete morning cardio", 
+        description: "Get your heart rate up",
+        status: "completed",
+        meta: "30 min"
+      },
+      { 
+        id: "a2", 
+        type: "meal", 
+        title: "Log breakfast", 
+        description: "Track your morning meal",
+        status: "completed",
+        meta: "400 cal"
+      },
+      { 
+        id: "a3", 
+        type: "hydration", 
+        title: "Drink water", 
+        description: "Stay hydrated throughout the day",
+        status: "in_progress",
+        meta: "4/8 cups"
+      },
+      { 
+        id: "a4", 
+        type: "habit", 
+        title: "Evening stretch routine", 
+        description: "Flexibility and recovery",
+        status: "pending",
+        meta: "15 min"
+      }
+    ],
+    workout: {
+      title: "Upper Body Strength",
+      durationLabel: "35–40 min",
+      intensityLabel: "Moderate",
+      steps: [
+        { id: "s1", label: "Warm-up", detail: "5 min dynamic stretches" },
+        { id: "s2", label: "Push-ups", detail: "3 sets of 12 reps" },
+        { id: "s3", label: "Dumbbell rows", detail: "3 sets of 10 reps each arm" },
+        { id: "s4", label: "Shoulder press", detail: "3 sets of 10 reps" },
+        { id: "s5", label: "Cool-down", detail: "5 min stretching" }
+      ]
+    },
+    consumption: {
+      mealsLogged: 2,
+      mealsPlanned: 4,
+      calories: 850,
+      caloriesTarget: 2000,
+      protein: 45,
+      proteinTarget: 150
+    },
+    hydration: {
+      cups: 4,
+      goalCups: 8
+    },
+    streaks: [
+      { id: "str1", label: "7 day workout streak", icon: "🔥" },
+      { id: "str2", label: "5 day meal tracking", icon: "✅" }
+    ],
+    checkin: {
+      question: "How are you feeling today?",
+      inputType: "mood"
+    },
+    education: {
+      title: "Benefits of Progressive Overload",
+      summary: "Learn how gradually increasing weight, frequency, or reps can boost muscle growth and strength gains.",
+      linkLabel: "Read More →"
+    }
+  };
 
   // Tab bar styles - Responsive with mobile-friendly touch targets
   const tabBarStyles = {
@@ -844,25 +927,14 @@ const SearchResults: React.FC<SearchResultsProps> = ({
 
               {activeTab === 'charts' && (
                 <>
-                  <h1 className="dashboard-title" style={{
-                    fontSize: windowWidth < 768 ? '22px' : '28px',
-                    textAlign: windowWidth < 768 ? 'center' : 'left',
-                    marginBottom: windowWidth < 768 ? '12px' : '15px',
-                    marginTop: windowWidth < 768 ? '8px' : '10px',
-                    padding: windowWidth < 768 ? '0 8px' : '0'
-                  }}>
-                    Activity & Movement Trends
-                  </h1>
-                  
-                  <div style={{ marginTop: '8px' }}>
-                    <DashboardCharts 
-                      period={getDashboardPeriod()} 
-                      maxCards={calculateMaxCards()} 
-                      showAllCharts={true}
-                      excludeChartTypes={getExcludedChartTypes()}
-                      onAnalyze={handleAddToChatConversation}
-                    />
-                  </div>
+                  <MyProgressDashboard 
+                    coach={mockCoachData}
+                    onToggleAction={(actionId) => console.log('Toggle action:', actionId)}
+                    onStartWorkout={() => console.log('Start workout')}
+                    onAddHydration={() => console.log('Add hydration')}
+                    onLogMeal={() => console.log('Log meal')}
+                    onEducationClick={() => console.log('Education clicked')}
+                  />
                 </>
               )}
 
