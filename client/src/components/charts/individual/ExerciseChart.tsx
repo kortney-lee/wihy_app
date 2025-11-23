@@ -1,17 +1,5 @@
 import React, { useMemo } from 'react';
-import {
-  ResponsiveContainer,
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  BarChart,
-  Bar,
-  ReferenceLine
-} from 'recharts';
+import AnalyzeWithWihyButton from '../shared/AnalyzeWithWihyButton';
 
 interface ExerciseData {
   date: string;
@@ -61,127 +49,63 @@ export const ExerciseChart: React.FC<ExerciseChartProps> = ({
     };
   }, [mockData]);
 
-  const formatTooltip = (value: any, name: string) => {
-    if (name === 'duration') return [`${value} min`, 'Duration'];
-    if (name === 'calories') return [`${value} cal`, 'Calories'];
-    if (name === 'intensity') return [`${value}/10`, 'Intensity'];
-    return [value, name];
-  };
-
-  const renderChart = () => {
-    if (type === 'bar') {
-      return (
-        <BarChart data={mockData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#e0e4e7" />
-          <XAxis 
-            dataKey="date" 
-            stroke="#64748b"
-            fontSize={12}
-          />
-          <YAxis stroke="#64748b" fontSize={12} />
-          <Tooltip 
-            formatter={formatTooltip}
-            labelStyle={{ color: '#1e293b' }}
-            contentStyle={{ 
-              backgroundColor: '#ffffff',
-              border: '1px solid #e2e8f0',
-              borderRadius: '8px'
-            }}
-          />
-          <Legend />
-          <Bar dataKey="duration" fill="#3b82f6" name="Duration (min)" radius={[2, 2, 0, 0]} />
-          <Bar dataKey="calories" fill="#ef4444" name="Calories" radius={[2, 2, 0, 0]} />
-        </BarChart>
-      );
-    }
-
-    return (
-      <LineChart data={mockData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-        <CartesianGrid strokeDasharray="3 3" stroke="#e0e4e7" />
-        <XAxis 
-          dataKey="date" 
-          stroke="#64748b"
-          fontSize={12}
-        />
-        <YAxis stroke="#64748b" fontSize={12} />
-        <Tooltip 
-          formatter={formatTooltip}
-          labelStyle={{ color: '#1e293b' }}
-          contentStyle={{ 
-            backgroundColor: '#ffffff',
-            border: '1px solid #e2e8f0',
-            borderRadius: '8px'
-          }}
-        />
-        <Legend />
-        <Line 
-          type="monotone" 
-          dataKey="duration" 
-          stroke="#3b82f6" 
-          strokeWidth={2}
-          dot={{ r: 4 }}
-          activeDot={{ r: 6 }}
-          name="Duration (min)"
-        />
-        <Line 
-          type="monotone" 
-          dataKey="calories" 
-          stroke="#ef4444" 
-          strokeWidth={2}
-          dot={{ r: 4 }}
-          activeDot={{ r: 6 }}
-          name="Calories"
-        />
-        <Line 
-          type="monotone" 
-          dataKey="intensity" 
-          stroke="#22c55e" 
-          strokeWidth={2}
-          dot={{ r: 4 }}
-          activeDot={{ r: 6 }}
-          name="Intensity"
-        />
-        <ReferenceLine y={averages.duration} stroke="#3b82f6" strokeDasharray="5 5" label="Avg Duration" />
-      </LineChart>
-    );
-  };
+  // Metrics for horizontal bar display
+  const metrics = [
+    { name: 'Duration', value: averages.duration, max: 120, unit: 'min', color: '#3b82f6' },
+    { name: 'Calories', value: averages.calories, max: 500, unit: 'cal', color: '#ef4444' },
+    { name: 'Intensity', value: averages.intensity, max: 10, unit: '/10', color: '#22c55e' }
+  ];
 
   return (
-    <div className="flex flex-col p-6 rounded-2xl bg-white border border-gray-200 shadow-md h-[420px] overflow-hidden">
-      <h3 className="text-2xl font-semibold text-gray-400 m-0 mb-5 text-center">Exercise Tracking</h3>
-      
-      <ResponsiveContainer width="100%" height={300}>
-        {renderChart()}
-      </ResponsiveContainer>
+    <div className="flex flex-col p-4 md:p-6 rounded-2xl bg-white border border-gray-200 shadow-md overflow-visible">
+      {/* Title */}
+      <h3 className="text-xl md:text-2xl font-semibold text-gray-400 m-0 mb-3 md:mb-5 text-center">
+        Exercise Tracking
+      </h3>
 
-      <div className="mt-4 text-sm text-gray-600">
-        <div className="mb-3">
-          <div className="font-semibold text-gray-700 mb-2">Key Metrics</div>
-          <div className="space-y-1">
-            <div className="flex justify-between">
-              <span>Average Duration:</span>
-              <span className="font-medium">{averages.duration} minutes</span>
+      {/* Horizontal bar chart display */}
+      <div className="flex flex-col gap-4 flex-1 overflow-visible">
+        {/* Key Metrics Section */}
+        <div className="mb-2">
+          <div className="text-base font-semibold text-gray-700 mb-3">Key Metrics</div>
+          
+          {metrics.map((metric) => (
+            <div key={metric.name} className="mb-3">
+              <div className="flex justify-between items-center mb-1">
+                <span className="text-sm font-medium text-gray-700">{metric.name}:</span>
+                <span className="text-sm font-medium text-gray-900">
+                  {metric.value} {metric.unit}
+                </span>
+              </div>
+              
+              {/* Progress bar */}
+              <div style={{
+                height: '20px',
+                backgroundColor: '#f3f4f6',
+                borderRadius: '4px',
+                position: 'relative',
+                overflow: 'hidden'
+              }}>
+                <div style={{
+                  width: `${Math.min((metric.value / metric.max) * 100, 100)}%`,
+                  height: '100%',
+                  backgroundColor: metric.color,
+                  borderRadius: '4px',
+                  transition: 'width 0.3s ease'
+                }} />
+              </div>
             </div>
-            <div className="flex justify-between">
-              <span>Average Calories:</span>
-              <span className="font-medium">{averages.calories} cal/session</span>
-            </div>
-            <div className="flex justify-between">
-              <span>Average Intensity:</span>
-              <span className="font-medium">{averages.intensity}/10</span>
-            </div>
-          </div>
+          ))}
         </div>
+      </div>
 
-        <div className="mt-4">
-          <div className="font-semibold text-gray-700 mb-2">Recommendations</div>
-          <div className="space-y-1 text-xs">
-            <div>• Aim for 150+ minutes moderate activity weekly</div>
-            <div>• Include strength training 2-3 times per week</div>
-            <div>• Maintain consistent workout schedule</div>
-            <div>• Monitor intensity to avoid overtraining</div>
-          </div>
-        </div>
+      {/* Analyze button */}
+      <div className="flex justify-center mt-6 flex-shrink-0">
+        <AnalyzeWithWihyButton
+          cardContext={`Exercise Tracking: Average duration ${averages.duration} minutes, average calories ${averages.calories} per session, average intensity ${averages.intensity}/10. Based on ${mockData.length} workout sessions.`}
+          userQuery="Analyze my exercise patterns and provide recommendations for improving my fitness routine"
+          onAnalyze={onAnalyze}
+        />
       </div>
     </div>
   );
