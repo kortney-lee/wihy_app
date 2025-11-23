@@ -1,6 +1,23 @@
 import React, { useMemo } from 'react';
 import AnalyzeWithWihyButton from '../shared/AnalyzeWithWihyButton';
 
+/* ================= Card shell ================= */
+
+function CardShell({
+  title = "",
+  children,
+}: {
+  title?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="flex flex-col p-6 rounded-2xl bg-white border border-gray-200 shadow-md h-[420px] overflow-hidden">
+      <h3 className="m-0 mb-3 text-xl font-semibold text-gray-400">{title}</h3>
+      <div className="flex flex-col items-center justify-center flex-1 overflow-hidden min-h-0">{children}</div>
+    </section>
+  );
+}
+
 interface ExerciseData {
   date: string;
   duration: number;
@@ -57,57 +74,46 @@ export const ExerciseChart: React.FC<ExerciseChartProps> = ({
   ];
 
   return (
-    <div className="flex flex-col p-4 md:p-6 rounded-2xl bg-white border border-gray-200 shadow-md overflow-visible">
-      {/* Title */}
-      <h3 className="text-xl md:text-2xl font-semibold text-gray-400 m-0 mb-3 md:mb-5 text-center">
-        Exercise Tracking
-      </h3>
-
-      {/* Horizontal bar chart display */}
-      <div className="flex flex-col gap-4 flex-1 overflow-visible">
-        {/* Key Metrics Section */}
-        <div className="mb-2">
-          <div className="text-base font-semibold text-gray-700 mb-3">Key Metrics</div>
-          
-          {metrics.map((metric) => (
-            <div key={metric.name} className="mb-3">
-              <div className="flex justify-between items-center mb-1">
-                <span className="text-sm font-medium text-gray-700">{metric.name}:</span>
-                <span className="text-sm font-medium text-gray-900">
-                  {metric.value} {metric.unit}
-                </span>
-              </div>
-              
-              {/* Progress bar */}
-              <div style={{
-                height: '20px',
-                backgroundColor: '#f3f4f6',
-                borderRadius: '4px',
-                position: 'relative',
-                overflow: 'hidden'
-              }}>
-                <div style={{
-                  width: `${Math.min((metric.value / metric.max) * 100, 100)}%`,
-                  height: '100%',
-                  backgroundColor: metric.color,
-                  borderRadius: '4px',
-                  transition: 'width 0.3s ease'
-                }} />
-              </div>
+    <CardShell title="Exercise Tracking">
+      {/* Metrics display without label */}
+      <div className="w-full max-w-[280px] mb-2">
+        {metrics.map((metric) => (
+          <div key={metric.name} className="mb-3">
+            <div className="flex justify-between items-center mb-1">
+              <span className="text-sm font-medium text-gray-700">{metric.name}:</span>
+              <span className="text-sm font-medium text-gray-900">
+                {metric.value} {metric.unit}
+              </span>
             </div>
-          ))}
-        </div>
+            
+            {/* Progress bar */}
+            <div style={{
+              height: '20px',
+              backgroundColor: '#f3f4f6',
+              borderRadius: '4px',
+              position: 'relative',
+              overflow: 'hidden'
+            }}>
+              <div style={{
+                width: `${Math.min((metric.value / metric.max) * 100, 100)}%`,
+                height: '100%',
+                backgroundColor: metric.color,
+                borderRadius: '4px',
+                transition: 'width 0.3s ease'
+              }} />
+            </div>
+          </div>
+        ))}
       </div>
 
-      {/* Analyze button */}
-      <div className="flex justify-center mt-6 flex-shrink-0">
+      <div className="flex justify-center mt-2 flex-shrink-0">
         <AnalyzeWithWihyButton
           cardContext={`Exercise Tracking: Average duration ${averages.duration} minutes, average calories ${averages.calories} per session, average intensity ${averages.intensity}/10. Based on ${mockData.length} workout sessions.`}
           userQuery="Analyze my exercise patterns and provide recommendations for improving my fitness routine"
           onAnalyze={onAnalyze}
         />
       </div>
-    </div>
+    </CardShell>
   );
 };
 
