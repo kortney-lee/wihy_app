@@ -28,8 +28,12 @@ export enum ChartType {
   CALORIES = 'CALORIES',
   CALORIES_CHART = 'CALORIES_CHART',
   NUTRITION = 'NUTRITION',
+  NUTRITION_ANALYSIS = 'NUTRITION_ANALYSIS',
+  NUTRITION_CHART = 'NUTRITION_CHART',
   NUTRITION_TRACKING = 'NUTRITION_TRACKING',
+  NUTRITION_TRACKING_CHART = 'NUTRITION_TRACKING_CHART',
   MACRONUTRIENTS = 'MACRONUTRIENTS',
+  EXERCISE = 'EXERCISE',
 
   // Priority 30-40: Mind/behavior
   DOPAMINE = 'DOPAMINE',
@@ -123,7 +127,7 @@ export const CHART_TYPE_CONFIGS: Record<ChartType, ChartTypeConfig> = {
     priority: 78,
     requiresData: true,
     category: 'health',
-    tabView: [],
+    tabView: ['fitness'],
     description: 'Current weight and goal tracking'
   },
   [ChartType.WEIGHT_TREND]: {
@@ -132,7 +136,7 @@ export const CHART_TYPE_CONFIGS: Record<ChartType, ChartTypeConfig> = {
     priority: 75,
     requiresData: true,
     category: 'health',
-    tabView: [],
+    tabView: ['fitness'],
     description: 'Weight progression over time'
   },
   [ChartType.BLOOD_PRESSURE]: {
@@ -159,7 +163,7 @@ export const CHART_TYPE_CONFIGS: Record<ChartType, ChartTypeConfig> = {
     priority: 81,
     requiresData: true,
     category: 'health',
-    tabView: [],
+    tabView: ['insights'],
     description: 'Detailed health risk assessment chart'
   },
 
@@ -274,6 +278,24 @@ export const CHART_TYPE_CONFIGS: Record<ChartType, ChartTypeConfig> = {
     tabView: ['consumption'],
     description: 'Comprehensive nutritional analysis'
   },
+  [ChartType.NUTRITION_ANALYSIS]: {
+    type: ChartType.NUTRITION_ANALYSIS,
+    label: 'Nutrition Analysis',
+    priority: 46,
+    requiresData: true,
+    category: 'nutrition',
+    tabView: ['consumption'],
+    description: 'Detailed nutrition analysis card'
+  },
+  [ChartType.NUTRITION_CHART]: {
+    type: ChartType.NUTRITION_CHART,
+    label: 'Nutrition Chart',
+    priority: 44,
+    requiresData: true,
+    category: 'nutrition',
+    tabView: ['consumption'],
+    description: 'Macronutrient breakdown chart'
+  },
   [ChartType.NUTRITION_TRACKING]: {
     type: ChartType.NUTRITION_TRACKING,
     label: 'Nutrition Tracking - Macronutrients',
@@ -283,14 +305,32 @@ export const CHART_TYPE_CONFIGS: Record<ChartType, ChartTypeConfig> = {
     tabView: ['consumption', 'insights'],
     description: 'Longitudinal intake trends for behavioral and adaptive guidance'
   },
+  [ChartType.NUTRITION_TRACKING_CHART]: {
+    type: ChartType.NUTRITION_TRACKING_CHART,
+    label: 'Nutrition Tracking Chart',
+    priority: 51,
+    requiresData: true,
+    category: 'nutrition',
+    tabView: ['consumption', 'insights'],
+    description: 'Time-series nutrition tracking visualization'
+  },
+  [ChartType.EXERCISE]: {
+    type: ChartType.EXERCISE,
+    label: 'Exercise Chart',
+    priority: 71,
+    requiresData: true,
+    category: 'activity',
+    tabView: ['fitness'],
+    description: 'Exercise and workout tracking'
+  },
   [ChartType.MACRONUTRIENTS]: {
     type: ChartType.MACRONUTRIENTS,
     label: 'Macronutrient Breakdown',
     priority: 40,
     requiresData: true,
     category: 'nutrition',
-    tabView: ['consumption', 'insights'],
-    description: 'Habit-linked macro balance for behavioral coaching'
+    tabView: ['consumption'],
+    description: 'Macronutrient pie chart for consumption tracking'
   },
   [ChartType.VITAMIN_CONTENT]: {
     type: ChartType.VITAMIN_CONTENT,

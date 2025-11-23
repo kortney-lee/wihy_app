@@ -10,8 +10,10 @@ import DopamineChart from './individual/DopamineChart';
 import HealthRiskChart from './individual/HealthRiskChart';
 import HydrationChart from './individual/HydrationChart';
 import NutritionTrackingCard from './individual/NutritionTrackingCard';
+import NutritionTrackingChart from './individual/NutritionTrackingChart';
 import CaloriesChart from './individual/CaloriesChart';
 import HeartRateChart from './individual/HeartRateChart';
+import ExerciseChart from './individual/ExerciseChart';
 import MoodChart from './individual/MoodChart';
 import NovaChart from './cards/NovaChart';
 import NutritionChart from './cards/NutritionChart';
@@ -68,7 +70,11 @@ export const CHART_COMPONENT_REGISTRY: Record<ChartType, React.ComponentType<any
   [ChartType.MOOD_CHART]: MoodChart,
   [ChartType.MEMBERS_CARD]: MembersCard,
   [ChartType.NUTRITION]: NutritionAnalysisCard,
+  [ChartType.NUTRITION_ANALYSIS]: NutritionAnalysisCard,
+  [ChartType.NUTRITION_CHART]: NutritionChart,
   [ChartType.NUTRITION_TRACKING]: NutritionTrackingCard,
+  [ChartType.NUTRITION_TRACKING_CHART]: NutritionTrackingChart,
+  [ChartType.EXERCISE]: ExerciseChart,
   [ChartType.MACRONUTRIENTS]: MacronutrientPieChart,
   [ChartType.NOVA_SCORE]: NovaChart,
   [ChartType.RESEARCH_QUALITY]: ResearchQualityGauge,
@@ -108,7 +114,11 @@ export const DETAILED_CHART_REGISTRY: Record<ChartType, React.ComponentType<any>
   [ChartType.MOOD_CHART]: MoodChart,
   [ChartType.MEMBERS_CARD]: MembersCard,
   [ChartType.NUTRITION]: NutritionChart,
-  [ChartType.NUTRITION_TRACKING]: NutritionTrackingCard,
+  [ChartType.NUTRITION_ANALYSIS]: NutritionChart,
+  [ChartType.NUTRITION_CHART]: NutritionChart,
+  [ChartType.NUTRITION_TRACKING]: NutritionTrackingChart,
+  [ChartType.NUTRITION_TRACKING_CHART]: NutritionTrackingChart,
+  [ChartType.EXERCISE]: ExerciseChart,
   [ChartType.MACRONUTRIENTS]: MacronutrientPieChart,
   [ChartType.NOVA_SCORE]: NovaChart,
   [ChartType.RESEARCH_QUALITY]: ResearchQualityGauge,
