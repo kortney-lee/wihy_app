@@ -431,66 +431,113 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
         return;
       }
       
-      // Use Direct Upload Pattern for production
-      console.log('☁️ Using Direct Upload Pattern...');
+      // Try Direct Upload Pattern first, fallback to base64 if unavailable
       const apiUrl = 'https://services.wihy.ai';
-      const fileExtension = file.name.split('.').pop() || 'jpg';
+      let scanResult;
       
-      // Step 1: Request upload URL
-      console.log('📝 Step 1: Requesting upload URL...');
-      const urlResponse = await fetch(`${apiUrl}/api/scan/upload-url`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userId: 'web-user',
-          fileExtension: fileExtension
-        })
-      });
-      
-      if (!urlResponse.ok) {
-        throw new Error(`Failed to get upload URL: ${urlResponse.statusText}`);
-      }
-      
-      const uploadInfo = await urlResponse.json();
-      console.log('✅ Upload URL received:', uploadInfo.uploadId);
-      
-      // Step 2: Upload image directly to Azure
-      console.log('☁️ Step 2: Uploading to Azure Blob Storage...');
-      const uploadResponse = await fetch(uploadInfo.uploadUrl, {
-        method: 'PUT',
-        headers: {
-          'x-ms-blob-type': 'BlockBlob',
-          'Content-Type': file.type || 'image/jpeg'
-        },
-        body: file // Raw bytes - no base64 encoding!
-      });
-      
-      if (!uploadResponse.ok) {
-        throw new Error(`Upload failed: ${uploadResponse.status} ${uploadResponse.statusText}`);
-      }
-      
-      console.log('✅ Image uploaded successfully');
-      
-      // Step 3: Trigger analysis
-      console.log('🔬 Step 3: Triggering analysis...');
-      const analyzeResponse = await fetch(`${apiUrl}/api/scan/analyze-upload`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          uploadId: uploadInfo.uploadId,
-          user_context: {
+      try {
+        console.log('☁️ Attempting Direct Upload Pattern...');
+        const fileExtension = file.name.split('.').pop() || 'jpg';
+        
+        // Step 1: Request upload URL
+        console.log('📝 Step 1: Requesting upload URL...');
+        const urlResponse = await fetch(`${apiUrl}/api/scan/upload-url`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
             userId: 'web-user',
-            trackHistory: true,
-            include_charts: true
-          }
-        })
-      });
-      
-      if (!analyzeResponse.ok) {
-        throw new Error(`Analysis failed: ${analyzeResponse.statusText}`);
+            fileExtension: fileExtension
+          })
+        });
+        
+        const uploadInfo = await urlResponse.json();
+        
+        // Check if upload service is unavailable (503)
+        if (!urlResponse.ok || !uploadInfo.success) {
+          console.log('⚠️ Upload service unavailable, falling back to base64 method');
+          throw new Error('Upload service unavailable');
+        }
+        
+        console.log('✅ Upload URL received:', uploadInfo.uploadId);
+        
+        // Step 2: Upload image directly to Azure
+        console.log('☁️ Step 2: Uploading to Azure Blob Storage...');
+        const uploadResponse = await fetch(uploadInfo.uploadUrl, {
+          method: 'PUT',
+          headers: {
+            'x-ms-blob-type': 'BlockBlob',
+            'Content-Type': file.type || 'image/jpeg'
+          },
+          body: file // Raw bytes - no base64 encoding!
+        });
+        
+        if (!uploadResponse.ok) {
+          throw new Error(`Upload failed: ${uploadResponse.status} ${uploadResponse.statusText}`);
+        }
+        
+        console.log('✅ Image uploaded successfully');
+        
+        // Step 3: Trigger analysis
+        console.log('🔬 Step 3: Triggering analysis...');
+        const analyzeResponse = await fetch(`${apiUrl}/api/scan/analyze-upload`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            uploadId: uploadInfo.uploadId,
+            user_context: {
+              userId: 'web-user',
+              trackHistory: true,
+              include_charts: true
+            }
+          })
+        });
+        
+        if (!analyzeResponse.ok) {
+          throw new Error(`Analysis failed: ${analyzeResponse.statusText}`);
+        }
+        
+        scanResult = await analyzeResponse.json();
+        
+      } catch (uploadError) {
+        // Fallback to base64 method
+        console.log('🔄 Falling back to base64 upload method...');
+        
+        // Convert file to base64
+        const reader = new FileReader();
+        const base64Promise = new Promise<string>((resolve, reject) => {
+          reader.onload = () => {
+            const base64 = reader.result as string;
+            // Remove data:image/...;base64, prefix
+            const base64Data = base64.split(',')[1];
+            resolve(base64Data);
+          };
+          reader.onerror = reject;
+        });
+        
+        reader.readAsDataURL(file);
+        const base64Data = await base64Promise;
+        
+        console.log('📤 Sending base64 image for analysis...');
+        const fallbackResponse = await fetch(`${apiUrl}/api/scan`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            image: base64Data,
+            user_context: {
+              userId: 'web-user',
+              trackHistory: true,
+              include_charts: true
+            }
+          })
+        });
+        
+        if (!fallbackResponse.ok) {
+          throw new Error(`Fallback analysis failed: ${fallbackResponse.statusText}`);
+        }
+        
+        scanResult = await fallbackResponse.json();
+        console.log('✅ Analysis complete via fallback method');
       }
-      
-      const scanResult = await analyzeResponse.json();
       console.log('✅ Analysis complete:', scanResult);
       
       if (scanResult.success && scanResult.analysis) {
