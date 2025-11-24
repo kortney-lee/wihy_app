@@ -46,6 +46,16 @@ const StudyTypeDistributionChart: React.FC<StudyTypeDistributionChartProps> = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Default to Mental Illness if no categories provided
+  const defaultCategories = {
+    'Mental Illness': [
+      'depression',
+      'anxiety',
+      'panic disorder',
+      'bipolar disorder'
+    ]
+  };
+
   // Fetch data from Analytics Service API
   useEffect(() => {
     if (studyTypes.length === 0) {
@@ -58,7 +68,8 @@ const StudyTypeDistributionChart: React.FC<StudyTypeDistributionChartProps> = ({
           const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
           const apiUrl = isLocalhost ? (process.env.REACT_APP_API_URL || 'http://localhost:5000') : 'https://services.wihy.ai';
           console.log('[StudyTypeDistributionChart] API URL:', apiUrl);
-          console.log('[StudyTypeDistributionChart] Categories:', categories);
+          const categoriesToUse = categories || defaultCategories;
+          console.log('[StudyTypeDistributionChart] Categories:', categoriesToUse);
           
           const response = await fetch(`${apiUrl}/api/analytics/dashboard`, {
             method: 'POST',
@@ -66,7 +77,7 @@ const StudyTypeDistributionChart: React.FC<StudyTypeDistributionChartProps> = ({
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-              researchCategories: categories
+              researchCategories: categoriesToUse
             })
           });
           
