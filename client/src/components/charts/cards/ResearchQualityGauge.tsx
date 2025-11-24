@@ -94,8 +94,10 @@ const ResearchQualityGauge: React.FC<ResearchQualityGaugeProps> = ({
   } | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [activeCategories, setActiveCategories] = useState<Record<string, string[]> | null>(categories || null);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>('Mental Illness');
+  const [activeCategories, setActiveCategories] = useState<Record<string, string[]> | null>(
+    categories || RESEARCH_CATEGORIES['Mental Illness']
+  );
 
   // Fetch data from Analytics Service API
   const fetchAnalytics = async (categoriesToFetch: Record<string, string[]>) => {

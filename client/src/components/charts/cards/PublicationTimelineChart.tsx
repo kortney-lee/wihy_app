@@ -65,6 +65,16 @@ const PublicationTimelineChart: React.FC<PublicationTimelineChartProps> = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Default to Mental Illness if no categories provided
+  const defaultCategories = {
+    'Mental Illness': [
+      'depression',
+      'anxiety',
+      'panic disorder',
+      'bipolar disorder'
+    ]
+  };
+
   // Fetch data from Analytics Service API
   useEffect(() => {
     if (publications.length === 0) {
@@ -77,7 +87,8 @@ const PublicationTimelineChart: React.FC<PublicationTimelineChartProps> = ({
           const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
           const apiUrl = isLocalhost ? (process.env.REACT_APP_API_URL || 'http://localhost:5000') : 'https://services.wihy.ai';
           console.log('[PublicationTimelineChart] API URL:', apiUrl);
-          console.log('[PublicationTimelineChart] Categories:', categories);
+          const categoriesToUse = categories || defaultCategories;
+          console.log('[PublicationTimelineChart] Categories:', categoriesToUse);
           
           const response = await fetch(`${apiUrl}/api/analytics/dashboard`, {
             method: 'POST',
@@ -85,7 +96,7 @@ const PublicationTimelineChart: React.FC<PublicationTimelineChartProps> = ({
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-              researchCategories: categories
+              researchCategories: categoriesToUse
             })
           });
           
