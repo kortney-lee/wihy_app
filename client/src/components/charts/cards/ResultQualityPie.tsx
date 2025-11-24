@@ -127,7 +127,30 @@ const ResultQualityPie: React.FC<ResultQualityPieProps> = ({
 
   // Evaluate when props change and we have valid data
   useEffect(() => {
-    // Handle unified API response first
+    // Handle analytics API response (research metrics)
+    if (apiResponse?.success && apiResponse?.analytics?.research_metrics?.quality_assessment) {
+      console.log('Using research quality assessment from analytics API...');
+      
+      const qualityAssessment = apiResponse.analytics.research_metrics.quality_assessment;
+      const score = qualityAssessment.overallScore / 100; // Convert to 0-1 scale
+      const verdict: Verdict = score >= 0.8 ? 'GOOD' : score >= 0.6 ? 'REVIEW' : 'BAD';
+      
+      const breakdown = qualityAssessment.breakdown || {};
+      const reasons = [
+        `Overall Score: ${qualityAssessment.overallScore}% (${qualityAssessment.qualityLevel})`,
+        `Evidence: ${qualityAssessment.evidenceGrade}`,
+        `Confidence: ${qualityAssessment.confidence}`,
+        `Evidence Strength: ${breakdown.evidenceStrength}%`,
+        `Recency: ${breakdown.recency}%`,
+        `Consensus: ${breakdown.consensus}%`,
+        `Journal Quality: ${breakdown.journalQuality}%`
+      ].filter(Boolean);
+      
+      setEvaluation({ score, verdict, reasons });
+      return;
+    }
+    
+    // Handle unified API response (food/product data)
     if (apiResponse && apiResponse.success && apiResponse.data) {
       console.log('Using unified API response for quality evaluation...');
       
@@ -164,7 +187,7 @@ const ResultQualityPie: React.FC<ResultQualityPieProps> = ({
     }
     
     // No API response available - set default evaluation
-    console.log('No unified API response available for evaluation');
+    console.log('No API response available for evaluation');
     setEvaluation({
       score: 0.20,
       verdict: 'BAD',
