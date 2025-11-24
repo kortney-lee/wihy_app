@@ -390,9 +390,9 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
     cameraInputRef.current?.click();
   };
 
-  // --- Image file processing using Wihy Services API ---
+  // --- Image file processing using Direct Upload Pattern ---
   const processFile = useCallback(async (file: File) => {
-    console.log('🔍 Processing file with Wihy Scanning Service:', file.name);
+    console.log('🔍 Processing file with Direct Upload Pattern:', file.name);
     
     // Set preview URL so user can see the uploaded image
     setPreviewUrl(URL.createObjectURL(file));
@@ -431,79 +431,115 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
         return;
       }
       
-      // First test API connectivity (production only)
-      const connectionTest = await wihyScanningService.testConnection();
-      if (!connectionTest.available) {
-        console.warn('⚠️ WiHy Scanning API not available, falling back to vision analysis');
-        console.warn('📄 Connection error:', connectionTest.error);
-        
-        // Fallback to vision analysis immediately if API is not available
-        const visionResult = await visionAnalysisService.analyzeImage(file);
-        
-        if (visionResult.success && visionResult.data) {
-          onAnalysisComplete({
-            type: 'vision_analysis',
-            scanType: 'vision',
-            data: visionResult,
-            summary: `${visionAnalysisService.formatForDisplay(visionResult)}\n\n⚠️ Note: Using basic vision analysis as food database lookup failed.`,
-            userQuery: `Uploaded image: ${file.name}`,
-            imageUrl: URL.createObjectURL(file)
-          });
-        } else {
-          onAnalysisComplete({
-            type: 'error',
-            error: 'Analysis failed. Please try again.'
-          });
-        }
-        return;
+      // Use Direct Upload Pattern for production
+      console.log('☁️ Using Direct Upload Pattern...');
+      const apiUrl = 'https://services.wihy.ai';
+      const fileExtension = file.name.split('.').pop() || 'jpg';
+      
+      // Step 1: Request upload URL
+      console.log('📝 Step 1: Requesting upload URL...');
+      const urlResponse = await fetch(`${apiUrl}/api/scan/upload-url`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: 'web-user',
+          fileExtension: fileExtension
+        })
+      });
+      
+      if (!urlResponse.ok) {
+        throw new Error(`Failed to get upload URL: ${urlResponse.statusText}`);
       }
       
-      // Use Wihy Services API for comprehensive food scanning
-      const scanResult = await wihyScanningService.scanImage(file, {
-        health_goals: ['nutrition_analysis', 'health_insights'],
-        dietary_restrictions: []
+      const uploadInfo = await urlResponse.json();
+      console.log('✅ Upload URL received:', uploadInfo.uploadId);
+      
+      // Step 2: Upload image directly to Azure
+      console.log('☁️ Step 2: Uploading to Azure Blob Storage...');
+      const uploadResponse = await fetch(uploadInfo.uploadUrl, {
+        method: 'PUT',
+        headers: {
+          'x-ms-blob-type': 'BlockBlob',
+          'Content-Type': file.type || 'image/jpeg'
+        },
+        body: file // Raw bytes - no base64 encoding!
       });
-
+      
+      if (!uploadResponse.ok) {
+        throw new Error(`Upload failed: ${uploadResponse.status} ${uploadResponse.statusText}`);
+      }
+      
+      console.log('✅ Image uploaded successfully');
+      
+      // Step 3: Trigger analysis
+      console.log('🔬 Step 3: Triggering analysis...');
+      const analyzeResponse = await fetch(`${apiUrl}/api/scan/analyze-upload`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          uploadId: uploadInfo.uploadId,
+          user_context: {
+            userId: 'web-user',
+            trackHistory: true,
+            include_charts: true
+          }
+        })
+      });
+      
+      if (!analyzeResponse.ok) {
+        throw new Error(`Analysis failed: ${analyzeResponse.statusText}`);
+      }
+      
+      const scanResult = await analyzeResponse.json();
+      console.log('✅ Analysis complete:', scanResult);
+      
       if (scanResult.success && scanResult.analysis) {
-        // Pass structured image analysis data with rich chat data
+        // Pass structured image analysis data
         onAnalysisComplete({
           type: 'image_analysis',
           scanType: 'image',
-          data: scanResult,
-          summary: wihyScanningService.formatScanResult(scanResult),
-          chatData: wihyScanningService.extractChatData(scanResult),
+          data: scanResult.analysis,
+          summary: formatScanResult(scanResult.analysis),
           userQuery: `Uploaded image: ${file.name}`,
-          imageUrl: URL.createObjectURL(file)
+          imageUrl: scanResult.analysis.metadata?.image_url || URL.createObjectURL(file)
         });
       } else {
-        // Fallback to vision analysis if scanning fails
-        console.log('📸 Falling back to vision analysis...');
-        const visionResult = await visionAnalysisService.analyzeImage(file);
-        
-        if (visionResult.success && visionResult.data) {
-          onAnalysisComplete({
-            type: 'vision_analysis',
-            scanType: 'vision',
-            data: visionResult,
-            summary: `${visionAnalysisService.formatForDisplay(visionResult)}\n\n⚠️ Note: Using basic vision analysis as food database lookup failed.`,
-            userQuery: `Uploaded image: ${file.name}`,
-            imageUrl: URL.createObjectURL(file)
-          });
-        } else {
-          onAnalysisComplete({
-            type: 'error',
-            error: scanResult.error || 'Analysis failed. Please try again.'
-          });
-        }
+        throw new Error(scanResult.error || 'Analysis failed');
       }
+      
     } catch (err) {
       console.error('❌ processFile error:', err);
       onAnalysisComplete({
         type: 'error',
-        error: 'Image analysis failed. Please try again.'
+        error: err instanceof Error ? err.message : 'Image analysis failed. Please try again.'
       });
     }
   }, [onAnalysisComplete]);
+
+  // Helper to format scan results for display
+  const formatScanResult = (analysis: any): string => {
+    if (!analysis) return 'Analysis completed';
+    
+    const metadata = analysis.metadata || {};
+    let summary = `📸 **${metadata.product_name || 'Product Analysis'}**\n\n`;
+    
+    if (metadata.health_score) {
+      summary += `🎯 Health Score: ${metadata.health_score}/100\n`;
+    }
+    
+    if (analysis.health_insights?.summary) {
+      summary += `\n${analysis.health_insights.summary}\n`;
+    }
+    
+    if (analysis.ingredients?.length > 0) {
+      summary += `\n📋 Ingredients: ${analysis.ingredients.slice(0, 5).join(', ')}`;
+      if (analysis.ingredients.length > 5) {
+        summary += ` (+${analysis.ingredients.length - 5} more)`;
+      }
+    }
+    
+    return summary;
+  };
 
   // --- handlers ---
   const onFilePicked = async (e: React.ChangeEvent<HTMLInputElement>) => {
