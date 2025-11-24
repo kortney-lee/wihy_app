@@ -141,7 +141,8 @@
     position: relative !important;
     top: auto !important;
     transform: none !important;
-    margin-top: 10px !important; /* Reduced from 20px since body padding is now smaller */
+    margin: 0 !important;
+    padding: 0 10px !important; /* Only side padding for readability */
   }
   
   /* Prevent any scroll-to-top behavior */
@@ -158,9 +159,12 @@
   /* Fix any layout shifts on mobile */
   .search-landing,
   .results-page {
-    min-height: calc(100vh - 160px) !important; /* Match mobile body padding */
+    min-height: 100vh !important;
     margin-top: 0 !important;
-    padding-top: 10px !important;
+    padding-top: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
   }
 
   /* Better mobile text sizing throughout */
@@ -388,11 +392,23 @@
   }
 }
 
-/* Mobile-specific hiding for clean news-only view */
+/* Mobile-specific adjustments - buttons now visible like desktop */
 @media (max-width: 768px) {
-  /* Hide search buttons on mobile - user should only see news */
+  /* Show search buttons on mobile - matching desktop behavior */
   .search-buttons {
-    display: none !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+    width: 100% !important;
+    max-width: 600px !important;
+    margin: 0 auto !important;
+  }
+
+  /* Ensure buttons are properly sized on mobile */
+  .search-btn {
+    width: 100% !important;
+    padding: 14px 20px !important;
+    font-size: 16px !important;
   }
 
   /* Hide category buttons on mobile - already handled in HealthNewsFeed.css but adding here for extra coverage */
@@ -402,8 +418,8 @@
 
   /* Ensure news feed takes full width and starts at top */
   .feeling-healthy-section {
-    padding-top: 0 !important;
-    margin-top: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
     width: 100% !important;
     max-width: 100vw !important;
     overflow-x: hidden !important;
@@ -545,12 +561,12 @@
      MOBILE-SPECIFIC FIXES FOR SCREENSHOT ISSUES
      =========================================== */
   
-  /* Fix 1: Login icon always visible on mobile - override scroll detection */
+  /* Fix 1: Login icon always visible - fixed position, above all overlays */
   .multi-auth-container.top-right {
-    position: absolute !important; /* Scroll with page on mobile */
+    position: fixed !important; /* Always fixed to viewport */
     top: 20px !important;
     right: 20px !important;
-    z-index: 10002 !important;
+    z-index: 10002 !important; /* Above news feed overlay (z-index: 1000) */
     opacity: 1 !important; /* Always visible */
     visibility: visible !important;
     pointer-events: auto !important;
