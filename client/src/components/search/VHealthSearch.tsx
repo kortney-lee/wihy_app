@@ -946,14 +946,12 @@ const VHealthSearch: React.FC = () => {
     }
   }, [searchQuery]);
 
-  // Auto-show news feed on mobile devices
+  // Auto-show news feed on mobile devices - REMOVED TO MATCH DESKTOP BEHAVIOR
   useEffect(() => {
     const checkMobile = () => {
       const isMobileDevice = window.innerWidth <= 768 || 'ontouchstart' in window;
       setIsMobile(isMobileDevice);
-      if (isMobileDevice && !showFeelingHealthyContent) {
-        setShowFeelingHealthyContent(true);
-      }
+      // Removed auto-show behavior - let users click "I'm Feeling Healthy" button
     };
 
     // Check on mount
@@ -965,7 +963,7 @@ const VHealthSearch: React.FC = () => {
     return () => {
       window.removeEventListener('resize', checkMobile);
     };
-  }, [showFeelingHealthyContent]);
+  }, []);
 
   // Rotating placeholder effect
   useEffect(() => {
@@ -1125,16 +1123,12 @@ const VHealthSearch: React.FC = () => {
         position: 'fixed',
         top: '20px',
         right: '20px',
-        zIndex: 1000,
-        opacity: (isScrolled && !isMobile) ? 0 : 1,
-        visibility: (isScrolled && !isMobile) ? 'hidden' : 'visible',
-        pointerEvents: (isScrolled && !isMobile) ? 'none' : 'auto',
-        transition: 'all 0.2s ease'
+        zIndex: 10002
       }}>
         <MultiAuthLogin className="main-login-button" position="top-right" />
       </div>
 
-      {/* MAIN SEARCH INTERFACE */}
+      {/* MAIN SEARCH INTERFACE - Centered on page */}
       <div className="search-container-centered">
         {/* LOGO SECTION - Shows either image logo or text fallback */}
         <div className="logo-container">
@@ -1349,17 +1343,18 @@ const VHealthSearch: React.FC = () => {
             bottom: 0,
             backgroundColor: 'rgba(255, 255, 255, 0.95)',
             backdropFilter: 'blur(2px)',
-            zIndex: 1000,
+            zIndex: 500,
             overflow: 'auto',
-            cursor: 'pointer'
+            cursor: 'pointer',
+            paddingTop: '20px'
           }}
         >
           <div 
             onClick={(e) => e.stopPropagation()}
             style={{
               maxWidth: '1200px',
-              margin: '40px auto',
-              padding: '20px',
+              margin: '0 auto',
+              padding: isMobile ? '0 10px' : '10px 20px',
               cursor: 'default'
             }}
           >
