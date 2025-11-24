@@ -54,7 +54,9 @@ const StudyTypeDistributionChart: React.FC<StudyTypeDistributionChartProps> = ({
         setLoading(true);
         setError(null);
         try {
-          const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+          // Use services.wihy.ai in production, localhost only in development
+          const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+          const apiUrl = isLocalhost ? (process.env.REACT_APP_API_URL || 'http://localhost:5000') : 'https://services.wihy.ai';
           console.log('[StudyTypeDistributionChart] API URL:', apiUrl);
           console.log('[StudyTypeDistributionChart] Categories:', categories);
           
