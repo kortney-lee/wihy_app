@@ -411,74 +411,121 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
       
       console.log('ℹ️ No barcode detected, proceeding with image analysis...');
       
-      // Check if we're in local development - skip API call to avoid CORS
+      // Check if we're in local development - use base64 fallback to avoid CORS
       const isLocalDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
       
       if (isLocalDev) {
-        console.log('🏠 Local development detected - using mock analysis');
-        // Mock analysis for local development
-        onAnalysisComplete({
-          type: 'image_analysis',
-          scanType: 'image',
-          data: {
-            success: true,
-            message: 'Local development mode - API calls bypassed'
-          },
-          summary: `📸 Image uploaded: ${file.name}\n\n⚠️ Local Development Mode\nAPI calls are bypassed in localhost to avoid CORS errors.\n\nIn production, this would analyze the image and provide:\n• Nutritional information\n• Health insights\n• Ingredient analysis`,
-          userQuery: `Uploaded image: ${file.name}`,
-          imageUrl: URL.createObjectURL(file)
+        console.log('🏠 Local development detected - using base64 fallback to avoid CORS');
+        
+        // Convert file to base64 for local development
+        const reader = new FileReader();
+        const base64Promise = new Promise<string>((resolve, reject) => {
+          reader.onload = () => {
+            const base64 = reader.result as string;
+            const base64Data = base64.split(',')[1];
+            resolve(base64Data);
+          };
+          reader.onerror = reject;
         });
+        
+        reader.readAsDataURL(file);
+        const base64Data = await base64Promise;
+        
+        const apiUrl = 'https://services.wihy.ai';
+        const fallbackResponse = await fetch(`${apiUrl}/api/scan`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            image: base64Data,
+            user_context: {
+              userId: 'web-user',
+              trackHistory: true,
+              include_charts: true
+            }
+          })
+        });
+        
+        if (!fallbackResponse.ok) {
+          // If API fails in local dev, show mock response
+          console.log('⚠️ API unavailable in local dev, showing mock response');
+          onAnalysisComplete({
+            type: 'image_analysis',
+            scanType: 'image',
+            data: {
+              success: true,
+              message: 'Local development mode - API calls bypassed'
+            },
+            summary: `📸 Image uploaded: ${file.name}\n\n⚠️ Local Development Mode\nAPI calls are bypassed in localhost to avoid CORS errors.\n\nIn production, this would analyze the image and provide:\n• Nutritional information\n• Health insights\n• Ingredient analysis`,
+            userQuery: `Uploaded image: ${file.name}`,
+            imageUrl: URL.createObjectURL(file)
+          });
+          return;
+        }
+        
+        const scanResult = await fallbackResponse.json();
+        
+        if (scanResult.success && scanResult.analysis) {
+          onAnalysisComplete({
+            type: 'image_analysis',
+            scanType: 'image',
+            data: scanResult.analysis,
+            summary: formatScanResult(scanResult.analysis),
+            userQuery: `Uploaded image: ${file.name}`,
+            imageUrl: scanResult.analysis.metadata?.image_url || URL.createObjectURL(file)
+          });
+        } else {
+          throw new Error(scanResult.error || 'Analysis failed');
+        }
         return;
       }
       
-      // Try Direct Upload Pattern first, fallback to base64 if unavailable
+      // Production: Use Direct Upload Pattern with service-managed temporary URLs
+      console.log('☁️ Production mode - using Direct Upload Pattern...');
       const apiUrl = 'https://services.wihy.ai';
-      let scanResult;
+      const fileExtension = file.name.split('.').pop() || 'jpg';
       
       try {
-        console.log('☁️ Attempting Direct Upload Pattern...');
-        const fileExtension = file.name.split('.').pop() || 'jpg';
-        
-        // Step 1: Request upload URL
-        console.log('📝 Step 1: Requesting upload URL...');
+        // Step 1: Request upload URL from service (service manages temp storage/cleanup)
+        console.log('📝 Step 1: Requesting upload URL from service...');
         const urlResponse = await fetch(`${apiUrl}/api/scan/upload-url`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             userId: 'web-user',
-            fileExtension: fileExtension
+            fileExtension: fileExtension,
+            ttl: 60 // Request 60 second TTL - service will manage cleanup
           })
         });
         
         const uploadInfo = await urlResponse.json();
         
-        // Check if upload service is unavailable (503)
+        // If upload service returns 503 or error, fall back to base64
         if (!urlResponse.ok || !uploadInfo.success) {
-          console.log('⚠️ Upload service unavailable, falling back to base64 method');
-          throw new Error('Upload service unavailable');
+          console.log('⚠️ Upload service unavailable (503), falling back to base64 method');
+          throw new Error('Upload service unavailable - using fallback');
         }
         
-        console.log('✅ Upload URL received:', uploadInfo.uploadId);
+        console.log('✅ Upload URL received (service-managed temp storage):', uploadInfo.uploadId);
         
-        // Step 2: Upload image directly to Azure
-        console.log('☁️ Step 2: Uploading to Azure Blob Storage...');
+        // Step 2: Upload image directly to service-provided URL
+        console.log('☁️ Step 2: Uploading to service-managed storage...');
         const uploadResponse = await fetch(uploadInfo.uploadUrl, {
           method: 'PUT',
           headers: {
             'x-ms-blob-type': 'BlockBlob',
             'Content-Type': file.type || 'image/jpeg'
           },
-          body: file // Raw bytes - no base64 encoding!
+          body: file // Raw bytes - efficient upload
         });
         
         if (!uploadResponse.ok) {
-          throw new Error(`Upload failed: ${uploadResponse.status} ${uploadResponse.statusText}`);
+          throw new Error(`Upload failed: ${uploadResponse.status}`);
         }
         
-        console.log('✅ Image uploaded successfully');
+        console.log('✅ Image uploaded - service will auto-cleanup after TTL');
         
-        // Step 3: Trigger analysis
-        console.log('🔬 Step 3: Triggering analysis...');
+        // Step 3: Trigger analysis using service-managed URL
+        console.log('🔬 Step 3: Triggering analysis via service...');
         const analyzeResponse = await fetch(`${apiUrl}/api/scan/analyze-upload`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -496,11 +543,26 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
           throw new Error(`Analysis failed: ${analyzeResponse.statusText}`);
         }
         
-        scanResult = await analyzeResponse.json();
+        const scanResult = await analyzeResponse.json();
+        console.log('✅ Analysis complete');
+        
+        if (scanResult.success && scanResult.analysis) {
+          onAnalysisComplete({
+            type: 'image_analysis',
+            scanType: 'image',
+            data: scanResult.analysis,
+            summary: formatScanResult(scanResult.analysis),
+            userQuery: `Uploaded image: ${file.name}`,
+            imageUrl: scanResult.analysis.metadata?.image_url || URL.createObjectURL(file)
+          });
+        } else {
+          throw new Error(scanResult.error || 'Analysis failed');
+        }
         
       } catch (uploadError) {
-        // Fallback to base64 method
-        console.log('🔄 Falling back to base64 upload method...');
+        // Fallback: Use base64 method when Direct Upload unavailable
+        console.log('🔄 Falling back to base64 upload (less efficient, no temp URL management)...');
+        console.error('Upload error:', uploadError);
         
         // Convert file to base64
         const reader = new FileReader();
@@ -535,23 +597,21 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
           throw new Error(`Fallback analysis failed: ${fallbackResponse.statusText}`);
         }
         
-        scanResult = await fallbackResponse.json();
+        const fallbackResult = await fallbackResponse.json();
         console.log('✅ Analysis complete via fallback method');
-      }
-      console.log('✅ Analysis complete:', scanResult);
-      
-      if (scanResult.success && scanResult.analysis) {
-        // Pass structured image analysis data
-        onAnalysisComplete({
-          type: 'image_analysis',
-          scanType: 'image',
-          data: scanResult.analysis,
-          summary: formatScanResult(scanResult.analysis),
-          userQuery: `Uploaded image: ${file.name}`,
-          imageUrl: scanResult.analysis.metadata?.image_url || URL.createObjectURL(file)
-        });
-      } else {
-        throw new Error(scanResult.error || 'Analysis failed');
+        
+        if (fallbackResult.success && fallbackResult.analysis) {
+          onAnalysisComplete({
+            type: 'image_analysis',
+            scanType: 'image',
+            data: fallbackResult.analysis,
+            summary: formatScanResult(fallbackResult.analysis),
+            userQuery: `Uploaded image: ${file.name}`,
+            imageUrl: fallbackResult.analysis.metadata?.image_url || URL.createObjectURL(file)
+          });
+        } else {
+          throw new Error(fallbackResult.error || 'Analysis failed');
+        }
       }
       
     } catch (err) {
