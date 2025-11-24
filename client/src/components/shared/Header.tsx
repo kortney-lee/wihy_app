@@ -559,7 +559,38 @@ const Header: React.FC<HeaderProps> = ({
   /**
    * IMAGE ANALYSIS COMPLETION HANDLER
    */
-  const handleAnalysisComplete = async (foodName: string): Promise<void> => {
+  const handleAnalysisComplete = async (foodName: string | any): Promise<void> => {
+    // Handle object results (from image analysis)
+    if (typeof foodName === 'object' && foodName !== null) {
+      // Close the upload modal
+      setIsUploadModalOpen(false);
+      
+      // Check if this is an error
+      if (foodName.type === 'error') {
+        console.error('Analysis error:', foodName.error);
+        return;
+      }
+      
+      // Check if this is an image/vision/barcode analysis result
+      const isImageResult = foodName.type && (
+        foodName.type === 'image_analysis' ||
+        foodName.type === 'vision_analysis' ||
+        foodName.type === 'barcode_scan' ||
+        foodName.type === 'product_search' ||
+        foodName.type === 'barcode_analysis'
+      );
+      
+      // If it's an image result with data, pass it to onSearchSubmit as an object
+      if (isImageResult || foodName.data || foodName.summary) {
+        if (onSearchSubmit) {
+          // Pass the entire object to the parent
+          onSearchSubmit(foodName);
+        }
+        return;
+      }
+    }
+    
+    // Handle string results (legacy behavior)
     if (!foodName || isLoading) {
       setIsUploadModalOpen(false);
       return;

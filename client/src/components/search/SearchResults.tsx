@@ -567,8 +567,68 @@ const SearchResults: React.FC<SearchResultsProps> = ({
 
   // Handle image upload completion
   const handleAnalysisComplete = (results: any) => {
+    console.log('🔍 handleAnalysisComplete called with:', {
+      results,
+      type: results?.type,
+      hasType: Boolean(results?.type),
+      resultType: typeof results,
+      hasData: Boolean(results?.data),
+      hasSummary: Boolean(results?.summary)
+    });
+    
     setIsUploadModalOpen(false);
-    if (results) {
+    if (!results) return;
+    
+    // Check if this is an error type
+    if (results.type === 'error') {
+      console.error('Analysis error:', results.error);
+      // Could show a toast notification here
+      return;
+    }
+    
+    // Check if this is an image/vision/barcode analysis result
+    // Check both by type field AND by having data/summary (defensive check)
+    const isImageResult = results.type && (
+      results.type === 'image_analysis' ||
+      results.type === 'vision_analysis' ||
+      results.type === 'barcode_scan' ||
+      results.type === 'product_search' ||
+      results.type === 'barcode_analysis'
+    );
+    
+    const hasAnalysisData = results.data || results.summary || results.chatData;
+    const hasImageMetadata = results.imageUrl || results.userQuery;
+    
+    if (isImageResult || hasImageMetadata || (hasAnalysisData && typeof results === 'object')) {
+      // Direct chat display for image/scan results
+      const userMessage = results.userQuery || 'Uploaded image';
+      
+      console.log('🔍 Opening chat with image results:', { 
+        userMessage, 
+        type: results.type,
+        isImageResult,
+        hasAnalysisData,
+        hasImageMetadata
+      });
+      
+      // Open chat directly with the results
+      if (chatRef.current) {
+        chatRef.current.addMessage(userMessage, results);
+      }
+      setIsChatOpen(true);
+      
+      console.log('✅ Chat opened successfully');
+      return; // Important: exit here
+    }
+    
+    // Only reach here if it's not an image result
+    if (typeof results === 'string') {
+      // If results is a string, use normal search flow
+      console.log('🔍 Results is string, using onNewSearch');
+      onNewSearch(results);
+    } else {
+      // For any other object type, stringify it for normal search
+      console.warn('⚠️ Unknown result type, using normal search flow:', results);
       onNewSearch(JSON.stringify(results));
     }
   };
@@ -627,10 +687,21 @@ const SearchResults: React.FC<SearchResultsProps> = ({
   };
 
   // New Universal Search handler - calls services.wihy.ai/api/search and opens FullScreenChat
-  const handleUniversalSearch = async (searchQuery: string) => {
+  const handleUniversalSearch = async (searchQuery: string | any) => {
     console.log('🔍 UNIVERSAL SEARCH initiated from SearchResults page:', { searchQuery });
     
-    if (!searchQuery.trim()) return;
+    // Handle object results (from image analysis)
+    if (typeof searchQuery === 'object' && searchQuery !== null) {
+      console.log('🔍 Received object result, routing to handleAnalysisComplete');
+      handleAnalysisComplete(searchQuery);
+      return;
+    }
+    
+    // Handle string search queries
+    if (!searchQuery || typeof searchQuery !== 'string' || !searchQuery.trim()) {
+      console.warn('⚠️ Invalid search query:', searchQuery);
+      return;
+    }
     
     try {
       logger.debug('SearchResults: Making Universal Search API call', { 

@@ -1,5 +1,7 @@
 import React, { useState, useRef, useEffect, useImperativeHandle, forwardRef } from 'react';
 import { chatService } from '../../services/chatService';
+import { wihyScanningService } from '../../services/wihyScanningService';
+import { visionAnalysisService } from '../../services/visionAnalysisService';
 import '../../styles/mobile-fixes.css';
 
 interface ChatMessage {
@@ -7,6 +9,7 @@ interface ChatMessage {
   type: 'user' | 'assistant';
   message: string;
   timestamp: Date;
+  imageUrl?: string; // Optional image URL for displaying uploaded images
 }
 
 interface FullScreenChatProps {
@@ -80,14 +83,144 @@ const FullScreenChat = forwardRef<FullScreenChatRef, FullScreenChatProps>(({
     }
   }, [isOpen, apiResponseData, initialResponse]);
 
+  // Handle paste for images
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handlePaste = async (e: ClipboardEvent) => {
+      const items = e.clipboardData?.items;
+      if (!items) return;
+
+      for (let i = 0; i < items.length; i++) {
+        if (items[i].type.indexOf('image') !== -1) {
+          e.preventDefault();
+          const blob = items[i].getAsFile();
+          if (blob && !isLoading) {
+            await processImageFile(blob);
+          }
+          break;
+        }
+      }
+    };
+
+    document.addEventListener('paste', handlePaste);
+    return () => document.removeEventListener('paste', handlePaste);
+  }, [isOpen, isLoading]);
+
+  // Handle drag and drop for images
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleDragOver = (e: DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+    };
+
+    const handleDrop = async (e: DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      
+      const files = e.dataTransfer?.files;
+      if (!files?.length) return;
+      
+      const imageFile = Array.from(files).find(f => f.type.startsWith('image/'));
+      if (imageFile && !isLoading) {
+        await processImageFile(imageFile);
+      }
+    };
+
+    document.addEventListener('dragover', handleDragOver);
+    document.addEventListener('drop', handleDrop);
+    
+    return () => {
+      document.removeEventListener('dragover', handleDragOver);
+      document.removeEventListener('drop', handleDrop);
+    };
+  }, [isOpen, isLoading]);
+
+  // Process uploaded/pasted image file
+  const processImageFile = async (file: File) => {
+    setIsLoading(true);
+    
+    try {
+      // Create object URL for display
+      const imageUrl = URL.createObjectURL(file);
+      
+      // Add user message with image
+      const userMessage: ChatMessage = {
+        id: Date.now().toString(),
+        type: 'user',
+        message: `Uploaded image: ${file.name}`,
+        timestamp: new Date(),
+        imageUrl: imageUrl
+      };
+      setMessages(prev => [...prev, userMessage]);
+      
+      // Try API analysis first
+      const connectionTest = await wihyScanningService.testConnection();
+      let analysisResult;
+      
+      if (connectionTest.available) {
+        analysisResult = await wihyScanningService.scanImage(file, {
+          health_goals: ['nutrition_analysis', 'health_insights'],
+          dietary_restrictions: []
+        });
+      } else {
+        // Fallback to vision analysis
+        analysisResult = await visionAnalysisService.analyzeImage(file);
+      }
+      
+      // Format response
+      let responseMessage = '';
+      if (analysisResult.success) {
+        if (analysisResult.analysis) {
+          responseMessage = wihyScanningService.formatScanResult(analysisResult);
+        } else if (analysisResult.data) {
+          responseMessage = visionAnalysisService.formatForDisplay(analysisResult);
+          responseMessage += '\n\n⚠️ Note: Using basic vision analysis.';
+        }
+      } else {
+        responseMessage = 'Unable to analyze the image. Please try again.';
+      }
+      
+      // Add assistant message
+      const assistantMessage: ChatMessage = {
+        id: Date.now().toString() + '-assistant',
+        type: 'assistant',
+        message: responseMessage,
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, assistantMessage]);
+      
+    } catch (error) {
+      console.error('Image processing error:', error);
+      const errorMessage: ChatMessage = {
+        id: Date.now().toString() + '-assistant',
+        type: 'assistant',
+        message: 'Failed to process the image. Please try again.',
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, errorMessage]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   // Expose methods via ref
   useImperativeHandle(ref, () => ({
     addMessage: (userMessage: string, assistantMessage: string | any) => {
+      // Extract image URL if present in the response
+      let userImageUrl: string | undefined;
+      if (typeof assistantMessage === 'object' && assistantMessage !== null) {
+        userImageUrl = assistantMessage.imageUrl || assistantMessage.data?.imageUrl;
+      }
+      
       const userMsg: ChatMessage = {
         id: Date.now().toString(),
         type: 'user',
         message: userMessage,
-        timestamp: new Date()
+        timestamp: new Date(),
+        imageUrl: userImageUrl
       };
       
       // Handle both simple strings and Universal Search response objects
@@ -155,6 +288,14 @@ const FullScreenChat = forwardRef<FullScreenChatRef, FullScreenChatProps>(({
           if (assistantMessage.type === 'cached_search') {
             formattedMessage += '\n\n*Results from cache*';
           }
+        } else if (
+          assistantMessage.type === 'image_analysis' ||
+          assistantMessage.type === 'vision_analysis' ||
+          assistantMessage.type === 'barcode_scan' ||
+          assistantMessage.type === 'product_search'
+        ) {
+          // Handle image/vision analysis types
+          formattedMessage = assistantMessage.summary || 'Analysis completed';
         } else {
           // Fallback for other object types
           formattedMessage = JSON.stringify(assistantMessage, null, 2);
@@ -183,16 +324,47 @@ const FullScreenChat = forwardRef<FullScreenChatRef, FullScreenChatProps>(({
   useEffect(() => {
     if (initialQuery && initialResponse) {
       let responseMessage: string;
+      let userQueryMessage = initialQuery;
+      let userImageUrl: string | undefined;
+      
+      // Extract userQuery and image data from response if available (check ALL object types)
+      if (typeof initialResponse === 'object') {
+        if (initialResponse.userQuery) {
+          userQueryMessage = initialResponse.userQuery;
+          console.log('🔍 FULL SCREEN CHAT: Extracted userQuery:', userQueryMessage);
+        }
+        
+        // Extract image URL if available (from vision analysis or image analysis)
+        if (initialResponse.data?.imageUrl) {
+          userImageUrl = initialResponse.data.imageUrl;
+        } else if (initialResponse.imageUrl) {
+          userImageUrl = initialResponse.imageUrl;
+        }
+      }
       
       // Handle Universal Search API response format or structured barcode scan data
       if (typeof initialResponse === 'object' && (
           initialResponse.type === 'barcode_analysis' || 
+          initialResponse.type === 'vision_analysis' ||
+          initialResponse.type === 'image_analysis' ||
+          initialResponse.type === 'barcode_scan' ||
+          initialResponse.type === 'product_search' ||
           initialResponse.detected_type === 'barcode' ||
-          initialResponse.success && initialResponse.results
+          (initialResponse.success && initialResponse.results)
       )) {
         
+        // Handle vision_analysis, image_analysis, barcode_scan, product_search types FIRST
+        // (prioritize these simple types before complex parsing)
+        if ((initialResponse.type === 'vision_analysis' || 
+             initialResponse.type === 'image_analysis' ||
+             initialResponse.type === 'barcode_scan' ||
+             initialResponse.type === 'product_search') && 
+            initialResponse.summary) {
+          // Use the summary directly from these response types
+          responseMessage = initialResponse.summary;
+        }
         // Handle legacy barcode analysis format
-        if (initialResponse.type === 'barcode_analysis') {
+        else if (initialResponse.type === 'barcode_analysis') {
           const barcodeData = initialResponse.data;
           
           // Format the comprehensive analysis for display
@@ -277,6 +449,13 @@ const FullScreenChat = forwardRef<FullScreenChatRef, FullScreenChatProps>(({
           // Update chart availability indicator
           setHasChartData(true);
         }
+        // Fallback for any other type with summary
+        else if (initialResponse.summary) {
+          responseMessage = initialResponse.summary;
+        } else {
+          // No recognizable format, stringify
+          responseMessage = JSON.stringify(initialResponse, null, 2);
+        }
       } else {
         // Handle traditional string response
         responseMessage = typeof initialResponse === 'string' ? initialResponse : JSON.stringify(initialResponse);
@@ -286,8 +465,9 @@ const FullScreenChat = forwardRef<FullScreenChatRef, FullScreenChatProps>(({
         {
           id: '1',
           type: 'user',
-          message: initialQuery,
-          timestamp: new Date()
+          message: userQueryMessage,
+          timestamp: new Date(),
+          imageUrl: userImageUrl
         },
         {
           id: '2',
@@ -297,6 +477,12 @@ const FullScreenChat = forwardRef<FullScreenChatRef, FullScreenChatProps>(({
         }
       ];
       setMessages(initialMessages);
+      console.log('🔍 FULL SCREEN CHAT: Initialized messages:', {
+        userQuery: userQueryMessage,
+        responseType: typeof initialResponse === 'object' ? initialResponse.type : 'string',
+        hasUserQuery: Boolean(typeof initialResponse === 'object' && initialResponse.userQuery),
+        messageCount: initialMessages.length
+      });
     }
   }, [initialQuery, initialResponse]);
 
@@ -724,6 +910,20 @@ const FullScreenChat = forwardRef<FullScreenChatRef, FullScreenChatProps>(({
                   </div>
                   
                   <div className="flex-1 min-w-0">
+                    {/* Display image if available (for uploaded images) */}
+                    {message.imageUrl && (
+                      <div className={`${
+                        isMobile ? 'mb-3' : 'mb-4'
+                      }`}>
+                        <img
+                          src={message.imageUrl}
+                          alt="Uploaded"
+                          className="w-full max-w-md h-auto object-cover rounded-lg"
+                          style={{ maxHeight: isMobile ? '200px' : '300px' }}
+                        />
+                      </div>
+                    )}
+                    
                     <div className={`${
                       isMobile ? 'text-sm' : 'text-base'
                     } leading-relaxed text-gray-800 whitespace-pre-wrap break-words`}>

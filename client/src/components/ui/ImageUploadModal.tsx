@@ -41,6 +41,8 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
   const [isDragging, setIsDragging] = useState(false);
   const [imageUrl, setImageUrl] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);        // desktop & mobile (library/file)
   const cameraInputRef = useRef<HTMLInputElement>(null);      // mobile (camera)
@@ -62,6 +64,81 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
     lastProcessingTime.current = now;
     return true;
   };
+
+  // Add paste handler for images
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handlePaste = async (e: ClipboardEvent) => {
+      const items = e.clipboardData?.items;
+      if (!items) return;
+
+      for (let i = 0; i < items.length; i++) {
+        if (items[i].type.indexOf('image') !== -1) {
+          e.preventDefault();
+          const blob = items[i].getAsFile();
+          if (blob) {
+            // Create a proper File object with a name for pasted images
+            const file = new File([blob], `pasted-image-${Date.now()}.png`, { type: blob.type });
+            // Set preview and pending file, but DON'T process yet
+            setPreviewUrl(URL.createObjectURL(file));
+            setPendingFile(file);
+          }
+          break;
+        }
+      }
+    };
+
+    document.addEventListener('paste', handlePaste);
+    return () => document.removeEventListener('paste', handlePaste);
+  }, [isOpen, isProcessing]);
+
+  // Add global drag-drop prevention and handling
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleDragOver = (e: DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+    };
+
+    const handleGlobalDrop = async (e: DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      
+      const files = e.dataTransfer?.files;
+      if (!files?.length) return;
+      
+      const imageFile = Array.from(files).find(f => f.type.startsWith('image/'));
+      if (imageFile) {
+        // Set preview and pending file, but DON'T process yet
+        setPreviewUrl(URL.createObjectURL(imageFile));
+        setPendingFile(imageFile);
+      }
+    };
+
+    document.addEventListener('dragover', handleDragOver);
+    document.addEventListener('drop', handleGlobalDrop);
+    
+    return () => {
+      document.removeEventListener('dragover', handleDragOver);
+      document.removeEventListener('drop', handleGlobalDrop);
+    };
+  }, [isOpen, isProcessing]);
+
+  // Cleanup preview URL when modal closes
+  useEffect(() => {
+    if (!isOpen) {
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+        setPreviewUrl(null);
+      }
+      setPendingFile(null);
+      setImageUrl('');
+      setIsProcessing(false);
+      setIsDragging(false);
+    }
+  }, [isOpen]);
 
   // Handle camera access with fallback
   const handleCameraClick = async () => {
@@ -317,6 +394,9 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
   const processFile = useCallback(async (file: File) => {
     console.log('🔍 Processing file with Wihy Scanning Service:', file.name);
     
+    // Set preview URL so user can see the uploaded image
+    setPreviewUrl(URL.createObjectURL(file));
+    
     try {
       // First, try to detect barcodes using Quagga
       console.log('📷 Attempting barcode detection with Quagga...');
@@ -331,7 +411,27 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
       
       console.log('ℹ️ No barcode detected, proceeding with image analysis...');
       
-      // First test API connectivity
+      // Check if we're in local development - skip API call to avoid CORS
+      const isLocalDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+      
+      if (isLocalDev) {
+        console.log('🏠 Local development detected - using mock analysis');
+        // Mock analysis for local development
+        onAnalysisComplete({
+          type: 'image_analysis',
+          scanType: 'image',
+          data: {
+            success: true,
+            message: 'Local development mode - API calls bypassed'
+          },
+          summary: `📸 Image uploaded: ${file.name}\n\n⚠️ Local Development Mode\nAPI calls are bypassed in localhost to avoid CORS errors.\n\nIn production, this would analyze the image and provide:\n• Nutritional information\n• Health insights\n• Ingredient analysis`,
+          userQuery: `Uploaded image: ${file.name}`,
+          imageUrl: URL.createObjectURL(file)
+        });
+        return;
+      }
+      
+      // First test API connectivity (production only)
       const connectionTest = await wihyScanningService.testConnection();
       if (!connectionTest.available) {
         console.warn('⚠️ WiHy Scanning API not available, falling back to vision analysis');
@@ -345,7 +445,9 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
             type: 'vision_analysis',
             scanType: 'vision',
             data: visionResult,
-            summary: `${visionAnalysisService.formatForDisplay(visionResult)}\n\n⚠️ Note: Using basic vision analysis as food database lookup failed.`
+            summary: `${visionAnalysisService.formatForDisplay(visionResult)}\n\n⚠️ Note: Using basic vision analysis as food database lookup failed.`,
+            userQuery: `Uploaded image: ${file.name}`,
+            imageUrl: URL.createObjectURL(file)
           });
         } else {
           onAnalysisComplete({
@@ -369,7 +471,9 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
           scanType: 'image',
           data: scanResult,
           summary: wihyScanningService.formatScanResult(scanResult),
-          chatData: wihyScanningService.extractChatData(scanResult)
+          chatData: wihyScanningService.extractChatData(scanResult),
+          userQuery: `Uploaded image: ${file.name}`,
+          imageUrl: URL.createObjectURL(file)
         });
       } else {
         // Fallback to vision analysis if scanning fails
@@ -381,7 +485,9 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
             type: 'vision_analysis',
             scanType: 'vision',
             data: visionResult,
-            summary: `${visionAnalysisService.formatForDisplay(visionResult)}\n\n⚠️ Note: Using basic vision analysis as food database lookup failed.`
+            summary: `${visionAnalysisService.formatForDisplay(visionResult)}\n\n⚠️ Note: Using basic vision analysis as food database lookup failed.`,
+            userQuery: `Uploaded image: ${file.name}`,
+            imageUrl: URL.createObjectURL(file)
           });
         } else {
           onAnalysisComplete({
@@ -403,13 +509,9 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
   const onFilePicked = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (isProcessing || !canProcess()) return; // Prevent multiple/rapid processing
-      setIsProcessing(true);
-      try {
-        await processFile(file);
-      } finally {
-        setIsProcessing(false);
-      }
+      // Set preview and pending file, but DON'T process yet
+      setPreviewUrl(URL.createObjectURL(file));
+      setPendingFile(file);
     }
     e.target.value = '';
   };
@@ -420,13 +522,9 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
     if (!e.dataTransfer.files?.length) return;
     const f = Array.from(e.dataTransfer.files).find(x => x.type.startsWith('image/'));
     if (f) {
-      if (isProcessing || !canProcess()) return; // Prevent multiple/rapid processing
-      setIsProcessing(true);
-      try {
-        await processFile(f);
-      } finally {
-        setIsProcessing(false);
-      }
+      // Set preview and pending file, but DON'T process yet
+      setPreviewUrl(URL.createObjectURL(f));
+      setPendingFile(f);
     }
   };
 
@@ -455,7 +553,8 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
           scanType: 'barcode',
           data: barcodeResult,
           summary: wihyScanningService.formatScanResult(barcodeResult),
-          chatData: wihyScanningService.extractChatData(barcodeResult)
+          chatData: wihyScanningService.extractChatData(barcodeResult),
+          userQuery: `Scanned barcode: ${barcode}`
         });
       } else {
         onAnalysisComplete({
@@ -489,7 +588,8 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
           scanType: 'product_name',
           data: searchResult,
           summary: wihyScanningService.formatScanResult(searchResult),
-          chatData: wihyScanningService.extractChatData(searchResult)
+          chatData: wihyScanningService.extractChatData(searchResult),
+          userQuery: `Searched for: ${productName}`
         });
       } else {
         onAnalysisComplete({
@@ -521,7 +621,10 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
         throw new Error('URL does not point to an image');
       }
       
-      const file = new File([blob], 'url-image', { type: blob.type || 'image/jpeg' });
+      // Extract filename from URL or use generic name
+      const urlPath = new URL(imageUrl).pathname;
+      const fileName = urlPath.split('/').pop() || 'url-image';
+      const file = new File([blob], fileName, { type: blob.type || 'image/jpeg' });
       await processFile(file);
     } catch (error) {
       console.error('❌ Image URL processing error:', error);
@@ -561,6 +664,27 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
       setIsProcessing(false);
     }
   }, [imageUrl, handleBarcodeScanning, handleProductSearch, handleImageUrl, onAnalysisComplete]);
+
+  // Unified handler for both preview images and URL/text input
+  const handleAnalyze = useCallback(async () => {
+    if (isProcessing || !canProcess()) return;
+    
+    // Priority 1: Process pending file from preview
+    if (pendingFile) {
+      setIsProcessing(true);
+      try {
+        await processFile(pendingFile);
+      } finally {
+        setIsProcessing(false);
+      }
+      return;
+    }
+    
+    // Priority 2: Process URL/barcode/product name input
+    if (imageUrl.trim()) {
+      await handleUrlUpload();
+    }
+  }, [pendingFile, imageUrl, processFile, handleUrlUpload, isProcessing, canProcess]);
 
   // overlay close + Esc
   useEffect(() => {
@@ -710,10 +834,33 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
               onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
               onDragLeave={() => setIsDragging(false)}
               onDrop={handleDrop}
-              onClick={() => fileInputRef.current?.click()}
-              style={{ cursor: 'pointer' }}
+              onClick={() => !previewUrl && fileInputRef.current?.click()}
+              style={{ cursor: previewUrl ? 'default' : 'pointer' }}
             >
-              {isProcessing ? (
+              {previewUrl ? (
+                <div className="simple-upload-content" style={{ padding: '16px' }}>
+                  <img
+                    src={previewUrl}
+                    alt="Uploaded preview"
+                    style={{ 
+                      maxWidth: '100%', 
+                      maxHeight: 240, 
+                      borderRadius: 16, 
+                      objectFit: 'contain',
+                      display: 'block',
+                      margin: '0 auto'
+                    }}
+                  />
+                  {isProcessing && (
+                    <div style={{ marginTop: '12px', textAlign: 'center' }}>
+                      <div className="simple-spinner">
+                        <div className="spinner" />
+                      </div>
+                      <p className="simple-upload-text">Analyzing image…</p>
+                    </div>
+                  )}
+                </div>
+              ) : isProcessing ? (
                 <div className="simple-upload-content">
                   <div className="simple-spinner">
                     <div className="spinner" />
@@ -746,7 +893,26 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
             placeholder={isMobile ? "Enter barcode, product name, or image URL" : "Enter barcode, product name, or paste image URL"}
             value={imageUrl}
             onChange={(e) => setImageUrl(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleUrlUpload()}
+            onKeyDown={(e) => e.key === 'Enter' && handleAnalyze()}
+            onPaste={async (e) => {
+              // Handle image paste in mobile input field
+              const items = e.clipboardData?.items;
+              if (!items) return;
+              
+              for (let i = 0; i < items.length; i++) {
+                if (items[i].type.indexOf('image') !== -1) {
+                  e.preventDefault();
+                  const blob = items[i].getAsFile();
+                  if (blob) {
+                    const file = new File([blob], `pasted-image-${Date.now()}.png`, { type: blob.type });
+                    setPreviewUrl(URL.createObjectURL(file));
+                    setPendingFile(file);
+                    setImageUrl(''); // Clear text input
+                  }
+                  break;
+                }
+              }
+            }}
             disabled={isProcessing}
             autoComplete="off"
             inputMode={isMobile ? "text" : "text"}
@@ -781,8 +947,8 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
             animation: 'wihy-border-sweep 2.2s linear infinite'
           }}>
             <button
-              onClick={handleUrlUpload}
-              disabled={isProcessing || !imageUrl.trim()}
+              onClick={handleAnalyze}
+              disabled={isProcessing || (!imageUrl.trim() && !pendingFile)}
               style={{
                 width: '100%',
                 background: '#fff',
@@ -796,7 +962,7 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
                 textAlign: 'center'
               }}
             >
-              {isProcessing ? 'Analyzing...' : 'Analyze Food'}
+              {isProcessing ? 'Analyzing...' : 'Analyze with WiHY'}
             </button>
           </div>
         </div>
