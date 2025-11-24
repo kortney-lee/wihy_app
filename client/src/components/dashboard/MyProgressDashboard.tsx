@@ -115,52 +115,16 @@ const MyProgressDashboard: React.FC<MyProgressDashboardProps> = ({
   return (
     <div className="w-full bg-[#f0f7ff] min-h-[70vh] relative">
         {/* Today header */}
-        <header className="flex flex-col gap-2">
-          <div className="flex items-center justify-between gap-4">
-            <div>
-              <h1 className="text-2xl font-semibold text-slate-900">
-                My Progress – Today
-              </h1>
-              {summary && (
-                <p className="mt-1 text-sm text-slate-600">{summary}</p>
-              )}
-            </div>
-            {motivation && (
-              <div className="hidden md:block rounded-2xl bg-emerald-50 border border-emerald-100 px-4 py-2 text-xs text-emerald-800 max-w-xs">
-                {motivation}
-              </div>
-            )}
-          </div>
+        <header className="flex flex-col gap-2" style={{ paddingBottom: '16px' }}>
+          <h1 className="dashboard-title" style={{ fontSize: '22px', textAlign: 'center', marginBottom: '12px', marginTop: '8px', padding: '0px 8px', lineHeight: '1.5' }}>
+            My Progress – Today
+          </h1>
+          {summary && (
+            <p className="mt-1 text-sm text-slate-600 text-center">{summary}</p>
+          )}
         </header>
 
-        {/* Today's focus / priorities */}
-        {priorities.length > 0 && (
-          <section>
-            <h2 className="text-sm font-semibold text-slate-700 mb-2">
-              Today&apos;s Focus
-            </h2>
-            <div className="flex flex-wrap gap-2">
-              {priorities.map((p) => (
-                <div
-                  key={p.id}
-                  className="inline-flex flex-col justify-center rounded-full border border-slate-200 bg-white px-4 py-2 text-xs shadow-sm"
-                >
-                  <div className="flex items-center gap-1">
-                    {p.icon && <span className="text-base">{p.icon}</span>}
-                    <span className="font-medium text-slate-800">
-                      {p.title}
-                    </span>
-                  </div>
-                  {p.description && (
-                    <span className="mt-0.5 text-[11px] text-slate-500">
-                      {p.description}
-                    </span>
-                  )}
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
+        {/* Today's Focus section removed */}
 
         <div className="grid grid-cols-1 lg:grid-cols-[2fr,minmax(260px,1fr)] gap-6">
           {/* Left column: core actions + workout */}

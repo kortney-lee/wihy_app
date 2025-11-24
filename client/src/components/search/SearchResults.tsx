@@ -204,7 +204,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({
 
   // Mock coach data for My Progress tab
   const mockCoachData: WihyCoachModel = {
-    summary: "You're on track with your fitness goals today!",
+    summary: "",
     motivation: "Keep up the great work! 💪",
     priorities: [
       { id: "p1", title: "Morning Workout", icon: "🏃", description: "30 min cardio" },
