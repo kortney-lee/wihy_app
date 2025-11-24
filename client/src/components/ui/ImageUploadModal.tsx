@@ -247,8 +247,14 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
         addTouchFeedback(closeBtn, '');
 
         // Handle capture
-        captureBtn.onclick = () => {
-          if (isProcessing || !canProcess()) return; // Prevent multiple/rapid captures
+        captureBtn.onclick = async () => {
+          if (isProcessing) {
+            console.log('⏰ Already processing, ignoring capture request');
+            return;
+          }
+          
+          setIsProcessing(true);
+          lastProcessingTime.current = Date.now(); // Update timestamp
           
           const canvas = document.createElement('canvas');
           const context = canvas.getContext('2d');
@@ -259,8 +265,17 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
           
           canvas.toBlob(async (blob) => {
             if (blob) {
-              const file = new File([blob], 'camera-capture.jpg', { type: 'image/jpeg' });
-              await onFilePicked({ target: { files: [file] } } as any);
+              try {
+                const file = new File([blob], 'camera-capture.jpg', { type: 'image/jpeg' });
+                console.log('📸 Processing captured photo:', file.name);
+                await processFile(file);
+              } catch (error) {
+                console.error('❌ Error processing captured photo:', error);
+              } finally {
+                setIsProcessing(false);
+              }
+            } else {
+              setIsProcessing(false);
             }
             
             // Cleanup
