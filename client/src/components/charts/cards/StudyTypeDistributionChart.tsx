@@ -11,6 +11,30 @@ import AnalyzeWithWihyButton from '../shared/AnalyzeWithWihyButton';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
+// Helper function to get study type descriptions
+const getStudyTypeDescription = (type: string): string => {
+  const descriptions: Record<string, string> = {
+    'Clinical Trials': 'Controlled human studies',
+    'Observational Studies': 'Population-based research',
+    'Meta-Analyses': 'Statistical synthesis of studies',
+    'Systematic Reviews': 'Comprehensive literature reviews',
+    'Laboratory Studies': 'Controlled lab experiments',
+    'Case Studies': 'Individual patient reports',
+    'Other': 'Various research types'
+  };
+  return descriptions[type] || 'Research study';
+};
+
+// Helper function to determine evidence level
+const getStudyEvidenceLevel = (type: string): 'high' | 'medium' | 'low' => {
+  const highEvidence = ['Meta-Analyses', 'Systematic Reviews', 'Clinical Trials'];
+  const mediumEvidence = ['Observational Studies', 'Laboratory Studies'];
+  
+  if (highEvidence.includes(type)) return 'high';
+  if (mediumEvidence.includes(type)) return 'medium';
+  return 'low';
+};
+
 export interface StudyTypeData {
   type: string;
   count: number;
@@ -90,15 +114,23 @@ const StudyTypeDistributionChart: React.FC<StudyTypeDistributionChartProps> = ({
           const data = await response.json();
           console.log('[StudyTypeDistributionChart] API response:', data);
           
-          // Extract study type distribution from analytics
-          const studyTypeData = data.studyTypeDistribution || [];
-          const formattedData: StudyTypeData[] = studyTypeData.map((item: any) => ({
-            type: item.type,
-            count: item.count,
-            percentage: item.percentage,
-            description: item.description,
-            evidenceLevel: item.evidenceLevel
-          }));
+          // Extract study type distribution from analytics.research_metrics.study_types_breakdown
+          const studyTypesBreakdown = data.analytics?.research_metrics?.study_types_breakdown || {};
+          console.log('[StudyTypeDistributionChart] Study types breakdown:', studyTypesBreakdown);
+          
+          // Convert object to array format
+          const formattedData: StudyTypeData[] = Object.entries(studyTypesBreakdown)
+            .filter(([_, count]) => (count as number) > 0)
+            .map(([type, count]) => {
+              const total = Object.values(studyTypesBreakdown).reduce((sum: number, c) => sum + (c as number), 0) as number;
+              return {
+                type,
+                count: count as number,
+                percentage: total > 0 ? Math.round(((count as number) / total) * 100) : 0,
+                description: getStudyTypeDescription(type),
+                evidenceLevel: getStudyEvidenceLevel(type)
+              };
+            });
           
           setApiData(formattedData.length > 0 ? formattedData : null);
         } catch (err) {

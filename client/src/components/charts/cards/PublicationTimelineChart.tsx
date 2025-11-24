@@ -109,15 +109,18 @@ const PublicationTimelineChart: React.FC<PublicationTimelineChartProps> = ({
           const data = await response.json();
           console.log('[PublicationTimelineChart] API response:', data);
           
-          // Extract publication timeline from analytics
-          const timelineData = data.publicationTimeline || [];
-          const formattedData: PublicationData[] = timelineData.map((item: any) => ({
-            year: item.year,
-            month: item.month,
-            count: item.count,
-            studyTypes: item.studyTypes,
-            totalStudies: item.totalStudies
-          }));
+          // Extract publication timeline from analytics.research_metrics.publications_by_year
+          const publicationsByYear = data.analytics?.research_metrics?.publications_by_year || {};
+          console.log('[PublicationTimelineChart] Publications by year:', publicationsByYear);
+          
+          // Convert object to array format and sort by year
+          const formattedData: PublicationData[] = Object.entries(publicationsByYear)
+            .map(([year, count]) => ({
+              year: parseInt(year),
+              count: count as number,
+              totalStudies: count as number
+            }))
+            .sort((a, b) => a.year - b.year);
           
           setApiData(formattedData.length > 0 ? formattedData : null);
         } catch (err) {
