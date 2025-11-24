@@ -4,6 +4,7 @@ import '../../styles/VHealthSearch.css';
 import '../../styles/modals.css';
 import { wihyScanningService } from '../../services/wihyScanningService';
 import { visionAnalysisService } from '../../services/visionAnalysisService';
+import { quaggaBarcodeScanner } from '../../services/quaggaBarcodeScanner';
 
 interface ImageUploadModalProps {
   isOpen: boolean;
@@ -302,6 +303,19 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
     console.log('🔍 Processing file with Wihy Scanning Service:', file.name);
     
     try {
+      // First, try to detect barcodes using Quagga
+      console.log('📷 Attempting barcode detection with Quagga...');
+      const barcodeResult = await quaggaBarcodeScanner.scanImageFile(file);
+      
+      if (barcodeResult.success && barcodeResult.barcodes.length > 0) {
+        console.log('✅ Barcode detected in image:', barcodeResult.barcodes[0]);
+        // Found a barcode - use barcode scanning API directly
+        await handleBarcodeScanning(barcodeResult.barcodes[0]);
+        return;
+      }
+      
+      console.log('ℹ️ No barcode detected, proceeding with image analysis...');
+      
       // First test API connectivity
       const connectionTest = await wihyScanningService.testConnection();
       if (!connectionTest.available) {
