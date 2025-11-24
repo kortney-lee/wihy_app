@@ -24,6 +24,7 @@ interface ResearchQualityGaugeProps {
   showDetails?: boolean;
   showCategoryButtons?: boolean; // Show category selection buttons
   categories?: Record<string, string[]>; // Custom research categories for API
+  apiResponse?: any; // API response from analytics service
   onAnalyze?: (userMessage: string, assistantMessage: string) => void;
 }
 
@@ -85,6 +86,7 @@ const ResearchQualityGauge: React.FC<ResearchQualityGaugeProps> = ({
   showDetails = true,
   showCategoryButtons = true,
   categories,
+  apiResponse,
   onAnalyze
 }) => {
   const [apiData, setApiData] = useState<{
@@ -98,6 +100,27 @@ const ResearchQualityGauge: React.FC<ResearchQualityGaugeProps> = ({
   const [activeCategories, setActiveCategories] = useState<Record<string, string[]> | null>(
     categories || RESEARCH_CATEGORIES['Mental Illness']
   );
+
+  // Parse evidence level from API response string format "Level III - Moderate" -> "III"
+  const parseEvidenceLevel = (levelString?: string): 'I' | 'II' | 'III' | 'IV' => {
+    if (!levelString) return 'II';
+    const match = levelString.match(/Level\s+(I{1,3}|IV)/i);
+    return match ? match[1].toUpperCase() as 'I' | 'II' | 'III' | 'IV' : 'II';
+  };
+
+  // Extract data from API response
+  useEffect(() => {
+    if (apiResponse?.success && apiResponse?.analytics?.research_metrics) {
+      console.log('[ResearchQualityGauge] Using API response data');
+      const metrics = apiResponse.analytics.research_metrics;
+      
+      setApiData({
+        score: metrics.quality_score || metrics.quality_assessment?.overallScore || 70,
+        studyCount: metrics.total_studies || metrics.quality_assessment?.totalStudies || 0,
+        evidenceLevel: parseEvidenceLevel(metrics.evidence_level)
+      });
+    }
+  }, [apiResponse]);
 
   // Fetch data from Analytics Service API
   const fetchAnalytics = async (categoriesToFetch: Record<string, string[]>) => {
