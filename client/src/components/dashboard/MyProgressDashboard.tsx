@@ -121,8 +121,8 @@ const MyProgressDashboard: React.FC<MyProgressDashboardProps> = ({
   return (
     <div className="w-full bg-[#f0f7ff] min-h-[70vh] relative">
         {/* Today header */}
-        <header className="flex flex-col gap-2" style={{ paddingBottom: '16px' }}>
-          <h1 className="dashboard-title" style={{ fontSize: '22px', textAlign: 'center', marginBottom: '12px', marginTop: '8px', padding: '0px 8px', lineHeight: '1.5' }}>
+        <header className="flex flex-col gap-2 pb-4">
+          <h1 className="dashboard-title text-[22px] text-center mb-3 mt-2 px-2 leading-normal">
             My Progress – Today
           </h1>
           {summary && (
@@ -138,8 +138,8 @@ const MyProgressDashboard: React.FC<MyProgressDashboardProps> = ({
             {/* Action List */}
             {actions.length > 0 && (
               <section className="rounded-2xl bg-white shadow-sm border border-slate-100 p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <h2 className="text-sm font-semibold text-slate-800">
+                <div className="flex items-center justify-between mb-4 py-1">
+                  <h2 className="text-sm font-semibold text-slate-800 leading-relaxed">
                     Your Actions Today
                   </h2>
                 </div>
@@ -149,7 +149,7 @@ const MyProgressDashboard: React.FC<MyProgressDashboardProps> = ({
                       key={action.id}
                       type="button"
                       onClick={() => onToggleAction?.(action.id)}
-                      className="w-full text-left flex gap-3 rounded-xl border border-slate-100 bg-slate-50/70 hover:bg-slate-100 transition-colors px-3 py-2.5"
+                      className="w-full text-left flex gap-3 rounded-xl border border-slate-100 bg-slate-50/70 hover:bg-slate-100 transition-colors px-3 py-2.5 leading-relaxed"
                     >
                       <div className="flex flex-col justify-center">
                         <span
@@ -161,7 +161,7 @@ const MyProgressDashboard: React.FC<MyProgressDashboardProps> = ({
                           ].join(" ")}
                         />
                       </div>
-                      <div className="flex-1 min-w-0">
+                      <div className="flex-1 min-w-0 leading-relaxed">
                         <div className="flex items-center gap-2">
                           <span className="text-xs font-medium text-slate-900 truncate">
                             {action.title}
@@ -173,7 +173,7 @@ const MyProgressDashboard: React.FC<MyProgressDashboardProps> = ({
                           )}
                         </div>
                         {action.description && (
-                          <p className="mt-0.5 text-[11px] text-slate-500">
+                          <p className="mt-0.5 text-[11px] text-slate-500 leading-relaxed">
                             {action.description}
                           </p>
                         )}
@@ -191,9 +191,9 @@ const MyProgressDashboard: React.FC<MyProgressDashboardProps> = ({
 
             {/* Workout module */}
             {workout && (
-              <section className="rounded-2xl bg-white shadow-sm border border-slate-100 p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <h2 className="text-sm font-semibold text-slate-800">
+              <section className="rounded-2xl bg-white shadow-sm border border-slate-100 p-4 leading-relaxed">
+                <div className="flex items-center justify-between mb-4 py-1">
+                  <h2 className="text-sm font-semibold text-slate-800 leading-relaxed">
                     Your Workout
                   </h2>
                 </div>
@@ -293,8 +293,8 @@ const MyProgressDashboard: React.FC<MyProgressDashboardProps> = ({
             {/* Meals & logging */}
             {consumption && (
               <section className="rounded-2xl bg-white shadow-sm border border-slate-100 p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <h2 className="text-sm font-semibold text-slate-800">
+                <div className="flex items-center justify-between mb-4 py-1">
+                  <h2 className="text-sm font-semibold text-slate-800 leading-relaxed">
                     Meals Today
                   </h2>
                   <button
@@ -343,8 +343,8 @@ const MyProgressDashboard: React.FC<MyProgressDashboardProps> = ({
             {/* Hydration */}
             {hydration && (
               <section className="rounded-2xl bg-white shadow-sm border border-slate-100 p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <h2 className="text-sm font-semibold text-slate-800">
+                <div className="flex items-center justify-between mb-4 py-1">
+                  <h2 className="text-sm font-semibold text-slate-800 leading-relaxed">
                     Hydration
                   </h2>
                   <button
@@ -388,7 +388,7 @@ const MyProgressDashboard: React.FC<MyProgressDashboardProps> = ({
             {/* Streaks */}
             {streaks.length > 0 && (
               <section className="rounded-2xl bg-white shadow-sm border border-slate-100 p-4">
-                <h2 className="text-sm font-semibold text-slate-800 mb-2">
+                <h2 className="text-sm font-semibold text-slate-800 mb-4 py-1 leading-relaxed">
                   Your Streaks
                 </h2>
                 <div className="flex flex-wrap gap-2">
@@ -408,7 +408,7 @@ const MyProgressDashboard: React.FC<MyProgressDashboardProps> = ({
             {/* Check-in */}
             {checkin && (
               <section className="rounded-2xl bg-white shadow-sm border border-slate-100 p-4">
-                <h2 className="text-sm font-semibold text-slate-800 mb-2">
+                <h2 className="text-sm font-semibold text-slate-800 mb-4 py-1 leading-relaxed">
                   Daily Check-In
                 </h2>
                 <p className="text-[11px] text-slate-600 mb-2">
@@ -456,7 +456,7 @@ const MyProgressDashboard: React.FC<MyProgressDashboardProps> = ({
             {/* Education tile */}
             {education && (
               <section className="rounded-2xl bg-emerald-50 border border-emerald-100 p-4">
-                <h2 className="text-sm font-semibold text-emerald-900 mb-1">
+                <h2 className="text-sm font-semibold text-emerald-900 mb-3 py-1 leading-relaxed">
                   Learn One Thing Today
                 </h2>
                 <p className="text-[11px] text-emerald-800 font-medium">
