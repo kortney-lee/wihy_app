@@ -257,6 +257,106 @@ const SearchResults: React.FC<SearchResultsProps> = ({
         { id: "s5", label: "Cool-down", detail: "5 min stretching" }
       ]
     },
+    workoutProgram: [
+      {
+        meta: {
+          id: "ex1",
+          name: "Squats",
+          equipment: "BARBELL",
+          fitnessLoad: { STRENGTH: 3, ENDURANCE: 1 },
+          muscleLoad: { QUADS: 3, GLUTES: 2, HAMSTRINGS: 2, CORE: 1 }
+        },
+        prescription: {
+          exerciseId: "ex1",
+          sets: 4,
+          intensityLabel: "75% 1RM"
+        }
+      },
+      {
+        meta: {
+          id: "ex2",
+          name: "Bench Press",
+          equipment: "BARBELL",
+          fitnessLoad: { STRENGTH: 3, ENDURANCE: 1 },
+          muscleLoad: { CHEST: 3, SHOULDERS: 2, ARMS: 2 }
+        },
+        prescription: {
+          exerciseId: "ex2",
+          sets: 4,
+          intensityLabel: "70% 1RM"
+        }
+      },
+      {
+        meta: {
+          id: "ex3",
+          name: "Deadlift",
+          equipment: "BARBELL",
+          fitnessLoad: { STRENGTH: 3, ENDURANCE: 1 },
+          muscleLoad: { HAMSTRINGS: 3, GLUTES: 3, BACK: 2, CORE: 2 }
+        },
+        prescription: {
+          exerciseId: "ex3",
+          sets: 3,
+          intensityLabel: "80% 1RM"
+        }
+      },
+      {
+        meta: {
+          id: "ex4",
+          name: "Pull-ups",
+          equipment: "NONE",
+          fitnessLoad: { STRENGTH: 2, ENDURANCE: 2 },
+          muscleLoad: { BACK: 3, ARMS: 2, SHOULDERS: 1 }
+        },
+        prescription: {
+          exerciseId: "ex4",
+          sets: 3,
+          intensityLabel: "Bodyweight"
+        }
+      },
+      {
+        meta: {
+          id: "ex5",
+          name: "Overhead Press",
+          equipment: "DUMBBELLS",
+          fitnessLoad: { STRENGTH: 3, MOBILITY: 1 },
+          muscleLoad: { SHOULDERS: 3, ARMS: 2, CORE: 1 }
+        },
+        prescription: {
+          exerciseId: "ex5",
+          sets: 3,
+          intensityLabel: "Moderate"
+        }
+      },
+      {
+        meta: {
+          id: "ex6",
+          name: "Romanian Deadlifts",
+          equipment: "DUMBBELLS",
+          fitnessLoad: { STRENGTH: 2, MOBILITY: 2 },
+          muscleLoad: { HAMSTRINGS: 3, GLUTES: 2, BACK: 1 }
+        },
+        prescription: {
+          exerciseId: "ex6",
+          sets: 3,
+          intensityLabel: "Light"
+        }
+      },
+      {
+        meta: {
+          id: "ex7",
+          name: "Plank",
+          equipment: "NONE",
+          fitnessLoad: { ENDURANCE: 2, STRENGTH: 1 },
+          muscleLoad: { CORE: 3, SHOULDERS: 1 }
+        },
+        prescription: {
+          exerciseId: "ex7",
+          sets: 3,
+          intensityLabel: "60 sec"
+        }
+      }
+    ],
     consumption: {
       mealsLogged: 2,
       mealsPlanned: 4,

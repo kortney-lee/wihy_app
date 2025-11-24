@@ -1,5 +1,6 @@
 // src/components/dashboard/MyProgressDashboard.tsx
-import React from "react";
+import React, { useState } from "react";
+import { WorkoutProgramGrid, ExerciseRowView } from "./WorkoutProgramGrid";
 
 type Priority = {
   id: string;
@@ -70,6 +71,7 @@ export type WihyCoachModel = {
   priorities?: Priority[];
   actions?: Action[];
   workout?: WorkoutPlan | null;
+  workoutProgram?: ExerciseRowView[]; // PE/ACSM-based program grid
   consumption?: ConsumptionSummary | null;
   hydration?: HydrationSummary | null;
   streaks?: Streak[];
@@ -105,12 +107,16 @@ const MyProgressDashboard: React.FC<MyProgressDashboardProps> = ({
     priorities = [],
     actions = [],
     workout,
+    workoutProgram = [],
     consumption,
     hydration,
     streaks = [],
     checkin,
     education,
   } = coach;
+
+  // Workout tab state
+  const [workoutTab, setWorkoutTab] = useState<'today' | 'program'>('today');
 
   return (
     <div className="w-full bg-[#f0f7ff] min-h-[70vh] relative">
@@ -186,57 +192,97 @@ const MyProgressDashboard: React.FC<MyProgressDashboardProps> = ({
             {/* Workout module */}
             {workout && (
               <section className="rounded-2xl bg-white shadow-sm border border-slate-100 p-4">
-                <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center justify-between mb-3">
                   <h2 className="text-sm font-semibold text-slate-800">
                     Your Workout
                   </h2>
                 </div>
-                <div className="rounded-xl bg-slate-50/80 border border-slate-100 p-3 mb-3">
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
-                    <div>
-                      <p className="text-xs font-medium text-slate-900">
-                        {workout.title}
-                      </p>
-                      <p className="text-[11px] text-slate-500">
-                        {workout.durationLabel && (
-                          <span>{workout.durationLabel}</span>
-                        )}
-                        {workout.durationLabel && workout.intensityLabel && (
-                          <span> · </span>
-                        )}
-                        {workout.intensityLabel && (
-                          <span>{workout.intensityLabel}</span>
-                        )}
-                      </p>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={onStartWorkout}
-                      className="mt-1 inline-flex items-center justify-center rounded-full bg-emerald-500 px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-emerald-600 transition-colors"
-                    >
-                      Start Workout
-                    </button>
-                  </div>
+
+                {/* Tabs */}
+                <div className="flex gap-2 mb-4 border-b border-slate-100">
+                  <button
+                    type="button"
+                    onClick={() => setWorkoutTab('today')}
+                    className={`px-4 py-2 text-xs font-medium transition-colors ${
+                      workoutTab === 'today'
+                        ? 'text-emerald-600 border-b-2 border-emerald-600'
+                        : 'text-slate-500 hover:text-slate-700'
+                    }`}
+                  >
+                    Today
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setWorkoutTab('program')}
+                    className={`px-4 py-2 text-xs font-medium transition-colors ${
+                      workoutTab === 'program'
+                        ? 'text-emerald-600 border-b-2 border-emerald-600'
+                        : 'text-slate-500 hover:text-slate-700'
+                    }`}
+                  >
+                    Program
+                  </button>
                 </div>
-                {workout.steps && workout.steps.length > 0 && (
-                  <ul className="space-y-2">
-                    {workout.steps.map((step) => (
-                      <li
-                        key={step.id}
-                        className="flex items-start gap-2 text-[11px]"
-                      >
-                        <span className="mt-1 h-1.5 w-1.5 rounded-full bg-emerald-500" />
+
+                {/* Today Tab Content */}
+                {workoutTab === 'today' && (
+                  <>
+                    <div className="rounded-xl bg-slate-50/80 border border-slate-100 p-3 mb-3">
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
                         <div>
-                          <p className="font-medium text-slate-800">
-                            {step.label}
+                          <p className="text-xs font-medium text-slate-900">
+                            {workout.title}
                           </p>
-                          {step.detail && (
-                            <p className="text-slate-500">{step.detail}</p>
-                          )}
+                          <p className="text-[11px] text-slate-500">
+                            {workout.durationLabel && (
+                              <span>{workout.durationLabel}</span>
+                            )}
+                            {workout.durationLabel && workout.intensityLabel && (
+                              <span> · </span>
+                            )}
+                            {workout.intensityLabel && (
+                              <span>{workout.intensityLabel}</span>
+                            )}
+                          </p>
                         </div>
-                      </li>
-                    ))}
-                  </ul>
+                        <button
+                          type="button"
+                          onClick={onStartWorkout}
+                          className="mt-1 inline-flex items-center justify-center rounded-full bg-emerald-500 px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-emerald-600 transition-colors"
+                        >
+                          Start Workout
+                        </button>
+                      </div>
+                    </div>
+                    {workout.steps && workout.steps.length > 0 && (
+                      <ul className="space-y-2">
+                        {workout.steps.map((step) => (
+                          <li
+                            key={step.id}
+                            className="flex items-start gap-2 text-[11px]"
+                          >
+                            <span className="mt-1 h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                            <div>
+                              <p className="font-medium text-slate-800">
+                                {step.label}
+                              </p>
+                              {step.detail && (
+                                <p className="text-slate-500">{step.detail}</p>
+                              )}
+                            </div>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </>
+                )}
+
+                {/* Program Tab Content */}
+                {workoutTab === 'program' && (
+                  <WorkoutProgramGrid
+                    title="Your personalized program"
+                    rows={workoutProgram}
+                  />
                 )}
               </section>
             )}
