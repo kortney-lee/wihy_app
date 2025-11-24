@@ -200,6 +200,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({
   const [isChatOpen, setIsChatOpen] = useState(false);
   const chatRef = useRef<FullScreenChatRef>(null);
   const [activeTab, setActiveTab] = useState<SearchTab>('overview');
+  const [showProgressSidebar, setShowProgressSidebar] = useState(false);
 
   // Mock coach data for My Progress tab
   const mockCoachData: WihyCoachModel = {
@@ -781,6 +782,8 @@ const SearchResults: React.FC<SearchResultsProps> = ({
           onSearchSubmit={handleUniversalSearch}
           onChatMessage={handleAddToChatConversation}
           isInChatMode={isChatOpen}
+          showProgressMenu={activeTab === 'charts'}
+          onProgressMenuClick={() => setShowProgressSidebar(!showProgressSidebar)}
         />
       </div>
 
@@ -845,7 +848,8 @@ const SearchResults: React.FC<SearchResultsProps> = ({
               marginTop: windowWidth < 768 ? '0px' : '80px',
               marginBottom: windowWidth < 768 ? '12px' : '24px',
               padding: windowWidth < 768 ? '0 8px' : '0',
-              paddingTop: windowWidth < 768 ? '20px' : '0'
+              paddingTop: windowWidth < 768 ? '20px' : '0',
+              position: 'relative'
             }}>
               <div className="results-tabs" style={{
                 display: 'flex',
@@ -934,6 +938,8 @@ const SearchResults: React.FC<SearchResultsProps> = ({
                     onAddHydration={() => console.log('Add hydration')}
                     onLogMeal={() => console.log('Log meal')}
                     onEducationClick={() => console.log('Education clicked')}
+                    showSidebar={showProgressSidebar}
+                    onCloseSidebar={() => setShowProgressSidebar(false)}
                   />
                 </>
               )}
