@@ -89,8 +89,6 @@ interface MyProgressDashboardProps {
   onAddHydration?: () => void;
   onLogMeal?: () => void;
   onEducationClick?: () => void;
-  showSidebar?: boolean;
-  onCloseSidebar?: () => void;
 }
 
 const MyProgressDashboard: React.FC<MyProgressDashboardProps> = ({
@@ -100,8 +98,6 @@ const MyProgressDashboard: React.FC<MyProgressDashboardProps> = ({
   onAddHydration,
   onLogMeal,
   onEducationClick,
-  showSidebar = false,
-  onCloseSidebar,
 }) => {
   const {
     summary,
@@ -117,69 +113,7 @@ const MyProgressDashboard: React.FC<MyProgressDashboardProps> = ({
   } = coach;
 
   return (
-    <>
-      {/* History Sidebar - Fixed position overlay */}
-      {showSidebar && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          width: '280px',
-          height: '100vh',
-          backgroundColor: '#f8fafc',
-          borderRight: '1px solid #e5e7eb',
-          display: 'flex',
-          flexDirection: 'column',
-          overflow: 'hidden',
-          zIndex: 1001
-        }}>
-          {/* Sidebar Header */}
-          <div className="p-5 px-4 border-b border-gray-200 flex items-center justify-between">
-            <h2 className="m-0 text-base font-semibold text-gray-800">
-              Progress History
-            </h2>
-            <button
-              onClick={onCloseSidebar}
-              className="bg-transparent border-none cursor-pointer p-2 text-base text-gray-500 hover:text-gray-700"
-              title="Close History"
-            >
-              ✕
-            </button>
-          </div>
-
-          {/* History List */}
-          <div className="flex-1 overflow-hidden">
-            <div className="p-2 h-full overflow-y-auto overflow-x-hidden">
-              {/* Current Progress */}
-              <div className="p-3 mb-2 bg-white rounded-lg border border-gray-200 cursor-pointer hover:bg-gray-50 transition-colors duration-200">
-                <div className="text-sm font-medium text-gray-800 mb-1 overflow-hidden text-ellipsis whitespace-nowrap">
-                  Today's Progress
-                </div>
-                <div className="text-xs text-gray-500">
-                  Active now
-                </div>
-              </div>
-
-              {/* Previous Days */}
-              {['Yesterday', 'Thursday', 'Wednesday', 'Tuesday'].map((day, index) => (
-                <div 
-                  key={index} 
-                  className="p-3 mb-2 rounded-lg cursor-pointer transition-colors duration-200 hover:bg-gray-100"
-                >
-                  <div className="text-sm text-gray-700 mb-1 overflow-hidden text-ellipsis whitespace-nowrap">
-                    {day}
-                  </div>
-                  <div className="text-xs text-gray-400">
-                    {index + 1} day{index > 0 ? 's' : ''} ago
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-
-      <div className="w-full bg-[#f0f7ff] min-h-[70vh] relative">
+    <div className="w-full bg-[#f0f7ff] min-h-[70vh] relative">
         {/* Today header */}
         <header className="flex flex-col gap-2">
           <div className="flex items-center justify-between gap-4">
@@ -533,7 +467,6 @@ const MyProgressDashboard: React.FC<MyProgressDashboardProps> = ({
           </div>
         </div>
       </div>
-    </>
   );
 };
 
