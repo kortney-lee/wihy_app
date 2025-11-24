@@ -264,7 +264,7 @@ const ResearchQualityGauge: React.FC<ResearchQualityGaugeProps> = ({
   };
 
   return (
-    <div className="flex flex-col p-6 rounded-2xl bg-white border border-gray-200 shadow-md h-[420px] overflow-hidden">
+    <div className="flex flex-col p-6 rounded-2xl bg-white border border-gray-200 shadow-md h-[500px] overflow-hidden">
       <h3 className="text-xl font-semibold text-vh-muted mb-3">
         Research Quality {loading && <span className="text-sm text-gray-400">(Loading...)</span>}
       </h3>
