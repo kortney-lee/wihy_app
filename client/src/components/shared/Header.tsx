@@ -33,6 +33,9 @@ interface HeaderProps {
   // New props for chat integration
   onChatMessage?: (query: string, response: any) => void;
   isInChatMode?: boolean;
+  // Progress sidebar props
+  showProgressMenu?: boolean;
+  onProgressMenuClick?: () => void;
 }
 
 const Header: React.FC<HeaderProps> = ({
@@ -48,7 +51,10 @@ const Header: React.FC<HeaderProps> = ({
   showLogin = true,
   // New props for chat integration
   onChatMessage,
-  isInChatMode = false
+  isInChatMode = false,
+  // Progress sidebar props
+  showProgressMenu = false,
+  onProgressMenuClick
 }) => {
   // ================================
   // STATE MANAGEMENT
@@ -819,8 +825,34 @@ const Header: React.FC<HeaderProps> = ({
       )}
 
       <header className={headerClasses}>
-        {/* === TOP BAR: Login only (no notifications for client) === */}
+        {/* === TOP BAR: Progress menu + Login === */}
         <div className={CSS_CLASSES.VHEALTH_TOPBAR}>
+          {/* Left side: Progress History Menu */}
+          <div style={{ display: 'flex', alignItems: 'center', flex: 1 }}>
+            {showProgressMenu && onProgressMenuClick && (
+              <button
+                onClick={onProgressMenuClick}
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  cursor: 'pointer',
+                  padding: '8px 12px',
+                  fontSize: '24px',
+                  color: '#374151',
+                  transition: 'color 0.2s',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.color = '#6b7280'}
+                onMouseLeave={(e) => e.currentTarget.style.color = '#374151'}
+                title="Toggle Progress History"
+              >
+                ☰
+              </button>
+            )}
+          </div>
+          {/* Right side: Login */}
           <div className={CSS_CLASSES.VHEALTH_TOPBAR_RIGHT}>
             {showLogin && (
               <div 
