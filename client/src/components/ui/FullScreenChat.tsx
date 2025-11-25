@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect, useImperativeHandle, forwardRef } from 'react';
 import { chatService } from '../../services/chatService';
+import { conversationService } from '../../services/conversationService';
 import { wihyScanningService } from '../../services/wihyScanningService';
 import { visionAnalysisService } from '../../services/visionAnalysisService';
 import '../../styles/mobile-fixes.css';
@@ -20,6 +21,7 @@ interface FullScreenChatProps {
   onViewCharts?: () => void; // Optional callback for "View Charts" button
   apiResponseData?: any; // Universal Search API response data for chart generation
   onGenerateCharts?: (apiData: any) => void; // Callback to generate charts from API data
+  userId?: string; // Optional user ID for session management
 }
 
 // Add interface for ref methods
@@ -34,7 +36,8 @@ const FullScreenChat = forwardRef<FullScreenChatRef, FullScreenChatProps>(({
   initialResponse,
   onViewCharts,
   apiResponseData,
-  onGenerateCharts
+  onGenerateCharts,
+  userId
 }, ref) => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputMessage, setInputMessage] = useState('');
@@ -44,6 +47,9 @@ const FullScreenChat = forwardRef<FullScreenChatRef, FullScreenChatProps>(({
   const [isMobile, setIsMobile] = useState(false);
   const [hasActiveSession, setHasActiveSession] = useState(false);
   const [hasChartData, setHasChartData] = useState(false);
+  const [userSessions, setUserSessions] = useState<any[]>([]);
+  const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
+  const [isLoadingSessions, setIsLoadingSessions] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -58,14 +64,135 @@ const FullScreenChat = forwardRef<FullScreenChatRef, FullScreenChatProps>(({
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
+  // Initialize conversation service with user ID
+  useEffect(() => {
+    if (userId) {
+      conversationService.setUserId(userId);
+      console.log('💬 FULL SCREEN CHAT: User ID set for conversation service:', userId);
+    }
+  }, [userId]);
+
+  // Load user sessions when chat opens
+  useEffect(() => {
+    if (isOpen && userId) {
+      loadUserSessions();
+    }
+  }, [isOpen, userId]);
+
+  // Load all user sessions
+  const loadUserSessions = async () => {
+    if (!userId) return;
+    
+    setIsLoadingSessions(true);
+    try {
+      const sessionsResponse = await conversationService.getAllSessions();
+      if (sessionsResponse) {
+        setUserSessions(sessionsResponse.sessions || []);
+        console.log('💬 FULL SCREEN CHAT: Loaded sessions:', sessionsResponse.total_sessions);
+      }
+    } catch (error) {
+      console.error('💬 FULL SCREEN CHAT: Failed to load sessions:', error);
+    } finally {
+      setIsLoadingSessions(false);
+    }
+  };
+
+  // Create or resume session when chat opens
+  useEffect(() => {
+    if (isOpen && !currentSessionId) {
+      if (userId) {
+        createNewSession();
+      } else {
+        createTemporarySession();
+      }
+    }
+  }, [isOpen, userId]);
+
+  // Create a temporary session for stateless users
+  const createTemporarySession = () => {
+    // Generate a temporary session ID for stateless interactions
+    const tempSessionId = `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    setCurrentSessionId(tempSessionId);
+    conversationService.setSessionId(tempSessionId);
+    console.log('💬 FULL SCREEN CHAT: Created temporary session for stateless user:', tempSessionId);
+  };
+
+  // Create a new conversation session
+  const createNewSession = async () => {
+    if (!userId) {
+      createTemporarySession();
+      return;
+    }
+
+    try {
+      // Generate session name from initial query or timestamp
+      const sessionName = initialQuery 
+        ? `${initialQuery.substring(0, 50)}...` 
+        : `Chat ${new Date().toLocaleString()}`;
+
+      // Detect context from initial query
+      const context: any = { topic: 'general' };
+      if (initialQuery) {
+        const queryLower = initialQuery.toLowerCase();
+        if (queryLower.includes('barcode') || queryLower.match(/^\d{12,14}$/)) {
+          context.topic = 'barcode_scanning';
+        } else if (queryLower.includes('workout') || queryLower.includes('fitness')) {
+          context.topic = 'fitness';
+        } else if (queryLower.includes('food') || queryLower.includes('nutrition')) {
+          context.topic = 'nutrition';
+        } else if (queryLower.includes('research') || queryLower.includes('study')) {
+          context.topic = 'research';
+        }
+      }
+
+      const hour = new Date().getHours();
+      context.time_of_day = hour < 12 ? 'morning' : hour < 18 ? 'afternoon' : 'evening';
+
+      const sessionResponse = await conversationService.createSession(sessionName, context);
+      if (sessionResponse) {
+        setCurrentSessionId(sessionResponse.session_id);
+        setHasActiveSession(true);
+        console.log('💬 FULL SCREEN CHAT: Created new session:', sessionResponse.session_id);
+        
+        // Reload sessions list
+        await loadUserSessions();
+      }
+    } catch (error) {
+      console.error('💬 FULL SCREEN CHAT: Failed to create session:', error);
+    }
+  };
+
+  // Switch to a different session
+  const switchSession = async (sessionId: string) => {
+    setCurrentSessionId(sessionId);
+    conversationService.setSessionId(sessionId);
+    
+    // Load messages from this session
+    const historyResponse = await conversationService.getConversationHistory(sessionId);
+    if (historyResponse) {
+      const loadedMessages: ChatMessage[] = historyResponse.messages.map((msg: any) => ({
+        id: msg.message_id,
+        type: msg.sender as 'user' | 'assistant',
+        message: msg.message,
+        timestamp: new Date(msg.timestamp),
+        imageUrl: msg.imageUrl
+      }));
+      setMessages(loadedMessages);
+      console.log('💬 FULL SCREEN CHAT: Loaded', loadedMessages.length, 'messages from session:', sessionId);
+    }
+    
+    // Close history sidebar on mobile after selection
+    if (isMobile) {
+      setShowMobileHistory(false);
+    }
+  };
+
   // Check for active session when component opens
   useEffect(() => {
     if (isOpen) {
-      const sessionId = chatService.getCurrentSessionId();
-      const conversationId = chatService.getConversationId();
-      // Only consider it an active session if there's a session ID or conversation ID
-      // indicating there's been previous chat interaction
-      setHasActiveSession(Boolean(sessionId || conversationId));
+      const sessionId = conversationService.getSessionId();
+      // Only consider it an active session if there's a session ID
+      setHasActiveSession(Boolean(sessionId));
       
       // Check if we have chart data from API response or initial response
       setHasChartData(Boolean(apiResponseData || (
@@ -76,8 +203,7 @@ const FullScreenChat = forwardRef<FullScreenChatRef, FullScreenChatProps>(({
       
       console.log('🔍 FULL SCREEN CHAT: Session check:', {
         hasSessionId: Boolean(sessionId),
-        hasConversationId: Boolean(conversationId),
-        hasActiveSession: Boolean(sessionId || conversationId),
+        hasActiveSession: Boolean(sessionId),
         hasChartData: Boolean(apiResponseData || (typeof initialResponse === 'object' && initialResponse))
       });
     }
@@ -541,8 +667,18 @@ const FullScreenChat = forwardRef<FullScreenChatRef, FullScreenChatProps>(({
     setMessages(prev => [...prev, userMessage]);
 
     try {
-      // Get AI response using the updated API
-      const response = await chatService.sendMessage(messageText);
+      // Use conversationService for all messages (with temp or real session)
+      let response;
+      const isTemporarySession = currentSessionId?.startsWith('temp_');
+      
+      if (currentSessionId && !isTemporarySession && userId) {
+        console.log('💬 FULL SCREEN CHAT: Using persistent session-based conversation');
+        response = await conversationService.sendMessage(messageText, 'text');
+      } else {
+        console.log('💬 FULL SCREEN CHAT: Using stateless/temporary session');
+        // For temporary sessions or no userId, use stateless but track locally
+        response = await chatService.sendMessage(messageText);
+      }
       
       let aiResponse: string;
       let metadata: any = {};
@@ -771,16 +907,52 @@ const FullScreenChat = forwardRef<FullScreenChatRef, FullScreenChatProps>(({
         {/* History List */}
         <div className="flex-1 overflow-hidden">
           <div className="p-2 h-full overflow-y-auto overflow-x-hidden">
-            {/* Current Chat */}
-            {shouldShowHistory ? (
-              <div className="p-3 mb-2 bg-white rounded-lg border border-gray-200 cursor-pointer hover:bg-gray-50 transition-colors duration-200">
-                <div className="text-sm font-medium text-gray-800 mb-1 overflow-hidden text-ellipsis whitespace-nowrap">
-                  {initialQuery || 'Current Chat'}
-                </div>
-                <div className="text-xs text-gray-500">
-                  Active now
-                </div>
+            {/* Loading State */}
+            {isLoadingSessions ? (
+              <div className="flex items-center justify-center h-32">
+                <div className="text-sm text-gray-500">Loading sessions...</div>
               </div>
+            ) : shouldShowHistory ? (
+              <>
+                {/* Current Session */}
+                {currentSessionId && (
+                  <div className="p-3 mb-2 bg-white rounded-lg border border-gray-200 cursor-pointer hover:bg-gray-50 transition-colors duration-200">
+                    <div className="text-sm font-medium text-gray-800 mb-1 overflow-hidden text-ellipsis whitespace-nowrap">
+                      {initialQuery || 'Current Chat'}
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      Active now
+                    </div>
+                  </div>
+                )}
+
+                {/* User Sessions from API */}
+                {userSessions.length > 0 ? (
+                  userSessions
+                    .filter(session => session.session_id !== currentSessionId)
+                    .map((session) => (
+                      <div 
+                        key={session.session_id} 
+                        onClick={() => switchSession(session.session_id)}
+                        className="p-3 mb-2 rounded-lg cursor-pointer transition-colors duration-200 hover:bg-gray-100"
+                      >
+                        <div className="text-sm text-gray-700 mb-1 overflow-hidden text-ellipsis whitespace-nowrap">
+                          {session.session_name || 'Unnamed Chat'}
+                        </div>
+                        <div className="text-xs text-gray-400 flex items-center justify-between">
+                          <span>{new Date(session.created_at).toLocaleDateString()}</span>
+                          {session.total_messages && (
+                            <span>{session.total_messages} messages</span>
+                          )}
+                        </div>
+                      </div>
+                    ))
+                ) : (
+                  <div className="text-center p-4 text-sm text-gray-500">
+                    No previous conversations yet
+                  </div>
+                )}
+              </>
             ) : (
               <div className="flex flex-col items-center justify-center h-full text-center p-5">
                 <div className="text-base font-medium text-gray-700 mb-2">
@@ -791,21 +963,6 @@ const FullScreenChat = forwardRef<FullScreenChatRef, FullScreenChatProps>(({
                 </div>
               </div>
             )}
-
-            {/* Previous Chats */}
-            {shouldShowHistory && ['Health and nutrition basics', 'Exercise routine planning', 'Sleep optimization tips', 'Stress management techniques'].map((chat, index) => (
-              <div 
-                key={index} 
-                className="p-3 mb-2 rounded-lg cursor-pointer transition-colors duration-200 hover:bg-gray-100"
-              >
-                <div className="text-sm text-gray-700 mb-1 overflow-hidden text-ellipsis whitespace-nowrap">
-                  {chat}
-                </div>
-                <div className="text-xs text-gray-400">
-                  {index + 1} days ago
-                </div>
-              </div>
-            ))}
           </div>
         </div>
       </div>
