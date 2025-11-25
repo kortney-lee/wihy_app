@@ -692,18 +692,23 @@ const VHealthSearch: React.FC = () => {
       relatedTopics: [],
       medicalDisclaimer: 'This guidance is based on evidence-based health principles. Always consult healthcare professionals for personalized medical advice.',
       dataSource: 'wihy_scanner',
-      scanResult: barcodeData
+      scanResult: barcodeData,
+      imageUrl: input.imageUrl // Pass through the image URL
     };
     
     setIsLoading(false);
     navigate(`/results?q=${encodeURIComponent(productName)}`, {
       state: {
         results: nutritionResults,
-        apiResponse: barcodeData,
+        apiResponse: {
+          ...barcodeData,
+          imageUrl: input.imageUrl // Include imageUrl in apiResponse
+        },
         chatData: input.chatData, // Pass rich chat data
         dataSource: 'wihy_scanner',
         fromSearch: true,
-        scanType: 'barcode'
+        scanType: 'barcode',
+        imageUrl: input.imageUrl // Pass imageUrl at top level too
       }
     });
     setIsUploadModalOpen(false);
@@ -725,18 +730,23 @@ const VHealthSearch: React.FC = () => {
       relatedTopics: [],
       medicalDisclaimer: 'This guidance is based on evidence-based health principles. Always consult healthcare professionals for personalized medical advice.',
       dataSource: 'wihy_scanner',
-      scanResult: productData
+      scanResult: productData,
+      imageUrl: input.imageUrl // Pass through the image URL
     };
     
     setIsLoading(false);
     navigate(`/results?q=${encodeURIComponent(productName)}`, {
       state: {
         results: nutritionResults,
-        apiResponse: productData,
+        apiResponse: {
+          ...productData,
+          imageUrl: input.imageUrl // Include imageUrl in apiResponse
+        },
         chatData: input.chatData, // Pass rich chat data
         dataSource: 'wihy_scanner',
         fromSearch: true,
-        scanType: 'product_search'
+        scanType: 'product_search',
+        imageUrl: input.imageUrl // Pass imageUrl at top level too
       }
     });
     setIsUploadModalOpen(false);
@@ -758,18 +768,23 @@ const VHealthSearch: React.FC = () => {
       relatedTopics: [],
       medicalDisclaimer: 'This guidance is based on evidence-based health principles. Always consult healthcare professionals for personalized medical advice.',
       dataSource: input.type === 'vision_analysis' ? 'vision_analysis' : 'wihy_scanner',
-      scanResult: analysisData
+      scanResult: analysisData,
+      imageUrl: input.imageUrl // Pass through the image URL
     };
     
     setIsLoading(false);
     navigate(`/results?q=${encodeURIComponent(analysisName)}`, {
       state: {
         results: nutritionResults,
-        apiResponse: analysisData,
+        apiResponse: {
+          ...analysisData,
+          imageUrl: input.imageUrl // Include imageUrl in apiResponse
+        },
         chatData: input.chatData, // Pass rich chat data
         dataSource: input.type === 'vision_analysis' ? 'vision_analysis' : 'wihy_scanner',
         fromSearch: true,
-        scanType: 'image_analysis'
+        scanType: 'image_analysis',
+        imageUrl: input.imageUrl // Pass imageUrl at top level too
       }
     });
     setIsUploadModalOpen(false);
