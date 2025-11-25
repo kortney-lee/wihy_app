@@ -6,45 +6,23 @@
 
 /* Tablet and Mobile Styles */
 @media (max-width: 768px) {
-  /* Ensure no horizontal scroll - iOS specific fixes */
+  /* Ensure no horizontal scroll */
   html, body {
     overflow-x: hidden !important;
     max-width: 100vw !important;
-    width: 100% !important;
-    position: relative !important;
-    -webkit-overflow-scrolling: touch !important;
   }
   
   /* Main page wrapper */
   .about-page-wrapper {
     overflow-x: hidden !important;
     max-width: 100vw !important;
-    width: 100% !important;
-    position: relative !important;
-    min-height: 100vh !important;
-  }
-  
-  /* =========================
-     MOBILE STICKY FIXES
-     ========================= */
-  .mobile-sticky-cta {
-    display: block !important;
-    -webkit-transform: translate3d(0, 0, 0);
-    transform: translate3d(0, 0, 0);
-  }
-  
-  /* Show mobile nav toggle */
-  .mobile-nav-toggle {
-    display: flex !important;
   }
   
   /* =========================
      NAVIGATION - MOBILE
      ========================= */
   .top-nav {
-    padding: env(safe-area-inset-top) 1rem 0 1rem;
-    -webkit-transform: translateZ(0);
-    transform: translateZ(0);
+    padding: 0 1rem;
   }
   
   .nav-container {
@@ -79,19 +57,11 @@
   }
   
   .hero-container {
-    display: -webkit-box;
-    display: -ms-flexbox;
-    display: flex;
-    -webkit-box-orient: vertical;
-    -webkit-box-direction: normal;
-    -ms-flex-direction: column;
-    flex-direction: column;
+    grid-template-columns: 1fr;
     gap: 1rem;
     min-height: auto;
     max-width: 100%;
     padding: 2rem 1rem;
-    -webkit-transform: translateZ(0);
-    transform: translateZ(0);
   }
   
   .hero-content {
