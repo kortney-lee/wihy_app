@@ -65,7 +65,7 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
     return true;
   };
 
-  // Add paste handler for images
+  // Add paste handler for images - works on all screen sizes
   useEffect(() => {
     if (!isOpen) return;
 
@@ -76,6 +76,7 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
       for (let i = 0; i < items.length; i++) {
         if (items[i].type.indexOf('image') !== -1) {
           e.preventDefault();
+          e.stopPropagation();
           const blob = items[i].getAsFile();
           if (blob) {
             // Create a proper File object with a name for pasted images
@@ -83,14 +84,16 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
             // Set preview and pending file, but DON'T process yet
             setPreviewUrl(URL.createObjectURL(file));
             setPendingFile(file);
+            console.log('📋 Image pasted successfully:', file.name, 'Size:', Math.round(file.size / 1024), 'KB');
           }
           break;
         }
       }
     };
 
-    document.addEventListener('paste', handlePaste);
-    return () => document.removeEventListener('paste', handlePaste);
+    // Attach to document to catch paste anywhere when modal is open
+    document.addEventListener('paste', handlePaste, true); // Use capture phase for reliability
+    return () => document.removeEventListener('paste', handlePaste, true);
   }, [isOpen, isProcessing]);
 
   // Add global drag-drop prevention and handling
@@ -1038,19 +1041,21 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
             onChange={(e) => setImageUrl(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleAnalyze()}
             onPaste={async (e) => {
-              // Handle image paste in mobile input field
+              // Handle image paste in input field (redundant but ensures mobile compatibility)
               const items = e.clipboardData?.items;
               if (!items) return;
               
               for (let i = 0; i < items.length; i++) {
                 if (items[i].type.indexOf('image') !== -1) {
                   e.preventDefault();
+                  e.stopPropagation();
                   const blob = items[i].getAsFile();
                   if (blob) {
                     const file = new File([blob], `pasted-image-${Date.now()}.png`, { type: blob.type });
                     setPreviewUrl(URL.createObjectURL(file));
                     setPendingFile(file);
                     setImageUrl(''); // Clear text input
+                    console.log('📋 Image pasted in input field:', file.name, 'Size:', Math.round(file.size / 1024), 'KB');
                   }
                   break;
                 }
