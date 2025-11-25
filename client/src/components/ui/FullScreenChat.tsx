@@ -350,7 +350,9 @@ const FullScreenChat = forwardRef<FullScreenChatRef, FullScreenChatProps>(({
           initialResponse.type === 'barcode_scan' ||
           initialResponse.type === 'product_search' ||
           initialResponse.detected_type === 'barcode' ||
-          (initialResponse.success && initialResponse.results)
+          (initialResponse.success && initialResponse.results) ||
+          // Also handle responses with summary/recommendations but no type field (from VHealthSearch)
+          (initialResponse.summary && initialResponse.recommendations && initialResponse.imageUrl)
       )) {
         
         // Handle vision_analysis, image_analysis, barcode_scan, product_search types FIRST
@@ -362,6 +364,33 @@ const FullScreenChat = forwardRef<FullScreenChatRef, FullScreenChatProps>(({
             initialResponse.summary) {
           // Use the summary directly from these response types
           responseMessage = initialResponse.summary;
+        }
+        // Handle image analysis responses without explicit type field (from VHealthSearch uploads)
+        else if (initialResponse.summary && initialResponse.imageUrl && !initialResponse.type) {
+          // Format the image analysis response
+          responseMessage = initialResponse.summary;
+          
+          // Add recommendations if available
+          if (initialResponse.recommendations && initialResponse.recommendations.length > 0) {
+            responseMessage += '\n\n**Recommendations:**\n';
+            initialResponse.recommendations.forEach((rec: string) => {
+              responseMessage += `• ${rec}\n`;
+            });
+          }
+          
+          // Add health score if available in metadata
+          if (initialResponse.metadata?.health_score) {
+            responseMessage += `\n**Health Score:** ${initialResponse.metadata.health_score}/100`;
+            if (initialResponse.metadata.nutrition_grade?.grade) {
+              responseMessage += ` (${initialResponse.metadata.nutrition_grade.grade})`;
+            }
+          }
+          
+          // Store chart data if available
+          if (initialResponse.charts && onGenerateCharts) {
+            onGenerateCharts(initialResponse);
+            setHasChartData(true);
+          }
         }
         // Handle legacy barcode analysis format
         else if (initialResponse.type === 'barcode_analysis') {

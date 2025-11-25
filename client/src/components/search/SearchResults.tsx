@@ -1043,6 +1043,13 @@ const SearchResults: React.FC<SearchResultsProps> = ({
               onViewCharts={() => setIsChatOpen(false)} // Close chat to view charts behind it
               initialQuery={query}
               initialResponse={(() => {
+                // For image/barcode/product scans from VHealthSearch, pass the full apiResponse object
+                // so FullScreenChat can extract imageUrl and other metadata
+                if (apiResponse && apiResponse.imageUrl) {
+                  // Return the full apiResponse object to preserve imageUrl and other data
+                  return apiResponse;
+                }
+                
                 // Handle barcode scan data with full analysis
                 if (apiResponse && (apiResponse.analysis || apiResponse.product_info)) {
                   // This is barcode scan data - return the formatted results as string
