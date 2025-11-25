@@ -675,9 +675,10 @@ const FullScreenChat = forwardRef<FullScreenChatRef, FullScreenChatProps>(({
         console.log('💬 FULL SCREEN CHAT: Using persistent session-based conversation');
         response = await conversationService.sendMessage(messageText, 'text');
       } else {
-        console.log('💬 FULL SCREEN CHAT: Using stateless/temporary session');
-        // For temporary sessions or no userId, use stateless but track locally
-        response = await chatService.sendMessage(messageText);
+        console.log('💬 FULL SCREEN CHAT: Using /ask endpoint with session context');
+        // For temporary sessions or no userId, use /ask endpoint with session_id
+        // This enables conversation context without requiring persistent sessions
+        response = await chatService.sendMessage(messageText, currentSessionId || undefined);
       }
       
       let aiResponse: string;
@@ -729,8 +730,26 @@ const FullScreenChat = forwardRef<FullScreenChatRef, FullScreenChatProps>(({
           const chatResp = response as any;
           aiResponse = chatResp.response;
           
-          // Check if the /ask response contains Universal Search data
-          if (chatResp.data && typeof chatResp.data === 'object' && chatResp.data.success) {
+          // Check if the /ask response contains chart_data (NEW FORMAT FROM /ask ENDPOINT)
+          if (chatResp.chart_data && typeof chatResp.chart_data === 'object') {
+            console.log('📊 FULL SCREEN CHAT: Found chart_data in /ask response');
+            
+            // Trigger chart generation with chart_data
+            if (onGenerateCharts) {
+              onGenerateCharts({
+                type: chatResp.type,
+                chart_data: chatResp.chart_data,
+                response: chatResp.response,
+                confidence: chatResp.confidence,
+                source: chatResp.source
+              });
+            }
+            
+            // Update chart availability
+            setHasChartData(true);
+          }
+          // Check if the /ask response contains Universal Search data (LEGACY FORMAT)
+          else if (chatResp.data && typeof chatResp.data === 'object' && chatResp.data.success) {
             // The /ask endpoint returned Universal Search data
             const universalData = chatResp.data;
             
@@ -784,6 +803,7 @@ const FullScreenChat = forwardRef<FullScreenChatRef, FullScreenChatProps>(({
             processing_time: chatResp.processing_time || 0
           };
           console.log('🔍 FULL SCREEN CHAT: Ask endpoint response:', {
+            hasChartData: Boolean(chatResp.chart_data),
             hasUniversalData: Boolean(chatResp.data?.success),
             responseLength: aiResponse.length,
             metadata
