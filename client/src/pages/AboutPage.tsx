@@ -9,6 +9,7 @@ import PublicationTimelineChart from '../components/charts/cards/PublicationTime
 import '../styles/AboutPage.css';
 import '../styles/MobileAboutPage.css';
 import '../styles/InvestorSections.css';
+import '../styles/IOSFixes.css';
 
 const AboutPage: React.FC = () => {
   const currentYear = new Date().getFullYear();
