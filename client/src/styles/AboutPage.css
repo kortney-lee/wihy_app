@@ -138,6 +138,8 @@ body {
 .nav-brand {
   display: flex;
   align-items: center;
+  z-index: 1000;
+  position: relative;
 }
 
 .nav-logo {
@@ -151,15 +153,20 @@ body {
   gap: 4px;
   border: none;
   background: transparent;
-  padding: 4px;
+  padding: 8px;
   cursor: pointer;
+  z-index: 1001;
+  position: relative;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
 
 .mobile-nav-toggle span {
-  width: 20px;
-  height: 2px;
+  width: 24px;
+  height: 3px;
   background: var(--vh-ink);
   border-radius: 999px;
+  pointer-events: none;
 }
 
 .nav-links {

@@ -295,6 +295,13 @@
     margin: 0 !important;
   }
   
+  /* Platform card wrapper - reduce padding on mobile */
+  .platform-card-wrapper {
+    padding: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  
   /* Tech Stack Cards - Same mobile treatment as platform-grid */
   .tech-stack-cards {
     width: 100% !important;
@@ -359,16 +366,29 @@
   }
   
   /* =========================
-     FOOTER - MOBILE
+     FOOTER
      ========================= */
   .footer-container {
-    grid-template-columns: 1fr;
-    gap: 2rem;
-    padding: 0 1rem;
+    grid-template-columns: 1fr !important;
+    gap: 1.5rem !important;
+    padding: 0 1rem !important;
+    text-align: center !important;
   }
   
   .investor-footer {
     padding: 2rem 0 1rem 0;
+  }
+  
+  .footer-left,
+  .footer-center,
+  .footer-right {
+    text-align: center !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+  
+  .footer-contact {
+    text-align: center !important;
   }
   
   .footer-logo-img {
@@ -383,6 +403,23 @@
   .footer-disclaimer,
   .footer-copyright {
     font-size: 0.8rem;
+  }
+  
+  /* CTA Buttons - Stack on mobile */
+  .investment-cta-centered {
+    flex-direction: column !important;
+    gap: 12px !important;
+    width: 100%;
+    padding: 0 1rem;
+  }
+  
+  .investment-cta-centered .cta-button {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 1rem 1.5rem !important;
+    font-size: 0.95rem !important;
+    white-space: normal !important;
+    text-align: center !important;
   }
 }
 
