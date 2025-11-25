@@ -55,14 +55,25 @@ class ChatService {
   /**
    * Send a message using the direct /ask endpoint (primary API endpoint)
    * This aligns with the WIHY API documentation
+   * @param query - The message text
+   * @param sessionId - Optional session ID for conversation context
    */
-  async sendDirectMessage(query: string): Promise<ChatResponse | null> {
+  async sendDirectMessage(query: string, sessionId?: string): Promise<ChatResponse | null> {
     try {
       console.log('🔍 CHAT SERVICE: Sending message to /ask endpoint');
 
-      const request: ChatRequest = { query };
+      const request: any = { query };
+      
+      // Include session_id if provided for conversation context
+      if (sessionId) {
+        request.session_id = sessionId;
+        console.log('🔍 CHAT SERVICE: Including session_id for conversation context:', sessionId);
+      }
 
-      console.log('🔍 CHAT SERVICE: Request:', { query: query.substring(0, 100) + '...' });
+      console.log('🔍 CHAT SERVICE: Request:', { 
+        query: query.substring(0, 100) + '...',
+        hasSessionId: Boolean(sessionId)
+      });
 
       const response = await fetch(`${CHAT_API_BASE}/ask`, {
         method: 'POST',
@@ -82,7 +93,8 @@ class ChatService {
         type: data.type,
         source: data.source,
         confidence: data.confidence,
-        responseLength: data.response?.length
+        responseLength: data.response?.length,
+        hasChartData: Boolean((data as any).chart_data)
       });
 
       return data;
@@ -158,19 +170,14 @@ class ChatService {
   }
 
   /**
-   * Primary send message method - simplified to use only /ask endpoint
+   * Primary send message method - uses /ask endpoint with optional session_id
+   * @param query - The message text
+   * @param sessionId - Optional session ID for conversation context
    */
-  async sendMessage(query: string): Promise<ChatResponse | ChatMessageResponse | null> {
-    // Try session-based chat first if session exists
-    if (this.currentSessionId) {
-      const sessionResponse = await this.sendSessionMessage(query, 'health_chat', false);
-      if (sessionResponse?.success) {
-        return sessionResponse;
-      }
-    }
-
-    // Use the primary /ask endpoint (aligned with API documentation)
-    return await this.sendDirectMessage(query);
+  async sendMessage(query: string, sessionId?: string): Promise<ChatResponse | ChatMessageResponse | null> {
+    // Use the primary /ask endpoint with session_id if provided
+    // This enables conversation context while using the main API endpoint
+    return await this.sendDirectMessage(query, sessionId || this.currentSessionId || undefined);
   }
 
   /**
