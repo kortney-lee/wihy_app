@@ -113,38 +113,80 @@ class QuaggaBarcodeScanner {
 
       img.onload = () => {
         try {
-          // Set canvas dimensions
-          canvas.width = img.width;
-          canvas.height = img.height;
-          ctx.drawImage(img, 0, 0);
+          // Set canvas dimensions - scale up for better detection
+          const maxDimension = 1280;
+          const scale = Math.min(maxDimension / img.width, maxDimension / img.height, 1);
+          canvas.width = img.width * scale;
+          canvas.height = img.height * scale;
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
-          const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-          
-          // QuaggaJS configuration for image processing
-          const config = {
-            decoder: {
-              readers: [
-                'code_128_reader',
-                'ean_reader',
-                'ean_8_reader',
-                'code_39_reader',
-                'upc_reader',
-                'upc_e_reader'
-              ]
-            },
-            locate: true,
-            src: canvas.toDataURL('image/jpeg', 0.8)
+          const detectedBarcodes: string[] = [];
+          let attemptCount = 0;
+          const maxAttempts = 3;
+
+          const tryDecode = () => {
+            attemptCount++;
+            console.log(`🔍 QuaggaJS attempt ${attemptCount}/${maxAttempts}`);
+
+            // Try different image processing techniques for better detection
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            
+            // Enhance contrast for better barcode detection
+            if (attemptCount > 1) {
+              const data = imageData.data;
+              for (let i = 0; i < data.length; i += 4) {
+                // Increase contrast
+                const r = data[i];
+                const g = data[i + 1];
+                const b = data[i + 2];
+                const gray = 0.299 * r + 0.587 * g + 0.114 * b;
+                const enhanced = gray < 128 ? gray * 0.8 : gray * 1.2;
+                data[i] = data[i + 1] = data[i + 2] = Math.min(255, Math.max(0, enhanced));
+              }
+              ctx.putImageData(imageData, 0, 0);
+            }
+
+            const config = {
+              decoder: {
+                readers: [
+                  'ean_reader',       // Try EAN first (most common for food)
+                  'upc_reader',       // UPC barcodes
+                  'upc_e_reader',     // UPC-E
+                  'ean_8_reader',     // EAN-8
+                  'code_128_reader',  // Code 128
+                  'code_39_reader'    // Code 39
+                ],
+                multiple: false
+              },
+              locate: true,
+              numOfWorkers: 0, // Use main thread for static images
+              src: canvas.toDataURL('image/jpeg', 0.9)
+            };
+
+            Quagga.decodeSingle(config, (result: any) => {
+              if (result && result.codeResult && result.codeResult.code) {
+                const barcode = result.codeResult.code;
+                const normalizedBarcode = this.normalizeBarcode(barcode);
+                console.log(`✅ QuaggaJS detected: ${barcode} → ${normalizedBarcode}`);
+                
+                if (!detectedBarcodes.includes(normalizedBarcode)) {
+                  detectedBarcodes.push(normalizedBarcode);
+                }
+                resolve(detectedBarcodes);
+              } else if (attemptCount < maxAttempts) {
+                // Try again with image enhancement
+                console.log('⚠️ No barcode found, retrying with enhancement...');
+                setTimeout(tryDecode, 100);
+              } else {
+                console.log('ℹ️ QuaggaJS: No barcodes detected after all attempts');
+                resolve([]);
+              }
+            });
           };
 
-          Quagga.decodeSingle(config, (result: any) => {
-            if (result && result.codeResult) {
-              const barcode = result.codeResult.code;
-              const normalizedBarcode = this.normalizeBarcode(barcode);
-              resolve([normalizedBarcode]);
-            } else {
-              resolve([]);
-            }
-          });
+          // Start first attempt
+          tryDecode();
+
         } catch (error) {
           reject(error);
         }
