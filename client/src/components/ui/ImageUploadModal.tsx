@@ -4,7 +4,7 @@ import '../../styles/VHealthSearch.css';
 import '../../styles/modals.css';
 import { wihyScanningService } from '../../services/wihyScanningService';
 import { visionAnalysisService } from '../../services/visionAnalysisService';
-import { quaggaBarcodeScanner } from '../../services/quaggaBarcodeScanner';
+import LiveBarcodeScannerWeb from './LiveBarcodeScannerWeb';
 
 interface ImageUploadModalProps {
   isOpen: boolean;
@@ -43,6 +43,7 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
   const [isProcessing, setIsProcessing] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
+  const [showLiveScanner, setShowLiveScanner] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);        // desktop & mobile (library/file)
   const cameraInputRef = useRef<HTMLInputElement>(null);      // mobile (camera)
@@ -401,19 +402,6 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
     setPreviewUrl(URL.createObjectURL(file));
     
     try {
-      // First, try to detect barcodes using Quagga
-      console.log('📷 Attempting barcode detection with Quagga...');
-      const barcodeResult = await quaggaBarcodeScanner.scanImageFile(file);
-      
-      if (barcodeResult.success && barcodeResult.barcodes.length > 0) {
-        console.log('✅ Barcode detected in image:', barcodeResult.barcodes[0]);
-        // Found a barcode - use barcode scanning API directly
-        await handleBarcodeScanning(barcodeResult.barcodes[0]);
-        return;
-      }
-      
-      console.log('ℹ️ No barcode detected, proceeding with image analysis...');
-      
       // Check if we're in local development - use base64 fallback to avoid CORS
       const isLocalDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
       
@@ -717,6 +705,17 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
     }
   }, [onAnalysisComplete]);
 
+  // Handle live barcode detection
+  const handleLiveBarcodeDetected = useCallback(async (barcode: string) => {
+    console.log('📷 Live scanner detected barcode:', barcode);
+    setShowLiveScanner(false);
+    setIsProcessing(true);
+    
+    await handleBarcodeScanning(barcode);
+    
+    setIsProcessing(false);
+  }, [handleBarcodeScanning]);
+
   // Separate handler for product name searching  
   const handleProductSearch = useCallback(async (productName: string) => {
     console.log('🔍 Handling product search:', productName);
@@ -869,36 +868,72 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
         {/* Main upload area */}
         <div className="simple-upload-container" style={{padding: '16px 24px', textAlign: 'center'}}>
           
-          {/* Upload buttons */}
-          <div style={{display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '16px', marginTop: '4px'}}>
-            {isMobile && hasCamera() && (
-              <>
-                <button 
-                  className="simple-search-button" 
-                  onClick={handleCameraClick} 
-                  disabled={isProcessing}
-                  style={{
-                    width: '100%', 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    justifyContent: 'center', 
-                    gap: '8px',
-                    background: isProcessing ? '#cccccc' : '#4cbb17',
-                    color: isProcessing ? '#666' : 'white',
-                    border: 'none',
-                    borderRadius: '24px',
-                    padding: '16px 20px',
-                    fontSize: '16px',
-                    fontWeight: '600',
-                    transition: 'all 0.2s ease',
-                    cursor: isProcessing ? 'not-allowed' : 'pointer'
-                  }}
-                >
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M9.4 10.5l4.77-8.26C13.47 2.09 12.75 2 12 2c-2.4 0-4.6.85-6.32 2.25l3.66 6.35.06-.1zM21.54 9c-.92-2.92-3.15-5.26-6-6.34L11.88 9h9.66zm.26 1h-7.49l.29.5 4.76 8.25C21 16.97 22 14.61 22 12c0-.69-.07-1.35-.2-2zM8.54 12l-3.9-6.75C3.01 7.03 2 9.39 2 12c0 .69.07 1.35.2 2h7.49l-1.15-2zm-6.08 3c.92 2.92 3.15 5.26 6 6.34L12.12 15H2.46zm11.27 0l-3.9 6.76c.7.15 1.42.24 2.17.24 2.4 0 4.6-.85 6.32-2.25L14.73 15z"/>
-                  </svg>
-                  {isProcessing ? 'Processing...' : 'Use Camera'}
-                </button>
+          {/* Show live scanner if active */}
+          {showLiveScanner ? (
+            <div style={{ marginBottom: '16px' }}>
+              <LiveBarcodeScannerWeb 
+                onDetected={handleLiveBarcodeDetected}
+                onClose={() => setShowLiveScanner(false)}
+              />
+            </div>
+          ) : (
+            <>
+              {/* Upload buttons */}
+              <div style={{display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '16px', marginTop: '4px'}}>
+                {isMobile && hasCamera() && (
+                  <>
+                    <button 
+                      className="simple-search-button" 
+                      onClick={() => setShowLiveScanner(true)} 
+                      disabled={isProcessing}
+                      style={{
+                        width: '100%', 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        justifyContent: 'center', 
+                        gap: '8px',
+                        background: isProcessing ? '#cccccc' : '#4cbb17',
+                        color: isProcessing ? '#666' : 'white',
+                        border: 'none',
+                        borderRadius: '24px',
+                        padding: '16px 20px',
+                        fontSize: '16px',
+                        fontWeight: '600',
+                        transition: 'all 0.2s ease',
+                        cursor: isProcessing ? 'not-allowed' : 'pointer'
+                      }}
+                    >
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M4 6h2v12H4zm3 14h2V4H7zm3-7h2V4h-2zm3 7h2V4h-2zm4-14v12h2V6h-2z"/>
+                      </svg>
+                      {isProcessing ? 'Processing...' : 'Live Scan Barcode'}
+                    </button>
+                    <button 
+                      className="simple-search-button" 
+                      onClick={handleCameraClick} 
+                      disabled={isProcessing}
+                      style={{
+                        width: '100%', 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        justifyContent: 'center', 
+                        gap: '8px',
+                        background: isProcessing ? '#f5f5f5' : '#f8f9fa',
+                        color: isProcessing ? '#999' : '#5f6368',
+                        border: `1px solid ${isProcessing ? '#ddd' : '#e5e7eb'}`,
+                        borderRadius: '24px',
+                        padding: '16px 20px',
+                        fontSize: '16px',
+                        fontWeight: '600',
+                        transition: 'all 0.2s ease',
+                        cursor: isProcessing ? 'not-allowed' : 'pointer'
+                      }}
+                    >
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M9.4 10.5l4.77-8.26C13.47 2.09 12.75 2 12 2c-2.4 0-4.6.85-6.32 2.25l3.66 6.35.06-.1zM21.54 9c-.92-2.92-3.15-5.26-6-6.34L11.88 9h9.66zm.26 1h-7.49l.29.5 4.76 8.25C21 16.97 22 14.61 22 12c0-.69-.07-1.35-.2-2zM8.54 12l-3.9-6.75C3.01 7.03 2 9.39 2 12c0 .69.07 1.35.2 2h7.49l-1.15-2zm-6.08 3c.92 2.92 3.15 5.26 6 6.34L12.12 15H2.46zm11.27 0l-3.9 6.76c.7.15 1.42.24 2.17.24 2.4 0 4.6-.85 6.32-2.25L14.73 15z"/>
+                      </svg>
+                      {isProcessing ? 'Processing...' : 'Take Photo'}
+                    </button>
                 <button 
                   className="simple-search-button" 
                   onClick={() => fileInputRef.current?.click()} 
@@ -951,10 +986,39 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
                 </svg>
-                Upload from Files
+                Choose File
+              </button>
+            )}
+            {!isMobile && (
+              <button 
+                className="simple-search-button" 
+                onClick={() => fileInputRef.current?.click()} 
+                disabled={isProcessing}
+                style={{
+                  width: '100%', 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center', 
+                  gap: '8px',
+                  background: '#4cbb17',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '24px',
+                  padding: '16px 20px',
+                  fontSize: '16px',
+                  fontWeight: '600',
+                  transition: 'all 0.2s ease'
+                }}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
+                </svg>
+                {isProcessing ? 'Processing...' : 'Choose File'}
               </button>
             )}
           </div>
+          </>
+          )}
 
           {/* Hidden inputs */}
           <input
@@ -974,7 +1038,7 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
           />
 
           {/* Dropzone (desktop only) */}
-          {!isMobile && (
+          {!isMobile && !showLiveScanner && (
             <div
               className={`simple-upload-area ${isDragging ? 'dragging' : ''} ${isProcessing ? 'processing' : ''}`}
               onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
