@@ -317,7 +317,7 @@ Provide detailed health analysis and answer user questions about this product.`;
 
       const universalSearchResult = await universalSearchService.search({
         query: contextQuery,
-        type: 'food',
+        type: 'auto',  // Use 'auto' for general conversational response instead of 'food' or 'barcode'
         sessionId: sessionId,  // Pass session ID for chat context
         context: {
           health_goals: ['nutrition_analysis'],
@@ -339,7 +339,9 @@ Provide detailed health analysis and answer user questions about this product.`;
         const transformedResult: BarcodeScanResult = {
           success: true,
           analysis: {
-            summary: universalSearchResult.results.summary || 
+            // Use the AI response text from /ask endpoint, fallback to summary
+            summary: universalSearchResult.response || 
+                    universalSearchResult.results.summary || 
                     `${metadata.product_name} - Health Score: ${metadata.health_score}/100`,
             recommendations: universalSearchResult.recommendations || [],
             confidence_score: universalSearchResult.results.confidence_score || 0.8,

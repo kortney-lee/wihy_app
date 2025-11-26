@@ -160,19 +160,38 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
       try {
         // Request camera permission and get stream
-        const stream = await navigator.mediaDevices.getUserMedia({
+        // Use more compatible constraints for mobile devices
+        const constraints = {
           video: {
             facingMode: 'environment', // Prefer back camera
-            width: { ideal: 1280 },
-            height: { ideal: 720 }
-          }
-        });
+            width: { ideal: 1920, max: 1920 },
+            height: { ideal: 1080, max: 1080 }
+          },
+          audio: false
+        };
+        
+        console.log('📱 Requesting camera with constraints:', constraints);
+        const stream = await navigator.mediaDevices.getUserMedia(constraints);
+        console.log('✅ Camera stream obtained');
 
         // Create video element to show camera feed
         const video = document.createElement('video');
+        video.setAttribute('playsinline', 'true'); // Required for iOS
+        video.setAttribute('webkit-playsinline', 'true'); // Older iOS versions
+        video.setAttribute('autoplay', 'true');
+        video.setAttribute('muted', 'true');
         video.srcObject = stream;
         video.autoplay = true;
         video.playsInline = true;
+        video.muted = true;  // Required for autoplay on some mobile browsers
+        
+        // Explicitly play the video (required for some mobile browsers)
+        try {
+          await video.play();
+          console.log('✅ Video playing');
+        } catch (playError) {
+          console.warn('⚠️ Video autoplay failed, will retry:', playError);
+        }
         
         // Initialize barcode scanner
         let barcodeDetected = false;
@@ -409,45 +428,87 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
         modal.appendChild(buttonContainer);
         document.body.appendChild(modal);
         
-        // Start barcode scanning in background
-        console.log('📷 Starting continuous barcode scanning...');
-        codeReader.decodeFromInputVideoDeviceContinuously(
-          undefined,
-          video,
-          async (result: Result | undefined, err: unknown) => {
-            if (barcodeDetected || isProcessing) return;
-            
-            frameCount++;
-            if (frameCount % 30 === 0) {
-              console.log(`📷 Scanning frame ${frameCount}...`);
-            }
-
-            if (result) {
-              const barcode = result.getText().trim();
-              const format = result.getBarcodeFormat();
-              console.log('✅ BARCODE DETECTED!', barcode, 'format:', format);
-              
-              barcodeDetected = true;
-              setIsProcessing(true);
-              
-              // Stop scanner and cleanup
-              codeReader.reset();
-              stream.getTracks().forEach(track => track.stop());
-              document.body.removeChild(modal);
-              
-              // Process barcode through proper service flow: /api/scan → /ask
-              await handleBarcodeScanning(barcode);
-              
-              setIsProcessing(false);
-              onClose();
-              return;
-            }
-
-            if (err && (err as any).name !== 'NotFoundException') {
-              console.warn('⚠️ Scanner error:', err);
-            }
+        // Wait for video to be ready before starting barcode scanning (critical for mobile)
+        let scannerStarted = false;
+        const startBarcodeScanning = () => {
+          if (scannerStarted) {
+            console.log('⚠️ Scanner already started, skipping duplicate initialization');
+            return;
           }
-        );
+          
+          if (video.videoWidth === 0 || video.videoHeight === 0) {
+            console.warn('⚠️ Video dimensions not ready:', video.videoWidth, 'x', video.videoHeight);
+            return;
+          }
+          
+          scannerStarted = true;
+          console.log('📷 Video ready, starting continuous barcode scanning...');
+          console.log('📹 Video dimensions:', video.videoWidth, 'x', video.videoHeight);
+          
+          codeReader.decodeFromInputVideoDeviceContinuously(
+            undefined,
+            video,
+            async (result: Result | undefined, err: unknown) => {
+              if (barcodeDetected || isProcessing) return;
+              
+              frameCount++;
+              if (frameCount % 30 === 0) {
+                console.log(`📷 Scanning frame ${frameCount}...`);
+              }
+
+              if (result) {
+                const barcode = result.getText().trim();
+                const format = result.getBarcodeFormat();
+                console.log('✅ BARCODE DETECTED!', barcode, 'format:', format);
+                
+                barcodeDetected = true;
+                setIsProcessing(true);
+                
+                // Stop scanner and cleanup
+                codeReader.reset();
+                stream.getTracks().forEach(track => track.stop());
+                document.body.removeChild(modal);
+                
+                // Process barcode through proper service flow: /api/scan → /ask
+                await handleBarcodeScanning(barcode);
+                
+                setIsProcessing(false);
+                onClose();
+                return;
+              }
+
+              if (err && (err as any).name !== 'NotFoundException') {
+                console.warn('⚠️ Scanner error:', err);
+              }
+            }
+          );
+        };
+        
+        // Wait for video to be fully loaded (critical for mobile browsers)
+        if (video.readyState >= 2 && video.videoWidth > 0) {
+          // Video is already loaded
+          console.log('📹 Video already ready');
+          startBarcodeScanning();
+        } else {
+          // Wait for video to load
+          video.addEventListener('loadeddata', () => {
+            console.log('📹 Video loadeddata event, dimensions:', video.videoWidth, 'x', video.videoHeight);
+            startBarcodeScanning();
+          }, { once: true });
+          
+          // Fallback: Also listen for 'playing' event
+          video.addEventListener('playing', () => {
+            console.log('📹 Video playing event');
+            startBarcodeScanning();
+          }, { once: true });
+          
+          // Additional fallback with timeout
+          setTimeout(() => {
+            console.log('📹 Timeout fallback, checking video state');
+            startBarcodeScanning();
+            }
+          }, 1000);
+        }
         
         return;
       } catch (error) {
