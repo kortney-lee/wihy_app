@@ -503,12 +503,15 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
         }
         
       } catch (error) {
-        console.log('MediaDevices failed, falling back to file input:', error);
+        console.log('MediaDevices failed:', error);
+        // Show error message instead of falling back to file input
+        alert('Camera access failed. Please ensure camera permissions are granted.');
       }
+    } else {
+      // No MediaDevices API available
+      console.warn('MediaDevices API not available');
+      alert('Camera access is not available on this device.');
     }
-    
-    // Fallback to file input with capture
-    cameraInputRef.current?.click();
   };
 
   // --- Image file processing using Direct Upload Pattern ---
