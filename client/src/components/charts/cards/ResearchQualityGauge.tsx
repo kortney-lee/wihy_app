@@ -114,10 +114,16 @@ const ResearchQualityGauge: React.FC<ResearchQualityGaugeProps> = ({
       console.log('[ResearchQualityGauge] Using API response data');
       const metrics = apiResponse.analytics.research_metrics;
       
+      const qualityScore = metrics.quality_score || metrics.quality_assessment?.overallScore || 70;
+      const totalStudies = metrics.total_studies || metrics.quality_assessment?.totalStudies || 0;
+      const levelString = metrics.evidence_level || metrics.quality_assessment?.evidenceLevel || 'Level II';
+      
+      console.log('[ResearchQualityGauge] Parsed from apiResponse:', { qualityScore, totalStudies, levelString });
+      
       setApiData({
-        score: metrics.quality_score || metrics.quality_assessment?.overallScore || 70,
-        studyCount: metrics.total_studies || metrics.quality_assessment?.totalStudies || 0,
-        evidenceLevel: parseEvidenceLevel(metrics.evidence_level)
+        score: qualityScore,
+        studyCount: totalStudies,
+        evidenceLevel: parseEvidenceLevel(levelString)
       });
     }
   }, [apiResponse]);
@@ -154,9 +160,25 @@ const ResearchQualityGauge: React.FC<ResearchQualityGaugeProps> = ({
       console.log('[ResearchQualityGauge] API response:', data);
           
       // Extract research quality metrics from analytics
-      const qualityScore = data.researchQuality?.overallScore || 75;
-      const totalStudies = data.researchQuality?.totalStudies || 42;
-      const level = data.researchQuality?.evidenceLevel || 'II';
+      // Support both old and new API response formats
+      const qualityScore = 
+        data.analytics?.research_metrics?.quality_score || 
+        data.analytics?.research_metrics?.quality_assessment?.overallScore ||
+        data.researchQuality?.overallScore || 
+        75;
+      const totalStudies = 
+        data.analytics?.research_metrics?.total_studies ||
+        data.analytics?.research_metrics?.quality_assessment?.totalStudies ||
+        data.researchQuality?.totalStudies || 
+        42;
+      const levelString = 
+        data.analytics?.research_metrics?.evidence_level ||
+        data.analytics?.research_metrics?.quality_assessment?.evidenceLevel ||
+        data.researchQuality?.evidenceLevel || 
+        'Level II';
+      const level = parseEvidenceLevel(levelString);
+      
+      console.log('[ResearchQualityGauge] Extracted values:', { qualityScore, totalStudies, level });
       
       setApiData({
         score: qualityScore,
