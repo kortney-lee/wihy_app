@@ -105,17 +105,19 @@
 }
 
 .spinner-gif {
-  margin-bottom: 20px;
+  margin: 0 auto 20px;
   display: flex;
   justify-content: center;
   align-items: center;
+  width: 100%;
 }
 
 .spinner-image {
-  width: 60px;          /* Adjust this size */
-  height: 60px;         /* Keep it square */
+  width: 80px;          /* Larger, more visible */
+  height: 80px;         /* Keep it square */
   object-fit: contain;  /* Maintains aspect ratio */
-  border-radius: 50%;   /* Makes it circular if you want */
+  display: block;
+  margin: 0 auto;
 }
 
 /* Alternative sizes you can try */
