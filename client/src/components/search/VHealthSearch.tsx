@@ -810,15 +810,14 @@ const VHealthSearch: React.FC = () => {
     abortControllerRef.current = new AbortController();
     const signal = abortControllerRef.current.signal;
     
-    setIsLoading(true);
-    setLoadingMessage('Processing analysis...');
-    
     try {
       // Handle structured responses from ImageUploadModal
       if (typeof input === 'object' && input.type) {
         console.log(`${input.type} completed, processing structured result:`, input);
         
         // Handle different types of structured responses
+        // Note: barcode_scan, product_search, and image_analysis already have their data
+        // so we don't need to show the loading overlay - they're ready to navigate
         switch (input.type) {
           case 'barcode_scan':
             return handleBarcodeResult(input);
@@ -841,6 +840,11 @@ const VHealthSearch: React.FC = () => {
             // Fall through to handle as string
         }
       }
+      
+      // For string inputs (legacy or manual), we need to fetch nutrition data
+      // So we show the loading overlay
+      setIsLoading(true);
+      setLoadingMessage('Processing analysis...');
       
       // Handle traditional string input (food name)
       const foodName = typeof input === 'string' ? input : String(input);
