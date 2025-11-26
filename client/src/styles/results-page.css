@@ -6,7 +6,7 @@
   position: relative;
   min-height: 100vh;
   padding: 0;
-  padding-top: 120px; /* Add top padding to push content below header */
+  padding-top: 140px; /* Add top padding to push content below fixed header */
 }
 
 .results-search-header {
@@ -23,6 +23,10 @@
   flex-wrap: wrap;
   margin-top: -10px;
   width: 100%;
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
 }
 
 .results-logo-container {
@@ -68,6 +72,10 @@
 
 /* Mobile-specific adjustments for results header */
 @media (max-width: 768px) {
+  .results-page {
+    padding-top: 180px !important; /* Extra padding for stacked mobile header */
+  }
+  
   .results-search-header .search-input-container {
     width: 100% !important;
     max-width: 100% !important;

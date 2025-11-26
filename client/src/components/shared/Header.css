@@ -46,11 +46,17 @@
 .vhealth-header.results {
   border-bottom: 1px solid #e8eaed;
   min-height: auto;
-  position: sticky;
+  position: fixed;
   top: 0;
+  left: 0;
+  right: 0;
   z-index: 1000;
   background: #ffffff;
   width: 100%;
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
 }
 
 .vhealth-header.results .vhealth-mainbar {
@@ -140,9 +146,15 @@
   /* Fix the main bar layout for mobile - stack logo above search */
   .vhealth-header.results .vhealth-mainbar {
     flex-direction: column !important;
-    gap: 15px;
-    padding: 15px;
+    gap: 12px;
+    padding: 12px 15px;
     align-items: center;
+  }
+  
+  /* Ensure fixed positioning works on iOS */
+  .vhealth-header.results {
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
   }
 
   /* Logo should be centered and sized appropriately */

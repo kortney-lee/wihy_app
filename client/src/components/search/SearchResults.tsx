@@ -944,7 +944,12 @@ const SearchResults: React.FC<SearchResultsProps> = ({
         left: 0,
         right: 0,
         zIndex: 1000, 
-        backgroundColor: 'white'
+        backgroundColor: 'white',
+        WebkitTransform: 'translateZ(0)',
+        transform: 'translateZ(0)',
+        WebkitBackfaceVisibility: 'hidden',
+        backfaceVisibility: 'hidden',
+        width: '100%'
       }}>
         <Header
           variant="results"
@@ -969,7 +974,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({
       )}
       
       {/* Main Content Area with Dashboard Layout */}
-      <div className={CSS_CLASSES.DASHBOARD_CONTAINER} style={{ paddingTop: windowWidth < 768 ? '200px' : '100px' }}>
+      <div className={CSS_CLASSES.DASHBOARD_CONTAINER} style={{ paddingTop: windowWidth < 768 ? '180px' : '120px' }}>
         {/* Progress History Sidebar - Always available */}
         {showProgressSidebar && (
           <div style={{
