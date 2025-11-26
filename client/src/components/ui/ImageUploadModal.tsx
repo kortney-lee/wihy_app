@@ -506,11 +506,9 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
           setTimeout(() => {
             console.log('📹 Timeout fallback, checking video state');
             startBarcodeScanning();
-            }
           }, 1000);
         }
         
-        return;
       } catch (error) {
         console.log('MediaDevices failed, falling back to file input:', error);
       }
