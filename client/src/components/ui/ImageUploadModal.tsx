@@ -156,366 +156,297 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
     console.log('User Agent:', navigator.userAgent);
     console.log('MediaDevices available:', 'mediaDevices' in navigator);
 
-    // Try to use MediaDevices API first for better camera control
-    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-      try {
-        // Request camera permission and get stream
-        // Use more compatible constraints for mobile devices
-        const constraints = {
-          video: {
-            facingMode: 'environment', // Prefer back camera
-            width: { ideal: 1920, max: 1920 },
-            height: { ideal: 1080, max: 1080 }
-          },
-          audio: false
-        };
-        
-        console.log('📱 Requesting camera with constraints:', constraints);
-        const stream = await navigator.mediaDevices.getUserMedia(constraints);
-        console.log('✅ Camera stream obtained');
-
-        // Create video element to show camera feed
-        const video = document.createElement('video');
-        video.setAttribute('playsinline', 'true'); // Required for iOS
-        video.setAttribute('webkit-playsinline', 'true'); // Older iOS versions
-        video.setAttribute('autoplay', 'true');
-        video.setAttribute('muted', 'true');
-        video.srcObject = stream;
-        video.autoplay = true;
-        video.playsInline = true;
-        video.muted = true;  // Required for autoplay on some mobile browsers
-        
-        // Explicitly play the video (required for some mobile browsers)
-        try {
-          await video.play();
-          console.log('✅ Video playing');
-        } catch (playError) {
-          console.warn('⚠️ Video autoplay failed, will retry:', playError);
-        }
-        
-        // Initialize barcode scanner
-        let barcodeDetected = false;
-        let frameCount = 0;
-        const hints = new Map();
-        const formats = [
-          BarcodeFormat.EAN_13,
-          BarcodeFormat.EAN_8,
-          BarcodeFormat.UPC_A,
-          BarcodeFormat.UPC_E,
-          BarcodeFormat.CODE_128,
-          BarcodeFormat.CODE_39,
-          BarcodeFormat.ITF,
-          BarcodeFormat.QR_CODE,
-        ];
-        hints.set(DecodeHintType.POSSIBLE_FORMATS, formats);
-        const codeReader = new BrowserMultiFormatReader(hints);
-        
-        // Create a mobile-optimized modal for camera capture
-        const modal = document.createElement('div');
-        modal.style.cssText = `
-          position: fixed;
-          top: 0;
-          left: 0;
-          width: 100vw;
-          height: 100vh;
-          height: 100dvh;
-          background: #000;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          z-index: 10000;
-          padding: 0;
-          margin: 0;
-          overflow: hidden;
-        `;
-        
-        video.style.cssText = `
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-          border-radius: 0;
-          position: absolute;
-          top: 0;
-          left: 0;
-        `;
-        
-        // Create animated scanner overlay
-        const scannerOverlay = document.createElement('div');
-        scannerOverlay.style.cssText = `
-          position: absolute;
-          top: 50%;
-          left: 50%;
-          width: 250px;
-          height: 250px;
-          transform: translate(-50%, -50%);
-          border: 2px solid #00ff00;
-          border-radius: 12px;
-          z-index: 10001;
-          pointer-events: none;
-          box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
-        `;
-        
-        // Create corner indicators
-        const corners = ['top-left', 'top-right', 'bottom-left', 'bottom-right'];
-        corners.forEach(corner => {
-          const cornerDiv = document.createElement('div');
-          cornerDiv.style.cssText = `
-            position: absolute;
-            width: 20px;
-            height: 20px;
-            border: 3px solid #00ff00;
-            ${corner.includes('top') ? 'top: -2px;' : 'bottom: -2px;'}
-            ${corner.includes('left') ? 'left: -2px;' : 'right: -2px;'}
-            ${corner.includes('top') && corner.includes('left') ? 'border-right: none; border-bottom: none;' : ''}
-            ${corner.includes('top') && corner.includes('right') ? 'border-left: none; border-bottom: none;' : ''}
-            ${corner.includes('bottom') && corner.includes('left') ? 'border-right: none; border-top: none;' : ''}
-            ${corner.includes('bottom') && corner.includes('right') ? 'border-left: none; border-top: none;' : ''}
-          `;
-          scannerOverlay.appendChild(cornerDiv);
-        });
-        
-        // Create animated scan line
-        const scanLine = document.createElement('div');
-        scanLine.style.cssText = `
-          position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          height: 2px;
-          background: linear-gradient(90deg, transparent, #ff0000, transparent);
-          animation: scanAnimation 2s ease-in-out infinite;
-          box-shadow: 0 0 10px #ff0000;
-        `;
-        scannerOverlay.appendChild(scanLine);
-        
-        // Add CSS animation for scan line
-        const style = document.createElement('style');
-        style.textContent = `
-          @keyframes scanAnimation {
-            0% { top: 0; opacity: 1; }
-            50% { opacity: 1; }
-            100% { top: calc(100% - 2px); opacity: 1; }
-          }
-        `;
-        document.head.appendChild(style);
-        
-        // Create button container with better mobile positioning
-        const buttonContainer = document.createElement('div');
-        buttonContainer.style.cssText = `
-          position: absolute;
-          bottom: env(safe-area-inset-bottom, 20px);
-          left: 0;
-          right: 0;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          gap: 12px;
-          z-index: 10001;
-          padding: 0 20px 20px 20px;
-          box-sizing: border-box;
-        `;
-        
-        const captureBtn = document.createElement('button');
-        captureBtn.textContent = 'Capture Photo';
-        captureBtn.style.cssText = `
-          padding: 18px 40px;
-          background: #4cbb17;
-          color: white;
-          border: none;
-          border-radius: 50px;
-          font-size: 18px;
-          font-weight: 600;
-          cursor: pointer;
-          box-shadow: 0 4px 12px rgba(76, 187, 23, 0.3);
-          width: 100%;
-          max-width: 280px;
-          transition: all 0.2s ease;
-          touch-action: manipulation;
-        `;
-        
-        const closeBtn = document.createElement('button');
-        closeBtn.textContent = '✕ Close';
-        closeBtn.style.cssText = `
-          padding: 14px 24px;
-          background: rgba(255, 255, 255, 0.95);
-          color: #333;
-          border: none;
-          border-radius: 25px;
-          font-size: 16px;
-          cursor: pointer;
-          backdrop-filter: blur(10px);
-          width: 100%;
-          max-width: 200px;
-          transition: all 0.2s ease;
-          touch-action: manipulation;
-        `;
-        
-        // Add touch feedback for buttons
-        const addTouchFeedback = (btn: HTMLButtonElement) => {
-          btn.addEventListener('touchstart', () => {
-            btn.style.transform = 'scale(0.95)';
-          });
-          btn.addEventListener('touchend', () => {
-            btn.style.transform = 'scale(1)';
-          });
-          btn.addEventListener('touchcancel', () => {
-            btn.style.transform = 'scale(1)';
-          });
-        };
-
-        addTouchFeedback(captureBtn);
-        addTouchFeedback(closeBtn);
-
-        // Handle capture
-        captureBtn.onclick = async () => {
-          if (isProcessing) {
-            console.log('⏰ Already processing, ignoring capture request');
-            return;
-          }
-          
-          setIsProcessing(true);
-          barcodeDetected = true; // Stop barcode scanning
-          lastProcessingTime.current = Date.now();
-          
-          const canvas = document.createElement('canvas');
-          const context = canvas.getContext('2d');
-          
-          canvas.width = video.videoWidth;
-          canvas.height = video.videoHeight;
-          context?.drawImage(video, 0, 0);
-          
-          canvas.toBlob(async (blob) => {
-            if (blob) {
-              try {
-                const file = new File([blob], 'camera-capture.jpg', { type: 'image/jpeg' });
-                console.log('📸 Processing captured photo:', file.name);
-                codeReader.reset();
-                await processFile(file);
-              } catch (error) {
-                console.error('❌ Error processing captured photo:', error);
-              } finally {
-                setIsProcessing(false);
-              }
-            } else {
-              setIsProcessing(false);
-            }
-            
-            // Cleanup
-            stream.getTracks().forEach(track => track.stop());
-            document.body.removeChild(modal);
-          }, 'image/jpeg', 0.8);
-        };
-        
-        // Handle close
-        const cleanup = () => {
-          barcodeDetected = true;
-          codeReader.reset();
-          stream.getTracks().forEach(track => track.stop());
-          document.body.removeChild(modal);
-        };
-        
-        closeBtn.onclick = cleanup;
-        modal.onclick = (e) => {
-          if (e.target === modal) cleanup();
-        };
-        
-        // Assemble the modal
-        buttonContainer.appendChild(captureBtn);
-        buttonContainer.appendChild(closeBtn);
-        modal.appendChild(video);
-        modal.appendChild(scannerOverlay);
-        modal.appendChild(buttonContainer);
-        document.body.appendChild(modal);
-        
-        // Wait for video to be ready before starting barcode scanning (critical for mobile)
-        let scannerStarted = false;
-        const startBarcodeScanning = () => {
-          if (scannerStarted) {
-            console.log('⚠️ Scanner already started, skipping duplicate initialization');
-            return;
-          }
-          
-          if (video.videoWidth === 0 || video.videoHeight === 0) {
-            console.warn('⚠️ Video dimensions not ready:', video.videoWidth, 'x', video.videoHeight);
-            return;
-          }
-          
-          scannerStarted = true;
-          console.log('📷 Video ready, starting continuous barcode scanning...');
-          console.log('📹 Video dimensions:', video.videoWidth, 'x', video.videoHeight);
-          
-          codeReader.decodeFromInputVideoDeviceContinuously(
-            undefined,
-            video,
-            async (result: Result | undefined, err: unknown) => {
-              if (barcodeDetected || isProcessing) return;
-              
-              frameCount++;
-              if (frameCount % 30 === 0) {
-                console.log(`📷 Scanning frame ${frameCount}...`);
-              }
-
-              if (result) {
-                const barcode = result.getText().trim();
-                const format = result.getBarcodeFormat();
-                console.log('✅ BARCODE DETECTED!', barcode, 'format:', format);
-                
-                barcodeDetected = true;
-                setIsProcessing(true);
-                
-                // Stop scanner and cleanup
-                codeReader.reset();
-                stream.getTracks().forEach(track => track.stop());
-                document.body.removeChild(modal);
-                
-                // Process barcode through proper service flow: /api/scan → /ask
-                await handleBarcodeScanning(barcode);
-                
-                setIsProcessing(false);
-                onClose();
-                return;
-              }
-
-              if (err && (err as any).name !== 'NotFoundException') {
-                console.warn('⚠️ Scanner error:', err);
-              }
-            }
-          );
-        };
-        
-        // Wait for video to be fully loaded (critical for mobile browsers)
-        if (video.readyState >= 2 && video.videoWidth > 0) {
-          // Video is already loaded
-          console.log('📹 Video already ready');
-          startBarcodeScanning();
-        } else {
-          // Wait for video to load
-          video.addEventListener('loadeddata', () => {
-            console.log('📹 Video loadeddata event, dimensions:', video.videoWidth, 'x', video.videoHeight);
-            startBarcodeScanning();
-          }, { once: true });
-          
-          // Fallback: Also listen for 'playing' event
-          video.addEventListener('playing', () => {
-            console.log('📹 Video playing event');
-            startBarcodeScanning();
-          }, { once: true });
-          
-          // Additional fallback with timeout
-          setTimeout(() => {
-            console.log('📹 Timeout fallback, checking video state');
-            startBarcodeScanning();
-          }, 1000);
-        }
-        
-      } catch (error) {
-        console.log('MediaDevices failed, falling back to file input:', error);
-      }
+    // If no mediaDevices, fall back to file input
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      console.warn('No mediaDevices API, falling back to file input');
+      cameraInputRef.current?.click();
+      return;
     }
-    
-    // Fallback to file input with capture
-    cameraInputRef.current?.click();
+
+    // Create ZXing reader with hints
+    const hints = new Map();
+    const formats = [
+      BarcodeFormat.EAN_13,
+      BarcodeFormat.EAN_8,
+      BarcodeFormat.UPC_A,
+      BarcodeFormat.UPC_E,
+      BarcodeFormat.CODE_128,
+      BarcodeFormat.CODE_39,
+      BarcodeFormat.ITF,
+      BarcodeFormat.QR_CODE,
+    ];
+    hints.set(DecodeHintType.POSSIBLE_FORMATS, formats);
+    hints.set(DecodeHintType.TRY_HARDER, true);
+
+    const codeReader = new BrowserMultiFormatReader(hints);
+
+    // Build full-screen mobile modal
+    const modal = document.createElement('div');
+    modal.style.cssText = `
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      height: 100dvh;
+      background: #000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+      overflow: hidden;
+    `;
+
+    const video = document.createElement('video');
+    video.setAttribute('playsinline', 'true');
+    video.setAttribute('webkit-playsinline', 'true');
+    video.setAttribute('autoplay', 'true');
+    video.setAttribute('muted', 'true');
+    video.muted = true;
+    video.playsInline = true;
+    video.style.cssText = `
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      position: absolute;
+      top: 0;
+      left: 0;
+    `;
+
+    // Scanner overlay (green square with moving line)
+    const scannerOverlay = document.createElement('div');
+    scannerOverlay.style.cssText = `
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 250px;
+      height: 250px;
+      transform: translate(-50%, -50%);
+      border-radius: 12px;
+      z-index: 10001;
+      pointer-events: none;
+      box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+    `;
+
+    const corners = ['top-left', 'top-right', 'bottom-left', 'bottom-right'];
+    corners.forEach((corner) => {
+      const cornerDiv = document.createElement('div');
+      cornerDiv.style.cssText = `
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        border: 3px solid #00ff00;
+        ${corner.includes('top') ? 'top: -2px;' : 'bottom: -2px;'}
+        ${corner.includes('left') ? 'left: -2px;' : 'right: -2px;'}
+        ${
+          corner.includes('top') && corner.includes('left')
+            ? 'border-right: none; border-bottom: none;'
+            : ''
+        }
+        ${
+          corner.includes('top') && corner.includes('right')
+            ? 'border-left: none; border-bottom: none;'
+            : ''
+        }
+        ${
+          corner.includes('bottom') && corner.includes('left')
+            ? 'border-right: none; border-top: none;'
+            : ''
+        }
+        ${
+          corner.includes('bottom') && corner.includes('right')
+            ? 'border-left: none; border-top: none;'
+            : ''
+        }
+      `;
+      scannerOverlay.appendChild(cornerDiv);
+    });
+
+    const scanLine = document.createElement('div');
+    scanLine.style.cssText = `
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #ff0000, transparent);
+      box-shadow: 0 0 10px #ff0000;
+      animation: scanAnimation 2s ease-in-out infinite;
+    `;
+    scannerOverlay.appendChild(scanLine);
+
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes scanAnimation {
+        0% { top: 0; opacity: 1; }
+        100% { top: calc(100% - 2px); opacity: 1; }
+      }
+    `;
+    document.head.appendChild(style);
+
+    // Buttons
+    const buttonContainer = document.createElement('div');
+    buttonContainer.style.cssText = `
+      position: absolute;
+      bottom: env(safe-area-inset-bottom, 20px);
+      left: 0;
+      right: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      z-index: 10001;
+      padding: 0 20px 20px 20px;
+      box-sizing: border-box;
+    `;
+
+    const captureBtn = document.createElement('button');
+    captureBtn.textContent = 'Capture Photo';
+    captureBtn.style.cssText = `
+      padding: 18px 40px;
+      background: #4cbb17;
+      color: white;
+      border: none;
+      border-radius: 50px;
+      font-size: 18px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(76, 187, 23, 0.3);
+      width: 100%;
+      max-width: 280px;
+      touch-action: manipulation;
+    `;
+
+    const closeBtn = document.createElement('button');
+    closeBtn.textContent = '✕ Close';
+    closeBtn.style.cssText = `
+      padding: 14px 24px;
+      background: rgba(255, 255, 255, 0.95);
+      color: #333;
+      border: none;
+      border-radius: 25px;
+      font-size: 16px;
+      cursor: pointer;
+      width: 100%;
+      max-width: 200px;
+      touch-action: manipulation;
+    `;
+
+    const addTouchFeedback = (btn: HTMLButtonElement) => {
+      btn.addEventListener('touchstart', () => {
+        btn.style.transform = 'scale(0.95)';
+      });
+      btn.addEventListener('touchend', () => {
+        btn.style.transform = 'scale(1)';
+      });
+      btn.addEventListener('touchcancel', () => {
+        btn.style.transform = 'scale(1)';
+      });
+    };
+
+    addTouchFeedback(captureBtn);
+    addTouchFeedback(closeBtn);
+
+    buttonContainer.appendChild(captureBtn);
+    buttonContainer.appendChild(closeBtn);
+    modal.appendChild(video);
+    modal.appendChild(scannerOverlay);
+    modal.appendChild(buttonContainer);
+    document.body.appendChild(modal);
+
+    let scanningStopped = false;
+
+    const cleanup = () => {
+      if (scanningStopped) return;
+      scanningStopped = true;
+      try {
+        codeReader.reset();
+      } catch (_) {}
+      const stream = video.srcObject as MediaStream | null;
+      stream?.getTracks().forEach((t) => t.stop());
+      if (modal.parentNode) modal.parentNode.removeChild(modal);
+    };
+
+    closeBtn.onclick = cleanup;
+    modal.onclick = (e) => {
+      if (e.target === modal) cleanup();
+    };
+
+    // Capture photo fallback (uses the current video frame)
+    captureBtn.onclick = async () => {
+      if (isProcessing) {
+        console.log('⏰ Already processing, ignoring capture request');
+        return;
+      }
+      setIsProcessing(true);
+      scanningStopped = true;
+      try {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        ctx?.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+        await new Promise<void>((resolve) =>
+          canvas.toBlob(async (blob) => {
+            if (!blob) return resolve();
+            const file = new File([blob], 'camera-capture.jpg', { type: 'image/jpeg' });
+            await processFile(file);
+            resolve();
+          }, 'image/jpeg', 0.85)
+        );
+      } catch (err) {
+        console.error('❌ Error processing captured frame:', err);
+      } finally {
+        setIsProcessing(false);
+        cleanup();
+      }
+    };
+
+    // Start ZXing with constraints (ZXing owns getUserMedia)
+    const constraints = {
+      video: {
+        facingMode: { ideal: 'environment' as const },
+        width: { ideal: 1280 },
+        height: { ideal: 720 },
+      },
+      audio: false,
+    };
+
+    try {
+      console.log('📷 Starting ZXing decodeFromConstraints on mobile...', constraints);
+      codeReader.decodeFromConstraints(
+        constraints,
+        video,
+        async (result: Result | undefined, err: unknown) => {
+          if (scanningStopped || isProcessing) return;
+
+          if (result) {
+            const barcode = result.getText().trim();
+            const format = result.getBarcodeFormat();
+            console.log('✅ BARCODE DETECTED!', barcode, 'format:', format);
+            scanningStopped = true;
+            setIsProcessing(true);
+            try {
+              await handleBarcodeScanning(barcode);
+              onClose();
+            } finally {
+              setIsProcessing(false);
+              cleanup();
+            }
+            return;
+          }
+
+          if (err && (err as any).name !== 'NotFoundException') {
+            console.warn('⚠️ Scanner error:', err);
+          }
+        }
+      );
+    } catch (err) {
+      console.error('❌ Failed to start ZXing scanner, falling back to file input:', err);
+      cleanup();
+      cameraInputRef.current?.click();
+    }
   };
 
   // --- Image file processing using Direct Upload Pattern ---
