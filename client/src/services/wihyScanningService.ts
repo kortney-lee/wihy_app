@@ -93,6 +93,7 @@ export interface BarcodeScanResult {
     timestamp: string;
     confidence_score: number;
     data_sources: string[];
+    session_id?: string;  // Chat session ID for follow-up questions
   };
   error?: string;
 }
@@ -260,19 +261,68 @@ class WihyScanningService {
   }
 
   /**
-   * Scan food by barcode using Universal Search API with full business logic
+   * Scan food by barcode using WiHy Scanner API /api/scan endpoint
    */
   async scanBarcode(barcode: string, userContext?: any): Promise<BarcodeScanResult> {
     try {
-      console.log('🔍 WiHy Scanning API - barcode scan via Universal Search:', barcode);
+      console.log('🔍 WiHy Scanning API - barcode scan via /api/scan:', barcode);
 
-      // Use Universal Search API for barcode scanning with rich business logic
+      // Step 1: Get product data from Scanner API
+      const response = await fetch(`${this.baseUrl}/api/scan`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          barcode,
+          user_context: {
+            userId: 'web-user',
+            trackHistory: true,
+            health_goals: ['nutrition_analysis'],
+            dietary_restrictions: [],
+            ...userContext
+          }
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const scannerData = await response.json();
+      console.log('✅ Scanner API response:', scannerData);
+
+      // Step 2: Pass scanner result to Universal Search /ask for conversational analysis
+      // Extract product information to build a rich context query
+      const productName = scannerData.product_info?.name || scannerData.analysis?.metadata?.product_name || 'Unknown product';
+      const brand = scannerData.product_info?.brand || scannerData.analysis?.metadata?.brand || '';
+      const nutritionFacts = scannerData.product_info?.nutrition_facts || scannerData.analysis?.metadata?.nutrition_facts || {};
+      const healthScore = scannerData.analysis?.metadata?.health_score || 0;
+      const novaGroup = scannerData.analysis?.metadata?.nova_group || 0;
+      const summary = scannerData.analysis?.summary || '';
+      
+      // Build a descriptive query with all the product context
+      const contextQuery = `Product: ${productName}${brand ? ` by ${brand}` : ''}, Barcode: ${barcode}
+Health Score: ${healthScore}/100, NOVA Group: ${novaGroup}
+Nutrition per 100g: ${nutritionFacts.calories || 0} calories, ${nutritionFacts.protein_g || 0}g protein, ${nutritionFacts.carbohydrates_g || 0}g carbs, ${nutritionFacts.fat_g || 0}g fat, ${nutritionFacts.sodium_mg || 0}mg sodium
+Initial Analysis: ${summary}
+
+Provide detailed health analysis and answer user questions about this product.`;
+
+      console.log('🔍 Sending product context to Universal Search:', contextQuery);
+
+      // Create a session ID for this barcode scan to enable chat continuity
+      const sessionId = `barcode_${barcode}_${Date.now()}`;
+      console.log('📱 Creating chat session:', sessionId);
+
       const universalSearchResult = await universalSearchService.search({
-        query: barcode,
-        type: 'barcode',
+        query: contextQuery,
+        type: 'food',
+        sessionId: sessionId,  // Pass session ID for chat context
         context: {
           health_goals: ['nutrition_analysis'],
           dietary_restrictions: [],
+          productData: scannerData,  // Include full scanner data as context
           ...userContext
         },
         options: {
@@ -303,7 +353,7 @@ class WihyScanningService {
             barcode: metadata.barcode || barcode,
             categories: metadata.categories,
             nova_group: metadata.nova_group,
-            image_url: undefined // Not provided in current contract
+            image_url: undefined
           },
           nutrition: {
             score: metadata.nutrition_score,
@@ -342,11 +392,12 @@ class WihyScanningService {
             scan_id: `scan_${Date.now()}`,
             timestamp: universalSearchResult.timestamp,
             confidence_score: universalSearchResult.results.confidence_score || 0.8,
-            data_sources: ['universal_search_api', 'openfoodfacts']
+            data_sources: ['universal_search_api', 'scanner_api', 'openfoodfacts'],
+            session_id: sessionId  // Include session ID for chat continuity
           }
         };
 
-        console.log('✅ Universal Search barcode scan successful');
+        console.log('✅ Universal Search barcode scan successful with session:', sessionId);
         return transformedResult;
       } else {
         return {

@@ -4,7 +4,12 @@ import '../../styles/VHealthSearch.css';
 import '../../styles/modals.css';
 import { wihyScanningService } from '../../services/wihyScanningService';
 import { visionAnalysisService } from '../../services/visionAnalysisService';
-import LiveBarcodeScannerWeb from './LiveBarcodeScannerWeb';
+import {
+  BrowserMultiFormatReader,
+  DecodeHintType,
+  BarcodeFormat,
+  Result,
+} from '@zxing/library';
 
 interface ImageUploadModalProps {
   isOpen: boolean;
@@ -43,7 +48,6 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
   const [isProcessing, setIsProcessing] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
-  const [showLiveScanner, setShowLiveScanner] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);        // desktop & mobile (library/file)
   const cameraInputRef = useRef<HTMLInputElement>(null);      // mobile (camera)
@@ -144,7 +148,7 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
     }
   }, [isOpen]);
 
-  // Handle camera access with fallback
+  // Handle camera access with fallback and barcode scanning
   const handleCameraClick = async () => {
     console.log('Camera button clicked');
     console.log('isMobile:', isMobile);
@@ -169,6 +173,23 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
         video.srcObject = stream;
         video.autoplay = true;
         video.playsInline = true;
+        
+        // Initialize barcode scanner
+        let barcodeDetected = false;
+        let frameCount = 0;
+        const hints = new Map();
+        const formats = [
+          BarcodeFormat.EAN_13,
+          BarcodeFormat.EAN_8,
+          BarcodeFormat.UPC_A,
+          BarcodeFormat.UPC_E,
+          BarcodeFormat.CODE_128,
+          BarcodeFormat.CODE_39,
+          BarcodeFormat.ITF,
+          BarcodeFormat.QR_CODE,
+        ];
+        hints.set(DecodeHintType.POSSIBLE_FORMATS, formats);
+        const codeReader = new BrowserMultiFormatReader(hints);
         
         // Create a mobile-optimized modal for camera capture
         const modal = document.createElement('div');
@@ -311,8 +332,8 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
           touch-action: manipulation;
         `;
         
-        // Add touch feedback for capture button
-        const addTouchFeedback = (btn: HTMLButtonElement, pressedStyle: string) => {
+        // Add touch feedback for buttons
+        const addTouchFeedback = (btn: HTMLButtonElement) => {
           btn.addEventListener('touchstart', () => {
             btn.style.transform = 'scale(0.95)';
           });
@@ -324,8 +345,8 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
           });
         };
 
-        addTouchFeedback(captureBtn, '');
-        addTouchFeedback(closeBtn, '');
+        addTouchFeedback(captureBtn);
+        addTouchFeedback(closeBtn);
 
         // Handle capture
         captureBtn.onclick = async () => {
@@ -335,7 +356,8 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
           }
           
           setIsProcessing(true);
-          lastProcessingTime.current = Date.now(); // Update timestamp
+          barcodeDetected = true; // Stop barcode scanning
+          lastProcessingTime.current = Date.now();
           
           const canvas = document.createElement('canvas');
           const context = canvas.getContext('2d');
@@ -349,6 +371,7 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
               try {
                 const file = new File([blob], 'camera-capture.jpg', { type: 'image/jpeg' });
                 console.log('📸 Processing captured photo:', file.name);
+                codeReader.reset();
                 await processFile(file);
               } catch (error) {
                 console.error('❌ Error processing captured photo:', error);
@@ -367,6 +390,8 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
         
         // Handle close
         const cleanup = () => {
+          barcodeDetected = true;
+          codeReader.reset();
           stream.getTracks().forEach(track => track.stop());
           document.body.removeChild(modal);
         };
@@ -380,9 +405,49 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
         buttonContainer.appendChild(captureBtn);
         buttonContainer.appendChild(closeBtn);
         modal.appendChild(video);
-        modal.appendChild(scannerOverlay);  // Add animated scanner overlay
+        modal.appendChild(scannerOverlay);
         modal.appendChild(buttonContainer);
         document.body.appendChild(modal);
+        
+        // Start barcode scanning in background
+        console.log('📷 Starting continuous barcode scanning...');
+        codeReader.decodeFromInputVideoDeviceContinuously(
+          undefined,
+          video,
+          async (result: Result | undefined, err: unknown) => {
+            if (barcodeDetected || isProcessing) return;
+            
+            frameCount++;
+            if (frameCount % 30 === 0) {
+              console.log(`📷 Scanning frame ${frameCount}...`);
+            }
+
+            if (result) {
+              const barcode = result.getText().trim();
+              const format = result.getBarcodeFormat();
+              console.log('✅ BARCODE DETECTED!', barcode, 'format:', format);
+              
+              barcodeDetected = true;
+              setIsProcessing(true);
+              
+              // Stop scanner and cleanup
+              codeReader.reset();
+              stream.getTracks().forEach(track => track.stop());
+              document.body.removeChild(modal);
+              
+              // Process barcode through proper service flow: /api/scan → /ask
+              await handleBarcodeScanning(barcode);
+              
+              setIsProcessing(false);
+              onClose();
+              return;
+            }
+
+            if (err && (err as any).name !== 'NotFoundException') {
+              console.warn('⚠️ Scanner error:', err);
+            }
+          }
+        );
         
         return;
       } catch (error) {
@@ -667,17 +732,7 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
     console.log('🔍 Handling barcode scan:', barcode);
     
     try {
-      // Test API connectivity first
-      const connectionTest = await wihyScanningService.testConnection();
-      if (!connectionTest.available) {
-        console.warn('⚠️ WiHy Scanning API not available for barcode scan');
-        onAnalysisComplete({
-          type: 'error',
-          error: `Barcode scanning service unavailable: ${connectionTest.error || 'Connection failed'}`
-        });
-        return;
-      }
-      
+      // Skip connectivity test - just call the service directly
       const barcodeResult = await wihyScanningService.scanBarcode(barcode);
       
       if (barcodeResult.success) {
@@ -704,17 +759,6 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
       });
     }
   }, [onAnalysisComplete]);
-
-  // Handle live barcode detection
-  const handleLiveBarcodeDetected = useCallback(async (barcode: string) => {
-    console.log('📷 Live scanner detected barcode:', barcode);
-    setShowLiveScanner(false);
-    setIsProcessing(true);
-    
-    await handleBarcodeScanning(barcode);
-    
-    setIsProcessing(false);
-  }, [handleBarcodeScanning]);
 
   // Separate handler for product name searching  
   const handleProductSearch = useCallback(async (productName: string) => {
@@ -868,23 +912,13 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
         {/* Main upload area */}
         <div className="simple-upload-container" style={{padding: '16px 24px', textAlign: 'center'}}>
           
-          {/* Show live scanner if active */}
-          {showLiveScanner ? (
-            <div style={{ marginBottom: '16px' }}>
-              <LiveBarcodeScannerWeb 
-                onDetected={handleLiveBarcodeDetected}
-                onClose={() => setShowLiveScanner(false)}
-              />
-            </div>
-          ) : (
-            <>
-              {/* Upload buttons */}
-              <div style={{display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '16px', marginTop: '4px'}}>
-                {isMobile && hasCamera() && (
-                  <>
-                    <button 
+          {/* Upload buttons */}
+          <div style={{display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '16px', marginTop: '4px'}}>
+            {isMobile && hasCamera() && (
+              <>
+                <button 
                       className="simple-search-button" 
-                      onClick={() => setShowLiveScanner(true)} 
+                      onClick={handleCameraClick} 
                       disabled={isProcessing}
                       style={{
                         width: '100%', 
@@ -904,35 +938,9 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
                       }}
                     >
                       <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M4 6h2v12H4zm3 14h2V4H7zm3-7h2V4h-2zm3 7h2V4h-2zm4-14v12h2V6h-2z"/>
-                      </svg>
-                      {isProcessing ? 'Processing...' : 'Live Scan Barcode'}
-                    </button>
-                    <button 
-                      className="simple-search-button" 
-                      onClick={handleCameraClick} 
-                      disabled={isProcessing}
-                      style={{
-                        width: '100%', 
-                        display: 'flex', 
-                        alignItems: 'center', 
-                        justifyContent: 'center', 
-                        gap: '8px',
-                        background: isProcessing ? '#f5f5f5' : '#f8f9fa',
-                        color: isProcessing ? '#999' : '#5f6368',
-                        border: `1px solid ${isProcessing ? '#ddd' : '#e5e7eb'}`,
-                        borderRadius: '24px',
-                        padding: '16px 20px',
-                        fontSize: '16px',
-                        fontWeight: '600',
-                        transition: 'all 0.2s ease',
-                        cursor: isProcessing ? 'not-allowed' : 'pointer'
-                      }}
-                    >
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M9.4 10.5l4.77-8.26C13.47 2.09 12.75 2 12 2c-2.4 0-4.6.85-6.32 2.25l3.66 6.35.06-.1zM21.54 9c-.92-2.92-3.15-5.26-6-6.34L11.88 9h9.66zm.26 1h-7.49l.29.5 4.76 8.25C21 16.97 22 14.61 22 12c0-.69-.07-1.35-.2-2zM8.54 12l-3.9-6.75C3.01 7.03 2 9.39 2 12c0 .69.07 1.35.2 2h7.49l-1.15-2zm-6.08 3c.92 2.92 3.15 5.26 6 6.34L12.12 15H2.46zm11.27 0l-3.9 6.76c.7.15 1.42.24 2.17.24 2.4 0 4.6-.85 6.32-2.25L14.73 15z"/>
                       </svg>
-                      {isProcessing ? 'Processing...' : 'Take Photo'}
+                      {isProcessing ? 'Processing...' : 'Scan / Take Photo'}
                     </button>
                 <button 
                   className="simple-search-button" 
@@ -1017,8 +1025,6 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
               </button>
             )}
           </div>
-          </>
-          )}
 
           {/* Hidden inputs */}
           <input
@@ -1038,7 +1044,7 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
           />
 
           {/* Dropzone (desktop only) */}
-          {!isMobile && !showLiveScanner && (
+          {!isMobile && (
             <div
               className={`simple-upload-area ${isDragging ? 'dragging' : ''} ${isProcessing ? 'processing' : ''}`}
               onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
