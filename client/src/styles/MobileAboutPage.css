@@ -47,11 +47,11 @@
      HERO SECTION - MOBILE
      ========================= */
   .hero-header {
-    padding: 80px 1rem 2rem 1rem;
+    padding: 0 1rem 2rem 1rem;
   }
   
   .main-title-section {
-    padding: 2rem 1rem;
+    padding: 80px 1rem 2rem 1rem !important;
     margin: 0;
     text-align: center;
   }
