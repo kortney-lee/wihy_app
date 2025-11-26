@@ -64,7 +64,6 @@ const Header: React.FC<HeaderProps> = ({
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState('Searching...');
-  const [isScrolled, setIsScrolled] = useState(false);
   
   const navigate = useNavigate();
   const location = useLocation();
@@ -74,27 +73,6 @@ const Header: React.FC<HeaderProps> = ({
 
   // Use internal listening state if onVoiceInput is not provided
   const currentIsListening = onVoiceInput ? isListening : internalIsListening;
-
-  // ================================
-  // SCROLL DETECTION FOR LOGIN BUTTON
-  // ================================
-  useEffect(() => {
-    const handleScroll = () => {
-      const scrollY = window.scrollY;
-      const threshold = 10; // Hide login button when scrolled more than 10px (more aggressive)
-      console.log('Scroll detected:', scrollY, 'Threshold:', threshold, 'Should hide:', scrollY > threshold);
-      setIsScrolled(scrollY > threshold);
-    };
-
-    // Check initial scroll position
-    handleScroll();
-    
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-    };
-  }, []);
 
   // ================================
   // HEADER HEIGHT MEASUREMENT
@@ -887,17 +865,14 @@ const Header: React.FC<HeaderProps> = ({
           <div className={CSS_CLASSES.VHEALTH_TOPBAR_RIGHT}>
             {showLogin && (
               <div 
-                className={`${CSS_CLASSES.HEADER_AUTH_WRAPPER} ${isScrolled ? CSS_CLASSES.HIDDEN_ON_SCROLL || 'hidden-on-scroll' : ''}`}
+                className={CSS_CLASSES.HEADER_AUTH_WRAPPER}
                 style={{
                   minWidth: '48px',
                   minHeight: '48px',
                   padding: '4px',
-                  display: isScrolled ? 'none' : 'flex',
+                  display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'center',
-                  opacity: isScrolled ? 0 : 1,
-                  visibility: isScrolled ? 'hidden' : 'visible',
-                  transition: 'all 0.2s ease'
+                  justifyContent: 'center'
                 }}>
                 <MultiAuthLogin 
                   position="inline"

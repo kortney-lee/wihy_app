@@ -46,8 +46,10 @@
 .vhealth-header.results {
   border-bottom: 1px solid #e8eaed;
   min-height: auto;
-  position: sticky;
+  position: fixed;
   top: 0;
+  left: 0;
+  right: 0;
   z-index: 1000;
   background: #ffffff;
   width: 100%;
