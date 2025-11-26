@@ -10,6 +10,7 @@ import { API_CONFIG } from '../config/apiConfig';
 export interface UniversalSearchRequest {
   query: string;
   type?: 'auto' | 'barcode' | 'food' | 'research' | 'news' | 'recipe' | 'health' | 'meal_education';
+  sessionId?: string;  // Optional session ID for chat continuity
   context?: {
     health_goals?: string[];
     dietary_restrictions?: string[];
@@ -315,6 +316,7 @@ class UniversalSearchService {
       console.log('📤 Request payload:', {
         query: request.query,
         type: request.type || 'auto',
+        sessionId: request.sessionId,
         context: request.context,
         options: request.options
       });
@@ -327,6 +329,7 @@ class UniversalSearchService {
         body: JSON.stringify({
           query: request.query,
           type: request.type || 'auto',
+          sessionId: request.sessionId,  // Include session ID for chat continuity
           context: request.context || {},
           options: {
             limit: 10,
