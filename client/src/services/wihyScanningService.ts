@@ -261,6 +261,81 @@ class WihyScanningService {
   }
 
   /**
+   * Transform Scanner API response to BarcodeScanResult format
+   * Used as fallback when Universal Search API is unavailable
+   */
+  private transformScannerDataToBarcodeScanResult(
+    scannerData: any, 
+    barcode: string, 
+    sessionId: string
+  ): BarcodeScanResult {
+    const metadata = scannerData.analysis?.metadata || {};
+    const productInfo = scannerData.product_info || {};
+    const nutritionFacts = metadata.nutrition_facts || productInfo.nutrition_facts || {};
+    const nutritionAnalysis = metadata.nutrition_analysis || {};
+    
+    return {
+      success: true,
+      analysis: {
+        summary: scannerData.analysis?.summary || `${productInfo.name || 'Product'} - Health Score: ${metadata.health_score || 0}/100`,
+        recommendations: nutritionAnalysis.areas_of_concern?.map((concern: any) => concern.recommendation) || [],
+        confidence_score: scannerData.confidence_score || 0.8,
+        charts: scannerData.charts_data
+      },
+      health_score: metadata.health_score || 0,
+      nova_group: metadata.nova_group || 0,
+      product: {
+        name: productInfo.name || metadata.product_name || 'Unknown product',
+        brand: productInfo.brand || metadata.brand || '',
+        barcode: barcode,
+        categories: metadata.categories || [],
+        nova_group: metadata.nova_group || 0,
+        image_url: productInfo.image_url
+      },
+      nutrition: {
+        score: metadata.nutrition_score || 0,
+        grade: metadata.grade || 'N/A',
+        per_100g: {
+          energy_kcal: nutritionFacts.calories || 0,
+          fat: nutritionFacts.fat || 0,
+          saturated_fat: nutritionFacts.saturated_fat || 0,
+          carbohydrates: nutritionFacts.carbohydrates || 0,
+          sugars: nutritionFacts.sugars || 0,
+          fiber: nutritionFacts.fiber || 0,
+          proteins: nutritionFacts.protein || 0,
+          salt: nutritionFacts.salt || 0,
+          sodium: nutritionFacts.sodium || 0
+        },
+        daily_values: {
+          energy: nutritionAnalysis.daily_value_percentages?.calories || 0,
+          fat: nutritionAnalysis.daily_value_percentages?.fat || 0,
+          saturated_fat: nutritionAnalysis.daily_value_percentages?.saturated_fat || 0
+        }
+      },
+      health_analysis: {
+        alerts: (nutritionAnalysis.health_alerts || []).map((alert: any) => ({
+          type: alert.type,
+          message: alert.message,
+          severity: alert.level
+        })),
+        recommendations: (nutritionAnalysis.areas_of_concern || []).map((concern: any) => concern.recommendation),
+        processing_level: {
+          nova_group: metadata.nova_group || 0,
+          description: metadata.nova_description || '',
+          details: metadata.processing_level || ''
+        }
+      },
+      scan_metadata: {
+        scan_id: `scan_${Date.now()}`,
+        timestamp: scannerData.timestamp || new Date().toISOString(),
+        confidence_score: scannerData.confidence_score || 0.8,
+        data_sources: ['scanner_api', 'openfoodfacts'],
+        session_id: sessionId
+      }
+    };
+  }
+
+  /**
    * Scan food by barcode using WiHy Scanner API /api/scan endpoint
    */
   async scanBarcode(barcode: string, userContext?: any): Promise<BarcodeScanResult> {
@@ -315,22 +390,31 @@ Provide detailed health analysis and answer user questions about this product.`;
       const sessionId = `barcode_${barcode}_${Date.now()}`;
       console.log('📱 Creating chat session:', sessionId);
 
-      const universalSearchResult = await universalSearchService.search({
-        query: contextQuery,
-        type: 'auto',  // Use 'auto' for general conversational response instead of 'food' or 'barcode'
-        sessionId: sessionId,  // Pass session ID for chat context
-        context: {
-          health_goals: ['nutrition_analysis'],
-          dietary_restrictions: [],
-          productData: scannerData,  // Include full scanner data as context
-          ...userContext
-        },
-        options: {
-          include_charts: true,
-          include_recommendations: true,
-          limit: 1
-        }
-      });
+      // Try to get enhanced analysis from Universal Search API (ml.wihy.ai)
+      // If it fails (CORS, down, etc), fall back to Scanner API response
+      let universalSearchResult;
+      try {
+        universalSearchResult = await universalSearchService.search({
+          query: contextQuery,
+          type: 'auto',  // Use 'auto' for general conversational response instead of 'food' or 'barcode'
+          sessionId: sessionId,  // Pass session ID for chat context
+          context: {
+            health_goals: ['nutrition_analysis'],
+            dietary_restrictions: [],
+            productData: scannerData,  // Include full scanner data as context
+            ...userContext
+          },
+          options: {
+            include_charts: true,
+            include_recommendations: true,
+            limit: 1
+          }
+        });
+      } catch (universalSearchError) {
+        console.warn('⚠️ Universal Search API unavailable, using Scanner API response only:', universalSearchError);
+        // Return Scanner API data directly when Universal Search fails
+        return this.transformScannerDataToBarcodeScanResult(scannerData, barcode, sessionId);
+      }
 
       if (universalSearchResult.success && universalSearchResult.results.metadata) {
         const metadata = universalSearchResult.results.metadata;
@@ -402,10 +486,9 @@ Provide detailed health analysis and answer user questions about this product.`;
         console.log('✅ Universal Search barcode scan successful with session:', sessionId);
         return transformedResult;
       } else {
-        return {
-          success: false,
-          error: universalSearchResult.error || 'No barcode data found'
-        } as BarcodeScanResult;
+        // Universal Search failed or returned no data, fall back to Scanner API response
+        console.warn('⚠️ Universal Search returned no metadata, using Scanner API response only');
+        return this.transformScannerDataToBarcodeScanResult(scannerData, barcode, sessionId);
       }
 
     } catch (error) {

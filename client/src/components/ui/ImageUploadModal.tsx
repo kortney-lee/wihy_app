@@ -4,12 +4,6 @@ import '../../styles/VHealthSearch.css';
 import '../../styles/modals.css';
 import { wihyScanningService } from '../../services/wihyScanningService';
 import { visionAnalysisService } from '../../services/visionAnalysisService';
-import {
-  BrowserMultiFormatReader,
-  DecodeHintType,
-  BarcodeFormat,
-  Result,
-} from '@zxing/library';
 
 interface ImageUploadModalProps {
   isOpen: boolean;
@@ -162,21 +156,11 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
       return;
     }
 
-    // ZXing hints
-    const hints = new Map();
-    const formats = [
-      BarcodeFormat.EAN_13,
-      BarcodeFormat.EAN_8,
-      BarcodeFormat.UPC_A,
-      BarcodeFormat.UPC_E,
-      BarcodeFormat.CODE_128,
-      BarcodeFormat.CODE_39,
-      BarcodeFormat.ITF,
-      BarcodeFormat.QR_CODE,
-    ];
-    hints.set(DecodeHintType.POSSIBLE_FORMATS, formats);
-    hints.set(DecodeHintType.TRY_HARDER, true);
-    const codeReader = new BrowserMultiFormatReader(hints);
+    // Initialize BarcodeDetector with common food product barcode formats
+    // @ts-ignore
+    const detector = new window.BarcodeDetector({
+      formats: ['ean_13', 'ean_8', 'upc_a', 'upc_e', 'code_128', 'qr_code'],
+    });
 
     // Full-screen modal + video
     const modal = document.createElement('div');
@@ -353,20 +337,57 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
     let stopped = false;
 
     const cleanup = () => {
-      if (stopped) return;
+      console.log('🧹 Cleanup called, stopped:', stopped);
+      if (stopped) {
+        console.log('⚠️ Already stopped, forcing cleanup anyway');
+      }
       stopped = true;
-      try {
-        codeReader.reset();
-      } catch {}
+      
+      // Force stop all video tracks
       const s = video.srcObject as MediaStream | null;
-      s?.getTracks().forEach((t) => t.stop());
-      if (modal.parentNode) modal.parentNode.removeChild(modal);
-      if (style.parentNode) style.parentNode.removeChild(style);
+      if (s) {
+        console.log('🎥 Stopping video tracks:', s.getTracks().length);
+        s.getTracks().forEach((t) => {
+          console.log('  - Stopping track:', t.kind, t.label);
+          t.stop();
+        });
+        video.srcObject = null;
+      }
+      
+      // Force remove DOM elements
+      try {
+        if (modal.parentNode) {
+          console.log('🗑️ Removing modal from DOM');
+          modal.parentNode.removeChild(modal);
+        }
+      } catch (e) {
+        console.error('❌ Error removing modal:', e);
+      }
+      
+      try {
+        if (style.parentNode) {
+          console.log('🗑️ Removing style from DOM');
+          style.parentNode.removeChild(style);
+        }
+      } catch (e) {
+        console.error('❌ Error removing style:', e);
+      }
+      
+      console.log('✅ Cleanup complete');
     };
 
-    closeBtn.onclick = cleanup;
+    closeBtn.onclick = () => {
+      console.log('❌ Close button clicked - forcing cleanup');
+      cleanup();
+      onClose();
+    };
+    
     modal.onclick = (e) => {
-      if (e.target === modal) cleanup();
+      if (e.target === modal) {
+        console.log('❌ Modal backdrop clicked - forcing cleanup');
+        cleanup();
+        onClose();
+      }
     };
 
     // manual capture fallback (still uses current frame)
@@ -409,37 +430,55 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
     };
 
     try {
-      console.log('📷 Starting ZXing decodeFromConstraints...', constraints);
-      await codeReader.decodeFromConstraints(
-        constraints,
-        video,
-        async (result: Result | undefined, err: unknown) => {
-          if (stopped || isProcessing) return;
+      console.log('📷 Starting camera with BarcodeDetector...', constraints);
+      
+      // Get camera stream
+      const stream = await navigator.mediaDevices.getUserMedia(constraints);
+      video.srcObject = stream;
+      await video.play();
+      
+      console.log('✅ Camera started successfully');
 
-          if (result) {
-            const barcode = result.getText().trim();
-            const format = result.getBarcodeFormat();
-            console.log('✅ BARCODE DETECTED!', barcode, 'format:', format);
+      // BarcodeDetector scanning loop (~6-7 scans per second)
+      const scanLoop = async () => {
+        while (!stopped) {
+          try {
+            // @ts-ignore
+            const barcodes = await detector.detect(video);
+            
+            if (barcodes.length > 0) {
+              const barcode = barcodes[0].rawValue.trim();
+              const format = barcodes[0].format;
+              console.log('✅ BARCODE DETECTED!', barcode, 'format:', format);
 
-            stopped = true;
-            setIsProcessing(true);
-            try {
-              await handleBarcodeScanning(barcode);
-              onClose();
-            } finally {
-              setIsProcessing(false);
-              cleanup();
+              stopped = true;
+              setIsProcessing(true);
+              try {
+                await handleBarcodeScanning(barcode);
+              } finally {
+                setIsProcessing(false);
+                cleanup(); // Clean up camera modal BEFORE closing React modal
+                onClose(); // Close React modal last
+              }
+              return;
             }
-            return;
+          } catch (err) {
+            // Detector errors are normal when no barcode is visible
+            if ((err as any)?.message && !(err as any).message.includes('Could not detect')) {
+              console.warn('⚠️ BarcodeDetector error:', err);
+            }
           }
-
-          if (err && (err as any).name !== 'NotFoundException') {
-            console.warn('⚠️ Scanner error:', err);
-          }
+          
+          // Wait ~150ms between scans (~6-7 scans/sec)
+          await new Promise((resolve) => setTimeout(resolve, 150));
         }
-      );
+      };
+
+      // Start the scanning loop
+      scanLoop();
+
     } catch (err) {
-      console.error('❌ Failed to start ZXing scanner:', err);
+      console.error('❌ Failed to start camera:', err);
       cleanup();
       alert('Camera access failed. Please ensure camera permissions are granted and you are using HTTPS or localhost.');
     }
