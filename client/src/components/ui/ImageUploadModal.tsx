@@ -1,4 +1,5 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
+import Spinner from './Spinner';
 import './Spinner.css';
 import '../../styles/VHealthSearch.css';
 import '../../styles/modals.css';
@@ -40,6 +41,7 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
   const [isDragging, setIsDragging] = useState(false);
   const [imageUrl, setImageUrl] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
+  const [loadingMessage, setLoadingMessage] = useState('Processing your request...');
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
 
@@ -393,8 +395,18 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
     // manual capture fallback (still uses current frame)
     captureBtn.onclick = async () => {
       if (isProcessing) return;
+      
+      // Immediately hide camera modal so spinner can show
+      modal.style.display = 'none';
+      
+      // Show spinner immediately
       setIsProcessing(true);
+      setLoadingMessage('Analyzing captured photo...');
       stopped = true;
+      
+      // Small delay to ensure spinner renders
+      await new Promise(resolve => setTimeout(resolve, 50));
+      
       try {
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
@@ -452,7 +464,17 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
               console.log('✅ BARCODE DETECTED!', barcode, 'format:', format);
 
               stopped = true;
+              
+              // Immediately hide camera modal so spinner can show
+              modal.style.display = 'none';
+              
+              // Show spinner immediately
               setIsProcessing(true);
+              setLoadingMessage(`Analyzing barcode ${barcode}...`);
+              
+              // Small delay to ensure React renders the spinner
+              await new Promise(resolve => setTimeout(resolve, 50));
+              
               try {
                 await handleBarcodeScanning(barcode);
               } finally {
@@ -487,6 +509,7 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
   // --- Image file processing using Direct Upload Pattern ---
   const processFile = useCallback(async (file: File) => {
     console.log('🔍 Processing file with Direct Upload Pattern:', file.name);
+    setLoadingMessage('Analyzing image with AI...');
     
     // Set preview URL so user can see the uploaded image
     setPreviewUrl(URL.createObjectURL(file));
@@ -755,6 +778,7 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
   // Separate handler for barcode scanning
   const handleBarcodeScanning = useCallback(async (barcode: string) => {
     console.log('🔍 Handling barcode scan:', barcode);
+    setLoadingMessage(`Looking up product ${barcode}...`);
     
     try {
       // Skip connectivity test - just call the service directly
@@ -788,6 +812,7 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
   // Separate handler for product name searching  
   const handleProductSearch = useCallback(async (productName: string) => {
     console.log('🔍 Handling product search:', productName);
+    setLoadingMessage(`Searching for ${productName}...`);
     
     try {
       const searchResult = await wihyScanningService.scanProductName(productName, {
@@ -823,6 +848,7 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
   // Separate handler for image URL processing
   const handleImageUrl = useCallback(async (imageUrl: string) => {
     console.log('🔍 Handling image URL:', imageUrl);
+    setLoadingMessage('Loading image from URL...');
     
     try {
       const res = await fetch(imageUrl);
@@ -853,6 +879,7 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
   const handleUrlUpload = useCallback(async () => {
     if (!imageUrl.trim() || isProcessing || !canProcess()) return;
     setIsProcessing(true);
+    setLoadingMessage('Processing your input...');
     
     try {
       const input = imageUrl.trim();
@@ -886,6 +913,7 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
     // Priority 1: Process pending file from preview
     if (pendingFile) {
       setIsProcessing(true);
+      setLoadingMessage('Analyzing image with AI...');
       try {
         await processFile(pendingFile);
       } finally {
@@ -917,7 +945,18 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="photo-modal-overlay" onClick={safeClose}>
+    <>
+      {/* Spinner overlay during processing */}
+      {isProcessing && (
+        <Spinner
+          overlay={true}
+          title="Analyzing with AI..."
+          subtitle={loadingMessage}
+          disableEsc={true}
+        />
+      )}
+      
+      <div className="photo-modal-overlay" onClick={safeClose}>
       <div className="photo-modal" onClick={(e) => e.stopPropagation()}>
         
         {/* Header with close button */}
@@ -1211,6 +1250,7 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
         </div>
       </div>
     </div>
+    </>
   );
 };
 
