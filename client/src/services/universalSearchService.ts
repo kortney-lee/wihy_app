@@ -35,6 +35,7 @@ export interface UniversalSearchResponse {
   detected_type: string;
   processing_time_ms: number;
   timestamp: string;
+  response?: string;  // AI conversational response text from /ask endpoint
   results: {
     // Research results
     articles?: Array<{
@@ -379,8 +380,9 @@ class UniversalSearchService {
         processing_time_ms: data.processing_time_ms || 0,
         timestamp: data.timestamp || new Date().toISOString(),
         results: data.results || {},
+        response: data.response,  // Capture AI response text from /ask endpoint
         recommendations: data.recommendations || [],
-        charts: data.charts || {},
+        charts: data.charts || data.chart_data || {},  // Support both charts and chart_data
         context_used: data.context_used || {},
         options_used: data.options_used || {},
         error: apiSuccess ? undefined : (data.error || 'No valid data returned')
