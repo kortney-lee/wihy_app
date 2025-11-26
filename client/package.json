@@ -24,9 +24,9 @@
   "dependencies": {
     "@openfoodfacts/openfoodfacts-nodejs": "github:openfoodfacts/openfoodfacts-js",
     "@zxing/browser": "^0.1.5",
-    "@zxing/library": "^0.21.3",
     "autoprefixer": "^10.4.22",
     "axios": "^1.11.0",
+    "barcode-detector": "^3.0.8",
     "chart.js": "^4.5.1",
     "chartjs-adapter-date-fns": "^3.0.0",
     "glob": "^11.0.3",
