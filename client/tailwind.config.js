@@ -66,7 +66,7 @@ module.exports = {
         'typing': 'typing 1.4s ease-in-out infinite',
         'spin': 'spin 1s linear infinite',
       },
-      animationDelay: {
+      transitionDelay: {
         '0': '0ms',
         '75': '75ms',
         '100': '100ms',
