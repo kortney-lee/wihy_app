@@ -678,58 +678,42 @@ body {
 .demo-section {
   background: var(--vh-surface-2);
   padding: 0;
-  position: relative;
-  z-index: 1;
 }
 
 .tech-section {
   background: #ffffff;
   padding: 0;
-  position: relative;
-  z-index: 1;
 }
 
 /* MARKET SECTION WITH GRADIENT BACKGROUND */
 .market-section {
   background: linear-gradient(135deg, #f8faff 0%, #e8f4f8 100%);
   padding: 0;
-  position: relative;
-  z-index: 1;
 }
 
 .leadership-section {
   background: var(--vh-surface-2);
   padding: 0;
-  position: relative;
-  z-index: 1;
 }
 
 .investment-section {
   background: #ffffff;
   padding: 0 0 4rem 0;
-  position: relative;
-  z-index: 1;
 }
 
 .experience-section {
   background: var(--vh-surface-2);
   padding: 4rem 0;
-  position: relative;
-  z-index: 1;
 }
 
 .metrics-section {
   background: var(--vh-surface-2);
   padding: 0;
-  position: relative;
-  z-index: 1;
 }
 
 .platform-section {
   background: var(--vh-surface-2);
   padding: 0;
-  position: relative;
-  z-index: 1;
 }
 
 /* =========================
