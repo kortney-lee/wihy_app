@@ -3,6 +3,7 @@ import Header from '../components/shared/Header';
 import FullScreenChat from '../components/ui/FullScreenChat';
 import { FeatureCard, MetricCard, HighlightCard } from '../components/shared/CardComponents';
 import { CTAButton, NavLink } from '../components/shared/ButtonComponents';
+import AboutPageHeader from '../components/layout/AboutPageHeader';
 import ResearchQualityGauge from '../components/charts/cards/ResearchQualityGauge';
 import StudyTypeDistributionChart from '../components/charts/cards/StudyTypeDistributionChart';
 import PublicationTimelineChart from '../components/charts/cards/PublicationTimelineChart';
@@ -108,37 +109,11 @@ const AboutPage: React.FC = () => {
 
   return (
     <div className="about-page-wrapper">
+      {/* Fixed Navigation Header - Outside hero section */}
+      <AboutPageHeader isNavOpen={isNavOpen} onToggleNav={() => setIsNavOpen(!isNavOpen)} />
+
       {/* Hero Header */}
       <header className="hero-header">
-        <nav className="top-nav">
-          <div className="nav-container">
-            <div className="nav-brand">
-              <img src="/assets/wihylogo.png" alt="WIHY.ai" className="nav-logo" />
-            </div>
-
-            <button
-              className="mobile-nav-toggle"
-              onClick={() => setIsNavOpen(open => !open)}
-              aria-label="Toggle navigation"
-            >
-              <span />
-              <span />
-              <span />
-            </button>
-
-            <div className={`nav-links ${isNavOpen ? 'open' : ''}`}>
-              <NavLink href="#platform">Platform</NavLink>
-              <NavLink href="#technology">Technology</NavLink>
-              <NavLink href="#market">Market</NavLink>
-              <NavLink href="#founder">Leadership</NavLink>
-              <NavLink href="#investment">Investment</NavLink>
-              <CTAButton href="/" primary>
-                Launch Platform
-              </CTAButton>
-            </div>
-          </div>
-        </nav>
-
         {/* Main Title Block */}
         <div className="main-title-section">
           <h1 className={`main-page-title gradient-text ${isLoaded ? 'animate-in' : ''}`}>
