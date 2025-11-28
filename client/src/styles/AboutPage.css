@@ -109,7 +109,7 @@ body {
 .hero-header {
   background: transparent;
   position: relative;
-  padding-top: 0;
+  padding-top: 64px; /* Account for fixed navigation height */
 }
 
 /* =========================
