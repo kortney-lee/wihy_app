@@ -155,37 +155,8 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
     
     if (!canProcess()) return;
 
-    // Use Capacitor Camera on native mobile platforms
-    if (PlatformDetectionService.isNative()) {
-      try {
-        setIsProcessing(true);
-        setLoadingMessage('Opening camera...');
-        
-        console.log('📱 Using Capacitor native camera');
-        const imageDataUrl = await AdaptiveCameraService.captureImage();
-        
-        setLoadingMessage('Processing image...');
-        
-        // Convert data URL to File for processing
-        const response = await fetch(imageDataUrl as string);
-        const blob = await response.blob();
-        const file = new File([blob], 'camera-capture.jpg', { type: 'image/jpeg' });
-        
-        await processFile(file);
-        
-      } catch (error: any) {
-        console.error('❌ Capacitor camera error:', error);
-        if (error.message && !error.message.includes('User cancelled')) {
-          alert('Camera access failed. Please check camera permissions in device settings.');
-        }
-      } finally {
-        setIsProcessing(false);
-      }
-      return;
-    }
-
-    // Original web camera implementation for desktop browsers
-    console.log('🖥️ Using web camera API');
+    // Always use web camera with live video preview - works on both desktop and mobile
+    console.log('📷 Using web camera API with live video preview');
     console.log('hasCamera:', hasCamera());
     console.log('User Agent:', navigator.userAgent);
     console.log('MediaDevices available:', 'mediaDevices' in navigator);
@@ -196,11 +167,22 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
       return;
     }
 
-    // Initialize BarcodeDetector with common food product barcode formats
-    // @ts-ignore
-    const detector = new window.BarcodeDetector({
-      formats: ['ean_13', 'ean_8', 'upc_a', 'upc_e', 'code_128', 'qr_code'],
-    });
+    // Initialize BarcodeDetector if available (optional feature)
+    let detector = null;
+    try {
+      // @ts-ignore
+      if (window.BarcodeDetector) {
+        // @ts-ignore
+        detector = new window.BarcodeDetector({
+          formats: ['ean_13', 'ean_8', 'upc_a', 'upc_e', 'code_128', 'qr_code'],
+        });
+        console.log('✅ BarcodeDetector initialized');
+      } else {
+        console.log('⚠️ BarcodeDetector not available - barcode scanning disabled, manual capture only');
+      }
+    } catch (error) {
+      console.log('⚠️ BarcodeDetector initialization failed - barcode scanning disabled, manual capture only:', error);
+    }
 
     // Full-screen modal + video
     const modal = document.createElement('div');
@@ -223,7 +205,9 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
     video.setAttribute('playsinline', 'true');
     video.setAttribute('webkit-playsinline', 'true');
     video.setAttribute('muted', 'true');
+    video.setAttribute('autoplay', 'true');
     video.muted = true;
+    video.autoplay = true;
     video.playsInline = true;
     video.style.cssText = `
       width: 100%;
@@ -232,6 +216,8 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
       position: absolute;
       top: 0;
       left: 0;
+      opacity: 0;
+      transition: opacity 0.3s ease;
     `;
 
     // Scanner overlay
@@ -485,12 +471,33 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
       // Get camera stream
       const stream = await navigator.mediaDevices.getUserMedia(constraints);
       video.srcObject = stream;
-      await video.play();
       
-      console.log('✅ Camera started successfully');
+      // Force play and wait for it to start
+      video.play().catch(err => console.warn('Video play error:', err));
+      
+      // Wait for video to actually start playing
+      await new Promise((resolve) => {
+        video.onloadedmetadata = () => {
+          video.play().then(() => {
+            console.log('✅ Camera started successfully');
+            // Fade in video once it's actually playing
+            video.style.opacity = '1';
+            resolve(null);
+          }).catch(err => {
+            console.warn('Video play error after metadata:', err);
+            video.style.opacity = '1';
+            resolve(null);
+          });
+        };
+      });
 
-      // BarcodeDetector scanning loop (~6-7 scans per second)
+      // BarcodeDetector scanning loop (~6-7 scans per second) - only if detector available
       const scanLoop = async () => {
+        if (!detector) {
+          console.log('⚠️ Barcode scanning disabled - detector not available');
+          return;
+        }
+        
         while (!stopped) {
           try {
             // @ts-ignore
@@ -542,6 +549,45 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
       cleanup();
       alert('Camera access failed. Please ensure camera permissions are granted and you are using HTTPS or localhost.');
     }
+  };
+
+  // Handle gallery/photo library selection
+  const handleGalleryClick = async () => {
+    console.log('Gallery button clicked');
+    
+    if (!canProcess()) return;
+
+    // Use Capacitor Photos picker on native mobile platforms
+    if (PlatformDetectionService.isNative()) {
+      try {
+        setIsProcessing(true);
+        setLoadingMessage('Opening photo library...');
+        
+        console.log('📱 Using Capacitor photo picker');
+        const imageDataUrl = await AdaptiveCameraService.selectImage();
+        
+        setLoadingMessage('Processing image...');
+        
+        // Convert data URL to File for processing
+        const response = await fetch(imageDataUrl as string);
+        const blob = await response.blob();
+        const file = new File([blob], 'gallery-image.jpg', { type: 'image/jpeg' });
+        
+        await processFile(file);
+        
+      } catch (error: any) {
+        console.error('❌ Capacitor gallery error:', error);
+        if (error.message && !error.message.includes('User cancelled')) {
+          alert('Photo library access failed. Please check permissions in device settings.');
+        }
+      } finally {
+        setIsProcessing(false);
+      }
+      return;
+    }
+
+    // On web, trigger file input as fallback
+    fileInputRef.current?.click();
   };
 
   // --- Image file processing using Direct Upload Pattern ---
@@ -1045,37 +1091,37 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
                       {isProcessing ? 'Processing...' : 'Scan / Take Photo'}
                     </button>
                 <button 
-                  className="simple-search-button" 
-                  onClick={() => fileInputRef.current?.click()} 
-                  disabled={isProcessing}
-                  style={{
-                    width: '100%', 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    justifyContent: 'center', 
-                    gap: '8px',
-                    background: isProcessing ? '#f5f5f5' : '#f8f9fa',
-                    color: isProcessing ? '#999' : '#5f6368',
-                    border: `1px solid ${isProcessing ? '#ddd' : '#e5e7eb'}`,
-                    borderRadius: '24px',
-                    padding: '16px 20px',
-                    fontSize: '16px',
-                    fontWeight: '600',
-                    transition: 'all 0.2s ease',
-                    cursor: isProcessing ? 'not-allowed' : 'pointer'
-                  }}
-                >
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
-                  </svg>
-                  {isProcessing ? 'Processing...' : 'Upload from Files'}
-                </button>
+                      className="simple-search-button" 
+                      onClick={handleGalleryClick} 
+                      disabled={isProcessing}
+                      style={{
+                        width: '100%', 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        justifyContent: 'center', 
+                        gap: '8px',
+                        background: isProcessing ? '#cccccc' : '#2196f3',
+                        color: isProcessing ? '#666' : 'white',
+                        border: 'none',
+                        borderRadius: '24px',
+                        padding: '16px 20px',
+                        fontSize: '16px',
+                        fontWeight: '600',
+                        transition: 'all 0.2s ease',
+                        cursor: isProcessing ? 'not-allowed' : 'pointer'
+                      }}
+                    >
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
+                      </svg>
+                      {isProcessing ? 'Processing...' : 'Choose from Gallery'}
+                    </button>
               </>
             )}
             {isMobile && !hasCamera() && (
               <button 
                 className="simple-search-button" 
-                onClick={() => fileInputRef.current?.click()} 
+                onClick={handleGalleryClick} 
                 disabled={isProcessing}
                 style={{
                   width: '100%', 
@@ -1094,9 +1140,9 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
                 }}
               >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
+                  <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
                 </svg>
-                Choose File
+                Choose from Gallery
               </button>
             )}
             {!isMobile && (

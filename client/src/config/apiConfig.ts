@@ -29,7 +29,7 @@ export const API_CONFIG = {
   WIHY_API_URL: getWihyApiUrl(),
   
   // WIHY Auth API - Authentication service
-  WIHY_AUTH_API_URL: process.env.REACT_APP_WIHY_AUTH_API_URL || 'http://wihy-auth-api.centralus.azurecontainer.io:5000',
+  WIHY_AUTH_API_URL: process.env.REACT_APP_WIHY_AUTH_API_URL || 'https://wihy-auth-api.centralus.azurecontainer.io:5000',
 } as const;
 
 // Debug logging
