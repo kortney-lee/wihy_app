@@ -7,7 +7,6 @@ import NutritionChart from '../charts/cards/NutritionChart';
 import ResultQualityPie from '../charts/cards/ResultQualityPie';
 import { wihyAPI, isUnifiedResponse, UnifiedResponse, WihyResponse } from '../../services/wihyAPI';
 import { searchCache } from '../../services/searchCache';
-import HealthNewsFeed from '../HealthNewsFeed';
 import { getApiEndpoint } from '../../config/apiConfig';
 import { logger } from '../../utils/logger';
 import { chatService } from '../../services/chatService';
@@ -39,7 +38,6 @@ const VHealthSearch: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [imageError, setImageError] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState('Searching...');
-  const [showFeelingHealthyContent, setShowFeelingHealthyContent] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [placeholder, setPlaceholder] = useState(rotatingPrompts[0]);
@@ -122,19 +120,19 @@ const VHealthSearch: React.FC = () => {
   }, []);
 
   // ================================
-  // ALLOW SCROLLING WHEN NEWS FEED OR RESULTS ARE OPEN
+  // ALLOW SCROLLING WHEN RESULTS ARE OPEN
   // ================================
   useEffect(() => {
-    if (showFeelingHealthyContent || showResults) {
-      // Remove landing page classes to allow scrolling when news feed or results are open
+    if (showResults) {
+      // Remove landing page classes to allow scrolling when results are open
       document.body.classList.remove('landing-page-active');
       document.documentElement.classList.remove('landing-page-active');
     } else {
-      // Re-add landing page classes when news feed and results are closed
+      // Re-add landing page classes when results are closed
       document.body.classList.add('landing-page-active');
       document.documentElement.classList.add('landing-page-active');
     }
-  }, [showFeelingHealthyContent, showResults]);
+  }, [showResults]);
 
   // ================================
   // SCROLL DETECTION FOR LOGIN BUTTON
@@ -1335,18 +1333,11 @@ const VHealthSearch: React.FC = () => {
               {isLoading ? loadingMessage : 'Analyze Nutrition'}
             </button>
             
-            {/* FEELING HEALTHY BUTTON - Shows/hides health news feed */}
+            {/* FEELING HEALTHY BUTTON - Navigates to news page */}
             <button 
               onClick={() => {
                 if (isLoading) return;
-                
-                if (showFeelingHealthyContent) {
-                  // If news is showing, just close it (don't change search query)
-                  setShowFeelingHealthyContent(false);
-                } else {
-                  // Show the news feed
-                  setShowFeelingHealthyContent(true);
-                }
+                navigate('/news');
               }}
               className="search-btn secondary"
               type="button"
@@ -1379,54 +1370,6 @@ const VHealthSearch: React.FC = () => {
         )}
       </div>
       
-      {/* HEALTH NEWS FEED - Shows when "I'm Feeling Healthy" is active */}
-      {showFeelingHealthyContent && (
-        <div 
-          className="feeling-healthy-section"
-          onClick={() => {
-            // Close news feed when clicking anywhere in the white space
-            setShowFeelingHealthyContent(false);
-          }}
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: '#ffffff',
-            zIndex: 1100,
-            overflow: 'auto',
-            cursor: 'pointer',
-            paddingTop: '20px',
-            paddingBottom: PlatformDetectionService.isNative() ? '80px' : '20px'
-          }}
-        >
-          <div 
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              maxWidth: '1200px',
-              margin: '0 auto',
-              padding: isMobile ? '0 10px' : '10px 20px',
-              cursor: 'default'
-            }}
-          >
-            <HealthNewsFeed 
-              maxArticles={6}
-              setSearchQuery={setSearchQuery}
-              triggerSearch={(customQuery?: string) => {
-                setShowFeelingHealthyContent(false); // Close news feed
-                // Use the custom query if provided, otherwise use current searchQuery
-                if (customQuery) {
-                  handleSearch(customQuery);
-                } else {
-                  handleSearch();
-                }
-              }}
-            />
-          </div>
-        </div>
-      )}
-
       {/* INLINE RESULTS DISPLAY - Shows search results without navigation */}
       {showResults && (
         <div 
@@ -1599,7 +1542,6 @@ const VHealthSearch: React.FC = () => {
             onClick={() => {
               setSearchQuery('');
               setShowResults(false);
-              setShowFeelingHealthyContent(false);
             }}
             style={{
               flex: 1,
@@ -1646,12 +1588,10 @@ const VHealthSearch: React.FC = () => {
             <span style={{ fontSize: '11px', fontWeight: '500' }}>Scan</span>
           </button>
 
-          {/* I'm Feeling Healthy - News Feed Only */}
+          {/* I'm Feeling Healthy - Navigate to News Page */}
           <button
             onClick={() => {
-              // Only show news feed, don't load search interface
-              setShowFeelingHealthyContent(true);
-              setShowResults(false);
+              navigate('/news');
             }}
             style={{
               flex: 1,
