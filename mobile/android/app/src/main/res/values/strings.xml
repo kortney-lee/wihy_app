@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">WiHY</string>
+    <string name="title_activity_main">WiHY</string>
+    <string name="package_name">com.wihy.healthscanner</string>
+    <string name="custom_url_scheme">com.wihy.healthscanner</string>
+</resources>

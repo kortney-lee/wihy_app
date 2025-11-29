@@ -14,6 +14,7 @@ import { wihyAPI } from './services/wihyAPI';
 import { searchCache } from './services/searchCache';
 import { fetchNewsFeed, refreshNewsFeed, searchNewsArticles } from './services/newsService';
 import { logger } from './utils/logger';
+import { PlatformDetectionService } from './services/shared/platformDetectionService';
 import './styles/VHealthSearch.css';
 import './index.css';
 // import VHealthApp from './vHealthApp';
@@ -502,6 +503,11 @@ This analysis is based on peer-reviewed nutritional research and USDA food compo
 
 const App: React.FC = () => {
   logger.debug("App component rendered");
+  
+  // Log platform information on app initialization
+  useEffect(() => {
+    PlatformDetectionService.logPlatformInfo();
+  }, []);
   
   return (
     <Router>
