@@ -22,6 +22,10 @@
     "typescript": "^4.9.5"
   },
   "dependencies": {
+    "@capacitor/app": "^7.1.0",
+    "@capacitor/camera": "^7.0.2",
+    "@capacitor/core": "^7.4.4",
+    "@capacitor/filesystem": "^7.1.5",
     "@openfoodfacts/openfoodfacts-nodejs": "github:openfoodfacts/openfoodfacts-js",
     "@zxing/browser": "^0.1.5",
     "autoprefixer": "^10.4.22",

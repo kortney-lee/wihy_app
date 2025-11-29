@@ -5,6 +5,8 @@ import '../../styles/VHealthSearch.css';
 import '../../styles/modals.css';
 import { wihyScanningService } from '../../services/wihyScanningService';
 import { visionAnalysisService } from '../../services/visionAnalysisService';
+import { PlatformDetectionService } from '../../services/shared/platformDetectionService';
+import { AdaptiveCameraService } from '../../services/adaptiveCameraService';
 
 interface ImageUploadModalProps {
   isOpen: boolean;
@@ -147,7 +149,43 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
   // Handle camera access with fallback and barcode scanning
   const handleCameraClick = async () => {
     console.log('Camera button clicked');
+    console.log('Platform:', PlatformDetectionService.getPlatform());
+    console.log('isNative:', PlatformDetectionService.isNative());
     console.log('isMobile:', isMobile);
+    
+    if (!canProcess()) return;
+
+    // Use Capacitor Camera on native mobile platforms
+    if (PlatformDetectionService.isNative()) {
+      try {
+        setIsProcessing(true);
+        setLoadingMessage('Opening camera...');
+        
+        console.log('📱 Using Capacitor native camera');
+        const imageDataUrl = await AdaptiveCameraService.captureImage();
+        
+        setLoadingMessage('Processing image...');
+        
+        // Convert data URL to File for processing
+        const response = await fetch(imageDataUrl as string);
+        const blob = await response.blob();
+        const file = new File([blob], 'camera-capture.jpg', { type: 'image/jpeg' });
+        
+        await processFile(file);
+        
+      } catch (error: any) {
+        console.error('❌ Capacitor camera error:', error);
+        if (error.message && !error.message.includes('User cancelled')) {
+          alert('Camera access failed. Please check camera permissions in device settings.');
+        }
+      } finally {
+        setIsProcessing(false);
+      }
+      return;
+    }
+
+    // Original web camera implementation for desktop browsers
+    console.log('🖥️ Using web camera API');
     console.log('hasCamera:', hasCamera());
     console.log('User Agent:', navigator.userAgent);
     console.log('MediaDevices available:', 'mediaDevices' in navigator);
