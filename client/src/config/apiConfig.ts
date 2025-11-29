@@ -27,13 +27,18 @@ const CACHE_VERSION = ''; // Increment this after each deployment
 export const API_CONFIG = {
   // WIHY API - Unified for mobile and desktop
   WIHY_API_URL: getWihyApiUrl(),
+  
+  // WIHY Auth API - Authentication service
+  WIHY_AUTH_API_URL: process.env.REACT_APP_WIHY_AUTH_API_URL || 'http://wihy-auth-api.centralus.azurecontainer.io:5000',
 } as const;
 
 // Debug logging
 console.log('🔍 API CONFIG DEBUG:', {
   NODE_ENV: process.env.NODE_ENV,
   REACT_APP_WIHY_API_URL: process.env.REACT_APP_WIHY_API_URL,
-  FINAL_URL: API_CONFIG.WIHY_API_URL,
+  REACT_APP_WIHY_AUTH_API_URL: process.env.REACT_APP_WIHY_AUTH_API_URL,
+  FINAL_WIHY_URL: API_CONFIG.WIHY_API_URL,
+  FINAL_AUTH_URL: API_CONFIG.WIHY_AUTH_API_URL,
   HOSTNAME: window.location.hostname,
   IS_LOCALHOST: window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1',
   USE_LOCAL_DEV: process.env.REACT_APP_USE_LOCAL_API === 'true',

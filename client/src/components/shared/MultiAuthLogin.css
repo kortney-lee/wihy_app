@@ -136,10 +136,13 @@
 }
 
 .providers-list {
-  padding: 0 20px; /* Reduced horizontal padding */
+  padding: 0 20px;
   display: flex;
   flex-direction: column;
-  gap: 12px; /* Increased spacing between buttons */
+  gap: 12px;
+  pointer-events: auto;
+  position: relative;
+  z-index: 1;
 }
 
 .provider-button {
@@ -147,23 +150,25 @@
   align-items: center;
   justify-content: center;
   gap: 12px;
-  padding: 14px 18px; /* More padding for better feel */
-  border: 1px solid #dadce0; /* Match LoginButton border */
-  border-radius: 24px; /* Much more rounded */
+  padding: 14px 18px;
+  border: 1px solid #dadce0;
+  border-radius: 24px;
   background: white;
   cursor: pointer;
-  transition: all 0.2s ease; /* Smooth transitions */
+  transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
   font-size: 14px;
   font-weight: 500;
   color: #334155;
   width: 100%;
   text-align: center;
+  pointer-events: auto;
+  position: relative;
+  z-index: 1;
 }
 
 .provider-button:hover {
-  background-color: #f8f9fa; /* Match LoginButton hover */
+  background-color: #f8f9fa;
   border-color: #bdc3c7;
-  transform: translateY(-1px); /* Subtle lift effect */
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
@@ -317,12 +322,12 @@
     right: 16px !important;
     left: 16px !important;
     position: fixed;
-    top: 50% !important;
-    transform: translate(0, -50%) !important; /* Center vertically on mobile */
+    top: 80px !important; /* Move down from top instead of centering */
+    transform: translate(0, 0) !important; /* Remove centering transform */
     z-index: 10001 !important;
     max-width: none !important;
     min-width: auto !important;
-    max-height: calc(100vh - 80px) !important; /* Ensure space at top and bottom */
+    max-height: calc(100vh - 100px) !important; /* Ensure space at top and bottom */
     overflow-y: auto !important; /* Allow scrolling if content is too tall */
   }
   
@@ -337,12 +342,12 @@
   .providers-popup {
     right: 16px !important;
     left: 16px !important;
-    top: 50% !important;
-    transform: translate(0, -50%) !important; /* Center vertically */
+    top: 80px !important; /* Move down from top */
+    transform: translate(0, 0) !important; /* Remove centering */
     width: calc(100vw - 32px) !important;
     max-width: none !important;
     min-width: auto !important;
-    max-height: calc(100vh - 80px) !important; /* Ensure disclaimer is visible */
+    max-height: calc(100vh - 100px) !important; /* Ensure disclaimer is visible */
     overflow-y: auto !important; /* Allow scrolling */
     margin: 0 !important;
     z-index: 10001 !important;
