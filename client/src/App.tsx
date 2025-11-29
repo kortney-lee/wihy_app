@@ -10,6 +10,7 @@ import TestIndividualComponents from './pages/TestIndividualComponents';
 import AboutPage from './pages/AboutPage';
 import NewAboutpage from './pages/NewAboutpage';
 import TailwindDemoPage from './pages/TailwindDemoPage';
+import NewsPage from './pages/NewsPage';
 import { wihyAPI } from './services/wihyAPI';
 import { searchCache } from './services/searchCache';
 import { fetchNewsFeed, refreshNewsFeed, searchNewsArticles } from './services/newsService';
@@ -516,6 +517,7 @@ const App: React.FC = () => {
         <Route path="/results" element={<ResultsPage />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/new-about" element={<NewAboutpage />} />
+        <Route path="/news" element={<NewsPage />} />
         <Route path="/test" element={<TestChartsPage />} />
         <Route path="/test-grid" element={<TestDashboardGrid />} />
         <Route path="/test-individual" element={<TestIndividualComponents />} />
