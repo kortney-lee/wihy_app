@@ -1,22 +1,16 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
+import { authService, User } from '../../services/authService';
 import './MultiAuthLogin.css';
 
-export interface User {
-  id: string;
-  name: string;
-  email: string;
-  picture?: string;
-  provider: 'google' | 'microsoft' | 'apple' | 'facebook' | 'email';
-}
+// Re-export User type for external use
+export type { User };
 
 export interface AuthProvider {
   name: string;
-  id: 'google' | 'microsoft' | 'apple' | 'facebook' | 'email';
-  icon: React.ReactNode; // Changed from JSX.Element
+  id: 'google' | 'microsoft' | 'apple' | 'facebook' | 'samsung' | 'email' | 'local';
+  icon: React.ReactNode;
   color: string;
-  clientId: string;
-  authUrl: string;
 }
 
 interface MultiAuthLoginProps {
@@ -72,9 +66,7 @@ const MultiAuthLogin: React.FC<MultiAuthLoginProps> = ({
           <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
         </svg>
       ),
-      color: '#4285F4',
-      clientId: process.env.REACT_APP_GOOGLE_CLIENT_ID || 'your-google-client-id',
-      authUrl: 'https://accounts.google.com/oauth/authorize'
+      color: '#4285F4'
     },
     {
       name: 'Microsoft',
@@ -87,21 +79,7 @@ const MultiAuthLogin: React.FC<MultiAuthLoginProps> = ({
           <path fill="#FFB900" d="M13 13h10v10H13z"/>
         </svg>
       ),
-      color: '#0078D4',
-      clientId: process.env.REACT_APP_MICROSOFT_CLIENT_ID || 'your-microsoft-client-id',
-      authUrl: 'https://login.microsoftonline.com/common/oauth2/v2.0/authorize'
-    },
-    {
-      name: 'Apple',
-      id: 'apple',
-      icon: (
-        <svg viewBox="0 0 24 24" className="provider-icon">
-          <path fill="#000" d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
-        </svg>
-      ),
-      color: '#000',
-      clientId: process.env.REACT_APP_APPLE_CLIENT_ID || 'your-apple-client-id',
-      authUrl: 'https://appleid.apple.com/auth/authorize'
+      color: '#0078D4'
     },
     {
       name: 'Facebook',
@@ -111,9 +89,17 @@ const MultiAuthLogin: React.FC<MultiAuthLoginProps> = ({
           <path fill="#1877F2" d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
         </svg>
       ),
-      color: '#1877F2',
-      clientId: process.env.REACT_APP_FACEBOOK_CLIENT_ID || 'your-facebook-client-id',
-      authUrl: 'https://www.facebook.com/v18.0/dialog/oauth'
+      color: '#1877F2'
+    },
+    {
+      name: 'Apple',
+      id: 'apple',
+      icon: (
+        <svg viewBox="0 0 24 24" className="provider-icon">
+          <path fill="#000" d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
+        </svg>
+      ),
+      color: '#000'
     },
     {
       name: 'email',
@@ -123,29 +109,33 @@ const MultiAuthLogin: React.FC<MultiAuthLoginProps> = ({
           <path fill="#5f6368" d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
         </svg>
       ),
-      color: '#5f6368',
-      clientId: '',
-      authUrl: ''
+      color: '#5f6368'
     }
   ];
 
   const authProviders = customProviders || defaultAuthProviders;
 
   useEffect(() => {
-    // Check if user is already logged in
-    const savedUser = localStorage.getItem(storageKey);
-    if (savedUser) {
-      try {
-        const parsedUser = JSON.parse(savedUser);
-        setUser(parsedUser);
-        // IMPORTANT: Wrap this in a conditional to prevent excessive logging
-        if (!user) {
-          onUserChange?.(parsedUser);
+    // Subscribe to auth service state changes
+    const unsubscribe = authService.subscribe((state) => {
+      if (state.user && state.user !== user) {
+        setUser(state.user);
+        onUserChange?.(state.user);
+        if (state.user && !user) {
+          onSignIn?.(state.user);
         }
-      } catch (error) {
-        safeLog('Error parsing saved user', error);
-        localStorage.removeItem(storageKey);
+      } else if (!state.user && user) {
+        setUser(null);
+        onUserChange?.(null);
       }
+      setLoading(state.loading);
+    });
+
+    // Get initial state
+    const initialState = authService.getState();
+    if (initialState.user) {
+      setUser(initialState.user);
+      onUserChange?.(initialState.user);
     }
 
     // Handle OAuth callback
@@ -156,7 +146,11 @@ const MultiAuthLogin: React.FC<MultiAuthLoginProps> = ({
     if (code && state && !user) {
       handleOAuthCallback(code, state);
     }
-  }, [storageKey]); // Remove onUserChange from dependencies
+
+    return () => {
+      unsubscribe();
+    };
+  }, []); // Only run once on mount
 
   // Manage body class for modal state
   useEffect(() => {
@@ -175,36 +169,20 @@ const MultiAuthLogin: React.FC<MultiAuthLoginProps> = ({
   const handleOAuthCallback = async (code: string, state: string) => {
     setLoading(true);
     try {
-      const provider = state as 'google' | 'microsoft' | 'apple' | 'facebook';
+      const provider = state as 'google' | 'microsoft' | 'facebook';
       
-      // TODO: Replace with actual API call to your backend
-      // const response = await fetch('/api/auth/oauth/callback', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({ code, state, provider })
-      // });
-      // const userData = await response.json();
+      // Use the new auth service to handle OAuth callback
+      const result = await authService.handleOAuthCallback(provider, code, state);
       
-      // For demo purposes, simulate a successful login
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      const mockUser: User = {
-        id: `${provider}-123456`,
-        name: `User from ${provider.charAt(0).toUpperCase() + provider.slice(1)}`,
-        email: `user@${provider === 'microsoft' ? 'outlook.com' : provider}.com`,
-        picture: `https://via.placeholder.com/40/${getProviderColor(provider).replace('#', '')}/ffffff?text=${provider.charAt(0).toUpperCase()}`,
-        provider
-      };
-
-      setUser(mockUser);
-      localStorage.setItem(storageKey, JSON.stringify(mockUser));
-      onUserChange?.(mockUser);
-      onSignIn?.(mockUser);
+      if (result.success && result.user) {
+        setUser(result.user);
+        onUserChange?.(result.user);
+        onSignIn?.(result.user);
+      }
       
       // Clean up URL
       window.history.replaceState({}, document.title, window.location.pathname);
     } catch (error) {
-      // console.error('OAuth callback error:', error);
       safeLog('OAuth callback error', error);
     } finally {
       setLoading(false);
@@ -216,7 +194,7 @@ const MultiAuthLogin: React.FC<MultiAuthLoginProps> = ({
     return providerObj?.color || '#666';
   };
 
-  const handleProviderLogin = (provider: AuthProvider) => {
+  const handleProviderLogin = async (provider: AuthProvider) => {
     // Handle email provider differently - show email form
     if (provider.id === 'email') {
       setShowProviders(false);
@@ -225,39 +203,37 @@ const MultiAuthLogin: React.FC<MultiAuthLoginProps> = ({
       return;
     }
 
-    const params = new URLSearchParams({
-      client_id: provider.clientId,
-      redirect_uri: window.location.origin,
-      response_type: 'code',
-      scope: getProviderScopes(provider.id),
-      state: provider.id,
-      ...(provider.id === 'microsoft' && { response_mode: 'query' }),
-      ...(provider.id === 'apple' && { response_mode: 'form_post' })
-    });
-
-    const authUrl = `${provider.authUrl}?${params.toString()}`;
-    window.location.href = authUrl;
+    // Use auth service for OAuth providers
+    try {
+      if (provider.id === 'google') {
+        await authService.initiateOAuth('google');
+      } else if (provider.id === 'microsoft') {
+        await authService.initiateOAuth('microsoft');
+      } else if (provider.id === 'facebook') {
+        await authService.initiateOAuth('facebook');
+      } else if (provider.id === 'apple') {
+        await authService.initiateOAuth('apple');
+      } else if (provider.id === 'samsung') {
+        await authService.initiateOAuth('samsung');
+      }
+    } catch (error) {
+      safeLog('OAuth initiation error', error);
+      setEmailError('Failed to initiate authentication. Please try again.');
+    }
   };
 
-  const getProviderScopes = (providerId: string): string => {
-    const scopes = {
-      google: 'openid profile email',
-      microsoft: 'openid profile email',
-      apple: 'name email',
-      facebook: 'email public_profile',
-      email: ''
-    };
-    return scopes[providerId as keyof typeof scopes] || 'profile email';
-  };
-
-  const handleSignOut = () => {
-    setUser(null);
-    localStorage.removeItem(storageKey);
-    setShowDropdown(false);
-    setShowProviders(false);
-    setShowEmailForm(false);
-    onUserChange?.(null);
-    onSignOut?.();
+  const handleSignOut = async () => {
+    try {
+      await authService.logout();
+      setUser(null);
+      setShowDropdown(false);
+      setShowProviders(false);
+      setShowEmailForm(false);
+      onUserChange?.(null);
+      onSignOut?.();
+    } catch (error) {
+      safeLog('Sign out error', error);
+    }
   };
 
   const handleEmailSubmit = async (e: React.FormEvent) => {
@@ -278,22 +254,42 @@ const MultiAuthLogin: React.FC<MultiAuthLoginProps> = ({
         if (!emailData.name) {
           throw new Error('Name is required');
         }
+
+        // Register new user
+        const result = await authService.register({
+          email: emailData.email,
+          password: emailData.password,
+          name: emailData.name
+        });
+
+        if (!result.success) {
+          throw new Error(result.error || 'Registration failed');
+        }
+
+        // After successful registration, log them in
+        const loginResult = await authService.login(emailData.email, emailData.password);
+        
+        if (!loginResult.success) {
+          throw new Error(loginResult.error || 'Login failed after registration');
+        }
+
+        const newUser = loginResult.user!;
+        setUser(newUser);
+        onUserChange?.(newUser);
+        onSignIn?.(newUser);
+      } else {
+        // Sign in existing user
+        const result = await authService.login(emailData.email, emailData.password);
+
+        if (!result.success) {
+          throw new Error(result.error || 'Login failed');
+        }
+
+        const loggedInUser = result.user!;
+        setUser(loggedInUser);
+        onUserChange?.(loggedInUser);
+        onSignIn?.(loggedInUser);
       }
-
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      const mockUser: User = {
-        id: `email-${Date.now()}`,
-        name: emailData.name || emailData.email.split('@')[0],
-        email: emailData.email,
-        provider: 'email'
-      };
-
-      setUser(mockUser);
-      localStorage.setItem(storageKey, JSON.stringify(mockUser));
-      onUserChange?.(mockUser);
-      onSignIn?.(mockUser);
       
       setShowEmailForm(false);
       setEmailData({ email: '', password: '', confirmPassword: '', name: '' });
