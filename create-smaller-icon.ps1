@@ -3,7 +3,7 @@
 
 Write-Host "Creating smaller WIHY app icon..." -ForegroundColor Cyan
 
-$sourcePath = "c:\repo\wihy_ui_clean\client\public\assets\wihyfavicon.png"
+$sourcePath = "c:\repo\wihy_ui_clean\client\public\assets\wihyfaviconandriod.png"
 $outputPath = "c:\repo\wihy_ui_clean\mobile\resources\icon.png"
 
 # Check if ImageMagick is installed
