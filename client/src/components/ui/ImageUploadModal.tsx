@@ -155,8 +155,9 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
     
     if (!canProcess()) return;
 
-    // Always use web camera with live video preview - works on both desktop and mobile
-    console.log('📷 Using web camera API with live video preview');
+    // Use web camera with live barcode scanning on ALL platforms (web + Android)
+    // This allows barcode detection which native camera cannot do
+    console.log('📷 Using web camera API with live video preview and barcode scanning');
     console.log('hasCamera:', hasCamera());
     console.log('User Agent:', navigator.userAgent);
     console.log('MediaDevices available:', 'mediaDevices' in navigator);
