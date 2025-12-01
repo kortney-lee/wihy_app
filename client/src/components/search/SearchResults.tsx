@@ -993,7 +993,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({
       )}
       
       {/* Main Content Area with Dashboard Layout */}
-      <div className={CSS_CLASSES.DASHBOARD_CONTAINER} style={{ paddingTop: windowWidth < 768 ? '200px' : '100px' }}>
+      <div className={CSS_CLASSES.DASHBOARD_CONTAINER} style={{ paddingTop: windowWidth < 768 ? '220px' : windowWidth < 1200 ? '220px' : '100px' }}>
         {/* Progress History Sidebar - Always available */}
         {showProgressSidebar && (
           <div style={{
@@ -1110,7 +1110,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({
               alignItems: 'center', 
               marginTop: windowWidth < 768 ? '0px' : '80px',
               marginBottom: windowWidth < 768 ? '12px' : '24px',
-              padding: windowWidth < 768 ? '0 8px' : '0',
+              padding: windowWidth < 768 ? '0 8px' : '0 20px',
               paddingTop: windowWidth < 768 ? '20px' : '0',
               position: 'relative'
             }}>
@@ -1118,7 +1118,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({
                 display: 'flex',
                 gap: windowWidth < 768 ? '6px' : '8px',
                 alignItems: 'center',
-                flexWrap: windowWidth < 768 ? 'wrap' : 'nowrap',
+                flexWrap: 'wrap', // Always allow wrapping for all screen sizes
                 justifyContent: 'center',
                 maxWidth: '100%'
               }}>
