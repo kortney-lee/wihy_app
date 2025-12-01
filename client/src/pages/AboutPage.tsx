@@ -7,6 +7,7 @@ import AboutPageHeader from '../components/layout/AboutPageHeader';
 import ResearchQualityGauge from '../components/charts/cards/ResearchQualityGauge';
 import StudyTypeDistributionChart from '../components/charts/cards/StudyTypeDistributionChart';
 import PublicationTimelineChart from '../components/charts/cards/PublicationTimelineChart';
+import { PlatformDetectionService } from '../services/shared/platformDetectionService';
 import '../styles/AboutPage.css';
 import '../styles/MobileAboutPage.css';
 import '../styles/InvestorSections.css';
@@ -26,6 +27,15 @@ const AboutPage: React.FC = () => {
     setIsLoaded(true);
     // Scroll to top when component mounts
     window.scrollTo(0, 0);
+    
+    // Add Android class to body for CSS adjustments
+    if (PlatformDetectionService.isNative()) {
+      document.body.classList.add('platform-android');
+    }
+    
+    return () => {
+      document.body.classList.remove('platform-android');
+    };
   }, []);
 
   // Simple automation: show popup after scroll or a short delay
@@ -108,7 +118,9 @@ const AboutPage: React.FC = () => {
   }, []);
 
   return (
-    <div className="about-page-wrapper">
+    <div className="about-page-wrapper" style={{
+      paddingTop: PlatformDetectionService.isNative() ? '48px' : undefined
+    }}>
       {/* Fixed Navigation Header - Outside hero section */}
       <AboutPageHeader isNavOpen={isNavOpen} onToggleNav={() => setIsNavOpen(!isNavOpen)} />
 

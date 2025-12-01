@@ -1,5 +1,6 @@
 import React from 'react';
 import { CTAButton, NavLink } from '../shared/ButtonComponents';
+import { PlatformDetectionService } from '../../services/shared/platformDetectionService';
 
 interface AboutPageHeaderProps {
   isNavOpen: boolean;
@@ -8,7 +9,9 @@ interface AboutPageHeaderProps {
 
 const AboutPageHeader: React.FC<AboutPageHeaderProps> = ({ isNavOpen, onToggleNav }) => {
   return (
-    <nav className="top-nav">
+    <nav className="top-nav" style={{
+      paddingTop: PlatformDetectionService.isNative() ? '48px' : undefined
+    }}>
       <div className="nav-container">
         <div className="nav-brand">
           <img src="/assets/wihylogo.png" alt="WIHY.ai" className="nav-logo" />

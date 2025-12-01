@@ -590,28 +590,6 @@
     100% { background-position: -200% 0; }
   }
 
-  /* Fix 3: Full screen chat input above mobile navigation bars */
-  .fullscreen-chat-container {
-    padding-bottom: 120px !important; /* Extra space for mobile nav bars */
-  }
-
-  .fullscreen-chat-input-container {
-    bottom: 100px !important; /* Position above mobile nav bars */
-    padding-bottom: 20px !important;
-    background: linear-gradient(to top, rgba(255,255,255,1) 70%, rgba(255,255,255,0.95) 100%) !important;
-    backdrop-filter: blur(10px) !important;
-  }
-
-  .fullscreen-chat textarea,
-  .fullscreen-chat input[type="text"] {
-    margin-bottom: 20px !important; /* Extra margin from bottom */
-  }
-
-  /* Ensure chat send button is also above mobile nav */
-  .fullscreen-chat .chat-send-button {
-    margin-bottom: 20px !important;
-  }
-
   /* News feed spacing to prevent header overlap */
   .feeling-healthy-section {
     margin-top: 100px !important; /* Space for mobile header */
