@@ -14,6 +14,8 @@ import BloodPressureChart from '../charts/individual/BloodPressureChart';
 import { ChartType, CHART_TYPE_CONFIGS, getChartTypesByPriority, getChartTypesByTab } from '../charts/chartTypes';
 import FullScreenChat, { FullScreenChatRef } from '../ui/FullScreenChat';
 import MyProgressDashboard, { WihyCoachModel } from '../dashboard/MyProgressDashboard';
+import CoachDashboard from '../dashboard/CoachDashboard';
+import ParentDashboard from '../dashboard/ParentDashboard';
 import { CSS_CLASSES } from '../../constants/cssConstants';
 import '../../styles/VHealthSearch.css';
 import '../../styles/Dashboard.css';
@@ -25,7 +27,7 @@ import Spinner from '../ui/Spinner';
 import { logger } from '../../utils/logger';
 
 // Tab type definition - matches chartTypes.ts tabView values
-type SearchTab = 'overview' | 'charts' | 'consumption' | 'research' | 'insights' | 'wellness' | 'fitness';
+type SearchTab = 'overview' | 'charts' | 'consumption' | 'research' | 'insights' | 'wellness' | 'fitness' | 'coach' | 'parent';
 
 // Tab configuration
 const TAB_CONFIG = {
@@ -35,7 +37,9 @@ const TAB_CONFIG = {
   research: { label: 'Research', value: 'research' as SearchTab },
   insights: { label: 'Insights', value: 'insights' as SearchTab },
   wellness: { label: 'Wellness', value: 'wellness' as SearchTab },
-  fitness: { label: 'Fitness', value: 'fitness' as SearchTab }
+  fitness: { label: 'Fitness', value: 'fitness' as SearchTab },
+  coach: { label: 'Coach Portal', value: 'coach' as SearchTab },
+  parent: { label: 'Parent Portal', value: 'parent' as SearchTab }
 };
 
 const TABS = Object.values(TAB_CONFIG);
@@ -501,6 +505,11 @@ const SearchResults: React.FC<SearchResultsProps> = ({
 
   // Filter charts based on active tab using the proper function from chartTypes.ts
   const getChartsForActiveTab = () => {
+    // Coach and Parent tabs don't use charts - return empty array
+    if (activeTab === 'coach' || activeTab === 'parent') {
+      return [];
+    }
+    
     // Use the dedicated function that properly handles 'all' tabView
     const charts = getChartTypesByTab(activeTab);
     console.log(`🔍 CHARTS FOR TAB "${activeTab}":`, charts.map(c => ({ type: c.type, label: c.label, tabView: c.tabView })));
@@ -1316,6 +1325,18 @@ const SearchResults: React.FC<SearchResultsProps> = ({
                       onAnalyze={handleAddToChatConversation}
                     />
                   </div>
+                </>
+              )}
+
+              {activeTab === 'coach' && (
+                <>
+                  <CoachDashboard />
+                </>
+              )}
+
+              {activeTab === 'parent' && (
+                <>
+                  <ParentDashboard />
                 </>
               )}
             </div>
