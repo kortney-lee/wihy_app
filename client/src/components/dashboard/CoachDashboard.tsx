@@ -1,10 +1,5 @@
 import React, { useState, useMemo } from "react";
-
 import MyProgressDashboard, { WihyCoachModel } from "../dashboard/MyProgressDashboard";
-import { PlatformDetectionService } from "../../services/shared/platformDetectionService";
-import Header from "../shared/Header";
-import "../../styles/VHealthSearch.css";
-import "../../styles/Dashboard.css";
 
 type ClientStatus = "active" | "paused" | "prospect";
 
@@ -108,7 +103,7 @@ const seedClients: CoachClient[] = [
   },
 ];
 
-const CoachClientsPage: React.FC = () => {
+const CoachDashboard: React.FC = () => {
   const [clients, setClients] = useState<CoachClient[]>(seedClients);
   const [selectedClientId, setSelectedClientId] = useState<string>(seedClients[0]?.id);
   const [search, setSearch] = useState("");
@@ -225,25 +220,7 @@ const CoachClientsPage: React.FC = () => {
   }, [clients, search]);
 
   return (
-    <>
-      <div style={{ 
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        zIndex: 1000, 
-        backgroundColor: 'white',
-        paddingTop: PlatformDetectionService.isNative() ? '48px' : undefined
-      }}>
-        <Header
-          variant="results"
-          showLogin={true}
-          showSearchInput={true}
-          showProgressMenu={false}
-        />
-      </div>
-
-      <div className="w-full bg-[#f0f7ff] min-h-[70vh] relative" style={{ paddingTop: PlatformDetectionService.isNative() ? '200px' : '160px' }}>
+      <div className="w-full bg-[#f0f7ff] min-h-[70vh] relative">
         <header className="flex flex-col gap-2 pb-4">
           <h1 className="dashboard-title text-[22px] text-center mb-3 mt-2 px-2 leading-normal">
             Coach Portal – Client Plans
@@ -585,8 +562,7 @@ const CoachClientsPage: React.FC = () => {
             )}
           </div>
       </div>
-    </>
   );
 };
 
-export default CoachClientsPage;
+export default CoachDashboard;
