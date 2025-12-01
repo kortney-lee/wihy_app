@@ -233,7 +233,7 @@ const ResultQualityPie: React.FC<ResultQualityPieProps> = ({
   const legendBadColor = verdict === 'BAD' ? '#EF4444' : '#E5E7EB';
 
   return (
-    <div className="p-6 rounded-2xl border border-gray-200 bg-white shadow-lg h-[420px] flex flex-col text-center overflow-hidden">
+    <div className="p-6 rounded-2xl border border-gray-200 bg-white shadow-lg h-[500px] flex flex-col text-center overflow-hidden">
       <h3 className="text-xl font-semibold text-vh-muted mb-3">
         Result Quality
       </h3>

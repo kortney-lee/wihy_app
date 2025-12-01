@@ -17,6 +17,7 @@ import MyProgressDashboard, { WihyCoachModel } from '../dashboard/MyProgressDash
 import CoachDashboard from '../dashboard/CoachDashboard';
 import ParentDashboard from '../dashboard/ParentDashboard';
 import ConsumptionDashboard from '../dashboard/ConsumptionDashboard';
+import ResearchDashboard from '../dashboard/ResearchDashboard';
 import { CSS_CLASSES } from '../../constants/cssConstants';
 import '../../styles/VHealthSearch.css';
 import '../../styles/Dashboard.css';
@@ -1213,26 +1214,12 @@ const SearchResults: React.FC<SearchResultsProps> = ({
 
               {activeTab === 'research' && (
                 <>
-                  <h1 className="dashboard-title" style={{
-                    fontSize: windowWidth < 768 ? '22px' : '28px',
-                    textAlign: windowWidth < 768 ? 'center' : 'left',
-                    marginBottom: windowWidth < 768 ? '12px' : '15px',
-                    marginTop: windowWidth < 768 ? '8px' : '10px',
-                    padding: windowWidth < 768 ? '0 8px' : '0'
-                  }}>
-                    Research & Analysis
-                  </h1>
-                  
-                  <div style={{ marginTop: '8px' }}>
-                    <DashboardCharts 
-                      period={getDashboardPeriod()} 
-                      maxCards={calculateMaxCards()} 
-                      showAllCharts={true}
-                      excludeChartTypes={getExcludedChartTypes()}
-                      isResearchLayout={true}
-                      onAnalyze={handleAddToChatConversation}
-                    />
-                  </div>
+                  <ResearchDashboard
+                    period={getDashboardPeriod()}
+                    onAnalyze={handleAddToChatConversation}
+                    onSearch={handleUniversalSearch}
+                    windowWidth={windowWidth}
+                  />
                 </>
               )}
 
