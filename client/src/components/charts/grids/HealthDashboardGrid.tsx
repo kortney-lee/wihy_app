@@ -13,6 +13,15 @@ interface HealthDashboardGridProps {
   isInsightsLayout?: boolean;
   isResearchLayout?: boolean;
   isNutritionLayout?: boolean;
+  researchChartData?: {
+    evidence_grade?: string;
+    research_quality_score?: number;
+    study_count?: number;
+    confidence_level?: string;
+    publication_timeline?: Record<string, number>;
+    study_type_distribution?: Record<string, number>;
+    evidence_distribution?: Record<string, number>;
+  };
   onAnalyze?: (userMessage: string, assistantMessage: string) => void;
 }
 
@@ -171,6 +180,7 @@ const HealthDashboardGrid: React.FC<HealthDashboardGridProps> = ({
   isInsightsLayout = false,
   isResearchLayout = false,
   isNutritionLayout = false,
+  researchChartData,
   onAnalyze
 }) => {
   const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1200);
@@ -195,6 +205,7 @@ const HealthDashboardGrid: React.FC<HealthDashboardGridProps> = ({
               config={cardData.config}
               height={height}
               onAnalyze={onAnalyze}
+              researchData={researchChartData}
               {...(cardData.config || {})}
             />
           ) : (

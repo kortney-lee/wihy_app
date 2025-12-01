@@ -12,6 +12,15 @@ interface DashboardChartsProps {
   isInsightsLayout?: boolean;
   isResearchLayout?: boolean;
   isNutritionLayout?: boolean;
+  researchChartData?: {
+    evidence_grade?: string;
+    research_quality_score?: number;
+    study_count?: number;
+    confidence_level?: string;
+    publication_timeline?: Record<string, number>;
+    study_type_distribution?: Record<string, number>;
+    evidence_distribution?: Record<string, number>;
+  };
   onAnalyze?: (userMessage: string, assistantMessage: string) => void;
 }
 
@@ -23,6 +32,7 @@ const DashboardCharts: React.FC<DashboardChartsProps> = ({
   isInsightsLayout = false,
   isResearchLayout = false,
   isNutritionLayout = false,
+  researchChartData,
   onAnalyze
 }) => {
   return (
@@ -36,6 +46,7 @@ const DashboardCharts: React.FC<DashboardChartsProps> = ({
         isInsightsLayout={isInsightsLayout}
         isResearchLayout={isResearchLayout}
         isNutritionLayout={isNutritionLayout}
+        researchChartData={researchChartData}
         className="chart-sections-grid"
         onAnalyze={onAnalyze}
       />

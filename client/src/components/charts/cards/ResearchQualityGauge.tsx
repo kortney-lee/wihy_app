@@ -25,6 +25,12 @@ interface ResearchQualityGaugeProps {
   showCategoryButtons?: boolean; // Show category selection buttons
   categories?: Record<string, string[]>; // Custom research categories for API
   apiResponse?: any; // API response from analytics service
+  researchData?: {
+    research_quality_score?: number;
+    study_count?: number;
+    confidence_level?: string;
+    evidence_grade?: string;
+  };
   onAnalyze?: (userMessage: string, assistantMessage: string) => void;
 }
 
@@ -84,9 +90,10 @@ const ResearchQualityGauge: React.FC<ResearchQualityGaugeProps> = ({
   evidenceLevel,
   size = 'medium',
   showDetails = true,
-  showCategoryButtons = true,
+  showCategoryButtons = false,
   categories,
   apiResponse,
+  researchData,
   onAnalyze
 }) => {
   const [apiData, setApiData] = useState<{
@@ -127,6 +134,19 @@ const ResearchQualityGauge: React.FC<ResearchQualityGaugeProps> = ({
       });
     }
   }, [apiResponse]);
+
+  // Use research data from search results if available
+  useEffect(() => {
+    if (researchData) {
+      console.log('[ResearchQualityGauge] Using research data from search results');
+      const levelString = researchData.evidence_grade || 'Level III';
+      setApiData({
+        score: researchData.research_quality_score || 70,
+        studyCount: researchData.study_count || 0,
+        evidenceLevel: parseEvidenceLevel(levelString)
+      });
+    }
+  }, [researchData]);
 
   // Fetch data from Analytics Service API
   const fetchAnalytics = async (categoriesToFetch: Record<string, string[]>) => {
@@ -210,12 +230,17 @@ const ResearchQualityGauge: React.FC<ResearchQualityGaugeProps> = ({
 
   // Initial load with provided categories
   useEffect(() => {
+    // Skip API call if we have research data from search results
+    if (researchData) {
+      return;
+    }
+    
     if (score === undefined && activeCategories) {
       fetchAnalytics(activeCategories);
     } else if (score !== undefined) {
       console.log('[ResearchQualityGauge] Using provided score prop:', score);
     }
-  }, [score]);
+  }, [score, researchData]);
 
   // Use API data if available, otherwise use props or defaults
   const defaultScore = score !== undefined ? score : (apiData?.score || 75);
