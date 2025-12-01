@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import DashboardCharts from '../charts/grids/DashboardCharts';
 import { ChartType } from '../charts/chartTypes';
+import Spinner from '../ui/Spinner';
 
 /** ---- CONFIG ---- */
 const RESEARCH_API_BASE =
@@ -19,29 +20,73 @@ type StudyType =
   | 'review';
 
 type ResearchSearchResult = {
+  id: string;
   pmcid: string;
   title: string;
-  authors?: string[];
+  authors?: string;
+  authorCount?: number;
   journal?: string;
-  publication_date?: string;
-  study_type?: StudyType | string;
-  evidence_level?: EvidenceLevel | string;
-  participants?: number;
-  relevance_score?: number;
-  doi?: string;
+  publishedDate?: string;
+  publicationYear?: number;
+  abstract?: string;
+  studyType?: string;
+  researchArea?: string;
+  evidenceLevel?: string;
+  relevanceScore?: number;
+  rank?: number;
+  fullTextAvailable?: boolean;
+  links?: {
+    pmcWebsite?: string;
+    pubmedLink?: string;
+    pdfDownload?: string | null;
+    doi?: string;
+  };
 };
 
 type ResearchSearchResponse = {
   success: boolean;
-  query: string;
-  results: ResearchSearchResult[];
-  total_found?: number;
-  count?: number;
-  evidence_summary?: {
-    high_quality_studies?: number;
-    moderate_quality_studies?: number;
-    low_quality_studies?: number;
-    overall_evidence_strength?: string;
+  keyword: string;
+  originalQuery?: string;
+  articles: ResearchSearchResult[];
+  totalResearchCount?: number;
+  returnedCount?: number;
+  hasMoreResults?: boolean;
+  qualityScore?: number;
+  qualityLevel?: string;
+  evidenceGrade?: string;
+  confidence?: string;
+  qualityAssessment?: {
+    overallScore?: number;
+    qualityLevel?: string;
+    confidence?: string;
+    evidenceGrade?: string;
+    breakdown?: {
+      evidenceStrength?: number;
+      recency?: number;
+      consensus?: number;
+      sampleSize?: number;
+      journalQuality?: number;
+      accessibility?: number;
+    };
+    recommendations?: string[];
+    researchSummary?: {
+      totalAvailable?: number;
+      analyzed?: number;
+      recentStudies?: number;
+      fullTextAccess?: number;
+    };
+    keyFindings?: string[];
+    strengthsOfEvidence?: string[];
+    limitations?: string[];
+  };
+  chart_data?: {
+    evidence_grade?: string;
+    research_quality_score?: number;
+    study_count?: number;
+    confidence_level?: string;
+    publication_timeline?: Record<string, number>;
+    study_type_distribution?: Record<string, number>;
+    evidence_distribution?: Record<string, number>;
   };
 };
 
@@ -147,7 +192,9 @@ const ResearchPanel: React.FC<ResearchPanelProps> = ({
   // Search
   const [searchResults, setSearchResults] = useState<ResearchSearchResult[]>([]);
   const [evidenceSummary, setEvidenceSummary] =
-    useState<ResearchSearchResponse['evidence_summary'] | null>(null);
+    useState<ResearchSearchResponse['qualityAssessment'] | null>(null);
+  const [chartData, setChartData] =
+    useState<ResearchSearchResponse['chart_data'] | null>(null);
 
   // Trends & Quality
   const [trends, setTrends] = useState<TrendsResponse | null>(null);
@@ -170,7 +217,7 @@ const ResearchPanel: React.FC<ResearchPanelProps> = ({
   /** ---- API CALLS ---- */
 
   const runSearch = async (options: {
-    q: string;
+    keyword: string;
     limit?: number;
     year_from?: number;
     study_type?: StudyType;
@@ -181,21 +228,28 @@ const ResearchPanel: React.FC<ResearchPanelProps> = ({
     setError(null);
     setSearchResults([]);
     setEvidenceSummary(null);
+    setChartData(null);
     try {
       const qs = buildQS({
-        q: options.q,
+        keyword: options.keyword,
         limit: options.limit ?? 10,
         year_from: options.year_from,
         study_type: options.study_type,
         evidence_level: options.evidence_level
       });
       const res = await fetch(`${RESEARCH_API_BASE}/api/research/search?${qs}`);
-      if (!res.ok) throw new Error(`Search failed: ${res.status} ${res.statusText}`);
+      if (!res.ok) {
+        const errorText = await res.text();
+        console.error('Search API error:', res.status, errorText);
+        throw new Error(`Search failed: ${res.status} ${res.statusText}. ${errorText}`);
+      }
       const data: ResearchSearchResponse = await res.json();
       if (!data.success) throw new Error('Search not successful');
-      setSearchResults(data.results || []);
-      setEvidenceSummary(data.evidence_summary || null);
+      setSearchResults(data.articles || []);
+      setEvidenceSummary(data.qualityAssessment || null);
+      setChartData(data.chart_data || null);
     } catch (e: any) {
+      console.error('Search error:', e);
       setError(e?.message || 'Error searching research.');
     } finally {
       setLoading(false);
@@ -305,7 +359,7 @@ const ResearchPanel: React.FC<ResearchPanelProps> = ({
       label: 'Obesity & Metabolic (high-quality RCTs)',
       onClick: () =>
         runSearch({
-          q: 'obesity insulin resistance metabolic syndrome GLP-1',
+          keyword: 'obesity insulin resistance metabolic syndrome GLP-1',
           study_type: 'randomized_controlled_trial',
           evidence_level: 'high',
           year_from: 2015
@@ -315,7 +369,7 @@ const ResearchPanel: React.FC<ResearchPanelProps> = ({
       label: 'Cardiovascular – Mediterranean diet',
       onClick: () =>
         runSearch({
-          q: 'Mediterranean diet cardiovascular events',
+          keyword: 'Mediterranean diet cardiovascular events',
           study_type: 'meta_analysis',
           evidence_level: 'high',
           year_from: 2010
@@ -325,7 +379,7 @@ const ResearchPanel: React.FC<ResearchPanelProps> = ({
       label: 'Type 2 Diabetes – remission',
       onClick: () =>
         runSearch({
-          q: 'type 2 diabetes remission diet exercise',
+          keyword: 'type 2 diabetes remission diet exercise',
           study_type: 'randomized_controlled_trial',
           evidence_level: 'moderate',
           year_from: 2010
@@ -335,7 +389,7 @@ const ResearchPanel: React.FC<ResearchPanelProps> = ({
       label: 'Ultra-processed foods & health outcomes',
       onClick: () =>
         runSearch({
-          q: 'ultra-processed foods NOVA health outcomes',
+          keyword: 'ultra-processed foods NOVA health outcomes',
           study_type: 'observational_study',
           evidence_level: 'moderate',
           year_from: 2018
@@ -403,19 +457,9 @@ const ResearchPanel: React.FC<ResearchPanelProps> = ({
             {tab.label}
           </button>
         ))}
-        {loading && (
-          <div
-            style={{
-              marginLeft: 'auto',
-              fontSize: 11,
-              color: '#6b7280',
-              paddingRight: 4
-            }}
-          >
-            Loading…
-          </div>
-        )}
       </div>
+
+      {loading && <Spinner overlay={true} title="Loading research data..." subtitle="Please wait" />}
 
       {error && (
         <div
@@ -628,11 +672,32 @@ const ResearchPanel: React.FC<ResearchPanelProps> = ({
                 Search Results
               </div>
               {evidenceSummary && (
-                <div style={{ marginBottom: 8, color: '#4b5563', fontSize: 13 }}>
-                  Evidence summary: {evidenceSummary.overall_evidence_strength || '—'} ·
-                  high: {evidenceSummary.high_quality_studies ?? 0} · moderate:{' '}
-                  {evidenceSummary.moderate_quality_studies ?? 0} · low:{' '}
-                  {evidenceSummary.low_quality_studies ?? 0}
+                <div style={{ marginBottom: 12, padding: 12, background: '#f3f4f6', borderRadius: 6 }}>
+                  <div style={{ fontWeight: 600, marginBottom: 6, fontSize: 14 }}>
+                    Quality Assessment
+                  </div>
+                  <div style={{ color: '#4b5563', fontSize: 13, marginBottom: 4 }}>
+                    <strong>Grade:</strong> {evidenceSummary.evidenceGrade || '—'} · 
+                    <strong>Quality:</strong> {evidenceSummary.qualityLevel || '—'} · 
+                    <strong>Confidence:</strong> {evidenceSummary.confidence || '—'}
+                  </div>
+                  {evidenceSummary.researchSummary && (
+                    <div style={{ color: '#6b7280', fontSize: 12, marginBottom: 4 }}>
+                      Total Available: {evidenceSummary.researchSummary.totalAvailable?.toLocaleString() || 0} · 
+                      Analyzed: {evidenceSummary.researchSummary.analyzed || 0} · 
+                      Full Text: {evidenceSummary.researchSummary.fullTextAccess || 0}
+                    </div>
+                  )}
+                  {evidenceSummary.keyFindings && evidenceSummary.keyFindings.length > 0 && (
+                    <div style={{ marginTop: 6, fontSize: 12 }}>
+                      <strong>Key Findings:</strong>
+                      <ul style={{ margin: '4px 0', paddingLeft: 20 }}>
+                        {evidenceSummary.keyFindings.map((finding, idx) => (
+                          <li key={idx}>{finding}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
                 </div>
               )}
               {searchResults.length === 0 && (
@@ -667,18 +732,63 @@ const ResearchPanel: React.FC<ResearchPanelProps> = ({
                         {r.title}
                       </div>
                       <div style={{ color: '#4b5563', marginBottom: 2 }}>
+                        {r.authors && <div style={{ fontSize: 12, marginBottom: 2 }}>{r.authors}</div>}
                         {r.journal || 'Journal n/a'} ·{' '}
-                        {r.publication_date
-                          ? new Date(r.publication_date).getFullYear()
-                          : 'Year n/a'}
+                        {r.publicationYear || (r.publishedDate ? new Date(r.publishedDate).getFullYear() : 'Year n/a')}
                       </div>
                       <div style={{ color: '#6b7280', marginBottom: 4 }}>
-                        {r.study_type && <span>{r.study_type} · </span>}
-                        {r.evidence_level && <span>evidence: {r.evidence_level}</span>}
-                        {r.relevance_score !== undefined && (
-                          <span> · score: {r.relevance_score.toFixed(2)}</span>
+                        {r.studyType && <span>{r.studyType} · </span>}
+                        {r.evidenceLevel && <span>evidence: {r.evidenceLevel}</span>}
+                        {r.relevanceScore !== undefined && (
+                          <span> · score: {r.relevanceScore}</span>
                         )}
                       </div>
+                      {r.links?.pmcWebsite && (
+                        <div style={{ marginBottom: 6 }}>
+                          <a 
+                            href={r.links.pmcWebsite} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            style={{ 
+                              color: '#2563eb', 
+                              textDecoration: 'none',
+                              fontSize: 13,
+                              marginRight: 12
+                            }}
+                          >
+                            PMC Article ↗
+                          </a>
+                          {r.links.pdfDownload && (
+                            <a 
+                              href={r.links.pdfDownload} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              style={{ 
+                                color: '#2563eb', 
+                                textDecoration: 'none',
+                                fontSize: 13,
+                                marginRight: 12
+                              }}
+                            >
+                              PDF ↗
+                            </a>
+                          )}
+                          {r.links.doi && (
+                            <a 
+                              href={r.links.doi} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              style={{ 
+                                color: '#2563eb', 
+                                textDecoration: 'none',
+                                fontSize: 13
+                              }}
+                            >
+                              DOI ↗
+                            </a>
+                          )}
+                        </div>
+                      )}
                       <button
                         type="button"
                         onClick={() => loadArticleContent(r.pmcid)}
@@ -712,8 +822,7 @@ const ResearchPanel: React.FC<ResearchPanelProps> = ({
               </div>
               {!selectedPmcId && (
                 <div style={{ color: '#6b7280' }}>
-                  Select an article from the Search tab to load full content via
-                  <code> /api/research/pmc/:pmcId/content</code>.
+                  Select an article from the Search tab to view full content.
                 </div>
               )}
               {selectedPmcId && !articleContent && !loading && (
@@ -1027,20 +1136,28 @@ const ResearchPanel: React.FC<ResearchPanelProps> = ({
         {/* QUALITY TAB - Show charts directly without card wrapper */}
         {activeTab === 'quality' && (
           <div style={{ flex: 1 }}>
-            <DashboardCharts
-              period="week"
-              maxCards={4}
-              showAllCharts={true}
-              excludeChartTypes={Object.values(ChartType).filter(
-                type =>
-                  type !== ChartType.STUDY_TYPE_DISTRIBUTION &&
-                  type !== ChartType.PUBLICATION_TIMELINE &&
-                  type !== ChartType.RESULT_QUALITY_PIE &&
-                  type !== ChartType.RESEARCH_QUALITY
-              )}
-              isResearchLayout={true}
-              onAnalyze={() => {}}
-            />
+            {!chartData && (
+              <div style={{ color: '#6b7280', padding: 20 }}>
+                Run a search query to see research quality charts and analysis.
+              </div>
+            )}
+            {chartData && (
+              <DashboardCharts
+                period="week"
+                maxCards={4}
+                showAllCharts={true}
+                excludeChartTypes={Object.values(ChartType).filter(
+                  type =>
+                    type !== ChartType.STUDY_TYPE_DISTRIBUTION &&
+                    type !== ChartType.PUBLICATION_TIMELINE &&
+                    type !== ChartType.RESULT_QUALITY_PIE &&
+                    type !== ChartType.RESEARCH_QUALITY
+                )}
+                isResearchLayout={true}
+                researchChartData={chartData}
+                onAnalyze={() => {}}
+              />
+            )}
           </div>
         )}
       </div>
