@@ -111,7 +111,7 @@ const NovaChart: React.FC<NovaChartProps> = ({ apiResponse, query, onAnalyze }) 
   };
 
   return (
-    <div className="flex flex-col p-6 rounded-2xl bg-white border border-gray-200 shadow-md h-[650px] md:h-[500px] overflow-hidden">
+    <div className="flex flex-col p-6 rounded-2xl bg-white border border-gray-200 shadow-md h-[420px] overflow-hidden">
       <h3 className="text-2xl font-semibold text-vh-muted mb-5">
         NOVA Food Processing
       </h3>

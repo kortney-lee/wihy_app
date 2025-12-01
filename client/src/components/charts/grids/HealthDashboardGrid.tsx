@@ -173,7 +173,6 @@ const HealthDashboardGrid: React.FC<HealthDashboardGridProps> = ({
   isNutritionLayout = false,
   onAnalyze
 }) => {
-  const [selectedPeriod] = useState(period);
   const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1200);
 
   // Handle responsive window resizing
@@ -191,7 +190,7 @@ const HealthDashboardGrid: React.FC<HealthDashboardGridProps> = ({
         <div style={gridStyles.cardContent}>
           {ChartComponent ? (
             <ChartComponent 
-              period={selectedPeriod}
+              period={period}
               data={cardData.data}
               config={cardData.config}
               height={height}
@@ -242,7 +241,7 @@ const HealthDashboardGrid: React.FC<HealthDashboardGridProps> = ({
       // ChartType.STEPS_CHART, // Moved to grid cards to position next to Nutrition Analysis
       // ChartType.DOPAMINE, // Removed - should be grid card in insights
       // ChartType.VITAMIN_CONTENT, // Moved to grid cards for nutrition layout
-      // ChartType.DAILY_VALUE_PROGRESS // Moved to grid cards for nutrition layout
+      ChartType.DAILY_VALUE_PROGRESS // Full width for better horizontal bar display
     ];
     return fullWidthCharts.includes(chartType);
   };
