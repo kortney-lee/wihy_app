@@ -7,6 +7,7 @@ import { wihyAPI } from '../../services/wihyAPI';
 import { chatService } from '../../services/chatService';
 import { universalSearchService } from '../../services/universalSearchService';
 import { getApiEndpoint } from '../../config/apiConfig';
+import { PlatformDetectionService } from '../../services/shared/platformDetectionService';
 import '../../styles/VHealthSearch.css';
 import { CSS_CLASSES } from '../../constants/cssConstants';
 import '../../styles/search-components.css';
@@ -833,7 +834,9 @@ const Header: React.FC<HeaderProps> = ({
         />
       )}
 
-      <header className={headerClasses}>
+      <header className={headerClasses} style={{
+        paddingTop: PlatformDetectionService.isNative() ? '48px' : undefined
+      }}>
         {/* === TOP BAR: Progress menu + Login === */}
         <div className={CSS_CLASSES.VHEALTH_TOPBAR}>
           {/* Left side: Progress History Menu */}
@@ -863,7 +866,7 @@ const Header: React.FC<HeaderProps> = ({
           </div>
           {/* Right side: Login */}
           <div className={CSS_CLASSES.VHEALTH_TOPBAR_RIGHT}>
-            {showLogin && (
+            {showLogin && !PlatformDetectionService.isNative() && (
               <div 
                 className={CSS_CLASSES.HEADER_AUTH_WRAPPER}
                 style={{

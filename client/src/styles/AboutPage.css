@@ -1967,6 +1967,12 @@ body {
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
   }
+  
+  /* Android-specific adjustment for dropdown when nav has padding */
+  body.platform-android .nav-links {
+    top: 112px;
+    max-height: calc(100vh - 112px);
+  }
 
   .nav-links.open {
     display: flex;
@@ -2156,4 +2162,14 @@ body {
 
 .overlay-content {
   color: #4cbb17 !important;
+}
+ 
+ 
+/* Android Safe Area Adjustments for Dropdown Menu */
+@media (max-width: 768px) {
+  /* Adjust dropdown position when nav has Android padding */
+  body.platform-android .nav-links {
+    top: calc(64px + 48px) !important;
+    max-height: calc(100vh - 112px) !important;
+  }
 }
