@@ -1,18 +1,56 @@
 import React, { useState, useMemo } from "react";
-import MyProgressDashboard, { WihyCoachModel } from "../dashboard/MyProgressDashboard";
+import { WihyCoachModel } from "./MyProgressDashboard";
 
-type ClientStatus = "active" | "paused" | "prospect";
-
-type CoachClient = {
+// -----------------------------------------------------------------
+// TYPE DEFINITIONS (nutrition features)
+// -----------------------------------------------------------------
+export type DietTag = {
   id: string;
   name: string;
-  email: string;
-  goal?: string;
-  status: ClientStatus;
-  plan: WihyCoachModel;
+  description?: string;
 };
 
-type ActionType =
+export type ShoppingListCategory =
+  | "protein"
+  | "produce"
+  | "grains"
+  | "dairy"
+  | "pantry"
+  | "snacks"
+  | "drinks"
+  | "other";
+
+export type ShoppingListItem = {
+  id: string;
+  name: string;
+  category: ShoppingListCategory;
+  quantity?: string;
+  note?: string;
+  optional?: boolean;
+};
+
+// 11 core diet goals/approaches
+export type DietGoalKey =
+  | "gut_nutrition"
+  | "sad"
+  | "mediterranean"
+  | "keto"
+  | "paleo"
+  | "carnivore"
+  | "vegan"
+  | "vegetarian"
+  | "wfpb"
+  | "dash"
+  | "biblical_levitical";
+
+export type DietGoalTag = {
+  key: DietGoalKey;
+  label: string;
+  description: string;
+};
+
+// Action types (from WihyCoachModel)
+export type ActionType =
   | "workout"
   | "meal"
   | "hydration"
@@ -22,547 +60,1022 @@ type ActionType =
   | "education"
   | "custom";
 
-type ActionStatus = "pending" | "in_progress" | "completed";
+export type ActionStatus = "pending" | "in_progress" | "completed";
 
-// ----- Seed data (local only) -----
+export type Action = {
+  id: string;
+  type: ActionType;
+  title: string;
+  description?: string;
+  meta?: string;
+  status: ActionStatus;
+};
+
+export const ALL_DIET_GOALS: DietGoalTag[] = [
+  {
+    key: "gut_nutrition",
+    label: "Gut Nutrition",
+    description: "Focus on gut health through probiotics, prebiotics, and fiber.",
+  },
+  {
+    key: "sad",
+    label: "Standard American Diet (SAD)",
+    description: "High-processed, convenience-based eating.",
+  },
+  {
+    key: "mediterranean",
+    label: "Mediterranean",
+    description: "Olive oil, fish, whole grains, vegetables, moderate wine.",
+  },
+  {
+    key: "keto",
+    label: "Keto",
+    description: "Very low-carb, high-fat, moderate protein for ketosis.",
+  },
+  {
+    key: "paleo",
+    label: "Paleo",
+    description: "Unprocessed foods: meat, fish, vegetables, nuts, seeds.",
+  },
+  {
+    key: "carnivore",
+    label: "Carnivore",
+    description: "Animal-based: meat, fish, eggs, minimal plant foods.",
+  },
+  {
+    key: "vegan",
+    label: "Vegan",
+    description: "No animal products; plant-based only.",
+  },
+  {
+    key: "vegetarian",
+    label: "Vegetarian",
+    description: "No meat; includes dairy, eggs, and plant foods.",
+  },
+  {
+    key: "wfpb",
+    label: "Whole-Food Plant-Based (WFPB)",
+    description: "Unprocessed plant foods; minimal/no animal products.",
+  },
+  {
+    key: "dash",
+    label: "DASH",
+    description: "Dietary Approaches to Stop Hypertension; low sodium, balanced.",
+  },
+  {
+    key: "biblical_levitical",
+    label: "Biblical Levitical",
+    description: "Following Levitical dietary laws; clean meats, no pork/shellfish.",
+  },
+];
+
+// Quick-add diet pattern templates
+export const commonDietOptions: DietTag[] = [
+  { id: "std1", name: "Low-Carb", description: "Reduce carbs, focus on protein & veggies" },
+  { id: "std2", name: "Calorie Deficit", description: "Track calories, maintain a moderate deficit" },
+  { id: "std3", name: "Whole Foods", description: "Eliminate processed foods" },
+  { id: "std4", name: "Intermittent Fasting", description: "16/8 or 18/6 eating window" },
+];
+
+// Helper to generate unique IDs
+function makeId(prefix: string) {
+  return `${prefix}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+}
+
+// Extended plan with nutrition
+export interface CoachPlan extends WihyCoachModel {
+  goals?: string[];           // Simple array of goal strings
+  diets?: DietTag[];          // Custom diet patterns
+  shoppingList?: ShoppingListItem[];
+  dietGoals?: DietGoalKey[];  // Selected from the 11 core diet approaches
+}
+
+export type CoachClient = {
+  id: string;
+  name: string;
+  email: string;
+  goal?: string;
+  status: string;
+  plan: CoachPlan;
+};
+
+// Tab keys
+export type TabKey = "plan" | "actions" | "shopping" | "preview";
+
+// -----------------------------------------------------------------
+// SEED DATA
+// -----------------------------------------------------------------
 const seedClients: CoachClient[] = [
   {
     id: "c1",
-    name: "Alex Johnson",
-    email: "alex@example.com",
-    goal: "Lose 10–15 lb in 12 weeks",
-    status: "active",
+    name: "Alice Johnson",
+    email: "alice@example.com",
+    goal: "Weight loss",
+    status: "Active",
     plan: {
-      summary: "We are focusing on sustainable fat loss and daily movement.",
-      motivation:
-        "Small consistent changes over 12 weeks will matter more than a perfect week.",
-      priorities: [
+      goals: ["Lose 15 lbs by June", "Improve energy levels"],
+      dietGoals: ["gut_nutrition", "mediterranean"],
+      diets: [
         {
-          id: "g1",
-          title: "Walk 6,000–8,000 steps at least 5 days per week",
-          description: "Short walks after meals are great.",
-          icon: "🚶‍♂️",
+          id: "diet-alice-1",
+          name: "Low-Carb",
+          description: "Reduce carbs to <50g/day",
+        },
+      ],
+      shoppingList: [
+        {
+          id: "shop-alice-1",
+          name: "Chicken breast",
+          category: "protein",
+          quantity: "2 lbs",
         },
         {
-          id: "g2",
-          title: "Hit protein target 4+ days per week",
-          description: "Use Greek yogurt and prepared protein to help.",
-          icon: "🍗",
+          id: "shop-alice-2",
+          name: "Spinach",
+          category: "produce",
+          quantity: "1 bag",
+          optional: true,
         },
       ],
       actions: [
         {
-          id: "a1",
+          id: "action-alice-1",
           type: "workout",
-          title: "Complete Workout A",
-          description: "Full-body strength, 30–40 minutes.",
+          title: "Morning walk",
+          description: "30-minute brisk walk",
+          meta: "daily",
           status: "pending",
-          meta: "3 sets each exercise",
         },
         {
-          id: "a2",
+          id: "action-alice-2",
           type: "meal",
-          title: "Log all meals today",
-          description: "No judgment, just awareness.",
-          status: "pending",
+          title: "Meal prep Sundays",
+          description: "Prep lunches for the week",
+          meta: "weekly",
+          status: "completed",
         },
+      ],
+      priorities: [
+        { id: "p1", title: "Track daily calories" },
+        { id: "p2", title: "Stay hydrated" },
       ],
     },
   },
   {
     id: "c2",
-    name: "Taylor Brooks",
-    email: "taylor@example.com",
-    goal: "Build lean muscle",
-    status: "active",
+    name: "Bob Smith",
+    email: "bob@example.com",
+    goal: "Muscle gain",
+    status: "Active",
     plan: {
-      summary: "We are building strength and muscle with progressive overload.",
-      motivation:
-        "You do not need perfection; you need consistent training and recovery.",
-      priorities: [
+      goals: ["Gain 10 lbs lean mass", "Increase bench press to 225 lbs"],
+      dietGoals: ["keto", "carnivore"],
+      diets: [
         {
-          id: "g3",
-          title: "3 strength workouts per week",
-          icon: "🏋️",
+          id: "diet-bob-1",
+          name: "High-Protein",
+          description: "1.5g protein per lb bodyweight",
+        },
+      ],
+      shoppingList: [
+        {
+          id: "shop-bob-1",
+          name: "Ground beef",
+          category: "protein",
+          quantity: "3 lbs",
         },
         {
-          id: "g4",
-          title: "Hit protein at least 5 days per week",
-          icon: "🥚",
+          id: "shop-bob-2",
+          name: "Eggs",
+          category: "protein",
+          quantity: "2 dozen",
         },
       ],
       actions: [
         {
-          id: "a3",
+          id: "action-bob-1",
           type: "workout",
-          title: "Upper body strength session",
+          title: "Upper body strength",
+          description: "Bench, rows, OHP",
+          meta: "3x/week",
+          status: "in_progress",
+        },
+        {
+          id: "action-bob-2",
+          type: "meal",
+          title: "Post-workout shake",
+          description: "40g protein + carbs",
+          meta: "after training",
           status: "pending",
         },
+      ],
+      priorities: [
+        { id: "p1", title: "Progressive overload" },
+        { id: "p2", title: "Sleep 8 hours" },
       ],
     },
   },
 ];
 
-const CoachDashboard: React.FC = () => {
+// -----------------------------------------------------------------
+// MAIN COMPONENT
+// -----------------------------------------------------------------
+export default function CoachDashboard() {
   const [clients, setClients] = useState<CoachClient[]>(seedClients);
-  const [selectedClientId, setSelectedClientId] = useState<string>(seedClients[0]?.id);
   const [search, setSearch] = useState("");
+  const [selectedClient, setSelectedClient] = useState<CoachClient | null>(null);
+  const [activeTab, setActiveTab] = useState<TabKey>("plan");
 
-  const selectedClient = useMemo(
-    () => clients.find((c) => c.id === selectedClientId) ?? clients[0],
-    [clients, selectedClientId]
-  );
+  // Edit states for Goals & Diets tab
+  const [editingGoals, setEditingGoals] = useState(false);
+  const [newGoal, setNewGoal] = useState("");
+  const [editingDietGoals, setEditingDietGoals] = useState(false);
+  const [editingDiets, setEditingDiets] = useState(false);
+  const [newDietName, setNewDietName] = useState("");
+  const [newDietDesc, setNewDietDesc] = useState("");
 
-  const [editingGoals, setEditingGoals] = useState<WihyCoachModel["priorities"]>(
-    selectedClient?.plan?.priorities ?? []
-  );
-  const [editingActions, setEditingActions] = useState<WihyCoachModel["actions"]>(
-    selectedClient?.plan?.actions ?? []
-  );
-
-  React.useEffect(() => {
-    if (!selectedClient) return;
-    setEditingGoals(selectedClient.plan?.priorities ?? []);
-    setEditingActions(selectedClient.plan?.actions ?? []);
-  }, [selectedClientId, selectedClient]);
-
-  const handleToggleActionStatus = (id: string) => {
-    setEditingActions((prev) =>
-      (prev ?? []).map((a) =>
-        a.id === id
-          ? {
-              ...a,
-              status:
-                a.status === "completed"
-                  ? "pending"
-                  : a.status === "pending"
-                  ? "in_progress"
-                  : "completed",
-            }
-          : a
-      )
-    );
-  };
-
-  const handleRemoveAction = (id: string) => {
-    setEditingActions((prev) => (prev ?? []).filter((a) => a.id !== id));
-  };
-
+  // Edit states for Actions tab
+  const [editingActions, setEditingActions] = useState(false);
   const [newActionType, setNewActionType] = useState<ActionType>("workout");
   const [newActionTitle, setNewActionTitle] = useState("");
   const [newActionDescription, setNewActionDescription] = useState("");
   const [newActionMeta, setNewActionMeta] = useState("");
 
-  const handleAddAction = () => {
-    if (!newActionTitle.trim()) return;
-    const newAction = {
-      id: `action-${Date.now()}`,
-      type: newActionType,
-      title: newActionTitle.trim(),
-      description: newActionDescription.trim() || undefined,
-      meta: newActionMeta.trim() || undefined,
-      status: "pending" as ActionStatus,
-    };
-    setEditingActions((prev) => [...(prev ?? []), newAction]);
+  // Edit states for Shopping tab
+  const [editingShopping, setEditingShopping] = useState(false);
+  const [newShoppingName, setNewShoppingName] = useState("");
+  const [newShoppingCategory, setNewShoppingCategory] = useState<ShoppingListCategory>("protein");
+  const [newShoppingQty, setNewShoppingQty] = useState("");
+  const [newShoppingNote, setNewShoppingNote] = useState("");
+  const [newShoppingOptional, setNewShoppingOptional] = useState(false);
 
-    setNewActionTitle("");
-    setNewActionDescription("");
-    setNewActionMeta("");
-    setNewActionType("workout");
-  };
-
-  const [newGoalTitle, setNewGoalTitle] = useState("");
-  const [newGoalDescription, setNewGoalDescription] = useState("");
-  const [newGoalIcon, setNewGoalIcon] = useState("");
-
-  const handleAddGoal = () => {
-    if (!newGoalTitle.trim()) return;
-    const newGoal = {
-      id: `goal-${Date.now()}`,
-      title: newGoalTitle.trim(),
-      description: newGoalDescription.trim() || undefined,
-      icon: newGoalIcon.trim() || undefined,
-    };
-    setEditingGoals((prev) => [...(prev ?? []), newGoal]);
-
-    setNewGoalTitle("");
-    setNewGoalDescription("");
-    setNewGoalIcon("");
-  };
-
-  const handleRemoveGoal = (id: string) => {
-    setEditingGoals((prev) => (prev ?? []).filter((g) => g.id !== id));
-  };
-
-  const handleSaveToLocalClient = () => {
-    if (!selectedClient) return;
-
-    const updatedPlan: WihyCoachModel = {
-      ...(selectedClient.plan ?? {}),
-      priorities: editingGoals ?? [],
-      actions: editingActions ?? [],
-    };
-
-    setClients((prev) =>
-      prev.map((c) =>
-        c.id === selectedClient.id ? { ...c, plan: updatedPlan } : c
-      )
-    );
-  };
-
+  // Filter clients by search
   const filteredClients = useMemo(() => {
-    const q = search.toLowerCase();
-    if (!q) return clients;
+    if (!search.trim()) return clients;
+    const lower = search.toLowerCase();
     return clients.filter(
       (c) =>
-        c.name.toLowerCase().includes(q) || c.email.toLowerCase().includes(q)
+        c.name.toLowerCase().includes(lower) ||
+        c.email.toLowerCase().includes(lower) ||
+        (c.goal && c.goal.toLowerCase().includes(lower))
     );
   }, [clients, search]);
 
-  return (
-      <div className="w-full bg-[#f0f7ff] min-h-[70vh] relative">
-        <header className="flex flex-col gap-2 pb-4">
-          <h1 className="dashboard-title text-[22px] text-center mb-3 mt-2 px-2 leading-normal">
-            Coach Portal – Client Plans
-          </h1>
-          <p className="text-sm text-slate-600 text-center">
-            Manage your clients' goals and action items.
-          </p>
-        </header>
+  // -----------------------------------------------------------------
+  // CRUD HANDLERS: Goals
+  // -----------------------------------------------------------------
+  function handleAddGoal() {
+    if (!selectedClient || !newGoal.trim()) return;
+    const updated = { ...selectedClient };
+    updated.plan.goals = [...(updated.plan.goals || []), newGoal.trim()];
+    handleSaveToLocalClient(updated);
+    setNewGoal("");
+  }
+  function handleRemoveGoal(index: number) {
+    if (!selectedClient) return;
+    const updated = { ...selectedClient };
+    updated.plan.goals = (updated.plan.goals || []).filter((_, i) => i !== index);
+    handleSaveToLocalClient(updated);
+  }
 
-        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)] gap-6">
-            <section className="rounded-2xl bg-white border border-slate-100 p-4 flex flex-col shadow-sm">
-              <div className="flex items-center justify-between mb-4 py-1">
-                <h2 className="text-sm font-semibold text-slate-800 leading-relaxed">Your Clients</h2>
-                <span className="text-sm text-slate-600">
-                  {clients.length} total
-                </span>
-              </div>
+  // -----------------------------------------------------------------
+  // CRUD HANDLERS: Diet Goals (the 11 core diet approaches)
+  // -----------------------------------------------------------------
+  function toggleDietGoal(key: DietGoalKey) {
+    if (!selectedClient) return;
+    const updated = { ...selectedClient };
+    const current = updated.plan.dietGoals || [];
+    if (current.includes(key)) {
+      updated.plan.dietGoals = current.filter((k) => k !== key);
+    } else {
+      updated.plan.dietGoals = [...current, key];
+    }
+    handleSaveToLocalClient(updated);
+  }
 
-              <div className="mb-3">
+  // -----------------------------------------------------------------
+  // CRUD HANDLERS: Diet Patterns
+  // -----------------------------------------------------------------
+  function handleAddDiet() {
+    if (!selectedClient || !newDietName.trim()) return;
+    const updated = { ...selectedClient };
+    const newDiet: DietTag = {
+      id: makeId("diet"),
+      name: newDietName.trim(),
+      description: newDietDesc.trim() || undefined,
+    };
+    updated.plan.diets = [...(updated.plan.diets || []), newDiet];
+    handleSaveToLocalClient(updated);
+    setNewDietName("");
+    setNewDietDesc("");
+  }
+  function handleAddDietFromTemplate(template: DietTag) {
+    if (!selectedClient) return;
+    const updated = { ...selectedClient };
+    const newDiet: DietTag = {
+      id: makeId("diet"),
+      name: template.name,
+      description: template.description,
+    };
+    updated.plan.diets = [...(updated.plan.diets || []), newDiet];
+    handleSaveToLocalClient(updated);
+  }
+  function handleRemoveDiet(dietId: string) {
+    if (!selectedClient) return;
+    const updated = { ...selectedClient };
+    updated.plan.diets = (updated.plan.diets || []).filter(
+      (d) => d.id !== dietId
+    );
+    handleSaveToLocalClient(updated);
+  }
+
+  // -----------------------------------------------------------------
+  // CRUD HANDLERS: Actions
+  // -----------------------------------------------------------------
+  function handleAddAction() {
+    if (!selectedClient || !newActionTitle.trim()) return;
+    const updated = { ...selectedClient };
+    const newAction = {
+      id: makeId("action"),
+      type: newActionType,
+      title: newActionTitle.trim(),
+      status: "pending" as const,
+      description: newActionDescription.trim() || undefined,
+      meta: newActionMeta.trim() || undefined,
+    };
+    updated.plan.actions = [...(updated.plan.actions || []), newAction];
+    handleSaveToLocalClient(updated);
+    setNewActionTitle("");
+    setNewActionDescription("");
+    setNewActionMeta("");
+  }
+  function handleRemoveAction(actionId: string) {
+    if (!selectedClient) return;
+    const updated = { ...selectedClient };
+    updated.plan.actions = (updated.plan.actions || []).filter(
+      (a) => a.id !== actionId
+    );
+    handleSaveToLocalClient(updated);
+  }
+  function handleToggleActionStatus(actionId: string) {
+    if (!selectedClient) return;
+    const updated = { ...selectedClient };
+    updated.plan.actions = (updated.plan.actions || []).map((a) =>
+      a.id === actionId
+        ? {
+            ...a,
+            status:
+              a.status === "pending"
+                ? "in_progress"
+                : a.status === "in_progress"
+                ? "completed"
+                : "pending",
+          }
+        : a
+    );
+    handleSaveToLocalClient(updated);
+  }
+
+  // -----------------------------------------------------------------
+  // CRUD HANDLERS: Shopping List
+  // -----------------------------------------------------------------
+  function handleAddShoppingItem() {
+    if (!selectedClient || !newShoppingName.trim()) return;
+    const updated = { ...selectedClient };
+    const newItem: ShoppingListItem = {
+      id: makeId("shop"),
+      name: newShoppingName.trim(),
+      category: newShoppingCategory,
+      quantity: newShoppingQty.trim() || undefined,
+      note: newShoppingNote.trim() || undefined,
+      optional: newShoppingOptional,
+    };
+    updated.plan.shoppingList = [...(updated.plan.shoppingList || []), newItem];
+    handleSaveToLocalClient(updated);
+    setNewShoppingName("");
+    setNewShoppingQty("");
+    setNewShoppingNote("");
+    setNewShoppingOptional(false);
+  }
+  function handleRemoveShoppingItem(itemId: string) {
+    if (!selectedClient) return;
+    const updated = { ...selectedClient };
+    updated.plan.shoppingList = (updated.plan.shoppingList || []).filter(
+      (i) => i.id !== itemId
+    );
+    handleSaveToLocalClient(updated);
+  }
+
+  // -----------------------------------------------------------------
+  // SAVE (local state)
+  // -----------------------------------------------------------------
+  function handleSaveToLocalClient(updated: CoachClient) {
+    setClients((prev) => prev.map((c) => (c.id === updated.id ? updated : c)));
+    setSelectedClient(updated);
+  }
+
+  // -----------------------------------------------------------------
+  // RENDER HELPERS: Goals & Diets Tab
+  // -----------------------------------------------------------------
+  function renderGoalsAndDiets() {
+    if (!selectedClient) return null;
+    return (
+      <div className="space-y-6">
+        {/* 1) Goals */}
+        <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-lg font-bold text-gray-800">Goals</h3>
+            <button
+              onClick={() => setEditingGoals(!editingGoals)}
+              className="text-xs px-3 py-3 bg-blue-600 text-white rounded hover:bg-blue-700"
+            >
+              {editingGoals ? "Done" : "Edit"}
+            </button>
+          </div>
+          <ul className="space-y-1 text-sm">
+            {(selectedClient.plan.goals || []).length === 0 ? (
+              <li className="text-gray-400 italic">No goals set</li>
+            ) : (
+              (selectedClient.plan.goals || []).map((g, idx) => (
+                <li
+                  key={idx}
+                  className="flex items-center justify-between"
+                >
+                  <span>• {g}</span>
+                  {editingGoals && (
+                    <button
+                      onClick={() => handleRemoveGoal(idx)}
+                      className="ml-2 text-xs text-red-600 hover:underline"
+                    >
+                      Remove
+                    </button>
+                  )}
+                </li>
+              ))
+            )}
+          </ul>
+          {editingGoals && (
+            <div className="mt-3 flex gap-2">
+              <input
+                type="text"
+                placeholder="New goal..."
+                value={newGoal}
+                onChange={(e) => setNewGoal(e.target.value)}
+                className="flex-1 px-2 py-1 border border-gray-300 rounded text-sm"
+              />
+              <button
+                onClick={handleAddGoal}
+                className="text-xs px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700"
+              >
+                Add
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* 2) Diet Goals (11 core approaches) */}
+        <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-lg font-bold text-gray-800">
+              Diet Goals (Approach)
+            </h3>
+            <button
+              onClick={() => setEditingDietGoals(!editingDietGoals)}
+              className="text-xs px-3 py-3 bg-blue-600 text-white rounded hover:bg-blue-700"
+            >
+              {editingDietGoals ? "Done" : "Edit"}
+            </button>
+          </div>
+
+          {!editingDietGoals ? (
+            <div className="text-sm space-y-1">
+              {(selectedClient.plan.dietGoals || []).length === 0 ? (
+                <p className="text-gray-400 italic">
+                  No diet goals selected
+                </p>
+              ) : (
+                (selectedClient.plan.dietGoals || []).map((key) => {
+                  const found = ALL_DIET_GOALS.find(
+                    (dg) => dg.key === key
+                  );
+                  return (
+                    <div key={key} className="flex items-start space-x-1">
+                      <span className="font-semibold">•</span>
+                      <span>
+                        {found?.label} – {found?.description}
+                      </span>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2">
+              {ALL_DIET_GOALS.map((dg) => {
+                const isSelected = (
+                  selectedClient.plan.dietGoals || []
+                ).includes(dg.key);
+                return (
+                  <button
+                    key={dg.key}
+                    onClick={() => toggleDietGoal(dg.key)}
+                    className={`text-left p-2 rounded border text-xs transition ${
+                      isSelected
+                        ? "bg-blue-50 border-blue-400 font-semibold"
+                        : "bg-white border-gray-200 hover:bg-gray-50"
+                    }`}
+                  >
+                    <div className="font-semibold">{dg.label}</div>
+                    <div className="text-gray-600 text-xs">
+                      {dg.description}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* 3) Diet Patterns (custom/quick-add) */}
+        <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-lg font-bold text-gray-800">
+              Diet Patterns
+            </h3>
+            <button
+              onClick={() => setEditingDiets(!editingDiets)}
+              className="text-xs px-3 py-3 bg-blue-600 text-white rounded hover:bg-blue-700"
+            >
+              {editingDiets ? "Done" : "Edit"}
+            </button>
+          </div>
+          <ul className="space-y-2 text-sm">
+            {(selectedClient.plan.diets || []).length === 0 ? (
+              <li className="text-gray-400 italic">
+                No diet patterns yet
+              </li>
+            ) : (
+              (selectedClient.plan.diets || []).map((d) => (
+                <li
+                  key={d.id}
+                  className="flex items-start justify-between"
+                >
+                  <div>
+                    <div className="font-semibold">{d.name}</div>
+                    {d.description && (
+                      <div className="text-gray-600 text-xs">
+                        {d.description}
+                      </div>
+                    )}
+                  </div>
+                  {editingDiets && (
+                    <button
+                      onClick={() => handleRemoveDiet(d.id)}
+                      className="ml-2 text-xs text-red-600 hover:underline"
+                    >
+                      Remove
+                    </button>
+                  )}
+                </li>
+              ))
+            )}
+          </ul>
+          {editingDiets && (
+            <div className="mt-4 space-y-2">
+              <div className="flex gap-2">
                 <input
                   type="text"
-                  placeholder="Search by name or email"
-                  className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Diet name..."
+                  value={newDietName}
+                  onChange={(e) => setNewDietName(e.target.value)}
+                  className="flex-1 px-2 py-1 border border-gray-300 rounded text-sm"
                 />
+                <button
+                  onClick={handleAddDiet}
+                  className="text-xs px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700"
+                >
+                  Add
+                </button>
               </div>
+              <input
+                type="text"
+                placeholder="Description (optional)..."
+                value={newDietDesc}
+                onChange={(e) => setNewDietDesc(e.target.value)}
+                className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+              />
+              <div className="text-xs text-gray-600 mt-2">
+                Quick-add templates:
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                {commonDietOptions.map((opt) => (
+                  <button
+                    key={opt.id}
+                    onClick={() => handleAddDietFromTemplate(opt)}
+                    className="text-left p-2 bg-gray-50 border border-gray-200 rounded hover:bg-gray-100 text-xs"
+                  >
+                    <div className="font-semibold">{opt.name}</div>
+                    <div className="text-gray-600 text-xs">
+                      {opt.description}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
 
-              <div className="flex-1 overflow-y-auto pr-1 space-y-2">
-                {filteredClients.map((client) => {
-                  const active = client.id === selectedClientId;
-                  const statusLabel =
-                    client.status === "active"
-                      ? "Active"
-                      : client.status === "paused"
-                      ? "Paused"
-                      : "Prospect";
-
-                  return (
-                    <button
-                      key={client.id}
-                      type="button"
-                      onClick={() => setSelectedClientId(client.id)}
-                      className={`w-full text-left rounded-xl px-3 py-3 text-sm border transition-colors ${
-                        active
-                          ? "border-blue-500 bg-blue-50"
-                          : "border-slate-100 bg-white hover:bg-slate-50"
+  // -----------------------------------------------------------------
+  // RENDER HELPERS: Actions Tab
+  // -----------------------------------------------------------------
+  function renderActions() {
+    if (!selectedClient) return null;
+    return (
+      <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-lg font-bold text-gray-800">Actions</h3>
+          <button
+            onClick={() => setEditingActions(!editingActions)}
+            className="text-xs px-3 py-3 bg-blue-600 text-white rounded hover:bg-blue-700"
+          >
+            {editingActions ? "Done" : "Edit"}
+          </button>
+        </div>
+        <ul className="space-y-2 text-sm">
+          {(selectedClient.plan.actions || []).length === 0 ? (
+            <li className="text-gray-400 italic">No actions yet</li>
+          ) : (
+            (selectedClient.plan.actions || []).map((a) => (
+              <li
+                key={a.id}
+                className="flex items-start justify-between border-b border-gray-100 pb-2"
+              >
+                <div className="flex-1">
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold">{a.title}</span>
+                    <span
+                      className={`text-xs px-2 py-0.5 rounded ${
+                        a.status === "completed"
+                          ? "bg-green-100 text-green-800"
+                          : a.status === "in_progress"
+                          ? "bg-yellow-100 text-yellow-800"
+                          : "bg-gray-100 text-gray-700"
                       }`}
                     >
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <div className="font-medium text-slate-800">{client.name}</div>
-                          <div className="text-xs text-slate-600">
-                            {client.email}
-                          </div>
-                        </div>
-                        <div className="text-right text-xs">
-                          <div className="inline-flex items-center rounded-full border px-2 py-1 text-xs border-slate-200 text-slate-600 bg-slate-50">
-                            {statusLabel}
-                          </div>
-                          {client.goal && (
-                            <div className="mt-1 text-slate-500">{client.goal}</div>
-                          )}
-                        </div>
-                      </div>
+                      {a.status}
+                    </span>
+                    <span className="text-xs text-gray-500">
+                      [{a.type}]
+                    </span>
+                  </div>
+                  {a.description && (
+                    <div className="text-gray-600 text-xs mt-1">
+                      {a.description}
+                    </div>
+                  )}
+                  {a.meta && (
+                    <div className="text-gray-500 italic text-xs mt-1">
+                      Frequency: {a.meta}
+                    </div>
+                  )}
+                </div>
+                {editingActions && (
+                  <div className="flex gap-2 ml-2">
+                    <button
+                      onClick={() => handleToggleActionStatus(a.id)}
+                      className="text-xs text-blue-600 hover:underline"
+                    >
+                      ⟳
                     </button>
-                  );
-                })}
-              </div>
-            </section>
-
-            {selectedClient && (
-              <section className="rounded-2xl bg-white border border-slate-100 p-4 flex flex-col gap-4 shadow-sm">
-                <div className="flex items-center justify-between py-1">
-                  <div>
-                    <h2 className="text-sm font-semibold text-slate-800 leading-relaxed">{selectedClient.name}</h2>
-                    <p className="text-sm text-slate-600">
-                      {selectedClient.email}
-                      {selectedClient.goal ? ` · Goal: ${selectedClient.goal}` : ""}
-                    </p>
+                    <button
+                      onClick={() => handleRemoveAction(a.id)}
+                      className="text-xs text-red-600 hover:underline"
+                    >
+                      Remove
+                    </button>
                   </div>
+                )}
+              </li>
+            ))
+          )}
+        </ul>
+        {editingActions && (
+          <div className="mt-4 space-y-2">
+            <select
+              value={newActionType}
+              onChange={(e) =>
+                setNewActionType(e.target.value as ActionType)
+              }
+              className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+            >
+              <option value="workout">Workout</option>
+              <option value="meal">Meal</option>
+              <option value="hydration">Hydration</option>
+              <option value="log">Log</option>
+              <option value="habit">Habit</option>
+              <option value="checkin">Check-in</option>
+              <option value="education">Education</option>
+              <option value="custom">Custom</option>
+            </select>
+            <input
+              type="text"
+              placeholder="Action title..."
+              value={newActionTitle}
+              onChange={(e) => setNewActionTitle(e.target.value)}
+              className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+            />
+            <input
+              type="text"
+              placeholder="Description (optional)..."
+              value={newActionDescription}
+              onChange={(e) => setNewActionDescription(e.target.value)}
+              className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+            />
+            <input
+              type="text"
+              placeholder="Frequency (e.g. daily, 3x/week)..."
+              value={newActionMeta}
+              onChange={(e) => setNewActionMeta(e.target.value)}
+              className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+            />
+            <button
+              onClick={handleAddAction}
+              className="w-full text-xs px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700"
+            >
+              Add Action
+            </button>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // -----------------------------------------------------------------
+  // RENDER HELPERS: Shopping Tab
+  // -----------------------------------------------------------------
+  function renderShopping() {
+    if (!selectedClient) return null;
+    return (
+      <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-lg font-bold text-gray-800">
+            Shopping List
+          </h3>
+          <button
+            onClick={() => setEditingShopping(!editingShopping)}
+            className="text-xs px-3 py-3 bg-blue-600 text-white rounded hover:bg-blue-700"
+          >
+            {editingShopping ? "Done" : "Edit"}
+          </button>
+        </div>
+        <ul className="space-y-2 text-sm">
+          {(selectedClient.plan.shoppingList || []).length === 0 ? (
+            <li className="text-gray-400 italic">
+              No items on list yet
+            </li>
+          ) : (
+            (selectedClient.plan.shoppingList || []).map((item) => (
+              <li
+                key={item.id}
+                className="flex items-start justify-between border-b border-gray-100 pb-2"
+              >
+                <div className="flex-1">
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold">{item.name}</span>
+                    <span className="text-xs text-gray-500">
+                      [{item.category}]
+                    </span>
+                    {item.optional && (
+                      <span className="text-xs italic text-gray-400">
+                        (optional)
+                      </span>
+                    )}
+                  </div>
+                  {item.quantity && (
+                    <div className="text-xs text-gray-600 mt-1">
+                      Qty: {item.quantity}
+                    </div>
+                  )}
+                  {item.note && (
+                    <div className="text-xs text-gray-500 italic mt-1">
+                      {item.note}
+                    </div>
+                  )}
+                </div>
+                {editingShopping && (
                   <button
-                    type="button"
-                    onClick={handleSaveToLocalClient}
-                    className="rounded-lg bg-blue-500 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-600 transition-colors"
+                    onClick={() => handleRemoveShoppingItem(item.id)}
+                    className="ml-2 text-xs text-red-600 hover:underline"
                   >
-                    Save to local state
+                    Remove
                   </button>
-                </div>
+                )}
+              </li>
+            ))
+          )}
+        </ul>
+        {editingShopping && (
+          <div className="mt-4 space-y-2">
+            <input
+              type="text"
+              placeholder="Item name..."
+              value={newShoppingName}
+              onChange={(e) => setNewShoppingName(e.target.value)}
+              className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+            />
+            <select
+              value={newShoppingCategory}
+              onChange={(e) =>
+                setNewShoppingCategory(
+                  e.target.value as ShoppingListCategory
+                )
+              }
+              className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+            >
+              <option value="protein">Protein</option>
+              <option value="produce">Produce</option>
+              <option value="grains">Grains</option>
+              <option value="dairy">Dairy</option>
+              <option value="pantry">Pantry</option>
+              <option value="snacks">Snacks</option>
+              <option value="drinks">Drinks</option>
+              <option value="other">Other</option>
+            </select>
+            <input
+              type="text"
+              placeholder="Quantity (optional)..."
+              value={newShoppingQty}
+              onChange={(e) => setNewShoppingQty(e.target.value)}
+              className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+            />
+            <input
+              type="text"
+              placeholder="Note (optional)..."
+              value={newShoppingNote}
+              onChange={(e) => setNewShoppingNote(e.target.value)}
+              className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+            />
+            <label className="flex items-center space-x-2 text-xs">
+              <input
+                type="checkbox"
+                checked={newShoppingOptional}
+                onChange={(e) =>
+                  setNewShoppingOptional(e.target.checked)
+                }
+              />
+              <span>Mark as optional</span>
+            </label>
+            <button
+              onClick={handleAddShoppingItem}
+              className="w-full text-xs px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700"
+            >
+              Add Item
+            </button>
+          </div>
+        )}
+      </div>
+    );
+  }
 
-                <div className="grid gap-4 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1.2fr)]">
-                  <div className="rounded-2xl border border-slate-100 bg-slate-50/70 p-4 flex flex-col">
-                    <h3 className="text-sm font-semibold text-slate-800 mb-3 leading-relaxed">
-                      Goals (priorities)
-                    </h3>
-                    <div className="space-y-2 overflow-y-auto pr-1">
-                      {(editingGoals ?? []).length === 0 && (
-                        <p className="text-sm text-slate-500">
-                          No goals added yet. Use this to define what success looks
-                          like for this client.
-                        </p>
-                      )}
-                      {(editingGoals ?? []).map((goal) => (
-                        <div
-                          key={goal.id}
-                          className="rounded-xl bg-white border border-slate-100 px-3 py-3 text-sm flex justify-between gap-2 shadow-sm"
-                        >
-                          <div className="flex gap-2">
-                            {goal.icon && (
-                              <span className="text-lg leading-none mt-0.5">
-                                {goal.icon}
-                              </span>
-                            )}
-                            <div>
-                              <div className="font-semibold text-slate-800">
-                                {goal.title}
-                              </div>
-                              {goal.description && (
-                                <p className="text-slate-500 mt-1 text-sm">
-                                  {goal.description}
-                                </p>
-                              )}
-                            </div>
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveGoal(goal.id)}
-                            className="text-xs text-red-500 hover:text-red-600"
-                          >
-                            Remove
-                          </button>
-                        </div>
-                      ))}
+  // -----------------------------------------------------------------
+  // RENDER HELPERS: Preview Tab (MyProgressDashboard placeholder)
+  // -----------------------------------------------------------------
+  function renderPreview() {
+    if (!selectedClient) return null;
+    return (
+      <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
+        <h3 className="text-lg font-bold text-gray-800 mb-3">
+          Client View Preview
+        </h3>
+        <p className="text-sm text-gray-600">
+          Here you could embed the <code>MyProgressDashboard</code> component
+          to show how the client sees their plan.
+        </p>
+      </div>
+    );
+  }
+
+  // -----------------------------------------------------------------
+  // MAIN RENDER
+  // -----------------------------------------------------------------
+  return (
+    <div
+      className="min-h-screen p-6 overflow-auto"
+      style={{ backgroundColor: "#f0f7ff" }}
+    >
+      <div className="max-w-7xl mx-auto">
+        <h1 className="text-3xl font-bold text-gray-800 mb-6">
+          Coach Portal – Client Plans
+        </h1>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* LEFT: Client List */}
+          <div className="lg:col-span-1 bg-white rounded-xl p-4 shadow-sm border border-gray-200">
+            <h2 className="text-xl font-bold text-gray-800 mb-4">Clients</h2>
+            <input
+              type="text"
+              placeholder="Search clients..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded text-sm mb-4"
+            />
+            <ul className="space-y-2">
+              {filteredClients.map((c) => (
+                <li
+                  key={c.id}
+                  onClick={() => {
+                    setSelectedClient(c);
+                    setActiveTab("plan");
+                  }}
+                  className={`p-3 rounded-xl cursor-pointer transition ${
+                    selectedClient?.id === c.id
+                      ? "bg-blue-100 border border-blue-400"
+                      : "bg-gray-50 border border-gray-200 hover:bg-gray-100"
+                  }`}
+                >
+                  <div className="font-semibold text-sm">{c.name}</div>
+                  <div className="text-xs text-gray-600">{c.email}</div>
+                  {c.goal && (
+                    <div className="text-xs text-gray-500 italic mt-1">
+                      Goal: {c.goal}
                     </div>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </div>
 
-                    <div className="mt-3 border-t border-slate-200 pt-3 space-y-3 text-sm">
-                      <div>
-                        <label className="block text-xs text-slate-500 mb-1">
-                          Goal title
-                        </label>
-                        <input
-                          type="text"
-                          value={newGoalTitle}
-                          onChange={(e) => setNewGoalTitle(e.target.value)}
-                          placeholder="Example: Lose 10–15 lb in 12 weeks"
-                          className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs text-slate-500 mb-1">
-                          Description (optional)
-                        </label>
-                        <textarea
-                          value={newGoalDescription}
-                          onChange={(e) => setNewGoalDescription(e.target.value)}
-                          rows={2}
-                          className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs text-slate-500 mb-1">
-                          Icon (optional)
-                        </label>
-                        <input
-                          type="text"
-                          value={newGoalIcon}
-                          onChange={(e) => setNewGoalIcon(e.target.value)}
-                          placeholder="Example: 🎯"
-                          className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                      </div>
-                      <div className="flex justify-end">
-                        <button
-                          type="button"
-                          onClick={handleAddGoal}
-                          className="rounded-lg border border-blue-500 text-blue-700 px-4 py-2 text-sm font-semibold hover:bg-blue-50 transition-colors"
-                        >
-                          Add goal
-                        </button>
-                      </div>
-                    </div>
-                  </div>
+          {/* RIGHT: Details Panel with Tabs */}
+          <div className="lg:col-span-2 bg-white rounded-xl p-4 shadow-sm border border-gray-200">
+            {!selectedClient ? (
+              <p className="text-gray-500 italic">
+                Select a client to view/edit their plan
+              </p>
+            ) : (
+              <>
+                <h2 className="text-2xl font-bold text-gray-800 mb-4">
+                  {selectedClient.name}
+                </h2>
 
-                  <div className="rounded-2xl border border-slate-100 bg-slate-50/70 p-4 flex flex-col">
-                    <h3 className="text-sm font-semibold text-slate-800 mb-3 leading-relaxed">
-                      Daily action items
-                    </h3>
-
-                    <div className="space-y-2 overflow-y-auto pr-1">
-                      {(editingActions ?? []).length === 0 && (
-                        <p className="text-sm text-slate-500">
-                          No actions assigned. Add 2–5 clear steps for today or this
-                          week.
-                        </p>
-                      )}
-
-                      {(editingActions ?? []).map((action) => (
-                        <div
-                          key={action.id}
-                          className="rounded-xl bg-white border border-slate-100 px-3 py-3 text-sm flex justify-between gap-2 shadow-sm"
-                        >
-                          <div className="flex gap-2">
-                            <button
-                              type="button"
-                              onClick={() => handleToggleActionStatus(action.id)}
-                              className={`mt-0.5 h-4 w-4 rounded border ${
-                                action.status === "completed"
-                                  ? "bg-blue-500 border-blue-500"
-                                  : "border-slate-300 bg-white"
-                              }`}
-                            />
-                            <div>
-                              <div className="flex items-center gap-2">
-                                <span className="font-semibold text-slate-800">
-                                  {action.title}
-                                </span>
-                                <span className="text-xs uppercase tracking-wide text-slate-500">
-                                  {action.type}
-                                </span>
-                              </div>
-                              {action.description && (
-                                <p className="text-slate-500 mt-1 text-sm">
-                                  {action.description}
-                                </p>
-                              )}
-                              {action.meta && (
-                                <p className="text-xs text-slate-500 mt-1">
-                                  {action.meta}
-                                </p>
-                              )}
-                              <p className="text-xs text-slate-500 mt-1">
-                                Status:{" "}
-                                <span className="font-medium">
-                                  {action.status}
-                                </span>
-                              </p>
-                            </div>
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveAction(action.id)}
-                            className="text-xs text-red-500 hover:text-red-600"
-                          >
-                            Remove
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-
-                    <div className="mt-3 border-t border-slate-200 pt-3 space-y-3 text-sm">
-                      <div className="grid grid-cols-2 gap-3">
-                        <div>
-                          <label className="block text-xs text-slate-500 mb-1">
-                            Type
-                          </label>
-                          <select
-                            value={newActionType}
-                            onChange={(e) =>
-                              setNewActionType(e.target.value as ActionType)
-                            }
-                            className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          >
-                            <option value="workout">Workout</option>
-                            <option value="meal">Meal / food</option>
-                            <option value="hydration">Hydration</option>
-                            <option value="habit">Habit</option>
-                            <option value="log">Log / track</option>
-                            <option value="checkin">Check-in</option>
-                            <option value="education">Education</option>
-                            <option value="custom">Custom</option>
-                          </select>
-                        </div>
-                      </div>
-                      <div>
-                        <label className="block text-xs text-slate-500 mb-1">
-                          Title
-                        </label>
-                        <input
-                          type="text"
-                          value={newActionTitle}
-                          onChange={(e) => setNewActionTitle(e.target.value)}
-                          placeholder="Example: Walk 20–30 minutes after dinner"
-                          className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs text-slate-500 mb-1">
-                          Description (optional)
-                        </label>
-                        <textarea
-                          value={newActionDescription}
-                          onChange={(e) =>
-                            setNewActionDescription(e.target.value)
-                          }
-                          rows={2}
-                          className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs text-slate-500 mb-1">
-                          Meta (optional)
-                        </label>
-                        <input
-                          type="text"
-                          value={newActionMeta}
-                          onChange={(e) => setNewActionMeta(e.target.value)}
-                          placeholder='Example: "3 sets of 10", "4/6 cups"'
-                          className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                      </div>
-                      <div className="flex justify-end">
-                        <button
-                          type="button"
-                          onClick={handleAddAction}
-                          className="rounded-lg border border-blue-500 text-blue-700 px-4 py-2 text-sm font-semibold hover:bg-blue-50 transition-colors"
-                        >
-                          Add action
-                        </button>
-                      </div>
-                    </div>
+                {/* Tab Navigation */}
+                <div className="border-b border-gray-200 mb-4 overflow-x-auto">
+                  <div className="flex gap-1 min-w-max">
+                    <button
+                      onClick={() => setActiveTab("plan")}
+                      className={`px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold whitespace-nowrap transition-colors ${
+                        activeTab === "plan"
+                          ? "border-b-2 border-blue-600 text-blue-600"
+                          : "text-gray-600 hover:text-gray-800 hover:border-b-2 hover:border-gray-300"
+                      }`}
+                    >
+                      Goals & Diets
+                    </button>
+                    <button
+                      onClick={() => setActiveTab("actions")}
+                      className={`px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold whitespace-nowrap transition-colors ${
+                        activeTab === "actions"
+                          ? "border-b-2 border-blue-600 text-blue-600"
+                          : "text-gray-600 hover:text-gray-800 hover:border-b-2 hover:border-gray-300"
+                      }`}
+                    >
+                      Actions
+                    </button>
+                    <button
+                      onClick={() => setActiveTab("shopping")}
+                      className={`px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold whitespace-nowrap transition-colors ${
+                        activeTab === "shopping"
+                          ? "border-b-2 border-blue-600 text-blue-600"
+                          : "text-gray-600 hover:text-gray-800 hover:border-b-2 hover:border-gray-300"
+                      }`}
+                    >
+                      Shopping
+                    </button>
+                    <button
+                      onClick={() => setActiveTab("preview")}
+                      className={`px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold whitespace-nowrap transition-colors ${
+                        activeTab === "preview"
+                          ? "border-b-2 border-blue-600 text-blue-600"
+                          : "text-gray-600 hover:text-gray-800 hover:border-b-2 hover:border-gray-300"
+                      }`}
+                    >
+                      Client View
+                    </button>
                   </div>
                 </div>
 
-                <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-4">
-                  <p className="text-sm text-slate-600 mb-3">
-                    Preview of what this client will see in their dashboard:
-                  </p>
-                  <div className="border border-slate-100 rounded-2xl overflow-hidden bg-white shadow-sm">
-                    <MyProgressDashboard
-                      coach={{
-                        ...(selectedClient.plan ?? {}),
-                        priorities: editingGoals ?? [],
-                        actions: editingActions ?? [],
-                      }}
-                    />
-                  </div>
-                </div>
-              </section>
+                {/* Tab Content */}
+                {activeTab === "plan" && renderGoalsAndDiets()}
+                {activeTab === "actions" && renderActions()}
+                {activeTab === "shopping" && renderShopping()}
+                {activeTab === "preview" && renderPreview()}
+              </>
             )}
           </div>
+        </div>
       </div>
+    </div>
   );
-};
-
-export default CoachDashboard;
+}
