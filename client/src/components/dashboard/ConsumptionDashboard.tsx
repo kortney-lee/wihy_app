@@ -35,7 +35,7 @@ const ConsumptionDashboard: React.FC<ConsumptionDashboardProps> = ({
   onAnalyze,
   onUploadReceipt
 }) => {
-  const [activeSubTab, setActiveSubTab] = useState<'summary' | 'shopping' | 'receipts'>('summary');
+  const [activeSubTab, setActiveSubTab] = useState<'overview' | 'summary' | 'shopping' | 'receipts'>('overview');
   const [timeframe, setTimeframe] = useState<'day' | 'week' | 'month'>(period);
 
   // Temporary mock data – you'll swap this for real API data later
@@ -84,43 +84,149 @@ const ConsumptionDashboard: React.FC<ConsumptionDashboardProps> = ({
     </div>
   );
 
-  const renderSummary = () => (
-    <div className="consumption-summary-grid">
-      {/* Totals strip */}
-      <div className="consumption-summary-strip">
-        <div className="summary-card">
-          <div className="summary-label">Total Calories</div>
-          <div className="summary-value">
-            {mockTotals.calories.toLocaleString()} <span className="summary-unit">kcal</span>
-          </div>
-          <div className="summary-sub">
-            Target {mockTotals.target.toLocaleString()} kcal
-          </div>
-        </div>
-        <div className="summary-card">
-          <div className="summary-label">Meals Logged</div>
-          <div className="summary-value">{mockTotals.meals}</div>
-        </div>
-        <div className="summary-card">
-          <div className="summary-label">Items Logged</div>
-          <div className="summary-value">{mockTotals.items}</div>
-        </div>
-      </div>
+  const renderOverview = () => {
+    // When showing trends (week/month), exclude card summaries - only show charts
+    // When showing "Today", exclude trend charts - only show card summaries
+    const periodExclusions = timeframe === 'day' 
+      ? [
+          ChartType.CALORIES_CHART,
+          ChartType.NUTRITION_CHART,
+          ChartType.HYDRATION_CHART
+        ]
+      : [
+          ChartType.CALORIES,
+          ChartType.HYDRATION,
+          ChartType.NUTRITION_ANALYSIS,
+          ChartType.NUTRITION_GRADE_BADGE,
+          ChartType.VITAMIN_CONTENT,
+          ChartType.DAILY_VALUE_PROGRESS,
+          ChartType.NOVA_SCORE,
+          ChartType.NUTRITION_TRACKING,
+          ChartType.MACRONUTRIENTS
+        ];
 
-      {/* Charts – reuse existing nutrition layout */}
-      <div className="consumption-charts-section">
-        <DashboardCharts
-          period={timeframe}
-          maxCards={8}
-          showAllCharts={true}
-          // In the chartTypes config, you can make sure these are all nutrition/consumption related
-          excludeChartTypes={[ChartType.QUICK_INSIGHTS]}
-          isNutritionLayout={true}
-          onAnalyze={onAnalyze}
-        />
+    return (
+      <div className="consumption-overview-grid">
+        {/* Charts – show all consumption-related charts */}
+        <div className="consumption-charts-section">
+          <DashboardCharts
+            period={timeframe}
+            maxCards={20}
+            showAllCharts={true}
+            excludeChartTypes={[
+              ChartType.QUICK_INSIGHTS,
+              ChartType.MEMBERS_CARD,
+              ChartType.BMI_DOMAIN,
+              ChartType.HEALTH_RISK,
+              ChartType.HEALTH_SCORE,
+              ChartType.CURRENT_WEIGHT,
+              ChartType.WEIGHT_TREND,
+              ChartType.ACTIVITY,
+              ChartType.STEPS,
+              ChartType.STEPS_CHART,
+              ChartType.ACTIVE_MINUTES,
+              ChartType.SLEEP,
+              ChartType.BLOOD_PRESSURE,
+              ChartType.HEART_RATE,
+              ChartType.EXERCISE,
+              ChartType.DOPAMINE,
+              ChartType.MOOD_CHART,
+              ChartType.RESEARCH_QUALITY,
+              ChartType.PUBLICATION_TIMELINE,
+              ChartType.STUDY_TYPE_DISTRIBUTION,
+              ChartType.RESULT_QUALITY_PIE,
+              ChartType.BMI_BODY_FAT,
+              ChartType.SLEEP_CHART,
+              ChartType.HEALTH_RISK_CHART,
+              ChartType.NUTRITION_TRACKING_CHART,
+              ChartType.NUTRITION,
+              ...periodExclusions
+            ]}
+            onAnalyze={onAnalyze}
+          />
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
+
+  const renderSummary = () => {
+    // Intake summary should always exclude card summaries - only show trend charts
+    const periodExclusions = [
+      ChartType.CALORIES,
+      ChartType.HYDRATION,
+      ChartType.NUTRITION_ANALYSIS,
+      ChartType.NUTRITION_GRADE_BADGE,
+      ChartType.VITAMIN_CONTENT,
+      ChartType.DAILY_VALUE_PROGRESS,
+      ChartType.NOVA_SCORE,
+      ChartType.NUTRITION_TRACKING,
+      ChartType.MACRONUTRIENTS
+    ];
+
+    return (
+      <div className="consumption-summary-grid">
+        {/* Totals strip */}
+        <div className="consumption-summary-strip">
+          <div className="summary-card">
+            <div className="summary-label">Total Calories</div>
+            <div className="summary-value">
+              {mockTotals.calories.toLocaleString()} <span className="summary-unit">kcal</span>
+            </div>
+            <div className="summary-sub">
+              Target {mockTotals.target.toLocaleString()} kcal
+            </div>
+          </div>
+          <div className="summary-card">
+            <div className="summary-label">Meals Logged</div>
+            <div className="summary-value">{mockTotals.meals}</div>
+          </div>
+          <div className="summary-card">
+            <div className="summary-label">Items Logged</div>
+            <div className="summary-value">{mockTotals.items}</div>
+          </div>
+        </div>
+
+        {/* Charts – reuse existing nutrition layout */}
+        <div className="consumption-charts-section">
+          <DashboardCharts
+            period={timeframe}
+            maxCards={8}
+            showAllCharts={true}
+            excludeChartTypes={[
+              ChartType.QUICK_INSIGHTS,
+              ChartType.MEMBERS_CARD,
+              ChartType.BMI_DOMAIN,
+              ChartType.HEALTH_RISK,
+              ChartType.HEALTH_SCORE,
+              ChartType.CURRENT_WEIGHT,
+              ChartType.WEIGHT_TREND,
+              ChartType.ACTIVITY,
+              ChartType.STEPS,
+              ChartType.STEPS_CHART,
+              ChartType.ACTIVE_MINUTES,
+              ChartType.SLEEP,
+              ChartType.BLOOD_PRESSURE,
+              ChartType.HEART_RATE,
+              ChartType.EXERCISE,
+              ChartType.DOPAMINE,
+              ChartType.MOOD_CHART,
+              ChartType.RESEARCH_QUALITY,
+              ChartType.PUBLICATION_TIMELINE,
+              ChartType.STUDY_TYPE_DISTRIBUTION,
+              ChartType.RESULT_QUALITY_PIE,
+              ChartType.BMI_BODY_FAT,
+              ChartType.SLEEP_CHART,
+              ChartType.HEALTH_RISK_CHART,
+              ChartType.NUTRITION_TRACKING_CHART,
+              ChartType.NUTRITION,
+              ...periodExclusions
+            ]}
+            onAnalyze={onAnalyze}
+          />
+        </div>
+      </div>
+    );
+  };
 
   const renderShoppingList = () => (
     <div className="consumption-shopping-layout">
@@ -245,7 +351,7 @@ const ConsumptionDashboard: React.FC<ConsumptionDashboardProps> = ({
 
   return (
     <div className="consumption-dashboard">
-      <div className="consumption-dashboard-header">
+      <div className="consumption-dashboard-header" style={{ flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
         <div>
           <h1>Consumption & Shopping</h1>
           <p className="consumption-subtext">
@@ -256,6 +362,12 @@ const ConsumptionDashboard: React.FC<ConsumptionDashboardProps> = ({
       </div>
 
       <div className="consumption-subtabs">
+        <button
+          className={`subtab-btn ${activeSubTab === 'overview' ? 'active' : ''}`}
+          onClick={() => setActiveSubTab('overview')}
+        >
+          Overview
+        </button>
         <button
           className={`subtab-btn ${activeSubTab === 'summary' ? 'active' : ''}`}
           onClick={() => setActiveSubTab('summary')}
@@ -277,6 +389,7 @@ const ConsumptionDashboard: React.FC<ConsumptionDashboardProps> = ({
       </div>
 
       <div className="consumption-content">
+        {activeSubTab === 'overview' && renderOverview()}
         {activeSubTab === 'summary' && renderSummary()}
         {activeSubTab === 'shopping' && renderShoppingList()}
         {activeSubTab === 'receipts' && renderReceipts()}
