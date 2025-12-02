@@ -2,7 +2,6 @@ import React from 'react';
 import DashboardCharts from '../charts/grids/DashboardCharts';
 import { ChartType } from '../charts/chartTypes';
 import ResearchPanel from './ResearchPanel';
-import '../../styles/research.css';
 
 interface ResearchDashboardProps {
   period: 'day' | 'week' | 'month';
@@ -18,12 +17,11 @@ const ResearchDashboard: React.FC<ResearchDashboardProps> = ({
   windowWidth
 }) => {
   return (
-    <div className="research-dashboard">
+    <div className="w-full p-0 m-0">
       <h1
-        className="dashboard-title"
+        className="text-3xl font-semibold text-gray-900 text-center mb-3 mt-2.5 px-2"
         style={{
           fontSize: windowWidth < 768 ? '22px' : '28px',
-          textAlign: 'center',
           marginBottom: windowWidth < 768 ? '8px' : '12px',
           marginTop: windowWidth < 768 ? '8px' : '10px',
           padding: windowWidth < 768 ? '0 8px' : '0'

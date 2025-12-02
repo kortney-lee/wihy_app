@@ -487,7 +487,7 @@ export default function CoachDashboard() {
             <h3 className="text-lg font-bold text-gray-800">Goals</h3>
             <button
               onClick={() => setEditingGoals(!editingGoals)}
-              className="text-xs px-3 py-3 bg-blue-600 text-white rounded hover:bg-blue-700"
+              className="text-xs px-3 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-700"
             >
               {editingGoals ? "Done" : "Edit"}
             </button>
@@ -525,7 +525,7 @@ export default function CoachDashboard() {
               />
               <button
                 onClick={handleAddGoal}
-                className="text-xs px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700"
+                className="text-xs px-3 py-1 bg-green-600 text-white rounded-full hover:bg-green-700"
               >
                 Add
               </button>
@@ -541,7 +541,7 @@ export default function CoachDashboard() {
             </h3>
             <button
               onClick={() => setEditingDietGoals(!editingDietGoals)}
-              className="text-xs px-3 py-3 bg-blue-600 text-white rounded hover:bg-blue-700"
+              className="text-xs px-3 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-700"
             >
               {editingDietGoals ? "Done" : "Edit"}
             </button>
@@ -604,7 +604,7 @@ export default function CoachDashboard() {
             </h3>
             <button
               onClick={() => setEditingDiets(!editingDiets)}
-              className="text-xs px-3 py-3 bg-blue-600 text-white rounded hover:bg-blue-700"
+              className="text-xs px-3 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-700"
             >
               {editingDiets ? "Done" : "Edit"}
             </button>
@@ -652,7 +652,7 @@ export default function CoachDashboard() {
                 />
                 <button
                   onClick={handleAddDiet}
-                  className="text-xs px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700"
+                  className="text-xs px-3 py-1 bg-green-600 text-white rounded-full hover:bg-green-700"
                 >
                   Add
                 </button>
@@ -699,7 +699,7 @@ export default function CoachDashboard() {
           <h3 className="text-lg font-bold text-gray-800">Actions</h3>
           <button
             onClick={() => setEditingActions(!editingActions)}
-            className="text-xs px-3 py-3 bg-blue-600 text-white rounded hover:bg-blue-700"
+            className="text-xs px-3 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-700"
           >
             {editingActions ? "Done" : "Edit"}
           </button>
@@ -803,7 +803,7 @@ export default function CoachDashboard() {
             />
             <button
               onClick={handleAddAction}
-              className="w-full text-xs px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700"
+              className="w-full text-xs px-3 py-1 bg-green-600 text-white rounded-full hover:bg-green-700"
             >
               Add Action
             </button>
@@ -826,7 +826,7 @@ export default function CoachDashboard() {
           </h3>
           <button
             onClick={() => setEditingShopping(!editingShopping)}
-            className="text-xs px-3 py-3 bg-blue-600 text-white rounded hover:bg-blue-700"
+            className="text-xs px-3 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-700"
           >
             {editingShopping ? "Done" : "Edit"}
           </button>
@@ -930,7 +930,7 @@ export default function CoachDashboard() {
             </label>
             <button
               onClick={handleAddShoppingItem}
-              className="w-full text-xs px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700"
+              className="w-full text-xs px-3 py-1 bg-green-600 text-white rounded-full hover:bg-green-700"
             >
               Add Item
             </button>
@@ -1021,49 +1021,47 @@ export default function CoachDashboard() {
                 </h2>
 
                 {/* Tab Navigation */}
-                <div className="border-b border-gray-200 mb-4 overflow-x-auto">
-                  <div className="flex gap-1 min-w-max">
-                    <button
-                      onClick={() => setActiveTab("plan")}
-                      className={`px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold whitespace-nowrap transition-colors ${
-                        activeTab === "plan"
-                          ? "border-b-2 border-blue-600 text-blue-600"
-                          : "text-gray-600 hover:text-gray-800 hover:border-b-2 hover:border-gray-300"
-                      }`}
-                    >
-                      Goals & Diets
-                    </button>
-                    <button
-                      onClick={() => setActiveTab("actions")}
-                      className={`px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold whitespace-nowrap transition-colors ${
-                        activeTab === "actions"
-                          ? "border-b-2 border-blue-600 text-blue-600"
-                          : "text-gray-600 hover:text-gray-800 hover:border-b-2 hover:border-gray-300"
-                      }`}
-                    >
-                      Actions
-                    </button>
-                    <button
-                      onClick={() => setActiveTab("shopping")}
-                      className={`px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold whitespace-nowrap transition-colors ${
-                        activeTab === "shopping"
-                          ? "border-b-2 border-blue-600 text-blue-600"
-                          : "text-gray-600 hover:text-gray-800 hover:border-b-2 hover:border-gray-300"
-                      }`}
-                    >
-                      Shopping
-                    </button>
-                    <button
-                      onClick={() => setActiveTab("preview")}
-                      className={`px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold whitespace-nowrap transition-colors ${
-                        activeTab === "preview"
-                          ? "border-b-2 border-blue-600 text-blue-600"
-                          : "text-gray-600 hover:text-gray-800 hover:border-b-2 hover:border-gray-300"
-                      }`}
-                    >
-                      Client View
-                    </button>
-                  </div>
+                <div className="flex gap-1 mb-6 border-b border-gray-200 overflow-x-auto overflow-y-hidden scrollbar-hide">
+                  <button
+                    onClick={() => setActiveTab("plan")}
+                    className={`px-6 py-4 text-[15px] font-medium rounded-t-lg whitespace-nowrap leading-normal transition-colors ${
+                      activeTab === "plan"
+                        ? "bg-white text-gray-900 border border-gray-200 border-b-white -mb-px"
+                        : "bg-transparent text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                    }`}
+                  >
+                    Goals & Diets
+                  </button>
+                  <button
+                    onClick={() => setActiveTab("actions")}
+                    className={`px-6 py-4 text-[15px] font-medium rounded-t-lg whitespace-nowrap leading-normal transition-colors ${
+                      activeTab === "actions"
+                        ? "bg-white text-gray-900 border border-gray-200 border-b-white -mb-px"
+                        : "bg-transparent text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                    }`}
+                  >
+                    Actions
+                  </button>
+                  <button
+                    onClick={() => setActiveTab("shopping")}
+                    className={`px-6 py-4 text-[15px] font-medium rounded-t-lg whitespace-nowrap leading-normal transition-colors ${
+                      activeTab === "shopping"
+                        ? "bg-white text-gray-900 border border-gray-200 border-b-white -mb-px"
+                        : "bg-transparent text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                    }`}
+                  >
+                    Shopping
+                  </button>
+                  <button
+                    onClick={() => setActiveTab("preview")}
+                    className={`px-6 py-4 text-[15px] font-medium rounded-t-lg whitespace-nowrap leading-normal transition-colors ${
+                      activeTab === "preview"
+                        ? "bg-white text-gray-900 border border-gray-200 border-b-white -mb-px"
+                        : "bg-transparent text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                    }`}
+                  >
+                    Client View
+                  </button>
                 </div>
 
                 {/* Tab Content */}

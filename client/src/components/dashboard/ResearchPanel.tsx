@@ -191,6 +191,7 @@ const ResearchPanel: React.FC<ResearchPanelProps> = ({
 
   // Search
   const [searchResults, setSearchResults] = useState<ResearchSearchResult[]>([]);
+  const [hasSearched, setHasSearched] = useState(false);
   const [evidenceSummary, setEvidenceSummary] =
     useState<ResearchSearchResponse['qualityAssessment'] | null>(null);
   const [chartData, setChartData] =
@@ -241,6 +242,7 @@ const ResearchPanel: React.FC<ResearchPanelProps> = ({
     setLoading(true);
     setError(null);
     setSearchResults([]);
+    setHasSearched(true);
     setEvidenceSummary(null);
     setChartData(null);
     setTrends(null);
@@ -441,14 +443,7 @@ const ResearchPanel: React.FC<ResearchPanelProps> = ({
       }}
     >
       {/* Tab bar – simplified: Search, Article, Quality */}
-      <div
-        style={{
-          display: 'flex',
-          gap: 8,
-          borderBottom: '1px solid #e5e7eb',
-          padding: '4px 4px 0'
-        }}
-      >
+      <div className="flex gap-1 mb-6 border-b border-gray-200 overflow-x-auto overflow-y-hidden scrollbar-hide">
         {(() => {
           const tabs: { key: TabKey; label: string }[] = [
             { key: 'search', label: 'Search & Tools' },
@@ -467,17 +462,11 @@ const ResearchPanel: React.FC<ResearchPanelProps> = ({
               key={tab.key}
               type="button"
               onClick={() => setActiveTab(tab.key)}
-              style={{
-                border: 'none',
-                borderBottom:
-                  activeTab === tab.key ? '2px solid #16a34a' : '2px solid transparent',
-                background: 'transparent',
-                padding: '6px 10px',
-                fontSize: 12,
-                cursor: 'pointer',
-                color: activeTab === tab.key ? '#111827' : '#6b7280',
-                fontWeight: activeTab === tab.key ? 600 : 500
-              }}
+              className={`px-6 py-4 text-[15px] font-medium rounded-t-lg transition-all duration-200 relative leading-normal whitespace-nowrap ${
+                activeTab === tab.key
+                  ? 'bg-white text-gray-900 border border-gray-200 border-b-white -mb-px'
+                  : 'bg-transparent text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+              }`}
             >
               {tab.label}
             </button>
@@ -516,15 +505,21 @@ const ResearchPanel: React.FC<ResearchPanelProps> = ({
         {/* LEFT – always shows presets + tools, regardless of tab */}
         <div
           style={{
-            flex: windowWidth < 1024 ? '0 0 auto' : '0 0 420px',
+            flex: windowWidth < 1024 ? '0 0 auto' : hasSearched ? '0 0 420px' : '1',
             display: 'flex',
-            flexDirection: 'column',
-            gap: 16
+            flexDirection: hasSearched ? 'column' : 'row',
+            gap: 16,
+            maxWidth: hasSearched ? undefined : '1200px',
+            margin: hasSearched ? undefined : '0 auto',
+            flexWrap: hasSearched ? undefined : 'wrap'
           }}
         >
           {/* Search presets */}
-          <section className="research-card">
-            <h2>Quick Research Domains</h2>
+          <section className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm" style={{
+            flex: hasSearched ? undefined : '1',
+            minWidth: hasSearched ? undefined : '400px'
+          }}>
+            <h2 className="text-base font-semibold text-gray-900 mb-2">Quick Research Domains</h2>
             <div
               style={{
                 display: 'grid',
@@ -538,15 +533,7 @@ const ResearchPanel: React.FC<ResearchPanelProps> = ({
                   key={b.label}
                   onClick={b.onClick}
                   type="button"
-                  className="search-btn secondary"
-                  style={{
-                    textAlign: 'left',
-                    padding: '12px 14px',
-                    fontSize: 14,
-                    minWidth: 'unset',
-                    width: '100%',
-                    height: 'auto'
-                  }}
+                  className="px-4 py-3 bg-white text-gray-700 border border-gray-300 rounded-full hover:bg-gray-50 transition-colors font-medium text-sm text-center w-full"
                 >
                   {b.label}
                 </button>
@@ -555,8 +542,11 @@ const ResearchPanel: React.FC<ResearchPanelProps> = ({
           </section>
 
           {/* Tools: Claim verify + Trends + Quality topic */}
-          <section className="research-card">
-            <h2>Tools</h2>
+          <section className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm" style={{
+            flex: hasSearched ? undefined : '1',
+            minWidth: hasSearched ? undefined : '400px'
+          }}>
+            <h2 className="text-base font-semibold text-gray-900 mb-2">Tools</h2>
 
             {/* Claim verify */}
             <div style={{ marginBottom: 14 }}>
@@ -576,18 +566,25 @@ const ResearchPanel: React.FC<ResearchPanelProps> = ({
                   marginBottom: 6
                 }}
               />
-              <button
-                type="button"
-                onClick={runClaimVerify}
-                className="search-btn primary"
-                style={{
-                  fontSize: 13,
-                  padding: '8px 14px',
-                  minWidth: 'unset'
-                }}
-              >
-                Check claim (verify API)
-              </button>
+              <div className="inline-block border-2 border-transparent rounded-full relative overflow-hidden" style={{
+                background: 'linear-gradient(#fff, #fff) padding-box, linear-gradient(90deg, #fa5f06, #ffffff, #C0C0C0, #4cbb17) border-box',
+                backgroundSize: '100% 100%, 200% 100%',
+                animation: 'wiH-border-sweep 2.2s linear infinite'
+              }}>
+                <style>{`
+                  @keyframes wiH-border-sweep {
+                    0% { background-position: 0% 0%, 0% 0%; }
+                    100% { background-position: 0% 0%, 200% 0%; }
+                  }
+                `}</style>
+                <button
+                  type="button"
+                  onClick={runClaimVerify}
+                  className="bg-white text-black font-semibold px-6 py-2 text-sm rounded-full transition-all duration-200 whitespace-nowrap"
+                >
+                  Check claim (verify API)
+                </button>
+              </div>
             </div>
 
             {/* Trends */}
@@ -599,24 +596,14 @@ const ResearchPanel: React.FC<ResearchPanelProps> = ({
                 <button
                   type="button"
                   onClick={() => runTrends('3months', 'nutrition')}
-                  className="search-btn secondary"
-                  style={{
-                    fontSize: 13,
-                    padding: '8px 14px',
-                    minWidth: 'unset'
-                  }}
+                  className="px-3 py-2 bg-white text-gray-700 border border-gray-300 rounded-full hover:bg-gray-50 transition-colors font-medium text-sm"
                 >
                   3-month nutrition
                 </button>
                 <button
                   type="button"
                   onClick={() => runTrends('6months', 'lifestyle')}
-                  className="search-btn secondary"
-                  style={{
-                    fontSize: 13,
-                    padding: '8px 14px',
-                    minWidth: 'unset'
-                  }}
+                  className="px-3 py-2 bg-white text-gray-700 border border-gray-300 rounded-full hover:bg-gray-50 transition-colors font-medium text-sm"
                 >
                   6-month lifestyle
                 </button>
@@ -644,12 +631,7 @@ const ResearchPanel: React.FC<ResearchPanelProps> = ({
               <button
                 type="button"
                 onClick={runQuality}
-                className="search-btn secondary"
-                style={{
-                  fontSize: 13,
-                  padding: '8px 14px',
-                  minWidth: 'unset'
-                }}
+                className="px-4 py-2 bg-white text-gray-700 border border-gray-300 rounded-full hover:bg-gray-50 transition-colors font-medium text-sm"
               >
                 Get quality metrics
               </button>
@@ -658,8 +640,8 @@ const ResearchPanel: React.FC<ResearchPanelProps> = ({
         </div>
 
         {/* RIGHT – main content by tab */}
-        {activeTab === 'search' && (
-          <div className="research-content-card">
+        {activeTab === 'search' && hasSearched && (
+          <div className="flex-1 min-w-0 bg-white rounded-xl border border-gray-200 p-4 max-h-[640px] flex flex-col">
             {/* SEARCH RESULTS */}
             <div style={{ fontSize: 13, flex: 1, overflowY: 'auto' }}>
               <div
@@ -671,14 +653,6 @@ const ResearchPanel: React.FC<ResearchPanelProps> = ({
               >
                 Search Results
               </div>
-
-              {searchResults.length === 0 && (
-                <div style={{ color: '#6b7280', marginBottom: 12 }}>
-                  Use the presets on the left to pull RCTs, meta-analyses, or cohort
-                  studies. Click an article to open the full body with{' '}
-                  <code>/pmc/:pmcId/content</code>.
-                </div>
-              )}
 
               {searchResults.length > 0 && (
                 <ul
@@ -692,7 +666,7 @@ const ResearchPanel: React.FC<ResearchPanelProps> = ({
                   }}
                 >
                   {searchResults.map((r) => (
-                    <li key={r.pmcid} className="research-result-item">
+                    <li key={r.pmcid} className="p-2.5 rounded-lg border border-gray-200 bg-gray-50">
                       <div
                         style={{
                           fontWeight: 600,
@@ -772,12 +746,7 @@ const ResearchPanel: React.FC<ResearchPanelProps> = ({
                       <button
                         type="button"
                         onClick={() => loadArticleContent(r.pmcid)}
-                        className="search-btn primary"
-                        style={{
-                          fontSize: 13,
-                          padding: '8px 14px',
-                          minWidth: 'unset'
-                        }}
+                        className="px-4 py-2 bg-white text-gray-700 border border-gray-300 rounded-full hover:bg-gray-50 transition-colors font-medium text-sm"
                       >
                         View full article
                       </button>
@@ -838,13 +807,7 @@ const ResearchPanel: React.FC<ResearchPanelProps> = ({
                             limit: 10
                           })
                         }
-                        className="search-btn secondary"
-                        style={{
-                          marginTop: 4,
-                          fontSize: 12,
-                          padding: '4px 10px',
-                          minWidth: 'unset'
-                        }}
+                        className="px-3 py-1 bg-white text-gray-700 border border-gray-300 rounded-full hover:bg-gray-50 transition-colors font-medium text-xs mt-1"
                       >
                         View studies on this topic
                       </button>
@@ -910,7 +873,7 @@ const ResearchPanel: React.FC<ResearchPanelProps> = ({
         )}
 
         {activeTab === 'article' && (
-          <div className="research-content-card">
+          <div className="flex-1 min-w-0 bg-white rounded-xl border border-gray-200 p-4 max-h-[640px] flex flex-col">
             {/* ARTICLE TAB */}
             <div style={{ fontSize: 12, flex: 1, overflowY: 'auto' }}>
               <div
@@ -1103,26 +1066,28 @@ const ResearchPanel: React.FC<ResearchPanelProps> = ({
                         marginBottom: 4
                       }}
                     />
-                    <button
-                      type="button"
-                      onClick={handleAskArticleSubmit}
-                      disabled={!onAskArticle || !articleQuestion.trim()}
-                      className="search-btn primary"
-                      style={{
-                        fontSize: 12,
-                        padding: '4px 9px',
-                        minWidth: 'unset',
-                        opacity: !onAskArticle || !articleQuestion.trim() ? 0.5 : 1,
-                        cursor:
-                          !onAskArticle || !articleQuestion.trim()
-                            ? 'not-allowed'
-                            : 'pointer'
-                      }}
-                    >
-                      {onAskArticle
-                        ? 'Ask WIHY about this article'
-                        : 'Connect onAskArticle to enable'}
-                    </button>
+                    <div className="inline-block border-2 border-transparent rounded-full relative overflow-hidden" style={{
+                      background: 'linear-gradient(#fff, #fff) padding-box, linear-gradient(90deg, #fa5f06, #ffffff, #C0C0C0, #4cbb17) border-box',
+                      backgroundSize: '100% 100%, 200% 100%',
+                      animation: 'wiH-border-sweep 2.2s linear infinite'
+                    }}>
+                      <style>{`
+                        @keyframes wiH-border-sweep {
+                          0% { background-position: 0% 0%, 0% 0%; }
+                          100% { background-position: 0% 0%, 200% 0%; }
+                        }
+                      `}</style>
+                      <button
+                        type="button"
+                        onClick={handleAskArticleSubmit}
+                        disabled={!onAskArticle || !articleQuestion.trim()}
+                        className="bg-white text-black font-semibold px-5 py-1.5 text-xs rounded-full transition-all duration-200 whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {onAskArticle
+                          ? 'Ask WIHY about this article'
+                          : 'Connect onAskArticle to enable'}
+                      </button>
+                    </div>
                   </div>
                 </>
               )}
@@ -1136,8 +1101,7 @@ const ResearchPanel: React.FC<ResearchPanelProps> = ({
             <div style={{ flex: 1 }}>
               {!chartData && (
                 <div
-                  className="research-content-card"
-                  style={{ color: '#6b7280', padding: 20 }}
+                  className="flex-1 min-w-0 bg-white rounded-xl border border-gray-200 p-5 text-gray-600"
                 >
                   Run a search query to populate research quality charts and study-type
                   distributions.
