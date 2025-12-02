@@ -162,7 +162,7 @@ type ArticleContentResponse = {
   error?: string;
 };
 
-type TabKey = 'search' | 'article' | 'quality';
+type TabKey = 'search' | 'article' | 'trends' | 'quality' | 'claim';
 
 const buildQS = (params: Record<string, any>) => {
   const q = new URLSearchParams();
@@ -229,8 +229,6 @@ const ResearchPanel: React.FC<ResearchPanelProps> = ({
     setSearchResults([]);
     setEvidenceSummary(null);
     setChartData(null);
-    setTrends(null);
-    setClaimResult(null);
     try {
       const qs = buildQS({
         keyword: options.keyword,
@@ -262,8 +260,7 @@ const ResearchPanel: React.FC<ResearchPanelProps> = ({
     timeframe: '1month' | '3months' | '6months' | '1year',
     category?: string
   ) => {
-    // Trends are supportive context under Search
-    setActiveTab('search');
+    setActiveTab('trends');
     setLoading(true);
     setError(null);
     setTrends(null);
@@ -306,8 +303,7 @@ const ResearchPanel: React.FC<ResearchPanelProps> = ({
 
   const runClaimVerify = async () => {
     if (!claimText.trim()) return;
-    // Results live under Search rather than a separate tab
-    setActiveTab('search');
+    setActiveTab('claim');
     setLoading(true);
     setError(null);
     setClaimResult(null);
@@ -426,7 +422,7 @@ const ResearchPanel: React.FC<ResearchPanelProps> = ({
         gap: 10
       }}
     >
-      {/* Tab bar – simplified: Search, Article, Quality */}
+      {/* Tab bar */}
       <div
         style={{
           display: 'flex',
@@ -435,13 +431,13 @@ const ResearchPanel: React.FC<ResearchPanelProps> = ({
           padding: '4px 4px 0'
         }}
       >
-        {(
-          [
-            { key: 'search', label: 'Search & Tools' },
-            { key: 'article', label: 'Article View' },
-            { key: 'quality', label: 'Quality & Charts' }
-          ] as { key: TabKey; label: string }[]
-        ).map((tab) => (
+        {([
+          { key: 'search', label: 'Search' },
+          { key: 'article', label: 'Article' },
+          { key: 'trends', label: 'Trends' },
+          { key: 'quality', label: 'Quality' },
+          { key: 'claim', label: 'Claims' }
+        ] as { key: TabKey; label: string }[]).map((tab) => (
           <button
             key={tab.key}
             type="button"
@@ -463,13 +459,7 @@ const ResearchPanel: React.FC<ResearchPanelProps> = ({
         ))}
       </div>
 
-      {loading && (
-        <Spinner
-          overlay={true}
-          title="Loading research data..."
-          subtitle="Please wait"
-        />
-      )}
+      {loading && <Spinner overlay={true} title="Loading research data..." subtitle="Please wait" />}
 
       {error && (
         <div
@@ -491,7 +481,7 @@ const ResearchPanel: React.FC<ResearchPanelProps> = ({
           gap: 20
         }}
       >
-        {/* LEFT – always shows presets + tools, regardless of tab */}
+        {/* LEFT – context + controls vary slightly but we keep them visible across tabs */}
         <div
           style={{
             flex: windowWidth < 1024 ? '0 0 auto' : '0 0 420px',
@@ -500,9 +490,11 @@ const ResearchPanel: React.FC<ResearchPanelProps> = ({
             gap: 16
           }}
         >
-          {/* Search presets */}
+          {/* Search presets always visible */}
           <section className="research-card">
-            <h2>Quick Research Domains</h2>
+            <h2>
+              Quick Research Domains
+            </h2>
             <p>
               One-click searches on <code>/api/research/search</code> with study type and
               evidence filters.
@@ -536,62 +528,9 @@ const ResearchPanel: React.FC<ResearchPanelProps> = ({
             </div>
           </section>
 
-          {/* Tools: Claim verify + Trends + Quality topic */}
+          {/* Claim + Trends + Quality controls grouped logically */}
           <section className="research-card">
             <h2>Tools</h2>
-
-            {/* Quality Assessment from last search */}
-            {evidenceSummary && (
-              <div
-                style={{
-                  marginBottom: 14,
-                  padding: 12,
-                  background: '#f3f4f6',
-                  borderRadius: 6
-                }}
-              >
-                <div style={{ fontWeight: 600, marginBottom: 6, fontSize: 14 }}>
-                  Quality Assessment
-                </div>
-                <div
-                  style={{
-                    color: '#4b5563',
-                    fontSize: 13,
-                    marginBottom: 4
-                  }}
-                >
-                  <strong>Grade:</strong> {evidenceSummary.evidenceGrade || '—'} ·{' '}
-                  <strong>Quality:</strong> {evidenceSummary.qualityLevel || '—'} ·{' '}
-                  <strong>Confidence:</strong> {evidenceSummary.confidence || '—'}
-                </div>
-                {evidenceSummary.researchSummary && (
-                  <div
-                    style={{
-                      color: '#6b7280',
-                      fontSize: 12,
-                      marginBottom: 4
-                    }}
-                  >
-                    Total Available:{' '}
-                    {evidenceSummary.researchSummary.totalAvailable?.toLocaleString() ||
-                      0}{' '}
-                    · Analyzed: {evidenceSummary.researchSummary.analyzed || 0} · Full
-                    Text: {evidenceSummary.researchSummary.fullTextAccess || 0}
-                  </div>
-                )}
-                {evidenceSummary.keyFindings &&
-                  evidenceSummary.keyFindings.length > 0 && (
-                    <div style={{ marginTop: 6, fontSize: 12 }}>
-                      <strong>Key Findings:</strong>
-                      <ul style={{ margin: '4px 0', paddingLeft: 20 }}>
-                        {evidenceSummary.keyFindings.map((finding, idx) => (
-                          <li key={idx}>{finding}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-              </div>
-            )}
 
             {/* Claim verify */}
             <div style={{ marginBottom: 14 }}>
@@ -627,9 +566,7 @@ const ResearchPanel: React.FC<ResearchPanelProps> = ({
 
             {/* Trends */}
             <div style={{ marginBottom: 14 }}>
-              <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 6 }}>
-                Trends
-              </div>
+              <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 6 }}>Trends</div>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                 <button
                   type="button"
@@ -690,12 +627,40 @@ const ResearchPanel: React.FC<ResearchPanelProps> = ({
               </button>
             </div>
           </section>
+
+          {/* Types of research – clearly listed for clinicians */}
+          <section className="research-card">
+            <h2>
+              Types of Research Available
+            </h2>
+            <p>
+              Matches <code>study_type</code> and <code>evidence_level</code> filters in
+              the WIHY Research API.
+            </p>
+            <div style={{ fontSize: 13, color: '#374151', lineHeight: 1.5 }}>
+              <div>
+                <strong>Study types</strong>: randomized_controlled_trial, meta_analysis,
+                systematic_review, observational_study, case_control, cohort_study,
+                cross_sectional, case_report, review.
+              </div>
+              <div style={{ marginTop: 6 }}>
+                <strong>Evidence levels</strong>:
+                <ul style={{ margin: '4px 0 0 16px', padding: 0 }}>
+                  <li>high – meta-analyses, large RCTs</li>
+                  <li>moderate – individual RCTs, well-designed cohorts</li>
+                  <li>low – case studies, expert opinion, preliminary research</li>
+                  <li>very_low – very early or biased evidence</li>
+                </ul>
+              </div>
+            </div>
+          </section>
         </div>
 
-        {/* RIGHT – main content by tab */}
-        {activeTab === 'search' && (
+        {/* RIGHT – content area switches by tab */}
+        {activeTab !== 'quality' && (
           <div className="research-content-card">
-            {/* SEARCH RESULTS */}
+            {/* SEARCH RESULTS TAB */}
+            {activeTab === 'search' && (
             <div style={{ fontSize: 13, flex: 1, overflowY: 'auto' }}>
               <div
                 style={{
@@ -706,15 +671,41 @@ const ResearchPanel: React.FC<ResearchPanelProps> = ({
               >
                 Search Results
               </div>
-
-              {searchResults.length === 0 && (
-                <div style={{ color: '#6b7280', marginBottom: 12 }}>
-                  Use the presets on the left to pull RCTs, meta-analyses, or cohort
-                  studies. Click an article to open the full body with{' '}
-                  <code>/pmc/:pmcId/content</code>.
+              {evidenceSummary && (
+                <div style={{ marginBottom: 12, padding: 12, background: '#f3f4f6', borderRadius: 6 }}>
+                  <div style={{ fontWeight: 600, marginBottom: 6, fontSize: 14 }}>
+                    Quality Assessment
+                  </div>
+                  <div style={{ color: '#4b5563', fontSize: 13, marginBottom: 4 }}>
+                    <strong>Grade:</strong> {evidenceSummary.evidenceGrade || '—'} · 
+                    <strong>Quality:</strong> {evidenceSummary.qualityLevel || '—'} · 
+                    <strong>Confidence:</strong> {evidenceSummary.confidence || '—'}
+                  </div>
+                  {evidenceSummary.researchSummary && (
+                    <div style={{ color: '#6b7280', fontSize: 12, marginBottom: 4 }}>
+                      Total Available: {evidenceSummary.researchSummary.totalAvailable?.toLocaleString() || 0} · 
+                      Analyzed: {evidenceSummary.researchSummary.analyzed || 0} · 
+                      Full Text: {evidenceSummary.researchSummary.fullTextAccess || 0}
+                    </div>
+                  )}
+                  {evidenceSummary.keyFindings && evidenceSummary.keyFindings.length > 0 && (
+                    <div style={{ marginTop: 6, fontSize: 12 }}>
+                      <strong>Key Findings:</strong>
+                      <ul style={{ margin: '4px 0', paddingLeft: 20 }}>
+                        {evidenceSummary.keyFindings.map((finding, idx) => (
+                          <li key={idx}>{finding}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
                 </div>
               )}
-
+              {searchResults.length === 0 && (
+                <div style={{ color: '#6b7280' }}>
+                  Run a preset query on the left to pull RCTs, meta-analyses, or cohort
+                  studies. Click an article to open the full body.
+                </div>
+              )}
               {searchResults.length > 0 && (
                 <ul
                   style={{
@@ -727,7 +718,10 @@ const ResearchPanel: React.FC<ResearchPanelProps> = ({
                   }}
                 >
                   {searchResults.map((r) => (
-                    <li key={r.pmcid} className="research-result-item">
+                    <li
+                      key={r.pmcid}
+                      className="research-result-item"
+                    >
                       <div
                         style={{
                           fontWeight: 600,
@@ -738,34 +732,25 @@ const ResearchPanel: React.FC<ResearchPanelProps> = ({
                         {r.title}
                       </div>
                       <div style={{ color: '#4b5563', marginBottom: 2 }}>
-                        {r.authors && (
-                          <div style={{ fontSize: 12, marginBottom: 2 }}>
-                            {r.authors}
-                          </div>
-                        )}
+                        {r.authors && <div style={{ fontSize: 12, marginBottom: 2 }}>{r.authors}</div>}
                         {r.journal || 'Journal n/a'} ·{' '}
-                        {r.publicationYear ||
-                          (r.publishedDate
-                            ? new Date(r.publishedDate).getFullYear()
-                            : 'Year n/a')}
+                        {r.publicationYear || (r.publishedDate ? new Date(r.publishedDate).getFullYear() : 'Year n/a')}
                       </div>
                       <div style={{ color: '#6b7280', marginBottom: 4 }}>
                         {r.studyType && <span>{r.studyType} · </span>}
-                        {r.evidenceLevel && (
-                          <span>evidence: {r.evidenceLevel}</span>
-                        )}
+                        {r.evidenceLevel && <span>evidence: {r.evidenceLevel}</span>}
                         {r.relevanceScore !== undefined && (
                           <span> · score: {r.relevanceScore}</span>
                         )}
                       </div>
                       {r.links?.pmcWebsite && (
                         <div style={{ marginBottom: 6 }}>
-                          <a
-                            href={r.links.pmcWebsite}
-                            target="_blank"
+                          <a 
+                            href={r.links.pmcWebsite} 
+                            target="_blank" 
                             rel="noopener noreferrer"
-                            style={{
-                              color: '#2563eb',
+                            style={{ 
+                              color: '#2563eb', 
                               textDecoration: 'none',
                               fontSize: 13,
                               marginRight: 12
@@ -774,12 +759,12 @@ const ResearchPanel: React.FC<ResearchPanelProps> = ({
                             PMC Article ↗
                           </a>
                           {r.links.pdfDownload && (
-                            <a
-                              href={r.links.pdfDownload}
-                              target="_blank"
+                            <a 
+                              href={r.links.pdfDownload} 
+                              target="_blank" 
                               rel="noopener noreferrer"
-                              style={{
-                                color: '#2563eb',
+                              style={{ 
+                                color: '#2563eb', 
                                 textDecoration: 'none',
                                 fontSize: 13,
                                 marginRight: 12
@@ -789,12 +774,12 @@ const ResearchPanel: React.FC<ResearchPanelProps> = ({
                             </a>
                           )}
                           {r.links.doi && (
-                            <a
-                              href={r.links.doi}
-                              target="_blank"
+                            <a 
+                              href={r.links.doi} 
+                              target="_blank" 
                               rel="noopener noreferrer"
-                              style={{
-                                color: '#2563eb',
+                              style={{ 
+                                color: '#2563eb', 
                                 textDecoration: 'none',
                                 fontSize: 13
                               }}
@@ -820,133 +805,11 @@ const ResearchPanel: React.FC<ResearchPanelProps> = ({
                   ))}
                 </ul>
               )}
-
-              {/* TRENDS SECTION – inline under Search */}
-              {trends && trends.trending_topics && trends.trending_topics.length > 0 && (
-                <div
-                  style={{
-                    marginTop: 16,
-                    paddingTop: 12,
-                    borderTop: '1px solid #e5e7eb'
-                  }}
-                >
-                  <div
-                    style={{
-                      fontSize: 14,
-                      fontWeight: 600,
-                      marginBottom: 6
-                    }}
-                  >
-                    Trending Topics ({trends.timeframe})
-                  </div>
-                  {trends.trending_topics.map((t) => (
-                    <div
-                      key={t.topic}
-                      style={{
-                        padding: '6px 0',
-                        borderBottom: '1px solid #f3f4f6'
-                      }}
-                    >
-                      <div style={{ fontWeight: 600, marginBottom: 2 }}>{t.topic}</div>
-                      <div style={{ color: '#6b7280', marginBottom: 2 }}>
-                        Trend score: {t.trend_score} · new studies: {t.new_studies ?? '—'}
-                      </div>
-                      {t.key_developments && (
-                        <ul
-                          style={{
-                            margin: 0,
-                            paddingLeft: 16,
-                            color: '#374151',
-                            fontSize: 12
-                          }}
-                        >
-                          {t.key_developments.map((k) => (
-                            <li key={k}>{k}</li>
-                          ))}
-                        </ul>
-                      )}
-                      <button
-                        type="button"
-                        onClick={() =>
-                          runSearch({
-                            keyword: t.topic,
-                            limit: 10
-                          })
-                        }
-                        className="search-btn secondary"
-                        style={{
-                          marginTop: 4,
-                          fontSize: 12,
-                          padding: '4px 10px',
-                          minWidth: 'unset'
-                        }}
-                      >
-                        View studies on this topic
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {/* CLAIM SECTION – inline under Search */}
-              {claimResult && (
-                <div
-                  style={{
-                    marginTop: 16,
-                    paddingTop: 12,
-                    borderTop: '1px solid #e5e7eb'
-                  }}
-                >
-                  <div
-                    style={{
-                      fontSize: 14,
-                      fontWeight: 600,
-                      marginBottom: 6
-                    }}
-                  >
-                    Claim Verification
-                  </div>
-                  <div style={{ marginBottom: 4 }}>
-                    <strong>Claim:</strong> {claimResult.claim}
-                  </div>
-                  {claimResult.claim_specificity && (
-                    <div style={{ marginBottom: 4 }}>
-                      <strong>Specificity:</strong> {claimResult.claim_specificity}
-                    </div>
-                  )}
-                  {claimResult.verification_result && (
-                    <div style={{ marginBottom: 4 }}>
-                      <strong>Verdict:</strong>{' '}
-                      {claimResult.verification_result.overall_verdict} (
-                      {claimResult.verification_result.evidence_strength}) · confidence:{' '}
-                      {claimResult.verification_result.confidence_level
-                        ? (
-                            claimResult.verification_result.confidence_level * 100
-                          ).toFixed(0) + '%'
-                        : '—'}
-                      <div style={{ marginTop: 2 }}>
-                        {claimResult.verification_result.recommendation}
-                      </div>
-                    </div>
-                  )}
-                  {claimResult.claim_accuracy_rating && (
-                    <div>
-                      <strong>Better wording:</strong>{' '}
-                      {claimResult.claim_accuracy_rating.accurate_statement}
-                      <div style={{ fontSize: 11, color: '#6b7280' }}>
-                        certainty: {claimResult.claim_accuracy_rating.certainty_level}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
             </div>
-          </div>
-        )}
+          )}
 
-        {activeTab === 'article' && (
-          <div className="research-content-card">
-            {/* ARTICLE TAB */}
+          {/* ARTICLE TAB */}
+          {activeTab === 'article' && (
             <div style={{ fontSize: 12, flex: 1, overflowY: 'auto' }}>
               <div
                 style={{
@@ -1162,13 +1025,11 @@ const ResearchPanel: React.FC<ResearchPanelProps> = ({
                 </>
               )}
             </div>
-          </div>
-        )}
+          )}
 
-        {activeTab === 'quality' && (
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 12 }}>
-            {/* Quality metrics from /quality-metrics */}
-            <div className="research-content-card" style={{ flex: '0 0 auto' }}>
+          {/* TRENDS TAB */}
+          {activeTab === 'trends' && (
+            <div style={{ fontSize: 12, flex: 1, overflowY: 'auto' }}>
               <div
                 style={{
                   fontSize: 14,
@@ -1176,82 +1037,127 @@ const ResearchPanel: React.FC<ResearchPanelProps> = ({
                   marginBottom: 6
                 }}
               >
-                Evidence Quality Overview
+                Trending Topics
               </div>
-              {!quality && (
+              {!trends && (
                 <div style={{ color: '#6b7280' }}>
-                  Enter a topic on the left (e.g. <code>intermittent_fasting</code>) and
-                  click &quot;Get quality metrics&quot; to see structured evidence
-                  grading.
+                  Use the tools on the left to load trends (nutrition or lifestyle).
                 </div>
               )}
-              {quality && (
-                <div style={{ fontSize: 13 }}>
-                  <div style={{ marginBottom: 4 }}>
-                    <strong>Topic:</strong> {quality.topic}
-                  </div>
-                  <div style={{ marginBottom: 4 }}>
-                    <strong>Overall grade:</strong>{' '}
-                    {quality.quality_assessment?.overall_evidence_grade || '—'}
-                  </div>
-                  <div style={{ marginBottom: 4 }}>
-                    <strong>Study quality distribution:</strong>
-                    <div>
-                      high:{' '}
-                      {quality.quality_assessment?.study_quality_distribution
-                        ?.high_quality ?? 0}{' '}
-                      · moderate:{' '}
-                      {quality.quality_assessment?.study_quality_distribution
-                        ?.moderate_quality ?? 0}{' '}
-                      · low:{' '}
-                      {quality.quality_assessment?.study_quality_distribution
-                        ?.low_quality ?? 0}{' '}
-                      · very low:{' '}
-                      {quality.quality_assessment?.study_quality_distribution
-                        ?.very_low_quality ?? 0}
-                    </div>
-                  </div>
-                  <div style={{ marginBottom: 4 }}>
-                    <strong>Research maturity:</strong>{' '}
-                    {quality.quality_assessment?.research_maturity || '—'}
-                  </div>
-                  <div>
-                    <strong>Evidence consistency:</strong>{' '}
-                    {quality.quality_assessment?.evidence_consistency || '—'}
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Charts from /search quality chart_data */}
-            <div style={{ flex: 1 }}>
-              {!chartData && (
+              {trends?.trending_topics?.map((t) => (
                 <div
-                  className="research-content-card"
-                  style={{ color: '#6b7280', padding: 20 }}
+                  key={t.topic}
+                  style={{
+                    padding: '6px 0',
+                    borderBottom: '1px solid #e5e7eb'
+                  }}
                 >
-                  Run a search query to populate research quality charts and study-type
-                  distributions.
+                  <div style={{ fontWeight: 600, marginBottom: 2 }}>{t.topic}</div>
+                  <div style={{ color: '#6b7280', marginBottom: 2 }}>
+                    Trend score: {t.trend_score} · new studies: {t.new_studies ?? '—'}
+                  </div>
+                  {t.key_developments && (
+                    <ul
+                      style={{
+                        margin: 0,
+                        paddingLeft: 16,
+                        color: '#374151'
+                      }}
+                    >
+                      {t.key_developments.map((k) => (
+                        <li key={k}>{k}</li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* CLAIM TAB */}
+          {activeTab === 'claim' && (
+            <div style={{ fontSize: 12, flex: 1, overflowY: 'auto' }}>
+              <div
+                style={{
+                  fontSize: 14,
+                  fontWeight: 600,
+                  marginBottom: 6
+                }}
+              >
+                Claim Verification
+              </div>
+              {!claimResult && (
+                <div style={{ color: '#6b7280' }}>
+                  Enter a claim on the left and click &quot;Check claim&quot; to use{' '}
+                  <code>/api/research/verify</code>.
                 </div>
               )}
-              {chartData && (
-                <DashboardCharts
-                  period="week"
-                  maxCards={4}
-                  showAllCharts={true}
-                  excludeChartTypes={Object.values(ChartType).filter(
-                    (type) =>
-                      type !== ChartType.RESEARCH_STUDY_TYPE_DISTRIBUTION &&
-                      type !== ChartType.RESEARCH_PUBLICATION_TIMELINE &&
-                      type !== ChartType.RESEARCH_EVIDENCE_QUALITY &&
-                      type !== ChartType.RESEARCH_QUALITY
+              {claimResult && (
+                <div>
+                  <div style={{ marginBottom: 4 }}>
+                    <strong>Claim:</strong> {claimResult.claim}
+                  </div>
+                  {claimResult.claim_specificity && (
+                    <div style={{ marginBottom: 4 }}>
+                      <strong>Specificity:</strong> {claimResult.claim_specificity}
+                    </div>
                   )}
-                  isResearchLayout={true}
-                  researchChartData={chartData}
-                  onAnalyze={() => {}}
-                />
+                  {claimResult.verification_result && (
+                    <div style={{ marginBottom: 4 }}>
+                      <strong>Verdict:</strong>{' '}
+                      {claimResult.verification_result.overall_verdict} (
+                      {claimResult.verification_result.evidence_strength}) · confidence:{' '}
+                      {claimResult.verification_result.confidence_level
+                        ? (
+                            claimResult.verification_result.confidence_level * 100
+                          ).toFixed(0) + '%'
+                        : '—'}
+                      <div style={{ marginTop: 2 }}>
+                        {claimResult.verification_result.recommendation}
+                      </div>
+                    </div>
+                  )}
+                  {claimResult.claim_accuracy_rating && (
+                    <div>
+                      <strong>Better wording:</strong>{' '}
+                      {claimResult.claim_accuracy_rating.accurate_statement}
+                      <div style={{ fontSize: 11, color: '#6b7280' }}>
+                        certainty: {claimResult.claim_accuracy_rating.certainty_level}
+                      </div>
+                    </div>
+                  )}
+                </div>
               )}
             </div>
+          )}
+          </div>
+        )}
+
+        {/* QUALITY TAB - Show charts directly without card wrapper */}
+        {activeTab === 'quality' && (
+          <div style={{ flex: 1 }}>
+            {!chartData && (
+              <div style={{ color: '#6b7280', padding: 20 }}>
+                Run a search query to see research quality charts and analysis.
+              </div>
+            )}
+            {chartData && (
+              <DashboardCharts
+                period="week"
+                maxCards={4}
+                showAllCharts={true}
+                excludeChartTypes={Object.values(ChartType).filter(
+                  type =>
+                    type !== ChartType.STUDY_TYPE_DISTRIBUTION &&
+                    type !== ChartType.PUBLICATION_TIMELINE &&
+                    type !== ChartType.RESULT_QUALITY_PIE &&
+                    type !== ChartType.RESEARCH_QUALITY
+                )}
+                isResearchLayout={true}
+                researchChartData={chartData}
+                onAnalyze={() => {}}
+              />
+            )}
           </div>
         )}
       </div>

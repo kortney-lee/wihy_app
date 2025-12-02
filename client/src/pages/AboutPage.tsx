@@ -5,8 +5,8 @@ import { FeatureCard, MetricCard, HighlightCard } from '../components/shared/Car
 import { CTAButton, NavLink } from '../components/shared/ButtonComponents';
 import AboutPageHeader from '../components/layout/AboutPageHeader';
 import ResearchQualityGauge from '../components/charts/cards/ResearchQualityGauge';
-import StudyTypeDistributionChart from '../components/charts/cards/StudyTypeDistributionChart';
-import PublicationTimelineChart from '../components/charts/cards/PublicationTimelineChart';
+import StudyTypeDistributionChartDemo from '../components/charts/cards/StudyTypeDistributionChart';
+import PublicationTimelineChartDemo from '../components/charts/cards/PublicationTimelineChart';
 import { PlatformDetectionService } from '../services/shared/platformDetectionService';
 import '../styles/AboutPage.css';
 import '../styles/MobileAboutPage.css';
@@ -432,17 +432,17 @@ I will translate complex health and nutrition science into simple steps you can 
 
           <div className="demo-grid">
             <div className="demo-card">
-              <ResearchQualityGauge />
+              <ResearchQualityGauge showCategoryButtons={true} />
               <p className="demo-description">Research quality scored from peer-reviewed studies, weighted by strength of evidence.</p>
             </div>
 
             <div className="demo-card">
-              <StudyTypeDistributionChart />
+              <StudyTypeDistributionChartDemo />
               <p className="demo-description">Study types visualized to highlight how evidence is distributed across clinical, observational, and lab research.</p>
             </div>
 
             <div className="demo-card">
-              <PublicationTimelineChart timeRange="decade" title="Research Timeline" />
+              <PublicationTimelineChartDemo timeRange="decade" title="Research Timeline" />
               <p className="demo-description">Publication trends over time to track how evidence is growing.
 </p>
             </div>

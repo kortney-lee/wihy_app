@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import VitaminContentChart, { VitaminData } from '../charts/individual/VitaminContentChart';
-import PublicationTimelineChart, { PublicationData } from '../charts/cards/PublicationTimelineChart';
-import StudyTypeDistributionChart, { StudyTypeData } from '../charts/cards/StudyTypeDistributionChart';
+import PublicationTimelineChartDemo, { PublicationData } from '../charts/cards/PublicationTimelineChart';
+import StudyTypeDistributionChartDemo, { StudyTypeData } from '../charts/cards/StudyTypeDistributionChart';
 import DailyValueProgressChart, { NutrientProgress } from '../charts/individual/DailyValueProgressChart';
 
 const Priority2ChartsDemo: React.FC = () => {
@@ -224,7 +224,7 @@ const Priority2ChartsDemo: React.FC = () => {
           }}>
             Research publication trends over time
           </p>
-          <PublicationTimelineChart 
+          <PublicationTimelineChartDemo 
             publications={samplePublications}
             size={selectedSize}
             timeRange="recent"
@@ -258,7 +258,7 @@ const Priority2ChartsDemo: React.FC = () => {
           }}>
             Breakdown of research study methodologies
           </p>
-          <StudyTypeDistributionChart 
+          <StudyTypeDistributionChartDemo 
             studyTypes={sampleStudyTypes}
             size={selectedSize}
             chartStyle="doughnut"

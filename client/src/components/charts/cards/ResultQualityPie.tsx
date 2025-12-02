@@ -17,9 +17,6 @@ interface ResultQualityPieProps {
   results?: string;
   dataSource?: "error" | "openai" | "local" | "vnutrition" | "wihy";
   citations?: string[];
-  researchData?: {
-    evidence_distribution?: Record<string, number>;
-  };
   onAnalyze?: (userMessage: string, assistantMessage: string) => void;
 }
 
@@ -107,8 +104,7 @@ const ResultQualityPie: React.FC<ResultQualityPieProps> = ({
   query,
   results,
   dataSource,
-  citations = [],
-  researchData,
+  citations,
   onAnalyze
 }) => {
   const [evaluation, setEvaluation] = useState<{
@@ -131,25 +127,6 @@ const ResultQualityPie: React.FC<ResultQualityPieProps> = ({
 
   // Evaluate when props change and we have valid data
   useEffect(() => {
-    // Use research data from search results if available
-    if (researchData?.evidence_distribution) {
-      console.log('Using research evidence distribution from search results...');
-      const distribution = researchData.evidence_distribution;
-      const total = Object.values(distribution).reduce((sum, count) => sum + count, 0);
-      
-      // Calculate score based on evidence level distribution
-      const highEvidence = (distribution['Level I'] || 0) + (distribution['Level II'] || 0);
-      const score = total > 0 ? highEvidence / total : 0;
-      const verdict: Verdict = score >= 0.7 ? 'GOOD' : score >= 0.4 ? 'REVIEW' : 'BAD';
-      
-      const reasons = Object.entries(distribution)
-        .filter(([_, count]) => count > 0)
-        .map(([level, count]) => `${level}: ${count} studies (${Math.round((count / total) * 100)}%)`);
-      
-      setEvaluation({ score, verdict, reasons });
-      return;
-    }
-    
     // Handle analytics API response (research metrics)
     if (apiResponse?.success && apiResponse?.analytics?.research_metrics?.quality_assessment) {
       console.log('Using research quality assessment from analytics API...');
@@ -216,7 +193,7 @@ const ResultQualityPie: React.FC<ResultQualityPieProps> = ({
       verdict: 'BAD',
       reasons: ['Waiting for results...']
     });
-  }, [query, results, dataSource, citations, apiResponse, researchData]);
+  }, [query, results, dataSource, citations, apiResponse]);
 
   const { score, verdict, reasons } = evaluation;
   const percentage = Math.round(score * 100);
@@ -256,7 +233,7 @@ const ResultQualityPie: React.FC<ResultQualityPieProps> = ({
   const legendBadColor = verdict === 'BAD' ? '#EF4444' : '#E5E7EB';
 
   return (
-    <div className="p-6 rounded-2xl border border-gray-200 bg-white shadow-lg h-[500px] flex flex-col text-center overflow-hidden">
+    <div className="p-6 rounded-2xl border border-gray-200 bg-white shadow-lg h-[420px] flex flex-col text-center overflow-hidden">
       <h3 className="text-xl font-semibold text-vh-muted mb-3">
         Result Quality
       </h3>

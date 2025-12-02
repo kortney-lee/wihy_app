@@ -23,6 +23,9 @@ import StudyTypeDistributionChart from './cards/StudyTypeDistributionChart';
 import DailyValueProgressChart from './individual/DailyValueProgressChart';
 import MacronutrientPieChart from './cards/MacronutrientPieChart';
 import ResultQualityPie from './cards/ResultQualityPie';
+import ResearchQualityPie from './cards/ResearchQualityPie';
+import ResearchStudyTypeDistribution from './cards/ResearchStudyTypeDistribution';
+import ResearchPublicationTimeline from './cards/ResearchPublicationTimeline';
 import HealthScoreGauge from './individual/HealthScoreGauge';
 import ResearchQualityGauge from './cards/ResearchQualityGauge';
 import NutritionGradeBadge from './cards/NutritionGradeBadge';
@@ -83,6 +86,9 @@ export const CHART_COMPONENT_REGISTRY: Record<ChartType, React.ComponentType<any
   [ChartType.DAILY_VALUE_PROGRESS]: DailyValueProgressChart,
   [ChartType.STUDY_TYPE_DISTRIBUTION]: StudyTypeDistributionChart,
   [ChartType.RESULT_QUALITY_PIE]: ResultQualityPie,
+  [ChartType.RESEARCH_EVIDENCE_QUALITY]: ResearchQualityPie,
+  [ChartType.RESEARCH_STUDY_TYPE_DISTRIBUTION]: ResearchStudyTypeDistribution,
+  [ChartType.RESEARCH_PUBLICATION_TIMELINE]: ResearchPublicationTimeline,
   [ChartType.BMI_BODY_FAT]: BMIBodyFatChart,
   [ChartType.SLEEP_CHART]: SleepChart,
   [ChartType.HEALTH_RISK_CHART]: HealthRiskChart,
@@ -90,7 +96,7 @@ export const CHART_COMPONENT_REGISTRY: Record<ChartType, React.ComponentType<any
 };
 
 /**
- * Alternative chart components for detailed views
+ * Detailed chart registry - for expanded/detailed views
  */
 export const DETAILED_CHART_REGISTRY: Record<ChartType, React.ComponentType<any>> = {
   [ChartType.QUICK_INSIGHTS]: QuickInsights,
@@ -127,6 +133,9 @@ export const DETAILED_CHART_REGISTRY: Record<ChartType, React.ComponentType<any>
   [ChartType.DAILY_VALUE_PROGRESS]: DailyValueProgressChart,
   [ChartType.STUDY_TYPE_DISTRIBUTION]: StudyTypeDistributionChart,
   [ChartType.RESULT_QUALITY_PIE]: ResultQualityPie,
+  [ChartType.RESEARCH_EVIDENCE_QUALITY]: ResearchQualityPie,
+  [ChartType.RESEARCH_STUDY_TYPE_DISTRIBUTION]: ResearchStudyTypeDistribution,
+  [ChartType.RESEARCH_PUBLICATION_TIMELINE]: ResearchPublicationTimeline,
   [ChartType.BMI_BODY_FAT]: BMIBodyFatChart,
   [ChartType.SLEEP_CHART]: SleepChart,
   [ChartType.HEALTH_RISK_CHART]: HealthRiskChart,

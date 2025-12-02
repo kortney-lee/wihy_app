@@ -48,6 +48,9 @@ export enum ChartType {
   PUBLICATION_TIMELINE = 'PUBLICATION_TIMELINE',
   STUDY_TYPE_DISTRIBUTION = 'STUDY_TYPE_DISTRIBUTION',
   RESULT_QUALITY_PIE = 'RESULT_QUALITY_PIE',
+  RESEARCH_EVIDENCE_QUALITY = 'RESEARCH_EVIDENCE_QUALITY',
+  RESEARCH_STUDY_TYPE_DISTRIBUTION = 'RESEARCH_STUDY_TYPE_DISTRIBUTION',
+  RESEARCH_PUBLICATION_TIMELINE = 'RESEARCH_PUBLICATION_TIMELINE',
 
   // Priority 10-20: Supplementary charts and detailed views
   VITAMIN_CONTENT = 'VITAMIN_CONTENT',
@@ -436,6 +439,33 @@ export const CHART_TYPE_CONFIGS: Record<ChartType, ChartTypeConfig> = {
     category: 'research',
     tabView: ['research'],
     description: 'Research result quality distribution and study quality metrics'
+  },
+  [ChartType.RESEARCH_EVIDENCE_QUALITY]: {
+    type: ChartType.RESEARCH_EVIDENCE_QUALITY,
+    label: 'Research Evidence Quality',
+    priority: 28,
+    requiresData: true,
+    category: 'research',
+    tabView: ['research'],
+    description: 'Evidence level distribution for research results (Level I, II, III, etc.)'
+  },
+  [ChartType.RESEARCH_STUDY_TYPE_DISTRIBUTION]: {
+    type: ChartType.RESEARCH_STUDY_TYPE_DISTRIBUTION,
+    label: 'Research Study Types',
+    priority: 26,
+    requiresData: true,
+    category: 'research',
+    tabView: ['research'],
+    description: 'Study type distribution from research results'
+  },
+  [ChartType.RESEARCH_PUBLICATION_TIMELINE]: {
+    type: ChartType.RESEARCH_PUBLICATION_TIMELINE,
+    label: 'Research Publications',
+    priority: 24,
+    requiresData: true,
+    category: 'research',
+    tabView: ['research'],
+    description: 'Publication timeline from research results'
   }
 };
 
