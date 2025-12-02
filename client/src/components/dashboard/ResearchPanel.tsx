@@ -525,10 +525,6 @@ const ResearchPanel: React.FC<ResearchPanelProps> = ({
           {/* Search presets */}
           <section className="research-card">
             <h2>Quick Research Domains</h2>
-            <p>
-              One-click searches on <code>/api/research/search</code> with study type and
-              evidence filters.
-            </p>
             <div
               style={{
                 display: 'grid',
