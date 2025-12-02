@@ -308,10 +308,10 @@ const MultiAuthLogin: React.FC<MultiAuthLoginProps> = ({
   };
 
   return (
-    <div className={`relative inline-block ${position === 'top-right' ? 'fixed top-4 right-4 z-[10002] pointer-events-auto' : ''} ${className}`}>
+    <div className={`${position === 'top-right' ? 'block' : 'relative inline-block'} ${className}`}>
       {/* Main Login Button */}
       <button 
-        className={`bg-transparent border-none cursor-pointer !pointer-events-auto p-0 rounded-full flex items-center justify-center transition-colors duration-200 text-[#5f6368] w-10 h-10 z-[1500] relative hover:bg-black/5 hover:text-slate-800 disabled:opacity-60 disabled:cursor-not-allowed ${user ? 'authenticated' : ''}`}
+        className="bg-transparent border-none cursor-pointer !pointer-events-auto p-0 rounded-full flex items-center justify-center transition-colors duration-200 text-[#5f6368] w-10 h-10 relative hover:bg-black/5 hover:text-slate-800 disabled:opacity-60 disabled:cursor-not-allowed"
         onClick={handleLoginClick}
         disabled={loading}
         aria-label={user ? 'User menu' : 'Sign in'}
@@ -464,9 +464,9 @@ const MultiAuthLogin: React.FC<MultiAuthLoginProps> = ({
             }}
           ></div>
           <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[10001] bg-white rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.15),0_8px_25px_rgba(0,0,0,0.1)] w-[380px] max-w-[90vw] max-h-[90vh] border border-black/5 pointer-events-auto animate-[modalSlideIn_0.3s_cubic-bezier(0.16,1,0.3,1)] max-[600px]:!w-[calc(100vw-32px)] max-[600px]:!right-4 max-[600px]:!left-4 max-[600px]:!fixed max-[600px]:!top-20 max-[600px]:!translate-x-0 max-[600px]:!translate-y-0 max-[600px]:!max-h-[calc(100vh-100px)] flex flex-col">
-            <div className="flex items-center justify-between p-4 relative flex-shrink-0">
+            <div className="flex items-center justify-between px-4 py-4 relative flex-shrink-0">
               <button 
-                className="w-8 h-8 flex items-center justify-center rounded-full bg-transparent border-none cursor-pointer text-gray-600 hover:bg-gray-100 transition-colors duration-200"
+                className="w-8 h-8 flex items-center justify-center rounded-full bg-transparent border-none cursor-pointer text-gray-600 hover:bg-gray-100 transition-colors duration-200 flex-shrink-0"
                 onClick={() => {
                   setShowEmailForm(false);
                   setShowProviders(true);
@@ -477,9 +477,9 @@ const MultiAuthLogin: React.FC<MultiAuthLoginProps> = ({
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                 </svg>
               </button>
-              <h3 className="absolute left-1/2 -translate-x-1/2 m-0 text-lg font-medium text-[#202124]">{emailMode === 'signin' ? 'Sign in with email' : 'Create account'}</h3>
+              <h3 className="flex-1 text-center m-0 text-lg font-medium text-[#202124] whitespace-nowrap px-2">{emailMode === 'signin' ? 'Sign in with email' : 'Create account'}</h3>
               <button 
-                className="w-8 h-8 flex items-center justify-center rounded-full bg-transparent border-none cursor-pointer text-gray-600 hover:bg-gray-100 transition-colors duration-200"
+                className="w-8 h-8 flex items-center justify-center rounded-full bg-transparent border-none cursor-pointer text-gray-600 hover:bg-gray-100 transition-colors duration-200 flex-shrink-0"
                 onClick={() => setShowEmailForm(false)}
                 aria-label="Close"
               >
