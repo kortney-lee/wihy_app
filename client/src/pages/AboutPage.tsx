@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Header from '../components/shared/Header';
 import FullScreenChat from '../components/ui/FullScreenChat';
 import { FeatureCard, MetricCard, HighlightCard } from '../components/shared/CardComponents';
@@ -13,6 +14,7 @@ import '../styles/MobileAboutPage.css';
 import '../styles/InvestorSections.css';
 
 const AboutPage: React.FC = () => {
+  const navigate = useNavigate();
   const currentYear = new Date().getFullYear();
   const [isLoaded, setIsLoaded] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
@@ -667,7 +669,7 @@ I will translate complex health and nutrition science into simple steps you can 
       </section>
 
       {/* Leadership Section */}
-      <section id="founder" className="leadership-section">
+      <section id="leadership" className="leadership-section">
         <div className="section-container">
           <div className="leadership-header">
             <h2 className="section-title">Leadership</h2>
@@ -963,6 +965,36 @@ I will translate complex health and nutrition science into simple steps you can 
           <div className="footer-center">
             <div className="footer-copyright">© {currentYear} WIHY. All rights reserved.</div>
             <div className="footer-disclaimer">This page is for education and information only and is not a substitute for professional medical advice.</div>
+            <div className="footer-links" style={{ marginTop: '12px', display: 'flex', gap: '16px', justifyContent: 'center' }}>
+              <button
+                onClick={() => navigate('/privacy')}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: '#4cbb17',
+                  cursor: 'pointer',
+                  textDecoration: 'underline',
+                  fontSize: '14px',
+                  padding: 0
+                }}
+              >
+                Privacy Policy
+              </button>
+              <button
+                onClick={() => navigate('/terms')}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: '#4cbb17',
+                  cursor: 'pointer',
+                  textDecoration: 'underline',
+                  fontSize: '14px',
+                  padding: 0
+                }}
+              >
+                Terms of Service
+              </button>
+            </div>
           </div>
 
           <div className="footer-right">
