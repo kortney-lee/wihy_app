@@ -48,9 +48,6 @@ interface PublicationTimelineChartProps {
   timeRange?: 'recent' | 'decade' | 'all-time';
   showTrendline?: boolean;
   categories?: Record<string, string[]>; // Custom research categories for API
-  researchData?: {
-    publication_timeline?: Record<string, number>;
-  };
   onAnalyze?: (userMessage: string, assistantMessage: string) => void;
 }
 
@@ -62,30 +59,11 @@ const PublicationTimelineChart: React.FC<PublicationTimelineChartProps> = ({
   timeRange = 'decade',
   showTrendline = true,
   categories,
-  researchData,
   onAnalyze
 }) => {
   const [apiData, setApiData] = useState<PublicationData[] | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  // Convert researchData to chart format if provided
-  useEffect(() => {
-    if (researchData?.publication_timeline) {
-      const timeline = researchData.publication_timeline;
-      
-      const formattedData: PublicationData[] = Object.entries(timeline)
-        .map(([year, count]) => ({
-          year: parseInt(year),
-          count,
-          totalStudies: count
-        }))
-        .sort((a, b) => a.year - b.year);
-      
-      setApiData(formattedData);
-      return;
-    }
-  }, [researchData]);
 
   // Default to Mental Illness if no categories provided
   const defaultCategories = {
@@ -99,11 +77,6 @@ const PublicationTimelineChart: React.FC<PublicationTimelineChartProps> = ({
 
   // Fetch data from Analytics Service API
   useEffect(() => {
-    // Skip API call if we have research data from search results
-    if (researchData?.publication_timeline) {
-      return;
-    }
-    
     if (publications.length === 0) {
       const fetchAnalytics = async () => {
         console.log('[PublicationTimelineChart] Starting API fetch...');

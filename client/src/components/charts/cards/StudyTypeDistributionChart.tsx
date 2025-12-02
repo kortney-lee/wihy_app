@@ -52,9 +52,6 @@ interface StudyTypeDistributionChartProps {
   showPercentages?: boolean;
   showLegend?: boolean;
   categories?: Record<string, string[]>; // Custom research categories for API
-  researchData?: {
-    study_type_distribution?: Record<string, number>;
-  };
   onAnalyze?: (userMessage: string, assistantMessage: string) => void;
 }
 
@@ -67,33 +64,11 @@ const StudyTypeDistributionChart: React.FC<StudyTypeDistributionChartProps> = ({
   showPercentages = true,
   showLegend = true,
   categories,
-  researchData,
   onAnalyze
 }) => {
   const [apiData, setApiData] = useState<StudyTypeData[] | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  // Convert researchData to chart format if provided
-  useEffect(() => {
-    if (researchData?.study_type_distribution) {
-      const distribution = researchData.study_type_distribution;
-      const total = Object.values(distribution).reduce((sum, count) => sum + count, 0);
-      
-      const formattedData: StudyTypeData[] = Object.entries(distribution)
-        .filter(([_, count]) => count > 0)
-        .map(([type, count]) => ({
-          type,
-          count,
-          percentage: total > 0 ? Math.round((count / total) * 100) : 0,
-          description: getStudyTypeDescription(type),
-          evidenceLevel: getStudyEvidenceLevel(type)
-        }));
-      
-      setApiData(formattedData);
-      return;
-    }
-  }, [researchData]);
 
   // Default to Mental Illness if no categories provided
   const defaultCategories = {
@@ -107,11 +82,6 @@ const StudyTypeDistributionChart: React.FC<StudyTypeDistributionChartProps> = ({
 
   // Fetch data from Analytics Service API
   useEffect(() => {
-    // Skip API call if we have research data from search results
-    if (researchData?.study_type_distribution) {
-      return;
-    }
-    
     if (studyTypes.length === 0) {
       const fetchAnalytics = async () => {
         console.log('[StudyTypeDistributionChart] Starting API fetch...');

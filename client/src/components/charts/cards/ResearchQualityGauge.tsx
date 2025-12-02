@@ -180,18 +180,21 @@ const ResearchQualityGauge: React.FC<ResearchQualityGaugeProps> = ({
       console.log('[ResearchQualityGauge] API response:', data);
           
       // Extract research quality metrics from analytics
-      // Support both old and new API response formats
+      // Support both old and new API response formats, including chart_data
       const qualityScore = 
+        data.chart_data?.research_quality_score ||
         data.analytics?.research_metrics?.quality_score || 
         data.analytics?.research_metrics?.quality_assessment?.overallScore ||
         data.researchQuality?.overallScore || 
         75;
       const totalStudies = 
+        data.chart_data?.study_count ||
         data.analytics?.research_metrics?.total_studies ||
         data.analytics?.research_metrics?.quality_assessment?.totalStudies ||
         data.researchQuality?.totalStudies || 
         42;
       const levelString = 
+        data.chart_data?.evidence_grade ||
         data.analytics?.research_metrics?.evidence_level ||
         data.analytics?.research_metrics?.quality_assessment?.evidenceLevel ||
         data.researchQuality?.evidenceLevel || 
