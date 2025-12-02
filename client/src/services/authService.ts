@@ -206,6 +206,8 @@ class AuthService {
     this.setState({ loading: true, error: undefined });
     
     try {
+      console.log('[AuthService] Registering user:', { email: data.email, name: data.name });
+      
       const response = await fetch(`${WIHY_AUTH_API_BASE}/api/auth/local/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -213,16 +215,33 @@ class AuthService {
         body: JSON.stringify(data)
       });
 
-      const result = await this.handleResponse<{ success: boolean; user_id?: string; message?: string }>(response);
+      console.log('[AuthService] Register response status:', response.status);
+
+      // Handle non-OK responses
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ 
+          error: `HTTP ${response.status}: ${response.statusText}` 
+        }));
+        console.error('[AuthService] Register failed:', errorData);
+        const errorMessage = errorData.error || errorData.details || errorData.message || 'Registration failed';
+        this.setState({ loading: false, error: errorMessage });
+        return { success: false, error: errorMessage };
+      }
+
+      const result = await response.json();
+      console.log('[AuthService] Register result:', result);
       
       if (result.success) {
         this.setState({ loading: false });
         return { success: true, user_id: result.user_id };
       } else {
-        throw new Error('Registration failed');
+        const errorMessage = result.error || result.message || 'Registration failed';
+        this.setState({ loading: false, error: errorMessage });
+        return { success: false, error: errorMessage };
       }
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Registration failed';
+      console.error('[AuthService] Register exception:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Registration failed - network error';
       this.setState({ loading: false, error: errorMessage });
       return { success: false, error: errorMessage };
     }
@@ -235,6 +254,8 @@ class AuthService {
     this.setState({ loading: true, error: undefined });
     
     try {
+      console.log('[AuthService] Logging in user:', email);
+      
       const response = await fetch(`${WIHY_AUTH_API_BASE}/api/auth/local/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -242,7 +263,21 @@ class AuthService {
         body: JSON.stringify({ email, password })
       });
 
-      const result = await this.handleResponse<LoginResponse>(response);
+      console.log('[AuthService] Login response status:', response.status);
+
+      // Handle non-OK responses
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ 
+          error: `HTTP ${response.status}: ${response.statusText}` 
+        }));
+        console.error('[AuthService] Login failed:', errorData);
+        const errorMessage = errorData.error || errorData.details || errorData.message || 'Login failed';
+        this.setState({ loading: false, error: errorMessage });
+        return { success: false, error: errorMessage };
+      }
+
+      const result = await response.json();
+      console.log('[AuthService] Login result:', result);
       
       if (result.success && result.user) {
         const user: User = {
@@ -259,10 +294,13 @@ class AuthService {
         
         return result;
       } else {
-        throw new Error(result.error || 'Login failed');
+        const errorMessage = result.error || result.message || 'Login failed';
+        this.setState({ loading: false, error: errorMessage });
+        return { success: false, error: errorMessage };
       }
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Login failed';
+      console.error('[AuthService] Login exception:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Login failed - network error';
       this.setState({ loading: false, error: errorMessage });
       return { success: false, error: errorMessage };
     }
