@@ -20,9 +20,9 @@ export type ShoppingListCategory =
   | "drinks"
   | "other";
 
-export type ShoppingListItem = {
+export type CoachShoppingListItem = {
   id: string;
-  name: string;
+  item: string;
   category: ShoppingListCategory;
   quantity?: string;
   note?: string;
@@ -143,10 +143,10 @@ function makeId(prefix: string) {
 }
 
 // Extended plan with nutrition
-export interface CoachPlan extends WihyCoachModel {
+export interface CoachPlan extends Omit<WihyCoachModel, 'shoppingList'> {
   goals?: string[];           // Simple array of goal strings
   diets?: DietTag[];          // Custom diet patterns
-  shoppingList?: ShoppingListItem[];
+  shoppingList?: CoachShoppingListItem[];
   dietGoals?: DietGoalKey[];  // Selected from the 11 core diet approaches
 }
 
@@ -185,13 +185,13 @@ const seedClients: CoachClient[] = [
       shoppingList: [
         {
           id: "shop-alice-1",
-          name: "Chicken breast",
+          item: "Chicken breast",
           category: "protein",
           quantity: "2 lbs",
         },
         {
           id: "shop-alice-2",
-          name: "Spinach",
+          item: "Spinach",
           category: "produce",
           quantity: "1 bag",
           optional: true,
@@ -240,13 +240,13 @@ const seedClients: CoachClient[] = [
       shoppingList: [
         {
           id: "shop-bob-1",
-          name: "Ground beef",
+          item: "Ground beef",
           category: "protein",
           quantity: "3 lbs",
         },
         {
           id: "shop-bob-2",
-          name: "Eggs",
+          item: "Eggs",
           category: "protein",
           quantity: "2 dozen",
         },
@@ -442,9 +442,9 @@ export default function CoachDashboard() {
   function handleAddShoppingItem() {
     if (!selectedClient || !newShoppingName.trim()) return;
     const updated = { ...selectedClient };
-    const newItem: ShoppingListItem = {
+    const newItem: CoachShoppingListItem = {
       id: makeId("shop"),
-      name: newShoppingName.trim(),
+      item: newShoppingName.trim(),
       category: newShoppingCategory,
       quantity: newShoppingQty.trim() || undefined,
       note: newShoppingNote.trim() || undefined,
@@ -844,7 +844,7 @@ export default function CoachDashboard() {
               >
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
-                    <span className="font-semibold">{item.name}</span>
+                    <span className="font-semibold">{item.item}</span>
                     <span className="text-xs text-gray-500">
                       [{item.category}]
                     </span>
