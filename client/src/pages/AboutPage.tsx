@@ -21,6 +21,7 @@ const AboutPage: React.FC = () => {
   const [isNavOpen, setIsNavOpen] = useState(false);
   const [showWaitlistPopup, setShowWaitlistPopup] = useState(false);
   const [hasDismissedPopup, setHasDismissedPopup] = useState(false);
+  const [hasUsedDemo, setHasUsedDemo] = useState(false);
   
   // Ref to monitor the chat container specifically
   const chatContainerRef = React.useRef<HTMLDivElement>(null);
@@ -42,11 +43,15 @@ const AboutPage: React.FC = () => {
 
   // Simple automation: show popup after scroll or a short delay
   useEffect(() => {
-    if (hasDismissedPopup) return;
+    // Only prevent if manually dismissed, not if they used the demo
+    if (hasDismissedPopup && !hasUsedDemo) return;
 
     const onScroll = () => {
       if (window.scrollY > 400) {
         setShowWaitlistPopup(true);
+      } else {
+        // Hide popup when scrolled back to top (near chat demo)
+        setShowWaitlistPopup(false);
       }
     };
 
@@ -60,7 +65,7 @@ const AboutPage: React.FC = () => {
       window.removeEventListener('scroll', onScroll);
       window.clearTimeout(timer);
     };
-  }, [hasDismissedPopup]);
+  }, [hasDismissedPopup, hasUsedDemo]);
 
   const handleDismissPopup = () => {
     setShowWaitlistPopup(false);
@@ -190,7 +195,7 @@ const AboutPage: React.FC = () => {
               </div>
             </div> {/* End hero-left */}
 
-            <div className="hero-right">
+            <div className="hero-right" id="chat-demo">
               <div 
                 ref={chatContainerRef}
                 className={`chat-frame-container ${isLoaded ? 'animate-in delay-2' : ''}`}
@@ -1026,8 +1031,16 @@ I will translate complex health and nutrition science into simple steps you can 
             type="button"
             className="floating-popup-cta"
             onClick={() => {
-              navigate('/');
               setShowWaitlistPopup(false);
+              setHasUsedDemo(true);
+              setHasDismissedPopup(false); // Allow popup to show again after scrolling
+              // Small delay to allow popup to hide before scrolling
+              setTimeout(() => {
+                const chatSection = document.getElementById('chat-demo');
+                if (chatSection) {
+                  chatSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+              }, 300);
             }}
           >
             Ask Wihy Ai demo
