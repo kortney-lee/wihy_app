@@ -32,23 +32,6 @@ const ResearchDashboard: React.FC<ResearchDashboardProps> = ({
         Research & Evidence
       </h1>
 
-      <p
-        style={{
-          fontSize: '13px',
-          lineHeight: 1.4,
-          color: '#4b5563',
-          maxWidth: '800px',
-          margin: windowWidth < 768 ? '0 auto 12px' : '0 auto 16px',
-          padding: windowWidth < 768 ? '0 12px' : '0',
-          textAlign: 'center'
-        }}
-      >
-        Browse evidence by domain, launch focused literature searches in one click,
-        and view how research connects to this person&apos;s nutrition, activity, and
-        risk profile. Designed so a clinician can quickly move from{' '}
-        <strong>question → evidence → action.</strong>
-      </p>
-
       {/* Research Panel with tabbed workflow */}
       <div
         style={{
