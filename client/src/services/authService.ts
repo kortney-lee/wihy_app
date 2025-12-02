@@ -3,11 +3,11 @@
 // ============================================================
 // Comprehensive authentication service for wihy_auth API
 // Supports local auth, OAuth2 (Google, Facebook, Microsoft), and session management
-// API Base: http://wihy-auth-api.westus2.azurecontainer.io:5000
+// API Base: https://auth.wihy.ai
 
 const WIHY_AUTH_API_BASE = 
   process.env.REACT_APP_WIHY_AUTH_API_URL || 
-  'http://wihy-auth-api.westus2.azurecontainer.io:5000';
+  'https://auth.wihy.ai';
 
 // ============================================================
 // TYPE DEFINITIONS
