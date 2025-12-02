@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { CTAButton, NavLink } from '../shared/ButtonComponents';
 import { PlatformDetectionService } from '../../services/shared/platformDetectionService';
 
@@ -8,12 +9,28 @@ interface AboutPageHeaderProps {
 }
 
 const AboutPageHeader: React.FC<AboutPageHeaderProps> = ({ isNavOpen, onToggleNav }) => {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const handleNavClick = (hash: string) => {
+    // If we're not on the about page, navigate to it first
+    if (location.pathname !== '/about') {
+      navigate(`/about${hash}`);
+    } else {
+      // If we're already on about page, just scroll
+      const element = document.querySelector(hash);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+  };
+
   return (
     <nav className="top-nav" style={{
       paddingTop: PlatformDetectionService.isNative() ? '48px' : undefined
     }}>
       <div className="nav-container">
-        <div className="nav-brand">
+        <div className="nav-brand" onClick={() => navigate('/about')} style={{ cursor: 'pointer' }}>
           <img src="/assets/wihylogo.png" alt="WIHY.ai" className="nav-logo" />
         </div>
 
@@ -28,11 +45,21 @@ const AboutPageHeader: React.FC<AboutPageHeaderProps> = ({ isNavOpen, onToggleNa
         </button>
 
         <div className={`nav-links ${isNavOpen ? 'open' : ''}`}>
-          <NavLink href="#platform">Platform</NavLink>
-          <NavLink href="#technology">Technology</NavLink>
-          <NavLink href="#market">Market</NavLink>
-          <NavLink href="#founder">Leadership</NavLink>
-          <NavLink href="#investment">Investment</NavLink>
+          <a href="#platform" onClick={(e) => { e.preventDefault(); handleNavClick('#platform'); }} className="nav-link">
+            Platform
+          </a>
+          <a href="#technology" onClick={(e) => { e.preventDefault(); handleNavClick('#technology'); }} className="nav-link">
+            Technology
+          </a>
+          <a href="#market" onClick={(e) => { e.preventDefault(); handleNavClick('#market'); }} className="nav-link">
+            Market
+          </a>
+          <a href="#leadership" onClick={(e) => { e.preventDefault(); handleNavClick('#leadership'); }} className="nav-link">
+            Leadership
+          </a>
+          <a href="#investment" onClick={(e) => { e.preventDefault(); handleNavClick('#investment'); }} className="nav-link">
+            Investment
+          </a>
           <CTAButton href="/" primary>
             Launch Platform
           </CTAButton>

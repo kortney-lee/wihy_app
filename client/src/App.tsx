@@ -9,6 +9,8 @@ import TestDashboardGrid from './pages/TestDashboardGrid';
 import TestIndividualComponents from './pages/TestIndividualComponents';
 import AboutPage from './pages/AboutPage';
 import NewAboutpage from './pages/NewAboutpage';
+import PrivacyPage from './pages/PrivacyPage';
+import TermsPage from './pages/TermsPage'
 import TailwindDemoPage from './pages/TailwindDemoPage';
 import NewsPage from './pages/NewsPage';
 import CoachDashboard from './components/dashboard/CoachDashboard';
@@ -518,9 +520,11 @@ const App: React.FC = () => {
         <Route path="/" element={<VHealthSearch />} />
         <Route path="/results" element={<ResultsPage />} />
         <Route path="/about" element={<AboutPage />} />
+        <Route path="/about" element={<AboutPage />} />
+        <Route path="/privacy" element={<PrivacyPage />} />
+        <Route path="/terms" element={<TermsPage />} />
         <Route path="/new-about" element={<NewAboutpage />} />
         <Route path="/news" element={<NewsPage />} />
-        <Route path="/dashboard/coach" element={<CoachDashboard />} />
         <Route path="/dashboard/parent" element={<ParentDashboard />} />
         <Route path="/test" element={<TestChartsPage />} />
         <Route path="/test-grid" element={<TestDashboardGrid />} />
