@@ -20,3 +20,8 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+/* Modal open state - prevent body scroll */
+body.modal-open {
+  overflow: hidden;
+}
