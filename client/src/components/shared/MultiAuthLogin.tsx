@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { authService, User } from '../../services/authService';
-import './MultiAuthLogin.css';
 
 // Re-export User type for external use
 export type { User };
@@ -309,33 +308,33 @@ const MultiAuthLogin: React.FC<MultiAuthLoginProps> = ({
   };
 
   return (
-    <div className={`multi-auth-container ${position} ${className}`}>
+    <div className={`relative inline-block ${position === 'top-right' ? 'fixed top-4 right-4 z-[10002]' : ''} ${className}`}>
       {/* Main Login Button */}
       <button 
-        className={`login-icon ${user ? 'authenticated' : ''}`}
+        className={`bg-transparent border-none cursor-pointer p-0 rounded-full flex items-center justify-center transition-colors duration-200 text-gray-600 w-10 h-10 z-[1500] relative hover:bg-black/5 hover:text-slate-800 disabled:opacity-60 disabled:cursor-not-allowed ${user ? 'authenticated' : ''}`}
         onClick={handleLoginClick}
         disabled={loading}
         aria-label={user ? 'User menu' : 'Sign in'}
       >
         {loading ? (
-          <div className="login-spinner"></div>
+          <div className="w-5 h-5 border-2 border-gray-300 border-t-blue-500 rounded-full animate-spin"></div>
         ) : user ? (
           user.picture ? (
             <img 
               src={user.picture} 
               alt="Profile" 
-              className="profile-image"
+              className="w-6 h-6 rounded-full object-cover"
             />
           ) : (
             <div 
-              className="profile-initial"
+              className="w-6 h-6 rounded-full flex items-center justify-center text-white font-semibold text-xs"
               style={{ backgroundColor: getProviderColor(user.provider) }}
             >
               {user.name?.charAt(0) || 'U'}
             </div>
           )
         ) : (
-          <svg viewBox="0 0 24 24" fill="currentColor">
+          <svg viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
             <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
           </svg>
         )}
@@ -345,86 +344,58 @@ const MultiAuthLogin: React.FC<MultiAuthLoginProps> = ({
       {!user && showProviders && createPortal(
         <>
           <div 
-            className="auth-overlay" 
+            className="fixed inset-0 bg-black/50 z-[10000] backdrop-blur-sm"
             onClick={() => {
               setShowProviders(false);
               setShowDropdown(false);
             }}
           ></div>
-          <div className="providers-popup">
-            <div className="providers-header">
-              <h3>{title}</h3>
+          <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[10001] bg-white rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.15),0_8px_25px_rgba(0,0,0,0.1)] w-[380px] max-w-[90vw] max-h-[90vh] overflow-hidden border border-black/5 md:top-20 md:translate-y-0">
+            <div className="flex justify-center items-center p-4 text-center relative">
+              <h3 className="m-0 text-lg font-medium text-[#202124]">{title}</h3>
               <button 
-                className="close-button"
+                className="bg-transparent border-none cursor-pointer text-[22px] text-gray-600 p-0 w-6 h-6 flex items-center justify-center absolute top-4 right-4 hover:bg-gray-100 hover:text-slate-800 rounded"
                 onClick={() => setShowProviders(false)}
               >
                 ×
               </button>
             </div>
-            <div style={{ 
-              padding: '0 20px 16px 20px', 
-              textAlign: 'center',
-              color: '#6b7280',
-              fontSize: '14px',
-              lineHeight: '1.5'
-            }}>
-              <p style={{ margin: '0 0 12px 0', fontStyle: 'italic' }}>
+            <div className="px-5 pb-4 text-center text-gray-600 text-sm leading-relaxed">
+              <p className="m-0 mb-3 italic">
                 (pronounced "why")
               </p>
-              <p style={{ margin: '0 0 12px 0' }}>
+              <p className="m-0 mb-3">
                 You can scan foods for free or ask general questions anytime.
               </p>
-              <p style={{ margin: '0' }}>
+              <p className="m-0">
                 To save your history, track your progress, and share your goals, you'll need to create an account.
               </p>
             </div>
-            <div className="providers-list">
+            <div className="px-5 flex flex-col gap-3 relative z-[1]">
               {authProviders.filter(provider => provider.id !== 'email').map((provider) => (
                 <button
                   key={provider.id}
-                  className="provider-button"
+                  className="flex items-center justify-center gap-3 px-[18px] py-[14px] border border-[#dadce0] rounded-full bg-white cursor-pointer transition-all duration-200 text-sm font-medium text-slate-700 w-full text-center relative z-[1] hover:bg-gray-100 hover:border-[#bdc3c7] hover:shadow-md"
                   onClick={() => handleProviderLogin(provider)}
                   style={{ '--provider-color': provider.color } as React.CSSProperties}
                 >
-                  {provider.icon}
+                  <span className="w-5 h-5 flex-shrink-0">{provider.icon}</span>
                   <span>Continue with {provider.name}</span>
                 </button>
               ))}
             </div>
             
-            <div style={{ padding: '16px 20px', textAlign: 'center' }}>
-              <div style={{ 
-                display: 'flex', 
-                alignItems: 'center', 
-                margin: '8px 0',
-                color: '#6b7280',
-                fontSize: '14px',
-                fontWeight: '500'
-              }}>
-                <div style={{ flex: 1, height: '1px', backgroundColor: '#e5e7eb' }}></div>
-                <span style={{ margin: '0 16px' }}>OR</span>
-                <div style={{ flex: 1, height: '1px', backgroundColor: '#e5e7eb' }}></div>
+            <div className="px-5 py-4 text-center">
+              <div className="flex items-center my-2 text-gray-600 text-sm font-medium">
+                <div className="flex-1 h-px bg-gray-200"></div>
+                <span className="mx-4">OR</span>
+                <div className="flex-1 h-px bg-gray-200"></div>
               </div>
               
               <input
                 type="email"
                 placeholder="Email address"
-                style={{
-                  width: '100%',
-                  padding: '14px 18px',
-                  border: '1px solid #dadce0',
-                  borderRadius: '24px',
-                  fontSize: '14px',
-                  outline: 'none',
-                  marginBottom: '12px',
-                  boxSizing: 'border-box'
-                }}
-                onFocus={(e) => {
-                  e.target.style.borderColor = '#3b82f6';
-                }}
-                onBlur={(e) => {
-                  e.target.style.borderColor = '#dadce0';
-                }}
+                className="w-full px-[18px] py-[14px] border border-[#dadce0] rounded-full text-sm outline-none mb-3 box-border focus:border-blue-500"
               />
               
               <button
@@ -433,30 +404,13 @@ const MultiAuthLogin: React.FC<MultiAuthLoginProps> = ({
                   setShowEmailForm(true);
                   setEmailMode('signin');
                 }}
-                style={{
-                  width: '100%',
-                  padding: '14px 18px',
-                  backgroundColor: '#1f2937',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '24px',
-                  fontSize: '14px',
-                  fontWeight: '600',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = '#374151';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = '#1f2937';
-                }}
+                className="w-full px-[18px] py-[14px] bg-gray-800 text-white border-none rounded-full text-sm font-semibold cursor-pointer transition-all duration-200 hover:bg-gray-700"
               >
                 Continue
               </button>
             </div>
             
-            <p className="providers-disclaimer">
+            <p className="px-5 pb-4 text-xs text-slate-600 text-center m-0 leading-snug">
               {disclaimer}
             </p>
           </div>
@@ -468,28 +422,23 @@ const MultiAuthLogin: React.FC<MultiAuthLoginProps> = ({
       {user && showDropdown && createPortal(
         <>
           <div 
-            className="auth-overlay" 
+            className="fixed inset-0 bg-black/50 z-[10000] backdrop-blur-sm"
             onClick={() => {
               setShowProviders(false);
               setShowDropdown(false);
             }}
           ></div>
-          <div className="user-dropdown" style={{ 
-            position: 'fixed',
-            top: '60px',
-            right: '20px',
-            zIndex: 10001
-          }}>
-            <div className="user-info">
-              <div className="user-name">{user.name}</div>
-              <div className="user-email">{user.email}</div>
-              <div className="user-provider">
+          <div className="fixed top-[60px] right-5 z-[10001] w-[280px] bg-white rounded-lg shadow-[0_2px_10px_rgba(0,0,0,0.2)] overflow-hidden py-4 animate-[fadeIn_0.2s_ease-out]">
+            <div className="px-4 pb-4">
+              <div className="font-semibold text-[#202124] mb-1 text-sm">{user.name}</div>
+              <div className="text-gray-600 mb-1 text-xs">{user.email}</div>
+              <div className="text-gray-600 text-[11px] m-0">
                 Signed in with {user.provider.charAt(0).toUpperCase() + user.provider.slice(1)}
               </div>
             </div>
-            <div className="dropdown-divider"></div>
-            <button className="dropdown-item" onClick={handleSignOut}>
-              <svg viewBox="0 0 24 24" fill="currentColor" className="dropdown-icon">
+            <div className="h-px bg-[#dadce0] mx-4 mb-2"></div>
+            <button className="w-full flex items-center gap-3 px-4 py-2 bg-transparent border-none cursor-pointer text-sm text-[#202124] transition-colors duration-200 text-left hover:bg-gray-100" onClick={handleSignOut}>
+              <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-gray-600">
                 <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.59L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>
               </svg>
               Sign Out
@@ -503,42 +452,40 @@ const MultiAuthLogin: React.FC<MultiAuthLoginProps> = ({
       {!user && showEmailForm && createPortal(
         <>
           <div 
-            className="auth-overlay" 
+            className="fixed inset-0 bg-black/50 z-[10000] backdrop-blur-sm"
             onClick={() => {
               setShowEmailForm(false);
               setShowProviders(false);
             }}
           ></div>
-          <div className="providers-popup">
-            <div className="providers-header">
+          <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[10001] bg-white rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.15),0_8px_25px_rgba(0,0,0,0.1)] w-[380px] max-w-[90vw] max-h-[90vh] overflow-hidden border border-black/5 md:top-20 md:translate-y-0">
+            <div className="flex justify-center items-center p-4 text-center relative">
               <button 
-                className="close-button"
+                className="bg-transparent border-none cursor-pointer text-[22px] text-gray-600 p-0 w-6 h-6 flex items-center justify-center hover:bg-gray-100 hover:text-slate-800 rounded mr-auto"
                 onClick={() => {
                   setShowEmailForm(false);
                   setShowProviders(true);
                 }}
-                style={{ marginRight: 'auto' }}
               >
                 ←
               </button>
-              <h3>{emailMode === 'signin' ? 'Sign in with email' : 'Create account'}</h3>
+              <h3 className="m-0 text-lg font-medium text-[#202124]">{emailMode === 'signin' ? 'Sign in with email' : 'Create account'}</h3>
               <button 
-                className="close-button"
+                className="bg-transparent border-none cursor-pointer text-[22px] text-gray-600 p-0 w-6 h-6 flex items-center justify-center absolute top-4 right-4 hover:bg-gray-100 hover:text-slate-800 rounded"
                 onClick={() => setShowEmailForm(false)}
               >
                 ×
               </button>
             </div>
-            <div className="providers-list">
-              <form onSubmit={handleEmailSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <div className="px-5 flex flex-col gap-3">
+              <form onSubmit={handleEmailSubmit} className="flex flex-col gap-4">
                 {emailMode === 'signup' && (
                   <input
                     type="text"
                     placeholder="Full name"
                     value={emailData.name}
                     onChange={(e) => setEmailData({ ...emailData, name: e.target.value })}
-                    className="provider-button"
-                    style={{ textAlign: 'left', border: '1px solid #dadce0' }}
+                    className="flex items-center justify-center gap-3 px-[18px] py-[14px] border border-[#dadce0] rounded-full bg-white cursor-pointer transition-all duration-200 text-sm font-medium text-slate-700 w-full text-left"
                     required
                   />
                 )}
@@ -547,8 +494,7 @@ const MultiAuthLogin: React.FC<MultiAuthLoginProps> = ({
                   placeholder="Email address"
                   value={emailData.email}
                   onChange={(e) => setEmailData({ ...emailData, email: e.target.value })}
-                  className="provider-button"
-                  style={{ textAlign: 'left', border: '1px solid #dadce0' }}
+                  className="flex items-center justify-center gap-3 px-[18px] py-[14px] border border-[#dadce0] rounded-full bg-white cursor-pointer transition-all duration-200 text-sm font-medium text-slate-700 w-full text-left"
                   required
                 />
                 <input
@@ -556,8 +502,7 @@ const MultiAuthLogin: React.FC<MultiAuthLoginProps> = ({
                   placeholder="Password"
                   value={emailData.password}
                   onChange={(e) => setEmailData({ ...emailData, password: e.target.value })}
-                  className="provider-button"
-                  style={{ textAlign: 'left', border: '1px solid #dadce0' }}
+                  className="flex items-center justify-center gap-3 px-[18px] py-[14px] border border-[#dadce0] rounded-full bg-white cursor-pointer transition-all duration-200 text-sm font-medium text-slate-700 w-full text-left"
                   required
                 />
                 {emailMode === 'signup' && (
@@ -566,14 +511,13 @@ const MultiAuthLogin: React.FC<MultiAuthLoginProps> = ({
                     placeholder="Confirm password"
                     value={emailData.confirmPassword}
                     onChange={(e) => setEmailData({ ...emailData, confirmPassword: e.target.value })}
-                    className="provider-button"
-                    style={{ textAlign: 'left', border: '1px solid #dadce0' }}
+                    className="flex items-center justify-center gap-3 px-[18px] py-[14px] border border-[#dadce0] rounded-full bg-white cursor-pointer transition-all duration-200 text-sm font-medium text-slate-700 w-full text-left"
                     required
                   />
                 )}
                 
                 {emailError && (
-                  <div style={{ color: '#ef4444', fontSize: '14px', textAlign: 'center' }}>
+                  <div className="text-red-500 text-sm text-center">
                     {emailError}
                   </div>
                 )}
@@ -581,29 +525,17 @@ const MultiAuthLogin: React.FC<MultiAuthLoginProps> = ({
                 <button
                   type="submit"
                   disabled={emailLoading}
-                  className="provider-button"
-                  style={{ 
-                    backgroundColor: '#1f2937', 
-                    color: 'white', 
-                    border: '1px solid #1f2937',
-                    fontWeight: '600'
-                  }}
+                  className="flex items-center justify-center gap-3 px-[18px] py-[14px] border border-gray-800 rounded-full bg-gray-800 text-white cursor-pointer transition-all duration-200 text-sm font-semibold w-full text-center disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   {emailLoading ? 'Please wait...' : emailMode === 'signin' ? 'Sign in' : 'Create account'}
                 </button>
                 
-                <div style={{ textAlign: 'center', fontSize: '14px', color: '#6b7280' }}>
+                <div className="text-center text-sm text-gray-600">
                   {emailMode === 'signin' ? "Don't have an account? " : "Already have an account? "}
                   <button
                     type="button"
                     onClick={() => setEmailMode(emailMode === 'signin' ? 'signup' : 'signin')}
-                    style={{ 
-                      background: 'none', 
-                      border: 'none', 
-                      color: '#3b82f6', 
-                      cursor: 'pointer',
-                      textDecoration: 'underline'
-                    }}
+                    className="bg-transparent border-none text-blue-500 cursor-pointer underline"
                   >
                     {emailMode === 'signin' ? 'Sign up' : 'Sign in'}
                   </button>
