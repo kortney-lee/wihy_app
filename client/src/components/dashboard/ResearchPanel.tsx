@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import DashboardCharts from '../charts/grids/DashboardCharts';
 import { ChartType } from '../charts/chartTypes';
 import Spinner from '../ui/Spinner';
@@ -213,6 +213,13 @@ const ResearchPanel: React.FC<ResearchPanelProps> = ({
   );
   const [articleQuestion, setArticleQuestion] = useState<string>('');
   const [articleSearchTerm, setArticleSearchTerm] = useState<string>('');
+
+  // Safety: if on Article tab but no article loaded, redirect to Search
+  useEffect(() => {
+    if (activeTab === 'article' && !selectedPmcId && !articleContent) {
+      setActiveTab('search');
+    }
+  }, [activeTab, selectedPmcId, articleContent]);
 
   /** ---- API CALLS ---- */
 
@@ -435,32 +442,37 @@ const ResearchPanel: React.FC<ResearchPanelProps> = ({
           padding: '4px 4px 0'
         }}
       >
-        {(
-          [
+        {(() => {
+          const tabs: { key: TabKey; label: string }[] = [
             { key: 'search', label: 'Search & Tools' },
-            { key: 'article', label: 'Article View' },
+            // Article tab only appears when user loads an article
+            ...(selectedPmcId || articleContent
+              ? [{ key: 'article' as TabKey, label: 'Article View' }]
+              : []),
             { key: 'quality', label: 'Quality & Charts' }
-          ] as { key: TabKey; label: string }[]
-        ).map((tab) => (
-          <button
-            key={tab.key}
-            type="button"
-            onClick={() => setActiveTab(tab.key)}
-            style={{
-              border: 'none',
-              borderBottom:
-                activeTab === tab.key ? '2px solid #16a34a' : '2px solid transparent',
-              background: 'transparent',
-              padding: '6px 10px',
-              fontSize: 12,
-              cursor: 'pointer',
-              color: activeTab === tab.key ? '#111827' : '#6b7280',
-              fontWeight: activeTab === tab.key ? 600 : 500
-            }}
-          >
-            {tab.label}
-          </button>
-        ))}
+          ];
+
+          return tabs.map((tab) => (
+            <button
+              key={tab.key}
+              type="button"
+              onClick={() => setActiveTab(tab.key)}
+              style={{
+                border: 'none',
+                borderBottom:
+                  activeTab === tab.key ? '2px solid #16a34a' : '2px solid transparent',
+                background: 'transparent',
+                padding: '6px 10px',
+                fontSize: 12,
+                cursor: 'pointer',
+                color: activeTab === tab.key ? '#111827' : '#6b7280',
+                fontWeight: activeTab === tab.key ? 600 : 500
+              }}
+            >
+              {tab.label}
+            </button>
+          ));
+        })()}
       </div>
 
       {loading && (
