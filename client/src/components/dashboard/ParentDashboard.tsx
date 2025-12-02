@@ -263,7 +263,7 @@ const ParentDashboard: React.FC = () => {
                 </div>
 
                 {/* Tabs */}
-                <div className="flex gap-2 mb-4 border-b border-slate-100">
+                <div className="flex gap-1 mb-6 border-b border-gray-200 overflow-x-auto overflow-y-hidden scrollbar-hide">
                   {[
                     { id: "overview", label: "Overview" },
                     { id: "food", label: "Food" },
@@ -274,10 +274,10 @@ const ParentDashboard: React.FC = () => {
                       key={tab.id}
                       type="button"
                       onClick={() => setActiveTab(tab.id as TabId)}
-                      className={`px-4 py-2 text-xs font-medium transition-colors ${
+                      className={`px-6 py-4 text-[15px] font-medium rounded-t-lg whitespace-nowrap leading-normal transition-colors ${
                         activeTab === tab.id
-                          ? "text-emerald-600 border-b-2 border-emerald-600"
-                          : "text-slate-500 hover:text-slate-700"
+                          ? "bg-white text-gray-900 border border-gray-200 border-b-white -mb-px"
+                          : "bg-transparent text-gray-600 hover:text-gray-900 hover:bg-gray-50"
                       }`}
                     >
                       {tab.label}
@@ -549,7 +549,7 @@ const ChildNotes: React.FC<{
       <button
         type="button"
         onClick={onAddNote}
-        className="rounded-lg bg-emerald-500 px-4 py-2 text-xs font-semibold text-white hover:bg-emerald-600 transition-colors"
+        className="rounded-full bg-emerald-500 px-4 py-2 text-xs font-semibold text-white hover:bg-emerald-600 transition-colors"
       >
         Save
       </button>

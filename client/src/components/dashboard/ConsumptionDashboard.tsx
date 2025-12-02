@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import DashboardCharts from '../charts/grids/DashboardCharts';
 import { ChartType } from '../charts/chartTypes';
-import '../../styles/consumption.css';
 
 export interface ShoppingListItem {
   id: string;
@@ -71,11 +70,15 @@ const ConsumptionDashboard: React.FC<ConsumptionDashboardProps> = ({
   };
 
   const renderTimeframeSelector = () => (
-    <div className="consumption-timeframe-toggle">
+    <div className="flex gap-2 bg-gray-100 p-1 rounded-full">
       {(['day', 'week', 'month'] as const).map(tf => (
         <button
           key={tf}
-          className={`consumption-timeframe-btn ${timeframe === tf ? 'active' : ''}`}
+          className={`px-4 py-2 text-sm font-medium rounded-full transition-all duration-200 ${
+            timeframe === tf
+              ? 'bg-white text-gray-900 shadow-sm'
+              : 'bg-transparent text-gray-600 hover:text-gray-900'
+          }`}
           onClick={() => setTimeframe(tf)}
         >
           {tf === 'day' ? 'Today' : tf === 'week' ? 'This Week' : 'This Month'}
@@ -106,9 +109,9 @@ const ConsumptionDashboard: React.FC<ConsumptionDashboardProps> = ({
         ];
 
     return (
-      <div className="consumption-overview-grid">
+      <div className="flex flex-col gap-6">
         {/* Charts – show all consumption-related charts */}
-        <div className="consumption-charts-section">
+        <div>
           <DashboardCharts
             period={timeframe}
             maxCards={20}
@@ -135,6 +138,9 @@ const ConsumptionDashboard: React.FC<ConsumptionDashboardProps> = ({
               ChartType.PUBLICATION_TIMELINE,
               ChartType.STUDY_TYPE_DISTRIBUTION,
               ChartType.RESULT_QUALITY_PIE,
+              ChartType.RESEARCH_EVIDENCE_QUALITY,
+              ChartType.RESEARCH_STUDY_TYPE_DISTRIBUTION,
+              ChartType.RESEARCH_PUBLICATION_TIMELINE,
               ChartType.BMI_BODY_FAT,
               ChartType.SLEEP_CHART,
               ChartType.HEALTH_RISK_CHART,
@@ -150,44 +156,51 @@ const ConsumptionDashboard: React.FC<ConsumptionDashboardProps> = ({
   };
 
   const renderSummary = () => {
-    // Intake summary should always exclude card summaries - only show trend charts
-    const periodExclusions = [
-      ChartType.CALORIES,
-      ChartType.HYDRATION,
-      ChartType.NUTRITION_ANALYSIS,
-      ChartType.NUTRITION_GRADE_BADGE,
-      ChartType.VITAMIN_CONTENT,
-      ChartType.DAILY_VALUE_PROGRESS,
-      ChartType.NOVA_SCORE,
-      ChartType.NUTRITION_TRACKING,
-      ChartType.MACRONUTRIENTS
-    ];
+    // When showing trends (week/month), exclude card summaries - only show charts
+    // When showing "Today", exclude trend charts - only show card summaries
+    const periodExclusions = timeframe === 'day' 
+      ? [
+          ChartType.CALORIES_CHART,
+          ChartType.NUTRITION_CHART,
+          ChartType.HYDRATION_CHART
+        ]
+      : [
+          ChartType.CALORIES,
+          ChartType.HYDRATION,
+          ChartType.NUTRITION_ANALYSIS,
+          ChartType.NUTRITION_GRADE_BADGE,
+          ChartType.VITAMIN_CONTENT,
+          ChartType.DAILY_VALUE_PROGRESS,
+          ChartType.NOVA_SCORE,
+          ChartType.NUTRITION_TRACKING,
+          ChartType.MACRONUTRIENTS
+        ];
 
     return (
-      <div className="consumption-summary-grid">
+      <div className="flex flex-col gap-6">
         {/* Totals strip */}
-        <div className="consumption-summary-strip">
-          <div className="summary-card">
-            <div className="summary-label">Total Calories</div>
-            <div className="summary-value">
-              {mockTotals.calories.toLocaleString()} <span className="summary-unit">kcal</span>
+        <div className="flex gap-4">
+          <div className="bg-white rounded-lg border border-gray-200 p-4 flex-1 shadow-sm">
+            <div className="text-sm text-gray-600 mb-1">Total Calories</div>
+            <div className="text-2xl font-semibold text-gray-900">
+              {mockTotals.calories.toLocaleString()} <span className="text-sm font-normal text-gray-600">kcal</span>
             </div>
-            <div className="summary-sub">
+            <div className="text-xs text-gray-500 mt-1">
               Target {mockTotals.target.toLocaleString()} kcal
             </div>
           </div>
-          <div className="summary-card">
-            <div className="summary-label">Meals Logged</div>
-            <div className="summary-value">{mockTotals.meals}</div>
+          <div className="bg-white rounded-lg border border-gray-200 p-4 flex-1 shadow-sm">
+            <div className="text-sm text-gray-600 mb-1">Meals Logged</div>
+            <div className="text-2xl font-semibold text-gray-900">{mockTotals.meals}</div>
           </div>
-          <div className="summary-card">
-            <div className="summary-label">Items Logged</div>
-            <div className="summary-value">{mockTotals.items}</div>
+          <div className="bg-white rounded-lg border border-gray-200 p-4 flex-1 shadow-sm">
+            <div className="text-sm text-gray-600 mb-1">Items Logged</div>
+            <div className="text-2xl font-semibold text-gray-900">{mockTotals.items}</div>
           </div>
         </div>
 
         {/* Charts – reuse existing nutrition layout */}
-        <div className="consumption-charts-section">
+        <div>
           <DashboardCharts
             period={timeframe}
             maxCards={8}
@@ -214,6 +227,9 @@ const ConsumptionDashboard: React.FC<ConsumptionDashboardProps> = ({
               ChartType.PUBLICATION_TIMELINE,
               ChartType.STUDY_TYPE_DISTRIBUTION,
               ChartType.RESULT_QUALITY_PIE,
+              ChartType.RESEARCH_EVIDENCE_QUALITY,
+              ChartType.RESEARCH_STUDY_TYPE_DISTRIBUTION,
+              ChartType.RESEARCH_PUBLICATION_TIMELINE,
               ChartType.BMI_BODY_FAT,
               ChartType.SLEEP_CHART,
               ChartType.HEALTH_RISK_CHART,
@@ -229,62 +245,83 @@ const ConsumptionDashboard: React.FC<ConsumptionDashboardProps> = ({
   };
 
   const renderShoppingList = () => (
-    <div className="consumption-shopping-layout">
-      <div className="consumption-shopping-header">
+    <div className="space-y-6">
+      <div className="flex justify-between items-start gap-6">
         <div>
-          <h2>Shopping List Manager</h2>
-          <p className="consumption-subtext">
+          <h2 className="text-2xl font-semibold text-gray-900 mb-2">Shopping List Manager</h2>
+          <p className="text-sm text-gray-600">
             Combine WIHY AI, coach plans, and your own items into one unified list.
           </p>
         </div>
-        <div className="consumption-shopping-actions">
-          <button className="search-btn primary" onClick={handleAskWihyForList}>
-            Ask WIHY to build my list
-          </button>
-          <button className="search-btn secondary">
+        <div className="flex gap-3">
+          <div className="inline-block border-2 border-transparent rounded-full relative overflow-hidden" style={{
+            background: 'linear-gradient(#fff, #fff) padding-box, linear-gradient(90deg, #fa5f06, #ffffff, #C0C0C0, #4cbb17) border-box',
+            backgroundSize: '100% 100%, 200% 100%',
+            animation: 'wiH-border-sweep 2.2s linear infinite'
+          }}>
+            <style>{`
+              @keyframes wiH-border-sweep {
+                0% { background-position: 0% 0%, 0% 0%; }
+                100% { background-position: 0% 0%, 200% 0%; }
+              }
+            `}</style>
+            <button 
+              className="bg-white text-black font-semibold px-8 py-3 text-sm rounded-full transition-all duration-200 whitespace-nowrap" 
+              onClick={handleAskWihyForList}
+            >
+              Ask WIHY to build my list
+            </button>
+          </div>
+          <button className="px-4 py-2 bg-white text-gray-700 border border-gray-300 rounded-full hover:bg-gray-50 transition-colors font-medium text-sm">
             Import coach plan items
           </button>
-          <button className="search-btn secondary">
+          <button className="px-4 py-2 bg-white text-gray-700 border border-gray-300 rounded-full hover:bg-gray-50 transition-colors font-medium text-sm">
             Add item
           </button>
         </div>
       </div>
 
-      <div className="consumption-shopping-filters">
-        <span className="filter-label">Source:</span>
-        <button className="chip chip-active">All</button>
-        <button className="chip">WIHY</button>
-        <button className="chip">Coach</button>
-        <button className="chip">My Items</button>
+      <div className="flex items-center gap-3">
+        <span className="text-sm font-medium text-gray-700">Source:</span>
+        <button className="px-3 py-1 text-sm rounded-full bg-gray-900 text-white">All</button>
+        <button className="px-3 py-1 text-sm rounded-full bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors">WIHY</button>
+        <button className="px-3 py-1 text-sm rounded-full bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors">Coach</button>
+        <button className="px-3 py-1 text-sm rounded-full bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors">My Items</button>
       </div>
 
-      <div className="consumption-table-wrapper">
-        <table className="consumption-table">
-          <thead>
+      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
+        <table className="w-full">
+          <thead className="bg-gray-50 border-b border-gray-200">
             <tr>
-              <th>Item</th>
-              <th>Qty</th>
-              <th>Store</th>
-              <th>Source</th>
-              <th>Est. kcal / serving</th>
-              <th>Status</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Item</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Qty</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Store</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Source</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Est. kcal / serving</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Status</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody className="divide-y divide-gray-200">
             {mockShoppingList.map(item => (
-              <tr key={item.id}>
-                <td>{item.name}</td>
-                <td>{item.quantity} {item.unit}</td>
-                <td>{item.store || '—'}</td>
-                <td>
-                  <span className={`badge badge-${item.source.toLowerCase()}`}>
+              <tr key={item.id} className="hover:bg-gray-50 transition-colors">
+                <td className="px-4 py-3 text-sm text-gray-900">{item.name}</td>
+                <td className="px-4 py-3 text-sm text-gray-600">{item.quantity} {item.unit}</td>
+                <td className="px-4 py-3 text-sm text-gray-600">{item.store || '—'}</td>
+                <td className="px-4 py-3">
+                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                    item.source === 'WIHY' ? 'bg-blue-100 text-blue-800' :
+                    item.source === 'COACH' ? 'bg-green-100 text-green-800' :
+                    'bg-gray-100 text-gray-800'
+                  }`}>
                     {item.source === 'WIHY' ? 'WIHY AI' :
                      item.source === 'COACH' ? 'Coach' : 'User'}
                   </span>
                 </td>
-                <td>{item.estimatedCaloriesPerServing ?? '—'}</td>
-                <td>
-                  <span className={`status-pill status-${item.status.toLowerCase()}`}>
+                <td className="px-4 py-3 text-sm text-gray-600">{item.estimatedCaloriesPerServing ?? '—'}</td>
+                <td className="px-4 py-3">
+                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                    item.status === 'PLANNED' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'
+                  }`}>
                     {item.status === 'PLANNED' ? 'Planned' : 'Purchased'}
                   </span>
                 </td>
@@ -297,52 +334,67 @@ const ConsumptionDashboard: React.FC<ConsumptionDashboardProps> = ({
   );
 
   const renderReceipts = () => (
-    <div className="consumption-receipts-layout">
-      <div className="consumption-receipts-header">
+    <div className="space-y-6">
+      <div className="flex justify-between items-start gap-6">
         <div>
-          <h2>Trips & Receipts</h2>
-          <p className="consumption-subtext">
+          <h2 className="text-2xl font-semibold text-gray-900 mb-2">Trips & Receipts</h2>
+          <p className="text-sm text-gray-600">
             Track fast food runs and grocery trips, and convert receipts into logged intake.
           </p>
         </div>
-        <div className="consumption-receipts-actions">
-          <button className="search-btn primary" onClick={onUploadReceipt}>
+        <div className="flex gap-3">
+          <button className="px-4 py-2 bg-white text-gray-700 border border-gray-300 rounded-full hover:bg-gray-50 transition-colors font-medium text-sm" onClick={onUploadReceipt}>
             Upload receipt
           </button>
-          <button className="search-btn secondary" onClick={handleAnalyzeReceipts}>
-            Analyze my receipts with WIHY
-          </button>
+          <div className="inline-block border-2 border-transparent rounded-full relative overflow-hidden" style={{
+            background: 'linear-gradient(#fff, #fff) padding-box, linear-gradient(90deg, #fa5f06, #ffffff, #C0C0C0, #4cbb17) border-box',
+            backgroundSize: '100% 100%, 200% 100%',
+            animation: 'wiH-border-sweep 2.2s linear infinite'
+          }}>
+            <style>{`
+              @keyframes wiH-border-sweep {
+                0% { background-position: 0% 0%, 0% 0%; }
+                100% { background-position: 0% 0%, 200% 0%; }
+              }
+            `}</style>
+            <button 
+              className="bg-white text-black font-semibold px-8 py-3 text-sm rounded-full transition-all duration-200 whitespace-nowrap" 
+              onClick={handleAnalyzeReceipts}
+            >
+              Analyze my receipts with WIHY
+            </button>
+          </div>
         </div>
       </div>
 
-      <div className="consumption-table-wrapper">
-        <table className="consumption-table">
-          <thead>
+      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
+        <table className="w-full">
+          <thead className="bg-gray-50 border-b border-gray-200">
             <tr>
-              <th>Date</th>
-              <th>Store</th>
-              <th>Type</th>
-              <th>Items</th>
-              <th>Total kcal</th>
-              <th>Total spend</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Date</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Store</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Type</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Items</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Total kcal</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Total spend</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody className="divide-y divide-gray-200">
             {mockReceipts.map(r => (
-              <tr key={r.id}>
-                <td>{r.date}</td>
-                <td>{r.store}</td>
-                <td>{r.type === 'FAST_FOOD' ? 'Fast food' : 'Grocery'}</td>
-                <td>{r.itemsCount}</td>
-                <td>{r.totalCalories?.toLocaleString() ?? '—'}</td>
-                <td>{r.totalSpend != null ? `$${r.totalSpend.toFixed(2)}` : '—'}</td>
+              <tr key={r.id} className="hover:bg-gray-50 transition-colors">
+                <td className="px-4 py-3 text-sm text-gray-900">{r.date}</td>
+                <td className="px-4 py-3 text-sm text-gray-900">{r.store}</td>
+                <td className="px-4 py-3 text-sm text-gray-600">{r.type === 'FAST_FOOD' ? 'Fast food' : 'Grocery'}</td>
+                <td className="px-4 py-3 text-sm text-gray-600">{r.itemsCount}</td>
+                <td className="px-4 py-3 text-sm text-gray-600">{r.totalCalories?.toLocaleString() ?? '—'}</td>
+                <td className="px-4 py-3 text-sm text-gray-600">{r.totalSpend != null ? `$${r.totalSpend.toFixed(2)}` : '—'}</td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
 
-      <p className="consumption-hint">
+      <p className="text-sm text-gray-600 italic">
         You'll be able to tap into a receipt to see each item, match it with known products,
         and convert those into meals and total calories.
       </p>
@@ -350,45 +402,61 @@ const ConsumptionDashboard: React.FC<ConsumptionDashboardProps> = ({
   );
 
   return (
-    <div className="consumption-dashboard">
-      <div className="consumption-dashboard-header" style={{ flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
+    <div className="p-5 max-w-full overflow-x-hidden">
+      <div className="flex flex-col items-center text-center gap-6 mb-6">
         <div>
-          <h1>Consumption & Shopping</h1>
-          <p className="consumption-subtext">
+          <h1 className="text-3xl font-semibold text-gray-900 mb-2">Consumption & Shopping</h1>
+          <p className="text-gray-600 text-sm">
             See how much you actually eat, where it comes from, and keep your shopping organized.
           </p>
         </div>
         {renderTimeframeSelector()}
       </div>
 
-      <div className="consumption-subtabs">
+      <div className="flex gap-1 mb-6 border-b border-gray-200 overflow-x-auto overflow-y-hidden scrollbar-hide">
         <button
-          className={`subtab-btn ${activeSubTab === 'overview' ? 'active' : ''}`}
+          className={`px-6 py-4 text-[15px] font-medium rounded-t-lg transition-all duration-200 relative leading-normal whitespace-nowrap ${
+            activeSubTab === 'overview'
+              ? 'bg-white text-gray-900 border border-gray-200 border-b-white -mb-px'
+              : 'bg-transparent text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+          }`}
           onClick={() => setActiveSubTab('overview')}
         >
           Overview
         </button>
         <button
-          className={`subtab-btn ${activeSubTab === 'summary' ? 'active' : ''}`}
+          className={`px-6 py-4 text-[15px] font-medium rounded-t-lg transition-all duration-200 relative leading-normal whitespace-nowrap ${
+            activeSubTab === 'summary'
+              ? 'bg-white text-gray-900 border border-gray-200 border-b-white -mb-px'
+              : 'bg-transparent text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+          }`}
           onClick={() => setActiveSubTab('summary')}
         >
           Intake summary
         </button>
         <button
-          className={`subtab-btn ${activeSubTab === 'shopping' ? 'active' : ''}`}
+          className={`px-6 py-4 text-[15px] font-medium rounded-t-lg transition-all duration-200 relative leading-normal whitespace-nowrap ${
+            activeSubTab === 'shopping'
+              ? 'bg-white text-gray-900 border border-gray-200 border-b-white -mb-px'
+              : 'bg-transparent text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+          }`}
           onClick={() => setActiveSubTab('shopping')}
         >
           Shopping list
         </button>
         <button
-          className={`subtab-btn ${activeSubTab === 'receipts' ? 'active' : ''}`}
+          className={`px-6 py-4 text-[15px] font-medium rounded-t-lg transition-all duration-200 relative leading-normal whitespace-nowrap ${
+            activeSubTab === 'receipts'
+              ? 'bg-white text-gray-900 border border-gray-200 border-b-white -mb-px'
+              : 'bg-transparent text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+          }`}
           onClick={() => setActiveSubTab('receipts')}
         >
           Trips & receipts
         </button>
       </div>
 
-      <div className="consumption-content">
+      <div className="mt-6">
         {activeSubTab === 'overview' && renderOverview()}
         {activeSubTab === 'summary' && renderSummary()}
         {activeSubTab === 'shopping' && renderShoppingList()}
