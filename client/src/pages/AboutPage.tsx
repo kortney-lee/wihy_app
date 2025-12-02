@@ -1026,11 +1026,11 @@ I will translate complex health and nutrition science into simple steps you can 
             type="button"
             className="floating-popup-cta"
             onClick={() => {
-              setIsChatOpen(true);
+              navigate('/');
               setShowWaitlistPopup(false);
             }}
           >
-            Start a 30-second demo
+            Ask Wihy Ai demo
           </button>
         </div>
       )}
