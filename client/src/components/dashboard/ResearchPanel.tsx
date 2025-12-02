@@ -221,6 +221,13 @@ const ResearchPanel: React.FC<ResearchPanelProps> = ({
     }
   }, [activeTab, selectedPmcId, articleContent]);
 
+  // Safety: if on Quality tab but no chart data, redirect to Search
+  useEffect(() => {
+    if (activeTab === 'quality' && !chartData) {
+      setActiveTab('search');
+    }
+  }, [activeTab, chartData]);
+
   /** ---- API CALLS ---- */
 
   const runSearch = async (options: {
@@ -449,7 +456,10 @@ const ResearchPanel: React.FC<ResearchPanelProps> = ({
             ...(selectedPmcId || articleContent
               ? [{ key: 'article' as TabKey, label: 'Article View' }]
               : []),
-            { key: 'quality', label: 'Quality & Charts' }
+            // Quality tab only appears when there's chart data from a search
+            ...(chartData
+              ? [{ key: 'quality' as TabKey, label: 'Quality & Charts' }]
+              : [])
           ];
 
           return tabs.map((tab) => (
@@ -551,59 +561,6 @@ const ResearchPanel: React.FC<ResearchPanelProps> = ({
           {/* Tools: Claim verify + Trends + Quality topic */}
           <section className="research-card">
             <h2>Tools</h2>
-
-            {/* Quality Assessment from last search */}
-            {evidenceSummary && (
-              <div
-                style={{
-                  marginBottom: 14,
-                  padding: 12,
-                  background: '#f3f4f6',
-                  borderRadius: 6
-                }}
-              >
-                <div style={{ fontWeight: 600, marginBottom: 6, fontSize: 14 }}>
-                  Quality Assessment
-                </div>
-                <div
-                  style={{
-                    color: '#4b5563',
-                    fontSize: 13,
-                    marginBottom: 4
-                  }}
-                >
-                  <strong>Grade:</strong> {evidenceSummary.evidenceGrade || '—'} ·{' '}
-                  <strong>Quality:</strong> {evidenceSummary.qualityLevel || '—'} ·{' '}
-                  <strong>Confidence:</strong> {evidenceSummary.confidence || '—'}
-                </div>
-                {evidenceSummary.researchSummary && (
-                  <div
-                    style={{
-                      color: '#6b7280',
-                      fontSize: 12,
-                      marginBottom: 4
-                    }}
-                  >
-                    Total Available:{' '}
-                    {evidenceSummary.researchSummary.totalAvailable?.toLocaleString() ||
-                      0}{' '}
-                    · Analyzed: {evidenceSummary.researchSummary.analyzed || 0} · Full
-                    Text: {evidenceSummary.researchSummary.fullTextAccess || 0}
-                  </div>
-                )}
-                {evidenceSummary.keyFindings &&
-                  evidenceSummary.keyFindings.length > 0 && (
-                    <div style={{ marginTop: 6, fontSize: 12 }}>
-                      <strong>Key Findings:</strong>
-                      <ul style={{ margin: '4px 0', paddingLeft: 20 }}>
-                        {evidenceSummary.keyFindings.map((finding, idx) => (
-                          <li key={idx}>{finding}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-              </div>
-            )}
 
             {/* Claim verify */}
             <div style={{ marginBottom: 14 }}>
@@ -1179,62 +1136,6 @@ const ResearchPanel: React.FC<ResearchPanelProps> = ({
 
         {activeTab === 'quality' && (
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 12 }}>
-            {/* Quality metrics from /quality-metrics */}
-            <div className="research-content-card" style={{ flex: '0 0 auto' }}>
-              <div
-                style={{
-                  fontSize: 14,
-                  fontWeight: 600,
-                  marginBottom: 6
-                }}
-              >
-                Evidence Quality Overview
-              </div>
-              {!quality && (
-                <div style={{ color: '#6b7280' }}>
-                  Enter a topic on the left (e.g. <code>intermittent_fasting</code>) and
-                  click &quot;Get quality metrics&quot; to see structured evidence
-                  grading.
-                </div>
-              )}
-              {quality && (
-                <div style={{ fontSize: 13 }}>
-                  <div style={{ marginBottom: 4 }}>
-                    <strong>Topic:</strong> {quality.topic}
-                  </div>
-                  <div style={{ marginBottom: 4 }}>
-                    <strong>Overall grade:</strong>{' '}
-                    {quality.quality_assessment?.overall_evidence_grade || '—'}
-                  </div>
-                  <div style={{ marginBottom: 4 }}>
-                    <strong>Study quality distribution:</strong>
-                    <div>
-                      high:{' '}
-                      {quality.quality_assessment?.study_quality_distribution
-                        ?.high_quality ?? 0}{' '}
-                      · moderate:{' '}
-                      {quality.quality_assessment?.study_quality_distribution
-                        ?.moderate_quality ?? 0}{' '}
-                      · low:{' '}
-                      {quality.quality_assessment?.study_quality_distribution
-                        ?.low_quality ?? 0}{' '}
-                      · very low:{' '}
-                      {quality.quality_assessment?.study_quality_distribution
-                        ?.very_low_quality ?? 0}
-                    </div>
-                  </div>
-                  <div style={{ marginBottom: 4 }}>
-                    <strong>Research maturity:</strong>{' '}
-                    {quality.quality_assessment?.research_maturity || '—'}
-                  </div>
-                  <div>
-                    <strong>Evidence consistency:</strong>{' '}
-                    {quality.quality_assessment?.evidence_consistency || '—'}
-                  </div>
-                </div>
-              )}
-            </div>
-
             {/* Charts from /search quality chart_data */}
             <div style={{ flex: 1 }}>
               {!chartData && (
