@@ -70,62 +70,63 @@ export const WorkoutProgramGrid: React.FC<WorkoutProgramGridProps> = ({
   rows,
 }) => {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white shadow-sm">
-      <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3">
+    <div>
+      <div className="flex items-center justify-between border-b border-gray-100 pb-3 mb-3">
         <div>
-          <h3 className="text-sm font-semibold text-slate-900">{title}</h3>
-          <p className="text-xs text-slate-500">
+          <h3 className="text-sm font-semibold text-gray-900">{title}</h3>
+          <p className="text-xs text-gray-500">
             Based on your age, goals, and PE guidelines.
           </p>
         </div>
       </div>
 
-      {/* Header row */}
-      <div className="grid grid-cols-[auto,72px,1fr] border-b border-slate-100 px-4 py-2 text-[11px] font-medium text-slate-500">
-        <div className="flex items-center gap-2">
-          <span className="w-10 text-center">Sets</span>
-          <span>Exercise</span>
-        </div>
-        <div className="text-center">Intensity</div>
-
-        <div className="flex flex-col gap-1">
-          <div className="flex gap-1">
-            {fitnessOrder.map((c) => (
-              <span
-                key={c}
-                className="flex-1 text-center text-[10px] tracking-tight"
-              >
-                {c[0] + c.toLowerCase().slice(1, 3)}
-              </span>
-            ))}
+      <div className="overflow-x-auto scrollbar-hide -mx-4 px-4">
+        {/* Header row */}
+        <div className="grid grid-cols-[auto,72px,1fr] border-b border-gray-100 py-2 text-[11px] font-medium text-gray-500 min-w-[600px]">
+          <div className="flex items-center gap-2">
+            <span className="w-10 text-center">Sets</span>
+            <span>Exercise</span>
           </div>
-          <div className="flex gap-1 text-[10px]">
-            {muscleOrder.map((m) => (
-              <span key={m} className="flex-1 text-center">
-                {m[0]}
-              </span>
-            ))}
+          <div className="text-center">Intensity</div>
+
+          <div className="flex flex-col gap-1">
+            <div className="flex gap-1">
+              {fitnessOrder.map((c) => (
+                <span
+                  key={c}
+                  className="flex-1 text-center text-[10px] tracking-tight"
+                >
+                  {c[0] + c.toLowerCase().slice(1, 3)}
+                </span>
+              ))}
+            </div>
+            <div className="flex gap-1 text-[10px]">
+              {muscleOrder.map((m) => (
+                <span key={m} className="flex-1 text-center">
+                  {m[0]}
+                </span>
+              ))}
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Body rows */}
-      <div className="divide-y divide-slate-100">
-        {rows.map((row) => (
-          <div
-            key={row.meta.id}
-            className="grid grid-cols-[auto,72px,1fr] items-center px-4 py-2 text-xs"
-          >
+        {/* Body rows */}
+        <div className="divide-y divide-gray-100">
+          {rows.map((row) => (
+            <div
+              key={row.meta.id}
+              className="grid grid-cols-[auto,72px,1fr] items-center py-3 text-xs min-w-[600px]"
+            >
             {/* Left: Sets + Exercise */}
             <div className="flex items-center gap-2">
-              <span className="flex w-10 items-center justify-center rounded-full bg-slate-50 text-[11px] font-semibold text-slate-700">
+              <span className="flex w-10 items-center justify-center rounded-full bg-gray-50 text-[11px] font-semibold text-gray-700">
                 {row.prescription.sets}x
               </span>
               <div className="flex flex-col">
-                <span className="font-medium text-slate-900">
+                <span className="font-medium text-gray-900">
                   {row.meta.name}
                 </span>
-                <span className="text-[11px] text-slate-500">
+                <span className="text-[11px] text-gray-500">
                   {row.meta.equipment === "NONE"
                     ? "Bodyweight"
                     : row.meta.equipment}
@@ -134,7 +135,7 @@ export const WorkoutProgramGrid: React.FC<WorkoutProgramGridProps> = ({
             </div>
 
             {/* Middle: Intensity */}
-            <div className="text-center text-[11px] text-slate-700">
+            <div className="text-center text-[11px] text-gray-700">
               {row.prescription.intensityLabel}
             </div>
 
@@ -147,7 +148,7 @@ export const WorkoutProgramGrid: React.FC<WorkoutProgramGridProps> = ({
                   return (
                     <div
                       key={c}
-                      className={`h-4 flex-1 rounded-[3px] border ${loadLevelClass(
+                      className={`h-5 flex-1 rounded-[3px] border ${loadLevelClass(
                         level
                       )}`}
                       title={`${c.toLowerCase()} load: ${level}/3`}
@@ -162,7 +163,7 @@ export const WorkoutProgramGrid: React.FC<WorkoutProgramGridProps> = ({
                   return (
                     <div
                       key={m}
-                      className={`h-4 flex-1 rounded-[3px] border ${loadLevelClass(
+                      className={`h-5 flex-1 rounded-[3px] border ${loadLevelClass(
                         level
                       )}`}
                       title={`${m.toLowerCase()} load: ${level}/3`}
@@ -175,11 +176,12 @@ export const WorkoutProgramGrid: React.FC<WorkoutProgramGridProps> = ({
         ))}
 
         {rows.length === 0 && (
-          <div className="px-4 py-6 text-center text-xs text-slate-500">
+          <div className="py-6 text-center text-xs text-gray-500 min-w-[600px]">
             No exercises scheduled yet. Your coach will create a plan once you
             complete onboarding.
           </div>
         )}
+        </div>
       </div>
     </div>
   );
