@@ -643,10 +643,10 @@ const ResearchPanel: React.FC<ResearchPanelProps> = ({
         {activeTab === 'search' && hasSearched && (
           <div className="flex-1 min-w-0 bg-white rounded-xl border border-gray-200 p-4 max-h-[640px] flex flex-col">
             {/* SEARCH RESULTS */}
-            <div style={{ fontSize: 13, flex: 1, overflowY: 'auto' }}>
+            <div style={{ fontSize: 15, flex: 1, overflowY: 'auto' }}>
               <div
                 style={{
-                  fontSize: 16,
+                  fontSize: 18,
                   fontWeight: 600,
                   marginBottom: 8
                 }}
@@ -670,7 +670,7 @@ const ResearchPanel: React.FC<ResearchPanelProps> = ({
                       <div
                         style={{
                           fontWeight: 600,
-                          fontSize: 14,
+                          fontSize: 16,
                           marginBottom: 4
                         }}
                       >
@@ -678,7 +678,7 @@ const ResearchPanel: React.FC<ResearchPanelProps> = ({
                       </div>
                       <div style={{ color: '#4b5563', marginBottom: 2 }}>
                         {r.authors && (
-                          <div style={{ fontSize: 12, marginBottom: 2 }}>
+                          <div style={{ fontSize: 14, marginBottom: 2 }}>
                             {r.authors}
                           </div>
                         )}
@@ -706,7 +706,7 @@ const ResearchPanel: React.FC<ResearchPanelProps> = ({
                             style={{
                               color: '#2563eb',
                               textDecoration: 'none',
-                              fontSize: 13,
+                              fontSize: 14,
                               marginRight: 12
                             }}
                           >
@@ -720,7 +720,7 @@ const ResearchPanel: React.FC<ResearchPanelProps> = ({
                               style={{
                                 color: '#2563eb',
                                 textDecoration: 'none',
-                                fontSize: 13,
+                                fontSize: 14,
                                 marginRight: 12
                               }}
                             >
@@ -735,7 +735,7 @@ const ResearchPanel: React.FC<ResearchPanelProps> = ({
                               style={{
                                 color: '#2563eb',
                                 textDecoration: 'none',
-                                fontSize: 13
+                                fontSize: 14
                               }}
                             >
                               DOI ↗
@@ -746,7 +746,8 @@ const ResearchPanel: React.FC<ResearchPanelProps> = ({
                       <button
                         type="button"
                         onClick={() => loadArticleContent(r.pmcid)}
-                        className="px-4 py-2 bg-white text-gray-700 border border-gray-300 rounded-full hover:bg-gray-50 transition-colors font-medium text-sm"
+                        className="px-4 py-2 bg-white text-gray-700 border border-gray-300 rounded-full hover:bg-gray-50 transition-colors font-medium"
+                        style={{ fontSize: 14 }}
                       >
                         View full article
                       </button>
@@ -766,7 +767,7 @@ const ResearchPanel: React.FC<ResearchPanelProps> = ({
                 >
                   <div
                     style={{
-                      fontSize: 14,
+                      fontSize: 16,
                       fontWeight: 600,
                       marginBottom: 6
                     }}
