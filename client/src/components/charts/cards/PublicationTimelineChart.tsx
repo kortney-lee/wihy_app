@@ -40,8 +40,34 @@ export interface PublicationData {
   totalStudies?: number;
 }
 
+interface ResearchCoverageData {
+  earliest_year: number;
+  latest_year: number;
+  year_span: number;
+  recent_studies_count: number;
+  recent_studies_percentage: number;
+  total_research_available: number;
+  sample_size_analyzed: number;
+}
+
+interface StudyTypeDistribution {
+  [key: string]: number;
+}
+
+interface ChartDataPayload {
+  evidence_grade?: string;
+  research_quality_score?: number;
+  study_count?: number;
+  confidence_level?: string;
+  research_coverage?: ResearchCoverageData;
+  study_type_distribution?: StudyTypeDistribution;
+  evidence_distribution?: Record<string, number>;
+  journal_impact_scores?: number[];
+}
+
 interface PublicationTimelineChartProps {
   publications?: PublicationData[];
+  researchData?: ChartDataPayload; // Renamed from chartData to avoid conflict
   size?: 'small' | 'medium' | 'large';
   showLabels?: boolean;
   title?: string;
@@ -53,6 +79,7 @@ interface PublicationTimelineChartProps {
 
 const PublicationTimelineChart: React.FC<PublicationTimelineChartProps> = ({
   publications = [],
+  researchData,
   size = 'medium',
   showLabels = true,
   title = 'Research Publication Timeline',
@@ -64,6 +91,41 @@ const PublicationTimelineChart: React.FC<PublicationTimelineChartProps> = ({
   const [apiData, setApiData] = useState<PublicationData[] | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Convert research_coverage data to publication timeline format
+  const convertResearchCoverageToTimeline = (coverage: ResearchCoverageData, studyTypes?: StudyTypeDistribution): PublicationData[] => {
+    const { earliest_year, latest_year, total_research_available, sample_size_analyzed } = coverage;
+    const yearSpan = latest_year - earliest_year + 1;
+    const data: PublicationData[] = [];
+    
+    // Distribute studies across years proportionally
+    const avgPerYear = Math.floor(sample_size_analyzed / yearSpan);
+    const remainder = sample_size_analyzed % yearSpan;
+    
+    for (let i = 0; i < yearSpan; i++) {
+      const year = earliest_year + i;
+      // Add extra to recent years from remainder
+      const count = avgPerYear + (i >= yearSpan - remainder ? 1 : 0);
+      
+      // Build study types from distribution
+      const studyTypesForYear: PublicationData['studyTypes'] = studyTypes ? {
+        'Clinical Trial': Math.floor((studyTypes['Clinical Trial'] || 0) * count / sample_size_analyzed),
+        'Meta-Analysis': Math.floor((studyTypes['Meta-Analysis'] || 0) * count / sample_size_analyzed),
+        'Observational': Math.floor((studyTypes['Observational'] || 0) * count / sample_size_analyzed),
+        'Review': Math.floor((studyTypes['Review'] || 0) * count / sample_size_analyzed),
+        'Laboratory': Math.floor((studyTypes['Laboratory'] || 0) * count / sample_size_analyzed)
+      } : undefined;
+      
+      data.push({
+        year,
+        count,
+        studyTypes: studyTypesForYear,
+        totalStudies: count
+      });
+    }
+    
+    return data;
+  };
 
   // Default to Mental Illness if no categories provided
   const defaultCategories = {
@@ -77,69 +139,81 @@ const PublicationTimelineChart: React.FC<PublicationTimelineChartProps> = ({
 
   // Fetch data from Analytics Service API
   useEffect(() => {
-    if (publications.length === 0) {
-      const fetchAnalytics = async () => {
-        console.log('[PublicationTimelineChart] Starting API fetch...');
-        setLoading(true);
-        setError(null);
-        try {
-          // Use services.wihy.ai in production, localhost only in development
-          const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-          const apiUrl = isLocalhost ? (process.env.REACT_APP_API_URL || 'http://localhost:5000') : 'https://services.wihy.ai';
-          console.log('[PublicationTimelineChart] API URL:', apiUrl);
-          const categoriesToUse = categories || defaultCategories;
-          console.log('[PublicationTimelineChart] Categories:', categoriesToUse);
-          
-          const response = await fetch(`${apiUrl}/api/analytics/dashboard`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              researchCategories: categoriesToUse
-            })
-          });
-          
-          console.log('[PublicationTimelineChart] Response status:', response.status);
-          
-          if (!response.ok) {
-            throw new Error(`API error: ${response.status}`);
-          }
-          
-          const data = await response.json();
-          console.log('[PublicationTimelineChart] API response:', data);
-          
-          // Extract publication timeline from analytics.research_metrics.publications_by_year
-          const publicationsByYear = data.analytics?.research_metrics?.publications_by_year || {};
-          console.log('[PublicationTimelineChart] Publications by year:', publicationsByYear);
-          
-          // Convert object to array format and sort by year
-          const formattedData: PublicationData[] = Object.entries(publicationsByYear)
-            .map(([year, count]) => ({
-              year: parseInt(year),
-              count: count as number,
-              totalStudies: count as number
-            }))
-            .sort((a, b) => a.year - b.year);
-          
-          setApiData(formattedData.length > 0 ? formattedData : null);
-        } catch (err) {
-          console.error('[PublicationTimelineChart] Failed to fetch analytics:', err);
-          setError('Failed to load publication timeline');
-          setApiData(null);
-        } finally {
-          console.log('[PublicationTimelineChart] Fetch complete');
-          setLoading(false);
-        }
-      };
-      
-      fetchAnalytics();
-    } else {
-      console.log('[PublicationTimelineChart] Using provided publications prop');
+    // Priority 1: Use researchData prop if provided (research_coverage)
+    if (researchData?.research_coverage) {
+      console.log('[PublicationTimelineChart] Using research_coverage from researchData prop:', researchData.research_coverage);
+      const timelineData = convertResearchCoverageToTimeline(
+        researchData.research_coverage,
+        researchData.study_type_distribution
+      );
+      setApiData(timelineData);
+      return;
     }
-  }, [publications.length, categories]);
-
-  // Generate sample data based on timeRange
+    
+    // Priority 2: Use publications prop if provided
+    if (publications.length > 0) {
+      console.log('[PublicationTimelineChart] Using provided publications prop');
+      return;
+    }
+    
+    // Priority 3: Fetch from API
+    const fetchAnalytics = async () => {
+      console.log('[PublicationTimelineChart] Starting API fetch...');
+      setLoading(true);
+      setError(null);
+      try {
+        // Use services.wihy.ai in production, localhost only in development
+        const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+        const apiUrl = isLocalhost ? (process.env.REACT_APP_API_URL || 'http://localhost:5000') : 'https://services.wihy.ai';
+        console.log('[PublicationTimelineChart] API URL:', apiUrl);
+        const categoriesToUse = categories || defaultCategories;
+        console.log('[PublicationTimelineChart] Categories:', categoriesToUse);
+        
+        const response = await fetch(`${apiUrl}/api/analytics/dashboard`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            researchCategories: categoriesToUse
+          })
+        });
+        
+        console.log('[PublicationTimelineChart] Response status:', response.status);
+        
+        if (!response.ok) {
+          throw new Error(`API error: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        console.log('[PublicationTimelineChart] API response:', data);
+        
+        // Extract publication timeline from analytics.research_metrics.publications_by_year
+        const publicationsByYear = data.analytics?.research_metrics?.publications_by_year || {};
+        console.log('[PublicationTimelineChart] Publications by year:', publicationsByYear);
+        
+        // Convert object to array format and sort by year
+        const formattedData: PublicationData[] = Object.entries(publicationsByYear)
+          .map(([year, count]) => ({
+            year: parseInt(year),
+            count: count as number,
+            totalStudies: count as number
+          }))
+          .sort((a, b) => a.year - b.year);
+        
+        setApiData(formattedData.length > 0 ? formattedData : null);
+      } catch (err) {
+        console.error('[PublicationTimelineChart] Failed to fetch analytics:', err);
+        setError('Failed to load publication timeline');
+        setApiData(null);
+      } finally {
+        console.log('[PublicationTimelineChart] Fetch complete');
+        setLoading(false);
+      }
+    };
+    
+    fetchAnalytics();
+  }, [publications.length, categories, researchData]);  // Generate sample data based on timeRange
   const generateSampleData = (): PublicationData[] => {
     const currentYear = new Date().getFullYear();
     const data: PublicationData[] = [];

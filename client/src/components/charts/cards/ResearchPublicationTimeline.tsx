@@ -28,9 +28,19 @@ interface PublicationData {
   count: number;
 }
 
+interface ResearchCoverageData {
+  earliest_year?: number;
+  latest_year?: number;
+  year_span?: number;
+  sample_size_analyzed?: number;
+  total_research_available?: number;
+}
+
 interface ResearchPublicationTimelineProps {
   researchData?: {
     publication_timeline?: Record<string, number>;
+    study_type_distribution?: Record<string, number>;
+    research_coverage?: ResearchCoverageData;
   };
   onAnalyze?: (userMessage: string, assistantMessage: string) => void;
 }
@@ -45,7 +55,48 @@ const ResearchPublicationTimeline: React.FC<ResearchPublicationTimelineProps> = 
 }) => {
   const [publicationData, setPublicationData] = useState<PublicationData[]>([]);
 
+  // Convert research_coverage to publication timeline data
+  const convertResearchCoverageToTimeline = (
+    coverage: ResearchCoverageData,
+    studyTypeDistribution?: Record<string, number>
+  ): PublicationData[] => {
+    if (!coverage.earliest_year || !coverage.latest_year || !coverage.sample_size_analyzed) {
+      return [];
+    }
+
+    const yearSpan = coverage.year_span || (coverage.latest_year - coverage.earliest_year) || 1;
+    const totalStudies = coverage.sample_size_analyzed;
+    
+    // Distribute studies across years proportionally
+    const avgPerYear = Math.floor(totalStudies / yearSpan);
+    const remainder = totalStudies - (avgPerYear * yearSpan);
+    
+    const timeline: PublicationData[] = [];
+    for (let year = coverage.earliest_year; year <= coverage.latest_year; year++) {
+      const yearIndex = year - coverage.earliest_year;
+      // Add extra studies to more recent years
+      const extraStudies = yearIndex >= (yearSpan - remainder) ? 1 : 0;
+      timeline.push({
+        year,
+        count: avgPerYear + extraStudies
+      });
+    }
+    
+    return timeline;
+  };
+
   useEffect(() => {
+    // Priority 1: Use research_coverage if available
+    if (researchData?.research_coverage) {
+      const timelineData = convertResearchCoverageToTimeline(
+        researchData.research_coverage,
+        researchData.study_type_distribution
+      );
+      setPublicationData(timelineData);
+      return;
+    }
+
+    // Priority 2: Use publication_timeline if available
     if (researchData?.publication_timeline) {
       const timeline = researchData.publication_timeline;
       
@@ -179,12 +230,59 @@ const ResearchPublicationTimeline: React.FC<ResearchPublicationTimelineProps> = 
               <strong>Trend:</strong> {recentAvg > avgPerYear ? '↗️ Up' : '↘️ Down'}
             </div>
           </div>
+
+          {/* Research Coverage Display */}
+          {researchData?.research_coverage && (
+            <div className="mt-3 p-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs font-semibold text-blue-700">📊 Research Coverage</span>
+                {researchData.research_coverage.year_span && (
+                  <span className="text-xs text-indigo-600 font-bold">
+                    {researchData.research_coverage.year_span} years
+                  </span>
+                )}
+              </div>
+
+              {/* Timeline visualization */}
+              {researchData.research_coverage.earliest_year && researchData.research_coverage.latest_year && (
+                <div className="relative mb-2">
+                  <div className="h-2 bg-gradient-to-r from-blue-300 via-indigo-300 to-blue-400 rounded-full" />
+                  <div className="flex justify-between mt-1">
+                    <span className="text-[10px] font-medium text-blue-700">
+                      {researchData.research_coverage.earliest_year}
+                    </span>
+                    <span className="text-[10px] font-medium text-indigo-700">
+                      {researchData.research_coverage.latest_year}
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              {/* Coverage stats */}
+              <div className="flex gap-2 justify-center flex-wrap">
+                {researchData.research_coverage.sample_size_analyzed && (
+                  <span className="text-[10px] px-2 py-1 bg-white rounded-full font-medium text-blue-700 border border-blue-200">
+                    🔬 {researchData.research_coverage.sample_size_analyzed.toLocaleString()} analyzed
+                  </span>
+                )}
+                {researchData.research_coverage.total_research_available && (
+                  <span className="text-[10px] px-2 py-1 bg-white rounded-full font-medium text-indigo-700 border border-indigo-200">
+                    📚 {researchData.research_coverage.total_research_available.toLocaleString()} available
+                  </span>
+                )}
+              </div>
+            </div>
+          )}
         </>
       )}
       
       <div className="flex justify-center mt-4 flex-shrink-0">
         <AnalyzeWithWihyButton
-          cardContext={`Publication timeline: ${totalPublications} total publications. Average: ${avgPerYear}/year. Recent average: ${recentAvg}. Trend: ${recentAvg > avgPerYear ? 'Increasing' : 'Declining'}`}
+          cardContext={`Publication timeline: ${totalPublications} total publications. Average: ${avgPerYear}/year. Recent average: ${recentAvg}. Trend: ${recentAvg > avgPerYear ? 'Increasing' : 'Declining'}${
+            researchData?.research_coverage ? 
+            `. Coverage: ${researchData.research_coverage.earliest_year || 'N/A'}-${researchData.research_coverage.latest_year || 'N/A'} (${researchData.research_coverage.year_span || 'N/A'} years), ${researchData.research_coverage.sample_size_analyzed || 0} analyzed out of ${researchData.research_coverage.total_research_available || 0} available`
+            : ''
+          }`}
           userQuery="Analyze this publication timeline and explain what research trends indicate about evidence development"
           onAnalyze={onAnalyze}
         />

@@ -3,6 +3,45 @@ import DashboardCharts from '../charts/grids/DashboardCharts';
 import { ChartType } from '../charts/chartTypes';
 import Spinner from '../ui/Spinner';
 
+/** ---- HELPER: Convert URLs to clickable links ---- */
+const renderTextWithLinks = (text: string) => {
+  // Match URLs but stop before capital letters or common punctuation
+  const urlRegex = /(https?:\/\/[^\s]+?)(?=[A-Z]|[.!?,;:](?:\s|$)|$)/g;
+  const parts = text.split(urlRegex);
+  
+  return parts.map((part, index) => {
+    if (part.match(/^https?:\/\//)) {
+      // Check if we need spacing before the URL
+      const prevPart = parts[index - 1];
+      const needsSpaceBefore = prevPart && !prevPart.match(/[\s\n]$/);
+      
+      // Check if URL should be on new line (after sentence end or long paragraph)
+      const afterSentenceEnd = prevPart && /[.!?]\s*$/.test(prevPart);
+      const shouldBreakLine = afterSentenceEnd && prevPart.length > 100;
+      
+      return (
+        <React.Fragment key={index}>
+          {shouldBreakLine && <><br /><br /></>}
+          {!shouldBreakLine && needsSpaceBefore && ' '}
+          <a
+            href={part}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              color: '#2563eb',
+              textDecoration: 'underline',
+              wordBreak: 'break-all'
+            }}
+          >
+            {part}
+          </a>
+        </React.Fragment>
+      );
+    }
+    return part;
+  });
+};
+
 /** ---- CONFIG ---- */
 const RESEARCH_API_BASE =
   process.env.REACT_APP_RESEARCH_API_BASE_URL || 'https://services.wihy.ai';
@@ -87,6 +126,13 @@ type ResearchSearchResponse = {
     publication_timeline?: Record<string, number>;
     study_type_distribution?: Record<string, number>;
     evidence_distribution?: Record<string, number>;
+    research_coverage?: {
+      earliest_year?: number;
+      latest_year?: number;
+      year_span?: number;
+      sample_size_analyzed?: number;
+      total_research_available?: number;
+    };
   };
 };
 
@@ -958,8 +1004,8 @@ const ResearchPanel: React.FC<ResearchPanelProps> = ({
                   {articleContent.content?.abstract && (
                     <div
                       style={{
-                        marginBottom: 8,
-                        padding: '6px 8px',
+                        marginBottom: 16,
+                        padding: '12px 16px',
                         borderRadius: 8,
                         background: '#f9fafb',
                         border: '1px solid #e5e7eb'
@@ -967,15 +1013,15 @@ const ResearchPanel: React.FC<ResearchPanelProps> = ({
                     >
                       <div
                         style={{
-                          fontSize: 12,
+                          fontSize: 15,
                           fontWeight: 600,
-                          marginBottom: 3
+                          marginBottom: 8
                         }}
                       >
                         Abstract
                       </div>
-                      <div style={{ fontSize: 12, color: '#374151' }}>
-                        {articleContent.content.abstract}
+                      <div style={{ fontSize: 15, color: '#374151', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>
+                        {renderTextWithLinks(articleContent.content.abstract)}
                       </div>
                     </div>
                   )}
@@ -983,13 +1029,13 @@ const ResearchPanel: React.FC<ResearchPanelProps> = ({
                   {/* mini search within article */}
                   <div
                     style={{
-                      marginBottom: 8,
+                      marginBottom: 12,
                       display: 'flex',
                       flexDirection: 'column',
-                      gap: 4
+                      gap: 6
                     }}
                   >
-                    <div style={{ fontSize: 12, fontWeight: 600 }}>
+                    <div style={{ fontSize: 14, fontWeight: 600 }}>
                       Search within this article
                     </div>
                     <input
@@ -999,8 +1045,8 @@ const ResearchPanel: React.FC<ResearchPanelProps> = ({
                       placeholder="e.g. stroke, HbA1c, mortality"
                       style={{
                         width: '100%',
-                        fontSize: 12,
-                        padding: 6,
+                        fontSize: 14,
+                        padding: 8,
                         borderRadius: 6,
                         border: '1px solid #d1d5db'
                       }}
@@ -1011,22 +1057,23 @@ const ResearchPanel: React.FC<ResearchPanelProps> = ({
                   {filteredParagraphs && filteredParagraphs.length > 0 && (
                     <div
                       style={{
-                        padding: '6px 0',
+                        padding: '12px 0',
                         borderTop: '1px solid #e5e7eb',
-                        marginTop: 4
+                        marginTop: 8
                       }}
                     >
                       {filteredParagraphs.map((p, i) => (
                         <p
                           key={i}
                           style={{
-                            margin: '4px 0',
-                            lineHeight: 1.4,
-                            fontSize: 12,
-                            color: '#111827'
+                            margin: '12px 0',
+                            lineHeight: 1.7,
+                            fontSize: 15,
+                            color: '#111827',
+                            whiteSpace: 'pre-wrap'
                           }}
                         >
-                          {p}
+                          {renderTextWithLinks(p)}
                         </p>
                       ))}
                     </div>
