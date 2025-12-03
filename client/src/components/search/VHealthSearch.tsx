@@ -1056,7 +1056,12 @@ const VHealthSearch: React.FC = () => {
       }}>
       
         {/* Spinner */}
-        <div style={{ margin: '0 auto 24px auto' }}>
+        <div style={{ 
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          marginBottom: '24px'
+        }}>
           <img 
             src="/assets/whatishealthyspinner.gif" 
             alt="Loading..." 
