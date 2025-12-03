@@ -20,6 +20,13 @@ interface DashboardChartsProps {
     publication_timeline?: Record<string, number>;
     study_type_distribution?: Record<string, number>;
     evidence_distribution?: Record<string, number>;
+    research_coverage?: {
+      earliest_year?: number;
+      latest_year?: number;
+      year_span?: number;
+      sample_size_analyzed?: number;
+      total_research_available?: number;
+    };
   };
   onAnalyze?: (userMessage: string, assistantMessage: string) => void;
 }
