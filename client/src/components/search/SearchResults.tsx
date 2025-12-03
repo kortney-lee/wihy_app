@@ -18,6 +18,8 @@ import CoachDashboard from '../dashboard/CoachDashboard';
 import ParentDashboard from '../dashboard/ParentDashboard';
 import ConsumptionDashboard from '../dashboard/ConsumptionDashboard';
 import ResearchDashboard from '../dashboard/ResearchDashboard';
+import FitnessDashboard, { FitnessDashboardModel, buildProgramKey } from '../dashboard/FitnessDashboard';
+import { ExerciseRowView } from '../dashboard/WorkoutProgramGrid';
 import { CSS_CLASSES } from '../../constants/cssConstants';
 import '../../styles/VHealthSearch.css';
 import '../../styles/Dashboard.css';
@@ -402,6 +404,308 @@ const SearchResults: React.FC<SearchResultsProps> = ({
       summary: "Learn how gradually increasing weight, frequency, or reps can boost muscle growth and strength gains.",
       linkLabel: "Read More →"
     }
+  };
+
+  // Mock fitness dashboard data
+  const mockFitnessDashboard: FitnessDashboardModel = {
+    title: "Your Training Program",
+    subtitle: "Select your phase, level, and day to view exercises",
+    
+    phases: [
+      { id: "phase1", name: "Foundation (Weeks 1-4)" },
+      { id: "phase2", name: "Building (Weeks 5-8)" },
+      { id: "phase3", name: "Strength (Weeks 9-12)" }
+    ],
+    
+    levels: [
+      { id: "beginner", label: "Beginner" },
+      { id: "intermediate", label: "Intermediate" },
+      { id: "advanced", label: "Advanced" }
+    ],
+    
+    days: [
+      { id: "day1", label: "Day 1" },
+      { id: "day2", label: "Day 2" },
+      { id: "day3", label: "Day 3" },
+      { id: "day4", label: "Day 4" }
+    ],
+    
+    variants: {
+      // Beginner - Phase 1 - Day 1
+      [buildProgramKey("phase1", "beginner", "day1")]: [
+        {
+          meta: {
+            id: "ex1",
+            name: "Bodyweight Squats",
+            equipment: "NONE",
+            fitnessLoad: { STRENGTH: 1, ENDURANCE: 2 },
+            muscleLoad: { QUADS: 2, GLUTES: 2, CORE: 1 }
+          },
+          prescription: {
+            exerciseId: "ex1",
+            sets: 3,
+            intensityLabel: "12-15 reps"
+          }
+        },
+        {
+          meta: {
+            id: "ex2",
+            name: "Push-ups (Knee)",
+            equipment: "NONE",
+            fitnessLoad: { STRENGTH: 1, ENDURANCE: 2 },
+            muscleLoad: { CHEST: 2, ARMS: 2, SHOULDERS: 1 }
+          },
+          prescription: {
+            exerciseId: "ex2",
+            sets: 3,
+            intensityLabel: "8-12 reps"
+          }
+        },
+        {
+          meta: {
+            id: "ex3",
+            name: "Dumbbell Rows",
+            equipment: "DUMBBELLS",
+            fitnessLoad: { STRENGTH: 2, ENDURANCE: 1 },
+            muscleLoad: { BACK: 3, ARMS: 2 }
+          },
+          prescription: {
+            exerciseId: "ex3",
+            sets: 3,
+            intensityLabel: "Light weight"
+          }
+        },
+        {
+          meta: {
+            id: "ex4",
+            name: "Plank",
+            equipment: "NONE",
+            fitnessLoad: { ENDURANCE: 2, STRENGTH: 1 },
+            muscleLoad: { CORE: 3 }
+          },
+          prescription: {
+            exerciseId: "ex4",
+            sets: 3,
+            intensityLabel: "20-30 sec"
+          }
+        }
+      ],
+      
+      // Beginner - Phase 1 - Day 2
+      [buildProgramKey("phase1", "beginner", "day2")]: [
+        {
+          meta: {
+            id: "ex5",
+            name: "Lunges",
+            equipment: "NONE",
+            fitnessLoad: { STRENGTH: 1, MOBILITY: 2 },
+            muscleLoad: { QUADS: 2, GLUTES: 2, HAMSTRINGS: 1 }
+          },
+          prescription: {
+            exerciseId: "ex5",
+            sets: 3,
+            intensityLabel: "10 reps each"
+          }
+        },
+        {
+          meta: {
+            id: "ex6",
+            name: "Shoulder Press",
+            equipment: "DUMBBELLS",
+            fitnessLoad: { STRENGTH: 2, MOBILITY: 1 },
+            muscleLoad: { SHOULDERS: 3, ARMS: 2 }
+          },
+          prescription: {
+            exerciseId: "ex6",
+            sets: 3,
+            intensityLabel: "Light weight"
+          }
+        },
+        {
+          meta: {
+            id: "ex7",
+            name: "Assisted Pull-ups",
+            equipment: "MACHINE",
+            fitnessLoad: { STRENGTH: 2, ENDURANCE: 1 },
+            muscleLoad: { BACK: 3, ARMS: 2 }
+          },
+          prescription: {
+            exerciseId: "ex7",
+            sets: 3,
+            intensityLabel: "6-8 reps"
+          }
+        }
+      ],
+      
+      // Intermediate - Phase 1 - Day 1
+      [buildProgramKey("phase1", "intermediate", "day1")]: [
+        {
+          meta: {
+            id: "ex8",
+            name: "Barbell Squats",
+            equipment: "BARBELL",
+            fitnessLoad: { STRENGTH: 3, ENDURANCE: 1 },
+            muscleLoad: { QUADS: 3, GLUTES: 2, HAMSTRINGS: 2, CORE: 1 }
+          },
+          prescription: {
+            exerciseId: "ex8",
+            sets: 4,
+            intensityLabel: "70% 1RM"
+          }
+        },
+        {
+          meta: {
+            id: "ex9",
+            name: "Bench Press",
+            equipment: "BARBELL",
+            fitnessLoad: { STRENGTH: 3, ENDURANCE: 1 },
+            muscleLoad: { CHEST: 3, SHOULDERS: 2, ARMS: 2 }
+          },
+          prescription: {
+            exerciseId: "ex9",
+            sets: 4,
+            intensityLabel: "70% 1RM"
+          }
+        },
+        {
+          meta: {
+            id: "ex10",
+            name: "Romanian Deadlifts",
+            equipment: "BARBELL",
+            fitnessLoad: { STRENGTH: 3, MOBILITY: 1 },
+            muscleLoad: { HAMSTRINGS: 3, GLUTES: 2, BACK: 1 }
+          },
+          prescription: {
+            exerciseId: "ex10",
+            sets: 3,
+            intensityLabel: "Moderate"
+          }
+        },
+        {
+          meta: {
+            id: "ex11",
+            name: "Pull-ups",
+            equipment: "NONE",
+            fitnessLoad: { STRENGTH: 2, ENDURANCE: 2 },
+            muscleLoad: { BACK: 3, ARMS: 2, SHOULDERS: 1 }
+          },
+          prescription: {
+            exerciseId: "ex11",
+            sets: 3,
+            intensityLabel: "Bodyweight"
+          }
+        },
+        {
+          meta: {
+            id: "ex12",
+            name: "Weighted Plank",
+            equipment: "DUMBBELLS",
+            fitnessLoad: { ENDURANCE: 2, STRENGTH: 2 },
+            muscleLoad: { CORE: 3 }
+          },
+          prescription: {
+            exerciseId: "ex12",
+            sets: 3,
+            intensityLabel: "45 sec"
+          }
+        }
+      ],
+      
+      // Advanced - Phase 1 - Day 1
+      [buildProgramKey("phase1", "advanced", "day1")]: [
+        {
+          meta: {
+            id: "ex13",
+            name: "Barbell Squats",
+            equipment: "BARBELL",
+            fitnessLoad: { STRENGTH: 3, ENDURANCE: 1 },
+            muscleLoad: { QUADS: 3, GLUTES: 3, HAMSTRINGS: 2, CORE: 2 }
+          },
+          prescription: {
+            exerciseId: "ex13",
+            sets: 5,
+            intensityLabel: "80% 1RM"
+          }
+        },
+        {
+          meta: {
+            id: "ex14",
+            name: "Bench Press",
+            equipment: "BARBELL",
+            fitnessLoad: { STRENGTH: 3, ENDURANCE: 1 },
+            muscleLoad: { CHEST: 3, SHOULDERS: 2, ARMS: 2 }
+          },
+          prescription: {
+            exerciseId: "ex14",
+            sets: 5,
+            intensityLabel: "80% 1RM"
+          }
+        },
+        {
+          meta: {
+            id: "ex15",
+            name: "Deadlifts",
+            equipment: "BARBELL",
+            fitnessLoad: { STRENGTH: 3, ENDURANCE: 1 },
+            muscleLoad: { HAMSTRINGS: 3, GLUTES: 3, BACK: 3, CORE: 2 }
+          },
+          prescription: {
+            exerciseId: "ex15",
+            sets: 4,
+            intensityLabel: "85% 1RM"
+          }
+        },
+        {
+          meta: {
+            id: "ex16",
+            name: "Weighted Pull-ups",
+            equipment: "DUMBBELLS",
+            fitnessLoad: { STRENGTH: 3, ENDURANCE: 1 },
+            muscleLoad: { BACK: 3, ARMS: 2, SHOULDERS: 1 }
+          },
+          prescription: {
+            exerciseId: "ex16",
+            sets: 4,
+            intensityLabel: "Heavy"
+          }
+        },
+        {
+          meta: {
+            id: "ex17",
+            name: "Barbell Overhead Press",
+            equipment: "BARBELL",
+            fitnessLoad: { STRENGTH: 3, MOBILITY: 1 },
+            muscleLoad: { SHOULDERS: 3, ARMS: 2, CORE: 1 }
+          },
+          prescription: {
+            exerciseId: "ex17",
+            sets: 4,
+            intensityLabel: "75% 1RM"
+          }
+        },
+        {
+          meta: {
+            id: "ex18",
+            name: "Ab Wheel Rollouts",
+            equipment: "MACHINE",
+            fitnessLoad: { ENDURANCE: 2, STRENGTH: 3 },
+            muscleLoad: { CORE: 3, SHOULDERS: 1 }
+          },
+          prescription: {
+            exerciseId: "ex18",
+            sets: 3,
+            intensityLabel: "8-12 reps"
+          }
+        }
+      ]
+    },
+    
+    programTitle: "12-Week Progressive Strength Program",
+    programDescription: "Build strength and muscle across all fitness levels with our structured program",
+    
+    defaultPhaseId: "phase1",
+    defaultLevelId: "beginner",
+    defaultDayId: "day1"
   };
 
   // Tab bar styles - Responsive with mobile-friendly touch targets
@@ -1284,25 +1588,13 @@ const SearchResults: React.FC<SearchResultsProps> = ({
 
               {activeTab === 'fitness' && (
                 <>
-                  <h1 className="dashboard-title" style={{
-                    fontSize: windowWidth < 768 ? '22px' : '28px',
-                    textAlign: windowWidth < 768 ? 'center' : 'left',
-                    marginBottom: windowWidth < 768 ? '12px' : '15px',
-                    marginTop: windowWidth < 768 ? '8px' : '10px',
-                    padding: windowWidth < 768 ? '0 8px' : '0'
-                  }}>
-                    Fitness & Performance
-                  </h1>
-                  
-                  <div style={{ marginTop: '8px' }}>
-                    <DashboardCharts 
-                      period={getDashboardPeriod()} 
-                      maxCards={calculateMaxCards()} 
-                      showAllCharts={true}
-                      excludeChartTypes={getExcludedChartTypes()}
-                      onAnalyze={handleAddToChatConversation}
-                    />
-                  </div>
+                  <FitnessDashboard
+                    data={mockFitnessDashboard}
+                    onStartSession={(params) => {
+                      console.log('Start session:', params);
+                      // Could open a workout tracking view here
+                    }}
+                  />
                 </>
               )}
 
