@@ -11,29 +11,180 @@ import {
 } from "./WorkoutProgramGrid";
 
 /**
+ * Inline SVG icons for legend (no emoji / unicode)
+ */
+interface IconProps {
+  className?: string;
+}
+
+const CardioIcon: React.FC<IconProps> = ({ className }) => (
+  <svg
+    className={className ?? "h-4 w-4"}
+    viewBox="0 0 24 24"
+    aria-hidden="true"
+  >
+    <path
+      d="M12 21s-5.5-3.5-8-7.2C2.7 12.6 2.3 11.3 2.3 10a4.2 4.2 0 0 1 7.5-2.6L12 9l2.2-1.6A4.2 4.2 0 0 1 21.7 10c0 1.3-.4 2.6-1.7 3.8C17.5 17.5 12 21 12 21z"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.6"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
+const StrengthIcon: React.FC<IconProps> = ({ className }) => (
+  <svg
+    className={className ?? "h-4 w-4"}
+    viewBox="0 0 24 24"
+    aria-hidden="true"
+  >
+    <rect
+      x="3"
+      y="9"
+      width="3"
+      height="6"
+      rx="0.5"
+      stroke="currentColor"
+      fill="none"
+      strokeWidth="1.4"
+    />
+    <rect
+      x="18"
+      y="9"
+      width="3"
+      height="6"
+      rx="0.5"
+      stroke="currentColor"
+      fill="none"
+      strokeWidth="1.4"
+    />
+    <rect
+      x="7"
+      y="10"
+      width="10"
+      height="4"
+      rx="0.8"
+      stroke="currentColor"
+      fill="none"
+      strokeWidth="1.4"
+    />
+  </svg>
+);
+
+const EnduranceIcon: React.FC<IconProps> = ({ className }) => (
+  <svg
+    className={className ?? "h-4 w-4"}
+    viewBox="0 0 24 24"
+    aria-hidden="true"
+  >
+    <circle
+      cx="12"
+      cy="12"
+      r="7"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.4"
+    />
+    <path
+      d="M12 8v4l2.5 2"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.4"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
+const MobilityIcon: React.FC<IconProps> = ({ className }) => (
+  <svg
+    className={className ?? "h-4 w-4"}
+    viewBox="0 0 24 24"
+    aria-hidden="true"
+  >
+    <circle
+      cx="12"
+      cy="6"
+      r="2"
+      stroke="currentColor"
+      strokeWidth="1.4"
+      fill="none"
+    />
+    <path
+      d="M10 9l-3 4.5 2 1.5"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.4"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M14 9l3 4.5-2 1.5"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.4"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M10 18l2-3 2 3"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.4"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
+const MuscleIcon: React.FC<IconProps> = ({ className }) => (
+  <svg
+    className={className ?? "h-4 w-4"}
+    viewBox="0 0 24 24"
+    aria-hidden="true"
+  >
+    <circle
+      cx="12"
+      cy="12"
+      r="7"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.4"
+    />
+    <path
+      d="M9 13c1 .7 2 1 3 1s2-.3 3-1"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.2"
+      strokeLinecap="round"
+    />
+  </svg>
+);
+
+/**
  * High-level program configuration
  */
 
 export interface FitnessPhase {
-  id: string;          // e.g. "phase1"
-  name: string;        // e.g. "Phase 1 - Foundation"
+  id: string;          // "phase1"
+  name: string;        // "Phase 1 - Foundation"
 }
 
 export interface ProgramLevel {
-  id: string;          // e.g. "beginner" | "intermediate" | "advanced"
-  label: string;       // human readable
+  id: string;          // "beginner" | "intermediate" | "advanced"
+  label: string;
 }
 
 export interface ProgramDay {
-  id: string;          // e.g. "day1"
-  label: string;       // e.g. "Day 1", "Upper A", "Full Body"
+  id: string;          // "day1"
+  label: string;       // "Day 1", "Full body A", etc.
 }
 
 /**
- * We store all program variants (phase + level + day)
- * as a keyed dictionary of ExerciseRowView[].
- *
- * Example key: "phase1__beginner__day1"
+ * All program variants (phase + level + day) stored in a map
+ * key: "phaseId__levelId__dayId"
  */
 
 export type ProgramVariantMap = Record<string, ExerciseRowView[]>;
@@ -81,39 +232,38 @@ export interface FitnessDashboardProps {
 }
 
 /**
- * Mobile-friendly cards for each exercise (instead of full grid)
+ * Mobile-friendly card view for each exercise
  */
 
 const MobileExerciseCard: React.FC<{ row: ExerciseRowView }> = ({ row }) => {
   const { meta, prescription } = row;
 
   return (
-    <div className="rounded-lg border border-gray-200 bg-white p-3 mb-2 shadow-sm">
+    <div className="rounded-xl border border-slate-200 bg-white p-3 mb-2 shadow-sm">
       <div className="flex justify-between items-start mb-2">
         <div>
-          <p className="text-sm font-semibold text-gray-900">{meta.name}</p>
-          <p className="text-xs text-gray-500">
+          <p className="text-xs font-semibold text-slate-900">{meta.name}</p>
+          <p className="text-[11px] text-slate-500">
             {meta.equipment === "NONE" ? "Bodyweight" : meta.equipment}
           </p>
         </div>
-        <span className="inline-flex items-center justify-center rounded-full bg-gray-50 px-2 py-1 text-xs font-semibold text-gray-700">
-          {prescription.sets}x
+        <span className="inline-flex items-center justify-center rounded-full bg-slate-50 px-2 py-0.5 text-[11px] font-semibold text-slate-700">
+          {prescription.sets} sets
         </span>
       </div>
-      <p className="text-xs text-gray-700 mb-2">
+      <p className="text-[11px] text-slate-700 mb-2">
         {prescription.intensityLabel}
       </p>
 
-      {/* Simple load summary */}
-      <div className="flex flex-wrap gap-1 text-xs text-gray-600">
-        <span className="px-2 py-0.5 rounded-full bg-gray-50 border border-gray-100">
-          Strength: {meta.fitnessLoad.STRENGTH ?? 0}/3
+      <div className="flex flex-wrap gap-1 text-[10px] text-slate-600">
+        <span className="px-2 py-0.5 rounded-full bg-slate-50 border border-slate-100">
+          Cardio load {meta.fitnessLoad.CARDIO ?? 0}/3
         </span>
-        <span className="px-2 py-0.5 rounded-full bg-gray-50 border border-gray-100">
-          Cardio: {meta.fitnessLoad.CARDIO ?? 0}/3
+        <span className="px-2 py-0.5 rounded-full bg-slate-50 border border-slate-100">
+          Strength load {meta.fitnessLoad.STRENGTH ?? 0}/3
         </span>
-        <span className="px-2 py-0.5 rounded-full bg-gray-50 border border-gray-100">
-          Mobility: {meta.fitnessLoad.MOBILITY ?? 0}/3
+        <span className="px-2 py-0.5 rounded-full bg-slate-50 border border-slate-100">
+          Mobility load {meta.fitnessLoad.MOBILITY ?? 0}/3
         </span>
       </div>
     </div>
@@ -130,13 +280,13 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
 }) => {
   const {
     title = "Fitness Program",
-    subtitle = "Your personalized program based on physical education and progression.",
+    subtitle = "Your personalized workout plan, based on physical education and progression.",
     phases,
     levels,
     days,
     variants,
     programTitle = "Program overview",
-    programDescription = "Designed with your goals, baseline, and PE-aligned progression.",
+    programDescription = "Each column shows how hard the exercise works your heart, muscles, and main muscle groups.",
     defaultPhaseId,
     defaultLevelId,
     defaultDayId,
@@ -175,30 +325,89 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
   };
 
   return (
-    <div className="w-full bg-[#f0f7ff] min-h-[70vh] px-4 sm:px-6 pb-10">
+    <div className="w-full bg-[#f0f7ff] min-h-[70vh] px-2 sm:px-4 pb-10">
       {/* Header */}
       <header className="flex flex-col items-center gap-2 py-6">
-        <h1 className="text-3xl font-semibold text-gray-900 text-center">
+        <h1 className="text-[22px] font-semibold text-slate-900 text-center">
           {title}
         </h1>
         {subtitle && (
-          <p className="text-sm text-gray-600 text-center max-w-2xl">
+          <p className="mt-1 text-sm text-slate-600 text-center max-w-2xl">
             {subtitle}
           </p>
         )}
       </header>
 
       <div className="max-w-6xl mx-auto space-y-4">
-        {/* Controls: Phase selector, Level toggle, Day picker */}
-        <section className="rounded-lg bg-white border border-gray-200 shadow-sm p-4">
-          <div className="grid gap-4 sm:grid-cols-[2fr,2fr,3fr] items-start">
+        {/* HOW TO READ THIS PROGRAM (Legend) */}
+        <section className="rounded-2xl bg-white border border-slate-200 shadow-sm p-4">
+          <h2 className="text-sm font-semibold text-slate-800 mb-2">
+            How to read this program
+          </h2>
+          <div className="grid gap-3 md:grid-cols-2 text-[11px] text-slate-700">
+            <div className="space-y-1.5">
+              <p>
+                <span className="font-semibold">Sets</span> means how many
+                times you repeat the exercise block. For example, 3 sets of 10
+                reps means you do 10 reps, rest, and repeat 3 times.
+              </p>
+              <p>
+                <span className="font-semibold">Intensity Level</span> explains
+                how hard you should feel you are working. We use simple cues
+                like easy, moderate, or hard instead of complicated numbers.
+              </p>
+            </div>
+            <div className="space-y-1.5">
+              <p className="flex items-center gap-2">
+                <CardioIcon className="h-4 w-4 text-emerald-600" />
+                <span>
+                  <span className="font-semibold">Cardio</span> shows how much
+                  the exercise works your heart and breathing.
+                </span>
+              </p>
+              <p className="flex items-center gap-2">
+                <StrengthIcon className="h-4 w-4 text-emerald-600" />
+                <span>
+                  <span className="font-semibold">Strength</span> shows how
+                  much it challenges your muscles and force.
+                </span>
+              </p>
+              <p className="flex items-center gap-2">
+                <EnduranceIcon className="h-4 w-4 text-emerald-600" />
+                <span>
+                  <span className="font-semibold">Endurance</span> shows how
+                  much it builds your ability to keep moving longer.
+                </span>
+              </p>
+              <p className="flex items-center gap-2">
+                <MobilityIcon className="h-4 w-4 text-emerald-600" />
+                <span>
+                  <span className="font-semibold">Mobility</span> shows how
+                  much it helps your joints move freely and easily.
+                </span>
+              </p>
+              <p className="flex items-center gap-2">
+                <MuscleIcon className="h-4 w-4 text-emerald-600" />
+                <span>
+                  <span className="font-semibold">Muscle Focus</span> tiles show
+                  which muscle groups (legs, back, core, etc.) are working the
+                  most. The darker the tile, the more that area is loaded.
+                </span>
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* Controls: Phase selector, Level toggle, Day picker, Start session */}
+        <section className="rounded-2xl bg-white border border-slate-200 shadow-sm p-4">
+          <div className="grid gap-3 sm:grid-cols-[2fr,2fr,3fr] items-center">
             {/* Phase selector */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <label className="block text-[11px] font-semibold text-slate-700 mb-1">
                 Phase
               </label>
               <select
-                className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                className="w-full rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-[11px] text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                 value={phaseId}
                 onChange={(e) => setPhaseId(e.target.value)}
               >
@@ -212,19 +421,19 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
 
             {/* Level toggle */}
             <div>
-              <p className="block text-sm font-semibold text-gray-700 mb-2">
+              <p className="block text-[11px] font-semibold text-slate-700 mb-1">
                 Level
               </p>
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-1">
                 {levels.map((level) => (
                   <button
                     key={level.id}
                     type="button"
                     onClick={() => setLevelId(level.id)}
-                    className={`px-4 py-2 rounded-full text-sm font-medium border transition-colors ${
+                    className={`px-3 py-1 rounded-full text-[11px] font-medium border transition-colors ${
                       levelId === level.id
                         ? "bg-emerald-500 border-emerald-500 text-white"
-                        : "bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100"
+                        : "bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100"
                     }`}
                   >
                     {level.label}
@@ -235,19 +444,19 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
 
             {/* Day picker */}
             <div>
-              <p className="block text-sm font-semibold text-gray-700 mb-2">
+              <p className="block text-[11px] font-semibold text-slate-700 mb-1">
                 Day
               </p>
-              <div className="flex gap-2 overflow-x-auto pb-1">
+              <div className="flex gap-1 overflow-x-auto pb-1">
                 {days.map((day) => (
                   <button
                     key={day.id}
                     type="button"
                     onClick={() => setDayId(day.id)}
-                    className={`px-4 py-2 rounded-full text-sm font-medium border whitespace-nowrap transition-colors ${
+                    className={`px-3 py-1 rounded-full text-[11px] font-medium border whitespace-nowrap transition-colors ${
                       dayId === day.id
-                        ? "bg-gray-900 border-gray-900 text-white"
-                        : "bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100"
+                        ? "bg-slate-900 border-slate-900 text-white"
+                        : "bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100"
                     }`}
                   >
                     {day.label}
@@ -258,21 +467,21 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
           </div>
 
           {/* Session context + Start button */}
-          <div className="mt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-4 border-t border-gray-200">
-            <div className="text-sm text-gray-600">
-              <p className="font-semibold text-gray-800">
+          <div className="mt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div className="text-[11px] text-slate-600">
+              <p className="font-semibold text-slate-800">
                 {currentPhase ? currentPhase.name : "Phase"} /{" "}
                 {currentLevel ? currentLevel.label : "Level"} /{" "}
                 {currentDay ? currentDay.label : "Day"}
               </p>
               {programDescription && (
-                <p className="mt-1 max-w-2xl text-sm">{programDescription}</p>
+                <p className="mt-1 max-w-2xl">{programDescription}</p>
               )}
             </div>
             <button
               type="button"
               onClick={handleStartSession}
-              className="inline-flex items-center justify-center self-start sm:self-auto rounded-full bg-emerald-500 px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-emerald-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="inline-flex items-center justify-center self-start sm:self-auto rounded-full bg-emerald-500 px-4 py-1.5 text-[11px] font-semibold text-white shadow-sm hover:bg-emerald-600 transition-colors"
               disabled={currentRows.length === 0}
             >
               Start Session
@@ -282,27 +491,23 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
 
         {/* Desktop: Program grid */}
         <section className="hidden sm:block">
-          <div className="rounded-lg bg-white shadow-sm border border-gray-200 p-4">
-            <WorkoutProgramGrid title={programTitle} rows={currentRows} />
-          </div>
+          <WorkoutProgramGrid title={programTitle} rows={currentRows} />
         </section>
 
-        {/* Mobile: Accordion-style list */}
+        {/* Mobile: Card list */}
         <section className="sm:hidden">
-          <div className="rounded-lg bg-white shadow-sm border border-gray-200 p-4">
-            <h2 className="text-lg font-semibold text-gray-800 mb-3">
-              {programTitle}
-            </h2>
-            {currentRows.length === 0 && (
-              <p className="text-sm text-gray-500">
-                No exercises scheduled yet for this combination. Your coach may
-                not have configured this phase, level, and day.
-              </p>
-            )}
-            {currentRows.map((row) => (
-              <MobileExerciseCard key={row.meta.id} row={row} />
-            ))}
-          </div>
+          <h2 className="text-xs font-semibold text-slate-800 mb-2">
+            {programTitle}
+          </h2>
+          {currentRows.length === 0 && (
+            <p className="text-[11px] text-slate-500">
+              No exercises scheduled yet for this combination. Your coach may
+              not have configured this phase, level, and day.
+            </p>
+          )}
+          {currentRows.map((row) => (
+            <MobileExerciseCard key={row.meta.id} row={row} />
+          ))}
         </section>
       </div>
     </div>
@@ -312,7 +517,7 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
 export default FitnessDashboard;
 
 /**
- * Optional: Adapter types to "auto-type" ExerciseRowView
+ * Optional: Adapter types to auto-type ExerciseRowView
  * from your service payloads.
  */
 
@@ -345,12 +550,6 @@ export function mapServiceExerciseToRow(
 
   return { meta, prescription };
 }
-
-/**
- * Helper to build a ProgramVariantMap from a nested structure:
- *
- * programConfig[phaseId][levelId][dayId] = ServiceExerciseDto[]
- */
 
 export type ServiceProgramConfig = {
   [phaseId: string]: {
