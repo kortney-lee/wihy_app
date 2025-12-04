@@ -25,6 +25,10 @@ interface FullScreenChatProps {
   apiResponseData?: any; // Universal Search API response data for chart generation
   onGenerateCharts?: (apiData: any) => void; // Callback to generate charts from API data
   userId?: string; // Optional user ID for session management
+  isEmbedded?: boolean; // Whether chat is embedded in another page (like NutritionFacts)
+  onBackToOverview?: () => void; // Callback to return to overview mode
+  onNewScan?: () => void; // Callback to start a new scan
+  productName?: string; // Optional product name to display in header
 }
 
 // Add interface for ref methods
@@ -40,7 +44,11 @@ const FullScreenChat = forwardRef<FullScreenChatRef, FullScreenChatProps>(({
   onViewCharts,
   apiResponseData,
   onGenerateCharts,
-  userId
+  userId,
+  isEmbedded = false,
+  onBackToOverview,
+  onNewScan,
+  productName
 }, ref) => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputMessage, setInputMessage] = useState('');
@@ -1011,37 +1019,47 @@ const FullScreenChat = forwardRef<FullScreenChatRef, FullScreenChatProps>(({
       <div className="flex-1 flex flex-col h-full overflow-hidden">
 
         {/* Top Navigation Bar with Toggle History and View Charts */}
-        <div className="flex items-center justify-between px-3 py-2 bg-slate-50 min-h-[40px]">
-          {/* Left side - Toggle History Button */}
-          <button
-            onClick={() => {
-              if (isMobile) {
-                setShowMobileHistory(!showMobileHistory);
-              } else {
-                setShowDesktopHistory(!showDesktopHistory);
-              }
-            }}
-            className="bg-transparent border-none cursor-pointer p-1 text-2xl hover:text-gray-600 transition-colors duration-200"
-            title="Toggle History"
-          >
-            ☰
-          </button>
-
-          {/* Right side - View Charts Button */}
-          {onViewCharts && (
+        <div className="flex-shrink-0 flex items-center justify-between px-4 py-3 bg-white border-b border-gray-200">
+          <div className="flex items-center justify-between w-full px-3 py-2 bg-white min-h-[40px]">
+            <button
+              onClick={() => {
+                if (isMobile) {
+                  setShowMobileHistory(!showMobileHistory);
+                } else {
+                  setShowDesktopHistory(!showDesktopHistory);
+                }
+              }}
+              className="bg-transparent border-none cursor-pointer p-1 text-2xl hover:text-gray-600 transition-colors duration-200"
+              title="Toggle History"
+            >
+              ☰
+            </button>
             <div className="relative">
               <button
                 onClick={() => {
-                  if (hasChartData) {
-                    onViewCharts();
+                  if (hasChartData && apiResponseData) {
+                    // Navigate to results page with chart data in the expected format
+                    navigate('/results?q=' + encodeURIComponent(initialQuery || 'Analysis Results'), {
+                      state: {
+                        fromSearch: true,
+                        fromChat: true,
+                        results: {
+                          summary: initialResponse?.summary || 'Analysis results',
+                          details: initialResponse?.summary || 'Analysis results',
+                          sources: initialResponse?.sources || [],
+                          recommendations: initialResponse?.recommendations || [],
+                          medicalDisclaimer: initialResponse?.disclaimer || ''
+                        },
+                        apiResponse: apiResponseData,
+                        dataSource: 'wihy'
+                      }
+                    });
                   } else {
-                    onClose(); // Navigate back to search screen when no chart data
+                    onClose();
                   }
                 }}
-                title={hasChartData ? "View Interactive Charts" : "Back to Search Screen"}
-                className={`chat-icon-button bg-transparent border-none cursor-pointer p-1 rounded transition-all duration-200 flex items-center justify-center ${
-                  hasChartData ? 'opacity-100' : 'opacity-70'
-                } hover:opacity-90`}
+                title="View Interactive Charts"
+                className="chat-icon-button bg-transparent border-none cursor-pointer p-1 rounded transition-all duration-200 flex items-center justify-center opacity-100 hover:opacity-90"
               >
                 <img 
                   src="/assets/Chartlogo.png" 
@@ -1049,41 +1067,68 @@ const FullScreenChat = forwardRef<FullScreenChatRef, FullScreenChatProps>(({
                   className="w-16 h-16 object-contain"
                 />
               </button>
-              
-              {/* Chart availability indicator */}
-              {hasChartData && (
-                <div className="absolute top-2 right-2 w-3 h-3 rounded-full bg-emerald-500 border-2 border-white shadow-sm" />
-              )}
-              
-              {/* Back indicator - clickable to return to search */}
-              {!hasChartData && (
-                <div className="absolute -bottom-0.5 right-2 text-[9px] text-gray-500 font-medium text-center">
-                  ← Back
-                </div>
-              )}
+              <div className="absolute top-2 right-2 w-3 h-3 rounded-full bg-emerald-500 border-2 border-white shadow-sm" />
             </div>
-          )}
+          </div>
         </div>
         
-        {/* Header */}
-        <div className={`flex items-center justify-between ${
-          isMobile ? 'px-4 py-2' : 'px-6 py-3'
+        {/* Header with product name and pill toggle */}
+        <div className={`flex items-center justify-center ${
+          isMobile ? 'px-4 py-2' : 'px-4 py-2'
         } border-b border-gray-200 bg-white flex-shrink-0`}>
-          <div className="flex items-center gap-3 w-fit">
-            <h1 className={`m-0 ${
-              isMobile ? 'text-base' : 'text-lg'
-            } font-semibold text-gray-800 whitespace-nowrap`}>
-              Ask WiHY{' '}
-              <span className={`${
-                isMobile ? 'text-xs' : 'text-sm'
-              } font-medium text-gray-500`}>
-                (pro·nounced why)
-              </span>
-            </h1>
-          </div>
-
+          
           <div className="flex items-center gap-3">
-            {/* Header actions can be added here if needed */}
+            {/* Product name - hidden on small screens */}
+            {productName && (
+              <span className="text-xs font-semibold text-gray-900 hidden sm:inline max-w-[200px] truncate">
+                {productName}
+              </span>
+            )}
+            
+            {/* View mode toggle */}
+            <div className="inline-flex rounded-full bg-gray-100 p-1 text-xs">
+              {/* Overview button - clickable to go back */}
+              {isEmbedded && onBackToOverview ? (
+                <button
+                  onClick={onBackToOverview}
+                  className="px-3 py-1.5 rounded-full transition-all text-gray-600 hover:text-gray-900"
+                  title="View Overview"
+                  aria-label="View overview"
+                >
+                  Overview
+                </button>
+              ) : (
+                <span className="px-3 py-1.5 text-gray-600 flex items-center">
+                  Overview
+                </span>
+              )}
+
+              {/* Ask WiHY button - active state */}
+              <button
+                className="px-3 py-1.5 rounded-full transition-all bg-white text-gray-900 shadow-sm font-semibold"
+                disabled
+              >
+                Ask WiHY
+              </button>
+
+              {/* Camera button - only show when embedded */}
+              {isEmbedded && onNewScan && (
+                <button
+                  onClick={onNewScan}
+                  className="px-2 py-1.5 rounded-full transition-all text-gray-600 hover:text-gray-900 hover:bg-white"
+                  title="New Scan"
+                  aria-label="Start new scan"
+                >
+                  <svg 
+                    viewBox="0 0 24 24" 
+                    fill="currentColor"
+                    className="w-4 h-4"
+                  >
+                    <path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/>
+                  </svg>
+                </button>
+              )}
+            </div>
           </div>
         </div>
 
@@ -1091,9 +1136,20 @@ const FullScreenChat = forwardRef<FullScreenChatRef, FullScreenChatProps>(({
         <div className="flex-1 flex flex-col overflow-hidden">
           <div className={`flex-1 overflow-y-auto overflow-x-hidden ${
             isMobile ? 'p-4' : 'p-6'
-          } max-w-full ${isMobile ? '' : 'md:max-w-3xl'} mx-auto w-full scroll-smooth`}>
+          } max-w-full ${isMobile ? '' : 'md:max-w-3xl'} w-full scroll-smooth`}>
             {messages.length === 0 ? (
-              <div className="flex flex-col items-center justify-center h-[60vh] text-center text-gray-500">
+              <>
+                {/* Title as first element in chat area - left aligned */}
+                <div className="mb-6 flex items-start">
+                  <h1 className="m-0 text-sm font-semibold text-gray-800 text-left block">
+                    Ask WiHY{' '}
+                    <span className="text-xs font-medium text-gray-500">
+                      (pro·nounced why)
+                    </span>
+                  </h1>
+                </div>
+                
+                <div className="flex flex-col items-center justify-center h-[50vh] text-center text-gray-500">
                 <div className={`${
                   isMobile ? 'w-12 h-12 text-xl' : 'w-16 h-16 text-2xl'
                 } rounded-2xl bg-gray-100 flex items-center justify-center mb-4`}>
@@ -1109,9 +1165,21 @@ const FullScreenChat = forwardRef<FullScreenChatRef, FullScreenChatProps>(({
                 } m-0`}>
                   Ask me anything about health, nutrition, exercise, or wellness. I'm here to provide evidence-based guidance.
                 </p>
-              </div>
+                </div>
+              </>
             ) : (
-              messages.map((message) => (
+              <>
+                {/* Title as first message when messages exist - left aligned */}
+                <div className="mb-6 pb-4 border-b border-gray-100 flex items-start">
+                  <h1 className="m-0 text-sm font-semibold text-gray-800 text-left block">
+                    Ask WiHY{' '}
+                    <span className="text-xs font-medium text-gray-500">
+                      (pro·nounced why)
+                    </span>
+                  </h1>
+                </div>
+                
+                {messages.map((message) => (
                 <div
                   key={message.id}
                   className={`flex ${
@@ -1159,7 +1227,8 @@ const FullScreenChat = forwardRef<FullScreenChatRef, FullScreenChatProps>(({
                     </div>
                   </div>
                 </div>
-              ))
+              ))}
+            </>
             )}
 
             {isLoading && (
