@@ -34,7 +34,7 @@ const ConsumptionDashboard: React.FC<ConsumptionDashboardProps> = ({
   onAnalyze,
   onUploadReceipt
 }) => {
-  const [activeSubTab, setActiveSubTab] = useState<'overview' | 'summary' | 'shopping' | 'receipts'>('overview');
+  const [activeSubTab, setActiveSubTab] = useState<'summary' | 'shopping' | 'receipts'>('summary');
   const [timeframe, setTimeframe] = useState<'day' | 'week' | 'month'>(period);
 
   // Temporary mock data – you'll swap this for real API data later
@@ -86,74 +86,6 @@ const ConsumptionDashboard: React.FC<ConsumptionDashboardProps> = ({
       ))}
     </div>
   );
-
-  const renderOverview = () => {
-    // When showing trends (week/month), exclude card summaries - only show charts
-    // When showing "Today", exclude trend charts - only show card summaries
-    const periodExclusions = timeframe === 'day' 
-      ? [
-          ChartType.CALORIES_CHART,
-          ChartType.NUTRITION_CHART,
-          ChartType.HYDRATION_CHART
-        ]
-      : [
-          ChartType.CALORIES,
-          ChartType.HYDRATION,
-          ChartType.NUTRITION_ANALYSIS,
-          ChartType.NUTRITION_GRADE_BADGE,
-          ChartType.VITAMIN_CONTENT,
-          ChartType.DAILY_VALUE_PROGRESS,
-          ChartType.NOVA_SCORE,
-          ChartType.NUTRITION_TRACKING,
-          ChartType.MACRONUTRIENTS
-        ];
-
-    return (
-      <div className="flex flex-col gap-6">
-        {/* Charts – show all consumption-related charts */}
-        <div>
-          <DashboardCharts
-            period={timeframe}
-            maxCards={20}
-            showAllCharts={true}
-            excludeChartTypes={[
-              ChartType.QUICK_INSIGHTS,
-              ChartType.MEMBERS_CARD,
-              ChartType.BMI_DOMAIN,
-              ChartType.HEALTH_RISK,
-              ChartType.HEALTH_SCORE,
-              ChartType.CURRENT_WEIGHT,
-              ChartType.WEIGHT_TREND,
-              ChartType.ACTIVITY,
-              ChartType.STEPS,
-              ChartType.STEPS_CHART,
-              ChartType.ACTIVE_MINUTES,
-              ChartType.SLEEP,
-              ChartType.BLOOD_PRESSURE,
-              ChartType.HEART_RATE,
-              ChartType.EXERCISE,
-              ChartType.DOPAMINE,
-              ChartType.MOOD_CHART,
-              ChartType.RESEARCH_QUALITY,
-              ChartType.PUBLICATION_TIMELINE,
-              ChartType.STUDY_TYPE_DISTRIBUTION,
-              ChartType.RESULT_QUALITY_PIE,
-              ChartType.RESEARCH_EVIDENCE_QUALITY,
-              ChartType.RESEARCH_STUDY_TYPE_DISTRIBUTION,
-              ChartType.RESEARCH_PUBLICATION_TIMELINE,
-              ChartType.BMI_BODY_FAT,
-              ChartType.SLEEP_CHART,
-              ChartType.HEALTH_RISK_CHART,
-              ChartType.NUTRITION_TRACKING_CHART,
-              ChartType.NUTRITION,
-              ...periodExclusions
-            ]}
-            onAnalyze={onAnalyze}
-          />
-        </div>
-      </div>
-    );
-  };
 
   const renderSummary = () => {
     // When showing trends (week/month), exclude card summaries - only show charts
@@ -404,26 +336,10 @@ const ConsumptionDashboard: React.FC<ConsumptionDashboardProps> = ({
   return (
     <div className="p-5 max-w-full overflow-x-hidden">
       <div className="flex flex-col items-center text-center gap-6 mb-6">
-        <div>
-          <h1 className="text-3xl font-semibold text-gray-900 mb-2">Consumption & Shopping</h1>
-          <p className="text-gray-600 text-sm">
-            See how much you actually eat, where it comes from, and keep your shopping organized.
-          </p>
-        </div>
         {renderTimeframeSelector()}
       </div>
 
       <div className="flex gap-1 mb-6 border-b border-gray-200 overflow-x-auto overflow-y-hidden scrollbar-hide">
-        <button
-          className={`px-6 py-4 text-[15px] font-medium rounded-t-lg transition-all duration-200 relative leading-normal whitespace-nowrap ${
-            activeSubTab === 'overview'
-              ? 'bg-white text-gray-900 border border-gray-200 border-b-white -mb-px'
-              : 'bg-transparent text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-          }`}
-          onClick={() => setActiveSubTab('overview')}
-        >
-          Overview
-        </button>
         <button
           className={`px-6 py-4 text-[15px] font-medium rounded-t-lg transition-all duration-200 relative leading-normal whitespace-nowrap ${
             activeSubTab === 'summary'
@@ -457,7 +373,6 @@ const ConsumptionDashboard: React.FC<ConsumptionDashboardProps> = ({
       </div>
 
       <div className="mt-6">
-        {activeSubTab === 'overview' && renderOverview()}
         {activeSubTab === 'summary' && renderSummary()}
         {activeSubTab === 'shopping' && renderShoppingList()}
         {activeSubTab === 'receipts' && renderReceipts()}

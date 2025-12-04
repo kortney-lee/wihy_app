@@ -326,17 +326,6 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
 
   return (
     <div className="w-full bg-[#f0f7ff] min-h-[70vh] px-2 sm:px-4 pb-10">
-      {/* Header */}
-      <header className="flex flex-col items-center gap-2 py-6">
-        <h1 className="text-[22px] font-semibold text-slate-900 text-center">
-          {title}
-        </h1>
-        {subtitle && (
-          <p className="mt-1 text-sm text-slate-600 text-center max-w-2xl">
-            {subtitle}
-          </p>
-        )}
-      </header>
 
       <div className="max-w-6xl mx-auto space-y-4">
         {/* HOW TO READ THIS PROGRAM (Legend) */}

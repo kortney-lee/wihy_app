@@ -13,6 +13,7 @@ interface HealthDashboardGridProps {
   isInsightsLayout?: boolean;
   isResearchLayout?: boolean;
   isNutritionLayout?: boolean;
+  isTrendsLayout?: boolean;
   researchChartData?: {
     evidence_grade?: string;
     research_quality_score?: number;
@@ -169,6 +170,11 @@ const gridStyles = {
     gridTemplateColumns: 'repeat(2, 1fr)',
     marginBottom: '24px'
   },
+  trendsGrid: {
+    display: 'grid',
+    gap: '24px',
+    gridTemplateColumns: 'repeat(2, 1fr)'
+  },
   fullWidthCard: {
     display: 'grid',
     gridTemplateColumns: '1fr',
@@ -187,6 +193,7 @@ const HealthDashboardGrid: React.FC<HealthDashboardGridProps> = ({
   isInsightsLayout = false,
   isResearchLayout = false,
   isNutritionLayout = false,
+  isTrendsLayout = false,
   researchChartData,
   onAnalyze
 }) => {
@@ -382,7 +389,12 @@ const HealthDashboardGrid: React.FC<HealthDashboardGridProps> = ({
 
       {/* Grid Cards */}
       {gridCardItems.length > 0 && (
-        isInsightsLayout && windowWidth >= 768 ? (
+        isTrendsLayout && windowWidth >= 768 ? (
+          // Special layout for trends: 2 cards per row
+          <div style={gridStyles.trendsGrid}>
+            {gridCardItems.map(cardData => renderCard(cardData))}
+          </div>
+        ) : isInsightsLayout && windowWidth >= 768 ? (
           // Special layout for insights: 3 cards on first row, 2 on second row
           <div style={gridStyles.insightsGrid}>
             {/* First row: 3 cards */}
@@ -430,11 +442,12 @@ const HealthDashboardGrid: React.FC<HealthDashboardGridProps> = ({
               {gridCardItems.slice(0, 3).map(cardData => renderCard(cardData))}
             </div>
             
-            {/* Special wide row for Vitamin Content and Nutrition Analysis (taller cards side by side) */}
+            {/* Special wide row for Vitamin Content, Nutrition Analysis, and Nova Chat (taller cards side by side) */}
             {(() => {
               const vitaminCard = gridCardItems.find(card => card.chartType === ChartType.VITAMIN_CONTENT);
               const nutritionCard = gridCardItems.find(card => card.chartType === ChartType.NUTRITION);
-              const wideRowCards = [vitaminCard, nutritionCard].filter(Boolean);
+              const novaCard = gridCardItems.find(card => card.chartType === ChartType.NOVA_SCORE);
+              const wideRowCards = [vitaminCard, nutritionCard, novaCard].filter(Boolean);
               
               if (wideRowCards.length > 0) {
                 return (
@@ -453,7 +466,9 @@ const HealthDashboardGrid: React.FC<HealthDashboardGridProps> = ({
             {/* Subsequent rows: 2 cards each (excluding the wide row cards) */}
             {(() => {
               const remainingCards = gridCardItems.slice(3).filter(card => 
-                card.chartType !== ChartType.VITAMIN_CONTENT && card.chartType !== ChartType.NUTRITION
+                card.chartType !== ChartType.VITAMIN_CONTENT && 
+                card.chartType !== ChartType.NUTRITION &&
+                card.chartType !== ChartType.NOVA_SCORE
               );
               
               if (remainingCards.length > 0) {
@@ -467,9 +482,9 @@ const HealthDashboardGrid: React.FC<HealthDashboardGridProps> = ({
             })()}
           </div>
         ) : (
-          // Default grid layout for non-insights/non-research or mobile
+          // Default grid layout for non-insights/non-research/non-trends or mobile
           <div style={{ 
-            ...(isInsightsLayout || isResearchLayout || isNutritionLayout
+            ...(isInsightsLayout || isResearchLayout || isNutritionLayout || isTrendsLayout
               ? gridStyles.insightsGridMobile
               : gridStyles.chartsGrid
             ), 
