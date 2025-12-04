@@ -1,5 +1,14 @@
 import React from 'react';
+import {
+  Chart as ChartJS,
+  ArcElement,
+  Tooltip,
+  Legend,
+} from "chart.js";
+import { Doughnut } from "react-chartjs-2";
 import AnalyzeWithWihyButton from '../shared/AnalyzeWithWihyButton';
+
+ChartJS.register(ArcElement, Tooltip, Legend);
 
 /* ================= Converted to use Tailwind CSS ================= */
 
@@ -17,7 +26,7 @@ function CardShell({
   return (
     <section className={`flex flex-col p-6 rounded-2xl bg-white border border-gray-200 shadow-md overflow-hidden ${height ? '' : 'h-[420px]'}`} style={height ? { height } : {}}>
       <h3 className="m-0 mb-5 text-xl font-semibold text-gray-400">{title}</h3>
-      <div className="flex flex-col items-center justify-center flex-1 overflow-hidden min-h-0">{children}</div>
+      <div className="flex-1 overflow-hidden min-h-0">{children}</div>
     </section>
   );
 }
@@ -96,97 +105,96 @@ const NutritionAnalysisCard: React.FC<NutritionAnalysisCardProps> = ({ data, hei
     }
   ];
 
-  return (
-    <CardShell title="Nutrition Analysis" height={height}>
+  const doughnutData = {
+    labels: macros.map((m) => m.name),
+    datasets: [
+      {
+        data: macros.map((m) => m.current),
+        backgroundColor: macros.map((m) => m.color),
+        borderWidth: 0,
+        cutout: "70%",
+      },
+    ],
+  };
 
-      {/* Macronutrients Visual Representation */}
-      <div className="mb-4" style={{ height: '200px', width: '100%' }}>
-        {/* Custom CSS Pie Chart as fallback */}
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '160px' }}>
-          <div style={{ 
-            width: '140px', 
-            height: '140px', 
-            borderRadius: '50%',
-            background: `conic-gradient(
-              ${macros[0].color} 0deg ${(macros[0].current / (macros[0].current + macros[1].current + macros[2].current + macros[3].current)) * 360}deg,
-              ${macros[1].color} ${(macros[0].current / (macros[0].current + macros[1].current + macros[2].current + macros[3].current)) * 360}deg ${((macros[0].current + macros[1].current) / (macros[0].current + macros[1].current + macros[2].current + macros[3].current)) * 360}deg,
-              ${macros[2].color} ${((macros[0].current + macros[1].current) / (macros[0].current + macros[1].current + macros[2].current + macros[3].current)) * 360}deg ${((macros[0].current + macros[1].current + macros[2].current) / (macros[0].current + macros[1].current + macros[2].current + macros[3].current)) * 360}deg,
-              ${macros[3].color} ${((macros[0].current + macros[1].current + macros[2].current) / (macros[0].current + macros[1].current + macros[2].current + macros[3].current)) * 360}deg 360deg
-            )`,
-            position: 'relative'
-          }}>
-            {/* Inner circle to create donut effect */}
-            <div style={{
-              position: 'absolute',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-              width: '70px',
-              height: '70px',
-              backgroundColor: 'white',
-              borderRadius: '50%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '12px',
-              fontWeight: 'bold',
-              color: '#666'
-            }}>
-              Nutrition
+  const options: any = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        display: false,
+      },
+      tooltip: {
+        enabled: true,
+        callbacks: {
+          label: (ctx: any) => {
+            const label = ctx.label || "";
+            const value = ctx.parsed ?? 0;
+            const macro = macros[ctx.dataIndex];
+            const unit = macro?.unit ?? "";
+            const goal = macro?.goal ?? 0;
+            return `${label}: ${value}${unit} / ${goal}${unit}`;
+          },
+        },
+      },
+    },
+  };
+
+  return (
+    <div className="flex flex-col p-6 rounded-2xl bg-white border border-gray-200 h-[420px] overflow-hidden text-center">
+      <h3 className="text-xl font-semibold text-gray-400 mb-1">
+        Nutrition Analysis
+      </h3>
+      <p className="text-sm text-gray-500 mb-4 max-w-xs mx-auto">
+        Your daily macronutrient breakdown and progress toward nutritional goals.
+      </p>
+
+      {/* Main content: horizontal layout with chart on left, legend on right */}
+      <div className="flex flex-row items-center justify-center gap-6 flex-1 overflow-hidden min-h-0">
+        {/* Chart on the left */}
+        <div className="relative w-full h-full max-w-[240px] max-h-[240px] flex-shrink-0 overflow-hidden">
+          <Doughnut data={doughnutData} options={options} />
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center pointer-events-none">
+            <div className="text-3xl font-bold text-gray-800 leading-none overflow-hidden">
+              {nutrition.calories}
+            </div>
+            <div className="text-xs text-gray-500 mt-1 font-medium">
+              kcal today
             </div>
           </div>
         </div>
-        
-        {/* Complete Nutrition Info */}
-        <div style={{ marginTop: '12px' }}>
-          {/* Macronutrient Legend */}
-          <div style={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: '12px', marginBottom: '12px' }}>
-            {macros.map((macro, index) => (
-              <div key={index} style={{ display: 'flex', alignItems: 'center', fontSize: '12px' }}>
-                <div style={{
-                  width: '12px',
-                  height: '12px',
-                  backgroundColor: macro.color,
-                  borderRadius: '50%',
-                  marginRight: '6px'
-                }}></div>
-                <span>{macro.name}: {macro.current}{macro.unit}</span>
+
+        {/* Legend / details on the right */}
+        <div className="flex flex-col justify-center space-y-3">
+          {macros.map((macro, index) => (
+            <div
+              key={index}
+              className="flex items-center justify-between text-sm gap-3"
+            >
+              <div className="flex items-center">
+                <div
+                  className="w-3 h-3 rounded-sm mr-2 flex-shrink-0"
+                  style={{ backgroundColor: macro.color }}
+                />
+                <span className="font-medium text-gray-700 whitespace-nowrap">
+                  {macro.name}
+                </span>
+                <span className="text-gray-500 ml-1">
+                  — {macro.current}{macro.unit}
+                </span>
               </div>
-            ))}
-          </div>
-          
-          {/* Additional Nutrients */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', textAlign: 'center', marginBottom: '12px' }}>
-            <div>
-              <div style={{ fontSize: '14px', fontWeight: 'bold', color: '#2563eb' }}>{nutrition.fiber}g</div>
-              <div style={{ fontSize: '12px', color: '#6b7280' }}>Fiber</div>
-            </div>
-            <div>
-              <div style={{ fontSize: '14px', fontWeight: 'bold', color: '#ea580c' }}>{nutrition.sugar}g</div>
-              <div style={{ fontSize: '12px', color: '#6b7280' }}>Sugar</div>
-            </div>
-            <div>
-              <div style={{ fontSize: '14px', fontWeight: 'bold', color: '#dc2626' }}>{nutrition.sodium}mg</div>
-              <div style={{ fontSize: '12px', color: '#6b7280' }}>Sodium</div>
-            </div>
-          </div>
-          
-          {/* Quick Stats */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', fontSize: '12px', marginBottom: '8px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <span style={{ color: '#6b7280' }}>Remaining:</span>
-              <span style={{ 
-                fontWeight: '500', 
-                color: goals.calories - nutrition.calories >= 0 ? '#059669' : '#dc2626' 
-              }}>
-                {goals.calories - nutrition.calories} kcal
+              <span className="font-semibold text-gray-700 ml-4">
+                {Math.round((macro.current / macro.goal) * 100)}%
               </span>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <span style={{ color: '#6b7280' }}>Protein %:</span>
-              <span style={{ fontWeight: '500', color: '#2563eb' }}>
-                {Math.round((nutrition.protein * 4 / nutrition.calories) * 100)}%
-              </span>
+          ))}
+
+          {/* Additional nutrients summary */}
+          <div className="pt-3 border-t border-gray-200 space-y-1 text-xs text-gray-600">
+            <div>Fiber: {nutrition.fiber}g • Sugar: {nutrition.sugar}g</div>
+            <div>Sodium: {nutrition.sodium}mg</div>
+            <div className={`font-semibold ${goals.calories - nutrition.calories >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+              {goals.calories - nutrition.calories} kcal remaining
             </div>
           </div>
         </div>
@@ -199,7 +207,7 @@ const NutritionAnalysisCard: React.FC<NutritionAnalysisCardProps> = ({ data, hei
           onAnalyze={onAnalyze}
         />
       </div>
-    </CardShell>
+    </div>
   );
 };
 

@@ -103,7 +103,7 @@ export const CHART_TYPE_CONFIGS: Record<ChartType, ChartTypeConfig> = {
     priority: 85,
     requiresData: true,
     category: 'health',
-    tabView: ['overview'],
+    tabView: ['wellness'],
     description: 'Weight category context and BMI analysis'
   },
   [ChartType.HEALTH_RISK]: {
@@ -112,7 +112,7 @@ export const CHART_TYPE_CONFIGS: Record<ChartType, ChartTypeConfig> = {
     priority: 80,
     requiresData: true,
     category: 'health',
-    tabView: ['insights'],
+    tabView: ['wellness'],
     description: 'Risk factors card view for behavioral and adaptive guidance'
   },
   [ChartType.HEALTH_SCORE]: {
@@ -121,7 +121,7 @@ export const CHART_TYPE_CONFIGS: Record<ChartType, ChartTypeConfig> = {
     priority: 90,
     requiresData: true,
     category: 'health',
-    tabView: ['overview'],
+    tabView: ['wellness'],
     description: 'Global health gauge and overall wellness score'
   },
   [ChartType.CURRENT_WEIGHT]: {
@@ -130,7 +130,7 @@ export const CHART_TYPE_CONFIGS: Record<ChartType, ChartTypeConfig> = {
     priority: 78,
     requiresData: true,
     category: 'health',
-    tabView: ['fitness'],
+    tabView: ['wellness'],
     description: 'Current weight and goal tracking'
   },
   [ChartType.WEIGHT_TREND]: {
@@ -157,7 +157,7 @@ export const CHART_TYPE_CONFIGS: Record<ChartType, ChartTypeConfig> = {
     priority: 73,
     requiresData: true,
     category: 'health',
-    tabView: ['wellness'],
+    tabView: [],
     description: 'BMI and body fat percentage analysis'
   },
   [ChartType.HEALTH_RISK_CHART]: {
@@ -166,7 +166,7 @@ export const CHART_TYPE_CONFIGS: Record<ChartType, ChartTypeConfig> = {
     priority: 81,
     requiresData: true,
     category: 'health',
-    tabView: ['insights'],
+    tabView: [],
     description: 'Detailed health risk assessment chart'
   },
 
@@ -186,7 +186,7 @@ export const CHART_TYPE_CONFIGS: Record<ChartType, ChartTypeConfig> = {
     priority: 70,
     requiresData: true,
     category: 'activity',
-    tabView: ['fitness'],
+    tabView: ['wellness'],
     description: 'Step count tracking and goals'
   },
   [ChartType.STEPS_CHART]: {
@@ -195,7 +195,7 @@ export const CHART_TYPE_CONFIGS: Record<ChartType, ChartTypeConfig> = {
     priority: 68,
     requiresData: true,
     category: 'activity',
-    tabView: ['fitness'],
+    tabView: ['wellness'],
     description: 'Step count trends and historical analysis'
   },
   [ChartType.ACTIVE_MINUTES]: {
@@ -204,7 +204,7 @@ export const CHART_TYPE_CONFIGS: Record<ChartType, ChartTypeConfig> = {
     priority: 65,
     requiresData: true,
     category: 'activity',
-    tabView: ['fitness'],
+    tabView: ['wellness'],
     description: 'Daily active minutes and exercise tracking'
   },
   [ChartType.SLEEP]: {
@@ -222,7 +222,7 @@ export const CHART_TYPE_CONFIGS: Record<ChartType, ChartTypeConfig> = {
     priority: 62,
     requiresData: true,
     category: 'activity',
-    tabView: ['wellness'],
+    tabView: [],
     description: 'Detailed sleep pattern analysis'
   },
   [ChartType.HYDRATION]: {
@@ -240,7 +240,7 @@ export const CHART_TYPE_CONFIGS: Record<ChartType, ChartTypeConfig> = {
     priority: 65,
     requiresData: true,
     category: 'activity',
-    tabView: ['wellness', 'consumption'],
+    tabView: ['consumption'],
     description: 'Daily hydration tracking and analysis'
   },
   [ChartType.HEART_RATE]: {
@@ -305,7 +305,7 @@ export const CHART_TYPE_CONFIGS: Record<ChartType, ChartTypeConfig> = {
     priority: 52,
     requiresData: true,
     category: 'nutrition',
-    tabView: ['consumption', 'insights'],
+    tabView: ['consumption'],
     description: 'Longitudinal intake trends for behavioral and adaptive guidance'
   },
   [ChartType.NUTRITION_TRACKING_CHART]: {
@@ -314,7 +314,7 @@ export const CHART_TYPE_CONFIGS: Record<ChartType, ChartTypeConfig> = {
     priority: 51,
     requiresData: true,
     category: 'nutrition',
-    tabView: ['consumption', 'insights'],
+    tabView: ['consumption'],
     description: 'Time-series nutrition tracking visualization'
   },
   [ChartType.EXERCISE]: {
@@ -323,7 +323,7 @@ export const CHART_TYPE_CONFIGS: Record<ChartType, ChartTypeConfig> = {
     priority: 71,
     requiresData: true,
     category: 'activity',
-    tabView: ['fitness'],
+    tabView: ['wellness'],
     description: 'Exercise and workout tracking'
   },
   [ChartType.MACRONUTRIENTS]: {

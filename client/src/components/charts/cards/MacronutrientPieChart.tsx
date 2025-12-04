@@ -1,6 +1,6 @@
 /**
  * Macronutrient Pie Chart - Priority 1
- * Protein/Carbs/Fat breakdown with customizable styling
+ * Protein/Carbs/Fat breakdown with Nova-style donut pattern
  */
 
 import React from 'react';
@@ -10,7 +10,7 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
-import { Pie } from 'react-chartjs-2';
+import { Doughnut } from 'react-chartjs-2';
 import AnalyzeWithWihyButton from '../shared/AnalyzeWithWihyButton';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
@@ -92,13 +92,14 @@ const MacronutrientPieChart: React.FC<MacronutrientPieChartProps> = ({
   };
 
   const displayValues = calculateDisplayValues();
+  const safeTotal = displayValues.total || 1; // avoid divide-by-zero
 
-  // Macronutrient color scheme
+  // Macronutrient color scheme (match other charts)
   const colors = {
     protein: '#EF4444', // Red
-    carbs: '#3B82F6',   // Blue  
+    carbs: '#3B82F6',   // Blue
     fat: '#F59E0B',     // Yellow
-    fiber: '#10B981'    // Green (if included)
+    fiber: '#10B981'    // Green (if included later)
   };
 
   const chartData = {
@@ -109,45 +110,28 @@ const MacronutrientPieChart: React.FC<MacronutrientPieChartProps> = ({
         backgroundColor: [colors.protein, colors.carbs, colors.fat],
         borderColor: ['#ffffff', '#ffffff', '#ffffff'],
         borderWidth: 2,
-        hoverOffset: 4,
+        hoverOffset: 6,
+        cutout: '70%', // donut cutout to match Nova pattern
       },
     ],
   };
 
-  const options = {
+  const options: any = {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
       legend: {
-        display: showLegend,
-        position: 'bottom' as const,
-        labels: {
-          padding: 20,
-          usePointStyle: true,
-          font: {
-            size: size === 'small' ? 12 : size === 'large' ? 16 : 14,
-          },
-          generateLabels: (chart: any) => {
-            const datasets = chart.data.datasets;
-            return chart.data.labels.map((label: string, index: number) => ({
-              text: `${label}: ${datasets[0].data[index]}${displayValues.unit}`,
-              fillStyle: datasets[0].backgroundColor[index],
-              hidden: false,
-              index: index,
-              pointStyle: 'circle'
-            }));
-          }
-        },
+        display: false, // use custom side legend instead
       },
       tooltip: {
         callbacks: {
           label: (context: any) => {
             const label = context.label;
             const value = context.parsed;
-            const percentage = displayMode !== 'percentage' 
-              ? Math.round((value / displayValues.total) * 100) 
+            const percentage = displayMode !== 'percentage'
+              ? Math.round((value / safeTotal) * 100)
               : value;
-            
+
             return `${label}: ${value}${displayValues.unit} (${percentage}%)`;
           },
         },
@@ -155,63 +139,131 @@ const MacronutrientPieChart: React.FC<MacronutrientPieChartProps> = ({
     },
   };
 
+  // Helper to get percentage regardless of displayMode
+  const toPercent = (value: number) =>
+    Math.round((value / safeTotal) * 100);
+
   return (
     <div className="flex flex-col p-6 rounded-2xl bg-white border border-gray-200 h-[420px] overflow-hidden text-center">
-      <h3 className="text-xl font-semibold text-gray-400 mb-5">
+      <h3 className="text-xl font-semibold text-gray-400 mb-1">
         {title}
       </h3>
-      
-      <div className="flex flex-col items-center justify-center flex-1 overflow-hidden min-h-0">
-        <div className="relative w-full h-full max-w-[280px] max-h-[280px]">
-          <Pie data={chartData} options={options} />
-          
+      <p className="text-sm text-gray-500 mb-4 max-w-xs mx-auto">
+        Visual breakdown of protein, carbs, and fat in your current intake.
+      </p>
+
+      {/* Main content: donut + custom side legend (Nova-style pattern) */}
+      <div className="flex flex-row items-center justify-center gap-6 flex-1 overflow-hidden min-h-0">
+        {/* Donut chart */}
+        <div className="relative w-full h-full max-w-[240px] max-h-[240px] flex-shrink-0 overflow-hidden">
+          <Doughnut data={chartData} options={options} />
+
           {/* Center total display */}
           {showCenter && displayMode !== 'percentage' && (
             <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center pointer-events-none">
-              <div className={`font-bold text-gray-700 leading-none ${
-                size === 'small' ? 'text-base' : size === 'large' ? 'text-2xl' : 'text-xl'
-              }`}>
+              <div
+                className={`font-bold text-gray-700 leading-none ${
+                  size === 'small'
+                    ? 'text-base'
+                    : size === 'large'
+                    ? 'text-2xl'
+                    : 'text-xl'
+                }`}
+              >
                 {displayValues.total}
               </div>
-              <div className={`text-gray-500 mt-0.5 ${
-                size === 'small' ? 'text-xs' : size === 'large' ? 'text-base' : 'text-sm'
-              }`}>
+              <div
+                className={`text-gray-500 mt-0.5 ${
+                  size === 'small'
+                    ? 'text-xs'
+                    : size === 'large'
+                    ? 'text-base'
+                    : 'text-sm'
+                }`}
+              >
                 total {displayValues.unit}
               </div>
             </div>
           )}
         </div>
+
+        {/* Custom legend / details on the right */}
+        {showLegend && (
+          <div className="flex flex-col justify-center space-y-3 text-left max-w-[220px]">
+            <div className="text-xs uppercase tracking-wide text-gray-400 mb-1">
+              Macro distribution
+            </div>
+
+            <div className="flex items-center justify-between text-sm gap-3">
+              <div className="flex items-center">
+                <span
+                  className="w-3 h-3 rounded-sm mr-2 flex-shrink-0"
+                  style={{ backgroundColor: colors.protein }}
+                />
+                <span className="font-medium text-gray-700 whitespace-nowrap">
+                  Protein
+                </span>
+              </div>
+              <div className="text-right">
+                <div className="font-semibold text-gray-800">
+                  {displayValues.protein}
+                  {displayValues.unit}
+                </div>
+                <div className="text-xs text-gray-500">
+                  {toPercent(displayValues.protein)}%
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between text-sm gap-3">
+              <div className="flex items-center">
+                <span
+                  className="w-3 h-3 rounded-sm mr-2 flex-shrink-0"
+                  style={{ backgroundColor: colors.carbs }}
+                />
+                <span className="font-medium text-gray-700 whitespace-nowrap">
+                  Carbs
+                </span>
+              </div>
+              <div className="text-right">
+                <div className="font-semibold text-gray-800">
+                  {displayValues.carbs}
+                  {displayValues.unit}
+                </div>
+                <div className="text-xs text-gray-500">
+                  {toPercent(displayValues.carbs)}%
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between text-sm gap-3">
+              <div className="flex items-center">
+                <span
+                  className="w-3 h-3 rounded-sm mr-2 flex-shrink-0"
+                  style={{ backgroundColor: colors.fat }}
+                />
+                <span className="font-medium text-gray-700 whitespace-nowrap">
+                  Fat
+                </span>
+              </div>
+              <div className="text-right">
+                <div className="font-semibold text-gray-800">
+                  {displayValues.fat}
+                  {displayValues.unit}
+                </div>
+                <div className="text-xs text-gray-500">
+                  {toPercent(displayValues.fat)}%
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* Nutritional insights */}
-      <div className={`mt-4 text-gray-500 text-left max-w-[280px] mx-auto ${
-        size === 'small' ? 'text-xs' : 'text-sm'
-      }`}>
-        <div className="grid grid-cols-3 gap-2">
-          <div className="text-center">
-            <div className="font-bold" style={{ color: colors.protein }}>
-              {Math.round((displayValues.protein / displayValues.total) * 100)}%
-            </div>
-            <div className="text-xs">Protein</div>
-          </div>
-          <div className="text-center">
-            <div className="font-bold" style={{ color: colors.carbs }}>
-              {Math.round((displayValues.carbs / displayValues.total) * 100)}%
-            </div>
-            <div className="text-xs">Carbs</div>
-          </div>
-          <div className="text-center">
-            <div className="font-bold" style={{ color: colors.fat }}>
-              {Math.round((displayValues.fat / displayValues.total) * 100)}%
-            </div>
-            <div className="text-xs">Fat</div>
-          </div>
-        </div>
-      </div>
-      
+      {/* Analyze with WiHy */}
       <div className="flex justify-center mt-4 flex-shrink-0">
         <AnalyzeWithWihyButton
-          cardContext={`Macronutrient analysis: ${title} showing ${displayMode} breakdown - Protein: ${Math.round((displayValues.protein / displayValues.total) * 100)}% (${displayValues.protein}${displayMode === 'grams' ? 'g' : displayMode === 'calories' ? ' cal' : '%'}), Carbs: ${Math.round((displayValues.carbs / displayValues.total) * 100)}% (${displayValues.carbs}${displayMode === 'grams' ? 'g' : displayMode === 'calories' ? ' cal' : '%'}), Fat: ${Math.round((displayValues.fat / displayValues.total) * 100)}% (${displayValues.fat}${displayMode === 'grams' ? 'g' : displayMode === 'calories' ? ' cal' : '%'})`}
+          cardContext={`Macronutrient analysis: ${title} showing ${displayMode} breakdown - Protein: ${toPercent(displayValues.protein)}% (${displayValues.protein}${displayMode === 'grams' ? 'g' : displayMode === 'calories' ? ' cal' : '%'}), Carbs: ${toPercent(displayValues.carbs)}% (${displayValues.carbs}${displayMode === 'grams' ? 'g' : displayMode === 'calories' ? ' cal' : '%'}), Fat: ${toPercent(displayValues.fat)}% (${displayValues.fat}${displayMode === 'grams' ? 'g' : displayMode === 'calories' ? ' cal' : '%'})`}
           userQuery="Analyze this macronutrient breakdown and provide insights about the protein, carbohydrate, and fat distribution"
           onAnalyze={onAnalyze}
         />

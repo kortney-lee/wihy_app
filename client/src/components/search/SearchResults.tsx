@@ -19,6 +19,7 @@ import ParentDashboard from '../dashboard/ParentDashboard';
 import ConsumptionDashboard from '../dashboard/ConsumptionDashboard';
 import ResearchDashboard from '../dashboard/ResearchDashboard';
 import FitnessDashboard, { FitnessDashboardModel, buildProgramKey } from '../dashboard/FitnessDashboard';
+import OverviewDashboard from '../dashboard/OverviewDashboard';
 import { ExerciseRowView } from '../dashboard/WorkoutProgramGrid';
 import { CSS_CLASSES } from '../../constants/cssConstants';
 import '../../styles/VHealthSearch.css';
@@ -31,7 +32,7 @@ import Spinner from '../ui/Spinner';
 import { logger } from '../../utils/logger';
 
 // Tab type definition - matches chartTypes.ts tabView values
-type SearchTab = 'overview' | 'charts' | 'consumption' | 'research' | 'insights' | 'wellness' | 'fitness' | 'coach' | 'parent';
+type SearchTab = 'overview' | 'charts' | 'consumption' | 'research' | 'fitness' | 'coach' | 'parent';
 
 // Tab configuration
 const TAB_CONFIG = {
@@ -39,8 +40,6 @@ const TAB_CONFIG = {
   charts: { label: 'My Progress', value: 'charts' as SearchTab },
   consumption: { label: 'Consumption', value: 'consumption' as SearchTab },
   research: { label: 'Research', value: 'research' as SearchTab },
-  insights: { label: 'Insights', value: 'insights' as SearchTab },
-  wellness: { label: 'Wellness', value: 'wellness' as SearchTab },
   fitness: { label: 'Fitness', value: 'fitness' as SearchTab },
   coach: { label: 'Coach Portal', value: 'coach' as SearchTab },
   parent: { label: 'Parent Portal', value: 'parent' as SearchTab }
@@ -409,7 +408,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({
   // Mock fitness dashboard data
   const mockFitnessDashboard: FitnessDashboardModel = {
     title: "Your Training Program",
-    subtitle: "Select your phase, level, and day to view exercises",
+    subtitle: "",
     
     phases: [
       { id: "phase1", name: "Foundation (Weeks 1-4)" },
@@ -809,41 +808,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({
     return '32px'; // Desktop
   };
 
-  // Filter charts based on active tab using the proper function from chartTypes.ts
-  const getChartsForActiveTab = () => {
-    // Coach and Parent tabs don't use charts - return empty array
-    if (activeTab === 'coach' || activeTab === 'parent') {
-      return [];
-    }
-    
-    // Use the dedicated function that properly handles 'all' tabView
-    const charts = getChartTypesByTab(activeTab);
-    console.log(`🔍 CHARTS FOR TAB "${activeTab}":`, charts.map(c => ({ type: c.type, label: c.label, tabView: c.tabView })));
-    console.log(`🔍 TOTAL CHARTS FOR "${activeTab}":`, charts.length);
-    return charts;
-  };
 
-  // Get chart types to exclude based on active tab
-  const getExcludedChartTypes = () => {
-    const chartsForTab = getChartsForActiveTab();
-    const chartTypesForTab = chartsForTab.map(config => config.type);
-    
-    // Always exclude QUICK_INSIGHTS from DashboardCharts component
-    const excludeTypes = [ChartType.QUICK_INSIGHTS];
-    
-    // Add charts that don't belong to the current tab
-    const allChartTypes = Object.values(ChartType);
-    allChartTypes.forEach(chartType => {
-      if (!chartTypesForTab.includes(chartType) && chartType !== ChartType.QUICK_INSIGHTS) {
-        excludeTypes.push(chartType);
-      }
-    });
-    
-    console.log(`🔍 EXCLUDED CHART TYPES FOR "${activeTab}":`, excludeTypes);
-    console.log(`🔍 INCLUDED CHART TYPES FOR "${activeTab}":`, chartTypesForTab);
-    
-    return excludeTypes;
-  };
 
   const [hasAutoOpened, setHasAutoOpened] = useState(false); // Track if auto-open has already happened
   
@@ -1479,27 +1444,9 @@ const SearchResults: React.FC<SearchResultsProps> = ({
               {/* Tab-specific content */}
               {activeTab === 'overview' && (
                 <>
-                  {/* Dashboard Header */}
-                  <h1 className="dashboard-title" style={{
-                    fontSize: windowWidth < 768 ? '22px' : '28px',
-                    textAlign: windowWidth < 768 ? 'center' : 'left',
-                    marginBottom: windowWidth < 768 ? '12px' : '15px',
-                    marginTop: windowWidth < 768 ? '8px' : '10px',
-                    padding: windowWidth < 768 ? '0 8px' : '0'
-                  }}>
-                    Your Health Snapshot
-                  </h1>
-                  
-                  {/* Overview displays only 6 charts via DashboardCharts */}
-                  <div style={{ marginTop: '8px' }}>
-                    <DashboardCharts 
-                      period={getDashboardPeriod()} 
-                      maxCards={calculateMaxCards()} 
-                      showAllCharts={true}
-                      excludeChartTypes={getExcludedChartTypes()}
-                      onAnalyze={handleAddToChatConversation}
-                    />
-                  </div>
+                  <OverviewDashboard
+                    onAnalyze={handleAddToChatConversation}
+                  />
                 </>
               )}
 
@@ -1534,55 +1481,6 @@ const SearchResults: React.FC<SearchResultsProps> = ({
                     onAnalyze={handleAddToChatConversation}
                     onUploadReceipt={handleOpenReceiptUpload}
                   />
-                </>
-              )}
-
-              {activeTab === 'insights' && (
-                <>
-                  <h1 className="dashboard-title" style={{
-                    fontSize: windowWidth < 768 ? '22px' : '28px',
-                    textAlign: windowWidth < 768 ? 'center' : 'left',
-                    marginBottom: windowWidth < 768 ? '12px' : '15px',
-                    marginTop: windowWidth < 768 ? '8px' : '10px',
-                    padding: windowWidth < 768 ? '0 8px' : '0'
-                  }}>
-                    Mind & Behavior Insights
-                  </h1>
-                  
-                  <div style={{ marginTop: '8px' }}>
-                    <DashboardCharts 
-                      period={getDashboardPeriod()} 
-                      maxCards={calculateMaxCards()} 
-                      showAllCharts={true}
-                      excludeChartTypes={getExcludedChartTypes()}
-                      isInsightsLayout={true}
-                      onAnalyze={handleAddToChatConversation}
-                    />
-                  </div>
-                </>
-              )}
-
-              {activeTab === 'wellness' && (
-                <>
-                  <h1 className="dashboard-title" style={{
-                    fontSize: windowWidth < 768 ? '22px' : '28px',
-                    textAlign: windowWidth < 768 ? 'center' : 'left',
-                    marginBottom: windowWidth < 768 ? '12px' : '15px',
-                    marginTop: windowWidth < 768 ? '8px' : '10px',
-                    padding: windowWidth < 768 ? '0 8px' : '0'
-                  }}>
-                    Wellness & Recovery
-                  </h1>
-                  
-                  <div style={{ marginTop: '8px' }}>
-                    <DashboardCharts 
-                      period={getDashboardPeriod()} 
-                      maxCards={calculateMaxCards()} 
-                      showAllCharts={true}
-                      excludeChartTypes={getExcludedChartTypes()}
-                      onAnalyze={handleAddToChatConversation}
-                    />
-                  </div>
                 </>
               )}
 

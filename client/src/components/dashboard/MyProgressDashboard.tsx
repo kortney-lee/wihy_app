@@ -970,15 +970,6 @@ const MyProgressDashboard: React.FC<MyProgressDashboardProps> = ({
     <div className="w-full bg-[#f0f7ff] min-h-[70vh] relative px-4 sm:px-6 pb-6">
       {/* Header */}
       <header className="flex flex-col items-center gap-2 pb-4 pt-4">
-        <h1 className="text-3xl font-semibold text-gray-900 text-center mb-2">
-          My Progress
-        </h1>
-        {summary && (
-          <p className="text-sm text-gray-600 text-center max-w-2xl">
-            {summary}
-          </p>
-        )}
-
         {/* View Tabs */}
         <div className="mt-3 flex gap-2 bg-gray-100 p-1 rounded-full">
           {(["today", "week", "history"] as const).map((tab) => (

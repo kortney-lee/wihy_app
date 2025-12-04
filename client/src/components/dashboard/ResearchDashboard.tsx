@@ -18,18 +18,6 @@ const ResearchDashboard: React.FC<ResearchDashboardProps> = ({
 }) => {
   return (
     <div className="w-full p-0 m-0">
-      <h1
-        className="text-3xl font-semibold text-gray-900 text-center mb-3 mt-2.5 px-2"
-        style={{
-          fontSize: windowWidth < 768 ? '22px' : '28px',
-          marginBottom: windowWidth < 768 ? '8px' : '12px',
-          marginTop: windowWidth < 768 ? '8px' : '10px',
-          padding: windowWidth < 768 ? '0 8px' : '0'
-        }}
-      >
-        Research & Evidence
-      </h1>
-
       {/* Research Panel with tabbed workflow */}
       <div
         style={{

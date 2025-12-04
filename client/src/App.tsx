@@ -15,6 +15,7 @@ import TailwindDemoPage from './pages/TailwindDemoPage';
 import NewsPage from './pages/NewsPage';
 import CoachDashboard from './components/dashboard/CoachDashboard';
 import ParentDashboard from './components/dashboard/ParentDashboard';
+import OverviewDashboard from './components/dashboard/OverviewDashboard';
 import { wihyAPI } from './services/wihyAPI';
 import { searchCache } from './services/searchCache';
 import { fetchNewsFeed, refreshNewsFeed, searchNewsArticles } from './services/newsService';
@@ -525,6 +526,7 @@ const App: React.FC = () => {
         <Route path="/terms" element={<TermsPage />} />
         <Route path="/new-about" element={<NewAboutpage />} />
         <Route path="/news" element={<NewsPage />} />
+        <Route path="/dashboard/overview" element={<OverviewDashboard />} />
         <Route path="/dashboard/parent" element={<ParentDashboard />} />
         <Route path="/test" element={<TestChartsPage />} />
         <Route path="/test-grid" element={<TestDashboardGrid />} />

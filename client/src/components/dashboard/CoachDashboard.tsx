@@ -967,10 +967,6 @@ export default function CoachDashboard() {
       style={{ backgroundColor: "#f0f7ff" }}
     >
       <div className="max-w-7xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-800 mb-6">
-          Coach Portal – Client Plans
-        </h1>
-
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* LEFT: Client List */}
           <div className="lg:col-span-1 bg-white rounded-xl p-4 shadow-sm border border-gray-200">

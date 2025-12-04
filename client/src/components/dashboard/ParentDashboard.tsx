@@ -161,14 +161,6 @@ const ParentDashboard: React.FC = () => {
 
   return (
       <div className="w-full bg-[#f0f7ff] min-h-[70vh] relative">
-        <header className="flex flex-col gap-2 pb-4">
-          <h1 className="dashboard-title text-[22px] text-center mb-3 mt-2 px-2 leading-normal">
-            Parent Dashboard – Today
-          </h1>
-          <p className="text-sm text-slate-600 text-center">
-            Monitor how your kids are eating, moving, and sleeping
-          </p>
-        </header>
 
         <div className="grid grid-cols-1 lg:grid-cols-[2fr,minmax(260px,1fr)] gap-6">
           {/* Left column: kids list + selected detail */}
