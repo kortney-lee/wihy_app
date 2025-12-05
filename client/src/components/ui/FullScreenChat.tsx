@@ -1454,8 +1454,24 @@ const FullScreenChat = forwardRef<FullScreenChatRef, FullScreenChatProps>(({
         onClose={() => setIsUploadModalOpen(false)}
         onNavigateToNutritionFacts={(data, sessionId) => {
           setIsUploadModalOpen(false);
+          console.log('[FullScreenChat] onNavigateToNutritionFacts - raw data:', data);
+          console.log('[FullScreenChat] onNavigateToNutritionFacts - sessionId:', sessionId);
           // Normalize the barcode scan result to NutritionFactsData format
           const nutritionfacts = normalizeBarcodeScan(data);
+          console.log('[FullScreenChat] onNavigateToNutritionFacts - normalized:', nutritionfacts);
+          
+          // iOS Safari fallback: Store in sessionStorage as backup
+          try {
+            sessionStorage.setItem('nutritionfacts_data', JSON.stringify({
+              nutritionfacts: nutritionfacts,
+              sessionId: sessionId || currentSessionId,
+              timestamp: Date.now()
+            }));
+            console.log('[FullScreenChat] Stored backup in sessionStorage');
+          } catch (e) {
+            console.warn('[FullScreenChat] Failed to store in sessionStorage:', e);
+          }
+          
           navigate('/nutritionfacts', {
             state: {
               nutritionfacts: nutritionfacts,
