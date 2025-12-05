@@ -205,6 +205,13 @@ class ChatService {
   }
 
   /**
+   * Get current session ID (alias for getCurrentSessionId)
+   */
+  getSessionId(): string | null {
+    return this.currentSessionId;
+  }
+
+  /**
    * Get current conversation ID for direct chat continuity
    */
   getConversationId(): string | null {

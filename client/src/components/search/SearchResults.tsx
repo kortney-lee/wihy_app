@@ -118,6 +118,7 @@ interface SearchResultsProps {
   disclaimer?: string;
   apiResponse?: any; // Add unified API response for chart components
   autoOpenChat?: boolean; // Add prop to automatically open chat when coming from VHealthSearch
+  hideChatWidget?: boolean; // Hide chat widget completely (e.g., when coming from NutritionFacts)
 }
 
 // Add this function before the SearchResults component
@@ -182,8 +183,14 @@ const SearchResults: React.FC<SearchResultsProps> = ({
   recommendations: _recommendations = [],
   disclaimer: _disclaimer = "",
   apiResponse,
-  autoOpenChat = false
+  autoOpenChat = false,
+  hideChatWidget = false
 }) => {
+  // Debug log for hideChatWidget
+  useEffect(() => {
+    console.log('🔍 SEARCH RESULTS hideChatWidget:', hideChatWidget);
+  }, [hideChatWidget]);
+  
   // Only log on significant changes, not every render
   const prevQueryRef = useRef<string>('');
   
@@ -1335,13 +1342,14 @@ const SearchResults: React.FC<SearchResultsProps> = ({
         
         {hasValidResults ? (
           <>
-            {/* Full Screen Chat */}
-            <FullScreenChat
-              ref={chatRef}
-              isOpen={isChatOpen}
-              onClose={() => setIsChatOpen(false)}
-              onViewCharts={() => setIsChatOpen(false)} // Close chat to view charts behind it
-              initialQuery={query}
+            {/* Full Screen Chat - Hidden when coming from NutritionFacts */}
+            {!hideChatWidget && (
+              <FullScreenChat
+                ref={chatRef}
+                isOpen={isChatOpen}
+                onClose={() => setIsChatOpen(false)}
+                onViewCharts={() => setIsChatOpen(false)} // Close chat to view charts behind it
+                initialQuery={query}
               initialResponse={(() => {
                 // For image/barcode/product scans from VHealthSearch, pass the full apiResponse object
                 // so FullScreenChat can extract imageUrl and other metadata
@@ -1367,10 +1375,11 @@ const SearchResults: React.FC<SearchResultsProps> = ({
                 }
                 return extractedResponse;
               })()}
-            />
+              />
+            )}
 
-            {/* Floating Chat Button - Show when chat is closed (hidden on native Android) */}
-            {!isChatOpen && !PlatformDetectionService.isNative() && (
+            {/* Floating Chat Button - Show when chat is closed and not hidden (hidden on native Android) */}
+            {!hideChatWidget && !isChatOpen && !PlatformDetectionService.isNative() && (
               <button
                 onClick={() => setIsChatOpen(!isChatOpen)}
                 className="floating-chat-button"

@@ -8,6 +8,7 @@ import { chatService } from '../../services/chatService';
 import { universalSearchService } from '../../services/universalSearchService';
 import { getApiEndpoint } from '../../config/apiConfig';
 import { PlatformDetectionService } from '../../services/shared/platformDetectionService';
+import { normalizeBarcodeScan } from '../../utils/nutritionDataNormalizer';
 import '../../styles/VHealthSearch.css';
 import { CSS_CLASSES } from '../../constants/cssConstants';
 import '../../styles/search-components.css';
@@ -550,11 +551,28 @@ const Header: React.FC<HeaderProps> = ({
         return;
       }
       
-      // Check if this is an image/vision/barcode analysis result
+      // Check if this is a barcode scan - navigate to NutritionFacts page
+      if (foodName.type === 'barcode_scan') {
+        const barcodeData = foodName.data;
+        const productName = barcodeData.product?.name || barcodeData.product_info?.name || 'Unknown Product';
+        
+        // Normalize barcode scan data to universal format
+        const nutritionfacts = normalizeBarcodeScan(foodName);
+        
+        // Navigate to NutritionFacts page
+        navigate('/nutritionfacts', {
+          state: {
+            initialQuery: `Tell me about ${productName}`,
+            nutritionfacts,
+          },
+        });
+        return;
+      }
+      
+      // Check if this is other image/vision/product analysis result
       const isImageResult = foodName.type && (
         foodName.type === 'image_analysis' ||
         foodName.type === 'vision_analysis' ||
-        foodName.type === 'barcode_scan' ||
         foodName.type === 'product_search' ||
         foodName.type === 'barcode_analysis'
       );
@@ -670,15 +688,14 @@ const Header: React.FC<HeaderProps> = ({
   };
 
   const handleLogoClick = () => {
-    // Clear chat session when navigating to about page
-    chatService.clearSession();
-    console.log('🔍 HEADER: Cleared chat session on about page navigation');
+    // Maintain session when navigating back to home
+    console.log('🔍 HEADER: Navigating to home page (maintaining session)');
     
     if (onLogoClick) {
       onLogoClick();
     } else {
-      // Default behavior: navigate to about page
-      navigate('/about');
+      // Default behavior: navigate to home page (VHealthSearch)
+      navigate('/');
     }
   };
 
@@ -893,11 +910,11 @@ const Header: React.FC<HeaderProps> = ({
           {/* Logo Section */}
           <div className={CSS_CLASSES.VHEALTH_LOGO_CONTAINER}>
             <img
-              src="/assets/wihylogo.png?v=2025-11-05"
+              src="/assets/wihylogohome.png"
               alt="What is Healthy?"
               className={`${CSS_CLASSES.VHEALTH_LOGO} ${variant}-logo`}
               onClick={handleLogoClick}
-              style={{ cursor: onLogoClick ? 'pointer' : 'default' }}
+              style={{ cursor: 'pointer' }}
             />
           </div>
 

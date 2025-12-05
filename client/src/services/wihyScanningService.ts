@@ -384,112 +384,17 @@ Initial Analysis: ${summary}
 
 Provide detailed health analysis and answer user questions about this product.`;
 
-      console.log('🔍 Sending product context to Universal Search:', contextQuery);
-
       // Create a session ID for this barcode scan to enable chat continuity
       const sessionId = `barcode_${barcode}_${Date.now()}`;
       console.log('📱 Creating chat session:', sessionId);
 
-      // Try to get enhanced analysis from Universal Search API (ml.wihy.ai)
-      // If it fails (CORS, down, etc), fall back to Scanner API response
-      let universalSearchResult;
-      try {
-        universalSearchResult = await universalSearchService.search({
-          query: contextQuery,
-          type: 'auto',  // Use 'auto' for general conversational response instead of 'food' or 'barcode'
-          sessionId: sessionId,  // Pass session ID for chat context
-          context: {
-            health_goals: ['nutrition_analysis'],
-            dietary_restrictions: [],
-            productData: scannerData,  // Include full scanner data as context
-            ...userContext
-          },
-          options: {
-            include_charts: true,
-            include_recommendations: true,
-            limit: 1
-          }
-        });
-      } catch (universalSearchError) {
-        console.warn('⚠️ Universal Search API unavailable, using Scanner API response only:', universalSearchError);
-        // Return Scanner API data directly when Universal Search fails
-        return this.transformScannerDataToBarcodeScanResult(scannerData, barcode, sessionId);
-      }
+      // Don't call Universal Search immediately - let the chat widget handle that when user asks questions
+      // Just return the Scanner API data with the session ID for chat continuity
+      console.log('🔍 Returning Scanner API data for immediate display, chat will handle questions');
+      return this.transformScannerDataToBarcodeScanResult(scannerData, barcode, sessionId);
 
-      if (universalSearchResult.success && universalSearchResult.results.metadata) {
-        const metadata = universalSearchResult.results.metadata;
-        
-        // Transform Universal Search response to BarcodeScanResult format
-        const transformedResult: BarcodeScanResult = {
-          success: true,
-          analysis: {
-            // Use the AI response text from /ask endpoint, fallback to summary
-            summary: universalSearchResult.response || 
-                    universalSearchResult.results.summary || 
-                    `${metadata.product_name} - Health Score: ${metadata.health_score}/100`,
-            recommendations: universalSearchResult.recommendations || [],
-            confidence_score: universalSearchResult.results.confidence_score || 0.8,
-            charts: universalSearchResult.charts
-          },
-          health_score: metadata.health_score,
-          nova_group: metadata.nova_group,
-          product: {
-            name: metadata.product_name,
-            brand: metadata.brand,
-            barcode: metadata.barcode || barcode,
-            categories: metadata.categories,
-            nova_group: metadata.nova_group,
-            image_url: undefined
-          },
-          nutrition: {
-            score: metadata.nutrition_score,
-            grade: metadata.grade,
-            per_100g: {
-              energy_kcal: metadata.nutrition_facts.calories,
-              fat: metadata.nutrition_facts.fat,
-              saturated_fat: metadata.nutrition_facts.saturated_fat,
-              carbohydrates: metadata.nutrition_facts.carbohydrates,
-              sugars: metadata.nutrition_facts.sugars,
-              fiber: metadata.nutrition_facts.fiber,
-              proteins: metadata.nutrition_facts.protein,
-              salt: metadata.nutrition_facts.salt,
-              sodium: metadata.nutrition_facts.sodium
-            },
-            daily_values: {
-              energy: metadata.nutrition_analysis.daily_value_percentages.calories,
-              fat: metadata.nutrition_analysis.daily_value_percentages.fat,
-              saturated_fat: metadata.nutrition_analysis.daily_value_percentages.saturated_fat
-            }
-          },
-          health_analysis: {
-            alerts: metadata.nutrition_analysis.health_alerts.map(alert => ({
-              type: alert.type,
-              message: alert.message,
-              severity: alert.level
-            })),
-            recommendations: metadata.nutrition_analysis.areas_of_concern.map(concern => concern.recommendation),
-            processing_level: {
-              nova_group: metadata.nova_group,
-              description: metadata.nova_description,
-              details: metadata.processing_level
-            }
-          },
-          scan_metadata: {
-            scan_id: `scan_${Date.now()}`,
-            timestamp: universalSearchResult.timestamp,
-            confidence_score: universalSearchResult.results.confidence_score || 0.8,
-            data_sources: ['universal_search_api', 'scanner_api', 'openfoodfacts'],
-            session_id: sessionId  // Include session ID for chat continuity
-          }
-        };
-
-        console.log('✅ Universal Search barcode scan successful with session:', sessionId);
-        return transformedResult;
-      } else {
-        // Universal Search failed or returned no data, fall back to Scanner API response
-        console.warn('⚠️ Universal Search returned no metadata, using Scanner API response only');
-        return this.transformScannerDataToBarcodeScanResult(scannerData, barcode, sessionId);
-      }
+      // REMOVED: Immediate Universal Search call - this was causing duplicate API calls
+      // The chat widget will call the /ask endpoint when the user actually asks a question
 
     } catch (error) {
       console.error('❌ WiHy Scanning API - barcode scan error:', error);

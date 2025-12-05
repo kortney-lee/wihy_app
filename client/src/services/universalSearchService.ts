@@ -342,7 +342,7 @@ class UniversalSearchService {
       });
 
       if (!response.ok) {
-        console.error(`❌ Universal Search API - HTTP Error: ${response.status} ${response.statusText}`);
+        console.error(`❌ ML WiHY /ask API - HTTP Error: ${response.status} ${response.statusText}`);
         console.error('📡 Response headers:', Object.fromEntries(response.headers.entries()));
         
         // Try to get error details from response body
