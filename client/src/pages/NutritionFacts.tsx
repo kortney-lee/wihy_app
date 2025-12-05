@@ -94,7 +94,7 @@ const NutritionFactsPage: React.FC = () => {
       <div className="fixed inset-0 bg-black/50 z-[9999]" onClick={() => navigate(-1)} />
 
       <div 
-        className={`fixed inset-0 ${
+        className={`fullscreen-chat-container fixed inset-0 ${
           isMobile ? 'w-screen h-screen' : 'w-auto h-auto'
         } z-[10000] flex flex-col font-sans overflow-hidden`}
         style={{
