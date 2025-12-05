@@ -42,7 +42,7 @@ const ProductScanView: React.FC<ProductScanViewProps> = ({
   };
 
   return (
-    <div className="flex flex-col px-4 py-4 md:px-6 md:py-6" style={{ backgroundColor: '#f0f7ff' }}>
+    <div className="flex flex-col px-4 py-4 md:px-6 md:py-6">
       {/* Header Section */}
       <div className="flex items-start gap-4 mb-6">
         {imageUrl && (

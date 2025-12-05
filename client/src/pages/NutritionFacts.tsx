@@ -359,10 +359,16 @@ const NutritionFactsPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Main Body - with proper scrolling */}
+        {/* Main Body - Single scroll container pattern (matches FullScreenChat) */}
         <div className="flex-1 flex flex-col overflow-hidden">
           {viewMode === "overview" ? (
-            <div className="flex-1 overflow-y-auto bg-white">
+            <div 
+              className="flex-1 overflow-y-auto" 
+              style={{ 
+                backgroundColor: '#f0f7ff',
+                WebkitOverflowScrolling: 'touch'
+              }}
+            >
               <ProductScanView
                 product={nutritionfacts}
                 onAskMore={() => setViewMode("chat")}
