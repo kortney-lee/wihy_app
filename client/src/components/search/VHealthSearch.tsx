@@ -10,8 +10,10 @@ import { searchCache } from '../../services/searchCache';
 import { getApiEndpoint } from '../../config/apiConfig';
 import { logger } from '../../utils/logger';
 import { chatService } from '../../services/chatService';
+import { sessionManager } from '../../services/sessionManager';
 import { isLocalDevelopment, getTestDataForQuery } from '../../utils/testDataGenerator';
 import { PlatformDetectionService } from '../../services/shared/platformDetectionService';
+import { normalizeBarcodeScan } from '../../utils/nutritionDataNormalizer';
 
 const rotatingPrompts = [
   "Ask me what is healthy",
@@ -585,6 +587,9 @@ const VHealthSearch: React.FC = () => {
             setLoadingMessage('Results ready!');
             await new Promise(resolve => setTimeout(resolve, 500));
             
+            // Get current session ID from session manager
+            const sessionId = sessionManager.getSessionId();
+            
             // Navigate to SearchResults with the results
             navigate(`/results?q=${encodeURIComponent(queryToUse)}`, {
               state: {
@@ -599,7 +604,8 @@ const VHealthSearch: React.FC = () => {
                 },
                 apiResponse: wihyResponse,
                 dataSource: 'wihy',
-                fromSearch: true
+                fromSearch: true,
+                sessionId // Pass session ID for continuity
               }
             });
             
@@ -712,33 +718,23 @@ const VHealthSearch: React.FC = () => {
     const productName = barcodeData.product?.name || barcodeData.product_info?.name || 'Unknown Product';
     setSearchQuery(productName);
     
-    const nutritionResults = {
-      summary: input.summary,
-      details: input.summary,
-      sources: [],
-      recommendations: barcodeData.health_analysis?.recommendations || [],
-      relatedTopics: [],
-      medicalDisclaimer: 'This guidance is based on evidence-based health principles. Always consult healthcare professionals for personalized medical advice.',
-      dataSource: 'wihy_scanner',
-      scanResult: barcodeData,
-      imageUrl: input.imageUrl // Pass through the image URL
-    };
+    // Normalize barcode scan data to universal NutritionFactsData format
+    const nutritionfacts = normalizeBarcodeScan(input);
     
     setIsLoading(false);
-    navigate(`/results?q=${encodeURIComponent(productName)}`, {
+    
+    // Get current session ID from session manager
+    const sessionId = sessionManager.getSessionId();
+    
+    // Navigate to new NutritionFacts page instead of SearchResults
+    navigate('/nutritionfacts', {
       state: {
-        results: nutritionResults,
-        apiResponse: {
-          ...barcodeData,
-          imageUrl: input.imageUrl // Include imageUrl in apiResponse
-        },
-        chatData: input.chatData, // Pass rich chat data
-        dataSource: 'wihy_scanner',
-        fromSearch: true,
-        scanType: 'barcode',
-        imageUrl: input.imageUrl // Pass imageUrl at top level too
-      }
+        initialQuery: `Tell me about ${productName}`,
+        nutritionfacts,
+        sessionId, // Pass session ID for continuity
+      },
     });
+    
     setIsUploadModalOpen(false);
   };
 
@@ -763,6 +759,10 @@ const VHealthSearch: React.FC = () => {
     };
     
     setIsLoading(false);
+    
+    // Get current session ID from session manager
+    const sessionId = sessionManager.getSessionId();
+    
     navigate(`/results?q=${encodeURIComponent(productName)}`, {
       state: {
         results: nutritionResults,
@@ -774,7 +774,8 @@ const VHealthSearch: React.FC = () => {
         dataSource: 'wihy_scanner',
         fromSearch: true,
         scanType: 'product_search',
-        imageUrl: input.imageUrl // Pass imageUrl at top level too
+        imageUrl: input.imageUrl, // Pass imageUrl at top level too
+        sessionId // Pass session ID for continuity
       }
     });
     setIsUploadModalOpen(false);
@@ -801,6 +802,10 @@ const VHealthSearch: React.FC = () => {
     };
     
     setIsLoading(false);
+    
+    // Get current session ID from session manager
+    const sessionId = sessionManager.getSessionId();
+    
     navigate(`/results?q=${encodeURIComponent(analysisName)}`, {
       state: {
         results: nutritionResults,
@@ -812,7 +817,8 @@ const VHealthSearch: React.FC = () => {
         dataSource: input.type === 'vision_analysis' ? 'vision_analysis' : 'wihy_scanner',
         fromSearch: true,
         scanType: 'image_analysis',
-        imageUrl: input.imageUrl // Pass imageUrl at top level too
+        imageUrl: input.imageUrl, // Pass imageUrl at top level too
+        sessionId // Pass session ID for continuity
       }
     });
     setIsUploadModalOpen(false);
@@ -919,13 +925,18 @@ const VHealthSearch: React.FC = () => {
             await new Promise(resolve => setTimeout(resolve, 300));
             
             setIsLoading(false);
+            
+            // Get current session ID from session manager
+            const sessionId = sessionManager.getSessionId();
+            
             // Pass the fresh nutrition results via navigation state
             navigate(`/results?q=${encodeURIComponent(foodName)}`, {
               state: {
                 results: nutritionResults,
                 apiResponse: wihyResponse, // Include the raw API response for ChatWidget
                 dataSource: 'wihy',
-                fromSearch: true
+                fromSearch: true,
+                sessionId // Pass session ID for continuity
               }
             });
             return;

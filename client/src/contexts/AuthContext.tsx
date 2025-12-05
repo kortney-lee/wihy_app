@@ -6,6 +6,7 @@
 
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { authService, User, AuthState } from '../services/authService';
+import { sessionManager } from '../services/sessionManager';
 
 // ============================================================
 // CONTEXT TYPE DEFINITIONS
@@ -55,18 +56,25 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   useEffect(() => {
     const unsubscribe = authService.subscribe((state) => {
       setAuthState(state);
+      
+      // Update session when auth state changes
+      sessionManager.handleAuthChange(state.user);
     });
 
-    // Initialize authentication on mount
-    authService.initAuth().catch((error) => {
-      console.error('Failed to initialize auth:', error);
-      setAuthState({
-        isAuthenticated: false,
-        user: null,
-        loading: false,
-        error: 'Failed to initialize authentication'
+    // Initialize authentication and session on mount
+    authService.initAuth()
+      .then(() => sessionManager.initialize())
+      .catch((error) => {
+        console.error('Failed to initialize auth:', error);
+        setAuthState({
+          isAuthenticated: false,
+          user: null,
+          loading: false,
+          error: 'Failed to initialize authentication'
+        });
+        // Still initialize session for anonymous users
+        sessionManager.initialize();
       });
-    });
 
     return () => {
       unsubscribe();

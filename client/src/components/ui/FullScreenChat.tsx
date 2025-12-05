@@ -29,6 +29,7 @@ interface FullScreenChatProps {
   onBackToOverview?: () => void; // Callback to return to overview mode
   onNewScan?: () => void; // Callback to start a new scan
   productName?: string; // Optional product name to display in header
+  sessionId?: string; // Optional session ID for maintaining conversation continuity
 }
 
 // Add interface for ref methods
@@ -48,7 +49,8 @@ const FullScreenChat = forwardRef<FullScreenChatRef, FullScreenChatProps>(({
   isEmbedded = false,
   onBackToOverview,
   onNewScan,
-  productName
+  productName,
+  sessionId
 }, ref) => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputMessage, setInputMessage] = useState('');
@@ -67,6 +69,7 @@ const FullScreenChat = forwardRef<FullScreenChatRef, FullScreenChatProps>(({
   );
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const sessionInitializedRef = useRef<boolean>(false); // Prevent double initialization from React StrictMode
   const navigate = useNavigate();
 
   // Check for mobile screen size
@@ -123,14 +126,46 @@ const FullScreenChat = forwardRef<FullScreenChatRef, FullScreenChatProps>(({
 
   // Create or resume session when chat opens
   useEffect(() => {
-    if (isOpen && !currentSessionId) {
+    if (!isOpen) {
+      // Reset initialization flag when chat closes
+      sessionInitializedRef.current = false;
+      return;
+    }
+
+    // Prevent double initialization from React StrictMode
+    if (sessionInitializedRef.current) {
+      console.log('💬 FULL SCREEN CHAT: Skipping duplicate initialization (StrictMode double mount)');
+      return;
+    }
+    
+    // If a sessionId is provided from navigation, use it
+    if (sessionId && currentSessionId !== sessionId) {
+      setCurrentSessionId(sessionId);
+      conversationService.setSessionId(sessionId);
+      sessionInitializedRef.current = true;
+      console.log('💬 FULL SCREEN CHAT: Resuming session from navigation:', sessionId);
+      return;
+    }
+    
+    // Check if a session already exists in the service
+    const existingSessionId = conversationService.getSessionId();
+    if (existingSessionId && !currentSessionId) {
+      setCurrentSessionId(existingSessionId);
+      sessionInitializedRef.current = true;
+      console.log('💬 FULL SCREEN CHAT: Using existing session from service:', existingSessionId);
+      return;
+    }
+    
+    // Only create new session if we don't have one
+    if (!currentSessionId && !existingSessionId) {
+      sessionInitializedRef.current = true;
       if (userId) {
         createNewSession();
       } else {
         createTemporarySession();
       }
     }
-  }, [isOpen, userId]);
+  }, [isOpen, userId, sessionId, currentSessionId]);
 
   // Create a temporary session for stateless users
   const createTemporarySession = () => {
@@ -1051,7 +1086,8 @@ const FullScreenChat = forwardRef<FullScreenChatRef, FullScreenChatProps>(({
                           medicalDisclaimer: initialResponse?.disclaimer || ''
                         },
                         apiResponse: apiResponseData,
-                        dataSource: 'wihy'
+                        dataSource: 'wihy',
+                        sessionId: currentSessionId // Pass session ID to dashboard
                       }
                     });
                   } else {

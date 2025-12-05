@@ -14,6 +14,7 @@ interface ImageUploadModalProps {
   onAnalysisComplete: (foodAnalysis: string | any) => void; // Allow both string and full scan result
   title?: string;
   subtitle?: string;
+  autoOpenCamera?: boolean; // Auto-trigger camera when modal opens
 }
 
 const isMobileDevice = () => {
@@ -38,7 +39,8 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
   onClose,
   onAnalysisComplete,
   title = 'Analyze any food',
-  subtitle = 'Scan barcodes, search products, or analyze images'
+  subtitle = 'Scan barcodes, search products, or analyze images',
+  autoOpenCamera = false
 }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [imageUrl, setImageUrl] = useState('');
@@ -145,6 +147,17 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
       setIsDragging(false);
     }
   }, [isOpen]);
+
+  // Auto-open camera if autoOpenCamera prop is true
+  useEffect(() => {
+    if (isOpen && autoOpenCamera && !isProcessing) {
+      // Small delay to ensure modal is fully rendered
+      const timer = setTimeout(() => {
+        handleCameraClick();
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen, autoOpenCamera]);
 
   // Handle camera access with fallback and barcode scanning
   const handleCameraClick = async () => {

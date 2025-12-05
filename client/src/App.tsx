@@ -13,6 +13,7 @@ import PrivacyPage from './pages/PrivacyPage';
 import TermsPage from './pages/TermsPage'
 import TailwindDemoPage from './pages/TailwindDemoPage';
 import NewsPage from './pages/NewsPage';
+import NutritionFactsPage from './pages/NutritionFacts';
 import CoachDashboard from './components/dashboard/CoachDashboard';
 import ParentDashboard from './components/dashboard/ParentDashboard';
 import OverviewDashboard from './components/dashboard/OverviewDashboard';
@@ -415,7 +416,16 @@ Please try your search again in a moment! 😅`;
 
   // Check if we should auto-open chat (when coming from VHealthSearch)
   const navigationState = location.state as any;
-  const shouldAutoOpenChat = navigationState?.fromSearch === true;
+  const shouldAutoOpenChat = navigationState?.fromSearch === true && !isHealthNews;
+  const hideChatWidget = navigationState?.fromNutritionFacts === true;
+
+  // Debug log
+  console.log('🔍 APP.TSX ResultsPage render:', {
+    fromNutritionFacts: navigationState?.fromNutritionFacts,
+    hideChatWidget,
+    shouldAutoOpenChat,
+    query
+  });
 
   return (
     <SearchResults
@@ -430,6 +440,7 @@ Please try your search again in a moment! 😅`;
       disclaimer={disclaimer}
       apiResponse={apiResponse}
       autoOpenChat={shouldAutoOpenChat}
+      hideChatWidget={hideChatWidget}
     />
   );
 };
@@ -520,6 +531,7 @@ const App: React.FC = () => {
       <Routes>
         <Route path="/" element={<VHealthSearch />} />
         <Route path="/results" element={<ResultsPage />} />
+        <Route path="/nutritionfacts" element={<NutritionFactsPage />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/privacy" element={<PrivacyPage />} />
