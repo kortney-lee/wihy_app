@@ -1458,7 +1458,7 @@ const FullScreenChat = forwardRef<FullScreenChatRef, FullScreenChatProps>(({
           if (result && typeof result === 'object' && result.type === 'barcode_scan' && result.data) {
             navigate('/nutritionfacts', {
               state: {
-                apiResponse: result.data,
+                nutritionfacts: result.data,
                 sessionId: result.data.sessionId || sessionId || currentSessionId,
                 fromChat: true
               }
