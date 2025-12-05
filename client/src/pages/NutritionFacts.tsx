@@ -40,18 +40,54 @@ const NutritionFactsPage: React.FC = () => {
 
   // Resolve state once in effect, handle missing data gracefully
   useEffect(() => {
+    console.log("[NutritionFacts] useEffect - location.state:", location.state);
     const state = (location.state as LocationState) || {};
+    console.log("[NutritionFacts] useEffect - parsed state:", state);
 
     // Accept both nutritionfacts and apiResponse keys for flexibility
-    const dataFromState = state.nutritionfacts ?? (state.apiResponse as NutritionFactsData | undefined);
+    let dataFromState = state.nutritionfacts ?? (state.apiResponse as NutritionFactsData | undefined);
+    console.log("[NutritionFacts] useEffect - dataFromState from location:", dataFromState);
+
+    // iOS Safari fallback: Check sessionStorage if no data in location.state
+    if (!dataFromState) {
+      console.log("[NutritionFacts] useEffect - No data in location.state, checking sessionStorage");
+      try {
+        const stored = sessionStorage.getItem('nutritionfacts_data');
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          console.log("[NutritionFacts] useEffect - Found data in sessionStorage:", parsed);
+          // Use stored data if it's recent (within 30 seconds)
+          if (Date.now() - parsed.timestamp < 30000) {
+            dataFromState = parsed.nutritionfacts;
+            setSessionId(parsed.sessionId);
+            console.log("[NutritionFacts] useEffect - Using sessionStorage data");
+          } else {
+            console.log("[NutritionFacts] useEffect - sessionStorage data too old, clearing");
+            sessionStorage.removeItem('nutritionfacts_data');
+          }
+        }
+      } catch (e) {
+        console.warn("[NutritionFacts] useEffect - Failed to read sessionStorage:", e);
+      }
+    }
 
     if (dataFromState) {
+      console.log("[NutritionFacts] useEffect - setting data, name:", dataFromState.name);
       setNutritionfacts(dataFromState);
       setInitialQuery(state.initialQuery);
-      setSessionId(state.sessionId);
+      if (state.sessionId) setSessionId(state.sessionId);
+      
+      // Clear sessionStorage after successful load
+      try {
+        sessionStorage.removeItem('nutritionfacts_data');
+        console.log("[NutritionFacts] useEffect - Cleared sessionStorage backup");
+      } catch (e) {
+        console.warn("[NutritionFacts] useEffect - Failed to clear sessionStorage:", e);
+      }
     } else {
       // No data - Safari probably opened /nutritionfacts directly or lost state
       // Redirect to home instead of rendering nothing
+      console.log("[NutritionFacts] useEffect - NO DATA, redirecting to home");
       navigate("/", { replace: true });
     }
   }, [location.state, navigate]);
