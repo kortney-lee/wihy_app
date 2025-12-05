@@ -25,10 +25,18 @@ const NutritionFactsPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
+  // ALL HOOKS MUST BE AT THE TOP - before any conditional returns
   // Use state to manage nutrition facts data instead of reading directly from location
   const [initialQuery, setInitialQuery] = useState<string | undefined>();
   const [nutritionfacts, setNutritionfacts] = useState<NutritionFactsData | null>(null);
   const [sessionId, setSessionId] = useState<string | undefined>();
+  const [viewMode, setViewMode] = useState<ViewMode>("overview");
+  const [isMobile, setIsMobile] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
+  const [hasChartData, setHasChartData] = useState(true); // Always true for nutrition facts
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  const [scanHistory, setScanHistory] = useState<NutritionFactsData[]>([]);
+  const [autoOpenCamera, setAutoOpenCamera] = useState(false);
 
   // Resolve state once in effect, handle missing data gracefully
   useEffect(() => {
@@ -47,26 +55,6 @@ const NutritionFactsPage: React.FC = () => {
       navigate("/", { replace: true });
     }
   }, [location.state, navigate]);
-
-  // Show loading state instead of returning null
-  if (!nutritionfacts) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-white">
-        <div className="text-center">
-          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-blue-600 border-r-transparent mb-4"></div>
-          <p className="text-gray-500 text-sm">Loading nutrition facts…</p>
-        </div>
-      </div>
-    );
-  }
-
-  const [viewMode, setViewMode] = useState<ViewMode>("overview");
-  const [isMobile, setIsMobile] = useState(false);
-  const [showHistory, setShowHistory] = useState(false);
-  const [hasChartData, setHasChartData] = useState(true); // Always true for nutrition facts
-  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
-  const [scanHistory, setScanHistory] = useState<NutritionFactsData[]>([]);
-  const [autoOpenCamera, setAutoOpenCamera] = useState(false);
 
   // Check for mobile screen size
   useEffect(() => {
@@ -118,10 +106,16 @@ const NutritionFactsPage: React.FC = () => {
     }
   };
 
-  // If user navigates directly without data, bounce back
+  // Show loading state instead of returning null - AFTER all hooks
   if (!nutritionfacts) {
-    navigate(-1);
-    return null;
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-white">
+        <div className="text-center">
+          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-blue-600 border-r-transparent mb-4"></div>
+          <p className="text-gray-500 text-sm">Loading nutrition facts…</p>
+        </div>
+      </div>
+    );
   }
 
   return (

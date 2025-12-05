@@ -5,6 +5,7 @@ import { conversationService } from '../../services/conversationService';
 import { wihyScanningService } from '../../services/wihyScanningService';
 import { visionAnalysisService } from '../../services/visionAnalysisService';
 import { PlatformDetectionService } from '../../services/shared/platformDetectionService';
+import { normalizeBarcodeScan } from '../../utils/nutritionDataNormalizer';
 import ImageUploadModal from './ImageUploadModal';
 import '../../styles/mobile-fixes.css';
 
@@ -1453,9 +1454,11 @@ const FullScreenChat = forwardRef<FullScreenChatRef, FullScreenChatProps>(({
         onClose={() => setIsUploadModalOpen(false)}
         onNavigateToNutritionFacts={(data, sessionId) => {
           setIsUploadModalOpen(false);
+          // Normalize the barcode scan result to NutritionFactsData format
+          const nutritionfacts = normalizeBarcodeScan(data);
           navigate('/nutritionfacts', {
             state: {
-              nutritionfacts: data,
+              nutritionfacts: nutritionfacts,
               sessionId: sessionId || currentSessionId,
               fromChat: true
             }
