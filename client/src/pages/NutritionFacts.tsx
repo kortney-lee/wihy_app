@@ -8,21 +8,34 @@ import ProductScanView from "../components/food/ProductScanView";
 import ImageUploadModal from "../components/ui/ImageUploadModal";
 import { NutritionFactsData } from "../types/nutritionFacts";
 import { PlatformDetectionService } from "../services/shared/platformDetectionService";
+import "../styles/mobile-fixes.css";
+import "../styles/mobile-fixes.css";
 
 type ViewMode = "overview" | "chat";
 
 interface LocationState {
   initialQuery?: string;
   nutritionfacts?: NutritionFactsData;
+  apiResponse?: any;
   sessionId?: string;
+  fromChat?: boolean;
 }
 
 const NutritionFactsPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const state = (location.state as LocationState) || {};
 
-  // Expected from scanner or FoodIQ engine
-  const { initialQuery, nutritionfacts, sessionId } = (location.state as LocationState) || {};
+  // Accept either nutritionfacts or apiResponse for flexibility
+  const rawData = state.nutritionfacts ?? (state.apiResponse as NutritionFactsData | undefined);
+  
+  if (!rawData) {
+    navigate(-1);
+    return null;
+  }
+
+  const nutritionfacts = rawData;
+  const { initialQuery, sessionId } = state;
 
   const [viewMode, setViewMode] = useState<ViewMode>("overview");
   const [isMobile, setIsMobile] = useState(false);
