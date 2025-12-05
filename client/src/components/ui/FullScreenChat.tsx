@@ -1073,21 +1073,14 @@ const FullScreenChat = forwardRef<FullScreenChatRef, FullScreenChatProps>(({
               <button
                 onClick={() => {
                   if (hasChartData && apiResponseData) {
-                    // Navigate to results page with chart data in the expected format
-                    navigate('/results?q=' + encodeURIComponent(initialQuery || 'Analysis Results'), {
+                    // Navigate to dashboard with chart data
+                    navigate('/dashboard', {
                       state: {
-                        fromSearch: true,
                         fromChat: true,
-                        results: {
-                          summary: initialResponse?.summary || 'Analysis results',
-                          details: initialResponse?.summary || 'Analysis results',
-                          sources: initialResponse?.sources || [],
-                          recommendations: initialResponse?.recommendations || [],
-                          medicalDisclaimer: initialResponse?.disclaimer || ''
-                        },
                         apiResponse: apiResponseData,
                         dataSource: 'wihy',
-                        sessionId: currentSessionId // Pass session ID to dashboard
+                        sessionId: currentSessionId,
+                        initialTab: 'overview'
                       }
                     });
                   } else {
