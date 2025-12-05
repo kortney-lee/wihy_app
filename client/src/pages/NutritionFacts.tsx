@@ -189,22 +189,14 @@ const NutritionFactsPage: React.FC = () => {
               <button
                 onClick={() => {
                   if (hasChartData) {
-                    // Navigate to results page with chart data
-                    const productQuery = nutritionfacts.name || initialQuery || 'Product Analysis';
-                    navigate(`/results?q=${encodeURIComponent(productQuery)}`, {
+                    // Navigate to dashboard with chart data
+                    navigate('/dashboard', {
                       state: {
-                        results: {
-                          summary: nutritionfacts.name || 'Product nutrition analysis',
-                          details: nutritionfacts.name || 'Product nutrition analysis',
-                          sources: [],
-                          recommendations: [],
-                          medicalDisclaimer: 'This guidance is based on product nutrition data.'
-                        },
                         apiResponse: nutritionfacts,
                         dataSource: 'nutrition_facts',
-                        fromSearch: true,
                         fromNutritionFacts: true,
-                        sessionId: sessionId
+                        sessionId: sessionId,
+                        initialTab: 'overview' // Start on overview tab to show charts
                       }
                     });
                   } else {
