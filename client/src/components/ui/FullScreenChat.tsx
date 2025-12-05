@@ -1116,7 +1116,7 @@ const FullScreenChat = forwardRef<FullScreenChatRef, FullScreenChatProps>(({
             
             {/* View mode toggle */}
             <div className="inline-flex rounded-full bg-gray-100 p-1 text-xs">
-              {/* Overview button - clickable to go back */}
+              {/* Overview button - clickable to go back or open image modal on desktop */}
               {isEmbedded && onBackToOverview ? (
                 <button
                   onClick={onBackToOverview}
@@ -1127,9 +1127,20 @@ const FullScreenChat = forwardRef<FullScreenChatRef, FullScreenChatProps>(({
                   Overview
                 </button>
               ) : (
-                <span className="px-3 py-1.5 text-gray-600 flex items-center">
-                  Overview
-                </span>
+                <button
+                  onClick={() => setIsUploadModalOpen(true)}
+                  className="px-2 py-1.5 rounded-full transition-all text-gray-600 hover:text-gray-900 hover:bg-white"
+                  title="Upload Image"
+                  aria-label="Upload image"
+                >
+                  <svg 
+                    viewBox="0 0 24 24" 
+                    fill="currentColor"
+                    className="w-4 h-4"
+                  >
+                    <path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/>
+                  </svg>
+                </button>
               )}
 
               {/* Ask WiHY button - active state */}
@@ -1442,7 +1453,20 @@ const FullScreenChat = forwardRef<FullScreenChatRef, FullScreenChatProps>(({
         onClose={() => setIsUploadModalOpen(false)}
         onAnalysisComplete={(result) => {
           setIsUploadModalOpen(false);
-          // Add analysis result to chat
+          
+          // Handle barcode scans - navigate to NutritionFacts
+          if (result && typeof result === 'object' && result.type === 'barcode_scan' && result.data) {
+            navigate('/nutritionfacts', {
+              state: {
+                apiResponse: result.data,
+                sessionId: result.data.sessionId || sessionId || currentSessionId,
+                fromChat: true
+              }
+            });
+            return;
+          }
+          
+          // Add other analysis results to chat
           if (result && typeof result === 'object') {
             const userQuery = result.userQuery || 'Uploaded image';
             const summary = result.summary || 'Analysis completed';
