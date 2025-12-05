@@ -104,7 +104,13 @@ const NutritionFactsPage: React.FC = () => {
   return (
     <>
       {/* Backdrop overlay */}
-      <div className="fixed inset-0 bg-black/50 z-[9999]" onClick={() => navigate(-1)} />
+      <div 
+        className="fixed inset-0 bg-black/50 z-[9999]" 
+        onClick={() => navigate(-1)}
+        style={{
+          WebkitTapHighlightColor: 'transparent'
+        }}
+      />
 
       <div 
         className={`fullscreen-chat-container fixed inset-0 ${
@@ -112,7 +118,8 @@ const NutritionFactsPage: React.FC = () => {
         } z-[10000] flex flex-col font-sans overflow-hidden`}
         style={{
           backgroundColor: '#f0f7ff',
-          paddingTop: PlatformDetectionService.isNative() ? '48px' : undefined
+          paddingTop: PlatformDetectionService.isNative() ? '48px' : '0px',
+          WebkitOverflowScrolling: 'touch'
         }}
       >
         {/* History Sidebar - show when toggled */}

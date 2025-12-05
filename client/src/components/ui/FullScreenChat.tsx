@@ -1451,22 +1451,20 @@ const FullScreenChat = forwardRef<FullScreenChatRef, FullScreenChatProps>(({
       <ImageUploadModal
         isOpen={isUploadModalOpen}
         onClose={() => setIsUploadModalOpen(false)}
+        onNavigateToNutritionFacts={(data, sessionId) => {
+          setIsUploadModalOpen(false);
+          navigate('/nutritionfacts', {
+            state: {
+              nutritionfacts: data,
+              sessionId: sessionId || currentSessionId,
+              fromChat: true
+            }
+          });
+        }}
         onAnalysisComplete={(result) => {
           setIsUploadModalOpen(false);
           
-          // Handle barcode scans - navigate to NutritionFacts
-          if (result && typeof result === 'object' && result.type === 'barcode_scan' && result.data) {
-            navigate('/nutritionfacts', {
-              state: {
-                nutritionfacts: result.data,
-                sessionId: result.data.sessionId || sessionId || currentSessionId,
-                fromChat: true
-              }
-            });
-            return;
-          }
-          
-          // Add other analysis results to chat
+          // Add other analysis results to chat (non-barcode scans)
           if (result && typeof result === 'object') {
             const userQuery = result.userQuery || 'Uploaded image';
             const summary = result.summary || 'Analysis completed';

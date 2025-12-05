@@ -12,6 +12,7 @@ interface ImageUploadModalProps {
   isOpen: boolean;
   onClose: () => void;
   onAnalysisComplete: (foodAnalysis: string | any) => void; // Allow both string and full scan result
+  onNavigateToNutritionFacts?: (data: any, sessionId?: string) => void; // Optional navigation handler for barcode scans
   title?: string;
   subtitle?: string;
   autoOpenCamera?: boolean; // Auto-trigger camera when modal opens
@@ -38,6 +39,7 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
   isOpen,
   onClose,
   onAnalysisComplete,
+  onNavigateToNutritionFacts,
   title = 'Analyze any food',
   subtitle = 'Scan barcodes, search products, or analyze images',
   autoOpenCamera = false
@@ -883,7 +885,13 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
       const barcodeResult = await wihyScanningService.scanBarcode(barcode);
       
       if (barcodeResult.success) {
-        // Pass structured barcode data with rich chat data
+        // If navigation handler provided (from FullScreenChat), use it to navigate to NutritionFacts
+        if (onNavigateToNutritionFacts) {
+          onNavigateToNutritionFacts(barcodeResult, (barcodeResult as any).sessionId);
+          return;
+        }
+        
+        // Otherwise, pass structured barcode data back to parent (VHealthSearch, etc.)
         onAnalysisComplete({
           type: 'barcode_scan',
           scanType: 'barcode',
@@ -905,7 +913,7 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
         error: 'Barcode scanning failed. Please try again.'
       });
     }
-  }, [onAnalysisComplete]);
+  }, [onAnalysisComplete, onNavigateToNutritionFacts]);
 
   // Separate handler for product name searching  
   const handleProductSearch = useCallback(async (productName: string) => {
