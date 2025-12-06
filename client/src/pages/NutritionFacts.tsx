@@ -156,15 +156,8 @@ const NutritionFactsPage: React.FC = () => {
 
   return (
     <>
-      {/* Backdrop overlay */}
-      <div 
-        className="fixed inset-0 bg-black/50 z-[9999]" 
-        onClick={() => navigate(-1)}
-        style={{
-          WebkitTapHighlightColor: 'transparent'
-        }}
-      />
-
+      {/* NO BACKDROP - This is a standalone page, not a modal */}
+      
       <div 
         className={`fullscreen-chat-container fixed inset-0 ${
           isMobile ? 'w-screen h-screen' : 'w-auto h-auto'
