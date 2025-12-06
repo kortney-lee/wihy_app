@@ -15,6 +15,8 @@ const ProductScanView: React.FC<ProductScanViewProps> = ({
 }) => {
   if (!product) return null;
 
+  console.log('[ProductScanView] Rendering with product:', product.name);
+
   const {
     name,
     brand,
@@ -43,12 +45,15 @@ const ProductScanView: React.FC<ProductScanViewProps> = ({
 
   return (
     <div 
-      className="flex flex-col"
+      className="flex flex-col product-scan-view"
       style={{
         backgroundColor: '#ffffff',
         color: '#1f2937',
         minHeight: '100vh',
-        padding: '16px'
+        padding: '16px',
+        opacity: 1,
+        visibility: 'visible',
+        display: 'flex'
       }}
     >
       {/* Header Section */}
