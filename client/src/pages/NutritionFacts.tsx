@@ -270,9 +270,7 @@ const NutritionFactsPage: React.FC = () => {
                   }
                 }}
                 title={hasChartData ? "View Interactive Charts" : "Back to Search Screen"}
-                className={`chat-icon-button bg-transparent border-none cursor-pointer p-1 rounded transition-all duration-200 flex items-center justify-center ${
-                  hasChartData ? 'opacity-100' : 'opacity-70'
-                } hover:opacity-90`}
+                className="bg-transparent border-none cursor-pointer p-1 rounded transition-all duration-200 flex items-center justify-center opacity-100 hover:opacity-90"
               >
                 <img 
                   src="/assets/Chartlogo.png" 
