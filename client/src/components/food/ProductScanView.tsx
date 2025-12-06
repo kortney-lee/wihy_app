@@ -42,7 +42,12 @@ const ProductScanView: React.FC<ProductScanViewProps> = ({
   };
 
   return (
-    <div className="flex flex-col px-4 py-4 md:px-6 md:py-6">
+    <div 
+      className="flex flex-col px-4 py-4 md:px-6 md:py-6"
+      style={{
+        color: '#1f2937' // Force dark text for iOS Safari (matches FullScreenChat)
+      }}
+    >
       {/* Header Section */}
       <div className="flex items-start gap-4 mb-6">
         {imageUrl && (
