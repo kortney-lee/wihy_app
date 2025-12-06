@@ -44,19 +44,42 @@ const ProductScanView: React.FC<ProductScanViewProps> = ({
   };
 
   return (
-    <div 
-      className="flex flex-col product-scan-view"
-      style={{
-        backgroundColor: '#ffffff',
-        color: '#1f2937',
-        minHeight: '100vh',
-        padding: '16px',
-        opacity: 1,
-        visibility: 'visible',
-        display: 'flex'
-      }}
-    >
-      {/* Header Section */}
+    <>
+      <style>{`
+        /* Force visibility on iOS Safari */
+        .product-scan-view,
+        .product-scan-view * {
+          opacity: 1 !important;
+          visibility: visible !important;
+          color: #1f2937 !important;
+          -webkit-text-fill-color: #1f2937 !important;
+        }
+        .product-scan-view h1,
+        .product-scan-view h2,
+        .product-scan-view h3,
+        .product-scan-view h4,
+        .product-scan-view h5,
+        .product-scan-view h6 {
+          color: #111827 !important;
+          -webkit-text-fill-color: #111827 !important;
+          background: none !important;
+          -webkit-background-clip: unset !important;
+          background-clip: unset !important;
+        }
+      `}</style>
+      <div 
+        className="flex flex-col product-scan-view"
+        style={{
+          backgroundColor: '#ffffff',
+          color: '#1f2937',
+          minHeight: '100vh',
+          padding: '16px',
+          opacity: 1,
+          visibility: 'visible',
+          display: 'flex'
+        }}
+      >
+        {/* Header Section */}
       <div className="flex items-start gap-4 mb-6">
         {imageUrl && (
           <img
@@ -310,6 +333,7 @@ const ProductScanView: React.FC<ProductScanViewProps> = ({
         </section>
       )}
     </div>
+    </>
   );
 };
 
