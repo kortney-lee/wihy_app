@@ -15,6 +15,15 @@ interface DebugLog {
 
 const DEBUG_SESSION_KEY = 'wihy_debug_session';
 const DEBUG_START_TIME_KEY = 'wihy_debug_start_time';
+const DEBUG_HISTORY_KEY = 'wihy_debug_history';
+
+interface DebugSession {
+  sessionId: string;
+  startTime: number;
+  endTime: number;
+  logCount: number;
+  logs: DebugLog[];
+}
 
 const DebugFullScreen: React.FC = () => {
   const navigate = useNavigate();
@@ -23,11 +32,41 @@ const DebugFullScreen: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [autoRefresh, setAutoRefresh] = useState<boolean>(true);
   const [sessionStartTime, setSessionStartTime] = useState<number>(0);
+  const [showHistory, setShowHistory] = useState<boolean>(false);
+  const [history, setHistory] = useState<DebugSession[]>([]);
+  const [selectedSession, setSelectedSession] = useState<string | null>(null);
 
-  // Load logs from sessionStorage - always load, regardless of ?debug parameter
-  const loadLogs = () => {
-    console.log('[DebugFullScreen] loadLogs called');
+  // Load history from localStorage
+  const loadHistory = () => {
     try {
+      const historyStr = localStorage.getItem(DEBUG_HISTORY_KEY);
+      if (historyStr) {
+        const parsed = JSON.parse(historyStr);
+        setHistory(parsed.reverse()); // Most recent first
+        console.log('[DebugFullScreen] Loaded', parsed.length, 'historical sessions');
+      }
+    } catch (e) {
+      console.error('[DebugFullScreen] Failed to load history:', e);
+    }
+  };
+
+  // Load logs from sessionStorage or selected historical session
+  const loadLogs = (sessionId?: string) => {
+    console.log('[DebugFullScreen] loadLogs called, sessionId:', sessionId);
+    try {
+      if (sessionId) {
+        // Load from history
+        const session = history.find(s => s.sessionId === sessionId);
+        if (session) {
+          setLogs(session.logs);
+          setSessionStartTime(session.startTime);
+          setSelectedSession(sessionId);
+          console.log('[DebugFullScreen] Loaded historical session:', session.logCount, 'logs');
+          return;
+        }
+      }
+      
+      // Load current session from sessionStorage
       const persistedLogs = sessionStorage.getItem(DEBUG_SESSION_KEY);
       const startTimeStr = sessionStorage.getItem(DEBUG_START_TIME_KEY);
       
@@ -38,6 +77,7 @@ const DebugFullScreen: React.FC = () => {
         const parsedLogs = JSON.parse(persistedLogs);
         console.log('[DebugFullScreen] Parsed logs:', parsedLogs.length, 'logs');
         setLogs(parsedLogs);
+        setSelectedSession(null);
       } else {
         console.log('[DebugFullScreen] No logs found in sessionStorage');
         setLogs([]);
@@ -53,6 +93,7 @@ const DebugFullScreen: React.FC = () => {
 
   useEffect(() => {
     console.log('[DebugFullScreen] Component mounted, loading logs...');
+    loadHistory();
     loadLogs();
     
     if (autoRefresh) {
@@ -153,21 +194,38 @@ const DebugFullScreen: React.FC = () => {
           <h1 style={{ margin: 0, fontSize: '20px', fontWeight: 'bold', color: '#4cbb17' }}>
             🐛 Debug Console
           </h1>
-          <button
-            onClick={() => navigate(-1)}
-            style={{
-              backgroundColor: '#64748b',
-              border: 'none',
-              color: '#ffffff',
-              padding: '8px 16px',
-              borderRadius: '6px',
-              cursor: 'pointer',
-              fontSize: '14px',
-              fontWeight: 'bold'
-            }}
-          >
-            ← Back
-          </button>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <button
+              onClick={() => setShowHistory(!showHistory)}
+              style={{
+                backgroundColor: showHistory ? '#8b5cf6' : '#475569',
+                border: 'none',
+                color: '#ffffff',
+                padding: '8px 16px',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                fontSize: '14px',
+                fontWeight: 'bold'
+              }}
+            >
+              📚 History ({history.length})
+            </button>
+            <button
+              onClick={() => navigate(-1)}
+              style={{
+                backgroundColor: '#64748b',
+                border: 'none',
+                color: '#ffffff',
+                padding: '8px 16px',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                fontSize: '14px',
+                fontWeight: 'bold'
+              }}
+            >
+              ← Back
+            </button>
+          </div>
         </div>
         
         <div style={{ display: 'flex', gap: '12px', fontSize: '12px', color: '#94a3b8', marginBottom: '12px' }}>
@@ -237,7 +295,7 @@ const DebugFullScreen: React.FC = () => {
             {autoRefresh ? '✓ Auto-Refresh' : 'Auto-Refresh OFF'}
           </button>
           <button
-            onClick={loadLogs}
+            onClick={() => loadLogs()}
             style={{
               backgroundColor: '#3b82f6',
               border: 'none',
@@ -298,6 +356,71 @@ const DebugFullScreen: React.FC = () => {
           </button>
         </div>
       </div>
+
+      {/* History Panel */}
+      {showHistory && (
+        <div style={{
+          backgroundColor: '#1e293b',
+          borderBottom: '2px solid #334155',
+          padding: '16px',
+          maxHeight: '300px',
+          overflowY: 'auto'
+        }}>
+          <h2 style={{ margin: '0 0 12px 0', fontSize: '16px', color: '#94a3b8' }}>Session History</h2>
+          {history.length === 0 ? (
+            <div style={{ color: '#64748b', padding: '20px', textAlign: 'center' }}>
+              No historical sessions found
+            </div>
+          ) : (
+            history.map((session) => (
+              <div
+                key={session.sessionId}
+                onClick={() => {
+                  loadLogs(session.sessionId);
+                  setShowHistory(false);
+                }}
+                style={{
+                  backgroundColor: selectedSession === session.sessionId ? '#334155' : '#0f172a',
+                  border: selectedSession === session.sessionId ? '2px solid #8b5cf6' : '1px solid #475569',
+                  borderRadius: '6px',
+                  padding: '12px',
+                  marginBottom: '8px',
+                  cursor: 'pointer'
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                  <span style={{ color: '#f1f5f9', fontWeight: 'bold' }}>
+                    {new Date(session.startTime).toLocaleString()}
+                  </span>
+                  <span style={{ color: '#94a3b8' }}>
+                    {session.logCount} logs
+                  </span>
+                </div>
+                <div style={{ fontSize: '12px', color: '#64748b' }}>
+                  Duration: {((session.endTime - session.startTime) / 1000).toFixed(1)}s
+                </div>
+              </div>
+            ))
+          )}
+          <button
+            onClick={() => loadLogs()}
+            style={{
+              width: '100%',
+              backgroundColor: '#334155',
+              border: 'none',
+              color: '#ffffff',
+              padding: '10px',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '14px',
+              fontWeight: 'bold',
+              marginTop: '8px'
+            }}
+          >
+            📌 Current Session
+          </button>
+        </div>
+      )}
 
       {/* Logs */}
       <div style={{ padding: '16px' }}>
