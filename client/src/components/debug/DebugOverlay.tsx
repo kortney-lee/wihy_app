@@ -20,6 +20,43 @@ interface DebugOverlayProps {
 // Global session storage key
 const DEBUG_SESSION_KEY = 'wihy_debug_session';
 const DEBUG_START_TIME_KEY = 'wihy_debug_start_time';
+const DEBUG_HISTORY_KEY = 'wihy_debug_history'; // localStorage for historical sessions
+
+// Save current session to history
+const saveSessionToHistory = () => {
+  try {
+    const currentLogs = sessionStorage.getItem(DEBUG_SESSION_KEY);
+    const startTime = sessionStorage.getItem(DEBUG_START_TIME_KEY);
+    
+    if (!currentLogs || !startTime) return;
+    
+    const logs = JSON.parse(currentLogs);
+    if (logs.length === 0) return;
+    
+    // Get existing history
+    const historyStr = localStorage.getItem(DEBUG_HISTORY_KEY);
+    const history = historyStr ? JSON.parse(historyStr) : [];
+    
+    // Add current session
+    history.push({
+      sessionId: startTime,
+      startTime: parseInt(startTime),
+      endTime: Date.now(),
+      logCount: logs.length,
+      logs: logs
+    });
+    
+    // Keep only last 10 sessions
+    const trimmed = history.slice(-10);
+    localStorage.setItem(DEBUG_HISTORY_KEY, JSON.stringify(trimmed));
+    
+    console.log('[Debug] Session saved to history:', logs.length, 'logs');
+  } catch (e) {
+    console.warn('[Debug] Failed to save session to history:', e);
+  }
+};
+
+export { saveSessionToHistory };
 
 // Initialize debug session if ?debug=true
 const initDebugSession = () => {
