@@ -14,6 +14,7 @@ import TermsPage from './pages/TermsPage'
 import TailwindDemoPage from './pages/TailwindDemoPage';
 import NewsPage from './pages/NewsPage';
 import NutritionFactsPage from './pages/NutritionFacts';
+import DebugFullScreen from './pages/DebugFullScreen';
 import CoachDashboard from './components/dashboard/CoachDashboard';
 import ParentDashboard from './components/dashboard/ParentDashboard';
 import OverviewDashboard from './components/dashboard/OverviewDashboard';
@@ -533,6 +534,7 @@ const App: React.FC = () => {
         <Route path="/" element={<VHealthSearch />} />
         <Route path="/results" element={<ResultsPage />} />
         <Route path="/nutritionfacts" element={<NutritionFactsPage />} />
+        <Route path="/debug-fullscreen" element={<DebugFullScreen />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/privacy" element={<PrivacyPage />} />

@@ -10,6 +10,7 @@ interface DebugLog {
   message: string;
   data?: any;
   page?: string; // Track which page logged this
+  stack?: string; // Stack trace for errors
 }
 
 interface DebugOverlayProps {
@@ -58,8 +59,7 @@ const DebugOverlay: React.FC<DebugOverlayProps> = ({ pageName }) => {
   // Check if debug mode is enabled
   const isDebugMode = initDebugSession();
 
-  // Add log entry with session persistence
-  const addLog = (type: DebugLog['type'], message: string, data?: any) => {
+  const addLog = (type: DebugLog['type'], message: string, data?: any, stack?: string) => {
     const startTime = sessionStartTime.current;
     const elapsed = startTime ? ((Date.now() - startTime) / 1000).toFixed(3) : '0.000';
     const timestamp = `+${elapsed}s`;
@@ -69,7 +69,8 @@ const DebugOverlay: React.FC<DebugOverlayProps> = ({ pageName }) => {
       type, 
       message, 
       data,
-      page: pageName 
+      page: pageName,
+      stack
     };
     
     setLogs(prev => {
@@ -186,16 +187,60 @@ const DebugOverlay: React.FC<DebugOverlayProps> = ({ pageName }) => {
     };
   }, []);
 
-  // Monitor console errors
+  // Monitor console errors with stack traces
   useEffect(() => {
     const originalError = console.error;
+    const originalWarn = console.warn;
+    
     console.error = (...args) => {
-      addLog('error', args.join(' '), args);
+      const error = args[0];
+      let stack = '';
+      
+      if (error instanceof Error) {
+        stack = error.stack || '';
+      } else if (typeof error === 'object' && error?.stack) {
+        stack = error.stack;
+      } else {
+        // Capture current stack trace
+        stack = new Error().stack || '';
+      }
+      
+      addLog('error', `❌ ERROR: ${args.join(' ')}`, { args, stack });
       originalError(...args);
     };
+    
+    console.warn = (...args) => {
+      addLog('error', `⚠️ WARNING: ${args.join(' ')}`, { args });
+      originalWarn(...args);
+    };
+    
+    // Global error handler
+    const handleGlobalError = (event: ErrorEvent) => {
+      addLog('error', `🔥 UNCAUGHT ERROR: ${event.message}`, {
+        message: event.message,
+        filename: event.filename,
+        lineno: event.lineno,
+        colno: event.colno,
+        stack: event.error?.stack || 'No stack trace available'
+      });
+    };
+    
+    // Promise rejection handler
+    const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
+      addLog('error', `🔥 UNHANDLED PROMISE REJECTION: ${event.reason}`, {
+        reason: event.reason,
+        stack: event.reason?.stack || 'No stack trace available'
+      });
+    };
+    
+    window.addEventListener('error', handleGlobalError);
+    window.addEventListener('unhandledrejection', handleUnhandledRejection);
 
     return () => {
       console.error = originalError;
+      console.warn = originalWarn;
+      window.removeEventListener('error', handleGlobalError);
+      window.removeEventListener('unhandledrejection', handleUnhandledRejection);
     };
   }, []);
 
@@ -304,6 +349,26 @@ const DebugOverlay: React.FC<DebugOverlayProps> = ({ pageName }) => {
           </span>
         </div>
         <div style={{ display: 'flex', gap: '8px' }}>
+          <button 
+            onClick={(e) => { 
+              e.stopPropagation(); 
+              window.open('/debug-fullscreen', '_blank');
+            }}
+            style={{
+              backgroundColor: '#10b981',
+              border: 'none',
+              color: '#ffffff',
+              padding: '8px 16px',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '12px',
+              fontWeight: 'bold',
+              minHeight: '36px',
+              minWidth: '70px'
+            }}
+          >
+            Full Page
+          </button>
           <button 
             onClick={(e) => { e.stopPropagation(); clearSession(); }}
             style={{
@@ -460,6 +525,33 @@ const DebugOverlay: React.FC<DebugOverlayProps> = ({ pageName }) => {
                 }}>
                   {log.message}
                 </div>
+                {log.stack && (
+                  <details style={{ marginTop: '8px', cursor: 'pointer' }}>
+                    <summary style={{ 
+                      color: '#ef4444',
+                      padding: '4px',
+                      fontSize: '11px',
+                      fontWeight: 'bold'
+                    }}>
+                      🔥 Stack Trace
+                    </summary>
+                    <pre style={{ 
+                      margin: '8px 0 0 0',
+                      padding: '8px',
+                      fontSize: '10px',
+                      color: '#fca5a5',
+                      backgroundColor: '#450a0a',
+                      borderRadius: '4px',
+                      overflow: 'auto',
+                      maxHeight: '300px',
+                      whiteSpace: 'pre-wrap',
+                      wordBreak: 'break-all',
+                      border: '1px solid #7f1d1d'
+                    }}>
+                      {log.stack}
+                    </pre>
+                  </details>
+                )}
                 {log.data && (
                   <details style={{ marginTop: '8px', cursor: 'pointer' }}>
                     <summary style={{ 
@@ -503,7 +595,7 @@ export const useDebugLog = (pageName: string) => {
   const searchParams = new URLSearchParams(window.location.search);
   const isDebugMode = searchParams.get('debug') === 'true';
 
-  const addToSession = (type: DebugLog['type'], message: string, data?: any) => {
+  const addToSession = (type: DebugLog['type'], message: string, data?: any, stack?: string) => {
     if (!isDebugMode) return;
     
     try {
@@ -520,7 +612,8 @@ export const useDebugLog = (pageName: string) => {
         type,
         message,
         data,
-        page: pageName
+        page: pageName,
+        stack
       });
       
       sessionStorage.setItem(DEBUG_SESSION_KEY, JSON.stringify(logs));
@@ -543,8 +636,9 @@ export const useDebugLog = (pageName: string) => {
     logAPI: (message: string, data?: any) => {
       addToSession('api', message, data);
     },
-    logError: (message: string, data?: any) => {
-      addToSession('error', message, data);
+    logError: (message: string, data?: any, error?: Error) => {
+      const stack = error?.stack || new Error().stack || '';
+      addToSession('error', message, data, stack);
     },
     logNavigation: (message: string, data?: any) => {
       addToSession('navigation', message, data);
