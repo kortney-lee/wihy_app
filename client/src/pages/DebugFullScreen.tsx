@@ -24,25 +24,35 @@ const DebugFullScreen: React.FC = () => {
   const [autoRefresh, setAutoRefresh] = useState<boolean>(true);
   const [sessionStartTime, setSessionStartTime] = useState<number>(0);
 
-  // Load logs from sessionStorage
+  // Load logs from sessionStorage - always load, regardless of ?debug parameter
   const loadLogs = () => {
+    console.log('[DebugFullScreen] loadLogs called');
     try {
       const persistedLogs = sessionStorage.getItem(DEBUG_SESSION_KEY);
       const startTimeStr = sessionStorage.getItem(DEBUG_START_TIME_KEY);
       
+      console.log('[DebugFullScreen] persistedLogs raw:', persistedLogs);
+      console.log('[DebugFullScreen] startTimeStr:', startTimeStr);
+      
       if (persistedLogs) {
-        setLogs(JSON.parse(persistedLogs));
+        const parsedLogs = JSON.parse(persistedLogs);
+        console.log('[DebugFullScreen] Parsed logs:', parsedLogs.length, 'logs');
+        setLogs(parsedLogs);
+      } else {
+        console.log('[DebugFullScreen] No logs found in sessionStorage');
+        setLogs([]);
       }
       
       if (startTimeStr) {
         setSessionStartTime(parseInt(startTimeStr, 10));
       }
     } catch (e) {
-      console.error('Failed to load debug logs:', e);
+      console.error('[DebugFullScreen] Failed to load debug logs:', e);
     }
   };
 
   useEffect(() => {
+    console.log('[DebugFullScreen] Component mounted, loading logs...');
     loadLogs();
     
     if (autoRefresh) {
