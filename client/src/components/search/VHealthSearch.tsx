@@ -82,7 +82,6 @@ const VHealthSearch: React.FC = () => {
   const [isMobile, setIsMobile] = useState(false);
   const [placeholder, setPlaceholder] = useState(rotatingPrompts[0]);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [pullDistance, setPullDistance] = useState(0);
   
   // Detect system dark/light mode
   const [isDarkMode, setIsDarkMode] = useState(
@@ -94,60 +93,50 @@ const VHealthSearch: React.FC = () => {
   const [currentChatResponse, setCurrentChatResponse] = useState<string>('');
   const [showResults, setShowResults] = useState(false);
   
-  // Pull-to-refresh on mobile
+  // Pull-to-refresh handler for native mobile
+  const handleRefresh = React.useCallback(() => {
+    setIsRefreshing(true);
+    debug.logEvent('Pull-to-refresh triggered (native)', { platform: PlatformDetectionService.getPlatform() });
+    
+    // Clear debug session and reload
+    sessionStorage.removeItem('wihy_debug_session');
+    sessionStorage.removeItem('wihy_debug_start_time');
+    sessionStorage.removeItem('wihy_debug_session_id');
+    
+    // For native apps, use window.location.reload()
+    // For web, the native pull-to-refresh handles it
+    if (PlatformDetectionService.isNative()) {
+      setTimeout(() => {
+        window.location.reload();
+      }, 300);
+    } else {
+      // Web browser - just reload
+      setTimeout(() => {
+        window.location.reload();
+        setIsRefreshing(false);
+      }, 300);
+    }
+  }, [debug]);
+  
+  // Native pull-to-refresh setup
   React.useEffect(() => {
-    if (typeof window === 'undefined' || !('ontouchstart' in window)) return;
-
-    let startY = 0;
-
-    const handleTouchStart = (e: TouchEvent) => {
-      if (window.scrollY === 0) {
-        startY = e.touches[0].clientY;
-      }
+    // Enable native overscroll behavior for pull-to-refresh
+    const container = document.querySelector('.search-landing');
+    if (container) {
+      (container as HTMLElement).style.overscrollBehavior = 'auto';
+    }
+    
+    // Listen for native refresh event (iOS/Android)
+    const handleNativeRefresh = () => {
+      handleRefresh();
     };
-
-    const handleTouchMove = (e: TouchEvent) => {
-      if (startY === 0) return;
-      const currentY = e.touches[0].clientY;
-      const distance = currentY - startY;
-      
-      if (distance > 0 && window.scrollY === 0) {
-        setPullDistance(Math.min(distance, 150));
-        if (distance > 80) {
-          e.preventDefault();
-        }
-      }
-    };
-
-    const handleTouchEnd = () => {
-      if (pullDistance > 80) {
-        setIsRefreshing(true);
-        debug.logEvent('Pull-to-refresh triggered', { pullDistance });
-        
-        // Clear debug session and reload
-        sessionStorage.removeItem('wihy_debug_session');
-        sessionStorage.removeItem('wihy_debug_start_time');
-        sessionStorage.removeItem('wihy_debug_session_id');
-        
-        setTimeout(() => {
-          window.location.reload();
-        }, 100);
-      }
-      
-      startY = 0;
-      setPullDistance(0);
-    };
-
-    document.addEventListener('touchstart', handleTouchStart, { passive: true });
-    document.addEventListener('touchmove', handleTouchMove, { passive: false });
-    document.addEventListener('touchend', handleTouchEnd, { passive: true });
-
+    
+    window.addEventListener('refresh', handleNativeRefresh);
+    
     return () => {
-      document.removeEventListener('touchstart', handleTouchStart);
-      document.removeEventListener('touchmove', handleTouchMove);
-      document.removeEventListener('touchend', handleTouchEnd);
+      window.removeEventListener('refresh', handleNativeRefresh);
     };
-  }, [pullDistance, debug]);
+  }, [handleRefresh]);
   
   // Log state changes
   React.useEffect(() => {
@@ -1334,34 +1323,6 @@ const VHealthSearch: React.FC = () => {
 
   return (
     <div className="search-landing">
-      {/* PULL-TO-REFRESH INDICATOR */}
-      {pullDistance > 0 && (
-        <div 
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            height: `${Math.min(pullDistance, 150)}px`,
-            background: 'linear-gradient(180deg, rgba(59, 130, 246, 0.1) 0%, transparent 100%)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 9999,
-            transition: isRefreshing ? 'all 0.3s ease' : 'none'
-          }}
-        >
-          <div style={{
-            fontSize: '24px',
-            opacity: Math.min(pullDistance / 80, 1),
-            transform: `rotate(${Math.min(pullDistance * 3, 360)}deg)`,
-            transition: isRefreshing ? 'transform 0.3s ease' : 'none'
-          }}>
-            {isRefreshing ? '⏳' : '↻'}
-          </div>
-        </div>
-      )}
-
       {/* LOADING OVERLAY - Shows during search operations */}
       {isLoading && (
         <LoadingOverlay 
