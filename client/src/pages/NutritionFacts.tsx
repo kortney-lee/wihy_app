@@ -8,7 +8,7 @@ import ProductScanView from "../components/food/ProductScanView";
 import ImageUploadModal from "../components/ui/ImageUploadModal";
 import { NutritionFactsData } from "../types/nutritionFacts";
 import { PlatformDetectionService } from "../services/shared/platformDetectionService";
-import DebugOverlay, { useDebugLog } from "../components/debug/DebugOverlay";
+import { useDebugLog } from "../components/debug/DebugOverlay";
 import "../styles/mobile-fixes.css";
 
 type ViewMode = "overview" | "chat";
@@ -88,10 +88,17 @@ const NutritionFactsPage: React.FC = () => {
     } else {
       // No data - Safari probably opened /nutritionfacts directly or lost state
       // Redirect to home instead of rendering nothing
+      debug.logError("[NutritionFacts] NO DATA - redirecting to home");
       console.log("[NutritionFacts] useEffect - NO DATA, redirecting to home");
-      navigate("/", { replace: true });
+      
+      // Preserve debug parameter if present
+      const searchParams = new URLSearchParams(window.location.search);
+      const isDebugMode = searchParams.get('debug') === 'true';
+      const redirectPath = isDebugMode ? '/?debug=true' : '/';
+      
+      navigate(redirectPath, { replace: true });
     }
-  }, [location.state, navigate]);
+  }, [location.state, navigate, debug]);
 
   // Check for mobile screen size
   useEffect(() => {
@@ -157,9 +164,6 @@ const NutritionFactsPage: React.FC = () => {
 
   return (
     <>
-      {/* Debug overlay - enabled with ?debug=true */}
-      <DebugOverlay pageName="NutritionFacts" />
-      
       {/* NO BACKDROP - This is a standalone page, not a modal */}
       
       <div 
