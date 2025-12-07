@@ -36,6 +36,19 @@ const VHealthSearch: React.FC = () => {
   
   // Log component mount
   React.useEffect(() => {
+    // Initialize debug session if ?debug=true
+    const searchParams = new URLSearchParams(window.location.search);
+    if (searchParams.get('debug') === 'true') {
+      const startTimeStr = sessionStorage.getItem('wihy_debug_start_time');
+      if (!startTimeStr) {
+        // First load - initialize fresh debug session
+        const now = Date.now().toString();
+        sessionStorage.setItem('wihy_debug_start_time', now);
+        sessionStorage.setItem('wihy_debug_session', JSON.stringify([]));
+        console.log('[Debug] Fresh debug session initialized at:', new Date(parseInt(now)));
+      }
+    }
+    
     debug.logRender('VHealthSearch component mounted', {
       platform: PlatformDetectionService.getPlatform(),
       isNative: PlatformDetectionService.isNative(),
@@ -68,6 +81,8 @@ const VHealthSearch: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [placeholder, setPlaceholder] = useState(rotatingPrompts[0]);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [pullDistance, setPullDistance] = useState(0);
   
   // Detect system dark/light mode
   const [isDarkMode, setIsDarkMode] = useState(
@@ -78,6 +93,61 @@ const VHealthSearch: React.FC = () => {
   const [currentApiResponse, setCurrentApiResponse] = useState<UnifiedResponse | null>(null);
   const [currentChatResponse, setCurrentChatResponse] = useState<string>('');
   const [showResults, setShowResults] = useState(false);
+  
+  // Pull-to-refresh on mobile
+  React.useEffect(() => {
+    if (typeof window === 'undefined' || !('ontouchstart' in window)) return;
+
+    let startY = 0;
+
+    const handleTouchStart = (e: TouchEvent) => {
+      if (window.scrollY === 0) {
+        startY = e.touches[0].clientY;
+      }
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (startY === 0) return;
+      const currentY = e.touches[0].clientY;
+      const distance = currentY - startY;
+      
+      if (distance > 0 && window.scrollY === 0) {
+        setPullDistance(Math.min(distance, 150));
+        if (distance > 80) {
+          e.preventDefault();
+        }
+      }
+    };
+
+    const handleTouchEnd = () => {
+      if (pullDistance > 80) {
+        setIsRefreshing(true);
+        debug.logEvent('Pull-to-refresh triggered', { pullDistance });
+        
+        // Clear debug session and reload
+        sessionStorage.removeItem('wihy_debug_session');
+        sessionStorage.removeItem('wihy_debug_start_time');
+        sessionStorage.removeItem('wihy_debug_session_id');
+        
+        setTimeout(() => {
+          window.location.reload();
+        }, 100);
+      }
+      
+      startY = 0;
+      setPullDistance(0);
+    };
+
+    document.addEventListener('touchstart', handleTouchStart, { passive: true });
+    document.addEventListener('touchmove', handleTouchMove, { passive: false });
+    document.addEventListener('touchend', handleTouchEnd, { passive: true });
+
+    return () => {
+      document.removeEventListener('touchstart', handleTouchStart);
+      document.removeEventListener('touchmove', handleTouchMove);
+      document.removeEventListener('touchend', handleTouchEnd);
+    };
+  }, [pullDistance, debug]);
   
   // Log state changes
   React.useEffect(() => {
@@ -789,8 +859,12 @@ const VHealthSearch: React.FC = () => {
     
     debug.logNavigation('Navigating to NutritionFacts from barcode', { productName, sessionId });
     
+    // Preserve debug parameter if present
+    const searchParams = new URLSearchParams(window.location.search);
+    const debugParam = searchParams.get('debug') === 'true' ? '?debug=true' : '';
+    
     // Navigate to new NutritionFacts page instead of SearchResults
-    navigate('/nutritionfacts', {
+    navigate(`/nutritionfacts${debugParam}`, {
       state: {
         initialQuery: `Tell me about ${productName}`,
         nutritionfacts,
@@ -1260,6 +1334,34 @@ const VHealthSearch: React.FC = () => {
 
   return (
     <div className="search-landing">
+      {/* PULL-TO-REFRESH INDICATOR */}
+      {pullDistance > 0 && (
+        <div 
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            height: `${Math.min(pullDistance, 150)}px`,
+            background: 'linear-gradient(180deg, rgba(59, 130, 246, 0.1) 0%, transparent 100%)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 9999,
+            transition: isRefreshing ? 'all 0.3s ease' : 'none'
+          }}
+        >
+          <div style={{
+            fontSize: '24px',
+            opacity: Math.min(pullDistance / 80, 1),
+            transform: `rotate(${Math.min(pullDistance * 3, 360)}deg)`,
+            transition: isRefreshing ? 'transform 0.3s ease' : 'none'
+          }}>
+            {isRefreshing ? '⏳' : '↻'}
+          </div>
+        </div>
+      )}
+
       {/* LOADING OVERLAY - Shows during search operations */}
       {isLoading && (
         <LoadingOverlay 
