@@ -22,6 +22,26 @@ interface LocationState {
 }
 
 const NutritionFactsPage: React.FC = () => {
+  // IMMEDIATE LOG - before any hooks
+  try {
+    const sessionLogs = sessionStorage.getItem('wihy_debug_session');
+    const logs = sessionLogs ? JSON.parse(sessionLogs) : [];
+    logs.push({
+      timestamp: '+' + ((Date.now() - parseInt(sessionStorage.getItem('wihy_debug_start_time') || Date.now().toString())) / 1000).toFixed(3) + 's',
+      type: 'system',
+      message: 'NutritionFacts: Component function called',
+      page: 'NutritionFacts',
+      data: { 
+        pathname: window.location.pathname,
+        hasLocationState: !!(window as any).history?.state?.usr
+      }
+    });
+    sessionStorage.setItem('wihy_debug_session', JSON.stringify(logs));
+    console.log('[NutritionFacts] Component function called');
+  } catch (e) {
+    console.error('[NutritionFacts] Failed to log component call:', e);
+  }
+  
   const navigate = useNavigate();
   const location = useLocation();
   const debug = useDebugLog('NutritionFacts');
@@ -252,9 +272,10 @@ const NutritionFactsPage: React.FC = () => {
     scanHistoryCount: scanHistory.length
   });
 
-  return (
-    <>
-      {/* NO BACKDROP - This is a standalone page, not a modal */}
+  try {
+    return (
+      <>
+        {/* NO BACKDROP - This is a standalone page, not a modal */}
       
       <div 
         className={`fullscreen-chat-container fixed inset-0 ${
@@ -494,6 +515,25 @@ const NutritionFactsPage: React.FC = () => {
       />
     </>
   );
+  } catch (error) {
+    debug.logError('Error rendering NutritionFacts', { error: error.message }, error instanceof Error ? error : new Error(String(error)));
+    console.error('[NutritionFacts] Render error:', error);
+    
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-red-50">
+        <div className="text-center p-8">
+          <h1 className="text-2xl font-bold text-red-600 mb-4">Error Loading Nutrition Facts</h1>
+          <p className="text-gray-700 mb-4">{error instanceof Error ? error.message : String(error)}</p>
+          <button 
+            onClick={() => navigate('/?debug=true')}
+            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+          >
+            Return to Home
+          </button>
+        </div>
+      </div>
+    );
+  }
 };
 
 export default NutritionFactsPage;
