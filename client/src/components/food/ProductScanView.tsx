@@ -1,8 +1,9 @@
 // Yuka-style product overview component
 // Displays nutrition facts, positives, negatives, and recommendations
 
-import React from "react";
+import React, { useEffect } from "react";
 import { NutritionFactsData } from "../../types/nutritionFacts";
+import { useDebugLog } from "../debug/DebugOverlay";
 
 interface ProductScanViewProps {
   product: NutritionFactsData;
@@ -13,9 +14,43 @@ const ProductScanView: React.FC<ProductScanViewProps> = ({
   product,
   onAskMore,
 }) => {
+  const debug = useDebugLog('ProductScanView');
+  
   if (!product) return null;
 
   console.log('[ProductScanView] Rendering with product:', product.name);
+  
+  // Log rendering and CSS diagnostics
+  debug.logRender('ProductScanView rendering', {
+    productName: product.name,
+    healthScore: product.healthScore,
+    hasImage: !!product.imageUrl,
+    hasPositives: product.positives?.length || 0,
+    hasNegatives: product.negatives?.length || 0
+  });
+  
+  // CSS diagnostics on mount
+  useEffect(() => {
+    const container = document.querySelector('.product-scan-view');
+    if (container) {
+      debug.logEvent('ProductScanView CSS applied', {
+        display: window.getComputedStyle(container).display,
+        visibility: window.getComputedStyle(container).visibility,
+        opacity: window.getComputedStyle(container).opacity
+      });
+      
+      // Check computed styles after a brief delay
+      setTimeout(() => {
+        const computed = window.getComputedStyle(container);
+        debug.logEvent('ProductScanView computed styles', {
+          backgroundColor: computed.backgroundColor,
+          color: computed.color,
+          width: computed.width,
+          height: computed.height
+        });
+      }, 100);
+    }
+  }, [debug]);
 
   const {
     name,

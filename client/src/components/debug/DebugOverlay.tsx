@@ -599,8 +599,16 @@ export const useDebugLog = (pageName: string) => {
     if (!isDebugMode) return;
     
     try {
-      const startTimeStr = sessionStorage.getItem(DEBUG_START_TIME_KEY);
-      const startTime = startTimeStr ? parseInt(startTimeStr, 10) : Date.now();
+      let startTimeStr = sessionStorage.getItem(DEBUG_START_TIME_KEY);
+      if (!startTimeStr) {
+        // Initialize session if not exists
+        const now = Date.now().toString();
+        sessionStorage.setItem(DEBUG_START_TIME_KEY, now);
+        sessionStorage.setItem(DEBUG_SESSION_KEY, JSON.stringify([]));
+        startTimeStr = now;
+        console.log('[Debug] Session initialized at:', new Date(parseInt(now)));
+      }
+      const startTime = parseInt(startTimeStr, 10);
       const elapsed = ((Date.now() - startTime) / 1000).toFixed(3);
       const timestamp = `+${elapsed}s`;
       
