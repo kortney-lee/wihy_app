@@ -7,6 +7,7 @@ import { wihyScanningService } from '../../services/wihyScanningService';
 import { visionAnalysisService } from '../../services/visionAnalysisService';
 import { PlatformDetectionService } from '../../services/shared/platformDetectionService';
 import { AdaptiveCameraService } from '../../services/adaptiveCameraService';
+import { useDebugLog } from '../debug/DebugOverlay';
 
 interface ImageUploadModalProps {
   isOpen: boolean;
@@ -44,6 +45,8 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
   subtitle = 'Scan barcodes, search products, or analyze images',
   autoOpenCamera = false
 }) => {
+  const debug = useDebugLog('ImageUploadModal');
+  
   const [isDragging, setIsDragging] = useState(false);
   const [imageUrl, setImageUrl] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
@@ -163,6 +166,13 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
 
   // Handle camera access with fallback and barcode scanning
   const handleCameraClick = async () => {
+    debug.logScan('Camera button clicked', {
+      platform: PlatformDetectionService.getPlatform(),
+      isNative: PlatformDetectionService.isNative(),
+      isMobile,
+      userAgent: navigator.userAgent
+    });
+    
     console.log('Camera button clicked');
     console.log('Platform:', PlatformDetectionService.getPlatform());
     console.log('isNative:', PlatformDetectionService.isNative());
@@ -192,8 +202,12 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
         detector = new window.BarcodeDetector({
           formats: ['ean_13', 'ean_8', 'upc_a', 'upc_e', 'code_128', 'qr_code'],
         });
+        debug.logScan('BarcodeDetector initialized successfully', {
+          formats: ['ean_13', 'ean_8', 'upc_a', 'upc_e', 'code_128', 'qr_code']
+        });
         console.log('✅ BarcodeDetector initialized');
       } else {
+        debug.logScan('BarcodeDetector NOT available - manual capture only');
         console.log('⚠️ BarcodeDetector not available - barcode scanning disabled, manual capture only');
       }
     } catch (error) {
@@ -522,6 +536,7 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
             if (barcodes.length > 0) {
               const barcode = barcodes[0].rawValue.trim();
               const format = barcodes[0].format;
+              debug.logScan('✅ BARCODE DETECTED!', { barcode, format });
               console.log('✅ BARCODE DETECTED!', barcode, 'format:', format);
 
               stopped = true;
@@ -877,20 +892,31 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
 
   // Separate handler for barcode scanning
   const handleBarcodeScanning = useCallback(async (barcode: string) => {
+    debug.logScan('🔍 Processing barcode scan', { barcode });
     console.log('🔍 Handling barcode scan:', barcode);
     setLoadingMessage(`Looking up product ${barcode}...`);
     
     try {
+      debug.logAPI('Calling wihyScanningService.scanBarcode', { barcode });
       // Skip connectivity test - just call the service directly
       const barcodeResult = await wihyScanningService.scanBarcode(barcode);
+      
+      debug.logAPI('Barcode API response received', {
+        success: barcodeResult.success,
+        hasSessionId: !!(barcodeResult as any).sessionId
+      });
       
       if (barcodeResult.success) {
         // If navigation handler provided (from FullScreenChat), use it to navigate to NutritionFacts
         if (onNavigateToNutritionFacts) {
+          debug.logNavigation('Navigating to NutritionFacts page', {
+            sessionId: (barcodeResult as any).sessionId
+          });
           onNavigateToNutritionFacts(barcodeResult, (barcodeResult as any).sessionId);
           return;
         }
         
+        debug.logState('Passing barcode data to parent component');
         // Otherwise, pass structured barcode data back to parent (VHealthSearch, etc.)
         onAnalysisComplete({
           type: 'barcode_scan',
@@ -901,19 +927,21 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
           userQuery: `Scanned barcode: ${barcode}`
         });
       } else {
+        debug.logError('Barcode not found', { error: barcodeResult.error });
         onAnalysisComplete({
           type: 'error',
           error: barcodeResult.error || 'Barcode not found in database'
         });
       }
     } catch (error) {
+      debug.logError('Barcode scanning exception', { error: String(error) });
       console.error('❌ Barcode scanning error:', error);
       onAnalysisComplete({
         type: 'error',
         error: 'Barcode scanning failed. Please try again.'
       });
     }
-  }, [onAnalysisComplete, onNavigateToNutritionFacts]);
+  }, [onAnalysisComplete, onNavigateToNutritionFacts, debug]);
 
   // Separate handler for product name searching  
   const handleProductSearch = useCallback(async (productName: string) => {

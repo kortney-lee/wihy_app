@@ -8,8 +8,8 @@ import ProductScanView from "../components/food/ProductScanView";
 import ImageUploadModal from "../components/ui/ImageUploadModal";
 import { NutritionFactsData } from "../types/nutritionFacts";
 import { PlatformDetectionService } from "../services/shared/platformDetectionService";
-// Temporarily disabled: mobile-fixes.css causes white screen on iPhone
-// import "../styles/mobile-fixes.css";
+import DebugOverlay, { useDebugLog } from "../components/debug/DebugOverlay";
+import "../styles/mobile-fixes.css";
 
 type ViewMode = "overview" | "chat";
 
@@ -24,6 +24,7 @@ interface LocationState {
 const NutritionFactsPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const debug = useDebugLog('NutritionFacts');
 
   // ALL HOOKS MUST BE AT THE TOP - before any conditional returns
   // Use state to manage nutrition facts data instead of reading directly from location
@@ -40,13 +41,13 @@ const NutritionFactsPage: React.FC = () => {
 
   // Resolve state once in effect, handle missing data gracefully
   useEffect(() => {
-    console.log("[NutritionFacts] useEffect - location.state:", location.state);
+    debug.logState("useEffect - location.state", location.state);
     const state = (location.state as LocationState) || {};
-    console.log("[NutritionFacts] useEffect - parsed state:", state);
+    debug.logState("parsed state", state);
 
     // Accept both nutritionfacts and apiResponse keys for flexibility
     let dataFromState = state.nutritionfacts ?? (state.apiResponse as NutritionFactsData | undefined);
-    console.log("[NutritionFacts] useEffect - dataFromState from location:", dataFromState);
+    debug.logState("dataFromState from location", dataFromState);
 
     // iOS Safari fallback: Check sessionStorage if no data in location.state
     if (!dataFromState) {
@@ -156,6 +157,9 @@ const NutritionFactsPage: React.FC = () => {
 
   return (
     <>
+      {/* Debug overlay - enabled with ?debug=true */}
+      <DebugOverlay pageName="NutritionFacts" />
+      
       {/* NO BACKDROP - This is a standalone page, not a modal */}
       
       <div 
