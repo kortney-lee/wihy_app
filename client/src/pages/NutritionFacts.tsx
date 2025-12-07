@@ -8,8 +8,8 @@ import ProductScanView from "../components/food/ProductScanView";
 import ImageUploadModal from "../components/ui/ImageUploadModal";
 import { NutritionFactsData } from "../types/nutritionFacts";
 import { PlatformDetectionService } from "../services/shared/platformDetectionService";
-import "../styles/mobile-fixes.css";
-import "../styles/mobile-fixes.css";
+// Temporarily disabled: mobile-fixes.css causes white screen on iPhone
+// import "../styles/mobile-fixes.css";
 
 type ViewMode = "overview" | "chat";
 
