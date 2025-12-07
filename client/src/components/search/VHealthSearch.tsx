@@ -34,6 +34,15 @@ const rotatingPrompts = [
 const VHealthSearch: React.FC = () => {
   const debug = useDebugLog('VHealthSearch');
   
+  // Log component mount
+  React.useEffect(() => {
+    debug.logRender('VHealthSearch component mounted', {
+      platform: PlatformDetectionService.getPlatform(),
+      isNative: PlatformDetectionService.isNative(),
+      width: window.innerWidth
+    });
+  }, []);
+  
   // ================================
   // STATE MANAGEMENT
   // ================================
@@ -56,6 +65,26 @@ const VHealthSearch: React.FC = () => {
   const [currentApiResponse, setCurrentApiResponse] = useState<UnifiedResponse | null>(null);
   const [currentChatResponse, setCurrentChatResponse] = useState<string>('');
   const [showResults, setShowResults] = useState(false);
+  
+  // Log state changes
+  React.useEffect(() => {
+    if (searchQuery) {
+      debug.logState('Search query updated', { searchQuery, length: searchQuery.length });
+    }
+  }, [searchQuery]);
+  
+  React.useEffect(() => {
+    debug.logState('Loading state changed', { isLoading, loadingMessage });
+  }, [isLoading, loadingMessage]);
+  
+  React.useEffect(() => {
+    if (showResults) {
+      debug.logState('Results displayed', { 
+        hasApiResponse: !!currentApiResponse,
+        hasChatResponse: !!currentChatResponse
+      });
+    }
+  }, [showResults]);
   
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -189,8 +218,10 @@ const VHealthSearch: React.FC = () => {
           
           container.classList.add('force-mobile-animation');
           logger.debug('Mobile device detected - custom gradient animation started');
+          debug.logEvent('Mobile animation applied', { isMobile: true, platform: PlatformDetectionService.getPlatform() });
         } else {
           // Desktop - use CSS animation
+          debug.logEvent('Desktop animation applied', { isMobile: false });
           container.style.setProperty('animation', 'wiH-border-sweep 2.2s linear infinite', 'important');
           container.style.setProperty('background', `
             linear-gradient(#fff, #fff) padding-box,
@@ -350,6 +381,9 @@ const VHealthSearch: React.FC = () => {
     const queryToUse = queryParam || searchQuery;
     if (!queryToUse.trim() || isLoading) return;
     
+    // Debug logging
+    debug.logEvent('Search initiated', { query: queryToUse });
+    
     // 🔍 MAIN SEARCH LOGGING: Initial request
     console.log('🔍 MAIN SEARCH INITIATED:', {
       query: queryToUse,
@@ -411,6 +445,7 @@ const VHealthSearch: React.FC = () => {
         } else {
           // Use WiHy Unified API for production
           logger.apiRequest('WiHy API search', { query: queryToUse });
+          debug.logAPI('Calling wihyAPI.searchHealth', { query: queryToUse });
           
           // 🔍 MAIN SEARCH LOGGING: API request initiated
           console.log('🔍 MAIN SEARCH API REQUEST:', {
@@ -420,6 +455,10 @@ const VHealthSearch: React.FC = () => {
           });
           
           wihyResponse = await wihyAPI.searchHealth(queryToUse);
+          debug.logAPI('wihyAPI.searchHealth response received', { 
+            success: wihyResponse.success,
+            hasData: !!(wihyResponse as any).data 
+          });
         }
         
         // 🔍 MAIN SEARCH LOGGING: API response received
@@ -717,6 +756,12 @@ const VHealthSearch: React.FC = () => {
    * Handle barcode scan results
    */
   const handleBarcodeResult = (input: any) => {
+    debug.logScan('Barcode scan result received', { 
+      hasData: !!input.data,
+      barcode: input.barcode,
+      productName: input.data?.product?.name 
+    });
+    
     const barcodeData = input.data;
     const productName = barcodeData.product?.name || barcodeData.product_info?.name || 'Unknown Product';
     setSearchQuery(productName);
@@ -728,6 +773,8 @@ const VHealthSearch: React.FC = () => {
     
     // Get current session ID from session manager
     const sessionId = sessionManager.getSessionId();
+    
+    debug.logNavigation('Navigating to NutritionFacts from barcode', { productName, sessionId });
     
     // Navigate to new NutritionFacts page instead of SearchResults
     navigate('/nutritionfacts', {
@@ -745,6 +792,11 @@ const VHealthSearch: React.FC = () => {
    * Handle product search results
    */
   const handleProductSearchResult = (input: any) => {
+    debug.logScan('Product search result received', { 
+      hasData: !!input.data,
+      summary: input.summary
+    });
+    
     const productData = input.data;
     const productName = productData.analysis?.summary || input.summary || 'Product Search Result';
     setSearchQuery(productName);
@@ -788,6 +840,12 @@ const VHealthSearch: React.FC = () => {
    * Handle image analysis results
    */
   const handleImageAnalysisResult = (input: any) => {
+    debug.logScan('Image analysis completed', { 
+      summary: input.summary, 
+      type: input.type,
+      hasImageUrl: !!input.imageUrl 
+    });
+    
     const analysisData = input.data;
     const analysisName = input.summary || 'Image Analysis Result';
     setSearchQuery(analysisName);
@@ -842,6 +900,11 @@ const VHealthSearch: React.FC = () => {
       setIsUploadModalOpen(false);
       return;
     }
+    
+    debug.logEvent('Analysis complete handler called', { 
+      inputType: typeof input,
+      isStructured: typeof input === 'object' && input.type
+    });
 
     // Create abort controller for this request too
     abortControllerRef.current = new AbortController();
@@ -868,6 +931,7 @@ const VHealthSearch: React.FC = () => {
             
           case 'error':
             console.error('Analysis error:', input.error);
+            debug.logError('Analysis error received', new Error(input.error || 'Unknown error'));
             setIsLoading(false);
             // You could show a toast/notification here
             return;
@@ -893,7 +957,14 @@ const VHealthSearch: React.FC = () => {
       
       try {
         logger.debug('Making WiHy API nutrition search for:', foodName);
+        debug.logAPI('Calling wihyAPI.searchNutrition', { foodName });
+        
         const wihyResponse = await wihyAPI.searchNutrition(foodName);
+        
+        debug.logAPI('wihyAPI.searchNutrition response', { 
+          success: wihyResponse.success,
+          hasData: 'data' in wihyResponse
+        });
         
         if (wihyResponse.success) {
           // Handle both unified and legacy response formats
