@@ -7,6 +7,7 @@ import { visionAnalysisService } from '../../services/visionAnalysisService';
 import { PlatformDetectionService } from '../../services/shared/platformDetectionService';
 import { normalizeBarcodeScan } from '../../utils/nutritionDataNormalizer';
 import ImageUploadModal from './ImageUploadModal';
+import DebugOverlay, { useDebugLog } from '../debug/DebugOverlay';
 import '../../styles/mobile-fixes.css';
 
 interface ChatMessage {
@@ -53,6 +54,7 @@ const FullScreenChat = forwardRef<FullScreenChatRef, FullScreenChatProps>(({
   productName,
   sessionId
 }, ref) => {
+  const debug = useDebugLog('FullScreenChat');
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -75,8 +77,10 @@ const FullScreenChat = forwardRef<FullScreenChatRef, FullScreenChatProps>(({
 
   // Check for mobile screen size
   useEffect(() => {
+    debug.logRender('Mobile check running');
     const checkMobile = () => {
       setIsMobile(window.innerWidth <= 768);
+      debug.logState('isMobile', window.innerWidth <= 768);
     };
     
     checkMobile();
@@ -941,6 +945,9 @@ const FullScreenChat = forwardRef<FullScreenChatRef, FullScreenChatProps>(({
 
   return (
     <>
+      {/* Debug overlay - enabled with ?debug=true */}
+      <DebugOverlay pageName="FullScreenChat" />
+      
       {/* Backdrop overlay for both mobile and desktop */}
       <div 
         className={`fixed inset-0 bg-black/50 z-[9999] transition-opacity duration-300 ease-in-out ${
