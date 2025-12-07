@@ -84,16 +84,18 @@ html {
 
 /* Hide scrollbars only when on search landing page */
 body.landing-page-active {
-  overflow: hidden !important;
+  overflow-y: auto !important; /* Changed from hidden to allow pull-to-refresh */
   height: 100vh;
   max-height: 100vh;
   padding-top: 0 !important; /* Remove header padding for landing page */
+  overscroll-behavior-y: contain; /* Enable native pull-to-refresh */
 }
 
 html.landing-page-active {
-  overflow: hidden !important;
+  overflow-y: auto !important; /* Changed from hidden to allow pull-to-refresh */
   height: 100vh;
   max-height: 100vh;
+  overscroll-behavior-y: contain; /* Enable native pull-to-refresh */
 }
 
 /* Loading spinner animation */

@@ -15,6 +15,7 @@ import { isLocalDevelopment, getTestDataForQuery } from '../../utils/testDataGen
 import { PlatformDetectionService } from '../../services/shared/platformDetectionService';
 import { normalizeBarcodeScan } from '../../utils/nutritionDataNormalizer';
 import { useDebugLog } from '../debug/DebugOverlay';
+import { saveSessionToHistory } from '../debug/DebugOverlay';
 
 const rotatingPrompts = [
   "Ask me what is healthy",
@@ -98,24 +99,18 @@ const VHealthSearch: React.FC = () => {
     setIsRefreshing(true);
     debug.logEvent('Pull-to-refresh triggered (native)', { platform: PlatformDetectionService.getPlatform() });
     
-    // Clear debug session and reload
+    // Save current debug session to history BEFORE clearing
+    saveSessionToHistory();
+    
+    // Clear debug session for fresh start
     sessionStorage.removeItem('wihy_debug_session');
     sessionStorage.removeItem('wihy_debug_start_time');
     sessionStorage.removeItem('wihy_debug_session_id');
     
-    // For native apps, use window.location.reload()
-    // For web, the native pull-to-refresh handles it
-    if (PlatformDetectionService.isNative()) {
-      setTimeout(() => {
-        window.location.reload();
-      }, 300);
-    } else {
-      // Web browser - just reload
-      setTimeout(() => {
-        window.location.reload();
-        setIsRefreshing(false);
-      }, 300);
-    }
+    // Reload the page
+    setTimeout(() => {
+      window.location.reload();
+    }, 300);
   }, [debug]);
   
   // Native pull-to-refresh setup
