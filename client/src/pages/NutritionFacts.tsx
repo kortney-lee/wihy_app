@@ -26,6 +26,17 @@ const NutritionFactsPage: React.FC = () => {
   const location = useLocation();
   const debug = useDebugLog('NutritionFacts');
 
+  // Log component mount
+  React.useEffect(() => {
+    debug.logRender('NutritionFacts component mounted', {
+      platform: PlatformDetectionService.getPlatform(),
+      isNative: PlatformDetectionService.isNative(),
+      width: window.innerWidth,
+      pathname: location.pathname,
+      hasState: !!location.state
+    });
+  }, []);
+
   // ALL HOOKS MUST BE AT THE TOP - before any conditional returns
   // Use state to manage nutrition facts data instead of reading directly from location
   const [initialQuery, setInitialQuery] = useState<string | undefined>();
@@ -38,42 +49,90 @@ const NutritionFactsPage: React.FC = () => {
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [scanHistory, setScanHistory] = useState<NutritionFactsData[]>([]);
   const [autoOpenCamera, setAutoOpenCamera] = useState(false);
+  
+  // Log view mode changes
+  React.useEffect(() => {
+    debug.logState('View mode changed', { viewMode, isMobile });
+  }, [viewMode]);
+  
+  // Log history visibility changes
+  React.useEffect(() => {
+    if (showHistory) {
+      debug.logEvent('History sidebar opened', { itemCount: scanHistory.length });
+    }
+  }, [showHistory]);
 
   // Resolve state once in effect, handle missing data gracefully
   useEffect(() => {
-    debug.logState("useEffect - location.state", location.state);
+    debug.logState("Location state received", {
+      hasState: !!location.state,
+      stateKeys: location.state ? Object.keys(location.state) : [],
+      pathname: location.pathname,
+      search: location.search
+    });
+    
     const state = (location.state as LocationState) || {};
-    debug.logState("parsed state", state);
+    debug.logState("Parsed location state", {
+      hasNutritionFacts: !!state.nutritionfacts,
+      hasApiResponse: !!state.apiResponse,
+      hasInitialQuery: !!state.initialQuery,
+      hasSessionId: !!state.sessionId,
+      fromChat: state.fromChat
+    });
 
     // Accept both nutritionfacts and apiResponse keys for flexibility
     let dataFromState = state.nutritionfacts ?? (state.apiResponse as NutritionFactsData | undefined);
-    debug.logState("dataFromState from location", dataFromState);
+    debug.logState("Data extracted from state", {
+      hasData: !!dataFromState,
+      dataSource: dataFromState ? 'location.state' : 'none',
+      productName: dataFromState?.name
+    });
 
     // iOS Safari fallback: Check sessionStorage if no data in location.state
     if (!dataFromState) {
       console.log("[NutritionFacts] useEffect - No data in location.state, checking sessionStorage");
+      debug.logState("No data in location.state, checking sessionStorage", {});
+      
       try {
         const stored = sessionStorage.getItem('nutritionfacts_data');
         if (stored) {
           const parsed = JSON.parse(stored);
           console.log("[NutritionFacts] useEffect - Found data in sessionStorage:", parsed);
+          debug.logState("Found data in sessionStorage", { 
+            hasData: !!parsed.nutritionfacts,
+            timestamp: parsed.timestamp,
+            age: Date.now() - parsed.timestamp
+          });
+          
           // Use stored data if it's recent (within 30 seconds)
           if (Date.now() - parsed.timestamp < 30000) {
             dataFromState = parsed.nutritionfacts;
             setSessionId(parsed.sessionId);
             console.log("[NutritionFacts] useEffect - Using sessionStorage data");
+            debug.logState("Using sessionStorage data (fresh)", { productName: dataFromState?.name });
           } else {
             console.log("[NutritionFacts] useEffect - sessionStorage data too old, clearing");
+            debug.logState("sessionStorage data too old, clearing", { age: Date.now() - parsed.timestamp });
             sessionStorage.removeItem('nutritionfacts_data');
           }
+        } else {
+          debug.logState("No data in sessionStorage either", {});
         }
       } catch (e) {
         console.warn("[NutritionFacts] useEffect - Failed to read sessionStorage:", e);
+        debug.logError("Failed to read sessionStorage", e instanceof Error ? e : new Error(String(e)));
       }
     }
 
     if (dataFromState) {
       console.log("[NutritionFacts] useEffect - setting data, name:", dataFromState.name);
+      debug.logState("Setting nutrition facts data", {
+        productName: dataFromState.name,
+        hasCalories: !!dataFromState.calories,
+        hasMacros: !!dataFromState.macros,
+        servingSize: dataFromState.servingSize
+      });
+      
       setNutritionfacts(dataFromState);
       setInitialQuery(state.initialQuery);
       if (state.sessionId) setSessionId(state.sessionId);
@@ -88,7 +147,7 @@ const NutritionFactsPage: React.FC = () => {
     } else {
       // No data - Safari probably opened /nutritionfacts directly or lost state
       // Redirect to home instead of rendering nothing
-      debug.logError("[NutritionFacts] NO DATA - redirecting to home");
+      debug.logError("NO DATA - redirecting to home", new Error('No nutrition facts data found'));
       console.log("[NutritionFacts] useEffect - NO DATA, redirecting to home");
       
       // Preserve debug parameter if present
@@ -96,6 +155,7 @@ const NutritionFactsPage: React.FC = () => {
       const isDebugMode = searchParams.get('debug') === 'true';
       const redirectPath = isDebugMode ? '/?debug=true' : '/';
       
+      debug.logNavigation('Redirecting to home (no data)', { redirectPath, isDebugMode });
       navigate(redirectPath, { replace: true });
     }
   }, [location.state, navigate, debug]);
@@ -103,7 +163,17 @@ const NutritionFactsPage: React.FC = () => {
   // Check for mobile screen size
   useEffect(() => {
     const checkMobile = () => {
-      setIsMobile(window.innerWidth <= 768);
+      const wasMobile = isMobile;
+      const nowMobile = window.innerWidth <= 768;
+      setIsMobile(nowMobile);
+      
+      if (wasMobile !== nowMobile) {
+        debug.logEvent('Mobile view changed', { 
+          isMobile: nowMobile, 
+          width: window.innerWidth,
+          height: window.innerHeight
+        });
+      }
     };
     
     checkMobile();
@@ -127,6 +197,8 @@ const NutritionFactsPage: React.FC = () => {
 
   // Handle new scan - store current in history and launch scanner
   const handleNewScan = () => {
+    debug.logEvent('New scan initiated', { currentProduct: nutritionfacts?.name });
+    
     // Current scan is already in history from useEffect
     // Open the scanner modal with camera auto-start
     setAutoOpenCamera(true);
@@ -135,11 +207,19 @@ const NutritionFactsPage: React.FC = () => {
 
   // Handle analysis complete from scanner
   const handleAnalysisComplete = (result: any) => {
+    debug.logScan('Analysis complete in NutritionFacts', { 
+      success: result?.success,
+      hasData: !!result,
+      productName: result?.name
+    });
+    
     setIsUploadModalOpen(false);
     setAutoOpenCamera(false); // Reset auto-open flag
     
     // Navigate to new nutrition facts page with the new scan
     if (result && result.success) {
+      debug.logNavigation('Navigating to new nutrition facts', { productName: result.name });
+      
       navigate('/nutritionfacts', {
         state: {
           initialQuery: result.userQuery || 'New scan',
@@ -152,6 +232,8 @@ const NutritionFactsPage: React.FC = () => {
 
   // Show loading state instead of returning null - AFTER all hooks
   if (!nutritionfacts) {
+    debug.logRender('Rendering loading state (no nutrition facts data yet)', {});
+    
     return (
       <div className="flex items-center justify-center min-h-screen bg-white">
         <div className="text-center">
@@ -161,6 +243,14 @@ const NutritionFactsPage: React.FC = () => {
       </div>
     );
   }
+  
+  debug.logRender('Rendering NutritionFacts page', {
+    productName: nutritionfacts.name,
+    viewMode,
+    isMobile,
+    showHistory,
+    scanHistoryCount: scanHistory.length
+  });
 
   return (
     <>
