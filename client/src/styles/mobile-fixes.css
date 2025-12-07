@@ -70,8 +70,7 @@
   .chat-messages-scroll {
     -webkit-overflow-scrolling: touch !important;
   }
-
-  /* Remove scrollbar from any potential wide elements */
+}  /* Remove scrollbar from any potential wide elements */
   div, section, article, main, header, footer {
     max-width: 100vw !important;
     overflow-x: hidden !important;
@@ -243,21 +242,21 @@
     padding: 15px 20px !important;
   }
 
-  /* Ensure clean white backgrounds for main content areas - SEARCH PAGE ONLY */
-  .search-page .results-page,
-  .search-page .search-landing,
-  .search-page .health-info-card,
-  .search-page .health-info-content,
-  .search-page .related-topics-card,
-  .search-page .resources-card {
+  /* Ensure clean white backgrounds for main content areas */
+  .results-page,
+  .search-landing,
+  .health-info-card,
+  .health-info-content,
+  .related-topics-card,
+  .resources-card {
     background: #ffffff !important;
     background-image: none !important;
     background-color: #ffffff !important;
   }
 
-  /* Override card gradients for mobile - SEARCH PAGE ONLY */
-  .search-page .related-topics-card,
-  .search-page .resources-card {
+  /* Override card gradients for mobile */
+  .related-topics-card,
+  .resources-card {
     background: #ffffff !important;
     border: 1px solid #e8f0fe;
     box-shadow: 0 2px 8px rgba(0,0,0,0.05);
@@ -600,17 +599,5 @@
   /* Ensure news cards don't get cut off */
   .news-card {
     margin-bottom: 20px !important;
-  }
-
-  /* NUTRITION FACTS PAGE - Ensure visibility on iOS Safari */
-  .fullscreen-chat-container {
-    color: #111827 !important; /* Tailwind gray-900 */
-  }
-
-  .fullscreen-chat-container .modal-overlay,
-  .fullscreen-chat-container .loading-overlay {
-    background: transparent !important;
-    opacity: 0 !important;
-    pointer-events: none !important;
   }
 }
