@@ -41,6 +41,19 @@ const VHealthSearch: React.FC = () => {
       isNative: PlatformDetectionService.isNative(),
       width: window.innerWidth
     });
+    
+    // Initialize session manager
+    sessionManager.initialize().then((session) => {
+      debug.logState('Session initialized', {
+        sessionId: session?.sessionId,
+        isAuthenticated: session?.isAuthenticated,
+        isTemporary: session?.isTemporary
+      });
+      console.log('Session initialized:', session);
+    }).catch((error) => {
+      debug.logError('Failed to initialize session', { error: error.message }, error);
+      console.error('Failed to initialize session:', error);
+    });
   }, []);
   
   // ================================
