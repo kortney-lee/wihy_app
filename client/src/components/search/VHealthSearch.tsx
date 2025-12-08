@@ -35,18 +35,29 @@ const rotatingPrompts = [
 const VHealthSearch: React.FC = () => {
   const debug = useDebugLog('VHealthSearch');
   
-  // Log component mount
+  // Log component mount and initialize server debug session
   React.useEffect(() => {
     // Initialize debug session if ?debug=true
     const searchParams = new URLSearchParams(window.location.search);
     if (searchParams.get('debug') === 'true') {
       const startTimeStr = sessionStorage.getItem('wihy_debug_start_time');
-      if (!startTimeStr) {
+      let sessionId = sessionStorage.getItem('wihy_debug_session_id');
+      
+      if (!startTimeStr || !sessionId) {
         // First load - initialize fresh debug session
         const now = Date.now().toString();
+        sessionId = `web_${now}_${Math.random().toString(36).substr(2, 9)}`;
+        
         sessionStorage.setItem('wihy_debug_start_time', now);
+        sessionStorage.setItem('wihy_debug_session_id', sessionId);
         sessionStorage.setItem('wihy_debug_session', JSON.stringify([]));
-        console.log('[Debug] Fresh debug session initialized at:', new Date(parseInt(now)));
+        
+        // Create session on server
+        import('../../services/debugLogService').then(({ debugLogService }) => {
+          debugLogService.createSession(sessionId!);
+        });
+        
+        console.log('[Debug] Fresh debug session initialized:', sessionId, 'at:', new Date(parseInt(now)));
       }
     }
     
