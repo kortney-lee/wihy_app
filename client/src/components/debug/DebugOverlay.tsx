@@ -1,17 +1,9 @@
 // Debug overlay component for monitoring page activity without opening console
 // Usage: Add ?debug=true to any URL
-// Logs persist across navigation via sessionStorage
+// Logs persist across navigation via sessionStorage and server API
 
 import React, { useState, useEffect, useRef } from 'react';
-
-interface DebugLog {
-  timestamp: string;
-  type: 'render' | 'css' | 'api' | 'error' | 'state' | 'event' | 'system' | 'navigation' | 'scan';
-  message: string;
-  data?: any;
-  page?: string; // Track which page logged this
-  stack?: string; // Stack trace for errors
-}
+import { debugLogService, DebugLog } from '../../services/debugLogService';
 
 interface DebugOverlayProps {
   pageName: string;
@@ -22,16 +14,22 @@ const DEBUG_SESSION_KEY = 'wihy_debug_session';
 const DEBUG_START_TIME_KEY = 'wihy_debug_start_time';
 const DEBUG_HISTORY_KEY = 'wihy_debug_history'; // localStorage for historical sessions
 
-// Save current session to history
-const saveSessionToHistory = () => {
+// Save current session to history and close on server
+const saveSessionToHistory = async () => {
   try {
     const currentLogs = sessionStorage.getItem(DEBUG_SESSION_KEY);
     const startTime = sessionStorage.getItem(DEBUG_START_TIME_KEY);
+    const sessionId = sessionStorage.getItem('wihy_debug_session_id');
     
     if (!currentLogs || !startTime) return;
     
     const logs = JSON.parse(currentLogs);
     if (logs.length === 0) return;
+    
+    // Close session on server (will flush remaining logs)
+    if (sessionId) {
+      await debugLogService.closeSession(sessionId);
+    }
     
     // Get existing history
     const historyStr = localStorage.getItem(DEBUG_HISTORY_KEY);
@@ -39,7 +37,7 @@ const saveSessionToHistory = () => {
     
     // Add current session
     history.push({
-      sessionId: startTime,
+      sessionId: sessionId || startTime,
       startTime: parseInt(startTime),
       endTime: Date.now(),
       logCount: logs.length,
@@ -50,7 +48,7 @@ const saveSessionToHistory = () => {
     const trimmed = history.slice(-10);
     localStorage.setItem(DEBUG_HISTORY_KEY, JSON.stringify(trimmed));
     
-    console.log('[Debug] Session saved to history:', logs.length, 'logs');
+    console.log('[Debug] Session saved to history and closed on server:', logs.length, 'logs');
   } catch (e) {
     console.warn('[Debug] Failed to save session to history:', e);
   }
@@ -637,7 +635,9 @@ export const useDebugLog = (pageName: string) => {
     
     try {
       let startTimeStr = sessionStorage.getItem(DEBUG_START_TIME_KEY);
-      if (!startTimeStr) {
+      let sessionId = sessionStorage.getItem('wihy_debug_session_id');
+      
+      if (!startTimeStr || !sessionId) {
         // Initialize session if not exists
         const now = Date.now().toString();
         sessionStorage.setItem(DEBUG_START_TIME_KEY, now);
@@ -645,23 +645,31 @@ export const useDebugLog = (pageName: string) => {
         startTimeStr = now;
         console.log('[Debug] Session initialized at:', new Date(parseInt(now)));
       }
+      
       const startTime = parseInt(startTimeStr, 10);
       const elapsed = ((Date.now() - startTime) / 1000).toFixed(3);
       const timestamp = `+${elapsed}s`;
       
-      const persistedLogs = sessionStorage.getItem(DEBUG_SESSION_KEY);
-      const logs = persistedLogs ? JSON.parse(persistedLogs) : [];
-      
-      logs.push({
+      const log: DebugLog = {
         timestamp,
         type,
         message,
         data,
         page: pageName,
         stack
-      });
+      };
       
+      // Save to sessionStorage (for local viewing)
+      const persistedLogs = sessionStorage.getItem(DEBUG_SESSION_KEY);
+      const logs = persistedLogs ? JSON.parse(persistedLogs) : [];
+      logs.push(log);
       sessionStorage.setItem(DEBUG_SESSION_KEY, JSON.stringify(logs));
+      
+      // Queue for server upload (batched)
+      if (sessionId) {
+        debugLogService.queueLog(log, sessionId);
+      }
+      
       console.log(`[${pageName}] ${type.toUpperCase()}:`, message, data);
     } catch (e) {
       console.warn('Failed to add debug log:', e);
