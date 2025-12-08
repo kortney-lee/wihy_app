@@ -445,8 +445,16 @@ const DebugFullScreen: React.FC = () => {
               <div
                 key={session.session_id}
                 onClick={() => {
+                  console.log('[DebugFullScreen] Session clicked:', session.session_id);
                   loadLogs(session.session_id);
                   setShowHistory(false);
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateX(4px)';
+                  e.currentTarget.style.transition = 'transform 0.2s';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateX(0)';
                 }}
                 style={{
                   backgroundColor: selectedSession === session.session_id ? '#334155' : '#0f172a',
@@ -454,19 +462,30 @@ const DebugFullScreen: React.FC = () => {
                   borderRadius: '6px',
                   padding: '12px',
                   marginBottom: '8px',
-                  cursor: 'pointer'
+                  cursor: 'pointer',
+                  transition: 'all 0.2s'
                 }}
               >
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
                   <span style={{ color: '#f1f5f9', fontWeight: 'bold', fontSize: '12px' }}>
-                    {session.session_id}
+                    🔍 {session.session_id}
                   </span>
-                  <span style={{ color: '#94a3b8' }}>
+                  <span style={{ 
+                    color: '#10b981', 
+                    fontWeight: 'bold',
+                    backgroundColor: '#065f46',
+                    padding: '2px 8px',
+                    borderRadius: '4px',
+                    fontSize: '11px'
+                  }}>
                     {session.log_count} logs
                   </span>
                 </div>
                 <div style={{ fontSize: '11px', color: '#64748b' }}>
                   {session.platform} • {new Date(session.created_at).toLocaleString()}
+                </div>
+                <div style={{ fontSize: '10px', color: '#60a5fa', marginTop: '4px' }}>
+                  👆 Click to view logs
                 </div>
               </div>
             ))
@@ -496,7 +515,34 @@ const DebugFullScreen: React.FC = () => {
 
       {/* Logs */}
       <div style={{ padding: '16px' }}>
-        {filteredLogs.length === 0 ? (
+        {loading && (
+          <div style={{
+            textAlign: 'center',
+            padding: '40px',
+            color: '#60a5fa',
+            fontSize: '16px'
+          }}>
+            <div style={{ fontSize: '48px', marginBottom: '16px' }}>⏳</div>
+            <div>Loading logs from server...</div>
+          </div>
+        )}
+        {!loading && selectedSession && (
+          <div style={{
+            backgroundColor: '#1e293b',
+            padding: '12px',
+            borderRadius: '6px',
+            marginBottom: '16px',
+            border: '2px solid #8b5cf6'
+          }}>
+            <div style={{ color: '#a78bfa', fontSize: '14px', fontWeight: 'bold' }}>
+              📂 Viewing Session: {selectedSession}
+            </div>
+            <div style={{ color: '#94a3b8', fontSize: '12px', marginTop: '4px' }}>
+              {logs.length} logs loaded from server
+            </div>
+          </div>
+        )}
+        {!loading && filteredLogs.length === 0 ? (
           <div style={{
             textAlign: 'center',
             padding: '40px',
