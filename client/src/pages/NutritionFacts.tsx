@@ -266,33 +266,14 @@ const NutritionFactsPage: React.FC = () => {
   
   debug.logRender('Rendering NutritionFacts page', {
     productName: nutritionfacts.name,
-    viewMode,
-    isMobile,
-    showHistory,
-    scanHistoryCount: scanHistory.length,
-    windowSize: { width: window.innerWidth, height: window.innerHeight },
-    hasProductData: !!nutritionfacts,
-    productKeys: Object.keys(nutritionfacts || {})
-  });
-  
-  // Additional diagnostic - log what's about to render
-  console.log('[NutritionFacts] About to render with:', {
-    viewMode,
-    isMobile,
-    nutritionfacts: nutritionfacts?.name,
-    platform: PlatformDetectionService.getPlatform(),
-    isNative: PlatformDetectionService.isNative()
+    // ...existing code...
   });
 
-  try {
-    return (
-      <>
-        {/* NO BACKDROP - This is a standalone page, not a modal */}
-      
-      <div 
-        className={`fullscreen-chat-container ${
-          isMobile ? 'w-screen' : 'w-auto'
-        } flex flex-col font-sans`}
+  return (
+    <>
+      {/* NO BACKDROP - This is a standalone page, not a modal */}
+      <div
+        className={`fullscreen-chat-container ${isMobile ? 'w-screen' : 'w-auto'} flex flex-col font-sans`}
         style={{
           position: 'fixed',
           top: 0,
@@ -301,7 +282,6 @@ const NutritionFactsPage: React.FC = () => {
           bottom: 0,
           height: '100dvh', // Use dynamic viewport height for iOS
           minHeight: '-webkit-fill-available', // iOS Safari fallback
-          backgroundColor: '#f0f7ff',
           paddingTop: PlatformDetectionService.isNative() ? '48px' : '0px',
           WebkitOverflowScrolling: 'touch',
           overflow: 'hidden',
@@ -384,7 +364,7 @@ const NutritionFactsPage: React.FC = () => {
         )}
 
         {/* Header */}
-        <div className="flex-shrink-0 flex items-center justify-between px-4 py-3 bg-white border-b border-gray-200">
+        <div className="flex-shrink-0 flex items-center justify-between px-4 py-3 bg-white border-b border-gray-200 text-gray-900">
           
           {/* Top Navigation Bar with Toggle History and View Charts */}
           <div className="flex items-center justify-between w-full px-3 py-2 bg-white min-h-[40px]">
@@ -444,7 +424,7 @@ const NutritionFactsPage: React.FC = () => {
         {/* Header with title and view mode toggle */}
         <div className={`flex items-center justify-center ${
           isMobile ? 'px-4 py-2' : 'px-6 py-3'
-        } border-b border-gray-200 bg-white flex-shrink-0`}>
+        } border-b border-gray-200 bg-white flex-shrink-0 text-gray-900`}>
           
           {/* Title & View tabs - centered */}
           <div className="flex items-center gap-3">
@@ -566,25 +546,6 @@ const NutritionFactsPage: React.FC = () => {
       />
     </>
   );
-  } catch (error) {
-    debug.logError('Error rendering NutritionFacts', { error: error.message }, error instanceof Error ? error : new Error(String(error)));
-    console.error('[NutritionFacts] Render error:', error);
-    
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-red-50">
-        <div className="text-center p-8">
-          <h1 className="text-2xl font-bold text-red-600 mb-4">Error Loading Nutrition Facts</h1>
-          <p className="text-gray-700 mb-4">{error instanceof Error ? error.message : String(error)}</p>
-          <button 
-            onClick={() => navigate('/?debug=true')}
-            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-          >
-            Return to Home
-          </button>
-        </div>
-      </div>
-    );
-  }
 };
 
 export default NutritionFactsPage;
