@@ -4,7 +4,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import FullScreenChat from "../components/ui/FullScreenChat";
-import ProductScanView from "../components/food/ProductScanView";
 import ImageUploadModal from "../components/ui/ImageUploadModal";
 import { NutritionFactsData } from "../types/nutritionFacts";
 import { PlatformDetectionService } from "../services/shared/platformDetectionService";
@@ -511,11 +510,231 @@ const NutritionFactsPage: React.FC = () => {
                 }
               }}
             >
-              {console.log('[NutritionFacts] About to render ProductScanView') as any}
-              <ProductScanView
-                product={nutritionfacts}
-                onAskMore={() => setViewMode("chat")}
-              />
+              {console.log('[NutritionFacts] About to render inline ProductScanView') as any}
+              {/* Inline ProductScanView Component */}
+              {(() => {
+                const product = nutritionfacts;
+                if (!product) return null;
+
+                console.log('[ProductScanView] Rendering with product:', product.name);
+                
+                // Log rendering diagnostics
+                debug.logRender('ProductScanView rendering', {
+                  productName: product.name,
+                  healthScore: product.healthScore,
+                  hasImage: !!product.imageUrl,
+                  hasPositives: product.positives?.length || 0,
+                  hasNegatives: product.negatives?.length || 0
+                });
+                
+                const {
+                  name,
+                  brand,
+                  imageUrl,
+                  healthScore,
+                  grade,
+                  novaScore,
+                  ultraProcessed,
+                  additives = [],
+                  calories,
+                  macros,
+                  servingSize,
+                  positives = [],
+                  negatives = [],
+                  recommendations = [],
+                } = product;
+
+                // Color-coded health score
+                const getScoreColor = (score?: number) => {
+                  if (!score) return "bg-gray-400";
+                  if (score >= 80) return "bg-emerald-500";
+                  if (score >= 60) return "bg-yellow-500";
+                  if (score >= 40) return "bg-orange-500";
+                  return "bg-red-500";
+                };
+
+                return (
+                  <div 
+                    className="flex flex-col product-scan-view min-h-screen p-4"
+                    style={{
+                      opacity: 1,
+                      visibility: 'visible',
+                      display: 'flex'
+                    }}
+                  >
+                    {/* Header Section */}
+                    <div className="flex items-start gap-4 mb-6">
+                      {imageUrl && (
+                        <img
+                          src={imageUrl}
+                          alt={name || "Product"}
+                          className="w-24 h-24 object-contain rounded-lg border border-gray-200 bg-white"
+                        />
+                      )}
+
+                      <div className="flex-1">
+                        <h2 className="text-xl font-semibold text-gray-900 leading-tight">
+                          {name || "Food item"}
+                        </h2>
+                        {brand && (
+                          <p className="text-sm text-gray-600 mt-1">{brand}</p>
+                        )}
+
+                        {/* Health Score */}
+                        {typeof healthScore === "number" && (
+                          <div className="flex items-center gap-2 mt-3">
+                            <span
+                              className={`inline-flex items-center justify-center w-4 h-4 rounded-full ${getScoreColor(
+                                healthScore
+                              )}`}
+                            />
+                            <span className="text-base font-semibold text-gray-900">
+                              {healthScore}/100
+                            </span>
+                            {grade && (
+                              <span className="text-sm text-gray-600 ml-1">{grade}</span>
+                            )}
+                          </div>
+                        )}
+
+                        {/* NOVA Score */}
+                        {novaScore && (
+                          <div className="mt-2">
+                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-700">
+                              NOVA {novaScore}
+                              {ultraProcessed && " · Ultra-processed"}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Nutrition Facts Summary */}
+                    {(calories || macros) && (
+                      <section className="mb-6">
+                        <h3 className="text-base font-semibold text-gray-900 mb-3">
+                          Nutrition Facts
+                          {servingSize && (
+                            <span className="ml-2 text-sm font-normal text-gray-500">
+                              per {servingSize}
+                            </span>
+                          )}
+                        </h3>
+                        <div className="bg-white rounded-xl border border-gray-200 p-4">
+                          <div className="grid grid-cols-2 gap-3">
+                            {calories && (
+                              <div className="flex justify-between items-center">
+                                <span className="text-sm text-gray-600">Calories</span>
+                                <span className="text-sm font-semibold text-gray-900">
+                                  {calories}
+                                </span>
+                              </div>
+                            )}
+                            {macros?.protein !== undefined && (
+                              <div className="flex justify-between items-center">
+                                <span className="text-sm text-gray-600">Protein</span>
+                                <span className="text-sm font-semibold text-gray-900">
+                                  {macros.protein}g
+                                </span>
+                              </div>
+                            )}
+                            {macros?.carbs !== undefined && (
+                              <div className="flex justify-between items-center">
+                                <span className="text-sm text-gray-600">Carbs</span>
+                                <span className="text-sm font-semibold text-gray-900">
+                                  {macros.carbs}g
+                                </span>
+                              </div>
+                            )}
+                            {macros?.fat !== undefined && (
+                              <div className="flex justify-between items-center">
+                                <span className="text-sm text-gray-600">Fat</span>
+                                <span className="text-sm font-semibold text-gray-900">
+                                  {macros.fat}g
+                                </span>
+                              </div>
+                            )}
+                            {macros?.fiber !== undefined && (
+                              <div className="flex justify-between items-center">
+                                <span className="text-sm text-gray-600">Fiber</span>
+                                <span className="text-sm font-semibold text-gray-900">
+                                  {macros.fiber}g
+                                </span>
+                              </div>
+                            )}
+                            {macros?.sugar !== undefined && (
+                              <div className="flex justify-between items-center">
+                                <span className="text-sm text-gray-600">Sugar</span>
+                                <span className="text-sm font-semibold text-gray-900">
+                                  {macros.sugar}g
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </section>
+                    )}
+
+                    {/* Negatives */}
+                    {negatives.length > 0 && (
+                      <section className="mb-6">
+                        <h3 className="text-base font-semibold text-gray-900 mb-3">
+                          Areas of Concern
+                        </h3>
+                        <div className="bg-white rounded-xl border border-gray-200 divide-y divide-gray-100">
+                          {negatives.map((negative, idx) => (
+                            <div
+                              key={idx}
+                              className="flex items-start gap-3 px-4 py-3"
+                            >
+                              <span className="w-3 h-3 rounded-full bg-red-500 mt-1 flex-shrink-0" />
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium text-gray-900">
+                                  {negative.label}
+                                </p>
+                                {negative.description && (
+                                  <p className="text-xs text-gray-600 mt-1">
+                                    {negative.description}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </section>
+                    )}
+
+                    {/* Positives */}
+                    {positives.length > 0 && (
+                      <section className="mb-6">
+                        <h3 className="text-base font-semibold text-gray-900 mb-3">
+                          Positive Aspects
+                        </h3>
+                        <div className="bg-white rounded-xl border border-gray-200 divide-y divide-gray-100">
+                          {positives.map((positive, idx) => (
+                            <div
+                              key={idx}
+                              className="flex items-start gap-3 px-4 py-3"
+                            >
+                              <span className="w-3 h-3 rounded-full bg-emerald-500 mt-1 flex-shrink-0" />
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium text-gray-900">
+                                  {positive.label}
+                                </p>
+                                {positive.description && (
+                                  <p className="text-xs text-gray-600 mt-1">
+                                    {positive.description}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </section>
+                    )}
+                  </div>
+                );
+              })()}
             </div>
           ) : (
             <FullScreenChat
