@@ -89,6 +89,7 @@ const ResultsPage: React.FC = () => {
   const [recommendations, setRecommendations] = useState<string[]>([]);
   const [disclaimer, setDisclaimer] = useState<string>('');
   const [apiResponse, setApiResponse] = useState<any>(null);
+  const [sessionId, setSessionId] = useState<string>('');
   
   // Track if this is initial load to prevent loading spinner on browser navigation
   const [isInitialLoad, setIsInitialLoad] = useState(true);
@@ -154,6 +155,7 @@ const ResultsPage: React.FC = () => {
           setCitations(navigationState.results.sources || []);
           setRecommendations(navigationState.results.recommendations || []);
           setDisclaimer(navigationState.results.medicalDisclaimer || '');
+          setSessionId(navigationState.sessionId || ''); // Extract sessionId for continuity
           setIsLoading(false);
           
           // 🔍 RESULTS PAGE LOGGING: State updated
@@ -443,6 +445,7 @@ Please try your search again in a moment! 😅`;
       apiResponse={apiResponse}
       autoOpenChat={shouldAutoOpenChat}
       hideChatWidget={hideChatWidget}
+      sessionId={sessionId}
     />
   );
 };
@@ -516,6 +519,7 @@ This analysis is based on peer-reviewed nutritional research and USDA food compo
       ]}
       disclaimer="This is demo data for development purposes. Always consult healthcare professionals for real medical advice."
       apiResponse={sampleApiResponse}
+      sessionId="demo-session-id"
     />
   );
 };

@@ -119,6 +119,7 @@ interface SearchResultsProps {
   apiResponse?: any; // Add unified API response for chart components
   autoOpenChat?: boolean; // Add prop to automatically open chat when coming from VHealthSearch
   hideChatWidget?: boolean; // Hide chat widget completely (e.g., when coming from NutritionFacts)
+  sessionId?: string; // Session ID for maintaining continuity across pages
 }
 
 // Add this function before the SearchResults component
@@ -184,7 +185,8 @@ const SearchResults: React.FC<SearchResultsProps> = ({
   disclaimer: _disclaimer = "",
   apiResponse,
   autoOpenChat = false,
-  hideChatWidget = false
+  hideChatWidget = false,
+  sessionId
 }) => {
   // Debug log for hideChatWidget
   useEffect(() => {
@@ -1262,6 +1264,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({
           isInChatMode={isChatOpen}
           showProgressMenu={true}
           onProgressMenuClick={() => setShowProgressSidebar(!showProgressSidebar)}
+          sessionId={sessionId}
         />
       </div>
 
