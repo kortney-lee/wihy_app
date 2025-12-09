@@ -271,28 +271,7 @@ const NutritionFactsPage: React.FC = () => {
 
   return (
     <>
-      <style>{`
-        /* Override base CSS for this page to support system color scheme */
-        body {
-          background-color: Canvas !important;
-          color: CanvasText !important;
-          color-scheme: light dark;
-        }
-        
-        @media (prefers-color-scheme: light) {
-          body {
-            background-color: white !important;
-            color: black !important;
-          }
-        }
-        
-        @media (prefers-color-scheme: dark) {
-          body {
-            background-color: black !important;
-            color: white !important;
-          }
-        }
-      `}</style>
+
       {/* NO BACKDROP - This is a standalone page, not a modal */}
       <div
         className={`fullscreen-chat-container ${isMobile ? 'w-screen' : 'w-auto'} flex flex-col font-sans`}
@@ -304,14 +283,11 @@ const NutritionFactsPage: React.FC = () => {
           bottom: 0,
           height: '100dvh', // Use dynamic viewport height for iOS
           minHeight: '-webkit-fill-available', // iOS Safari fallback
+          backgroundColor: '#f0f7ff',
           paddingTop: PlatformDetectionService.isNative() ? '48px' : '0px',
           WebkitOverflowScrolling: 'touch',
           overflow: 'hidden',
-          zIndex: 50, // Reduced from 10000
-          forcedColorAdjust: 'auto',
-          colorScheme: 'light dark',
-          backgroundColor: 'Canvas',
-          color: 'CanvasText'
+          zIndex: 50 // Reduced from 10000
         }}
         onLoad={() => {
           debug.logEvent('NutritionFacts container loaded', {
@@ -390,10 +366,10 @@ const NutritionFactsPage: React.FC = () => {
         )}
 
         {/* Header */}
-        <div className="flex-shrink-0 flex items-center justify-between px-4 py-3 border-b">
+        <div className="flex-shrink-0 flex items-center justify-between px-4 py-3 bg-white border-b border-gray-200">
           
           {/* Top Navigation Bar with Toggle History and View Charts */}
-          <div className="flex items-center justify-between w-full px-3 py-2 min-h-[40px]">
+          <div className="flex items-center justify-between w-full px-3 py-2 bg-white min-h-[40px]">
             {/* Left side - Toggle History Button */}
             <button
               onClick={() => setShowHistory(!showHistory)}
@@ -450,7 +426,7 @@ const NutritionFactsPage: React.FC = () => {
         {/* Header with title and view mode toggle */}
         <div className={`flex items-center justify-center ${
           isMobile ? 'px-4 py-2' : 'px-6 py-3'
-        } border-b flex-shrink-0`}>
+        } border-b border-gray-200 bg-white flex-shrink-0`}>
           
           {/* Title & View tabs - centered */}
           <div className="flex items-center gap-3">
@@ -513,11 +489,11 @@ const NutritionFactsPage: React.FC = () => {
             <div 
               className="flex-1" 
               style={{ 
+                backgroundColor: '#f0f7ff',
                 WebkitOverflowScrolling: 'touch',
                 overflowY: 'auto',
                 overflowX: 'hidden',
-                height: '100%',
-                forcedColorAdjust: 'auto'
+                height: '100%'
               }}
               ref={(el) => {
                 if (el) {
