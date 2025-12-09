@@ -90,17 +90,35 @@ const ProductScanView: React.FC<ProductScanViewProps> = ({
   return (
     <>
       <style>{`
-        /* Let iOS handle contrast - don't force colors */
+        /* Let iOS handle colors and contrast */
         .product-scan-view {
           forced-color-adjust: auto;
+          color-scheme: light dark;
+          background-color: Canvas;
+          color: CanvasText;
           -webkit-user-select: none;
           user-select: none;
+        }
+        
+        /* Support system color preferences */
+        @media (prefers-color-scheme: light) {
+          .product-scan-view {
+            background-color: white;
+            color: black;
+          }
+        }
+        
+        @media (prefers-color-scheme: dark) {
+          .product-scan-view {
+            background-color: black;
+            color: white;
+          }
         }
         
         /* Support iOS accessibility features */
         @media (prefers-contrast: high) {
           .product-scan-view {
-            filter: none !important;
+            filter: contrast(1.2);
           }
         }
         
@@ -117,7 +135,9 @@ const ProductScanView: React.FC<ProductScanViewProps> = ({
           opacity: 1,
           visibility: 'visible',
           display: 'flex',
-          forcedColorAdjust: 'auto'
+          forcedColorAdjust: 'auto',
+          backgroundColor: 'inherit',
+          color: 'inherit'
         }}
       >
         {/* Header Section */}

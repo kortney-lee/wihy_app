@@ -271,6 +271,28 @@ const NutritionFactsPage: React.FC = () => {
 
   return (
     <>
+      <style>{`
+        /* Override base CSS for this page to support system color scheme */
+        body {
+          background-color: Canvas !important;
+          color: CanvasText !important;
+          color-scheme: light dark;
+        }
+        
+        @media (prefers-color-scheme: light) {
+          body {
+            background-color: white !important;
+            color: black !important;
+          }
+        }
+        
+        @media (prefers-color-scheme: dark) {
+          body {
+            background-color: black !important;
+            color: white !important;
+          }
+        }
+      `}</style>
       {/* NO BACKDROP - This is a standalone page, not a modal */}
       <div
         className={`fullscreen-chat-container ${isMobile ? 'w-screen' : 'w-auto'} flex flex-col font-sans`}
@@ -286,7 +308,10 @@ const NutritionFactsPage: React.FC = () => {
           WebkitOverflowScrolling: 'touch',
           overflow: 'hidden',
           zIndex: 50, // Reduced from 10000
-          forcedColorAdjust: 'auto'
+          forcedColorAdjust: 'auto',
+          colorScheme: 'light dark',
+          backgroundColor: 'Canvas',
+          color: 'CanvasText'
         }}
         onLoad={() => {
           debug.logEvent('NutritionFacts container loaded', {
