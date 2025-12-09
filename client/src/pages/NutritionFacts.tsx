@@ -273,20 +273,9 @@ const NutritionFactsPage: React.FC = () => {
 
       {/* NO BACKDROP - This is a standalone page, not a modal */}
       <div
-        className={`fullscreen-chat-container ${isMobile ? 'w-screen' : 'w-auto'} flex flex-col font-sans`}
+        className={`nutrition-facts-page fixed inset-0 ${isMobile ? 'w-screen h-screen' : 'w-auto h-auto'} bg-white flex flex-col font-sans overflow-hidden`}
         style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          height: '100dvh', // Use dynamic viewport height for iOS
-          minHeight: '-webkit-fill-available', // iOS Safari fallback
-          backgroundColor: '#f0f7ff',
           paddingTop: PlatformDetectionService.isNative() ? '48px' : '0px',
-          WebkitOverflowScrolling: 'touch',
-          overflow: 'hidden',
-          zIndex: 50 // Reduced from 10000
         }}
         onLoad={() => {
           debug.logEvent('NutritionFacts container loaded', {
@@ -486,13 +475,9 @@ const NutritionFactsPage: React.FC = () => {
         }}>
           {viewMode === "overview" ? (
             <div 
-              className="flex-1" 
+              className="flex-1 bg-gray-50 overflow-y-auto overflow-x-hidden h-full" 
               style={{ 
-                backgroundColor: '#f0f7ff',
-                WebkitOverflowScrolling: 'touch',
-                overflowY: 'auto',
-                overflowX: 'hidden',
-                height: '100%'
+                WebkitOverflowScrolling: 'touch'
               }}
               ref={(el) => {
                 if (el) {
