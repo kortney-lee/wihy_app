@@ -150,7 +150,7 @@ const Header: React.FC<HeaderProps> = ({
   useEffect(() => {
     if (sessionId && sessionId !== chatService.getCurrentSessionId()) {
       console.log('[Header] Setting session ID from props:', sessionId);
-      chatService.setCurrentSessionId(sessionId);
+      chatService.setSessionId(sessionId);
     }
   }, [sessionId]);
 
