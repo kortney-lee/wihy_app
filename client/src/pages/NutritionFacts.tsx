@@ -269,7 +269,19 @@ const NutritionFactsPage: React.FC = () => {
     viewMode,
     isMobile,
     showHistory,
-    scanHistoryCount: scanHistory.length
+    scanHistoryCount: scanHistory.length,
+    windowSize: { width: window.innerWidth, height: window.innerHeight },
+    hasProductData: !!nutritionfacts,
+    productKeys: Object.keys(nutritionfacts || {})
+  });
+  
+  // Additional diagnostic - log what's about to render
+  console.log('[NutritionFacts] About to render with:', {
+    viewMode,
+    isMobile,
+    nutritionfacts: nutritionfacts?.name,
+    platform: PlatformDetectionService.getPlatform(),
+    isNative: PlatformDetectionService.isNative()
   });
 
   try {
@@ -285,6 +297,13 @@ const NutritionFactsPage: React.FC = () => {
           backgroundColor: '#f0f7ff',
           paddingTop: PlatformDetectionService.isNative() ? '48px' : '0px',
           WebkitOverflowScrolling: 'touch'
+        }}
+        onLoad={() => {
+          debug.logEvent('NutritionFacts container loaded', {
+            containerVisible: true,
+            viewMode,
+            isMobile
+          });
         }}
       >
         {/* History Sidebar - show when toggled */}
@@ -478,7 +497,23 @@ const NutritionFactsPage: React.FC = () => {
                 backgroundColor: '#f0f7ff',
                 WebkitOverflowScrolling: 'touch'
               }}
+              ref={(el) => {
+                if (el) {
+                  debug.logEvent('Overview container mounted', {
+                    scrollHeight: el.scrollHeight,
+                    clientHeight: el.clientHeight,
+                    hasProduct: !!nutritionfacts,
+                    productName: nutritionfacts?.name
+                  });
+                  console.log('[NutritionFacts] Overview container ref:', {
+                    scrollHeight: el.scrollHeight,
+                    clientHeight: el.clientHeight,
+                    children: el.children.length
+                  });
+                }
+              }}
             >
+              {console.log('[NutritionFacts] About to render ProductScanView') as any}
               <ProductScanView
                 product={nutritionfacts}
                 onAskMore={() => setViewMode("chat")}
