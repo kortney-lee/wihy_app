@@ -91,7 +91,7 @@ const ProductScanView: React.FC<ProductScanViewProps> = ({
     <>
 
       <div 
-        className="flex flex-col product-scan-view min-h-screen p-4"
+        className="flex flex-col product-scan-view min-h-screen p-4 bg-white"
         style={{
           opacity: 1,
           visibility: 'visible',
