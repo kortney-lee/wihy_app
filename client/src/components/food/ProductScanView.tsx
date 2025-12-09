@@ -36,17 +36,26 @@ const ProductScanView: React.FC<ProductScanViewProps> = ({
       debug.logEvent('ProductScanView CSS applied', {
         display: window.getComputedStyle(container).display,
         visibility: window.getComputedStyle(container).visibility,
-        opacity: window.getComputedStyle(container).opacity
+        opacity: window.getComputedStyle(container).opacity,
+        backgroundColor: window.getComputedStyle(container).backgroundColor
       });
       
-      // Check computed styles after a brief delay
+      // Check for colored elements
       setTimeout(() => {
+        const healthBadge = container.querySelector('[class*="bg-"]');
+        const heading = container.querySelector('h2');
         const computed = window.getComputedStyle(container);
+        
         debug.logEvent('ProductScanView computed styles', {
-          backgroundColor: computed.backgroundColor,
-          color: computed.color,
+          containerBg: computed.backgroundColor,
+          containerColor: computed.color,
           width: computed.width,
-          height: computed.height
+          height: computed.height,
+          healthBadgeFound: !!healthBadge,
+          healthBadgeBg: healthBadge ? window.getComputedStyle(healthBadge).backgroundColor : 'not found',
+          healthBadgeColor: healthBadge ? window.getComputedStyle(healthBadge).color : 'not found',
+          headingColor: heading ? window.getComputedStyle(heading).color : 'not found',
+          headingWeight: heading ? window.getComputedStyle(heading).fontWeight : 'not found'
         });
       }, 100);
     }
@@ -81,46 +90,14 @@ const ProductScanView: React.FC<ProductScanViewProps> = ({
   return (
     <>
       <style>{`
-        /* Force visibility on iOS Safari - but preserve colors */
+        /* Let iOS handle contrast - don't force colors */
         .product-scan-view {
-          opacity: 1 !important;
-          visibility: visible !important;
-        }
-        
-        /* Only force text color on text elements, not badges/buttons */
-        .product-scan-view p,
-        .product-scan-view span:not([class*="bg-"]):not([class*="border-"]),
-        .product-scan-view li {
-          color: #1f2937 !important;
-          -webkit-text-fill-color: #1f2937 !important;
-        }
-        
-        .product-scan-view h1,
-        .product-scan-view h2,
-        .product-scan-view h3,
-        .product-scan-view h4,
-        .product-scan-view h5,
-        .product-scan-view h6 {
-          color: #111827 !important;
-          -webkit-text-fill-color: #111827 !important;
-          background: none !important;
-          -webkit-background-clip: unset !important;
-          background-clip: unset !important;
-        }
-        
-        /* Ensure colored backgrounds work properly */
-        .product-scan-view [class*="bg-"] {
-          opacity: 1 !important;
-          visibility: visible !important;
+          forced-color-adjust: auto;
         }
       `}</style>
       <div 
-        className="flex flex-col product-scan-view"
+        className="flex flex-col product-scan-view bg-white min-h-screen p-4"
         style={{
-          backgroundColor: '#ffffff',
-          color: '#1f2937',
-          minHeight: '100vh',
-          padding: '16px',
           opacity: 1,
           visibility: 'visible',
           display: 'flex'
