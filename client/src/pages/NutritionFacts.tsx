@@ -177,7 +177,7 @@ const NutritionFactsPage: React.FC = () => {
       debug.logNavigation('Redirecting to home (no data)', { redirectPath, isDebugMode });
       navigate(redirectPath, { replace: true });
     }
-  }, [location.state, navigate, debug]);
+  }, [location.state, navigate]);
 
   // Check for mobile screen size
   useEffect(() => {
