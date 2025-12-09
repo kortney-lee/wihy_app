@@ -89,55 +89,13 @@ const ProductScanView: React.FC<ProductScanViewProps> = ({
 
   return (
     <>
-      <style>{`
-        /* Let iOS handle colors and contrast */
-        .product-scan-view {
-          forced-color-adjust: auto;
-          color-scheme: light dark;
-          background-color: Canvas;
-          color: CanvasText;
-          -webkit-user-select: none;
-          user-select: none;
-        }
-        
-        /* Support system color preferences */
-        @media (prefers-color-scheme: light) {
-          .product-scan-view {
-            background-color: white;
-            color: black;
-          }
-        }
-        
-        @media (prefers-color-scheme: dark) {
-          .product-scan-view {
-            background-color: black;
-            color: white;
-          }
-        }
-        
-        /* Support iOS accessibility features */
-        @media (prefers-contrast: high) {
-          .product-scan-view {
-            filter: contrast(1.2);
-          }
-        }
-        
-        /* Prevent text selection highlighting issues */
-        .product-scan-view * {
-          -webkit-touch-callout: none;
-          -webkit-user-select: none;
-          user-select: none;
-        }
-      `}</style>
+
       <div 
         className="flex flex-col product-scan-view min-h-screen p-4"
         style={{
           opacity: 1,
           visibility: 'visible',
-          display: 'flex',
-          forcedColorAdjust: 'auto',
-          backgroundColor: 'inherit',
-          color: 'inherit'
+          display: 'flex'
         }}
       >
         {/* Header Section */}
@@ -146,16 +104,16 @@ const ProductScanView: React.FC<ProductScanViewProps> = ({
           <img
             src={imageUrl}
             alt={name || "Product"}
-            className="w-24 h-24 object-contain rounded-lg border"
+            className="w-24 h-24 object-contain rounded-lg border border-gray-200 bg-white"
           />
         )}
 
         <div className="flex-1">
-          <h2 className="text-xl font-semibold leading-tight">
+          <h2 className="text-xl font-semibold text-gray-900 leading-tight">
             {name || "Food item"}
           </h2>
           {brand && (
-            <p className="text-sm opacity-75 mt-1">{brand}</p>
+            <p className="text-sm text-gray-600 mt-1">{brand}</p>
           )}
 
           {/* Health Score */}
@@ -193,41 +151,41 @@ const ProductScanView: React.FC<ProductScanViewProps> = ({
           <h3 className="text-base font-semibold text-gray-900 mb-3">
             Nutrition Facts
             {servingSize && (
-              <span className="ml-2 text-sm font-normal opacity-75">
+              <span className="ml-2 text-sm font-normal text-gray-500">
                 per {servingSize}
               </span>
             )}
           </h3>
-          <div className="rounded-xl border p-4">
+          <div className="bg-white rounded-xl border border-gray-200 p-4">
             <div className="grid grid-cols-2 gap-3">
               {calories && (
                 <div className="flex justify-between items-center">
-                  <span className="text-sm opacity-75">Calories</span>
-                  <span className="text-sm font-semibold">
+                  <span className="text-sm text-gray-600">Calories</span>
+                  <span className="text-sm font-semibold text-gray-900">
                     {calories}
                   </span>
                 </div>
               )}
               {macros?.protein !== undefined && (
                 <div className="flex justify-between items-center">
-                  <span className="text-sm opacity-75">Protein</span>
-                  <span className="text-sm font-semibold">
+                  <span className="text-sm text-gray-600">Protein</span>
+                  <span className="text-sm font-semibold text-gray-900">
                     {macros.protein}g
                   </span>
                 </div>
               )}
               {macros?.carbs !== undefined && (
                 <div className="flex justify-between items-center">
-                  <span className="text-sm opacity-75">Carbs</span>
-                  <span className="text-sm font-semibold">
+                  <span className="text-sm text-gray-600">Carbs</span>
+                  <span className="text-sm font-semibold text-gray-900">
                     {macros.carbs}g
                   </span>
                 </div>
               )}
               {macros?.fat !== undefined && (
                 <div className="flex justify-between items-center">
-                  <span className="text-sm opacity-75">Fat</span>
-                  <span className="text-sm font-semibold">
+                  <span className="text-sm text-gray-600">Fat</span>
+                  <span className="text-sm font-semibold text-gray-900">
                     {macros.fat}g
                   </span>
                 </div>
