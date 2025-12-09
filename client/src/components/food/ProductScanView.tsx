@@ -81,14 +81,20 @@ const ProductScanView: React.FC<ProductScanViewProps> = ({
   return (
     <>
       <style>{`
-        /* Force visibility on iOS Safari */
-        .product-scan-view,
-        .product-scan-view * {
+        /* Force visibility on iOS Safari - but preserve colors */
+        .product-scan-view {
           opacity: 1 !important;
           visibility: visible !important;
+        }
+        
+        /* Only force text color on text elements, not badges/buttons */
+        .product-scan-view p,
+        .product-scan-view span:not([class*="bg-"]):not([class*="border-"]),
+        .product-scan-view li {
           color: #1f2937 !important;
           -webkit-text-fill-color: #1f2937 !important;
         }
+        
         .product-scan-view h1,
         .product-scan-view h2,
         .product-scan-view h3,
@@ -100,6 +106,12 @@ const ProductScanView: React.FC<ProductScanViewProps> = ({
           background: none !important;
           -webkit-background-clip: unset !important;
           background-clip: unset !important;
+        }
+        
+        /* Ensure colored backgrounds work properly */
+        .product-scan-view [class*="bg-"] {
+          opacity: 1 !important;
+          visibility: visible !important;
         }
       `}</style>
       <div 
