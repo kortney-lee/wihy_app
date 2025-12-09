@@ -38,6 +38,8 @@ interface HeaderProps {
   // Progress sidebar props
   showProgressMenu?: boolean;
   onProgressMenuClick?: () => void;
+  // Session continuity prop
+  sessionId?: string;
 }
 
 const Header: React.FC<HeaderProps> = ({
@@ -48,6 +50,7 @@ const Header: React.FC<HeaderProps> = ({
   onLogoClick,
   isListening = false,
   showSearchInput = true,
+  sessionId,
   variant = 'landing',
   className = '',
   showLogin = true,
@@ -141,6 +144,17 @@ const Header: React.FC<HeaderProps> = ({
   }, [variant]); // Re-run when variant changes
 
   // ================================
+  // SESSION MANAGEMENT
+  // ================================
+  // Set session ID in chat service when provided via props for continuity
+  useEffect(() => {
+    if (sessionId && sessionId !== chatService.getCurrentSessionId()) {
+      console.log('[Header] Setting session ID from props:', sessionId);
+      chatService.setCurrentSessionId(sessionId);
+    }
+  }, [sessionId]);
+
+  // ================================
   // UTILITY FUNCTIONS
   // ================================
 
@@ -190,11 +204,14 @@ const Header: React.FC<HeaderProps> = ({
     // Check if we're explicitly told we're in chat mode
     if (isInChatMode) return true;
     
+    // Check if we have a sessionId prop (from navigation state)
+    if (sessionId) return true;
+    
     // Check if we're on a results page and have an active chat session
     if (location.pathname === '/results') {
-      const sessionId = chatService.getCurrentSessionId();
+      const currentSessionId = chatService.getCurrentSessionId();
       const conversationId = chatService.getConversationId();
-      return Boolean(sessionId || conversationId);
+      return Boolean(currentSessionId || conversationId);
     }
     
     return false;
