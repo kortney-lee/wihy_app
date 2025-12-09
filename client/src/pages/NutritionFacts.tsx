@@ -290,13 +290,22 @@ const NutritionFactsPage: React.FC = () => {
         {/* NO BACKDROP - This is a standalone page, not a modal */}
       
       <div 
-        className={`fullscreen-chat-container fixed inset-0 ${
-          isMobile ? 'w-screen h-screen' : 'w-auto h-auto'
-        } z-[10000] flex flex-col font-sans overflow-hidden`}
+        className={`fullscreen-chat-container ${
+          isMobile ? 'w-screen' : 'w-auto'
+        } flex flex-col font-sans`}
         style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          height: '100dvh', // Use dynamic viewport height for iOS
+          minHeight: '-webkit-fill-available', // iOS Safari fallback
           backgroundColor: '#f0f7ff',
           paddingTop: PlatformDetectionService.isNative() ? '48px' : '0px',
-          WebkitOverflowScrolling: 'touch'
+          WebkitOverflowScrolling: 'touch',
+          overflow: 'hidden',
+          zIndex: 50 // Reduced from 10000
         }}
         onLoad={() => {
           debug.logEvent('NutritionFacts container loaded', {
@@ -489,13 +498,20 @@ const NutritionFactsPage: React.FC = () => {
         </div>
 
         {/* Main Body - Single scroll container pattern (matches FullScreenChat) */}
-        <div className="flex-1 flex flex-col overflow-hidden">
+        <div className="flex-1 flex flex-col" style={{ 
+          overflow: 'hidden',
+          height: '100%',
+          minHeight: 0 // Critical for flex children scrolling
+        }}>
           {viewMode === "overview" ? (
             <div 
-              className="flex-1 overflow-y-auto" 
+              className="flex-1" 
               style={{ 
                 backgroundColor: '#f0f7ff',
-                WebkitOverflowScrolling: 'touch'
+                WebkitOverflowScrolling: 'touch',
+                overflowY: 'auto',
+                overflowX: 'hidden',
+                height: '100%'
               }}
               ref={(el) => {
                 if (el) {
