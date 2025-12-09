@@ -255,10 +255,10 @@ const NutritionFactsPage: React.FC = () => {
     debug.logRender('Rendering loading state (no nutrition facts data yet)', {});
     
     return (
-      <div className="flex items-center justify-center min-h-screen bg-white">
+      <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-blue-600 border-r-transparent mb-4"></div>
-          <p className="text-gray-500 text-sm">Loading nutrition facts…</p>
+          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-r-transparent mb-4"></div>
+          <p className="text-sm opacity-75">Loading nutrition facts…</p>
         </div>
       </div>
     );
@@ -285,7 +285,8 @@ const NutritionFactsPage: React.FC = () => {
           paddingTop: PlatformDetectionService.isNative() ? '48px' : '0px',
           WebkitOverflowScrolling: 'touch',
           overflow: 'hidden',
-          zIndex: 50 // Reduced from 10000
+          zIndex: 50, // Reduced from 10000
+          forcedColorAdjust: 'auto'
         }}
         onLoad={() => {
           debug.logEvent('NutritionFacts container loaded', {
@@ -303,13 +304,13 @@ const NutritionFactsPage: React.FC = () => {
             isMobile ? 'z-[100]' : 'z-[105]'
           }`}>
             {/* Sidebar Header */}
-            <div className="p-5 px-4 border-b border-gray-200 flex items-center justify-between">
-              <h2 className="m-0 text-base font-semibold text-gray-800">
+            <div className="p-5 px-4 border-b flex items-center justify-between">
+              <h2 className="m-0 text-base font-semibold">
                 Recent Scans
               </h2>
               <button
                 onClick={() => setShowHistory(false)}
-                className="bg-transparent border-none cursor-pointer p-2 text-base text-gray-500 hover:text-gray-700"
+                className="bg-transparent border-none cursor-pointer p-2 text-base opacity-75 hover:opacity-100"
                 title="Close History"
               >
                 ✕
@@ -325,8 +326,8 @@ const NutritionFactsPage: React.FC = () => {
                     key={index}
                     className={`p-3 mb-2 rounded-lg border cursor-pointer transition-colors ${
                       scan.name === nutritionfacts.name
-                        ? 'bg-white border-gray-200'
-                        : 'bg-transparent border-transparent hover:bg-gray-50'
+                        ? 'border-opacity-50'
+                        : 'border-transparent hover:opacity-75'
                     }`}
                     onClick={() => {
                       if (scan.name !== nutritionfacts.name) {
@@ -343,10 +344,10 @@ const NutritionFactsPage: React.FC = () => {
                       }
                     }}
                   >
-                    <div className="text-sm font-medium text-gray-800 mb-1 overflow-hidden text-ellipsis whitespace-nowrap">
+                    <div className="text-sm font-medium mb-1 overflow-hidden text-ellipsis whitespace-nowrap">
                       {scan.name || 'Unnamed Item'}
                     </div>
-                    <div className="text-xs text-gray-500">
+                    <div className="text-xs opacity-75">
                       {scan.name === nutritionfacts.name ? 'Active now' : 'Previous scan'}
                     </div>
                   </div>
@@ -354,7 +355,7 @@ const NutritionFactsPage: React.FC = () => {
 
                 {/* Empty state */}
                 {scanHistory.length === 0 && (
-                  <div className="text-center p-4 text-sm text-gray-500">
+                  <div className="text-center p-4 text-sm opacity-75">
                     Previous scans will appear here
                   </div>
                 )}
@@ -364,10 +365,10 @@ const NutritionFactsPage: React.FC = () => {
         )}
 
         {/* Header */}
-        <div className="flex-shrink-0 flex items-center justify-between px-4 py-3 bg-white border-b border-gray-200 text-gray-900">
+        <div className="flex-shrink-0 flex items-center justify-between px-4 py-3 border-b">
           
           {/* Top Navigation Bar with Toggle History and View Charts */}
-          <div className="flex items-center justify-between w-full px-3 py-2 bg-white min-h-[40px]">
+          <div className="flex items-center justify-between w-full px-3 py-2 min-h-[40px]">
             {/* Left side - Toggle History Button */}
             <button
               onClick={() => setShowHistory(!showHistory)}
@@ -424,13 +425,13 @@ const NutritionFactsPage: React.FC = () => {
         {/* Header with title and view mode toggle */}
         <div className={`flex items-center justify-center ${
           isMobile ? 'px-4 py-2' : 'px-6 py-3'
-        } border-b border-gray-200 bg-white flex-shrink-0 text-gray-900`}>
+        } border-b flex-shrink-0`}>
           
           {/* Title & View tabs - centered */}
           <div className="flex items-center gap-3">
             <span className={`${
               isMobile ? 'text-xs' : 'text-sm'
-            } font-semibold text-gray-900 hidden sm:inline max-w-[200px] truncate`}>
+            } font-semibold hidden sm:inline max-w-[200px] truncate`}>
               {nutritionfacts.name || "Nutrition Facts"}
             </span>
 
@@ -440,8 +441,8 @@ const NutritionFactsPage: React.FC = () => {
                 onClick={() => setViewMode("overview")}
                 className={`px-3 py-1.5 rounded-full transition-all ${
                   viewMode === "overview"
-                    ? "bg-white text-gray-900 shadow-sm font-semibold"
-                    : "text-gray-600 hover:text-gray-900"
+                    ? "shadow-sm font-semibold"
+                    : "hover:opacity-80"
                 }`}
               >
                 Overview
@@ -451,8 +452,8 @@ const NutritionFactsPage: React.FC = () => {
                 onClick={() => setViewMode("chat")}
                 className={`px-3 py-1.5 rounded-full transition-all ${
                   viewMode === "chat"
-                    ? "bg-white text-gray-900 shadow-sm font-semibold"
-                    : "text-gray-600 hover:text-gray-900"
+                    ? "shadow-sm font-semibold"
+                    : "hover:opacity-80"
                 }`}
               >
                 Ask WiHY
@@ -461,7 +462,7 @@ const NutritionFactsPage: React.FC = () => {
               {/* Camera button - directly opens camera function */}
               <button
                 onClick={handleNewScan}
-                className="px-2 py-1.5 rounded-full transition-all text-gray-600 hover:text-gray-900 hover:bg-white"
+                className="px-2 py-1.5 rounded-full transition-all hover:opacity-80"
                 title="New Scan"
                 aria-label="Start new scan"
               >
@@ -487,11 +488,11 @@ const NutritionFactsPage: React.FC = () => {
             <div 
               className="flex-1" 
               style={{ 
-                backgroundColor: '#f0f7ff',
                 WebkitOverflowScrolling: 'touch',
                 overflowY: 'auto',
                 overflowX: 'hidden',
-                height: '100%'
+                height: '100%',
+                forcedColorAdjust: 'auto'
               }}
               ref={(el) => {
                 if (el) {
