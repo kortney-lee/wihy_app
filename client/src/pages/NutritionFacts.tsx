@@ -273,8 +273,9 @@ const NutritionFactsPage: React.FC = () => {
 
       {/* NO BACKDROP - This is a standalone page, not a modal */}
       <div
-        className={`nutrition-facts-page fixed inset-0 ${isMobile ? 'w-screen h-screen' : 'w-auto h-auto'} bg-white flex flex-col font-sans overflow-hidden`}
+        className={`nutrition-facts-page fixed inset-0 ${isMobile ? 'w-screen h-screen' : 'w-auto h-auto'} flex flex-col font-sans overflow-hidden`}
         style={{
+          backgroundColor: '#f0f7ff',
           paddingTop: PlatformDetectionService.isNative() ? '48px' : '0px',
         }}
         onLoad={() => {
@@ -475,8 +476,9 @@ const NutritionFactsPage: React.FC = () => {
         }}>
           {viewMode === "overview" ? (
             <div 
-              className="flex-1 bg-gray-50 overflow-y-auto overflow-x-hidden h-full" 
+              className="flex-1 overflow-y-auto overflow-x-hidden h-full" 
               style={{ 
+                backgroundColor: '#f0f7ff',
                 WebkitOverflowScrolling: 'touch'
               }}
               ref={(el) => {
