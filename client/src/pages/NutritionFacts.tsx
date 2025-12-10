@@ -4,7 +4,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import FullScreenChat from "../components/ui/FullScreenChat";
-import ImageUploadModal from "../components/ui/ImageUploadModal";
 import { NutritionFactsData } from "../types/nutritionFacts";
 import { PlatformDetectionService } from "../services/shared/platformDetectionService";
 import { useDebugLog } from "../components/debug/DebugOverlay";
@@ -44,9 +43,18 @@ const NutritionFactsPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const debug = useDebugLog('NutritionFacts');
+  
+  // Prevent excessive logging during React StrictMode double mounting
+  const componentInitializedRef = useRef<boolean>(false);
 
-  // Log component mount
+  // Log component mount (prevent double logging from React StrictMode)
   React.useEffect(() => {
+    if (componentInitializedRef.current) {
+      console.log('💬 NUTRITION FACTS: Skipping duplicate initialization (StrictMode double mount)');
+      return;
+    }
+    
+    componentInitializedRef.current = true;
     debug.logRender('NutritionFacts component mounted', {
       platform: PlatformDetectionService.getPlatform(),
       isNative: PlatformDetectionService.isNative(),
@@ -65,117 +73,33 @@ const NutritionFactsPage: React.FC = () => {
   const [isMobile, setIsMobile] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
   const [hasChartData, setHasChartData] = useState(true); // Always true for nutrition facts
-  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
-  const [scanHistory, setScanHistory] = useState<NutritionFactsData[]>([]);
-  const [autoOpenCamera, setAutoOpenCamera] = useState(false);
   
   // Log view mode changes
   React.useEffect(() => {
-    debug.logState('View mode changed', { viewMode, isMobile });
-  }, [viewMode]);
+    // debug.logState('View mode changed', { viewMode, isMobile });
+  }, [viewMode, isMobile]);
   
-  // Log history visibility changes
-  React.useEffect(() => {
-    if (showHistory) {
-      debug.logEvent('History sidebar opened', { itemCount: scanHistory.length });
-    }
-  }, [showHistory]);
+  // Removed history logging to prevent re-render loops
 
   // Resolve state once in effect, handle missing data gracefully
   useEffect(() => {
-    debug.logState("Location state received", {
-      hasState: !!location.state,
-      stateKeys: location.state ? Object.keys(location.state) : [],
-      pathname: location.pathname,
-      search: location.search
-    });
-    
     const state = (location.state as LocationState) || {};
-    debug.logState("Parsed location state", {
-      hasNutritionFacts: !!state.nutritionfacts,
-      hasApiResponse: !!state.apiResponse,
-      hasInitialQuery: !!state.initialQuery,
-      hasSessionId: !!state.sessionId,
-      fromChat: state.fromChat
-    });
 
     // Accept both nutritionfacts and apiResponse keys for flexibility
     let dataFromState = state.nutritionfacts ?? (state.apiResponse as NutritionFactsData | undefined);
-    debug.logState("Data extracted from state", {
-      hasData: !!dataFromState,
-      dataSource: dataFromState ? 'location.state' : 'none',
-      productName: dataFromState?.name
-    });
 
-    // iOS Safari fallback: Check sessionStorage if no data in location.state
-    if (!dataFromState) {
-      console.log("[NutritionFacts] useEffect - No data in location.state, checking sessionStorage");
-      debug.logState("No data in location.state, checking sessionStorage", {});
-      
-      try {
-        const stored = sessionStorage.getItem('nutritionfacts_data');
-        if (stored) {
-          const parsed = JSON.parse(stored);
-          console.log("[NutritionFacts] useEffect - Found data in sessionStorage:", parsed);
-          debug.logState("Found data in sessionStorage", { 
-            hasData: !!parsed.nutritionfacts,
-            timestamp: parsed.timestamp,
-            age: Date.now() - parsed.timestamp
-          });
-          
-          // Use stored data if it's recent (within 30 seconds)
-          if (Date.now() - parsed.timestamp < 30000) {
-            dataFromState = parsed.nutritionfacts;
-            setSessionId(parsed.sessionId);
-            console.log("[NutritionFacts] useEffect - Using sessionStorage data");
-            debug.logState("Using sessionStorage data (fresh)", { productName: dataFromState?.name });
-          } else {
-            console.log("[NutritionFacts] useEffect - sessionStorage data too old, clearing");
-            debug.logState("sessionStorage data too old, clearing", { age: Date.now() - parsed.timestamp });
-            sessionStorage.removeItem('nutritionfacts_data');
-          }
-        } else {
-          debug.logState("No data in sessionStorage either", {});
-        }
-      } catch (e) {
-        console.warn("[NutritionFacts] useEffect - Failed to read sessionStorage:", e);
-        debug.logError("Failed to read sessionStorage", e instanceof Error ? e : new Error(String(e)));
-      }
-    }
+    // No sessionStorage fallback - direct navigation only
 
     if (dataFromState) {
       console.log("[NutritionFacts] useEffect - setting data, name:", dataFromState.name);
-      debug.logState("Setting nutrition facts data", {
-        productName: dataFromState.name,
-        hasCalories: !!dataFromState.calories,
-        hasMacros: !!dataFromState.macros,
-        servingSize: dataFromState.servingSize
-      });
       
       setNutritionfacts(dataFromState);
       setInitialQuery(state.initialQuery);
       if (state.sessionId) setSessionId(state.sessionId);
-      
-      // Clear sessionStorage after successful load
-      try {
-        sessionStorage.removeItem('nutritionfacts_data');
-        console.log("[NutritionFacts] useEffect - Cleared sessionStorage backup");
-      } catch (e) {
-        console.warn("[NutritionFacts] useEffect - Failed to clear sessionStorage:", e);
-      }
+
     } else {
-      // No data - Safari probably opened /nutritionfacts directly or lost state
-      // Redirect to home instead of rendering nothing
-      debug.logError("NO DATA - redirecting to home", new Error('No nutrition facts data found'));
-      console.log("[NutritionFacts] useEffect - NO DATA, redirecting to home");
-      
-      // Preserve debug parameter if present
-      const searchParams = new URLSearchParams(window.location.search);
-      const isDebugMode = searchParams.get('debug') === 'true';
-      const redirectPath = isDebugMode ? '/?debug=true' : '/';
-      
-      debug.logNavigation('Redirecting to home (no data)', { redirectPath, isDebugMode });
-      navigate(redirectPath, { replace: true });
+      // No data - show empty state instead of redirecting
+      setNutritionfacts(null);
     }
   }, [location.state, navigate]);
 
@@ -186,13 +110,13 @@ const NutritionFactsPage: React.FC = () => {
       const nowMobile = window.innerWidth <= 768;
       setIsMobile(nowMobile);
       
-      if (wasMobile !== nowMobile) {
-        debug.logEvent('Mobile view changed', { 
-          isMobile: nowMobile, 
-          width: window.innerWidth,
-          height: window.innerHeight
-        });
-      }
+      // if (wasMobile !== nowMobile) {
+      //   debug.logEvent('Mobile view changed', { 
+      //     isMobile: nowMobile, 
+      //     width: window.innerWidth,
+      //     height: window.innerHeight
+      //   });
+      // }
     };
     
     checkMobile();
@@ -200,73 +124,41 @@ const NutritionFactsPage: React.FC = () => {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Store current scan in history when component mounts
-  useEffect(() => {
-    if (nutritionfacts) {
-      setScanHistory(prev => {
-        // Add current scan to history if not already there
-        const exists = prev.some(item => item.name === nutritionfacts.name);
-        if (!exists) {
-          return [nutritionfacts, ...prev];
-        }
-        return prev;
-      });
-    }
-  }, [nutritionfacts]);
+  // No local history tracking - keep it simple
 
-  // Handle new scan - store current in history and launch scanner
+  // Handle new scan - navigate back to search page
   const handleNewScan = () => {
     debug.logEvent('New scan initiated', { currentProduct: nutritionfacts?.name });
     
-    // Current scan is already in history from useEffect
-    // Open the scanner modal with camera auto-start
-    setAutoOpenCamera(true);
-    setIsUploadModalOpen(true);
-  };
-
-  // Handle analysis complete from scanner
-  const handleAnalysisComplete = (result: any) => {
-    debug.logScan('Analysis complete in NutritionFacts', { 
-      success: result?.success,
-      hasData: !!result,
-      productName: result?.name
+    // Navigate back to search page for new scan
+    navigate('/', {
+      state: { 
+        autoOpenCamera: true // Signal search page to auto-open camera
+      }
     });
-    
-    setIsUploadModalOpen(false);
-    setAutoOpenCamera(false); // Reset auto-open flag
-    
-    // Navigate to new nutrition facts page with the new scan
-    if (result && result.success) {
-      debug.logNavigation('Navigating to new nutrition facts', { productName: result.name });
-      
-      navigate('/nutritionfacts', {
-        state: {
-          initialQuery: result.userQuery || 'New scan',
-          nutritionfacts: result
-        },
-        replace: false // Don't replace history, add new entry
-      });
-    }
   };
 
-  // Show loading state instead of returning null - AFTER all hooks
+  // Show simple message if no data - AFTER all hooks
   if (!nutritionfacts) {
-    debug.logRender('Rendering loading state (no nutrition facts data yet)', {});
-    
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-r-transparent mb-4"></div>
-          <p className="text-sm opacity-75">Loading nutrition facts…</p>
+      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+        <div className="text-center p-8">
+          <p className="text-gray-600 mb-4">No nutrition facts to display</p>
+          <button
+            onClick={() => navigate('/')}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          >
+            Go to Search
+          </button>
         </div>
       </div>
     );
   }
   
-  debug.logRender('Rendering NutritionFacts page', {
-    productName: nutritionfacts.name,
-    // ...existing code...
-  });
+  // debug.logRender('Rendering NutritionFacts page', {
+  //   productName: nutritionfacts.name,
+  //   // ...existing code...
+  // });
 
   return (
     <>
@@ -279,76 +171,34 @@ const NutritionFactsPage: React.FC = () => {
           paddingTop: PlatformDetectionService.isNative() ? '48px' : '0px',
         }}
         onLoad={() => {
-          debug.logEvent('NutritionFacts container loaded', {
-            containerVisible: true,
-            viewMode,
-            isMobile
-          });
+          // debug.logEvent('NutritionFacts container loaded', {
+          //   containerVisible: true,
+          //   viewMode,
+          //   isMobile
+          // });
         }}
       >
-        {/* History Sidebar - show when toggled */}
+        {/* Mock History Sidebar - toggles on/off but shows no actual data */}
         {showHistory && (
-          <div className={`${
-            isMobile ? 'w-full' : 'w-70'
-          } h-full bg-slate-50 border-r border-gray-200 flex flex-col overflow-hidden absolute top-0 left-0 ${
-            isMobile ? 'z-[100]' : 'z-[105]'
-          }`}>
+          <div className="absolute left-0 top-0 bottom-0 w-80 bg-white border-r border-gray-200 shadow-lg z-50 flex flex-col">
             {/* Sidebar Header */}
-            <div className="p-5 px-4 border-b flex items-center justify-between">
-              <h2 className="m-0 text-base font-semibold">
-                Recent Scans
-              </h2>
+            <div className="flex items-center justify-between p-4 border-b border-gray-200">
+              <h3 className="text-lg font-semibold text-gray-800">Scan History</h3>
               <button
                 onClick={() => setShowHistory(false)}
-                className="bg-transparent border-none cursor-pointer p-2 text-base opacity-75 hover:opacity-100"
+                className="text-gray-500 hover:text-gray-700 text-xl"
                 title="Close History"
               >
                 ✕
               </button>
             </div>
-
-            {/* History List */}
-            <div className="flex-1 overflow-hidden">
-              <div className="p-2 h-full overflow-y-auto overflow-x-hidden">
-                {/* History Items */}
-                {scanHistory.map((scan, index) => (
-                  <div 
-                    key={index}
-                    className={`p-3 mb-2 rounded-lg border cursor-pointer transition-colors ${
-                      scan.name === nutritionfacts.name
-                        ? 'border-opacity-50'
-                        : 'border-transparent hover:opacity-75'
-                    }`}
-                    onClick={() => {
-                      if (scan.name !== nutritionfacts.name) {
-                        // Navigate to this historical scan
-                        navigate('/nutritionfacts', {
-                          state: {
-                            initialQuery: scan.name,
-                            nutritionfacts: scan
-                          }
-                        });
-                      }
-                      if (isMobile) {
-                        setShowHistory(false);
-                      }
-                    }}
-                  >
-                    <div className="text-sm font-medium mb-1 overflow-hidden text-ellipsis whitespace-nowrap">
-                      {scan.name || 'Unnamed Item'}
-                    </div>
-                    <div className="text-xs opacity-75">
-                      {scan.name === nutritionfacts.name ? 'Active now' : 'Previous scan'}
-                    </div>
-                  </div>
-                ))}
-
-                {/* Empty state */}
-                {scanHistory.length === 0 && (
-                  <div className="text-center p-4 text-sm opacity-75">
-                    Previous scans will appear here
-                  </div>
-                )}
+            
+            {/* Sidebar Content - Mock/Empty State */}
+            <div className="flex-1 flex items-center justify-center p-8">
+              <div className="text-center text-gray-500">
+                <div className="text-4xl mb-4">📱</div>
+                <p className="text-sm">No scan history available</p>
+                <p className="text-xs mt-1 opacity-75">Previous scans will appear here</p>
               </div>
             </div>
           </div>
@@ -359,7 +209,7 @@ const NutritionFactsPage: React.FC = () => {
           
           {/* Top Navigation Bar with Toggle History and View Charts */}
           <div className="flex items-center justify-between w-full px-3 py-2 bg-white min-h-[40px]">
-            {/* Left side - Toggle History Button */}
+            {/* Left side - Toggle History Button (mock functionality) */}
             <button
               onClick={() => setShowHistory(!showHistory)}
               className="bg-transparent border-none cursor-pointer p-1 text-2xl hover:text-gray-600 transition-colors duration-200"
@@ -483,12 +333,12 @@ const NutritionFactsPage: React.FC = () => {
               }}
               ref={(el) => {
                 if (el) {
-                  debug.logEvent('Overview container mounted', {
-                    scrollHeight: el.scrollHeight,
-                    clientHeight: el.clientHeight,
-                    hasProduct: !!nutritionfacts,
-                    productName: nutritionfacts?.name
-                  });
+                  // debug.logEvent('Overview container mounted', {
+                  //   scrollHeight: el.scrollHeight,
+                  //   clientHeight: el.clientHeight,
+                  //   hasProduct: !!nutritionfacts,
+                  //   productName: nutritionfacts?.name
+                  // });
                   console.log('[NutritionFacts] Overview container ref:', {
                     scrollHeight: el.scrollHeight,
                     clientHeight: el.clientHeight,
@@ -506,13 +356,13 @@ const NutritionFactsPage: React.FC = () => {
                 console.log('[ProductScanView] Rendering with product:', product.name);
                 
                 // Log rendering diagnostics
-                debug.logRender('ProductScanView rendering', {
-                  productName: product.name,
-                  healthScore: product.healthScore,
-                  hasImage: !!product.imageUrl,
-                  hasPositives: product.positives?.length || 0,
-                  hasNegatives: product.negatives?.length || 0
-                });
+                // debug.logRender('ProductScanView rendering', {
+                //   productName: product.name,
+                //   healthScore: product.healthScore,
+                //   hasImage: !!product.imageUrl,
+                //   hasPositives: product.positives?.length || 0,
+                //   hasNegatives: product.negatives?.length || 0
+                // });
                 
                 const {
                   name,
@@ -740,18 +590,7 @@ const NutritionFactsPage: React.FC = () => {
         </div>
       </div>
 
-      {/* IMAGE UPLOAD MODAL - Opens when camera button is clicked */}
-      <ImageUploadModal
-        isOpen={isUploadModalOpen}
-        onClose={() => {
-          setIsUploadModalOpen(false);
-          setAutoOpenCamera(false);
-        }}
-        onAnalysisComplete={handleAnalysisComplete}
-        title="New Scan"
-        subtitle="Scan barcodes, search products, or analyze images"
-        autoOpenCamera={autoOpenCamera}
-      />
+
     </>
   );
 };
