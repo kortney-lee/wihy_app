@@ -6,6 +6,9 @@ import { useLocation, useNavigate } from "react-router-dom";
 import FullScreenChat from "../components/ui/FullScreenChat";
 import { NutritionFactsData } from "../types/nutritionFacts";
 import { PlatformDetectionService } from "../services/shared/platformDetectionService";
+import { scanningService } from "../services/scanningService";
+import { wihyScanningService } from "../services/wihyScanningService";
+import { normalizeBarcodeScan } from "../utils/nutritionDataNormalizer";
 import { useDebugLog } from "../components/debug/DebugOverlay";
 import "../styles/mobile-fixes.css";
 
@@ -126,16 +129,66 @@ const NutritionFactsPage: React.FC = () => {
 
   // No local history tracking - keep it simple
 
-  // Handle new scan - navigate back to search page
-  const handleNewScan = () => {
+  // Handle new scan - use scanningService directly
+  const handleNewScan = async () => {
     debug.logEvent('New scan initiated', { currentProduct: nutritionfacts?.name });
     
-    // Navigate back to search page for new scan
-    navigate('/', {
-      state: { 
-        autoOpenCamera: true // Signal search page to auto-open camera
-      }
-    });
+    try {
+      await scanningService.openCameraWithBarcodeScanning(
+        async (barcode: string) => {
+          console.log('✅ Barcode detected from NutritionFacts camera:', barcode);
+          
+          try {
+            // Scan new barcode and navigate to new nutrition facts
+            const barcodeResult = await wihyScanningService.scanBarcode(barcode);
+            if (barcodeResult.success) {
+              debug.logNavigation('Navigating to new NutritionFacts from camera scan');
+              
+              // Use the normalize function to convert barcode result to proper format
+              const newNutritionfacts = normalizeBarcodeScan(barcodeResult);
+              
+              try {
+                sessionStorage.setItem('nutritionfacts_data', JSON.stringify({
+                  nutritionfacts: newNutritionfacts,
+                  sessionId: (barcodeResult as any).sessionId,
+                  timestamp: Date.now()
+                }));
+              } catch (e) {
+                console.warn('Failed to store in sessionStorage:', e);
+              }
+              
+              // Replace current page with new nutrition facts
+              navigate('/nutritionfacts', {
+                state: {
+                  nutritionfacts: newNutritionfacts,
+                  sessionId: (barcodeResult as any).sessionId,
+                  fromCamera: true
+                },
+                replace: true // Replace current page instead of adding to history
+              });
+              return;
+            }
+            
+            // If barcode scan fails, show error and stay on current page
+            alert(barcodeResult.error || 'Barcode not found in database');
+          } catch (error) {
+            console.error('Error during camera barcode processing:', error);
+            alert('Barcode scanning failed. Please try again.');
+          }
+        },
+        () => {
+          console.log('❌ Camera scan closed by user');
+        },
+        async (file: File) => {
+          console.log('📸 Photo captured from NutritionFacts camera');
+          // For now, just show an alert. You could implement image analysis here
+          alert('Photo captured! Image analysis functionality can be implemented here.');
+        }
+      );
+    } catch (error) {
+      console.error('❌ Error opening camera from NutritionFacts:', error);
+      alert('Camera access failed. Please ensure camera permissions are granted.');
+    }
   };
 
   // Show simple message if no data - AFTER all hooks

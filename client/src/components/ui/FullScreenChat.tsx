@@ -7,6 +7,7 @@ import { visionAnalysisService } from '../../services/visionAnalysisService';
 import { PlatformDetectionService } from '../../services/shared/platformDetectionService';
 import { normalizeBarcodeScan } from '../../utils/nutritionDataNormalizer';
 import ImageUploadModal from './ImageUploadModal';
+import { scanningService } from '../../services/scanningService';
 import { useDebugLog } from '../debug/DebugOverlay';
 import '../../styles/mobile-fixes.css';
 
@@ -95,6 +96,117 @@ const FullScreenChat = forwardRef<FullScreenChatRef, FullScreenChatProps>(({
     mediaQuery.addEventListener('change', handler);
     return () => mediaQuery.removeEventListener('change', handler);
   }, []);
+
+  // Handle direct camera scanning without modal
+  const handleDirectCameraScan = async () => {
+    debug.logScan('Direct camera scan initiated from bottom nav');
+    
+    try {
+      await scanningService.openCameraWithBarcodeScanning(
+        async (barcode: string) => {
+          console.log('✅ Barcode detected via direct camera scan:', barcode);
+          
+          try {
+            // Navigate directly to NutritionFacts for barcode scans
+            const barcodeResult = await wihyScanningService.scanBarcode(barcode);
+            if (barcodeResult.success) {
+              debug.logNavigation('Navigating to NutritionFacts from direct camera scan');
+              
+              // Store in sessionStorage as backup
+              const nutritionfacts = normalizeBarcodeScan(barcodeResult);
+              try {
+                sessionStorage.setItem('nutritionfacts_data', JSON.stringify({
+                  nutritionfacts: nutritionfacts,
+                  sessionId: (barcodeResult as any).sessionId || currentSessionId,
+                  timestamp: Date.now()
+                }));
+              } catch (e) {
+                console.warn('Failed to store in sessionStorage:', e);
+              }
+              
+              navigate('/nutritionfacts', {
+                state: {
+                  nutritionfacts: nutritionfacts,
+                  sessionId: (barcodeResult as any).sessionId || currentSessionId,
+                  fromChat: true
+                }
+              });
+              return;
+            }
+            
+            // If barcode scan fails, add error to chat
+            const userMsg = {
+              id: Date.now().toString(),
+              type: 'user' as const,
+              message: `Scanned barcode: ${barcode}`,
+              timestamp: new Date()
+            };
+            const assistantMsg = {
+              id: (Date.now() + 1).toString(),
+              type: 'assistant' as const,
+              message: barcodeResult.error || 'Barcode not found in database',
+              timestamp: new Date()
+            };
+            setMessages(prev => [...prev, userMsg, assistantMsg]);
+          } catch (error) {
+            console.error('Error during direct camera barcode processing:', error);
+            const errorMsg = {
+              id: Date.now().toString(),
+              type: 'assistant' as const,
+              message: 'Barcode scanning failed. Please try again.',
+              timestamp: new Date()
+            };
+            setMessages(prev => [...prev, errorMsg]);
+          }
+        },
+        () => {
+          console.log('❌ Direct camera scan closed by user');
+        },
+        async (file: File) => {
+          console.log('📸 Photo captured via direct camera scan');
+          
+          // Add captured photo to chat for analysis
+          const userMsg = {
+            id: Date.now().toString(),
+            type: 'user' as const,
+            message: `Captured photo: ${file.name}`,
+            timestamp: new Date(),
+            imageUrl: URL.createObjectURL(file)
+          };
+          
+          const processingMsg = {
+            id: (Date.now() + 1).toString(),
+            type: 'assistant' as const,
+            message: 'Analyzing captured photo...',
+            timestamp: new Date()
+          };
+          
+          setMessages(prev => [...prev, userMsg, processingMsg]);
+          
+          // Process the captured image (you can implement this based on your image analysis service)
+          // For now, just show a placeholder response
+          setTimeout(() => {
+            const analysisMsg = {
+              id: (Date.now() + 2).toString(),
+              type: 'assistant' as const,
+              message: 'Photo captured successfully! Image analysis functionality can be implemented here.',
+              timestamp: new Date()
+            };
+            setMessages(prev => [...prev.slice(0, -1), analysisMsg]);
+          }, 1000);
+        }
+      );
+    } catch (error) {
+      console.error('❌ Error opening direct camera scan:', error);
+      const errorMsg = {
+        id: Date.now().toString(),
+        type: 'assistant' as const,
+        message: 'Camera access failed. Please ensure camera permissions are granted.',
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, errorMsg]);
+    }
+  };
 
   // Initialize conversation service with user ID
   useEffect(() => {
@@ -1157,9 +1269,9 @@ const FullScreenChat = forwardRef<FullScreenChatRef, FullScreenChatProps>(({
               </button>
 
               {/* Camera button - only show when embedded */}
-              {isEmbedded && onNewScan && (
+              {isEmbedded && (
                 <button
-                  onClick={onNewScan}
+                  onClick={handleDirectCameraScan}
                   className="px-2 py-1.5 rounded-full transition-all text-gray-600 hover:text-gray-900 hover:bg-white"
                   title="New Scan"
                   aria-label="Start new scan"
@@ -1557,7 +1669,7 @@ const FullScreenChat = forwardRef<FullScreenChatRef, FullScreenChatProps>(({
 
           {/* Scan - Camera/Upload */}
           <button
-            onClick={() => setIsUploadModalOpen(true)}
+            onClick={handleDirectCameraScan}
             style={{
               flex: 1,
               display: 'flex',
