@@ -210,10 +210,15 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
           }
         },
         () => {
-          console.log('❌ Camera closed by user - they can reopen scan modal if needed');
+          console.log('❌ Camera closed by user - closing upload modal as well');
+          onClose();
         },
         async (file: File) => {
           console.log('📸 Photo captured via scanningService');
+          
+          // Close the modal immediately after photo capture
+          onClose();
+          
           setIsProcessing(true);
           setLoadingMessage('Analyzing captured photo...');
           
@@ -221,7 +226,6 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
             await processFile(file);
           } finally {
             setIsProcessing(false);
-            onClose();
           }
         }
       );
