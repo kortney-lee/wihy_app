@@ -4,10 +4,11 @@ import './Spinner.css';
 import '../../styles/VHealthSearch.css';
 import '../../styles/modals.css';
 import { wihyScanningService } from '../../services/wihyScanningService';
-import { visionAnalysisService } from '../../services/visionAnalysisService';
 import { PlatformDetectionService } from '../../services/shared/platformDetectionService';
 import { AdaptiveCameraService } from '../../services/adaptiveCameraService';
 import { useDebugLog } from '../debug/DebugOverlay';
+import { scanningService } from '../../services/scanningService';
+import { useNavigate } from 'react-router-dom';
 
 interface ImageUploadModalProps {
   isOpen: boolean;
@@ -46,6 +47,7 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
   autoOpenCamera = false
 }) => {
   const debug = useDebugLog('ImageUploadModal');
+  const navigate = useNavigate();
   
   const [isDragging, setIsDragging] = useState(false);
   const [imageUrl, setImageUrl] = useState('');
@@ -55,7 +57,6 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
   const [pendingFile, setPendingFile] = useState<File | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);        // desktop & mobile (library/file)
-  const cameraInputRef = useRef<HTMLInputElement>(null);      // mobile (camera)
   const lastProcessingTime = useRef<number>(0);               // prevent rapid successive calls
   const isMobile = isMobileDevice();
 
@@ -164,7 +165,7 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
     }
   }, [isOpen, autoOpenCamera]);
 
-  // Handle camera access with fallback and barcode scanning
+  // Handle camera access with barcode scanning using centralized scanningService
   const handleCameraClick = async () => {
     debug.logScan('Camera button clicked', {
       platform: PlatformDetectionService.getPlatform(),
@@ -173,411 +174,59 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
       userAgent: navigator.userAgent
     });
     
-    console.log('Camera button clicked');
-    console.log('Platform:', PlatformDetectionService.getPlatform());
-    console.log('isNative:', PlatformDetectionService.isNative());
-    console.log('isMobile:', isMobile);
+    console.log('📷 Opening camera with scanningService');
     
     if (!canProcess()) return;
 
-    // Use web camera with live barcode scanning on ALL platforms (web + Android)
-    // This allows barcode detection which native camera cannot do
-    console.log('📷 Using web camera API with live video preview and barcode scanning');
-    console.log('hasCamera:', hasCamera());
-    console.log('User Agent:', navigator.userAgent);
-    console.log('MediaDevices available:', 'mediaDevices' in navigator);
-
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      console.warn('No mediaDevices API available');
-      alert('Camera access is not available on this device.');
-      return;
-    }
-
-    // Initialize BarcodeDetector if available (optional feature)
-    let detector = null;
     try {
-      // @ts-ignore
-      if (window.BarcodeDetector) {
-        // @ts-ignore
-        detector = new window.BarcodeDetector({
-          formats: ['ean_13', 'ean_8', 'upc_a', 'upc_e', 'code_128', 'qr_code'],
-        });
-        debug.logScan('BarcodeDetector initialized successfully', {
-          formats: ['ean_13', 'ean_8', 'upc_a', 'upc_e', 'code_128', 'qr_code']
-        });
-        console.log('✅ BarcodeDetector initialized');
-      } else {
-        debug.logScan('BarcodeDetector NOT available - manual capture only');
-        console.log('⚠️ BarcodeDetector not available - barcode scanning disabled, manual capture only');
-      }
-    } catch (error) {
-      console.log('⚠️ BarcodeDetector initialization failed - barcode scanning disabled, manual capture only:', error);
-    }
-
-    // Full-screen modal + video
-    const modal = document.createElement('div');
-    modal.style.cssText = `
-      position: fixed;
-      inset: 0;
-      width: 100vw;
-      height: 100vh;
-      height: 100dvh;
-      background: #000;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      z-index: 10000;
-      overflow: hidden;
-    `;
-
-    const video = document.createElement('video');
-    video.setAttribute('playsinline', 'true');
-    video.setAttribute('webkit-playsinline', 'true');
-    video.setAttribute('muted', 'true');
-    video.setAttribute('autoplay', 'true');
-    video.muted = true;
-    video.autoplay = true;
-    video.playsInline = true;
-    video.style.cssText = `
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      position: absolute;
-      top: 0;
-      left: 0;
-      opacity: 0;
-      transition: opacity 0.3s ease;
-    `;
-
-    // Scanner overlay
-    const scannerOverlay = document.createElement('div');
-    scannerOverlay.style.cssText = `
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 250px;
-      height: 250px;
-      transform: translate(-50%, -50%);
-      border-radius: 12px;
-      z-index: 10001;
-      pointer-events: none;
-      box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
-    `;
-
-    const corners = ['top-left', 'top-right', 'bottom-left', 'bottom-right'];
-    corners.forEach((corner) => {
-      const cornerDiv = document.createElement('div');
-      cornerDiv.style.cssText = `
-        position: absolute;
-        width: 20px;
-        height: 20px;
-        border: 3px solid #00ff00;
-        ${corner.includes('top') ? 'top: -2px;' : 'bottom: -2px;'}
-        ${corner.includes('left') ? 'left: -2px;' : 'right: -2px;'}
-        ${
-          corner.includes('top') && corner.includes('left')
-            ? 'border-right: none; border-bottom: none;'
-            : ''
-        }
-        ${
-          corner.includes('top') && corner.includes('right')
-            ? 'border-left: none; border-bottom: none;'
-            : ''
-        }
-        ${
-          corner.includes('bottom') && corner.includes('left')
-            ? 'border-right: none; border-top: none;'
-            : ''
-        }
-        ${
-          corner.includes('bottom') && corner.includes('right')
-            ? 'border-left: none; border-top: none;'
-            : ''
-        }
-      `;
-      scannerOverlay.appendChild(cornerDiv);
-    });
-
-    const scanLine = document.createElement('div');
-    scanLine.style.cssText = `
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 2px;
-      background: linear-gradient(90deg, transparent, #ff0000, transparent);
-      box-shadow: 0 0 10px #ff0000;
-      animation: scanAnimation 2s ease-in-out infinite;
-    `;
-    scannerOverlay.appendChild(scanLine);
-
-    const style = document.createElement('style');
-    style.textContent = `
-      @keyframes scanAnimation {
-        0% { top: 0; opacity: 1; }
-        100% { top: calc(100% - 2px); opacity: 1; }
-      }
-    `;
-    document.head.appendChild(style);
-
-    // Buttons
-    const buttonContainer = document.createElement('div');
-    buttonContainer.style.cssText = `
-      position: absolute;
-      bottom: env(safe-area-inset-bottom, 20px);
-      left: 0;
-      right: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 12px;
-      z-index: 10001;
-      padding: 0 20px 20px 20px;
-      box-sizing: border-box;
-    `;
-
-    const captureBtn = document.createElement('button');
-    captureBtn.textContent = 'Capture Photo';
-    captureBtn.style.cssText = `
-      padding: 18px 40px;
-      background: #4cbb17;
-      color: white;
-      border: none;
-      border-radius: 50px;
-      font-size: 18px;
-      font-weight: 600;
-      cursor: pointer;
-      box-shadow: 0 4px 12px rgba(76, 187, 23, 0.3);
-      width: 100%;
-      max-width: 280px;
-      touch-action: manipulation;
-    `;
-
-    const closeBtn = document.createElement('button');
-    closeBtn.textContent = '✕ Close';
-    closeBtn.style.cssText = `
-      padding: 14px 24px;
-      background: rgba(255, 255, 255, 0.95);
-      color: #333;
-      border: none;
-      border-radius: 25px;
-      font-size: 16px;
-      cursor: pointer;
-      width: 100%;
-      max-width: 200px;
-      touch-action: manipulation;
-    `;
-
-    const addTouchFeedback = (btn: HTMLButtonElement) => {
-      btn.addEventListener('touchstart', () => {
-        btn.style.transform = 'scale(0.95)';
-      });
-      btn.addEventListener('touchend', () => {
-        btn.style.transform = 'scale(1)';
-      });
-      btn.addEventListener('touchcancel', () => {
-        btn.style.transform = 'scale(1)';
-      });
-    };
-    addTouchFeedback(captureBtn);
-    addTouchFeedback(closeBtn);
-
-    buttonContainer.appendChild(captureBtn);
-    buttonContainer.appendChild(closeBtn);
-    modal.appendChild(video);
-    modal.appendChild(scannerOverlay);
-    modal.appendChild(buttonContainer);
-    document.body.appendChild(modal);
-
-    let stopped = false;
-
-    const cleanup = () => {
-      console.log('🧹 Cleanup called, stopped:', stopped);
-      if (stopped) {
-        console.log('⚠️ Already stopped, forcing cleanup anyway');
-      }
-      stopped = true;
-      
-      // Force stop all video tracks
-      const s = video.srcObject as MediaStream | null;
-      if (s) {
-        console.log('🎥 Stopping video tracks:', s.getTracks().length);
-        s.getTracks().forEach((t) => {
-          console.log('  - Stopping track:', t.kind, t.label);
-          t.stop();
-        });
-        video.srcObject = null;
-      }
-      
-      // Force remove DOM elements
-      try {
-        if (modal.parentNode) {
-          console.log('🗑️ Removing modal from DOM');
-          modal.parentNode.removeChild(modal);
-        }
-      } catch (e) {
-        console.error('❌ Error removing modal:', e);
-      }
-      
-      try {
-        if (style.parentNode) {
-          console.log('🗑️ Removing style from DOM');
-          style.parentNode.removeChild(style);
-        }
-      } catch (e) {
-        console.error('❌ Error removing style:', e);
-      }
-      
-      console.log('✅ Cleanup complete');
-    };
-
-    closeBtn.onclick = () => {
-      console.log('❌ Close button clicked - forcing cleanup');
-      cleanup();
-      onClose();
-    };
-    
-    modal.onclick = (e) => {
-      if (e.target === modal) {
-        console.log('❌ Modal backdrop clicked - forcing cleanup');
-        cleanup();
-        onClose();
-      }
-    };
-
-    // manual capture fallback (still uses current frame)
-    captureBtn.onclick = async () => {
-      if (isProcessing) return;
-      
-      // Immediately hide camera modal so spinner can show
-      modal.style.display = 'none';
-      
-      // Show spinner immediately
-      setIsProcessing(true);
-      setLoadingMessage('Analyzing captured photo...');
-      stopped = true;
-      
-      // Small delay to ensure spinner renders
-      await new Promise(resolve => setTimeout(resolve, 50));
-      
-      try {
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        ctx?.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-        await new Promise<void>((resolve) =>
-          canvas.toBlob(async (blob) => {
-            if (!blob) return resolve();
-            const file = new File([blob], 'camera-capture.jpg', { type: 'image/jpeg' });
-            await processFile(file);
-            resolve();
-          }, 'image/jpeg', 0.85)
-        );
-      } catch (error) {
-        console.error('❌ Error processing captured frame:', error);
-      } finally {
-        setIsProcessing(false);
-        cleanup();
-        onClose();
-      }
-    };
-
-    // Now let ZXing open the camera and scan
-    const constraints: MediaStreamConstraints = {
-      video: {
-        facingMode: { ideal: 'environment' as const },
-        width: { ideal: 1280 },
-        height: { ideal: 720 },
-      },
-      audio: false,
-    };
-
-    try {
-      console.log('📷 Starting camera with BarcodeDetector...', constraints);
-      
-      // Get camera stream
-      const stream = await navigator.mediaDevices.getUserMedia(constraints);
-      video.srcObject = stream;
-      
-      // Force play and wait for it to start
-      video.play().catch(err => console.warn('Video play error:', err));
-      
-      // Wait for video to actually start playing
-      await new Promise((resolve) => {
-        video.onloadedmetadata = () => {
-          video.play().then(() => {
-            console.log('✅ Camera started successfully');
-            // Fade in video once it's actually playing
-            video.style.opacity = '1';
-            resolve(null);
-          }).catch(err => {
-            console.warn('Video play error after metadata:', err);
-            video.style.opacity = '1';
-            resolve(null);
-          });
-        };
-      });
-
-      // BarcodeDetector scanning loop (~6-7 scans per second) - only if detector available
-      const scanLoop = async () => {
-        if (!detector) {
-          console.log('⚠️ Barcode scanning disabled - detector not available');
-          return;
-        }
-        
-        while (!stopped) {
-          try {
-            // @ts-ignore
-            const barcodes = await detector.detect(video);
-            
-            if (barcodes.length > 0) {
-              const barcode = barcodes[0].rawValue.trim();
-              const format = barcodes[0].format;
-              debug.logScan('✅ BARCODE DETECTED!', { barcode, format });
-              console.log('✅ BARCODE DETECTED!', barcode, 'format:', format);
-
-              stopped = true;
-              
-              // Immediately hide camera modal so spinner can show
-              modal.style.display = 'none';
-              
-              // Show spinner immediately
-              setIsProcessing(true);
-              setLoadingMessage(`Analyzing barcode ${barcode}...`);
-              
-              // Small delay to ensure React renders the spinner
-              await new Promise(resolve => setTimeout(resolve, 50));
-              
-              try {
-                await handleBarcodeScanning(barcode);
-              } finally {
-                setIsProcessing(false);
-                cleanup(); // Clean up camera modal BEFORE closing React modal
-                onClose(); // Close React modal last
-              }
-              return;
-            }
-          } catch (err) {
-            // Detector errors are normal when no barcode is visible
-            if ((err as any)?.message && !(err as any).message.includes('Could not detect')) {
-              console.warn('⚠️ BarcodeDetector error:', err);
-            }
-          }
+      // Use the centralized scanning service
+      await scanningService.openCameraWithBarcodeScanning(
+        async (barcode: string) => {
+          console.log('✅ Barcode detected via scanningService:', barcode);
           
-          // Wait ~150ms between scans (~6-7 scans/sec)
-          await new Promise((resolve) => setTimeout(resolve, 150));
+          try {
+            // If we have a navigation handler (from FullScreenChat), navigate directly to NutritionFacts
+            if (onNavigateToNutritionFacts) {
+              debug.logNavigation('Navigating to NutritionFacts from camera scan');
+              
+              const barcodeResult = await wihyScanningService.scanBarcode(barcode);
+              if (barcodeResult.success) {
+                onNavigateToNutritionFacts(barcodeResult, (barcodeResult as any).sessionId);
+                onClose();
+                return;
+              }
+            }
+            
+            // Otherwise handle barcode through normal flow
+            await handleBarcodeScanning(barcode);
+            onClose();
+          } catch (error) {
+            console.error('Error during barcode processing:', error);
+            onAnalysisComplete({
+              type: 'error',
+              error: 'Barcode processing failed. Please try again.'
+            });
+            onClose();
+          }
+        },
+        () => {
+          console.log('❌ Camera closed by user - they can reopen scan modal if needed');
+        },
+        async (file: File) => {
+          console.log('📸 Photo captured via scanningService');
+          setIsProcessing(true);
+          setLoadingMessage('Analyzing captured photo...');
+          
+          try {
+            await processFile(file);
+          } finally {
+            setIsProcessing(false);
+            onClose();
+          }
         }
-      };
-
-      // Start the scanning loop
-      scanLoop();
-
-    } catch (err) {
-      console.error('❌ Failed to start camera:', err);
-      cleanup();
+      );
+    } catch (error) {
+      console.error('❌ Error opening camera with scanningService:', error);
       alert('Camera access failed. Please ensure camera permissions are granted and you are using HTTPS or localhost.');
     }
   };
@@ -894,7 +543,7 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
   const handleBarcodeScanning = useCallback(async (barcode: string) => {
     debug.logScan('🔍 Processing barcode scan', { barcode });
     console.log('🔍 Handling barcode scan:', barcode);
-    setLoadingMessage(`Looking up product ${barcode}...`);
+    // Note: Loading message is now set by the camera callback to ensure proper timing
     
     try {
       debug.logAPI('Calling wihyScanningService.scanBarcode', { barcode });
@@ -1229,14 +878,6 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
             ref={fileInputRef}
             type="file"
             accept="image/*"
-            onChange={onFilePicked}
-            style={{ display: 'none' }}
-          />
-          <input
-            ref={cameraInputRef}
-            type="file"
-            accept="image/*"
-            capture={true}
             onChange={onFilePicked}
             style={{ display: 'none' }}
           />
