@@ -220,7 +220,7 @@ const NutritionFactsPage: React.FC = () => {
       <div
         className={`nutrition-facts-page fixed inset-0 ${isMobile ? 'w-screen h-screen' : 'w-auto h-auto'} flex flex-col font-sans overflow-hidden`}
         style={{
-          backgroundColor: '#f0f7ff',
+          // backgroundColor: '#f0f7ff',
           paddingTop: PlatformDetectionService.isNative() ? '48px' : '0px',
         }}
         onLoad={() => {
