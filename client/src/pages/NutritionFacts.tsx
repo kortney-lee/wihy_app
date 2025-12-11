@@ -381,7 +381,7 @@ const NutritionFactsPage: React.FC = () => {
             <div 
               className="flex-1 overflow-y-auto overflow-x-hidden h-full" 
               style={{ 
-                backgroundColor: '#f0f7ff',
+                // backgroundColor: '#f0f7ff',
                 WebkitOverflowScrolling: 'touch'
               }}
               ref={(el) => {
