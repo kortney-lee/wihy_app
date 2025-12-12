@@ -109,37 +109,20 @@ const Header: React.FC<HeaderProps> = ({
   }, []);
 
   // ================================
-  // FORCE HEADER ANIMATION WITH JAVASCRIPT
+  // CLEAN GOOGLE-STYLE INTERFACE
   // ================================
   useEffect(() => {
-    // Force apply the rainbow border animation to header search bar using JavaScript
+    // Apply clean Google-style interface without animations
     const container = document.querySelector('.vhealth-header .search-input-container') as HTMLElement;
     if (container) {
-      console.log('Applying JavaScript animation to header search bar, variant:', variant);
+      console.log('Applying Google-style clean interface to header search bar, variant:', variant);
       
-      // Set up the base styles
-      container.style.setProperty('border', '2px solid transparent', 'important');
-      container.style.setProperty('background', `
-        linear-gradient(#fff, #fff) padding-box,
-        linear-gradient(90deg, #fa5f06, #ffffff, #C0C0C0, #4cbb17, #1a73e8) border-box
-      `, 'important');
-      container.style.setProperty('background-size', '100% 100%, 200% 100%', 'important');
+      // Clean Google-style appearance
+      container.style.setProperty('border', '1px solid #dfe1e5', 'important');
+      container.style.setProperty('background', '#fff', 'important');
       container.style.setProperty('border-radius', '24px', 'important');
-      
-      // Remove CSS animation and use JavaScript instead
       container.style.setProperty('animation', 'none', 'important');
-      
-      // JavaScript animation
-      let position = 0;
-      const animate = () => {
-        position += 1;
-        if (position >= 200) position = 0;
-        
-        container.style.setProperty('background-position', `0 0, ${position}% 0`, 'important');
-        requestAnimationFrame(animate);
-      };
-      
-      animate();
+      container.style.setProperty('box-shadow', '0 2px 5px 1px rgba(64,60,67,.16)', 'important');
     }
   }, [variant]); // Re-run when variant changes
 
@@ -850,15 +833,6 @@ const Header: React.FC<HeaderProps> = ({
 
   return (
     <>
-      {/* Ensure keyframes are available */}
-      <style>
-        {`
-          @keyframes wiH-border-sweep {
-            0%   { background-position: 0 0, 0% 0; }
-            100% { background-position: 0 0, 200% 0; }
-          }
-        `}
-      </style>
       
       {/* LOADING OVERLAY - Shows during search operations */}
       {isLoading && (
@@ -942,19 +916,21 @@ const Header: React.FC<HeaderProps> = ({
                 <div 
                   className="search-input-container"
                   style={{
-                    animation: 'wiH-border-sweep 2.2s linear infinite !important',
-                    background: `
-                      linear-gradient(#fff, #fff) padding-box,
-                      linear-gradient(90deg, #fa5f06, #ffffff, #C0C0C0, #4cbb17, #1a73e8) border-box
-                    `,
-                    backgroundSize: '100% 100%, 200% 100%',
-                    border: '2px solid transparent',
+                    background: '#fff',
+                    border: '1px solid #dfe1e5',
                     borderRadius: '24px',
                     position: 'relative',
                     width: '100%',
-                    maxWidth: '800px',
+                    maxWidth: '584px',
                     margin: '0 auto',
-                    boxShadow: '0 1px 6px rgba(32,33,36,0.28)'
+                    boxShadow: '0 2px 5px 1px rgba(64,60,67,.16)',
+                    transition: 'box-shadow 200ms'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.boxShadow = '0 2px 8px 1px rgba(64,60,67,.24)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.boxShadow = '0 2px 5px 1px rgba(64,60,67,.16)';
                   }}
                 >
                   <textarea
@@ -969,21 +945,54 @@ const Header: React.FC<HeaderProps> = ({
                     style={{
                       resize: 'none',
                       overflow: 'hidden',
-                      minHeight: '44px',
+                      minHeight: '48px',
                       height: 'auto',
-                      paddingRight: '100px'
+                      paddingRight: '120px',
+                      paddingLeft: '16px',
+                      fontSize: '16px',
+                      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+                      color: '#202124',
+                      border: 'none',
+                      outline: 'none',
+                      borderRadius: '24px',
+                      background: 'transparent'
                     }}
                   />
 
-                  <div className="search-icons">
+                  <div 
+                    className="search-icons"
+                    style={{
+                      position: 'absolute',
+                      right: '8px',
+                      top: '50%',
+                      transform: 'translateY(-50%)',
+                      display: 'flex',
+                      gap: '6px',
+                      alignItems: 'center',
+                      background: 'transparent'
+                    }}
+                  >
                     {input && (
                       <button
                         type="button"
-                        className="icon-button clear-button"
                         onClick={clearInput}
                         title="Clear"
+                        style={{
+                          background: 'none',
+                          border: 'none',
+                          cursor: 'pointer',
+                          padding: '8px',
+                          borderRadius: '50%',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          color: '#5f6368',
+                          transition: 'background-color 0.2s'
+                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f3f4'}
+                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                       >
-                        <svg viewBox="0 0 24 24" width="16" height="16">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
                           <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
                         </svg>
                       </button>
@@ -991,10 +1000,24 @@ const Header: React.FC<HeaderProps> = ({
 
                     <button
                       type="button"
-                      className="icon-button"
                       onClick={handleImageUpload}
                       title="Upload image"
                       disabled={isLoading}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        cursor: isLoading ? 'not-allowed' : 'pointer',
+                        padding: '8px',
+                        borderRadius: '50%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: '#5f6368',
+                        opacity: isLoading ? 0.5 : 1,
+                        transition: 'background-color 0.2s, opacity 0.2s'
+                      }}
+                      onMouseEnter={(e) => !isLoading && (e.currentTarget.style.backgroundColor = '#f1f3f4')}
+                      onMouseLeave={(e) => !isLoading && (e.currentTarget.style.backgroundColor = 'transparent')}
                     >
                       <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
                         <path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/>
@@ -1003,10 +1026,24 @@ const Header: React.FC<HeaderProps> = ({
 
                     <button
                       type="button"
-                      className={`icon-button ${currentIsListening ? 'listening' : ''}`}
                       onClick={handleVoiceInput}
                       title={currentIsListening ? 'Stop listening' : 'Start voice input'}
                       disabled={isLoading}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        cursor: isLoading ? 'not-allowed' : 'pointer',
+                        padding: '8px',
+                        borderRadius: '50%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: currentIsListening ? '#4285f4' : '#5f6368',
+                        opacity: isLoading ? 0.5 : 1,
+                        transition: 'background-color 0.2s, opacity 0.2s, color 0.2s'
+                      }}
+                      onMouseEnter={(e) => !isLoading && (e.currentTarget.style.backgroundColor = '#f1f3f4')}
+                      onMouseLeave={(e) => !isLoading && (e.currentTarget.style.backgroundColor = 'transparent')}
                     >
                       <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
                         <path d="M12 14c1.66 0 2.99-1.34 2.99-3L15 5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z"/>
