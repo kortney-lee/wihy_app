@@ -109,20 +109,37 @@ const Header: React.FC<HeaderProps> = ({
   }, []);
 
   // ================================
-  // CLEAN GOOGLE-STYLE INTERFACE
+  // FORCE HEADER ANIMATION WITH JAVASCRIPT
   // ================================
   useEffect(() => {
-    // Apply clean Google-style interface without animations
+    // Force apply the rainbow border animation to header search bar using JavaScript
     const container = document.querySelector('.vhealth-header .search-input-container') as HTMLElement;
     if (container) {
-      console.log('Applying Google-style clean interface to header search bar, variant:', variant);
+      console.log('Applying JavaScript animation to header search bar, variant:', variant);
       
-      // Clean Google-style appearance
-      container.style.setProperty('border', '1px solid #dfe1e5', 'important');
-      container.style.setProperty('background', '#fff', 'important');
+      // Set up the base styles
+      container.style.setProperty('border', '2px solid transparent', 'important');
+      container.style.setProperty('background', `
+        linear-gradient(#fff, #fff) padding-box,
+        linear-gradient(90deg, #fa5f06, #ffffff, #C0C0C0, #4cbb17, #1a73e8) border-box
+      `, 'important');
+      container.style.setProperty('background-size', '100% 100%, 200% 100%', 'important');
       container.style.setProperty('border-radius', '24px', 'important');
+      
+      // Remove CSS animation and use JavaScript instead
       container.style.setProperty('animation', 'none', 'important');
-      container.style.setProperty('box-shadow', '0 2px 5px 1px rgba(64,60,67,.16)', 'important');
+      
+      // JavaScript animation
+      let position = 0;
+      const animate = () => {
+        position += 1;
+        if (position >= 200) position = 0;
+        
+        container.style.setProperty('background-position', `0 0, ${position}% 0`, 'important');
+        requestAnimationFrame(animate);
+      };
+      
+      animate();
     }
   }, [variant]); // Re-run when variant changes
 
@@ -833,6 +850,15 @@ const Header: React.FC<HeaderProps> = ({
 
   return (
     <>
+      {/* Ensure keyframes are available */}
+      <style>
+        {`
+          @keyframes wiH-border-sweep {
+            0%   { background-position: 0 0, 0% 0; }
+            100% { background-position: 0 0, 200% 0; }
+          }
+        `}
+      </style>
       
       {/* LOADING OVERLAY - Shows during search operations */}
       {isLoading && (
@@ -916,21 +942,19 @@ const Header: React.FC<HeaderProps> = ({
                 <div 
                   className="search-input-container"
                   style={{
-                    background: '#fff',
-                    border: '1px solid #dfe1e5',
+                    animation: 'wiH-border-sweep 2.2s linear infinite !important',
+                    background: `
+                      linear-gradient(#fff, #fff) padding-box,
+                      linear-gradient(90deg, #fa5f06, #ffffff, #C0C0C0, #4cbb17, #1a73e8) border-box
+                    `,
+                    backgroundSize: '100% 100%, 200% 100%',
+                    border: '2px solid transparent',
                     borderRadius: '24px',
                     position: 'relative',
                     width: '100%',
-                    maxWidth: '584px',
+                    maxWidth: '800px',
                     margin: '0 auto',
-                    boxShadow: '0 2px 5px 1px rgba(64,60,67,.16)',
-                    transition: 'box-shadow 200ms'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.boxShadow = '0 2px 8px 1px rgba(64,60,67,.24)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.boxShadow = '0 2px 5px 1px rgba(64,60,67,.16)';
+                    boxShadow: '0 1px 6px rgba(32,33,36,0.28)'
                   }}
                 >
                   <textarea
