@@ -1490,56 +1490,137 @@ const VHealthSearch: React.FC = () => {
           </div>
         </div>
 
-        {/* ACTION BUTTONS - Primary search and secondary "feeling healthy" (Hidden on mobile - use bottom nav) */}
-        {!PlatformDetectionService.isNative() && (
-          <div className="search-buttons">
-            {/* PRIMARY SEARCH BUTTON - Triggers main search function */}
-            <button 
-              onClick={(e) => {
-                e.preventDefault();
-                handleSearch();
-              }}
-              className="search-btn primary"
-              disabled={!searchQuery.trim() || isLoading}
-            >
-              {isLoading ? loadingMessage : 'Analyze Nutrition'}
-            </button>
-            
-            {/* FEELING HEALTHY BUTTON - Navigates to news page */}
+        {/* ACTION BUTTONS - Large mobile-friendly buttons similar to Google interface */}
+        <div className="search-buttons-mobile">
+          {/* PRIMARY SEARCH BUTTON - Triggers main search function */}
+          <button 
+            onClick={(e) => {
+              e.preventDefault();
+              handleSearch();
+            }}
+            className="search-btn-mobile primary"
+            disabled={!searchQuery.trim() || isLoading}
+            style={{
+              width: '100%',
+              maxWidth: '300px',
+              height: '48px',
+              backgroundColor: '#4285f4',
+              color: 'white',
+              border: 'none',
+              borderRadius: '24px',
+              fontSize: '16px',
+              fontWeight: '500',
+              margin: '8px',
+              cursor: isLoading || !searchQuery.trim() ? 'not-allowed' : 'pointer',
+              opacity: isLoading || !searchQuery.trim() ? 0.6 : 1,
+              transition: 'all 0.2s ease',
+              boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+            }}
+            onMouseOver={(e) => {
+              if (!isLoading && searchQuery.trim()) {
+                e.currentTarget.style.backgroundColor = '#3367d6';
+                e.currentTarget.style.transform = 'translateY(-1px)';
+                e.currentTarget.style.boxShadow = '0 4px 8px rgba(0,0,0,0.15)';
+              }
+            }}
+            onMouseOut={(e) => {
+              if (!isLoading && searchQuery.trim()) {
+                e.currentTarget.style.backgroundColor = '#4285f4';
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
+              }
+            }}
+          >
+            {isLoading ? loadingMessage : 'Analyze Nutrition'}
+          </button>
+          
+          {/* FEELING HEALTHY BUTTON - Navigates to news page */}
+          <button 
+            onClick={() => {
+              if (isLoading) return;
+              navigate('/news');
+            }}
+            className="search-btn-mobile secondary"
+            type="button"
+            disabled={isLoading}
+            style={{
+              width: '100%',
+              maxWidth: '300px',
+              height: '48px',
+              backgroundColor: '#f8f9fa',
+              color: '#3c4043',
+              border: '1px solid #f0f0f0',
+              borderRadius: '24px',
+              fontSize: '16px',
+              fontWeight: '500',
+              margin: '8px',
+              cursor: isLoading ? 'not-allowed' : 'pointer',
+              opacity: isLoading ? 0.6 : 1,
+              transition: 'all 0.2s ease',
+              boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+            }}
+            onMouseOver={(e) => {
+              if (!isLoading) {
+                e.currentTarget.style.backgroundColor = '#f1f3f4';
+                e.currentTarget.style.borderColor = '#dadce0';
+                e.currentTarget.style.transform = 'translateY(-1px)';
+                e.currentTarget.style.boxShadow = '0 4px 8px rgba(0,0,0,0.15)';
+              }
+            }}
+            onMouseOut={(e) => {
+              if (!isLoading) {
+                e.currentTarget.style.backgroundColor = '#f8f9fa';
+                e.currentTarget.style.borderColor = '#f0f0f0';
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
+              }
+            }}
+          >
+            I'm Feeling Healthy
+          </button>
+
+          {/* DEMO MODE BUTTON - Development only */}
+          {process.env.NODE_ENV === 'development' && (
             <button 
               onClick={() => {
                 if (isLoading) return;
-                navigate('/news');
+                navigate('/demo');
               }}
-              className="search-btn secondary"
+              className="search-btn-mobile demo"
               type="button"
-              style={{ color: '#000000' }}
               disabled={isLoading}
+              style={{
+                width: '100%',
+                maxWidth: '300px',
+                height: '40px',
+                backgroundColor: 'transparent',
+                color: '#10b981',
+                border: '1px solid #10b981',
+                borderRadius: '20px',
+                fontSize: '14px',
+                fontWeight: '500',
+                margin: '4px',
+                cursor: isLoading ? 'not-allowed' : 'pointer',
+                opacity: isLoading ? 0.6 : 1,
+                transition: 'all 0.2s ease'
+              }}
+              onMouseOver={(e) => {
+                if (!isLoading) {
+                  e.currentTarget.style.backgroundColor = '#ecfdf5';
+                  e.currentTarget.style.transform = 'translateY(-1px)';
+                }
+              }}
+              onMouseOut={(e) => {
+                if (!isLoading) {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                  e.currentTarget.style.transform = 'translateY(0)';
+                }
+              }}
             >
-              I'm Feeling Healthy
+              Demo Mode
             </button>
-
-            {/* DEMO MODE BUTTON - Development only */}
-            {process.env.NODE_ENV === 'development' && (
-              <button 
-                onClick={() => {
-                  if (isLoading) return;
-                  navigate('/demo');
-                }}
-                className="search-btn secondary"
-                type="button"
-                style={{ 
-                  color: '#10b981',
-                  border: '1px solid #10b981',
-                  fontSize: '14px'
-                }}
-                disabled={isLoading}
-              >
-                Demo Mode
-              </button>
-            )}
-          </div>
-        )}
+          )}
+        </div>
       </div>
       
       {/* INLINE RESULTS DISPLAY - Shows search results without navigation */}
