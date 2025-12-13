@@ -23,25 +23,6 @@ interface LocationState {
 }
 
 const NutritionFactsPage: React.FC = () => {
-  // IMMEDIATE LOG - before any hooks
-  try {
-    const sessionLogs = sessionStorage.getItem('wihy_debug_session');
-    const logs = sessionLogs ? JSON.parse(sessionLogs) : [];
-    logs.push({
-      timestamp: '+' + ((Date.now() - parseInt(sessionStorage.getItem('wihy_debug_start_time') || Date.now().toString())) / 1000).toFixed(3) + 's',
-      type: 'system',
-      message: 'NutritionFacts: Component function called',
-      page: 'NutritionFacts',
-      data: { 
-        pathname: window.location.pathname,
-        hasLocationState: !!(window as any).history?.state?.usr
-      }
-    });
-    sessionStorage.setItem('wihy_debug_session', JSON.stringify(logs));
-    console.log('[NutritionFacts] Component function called');
-  } catch (e) {
-    console.error('[NutritionFacts] Failed to log component call:', e);
-  }
   
   const navigate = useNavigate();
   const location = useLocation();
@@ -50,21 +31,14 @@ const NutritionFactsPage: React.FC = () => {
   // Prevent excessive logging during React StrictMode double mounting
   const componentInitializedRef = useRef<boolean>(false);
 
-  // Log component mount (prevent double logging from React StrictMode)
+  // Initialize component only once (prevent double mounting from React StrictMode)
   React.useEffect(() => {
     if (componentInitializedRef.current) {
-      console.log('💬 NUTRITION FACTS: Skipping duplicate initialization (StrictMode double mount)');
       return;
     }
     
     componentInitializedRef.current = true;
-    debug.logRender('NutritionFacts component mounted', {
-      platform: PlatformDetectionService.getPlatform(),
-      isNative: PlatformDetectionService.isNative(),
-      width: window.innerWidth,
-      pathname: location.pathname,
-      hasState: !!location.state
-    });
+    // Component initialized - reduced logging
   }, []);
 
   // ALL HOOKS MUST BE AT THE TOP - before any conditional returns
@@ -94,12 +68,10 @@ const NutritionFactsPage: React.FC = () => {
     // No sessionStorage fallback - direct navigation only
 
     if (dataFromState) {
-      console.log("[NutritionFacts] useEffect - setting data, name:", dataFromState.name);
-      
+      // Data received - reduced logging
       setNutritionfacts(dataFromState);
       setInitialQuery(state.initialQuery);
       if (state.sessionId) setSessionId(state.sessionId);
-
     } else {
       // No data - show empty state instead of redirecting
       setNutritionfacts(null);

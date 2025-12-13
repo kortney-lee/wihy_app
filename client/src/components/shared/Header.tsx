@@ -878,23 +878,12 @@ const Header: React.FC<HeaderProps> = ({
             {showProgressMenu && onProgressMenuClick && (
               <button
                 onClick={onProgressMenuClick}
-                style={{
-                  background: 'transparent',
-                  border: 'none',
-                  cursor: 'pointer',
-                  padding: '8px 12px',
-                  fontSize: '24px',
-                  color: '#374151',
-                  transition: 'color 0.2s',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.color = '#6b7280'}
-                onMouseLeave={(e) => e.currentTarget.style.color = '#374151'}
+                className="w-10 h-10 rounded-xl bg-gray-100/60 hover:bg-gray-200/80 flex items-center justify-center text-gray-700 hover:text-gray-900 transition-all duration-200 backdrop-blur-sm"
                 title="Toggle Progress History"
               >
-                ☰
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
               </button>
             )}
           </div>
