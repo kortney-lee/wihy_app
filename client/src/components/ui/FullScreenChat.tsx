@@ -78,10 +78,8 @@ const FullScreenChat = forwardRef<FullScreenChatRef, FullScreenChatProps>(({
 
   // Check for mobile screen size
   useEffect(() => {
-    debug.logRender('Mobile check running');
     const checkMobile = () => {
       setIsMobile(window.innerWidth <= 768);
-      debug.logState('isMobile', window.innerWidth <= 768);
     };
     
     checkMobile();
@@ -251,7 +249,6 @@ const FullScreenChat = forwardRef<FullScreenChatRef, FullScreenChatProps>(({
 
     // Prevent double initialization from React StrictMode
     if (sessionInitializedRef.current) {
-      console.log('💬 FULL SCREEN CHAT: Skipping duplicate initialization (StrictMode double mount)');
       return;
     }
     
@@ -260,7 +257,6 @@ const FullScreenChat = forwardRef<FullScreenChatRef, FullScreenChatProps>(({
       setCurrentSessionId(sessionId);
       conversationService.setSessionId(sessionId);
       sessionInitializedRef.current = true;
-      console.log('💬 FULL SCREEN CHAT: Resuming session from navigation:', sessionId);
       return;
     }
     
@@ -269,7 +265,6 @@ const FullScreenChat = forwardRef<FullScreenChatRef, FullScreenChatProps>(({
     if (existingSessionId && !currentSessionId) {
       setCurrentSessionId(existingSessionId);
       sessionInitializedRef.current = true;
-      console.log('💬 FULL SCREEN CHAT: Using existing session from service:', existingSessionId);
       return;
     }
     
@@ -377,11 +372,7 @@ const FullScreenChat = forwardRef<FullScreenChatRef, FullScreenChatProps>(({
         (initialResponse.success || initialResponse.type === 'barcode_analysis')
       )));
       
-      console.log('🔍 FULL SCREEN CHAT: Session check:', {
-        hasSessionId: Boolean(sessionId),
-        hasActiveSession: Boolean(sessionId),
-        hasChartData: Boolean(apiResponseData || (typeof initialResponse === 'object' && initialResponse))
-      });
+      // Session state updated - reduced logging
     }
   }, [isOpen, apiResponseData, initialResponse]);
 
@@ -808,12 +799,7 @@ const FullScreenChat = forwardRef<FullScreenChatRef, FullScreenChatProps>(({
         }
       ];
       setMessages(initialMessages);
-      console.log('🔍 FULL SCREEN CHAT: Initialized messages:', {
-        userQuery: userQueryMessage,
-        responseType: typeof initialResponse === 'object' ? initialResponse.type : 'string',
-        hasUserQuery: Boolean(typeof initialResponse === 'object' && initialResponse.userQuery),
-        messageCount: initialMessages.length
-      });
+      // Messages initialized - reduced logging
     }
   }, [initialQuery, initialResponse]);
 
@@ -1068,7 +1054,7 @@ const FullScreenChat = forwardRef<FullScreenChatRef, FullScreenChatProps>(({
       <div 
         className={`fullscreen-chat-container fixed inset-0 ${
           isMobile ? 'w-screen h-screen' : 'w-auto h-auto'
-        } bg-white z-[10000] flex flex-col font-sans overflow-hidden transform transition-transform duration-300 ease-in-out ${
+        } bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 z-[10000] flex flex-col font-sans overflow-hidden transform transition-transform duration-300 ease-in-out ${
           isOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
         style={{
@@ -1170,9 +1156,9 @@ const FullScreenChat = forwardRef<FullScreenChatRef, FullScreenChatProps>(({
       {/* Main Chat Area */}
       <div className="flex-1 flex flex-col h-full overflow-hidden">
 
-        {/* Top Navigation Bar with Toggle History and View Charts */}
-        <div className="flex-shrink-0 flex items-center justify-between px-4 py-3 bg-white border-b border-gray-200">
-          <div className="flex items-center justify-between w-full px-3 py-2 bg-white min-h-[40px]">
+        {/* Header Navigation */}
+        <div className="bg-white border-b border-gray-200 shadow-sm">
+          <div className="flex items-center justify-between px-4 py-3">
             <button
               onClick={() => {
                 if (isMobile) {
@@ -1181,16 +1167,64 @@ const FullScreenChat = forwardRef<FullScreenChatRef, FullScreenChatProps>(({
                   setShowDesktopHistory(!showDesktopHistory);
                 }
               }}
-              className="bg-transparent border-none cursor-pointer p-1 text-2xl hover:text-gray-600 transition-colors duration-200"
+              className="w-10 h-10 rounded-xl bg-gray-100/60 hover:bg-gray-200/80 flex items-center justify-center text-gray-700 hover:text-gray-900 transition-all duration-200 backdrop-blur-sm"
               title="Toggle History"
             >
-              ☰
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
             </button>
+            
+            {/* Pill Toggle Buttons - Moved from below */}
+            <div className="flex items-center gap-2">
+              <div className="inline-flex rounded-2xl bg-gray-100 p-1.5 text-sm border border-gray-200">
+                {/* Upload button - clickable to go back or open image modal on desktop */}
+                {isEmbedded && onBackToOverview ? (
+                  <button
+                    onClick={onBackToOverview}
+                    className={`px-4 py-2 rounded-xl transition-all duration-300 font-medium flex items-center gap-2 text-gray-600 hover:text-blue-600 hover:bg-white/50`}
+                  >
+                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/>
+                    </svg>
+                    Upload
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => setIsUploadModalOpen(true)}
+                    className={`px-4 py-2 rounded-xl transition-all duration-300 font-medium flex items-center gap-2 text-gray-600 hover:text-blue-600 hover:bg-white/50`}
+                  >
+                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/>
+                    </svg>
+                    Upload
+                  </button>
+                )}
+                
+                <button
+                  className={`px-4 py-2 rounded-xl transition-all duration-300 font-medium flex items-center gap-2 bg-white shadow-lg text-purple-600 transform scale-105`}
+                  disabled
+                >
+                  <img src="/assets/wihyfavicon.png" alt="WiHY" className="w-4 h-4" />
+                  Ask WiHY
+                </button>
+                
+                <button
+                  onClick={handleDirectCameraScan}
+                  className="px-3 py-2 rounded-xl transition-all duration-300 text-gray-600 hover:text-green-600 hover:bg-white/50 hover:scale-110"
+                  title="New Scan"
+                >
+                  <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
+                    <path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+            
             <div className="relative">
               <button
                 onClick={() => {
                   if (hasChartData && apiResponseData) {
-                    // Navigate to dashboard with chart data
                     navigate('/dashboard', {
                       state: {
                         fromChat: true,
@@ -1204,8 +1238,8 @@ const FullScreenChat = forwardRef<FullScreenChatRef, FullScreenChatProps>(({
                     onClose();
                   }
                 }}
-                title="View Interactive Charts"
-                className="chat-icon-button bg-transparent border-none cursor-pointer p-1 rounded transition-all duration-200 flex items-center justify-center opacity-100 hover:opacity-90"
+                title={hasChartData ? "View Interactive Charts" : "Back to Search Screen"}
+                className="p-1 rounded transition-all hover:opacity-90"
               >
                 <img 
                   src="/assets/Chartlogo.png" 
@@ -1213,77 +1247,8 @@ const FullScreenChat = forwardRef<FullScreenChatRef, FullScreenChatProps>(({
                   className="w-16 h-16 object-contain"
                 />
               </button>
-              <div className="absolute top-2 right-2 w-3 h-3 rounded-full bg-emerald-500 border-2 border-white shadow-sm" />
-            </div>
-          </div>
-        </div>
-        
-        {/* Header with product name and pill toggle */}
-        <div className={`flex items-center justify-center ${
-          isMobile ? 'px-4 py-2' : 'px-4 py-2'
-        } border-b border-gray-200 bg-white flex-shrink-0`}>
-          
-          <div className="flex items-center gap-3">
-            {/* Product name - hidden on small screens */}
-            {productName && (
-              <span className="text-xs font-semibold text-gray-900 hidden sm:inline max-w-[200px] truncate">
-                {productName}
-              </span>
-            )}
-            
-            {/* View mode toggle */}
-            <div className="inline-flex rounded-full bg-gray-100 p-1 text-xs">
-              {/* Overview button - clickable to go back or open image modal on desktop */}
-              {isEmbedded && onBackToOverview ? (
-                <button
-                  onClick={onBackToOverview}
-                  className="px-3 py-1.5 rounded-full transition-all text-gray-600 hover:text-gray-900"
-                  title="View Overview"
-                  aria-label="View overview"
-                >
-                  Overview
-                </button>
-              ) : (
-                <button
-                  onClick={() => setIsUploadModalOpen(true)}
-                  className="px-2 py-1.5 rounded-full transition-all text-gray-600 hover:text-gray-900 hover:bg-white"
-                  title="Upload Image"
-                  aria-label="Upload image"
-                >
-                  <svg 
-                    viewBox="0 0 24 24" 
-                    fill="currentColor"
-                    className="w-4 h-4"
-                  >
-                    <path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/>
-                  </svg>
-                </button>
-              )}
-
-              {/* Ask WiHY button - active state */}
-              <button
-                className="px-3 py-1.5 rounded-full transition-all bg-white text-gray-900 shadow-sm font-semibold"
-                disabled
-              >
-                Ask WiHY
-              </button>
-
-              {/* Camera button - only show when embedded */}
-              {isEmbedded && (
-                <button
-                  onClick={handleDirectCameraScan}
-                  className="px-2 py-1.5 rounded-full transition-all text-gray-600 hover:text-gray-900 hover:bg-white"
-                  title="New Scan"
-                  aria-label="Start new scan"
-                >
-                  <svg 
-                    viewBox="0 0 24 24" 
-                    fill="currentColor"
-                    className="w-4 h-4"
-                  >
-                    <path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/>
-                  </svg>
-                </button>
+              {hasChartData && (
+                <div className="absolute top-2 right-2 w-3 h-3 rounded-full bg-emerald-500 border-2 border-white shadow-sm" />
               )}
             </div>
           </div>
@@ -1292,94 +1257,108 @@ const FullScreenChat = forwardRef<FullScreenChatRef, FullScreenChatProps>(({
         {/* Messages Container - Single scroll area */}
         <div className="flex-1 flex flex-col overflow-hidden">
           <div className={`flex-1 overflow-y-auto overflow-x-hidden ${
-            isMobile ? 'p-4' : 'p-6'
-          } max-w-full ${isMobile ? '' : 'md:max-w-3xl'} w-full scroll-smooth`}>
+            isMobile ? 'p-6' : 'p-8'
+          } max-w-full ${isMobile ? '' : 'md:max-w-4xl'} mx-auto w-full scroll-smooth`}>
             {messages.length === 0 ? (
               <>
                 {/* Title as first element in chat area - left aligned */}
-                <div className="mb-6 flex items-start">
-                  <h1 className="m-0 text-sm font-semibold text-gray-800 text-left block">
-                    Ask WiHY{' '}
-                    <span className="text-xs font-medium text-gray-500">
-                      (pro·nounced why)
-                    </span>
-                  </h1>
+                <div className="mb-8 flex items-start">
+                  <div className="bg-white/80 backdrop-blur-sm px-4 py-2 rounded-2xl shadow-sm border border-gray-100">
+                    <h1 className="m-0 text-lg font-semibold text-gray-800">
+                      Ask WiHY{' '}
+                      <span className="text-sm font-medium text-gray-500">
+                        (pro·nounced why)
+                      </span>
+                    </h1>
+                  </div>
                 </div>
                 
-                <div className="flex flex-col items-center justify-center h-[50vh] text-center text-gray-500">
-                <div className={`${
-                  isMobile ? 'w-12 h-12 text-xl' : 'w-16 h-16 text-2xl'
-                } rounded-2xl bg-gray-100 flex items-center justify-center mb-4`}>
-                  💬
-                </div>
-                <h3 className={`${
-                  isMobile ? 'text-lg' : 'text-xl'
-                } font-semibold text-gray-800 m-0 mb-2`}>
-                  How can I help you today?
-                </h3>
-                <p className={`${
-                  isMobile ? 'text-sm max-w-[300px]' : 'text-base max-w-sm'
-                } m-0`}>
-                  Ask me anything about health, nutrition, exercise, or wellness. I'm here to provide evidence-based guidance.
-                </p>
+                <div className="flex flex-col items-center justify-center h-[50vh] text-center">
+                  <div className={`${
+                    isMobile ? 'w-20 h-20' : 'w-24 h-24'
+                  } rounded-3xl bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center mb-6 shadow-lg`}>
+                    <svg className="w-10 h-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                    </svg>
+                  </div>
+                  <h3 className={`${
+                    isMobile ? 'text-xl' : 'text-2xl'
+                  } font-semibold text-gray-800 m-0 mb-3`}>
+                    How can I help you today?
+                  </h3>
+                  <p className={`${
+                    isMobile ? 'text-base max-w-[320px]' : 'text-lg max-w-md'
+                  } m-0 text-gray-600 leading-relaxed`}>
+                    Ask me anything about health, nutrition, exercise, or wellness. I'm here to provide evidence-based guidance.
+                  </p>
                 </div>
               </>
             ) : (
               <>
                 {/* Title as first message when messages exist - left aligned */}
-                <div className="mb-6 pb-4 border-b border-gray-100 flex items-start">
-                  <h1 className="m-0 text-sm font-semibold text-gray-800 text-left block">
-                    Ask WiHY{' '}
-                    <span className="text-xs font-medium text-gray-500">
-                      (pro·nounced why)
-                    </span>
-                  </h1>
+                <div className="mb-8 pb-6 border-b border-gray-100 flex items-start">
+                  <div className="bg-white/80 backdrop-blur-sm px-4 py-2 rounded-2xl shadow-sm border border-gray-100">
+                    <h1 className="m-0 text-lg font-semibold text-gray-800">
+                      Ask WiHY{' '}
+                      <span className="text-sm font-medium text-gray-500">
+                        (pro·nounced why)
+                      </span>
+                    </h1>
+                  </div>
                 </div>
                 
                 {messages.map((message) => (
                 <div
                   key={message.id}
                   className={`flex ${
-                    isMobile ? 'gap-3 mb-4' : 'gap-4 mb-6'
+                    isMobile ? 'gap-4 mb-6' : 'gap-5 mb-8'
                   } items-start`}
                 >
                   <div className={`${
-                    isMobile ? 'w-7 h-7 text-xs' : 'w-8 h-8 text-sm'
-                  } rounded-full ${
-                    message.type === 'user' ? 'bg-emerald-500 text-white' : 'bg-gray-100 text-gray-500'
-                  } flex items-center justify-center font-bold flex-shrink-0`}>
-                    {message.type === 'user' ? 'U' : (
+                    isMobile ? 'w-10 h-10' : 'w-11 h-11'
+                  } rounded-2xl ${
+                    message.type === 'user' 
+                      ? 'bg-gradient-to-br from-emerald-500 to-green-600' 
+                      : 'bg-white border border-gray-100'
+                  } flex items-center justify-center flex-shrink-0 transform hover:scale-105 transition-transform duration-200`}>
+                    {message.type === 'user' ? (
+                      <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                      </svg>
+                    ) : (
                       <img
                         src="/assets/wihyfavicon.png"
-                        alt="WiHy"
+                        alt="WiHY"
                         className={`${
-                          isMobile ? 'w-4 h-4' : 'w-5 h-5'
-                        } rounded`}
+                          isMobile ? 'w-6 h-6' : 'w-7 h-7'
+                        } rounded-xl`}
                       />
                     )}
                   </div>
                   
                   <div className="flex-1 min-w-0">
-                    {/* Display image if available (for uploaded images) */}
-                    {message.imageUrl && (
+                    <div className={`bg-white/80 backdrop-blur-sm rounded-2xl border border-gray-100 p-4 ${isMobile ? 'p-4' : 'p-5'}`}>
+                      {/* Display image if available (for uploaded images) */}
+                      {message.imageUrl && (
+                        <div className={`${
+                          isMobile ? 'mb-4' : 'mb-5'
+                        }`}>
+                          <img
+                            src={message.imageUrl}
+                            alt="Uploaded"
+                            className="w-full max-w-md h-auto object-cover rounded-xl"
+                            style={{ maxHeight: isMobile ? '220px' : '320px' }}
+                          />
+                        </div>
+                      )}
+                      
                       <div className={`${
-                        isMobile ? 'mb-3' : 'mb-4'
-                      }`}>
-                        <img
-                          src={message.imageUrl}
-                          alt="Uploaded"
-                          className="w-full max-w-md h-auto object-cover rounded-lg"
-                          style={{ maxHeight: isMobile ? '200px' : '300px' }}
-                        />
+                        isMobile ? 'text-base' : 'text-lg'
+                      } leading-relaxed text-gray-800 whitespace-pre-wrap break-words font-medium`}>
+                        {message.message}
                       </div>
-                    )}
-                    
-                    <div className={`${
-                      isMobile ? 'text-sm' : 'text-base'
-                    } leading-relaxed text-gray-800 whitespace-pre-wrap break-words`}>
-                      {message.message}
                     </div>
-                    <div className="text-xs text-gray-400 mt-2">
+                    <div className="text-xs text-gray-400 mt-3 ml-2 font-medium">
                       {formatTime(message.timestamp)}
                     </div>
                   </div>
@@ -1390,26 +1369,27 @@ const FullScreenChat = forwardRef<FullScreenChatRef, FullScreenChatProps>(({
 
             {isLoading && (
               <div className={`flex ${
-                isMobile ? 'gap-3 mb-4' : 'gap-4 mb-6'
+                isMobile ? 'gap-4 mb-6' : 'gap-5 mb-8'
               } items-start`}>
                 <div className={`${
-                  isMobile ? 'w-7 h-7' : 'w-8 h-8'
-                } rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0`}>
+                  isMobile ? 'w-10 h-10' : 'w-11 h-11'
+                } rounded-2xl bg-white shadow-lg border border-gray-100 flex items-center justify-center flex-shrink-0`}>
                   <img
                     src="/assets/wihyfavicon.png"
-                    alt="WiHy"
+                    alt="WiHY"
                     className={`${
-                      isMobile ? 'w-4 h-4' : 'w-5 h-5'
-                    } rounded`}
+                      isMobile ? 'w-6 h-6' : 'w-7 h-7'
+                    } rounded-xl`}
                   />
                 </div>
                 
-                <div className={`flex gap-1 items-center ${
-                  isMobile ? 'px-3 py-2' : 'px-4 py-3'
-                } bg-gray-50 rounded-xl`}>
-                  <div className="w-2 h-2 rounded-full bg-gray-400 animate-typing" />
-                  <div className="w-2 h-2 rounded-full bg-gray-400 animate-typing [animation-delay:0.2s]" />
-                  <div className="w-2 h-2 rounded-full bg-gray-400 animate-typing [animation-delay:0.4s]" />
+                <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-sm border border-gray-100 p-5">
+                  <div className="flex gap-2 items-center">
+                    <div className="w-3 h-3 rounded-full bg-blue-400 animate-pulse" />
+                    <div className="w-3 h-3 rounded-full bg-blue-400 animate-pulse [animation-delay:0.2s]" />
+                    <div className="w-3 h-3 rounded-full bg-blue-400 animate-pulse [animation-delay:0.4s]" />
+                    <span className="text-gray-500 text-sm font-medium ml-2">WiHY is thinking...</span>
+                  </div>
                 </div>
               </div>
             )}
@@ -1420,17 +1400,17 @@ const FullScreenChat = forwardRef<FullScreenChatRef, FullScreenChatProps>(({
 
         {/* Input */}
         <div 
-          className={`border-t border-gray-200 bg-white flex-shrink-0 ${
-            isMobile ? 'px-4 pt-3 pb-2' : 'px-6 py-4'
+          className={`border-t border-gray-100 bg-gradient-to-r from-white via-blue-50/30 to-white backdrop-blur-xl flex-shrink-0 ${
+            isMobile ? 'px-6 pt-4 pb-3' : 'px-8 py-6'
           }`}
           style={{
             marginBottom: PlatformDetectionService.isNative() ? '56px' : '0px'
           }}
         >
           <div className={`${
-            isMobile ? 'max-w-full' : 'max-w-3xl'
+            isMobile ? 'max-w-full' : 'max-w-4xl'
           } mx-auto`}>
-            <div className="relative flex items-center gap-2">
+            <div className="relative flex items-center gap-3">
               <div className="search-input-container chat-input-container">
                 <textarea
                   ref={inputRef}
@@ -1467,100 +1447,154 @@ const FullScreenChat = forwardRef<FullScreenChatRef, FullScreenChatProps>(({
       </div>
 
       <style>{`
-        /* Hide scrollbars completely for a cleaner look */
+        /* Modern scrollbar styling - Apple/Google inspired */
         div::-webkit-scrollbar {
-          width: 0px;
-          background: transparent;
+          width: 6px;
+          height: 6px;
+        }
+
+        div::-webkit-scrollbar-track {
+          background: rgba(0, 0, 0, 0.05);
+          border-radius: 3px;
         }
 
         div::-webkit-scrollbar-thumb {
-          background: transparent;
+          background: rgba(0, 0, 0, 0.2);
+          border-radius: 3px;
+          transition: background 0.2s ease;
         }
 
-        /* For Firefox */
+        div::-webkit-scrollbar-thumb:hover {
+          background: rgba(0, 0, 0, 0.4);
+        }
+
+        /* For Firefox - subtle modern scrollbar */
         div {
-          scrollbar-width: none;
+          scrollbar-width: thin;
+          scrollbar-color: rgba(0, 0, 0, 0.2) rgba(0, 0, 0, 0.05);
         }
 
-
-
-        /* Chat input container - Simple solid styling for chat */
-        .chat-input-container {
-          width: 100% !important; /* Override the 80% width for chat context */
-          margin: 0 !important; /* Override auto margins for flexbox */
-          flex: 1; /* Allow it to grow in flexbox */
-          /* Override animated styles with solid styling */
-          background: #ffffff !important;
+        /* Chat input container - Modern Apple/Google styling with WiHY orange brand color */
+        .fullscreen-chat-container .chat-input-container {
+          width: 100% !important;
+          margin: 0 !important;
+          flex: 1;
+          background: rgba(255, 255, 255, 0.95) !important;
+          backdrop-filter: blur(20px) !important;
           border: 2px solid #fa5f06 !important;
-          border-radius: 28px !important;
-          box-shadow: 0 2px 8px rgba(250, 95, 6, 0.1) !important;
+          border-radius: 24px !important;
           animation: none !important;
-          padding: 4px;
+          padding: 2px;
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
         }
 
-        .chat-input-container:focus-within {
-          box-shadow: 0 4px 16px rgba(250, 95, 6, 0.25);
-          border-color: #fa5f06;
+        .fullscreen-chat-container .chat-input-container:focus-within {
+          border-color: #fa5f06 !important;
+          transform: translateY(-1px);
         }
 
-        /* Chat input overrides */
-        .chat-input-container .search-input {
+        /* Chat input overrides - Apple/Google style - ONLY for fullscreen chat */
+        .fullscreen-chat-container .chat-input-container .search-input {
           width: 100%;
-          min-height: ${isMobile ? '52px' : '60px'};
-          max-height: ${isMobile ? '120px' : '140px'};
-          padding: ${isMobile ? '16px 20px' : '18px 24px'};
+          min-height: ${isMobile ? '56px' : '64px'};
+          max-height: ${isMobile ? '140px' : '160px'};
+          padding: ${isMobile ? '18px 24px' : '20px 28px'};
           border: none;
-          border-radius: 24px;
+          border-radius: 22px;
           font-size: ${isMobile ? '16px' : '18px'};
-          line-height: 1.4;
+          font-weight: 500;
+          line-height: 1.5;
           resize: none;
           outline: none;
-          font-family: inherit;
-          background-color: #ffffff !important; /* Ensure pure white background */
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+          background-color: transparent !important;
           color: #1f2937;
+          transition: all 0.2s ease;
         }
 
-        .chat-input-container .search-input:disabled {
-          background-color: #f9fafb;
+        .fullscreen-chat-container .chat-input-container .search-input::placeholder {
+          color: #9ca3af;
+          font-weight: 400;
+        }
+
+        .fullscreen-chat-container .chat-input-container .search-input:disabled {
+          background-color: rgba(249, 250, 251, 0.8);
           color: #9ca3af;
         }
 
-        /* Send button styling - positioned outside input, matching ChatWidget exactly */
+        /* Send button styling - Modern Apple/Google design */
         .send-button {
           position: relative;
           right: auto;
           top: auto;
           transform: none;
-          color: #374151;
           border: none;
-          border-radius: 16px;
-          padding: 12px;
+          border-radius: 20px;
+          padding: 14px;
           display: flex;
           align-items: center;
           justify-content: center;
-          transition: all 0.2s ease;
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
           flex-shrink: 0;
-          min-width: 44px;
-          height: 44px;
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+          min-width: 48px;
+          height: 48px;
+          font-weight: 500;
         }
 
         .send-button.active {
-          background-color: #d1d5db;
-          color: #374151;
+          background: linear-gradient(135deg, #fa5f06 0%, #e55100 100%);
+          color: white;
           cursor: pointer;
+          box-shadow: 0 8px 25px rgba(250, 95, 6, 0.4);
         }
 
         .send-button.active:hover {
-          background-color: #9ca3af;
-          color: white;
+          background: linear-gradient(135deg, #e55100 0%, #d84315 100%);
+          box-shadow: 0 12px 35px rgba(250, 95, 6, 0.5);
+          transform: translateY(-2px) scale(1.05);
+        }
+
+        .send-button.active:active {
+          transform: translateY(-1px) scale(0.98);
         }
 
         .send-button.disabled {
-          background-color: #e5e7eb;
+          background: linear-gradient(135deg, #e5e7eb 0%, #d1d5db 100%);
           color: #9ca3af;
           cursor: not-allowed;
-          box-shadow: none;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Add subtle animations */
+        @keyframes fadeInUp {
+          from {
+            opacity: 0;
+            transform: translateY(20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        .fullscreen-chat-container * {
+          animation: fadeInUp 0.3s ease-out;
+        }
+
+        /* Custom animations for loading dots */
+        @keyframes typing {
+          0%, 60%, 100% {
+            transform: scale(0.8);
+            opacity: 0.5;
+          }
+          30% {
+            transform: scale(1.2);
+            opacity: 1;
+          }
+        }
+
+        .animate-typing {
+          animation: typing 1.4s ease-in-out infinite;
         }
       `}</style>
 
