@@ -4,6 +4,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import FullScreenChat from "../components/ui/FullScreenChat";
+import NavigationHeader from "../components/ui/NavigationHeader";
 import { NutritionFactsData } from "../types/nutritionFacts";
 import { PlatformDetectionService } from "../services/shared/platformDetectionService";
 import { scanningService } from "../services/scanningService";
@@ -210,98 +211,41 @@ const NutritionFactsPage: React.FC = () => {
         </div>
       )}
 
-      {/* Header Navigation */}
-      <div className="bg-white border-b border-gray-200 shadow-sm">
-        <div className="flex items-center justify-between px-4 py-3">
-          <button
-            onClick={() => setShowHistory(!showHistory)}
-            className="p-1 text-2xl text-gray-600 hover:text-gray-800 transition-colors"
-            title="Toggle History"
-          >
-            ☰
-          </button>
-          
-          <div className="relative">
-            <button
-              onClick={() => {
-                if (hasChartData) {
-                  navigate('/dashboard', {
-                    state: {
-                      apiResponse: nutritionfacts,
-                      dataSource: 'nutrition_facts',
-                      fromNutritionFacts: true,
-                      sessionId: sessionId,
-                      initialTab: 'overview'
-                    }
-                  });
-                } else {
-                  navigate(-1);
-                }
-              }}
-              title={hasChartData ? "View Interactive Charts" : "Back to Search Screen"}
-              className="p-1 rounded transition-all hover:opacity-90"
-            >
-              <img 
-                src="/assets/Chartlogo.png" 
-                alt="View Charts"
-                className="w-16 h-16 object-contain"
-              />
-            </button>
-            {hasChartData && (
-              <div className="absolute top-2 right-2 w-3 h-3 rounded-full bg-emerald-500 border-2 border-white shadow-sm" />
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* View Mode Toggle */}
-      <div className="bg-white border-b border-gray-200 px-4 py-4 shadow-sm">
-        <div className="flex items-center justify-center gap-4">
-          <div className="inline-flex rounded-2xl bg-gray-100 p-1.5 text-sm border border-gray-200">
-            <button
-              onClick={() => setViewMode("overview")}
-              className={`px-4 py-2 rounded-xl transition-all duration-300 font-medium flex items-center gap-2 ${
-                viewMode === "overview" 
-                  ? "bg-white shadow-lg text-blue-600 transform scale-105" 
-                  : "text-gray-600 hover:text-blue-600 hover:bg-white/50"
-              }`}
-            >
-              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/>
-              </svg>
-              Overview
-            </button>
-            <button
-              onClick={() => setViewMode("chat")}
-              className={`px-4 py-2 rounded-xl transition-all duration-300 font-medium flex items-center gap-2 ${
-                viewMode === "chat" 
-                  ? "bg-white shadow-lg text-purple-600 transform scale-105" 
-                  : "text-gray-600 hover:text-purple-600 hover:bg-white/50"
-              }`}
-            >
-              <img src="/assets/wihyfavicon.png" alt="WiHY" className="w-4 h-4" />
-              Ask WiHY
-            </button>
-            <button
-              onClick={handleNewScan}
-              className="px-3 py-2 rounded-xl transition-all duration-300 text-gray-600 hover:text-green-600 hover:bg-white/50 hover:scale-110"
-              title="New Scan"
-            >
-              <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
-                <path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/>
-              </svg>
-            </button>
-          </div>
-        </div>
-      </div>
+      {/* Navigation Header */}
+      <NavigationHeader
+        viewMode={viewMode}
+        onViewModeChange={setViewMode}
+        showViewToggle={true}
+        showHistory={showHistory}
+        onHistoryToggle={() => setShowHistory(!showHistory)}
+        onCameraScan={handleNewScan}
+        hasChartData={hasChartData}
+        chartData={nutritionfacts}
+        sessionId={sessionId}
+        showUploadButton={false}
+        showCameraButton={true}
+        showChartsButton={true}
+        isFixed={true}
+        dataSource="nutrition_facts"
+        fromNutritionFacts={true}
+      />
 
       {/* Main Content */}
-      {viewMode === "overview" ? (
-        <div className="min-h-screen py-8" style={{ backgroundColor: '#f0f7ff' }}>
-          <div className="max-w-3xl mx-auto p-6 space-y-8">
-            {(() => {
-              const product = nutritionfacts;
-              if (!product) return null;
+      <div className="relative min-h-screen pt-[73px]">
+        {/* Overview Content - Show/Hide with transitions */}
+        <div 
+          className={`transition-all duration-300 ease-in-out ${
+            viewMode === "overview" 
+              ? "opacity-100 translate-x-0 pointer-events-auto" 
+              : "opacity-0 -translate-x-full pointer-events-none absolute inset-0"
+          } overflow-y-auto`}
+          style={{ backgroundColor: '#f0f7ff', height: 'calc(100vh - 73px)' }}
+        >
+          <div className="py-8">
+            <div className="max-w-3xl mx-auto p-6 space-y-8">
+              {(() => {
+                const product = nutritionfacts;
+                if (!product) return null;
 
               const {
                 name, brand, imageUrl, healthScore, grade, novaScore, ultraProcessed,
@@ -504,22 +448,32 @@ const NutritionFactsPage: React.FC = () => {
                 </>
               );
             })()}
+            </div>
           </div>
         </div>
-      ) : (
-        <FullScreenChat
-          isOpen={true}
-          initialQuery={initialQuery || `Tell me more about ${nutritionfacts.name || "this food"}`}
-          initialResponse={nutritionfacts}
-          onClose={() => setViewMode("overview")}
-          isEmbedded={true}
-          onBackToOverview={() => setViewMode("overview")}
-          onNewScan={handleNewScan}
-          productName={nutritionfacts.name}
-          apiResponseData={nutritionfacts}
-          sessionId={sessionId}
-        />
-      )}
+
+        {/* Chat Content - Pre-mounted and Show/Hide with transitions */}
+        <div 
+          className={`absolute top-0 left-0 right-0 bottom-0 transition-all duration-300 ease-in-out ${
+            viewMode === "chat" 
+              ? "opacity-100 translate-x-0 pointer-events-auto" 
+              : "opacity-0 translate-x-full pointer-events-none"
+          }`}
+        >
+          <FullScreenChat
+            isOpen={viewMode === "chat"}
+            initialQuery={initialQuery || `Tell me more about ${nutritionfacts.name || "this food"}`}
+            initialResponse={nutritionfacts}
+            onClose={() => setViewMode("overview")}
+            isEmbedded={true}
+            onBackToOverview={() => setViewMode("overview")}
+            onNewScan={handleNewScan}
+            productName={nutritionfacts.name}
+            apiResponseData={nutritionfacts}
+            sessionId={sessionId}
+          />
+        </div>
+      </div>
     </div>
   );
 };

@@ -7,6 +7,7 @@ import { visionAnalysisService } from '../../services/visionAnalysisService';
 import { PlatformDetectionService } from '../../services/shared/platformDetectionService';
 import { normalizeBarcodeScan } from '../../utils/nutritionDataNormalizer';
 import ImageUploadModal from './ImageUploadModal';
+import NavigationHeader from './NavigationHeader';
 import { scanningService } from '../../services/scanningService';
 import { useDebugLog } from '../debug/DebugOverlay';
 import '../../styles/mobile-fixes.css';
@@ -122,6 +123,24 @@ const FullScreenChat = forwardRef<FullScreenChatRef, FullScreenChatProps>(({
                 console.warn('Failed to store in sessionStorage:', e);
               }
               
+              // If embedded in NutritionFacts page, close chat and let parent handle navigation
+              if (isEmbedded) {
+                onClose(); // Close the chat first
+                // Then navigate to new product from the parent component context
+                setTimeout(() => {
+                  navigate('/nutritionfacts', {
+                    state: {
+                      nutritionfacts: nutritionfacts,
+                      sessionId: (barcodeResult as any).sessionId || currentSessionId,
+                      fromChat: true
+                    },
+                    replace: true // Replace current page to avoid navigation stack issues
+                  });
+                }, 100);
+                return;
+              }
+              
+              // Otherwise, navigate to NutritionFacts page directly
               navigate('/nutritionfacts', {
                 state: {
                   nutritionfacts: nutritionfacts,
@@ -1036,26 +1055,36 @@ const FullScreenChat = forwardRef<FullScreenChatRef, FullScreenChatProps>(({
     }
   };
 
-  if (!isOpen) return null;
+  // For embedded mode, always render but hide with CSS for smooth transitions
+  // For standalone mode, return null when closed to save resources
+  if (!isOpen && !isEmbedded) return null;
 
   // Determine if we should show chat history (only if there's an active session with history)
   const shouldShowHistory = hasActiveSession && (messages.length > 0 || (initialQuery && initialResponse));
 
   return (
     <>
-      {/* Backdrop overlay for both mobile and desktop */}
-      <div 
-        className={`fixed inset-0 bg-black/50 z-[9999] transition-opacity duration-300 ease-in-out ${
-          isOpen ? 'opacity-100' : 'opacity-0'
-        }`}
-        onClick={onClose} 
-      />
+      {/* Backdrop overlay - only show for standalone (non-embedded) mode */}
+      {!isEmbedded && (
+        <div 
+          className={`fixed inset-0 bg-black/50 z-[9999] transition-opacity duration-300 ease-in-out ${
+            isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
+          }`}
+          onClick={onClose} 
+        />
+      )}
 
       <div 
-        className={`fullscreen-chat-container fixed inset-0 ${
-          isMobile ? 'w-screen h-screen' : 'w-auto h-auto'
-        } bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 z-[10000] flex flex-col font-sans overflow-hidden transform transition-transform duration-300 ease-in-out ${
-          isOpen ? 'translate-x-0' : 'translate-x-full'
+        className={`fullscreen-chat-container ${
+          isEmbedded ? 'w-full h-full' : `fixed inset-0 ${isMobile ? 'w-screen h-screen' : 'w-auto h-auto'}`
+        } bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 ${
+          isEmbedded ? '' : 'z-[10000]'
+        } flex flex-col font-sans overflow-hidden ${
+          isEmbedded 
+            ? '' 
+            : `transform transition-transform duration-300 ease-in-out ${
+                isOpen ? 'translate-x-0' : 'translate-x-full'
+              }`
         }`}
         style={{
           paddingTop: PlatformDetectionService.isNative() ? '48px' : undefined
@@ -1156,103 +1185,46 @@ const FullScreenChat = forwardRef<FullScreenChatRef, FullScreenChatProps>(({
       {/* Main Chat Area */}
       <div className="flex-1 flex flex-col h-full overflow-hidden">
 
-        {/* Header Navigation */}
-        <div className="bg-white border-b border-gray-200 shadow-sm">
-          <div className="flex items-center justify-between px-4 py-3">
-            <button
-              onClick={() => {
-                if (isMobile) {
-                  setShowMobileHistory(!showMobileHistory);
-                } else {
-                  setShowDesktopHistory(!showDesktopHistory);
-                }
-              }}
-              className="w-10 h-10 rounded-xl bg-gray-100/60 hover:bg-gray-200/80 flex items-center justify-center text-gray-700 hover:text-gray-900 transition-all duration-200 backdrop-blur-sm"
-              title="Toggle History"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            </button>
-            
-            {/* Pill Toggle Buttons - Moved from below */}
-            <div className="flex items-center gap-2">
-              <div className="inline-flex rounded-2xl bg-gray-100 p-1.5 text-sm border border-gray-200">
-                {/* Upload button - clickable to go back or open image modal on desktop */}
-                {isEmbedded && onBackToOverview ? (
-                  <button
-                    onClick={onBackToOverview}
-                    className={`px-4 py-2 rounded-xl transition-all duration-300 font-medium flex items-center gap-2 text-gray-600 hover:text-blue-600 hover:bg-white/50`}
-                  >
-                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/>
-                    </svg>
-                    Upload
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => setIsUploadModalOpen(true)}
-                    className={`px-4 py-2 rounded-xl transition-all duration-300 font-medium flex items-center gap-2 text-gray-600 hover:text-blue-600 hover:bg-white/50`}
-                  >
-                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/>
-                    </svg>
-                    Upload
-                  </button>
-                )}
-                
-                <button
-                  className={`px-4 py-2 rounded-xl transition-all duration-300 font-medium flex items-center gap-2 bg-white shadow-lg text-purple-600 transform scale-105`}
-                  disabled
-                >
-                  <img src="/assets/wihyfavicon.png" alt="WiHY" className="w-4 h-4" />
-                  Ask WiHY
-                </button>
-                
-                <button
-                  onClick={handleDirectCameraScan}
-                  className="px-3 py-2 rounded-xl transition-all duration-300 text-gray-600 hover:text-green-600 hover:bg-white/50 hover:scale-110"
-                  title="New Scan"
-                >
-                  <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
-                    <path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/>
-                  </svg>
-                </button>
-              </div>
-            </div>
-            
-            <div className="relative">
-              <button
-                onClick={() => {
-                  if (hasChartData && apiResponseData) {
-                    navigate('/dashboard', {
-                      state: {
-                        fromChat: true,
-                        apiResponse: apiResponseData,
-                        dataSource: 'wihy',
-                        sessionId: currentSessionId,
-                        initialTab: 'overview'
-                      }
-                    });
-                  } else {
-                    onClose();
+        {/* Header Navigation - Only show when not embedded */}
+        {!isEmbedded && (
+          <NavigationHeader
+            viewMode="chat"
+            showViewToggle={false}
+            showHistory={isMobile ? showMobileHistory : showDesktopHistory}
+            onHistoryToggle={() => {
+              if (isMobile) {
+                setShowMobileHistory(!showMobileHistory);
+              } else {
+                setShowDesktopHistory(!showDesktopHistory);
+              }
+            }}
+            onCameraScan={handleDirectCameraScan}
+            onImageUpload={() => setIsUploadModalOpen(true)}
+            onChartsView={() => {
+              if (hasChartData && apiResponseData) {
+                navigate('/dashboard', {
+                  state: {
+                    fromChat: true,
+                    apiResponse: apiResponseData,
+                    dataSource: 'wihy',
+                    sessionId: currentSessionId,
+                    initialTab: 'overview'
                   }
-                }}
-                title={hasChartData ? "View Interactive Charts" : "Back to Search Screen"}
-                className="p-1 rounded transition-all hover:opacity-90"
-              >
-                <img 
-                  src="/assets/Chartlogo.png" 
-                  alt="View Charts"
-                  className="w-16 h-16 object-contain"
-                />
-              </button>
-              {hasChartData && (
-                <div className="absolute top-2 right-2 w-3 h-3 rounded-full bg-emerald-500 border-2 border-white shadow-sm" />
-              )}
-            </div>
-          </div>
-        </div>
+                });
+              } else {
+                onClose();
+              }
+            }}
+            hasChartData={hasChartData}
+            chartData={apiResponseData}
+            sessionId={currentSessionId}
+            showUploadButton={true}
+            showCameraButton={true}
+            showChartsButton={true}
+            dataSource="wihy"
+            fromNutritionFacts={false}
+          />
+        )}
 
         {/* Messages Container - Single scroll area */}
         <div className="flex-1 flex flex-col overflow-hidden">
@@ -1404,7 +1376,10 @@ const FullScreenChat = forwardRef<FullScreenChatRef, FullScreenChatProps>(({
             isMobile ? 'px-6 pt-4 pb-3' : 'px-8 py-6'
           }`}
           style={{
-            marginBottom: PlatformDetectionService.isNative() ? '56px' : '0px'
+            marginBottom: PlatformDetectionService.isNative() ? '56px' : '0px',
+            position: isMobile ? 'sticky' : 'relative',
+            bottom: isMobile ? '0' : 'auto',
+            zIndex: isMobile ? '50' : 'auto'
           }}
         >
           <div className={`${
@@ -1474,7 +1449,7 @@ const FullScreenChat = forwardRef<FullScreenChatRef, FullScreenChatProps>(({
           scrollbar-color: rgba(0, 0, 0, 0.2) rgba(0, 0, 0, 0.05);
         }
 
-        /* Chat input container - Modern Apple/Google styling with WiHY orange brand color */
+        /* Chat input container - Orange border without shadows */
         .fullscreen-chat-container .chat-input-container {
           width: 100% !important;
           margin: 0 !important;
@@ -1490,7 +1465,7 @@ const FullScreenChat = forwardRef<FullScreenChatRef, FullScreenChatProps>(({
 
         .fullscreen-chat-container .chat-input-container:focus-within {
           border-color: #fa5f06 !important;
-          transform: translateY(-1px);
+          transform: none;
         }
 
         /* Chat input overrides - Apple/Google style - ONLY for fullscreen chat */
@@ -1545,24 +1520,21 @@ const FullScreenChat = forwardRef<FullScreenChatRef, FullScreenChatProps>(({
           background: linear-gradient(135deg, #fa5f06 0%, #e55100 100%);
           color: white;
           cursor: pointer;
-          box-shadow: 0 8px 25px rgba(250, 95, 6, 0.4);
         }
 
         .send-button.active:hover {
           background: linear-gradient(135deg, #e55100 0%, #d84315 100%);
-          box-shadow: 0 12px 35px rgba(250, 95, 6, 0.5);
-          transform: translateY(-2px) scale(1.05);
+          transform: scale(1.05);
         }
 
         .send-button.active:active {
-          transform: translateY(-1px) scale(0.98);
+          transform: scale(0.98);
         }
 
         .send-button.disabled {
           background: linear-gradient(135deg, #e5e7eb 0%, #d1d5db 100%);
           color: #9ca3af;
           cursor: not-allowed;
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
 
         /* Add subtle animations */
@@ -1617,18 +1589,34 @@ const FullScreenChat = forwardRef<FullScreenChatRef, FullScreenChatProps>(({
               sessionId: sessionId || currentSessionId,
               timestamp: Date.now()
             }));
-            console.log('[FullScreenChat] Stored backup in sessionStorage');
           } catch (e) {
             console.warn('[FullScreenChat] Failed to store in sessionStorage:', e);
           }
           
-          navigate('/nutritionfacts', {
-            state: {
-              nutritionfacts: nutritionfacts,
-              sessionId: sessionId || currentSessionId,
-              fromChat: true
-            }
-          });
+          // If embedded in NutritionFacts page, close chat and handle navigation properly
+          if (isEmbedded) {
+            onClose(); // Close the chat first
+            // Then navigate to new product from the parent component context
+            setTimeout(() => {
+              navigate('/nutritionfacts', {
+                state: {
+                  nutritionfacts: nutritionfacts,
+                  sessionId: sessionId || currentSessionId,
+                  fromChat: true
+                },
+                replace: true // Replace current page to avoid navigation stack issues
+              });
+            }, 100);
+          } else {
+            // Direct navigation when not embedded
+            navigate('/nutritionfacts', {
+              state: {
+                nutritionfacts: nutritionfacts,
+                sessionId: sessionId || currentSessionId,
+                fromChat: true
+              }
+            });
+          }
         }}
         onAnalysisComplete={(result) => {
           setIsUploadModalOpen(false);
