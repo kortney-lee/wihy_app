@@ -1,53 +1,64 @@
-/* ==== Fullscreen overlay (modal) ==== */
+/* ==== Google-style fullscreen overlay ==== */
 .spinner-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(17, 24, 39, 0.6); /* darker, matches screenshot mood */
-  display: grid;
-  place-items: center;
+  background: rgba(0, 0, 0, 0.75); /* Darker overlay */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   z-index: 2000;
-  backdrop-filter: blur(4px);
+  backdrop-filter: blur(2px);
 }
 
-/* ==== Card container ==== */
+/* ==== Simple container for Google-style ==== */
 .spinner-container {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 36px 40px 28px;
-  background: #fff;
-  border-radius: 16px;
-  box-shadow:
-    0 25px 50px -12px rgba(0,0,0,.35),
-    0 10px 20px rgba(0,0,0,.12);
-  border: 1px solid #e8f0fe;
-  width: min(640px, calc(100vw - 48px));
   text-align: center;
-  animation: spinner-fade-in .18s ease-out;
+  animation: spinner-fade-in 0.2s ease-out;
 }
 
-/* Title + body text */
+/* Google-style white text */
 .spinner-title {
-  margin: 8px 0 4px;
-  font-size: 24px;
-  font-weight: 700;
-  color: #111827;
+  margin: 24px 0 8px;
+  font-size: 20px;
+  font-weight: 400;
+  color: #ffffff;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 .spinner-text,
 .spinner-message {
-  color: #4b5563;
-  font-size: 16px;
-  margin: 4px 0 18px;
+  color: #ffffff;
+  font-size: 14px;
+  margin: 0 0 8px;
+  opacity: 0.9;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
-/* ==== Arc Spinner (replaces GIF) ==== */
+/* ==== GIF Spinner ==== */
+.spinner-gif {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.spinner-image {
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
+}
+
+/* ==== Arc Spinner (fallback) ==== */
 .arc-spinner {
   width: 40px;
   height: 40px;
   border-radius: 50%;
   border: 4px solid transparent;
-  border-top-color: #3b82f6;  /* blue accent */
-  border-left-color: #3b82f6;
+  border-top-color: #ffffff;
+  border-left-color: #ffffff;
   transform: rotate(45deg);
   animation: spinner-rotate 1s linear infinite;
   margin-bottom: 8px;

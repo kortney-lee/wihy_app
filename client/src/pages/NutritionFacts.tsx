@@ -43,14 +43,61 @@ const NutritionFactsPage: React.FC = () => {
   }, []);
 
   // ALL HOOKS MUST BE AT THE TOP - before any conditional returns
-  // Use state to manage nutrition facts data instead of reading directly from location
-  const [initialQuery, setInitialQuery] = useState<string | undefined>();
-  const [nutritionfacts, setNutritionfacts] = useState<NutritionFactsData | null>(null);
-  const [sessionId, setSessionId] = useState<string | undefined>();
+  // Initialize state directly from location.state to avoid blank screen flash
+  const locationState = (location.state as LocationState) || {};
+  const initialData = locationState.nutritionfacts ?? (locationState.apiResponse as NutritionFactsData | undefined);
+  
+  const [initialQuery, setInitialQuery] = useState<string | undefined>(locationState.initialQuery);
+  const [nutritionfacts, setNutritionfacts] = useState<NutritionFactsData | null>(initialData || null);
+  const [sessionId, setSessionId] = useState<string | undefined>(locationState.sessionId);
   const [viewMode, setViewMode] = useState<ViewMode>("overview");
   const [isMobile, setIsMobile] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
   const [hasChartData, setHasChartData] = useState(true); // Always true for nutrition facts
+  const [cameFromChat, setCameFromChat] = useState(locationState.fromChat === true);
+  
+  // Touch swipe handling
+  const touchStartX = useRef<number>(0);
+  const touchEndX = useRef<number>(0);
+  const overviewScrollPos = useRef<number>(0);
+  const overviewRef = useRef<HTMLDivElement>(null);
+  
+  // Save scroll position when switching away from overview
+  useEffect(() => {
+    if (viewMode !== 'overview' && overviewRef.current) {
+      overviewScrollPos.current = overviewRef.current.scrollTop;
+    }
+  }, [viewMode]);
+  
+  // Restore scroll position when returning to overview
+  useEffect(() => {
+    if (viewMode === 'overview' && overviewRef.current) {
+      overviewRef.current.scrollTop = overviewScrollPos.current;
+    }
+  }, [viewMode]);
+  
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+  };
+  
+  const handleTouchMove = (e: React.TouchEvent) => {
+    touchEndX.current = e.touches[0].clientX;
+  };
+  
+  const handleTouchEnd = () => {
+    const swipeThreshold = 50; // minimum swipe distance
+    const diff = touchStartX.current - touchEndX.current;
+    
+    if (Math.abs(diff) > swipeThreshold) {
+      if (diff > 0 && viewMode === "overview") {
+        // Swiped left - show chat
+        setViewMode("chat");
+      } else if (diff < 0 && viewMode === "chat") {
+        // Swiped right - show overview
+        setViewMode("overview");
+      }
+    }
+  };
   
   // Log view mode changes
   React.useEffect(() => {
@@ -73,6 +120,7 @@ const NutritionFactsPage: React.FC = () => {
       setNutritionfacts(dataFromState);
       setInitialQuery(state.initialQuery);
       if (state.sessionId) setSessionId(state.sessionId);
+      setCameFromChat(state.fromChat === true);
     } else {
       // No data - show empty state instead of redirecting
       setNutritionfacts(null);
@@ -234,12 +282,16 @@ const NutritionFactsPage: React.FC = () => {
       <div className="relative min-h-screen pt-[73px]">
         {/* Overview Content - Show/Hide with transitions */}
         <div 
-          className={`transition-all duration-300 ease-in-out ${
+          ref={overviewRef}
+          className={`transition-all duration-250 ease-in-out ${
             viewMode === "overview" 
               ? "opacity-100 translate-x-0 pointer-events-auto" 
               : "opacity-0 -translate-x-full pointer-events-none absolute inset-0"
           } overflow-y-auto`}
           style={{ backgroundColor: '#f0f7ff', height: 'calc(100vh - 73px)' }}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
         >
           <div className="py-8">
             <div className="max-w-3xl mx-auto p-6 space-y-8">
@@ -454,7 +506,7 @@ const NutritionFactsPage: React.FC = () => {
 
         {/* Chat Content - Pre-mounted and Show/Hide with transitions */}
         <div 
-          className={`absolute top-0 left-0 right-0 bottom-0 transition-all duration-300 ease-in-out ${
+          className={`absolute top-0 left-0 right-0 bottom-0 transition-all duration-250 ease-in-out ${
             viewMode === "chat" 
               ? "opacity-100 translate-x-0 pointer-events-auto" 
               : "opacity-0 translate-x-full pointer-events-none"
