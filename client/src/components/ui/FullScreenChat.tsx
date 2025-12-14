@@ -1077,7 +1077,7 @@ const FullScreenChat = forwardRef<FullScreenChatRef, FullScreenChatProps>(({
       <div 
         className={`fullscreen-chat-container ${
           isEmbedded ? 'w-full h-full' : `fixed inset-0 ${isMobile ? 'w-screen h-screen' : 'w-auto h-auto'}`
-        } bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 ${
+        } bg-blue-50 ${
           isEmbedded ? '' : 'z-[10000]'
         } flex flex-col font-sans overflow-hidden ${
           isEmbedded 
@@ -1372,7 +1372,7 @@ const FullScreenChat = forwardRef<FullScreenChatRef, FullScreenChatProps>(({
 
         {/* Input */}
         <div 
-          className={`border-t border-gray-100 bg-gradient-to-r from-white via-blue-50/30 to-white backdrop-blur-xl flex-shrink-0 ${
+          className={`border-t border-gray-100 bg-white backdrop-blur-xl flex-shrink-0 ${
             isMobile ? 'px-6 pt-4 pb-3' : 'px-8 py-6'
           }`}
           style={{

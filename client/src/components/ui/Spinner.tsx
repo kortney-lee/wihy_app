@@ -1,7 +1,6 @@
 // Spinner.tsx
 import React, { useEffect } from 'react';
 import ReactDOM from 'react-dom';
-import './Spinner.css';
 
 interface SpinnerProps {
   /** Full-screen overlay modal */
@@ -41,7 +40,7 @@ export default function Spinner({
   progress,
   disableEsc = true,
   onClose,
-  type = 'gif', // Force it to always be GIF
+  type = 'gif',
   gifSrc = '/assets/whatishealthyspinner.gif'
 }: SpinnerProps) {
   // Optional: trap/allow ESC when overlayed
@@ -64,9 +63,9 @@ export default function Spinner({
   // Non-overlay inline spinner (kept for compatibility)
   if (!overlay) {
     return (
-      <div className="clean-loader" role="status" aria-live="polite">
-        <div className="arc-spinner" />
-        {subtitle && <p style={{ marginTop: 12 }} className="spinner-text">{subtitle}</p>}
+      <div className="flex flex-col items-center" role="status" aria-live="polite">
+        <div className="w-10 h-10 border-4 border-gray-300 border-t-blue-500 rounded-full animate-spin" />
+        {subtitle && <p className="mt-3 text-gray-600 text-sm">{subtitle}</p>}
       </div>
     );
   }
@@ -79,32 +78,24 @@ export default function Spinner({
       : undefined;
 
   const modal = (
-    <div className="spinner-overlay" role="dialog" aria-modal="true" aria-labelledby="spinner-title" aria-describedby="spinner-subtitle">
-      <div className="spinner-container">
-        {/* Always show GIF for testing */}
-        <div className="spinner-gif">
+    <div 
+      className="fixed inset-0 bg-black/75 backdrop-blur-sm flex flex-col items-center justify-center z-[2000] animate-in fade-in duration-200" 
+      role="dialog" 
+      aria-modal="true" 
+      aria-labelledby="spinner-title" 
+      aria-describedby="spinner-subtitle"
+    >
+      <div className="flex flex-col items-center text-center">
+        {/* Google-style GIF spinner */}
+        <div className="mb-4">
           <img 
-            src="/assets/whatishealthyspinner.gif" 
+            src={gifSrc} 
             alt="Loading..." 
-            className="spinner-image"
+            className="w-16 h-16 object-contain"
           />
         </div>
-        <h2 id="spinner-title" className="spinner-title">{title}</h2>
-        {subtitle && <p id="spinner-subtitle" className="spinner-message">{subtitle}</p>}
-
-        {type !== 'gif' && (
-          <div className="spinner-progress">
-            <div className="spinner-track">
-              <div
-                className={`spinner-fill ${clamped === undefined ? 'indeterminate' : ''}`}
-                style={clamped !== undefined ? { width: `${clamped}%` } : undefined}
-              />
-            </div>
-            <div className="spinner-percent">
-              {clamped !== undefined ? `${clamped}% Complete` : 'Working…'}
-            </div>
-          </div>
-        )}
+        <h2 id="spinner-title" className="text-white text-xl font-normal mb-2 drop-shadow-md">{title}</h2>
+        {subtitle && <p id="spinner-subtitle" className="text-white/90 text-sm drop-shadow-sm">{subtitle}</p>}
       </div>
     </div>
   );
