@@ -1,5 +1,5 @@
 // src/components/dashboard/MyProgressDashboard.tsx
-import React, { useState, useMemo, useCallback } from "react";
+import React, { useState, useMemo, useCallback, useRef, useEffect } from "react";
 import { WorkoutProgramGrid, ExerciseRowView } from "./WorkoutProgramGrid";
 
 type Priority = {
@@ -298,6 +298,16 @@ const MyProgressDashboard: React.FC<MyProgressDashboardProps> = ({
   // Workout sub-tab: Today workout vs Program grid
   const [workoutTab, setWorkoutTab] = useState<"today" | "program">("today");
 
+  // Horizontal scroll/swipe navigation refs and state
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [scrollLeft, setScrollLeft] = useState(0);
+
+  // View tab indices for horizontal navigation
+  const viewTabs = ["today", "week", "history"] as const;
+  const currentTabIndex = viewTabs.indexOf(viewTab);
+
   const hasCoachFocus = Boolean(motivation) || priorities.length > 0;
 
   // Weekly summary from history (latest up to 7 entries)
@@ -342,6 +352,94 @@ const MyProgressDashboard: React.FC<MyProgressDashboardProps> = ({
     },
     [onToggleAction]
   );
+
+  // Horizontal swipe navigation handlers
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    if (!scrollContainerRef.current) return;
+    
+    setIsDragging(true);
+    setStartX(e.pageX - scrollContainerRef.current.offsetLeft);
+    setScrollLeft(scrollContainerRef.current.scrollLeft);
+  }, []);
+
+  const handleMouseMove = useCallback((e: React.MouseEvent) => {
+    if (!isDragging || !scrollContainerRef.current) return;
+    
+    e.preventDefault();
+    const x = e.pageX - scrollContainerRef.current.offsetLeft;
+    const walk = (x - startX) * 2; // Scroll speed multiplier
+    scrollContainerRef.current.scrollLeft = scrollLeft - walk;
+  }, [isDragging, startX, scrollLeft]);
+
+  const handleMouseUp = useCallback(() => {
+    if (!scrollContainerRef.current || !isDragging) return;
+    
+    setIsDragging(false);
+    
+    // Snap to nearest section based on scroll position
+    const containerWidth = scrollContainerRef.current.clientWidth;
+    const scrollPosition = scrollContainerRef.current.scrollLeft;
+    const sectionIndex = Math.round(scrollPosition / containerWidth);
+    const newTab = viewTabs[Math.max(0, Math.min(sectionIndex, viewTabs.length - 1))];
+    
+    if (newTab !== viewTab) {
+      setViewTab(newTab);
+    }
+    
+    // Smooth scroll to the correct position
+    scrollContainerRef.current.scrollTo({
+      left: sectionIndex * containerWidth,
+      behavior: 'smooth'
+    });
+  }, [isDragging, viewTab, viewTabs]);
+
+  // Touch handlers for mobile swipe navigation
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    if (!scrollContainerRef.current) return;
+    
+    const touch = e.touches[0];
+    setStartX(touch.pageX - scrollContainerRef.current.offsetLeft);
+    setScrollLeft(scrollContainerRef.current.scrollLeft);
+  }, []);
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    if (!scrollContainerRef.current) return;
+    
+    const touch = e.touches[0];
+    const x = touch.pageX - scrollContainerRef.current.offsetLeft;
+    const walk = (x - startX) * 1.5; // Touch scroll speed
+    scrollContainerRef.current.scrollLeft = scrollLeft - walk;
+  }, [startX, scrollLeft]);
+
+  const handleTouchEnd = useCallback(() => {
+    if (!scrollContainerRef.current) return;
+    
+    // Snap to nearest section
+    const containerWidth = scrollContainerRef.current.clientWidth;
+    const scrollPosition = scrollContainerRef.current.scrollLeft;
+    const sectionIndex = Math.round(scrollPosition / containerWidth);
+    const newTab = viewTabs[Math.max(0, Math.min(sectionIndex, viewTabs.length - 1))];
+    
+    if (newTab !== viewTab) {
+      setViewTab(newTab);
+    }
+    
+    scrollContainerRef.current.scrollTo({
+      left: sectionIndex * containerWidth,
+      behavior: 'smooth'
+    });
+  }, [viewTab, viewTabs]);
+
+  // Scroll to active tab when tab changes via buttons
+  useEffect(() => {
+    if (scrollContainerRef.current) {
+      const containerWidth = scrollContainerRef.current.clientWidth;
+      scrollContainerRef.current.scrollTo({
+        left: currentTabIndex * containerWidth,
+        behavior: 'smooth'
+      });
+    }
+  }, [currentTabIndex]);
 
   const renderCoachFocus = () => {
     if (!hasCoachFocus) return null;
@@ -994,40 +1092,114 @@ const MyProgressDashboard: React.FC<MyProgressDashboardProps> = ({
   };
 
   return (
-    <div className="w-full bg-gradient-to-br from-blue-50/30 via-indigo-50/20 to-purple-50/30 min-h-[70vh] relative px-6 sm:px-8 pb-8 pt-2">
-      {/* Header */}
-      <header className="flex flex-col gap-3 pb-6 pt-6 px-4">
+    <div className="w-full bg-blue-50 min-h-[70vh] relative">
+      {/* Header - Fixed position for tab navigation */}
+      <header className="sticky top-0 z-10 bg-blue-50/90 backdrop-blur-sm border-b border-white/20 pb-4 pt-6 px-6 sm:px-8">
         {/* View Tabs */}
-        <div className="mt-4 flex justify-start px-2 py-2">
+        <div className="flex justify-center">
           <div className="flex gap-2 bg-white/60 backdrop-blur-sm p-1.5 rounded-2xl border border-white/30 shadow-lg">
-            {(["today", "week", "history"] as const).map((tab) => (
-            <button
-              key={tab}
-              type="button"
-              onClick={() => setViewTab(tab)}
-              className={`px-6 py-3 text-sm font-medium rounded-xl transition-all duration-200 ${
-                viewTab === tab
-                  ? "bg-white text-gray-900 shadow-lg border border-gray-200/50"
-                  : "bg-transparent text-gray-600 hover:text-gray-900 hover:bg-white/50 hover:shadow-md"
-              }`}
-            >
-              {tab === "today"
-                ? "Today"
-                : tab === "week"
-                ? "Week"
-                : "History"}
-            </button>
+            {viewTabs.map((tab, index) => (
+              <button
+                key={tab}
+                type="button"
+                onClick={() => setViewTab(tab)}
+                className={`px-6 py-3 text-sm font-medium rounded-xl transition-all duration-200 ${
+                  viewTab === tab
+                    ? "bg-white text-gray-900 shadow-lg border border-gray-200/50"
+                    : "bg-transparent text-gray-600 hover:text-gray-900 hover:bg-white/50 hover:shadow-md"
+                }`}
+              >
+                {tab === "today"
+                  ? "Today"
+                  : tab === "week"
+                  ? "Week"
+                  : "History"}
+              </button>
             ))}
           </div>
         </div>
+        
+        {/* Swipe hint for mobile */}
+        <div className="flex justify-center mt-3 md:hidden">
+          <span className="text-xs text-gray-500 flex items-center gap-1">
+            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16l-4-4m0 0l4-4m-4 4h18" />
+            </svg>
+            Swipe to navigate
+            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+            </svg>
+          </span>
+        </div>
       </header>
 
-      {/* View Content */}
-      {viewTab === "today" && renderTodayView()}
-      {viewTab === "week" && renderWeekView()}
-      {viewTab === "history" && (
-        <div className="max-w-3xl mx-auto mt-2">{renderHistoryView()}</div>
-      )}
+      {/* Horizontal Scroll Container - Swipeable Dashboard Sections */}
+      <div 
+        ref={scrollContainerRef}
+        className="horizontal-scroll-container flex overflow-x-auto snap-x snap-mandatory scrollbar-hide cursor-grab active:cursor-grabbing"
+        style={{
+          scrollBehavior: isDragging ? 'auto' : 'smooth',
+          WebkitOverflowScrolling: 'touch'
+        }}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseUp}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+      >
+        {/* Today Section */}
+        <div className="snap-start flex-shrink-0 w-full px-6 sm:px-8 py-6">
+          {renderTodayView()}
+        </div>
+
+        {/* Week Section */}
+        <div className="snap-start flex-shrink-0 w-full px-6 sm:px-8 py-6">
+          {renderWeekView()}
+        </div>
+
+        {/* History Section */}
+        <div className="snap-start flex-shrink-0 w-full px-6 sm:px-8 py-6">
+          <div className="max-w-3xl mx-auto">
+            {renderHistoryView()}
+          </div>
+        </div>
+      </div>
+
+      {/* CSS for horizontal scrolling behavior */}
+      <style dangerouslySetInnerHTML={{
+        __html: `
+          .horizontal-scroll-container {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+          }
+          
+          .horizontal-scroll-container::-webkit-scrollbar {
+            display: none;
+          }
+          
+          .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+          }
+          
+          .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+          }
+          
+          .horizontal-scroll-container.cursor-grab:active {
+            cursor: grabbing !important;
+          }
+          
+          .horizontal-scroll-container * {
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+          }
+        `
+      }} />
     </div>
   );
 };
