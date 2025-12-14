@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { usePlatformNavigation } from '../../hooks/usePlatformNavigation';
 
 interface NavigationHeaderProps {
   // View mode management
@@ -52,6 +53,7 @@ const NavigationHeader: React.FC<NavigationHeaderProps> = ({
   fromNutritionFacts = false
 }) => {
   const navigate = useNavigate();
+  const { platform } = usePlatformNavigation();
 
   const handleChartsClick = () => {
     if (onChartsView) {

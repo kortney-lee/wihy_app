@@ -28,8 +28,15 @@ function ensurePortal(): HTMLElement {
   if (!el) {
     el = document.createElement('div');
     el.id = portalId;
+    el.style.position = 'fixed';
+    el.style.inset = '0';
+    el.style.zIndex = '2000';
+    el.style.pointerEvents = 'none'; // Allow clicks through when empty
     document.body.appendChild(el);
   }
+  // Clear any existing spinners before adding a new one
+  el.innerHTML = '';
+  el.style.pointerEvents = 'auto'; // Block clicks when spinner is active
   return el;
 }
 
@@ -59,6 +66,18 @@ export default function Spinner({
     document.addEventListener('keydown', onKey, { capture: true });
     return () => document.removeEventListener('keydown', onKey, { capture: true } as any);
   }, [overlay, disableEsc, onClose]);
+
+  // Cleanup portal when overlay unmounts
+  useEffect(() => {
+    if (!overlay) return;
+    
+    return () => {
+      const portal = document.getElementById(portalId);
+      if (portal) {
+        portal.style.pointerEvents = 'none';
+      }
+    };
+  }, [overlay]);
 
   // Non-overlay inline spinner (kept for compatibility)
   if (!overlay) {

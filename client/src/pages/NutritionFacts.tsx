@@ -50,7 +50,7 @@ const NutritionFactsPage: React.FC = () => {
   const [initialQuery, setInitialQuery] = useState<string | undefined>(locationState.initialQuery);
   const [nutritionfacts, setNutritionfacts] = useState<NutritionFactsData | null>(initialData || null);
   const [sessionId, setSessionId] = useState<string | undefined>(locationState.sessionId);
-  const [viewMode, setViewMode] = useState<ViewMode>("overview");
+  const [viewMode, setViewMode] = useState<ViewMode>(locationState.fromChat ? "chat" : "overview");
   const [isMobile, setIsMobile] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
   const [hasChartData, setHasChartData] = useState(true); // Always true for nutrition facts

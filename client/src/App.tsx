@@ -19,6 +19,7 @@ import CoachDashboard from './components/dashboard/CoachDashboard';
 import ParentDashboard from './components/dashboard/ParentDashboard';
 import OverviewDashboard from './components/dashboard/OverviewDashboard';
 import DashboardPage from './components/dashboard/DashboardPage';
+import { PlatformNavigationExample } from './components/examples/PlatformNavigationExample';
 import { wihyAPI } from './services/wihyAPI';
 import { searchCache } from './services/searchCache';
 import { fetchNewsFeed, refreshNewsFeed, searchNewsArticles } from './services/newsService';
@@ -553,6 +554,7 @@ const App: React.FC = () => {
         <Route path="/test-individual" element={<TestIndividualComponents />} />
         <Route path="/health-dashboard" element={<ComprehensiveHealthDashboard />} />
         <Route path="/tailwind-demo" element={<TailwindDemoPage />} />
+        <Route path="/platform-demo" element={<PlatformNavigationExample />} />
         {/* Demo route - only available in development */}
         {process.env.NODE_ENV === 'development' && (
           <Route path="/demo" element={<DemoResultsPage />} />
