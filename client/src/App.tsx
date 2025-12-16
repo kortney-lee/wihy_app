@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { BrowserRouter as Router, Routes, Route, useSearchParams, useNavigate, useLocation } from 'react-router-dom';
+import { AuthProvider } from './contexts/AuthContext';
 import VHealthSearch from './components/search/VHealthSearch';
 import SearchResults from './components/search/SearchResults';
 // import HealthNewsFeed from './components/HealthNewsFeed';
@@ -534,33 +535,35 @@ const App: React.FC = () => {
   }, []);
   
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<VHealthSearch />} />
-        <Route path="/results" element={<ResultsPage />} />
-        <Route path="/nutritionfacts" element={<NutritionFactsPage />} />
-        <Route path="/debug-fullscreen" element={<DebugFullScreen />} />
-        <Route path="/about" element={<AboutPage />} />
-        <Route path="/about" element={<AboutPage />} />
-        <Route path="/privacy" element={<PrivacyPage />} />
-        <Route path="/terms" element={<TermsPage />} />
-        <Route path="/new-about" element={<NewAboutpage />} />
-        <Route path="/news" element={<NewsPage />} />
-        <Route path="/dashboard" element={<DashboardPage />} />
-        <Route path="/dashboard/overview" element={<OverviewDashboard />} />
-        <Route path="/dashboard/parent" element={<ParentDashboard />} />
-        <Route path="/test" element={<TestChartsPage />} />
-        <Route path="/test-grid" element={<TestDashboardGrid />} />
-        <Route path="/test-individual" element={<TestIndividualComponents />} />
-        <Route path="/health-dashboard" element={<ComprehensiveHealthDashboard />} />
-        <Route path="/tailwind-demo" element={<TailwindDemoPage />} />
-        <Route path="/platform-demo" element={<PlatformNavigationExample />} />
-        {/* Demo route - only available in development */}
-        {process.env.NODE_ENV === 'development' && (
-          <Route path="/demo" element={<DemoResultsPage />} />
-        )}
-      </Routes>
-    </Router>
+    <AuthProvider>
+      <Router>
+        <Routes>
+          <Route path="/" element={<VHealthSearch />} />
+          <Route path="/results" element={<ResultsPage />} />
+          <Route path="/nutritionfacts" element={<NutritionFactsPage />} />
+          <Route path="/debug-fullscreen" element={<DebugFullScreen />} />
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="/privacy" element={<PrivacyPage />} />
+          <Route path="/terms" element={<TermsPage />} />
+          <Route path="/new-about" element={<NewAboutpage />} />
+          <Route path="/news" element={<NewsPage />} />
+          <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/dashboard/overview" element={<OverviewDashboard />} />
+          <Route path="/dashboard/parent" element={<ParentDashboard />} />
+          <Route path="/test" element={<TestChartsPage />} />
+          <Route path="/test-grid" element={<TestDashboardGrid />} />
+          <Route path="/test-individual" element={<TestIndividualComponents />} />
+          <Route path="/health-dashboard" element={<ComprehensiveHealthDashboard />} />
+          <Route path="/tailwind-demo" element={<TailwindDemoPage />} />
+          <Route path="/platform-demo" element={<PlatformNavigationExample />} />
+          {/* Demo route - only available in development */}
+          {process.env.NODE_ENV === 'development' && (
+            <Route path="/demo" element={<DemoResultsPage />} />
+          )}
+        </Routes>
+      </Router>
+    </AuthProvider>
   );
 };
 
