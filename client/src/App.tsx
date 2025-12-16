@@ -10,6 +10,7 @@ import TestDashboardGrid from './pages/TestDashboardGrid';
 import TestIndividualComponents from './pages/TestIndividualComponents';
 import AboutPage from './pages/AboutPage';
 import NewAboutpage from './pages/NewAboutpage';
+import InvestorsPage from './pages/InvestorsPage';
 import PrivacyPage from './pages/PrivacyPage';
 import TermsPage from './pages/TermsPage'
 import TailwindDemoPage from './pages/TailwindDemoPage';
@@ -544,6 +545,7 @@ const App: React.FC = () => {
           <Route path="/debug-fullscreen" element={<DebugFullScreen />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/about" element={<AboutPage />} />
+          <Route path="/investors" element={<InvestorsPage />} />
           <Route path="/privacy" element={<PrivacyPage />} />
           <Route path="/terms" element={<TermsPage />} />
           <Route path="/new-about" element={<NewAboutpage />} />
