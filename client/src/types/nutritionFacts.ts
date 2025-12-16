@@ -53,7 +53,8 @@ export interface NutritionFactsData {
   // Processing / quality
   novaScore?: number;
   ultraProcessed?: boolean;
-  additives?: Additive[];
+  additives?: Record<string, string> | Additive[];
+  ingredientsText?: string;
 
   // WIHY score
   healthScore?: number;

@@ -481,6 +481,41 @@ const NutritionFactsPage: React.FC = () => {
                     </div>
                   )}
 
+                  {/* Ingredients */}
+                  {product.ingredientsText && (
+                    <div className="bg-white rounded-2xl border-0 p-6 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2 active:scale-95 active:shadow-md active:translate-y-0 cursor-pointer transform">
+                      <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                        <svg className="w-6 h-6 text-blue-600" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+                        </svg>
+                        <span className="text-gray-900">Ingredients</span>
+                      </h2>
+                      <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border-l-4 border-blue-400">
+                        <p className="text-sm text-gray-700 leading-relaxed font-medium">
+                          {product.ingredientsText}
+                        </p>
+                      </div>
+                      {product.additives && Object.keys(product.additives).length > 0 && (
+                        <div className="mt-4 pt-4 border-t border-gray-200">
+                          <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
+                            <svg className="w-5 h-5 text-orange-600" viewBox="0 0 24 24" fill="currentColor">
+                              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                            </svg>
+                            Additives Detected
+                          </h3>
+                          <div className="space-y-2">
+                            {Object.entries(product.additives).map(([code, name], idx) => (
+                              <div key={idx} className="flex items-center gap-3 p-3 bg-gradient-to-r from-orange-50 to-amber-50 rounded-lg border-l-4 border-orange-400 hover:bg-gradient-to-r hover:from-orange-100 hover:to-amber-100 transition-all duration-200 cursor-pointer">
+                                <span className="px-2 py-1 bg-orange-600 text-white text-xs font-bold rounded-full">{code}</span>
+                                <span className="text-sm font-medium text-gray-700">{name as string}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
                   {/* Areas of Concern */}
                   {negatives.length > 0 && (
                     <div className="bg-white rounded-2xl border-0 p-6 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2 active:scale-95 active:shadow-md active:translate-y-0 cursor-pointer transform">
@@ -558,7 +593,7 @@ const NutritionFactsPage: React.FC = () => {
           <FullScreenChat
             isOpen={viewMode === "chat"}
             initialQuery={initialQuery || `Tell me more about ${nutritionfacts.name || "this food"}`}
-            initialResponse={nutritionfacts}
+            initialResponse={nutritionfacts?.name || "Product"}
             onClose={() => setViewMode("overview")}
             isEmbedded={true}
             onBackToOverview={() => setViewMode("overview")}

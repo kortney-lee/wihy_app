@@ -869,12 +869,15 @@ const VHealthSearch: React.FC = () => {
     // Use setTimeout to ensure modal closes before navigation
     setTimeout(() => {
       console.log('🔍 EXECUTING NAVIGATION');
+      const queryText = `Tell me about ${productName}`;
+      console.log('🔍 Initial query text:', queryText);
+      
       // Navigate to new NutritionFacts page instead of SearchResults
       navigate(`/nutritionfacts${debugParam}`, {
         state: {
-          initialQuery: `Tell me about ${productName}`,
-          nutritionfacts,
-          sessionId, // Pass session ID for continuity
+          initialQuery: queryText,
+          nutritionfacts: nutritionfacts,
+          sessionId: sessionId, // Pass session ID for continuity
           fromChat: false, // Open in overview (nutrition facts) view when scanning from camera
         },
       });
