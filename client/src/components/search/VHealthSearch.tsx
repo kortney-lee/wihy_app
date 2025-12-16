@@ -834,6 +834,7 @@ const VHealthSearch: React.FC = () => {
    * Handle barcode scan results
    */
   const handleBarcodeResult = (input: any) => {
+    console.log('🔍 HANDLE BARCODE RESULT CALLED:', input);
     debug.logScan('Barcode scan result received', { 
       hasData: !!input.data,
       barcode: input.barcode,
@@ -842,32 +843,43 @@ const VHealthSearch: React.FC = () => {
     
     const barcodeData = input.data;
     const productName = barcodeData.product?.name || barcodeData.product_info?.name || 'Unknown Product';
+    console.log('🔍 Product name extracted:', productName);
     setSearchQuery(productName);
     
     // Normalize barcode scan data to universal NutritionFactsData format
     const nutritionfacts = normalizeBarcodeScan(input);
+    console.log('🔍 Normalized nutrition facts:', nutritionfacts);
     
     setIsLoading(false);
     
     // Get current session ID from session manager
     const sessionId = sessionManager.getSessionId();
     
+    console.log('🔍 ABOUT TO NAVIGATE TO NUTRITIONFACTS');
     debug.logNavigation('Navigating to NutritionFacts from barcode', { productName, sessionId });
     
     // Preserve debug parameter if present
     const searchParams = new URLSearchParams(window.location.search);
     const debugParam = searchParams.get('debug') === 'true' ? '?debug=true' : '';
     
-    // Navigate to new NutritionFacts page instead of SearchResults
-    navigate(`/nutritionfacts${debugParam}`, {
-      state: {
-        initialQuery: `Tell me about ${productName}`,
-        nutritionfacts,
-        sessionId, // Pass session ID for continuity
-      },
-    });
-    
+    // Close modal first, then navigate after a brief delay to avoid navigation conflicts
     setIsUploadModalOpen(false);
+    console.log('🔍 MODAL CLOSED');
+    
+    // Use setTimeout to ensure modal closes before navigation
+    setTimeout(() => {
+      console.log('🔍 EXECUTING NAVIGATION');
+      // Navigate to new NutritionFacts page instead of SearchResults
+      navigate(`/nutritionfacts${debugParam}`, {
+        state: {
+          initialQuery: `Tell me about ${productName}`,
+          nutritionfacts,
+          sessionId, // Pass session ID for continuity
+          fromChat: false, // Open in overview (nutrition facts) view when scanning from camera
+        },
+      });
+      console.log('🔍 NAVIGATE CALLED');
+    }, 100);
   };
 
   /**
