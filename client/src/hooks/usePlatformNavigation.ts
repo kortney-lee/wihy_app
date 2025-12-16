@@ -37,17 +37,8 @@ export function usePlatformNavigation(): NavigationHelpers {
    */
   const openInMaps = (address: string) => {
     const encodedAddress = encodeURIComponent(address);
-    
-    if (isIOS) {
-      // Apple Maps
-      window.location.href = `maps://maps.apple.com/?q=${encodedAddress}`;
-    } else if (isAndroid) {
-      // Google Maps
-      window.location.href = `geo:0,0?q=${encodedAddress}`;
-    } else {
-      // Web fallback - Google Maps
-      window.open(`https://www.google.com/maps/search/?api=1&query=${encodedAddress}`, '_blank');
-    }
+    // Always open in web for now
+    window.open(`https://www.google.com/maps/search/?api=1&query=${encodedAddress}`, '_blank');
   };
 
   /**
@@ -56,13 +47,8 @@ export function usePlatformNavigation(): NavigationHelpers {
    * - Web: Opens in new tab
    */
   const openInNativeBrowser = (url: string) => {
-    if (isMobile) {
-      // On mobile, open in native browser
-      window.location.href = url;
-    } else {
-      // On desktop, open in new tab
-      window.open(url, '_blank', 'noopener,noreferrer');
-    }
+    // Always use window.open with _blank
+    window.open(url, '_blank', 'noopener,noreferrer');
   };
 
   /**
