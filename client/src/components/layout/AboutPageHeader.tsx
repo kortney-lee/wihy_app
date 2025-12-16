@@ -51,13 +51,7 @@ const AboutPageHeader: React.FC<AboutPageHeaderProps> = ({ isNavOpen, onToggleNa
           <a href="#technology" onClick={(e) => { e.preventDefault(); handleNavClick('#technology'); }} className="nav-link">
             Technology
           </a>
-          <a href="#market" onClick={(e) => { e.preventDefault(); handleNavClick('#market'); }} className="nav-link">
-            Market
-          </a>
-          <a href="#leadership" onClick={(e) => { e.preventDefault(); handleNavClick('#leadership'); }} className="nav-link">
-            Leadership
-          </a>
-          <a href="#investment" onClick={(e) => { e.preventDefault(); handleNavClick('#investment'); }} className="nav-link">
+          <a href="/investors" onClick={(e) => { e.preventDefault(); navigate('/investors'); }} className="nav-link">
             Investment
           </a>
           <CTAButton href="/" primary>
