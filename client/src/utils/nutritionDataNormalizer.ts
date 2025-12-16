@@ -8,18 +8,19 @@ import { NutritionFactsData, FoodSource } from '../types/nutritionFacts';
 export const normalizeBarcodeScan = (scanResult: any): NutritionFactsData => {
   // Handle BarcodeScanResult from wihyScanningService
   const data = scanResult.data || scanResult;
+  const metadata = data.metadata || scanResult.analysis?.metadata || {};
   
   return {
     source: 'barcode',
-    name: data.product?.name,
-    brand: data.product?.brand,
+    name: data.product?.name || metadata.product_name,
+    brand: data.product?.brand || metadata.brand,
     imageUrl: data.product?.image_url,
     
     // Health scores
-    healthScore: data.health_score,
-    grade: data.nutrition?.grade,
-    novaScore: data.nova_group || data.product?.nova_group,
-    ultraProcessed: (data.nova_group || data.product?.nova_group) >= 4,
+    healthScore: data.health_score || metadata.health_score,
+    grade: data.nutrition?.grade || metadata.grade,
+    novaScore: data.nova_group || data.product?.nova_group || metadata.nova_group,
+    ultraProcessed: (data.nova_group || data.product?.nova_group || metadata.nova_group) >= 4,
     
     // Nutrition data
     calories: data.nutrition?.per_100g?.energy_kcal,
@@ -31,6 +32,10 @@ export const normalizeBarcodeScan = (scanResult: any): NutritionFactsData => {
       fiber: data.nutrition?.per_100g?.fiber,
     },
     servingSize: '100g',
+    
+    // Ingredients and additives
+    ingredientsText: metadata.ingredients_text,
+    additives: metadata.additives || data.additives || {},
     
     // Insights from health_analysis
     negatives: (data.health_analysis?.alerts || []).map((alert: any) => ({
@@ -46,9 +51,6 @@ export const normalizeBarcodeScan = (scanResult: any): NutritionFactsData => {
       : [],
     
     recommendations: [],
-    
-    // Additives (if available)
-    additives: data.additives || [],
   };
 };
 

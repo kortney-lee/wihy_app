@@ -636,7 +636,10 @@ const FullScreenChat = forwardRef<FullScreenChatRef, FullScreenChatProps>(({
   useEffect(() => {
     if (initialQuery && initialResponse) {
       let responseMessage: string;
-      let userQueryMessage = initialQuery;
+      // Ensure initialQuery is a string, not an object
+      let userQueryMessage = typeof initialQuery === 'string' ? initialQuery : 
+        (initialQuery as any)?.name ? `Tell me about ${(initialQuery as any).name}` : 
+        'Tell me about this product';
       let userImageUrl: string | undefined;
       
       // Extract userQuery and image data from response if available (check ALL object types)
