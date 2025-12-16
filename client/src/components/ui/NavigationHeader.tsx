@@ -1,6 +1,8 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { usePlatformNavigation } from '../../hooks/usePlatformNavigation';
+import { useAuth } from '../../contexts/AuthContext';
+import MultiAuthLogin from '../shared/MultiAuthLogin';
 
 interface NavigationHeaderProps {
   // View mode management
@@ -54,6 +56,15 @@ const NavigationHeader: React.FC<NavigationHeaderProps> = ({
 }) => {
   const navigate = useNavigate();
   const { platform } = usePlatformNavigation();
+  const { isAuthenticated, user } = useAuth();
+  
+  // Check if running on localhost for dev mode
+  const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+  
+  // Determine if user should see dashboard or login
+  // Show dashboard icon if: authenticated OR localhost (dev mode)
+  // Otherwise show Login button
+  const shouldShowDashboard = isAuthenticated || isLocalhost;
 
   const handleChartsClick = () => {
     if (onChartsView) {
@@ -159,23 +170,48 @@ const NavigationHeader: React.FC<NavigationHeaderProps> = ({
           </div>
         </div>
         
-        {/* Charts Button */}
+        {/* Login Button or User Icon */}
         {showChartsButton && (
           <div className="relative">
-            <button
-              onClick={handleChartsClick}
-              title={hasChartData ? "View Interactive Charts" : "Back to Search Screen"}
-              className="p-1 rounded transition-all hover:opacity-90"
-            >
-              <img 
-                src="/assets/Chartlogo.png" 
-                alt="View Charts"
-                className="w-16 h-16 object-contain"
-              />
-            </button>
-            {hasChartData && (
-              <div className="absolute top-2 right-2 w-3 h-3 rounded-full bg-emerald-500 border-2 border-white shadow-sm" />
+            {shouldShowDashboard ? (
+              // Show dashboard icon for authenticated users or localhost with chart data
+              <>
+                <button
+                  onClick={handleChartsClick}
+                  title={hasChartData ? "View Dashboard" : "Dashboard"}
+                  className="p-1 rounded transition-all hover:opacity-90"
+                >
+                  <img 
+                    src="/assets/Chartlogo.png" 
+                    alt="Dashboard"
+                    className="w-16 h-16 object-contain"
+                  />
+                </button>
+                {hasChartData && (
+                  <div className="absolute top-2 right-2 w-3 h-3 rounded-full bg-emerald-500 border-2 border-white shadow-sm" />
+                )}
+              </>
+            ) : (
+              // Show Login button for non-authenticated users
+              <button
+                onClick={() => {
+                  const loginButton = document.querySelector('.navigation-login-button button');
+                  if (loginButton) {
+                    (loginButton as HTMLElement).click();
+                  }
+                }}
+                className="flex flex-col items-center justify-center p-1 transition-opacity hover:opacity-80"
+                title="Login"
+              >
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" className="text-gray-600">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/>
+                </svg>
+              </button>
             )}
+            {/* Hidden MultiAuthLogin component */}
+            <div className="navigation-login-button" style={{ display: 'none' }}>
+              <MultiAuthLogin position="top-right" />
+            </div>
           </div>
         )}
       </div>
