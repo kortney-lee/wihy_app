@@ -55,6 +55,8 @@ const NutritionFactsPage: React.FC = () => {
   const [showHistory, setShowHistory] = useState(false);
   const [hasChartData, setHasChartData] = useState(true); // Always true for nutrition facts
   const [cameFromChat, setCameFromChat] = useState(locationState.fromChat === true);
+  const [isInitialMount, setIsInitialMount] = useState(true);
+  const [slideDirection, setSlideDirection] = useState<'none' | 'left' | 'right'>('none'); // Track slide direction
   
   // Touch swipe handling
   const touchStartX = useRef<number>(0);
@@ -103,6 +105,27 @@ const NutritionFactsPage: React.FC = () => {
   React.useEffect(() => {
     // debug.logState('View mode changed', { viewMode, isMobile });
   }, [viewMode, isMobile]);
+  
+  // Disable transitions on initial mount to prevent flash
+  React.useEffect(() => {
+    // Check if this is a new scan (coming from NutritionFacts page itself)
+    const state = location.state as LocationState;
+    const isNewScan = window.history.state?.usr?.isNewScan;
+    
+    if (isNewScan) {
+      // New scan - slide in from right
+      setSlideDirection('right');
+      setIsInitialMount(false);
+    } else {
+      // First load or from home - no animation
+      setSlideDirection('none');
+      // Allow one frame to pass before enabling transitions
+      const timer = setTimeout(() => {
+        setIsInitialMount(false);
+      }, 50);
+      return () => clearTimeout(timer);
+    }
+  }, [location.state]);
   
   // Removed history logging to prevent re-render loops
 
@@ -178,14 +201,15 @@ const NutritionFactsPage: React.FC = () => {
                 console.warn('Failed to store in sessionStorage:', e);
               }
               
-              // Replace current page with new nutrition facts
+              // Navigate to new nutrition facts with right-slide animation
               navigate('/nutritionfacts', {
                 state: {
                   nutritionfacts: newNutritionfacts,
                   sessionId: (barcodeResult as any).sessionId,
-                  fromCamera: true
+                  fromChat: false, // Stay in overview mode when scanning from NutritionFacts page
+                  isNewScan: true // Flag to trigger right-slide animation
                 },
-                replace: true // Replace current page instead of adding to history
+                replace: false // Don't replace - create new history entry so back button works
               });
               return;
             }
@@ -277,16 +301,25 @@ const NutritionFactsPage: React.FC = () => {
         dataSource="nutrition_facts"
         fromNutritionFacts={true}
       />
-
       {/* Main Content */}
       <div className="relative min-h-screen pt-[73px]">
         {/* Overview Content - Show/Hide with transitions */}
         <div 
           ref={overviewRef}
-          className={`transition-all duration-250 ease-in-out ${
-            viewMode === "overview" 
-              ? "opacity-100 translate-x-0 pointer-events-auto" 
-              : "opacity-0 -translate-x-full pointer-events-none absolute inset-0"
+          className={`${
+            isInitialMount || slideDirection === 'none'
+              ? (viewMode === "overview" ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none absolute inset-0")
+              : slideDirection === 'right'
+              ? `transition-all duration-300 ease-in-out ${
+                  viewMode === "overview" 
+                    ? "opacity-100 translate-x-0 pointer-events-auto" 
+                    : "opacity-0 translate-x-full pointer-events-none absolute inset-0"
+                }`
+              : `transition-all duration-250 ease-in-out ${
+                  viewMode === "overview" 
+                    ? "opacity-100 translate-x-0 pointer-events-auto" 
+                    : "opacity-0 -translate-x-full pointer-events-none absolute inset-0"
+                }`
           } overflow-y-auto`}
           style={{ backgroundColor: '#f0f7ff', height: 'calc(100vh - 73px)' }}
           onTouchStart={handleTouchStart}
@@ -506,10 +539,20 @@ const NutritionFactsPage: React.FC = () => {
 
         {/* Chat Content - Pre-mounted and Show/Hide with transitions */}
         <div 
-          className={`absolute top-0 left-0 right-0 bottom-0 transition-all duration-250 ease-in-out ${
-            viewMode === "chat" 
-              ? "opacity-100 translate-x-0 pointer-events-auto" 
-              : "opacity-0 translate-x-full pointer-events-none"
+          className={`absolute top-0 left-0 right-0 bottom-0 ${
+            isInitialMount || slideDirection === 'none'
+              ? (viewMode === "chat" ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none")
+              : slideDirection === 'right'
+              ? `transition-all duration-300 ease-in-out ${
+                  viewMode === "chat" 
+                    ? "opacity-100 translate-x-0 pointer-events-auto" 
+                    : "opacity-0 translate-x-full pointer-events-none"
+                }`
+              : `transition-all duration-250 ease-in-out ${
+                  viewMode === "chat" 
+                    ? "opacity-100 translate-x-0 pointer-events-auto" 
+                    : "opacity-0 translate-x-full pointer-events-none"
+                }`
           }`}
         >
           <FullScreenChat
