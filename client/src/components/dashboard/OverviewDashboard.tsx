@@ -6,12 +6,13 @@ import QuickInsights from "../charts/cards/QuickInsights";
 import HealthRiskChart from "../charts/individual/HealthRiskChart";
 import NutritionAnalysisCard from "../charts/individual/NutritionAnalysisCard";
 import NovaChart from "../charts/cards/NovaChart";
+import PredictiveDashboard from "../../pages/PredictiveDashboard";
 
 interface OverviewDashboardProps {
   onAnalyze?: (userMessage: string, assistantMessage: string) => void;
 }
 
-type OverviewTab = "summary" | "insights" | "wellness" | "trends";
+type OverviewTab = "summary" | "insights" | "wellness" | "trends" | "predictive";
 
 /**
  * Build an exclude list so DashboardCharts only shows charts
@@ -44,7 +45,7 @@ const OverviewDashboard: React.FC<OverviewDashboardProps> = ({ onAnalyze }) => {
 
   const renderViewTabs = () => (
     <div className="mt-3 flex gap-2 bg-gray-100 p-1 rounded-full">
-      {(["summary", "insights", "wellness", "trends"] as const).map((tab) => (
+      {(["summary", "insights", "wellness", "trends", "predictive"] as const).map((tab) => (
         <button
           key={tab}
           type="button"
@@ -61,7 +62,9 @@ const OverviewDashboard: React.FC<OverviewDashboardProps> = ({ onAnalyze }) => {
             ? "Insights"
             : tab === "wellness"
             ? "Wellness"
-            : "Trends"}
+            : tab === "trends"
+            ? "Trends"
+            : "Predictive"}
         </button>
       ))}
     </div>
@@ -251,6 +254,7 @@ const OverviewDashboard: React.FC<OverviewDashboardProps> = ({ onAnalyze }) => {
       {viewTab === "insights" && renderInsights()}
       {viewTab === "wellness" && renderWellness()}
       {viewTab === "trends" && renderTrends()}
+      {viewTab === "predictive" && <PredictiveDashboard />}
     </div>
   );
 };

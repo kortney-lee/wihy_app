@@ -5,6 +5,7 @@ import FullScreenChat from '../components/ui/FullScreenChat';
 import ImageUploadModal from '../components/ui/ImageUploadModal';
 import VHealthSearch from '../components/search/VHealthSearch';
 import NutritionFactsDemo from '../components/demo/NutritionFactsDemo';
+import PredictiveDashboard from './PredictiveDashboard';
 import { FeatureCard, MetricCard, HighlightCard } from '../components/shared/CardComponents';
 import { CTAButton, NavLink } from '../components/shared/ButtonComponents';
 import AboutPageHeader from '../components/layout/AboutPageHeader';
@@ -438,19 +439,8 @@ const AboutPage: React.FC = () => {
                   className={`chat-frame-container ${isLoaded ? 'animate-in delay-2' : ''}`}
                 >
                   <div className="chat-frame-content">
-                    {/* Embedded preview of the chat experience */}
-                    <FullScreenChat
-                      isOpen={true}
-                      onClose={() => {}}
-                      initialQuery="What patterns do you see in my eating and activity habits?"
-                      initialResponse={`I look at patterns over time, not single days.
-
-I can help identify:
-- eating driven by routine or hunger
-- consistency in movement and workouts
-- trends that may lead toward gain, loss, or maintenance
-- small adjustments that can change direction early`}
-                    />
+                    {/* Embedded preview of the predictive dashboard */}
+                    <PredictiveDashboard />
                   </div>
                 </div>
               </div>
