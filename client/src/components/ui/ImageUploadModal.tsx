@@ -18,6 +18,7 @@ interface ImageUploadModalProps {
   title?: string;
   subtitle?: string;
   autoOpenCamera?: boolean; // Auto-trigger camera when modal opens
+  forceMobile?: boolean; // Force mobile layout regardless of device
 }
 
 const isMobileDevice = () => {
@@ -44,7 +45,8 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
   onNavigateToNutritionFacts,
   title = 'Analyze any food',
   subtitle = 'Scan barcodes, search products, or analyze images',
-  autoOpenCamera = false
+  autoOpenCamera = false,
+  forceMobile = false
 }) => {
   const debug = useDebugLog('ImageUploadModal');
   const navigate = useNavigate();
@@ -58,7 +60,7 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
 
   const fileInputRef = useRef<HTMLInputElement>(null);        // desktop & mobile (library/file)
   const lastProcessingTime = useRef<number>(0);               // prevent rapid successive calls
-  const isMobile = isMobileDevice();
+  const isMobile = forceMobile || isMobileDevice();
 
   // Helper to prevent rapid successive processing calls
   const canProcess = () => {
@@ -765,7 +767,7 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
           
           {/* Upload buttons */}
           <div style={{display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '16px', marginTop: '4px'}}>
-            {isMobile && hasCamera() && (
+            {isMobile && (hasCamera() || forceMobile) && (
               <>
                 <button 
                       className="simple-search-button" 
@@ -821,7 +823,7 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
                     </button>
               </>
             )}
-            {isMobile && !hasCamera() && (
+            {isMobile && !hasCamera() && !forceMobile && (
               <button 
                 className="simple-search-button" 
                 onClick={handleGalleryClick} 

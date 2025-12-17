@@ -472,11 +472,8 @@ body {
 }
 
 .chat-frame {
-  background: #1a1a1a;
   border-radius: 35px;
   overflow: hidden;
-  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4);
-  border: 8px solid #1a1a1a;
   position: relative;
 }
 
