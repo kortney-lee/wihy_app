@@ -1065,11 +1065,14 @@ const FullScreenChat = forwardRef<FullScreenChatRef, FullScreenChatProps>(({
     }
   };
 
-  // For embedded mode, always render but hide with CSS for smooth transitions
-  // For standalone mode, return null when closed to save resources
-  if (!isOpen && !isEmbedded) return null;
-
-  // Determine if we should show chat history (only if there's an active session with history)
+  // ============================================================================
+  // RENDER LOGIC - Keep component mounted for smooth slide-in transitions
+  // ============================================================================
+  // Previously: returned null when closed, causing component to unmount
+  // Problem: Transitions don't work when component mounts/unmounts
+  // Solution: Keep component in DOM, use CSS visibility + transform for animation
+  // Result: Smooth slide-in from right edge instead of abrupt appearance
+  // ============================================================================
   const shouldShowHistory = hasActiveSession && (messages.length > 0 || (initialQuery && initialResponse));
 
   return (
@@ -1084,17 +1087,25 @@ const FullScreenChat = forwardRef<FullScreenChatRef, FullScreenChatProps>(({
         />
       )}
 
+      {/* 
+        CHAT CONTAINER - Slides in from right as a side panel
+        - Desktop: Fixed to right edge, max-width 2xl (672px)
+        - Mobile: Full width overlay
+        - Animation: translate-x-full (off-screen right) → translate-x-0 (visible)
+        - Duration: 500ms with ease-in-out easing (slower for smoother appearance)
+        - Closing: pointer-events-none prevents interaction during slide-out
+      */}
       <div 
         className={`fullscreen-chat-container ${
-          isEmbedded ? 'w-full h-full' : `fixed inset-0 ${isMobile ? 'w-screen h-screen' : 'w-auto h-auto'}`
+          isEmbedded ? 'w-full h-full' : `fixed top-0 right-0 bottom-0 ${isMobile ? 'w-full' : 'w-full max-w-2xl'}`
         } bg-blue-50 ${
           isEmbedded ? '' : 'z-[10000]'
         } flex flex-col font-sans overflow-hidden ${
           isEmbedded 
             ? '' 
-            : `transform transition-transform duration-300 ease-in-out ${
+            : `transform transition-transform duration-500 ease-in-out ${
                 isOpen ? 'translate-x-0' : 'translate-x-full'
-              }`
+              } ${!isOpen ? 'pointer-events-none' : ''}`
         }`}
         style={{
           paddingTop: PlatformDetectionService.isNative() ? '48px' : undefined
