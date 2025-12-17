@@ -589,6 +589,9 @@ const NutritionFactsPage: React.FC = () => {
                     : "opacity-0 translate-x-full pointer-events-none"
                 }`
           }`}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
         >
           <FullScreenChat
             isOpen={viewMode === "chat"}
