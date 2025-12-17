@@ -24,6 +24,7 @@ import DashboardPage from './components/dashboard/DashboardPage';
 import TrackingDashboard from './pages/TrackingDashboard';
 import AdminLinkGenerator from './pages/AdminLinkGenerator';
 import EngagementDashboard from './pages/EngagementDashboard';
+import EngagementSignup from './pages/EngagementSignup';
 import PredictiveDashboard from './pages/PredictiveDashboard';
 import { PlatformNavigationExample } from './components/examples/PlatformNavigationExample';
 import { wihyAPI } from './services/wihyAPI';
@@ -560,6 +561,8 @@ const App: React.FC = () => {
           <Route path="/dashboard/predictive" element={<PredictiveDashboard />} />
           <Route path="/tracking-dashboard" element={<TrackingDashboard />} />
           <Route path="/tracking-admin" element={<AdminLinkGenerator />} />
+          <Route path="/engagement-signup" element={<EngagementSignup />} />
+          <Route path="/engagement-dashboard" element={<EngagementDashboard />} />
           <Route path="/engagement/:trackingId" element={<EngagementDashboard />} />
           <Route path="/test" element={<TestChartsPage />} />
           <Route path="/test-grid" element={<TestDashboardGrid />} />
