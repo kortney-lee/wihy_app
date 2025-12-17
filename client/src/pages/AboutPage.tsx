@@ -5,7 +5,6 @@ import FullScreenChat from '../components/ui/FullScreenChat';
 import ImageUploadModal from '../components/ui/ImageUploadModal';
 import VHealthSearch from '../components/search/VHealthSearch';
 import NutritionFactsDemo from '../components/demo/NutritionFactsDemo';
-import NavigationHeader from '../components/ui/NavigationHeader';
 import PredictiveDashboard from './PredictiveDashboard';
 import { FeatureCard, MetricCard, HighlightCard } from '../components/shared/CardComponents';
 import { CTAButton, NavLink } from '../components/shared/ButtonComponents';
@@ -16,7 +15,6 @@ import PublicationTimelineChartDemo from '../components/charts/cards/Publication
 import { PlatformDetectionService } from '../services/shared/platformDetectionService';
 import { LinkTrackingService } from '../components/tracking/LinkTracker';
 import { normalizeBarcodeScan } from '../utils/nutritionDataNormalizer';
-import { NutritionFactsData } from '../types/nutritionFacts';
 import '../styles/AboutPage.css';
 import '../styles/MobileAboutPage.css';
 
@@ -30,8 +28,6 @@ const AboutPage: React.FC = () => {
   const [showWaitlistPopup, setShowWaitlistPopup] = useState(false);
   const [hasDismissedPopup, setHasDismissedPopup] = useState(false);
   const [hasUsedDemo, setHasUsedDemo] = useState(false);
-  const [scannedNutritionData, setScannedNutritionData] = useState<NutritionFactsData | null>(null);
-  const [demo3ViewMode, setDemo3ViewMode] = useState<'overview' | 'chat'>('overview');
   
   // Ref to monitor the chat container specifically
   const chatContainerRef = React.useRef<HTMLDivElement>(null);
@@ -275,18 +271,17 @@ const AboutPage: React.FC = () => {
                       onClose={() => {}}
                       onNavigateToNutritionFacts={(data, sessionId) => {
                         console.log('[AboutPage] Raw barcode data received:', data);
-                        // Normalize the barcode scan result
+                        // Normalize the barcode scan result before navigating
                         const nutritionfacts = normalizeBarcodeScan(data);
                         console.log('[AboutPage] Normalized data:', nutritionfacts);
-                        // Update chat-demo-3 with scanned data
-                        setScannedNutritionData(nutritionfacts);
-                        // Scroll to chat-demo-3 to show the result
-                        setTimeout(() => {
-                          const demo3 = document.getElementById('chat-demo-3');
-                          if (demo3) {
-                            demo3.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                          }
-                        }, 300);
+                        // Navigate to nutrition facts page with properly formatted data
+                        navigate('/nutritionfacts', { 
+                          state: { 
+                            nutritionfacts: nutritionfacts,
+                            sessionId: sessionId,
+                            fromDemo: true 
+                          } 
+                        });
                       }}
                       onAnalysisComplete={(result) => {
                         console.log('[AboutPage] Image analysis - result:', result);
@@ -495,62 +490,9 @@ const AboutPage: React.FC = () => {
                   ref={chatContainerRef}
                   className={`chat-frame-container ${isLoaded ? 'animate-in delay-2' : ''}`}
                 >
-                  <div className="chat-frame-content" style={{ position: 'relative', height: '600px', overflow: 'hidden' }}>
-                    {/* Embedded preview of the nutrition facts experience with chat */}
-                    {scannedNutritionData ? (
-                      <div className="relative h-full">
-                        {/* Navigation Header */}
-                        <NavigationHeader
-                          viewMode={demo3ViewMode}
-                          onViewModeChange={setDemo3ViewMode}
-                          showViewToggle={true}
-                          showHistory={false}
-                          onHistoryToggle={() => {}}
-                          hasChartData={false}
-                          onChartsView={() => {}}
-                          dataSource="nutrition_facts"
-                          fromNutritionFacts={true}
-                          isFixed={false}
-                        />
-                        
-                        {/* Content Area */}
-                        <div className="relative" style={{ height: 'calc(100% - 73px)', overflow: 'hidden' }}>
-                          {/* Overview */}
-                          <div 
-                            className={`absolute inset-0 transition-opacity duration-300 ${
-                              demo3ViewMode === 'overview' ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
-                            }`}
-                            style={{ backgroundColor: '#f0f7ff', overflowY: 'auto' }}
-                          >
-                            <div className="py-8">
-                              <div className="max-w-3xl mx-auto p-6">
-                                <NutritionFactsDemo data={scannedNutritionData} />
-                              </div>
-                            </div>
-                          </div>
-                          
-                          {/* Chat */}
-                          <div 
-                            className={`absolute inset-0 transition-opacity duration-300 ${
-                              demo3ViewMode === 'chat' ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
-                            }`}
-                          >
-                            <FullScreenChat
-                              isOpen={demo3ViewMode === 'chat'}
-                              initialQuery={`Tell me more about ${scannedNutritionData.name || 'this food'}`}
-                              initialResponse={scannedNutritionData.name || 'Product'}
-                              onClose={() => setDemo3ViewMode('overview')}
-                              isEmbedded={true}
-                              onBackToOverview={() => setDemo3ViewMode('overview')}
-                              productName={scannedNutritionData.name}
-                              apiResponseData={scannedNutritionData}
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    ) : (
-                      <NutritionFactsDemo />
-                    )}
+                  <div className="chat-frame-content">
+                    {/* Embedded preview of the nutrition facts experience */}
+                    <NutritionFactsDemo />
                   </div>
                 </div>
               </div>
