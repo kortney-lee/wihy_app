@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import Header from '../components/shared/Header';
 import FullScreenChat from '../components/ui/FullScreenChat';
 import ImageUploadModal from '../components/ui/ImageUploadModal';
@@ -12,11 +12,13 @@ import ResearchQualityGauge from '../components/charts/cards/ResearchQualityGaug
 import StudyTypeDistributionChartDemo from '../components/charts/cards/StudyTypeDistributionChart';
 import PublicationTimelineChartDemo from '../components/charts/cards/PublicationTimelineChart';
 import { PlatformDetectionService } from '../services/shared/platformDetectionService';
+import { LinkTrackingService } from '../components/tracking/LinkTracker';
 import '../styles/AboutPage.css';
 import '../styles/MobileAboutPage.css';
 
 const AboutPage: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const currentYear = new Date().getFullYear();
   const [isLoaded, setIsLoaded] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
@@ -27,6 +29,19 @@ const AboutPage: React.FC = () => {
   
   // Ref to monitor the chat container specifically
   const chatContainerRef = React.useRef<HTMLDivElement>(null);
+
+  // Handle outbound click tracking (Kickstarter, Instagram, etc.)
+  const handleKickstarterClick = () => {
+    // Extract tracking ID from URL if present (e.g., ?ref=partner_john)
+    const params = new URLSearchParams(location.search);
+    const trackingId = params.get('ref') || 'direct_website';
+    const campaign = params.get('campaign') || params.get('utm_campaign') || 'about_page';
+    
+    const kickstarterUrl = 'https://www.kickstarter.com/projects/wihy/wihy-a-new-way-to-explore-food-knowledge-and-choices';
+    
+    // Track the outbound click with full attribution chain
+    LinkTrackingService.trackOutboundClick(trackingId, kickstarterUrl, campaign);
+  };
 
   useEffect(() => {
     setIsLoaded(true);
@@ -41,7 +56,7 @@ const AboutPage: React.FC = () => {
     return () => {
       document.body.classList.remove('platform-android');
     };
-  }, []);
+  }, []); // Only run on mount, not when location.search changes
 
   // Simple automation: show popup after scroll or a short delay
   useEffect(() => {
@@ -191,13 +206,13 @@ const AboutPage: React.FC = () => {
               </div>
 
               <div className={`hero-actions ${isLoaded ? 'animate-in delay-4' : ''}`}>
-                <CTAButton href="#demo" primary>
+                <CTAButton href="#chat-demo-1" primary>
                   See What WIHY Can Do
                 </CTAButton>
               </div>
             </div> {/* End hero-left */}
 
-            <div className="hero-right" id="chat-demo">
+            <div className="hero-right" id="chat-demo-1">
               <div className="chat-frame">
                 <div 
                   ref={chatContainerRef}
@@ -218,7 +233,7 @@ const AboutPage: React.FC = () => {
       <header className="hero-header1" style={{ background: 'white' }}>
         <div className="hero-content">
           <div className="hero-container" style={{ background: 'white' }}>
-            <div className="hero-right" id="chat-demo">
+            <div className="hero-right" id="chat-demo-2">
               <div className="chat-frame">
                 <div 
                   ref={chatContainerRef}
@@ -308,7 +323,7 @@ const AboutPage: React.FC = () => {
               </div>
 
               <div className={`hero-actions ${isLoaded ? 'animate-in delay-4' : ''}`}>
-                <CTAButton href="#demo" primary>
+                <CTAButton href="#chat-demo-2" primary>
                   Try Universal Scanning
                 </CTAButton>
               </div>
@@ -389,13 +404,13 @@ const AboutPage: React.FC = () => {
               </div>
 
               <div className={`hero-actions ${isLoaded ? 'animate-in delay-4' : ''}`}>
-                <CTAButton href="#demo" primary>
+                <CTAButton href="#chat-demo-3" primary>
                   Analyze Your Food
                 </CTAButton>
               </div>
             </div> {/* End hero-left */}
 
-            <div className="hero-right" id="chat-demo">
+            <div className="hero-right" id="chat-demo-3">
               <div className="chat-frame">
                 <div 
                   ref={chatContainerRef}
@@ -416,7 +431,7 @@ const AboutPage: React.FC = () => {
       <header className="hero-header3" style={{ background: 'white' }}>
         <div className="hero-content">
           <div className="hero-container" style={{ background: 'white' }}>
-            <div className="hero-right" id="chat-demo">
+            <div className="hero-right" id="chat-demo-4">
               <div className="chat-frame">
                 <div 
                   ref={chatContainerRef}
@@ -523,7 +538,7 @@ I can help identify:
               </div>
 
               <div className={`hero-actions ${isLoaded ? 'animate-in delay-4' : ''}`}>
-                <CTAButton href="#demo" primary>
+                <CTAButton href="#chat-demo-4" primary>
                   See Your Patterns
                 </CTAButton>
               </div>
@@ -608,13 +623,13 @@ I can help identify:
               </div>
 
               <div className={`hero-actions ${isLoaded ? 'animate-in delay-4' : ''}`}>
-                <CTAButton href="#demo" primary>
+                <CTAButton href="#chat-demo-5" primary>
                   Fact Check a Claim
                 </CTAButton>
               </div>
             </div> {/* End hero-left */}
 
-            <div className="hero-right" id="chat-demo">
+            <div className="hero-right" id="chat-demo-5">
               <div className="chat-frame">
                 <div 
                   ref={chatContainerRef}
@@ -790,6 +805,7 @@ I will also show how strong the evidence actually is.`}
               href="https://www.kickstarter.com/projects/wihy/wihy-a-new-way-to-explore-food-knowledge-and-choices"
               target="_blank"
               rel="noopener noreferrer"
+              onClick={handleKickstarterClick}
             >
               Join the WIHY Beta
             </CTAButton>
@@ -851,37 +867,64 @@ I will also show how strong the evidence actually is.`}
 
       {/* Floating automation popup (desktop/tablet) */}
       {showWaitlistPopup && !hasDismissedPopup && (
-        <div className="floating-popup">
+        <div style={{
+          position: 'fixed',
+          bottom: '24px',
+          right: '24px',
+          maxWidth: '320px',
+          backgroundColor: 'white',
+          borderRadius: '16px',
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12)',
+          padding: '20px',
+          zIndex: 1000,
+          border: '1px solid rgba(0, 0, 0, 0.08)'
+        }}>
           <button
             type="button"
-            className="floating-popup-close"
             onClick={handleDismissPopup}
             aria-label="Close popup"
+            style={{
+              position: 'absolute',
+              top: '12px',
+              right: '12px',
+              background: 'none',
+              border: 'none',
+              fontSize: '24px',
+              cursor: 'pointer',
+              color: '#666',
+              lineHeight: 1,
+              padding: '4px 8px'
+            }}
           >
             ×
           </button>
-          <div className="floating-popup-header">See WIHY explain your last meal</div>
-          <p className="floating-popup-text">
-            Open a live demo and ask WIHY to analyze what you ate today. Watch the intelligence engine work in real-time.
+          <div style={{
+            fontSize: '18px',
+            fontWeight: 600,
+            color: '#1a1a1a',
+            marginBottom: '12px',
+            paddingRight: '24px'
+          }}>
+            Join the WIHY Beta
+          </div>
+          <p style={{
+            fontSize: '14px',
+            color: '#666',
+            lineHeight: '1.5',
+            marginBottom: '16px'
+          }}>
+            Get early access through our Kickstarter and be among the first to explore food, nutrition, and health insights with WIHY.
           </p>
-          <button
-            type="button"
-            className="floating-popup-cta"
-            onClick={() => {
-              setShowWaitlistPopup(false);
-              setHasUsedDemo(true);
-              setHasDismissedPopup(false); // Allow popup to show again after scrolling
-              // Small delay to allow popup to hide before scrolling
-              setTimeout(() => {
-                const chatSection = document.getElementById('chat-demo');
-                if (chatSection) {
-                  chatSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }
-              }, 300);
-            }}
+          <CTAButton
+            primary
+            href="https://www.kickstarter.com/projects/wihy/wihy-a-new-way-to-explore-food-knowledge-and-choices"
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={handleKickstarterClick}
+            style={{ width: '100%' }}
           >
-            Ask Wihy Ai demo
-          </button>
+            Join the WIHY Beta
+          </CTAButton>
         </div>
       )}
 

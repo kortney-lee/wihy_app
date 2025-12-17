@@ -825,9 +825,16 @@ const FullScreenChat = forwardRef<FullScreenChatRef, FullScreenChatProps>(({
     }
   }, [initialQuery, initialResponse]);
 
-  // Auto-scroll to bottom
+  // Auto-scroll to bottom - scroll within container, not the entire page
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (messagesEndRef.current) {
+      // Find the scrollable parent container
+      const scrollContainer = messagesEndRef.current.closest('.overflow-y-auto');
+      if (scrollContainer) {
+        // Scroll the container to bottom instead of using scrollIntoView
+        scrollContainer.scrollTop = scrollContainer.scrollHeight;
+      }
+    }
   }, [messages]);
 
   const formatTime = (date: Date) => {
