@@ -8,7 +8,8 @@ import { NutritionFactsData, FoodSource } from '../types/nutritionFacts';
 export const normalizeBarcodeScan = (scanResult: any): NutritionFactsData => {
   // Handle BarcodeScanResult from wihyScanningService
   const data = scanResult.data || scanResult;
-  const metadata = data.metadata || scanResult.analysis?.metadata || {};
+  const metadata = data.metadata || data.analysis?.metadata || {};
+  const scanMetadata = data.scan_metadata || {};
   
   return {
     source: 'barcode',
@@ -34,7 +35,8 @@ export const normalizeBarcodeScan = (scanResult: any): NutritionFactsData => {
     servingSize: '100g',
     
     // Ingredients and additives
-    ingredientsText: metadata.ingredients_text,
+    ingredientsText: scanMetadata.ingredients_text || metadata.ingredients_text,
+    fdaIngredientAnalysis: scanMetadata.fda_ingredient_analysis || metadata.fda_ingredient_analysis,
     additives: metadata.additives || data.additives || {},
     
     // Insights from health_analysis

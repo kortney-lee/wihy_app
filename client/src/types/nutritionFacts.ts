@@ -55,6 +55,7 @@ export interface NutritionFactsData {
   ultraProcessed?: boolean;
   additives?: Record<string, string> | Additive[];
   ingredientsText?: string;
+  fdaIngredientAnalysis?: any;
 
   // WIHY score
   healthScore?: number;
