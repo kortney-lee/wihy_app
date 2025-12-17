@@ -203,10 +203,14 @@
   /* Make chat fullscreen within the iframe */
   .chat-frame-container {
     width: 100% !important;
-    height: 100% !important;
+    height: 70vh !important;
+    max-height: 600px !important;
     max-width: none !important;
     margin: 0 !important;
     padding: 0 !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
   }
   
   /* Fix ImageUploadModal when embedded in AboutPage */
@@ -247,6 +251,33 @@
     height: 100% !important;
     padding: 0 !important;
     margin: 0 !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+  
+  /* Ensure VHealthSearch and PredictiveDashboard are scrollable */
+  #chat-demo-1 .chat-frame-content,
+  #chat-demo-4 .chat-frame-content {
+    max-height: 70vh !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+    display: block !important;
+  }
+  
+  /* Make sure PredictiveDashboard content is fully accessible */
+  #chat-demo-4 .chat-frame-content > * {
+    max-height: none !important;
+    height: auto !important;
+  }
+  
+  #chat-demo-1 .search-container,
+  #chat-demo-4 .dashboard-container,
+  #chat-demo-4 > div,
+  #chat-demo-4 section {
+    max-height: none !important;
+    height: auto !important;
   }
   
   /* Ensure FullScreenChat takes full iframe space */
@@ -267,6 +298,9 @@
     border-radius: 12px;
     overflow: hidden;
     max-width: 100% !important;
+    height: 70vh !important;
+    max-height: 600px !important;
+    position: relative !important;
   }
   
   .chat-frame-header {

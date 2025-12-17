@@ -268,7 +268,15 @@ const AboutPage: React.FC = () => {
                     <ImageUploadModal
                       isOpen={true}
                       onClose={() => {}}
-                      onAnalysisComplete={(result) => console.log('Analysis:', result)}
+                      onAnalysisComplete={(result) => {
+                        // Navigate to nutrition facts page with the analysis result
+                        navigate('/nutritionfacts', { 
+                          state: { 
+                            analysisResult: result,
+                            fromDemo: true 
+                          } 
+                        });
+                      }}
                       title="Scan this food"
                       subtitle="Upload a barcode, photo, ingredient list, or receipt"
                       forceMobile={true}
