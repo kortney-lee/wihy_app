@@ -96,6 +96,7 @@ export interface BarcodeScanResult {
     session_id?: string;  // Chat session ID for follow-up questions
     ingredients_text?: string;  // Raw ingredients text from product label
     fda_ingredient_analysis?: any;  // FDA analysis of ingredients
+    ask_wihy?: string;  // Pre-formatted query for /ask endpoint from scan API
   };
   error?: string;
 }
@@ -334,7 +335,8 @@ class WihyScanningService {
         data_sources: ['scanner_api', 'openfoodfacts'],
         session_id: sessionId,
         ingredients_text: metadata.ingredients_text,
-        fda_ingredient_analysis: metadata.fda_ingredient_analysis
+        fda_ingredient_analysis: metadata.fda_ingredient_analysis,
+        ask_wihy: metadata.ask_wihy || scannerData.ask_wihy  // Pre-formatted query from scan API
       }
     };
   }

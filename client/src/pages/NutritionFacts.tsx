@@ -631,7 +631,6 @@ const NutritionFactsPage: React.FC = () => {
           <FullScreenChat
             isOpen={viewMode === "chat"}
             initialQuery={initialQuery || `Tell me more about ${nutritionfacts.name || "this food"}`}
-            initialResponse={nutritionfacts?.name || "Product"}
             onClose={() => setViewMode("overview")}
             isEmbedded={true}
             onBackToOverview={() => setViewMode("overview")}
@@ -639,6 +638,7 @@ const NutritionFactsPage: React.FC = () => {
             productName={nutritionfacts.name}
             apiResponseData={nutritionfacts}
             sessionId={sessionId}
+            askWihy={nutritionfacts.askWihy}
           />
         </div>
       </div>

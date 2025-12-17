@@ -34,6 +34,7 @@ interface FullScreenChatProps {
   onNewScan?: () => void; // Callback to start a new scan
   productName?: string; // Optional product name to display in header
   sessionId?: string; // Optional session ID for maintaining conversation continuity
+  askWihy?: string; // Pre-formatted query from scan API to pass to /ask endpoint
 }
 
 // Add interface for ref methods
@@ -54,7 +55,8 @@ const FullScreenChat = forwardRef<FullScreenChatRef, FullScreenChatProps>(({
   onBackToOverview,
   onNewScan,
   productName,
-  sessionId
+  sessionId,
+  askWihy
 }, ref) => {
   const debug = useDebugLog('FullScreenChat');
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -869,7 +871,9 @@ const FullScreenChat = forwardRef<FullScreenChatRef, FullScreenChatProps>(({
         console.log('💬 FULL SCREEN CHAT: Using /ask endpoint with session context');
         // For temporary sessions or no userId, use /ask endpoint with session_id
         // This enables conversation context without requiring persistent sessions
-        response = await chatService.sendMessage(messageText, currentSessionId || undefined);
+        // Pass askWihy from scan API if available (only on first message)
+        const useAskWihy = messages.length === 0 && askWihy ? askWihy : undefined;
+        response = await chatService.sendMessage(messageText, currentSessionId || undefined, useAskWihy);
       }
       
       let aiResponse: string;

@@ -39,6 +39,9 @@ export const normalizeBarcodeScan = (scanResult: any): NutritionFactsData => {
     fdaIngredientAnalysis: scanMetadata.fda_ingredient_analysis || metadata.fda_ingredient_analysis,
     additives: metadata.additives || data.additives || {},
     
+    // Chat context from scan API
+    askWihy: scanMetadata.ask_wihy || metadata.ask_wihy,
+    
     // Insights from health_analysis
     negatives: (data.health_analysis?.alerts || []).map((alert: any) => ({
       label: alert.message,
