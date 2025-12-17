@@ -1,5 +1,5 @@
 // Spinner.tsx
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
 
 interface SpinnerProps {
@@ -34,8 +34,7 @@ function ensurePortal(): HTMLElement {
     el.style.pointerEvents = 'none'; // Allow clicks through when empty
     document.body.appendChild(el);
   }
-  // Clear any existing spinners before adding a new one
-  el.innerHTML = '';
+  // Don't clear innerHTML - let React manage the portal content
   el.style.pointerEvents = 'auto'; // Block clicks when spinner is active
   return el;
 }
@@ -50,6 +49,24 @@ export default function Spinner({
   type = 'gif',
   gifSrc = '/assets/whatishealthyspinner.gif'
 }: SpinnerProps) {
+  const [isVisible, setIsVisible] = useState(false);
+  const [shouldRender, setShouldRender] = useState(overlay);
+
+  // Handle fade in/out animations for seamless transitions
+  useEffect(() => {
+    if (overlay) {
+      setShouldRender(true);
+      // Small delay to trigger fade-in animation
+      const timer = setTimeout(() => setIsVisible(true), 10);
+      return () => clearTimeout(timer);
+    } else {
+      // Fade out before unmounting
+      setIsVisible(false);
+      const timer = setTimeout(() => setShouldRender(false), 200); // Match animation duration
+      return () => clearTimeout(timer);
+    }
+  }, [overlay]);
+  
   // Optional: trap/allow ESC when overlayed
   useEffect(() => {
     if (!overlay) return;
@@ -72,15 +89,16 @@ export default function Spinner({
     if (!overlay) return;
     
     return () => {
+      // Just reset pointer events, don't touch the DOM
       const portal = document.getElementById(portalId);
-      if (portal) {
+      if (portal && portal.childNodes.length === 0) {
         portal.style.pointerEvents = 'none';
       }
     };
   }, [overlay]);
 
   // Non-overlay inline spinner (kept for compatibility)
-  if (!overlay) {
+  if (!overlay && !shouldRender) {
     return (
       <div className="flex flex-col items-center" role="status" aria-live="polite">
         <div className="w-10 h-10 border-4 border-gray-300 border-t-blue-500 rounded-full animate-spin" />
@@ -88,6 +106,9 @@ export default function Spinner({
       </div>
     );
   }
+
+  // Don't render anything if shouldn't be visible
+  if (!shouldRender) return null;
 
   // Overlay modal via portal to avoid z-index issues
   const portal = ensurePortal();
@@ -98,7 +119,11 @@ export default function Spinner({
 
   const modal = (
     <div 
-      className="fixed inset-0 bg-black/75 backdrop-blur-sm flex flex-col items-center justify-center z-[2000] animate-in fade-in duration-200" 
+      className="fixed inset-0 bg-black/75 backdrop-blur-sm flex flex-col items-center justify-center z-[2000]" 
+      style={{
+        opacity: isVisible ? 1 : 0,
+        transition: 'opacity 200ms ease-in-out'
+      }}
       role="dialog" 
       aria-modal="true" 
       aria-labelledby="spinner-title" 
