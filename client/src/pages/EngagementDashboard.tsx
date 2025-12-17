@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { useParams } from "react-router-dom";
-import { Users, TrendingUp, Target, Activity, Copy, Check } from "lucide-react";
+import { Users, TrendingUp, Target, Activity, Copy, Check, Crown } from "lucide-react";
 import TrackingHeader from "../components/layout/TrackingHeader";
 
 interface EngagementStats {
@@ -8,6 +8,7 @@ interface EngagementStats {
   totalClicks: number;
   totalConversions: number;
   conversionRate: number;
+  potentialRevenue: number; // Partner's 10% commission from conversions only
   topCampaigns: Array<{
     campaign: string;
     clicks: number;
@@ -50,7 +51,7 @@ function IconTile({
   tone = "blue",
   children,
 }: {
-  tone?: "blue" | "purple" | "yellow" | "green";
+  tone?: "blue" | "purple" | "yellow" | "green" | "emerald";
   children: React.ReactNode;
 }) {
   const toneMap: Record<string, string> = {
@@ -58,6 +59,7 @@ function IconTile({
     purple: "bg-purple-50 text-purple-600 ring-purple-100",
     yellow: "bg-yellow-50 text-yellow-700 ring-yellow-100",
     green: "bg-green-50 text-green-600 ring-green-100",
+    emerald: "bg-emerald-50 text-emerald-600 ring-emerald-100",
   };
 
   return (
@@ -84,7 +86,7 @@ function StatCard({
   value: string | number;
   deltaText: string;
   deltaUp?: boolean;
-  tone: "blue" | "purple" | "yellow" | "green";
+  tone: "blue" | "purple" | "yellow" | "green" | "emerald";
   icon: React.ReactNode;
 }) {
   return (
@@ -130,6 +132,7 @@ const EngagementDashboard: React.FC = () => {
         totalClicks: 1247,
         totalConversions: 89,
         conversionRate: 7.1,
+        potentialRevenue: 890, // 89 conversions × $100 × 10% = $890
         topCampaigns: [
           { campaign: "instagram_story", clicks: 456 },
           { campaign: "youtube_video", clicks: 312 },
@@ -299,7 +302,7 @@ const EngagementDashboard: React.FC = () => {
         </p>
 
         {/* Stats Grid */}
-        <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-5">
           <StatCard
             title="Total Clicks"
             value={stats.totalClicks.toLocaleString()}
@@ -323,6 +326,14 @@ const EngagementDashboard: React.FC = () => {
             deltaUp
             tone="green"
             icon={<TrendingUp className="h-4 w-4" />}
+          />
+          <StatCard
+            title="Your Earnings"
+            value={`$${stats.potentialRevenue.toLocaleString()}`}
+            deltaText="From conversions only"
+            deltaUp
+            tone="emerald"
+            icon={<Crown className="h-4 w-4" />}
           />
           <StatCard
             title="Campaigns"
