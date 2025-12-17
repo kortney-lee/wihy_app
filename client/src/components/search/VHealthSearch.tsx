@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import '../../styles/VHealthSearch.css';
 import ImageUploadModal from '../ui/ImageUploadModal';
 import MultiAuthLogin from '../shared/MultiAuthLogin';
+import Spinner from '../ui/Spinner';
 import NutritionChart from '../charts/cards/NutritionChart';
 import ResultQualityPie from '../charts/cards/ResultQualityPie';
 import { wihyAPI, isUnifiedResponse, UnifiedResponse, WihyResponse } from '../../services/wihyAPI';
@@ -330,29 +331,6 @@ const VHealthSearch: React.FC = () => {
   // ================================
   // UTILITY FUNCTIONS
   // ================================
-
-  /**
-   * PROGRESS CALCULATOR
-   * Converts loading message text to progress percentage for UI feedback
-   * @param msg - The current loading message
-   * @returns Progress percentage (0-100)
-   */
-  const progressFromMessage = (msg: string) => {
-    if (msg.includes('Initializing')) return 10;
-    if (msg.includes('Checking cache')) return 25;
-    if (msg.includes('Analyzing with AI')) return 55;
-    if (msg.includes('Processing results')) return 75;
-    if (msg.includes('Results ready') || msg.includes('Response ready')) return 95;
-
-    if (msg.includes('Processing image')) return 35;
-    if (msg.includes('Checking nutrition')) return 45;
-    if (msg.includes('Analyzing nutrition')) return 60;
-    if (msg.includes('Processing nutrition')) return 80;
-    if (msg.includes('complete')) return 95;
-
-    if (msg.includes('failed')) return 100; // will close shortly
-    return 40; // default midpoint
-  };
 
   /**
    * AUTO-SIZE TEXT AREA
@@ -1205,138 +1183,6 @@ const VHealthSearch: React.FC = () => {
     return () => clearInterval(interval);
   }, []);
 
-  // ================================
-  // UI COMPONENTS
-  // ================================
-
-  /**
-   * LOADING OVERLAY COMPONENT
-   * Shows animated loading screen with progress bar during search operations
-   * @param message - Current loading message to display
-   * @param progress - Progress percentage (0-100) for progress bar
-   */
-  const LoadingOverlay: React.FC<{ message: string; progress: number }> = ({ message, progress }) => (
-    <div style={{
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      backgroundColor: 'rgba(0, 0, 0, 0.5)',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      zIndex: 9999
-    }}>
-      <div style={{
-        backgroundColor: 'white',
-        borderRadius: '12px',
-        padding: '40px',
-        textAlign: 'center',
-        minWidth: '320px',
-        boxShadow: '0 10px 25px rgba(0, 0, 0, 0.2)'
-      }}>
-      
-        {/* Spinner */}
-        <div style={{ 
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          marginBottom: '24px'
-        }}>
-          <img 
-            src="/assets/whatishealthyspinner.gif" 
-            alt="Loading..." 
-            style={{
-              width: '48px',
-              height: '48px',
-              objectFit: 'contain'
-            }}
-          />
-        </div>
-        
-        {/* Title */}
-        <h3 style={{
-          margin: '0 0 8px 0',
-          fontSize: '24px',
-          fontWeight: '600',
-          color: '#1f2937'
-        }}>
-          Loading Content
-        </h3>
-        
-        {/* Subtitle */}
-        <p style={{
-          margin: '0 0 24px 0',
-          fontSize: '16px',
-          color: '#6b7280'
-        }}>
-          Please wait while we process your request...
-        </p>
-        
-        {/* Progress Bar */}
-        <div style={{
-          width: '100%',
-          height: '8px',
-          backgroundColor: '#e5e7eb',
-          borderRadius: '4px',
-          overflow: 'hidden',
-          marginBottom: '12px'
-        }}>
-          <div style={{
-            width: `${progress}%`,
-            height: '100%',
-            backgroundColor: '#3b82f6',
-            borderRadius: '4px',
-            transition: 'width 0.3s ease'
-          }} />
-        </div>
-        
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          marginTop: '16px'
-        }}>
-          <p style={{
-            margin: 0,
-            fontSize: '14px',
-            color: '#6b7280'
-          }}>
-            {progress}% Complete
-          </p>
-          
-          {/* Cancel button */}
-          <button
-            onClick={handleCancelSearch}
-            style={{
-              backgroundColor: 'transparent',
-              color: '#555',
-              border: '1px solid #ccc',
-              borderRadius: '16px',
-              padding: '8px 16px',
-              fontSize: '14px',
-              fontWeight: '500',
-              cursor: 'pointer',
-              transition: 'all 0.2s ease'
-            }}
-            onMouseOver={(e) => {
-              e.currentTarget.style.backgroundColor = '#f1f1f1';
-              e.currentTarget.style.color = '#333';
-              e.currentTarget.style.borderColor = '#aaa';
-            }}
-            onMouseOut={(e) => {
-              e.currentTarget.style.backgroundColor = 'transparent';
-              e.currentTarget.style.color = '#555';
-              e.currentTarget.style.borderColor = '#ccc';
-            }}
-          >
-            Cancel
-          </button>
-        </div>
-      </div>
-    </div>
-  );
 
   // ================================
   // MAIN COMPONENT RENDER
@@ -1344,11 +1190,15 @@ const VHealthSearch: React.FC = () => {
 
   return (
     <div className="search-landing">
-      {/* LOADING OVERLAY - Shows during search operations */}
+      {/* LOADING SPINNER - Shows during search operations */}
       {isLoading && (
-        <LoadingOverlay 
-          message={loadingMessage}
-          progress={progressFromMessage(loadingMessage)}
+        <Spinner
+          overlay={true}
+          title={loadingMessage}
+          subtitle="This may take a few moments..."
+          disableEsc={false}
+          onClose={handleCancelSearch}
+          type="gif"
         />
       )}
       
