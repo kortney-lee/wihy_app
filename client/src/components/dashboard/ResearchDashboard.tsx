@@ -151,7 +151,7 @@ const ResearchDashboard: React.FC<ResearchDashboardProps> = ({
       </div>
 
       {/* B. KPI CARDS */}
-      <div className="bg-gradient-to-br from-blue-50 to-indigo-50">
+      <div className="bg-[#f0f7ff]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
           <div className="bg-gradient-to-br from-blue-50 to-indigo-100 rounded-2xl border-0 p-5 transition-all duration-300 cursor-pointer">

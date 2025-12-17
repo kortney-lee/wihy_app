@@ -205,7 +205,7 @@ const ResearchPanel: React.FC<ResearchPanelProps> = ({
   const isMobile = windowWidth < 1024;
 
   return (
-    <div className="w-full h-full bg-white flex flex-col">
+    <div className="w-full h-full bg-[#f0f7ff] flex flex-col">
       {/* Top bar with back button */}
       <div className="border-b border-gray-200 px-4 py-3 flex items-center gap-3 bg-white">
         {onBack && (
@@ -223,7 +223,7 @@ const ResearchPanel: React.FC<ResearchPanelProps> = ({
       {/* 3-PANE LAYOUT */}
       <div className="flex-1 flex overflow-hidden">
         {/* PANE 1: NAVIGATOR (Left) */}
-        <div className={`border-r border-gray-200 bg-gray-50 flex flex-col ${
+        <div className={`border-r border-gray-200 bg-[#f0f7ff] flex flex-col ${
           isMobile ? 'w-full' : 'w-80'
         } ${isMobile && selectedStudy ? 'hidden' : ''}`}>
           
@@ -512,7 +512,7 @@ const ResearchPanel: React.FC<ResearchPanelProps> = ({
             </div>
 
             {/* Tab content */}
-            <div className="flex-1 overflow-y-auto p-4">
+            <div className="flex-1 overflow-y-auto p-4 bg-[#f0f7ff]">
               {/* OVERVIEW TAB */}
               {rightPaneTab === 'overview' && (
                 <div className="space-y-4">
