@@ -167,7 +167,7 @@ function Modal({
             Close
           </button>
         </div>
-        <div className="max-h-[70vh] overflow-auto px-6 py-5">{children}</div>
+        <div className="max-h-[70vh] overflow-hidden px-6 py-5">{children}</div>
       </div>
     </div>
   );
@@ -551,7 +551,7 @@ const TrackingDashboard: React.FC = () => {
             </div>
           </div>
 
-          <div className="mt-6 overflow-x-auto rounded-2xl ring-1 ring-slate-200">
+          <div className="mt-6 overflow-hidden rounded-2xl ring-1 ring-slate-200">
             <table className="min-w-full bg-white text-left text-sm">
               <thead className="bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-500">
                 <tr>
