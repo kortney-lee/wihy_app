@@ -2,6 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../components/shared/Header';
 import FullScreenChat from '../components/ui/FullScreenChat';
+import ImageUploadModal from '../components/ui/ImageUploadModal';
+import VHealthSearch from '../components/search/VHealthSearch';
+import NutritionFactsDemo from '../components/demo/NutritionFactsDemo';
 import { FeatureCard, MetricCard, HighlightCard } from '../components/shared/CardComponents';
 import { CTAButton, NavLink } from '../components/shared/ButtonComponents';
 import AboutPageHeader from '../components/layout/AboutPageHeader';
@@ -195,22 +198,15 @@ const AboutPage: React.FC = () => {
             </div> {/* End hero-left */}
 
             <div className="hero-right" id="chat-demo">
-              <div 
-                ref={chatContainerRef}
-                className={`chat-frame-container ${isLoaded ? 'animate-in delay-2' : ''}`}
-              >
-                <div className="chat-frame-content">
-                  {/* Embedded preview of the chat experience */}
-                  <FullScreenChat
-                    isOpen={true}
-                    onClose={() => {}}
-                    initialQuery="What can you help me with?"
-                    initialResponse={`Hey there, I am WIHY – your health intelligence engine connected to 30+ million research articles.
-
-Tell me what you are eating, how you are sleeping, or what you are worried about.
-
-I will translate complex health and nutrition science into simple steps you can act on today.`}
-                  />
+              <div className="chat-frame">
+                <div 
+                  ref={chatContainerRef}
+                  className={`chat-frame-container ${isLoaded ? 'animate-in delay-2' : ''}`}
+                >
+                  <div className="chat-frame-content">
+                    {/* Embedded preview of the search experience */}
+                    <VHealthSearch />
+                  </div>
                 </div>
               </div>
             </div> {/* End hero-right */}
@@ -218,232 +214,443 @@ I will translate complex health and nutrition science into simple steps you can 
         </div> {/* End hero-content */}
       </header>
 
-      {/* Platform Overview */}
-      <section id="platform" className="platform-section">
-        <div className="section-container-gradient-inner">
-          <div className="section-header">
-            <h2 className="section-title">Revolutionary Health Intelligence Platform</h2>
-            <p className="section-subtitle">
-              WIHY.ai combines real-time research translation, precision nutrition, and personal health insights into a unified intelligence layer that clarifies food, lifestyle, and clinical decisions.
-            </p>
-            <h3 className="section-subsection-title">Core Capabilities</h3>
-          </div>
-
-          <div className="platform-grid">
-            <div className="platform-card-wrapper">
-              <FeatureCard
-                iconComponent={
-                  <img 
-                    src="/assets/Advanced_AI_Engine.gif" 
-                    alt="AI Engine Analysis Demo"
-                    style={{
-                      width: '100%',
-                      height: '100%',
-                      objectFit: 'cover',
-                      borderRadius: '8px'
-                    }}
-                  />
-                }
-                title="Advanced AI Engine"
-                description="A health-specialized LLM trained on nutrition science, biomedical research, and verified government datasets. Built for accuracy, transparency, and clinical relevance."
-                metrics={[
-                  { label: 'indexed studies', value: '35M+' },
-                  { label: 'Evidence graded for', value: 'quality' }
-                ]}
-              />
-            </div>
-
-            <div className="platform-card-wrapper">
-              <FeatureCard
-                iconComponent={
-                  <img 
-                    src="/assets/Unviersal_Scanning.gif" 
-                    alt="Universal Scanning Demo"
-                    style={{
-                      width: '100%',
-                      height: '100%',
-                      objectFit: 'cover',
-                      borderRadius: '8px'
-                    }}
-                  />
-                }
-                title="Universal Scanning"
-                description="Instant analysis of food and ingredients using barcode decoding, food photography, ingredient OCR, receipt parsing, and global product verification."
-                metrics={[
-                  { label: 'products', value: '4.1M+' },
-                  { label: 'countries', value: '200+' }
-                ]}
-              />
-            </div>
-
-            <div className="platform-card-wrapper">
-              <FeatureCard
-                iconComponent={
-                  <img 
-                    src="/assets/Predictive_Analytics.gif" 
-                    alt="Predictive Analytics Dashboard"
-                    style={{
-                      width: '100%',
-                      height: '100%',
-                      objectFit: 'cover',
-                      borderRadius: '8px'
-                    }}
-                  />
-                }
-                title="Predictive Analytics"
-                description="Connects food, sleep, activity, hydration, symptoms, and biomarkers. Identifies patterns, forecasts risk, and generates personalized recommendations."
-                metrics={[
-                  { label: 'health metrics', value: '15+' },
-                  { label: 'Real-time', value: 'modeling' }
-                ]}
-              />
-            </div>
-
-            <div className="platform-card-wrapper">
-              <FeatureCard
-                iconComponent={
-                  <img 
-                    src="/assets/Research_Integration.gif" 
-                    alt="Research Integration Network"
-                    style={{
-                      width: '100%',
-                      height: '100%',
-                      objectFit: 'cover',
-                      borderRadius: '8px'
-                    }}
-                  />
-                }
-                title="Research Integration"
-                description="Continuous synchronization with global nutrition and health sources including PubMed, FDA, USDA, OpenFoodFacts, and CDC surveillance datasets."
-                metrics={[
-                  { label: 'daily updates', value: '10K+' },
-                  { label: 'Global data', value: 'coverage' }
-                ]}
-              />
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Technology Section */}
-      <section id="technology" className="tech-section">
-        <div className="section-container">
-          {/* Technical Architecture Title - Centered */}
-          <div className="tech-architecture-title">
-            <h3 className="section-title centered">Technical Architecture</h3>
-            <p className="section-subtitle centered">
-              A distributed, modular architecture designed for precision, scale, and explainable AI.
-            </p>
-          </div>
-
-          <div className="tech-content">
-            <div className="tech-left">
-              <h2 className="tech-title">Built for Scale and Intelligence</h2>
-              <p className="tech-subtitle">WIHY.ai is engineered to deliver fast, reliable, and verifiable insights for enterprise, clinical, and consumer use.</p>
-              <div className="tech-features">
-                <div className="tech-feature">
-                  <div className="tech-icon">⚡</div>
-                  <div className="tech-info">
-                    <h4>Lightning Fast Processing</h4>
-                    <p>Cloud-native architecture handling thousands of queries per second with sub-300ms responses.</p>
-                  </div>
-                </div>
-
-                <div className="tech-feature">
-                  <div className="tech-icon">🛡️</div>
-                  <div className="tech-info">
-                    <h4>Enterprise-Grade Security</h4>
-                    <p>SOC 2 aligned design, end-to-end encryption, and HIPAA-ready pathways for healthcare partners.</p>
-                  </div>
-                </div>
-
-                <div className="tech-feature">
-                  <div className="tech-icon">🌐</div>
-                  <div className="tech-info">
-                    <h4>Global Reach</h4>
-                    <p>Regional nutrition databases and culturally aware recommendations tuned for real communities.</p>
+      {/* Hero Header - Copy 1 */}
+      <header className="hero-header1" style={{ background: 'white' }}>
+        <div className="hero-content">
+          <div className="hero-container" style={{ background: 'white' }}>
+            <div className="hero-right" id="chat-demo">
+              <div className="chat-frame">
+                <div 
+                  ref={chatContainerRef}
+                  className={`chat-frame-container ${isLoaded ? 'animate-in delay-2' : ''}`}
+                >
+                  <div className="chat-frame-content">
+                    {/* Embedded preview of the image upload experience */}
+                    <ImageUploadModal
+                      isOpen={true}
+                      onClose={() => {}}
+                      onAnalysisComplete={(result) => console.log('Analysis:', result)}
+                      title="Scan this food"
+                      subtitle="Upload a barcode, photo, ingredient list, or receipt"
+                      forceMobile={true}
+                    />
                   </div>
                 </div>
               </div>
-            </div>
+            </div> {/* End hero-right */}
 
-            <div className="tech-right">
-              <div className="tech-stack">
-                <div className="stack-category">
-                  <h4>AI and ML</h4>
-                  <div className="stack-items">
-                    <span className="highlighted-item">Custom LLMs for health reasoning</span>
-                    <span className="highlighted-item">Nutrition and ingredient scoring models</span>
-                    <span className="highlighted-item">FDA pharmacology interpretation</span>
-                    <span className="highlighted-item">Computer vision models for food identification</span>
-                  </div>
+            <div className="hero-left">
+              <div className={`hero-badge ${isLoaded ? 'animate-in' : ''}`}>
+                <span>Universal Scanning</span>
+              </div>
+              
+              <div className="hero-content-block">
+                <h2 className="main-page-subtitle">
+                  Universal Scanning
+                </h2>
+                <p className="main-page-tagline">
+                  Instantly understand food and ingredients using scans, photos, and receipts.
+                </p>
+              </div>
+              
+              <div className="hero-content-block">
+                <p className={`hero-subtitle ${isLoaded ? 'animate-in delay-1' : ''}`}>
+                  Universal Scanning lets you analyze food no matter how it shows up in your life.
+                  Scan a barcode, take a photo, upload ingredients, or import a receipt and WIHY breaks it down into clear, understandable insights.
+                </p>
+                <p className={`hero-subtitle ${isLoaded ? 'animate-in delay-1' : ''}`}>
+                  No manual tracking. No guessing. No marketing hype.
+                </p>
+              </div>
+              
+              <div className="hero-content-block">
+                <p className={`hero-subtitle ${isLoaded ? 'animate-in delay-1' : ''}`}>
+                  <strong>How It Works</strong>
+                </p>
+                <p className={`hero-subtitle ${isLoaded ? 'animate-in delay-1' : ''}`}>
+                  WIHY automatically identifies food and ingredients using multiple inputs:
+                </p>
+                <div className="main-page-benefits">
+                  <p>Barcode decoding to recognize packaged products</p>
+                  <p>Food photography to identify meals and whole foods</p>
+                  <p>Ingredient OCR to read and analyze ingredient lists</p>
+                  <p>Receipt parsing to understand what you actually purchased</p>
+                  <p>Global product verification to match foods against trusted databases</p>
                 </div>
+                <p className={`hero-subtitle ${isLoaded ? 'animate-in delay-1' : ''}`}>
+                  You do not need to tell WIHY what to look for. It detects, verifies, and analyzes automatically.
+                </p>
+              </div>
 
-                <div className="stack-category">
-                  <h4>Infrastructure</h4>
-                  <div className="stack-items">
-                    <span className="highlighted-item">Azure cloud deployment</span>
-                    <span className="highlighted-item">Auto-scaling containers</span>
-                    <span className="highlighted-item">Edge APIs for low-latency inference</span>
-                    <span className="highlighted-item">Full observability and monitoring</span>
-                  </div>
+              <div className="hero-content-block">
+                <p className={`hero-subtitle ${isLoaded ? 'animate-in delay-1' : ''}`}>
+                  <strong>What You Get</strong>
+                </p>
+                <p className={`hero-subtitle ${isLoaded ? 'animate-in delay-1' : ''}`}>
+                  After a scan, WIHY shows you:
+                </p>
+                <div className="main-page-benefits">
+                  <p>What the food is made of</p>
+                  <p>How processed it is</p>
+                  <p>Which ingredients matter and why</p>
+                  <p>How it fits into a healthier pattern</p>
+                  <p>What to change or keep doing next</p>
                 </div>
+                <p className={`hero-subtitle ${isLoaded ? 'animate-in delay-1' : ''}`}>
+                  Everything is explained in plain language.
+                </p>
+              </div>
 
-                <div className="stack-category">
-                  <h4>Data</h4>
-                  <div className="stack-items">
-                    <span className="highlighted-item">Nutrition knowledge graph</span>
-                    <span className="highlighted-item">Research ingestion engine</span>
-                    <span className="highlighted-item">User analytics</span>
-                    <span className="highlighted-item">Health metric processing</span>
+              <div className="hero-content-block">
+                <p className={`hero-subtitle ${isLoaded ? 'animate-in delay-1' : ''}`}>
+                  Universal Scanning turns everyday food into clear health information you can actually use.
+                </p>
+              </div>
+
+              <div className={`hero-actions ${isLoaded ? 'animate-in delay-4' : ''}`}>
+                <CTAButton href="#demo" primary>
+                  Try Universal Scanning
+                </CTAButton>
+              </div>
+            </div> {/* End hero-left */}
+          </div> {/* End hero-container */}
+        </div> {/* End hero-content */}
+      </header>
+
+      {/* Hero Header - Copy 2 */}
+      <header className="hero-header2">
+        <div className="hero-content">
+          <div className="hero-container">
+            <div className="hero-left">
+              <div className={`hero-badge ${isLoaded ? 'animate-in' : ''}`}>
+                <span>Nutrition Analysis</span>
+              </div>
+              
+              <div className="hero-content-block">
+                <h2 className="main-page-subtitle">
+                  Nutrition Analysis You Can Actually Understand
+                </h2>
+                <p className="main-page-tagline">
+                  Turn scans and photos into clear nutrition insights, not confusing numbers.
+                </p>
+              </div>
+              
+              <div className="hero-content-block">
+                <p className={`hero-subtitle ${isLoaded ? 'animate-in delay-1' : ''}`}>
+                  After you scan food with WIHY, the system automatically analyzes what you are eating and explains it in plain language.
+                </p>
+                <p className={`hero-subtitle ${isLoaded ? 'animate-in delay-1' : ''}`}>
+                  This is where scanning becomes understanding.
+                </p>
+                <p className={`hero-subtitle ${isLoaded ? 'animate-in delay-1' : ''}`}>
+                  WIHY does not just list calories or macros. It interprets the food in context and shows what matters for real health.
+                </p>
+              </div>
+              
+              <div className="hero-content-block">
+                <p className={`hero-subtitle ${isLoaded ? 'animate-in delay-1' : ''}`}>
+                  <strong>What WIHY Analyzes</strong>
+                </p>
+                <p className={`hero-subtitle ${isLoaded ? 'animate-in delay-1' : ''}`}>
+                  From a single scan or image, WIHY can analyze:
+                </p>
+                <div className="main-page-benefits">
+                  <p>Macronutrients such as carbohydrates, protein, fats, and fiber</p>
+                  <p>Micronutrients including vitamins and minerals</p>
+                  <p>Added sugars, sweeteners, and additives</p>
+                  <p>Processing level and ingredient quality</p>
+                  <p>Portion impact, not just label serving sizes</p>
+                  <p>How the food fits into your overall eating pattern</p>
+                </div>
+                <p className={`hero-subtitle ${isLoaded ? 'animate-in delay-1' : ''}`}>
+                  All of this happens automatically after a scan or upload.
+                </p>
+              </div>
+
+              <div className="hero-content-block">
+                <p className={`hero-subtitle ${isLoaded ? 'animate-in delay-1' : ''}`}>
+                  <strong>Clear Answers, No Guesswork</strong>
+                </p>
+                <p className={`hero-subtitle ${isLoaded ? 'animate-in delay-1' : ''}`}>
+                  Instead of asking "Is this good or bad?" or "How many calories is this?" WIHY shows:
+                </p>
+                <div className="main-page-benefits">
+                  <p>What this food contributes</p>
+                  <p>What it may be missing</p>
+                  <p>What to balance next</p>
+                  <p>Whether it supports your goal</p>
+                </div>
+              </div>
+
+              <div className="hero-content-block">
+                <p className={`hero-subtitle ${isLoaded ? 'animate-in delay-1' : ''}`}>
+                  Nutrition analysis should guide decisions, not overwhelm them.
+                </p>
+              </div>
+
+              <div className={`hero-actions ${isLoaded ? 'animate-in delay-4' : ''}`}>
+                <CTAButton href="#demo" primary>
+                  Analyze Your Food
+                </CTAButton>
+              </div>
+            </div> {/* End hero-left */}
+
+            <div className="hero-right" id="chat-demo">
+              <div className="chat-frame">
+                <div 
+                  ref={chatContainerRef}
+                  className={`chat-frame-container ${isLoaded ? 'animate-in delay-2' : ''}`}
+                >
+                  <div className="chat-frame-content">
+                    {/* Embedded preview of the nutrition facts experience */}
+                    <NutritionFactsDemo />
                   </div>
                 </div>
               </div>
-            </div>
-          </div>
+            </div> {/* End hero-right */}
+          </div> {/* End hero-container */}
+        </div> {/* End hero-content */}
+      </header>
 
+      {/* Hero Header - Copy 3 */}
+      <header className="hero-header3" style={{ background: 'white' }}>
+        <div className="hero-content">
+          <div className="hero-container" style={{ background: 'white' }}>
+            <div className="hero-right" id="chat-demo">
+              <div className="chat-frame">
+                <div 
+                  ref={chatContainerRef}
+                  className={`chat-frame-container ${isLoaded ? 'animate-in delay-2' : ''}`}
+                >
+                  <div className="chat-frame-content">
+                    {/* Embedded preview of the chat experience */}
+                    <FullScreenChat
+                      isOpen={true}
+                      onClose={() => {}}
+                      initialQuery="What patterns do you see in my eating and activity habits?"
+                      initialResponse={`I look at patterns over time, not single days.
 
-        </div>
-      </section>
+I can help identify:
+- eating driven by routine or hunger
+- consistency in movement and workouts
+- trends that may lead toward gain, loss, or maintenance
+- small adjustments that can change direction early`}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div> {/* End hero-right */}
 
-      {/* Live Intelligence Demonstrations */}
-      <section id="demo" className="demo-section">
-        <div className="section-container-gradient-inner">
-          <div className="section-header">
-            <h2 className="section-title">See WIHY Live</h2>
-            <p className="section-subtitle">
-              Experience real-time analysis powered by verified data and continuous research integration.
-            </p>
-          </div>
+            <div className="hero-left">
+              <div className={`hero-badge ${isLoaded ? 'animate-in' : ''}`}>
+                <span>Predictive Insights</span>
+              </div>
+              
+              <div className="hero-content-block">
+                <h2 className="main-page-subtitle">
+                  Understand Where Your Habits Are Leading
+                </h2>
+                <p className="main-page-tagline">
+                  See patterns in eating, activity, and behavior before they turn into outcomes.
+                </p>
+              </div>
+              
+              <div className="hero-content-block">
+                <p className={`hero-subtitle ${isLoaded ? 'animate-in delay-1' : ''}`}>
+                  WIHY looks at patterns across your food choices, activity, and consistency to help you understand what is likely to happen next if habits stay the same.
+                </p>
+                <p className={`hero-subtitle ${isLoaded ? 'animate-in delay-1' : ''}`}>
+                  This is not about judging or predicting exact outcomes. It is about recognizing direction early.
+                </p>
+                <p className={`hero-subtitle ${isLoaded ? 'animate-in delay-1' : ''}`}>
+                  WIHY helps you see whether behaviors are trending toward:
+                </p>
+                <div className="main-page-benefits">
+                  <p>Intentional choices or automatic ones</p>
+                  <p>Consistency or drop-off</p>
+                  <p>Progress or stagnation</p>
+                </div>
+                <p className={`hero-subtitle ${isLoaded ? 'animate-in delay-1' : ''}`}>
+                  So you can adjust with awareness instead of reacting later.
+                </p>
+              </div>
+              
+              <div className="hero-content-block">
+                <p className={`hero-subtitle ${isLoaded ? 'animate-in delay-1' : ''}`}>
+                  <strong>What WIHY Can Detect</strong>
+                </p>
+                <p className={`hero-subtitle ${isLoaded ? 'animate-in delay-1' : ''}`}>
+                  Over time, WIHY can surface insights such as:
+                </p>
+                <div className="main-page-benefits">
+                  <p>Likelihood of eating out of routine versus hunger</p>
+                  <p>Patterns that suggest motivation or avoidance</p>
+                  <p>Consistency in movement and workouts</p>
+                  <p>Shifts toward more or less calorie-dense foods</p>
+                  <p>Habits that tend to lead toward weight gain or loss</p>
+                  <p>Early signs of burnout, imbalance, or disengagement</p>
+                </div>
+                <p className={`hero-subtitle ${isLoaded ? 'animate-in delay-1' : ''}`}>
+                  These insights are based on patterns, not single actions.
+                </p>
+              </div>
 
-          <div className="demo-grid">
-            <div className="demo-card">
-              <ResearchQualityGauge showCategoryButtons={true} />
-              <p className="demo-description">Research quality scored from peer-reviewed studies, weighted by strength of evidence.</p>
-            </div>
+              <div className="hero-content-block">
+                <p className={`hero-subtitle ${isLoaded ? 'animate-in delay-1' : ''}`}>
+                  <strong>Why This Matters</strong>
+                </p>
+                <p className={`hero-subtitle ${isLoaded ? 'animate-in delay-1' : ''}`}>
+                  Most health setbacks do not happen suddenly. They happen slowly, through small repeated behaviors.
+                </p>
+                <p className={`hero-subtitle ${isLoaded ? 'animate-in delay-1' : ''}`}>
+                  WIHY helps you:
+                </p>
+                <div className="main-page-benefits">
+                  <p>Notice changes early</p>
+                  <p>Understand why habits are forming</p>
+                  <p>Course-correct without extreme plans</p>
+                  <p>Make decisions that feel intentional, not forced</p>
+                </div>
+                <p className={`hero-subtitle ${isLoaded ? 'animate-in delay-1' : ''}`}>
+                  Awareness is the intervention.
+                </p>
+              </div>
 
-            <div className="demo-card">
-              <StudyTypeDistributionChartDemo />
-              <p className="demo-description">Study types visualized to highlight how evidence is distributed across clinical, observational, and lab research.</p>
-            </div>
+              <div className="hero-content-block">
+                <p className={`hero-subtitle ${isLoaded ? 'animate-in delay-1' : ''}`}>
+                  Predictive insights help you change direction before outcomes are locked in.
+                </p>
+              </div>
 
-            <div className="demo-card">
-              <PublicationTimelineChartDemo timeRange="decade" title="Research Timeline" />
-              <p className="demo-description">Publication trends over time to track how evidence is growing.
-</p>
-            </div>
-          </div>
+              <div className={`hero-actions ${isLoaded ? 'animate-in delay-4' : ''}`}>
+                <CTAButton href="#demo" primary>
+                  See Your Patterns
+                </CTAButton>
+              </div>
+            </div> {/* End hero-left */}
+          </div> {/* End hero-container */}
+        </div> {/* End hero-content */}
+      </header>
 
-        </div>
-      </section>
+      {/* Hero Header - Copy 4 */}
+      <header className="hero-header4">
+        <div className="hero-content">
+          <div className="hero-container">
+            <div className="hero-left">
+              <div className={`hero-badge ${isLoaded ? 'animate-in' : ''}`}>
+                <span>Fact Check</span>
+                <span>Evidence Verification</span>
+              </div>
+              
+              <div className="hero-content-block">
+                <h2 className="main-page-subtitle">
+                  Verify Health Claims With Real Evidence
+                </h2>
+                <p className="main-page-tagline">
+                  Check what is proven, what is uncertain, and what is overstated.
+                </p>
+              </div>
+              
+              <div className="hero-content-block">
+                <p className={`hero-subtitle ${isLoaded ? 'animate-in delay-1' : ''}`}>
+                  Health information is full of claims, headlines, and advice that sound convincing but lack real evidence.
+                </p>
+                <p className={`hero-subtitle ${isLoaded ? 'animate-in delay-1' : ''}`}>
+                  WIHY lets you fact check health and nutrition claims by analyzing available research and grading the quality of the evidence behind them.
+                </p>
+                <p className={`hero-subtitle ${isLoaded ? 'animate-in delay-1' : ''}`}>
+                  Instead of asking "Is this true?" and getting opinions, you get clarity.
+                </p>
+              </div>
+              
+              <div className="hero-content-block">
+                <p className={`hero-subtitle ${isLoaded ? 'animate-in delay-1' : ''}`}>
+                  <strong>How Fact Checking Works</strong>
+                </p>
+                <p className={`hero-subtitle ${isLoaded ? 'animate-in delay-1' : ''}`}>
+                  When you enter a claim, WIHY:
+                </p>
+                <div className="main-page-benefits">
+                  <p>Identifies the exact health or nutrition statement</p>
+                  <p>Searches relevant research and trusted data sources</p>
+                  <p>Evaluates study type, consistency, and limitations</p>
+                  <p>Separates correlation from causation</p>
+                  <p>Explains what the evidence actually supports</p>
+                </div>
+                <p className={`hero-subtitle ${isLoaded ? 'animate-in delay-1' : ''}`}>
+                  Claims are not labeled as simply true or false. They are explained with context.
+                </p>
+              </div>
+
+              <div className="hero-content-block">
+                <p className={`hero-subtitle ${isLoaded ? 'animate-in delay-1' : ''}`}>
+                  <strong>What You See</strong>
+                </p>
+                <p className={`hero-subtitle ${isLoaded ? 'animate-in delay-1' : ''}`}>
+                  For each claim, WIHY shows:
+                </p>
+                <div className="main-page-benefits">
+                  <p>Strength of evidence</p>
+                  <p>Level of certainty</p>
+                  <p>What research supports</p>
+                  <p>What research does not support</p>
+                  <p>Where common misunderstandings come from</p>
+                </div>
+                <p className={`hero-subtitle ${isLoaded ? 'animate-in delay-1' : ''}`}>
+                  This helps you make informed decisions without hype or fear.
+                </p>
+              </div>
+
+              <div className="hero-content-block">
+                <p className={`hero-subtitle ${isLoaded ? 'animate-in delay-1' : ''}`}>
+                  Not all health claims are equal. WIHY helps you see the difference.
+                </p>
+              </div>
+
+              <div className={`hero-actions ${isLoaded ? 'animate-in delay-4' : ''}`}>
+                <CTAButton href="#demo" primary>
+                  Fact Check a Claim
+                </CTAButton>
+              </div>
+            </div> {/* End hero-left */}
+
+            <div className="hero-right" id="chat-demo">
+              <div className="chat-frame">
+                <div 
+                  ref={chatContainerRef}
+                  className={`chat-frame-container ${isLoaded ? 'animate-in delay-2' : ''}`}
+                >
+                  <div className="chat-frame-content">
+                    {/* Embedded preview of the chat experience */}
+                    <FullScreenChat
+                      isOpen={true}
+                      onClose={() => {}}
+                      initialQuery="Verify this health claim: Green tea prevents cancer."
+                      initialResponse={`I can help verify that.
+
+I will:
+- analyze available research
+- explain what studies suggest
+- clarify limits of the evidence
+- distinguish association from prevention claims
+
+I will also show how strong the evidence actually is.`}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div> {/* End hero-right */}
+          </div> {/* End hero-container */}
+        </div> {/* End hero-content */}
+      </header>
 
       {/* WIHY Health Intelligence Stack Section */}
       <section id="intelligence-stack" className="section-container">
         <div className="container">
           <div className="section-header">
-            <h2 className="section-title">WIHY Health Intelligence Stack</h2>
+            <h2 className="section-title">Your Health, One Connected Platform</h2>
             <p className="section-subtitle">
-              A comprehensive architecture powering real-time health intelligence through advanced AI and data processing.
+              WIHY brings together progress tracking, nutrition, research, fitness, and coaching so health decisions are informed, intentional, and easier to sustain.
             </p>
           </div>
           
@@ -458,17 +665,13 @@ I will translate complex health and nutrition science into simple steps you can 
                       style={{
                         width: '100%',
                         height: '100%',
-                        objectFit: 'cover',
+                        objectFit: 'contain',
                         borderRadius: '8px'
                       }}
                     />
                   }
-                  title="1. Research Harvesting Layer"
-                  description="Automated ingestion from PubMed, PMC, FDA, USDA, NIH, NASS, and CDC with real-time delta updates and multi-language ingestion across 195+ countries."
-                  metrics={[
-                    { label: 'Sources', value: '7+' },
-                    { label: 'Countries', value: '195+' }
-                  ]}
+                  title="My Progress"
+                  description="Track how your nutrition, activity, and habits change over time. WIHY aggregates fitness and lifestyle data and explains trends clearly so you understand what is improving, what is stalling, and why."
                 />
               </div>
 
@@ -481,17 +684,13 @@ I will translate complex health and nutrition science into simple steps you can 
                       style={{
                         width: '100%',
                         height: '100%',
-                        objectFit: 'cover',
+                        objectFit: 'contain',
                         borderRadius: '8px'
                       }}
                     />
                   }
-                  title="2. Quality Curation Pipeline"
-                  description="AI-based credibility scoring, evaluation of study design, sample size, and effect strength with evidence grading from low to high confidence and removal of commercial bias."
-                  metrics={[
-                    { label: 'AI Scoring', value: 'Auto' },
-                    { label: 'Bias', value: 'Removed' }
-                  ]}
+                  title="Consumption"
+                  description="Track meals, groceries, and planning in one place. Scan food, upload receipts, generate meals with WIHY, or work with a nutritionist or dietitian to align eating and shopping with your goals."
                 />
               </div>
 
@@ -504,17 +703,13 @@ I will translate complex health and nutrition science into simple steps you can 
                       style={{
                         width: '100%',
                         height: '100%',
-                        objectFit: 'cover',
+                        objectFit: 'contain',
                         borderRadius: '8px'
                       }}
                     />
                   }
-                  title="3. Data Normalization and Nutrition Graph"
-                  description="Unified mapping of ingredients, nutrients, additives, allergens, and contaminants with links connecting foods to symptoms, conditions, and research. 4.1M+ food products tied to verified sources."
-                  metrics={[
-                    { label: 'Products', value: '4.1M+' },
-                    { label: 'Verified', value: '100%' }
-                  ]}
+                  title="Research"
+                  description="Search nutrition and health research without reading hundreds of papers. WIHY summarizes findings, explains evidence quality, and helps you understand what the science actually supports."
                 />
               </div>
 
@@ -527,17 +722,13 @@ I will translate complex health and nutrition science into simple steps you can 
                       style={{
                         width: '100%',
                         height: '100%',
-                        objectFit: 'cover',
+                        objectFit: 'contain',
                         borderRadius: '8px'
                       }}
                     />
                   }
-                  title="4. Domain-Specific Model Training"
-                  description="Custom LLMs trained on curated biomedical datasets, nutrition scoring and risk interpretation models, and vision models for ingredient-level detection."
-                  metrics={[
-                    { label: 'Custom LLMs', value: 'Multi' },
-                    { label: 'Datasets', value: 'Curated' }
-                  ]}
+                  title="Fitness"
+                  description="Generate workout plans that fit your schedule, ability, and goals or work directly with a personal trainer. WIHY supports consistency, progression, and realistic routines."
                 />
               </div>
 
@@ -550,17 +741,13 @@ I will translate complex health and nutrition science into simple steps you can 
                       style={{
                         width: '100%',
                         height: '100%',
-                        objectFit: 'cover',
+                        objectFit: 'contain',
                         borderRadius: '8px'
                       }}
                     />
                   }
-                  title="5. Prediction and Reasoning Engine"
-                  description="Behavioral pattern detection, forecasting for metabolic markers and dietary impact, and multi-source fusion for holistic risk scoring."
-                  metrics={[
-                    { label: 'Patterns', value: 'Real-time' },
-                    { label: 'Markers', value: 'Multi' }
-                  ]}
+                  title="Coach Portal"
+                  description="Designed for wellness professionals to track clients, identify engagement patterns, and improve retention. Coaches spend less time managing data and more time delivering personalized guidance."
                 />
               </div>
 
@@ -573,17 +760,13 @@ I will translate complex health and nutrition science into simple steps you can 
                       style={{
                         width: '100%',
                         height: '100%',
-                        objectFit: 'cover',
+                        objectFit: 'contain',
                         borderRadius: '8px'
                       }}
                     />
                   }
-                  title="6. Deployment and Operations"
-                  description="Azure ML for distributed training, automated versioning and rollback, SOC 2 aligned design, 99.9 percent uptime, and sub-300ms inference latency."
-                  metrics={[
-                    { label: 'Uptime', value: '99.9%' },
-                    { label: 'Latency', value: '<300ms' }
-                  ]}
+                  title="Parent Portal"
+                  description="Gives parents and guardians visibility into children's intake and household consumption. Understand where grocery choices are going and support healthier habits without micromanaging."
                 />
               </div>
             </div>
@@ -597,13 +780,18 @@ I will translate complex health and nutrition science into simple steps you can 
           <div className="section-header">
             <h2 className="section-title">Experience WIHY Intelligence</h2>
             <p className="section-subtitle">
-              Upload food photos. Scan barcodes. Share research links. WIHY delivers instant science.
+              WIHY is in early access. Join the beta and be among the first to experience intelligent health search.
             </p>
           </div>
           
           <div className="demo-cta">
-            <CTAButton primary href="/">
-              Try WIHY.ai Now – Free
+            <CTAButton 
+              primary 
+              href="https://www.kickstarter.com/projects/wihy/wihy-a-new-way-to-explore-food-knowledge-and-choices"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Join the WIHY Beta
             </CTAButton>
           </div>
         </div>

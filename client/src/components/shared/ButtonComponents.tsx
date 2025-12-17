@@ -122,6 +122,8 @@ export const Button: React.FC<ButtonProps> = ({
 // CTA Button - styled for call-to-action sections
 interface CTAButtonProps extends ButtonProps {
   primary?: boolean;
+  target?: string;
+  rel?: string;
 }
 
 // CTA Button Tailwind classes - preserves the unique animated gradient border design
@@ -177,6 +179,8 @@ export const CTAButton: React.FC<CTAButtonProps> = ({
   href,
   onClick,
   disabled = false,
+  target,
+  rel,
   ...props
 }) => {
   if (primary) {
@@ -191,6 +195,8 @@ export const CTAButton: React.FC<CTAButtonProps> = ({
               href={href}
               className={`${ctaClasses.button} cta-button-unified ${className}`}
               style={style}
+              target={target}
+              rel={rel}
             >
               {children}
             </a>
