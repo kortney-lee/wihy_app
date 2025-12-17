@@ -62,6 +62,17 @@
     min-height: auto;
     max-width: 100%;
     padding: 2rem 1rem;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  /* Order: text first, then demo */
+  .hero-left {
+    order: 1;
+  }
+  
+  .hero-right {
+    order: 2;
   }
   
   .hero-content {
@@ -198,6 +209,39 @@
     padding: 0 !important;
   }
   
+  /* Fix ImageUploadModal when embedded in AboutPage */
+  .chat-frame-content .photo-modal-overlay {
+    position: relative !important;
+    background: transparent !important;
+    padding: 0 !important;
+    display: block !important;
+  }
+  
+  .chat-frame-content .photo-modal {
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: none !important;
+    box-shadow: none !important;
+    border: none !important;
+    border-radius: 0 !important;
+  }
+  
+  .chat-frame-content .simple-upload-container,
+  .chat-frame-content .simple-url-section {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+  
+  .chat-frame-content .modal-header {
+    padding: 16px !important;
+  }
+  
+  .chat-frame-content .simple-search-button {
+    width: 100% !important;
+    font-size: 14px !important;
+    padding: 12px 16px !important;
+  }
+  
   .chat-frame-content {
     width: 100% !important;
     height: 100% !important;
@@ -306,11 +350,23 @@
   .tech-stack-cards {
     width: 100% !important;
     max-width: none !important; /* Remove any desktop constraints */
-    margin: 1rem 0 !important; /* Remove auto left/right margins */
+    margin: 1rem auto !important; /* Center with auto margins */
     padding: 0 1rem !important;
     box-sizing: border-box !important;
     grid-template-columns: 1fr !important; /* Force single column */
     gap: 1.5rem !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important; /* Center children */
+  }
+  
+  /* Tech card wrapper - ensure centering */
+  .tech-card-wrapper {
+    width: 100% !important;
+    max-width: 100% !important;
+    display: flex !important;
+    justify-content: center !important;
+    padding: 0 !important;
   }
   
   /* Ensure tech-stack-cards children are fully responsive */
