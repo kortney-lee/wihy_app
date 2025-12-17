@@ -197,6 +197,11 @@ export const CTAButton: React.FC<CTAButtonProps> = ({
               style={style}
               target={target}
               rel={rel}
+              onClick={(e) => {
+                if (onClick) {
+                  onClick(e as any);
+                }
+              }}
             >
               {children}
             </a>

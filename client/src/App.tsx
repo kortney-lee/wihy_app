@@ -21,6 +21,9 @@ import CoachDashboard from './components/dashboard/CoachDashboard';
 import ParentDashboard from './components/dashboard/ParentDashboard';
 import OverviewDashboard from './components/dashboard/OverviewDashboard';
 import DashboardPage from './components/dashboard/DashboardPage';
+import TrackingDashboard from './pages/TrackingDashboard';
+import AdminLinkGenerator from './pages/AdminLinkGenerator';
+import EngagementDashboard from './pages/EngagementDashboard';
 import { PlatformNavigationExample } from './components/examples/PlatformNavigationExample';
 import { wihyAPI } from './services/wihyAPI';
 import { searchCache } from './services/searchCache';
@@ -553,6 +556,9 @@ const App: React.FC = () => {
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/dashboard/overview" element={<OverviewDashboard />} />
           <Route path="/dashboard/parent" element={<ParentDashboard />} />
+          <Route path="/tracking-dashboard" element={<TrackingDashboard />} />
+          <Route path="/tracking-admin" element={<AdminLinkGenerator />} />
+          <Route path="/engagement/:trackingId" element={<EngagementDashboard />} />
           <Route path="/test" element={<TestChartsPage />} />
           <Route path="/test-grid" element={<TestDashboardGrid />} />
           <Route path="/test-individual" element={<TestIndividualComponents />} />
