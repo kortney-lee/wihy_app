@@ -213,6 +213,12 @@
     -webkit-overflow-scrolling: touch !important;
   }
   
+  /* Make demo 5 (chat) taller on mobile */
+  #chat-demo-5 .chat-frame-container {
+    height: 85vh !important;
+    max-height: 800px !important;
+  }
+  
   /* Fix ImageUploadModal when embedded in AboutPage */
   .chat-frame-content .photo-modal-overlay {
     position: relative !important;
@@ -309,6 +315,12 @@
     height: 70vh !important;
     max-height: 600px !important;
     position: relative !important;
+  }
+  
+  /* Make demo 5 (chat) taller on mobile */
+  #chat-demo-5 .chat-frame {
+    height: 85vh !important;
+    max-height: 800px !important;
   }
   
   .chat-frame-header {
