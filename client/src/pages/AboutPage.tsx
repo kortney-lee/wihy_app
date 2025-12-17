@@ -14,6 +14,7 @@ import StudyTypeDistributionChartDemo from '../components/charts/cards/StudyType
 import PublicationTimelineChartDemo from '../components/charts/cards/PublicationTimelineChart';
 import { PlatformDetectionService } from '../services/shared/platformDetectionService';
 import { LinkTrackingService } from '../components/tracking/LinkTracker';
+import { normalizeBarcodeScan } from '../utils/nutritionDataNormalizer';
 import '../styles/AboutPage.css';
 import '../styles/MobileAboutPage.css';
 
@@ -268,14 +269,23 @@ const AboutPage: React.FC = () => {
                     <ImageUploadModal
                       isOpen={true}
                       onClose={() => {}}
-                      onAnalysisComplete={(result) => {
-                        // Navigate to nutrition facts page with the analysis result
+                      onNavigateToNutritionFacts={(data, sessionId) => {
+                        console.log('[AboutPage] Raw barcode data received:', data);
+                        // Normalize the barcode scan result before navigating
+                        const nutritionfacts = normalizeBarcodeScan(data);
+                        console.log('[AboutPage] Normalized data:', nutritionfacts);
+                        // Navigate to nutrition facts page with properly formatted data
                         navigate('/nutritionfacts', { 
                           state: { 
-                            analysisResult: result,
+                            nutritionfacts: nutritionfacts,
+                            sessionId: sessionId,
                             fromDemo: true 
                           } 
                         });
+                      }}
+                      onAnalysisComplete={(result) => {
+                        console.log('[AboutPage] Image analysis - result:', result);
+                        // For non-barcode analyses, just log for now (could show in chat)
                       }}
                       title="Scan this food"
                       subtitle="Upload a barcode, photo, ingredient list, or receipt"
@@ -1050,3 +1060,5 @@ I will also show how strong the evidence actually is.`}
 };
 
 export default AboutPage;
+// Debug log added
+
