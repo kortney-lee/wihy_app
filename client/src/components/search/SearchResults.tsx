@@ -822,11 +822,17 @@ const SearchResults: React.FC<SearchResultsProps> = ({
   const [hasAutoOpened, setHasAutoOpened] = useState(false); // Track if auto-open has already happened
   
   // Auto-open chat when coming from VHealthSearch - only once
+  // Add delay to ensure FullScreenChat is mounted in DOM before triggering animation
   useEffect(() => {
     if (autoOpenChat && !isChatOpen && !hasAutoOpened) {
-      setIsChatOpen(true);
-      setHasAutoOpened(true); // Prevent future auto-opens
-      console.log('🔍 SEARCH RESULTS: Auto-opening chat from VHealthSearch');
+      // RequestAnimationFrame ensures component is mounted before animation starts
+      requestAnimationFrame(() => {
+        setTimeout(() => {
+          setIsChatOpen(true);
+          setHasAutoOpened(true); // Prevent future auto-opens
+          console.log('🔍 SEARCH RESULTS: Auto-opening chat from VHealthSearch');
+        }, 50);
+      });
     }
   }, [autoOpenChat, isChatOpen, hasAutoOpened]);
   
