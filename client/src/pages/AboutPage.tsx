@@ -886,7 +886,7 @@ I will also show how strong the evidence actually is.`}
           <div className="section-header">
             <h2 className="section-title">Experience WIHY Intelligence</h2>
             <p className="section-subtitle">
-              WIHY is in early access.
+              WIHY is in early access. Join the beta and be among the first to experience intelligent health search.
             </p>
           </div>
           
@@ -901,20 +901,6 @@ I will also show how strong the evidence actually is.`}
               Join the WIHY Beta
             </CTAButton>
           </div>
-          
-          {/* Collapsed Details */}
-          <details className="expandable-section" style={{ marginTop: '1.5rem' }}>
-            <summary style={{ cursor: 'pointer', color: '#4cbb17', fontWeight: 600, fontSize: '1.1rem', textAlign: 'center', listStyle: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px' }}>
-              <span style={{ fontSize: '1.5rem', transition: 'transform 0.3s ease' }} className="arrow-icon">▶</span>
-              <span>Expand early access details</span>
-              <span style={{ fontSize: '1.5rem', transition: 'transform 0.3s ease' }} className="arrow-icon">◀</span>
-            </summary>
-            <div style={{ marginTop: '1rem', paddingLeft: '1rem', textAlign: 'center' }}>
-              <p className="section-subtitle">
-                Join the beta and be among the first to experience intelligent health search.
-              </p>
-            </div>
-          </details>
         </div>
       </section>
 
