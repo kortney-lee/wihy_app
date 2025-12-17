@@ -207,8 +207,14 @@ const AboutPage: React.FC = () => {
               </div>
 
               <div className={`hero-actions ${isLoaded ? 'animate-in delay-4' : ''}`}>
-                <CTAButton href="#chat-demo-1" primary>
-                  See What WIHY Can Do
+                <CTAButton 
+                  href="https://www.kickstarter.com/projects/wihy/wihy-a-new-way-to-explore-food-knowledge-and-choices"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={handleKickstarterClick}
+                  primary
+                >
+                  Join the WIHY Beta
                 </CTAButton>
               </div>
             </div> {/* End hero-left */}
@@ -324,8 +330,14 @@ const AboutPage: React.FC = () => {
               </div>
 
               <div className={`hero-actions ${isLoaded ? 'animate-in delay-4' : ''}`}>
-                <CTAButton href="#chat-demo-2" primary>
-                  Try Universal Scanning
+                <CTAButton 
+                  href="https://www.kickstarter.com/projects/wihy/wihy-a-new-way-to-explore-food-knowledge-and-choices"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={handleKickstarterClick}
+                  primary
+                >
+                  Join the WIHY Beta
                 </CTAButton>
               </div>
             </div> {/* End hero-left */}
@@ -405,8 +417,14 @@ const AboutPage: React.FC = () => {
               </div>
 
               <div className={`hero-actions ${isLoaded ? 'animate-in delay-4' : ''}`}>
-                <CTAButton href="#chat-demo-3" primary>
-                  Analyze Your Food
+                <CTAButton 
+                  href="https://www.kickstarter.com/projects/wihy/wihy-a-new-way-to-explore-food-knowledge-and-choices"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={handleKickstarterClick}
+                  primary
+                >
+                  Join the WIHY Beta
                 </CTAButton>
               </div>
             </div> {/* End hero-left */}
@@ -528,8 +546,14 @@ const AboutPage: React.FC = () => {
               </div>
 
               <div className={`hero-actions ${isLoaded ? 'animate-in delay-4' : ''}`}>
-                <CTAButton href="#chat-demo-4" primary>
-                  See Your Patterns
+                <CTAButton 
+                  href="https://www.kickstarter.com/projects/wihy/wihy-a-new-way-to-explore-food-knowledge-and-choices"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={handleKickstarterClick}
+                  primary
+                >
+                  Join the WIHY Beta
                 </CTAButton>
               </div>
             </div> {/* End hero-left */}
@@ -613,8 +637,14 @@ const AboutPage: React.FC = () => {
               </div>
 
               <div className={`hero-actions ${isLoaded ? 'animate-in delay-4' : ''}`}>
-                <CTAButton href="#chat-demo-5" primary>
-                  Fact Check a Claim
+                <CTAButton 
+                  href="https://www.kickstarter.com/projects/wihy/wihy-a-new-way-to-explore-food-knowledge-and-choices"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={handleKickstarterClick}
+                  primary
+                >
+                  Join the WIHY Beta
                 </CTAButton>
               </div>
             </div> {/* End hero-left */}
