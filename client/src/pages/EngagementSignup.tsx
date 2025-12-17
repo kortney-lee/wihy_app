@@ -15,8 +15,8 @@ const EngagementSignup: React.FC = () => {
     
     // TODO: Implement actual signup API call
     setTimeout(() => {
-      // For now, navigate to demo dashboard
-      navigate('/engagement-dashboard');
+      // Navigate to partner hub after signup
+      navigate('/partner-hub');
     }, 1000);
   };
 

@@ -308,7 +308,7 @@ const PredictiveDashboard: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen overflow-y-auto" style={{ backgroundColor: '#f0f7ff', height: '100%' }}>
+    <div className="min-h-screen overflow-hidden" style={{ backgroundColor: '#f0f7ff', height: '100%' }}>
       <div className="w-full px-2 sm:px-4 pb-8">
         {/* Time Window Selector */}
         <div className="flex items-center justify-end gap-2 mb-6 pt-4">

@@ -435,7 +435,7 @@ const EngagementDashboard: React.FC = () => {
             </span>
           </div>
 
-          <div className="mt-4 overflow-x-auto rounded-2xl ring-1 ring-slate-200">
+          <div className="mt-4 overflow-hidden rounded-2xl ring-1 ring-slate-200">
             <table className="min-w-full bg-white text-left text-sm">
               <thead className="bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-500">
                 <tr>
@@ -480,7 +480,7 @@ const EngagementDashboard: React.FC = () => {
             </span>
           </div>
 
-          <div className="mt-4 overflow-x-auto rounded-2xl ring-1 ring-slate-200">
+          <div className="mt-4 overflow-hidden rounded-2xl ring-1 ring-slate-200">
             <table className="min-w-full bg-white text-left text-sm">
               <thead className="bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-500">
                 <tr>
@@ -543,7 +543,7 @@ const EngagementDashboard: React.FC = () => {
               </span>
             </div>
 
-            <div className="mt-4 overflow-x-auto rounded-2xl ring-1 ring-slate-200">
+            <div className="mt-4 overflow-hidden rounded-2xl ring-1 ring-slate-200">
               <table className="min-w-full bg-white text-left text-sm">
                 <thead className="bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-500">
                   <tr>
