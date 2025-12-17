@@ -481,7 +481,7 @@ const NutritionFactsPage: React.FC = () => {
                     </div>
                   )}
 
-                  {/* Ingredients */}
+                  {/* Ingredients Card */}
                   {product.ingredientsText && (
                     <div className="bg-white rounded-2xl border-0 p-6 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2 active:scale-95 active:shadow-md active:translate-y-0 cursor-pointer transform">
                       <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center gap-2">
@@ -490,29 +490,64 @@ const NutritionFactsPage: React.FC = () => {
                         </svg>
                         <span className="text-gray-900">Ingredients</span>
                       </h2>
-                      <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border-l-4 border-blue-400">
-                        <p className="text-sm text-gray-700 leading-relaxed font-medium">
-                          {product.ingredientsText}
-                        </p>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {product.ingredientsText.split(',').map((ingredient, idx) => {
+                          const colors = [
+                            { bg: 'from-blue-50 to-indigo-50', border: 'border-blue-400', text: 'text-blue-600' },
+                            { bg: 'from-green-50 to-emerald-50', border: 'border-green-400', text: 'text-green-600' },
+                            { bg: 'from-purple-50 to-violet-50', border: 'border-purple-400', text: 'text-purple-600' },
+                            { bg: 'from-pink-50 to-rose-50', border: 'border-pink-400', text: 'text-pink-600' },
+                            { bg: 'from-orange-50 to-amber-50', border: 'border-orange-400', text: 'text-orange-600' },
+                            { bg: 'from-teal-50 to-cyan-50', border: 'border-teal-400', text: 'text-teal-600' },
+                          ];
+                          const color = colors[idx % colors.length];
+                          return (
+                            <div key={idx} className={`flex items-center p-3 bg-gradient-to-r ${color.bg} rounded-lg border-l-4 ${color.border} hover:bg-gradient-to-r transition-all duration-200 cursor-pointer`}>
+                              <span className="text-sm font-medium text-gray-700">{ingredient.trim()}</span>
+                            </div>
+                          );
+                        })}
                       </div>
-                      {product.additives && Object.keys(product.additives).length > 0 && (
-                        <div className="mt-4 pt-4 border-t border-gray-200">
-                          <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
-                            <svg className="w-5 h-5 text-orange-600" viewBox="0 0 24 24" fill="currentColor">
-                              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
-                            </svg>
-                            Additives Detected
-                          </h3>
-                          <div className="space-y-2">
-                            {Object.entries(product.additives).map(([code, name], idx) => (
-                              <div key={idx} className="flex items-center gap-3 p-3 bg-gradient-to-r from-orange-50 to-amber-50 rounded-lg border-l-4 border-orange-400 hover:bg-gradient-to-r hover:from-orange-100 hover:to-amber-100 transition-all duration-200 cursor-pointer">
-                                <span className="px-2 py-1 bg-orange-600 text-white text-xs font-bold rounded-full">{code}</span>
-                                <span className="text-sm font-medium text-gray-700">{name as string}</span>
-                              </div>
-                            ))}
+                    </div>
+                  )}
+
+                  {/* FDA Analysis Card */}
+                  {product.fdaIngredientAnalysis && (
+                    <div className="bg-white rounded-2xl border-0 p-6 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2 active:scale-95 active:shadow-md active:translate-y-0 cursor-pointer transform">
+                      <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                        <svg className="w-6 h-6 text-green-600" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                        </svg>
+                        <span className="text-gray-900">FDA Ingredient Analysis</span>
+                      </h2>
+                      
+                      <div className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl border-l-4 border-green-400">
+                        <pre className="text-sm text-gray-700 leading-relaxed font-mono whitespace-pre-wrap">
+                          {JSON.stringify(product.fdaIngredientAnalysis, null, 2)}
+                        </pre>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Additives Card */}
+                  {product.additives && Object.keys(product.additives).length > 0 && (
+                    <div className="bg-white rounded-2xl border-0 p-6 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2 active:scale-95 active:shadow-md active:translate-y-0 cursor-pointer transform">
+                      <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                        <svg className="w-6 h-6 text-orange-600" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                        </svg>
+                        <span className="text-gray-900">Additives Detected</span>
+                      </h2>
+                      
+                      <div className="space-y-2">
+                        {Object.entries(product.additives).map(([code, name], idx) => (
+                          <div key={idx} className="flex items-center gap-3 p-3 bg-gradient-to-r from-orange-50 to-amber-50 rounded-lg border-l-4 border-orange-400 hover:bg-gradient-to-r hover:from-orange-100 hover:to-amber-100 transition-all duration-200 cursor-pointer">
+                            <span className="px-2 py-1 bg-orange-600 text-white text-xs font-bold rounded-full">{code}</span>
+                            <span className="text-sm font-medium text-gray-700">{name as string}</span>
                           </div>
-                        </div>
-                      )}
+                        ))}
+                      </div>
                     </div>
                   )}
 

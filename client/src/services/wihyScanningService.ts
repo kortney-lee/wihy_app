@@ -94,6 +94,8 @@ export interface BarcodeScanResult {
     confidence_score: number;
     data_sources: string[];
     session_id?: string;  // Chat session ID for follow-up questions
+    ingredients_text?: string;  // Raw ingredients text from product label
+    fda_ingredient_analysis?: any;  // FDA analysis of ingredients
   };
   error?: string;
 }
@@ -330,7 +332,9 @@ class WihyScanningService {
         timestamp: scannerData.timestamp || new Date().toISOString(),
         confidence_score: scannerData.confidence_score || 0.8,
         data_sources: ['scanner_api', 'openfoodfacts'],
-        session_id: sessionId
+        session_id: sessionId,
+        ingredients_text: metadata.ingredients_text,
+        fda_ingredient_analysis: metadata.fda_ingredient_analysis
       }
     };
   }
