@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Users, Activity, Eye, TrendingUp, Copy, Check, Crown } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Users, Activity, Eye, TrendingUp, Copy, Check, Crown, DollarSign } from "lucide-react";
 import TrackingHeader from "../components/layout/TrackingHeader";
 
 interface ManagerStats {
@@ -115,6 +116,7 @@ function StatCard({
 }
 
 const ManagerDashboard: React.FC = () => {
+  const navigate = useNavigate();
   const [stats, setStats] = useState<ManagerStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [copiedId, setCopiedId] = useState<string | null>(null);
@@ -542,9 +544,18 @@ const ManagerDashboard: React.FC = () => {
             </p>
           </div>
 
-          <div className="rounded-2xl bg-white px-4 py-2 shadow-sm ring-1 ring-slate-200">
-            <div className="text-xs font-medium text-slate-500">Manager ID</div>
-            <div className="font-mono text-sm font-semibold text-slate-900">{stats.managerId}</div>
+          <div className="flex gap-3">
+            <button
+              onClick={() => navigate('/payout-settings', { state: { from: '/manager-dashboard' } })}
+              className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700"
+            >
+              <DollarSign className="h-4 w-4" />
+              <span>Get Paid</span>
+            </button>
+            <div className="rounded-2xl bg-white px-4 py-2 shadow-sm ring-1 ring-slate-200">
+              <div className="text-xs font-medium text-slate-500">Manager ID</div>
+              <div className="font-mono text-sm font-semibold text-slate-900">{stats.managerId}</div>
+            </div>
           </div>
         </div>
 

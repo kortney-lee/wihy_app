@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo } from "react";
-import { useParams } from "react-router-dom";
-import { Users, TrendingUp, Target, Activity, Copy, Check, Crown } from "lucide-react";
+import { useParams, useNavigate } from "react-router-dom";
+import { Users, TrendingUp, Target, Activity, Copy, Check, Crown, DollarSign } from "lucide-react";
 import TrackingHeader from "../components/layout/TrackingHeader";
 
 interface EngagementStats {
@@ -117,6 +117,7 @@ function StatCard({
 
 const EngagementDashboard: React.FC = () => {
   const { trackingId } = useParams<{ trackingId: string }>();
+  const navigate = useNavigate();
   const [stats, setStats] = useState<EngagementStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -279,10 +280,18 @@ const EngagementDashboard: React.FC = () => {
             </p>
           </div>
 
-          <button
-            onClick={copyTrackingLink}
-            className="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-slate-800"
-          >
+          <div className="flex gap-3">
+            <button
+              onClick={() => navigate('/payout-settings', { state: { from: '/engagement-dashboard' } })}
+              className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700"
+            >
+              <DollarSign className="h-4 w-4" />
+              <span>Get Paid</span>
+            </button>
+            <button
+              onClick={copyTrackingLink}
+              className="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-slate-800"
+            >
             {copied ? (
               <>
                 <Check className="h-4 w-4" />
@@ -295,6 +304,7 @@ const EngagementDashboard: React.FC = () => {
               </>
             )}
           </button>
+          </div>
         </div>
 
         <p className="mt-4 max-w-2xl text-sm text-slate-600">
