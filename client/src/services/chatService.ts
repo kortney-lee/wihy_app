@@ -57,8 +57,9 @@ class ChatService {
    * This aligns with the WIHY API documentation
    * @param query - The message text
    * @param sessionId - Optional session ID for conversation context
+   * @param askWihy - Optional pre-formatted query from scan API
    */
-  async sendDirectMessage(query: string, sessionId?: string): Promise<ChatResponse | null> {
+  async sendDirectMessage(query: string, sessionId?: string, askWihy?: string): Promise<ChatResponse | null> {
     try {
       console.log('🔍 CHAT SERVICE: Sending message to /ask endpoint');
 
@@ -68,6 +69,12 @@ class ChatService {
       if (sessionId) {
         request.session_id = sessionId;
         console.log('🔍 CHAT SERVICE: Including session_id for conversation context:', sessionId);
+      }
+
+      // Include ask_wihy if provided from scan API
+      if (askWihy) {
+        request.ask_wihy = askWihy;
+        console.log('🔍 CHAT SERVICE: Including ask_wihy from scan API');
       }
 
       console.log('🔍 CHAT SERVICE: Request:', { 

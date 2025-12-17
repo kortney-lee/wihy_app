@@ -68,4 +68,7 @@ export interface NutritionFactsData {
 
   // Recommendations
   recommendations?: Recommendation[];
+
+  // Chat context from scan API
+  askWihy?: string;  // Pre-formatted query for /ask endpoint
 }
