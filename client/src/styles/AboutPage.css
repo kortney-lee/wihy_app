@@ -2170,3 +2170,12 @@ body {
     max-height: calc(100vh - 112px) !important;
   }
 }
+
+/* Expandable Section Arrow Rotation */
+.expandable-section[open] .arrow-icon:first-of-type {
+  transform: rotate(90deg);
+}
+
+.expandable-section[open] .arrow-icon:last-of-type {
+  transform: rotate(-90deg);
+}
