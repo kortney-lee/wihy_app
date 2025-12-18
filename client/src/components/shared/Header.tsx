@@ -22,6 +22,8 @@ interface UniversalSearchResult {
   error?: string;
 }
 
+
+
 interface HeaderProps {
   searchQuery?: string;
   onSearchSubmit?: (query: string) => void;
@@ -872,24 +874,14 @@ const Header: React.FC<HeaderProps> = ({
       <header className={headerClasses} style={{
         paddingTop: PlatformDetectionService.isNative() ? '48px' : undefined
       }}>
-        {/* === TOP BAR: Progress menu + Login === */}
+        {/* === TOP BAR: Login + Settings Menu === */}
         <div className={CSS_CLASSES.VHEALTH_TOPBAR}>
-          {/* Left side: Progress History Menu */}
+          {/* Left side: Empty space for better layout */}
           <div style={{ display: 'flex', alignItems: 'center', flex: 1 }}>
-            {showProgressMenu && onProgressMenuClick && authService.getState().isAuthenticated && (
-              <button
-                onClick={onProgressMenuClick}
-                className="w-10 h-10 rounded-xl bg-gray-100/60 hover:bg-gray-200/80 flex items-center justify-center text-gray-700 hover:text-gray-900 transition-all duration-200 backdrop-blur-sm"
-                title="Toggle Progress History"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
-              </button>
-            )}
+            {/* Empty - keeps layout balanced */}
           </div>
-          {/* Right side: Login */}
-          <div className={CSS_CLASSES.VHEALTH_TOPBAR_RIGHT}>
+          {/* Right side: Login + Settings Menu */}
+          <div className={CSS_CLASSES.VHEALTH_TOPBAR_RIGHT} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             {showLogin && !PlatformDetectionService.isNative() && (
               <div 
                 className={CSS_CLASSES.HEADER_AUTH_WRAPPER}
@@ -908,6 +900,18 @@ const Header: React.FC<HeaderProps> = ({
                   onSignOut={() => console.log('User signed out from header')}
                 />
               </div>
+            )}
+            {/* Settings Menu - Only show when authenticated */}
+            {authService.getState().isAuthenticated && showProgressMenu && onProgressMenuClick && (
+              <button
+                onClick={onProgressMenuClick}
+                className="settings-menu-button w-10 h-10 rounded-xl bg-gray-100/60 hover:bg-gray-200/80 flex items-center justify-center text-gray-700 hover:text-gray-900 transition-all duration-200 backdrop-blur-sm"
+                title="Toggle Progress History"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              </button>
             )}
           </div>
         </div>
