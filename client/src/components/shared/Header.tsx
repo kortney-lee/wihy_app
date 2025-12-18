@@ -159,6 +159,17 @@ const Header: React.FC<HeaderProps> = ({
   }, [sessionId]);
 
   // ================================
+  // SEARCH QUERY SYNCHRONIZATION
+  // ================================
+  // Sync internal input state with searchQuery prop changes
+  useEffect(() => {
+    console.log('[Header] searchQuery prop changed to:', searchQuery);
+    setInput(searchQuery);
+    // Auto-resize the textarea after updating input
+    setTimeout(() => autoSize(), 0);
+  }, [searchQuery]);
+
+  // ================================
   // UTILITY FUNCTIONS
   // ================================
 
