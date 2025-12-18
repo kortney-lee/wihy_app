@@ -364,46 +364,10 @@ const MultiAuthLogin: React.FC<MultiAuthLoginProps> = ({
               </button>
             </div>
             <div className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
-            {/* Coming Soon Message */}
-            <div className="px-8 py-12 text-center">
-              <div className="mb-6">
-                <svg className="w-20 h-20 mx-auto text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                </svg>
-              </div>
-              <h2 className="text-2xl font-bold text-gray-800 mb-4">Coming Soon!</h2>
-              <p className="text-gray-600 text-base leading-relaxed mb-6">
-                We're working hard to bring you a seamless authentication experience. 
-                Login functionality will be available soon.
-              </p>
-              <p className="text-gray-500 text-sm italic mb-8">
-                In the meantime, you can continue using WiHY to scan foods and ask health questions for free.
-              </p>
-              <div className="mt-6 pt-6 border-t border-gray-200">
-                <div className="inline-block rounded-[26px] overflow-hidden bg-gradient-to-r from-[#fa5f06] via-white via-[#c0c0c0] to-[#4cbb17] bg-[length:200%_100%] p-[2px] animate-[wihy-border-sweep_2.2s_linear_infinite]">
-                  <a 
-                    href="https://wihy.ai/about" 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="flex items-center justify-center gap-2 px-8 py-4 bg-white text-[#1A73E8] font-semibold rounded-[24px] transition-all duration-200 hover:shadow-lg"
-                  >
-                    <span>Learn More About WiHY</span>
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                    </svg>
-                  </a>
-                </div>
-                <p className="text-xs text-gray-400 mt-3">
-                  Visit wihy.ai/about for updates and development news
-                </p>
-              </div>
-            </div>
             
-            {/* Hidden login providers */}
-            <div style={{ display: 'none' }}>
             <div className="px-5 pb-4 text-center text-gray-600 text-sm leading-relaxed">
               <p className="m-0 mb-3 italic">
-                (pronounced "why")
+                (pronounced "why") BETA – Your AI-powered nutrition assistant.
               </p>
               <p className="m-0 mb-3">
                 You can scan foods for free or ask general questions anytime.
@@ -412,27 +376,8 @@ const MultiAuthLogin: React.FC<MultiAuthLoginProps> = ({
                 To save your history, track your progress, and share your goals, you'll need to create an account.
               </p>
             </div>
-            <div className="px-5 flex flex-col gap-3 relative z-[1]">
-              {authProviders.filter(provider => provider.id !== 'email').map((provider) => (
-                <button
-                  key={provider.id}
-                  className="flex items-center justify-center gap-3 px-[18px] py-[14px] border border-[#dadce0] rounded-full bg-white cursor-pointer transition-all duration-200 text-sm font-medium text-slate-700 w-full text-center relative z-[1] hover:bg-gray-100 hover:border-[#bdc3c7] hover:shadow-md"
-                  onClick={() => handleProviderLogin(provider)}
-                  style={{ '--provider-color': provider.color } as React.CSSProperties}
-                >
-                  <span className="w-5 h-5 flex-shrink-0">{provider.icon}</span>
-                  <span>Continue with {provider.name}</span>
-                </button>
-              ))}
-            </div>
             
             <div className="px-5 py-4 text-center">
-              <div className="flex items-center my-2 text-gray-600 text-sm font-medium">
-                <div className="flex-1 h-px bg-gray-200"></div>
-                <span className="mx-4">OR</span>
-                <div className="flex-1 h-px bg-gray-200"></div>
-              </div>
-              
               <input
                 type="email"
                 placeholder="Email address"
@@ -450,11 +395,23 @@ const MultiAuthLogin: React.FC<MultiAuthLoginProps> = ({
                 Continue
               </button>
             </div>
+
+            <div className="px-5 py-3 text-center">
+              <p className="text-xs text-gray-500 mb-2">
+                We're working hard to bring you a seamless authentication experience. 
+                <strong> Other providers coming soon.</strong>
+              </p>
+              <p className="text-xs text-gray-400">
+                In the meantime, you can continue using WiHY (Beta) to scan foods and ask health questions for free.
+              </p>
+            </div>
             
-            <p className="px-5 pb-4 text-xs text-slate-600 text-center m-0 leading-snug max-[600px]:pb-5">
+            <p className="px-5 pb-2 text-xs text-slate-600 text-center m-0 leading-snug max-[600px]:pb-2">
               {disclaimer}
             </p>
-            </div>
+            <p className="px-5 pb-4 text-xs text-gray-400 text-center m-0 leading-snug max-[600px]:pb-5">
+              Visit <a href="https://wihy.ai/about" target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">WihY</a> <a href="https://wihy.ai/about" target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">wihy.ai/about</a> for more details
+            </p>
             </div>
           </div>
         </>,
