@@ -20,6 +20,7 @@ import DebugFullScreen from './pages/DebugFullScreen';
 import CoachDashboard from './components/dashboard/CoachDashboard';
 import ParentDashboard from './components/dashboard/ParentDashboard';
 import OverviewDashboard from './components/dashboard/OverviewDashboard';
+import ResearchDashboard from './components/dashboard/ResearchDashboard';
 import DashboardPage from './components/dashboard/DashboardPage';
 import TrackingDashboard from './pages/TrackingDashboard';
 import AdminLinkGenerator from './pages/AdminLinkGenerator';
@@ -577,6 +578,7 @@ const App: React.FC = () => {
             <Route path="/terms" element={<TermsPage />} />
             <Route path="/new-about" element={<NewAboutpage />} />
             <Route path="/news" element={<NewsPage />} />
+            <Route path="/research" element={<ResearchDashboard period="week" onAnalyze={() => {}} onSearch={() => {}} windowWidth={window.innerWidth} />} />
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/dashboard/overview" element={<OverviewDashboard />} />
             <Route path="/dashboard/parent" element={<ParentDashboard />} />

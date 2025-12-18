@@ -21,18 +21,13 @@ import { useDebugLog } from '../debug/DebugOverlay';
 import { saveSessionToHistory } from '../debug/DebugOverlay';
 
 const rotatingPrompts = [
-  "Ask me what is healthy",
-  "Do we really need to eat several small meals per day?",
-  "What's the real truth about detox?",
-  "Why doesn't cleansing actually heal the body?",
-  "What does it mean to rediscover real food?",
-  "When did food become a prescription instead of nourishment?",
-  "What do we really know about the metabolism?",
-  "Is the thyroid the whole story—or just part of it?",
-  "How are food and fertility connected to our future?",
-  "What's the hidden cost of convenience in modern life?",
-  "What exactly happened in the year 2000 that changed our health?",
-  "How did disconnection start replacing love?"
+  "Scan food and explain it",
+  "Analyze my meals",
+  "Create a nutrition plan for me",
+  "Build me a workout plan",
+  "Review this health claim",
+  "Show me my habits over time",
+  "Help me improve my health"
 ];
 
 const VHealthSearch: React.FC = () => {
@@ -1160,7 +1155,7 @@ const VHealthSearch: React.FC = () => {
     const checkMobile = () => {
       const isMobileDevice = window.innerWidth <= 768 || 'ontouchstart' in window;
       setIsMobile(isMobileDevice);
-      // Removed auto-show behavior - let users click "I'm Feeling Healthy" button
+      // Removed auto-show behavior - let users click "Verify With Evidence" button
     };
 
     // Check on mount
@@ -1411,11 +1406,11 @@ const VHealthSearch: React.FC = () => {
             {isLoading ? loadingMessage : 'Analyze Nutrition'}
           </button>
           
-          {/* FEELING HEALTHY BUTTON - Navigates to news page */}
+          {/* VERIFY WITH EVIDENCE BUTTON - Navigates to research dashboard */}
           <button 
             onClick={() => {
               if (isLoading) return;
-              navigate('/news');
+              navigate('/research');
             }}
             className="search-btn-mobile secondary"
             type="button"
@@ -1453,7 +1448,7 @@ const VHealthSearch: React.FC = () => {
               }
             }}
           >
-            I'm Feeling Healthy
+            Verify With Evidence
           </button>
 
           {/* DEMO MODE BUTTON - Development only */}
@@ -1718,10 +1713,10 @@ const VHealthSearch: React.FC = () => {
             <span style={{ fontSize: '11px', fontWeight: '500' }}>Scan</span>
           </button>
 
-          {/* I'm Feeling Healthy - Navigate to News Page */}
+          {/* Verify With Evidence - Navigate to Research Dashboard */}
           <button
             onClick={() => {
-              navigate('/news');
+              navigate('/research');
             }}
             style={{
               flex: 1,
@@ -1741,7 +1736,7 @@ const VHealthSearch: React.FC = () => {
             <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
               <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/>
             </svg>
-            <span style={{ fontSize: '11px', fontWeight: '500' }}>News</span>
+            <span style={{ fontSize: '11px', fontWeight: '500' }}>Research</span>
           </button>
 
           {/* Login/Account */}
