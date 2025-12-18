@@ -30,6 +30,7 @@ import Header from '../shared/Header';
 import { extractHealthMetrics, extractBMIData, extractNutritionData, extractHealthRiskData } from '../../utils/healthDataExtractor';
 import Spinner from '../ui/Spinner';
 import { logger } from '../../utils/logger';
+import { authService } from '../../services/authService';
 
 // Tab type definition - matches chartTypes.ts tabView values
 type SearchTab = 'overview' | 'charts' | 'consumption' | 'research' | 'fitness' | 'coach' | 'parent';
@@ -1286,8 +1287,8 @@ const SearchResults: React.FC<SearchResultsProps> = ({
       
       {/* Main Content Area with Dashboard Layout */}
       <div className={CSS_CLASSES.DASHBOARD_CONTAINER} style={{ paddingTop: windowWidth < 768 ? '220px' : windowWidth < 1200 ? '220px' : '100px' }}>
-        {/* Progress History Sidebar - Always available */}
-        {showProgressSidebar && (
+        {/* Progress History Sidebar - Only available when logged in */}
+        {authService.getState().isAuthenticated && showProgressSidebar && (
           <div style={{
             position: 'fixed',
             top: 0,

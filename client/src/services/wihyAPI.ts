@@ -41,6 +41,7 @@
 
 import { API_CONFIG, getApiEndpoint } from '../config/apiConfig';
 import { logger } from '../utils/logger';
+import { authService } from './authService';
 
 // Dynamic endpoint that adapts to environment
 const getWihyApiEndpoint = (path: string = '/ask') => {
@@ -486,7 +487,7 @@ class WihyAPIService {
       
       const response = await fetch(endpoint, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authService.getAuthenticatedHeaders(),
         body: JSON.stringify(requestBody),
         signal: controller.signal
       });

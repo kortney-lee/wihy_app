@@ -30,6 +30,8 @@ import ManagerDashboard from './pages/ManagerDashboard';
 import PayoutSettings from './pages/PayoutSettings';
 import PredictiveDashboard from './pages/PredictiveDashboard';
 import MonitoringDashboard from './pages/MonitoringDashboard';
+import Settings from './pages/Settings';
+import AuthCallback from './pages/AuthCallback';
 import { PlatformNavigationExample } from './components/examples/PlatformNavigationExample';
 import { wihyAPI } from './services/wihyAPI';
 import { searchCache } from './services/searchCache';
@@ -42,6 +44,21 @@ import './index.css';
 import { API_CONFIG } from './config/apiConfig';
 
 const API_BASE_URL = API_CONFIG.WIHY_API_URL; // Use the ml.wihy.ai endpoint
+
+// Navigation Hook Component to expose navigate globally
+const NavigationSetup: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const navigate = useNavigate();
+  
+  useEffect(() => {
+    // Expose navigate to window for components that can't access hooks (like portals)
+    (window as any).__wihy_navigate = navigate;
+    return () => {
+      delete (window as any).__wihy_navigate;
+    };
+  }, [navigate]);
+  
+  return <>{children}</>;
+};
 
 export const searchFoodDatabase = async (query: string) => {
   try {
@@ -547,42 +564,46 @@ const App: React.FC = () => {
   return (
     <AuthProvider>
       <Router>
-        <Routes>
-          <Route path="/" element={<VHealthSearch />} />
-          <Route path="/results" element={<ResultsPage />} />
-          <Route path="/nutritionfacts" element={<NutritionFactsPage />} />
-          <Route path="/debug-fullscreen" element={<DebugFullScreen />} />
-          <Route path="/about" element={<AboutPage />} />
-          <Route path="/about" element={<AboutPage />} />
-          <Route path="/investors" element={<InvestorsPage />} />
-          <Route path="/privacy" element={<PrivacyPage />} />
-          <Route path="/terms" element={<TermsPage />} />
-          <Route path="/new-about" element={<NewAboutpage />} />
-          <Route path="/news" element={<NewsPage />} />
-          <Route path="/dashboard" element={<DashboardPage />} />
-          <Route path="/dashboard/overview" element={<OverviewDashboard />} />
-          <Route path="/dashboard/parent" element={<ParentDashboard />} />
-          <Route path="/dashboard/predictive" element={<PredictiveDashboard />} />
-          <Route path="/tracking-dashboard" element={<TrackingDashboard />} />
-          <Route path="/manager-dashboard" element={<ManagerDashboard />} />
-          <Route path="/tracking-admin" element={<AdminLinkGenerator />} />
-          <Route path="/engagement-signup" element={<EngagementSignup />} />
-          <Route path="/partner-hub" element={<PartnerHub />} />
-          <Route path="/payout-settings" element={<PayoutSettings />} />
-          <Route path="/monitoring-dashboard" element={<MonitoringDashboard />} />
-          <Route path="/engagement-dashboard" element={<EngagementDashboard />} />
-          <Route path="/engagement/:trackingId" element={<EngagementDashboard />} />
-          <Route path="/test" element={<TestChartsPage />} />
-          <Route path="/test-grid" element={<TestDashboardGrid />} />
-          <Route path="/test-individual" element={<TestIndividualComponents />} />
-          <Route path="/health-dashboard" element={<ComprehensiveHealthDashboard />} />
-          <Route path="/tailwind-demo" element={<TailwindDemoPage />} />
-          <Route path="/platform-demo" element={<PlatformNavigationExample />} />
-          {/* Demo route - only available in development */}
-          {process.env.NODE_ENV === 'development' && (
-            <Route path="/demo" element={<DemoResultsPage />} />
-          )}
-        </Routes>
+        <NavigationSetup>
+          <Routes>
+            <Route path="/" element={<VHealthSearch />} />
+            <Route path="/results" element={<ResultsPage />} />
+            <Route path="/nutritionfacts" element={<NutritionFactsPage />} />
+            <Route path="/debug-fullscreen" element={<DebugFullScreen />} />
+            <Route path="/about" element={<AboutPage />} />
+            <Route path="/about" element={<AboutPage />} />
+            <Route path="/investors" element={<InvestorsPage />} />
+            <Route path="/privacy" element={<PrivacyPage />} />
+            <Route path="/terms" element={<TermsPage />} />
+            <Route path="/new-about" element={<NewAboutpage />} />
+            <Route path="/news" element={<NewsPage />} />
+            <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/dashboard/overview" element={<OverviewDashboard />} />
+            <Route path="/dashboard/parent" element={<ParentDashboard />} />
+            <Route path="/dashboard/predictive" element={<PredictiveDashboard />} />
+            <Route path="/tracking-dashboard" element={<TrackingDashboard />} />
+            <Route path="/manager-dashboard" element={<ManagerDashboard />} />
+            <Route path="/tracking-admin" element={<AdminLinkGenerator />} />
+            <Route path="/engagement-signup" element={<EngagementSignup />} />
+            <Route path="/partner-hub" element={<PartnerHub />} />
+            <Route path="/payout-settings" element={<PayoutSettings />} />
+            <Route path="/monitoring-dashboard" element={<MonitoringDashboard />} />
+            <Route path="/engagement-dashboard" element={<EngagementDashboard />} />
+            <Route path="/engagement/:trackingId" element={<EngagementDashboard />} />
+            <Route path="/settings" element={<Settings />} />
+            <Route path="/auth/callback" element={<AuthCallback />} />
+            <Route path="/test" element={<TestChartsPage />} />
+            <Route path="/test-grid" element={<TestDashboardGrid />} />
+            <Route path="/test-individual" element={<TestIndividualComponents />} />
+            <Route path="/health-dashboard" element={<ComprehensiveHealthDashboard />} />
+            <Route path="/tailwind-demo" element={<TailwindDemoPage />} />
+            <Route path="/platform-demo" element={<PlatformNavigationExample />} />
+            {/* Demo route - only available in development */}
+            {process.env.NODE_ENV === 'development' && (
+              <Route path="/demo" element={<DemoResultsPage />} />
+            )}
+          </Routes>
+        </NavigationSetup>
       </Router>
     </AuthProvider>
   );

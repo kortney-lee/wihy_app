@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect, useImperativeHandle, forwardRef } f
 import { useNavigate } from 'react-router-dom';
 import { chatService } from '../../services/chatService';
 import { conversationService } from '../../services/conversationService';
+import { authService } from '../../services/authService';
 import { wihyScanningService } from '../../services/wihyScanningService';
 import { visionAnalysisService } from '../../services/visionAnalysisService';
 import { PlatformDetectionService } from '../../services/shared/platformDetectionService';
@@ -1205,8 +1206,8 @@ const FullScreenChat = forwardRef<FullScreenChatRef, FullScreenChatProps>(({
         }}
       >
 
-      {/* Chat History Sidebar - show when explicitly toggled */}
-      {((isMobile && showMobileHistory) || (!isMobile && showDesktopHistory)) && (
+      {/* Chat History Sidebar - show when explicitly toggled AND user is logged in */}
+      {authService.getState().isAuthenticated && ((isMobile && showMobileHistory) || (!isMobile && showDesktopHistory)) && (
         <div className={`${
           isMobile ? 'w-full' : 'w-70'
         } h-full bg-slate-50 border-r border-gray-200 flex flex-col overflow-hidden absolute top-0 left-0 ${
