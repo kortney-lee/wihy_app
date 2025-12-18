@@ -171,12 +171,21 @@ const MonitoringDashboard: React.FC = () => {
       setLoading(prev => ({ ...prev, summary: true }));
       const response = await fetch(`${API_BASE}/dashboard/summary?days_back=7`);
       const data = await response.json();
-      setSummaryStats(data.metrics || {
+      
+      const metrics = data.metrics || {
         total_conversations: 0,
         total_messages: 0,
         total_questions_logged: 0,
         total_errors_detected: 0
-      });
+      };
+      
+      // If no conversations but questions exist, treat questions as conversations
+      if (metrics.total_conversations === 0 && metrics.total_questions_logged > 0) {
+        metrics.total_conversations = metrics.total_questions_logged;
+        metrics.total_messages = metrics.total_questions_logged * 2; // Each Q&A = 2 messages
+      }
+      
+      setSummaryStats(metrics);
     } catch (error) {
       console.error('Error loading summary:', error);
     } finally {
@@ -212,8 +221,38 @@ const MonitoringDashboard: React.FC = () => {
 
   const loadConversations = async () => {
     try {
-      const response = await fetch(`${API_BASE}/dashboard/conversations?days_back=30&include_messages=false`);
-      const data = await response.json();
+      // Try the conversations endpoint first
+      let response = await fetch(`${API_BASE}/dashboard/conversations?days_back=30&include_messages=false`);
+      let data = await response.json();
+      
+      // If no conversations found, try to get questions and convert them
+      if (!data.conversations || data.conversations.length === 0) {
+        try {
+          response = await fetch(`${API_BASE}/dashboard/questions?days_back=30`);
+          data = await response.json();
+          
+          if (data.questions && data.questions.length > 0) {
+            // Convert questions to conversation format
+            const conversationsFromQuestions = data.questions.map((q: any) => ({
+              session_id: q.id,
+              user_id: 'guest', // Default user since questions don't have user context
+              message_count: 2, // Question + answer = 2 messages
+              created_at: q.timestamp,
+              updated_at: q.timestamp,
+              messages: [
+                { role: 'user', content: q.question },
+                { role: 'assistant', content: q.answer }
+              ]
+            }));
+            
+            setConversations(conversationsFromQuestions);
+            return;
+          }
+        } catch (questionError) {
+          console.log('Questions endpoint also failed:', questionError);
+        }
+      }
+      
       setConversations(data.conversations || []);
     } catch (error) {
       console.error('Error loading conversations:', error);
