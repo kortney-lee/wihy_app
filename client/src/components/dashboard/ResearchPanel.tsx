@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Search, BookOpen, ExternalLink } from 'lucide-react';
-import Spinner from '../ui/Spinner';
 import ExpandedResearchResult from './ExpandedResearchResult';
 
 /** ---- CONFIG ---- */
@@ -64,13 +63,15 @@ interface ResearchPanelProps {
   initialQuery?: string;
   onBack?: () => void;
   onAskArticle?: (pmcId: string, question: string) => void;
+  isHeaderLoading?: boolean;
 }
 
 const ResearchPanel: React.FC<ResearchPanelProps> = ({
   windowWidth = 1200,
   initialQuery,
   onBack,
-  onAskArticle
+  onAskArticle,
+  isHeaderLoading = false
 }) => {
   // Pane 1: Navigator state
   const [loading, setLoading] = useState(false);
@@ -133,10 +134,10 @@ const ResearchPanel: React.FC<ResearchPanelProps> = ({
       if (!res.ok) throw new Error(`Search failed: ${res.status}`);
       const data: ResearchSearchResponse = await res.json();
       
-      // Check for actual results, not just the success flag
+      // Check for actual results - prioritize articles over success flag
       const articles = data.articles || [];
-      if (!data.success && articles.length === 0) {
-        throw new Error('Search not successful');
+      if (articles.length === 0) {
+        throw new Error('No results found for this search');
       }
       
       // Cache the results
@@ -159,6 +160,7 @@ const ResearchPanel: React.FC<ResearchPanelProps> = ({
 
 
   const handleStudyClick = (study: ResearchSearchResult) => {
+    console.log('Study clicked:', study.title); // Debug log
     setSelectedStudy(study);
     setShowModal(true);
   };
@@ -185,18 +187,10 @@ const ResearchPanel: React.FC<ResearchPanelProps> = ({
           </div>
         )}
 
-        {/* Loading state */}
-        {loading && (
-          <div className="flex items-center justify-center py-16">
-            <div className="text-center">
-              <Spinner />
-              <p className="mt-4 text-gray-600">Searching research...</p>
-            </div>
-          </div>
-        )}
+        {/* Loading handled by overlay spinner */}
 
         {/* Error state */}
-        {error && (
+        {!loading && !isHeaderLoading && error && (
           <div className="max-w-md mx-auto">
             <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
               {error}
@@ -205,7 +199,7 @@ const ResearchPanel: React.FC<ResearchPanelProps> = ({
         )}
 
         {/* Empty states */}
-        {!loading && !hasSearched && (
+        {!loading && !isHeaderLoading && !hasSearched && (
           <div className="flex items-center justify-center py-16">
             <div className="text-center max-w-md">
               <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -217,7 +211,7 @@ const ResearchPanel: React.FC<ResearchPanelProps> = ({
           </div>
         )}
 
-        {!loading && hasSearched && searchResults.length === 0 && (
+        {!loading && !isHeaderLoading && hasSearched && searchResults.length === 0 && (
           <div className="flex items-center justify-center py-16">
             <div className="text-center max-w-md">
               <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -229,14 +223,20 @@ const ResearchPanel: React.FC<ResearchPanelProps> = ({
           </div>
         )}
 
-        {/* Research Grid */}
-        {searchResults.length > 0 && (
+        {/* Research Grid - only show when not loading */}
+        {!loading && !isHeaderLoading && searchResults.length > 0 && (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {searchResults.map((study) => (
               <article 
                 key={study.id}
                 className="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-lg transition-all duration-300 cursor-pointer group"
-                onClick={() => handleStudyClick(study)}
+                style={{ pointerEvents: 'auto', zIndex: 1 }}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  console.log('Card clicked!'); // Debug log
+                  handleStudyClick(study);
+                }}
               >
                 {/* Study Type Badge */}
                 {study.studyType && (
@@ -315,6 +315,34 @@ const ResearchPanel: React.FC<ResearchPanelProps> = ({
         onClose={closeModal}
         onAskArticle={onAskArticle}
       />
+
+      {/* Custom Spinner Overlay - Same style as spinner.tsx but no portal */}
+      {(loading || isHeaderLoading) && (
+        <div 
+          className="fixed inset-0 bg-black/75 backdrop-blur-sm flex flex-col items-center justify-center z-[2000]"
+          role="dialog" 
+          aria-modal="true" 
+          aria-labelledby="spinner-title" 
+          aria-describedby="spinner-subtitle"
+        >
+          <div className="flex flex-col items-center text-center">
+            {/* GIF spinner - same as spinner.tsx */}
+            <div className="mb-4">
+              <img 
+                src="/assets/whatishealthyspinner.gif" 
+                alt="Loading..." 
+                className="w-16 h-16 object-contain"
+              />
+            </div>
+            <h2 id="spinner-title" className="text-white text-xl font-normal mb-2 drop-shadow-md">
+              Searching Research...
+            </h2>
+            <p id="spinner-subtitle" className="text-white/90 text-sm drop-shadow-sm">
+              Finding the latest scientific evidence for your query
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
