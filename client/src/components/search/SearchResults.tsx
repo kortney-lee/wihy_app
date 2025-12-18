@@ -34,14 +34,13 @@ import { logger } from '../../utils/logger';
 import { authService } from '../../services/authService';
 
 // Tab type definition - matches chartTypes.ts tabView values
-type SearchTab = 'overview' | 'charts' | 'consumption' | 'research' | 'fitness' | 'coach' | 'parent';
+type SearchTab = 'overview' | 'charts' | 'consumption' | 'fitness' | 'coach' | 'parent';
 
 // Tab configuration
 const TAB_CONFIG = {
   overview: { label: 'Overview', value: 'overview' as SearchTab },
   charts: { label: 'My Progress', value: 'charts' as SearchTab },
   consumption: { label: 'Consumption', value: 'consumption' as SearchTab },
-  research: { label: 'Research', value: 'research' as SearchTab },
   fitness: { label: 'Fitness', value: 'fitness' as SearchTab },
   coach: { label: 'Coach Portal', value: 'coach' as SearchTab },
   parent: { label: 'Parent Portal', value: 'parent' as SearchTab }
@@ -1424,16 +1423,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({
                 </>
               )}
 
-              {activeTab === 'research' && (
-                <>
-                  <ResearchDashboard
-                    period={getDashboardPeriod()}
-                    onAnalyze={handleAddToChatConversation}
-                    onSearch={handleUniversalSearch}
-                    windowWidth={windowWidth}
-                  />
-                </>
-              )}
+
 
               {activeTab === 'consumption' && (
                 <>

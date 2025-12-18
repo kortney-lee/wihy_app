@@ -107,11 +107,11 @@ const ResearchPanel: React.FC<ResearchPanelProps> = ({
   onAskArticle
 }) => {
   // Pane 1: Navigator state
-  const [searchQuery, setSearchQuery] = useState(initialQuery || '');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [searchResults, setSearchResults] = useState<ResearchSearchResult[]>([]);
   const [hasSearched, setHasSearched] = useState(false);
+  const [currentQuery, setCurrentQuery] = useState(initialQuery || '');
 
   // Pane 2: Reader state
   const [selectedStudy, setSelectedStudy] = useState<ResearchSearchResult | null>(null);
@@ -125,16 +125,24 @@ const ResearchPanel: React.FC<ResearchPanelProps> = ({
   const [loadingClaim, setLoadingClaim] = useState(false);
   const [userNotes, setUserNotes] = useState('');
 
-  // Auto-run search if initialQuery provided
+  // Update currentQuery immediately when initialQuery changes
   useEffect(() => {
-    if (initialQuery && !hasSearched) {
-      runSearch(initialQuery);
+    if (initialQuery && initialQuery.trim()) {
+      setCurrentQuery(initialQuery.trim());
+    }
+  }, [initialQuery]);
+
+  // Auto-run search whenever initialQuery changes
+  useEffect(() => {
+    if (initialQuery && initialQuery.trim()) {
+      runSearch(initialQuery.trim());
     }
   }, [initialQuery]);
 
   /** ---- API CALLS ---- */
 
   const runSearch = async (keyword: string) => {
+    setCurrentQuery(keyword);
     setLoading(true);
     setError(null);
     setSearchResults([]);
@@ -147,8 +155,15 @@ const ResearchPanel: React.FC<ResearchPanelProps> = ({
       const res = await fetch(`${RESEARCH_API_BASE}/api/research/search?${qs}`);
       if (!res.ok) throw new Error(`Search failed: ${res.status}`);
       const data: ResearchSearchResponse = await res.json();
-      if (!data.success) throw new Error('Search not successful');
-      setSearchResults(data.articles || []);
+      
+      // Check for actual results, not just the success flag
+      const articles = data.articles || [];
+      if (!data.success && articles.length === 0) {
+        throw new Error('Search not successful');
+      }
+      
+      setSearchResults(articles);
+      console.log(`Search completed: ${articles.length} results found for "${keyword}"`);
     } catch (e: any) {
       setError(e?.message || 'Error searching research.');
     } finally {
@@ -195,12 +210,7 @@ const ResearchPanel: React.FC<ResearchPanelProps> = ({
     loadArticleContent(study.pmcid);
   };
 
-  const handleSearchSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      runSearch(searchQuery.trim());
-    }
-  };
+  // Remove internal search form handler - search comes from header now
 
   const isMobile = windowWidth < 1024;
 
@@ -227,25 +237,11 @@ const ResearchPanel: React.FC<ResearchPanelProps> = ({
           isMobile ? 'w-full' : 'w-80'
         } ${isMobile && selectedStudy ? 'hidden' : ''}`}>
           
-          {/* Search input */}
+          {/* Query summary - search controlled by header */}
           <div className="p-4 bg-white border-b border-gray-200">
-            <form onSubmit={handleSearchSubmit}>
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search studies..."
-                  className="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-            </form>
-
-            {/* Query summary */}
             {hasSearched && (
-              <div className="mt-2 text-xs text-gray-600">
-                {searchResults.length} results for "{searchQuery}"
+              <div className="text-sm text-gray-600">
+                {searchResults.length} results for "{initialQuery || currentQuery}"
               </div>
             )}
           </div>
