@@ -32,7 +32,7 @@ const AuthCallback: React.FC = () => {
         setStatus('error');
         setMessage('Connection failed.');
         setDetails(errorDesc || error);
-        setTimeout(() => navigate('/settings?tab=integrations'), 3000);
+        setTimeout(() => navigate('/dashboard'), 3000);
         return;
       }
 
@@ -41,7 +41,7 @@ const AuthCallback: React.FC = () => {
         setStatus('error');
         setMessage('Missing callback parameters.');
         setDetails('Expected OAuth callback parameters were not present.');
-        setTimeout(() => navigate('/settings?tab=integrations'), 3000);
+        setTimeout(() => navigate('/dashboard'), 3000);
         return;
       }
 
@@ -85,7 +85,7 @@ const AuthCallback: React.FC = () => {
           setDetails(null);
 
           // Redirect to settings with success message
-          const redirectTo = data?.redirectTo || '/settings?tab=integrations&connected=1';
+          const redirectTo = data?.redirectTo || '/dashboard';
           setTimeout(() => navigate(redirectTo), 900);
         }
       } catch (e: any) {
@@ -93,7 +93,7 @@ const AuthCallback: React.FC = () => {
         setStatus('error');
         setMessage('Connection failed.');
         setDetails(e?.message || 'Unknown error');
-        setTimeout(() => navigate('/settings?tab=integrations'), 3000);
+        setTimeout(() => navigate('/dashboard'), 3000);
       }
     };
 
@@ -202,7 +202,7 @@ const AuthCallback: React.FC = () => {
               flexWrap: 'wrap'
             }}>
               <button
-                onClick={() => navigate('/settings?tab=integrations')}
+                onClick={() => navigate('/dashboard')}
                 style={{
                   padding: '10px 20px',
                   backgroundColor: 'rgba(16, 185, 129, 0.15)',

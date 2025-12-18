@@ -3,6 +3,8 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import '../../styles/VHealthSearch.css';
 import ImageUploadModal from '../ui/ImageUploadModal';
 import MultiAuthLogin from '../shared/MultiAuthLogin';
+import UserPreference from '../shared/UserPreference';
+import { authService } from '../../services/authService';
 import Spinner from '../ui/Spinner';
 import NutritionChart from '../charts/cards/NutritionChart';
 import ResultQualityPie from '../charts/cards/ResultQualityPie';
@@ -1210,7 +1212,17 @@ const VHealthSearch: React.FC = () => {
         zIndex: 10002,
         display: PlatformDetectionService.isNative() ? 'none' : 'block'
       }}>
-        <MultiAuthLogin className="main-login-button" position="top-right" />
+        {(() => {
+          const isAuthed = authService.getState().isAuthenticated;
+          
+          // Signed out = show login
+          if (!isAuthed) {
+            return <MultiAuthLogin className="main-login-button" position="top-right" />;
+          }
+          
+          // Signed in = show hamburger (UserPreference)
+          return <UserPreference />;
+        })()}
       </div>
 
       {/* MAIN SEARCH INTERFACE - Centered on page */}

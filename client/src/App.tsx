@@ -30,7 +30,7 @@ import ManagerDashboard from './pages/ManagerDashboard';
 import PayoutSettings from './pages/PayoutSettings';
 import PredictiveDashboard from './pages/PredictiveDashboard';
 import MonitoringDashboard from './pages/MonitoringDashboard';
-import Settings from './pages/Settings';
+
 import AuthCallback from './pages/AuthCallback';
 import { PlatformNavigationExample } from './components/examples/PlatformNavigationExample';
 import { wihyAPI } from './services/wihyAPI';
@@ -590,7 +590,7 @@ const App: React.FC = () => {
             <Route path="/monitoring-dashboard" element={<MonitoringDashboard />} />
             <Route path="/engagement-dashboard" element={<EngagementDashboard />} />
             <Route path="/engagement/:trackingId" element={<EngagementDashboard />} />
-            <Route path="/settings" element={<Settings />} />
+
             <Route path="/auth/callback" element={<AuthCallback />} />
             <Route path="/test" element={<TestChartsPage />} />
             <Route path="/test-grid" element={<TestDashboardGrid />} />

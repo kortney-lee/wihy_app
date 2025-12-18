@@ -446,9 +446,9 @@ const MultiAuthLogin: React.FC<MultiAuthLoginProps> = ({
                 setShowDropdown(false);
                 const navigate = (window as any).__wihy_navigate;
                 if (navigate) {
-                  navigate('/settings');
+                  navigate('/dashboard');
                 } else {
-                  window.location.href = '/settings';
+                  window.location.href = '/dashboard';
                 }
               }}
             >
