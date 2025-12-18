@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Save, Copy, Lightbulb, X } from 'lucide-react';
-import Spinner from '../ui/Spinner';
 
 /** ---- CONFIG ---- */
 const RESEARCH_API_BASE =
@@ -254,15 +253,7 @@ const ExpandedResearchResult: React.FC<ExpandedResearchResultProps> = ({
 
         {/* Modal Content - Full Screen Wihy styled */}
         <div className="flex-1 overflow-y-auto px-6 sm:px-8 lg:px-12 pb-8">
-          {/* Loading state */}
-          {loadingArticle && (
-            <div className="flex items-center justify-center py-12">
-              <div className="text-center">
-                <Spinner />
-                <p className="mt-4 text-sm text-gray-600">Loading study details...</p>
-              </div>
-            </div>
-          )}
+          {/* Loading handled by custom overlay spinner */}
 
           {/* OVERVIEW TAB */}
           {modalTab === 'overview' && !loadingArticle && (
@@ -435,7 +426,7 @@ const ExpandedResearchResult: React.FC<ExpandedResearchResultProps> = ({
                   disabled={!claimText.trim() || loadingClaim}
                   className="w-full px-4 py-3 sm:py-4 bg-gradient-to-r from-blue-500 to-indigo-500 text-white text-sm sm:text-base font-bold rounded-2xl hover:from-blue-600 hover:to-indigo-600 disabled:from-gray-300 disabled:to-gray-400 disabled:cursor-not-allowed transition-all duration-300 shadow-lg"
                 >
-                  {loadingClaim ? '🔍 Evaluating...' : '🚀 Evaluate evidence'}
+                  🚀 Evaluate evidence
                 </button>
               </div>
 
@@ -580,6 +571,59 @@ const ExpandedResearchResult: React.FC<ExpandedResearchResultProps> = ({
           )}
         </div>
       </div>
+
+      {/* Custom Spinner Overlays - Same style as ResearchPanel */}
+      {loadingArticle && (
+        <div 
+          className="fixed inset-0 bg-black/75 backdrop-blur-sm flex flex-col items-center justify-center z-[2001]"
+          role="dialog" 
+          aria-modal="true" 
+          aria-labelledby="article-spinner-title" 
+          aria-describedby="article-spinner-subtitle"
+        >
+          <div className="flex flex-col items-center text-center">
+            <div className="mb-4">
+              <img 
+                src="/assets/whatishealthyspinner.gif" 
+                alt="Loading..." 
+                className="w-16 h-16 object-contain"
+              />
+            </div>
+            <h2 id="article-spinner-title" className="text-white text-xl font-normal mb-2 drop-shadow-md">
+              Loading Study Details...
+            </h2>
+            <p id="article-spinner-subtitle" className="text-white/90 text-sm drop-shadow-sm">
+              Retrieving full article content and analysis
+            </p>
+          </div>
+        </div>
+      )}
+      
+      {loadingClaim && (
+        <div 
+          className="fixed inset-0 bg-black/75 backdrop-blur-sm flex flex-col items-center justify-center z-[2001]"
+          role="dialog" 
+          aria-modal="true" 
+          aria-labelledby="claim-spinner-title" 
+          aria-describedby="claim-spinner-subtitle"
+        >
+          <div className="flex flex-col items-center text-center">
+            <div className="mb-4">
+              <img 
+                src="/assets/whatishealthyspinner.gif" 
+                alt="Loading..." 
+                className="w-16 h-16 object-contain"
+              />
+            </div>
+            <h2 id="claim-spinner-title" className="text-white text-xl font-normal mb-2 drop-shadow-md">
+              Evaluating Evidence...
+            </h2>
+            <p id="claim-spinner-subtitle" className="text-white/90 text-sm drop-shadow-sm">
+              Analyzing claim against study data
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
