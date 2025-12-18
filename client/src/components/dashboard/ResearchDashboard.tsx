@@ -21,6 +21,8 @@ const ResearchDashboard: React.FC<ResearchDashboardProps> = ({
   const [searchFromHeader, setSearchFromHeader] = useState<string | null>(null);
   const [recentSearches] = useState(['intermittent fasting', 'omega-3 benefits', 'creatine safety']);
   const [savedCollections] = useState(['Heart Health', 'Brain Function', 'Muscle Building']);
+  const [navigationHistory, setNavigationHistory] = useState<string[]>([]);
+  const [historyIndex, setHistoryIndex] = useState(-1);
   
   const commonQueries = [
     'Latest nutrition research',
@@ -32,11 +34,51 @@ const ResearchDashboard: React.FC<ResearchDashboardProps> = ({
   const handleHeaderSearch = (query: string) => {
     if (query.trim()) {
       const trimmedQuery = query.trim();
+      
+      // Cache the search in localStorage
+      const cacheKey = `research_cache_${trimmedQuery.toLowerCase().replace(/\s+/g, '_')}`;
+      const timestamp = Date.now();
+      const cacheData = { query: trimmedQuery, timestamp, results: null };
+      localStorage.setItem(cacheKey, JSON.stringify(cacheData));
+      
+      // Update navigation history
+      const newHistory = navigationHistory.slice(0, historyIndex + 1);
+      newHistory.push(trimmedQuery);
+      setNavigationHistory(newHistory);
+      setHistoryIndex(newHistory.length - 1);
+      
       setSearchFromHeader(trimmedQuery);
       setActiveWorkspace(trimmedQuery);
       console.log('Setting searchFromHeader to:', trimmedQuery); // Debug log
     }
   };
+
+  const handleBackNavigation = () => {
+    if (historyIndex > 0) {
+      const newIndex = historyIndex - 1;
+      const previousQuery = navigationHistory[newIndex];
+      setHistoryIndex(newIndex);
+      setActiveWorkspace(previousQuery);
+      setSearchFromHeader(previousQuery);
+    } else {
+      setActiveWorkspace(null);
+      setSearchFromHeader(null);
+      setHistoryIndex(-1);
+    }
+  };
+
+  const handleForwardNavigation = () => {
+    if (historyIndex < navigationHistory.length - 1) {
+      const newIndex = historyIndex + 1;
+      const nextQuery = navigationHistory[newIndex];
+      setHistoryIndex(newIndex);
+      setActiveWorkspace(nextQuery);
+      setSearchFromHeader(nextQuery);
+    }
+  };
+
+  const canGoBack = historyIndex > -1;
+  const canGoForward = historyIndex < navigationHistory.length - 1;
 
   // ResearchPanel will be shown within the dashboard layout below
 
@@ -118,7 +160,36 @@ const ResearchDashboard: React.FC<ResearchDashboardProps> = ({
         {/* Secondary header with title and actions */}
         <div className="bg-[#f0f7ff] px-6 py-4 border-b border-gray-200">
           <div className="max-w-7xl mx-auto flex items-center justify-between">
-            <h1 className="text-2xl font-bold text-gray-900">Research Dashboard</h1>
+            <div className="flex items-center gap-3">
+              {/* Forward/Back Navigation - conditionally shown */}
+              <div className="flex items-center gap-2">
+                {canGoBack && (
+                  <button
+                    type="button"
+                    onClick={handleBackNavigation}
+                    className="flex items-center justify-center w-10 h-10 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 18l-6-6 6-6" />
+                    </svg>
+                  </button>
+                )}
+                {canGoForward && (
+                  <button
+                    type="button"
+                    onClick={handleForwardNavigation}
+                    className="flex items-center justify-center w-10 h-10 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 18l6-6-6-6" />
+                    </svg>
+                  </button>
+                )}
+              </div>
+              <h1 className="text-2xl font-bold text-gray-900">
+                {activeWorkspace ? 'Research Workspace' : 'Research Dashboard'}
+              </h1>
+            </div>
             <div className="flex items-center gap-3">
               <button
                 type="button"
