@@ -2,6 +2,7 @@
 import React, { useState, useRef, useEffect, useLayoutEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import MultiAuthLogin from './MultiAuthLogin';
+import UserPreference from './UserPreference';
 import { authService } from '../../services/authService';
 import ImageUploadModal from '../ui/ImageUploadModal';
 import { wihyAPI } from '../../services/wihyAPI';
@@ -880,39 +881,41 @@ const Header: React.FC<HeaderProps> = ({
           <div style={{ display: 'flex', alignItems: 'center', flex: 1 }}>
             {/* Empty - keeps layout balanced */}
           </div>
-          {/* Right side: Login + Settings Menu */}
+          {/* Right side: Authentication */}
           <div className={CSS_CLASSES.VHEALTH_TOPBAR_RIGHT} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            {showLogin && !PlatformDetectionService.isNative() && (
-              <div 
-                className={CSS_CLASSES.HEADER_AUTH_WRAPPER}
-                style={{
-                  minWidth: '48px',
-                  minHeight: '48px',
-                  padding: '4px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}>
-                <MultiAuthLogin 
-                  position="inline"
-                  onUserChange={(user) => console.log('User changed in header:', user)}
-                  onSignIn={(user) => console.log('User signed in from header:', user)}
-                  onSignOut={() => console.log('User signed out from header')}
-                />
-              </div>
-            )}
-            {/* Settings Menu - Only show when authenticated */}
-            {authService.getState().isAuthenticated && showProgressMenu && onProgressMenuClick && (
-              <button
-                onClick={onProgressMenuClick}
-                className="settings-menu-button w-10 h-10 rounded-xl bg-gray-100/60 hover:bg-gray-200/80 flex items-center justify-center text-gray-700 hover:text-gray-900 transition-all duration-200 backdrop-blur-sm"
-                title="Toggle Progress History"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
-              </button>
-            )}
+            {(() => {
+              const isAuthed = authService.getState().isAuthenticated;
+              
+              // Signed out = show user/login icon
+              if (!isAuthed && showLogin && !PlatformDetectionService.isNative()) {
+                return (
+                  <div 
+                    className={CSS_CLASSES.HEADER_AUTH_WRAPPER}
+                    style={{
+                      minWidth: '48px',
+                      minHeight: '48px',
+                      padding: '4px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}>
+                    <MultiAuthLogin 
+                      position="inline"
+                      onUserChange={(user) => console.log('User changed in header:', user)}
+                      onSignIn={(user) => console.log('User signed in from header:', user)}
+                      onSignOut={() => console.log('User signed out from header')}
+                    />
+                  </div>
+                );
+              }
+              
+              // Signed in = show hamburger (UserPreference)
+              if (isAuthed) {
+                return <UserPreference />;
+              }
+              
+              return null;
+            })()}
           </div>
         </div>
 
