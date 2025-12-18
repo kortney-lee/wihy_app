@@ -9,59 +9,6 @@ const WIHY_AUTH_API_BASE =
   process.env.REACT_APP_WIHY_AUTH_API_URL || 
   'https://auth.wihy.ai';
 
-// Encryption configuration
-const ENCRYPTION_KEY = process.env.REACT_APP_AUTH_ENCRYPTION_KEY || 'wihy-auth-encryption-key-2024';
-
-// ============================================================
-// ENCRYPTION UTILITIES
-// ============================================================
-
-/**
- * Encrypt sensitive data before sending over the wire
- */
-async function encryptData(data: any): Promise<string> {
-  try {
-    const encoder = new TextEncoder();
-    const dataString = JSON.stringify(data);
-    const dataBuffer = encoder.encode(dataString);
-    
-    // Generate a key from our encryption key
-    const keyBuffer = encoder.encode(ENCRYPTION_KEY);
-    const hashBuffer = await crypto.subtle.digest('SHA-256', keyBuffer);
-    
-    const key = await crypto.subtle.importKey(
-      'raw',
-      hashBuffer,
-      { name: 'AES-GCM', length: 256 },
-      false,
-      ['encrypt']
-    );
-    
-    // Generate a random IV
-    const iv = crypto.getRandomValues(new Uint8Array(12));
-    
-    // Encrypt the data
-    const encryptedBuffer = await crypto.subtle.encrypt(
-      { name: 'AES-GCM', iv },
-      key,
-      dataBuffer
-    );
-    
-    // Combine IV and encrypted data
-    const encryptedArray = new Uint8Array(encryptedBuffer);
-    const combined = new Uint8Array(iv.length + encryptedArray.length);
-    combined.set(iv);
-    combined.set(encryptedArray, iv.length);
-    
-    // Convert to base64
-    return btoa(String.fromCharCode(...combined));
-  } catch (error) {
-    console.error('[AuthService] Encryption error:', error);
-    // Fallback: return base64 encoded JSON if encryption fails
-    return btoa(JSON.stringify(data));
-  }
-}
-
 // ============================================================
 // TYPE DEFINITIONS
 // ============================================================
@@ -182,6 +129,44 @@ class AuthService {
     return headers;
   }
 
+  /**
+   * Get authenticated headers for API requests (public method for other services)
+   * Includes session token if user is authenticated
+   */
+  getAuthenticatedHeaders(): HeadersInit {
+    const headers: HeadersInit = {
+      'Content-Type': 'application/json',
+    };
+    
+    // Load token from storage if not in memory
+    if (!this.sessionToken && typeof window !== 'undefined') {
+      const storedToken = localStorage.getItem(this.tokenKey);
+      if (storedToken) {
+        this.sessionToken = storedToken;
+      }
+    }
+    
+    if (this.sessionToken) {
+      headers['Authorization'] = `Bearer ${this.sessionToken}`;
+    }
+    
+    return headers;
+  }
+
+  /**
+   * Get the current session token
+   */
+  getSessionToken(): string | null {
+    // Load token from storage if not in memory
+    if (!this.sessionToken && typeof window !== 'undefined') {
+      const storedToken = localStorage.getItem(this.tokenKey);
+      if (storedToken) {
+        this.sessionToken = storedToken;
+      }
+    }
+    return this.sessionToken;
+  }
+
   private async handleResponse<T>(response: Response): Promise<T> {
     if (!response.ok) {
       const error = await response.json().catch(() => ({ 
@@ -261,17 +246,11 @@ class AuthService {
     try {
       console.log('[AuthService] Registering user:', { email: data.email, name: data.name });
       
-      // Encrypt sensitive data before sending
-      const encryptedPayload = await encryptData(data);
-      
       const response = await fetch(`${WIHY_AUTH_API_BASE}/api/auth/local/register`, {
         method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'X-Encrypted-Payload': 'true'
-        },
+        headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ encrypted: encryptedPayload })
+        body: JSON.stringify(data)
       });
 
       console.log('[AuthService] Register response status:', response.status);
@@ -315,17 +294,11 @@ class AuthService {
     try {
       console.log('[AuthService] Logging in user:', email);
       
-      // Encrypt sensitive credentials before sending
-      const encryptedPayload = await encryptData({ email, password });
-      
       const response = await fetch(`${WIHY_AUTH_API_BASE}/api/auth/local/login`, {
         method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'X-Encrypted-Payload': 'true'
-        },
+        headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ encrypted: encryptedPayload })
+        body: JSON.stringify({ email, password })
       });
 
       console.log('[AuthService] Login response status:', response.status);

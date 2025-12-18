@@ -5,6 +5,7 @@
  */
 
 import { API_CONFIG } from '../config/apiConfig';
+import { authService } from './authService';
 
 const CHAT_API_BASE = API_CONFIG.WIHY_API_URL;
 
@@ -84,9 +85,7 @@ class ChatService {
 
       const response = await fetch(`${CHAT_API_BASE}/ask`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: authService.getAuthenticatedHeaders(),
         body: JSON.stringify(request)
       });
 

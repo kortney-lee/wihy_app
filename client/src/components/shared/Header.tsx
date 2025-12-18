@@ -2,6 +2,7 @@
 import React, { useState, useRef, useEffect, useLayoutEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import MultiAuthLogin from './MultiAuthLogin';
+import { authService } from '../../services/authService';
 import ImageUploadModal from '../ui/ImageUploadModal';
 import { wihyAPI } from '../../services/wihyAPI';
 import { chatService } from '../../services/chatService';
@@ -875,7 +876,7 @@ const Header: React.FC<HeaderProps> = ({
         <div className={CSS_CLASSES.VHEALTH_TOPBAR}>
           {/* Left side: Progress History Menu */}
           <div style={{ display: 'flex', alignItems: 'center', flex: 1 }}>
-            {showProgressMenu && onProgressMenuClick && (
+            {showProgressMenu && onProgressMenuClick && authService.getState().isAuthenticated && (
               <button
                 onClick={onProgressMenuClick}
                 className="w-10 h-10 rounded-xl bg-gray-100/60 hover:bg-gray-200/80 flex items-center justify-center text-gray-700 hover:text-gray-900 transition-all duration-200 backdrop-blur-sm"
