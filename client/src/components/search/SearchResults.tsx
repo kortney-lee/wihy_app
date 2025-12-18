@@ -1292,15 +1292,16 @@ const SearchResults: React.FC<SearchResultsProps> = ({
           <div style={{
             position: 'fixed',
             top: 0,
-            left: 0,
+            right: 0,
             width: '280px',
             height: '100vh',
             backgroundColor: '#f8fafc',
-            borderRight: '1px solid #e5e7eb',
+            borderLeft: '1px solid #e5e7eb',
             display: 'flex',
             flexDirection: 'column',
             overflow: 'hidden',
-            zIndex: 1001
+            zIndex: 1001,
+            animation: 'slideInRight 0.3s ease-out'
           }}>
             {/* Sidebar Header */}
             <div className="p-5 px-4 border-b border-gray-200 flex items-center justify-between">

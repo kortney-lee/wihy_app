@@ -643,3 +643,36 @@ header.vhealth-header.landing .vhealth-search-section .vhealth-search-form .sear
   pointer-events: none !important;
   display: none !important;
 }
+
+/* Slide-in animations for menu buttons */
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* Settings menu button slide-in animation */
+.settings-menu-button {
+  animation: slideInRight 0.3s ease-out;
+}
+
+/* Progress menu button slide-in animation (when it was on the left) */
+.progress-menu-button {
+  animation: slideInLeft 0.3s ease-out;
+}
