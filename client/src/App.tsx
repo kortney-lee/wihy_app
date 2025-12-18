@@ -29,6 +29,7 @@ import PartnerHub from './pages/PartnerHub';
 import ManagerDashboard from './pages/ManagerDashboard';
 import PayoutSettings from './pages/PayoutSettings';
 import PredictiveDashboard from './pages/PredictiveDashboard';
+import MonitoringDashboard from './pages/MonitoringDashboard';
 import { PlatformNavigationExample } from './components/examples/PlatformNavigationExample';
 import { wihyAPI } from './services/wihyAPI';
 import { searchCache } from './services/searchCache';
@@ -568,6 +569,7 @@ const App: React.FC = () => {
           <Route path="/engagement-signup" element={<EngagementSignup />} />
           <Route path="/partner-hub" element={<PartnerHub />} />
           <Route path="/payout-settings" element={<PayoutSettings />} />
+          <Route path="/monitoring-dashboard" element={<MonitoringDashboard />} />
           <Route path="/engagement-dashboard" element={<EngagementDashboard />} />
           <Route path="/engagement/:trackingId" element={<EngagementDashboard />} />
           <Route path="/test" element={<TestChartsPage />} />

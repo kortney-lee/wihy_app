@@ -329,22 +329,11 @@ const FullScreenChat = forwardRef<FullScreenChatRef, FullScreenChatProps>(({
       setMessages([userMessage]);
 
       try {
-        // Build user context from apiResponseData if available
-        const userContext = apiResponseData ? {
-          health_goals: ['nutrition_analysis'],
-          dietary_restrictions: []
-        } : undefined;
-        
-        // Request specific chart types
-        const chartTypes = ['health_score', 'nutrition_breakdown', 'macronutrients'];
-        
-        // Call /ask endpoint with ask_wihy payload
-        const response = await chatService.sendMessage(
+        // Call /ask endpoint directly with askWihy parameter
+        const response = await chatService.sendDirectMessage(
           initialQuery,
           currentSessionId || undefined,
-          askWihy,
-          userContext,
-          chartTypes
+          askWihy
         );
 
         if (response && typeof response === 'object') {
