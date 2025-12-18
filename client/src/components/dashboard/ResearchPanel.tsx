@@ -107,6 +107,26 @@ const ResearchPanel: React.FC<ResearchPanelProps> = ({
     setHasSearched(true);
     setSelectedStudy(null);
     
+    // Check for cached results first
+    const cacheKey = `research_cache_${keyword.toLowerCase().replace(/\s+/g, '_')}`;
+    const cachedData = localStorage.getItem(cacheKey);
+    
+    if (cachedData) {
+      try {
+        const parsed = JSON.parse(cachedData);
+        const isExpired = Date.now() - parsed.timestamp > 30 * 60 * 1000; // 30 minutes cache
+        
+        if (!isExpired && parsed.results) {
+          setSearchResults(parsed.results);
+          setLoading(false);
+          console.log(`Using cached results for "${keyword}"`);
+          return;
+        }
+      } catch (e) {
+        console.warn('Error parsing cached data:', e);
+      }
+    }
+    
     try {
       const qs = buildQS({ keyword, limit: 20 });
       const res = await fetch(`${RESEARCH_API_BASE}/api/research/search?${qs}`);
@@ -118,6 +138,14 @@ const ResearchPanel: React.FC<ResearchPanelProps> = ({
       if (!data.success && articles.length === 0) {
         throw new Error('Search not successful');
       }
+      
+      // Cache the results
+      const cacheData = { 
+        query: keyword, 
+        timestamp: Date.now(), 
+        results: articles 
+      };
+      localStorage.setItem(cacheKey, JSON.stringify(cacheData));
       
       setSearchResults(articles);
       console.log(`Search completed: ${articles.length} results found for "${keyword}"`);
@@ -146,20 +174,6 @@ const ResearchPanel: React.FC<ResearchPanelProps> = ({
 
   return (
     <div className="w-full h-full bg-[#f0f7ff] flex flex-col">
-      {/* Top bar with back button */}
-      <div className="border-b border-gray-200 px-4 py-3 flex items-center gap-3 bg-white">
-        {onBack && (
-          <button
-            type="button"
-            onClick={onBack}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-          >
-            <ArrowLeft className="w-5 h-5 text-gray-600" />
-          </button>
-        )}
-        <h2 className="text-lg font-semibold text-gray-900">Research Workspace</h2>
-      </div>
-
       {/* Grid Layout for Research Results */}
       <div className="flex-1 overflow-y-auto p-6">
         {/* Query summary */}
