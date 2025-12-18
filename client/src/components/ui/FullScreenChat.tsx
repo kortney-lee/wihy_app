@@ -309,6 +309,108 @@ const FullScreenChat = forwardRef<FullScreenChatRef, FullScreenChatProps>(({
     console.log('💬 FULL SCREEN CHAT: Created temporary session for stateless user:', tempSessionId);
   };
 
+  // Auto-call /ask endpoint when chat opens with initialQuery and askWihy
+  useEffect(() => {
+    if (!isOpen || !initialQuery || !askWihy) return;
+    if (messages.length > 0) return; // Only run if no messages yet
+    if (isLoading) return; // Don't run if already loading
+
+    const autoFetchInitialResponse = async () => {
+      console.log('🤖 AUTO-FETCHING: Calling /ask endpoint on chat open');
+      setIsLoading(true);
+
+      // Add user message
+      const userMessage: ChatMessage = {
+        id: `initial_${Date.now()}`,
+        type: 'user',
+        message: initialQuery,
+        timestamp: new Date()
+      };
+      setMessages([userMessage]);
+
+      try {
+        // Build user context from apiResponseData if available
+        const userContext = apiResponseData ? {
+          health_goals: ['nutrition_analysis'],
+          dietary_restrictions: []
+        } : undefined;
+        
+        // Request specific chart types
+        const chartTypes = ['health_score', 'nutrition_breakdown', 'macronutrients'];
+        
+        // Call /ask endpoint with ask_wihy payload
+        const response = await chatService.sendMessage(
+          initialQuery,
+          currentSessionId || undefined,
+          askWihy,
+          userContext,
+          chartTypes
+        );
+
+        if (response && typeof response === 'object') {
+          let aiResponse: string;
+
+          // Handle different response types
+          if ('response' in response && typeof response.response === 'string') {
+            aiResponse = response.response;
+          } else if ('success' in response && 'results' in response && response.success) {
+            const universalResp = response as any;
+            aiResponse = universalResp.results?.summary || 'Analysis completed successfully.';
+            
+            // Add rich formatting for Universal Search responses
+            if (universalResp.results?.metadata) {
+              const meta = universalResp.results.metadata;
+              aiResponse += `\n\n**Product:** ${meta.product_name || 'Unknown'}`;
+              if (meta.health_score) {
+                aiResponse += `\n**Health Score:** ${meta.health_score}/100 (${meta.grade})`;
+              }
+              if (meta.nova_group) {
+                aiResponse += `\n**Processing Level:** NOVA ${meta.nova_group} - ${meta.processing_level}`;
+              }
+            }
+            
+            if (universalResp.recommendations?.length > 0) {
+              aiResponse += '\n\n**Recommendations:**\n';
+              universalResp.recommendations.forEach((rec: string) => {
+                aiResponse += `• ${rec}\n`;
+              });
+            }
+          } else {
+            aiResponse = JSON.stringify(response);
+          }
+
+          // Add assistant message
+          const assistantMessage: ChatMessage = {
+            id: `assistant_${Date.now()}`,
+            type: 'assistant',
+            message: aiResponse,
+            timestamp: new Date()
+          };
+          setMessages(prev => [...prev, assistantMessage]);
+          console.log('🤖 AUTO-FETCHED: AI response loaded on chat open');
+
+        } else {
+          throw new Error('Invalid response format');
+        }
+      } catch (error) {
+        console.error('🤖 AUTO-FETCH ERROR:', error);
+        const errorMessage: ChatMessage = {
+          id: `error_${Date.now()}`,
+          type: 'assistant',
+          message: 'Sorry, I encountered an error loading the analysis. Please try sending a message.',
+          timestamp: new Date()
+        };
+        setMessages(prev => [...prev, errorMessage]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    // Small delay to ensure session is initialized
+    const timer = setTimeout(autoFetchInitialResponse, 300);
+    return () => clearTimeout(timer);
+  }, [isOpen, initialQuery, askWihy, currentSessionId, apiResponseData]);
+
   // Create a new conversation session
   const createNewSession = async () => {
     if (!userId) {
@@ -871,9 +973,7 @@ const FullScreenChat = forwardRef<FullScreenChatRef, FullScreenChatProps>(({
         console.log('💬 FULL SCREEN CHAT: Using /ask endpoint with session context');
         // For temporary sessions or no userId, use /ask endpoint with session_id
         // This enables conversation context without requiring persistent sessions
-        // Pass askWihy from scan API if available (only on first message)
-        const useAskWihy = messages.length === 0 && askWihy ? askWihy : undefined;
-        response = await chatService.sendMessage(messageText, currentSessionId || undefined, useAskWihy);
+        response = await chatService.sendMessage(messageText, currentSessionId || undefined);
       }
       
       let aiResponse: string;
