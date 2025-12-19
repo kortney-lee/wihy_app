@@ -15,6 +15,32 @@ import "../styles/mobile-fixes.css";
 
 type ViewMode = "overview" | "chat";
 
+// API Base URL
+const WIHY_API_BASE = 'https://services.wihy.ai';
+
+// FDA Ingredient Analysis Types
+interface IngredientAnalysis {
+  ingredient: string;
+  success: boolean;
+  safety_score: number;
+  risk_level: 'low' | 'moderate' | 'high' | 'very_high';
+  recall_count: number;
+  adverse_event_count: number;
+  recommendations: {
+    type: string;
+    message: string;
+  }[];
+  fda_status: string;
+  analysis_summary: string;
+  error?: string;
+}
+
+interface IngredientAnalysisState {
+  loading: boolean;
+  analyses: IngredientAnalysis[];
+  error: string | null;
+}
+
 interface LocationState {
   initialQuery?: string;
   nutritionfacts?: NutritionFactsData;
@@ -57,6 +83,13 @@ const NutritionFactsPage: React.FC = () => {
   const [cameFromChat, setCameFromChat] = useState(locationState.fromChat === true);
   const [isInitialMount, setIsInitialMount] = useState(true);
   const [slideDirection, setSlideDirection] = useState<'none' | 'left' | 'right'>('none'); // Track slide direction
+  
+  // FDA Ingredient Analysis state
+  const [ingredientAnalysis, setIngredientAnalysis] = useState<IngredientAnalysisState>({
+    loading: false,
+    analyses: [],
+    error: null
+  });
   
   // Touch swipe handling
   const touchStartX = useRef<number>(0);
@@ -172,6 +205,110 @@ const NutritionFactsPage: React.FC = () => {
   }, []);
 
   // No local history tracking - keep it simple
+
+  // FDA Ingredient Analysis Functions
+  const analyzeIngredient = async (ingredient: string): Promise<IngredientAnalysis> => {
+    try {
+      const response = await fetch(`${WIHY_API_BASE}/api/openfda/ingredient/${encodeURIComponent(ingredient.trim())}`);
+      
+      if (!response.ok) {
+        throw new Error(`FDA API Error: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      return {
+        ingredient: ingredient.trim(),
+        success: data.success || true,
+        safety_score: data.safety_score || 0,
+        risk_level: data.risk_level || 'low',
+        recall_count: data.recall_count || 0,
+        adverse_event_count: data.adverse_event_count || 0,
+        recommendations: data.recommendations || [],
+        fda_status: data.fda_status || 'No data available',
+        analysis_summary: data.analysis_summary || 'No analysis available'
+      };
+    } catch (error: any) {
+      console.error(`Error analyzing ingredient "${ingredient}":`, error);
+      return {
+        ingredient: ingredient.trim(),
+        success: false,
+        safety_score: 0,
+        risk_level: 'low',
+        recall_count: 0,
+        adverse_event_count: 0,
+        recommendations: [],
+        fda_status: 'Analysis failed',
+        analysis_summary: 'Unable to analyze this ingredient',
+        error: error.message || 'Unknown error'
+      };
+    }
+  };
+
+  const analyzeAllIngredients = async (ingredientsText: string) => {
+    if (!ingredientsText) return;
+    
+    setIngredientAnalysis(prev => ({ ...prev, loading: true, error: null }));
+    
+    try {
+      const ingredients = ingredientsText.split(',').map(ing => ing.trim()).filter(ing => ing.length > 0);
+      
+      if (ingredients.length === 0) {
+        throw new Error('No ingredients found to analyze');
+      }
+      
+      debug.logEvent('Starting FDA ingredient analysis', { count: ingredients.length, ingredients });
+      
+      // Analyze ingredients in batches of 3 to avoid overwhelming the API
+      const batchSize = 3;
+      const allAnalyses: IngredientAnalysis[] = [];
+      
+      for (let i = 0; i < ingredients.length; i += batchSize) {
+        const batch = ingredients.slice(i, i + batchSize);
+        
+        const batchPromises = batch.map(ingredient => analyzeIngredient(ingredient));
+        const batchResults = await Promise.all(batchPromises);
+        
+        allAnalyses.push(...batchResults);
+        
+        // Small delay between batches to be API-friendly
+        if (i + batchSize < ingredients.length) {
+          await new Promise(resolve => setTimeout(resolve, 500));
+        }
+      }
+      
+      setIngredientAnalysis({
+        loading: false,
+        analyses: allAnalyses,
+        error: null
+      });
+      
+      debug.logEvent('FDA ingredient analysis completed', { 
+        total: allAnalyses.length, 
+        successful: allAnalyses.filter(a => a.success).length,
+        avgSafetyScore: allAnalyses.reduce((sum, a) => sum + a.safety_score, 0) / allAnalyses.length
+      });
+      
+    } catch (error: any) {
+      console.error('Error analyzing ingredients:', error);
+      setIngredientAnalysis({
+        loading: false,
+        analyses: [],
+        error: error.message || 'Failed to analyze ingredients'
+      });
+    }
+  };
+
+  // Auto-analyze ingredients when nutrition facts data is loaded
+  useEffect(() => {
+    if (nutritionfacts?.ingredientsText && !ingredientAnalysis.loading && ingredientAnalysis.analyses.length === 0) {
+      // Add small delay to avoid immediate API calls on page load
+      const timer = setTimeout(() => {
+        analyzeAllIngredients(nutritionfacts.ingredientsText!);
+      }, 1000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [nutritionfacts?.ingredientsText]);
 
   // Handle new scan - use scanningService directly
   const handleNewScan = async () => {
@@ -481,54 +618,176 @@ const NutritionFactsPage: React.FC = () => {
                     </div>
                   )}
 
-                  {/* Ingredients Card */}
+                  {/* Enhanced Ingredients Card with FDA Analysis */}
                   {product.ingredientsText && (
                     <div className="bg-white rounded-2xl border-0 p-6 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2 active:scale-95 active:shadow-md active:translate-y-0 cursor-pointer transform">
-                      <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-                        <svg className="w-6 h-6 text-blue-600" viewBox="0 0 24 24" fill="currentColor">
-                          <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
-                        </svg>
-                        <span className="text-gray-900">Ingredients</span>
-                      </h2>
+                      <div className="flex items-center justify-between mb-4">
+                        <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+                          <svg className="w-6 h-6 text-blue-600" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+                          </svg>
+                          <span className="text-gray-900">Ingredients & FDA Analysis</span>
+                        </h2>
+                        
+                        {ingredientAnalysis.loading && (
+                          <div className="flex items-center gap-2 text-sm text-blue-600">
+                            <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+                            </svg>
+                            Analyzing ingredients...
+                          </div>
+                        )}
+                        
+                        {!ingredientAnalysis.loading && ingredientAnalysis.analyses.length === 0 && !ingredientAnalysis.error && (
+                          <button
+                            onClick={() => analyzeAllIngredients(product.ingredientsText!)}
+                            className="px-3 py-1 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors"
+                          >
+                            🔬 Analyze Safety
+                          </button>
+                        )}
+                      </div>
                       
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {product.ingredientsText.split(',').map((ingredient, idx) => {
-                          const colors = [
-                            { bg: 'from-blue-50 to-indigo-50', border: 'border-blue-400', text: 'text-blue-600' },
-                            { bg: 'from-green-50 to-emerald-50', border: 'border-green-400', text: 'text-green-600' },
-                            { bg: 'from-purple-50 to-violet-50', border: 'border-purple-400', text: 'text-purple-600' },
-                            { bg: 'from-pink-50 to-rose-50', border: 'border-pink-400', text: 'text-pink-600' },
-                            { bg: 'from-orange-50 to-amber-50', border: 'border-orange-400', text: 'text-orange-600' },
-                            { bg: 'from-teal-50 to-cyan-50', border: 'border-teal-400', text: 'text-teal-600' },
-                          ];
-                          const color = colors[idx % colors.length];
-                          return (
-                            <div key={idx} className={`flex items-center p-3 bg-gradient-to-r ${color.bg} rounded-lg border-l-4 ${color.border} hover:bg-gradient-to-r transition-all duration-200 cursor-pointer`}>
-                              <span className="text-sm font-medium text-gray-700">{ingredient.trim()}</span>
+                      {/* Error State */}
+                      {ingredientAnalysis.error && (
+                        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+                          ⚠️ Analysis Error: {ingredientAnalysis.error}
+                          <button
+                            onClick={() => analyzeAllIngredients(product.ingredientsText!)}
+                            className="ml-2 underline hover:no-underline"
+                          >
+                            Retry
+                          </button>
+                        </div>
+                      )}
+                      
+                      <div className="space-y-3">
+                        {/* Show analyzed ingredients if available */}
+                        {ingredientAnalysis.analyses.length > 0 ? (
+                          ingredientAnalysis.analyses.map((analysis, idx) => {
+                            const getRiskColor = (risk: string) => {
+                              switch (risk) {
+                                case 'low': return { bg: 'from-green-50 to-emerald-50', border: 'border-green-400', text: 'text-green-600', badge: 'bg-green-500' };
+                                case 'moderate': return { bg: 'from-yellow-50 to-amber-50', border: 'border-yellow-400', text: 'text-yellow-600', badge: 'bg-yellow-500' };
+                                case 'high': return { bg: 'from-orange-50 to-red-50', border: 'border-orange-400', text: 'text-orange-600', badge: 'bg-orange-500' };
+                                case 'very_high': return { bg: 'from-red-50 to-pink-50', border: 'border-red-400', text: 'text-red-600', badge: 'bg-red-500' };
+                                default: return { bg: 'from-gray-50 to-slate-50', border: 'border-gray-400', text: 'text-gray-600', badge: 'bg-gray-500' };
+                              }
+                            };
+                            
+                            const colors = getRiskColor(analysis.risk_level);
+                            
+                            return (
+                              <div key={idx} className={`p-4 bg-gradient-to-r ${colors.bg} rounded-lg border-l-4 ${colors.border} hover:shadow-md transition-all duration-200`}>
+                                <div className="flex items-start justify-between mb-2">
+                                  <div className="flex-1">
+                                    <div className="flex items-center gap-2 mb-1">
+                                      <span className="font-semibold text-gray-800">{analysis.ingredient}</span>
+                                      <span className={`px-2 py-1 ${colors.badge} text-white text-xs rounded-full font-bold`}>
+                                        {analysis.safety_score}/100
+                                      </span>
+                                      <span className={`px-2 py-1 bg-white/80 ${colors.text} text-xs rounded-full font-medium border`}>
+                                        {analysis.risk_level.replace('_', ' ').toUpperCase()}
+                                      </span>
+                                    </div>
+                                    
+                                    {analysis.success ? (
+                                      <div className="text-sm text-gray-700 space-y-1">
+                                        <p><strong>FDA Status:</strong> {analysis.fda_status}</p>
+                                        {(analysis.recall_count > 0 || analysis.adverse_event_count > 0) && (
+                                          <div className="flex gap-4 text-xs">
+                                            {analysis.recall_count > 0 && (
+                                              <span className="text-red-600">🚨 Recalls: {analysis.recall_count}</span>
+                                            )}
+                                            {analysis.adverse_event_count > 0 && (
+                                              <span className="text-orange-600">⚠️ Adverse Events: {analysis.adverse_event_count}</span>
+                                            )}
+                                          </div>
+                                        )}
+                                        {analysis.analysis_summary && (
+                                          <p className="text-xs text-gray-600 italic">{analysis.analysis_summary}</p>
+                                        )}
+                                      </div>
+                                    ) : (
+                                      <p className="text-sm text-gray-600">❌ {analysis.error || 'Analysis unavailable'}</p>
+                                    )}
+                                  </div>
+                                </div>
+                                
+                                {/* Recommendations */}
+                                {analysis.recommendations.length > 0 && (
+                                  <div className="mt-3 pt-2 border-t border-white/50">
+                                    <h4 className="text-xs font-semibold text-gray-700 mb-1">Recommendations:</h4>
+                                    <div className="space-y-1">
+                                      {analysis.recommendations.slice(0, 2).map((rec, recIdx) => (
+                                        <div key={recIdx} className="text-xs text-gray-600 flex items-start gap-1">
+                                          <span className="text-blue-500">•</span>
+                                          <span><strong>{rec.type}:</strong> {rec.message}</span>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })
+                        ) : (
+                          /* Fallback to basic ingredient list if no analysis */
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            {product.ingredientsText.split(',').map((ingredient, idx) => {
+                              const colors = [
+                                { bg: 'from-blue-50 to-indigo-50', border: 'border-blue-400' },
+                                { bg: 'from-green-50 to-emerald-50', border: 'border-green-400' },
+                                { bg: 'from-purple-50 to-violet-50', border: 'border-purple-400' },
+                                { bg: 'from-pink-50 to-rose-50', border: 'border-pink-400' },
+                                { bg: 'from-orange-50 to-amber-50', border: 'border-orange-400' },
+                                { bg: 'from-teal-50 to-cyan-50', border: 'border-teal-400' },
+                              ];
+                              const color = colors[idx % colors.length];
+                              return (
+                                <div key={idx} className={`flex items-center p-3 bg-gradient-to-r ${color.bg} rounded-lg border-l-4 ${color.border} hover:bg-gradient-to-r transition-all duration-200 cursor-pointer`}>
+                                  <span className="text-sm font-medium text-gray-700">{ingredient.trim()}</span>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
+                        
+                        {/* Summary Stats */}
+                        {ingredientAnalysis.analyses.length > 0 && (
+                          <div className="mt-4 pt-4 border-t border-gray-200">
+                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
+                              <div className="bg-blue-50 p-3 rounded-lg">
+                                <div className="text-lg font-bold text-blue-600">{ingredientAnalysis.analyses.length}</div>
+                                <div className="text-xs text-blue-600">Ingredients</div>
+                              </div>
+                              <div className="bg-green-50 p-3 rounded-lg">
+                                <div className="text-lg font-bold text-green-600">
+                                  {Math.round(ingredientAnalysis.analyses.reduce((sum, a) => sum + a.safety_score, 0) / ingredientAnalysis.analyses.length)}
+                                </div>
+                                <div className="text-xs text-green-600">Avg Safety</div>
+                              </div>
+                              <div className="bg-orange-50 p-3 rounded-lg">
+                                <div className="text-lg font-bold text-orange-600">
+                                  {ingredientAnalysis.analyses.filter(a => a.risk_level === 'high' || a.risk_level === 'very_high').length}
+                                </div>
+                                <div className="text-xs text-orange-600">High Risk</div>
+                              </div>
+                              <div className="bg-red-50 p-3 rounded-lg">
+                                <div className="text-lg font-bold text-red-600">
+                                  {ingredientAnalysis.analyses.reduce((sum, a) => sum + a.recall_count + a.adverse_event_count, 0)}
+                                </div>
+                                <div className="text-xs text-red-600">Total Issues</div>
+                              </div>
                             </div>
-                          );
-                        })}
+                          </div>
+                        )}
                       </div>
                     </div>
                   )}
 
-                  {/* FDA Analysis Card */}
-                  {product.fdaIngredientAnalysis && (
-                    <div className="bg-white rounded-2xl border-0 p-6 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2 active:scale-95 active:shadow-md active:translate-y-0 cursor-pointer transform">
-                      <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-                        <svg className="w-6 h-6 text-green-600" viewBox="0 0 24 24" fill="currentColor">
-                          <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
-                        </svg>
-                        <span className="text-gray-900">FDA Ingredient Analysis</span>
-                      </h2>
-                      
-                      <div className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl border-l-4 border-green-400">
-                        <pre className="text-sm text-gray-700 leading-relaxed font-mono whitespace-pre-wrap">
-                          {JSON.stringify(product.fdaIngredientAnalysis, null, 2)}
-                        </pre>
-                      </div>
-                    </div>
-                  )}
+
 
                   {/* Additives Card */}
                   {product.additives && Object.keys(product.additives).length > 0 && (
