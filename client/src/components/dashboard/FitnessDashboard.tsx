@@ -1,5 +1,6 @@
 // src/components/dashboard/FitnessDashboard.tsx
 import React, { useMemo, useState } from "react";
+import { Heart, Dumbbell, Timer, Move, Target, HelpCircle, X } from 'lucide-react';
 import {
   WorkoutProgramGrid,
   ExerciseRowView,
@@ -9,159 +10,6 @@ import {
   MuscleGroup,
   LoadLevel,
 } from "./WorkoutProgramGrid";
-
-/**
- * Inline SVG icons for legend (no emoji / unicode)
- */
-interface IconProps {
-  className?: string;
-}
-
-const CardioIcon: React.FC<IconProps> = ({ className }) => (
-  <svg
-    className={className ?? "h-4 w-4"}
-    viewBox="0 0 24 24"
-    aria-hidden="true"
-  >
-    <path
-      d="M12 21s-5.5-3.5-8-7.2C2.7 12.6 2.3 11.3 2.3 10a4.2 4.2 0 0 1 7.5-2.6L12 9l2.2-1.6A4.2 4.2 0 0 1 21.7 10c0 1.3-.4 2.6-1.7 3.8C17.5 17.5 12 21 12 21z"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.6"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </svg>
-);
-
-const StrengthIcon: React.FC<IconProps> = ({ className }) => (
-  <svg
-    className={className ?? "h-4 w-4"}
-    viewBox="0 0 24 24"
-    aria-hidden="true"
-  >
-    <rect
-      x="3"
-      y="9"
-      width="3"
-      height="6"
-      rx="0.5"
-      stroke="currentColor"
-      fill="none"
-      strokeWidth="1.4"
-    />
-    <rect
-      x="18"
-      y="9"
-      width="3"
-      height="6"
-      rx="0.5"
-      stroke="currentColor"
-      fill="none"
-      strokeWidth="1.4"
-    />
-    <rect
-      x="7"
-      y="10"
-      width="10"
-      height="4"
-      rx="0.8"
-      stroke="currentColor"
-      fill="none"
-      strokeWidth="1.4"
-    />
-  </svg>
-);
-
-const EnduranceIcon: React.FC<IconProps> = ({ className }) => (
-  <svg
-    className={className ?? "h-4 w-4"}
-    viewBox="0 0 24 24"
-    aria-hidden="true"
-  >
-    <circle
-      cx="12"
-      cy="12"
-      r="7"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.4"
-    />
-    <path
-      d="M12 8v4l2.5 2"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.4"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </svg>
-);
-
-const MobilityIcon: React.FC<IconProps> = ({ className }) => (
-  <svg
-    className={className ?? "h-4 w-4"}
-    viewBox="0 0 24 24"
-    aria-hidden="true"
-  >
-    <circle
-      cx="12"
-      cy="6"
-      r="2"
-      stroke="currentColor"
-      strokeWidth="1.4"
-      fill="none"
-    />
-    <path
-      d="M10 9l-3 4.5 2 1.5"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.4"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-    <path
-      d="M14 9l3 4.5-2 1.5"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.4"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-    <path
-      d="M10 18l2-3 2 3"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.4"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </svg>
-);
-
-const MuscleIcon: React.FC<IconProps> = ({ className }) => (
-  <svg
-    className={className ?? "h-4 w-4"}
-    viewBox="0 0 24 24"
-    aria-hidden="true"
-  >
-    <circle
-      cx="12"
-      cy="12"
-      r="7"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.4"
-    />
-    <path
-      d="M9 13c1 .7 2 1 3 1s2-.3 3-1"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.2"
-      strokeLinecap="round"
-    />
-  </svg>
-);
 
 /**
  * High-level program configuration
@@ -239,30 +87,30 @@ const MobileExerciseCard: React.FC<{ row: ExerciseRowView }> = ({ row }) => {
   const { meta, prescription } = row;
 
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-3 mb-2 shadow-sm">
-      <div className="flex justify-between items-start mb-2">
-        <div>
-          <p className="text-xs font-semibold text-slate-900">{meta.name}</p>
-          <p className="text-[11px] text-slate-500">
+    <div className="bg-white rounded-2xl border border-gray-200 p-5 mb-4 shadow-sm transition-all duration-300 hover:shadow-md touch-manipulation">
+      <div className="flex justify-between items-start mb-3">
+        <div className="flex-1 min-w-0">
+          <p className="text-base font-semibold text-gray-900 truncate leading-snug">{meta.name}</p>
+          <p className="text-sm text-gray-500 mt-1">
             {meta.equipment === "NONE" ? "Bodyweight" : meta.equipment}
           </p>
         </div>
-        <span className="inline-flex items-center justify-center rounded-full bg-slate-50 px-2 py-0.5 text-[11px] font-semibold text-slate-700">
+        <span className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-gray-100 to-gray-200 px-4 py-2 text-sm font-semibold text-gray-700 ml-3 flex-shrink-0 min-h-[36px]">
           {prescription.sets} sets
         </span>
       </div>
-      <p className="text-[11px] text-slate-700 mb-2">
+      <p className="text-base text-gray-700 mb-4 leading-relaxed">
         {prescription.intensityLabel}
       </p>
 
-      <div className="flex flex-wrap gap-1 text-[10px] text-slate-600">
-        <span className="px-2 py-0.5 rounded-full bg-slate-50 border border-slate-100">
+      <div className="flex flex-wrap gap-2 text-sm text-gray-600">
+        <span className="px-3 py-2 rounded-full bg-gradient-to-r from-red-50 to-red-100 text-red-700 border border-red-200 min-h-[32px] flex items-center">
           Cardio load {meta.fitnessLoad.CARDIO ?? 0}/3
         </span>
-        <span className="px-2 py-0.5 rounded-full bg-slate-50 border border-slate-100">
+        <span className="px-3 py-2 rounded-full bg-gradient-to-r from-blue-50 to-blue-100 text-blue-700 border border-blue-200 min-h-[32px] flex items-center">
           Strength load {meta.fitnessLoad.STRENGTH ?? 0}/3
         </span>
-        <span className="px-2 py-0.5 rounded-full bg-slate-50 border border-slate-100">
+        <span className="px-3 py-2 rounded-full bg-gradient-to-r from-green-50 to-green-100 text-green-700 border border-green-200 min-h-[32px] flex items-center">
           Mobility load {meta.fitnessLoad.MOBILITY ?? 0}/3
         </span>
       </div>
@@ -279,14 +127,14 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
   onStartSession,
 }) => {
   const {
-    title = "Fitness Program",
-    subtitle = "Your personalized workout plan, based on physical education and progression.",
+    title = "Start Your Workout",
+    subtitle = "Choose your workout and start moving. Each session is designed to strengthen your body and improve your fitness.",
     phases,
     levels,
     days,
     variants,
-    programTitle = "Program overview",
-    programDescription = "Each column shows how hard the exercise works your heart, muscles, and main muscle groups.",
+    programTitle = "Today's Workout",
+    programDescription = "See which body parts get worked and how hard each exercise will be.",
     defaultPhaseId,
     defaultLevelId,
     defaultDayId,
@@ -299,6 +147,8 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
   const [phaseId, setPhaseId] = useState<string>(initialPhaseId);
   const [levelId, setLevelId] = useState<string>(initialLevelId);
   const [dayId, setDayId] = useState<string>(initialDayId);
+  const [showTooltip, setShowTooltip] = useState<boolean>(true); // Show by default for new users
+  const [simplifiedView, setSimplifiedView] = useState<boolean>(true); // Start with simplified view
 
   const programKey = useMemo(
     () => buildProgramKey(phaseId, levelId, dayId),
@@ -325,78 +175,74 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
   };
 
   return (
-    <div className="w-full bg-[#f0f7ff] min-h-[70vh] px-2 sm:px-4 pb-10">
-
-      <div className="max-w-6xl mx-auto space-y-4">
-        {/* HOW TO READ THIS PROGRAM (Legend) */}
-        <section className="rounded-2xl bg-white border border-slate-200 shadow-sm p-4">
-          <h2 className="text-sm font-semibold text-slate-800 mb-2">
-            How to read this program
-          </h2>
-          <div className="grid gap-3 md:grid-cols-2 text-[11px] text-slate-700">
-            <div className="space-y-1.5">
-              <p>
-                <span className="font-semibold">Sets</span> means how many
-                times you repeat the exercise block. For example, 3 sets of 10
-                reps means you do 10 reps, rest, and repeat 3 times.
-              </p>
-              <p>
-                <span className="font-semibold">Intensity Level</span> explains
-                how hard you should feel you are working. We use simple cues
-                like easy, moderate, or hard instead of complicated numbers.
-              </p>
-            </div>
-            <div className="space-y-1.5">
-              <p className="flex items-center gap-2">
-                <CardioIcon className="h-4 w-4 text-emerald-600" />
-                <span>
-                  <span className="font-semibold">Cardio</span> shows how much
-                  the exercise works your heart and breathing.
-                </span>
-              </p>
-              <p className="flex items-center gap-2">
-                <StrengthIcon className="h-4 w-4 text-emerald-600" />
-                <span>
-                  <span className="font-semibold">Strength</span> shows how
-                  much it challenges your muscles and force.
-                </span>
-              </p>
-              <p className="flex items-center gap-2">
-                <EnduranceIcon className="h-4 w-4 text-emerald-600" />
-                <span>
-                  <span className="font-semibold">Endurance</span> shows how
-                  much it builds your ability to keep moving longer.
-                </span>
-              </p>
-              <p className="flex items-center gap-2">
-                <MobilityIcon className="h-4 w-4 text-emerald-600" />
-                <span>
-                  <span className="font-semibold">Mobility</span> shows how
-                  much it helps your joints move freely and easily.
-                </span>
-              </p>
-              <p className="flex items-center gap-2">
-                <MuscleIcon className="h-4 w-4 text-emerald-600" />
-                <span>
-                  <span className="font-semibold">Muscle Focus</span> tiles show
-                  which muscle groups (legs, back, core, etc.) are working the
-                  most. The darker the tile, the more that area is loaded.
-                </span>
-              </p>
+    <div className="w-full h-full bg-[#f0f7ff] overflow-hidden flex flex-col">
+      <div className="flex-1 overflow-auto pt-16 sm:pt-[240px] lg:pt-[140px] p-4 sm:p-4 lg:p-6">
+        <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
+        <header className="mb-2">
+          <h1 className="text-xl font-semibold text-gray-900">{title}</h1>
+          <p className="text-sm text-gray-600 mt-1 max-w-3xl">{subtitle}</p>
+        </header>
+        {/* HOW TO READ THIS PROGRAM (Tooltip) */}
+        <div className="relative mb-4">
+          <div className="flex items-center justify-between gap-3 mb-3">
+            <div className="flex gap-1 bg-white/70 backdrop-blur border border-gray-200 rounded-full p-1">
+              <button
+                type="button"
+                onClick={() => setShowTooltip(!showTooltip)}
+                className={`px-4 py-2 text-sm font-medium rounded-full transition ${
+                  showTooltip ? "bg-white text-gray-900 shadow-sm" : "text-gray-600 hover:text-gray-900"
+                }`}
+              >
+                Guide
+              </button>
+              <button
+                type="button"
+                onClick={() => setSimplifiedView(!simplifiedView)}
+                className={`px-4 py-2 text-sm font-medium rounded-full transition ${
+                  simplifiedView ? "bg-white text-gray-900 shadow-sm" : "text-gray-600 hover:text-gray-900"
+                }`}
+              >
+                {simplifiedView ? "Simplified" : "Detailed"}
+              </button>
             </div>
           </div>
-        </section>
+          
+          {showTooltip && (
+            <div className="mt-3 bg-white rounded-2xl border border-gray-200 shadow-lg p-5 animate-in slide-in-from-top-2">
+              <div className="grid gap-4 text-sm text-gray-700">
+                <div className="bg-blue-50 p-4 rounded-lg">
+                  <h4 className="font-semibold text-blue-900 mb-2">Quick guide</h4>
+                  <p className="text-blue-800 leading-relaxed">
+                    <span className="font-medium">Sets</span> = how many rounds • 
+                    <span className="font-medium">Intensity</span> = how challenging • 
+                    <span className="font-medium">Colored bars</span> = which body areas get worked
+                  </p>
+                </div>
+                
+                {!simplifiedView && (
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <p className="text-gray-700 text-sm leading-relaxed">
+                      <strong>Blue bars:</strong> How much your heart and muscles work<br/>
+                      <strong>Green bars:</strong> Which body parts get the most attention<br/>
+                      Darker colors = more work for that area
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
 
         {/* Controls: Phase selector, Level toggle, Day picker, Start session */}
-        <section className="rounded-2xl bg-white border border-slate-200 shadow-sm p-4">
-          <div className="grid gap-3 sm:grid-cols-[2fr,2fr,3fr] items-center">
+        <section className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5 sm:p-6">
+          <div className="grid gap-5 sm:grid-cols-[2fr,2fr,3fr] items-start">
             {/* Phase selector */}
             <div>
-              <label className="block text-[11px] font-semibold text-slate-700 mb-1">
-                Phase
+              <label className="block text-sm sm:text-sm font-semibold text-gray-700 mb-3">
+                Workout Type
               </label>
               <select
-                className="w-full rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-[11px] text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                className="w-full rounded-xl border border-gray-300 bg-white px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 min-h-[44px]"
                 value={phaseId}
                 onChange={(e) => setPhaseId(e.target.value)}
               >
@@ -410,19 +256,19 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
 
             {/* Level toggle */}
             <div>
-              <p className="block text-[11px] font-semibold text-slate-700 mb-1">
-                Level
+              <p className="block text-sm sm:text-sm font-semibold text-gray-700 mb-3">
+                Difficulty
               </p>
-              <div className="flex flex-wrap gap-1">
+              <div className="flex flex-wrap gap-2">
                 {levels.map((level) => (
                   <button
                     key={level.id}
                     type="button"
                     onClick={() => setLevelId(level.id)}
-                    className={`px-3 py-1 rounded-full text-[11px] font-medium border transition-colors ${
+                    className={`px-4 sm:px-4 py-3 rounded-full text-sm sm:text-sm font-medium border transition-all duration-200 min-h-[48px] touch-manipulation ${
                       levelId === level.id
-                        ? "bg-emerald-500 border-emerald-500 text-white"
-                        : "bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100"
+                        ? "bg-gradient-to-r from-blue-500 to-blue-600 border-blue-500 text-white shadow-sm"
+                        : "bg-gradient-to-r from-gray-50 to-gray-100 border-gray-300 text-gray-700 hover:from-gray-100 hover:to-gray-200"
                     }`}
                   >
                     {level.label}
@@ -432,20 +278,20 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
             </div>
 
             {/* Day picker */}
-            <div>
-              <p className="block text-[11px] font-semibold text-slate-700 mb-1">
-                Day
+            <div className="min-w-0">
+              <p className="block text-sm sm:text-sm font-semibold text-gray-700 mb-3">
+                Session
               </p>
-              <div className="flex gap-1 overflow-x-auto pb-1">
+              <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide touch-pan-x min-w-full" style={{ WebkitOverflowScrolling: 'touch', scrollBehavior: 'smooth', touchAction: 'pan-x' }}>
                 {days.map((day) => (
                   <button
                     key={day.id}
                     type="button"
                     onClick={() => setDayId(day.id)}
-                    className={`px-3 py-1 rounded-full text-[11px] font-medium border whitespace-nowrap transition-colors ${
+                    className={`px-4 sm:px-4 py-3 rounded-full text-sm sm:text-sm font-medium border whitespace-nowrap transition-all duration-200 min-h-[48px] touch-manipulation flex-shrink-0 ${
                       dayId === day.id
-                        ? "bg-slate-900 border-slate-900 text-white"
-                        : "bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100"
+                        ? "bg-gradient-to-r from-gray-900 to-gray-800 border-gray-900 text-white shadow-sm"
+                        : "bg-gradient-to-r from-gray-50 to-gray-100 border-gray-300 text-gray-700 hover:from-gray-100 hover:to-gray-200"
                     }`}
                   >
                     {day.label}
@@ -456,48 +302,52 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
           </div>
 
           {/* Session context + Start button */}
-          <div className="mt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <div className="text-[11px] text-slate-600">
-              <p className="font-semibold text-slate-800">
-                {currentPhase ? currentPhase.name : "Phase"} /{" "}
-                {currentLevel ? currentLevel.label : "Level"} /{" "}
-                {currentDay ? currentDay.label : "Day"}
+          <div className="mt-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="text-sm sm:text-sm text-gray-600">
+              <p className="font-semibold text-gray-800 mb-2">
+                Ready to start: {currentPhase ? currentPhase.name : "Workout"} • {currentLevel ? currentLevel.label : "Level"} • {currentDay ? currentDay.label : "Session"}
               </p>
               {programDescription && (
-                <p className="mt-1 max-w-2xl">{programDescription}</p>
+                <p className="max-w-2xl text-gray-600">{programDescription}</p>
               )}
             </div>
             <button
               type="button"
               onClick={handleStartSession}
-              className="inline-flex items-center justify-center self-start sm:self-auto rounded-full bg-emerald-500 px-4 py-1.5 text-[11px] font-semibold text-white shadow-sm hover:bg-emerald-600 transition-colors"
               disabled={currentRows.length === 0}
+              className={`inline-flex items-center justify-center rounded-full px-7 py-3.5 text-sm font-semibold transition-all w-full sm:w-auto
+                ${currentRows.length === 0
+                  ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+                  : "bg-gray-900 text-white hover:bg-gray-800 active:bg-gray-900 shadow-sm"
+                }`}
             >
-              Start Session
+              Start workout
             </button>
           </div>
         </section>
 
         {/* Desktop: Program grid */}
         <section className="hidden sm:block">
-          <WorkoutProgramGrid title={programTitle} rows={currentRows} />
+          <WorkoutProgramGrid title={programTitle} rows={currentRows} simplifiedView={simplifiedView} />
         </section>
 
         {/* Mobile: Card list */}
         <section className="sm:hidden">
-          <h2 className="text-xs font-semibold text-slate-800 mb-2">
-            {programTitle}
+          <h2 className="text-lg sm:text-base font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent mb-5">
+            Your Exercises
           </h2>
           {currentRows.length === 0 && (
-            <p className="text-[11px] text-slate-500">
-              No exercises scheduled yet for this combination. Your coach may
-              not have configured this phase, level, and day.
-            </p>
+            <div className="bg-white rounded-2xl border border-gray-200 p-6 text-center">
+              <p className="text-sm text-gray-500">
+                Choose your workout type, difficulty, and session above to see your exercises!
+              </p>
+            </div>
           )}
           {currentRows.map((row) => (
             <MobileExerciseCard key={row.meta.id} row={row} />
           ))}
         </section>
+        </div>
       </div>
     </div>
   );
