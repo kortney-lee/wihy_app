@@ -343,7 +343,7 @@
   border-top: 0 !important;
 }
 
-/* Login button positioning */
+/* Login button positioning - match top-right position appearance */
 .header-auth-wrapper {
   display: inline-flex;
   align-items: center;
@@ -352,23 +352,30 @@
   align-self: center;
 }
 
-/* Login wrapper styling */
+/* Login wrapper styling - match top-right position sizing */
 .header-auth-wrapper {
   max-width: none;
   white-space: nowrap;
   margin: 0;
   padding: 0;
-  height: 36px;
+  height: 40px;
+  width: 40px;
   align-items: center;
   justify-content: center;
   box-sizing: border-box;
 }
 
-/* Nuke any margins a nested login component might add */
+/* Ensure inline login button matches top-right appearance */
 .header-auth-wrapper > * {
   display: inline-flex;
   margin: 0 !important;
   vertical-align: middle;
+}
+
+/* Ensure inline login button matches top-right appearance */
+.header-auth-wrapper button {
+  width: 40px !important;
+  height: 40px !important;
 }
 
 /* Responsive: stack search under logo nicely */
@@ -433,22 +440,29 @@
   white-space: nowrap;
 }
 
-/* Login button styling */
+/* Login button styling - match top-right position appearance */
 .header-auth-wrapper {
   display: inline-flex !important;
   align-items: center;
   justify-content: center;
-  height: 36px;
+  height: 40px;
+  width: 40px;
   flex: 0 0 auto;
   vertical-align: middle;
   box-sizing: border-box;
 }
 
-/* Make sure MultiAuthLogin stays compact */
+/* Make sure MultiAuthLogin stays compact and matches top-right styling */
 .header-auth-wrapper > * {
   display: inline-flex !important;
   margin: 0 !important;
   position: static !important;
+}
+
+/* Ensure inline login button matches top-right appearance */
+.header-auth-wrapper button {
+  width: 40px !important;
+  height: 40px !important;
   align-items: center !important;
   justify-content: center !important;
   box-sizing: border-box !important;
@@ -534,23 +548,30 @@ body {
   box-sizing: border-box;
 }
 
-/* Login button styling */
+/* Login button styling - match top-right position appearance */
 .header-auth-wrapper {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  height: 36px;
+  height: 40px;
+  width: 40px;
   white-space: nowrap;
   margin: 0;
   padding: 0;
 }
 
-/* Make sure MultiAuthLogin stays compact */
+/* Make sure MultiAuthLogin matches top-right styling */
 .header-auth-wrapper > * {
   display: inline-flex !important;
   margin: 0 !important;
   align-items: center !important;
   justify-content: center !important;
+}
+
+/* Ensure inline login button matches top-right appearance */
+.header-auth-wrapper button {
+  width: 40px !important;
+  height: 40px !important;
 }
 
 /* Responsive adjustments */

@@ -18,7 +18,7 @@ import NewsPage from './pages/NewsPage';
 import NutritionFactsPage from './pages/NutritionFacts';
 import DebugFullScreen from './pages/DebugFullScreen';
 import CoachDashboard from './components/dashboard/CoachDashboard';
-import ParentDashboard from './components/dashboard/ParentDashboard';
+import ParentDashboardPage from './pages/ParentDashboard';
 import OverviewDashboard from './components/dashboard/OverviewDashboard';
 import ResearchDashboard from './components/dashboard/ResearchDashboard';
 import DashboardPage from './components/dashboard/DashboardPage';
@@ -579,9 +579,10 @@ const App: React.FC = () => {
             <Route path="/new-about" element={<NewAboutpage />} />
             <Route path="/news" element={<NewsPage />} />
             <Route path="/research" element={<ResearchDashboard period="week" onAnalyze={() => {}} onSearch={() => {}} windowWidth={window.innerWidth} />} />
+            <Route path="/parent" element={<ParentDashboardPage windowWidth={window.innerWidth} />} />
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/dashboard/overview" element={<OverviewDashboard />} />
-            <Route path="/dashboard/parent" element={<ParentDashboard />} />
+            <Route path="/dashboard/parent" element={<ParentDashboardPage windowWidth={window.innerWidth} />} />
             <Route path="/dashboard/predictive" element={<PredictiveDashboard />} />
             <Route path="/tracking-dashboard" element={<TrackingDashboard />} />
             <Route path="/manager-dashboard" element={<ManagerDashboard />} />
