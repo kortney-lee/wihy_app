@@ -146,21 +146,22 @@ const ExpandedResearchResult: React.FC<ExpandedResearchResultProps> = ({
   }
 
   return (
-    <div className="fixed inset-0 bg-[#f0f7ff] z-[9999] overflow-hidden flex flex-col">
+    <div className="fixed inset-0 bg-[#f0f7ff] z-[9999] overflow-hidden flex flex-col" style={{ minHeight: '100dvh' }}>
       <div 
-        className="w-full h-full overflow-hidden flex flex-col"
+        className="w-full h-full overflow-hidden flex flex-col relative"
         style={{
-          background: 'linear-gradient(135deg, #f0f7ff 0%, #e6f3ff 50%, #ddeeff 100%)'
+          background: 'linear-gradient(135deg, #f0f7ff 0%, #e6f3ff 50%, #ddeeff 100%)',
+          minHeight: '100dvh'
         }}
       >
         {/* Modal Header - Full Screen Wihy Style */}
-        <div className="bg-white/90 backdrop-blur-xl border-b border-white/20 p-4 sm:p-6 flex-shrink-0">
+        <div className="bg-white/90 backdrop-blur-xl border-b border-white/20 p-3 sm:p-4 lg:p-6 flex-shrink-0 safe-area-inset-top">
           {/* Close button div above title */}
-          <div className="flex justify-end mb-4">
+          <div className="flex justify-end mb-2 sm:mb-4">
             <button
               type="button"
               onClick={onClose}
-              className="bg-transparent border-none cursor-pointer p-2 text-xl text-gray-500 hover:text-gray-700 transition-colors"
+              className="bg-transparent border-none cursor-pointer p-3 text-lg sm:text-xl text-gray-500 hover:text-gray-700 transition-colors touch-manipulation min-w-[44px] min-h-[44px] flex items-center justify-center"
               title="Close"
             >
               ✕
@@ -168,12 +169,12 @@ const ExpandedResearchResult: React.FC<ExpandedResearchResultProps> = ({
           </div>
           
           <div className="flex-1">
-            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-3 leading-tight">
+            <h1 className="text-lg sm:text-xl lg:text-2xl xl:text-3xl font-bold text-gray-900 mb-2 sm:mb-3 leading-tight pr-2">
               {study.title}
             </h1>
-            <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-sm sm:text-base text-gray-600 mb-4">
+            <div className="flex flex-wrap items-center gap-1 sm:gap-2 lg:gap-3 text-xs sm:text-sm lg:text-base text-gray-600 mb-3 sm:mb-4">
               {study.authors && (
-                <span>{study.authors}</span>
+                <span className="truncate max-w-[200px] sm:max-w-none">{study.authors}</span>
               )}
               {study.journal && (
                 <span>• {study.journal}</span>
@@ -183,21 +184,23 @@ const ExpandedResearchResult: React.FC<ExpandedResearchResultProps> = ({
               )}
             </div>
             
-            {/* Action buttons - Full screen layout */}
-            <div className="flex flex-wrap gap-3">
+            {/* Action buttons - Mobile optimized */}
+            <div className="flex flex-wrap gap-2 sm:gap-3">
               <button
                 type="button"
-                className="flex items-center gap-2 px-4 py-2.5 text-sm sm:text-base bg-white/80 backdrop-blur-sm text-gray-700 rounded-2xl hover:bg-white transition-all duration-300 border border-gray-200/50"
+                className="flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm lg:text-base bg-white/80 backdrop-blur-sm text-gray-700 rounded-xl sm:rounded-2xl hover:bg-white transition-all duration-300 border border-gray-200/50 touch-manipulation min-h-[44px]"
               >
-                <Save className="w-4 h-4" />
-                Save Study
+                <Save className="w-3 h-3 sm:w-4 sm:h-4" />
+                <span className="hidden xs:inline sm:inline">Save Study</span>
+                <span className="xs:hidden sm:hidden">Save</span>
               </button>
               <button
                 type="button"
-                className="flex items-center gap-2 px-4 py-2.5 text-sm sm:text-base bg-white/80 backdrop-blur-sm text-gray-700 rounded-2xl hover:bg-white transition-all duration-300 border border-gray-200/50"
+                className="flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm lg:text-base bg-white/80 backdrop-blur-sm text-gray-700 rounded-xl sm:rounded-2xl hover:bg-white transition-all duration-300 border border-gray-200/50 touch-manipulation min-h-[44px]"
               >
-                <Copy className="w-4 h-4" />
-                Copy Citation
+                <Copy className="w-3 h-3 sm:w-4 sm:h-4" />
+                <span className="hidden xs:inline sm:inline">Copy Citation</span>
+                <span className="xs:hidden sm:hidden">Copy</span>
               </button>
               
               {/* Direct Access Links */}
@@ -251,44 +254,47 @@ const ExpandedResearchResult: React.FC<ExpandedResearchResultProps> = ({
         </div>
 
         {/* Modal Content - Full Screen Wihy styled */}
-        <div className="flex-1 overflow-y-auto px-6 sm:px-8 lg:px-12 pb-8">
+        <div className="flex-1 overflow-y-auto px-3 sm:px-6 lg:px-8 xl:px-12 pb-4 sm:pb-8 safe-area-inset-bottom">
           {/* Modal Tabs - Inside content area */}
-          <div className="flex bg-white/60 backdrop-blur-xl border-0 rounded-2xl p-1.5 mt-6 mb-6 flex-shrink-0">
+          <div className="flex bg-white/60 backdrop-blur-xl border-0 rounded-xl sm:rounded-2xl p-1 sm:p-1.5 mt-3 sm:mt-6 mb-3 sm:mb-6 flex-shrink-0 overflow-x-auto">
             <button
               type="button"
               onClick={() => setModalTab('overview')}
-              className={`flex items-center gap-2 flex-1 px-4 sm:px-8 py-3 sm:py-4 text-sm sm:text-base font-semibold rounded-xl transition-all duration-300 ${
+              className={`flex items-center gap-1 sm:gap-2 flex-1 px-2 sm:px-4 lg:px-8 py-2 sm:py-3 lg:py-4 text-xs sm:text-sm lg:text-base font-semibold rounded-lg sm:rounded-xl transition-all duration-300 touch-manipulation min-h-[44px] whitespace-nowrap ${
                 modalTab === 'overview'
                   ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg shadow-blue-500/25'
                   : 'text-blue-600 hover:text-blue-700 hover:bg-blue-50/80 bg-blue-50/40'
               }`}
             >
-              <FileText className="w-4 h-4" />
-              Overview
+              <FileText className="w-3 h-3 sm:w-4 sm:h-4" />
+              <span className="hidden xs:inline">Overview</span>
+              <span className="xs:hidden">Info</span>
             </button>
             <button
               type="button"
               onClick={() => setModalTab('evidence')}
-              className={`flex items-center gap-2 flex-1 px-4 sm:px-8 py-3 sm:py-4 text-sm sm:text-base font-semibold rounded-xl transition-all duration-300 ${
+              className={`flex items-center gap-1 sm:gap-2 flex-1 px-2 sm:px-4 lg:px-8 py-2 sm:py-3 lg:py-4 text-xs sm:text-sm lg:text-base font-semibold rounded-lg sm:rounded-xl transition-all duration-300 touch-manipulation min-h-[44px] whitespace-nowrap ${
                 modalTab === 'evidence'
                   ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-lg shadow-emerald-500/25'
                   : 'text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50/80 bg-emerald-50/40'
               }`}
             >
-              <FlaskConical className="w-4 h-4" />
-              Evidence Review
+              <FlaskConical className="w-3 h-3 sm:w-4 sm:h-4" />
+              <span className="hidden xs:inline">Evidence Review</span>
+              <span className="xs:hidden">Evidence</span>
             </button>
             <button
               type="button"
               onClick={() => setModalTab('notes')}
-              className={`flex items-center gap-2 flex-1 px-4 sm:px-8 py-3 sm:py-4 text-sm sm:text-base font-semibold rounded-xl transition-all duration-300 ${
+              className={`flex items-center gap-1 sm:gap-2 flex-1 px-2 sm:px-4 lg:px-8 py-2 sm:py-3 lg:py-4 text-xs sm:text-sm lg:text-base font-semibold rounded-lg sm:rounded-xl transition-all duration-300 touch-manipulation min-h-[44px] whitespace-nowrap ${
                 modalTab === 'notes'
                   ? 'bg-gradient-to-r from-purple-500 to-purple-600 text-white shadow-lg shadow-purple-500/25'
                   : 'text-purple-600 hover:text-purple-700 hover:bg-purple-50/80 bg-purple-50/40'
               }`}
             >
-              <NotebookPen className="w-4 h-4" />
-              Notes
+              <NotebookPen className="w-3 h-3 sm:w-4 sm:h-4" />
+              <span className="hidden xs:inline">Notes</span>
+              <span className="xs:hidden">Notes</span>
             </button>
           </div>
           {/* Loading handled by custom overlay spinner */}
@@ -297,9 +303,9 @@ const ExpandedResearchResult: React.FC<ExpandedResearchResultProps> = ({
           {modalTab === 'overview' && !loadingArticle && (
             <div className="max-w-none">
               {articleContent && (
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-6">
                   {/* Left Column (Wider) - Main Content */}
-                  <div className="lg:col-span-2 space-y-6">
+                  <div className="lg:col-span-2 space-y-3 sm:space-y-6">
                     {/* WIHY Summary - Enhanced glass design */}
                     <div 
                       className="bg-gradient-to-br from-blue-500/10 via-indigo-500/10 to-purple-500/10 backdrop-blur-xl border border-white/20 p-6"
@@ -404,7 +410,7 @@ const ExpandedResearchResult: React.FC<ExpandedResearchResultProps> = ({
                   </div>
 
                   {/* Right Column (Narrower) - Study Details & Links */}
-                  <div className="space-y-6">
+                  <div className="space-y-3 sm:space-y-6">
                     {/* Study Details - Compact card */}
                     <div 
                       className="bg-white/70 backdrop-blur-xl border border-white/20 p-4"
@@ -506,7 +512,7 @@ const ExpandedResearchResult: React.FC<ExpandedResearchResultProps> = ({
 
           {/* EVIDENCE REVIEW TAB - Wihy styled */}
           {modalTab === 'evidence' && (
-            <div className="max-w-none space-y-6">
+            <div className="max-w-none space-y-3 sm:space-y-6">
               {/* Claim input card - Glass design */}
               <div 
                 className="bg-white/70 backdrop-blur-xl border border-white/20 p-4 sm:p-6"
@@ -658,7 +664,7 @@ const ExpandedResearchResult: React.FC<ExpandedResearchResultProps> = ({
 
           {/* NOTES TAB - Wihy styled */}
           {modalTab === 'notes' && (
-            <div className="max-w-none space-y-4 sm:space-y-6">
+            <div className="max-w-none space-y-3 sm:space-y-4 lg:space-y-6">
               <div 
                 className="bg-white/70 backdrop-blur-xl border border-white/20 p-4 sm:p-6"
                 style={{
@@ -699,10 +705,11 @@ const ExpandedResearchResult: React.FC<ExpandedResearchResultProps> = ({
         </div>
       </div>
 
-      {/* Custom Spinner Overlays - Same style as ResearchPanel */}
+      {/* Loading Spinners - Inline to avoid portal interference */}
       {loadingArticle && (
         <div 
           className="fixed inset-0 bg-black/75 backdrop-blur-sm flex flex-col items-center justify-center z-[2001]"
+          style={{ minHeight: '100dvh', width: '100dvw' }}
           role="dialog" 
           aria-modal="true" 
           aria-labelledby="article-spinner-title" 
@@ -729,6 +736,7 @@ const ExpandedResearchResult: React.FC<ExpandedResearchResultProps> = ({
       {loadingClaim && (
         <div 
           className="fixed inset-0 bg-black/75 backdrop-blur-sm flex flex-col items-center justify-center z-[2001]"
+          style={{ minHeight: '100dvh', width: '100dvw' }}
           role="dialog" 
           aria-modal="true" 
           aria-labelledby="claim-spinner-title" 

@@ -18,22 +18,25 @@ interface SpinnerProps {
   /** Specify spinner type: 'circle' or 'gif' */
   type?: 'circle' | 'gif';
   /** Custom GIF source, used if type is 'gif' */
-  gifSrc?: string;
-}
+  gifSrc?: string;  /** Custom z-index value */
+  zIndex?: number;
+  /** Custom CSS class for container */
+  className?: string;}
 
 const portalId = 'vh-spinner-portal';
 
-function ensurePortal(): HTMLElement {
+function ensurePortal(zIndex: number): HTMLElement {
   let el = document.getElementById(portalId);
   if (!el) {
     el = document.createElement('div');
     el.id = portalId;
     el.style.position = 'fixed';
     el.style.inset = '0';
-    el.style.zIndex = '2000';
     el.style.pointerEvents = 'none'; // Allow clicks through when empty
     document.body.appendChild(el);
   }
+  // Update z-index dynamically
+  el.style.zIndex = String(zIndex);
   // Don't clear innerHTML - let React manage the portal content
   el.style.pointerEvents = 'auto'; // Block clicks when spinner is active
   return el;
@@ -47,7 +50,9 @@ export default function Spinner({
   disableEsc = true,
   onClose,
   type = 'gif',
-  gifSrc = '/assets/whatishealthyspinner.gif'
+  gifSrc = '/assets/whatishealthyspinner.gif',
+  zIndex = 2000,
+  className
 }: SpinnerProps) {
   const [isVisible, setIsVisible] = useState(false);
   const [shouldRender, setShouldRender] = useState(overlay);
@@ -119,7 +124,7 @@ export default function Spinner({
   if (!shouldRender) return null;
 
   // Overlay modal via portal to avoid z-index issues
-  const portal = ensurePortal();
+  const portal = ensurePortal(zIndex);
   const clamped =
     typeof progress === 'number'
       ? Math.max(0, Math.min(100, Math.round(progress)))
@@ -127,9 +132,10 @@ export default function Spinner({
 
   const modal = (
     <div 
-      className="fixed inset-0 bg-black/75 backdrop-blur-sm flex flex-col items-center justify-center z-[2000] transition-opacity duration-200 ease-in-out" 
+      className={`fixed inset-0 bg-black/75 backdrop-blur-sm flex flex-col items-center justify-center transition-opacity duration-200 ease-in-out ${className || ''}`}
       style={{
-        opacity: isVisible ? 1 : 0
+        opacity: isVisible ? 1 : 0,
+        zIndex
       }}
       role="dialog" 
       aria-modal="true" 

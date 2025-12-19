@@ -147,7 +147,7 @@ const ResearchDashboard: React.FC<ResearchDashboardProps> = ({
       />
       
       {/* Main content area */}
-      <div className="flex-1 overflow-auto" style={{ paddingTop: '200px' }}>
+      <div className="flex-1 overflow-auto pt-[220px] sm:pt-[240px] lg:pt-[260px]">
 
         {/* Search filters section */}
         {showFilters && (
@@ -206,18 +206,18 @@ const ResearchDashboard: React.FC<ResearchDashboardProps> = ({
         )}
 
         {/* Secondary header with title and actions */}
-        <div className="bg-[#f0f7ff] px-6 py-4 border-b border-gray-200">
-          <div className="max-w-7xl mx-auto flex items-center justify-between">
-            <div className="flex items-center gap-3">
+        <div className="bg-[#f0f7ff] px-3 sm:px-6 py-3 sm:py-4 border-b border-gray-200">
+          <div className="max-w-7xl mx-auto flex items-center justify-between flex-wrap gap-2">
+            <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
               {/* Forward/Back Navigation - conditionally shown */}
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1 sm:gap-2">
                 {canGoBack && (
                   <button
                     type="button"
                     onClick={handleBackNavigation}
-                    className="flex items-center justify-center w-10 h-10 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                    className="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors touch-manipulation min-w-[44px] min-h-[44px]"
                   >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 18l-6-6 6-6" />
                     </svg>
                   </button>
@@ -226,41 +226,41 @@ const ResearchDashboard: React.FC<ResearchDashboardProps> = ({
                   <button
                     type="button"
                     onClick={handleForwardNavigation}
-                    className="flex items-center justify-center w-10 h-10 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                    className="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors touch-manipulation min-w-[44px] min-h-[44px]"
                   >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 18l6-6-6-6" />
                     </svg>
                   </button>
                 )}
               </div>
-              <h1 className="text-2xl font-bold text-gray-900">
+              <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 truncate">
                 {activeWorkspace ? 'Research Workspace' : 'Research Dashboard'}
               </h1>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
               <button
                 type="button"
                 onClick={() => setShowFilters(!showFilters)}
-                className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-sm"
+                className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-xs sm:text-sm touch-manipulation min-h-[44px]"
               >
-                <Filter className="w-4 h-4" />
+                <Filter className="w-3 h-3 sm:w-4 sm:h-4" />
                 <span className="hidden sm:inline">Filters</span>
               </button>
               <button
                 type="button"
                 onClick={() => {}}
-                className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-sm"
+                className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-xs sm:text-sm touch-manipulation min-h-[44px]"
               >
-                <Clock className="w-4 h-4" />
+                <Clock className="w-3 h-3 sm:w-4 sm:h-4" />
                 <span className="hidden sm:inline">History</span>
               </button>
               <button
                 type="button"
                 onClick={() => {}}
-                className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-sm"
+                className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-xs sm:text-sm touch-manipulation min-h-[44px]"
               >
-                <Bookmark className="w-4 h-4" />
+                <Bookmark className="w-3 h-3 sm:w-4 sm:h-4" />
                 <span className="hidden sm:inline">Saved</span>
               </button>
             </div>
@@ -289,9 +289,9 @@ const ResearchDashboard: React.FC<ResearchDashboardProps> = ({
         ) : (
           // Show Dashboard content
           <div className="bg-[#f0f7ff]">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
+            <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 py-3 sm:py-6">
               {/* KPI CARDS */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mb-4 sm:mb-6">
                 <div className="bg-gradient-to-br from-blue-50 to-indigo-100 rounded-2xl border-0 p-5 transition-all duration-300 cursor-pointer">
                   <div className="flex items-center gap-3">
                     <div className="p-3 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl">
@@ -333,9 +333,9 @@ const ResearchDashboard: React.FC<ResearchDashboardProps> = ({
               </div>
 
         {/* C. MAIN CONTENT (TWO-COLUMN) */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-3 sm:gap-6">
           {/* LEFT COLUMN (narrow) */}
-          <div className="lg:col-span-1 space-y-4">
+          <div className="lg:col-span-1 space-y-3 sm:space-y-4 order-2 lg:order-1">
             {/* Recent searches */}
             <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl border border-gray-200 p-4">
               <div className="flex items-center justify-between mb-3 overflow-hidden">
@@ -406,7 +406,7 @@ const ResearchDashboard: React.FC<ResearchDashboardProps> = ({
           </div>
 
           {/* RIGHT COLUMN (wide) */}
-          <div className="lg:col-span-3">
+          <div className="lg:col-span-3 order-1 lg:order-2">
             <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl border border-gray-200 p-8 min-h-[400px] flex items-center justify-center">
               <div className="text-center max-w-md">
                 <div className="w-20 h-20 bg-gradient-to-br from-blue-100 to-indigo-200 rounded-3xl flex items-center justify-center mx-auto mb-6">
