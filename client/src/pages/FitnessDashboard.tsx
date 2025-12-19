@@ -95,7 +95,7 @@ const FitnessDashboardPage: React.FC<FitnessDashboardPageProps> = ({ windowWidth
   return (
     <div style={{ 
       minHeight: '100vh',
-      backgroundColor: '#f8fafc' 
+      backgroundColor: '#f0f7ff' 
     }}>
       <Header
         variant="results"

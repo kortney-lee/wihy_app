@@ -10,7 +10,7 @@ const CoachDashboardPage: React.FC<CoachDashboardPageProps> = ({ windowWidth }) 
   return (
     <div style={{ 
       minHeight: '100vh',
-      backgroundColor: '#f8fafc' 
+      backgroundColor: '#f0f7ff' 
     }}>
       <Header
         variant="results"
