@@ -1450,48 +1450,6 @@ const VHealthSearch: React.FC = () => {
           >
             Verify With Evidence
           </button>
-
-          {/* DEMO MODE BUTTON - Development only */}
-          {process.env.NODE_ENV === 'development' && (
-            <button 
-              onClick={() => {
-                if (isLoading) return;
-                navigate('/demo');
-              }}
-              className="search-btn-mobile demo"
-              type="button"
-              disabled={isLoading}
-              style={{
-                width: '100%',
-                maxWidth: '300px',
-                height: '40px',
-                backgroundColor: 'transparent',
-                color: '#10b981',
-                border: '1px solid #10b981',
-                borderRadius: '20px',
-                fontSize: '14px',
-                fontWeight: '500',
-                margin: '4px',
-                cursor: isLoading ? 'not-allowed' : 'pointer',
-                opacity: isLoading ? 0.6 : 1,
-                transition: 'all 0.2s ease'
-              }}
-              onMouseOver={(e) => {
-                if (!isLoading) {
-                  e.currentTarget.style.backgroundColor = '#ecfdf5';
-                  e.currentTarget.style.transform = 'translateY(-1px)';
-                }
-              }}
-              onMouseOut={(e) => {
-                if (!isLoading) {
-                  e.currentTarget.style.backgroundColor = 'transparent';
-                  e.currentTarget.style.transform = 'translateY(0)';
-                }
-              }}
-            >
-              Demo Mode
-            </button>
-          )}
         </div>
       </div>
       
