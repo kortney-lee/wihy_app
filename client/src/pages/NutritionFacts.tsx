@@ -91,6 +91,12 @@ const NutritionFactsPage: React.FC = () => {
     error: null
   });
   
+  // Chat pre-loading state
+  const [chatPreloaded, setChatPreloaded] = useState(false);
+  const [chatResponse, setChatResponse] = useState<string | null>(null);
+  const [chatLoading, setChatLoading] = useState(false);
+  const [chatMounted, setChatMounted] = useState(false);
+  
   // Touch swipe handling
   const touchStartX = useRef<number>(0);
   const touchEndX = useRef<number>(0);
@@ -126,11 +132,35 @@ const NutritionFactsPage: React.FC = () => {
     if (Math.abs(diff) > swipeThreshold) {
       if (diff > 0 && viewMode === "overview") {
         // Swiped left - show chat
-        setViewMode("chat");
+        handleViewModeChange("chat");
       } else if (diff < 0 && viewMode === "chat") {
         // Swiped right - show overview
-        setViewMode("overview");
+        handleViewModeChange("overview");
       }
+    }
+  };
+  
+  // Handle view mode changes with smooth transitions
+  const handleViewModeChange = (newMode: ViewMode) => {
+    debug.logEvent('View mode changing', { from: viewMode, to: newMode });
+    
+    if (newMode === 'chat') {
+      // Pre-mount chat if not already mounted
+      if (!chatMounted) {
+        setChatMounted(true);
+      }
+      
+      // Smooth transition to chat
+      setSlideDirection('left');
+      setTimeout(() => {
+        setViewMode(newMode);
+      }, 50);
+    } else {
+      // Smooth transition to overview
+      setSlideDirection('right');
+      setTimeout(() => {
+        setViewMode(newMode);
+      }, 50);
     }
   };
   
@@ -310,6 +340,67 @@ const NutritionFactsPage: React.FC = () => {
     }
   }, [nutritionfacts?.ingredientsText]);
 
+  // Pre-load chat response when nutrition facts data is available
+  const preloadChatResponse = async (askWihyQuery: string) => {
+    if (chatPreloaded || chatLoading || !askWihyQuery) return;
+    
+    setChatLoading(true);
+    debug.logEvent('Pre-loading chat response', { query: askWihyQuery });
+    
+    try {
+      const response = await fetch('https://services.wihy.ai/api/ask', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          query: askWihyQuery,
+          context: {
+            product_name: nutritionfacts?.name,
+            nutrition_data: nutritionfacts,
+            session_id: sessionId
+          }
+        })
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setChatResponse(data.response || data.answer || 'Analysis complete!');
+        setChatPreloaded(true);
+        debug.logEvent('Chat response pre-loaded successfully');
+      } else {
+        console.warn('Failed to pre-load chat response:', response.status);
+      }
+    } catch (error) {
+      console.error('Error pre-loading chat response:', error);
+    } finally {
+      setChatLoading(false);
+    }
+  };
+
+  // Pre-load chat when nutrition facts data is available
+  useEffect(() => {
+    if (nutritionfacts?.askWihy && !chatPreloaded && !chatLoading) {
+      // Add delay to let the page render first
+      const timer = setTimeout(() => {
+        preloadChatResponse(nutritionfacts.askWihy!);
+      }, 2000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [nutritionfacts?.askWihy, chatPreloaded, chatLoading]);
+
+  // Mount chat component when switching to chat view
+  useEffect(() => {
+    if (viewMode === 'chat') {
+      setChatMounted(true);
+      // If chat not preloaded yet, try to preload now
+      if (!chatPreloaded && !chatLoading && nutritionfacts?.askWihy) {
+        preloadChatResponse(nutritionfacts.askWihy);
+      }
+    }
+  }, [viewMode, chatPreloaded, chatLoading, nutritionfacts?.askWihy]);
+
   // Handle new scan - use scanningService directly
   const handleNewScan = async () => {
     debug.logEvent('New scan initiated', { currentProduct: nutritionfacts?.name });
@@ -423,7 +514,7 @@ const NutritionFactsPage: React.FC = () => {
       {/* Navigation Header */}
       <NavigationHeader
         viewMode={viewMode}
-        onViewModeChange={setViewMode}
+        onViewModeChange={handleViewModeChange}
         showViewToggle={true}
         showHistory={showHistory}
         onHistoryToggle={() => setShowHistory(!showHistory)}
@@ -636,6 +727,16 @@ const NutritionFactsPage: React.FC = () => {
                               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
                             </svg>
                             Analyzing ingredients...
+                          </div>
+                        )}
+                        
+                        {chatLoading && (
+                          <div className="flex items-center gap-2 text-sm text-green-600">
+                            <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+                            </svg>
+                            Preparing chat...
                           </div>
                         )}
                         
@@ -866,40 +967,43 @@ const NutritionFactsPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Chat Content - Pre-mounted and Show/Hide with transitions */}
-        <div 
-          className={`absolute top-0 left-0 right-0 bottom-0 ${
-            isInitialMount || slideDirection === 'none'
-              ? (viewMode === "chat" ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none")
-              : slideDirection === 'right'
-              ? `transition-all duration-300 ease-in-out ${
-                  viewMode === "chat" 
-                    ? "opacity-100 translate-x-0 pointer-events-auto" 
-                    : "opacity-0 translate-x-full pointer-events-none"
-                }`
-              : `transition-all duration-250 ease-in-out ${
-                  viewMode === "chat" 
-                    ? "opacity-100 translate-x-0 pointer-events-auto" 
-                    : "opacity-0 translate-x-full pointer-events-none"
-                }`
-          }`}
-          onTouchStart={handleTouchStart}
-          onTouchMove={handleTouchMove}
-          onTouchEnd={handleTouchEnd}
-        >
-          <FullScreenChat
-            isOpen={viewMode === "chat"}
-            initialQuery={initialQuery || `Tell me more about ${nutritionfacts.name || "this food"}`}
-            onClose={() => setViewMode("overview")}
-            isEmbedded={true}
-            onBackToOverview={() => setViewMode("overview")}
-            onNewScan={handleNewScan}
-            productName={nutritionfacts.name}
-            apiResponseData={nutritionfacts}
-            sessionId={sessionId}
-            askWihy={nutritionfacts.askWihy}
-          />
-        </div>
+        {/* Chat Content - Conditionally mounted with smooth transitions */}
+        {(chatMounted || viewMode === "chat") && (
+          <div 
+            className={`absolute top-0 left-0 right-0 bottom-0 ${
+              isInitialMount || slideDirection === 'none'
+                ? (viewMode === "chat" ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none")
+                : slideDirection === 'left'
+                ? `transition-all duration-300 ease-in-out ${
+                    viewMode === "chat" 
+                      ? "opacity-100 translate-x-0 pointer-events-auto" 
+                      : "opacity-0 -translate-x-full pointer-events-none"
+                  }`
+                : `transition-all duration-300 ease-in-out ${
+                    viewMode === "chat" 
+                      ? "opacity-100 translate-x-0 pointer-events-auto" 
+                      : "opacity-0 translate-x-full pointer-events-none"
+                  }`
+            }`}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+          >
+            <FullScreenChat
+              isOpen={viewMode === "chat"}
+              initialQuery={initialQuery || nutritionfacts.askWihy || `Tell me more about ${nutritionfacts.name || "this food"}`}
+              initialResponse={chatPreloaded ? chatResponse : undefined}
+              onClose={() => handleViewModeChange("overview")}
+              isEmbedded={true}
+              onBackToOverview={() => handleViewModeChange("overview")}
+              onNewScan={handleNewScan}
+              productName={nutritionfacts.name}
+              apiResponseData={nutritionfacts}
+              sessionId={sessionId}
+              askWihy={nutritionfacts.askWihy}
+            />
+          </div>
+        )}
       </div>
     </div>
   );
