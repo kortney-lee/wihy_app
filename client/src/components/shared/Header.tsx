@@ -893,7 +893,7 @@ const Header: React.FC<HeaderProps> = ({
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <button
               onClick={() => setShowNavMenu(!showNavMenu)}
-              className="settings-menu-button w-10 h-10 rounded-xl bg-gray-100/60 hover:bg-gray-200/80 flex items-center justify-center text-gray-700 hover:text-gray-900 transition-all duration-200 backdrop-blur-sm"
+              className="settings-menu-button w-10 h-10 rounded-xl bg-gray-100/60 flex items-center justify-center text-gray-700 backdrop-blur-sm"
               aria-label="Navigation menu"
               title="Menu"
               type="button"

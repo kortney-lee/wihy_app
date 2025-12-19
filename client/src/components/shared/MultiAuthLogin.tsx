@@ -301,40 +301,24 @@ const MultiAuthLogin: React.FC<MultiAuthLoginProps> = ({
   };
 
   const handleLoginClick = () => {
-    if (user) {
-      setShowDropdown(!showDropdown);
-    } else {
+    if (!user) {
       setShowProviders(!showProviders);
     }
+    // For authenticated users, do nothing - UserPreference handles account management
   };
 
   return (
     <div className={`${position === 'top-right' ? 'block' : 'relative inline-block'} ${className}`}>
       {/* Main Login Button */}
       <button 
-        className="bg-transparent border-none cursor-pointer !pointer-events-auto p-0 rounded-full flex items-center justify-center transition-colors duration-200 text-[#5f6368] w-10 h-10 relative hover:bg-black/5 hover:text-slate-800 disabled:opacity-60 disabled:cursor-not-allowed"
+        className="border-none cursor-pointer !pointer-events-auto p-0 w-10 h-10 rounded-full bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center shadow-sm text-blue-600 relative disabled:opacity-60 disabled:cursor-not-allowed"
         onClick={handleLoginClick}
         disabled={loading}
-        aria-label={user ? 'User menu' : 'Sign in'}
+        aria-label={user ? 'User identity' : 'Sign in'}
       >
         {loading ? (
           <div className="w-5 h-5 border-2 border-gray-300 border-t-blue-500 rounded-full animate-spin"></div>
-        ) : user ? (
-          user.picture ? (
-            <img 
-              src={user.picture} 
-              alt="Profile" 
-              className="w-6 h-6 rounded-full object-cover"
-            />
-          ) : (
-            <div 
-              className="w-6 h-6 rounded-full flex items-center justify-center text-white font-semibold text-xs"
-              style={{ backgroundColor: getProviderColor(user.provider) }}
-            >
-              {user.name?.charAt(0) || 'U'}
-            </div>
-          )
-        ) : (
+        ) : user ? null : (
           <svg viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
             <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
           </svg>
@@ -416,53 +400,6 @@ const MultiAuthLogin: React.FC<MultiAuthLoginProps> = ({
               Visit <a href="https://wihy.ai/about" target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">WihY</a> <a href="https://wihy.ai/about" target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">wihy.ai/about</a> for more details
             </p>
             </div>
-          </div>
-        </>,
-        document.body
-      )}
-
-      {/* User Dropdown - Render via portal */}
-      {user && showDropdown && createPortal(
-        <>
-          <div 
-            className="fixed inset-0 bg-black/50 z-[10000] backdrop-blur-sm"
-            onClick={() => {
-              setShowProviders(false);
-              setShowDropdown(false);
-            }}
-          ></div>
-          <div className="fixed top-[60px] right-5 z-[10001] w-[280px] bg-white rounded-lg shadow-[0_2px_10px_rgba(0,0,0,0.2)] overflow-hidden py-4 animate-[fadeIn_0.2s_ease-out] pointer-events-auto max-[600px]:!w-[calc(100vw-32px)] max-[600px]:!right-4 max-[600px]:!left-4 max-[600px]:!top-20">
-            <div className="px-4 pb-4">
-              <div className="font-semibold text-[#202124] mb-1 text-sm">{user.name}</div>
-              <div className="text-gray-600 mb-1 text-xs">{user.email}</div>
-              <div className="text-gray-600 text-[11px] m-0">
-                Signed in with {user.provider?.charAt(0).toUpperCase() + user.provider?.slice(1) || 'Email'}
-              </div>
-            </div>
-            <div className="h-px bg-[#dadce0] mx-4 mb-2"></div>
-            <button 
-              className="w-full flex items-center gap-3 px-4 py-2 bg-transparent border-none cursor-pointer text-sm text-[#202124] transition-colors duration-200 text-left hover:bg-gray-100" 
-              onClick={() => {
-                setShowDropdown(false);
-                const navigate = (window as any).__wihy_navigate;
-                if (navigate) {
-                  navigate('/dashboard');
-                } else {
-                  window.location.href = '/dashboard';
-                }
-              }}
-            >
-              <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-gray-600">
-                <path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.07,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/>
-              </svg>
-              Settings
-            </button>
-            <button className="w-full flex items-center gap-3 px-4 py-2 bg-transparent border-none cursor-pointer text-sm text-[#202124] transition-colors duration-200 text-left hover:bg-gray-100" onClick={handleSignOut}>
-              <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-gray-600">
-                <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.59L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>
-              </svg>
-              Sign Out
-            </button>
           </div>
         </>,
         document.body

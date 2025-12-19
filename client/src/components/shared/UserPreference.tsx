@@ -144,7 +144,7 @@ const UserPreference: React.FC<UserPreferenceProps> = () => {
       {/* Green Avatar Identity Trigger */}
       <button
         onClick={() => setOpen(true)}
-        className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-100 to-green-200 flex items-center justify-center shadow-sm hover:shadow-md transition-all duration-200"
+        className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-100 to-green-200 flex items-center justify-center shadow-sm"
         title="Account Settings"
         type="button"
       >
