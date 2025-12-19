@@ -38,9 +38,9 @@ type SearchTab = 'overview' | 'charts' | 'consumption' | 'fitness' | 'coach';
 
 // Tab configuration
 const TAB_CONFIG = {
-  overview: { label: 'Overview', value: 'overview' as SearchTab },
+  overview: { label: 'Dashboard', value: 'overview' as SearchTab },
   charts: { label: 'My Progress', value: 'charts' as SearchTab },
-  consumption: { label: 'Consumption', value: 'consumption' as SearchTab },
+  consumption: { label: 'Intake & Consumption', value: 'consumption' as SearchTab },
   fitness: { label: 'Fitness', value: 'fitness' as SearchTab },
   coach: { label: 'Coach Portal', value: 'coach' as SearchTab }
 };
@@ -1338,7 +1338,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({
               </button>
             )}
 
-            {/* Tab Navigation - Above Health Snapshot */}
+            {/* Tab Navigation - Removed per user request
             <div style={{ 
               display: 'flex', 
               justifyContent: 'center', 
@@ -1393,64 +1393,15 @@ const SearchResults: React.FC<SearchResultsProps> = ({
                 })}
               </div>
             </div>
+            */}
 
-            {/* Live Dashboard */}
-            <div className="health-dashboard-content" style={{
+            {/* Search Results Content - Overview dashboard removed per user request */}
+            <div className="search-results-content" style={{
               padding: windowWidth < 768 ? '5px 8px 0 8px' : '10px 20px',
               maxWidth: '100%',
               overflowX: 'hidden'
             }}>
-              {/* Tab-specific content */}
-              {activeTab === 'overview' && (
-                <>
-                  <OverviewDashboard
-                    onAnalyze={handleAddToChatConversation}
-                  />
-                </>
-              )}
-
-              {activeTab === 'charts' && (
-                <>
-                  <MyProgressDashboard 
-                    coach={mockCoachData}
-                    onToggleAction={(actionId) => console.log('Toggle action:', actionId)}
-                    onStartWorkout={() => console.log('Start workout')}
-                    onAddHydration={() => console.log('Add hydration')}
-                    onLogMeal={() => console.log('Log meal')}
-                    onEducationClick={() => console.log('Education clicked')}
-                  />
-                </>
-              )}
-
-
-
-              {activeTab === 'consumption' && (
-                <>
-                  <ConsumptionDashboard
-                    period={getDashboardPeriod()}
-                    onAnalyze={handleAddToChatConversation}
-                    onUploadReceipt={handleOpenReceiptUpload}
-                  />
-                </>
-              )}
-
-              {activeTab === 'fitness' && (
-                <>
-                  <FitnessDashboard
-                    data={mockFitnessDashboard}
-                    onStartSession={(params) => {
-                      console.log('Start session:', params);
-                      // Could open a workout tracking view here
-                    }}
-                  />
-                </>
-              )}
-
-              {activeTab === 'coach' && (
-                <>
-                  <CoachDashboard />
-                </>
-              )}
+              {/* Search results will be displayed here without dashboard components */}
             </div>
           </>
         ) : (
