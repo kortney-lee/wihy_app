@@ -991,6 +991,42 @@ const Header: React.FC<HeaderProps> = ({
               <button 
                 className="w-full text-left px-4 py-2 hover:bg-gray-100 transition-colors duration-200 flex items-center gap-3"
                 onClick={() => {
+                  navigate('/consumption');
+                  setShowNavMenu(false);
+                }}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style={{ color: '#5f6368' }}>
+                  <path d="M11 9h2V6h3V4h-3V1h-2v3H8v2h3v3zm-4 9c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zm10 0c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2zm-9.83-3.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03L21.7 4H5.21l-.94-2H1v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.13 0-.25-.11-.25-.25z"/>
+                </svg>
+                Consumption
+              </button>
+              <button 
+                className="w-full text-left px-4 py-2 hover:bg-gray-100 transition-colors duration-200 flex items-center gap-3"
+                onClick={() => {
+                  navigate('/fitness');
+                  setShowNavMenu(false);
+                }}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style={{ color: '#5f6368' }}>
+                  <path d="M20.57 14.86L22 13.43 20.57 12 17 15.57 8.43 7 12 3.43 10.57 2 9.14 3.43 7.71 2 5.57 4.14 4.14 2.71 2.71 4.14l1.43 1.43L2 7.71l1.43 1.43L2 10.57 3.43 12 7 8.43 15.57 17 12 20.57 13.43 22l1.43-1.43L16.29 22l2.14-2.14 1.43 1.43 1.43-1.43-1.43-1.43L22 16.29z"/>
+                </svg>
+                Fitness
+              </button>
+              <button 
+                className="w-full text-left px-4 py-2 hover:bg-gray-100 transition-colors duration-200 flex items-center gap-3"
+                onClick={() => {
+                  navigate('/coach');
+                  setShowNavMenu(false);
+                }}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style={{ color: '#5f6368' }}>
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                </svg>
+                Coach Portal
+              </button>
+              <button 
+                className="w-full text-left px-4 py-2 hover:bg-gray-100 transition-colors duration-200 flex items-center gap-3"
+                onClick={() => {
                   navigate('/parent');
                   setShowNavMenu(false);
                 }}
