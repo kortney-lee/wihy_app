@@ -979,6 +979,18 @@ const Header: React.FC<HeaderProps> = ({
               <button 
                 className="w-full text-left px-4 py-2 hover:bg-gray-100 transition-colors duration-200 flex items-center gap-3"
                 onClick={() => {
+                  navigate('/overview');
+                  setShowNavMenu(false);
+                }}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style={{ color: '#5f6368' }}>
+                  <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/>
+                </svg>
+                Overview
+              </button>
+              <button 
+                className="w-full text-left px-4 py-2 hover:bg-gray-100 transition-colors duration-200 flex items-center gap-3"
+                onClick={() => {
                   navigate('/parent');
                   setShowNavMenu(false);
                 }}
