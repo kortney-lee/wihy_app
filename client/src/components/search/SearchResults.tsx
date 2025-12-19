@@ -60,50 +60,9 @@ if (typeof window !== 'undefined') {
   window.addEventListener('error', resizeObserverErrorHandler);
 }
 
-/* Define default topics and resources */
-const defaultRelatedTopics = [
-  "Nutrition and Diet Guidelines",
-  "Exercise and Physical Activity", 
-  "Mental Health and Wellness",
-  "Preventive Care and Screenings",
-  "Chronic Disease Management",
-  "Healthy Lifestyle Choices"
-];
 
-const defaultResources = [
-  { text: "Nutrition ED - Learn More", url: "https://vowels.com" },
-  { text: "Nutrition 101", url: "https://members.vowels.com" },
-  { text: "The World Counts", url: "https://www.theworldcounts.com/" }
-];
 
-// Define the dummy data for "test" queries
-const dummyTestData = {
-  query: "test",
-  healthInfo: `I'm sorry, but your query "test" is too vague. Could you please provide more details or specify the type of test you are interested in? It could be a medical test, a psychological test, or a physical fitness test, among others. Please provide more context so I can give you a more accurate and helpful response.
 
-**Recommendations:**
-• Consult healthcare professionals for personalized medical advice
-• Verify information with your doctor or medical provider
-• Follow evidence-based medical guidelines
-• Seek regular medical check-ups and screenings
-
-**Sources:** NIH Guidelines, CDC & WHO Publications, PubMed and peer-reviewed studies, Academic Medical Journals, Evidence-Based Clinical Reviews
-
-This information is based on research from reputable medical institutions and peer-reviewed journals including NIH, CDC, WHO, JAMA, NEJM, and other academic publications. It is for educational purposes only and should not replace professional medical advice, diagnosis, or treatment. Always consult with qualified healthcare providers for medical concerns.`,
-  relatedTopics: [
-    "Nutrition and Diet Guidelines",
-    "Exercise and Physical Activity", 
-    "Mental Health and Wellness",
-    "Preventive Care and Screenings",
-    "Chronic Disease Management",
-    "Healthy Lifestyle Choices"
-  ],
-  resources: [
-    { text: "🩺 mHealth - Mobile Health Solutions", url: "#" },
-    { text: "🏥 CDC - Health Guidelines", url: "#" },
-    { text: "🌍 WHO - Global Health Information", url: "#" }
-  ]
-};
 
 // Update the SearchResultsProps interface to include the new properties
 interface SearchResultsProps {
@@ -232,489 +191,9 @@ const SearchResults: React.FC<SearchResultsProps> = ({
     return () => darkModeQuery.removeEventListener('change', handler);
   }, []);
 
-  // Mock coach data for My Progress tab
-  const mockCoachData: WihyCoachModel = {
-    summary: "",
-    motivation: "Keep up the great work! 💪",
-    priorities: [
-      { id: "p1", title: "Morning Workout", icon: "🏃", description: "30 min cardio" },
-      { id: "p2", title: "Hydration Goal", icon: "💧", description: "8 cups today" },
-      { id: "p3", title: "Balanced Meals", icon: "🥗", description: "Track macros" }
-    ],
-    actions: [
-      { 
-        id: "a1", 
-        type: "workout", 
-        title: "Complete morning cardio", 
-        description: "Get your heart rate up",
-        status: "completed",
-        meta: "30 min"
-      },
-      { 
-        id: "a2", 
-        type: "meal", 
-        title: "Log breakfast", 
-        description: "Track your morning meal",
-        status: "completed",
-        meta: "400 cal"
-      },
-      { 
-        id: "a3", 
-        type: "hydration", 
-        title: "Drink water", 
-        description: "Stay hydrated throughout the day",
-        status: "in_progress",
-        meta: "4/8 cups"
-      },
-      { 
-        id: "a4", 
-        type: "habit", 
-        title: "Evening stretch routine", 
-        description: "Flexibility and recovery",
-        status: "pending",
-        meta: "15 min"
-      }
-    ],
-    workout: {
-      title: "Upper Body Strength",
-      durationLabel: "35–40 min",
-      intensityLabel: "Moderate",
-      steps: [
-        { id: "s1", label: "Warm-up", detail: "5 min dynamic stretches" },
-        { id: "s2", label: "Push-ups", detail: "3 sets of 12 reps" },
-        { id: "s3", label: "Dumbbell rows", detail: "3 sets of 10 reps each arm" },
-        { id: "s4", label: "Shoulder press", detail: "3 sets of 10 reps" },
-        { id: "s5", label: "Cool-down", detail: "5 min stretching" }
-      ]
-    },
-    workoutProgram: [
-      {
-        meta: {
-          id: "ex1",
-          name: "Squats",
-          equipment: "BARBELL",
-          fitnessLoad: { STRENGTH: 3, ENDURANCE: 1 },
-          muscleLoad: { QUADS: 3, GLUTES: 2, HAMSTRINGS: 2, CORE: 1 }
-        },
-        prescription: {
-          exerciseId: "ex1",
-          sets: 4,
-          intensityLabel: "75% 1RM"
-        }
-      },
-      {
-        meta: {
-          id: "ex2",
-          name: "Bench Press",
-          equipment: "BARBELL",
-          fitnessLoad: { STRENGTH: 3, ENDURANCE: 1 },
-          muscleLoad: { CHEST: 3, SHOULDERS: 2, ARMS: 2 }
-        },
-        prescription: {
-          exerciseId: "ex2",
-          sets: 4,
-          intensityLabel: "70% 1RM"
-        }
-      },
-      {
-        meta: {
-          id: "ex3",
-          name: "Deadlift",
-          equipment: "BARBELL",
-          fitnessLoad: { STRENGTH: 3, ENDURANCE: 1 },
-          muscleLoad: { HAMSTRINGS: 3, GLUTES: 3, BACK: 2, CORE: 2 }
-        },
-        prescription: {
-          exerciseId: "ex3",
-          sets: 3,
-          intensityLabel: "80% 1RM"
-        }
-      },
-      {
-        meta: {
-          id: "ex4",
-          name: "Pull-ups",
-          equipment: "NONE",
-          fitnessLoad: { STRENGTH: 2, ENDURANCE: 2 },
-          muscleLoad: { BACK: 3, ARMS: 2, SHOULDERS: 1 }
-        },
-        prescription: {
-          exerciseId: "ex4",
-          sets: 3,
-          intensityLabel: "Bodyweight"
-        }
-      },
-      {
-        meta: {
-          id: "ex5",
-          name: "Overhead Press",
-          equipment: "DUMBBELLS",
-          fitnessLoad: { STRENGTH: 3, MOBILITY: 1 },
-          muscleLoad: { SHOULDERS: 3, ARMS: 2, CORE: 1 }
-        },
-        prescription: {
-          exerciseId: "ex5",
-          sets: 3,
-          intensityLabel: "Moderate"
-        }
-      },
-      {
-        meta: {
-          id: "ex6",
-          name: "Romanian Deadlifts",
-          equipment: "DUMBBELLS",
-          fitnessLoad: { STRENGTH: 2, MOBILITY: 2 },
-          muscleLoad: { HAMSTRINGS: 3, GLUTES: 2, BACK: 1 }
-        },
-        prescription: {
-          exerciseId: "ex6",
-          sets: 3,
-          intensityLabel: "Light"
-        }
-      },
-      {
-        meta: {
-          id: "ex7",
-          name: "Plank",
-          equipment: "NONE",
-          fitnessLoad: { ENDURANCE: 2, STRENGTH: 1 },
-          muscleLoad: { CORE: 3, SHOULDERS: 1 }
-        },
-        prescription: {
-          exerciseId: "ex7",
-          sets: 3,
-          intensityLabel: "60 sec"
-        }
-      }
-    ],
-    consumption: {
-      mealsLogged: 2,
-      mealsPlanned: 4,
-      calories: 850,
-      caloriesTarget: 2000,
-      protein: 45,
-      proteinTarget: 150
-    },
-    hydration: {
-      cups: 4,
-      goalCups: 8
-    },
-    streaks: [
-      { id: "str1", label: "7 day workout streak", icon: "🔥" },
-      { id: "str2", label: "5 day meal tracking", icon: "✅" }
-    ],
-    checkin: {
-      question: "How are you feeling today?",
-      inputType: "mood"
-    },
-    education: {
-      title: "Benefits of Progressive Overload",
-      summary: "Learn how gradually increasing weight, frequency, or reps can boost muscle growth and strength gains.",
-      linkLabel: "Read More →"
-    }
-  };
 
-  // Mock fitness dashboard data
-  const mockFitnessDashboard: FitnessDashboardModel = {
-    title: "Your Training Program",
-    subtitle: "",
-    
-    phases: [
-      { id: "phase1", name: "Foundation (Weeks 1-4)" },
-      { id: "phase2", name: "Building (Weeks 5-8)" },
-      { id: "phase3", name: "Strength (Weeks 9-12)" }
-    ],
-    
-    levels: [
-      { id: "beginner", label: "Beginner" },
-      { id: "intermediate", label: "Intermediate" },
-      { id: "advanced", label: "Advanced" }
-    ],
-    
-    days: [
-      { id: "day1", label: "Day 1" },
-      { id: "day2", label: "Day 2" },
-      { id: "day3", label: "Day 3" },
-      { id: "day4", label: "Day 4" }
-    ],
-    
-    variants: {
-      // Beginner - Phase 1 - Day 1
-      [buildProgramKey("phase1", "beginner", "day1")]: [
-        {
-          meta: {
-            id: "ex1",
-            name: "Bodyweight Squats",
-            equipment: "NONE",
-            fitnessLoad: { STRENGTH: 1, ENDURANCE: 2 },
-            muscleLoad: { QUADS: 2, GLUTES: 2, CORE: 1 }
-          },
-          prescription: {
-            exerciseId: "ex1",
-            sets: 3,
-            intensityLabel: "12-15 reps"
-          }
-        },
-        {
-          meta: {
-            id: "ex2",
-            name: "Push-ups (Knee)",
-            equipment: "NONE",
-            fitnessLoad: { STRENGTH: 1, ENDURANCE: 2 },
-            muscleLoad: { CHEST: 2, ARMS: 2, SHOULDERS: 1 }
-          },
-          prescription: {
-            exerciseId: "ex2",
-            sets: 3,
-            intensityLabel: "8-12 reps"
-          }
-        },
-        {
-          meta: {
-            id: "ex3",
-            name: "Dumbbell Rows",
-            equipment: "DUMBBELLS",
-            fitnessLoad: { STRENGTH: 2, ENDURANCE: 1 },
-            muscleLoad: { BACK: 3, ARMS: 2 }
-          },
-          prescription: {
-            exerciseId: "ex3",
-            sets: 3,
-            intensityLabel: "Light weight"
-          }
-        },
-        {
-          meta: {
-            id: "ex4",
-            name: "Plank",
-            equipment: "NONE",
-            fitnessLoad: { ENDURANCE: 2, STRENGTH: 1 },
-            muscleLoad: { CORE: 3 }
-          },
-          prescription: {
-            exerciseId: "ex4",
-            sets: 3,
-            intensityLabel: "20-30 sec"
-          }
-        }
-      ],
-      
-      // Beginner - Phase 1 - Day 2
-      [buildProgramKey("phase1", "beginner", "day2")]: [
-        {
-          meta: {
-            id: "ex5",
-            name: "Lunges",
-            equipment: "NONE",
-            fitnessLoad: { STRENGTH: 1, MOBILITY: 2 },
-            muscleLoad: { QUADS: 2, GLUTES: 2, HAMSTRINGS: 1 }
-          },
-          prescription: {
-            exerciseId: "ex5",
-            sets: 3,
-            intensityLabel: "10 reps each"
-          }
-        },
-        {
-          meta: {
-            id: "ex6",
-            name: "Shoulder Press",
-            equipment: "DUMBBELLS",
-            fitnessLoad: { STRENGTH: 2, MOBILITY: 1 },
-            muscleLoad: { SHOULDERS: 3, ARMS: 2 }
-          },
-          prescription: {
-            exerciseId: "ex6",
-            sets: 3,
-            intensityLabel: "Light weight"
-          }
-        },
-        {
-          meta: {
-            id: "ex7",
-            name: "Assisted Pull-ups",
-            equipment: "MACHINE",
-            fitnessLoad: { STRENGTH: 2, ENDURANCE: 1 },
-            muscleLoad: { BACK: 3, ARMS: 2 }
-          },
-          prescription: {
-            exerciseId: "ex7",
-            sets: 3,
-            intensityLabel: "6-8 reps"
-          }
-        }
-      ],
-      
-      // Intermediate - Phase 1 - Day 1
-      [buildProgramKey("phase1", "intermediate", "day1")]: [
-        {
-          meta: {
-            id: "ex8",
-            name: "Barbell Squats",
-            equipment: "BARBELL",
-            fitnessLoad: { STRENGTH: 3, ENDURANCE: 1 },
-            muscleLoad: { QUADS: 3, GLUTES: 2, HAMSTRINGS: 2, CORE: 1 }
-          },
-          prescription: {
-            exerciseId: "ex8",
-            sets: 4,
-            intensityLabel: "70% 1RM"
-          }
-        },
-        {
-          meta: {
-            id: "ex9",
-            name: "Bench Press",
-            equipment: "BARBELL",
-            fitnessLoad: { STRENGTH: 3, ENDURANCE: 1 },
-            muscleLoad: { CHEST: 3, SHOULDERS: 2, ARMS: 2 }
-          },
-          prescription: {
-            exerciseId: "ex9",
-            sets: 4,
-            intensityLabel: "70% 1RM"
-          }
-        },
-        {
-          meta: {
-            id: "ex10",
-            name: "Romanian Deadlifts",
-            equipment: "BARBELL",
-            fitnessLoad: { STRENGTH: 3, MOBILITY: 1 },
-            muscleLoad: { HAMSTRINGS: 3, GLUTES: 2, BACK: 1 }
-          },
-          prescription: {
-            exerciseId: "ex10",
-            sets: 3,
-            intensityLabel: "Moderate"
-          }
-        },
-        {
-          meta: {
-            id: "ex11",
-            name: "Pull-ups",
-            equipment: "NONE",
-            fitnessLoad: { STRENGTH: 2, ENDURANCE: 2 },
-            muscleLoad: { BACK: 3, ARMS: 2, SHOULDERS: 1 }
-          },
-          prescription: {
-            exerciseId: "ex11",
-            sets: 3,
-            intensityLabel: "Bodyweight"
-          }
-        },
-        {
-          meta: {
-            id: "ex12",
-            name: "Weighted Plank",
-            equipment: "DUMBBELLS",
-            fitnessLoad: { ENDURANCE: 2, STRENGTH: 2 },
-            muscleLoad: { CORE: 3 }
-          },
-          prescription: {
-            exerciseId: "ex12",
-            sets: 3,
-            intensityLabel: "45 sec"
-          }
-        }
-      ],
-      
-      // Advanced - Phase 1 - Day 1
-      [buildProgramKey("phase1", "advanced", "day1")]: [
-        {
-          meta: {
-            id: "ex13",
-            name: "Barbell Squats",
-            equipment: "BARBELL",
-            fitnessLoad: { STRENGTH: 3, ENDURANCE: 1 },
-            muscleLoad: { QUADS: 3, GLUTES: 3, HAMSTRINGS: 2, CORE: 2 }
-          },
-          prescription: {
-            exerciseId: "ex13",
-            sets: 5,
-            intensityLabel: "80% 1RM"
-          }
-        },
-        {
-          meta: {
-            id: "ex14",
-            name: "Bench Press",
-            equipment: "BARBELL",
-            fitnessLoad: { STRENGTH: 3, ENDURANCE: 1 },
-            muscleLoad: { CHEST: 3, SHOULDERS: 2, ARMS: 2 }
-          },
-          prescription: {
-            exerciseId: "ex14",
-            sets: 5,
-            intensityLabel: "80% 1RM"
-          }
-        },
-        {
-          meta: {
-            id: "ex15",
-            name: "Deadlifts",
-            equipment: "BARBELL",
-            fitnessLoad: { STRENGTH: 3, ENDURANCE: 1 },
-            muscleLoad: { HAMSTRINGS: 3, GLUTES: 3, BACK: 3, CORE: 2 }
-          },
-          prescription: {
-            exerciseId: "ex15",
-            sets: 4,
-            intensityLabel: "85% 1RM"
-          }
-        },
-        {
-          meta: {
-            id: "ex16",
-            name: "Weighted Pull-ups",
-            equipment: "DUMBBELLS",
-            fitnessLoad: { STRENGTH: 3, ENDURANCE: 1 },
-            muscleLoad: { BACK: 3, ARMS: 2, SHOULDERS: 1 }
-          },
-          prescription: {
-            exerciseId: "ex16",
-            sets: 4,
-            intensityLabel: "Heavy"
-          }
-        },
-        {
-          meta: {
-            id: "ex17",
-            name: "Barbell Overhead Press",
-            equipment: "BARBELL",
-            fitnessLoad: { STRENGTH: 3, MOBILITY: 1 },
-            muscleLoad: { SHOULDERS: 3, ARMS: 2, CORE: 1 }
-          },
-          prescription: {
-            exerciseId: "ex17",
-            sets: 4,
-            intensityLabel: "75% 1RM"
-          }
-        },
-        {
-          meta: {
-            id: "ex18",
-            name: "Ab Wheel Rollouts",
-            equipment: "MACHINE",
-            fitnessLoad: { ENDURANCE: 2, STRENGTH: 3 },
-            muscleLoad: { CORE: 3, SHOULDERS: 1 }
-          },
-          prescription: {
-            exerciseId: "ex18",
-            sets: 3,
-            intensityLabel: "8-12 reps"
-          }
-        }
-      ]
-    },
-    
-    programTitle: "12-Week Progressive Strength Program",
-    programDescription: "Build strength and muscle across all fitness levels with our structured program",
-    
-    defaultPhaseId: "phase1",
-    defaultLevelId: "beginner",
-    defaultDayId: "day1"
-  };
+
+
 
   // Tab bar styles - Responsive with mobile-friendly touch targets
   const tabBarStyles = {
@@ -836,6 +315,14 @@ const SearchResults: React.FC<SearchResultsProps> = ({
     }
   }, [autoOpenChat, isChatOpen, hasAutoOpened]);
   
+  // Overview tab now shows dashboard directly instead of navigating
+  // useEffect(() => {
+  //   if (activeTab === 'overview') {
+  //     console.log('🔍 Navigating to overview dashboard from SearchResults');
+  //     navigate('/overview');
+  //   }
+  // }, [activeTab, navigate]);
+
   // Header search state - independent from main search
   const [headerSearchResults, setHeaderSearchResults] = useState<string>('');
   const [headerSearchQuery, setHeaderSearchQuery] = useState<string>('');
@@ -1042,8 +529,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({
     }
   };
 
-  // Check if this is a test query
-  const isTestQuery = query.toLowerCase() === 'test';
+
 
   // Original handle header search function
   const handleHeaderSearch = async (searchQuery: string) => {
@@ -1285,7 +771,9 @@ const SearchResults: React.FC<SearchResultsProps> = ({
       )}
       
       {/* Main Content Area with Dashboard Layout */}
-      <div className={CSS_CLASSES.DASHBOARD_CONTAINER} style={{ paddingTop: windowWidth < 768 ? '220px' : windowWidth < 1200 ? '220px' : '100px' }}>
+      <div className={CSS_CLASSES.DASHBOARD_CONTAINER} style={{ 
+        paddingTop: windowWidth < 768 ? '280px' : windowWidth < 1200 ? '260px' : '140px'
+      }}>
 
         
         <div className={CSS_CLASSES.DASHBOARD_MAIN_CONTENT}>
@@ -1395,14 +883,19 @@ const SearchResults: React.FC<SearchResultsProps> = ({
             </div>
             */}
 
-            {/* Search Results Content - Overview dashboard removed per user request */}
-            <div className="search-results-content" style={{
-              padding: windowWidth < 768 ? '5px 8px 0 8px' : '10px 20px',
-              maxWidth: '100%',
-              overflowX: 'hidden'
-            }}>
-              {/* Search results will be displayed here without dashboard components */}
-            </div>
+            {/* Render dashboard content based on active tab */}
+            {activeTab === 'overview' ? (
+              <OverviewDashboard onAnalyze={handleAddToChatConversation} />
+            ) : (
+              <div style={{
+                padding: windowWidth < 768 ? '5px 8px 0 8px' : '10px 20px',
+                maxWidth: '100%',
+                overflowX: 'hidden'
+              }}>
+                {/* Other dashboard tabs would render here */}
+                <p>Dashboard content for {activeTab} tab would appear here.</p>
+              </div>
+            )}
           </>
         ) : (
           !isLoading && !isSearching && (
