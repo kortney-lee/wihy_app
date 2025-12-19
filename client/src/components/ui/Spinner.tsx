@@ -101,8 +101,16 @@ export default function Spinner({
   if (!overlay && !shouldRender) {
     return (
       <div className="flex flex-col items-center" role="status" aria-live="polite">
-        <div className="w-10 h-10 border-4 border-gray-300 border-t-blue-500 rounded-full animate-spin" />
-        {subtitle && <p className="mt-3 text-gray-600 text-sm">{subtitle}</p>}
+        {type === 'gif' ? (
+          <img 
+            src={gifSrc} 
+            alt="Loading..." 
+            className="w-10 h-10 object-contain mb-3"
+          />
+        ) : (
+          <div className="w-10 h-10 border-4 border-gray-300 border-t-blue-500 rounded-full animate-spin mb-3" />
+        )}
+        {subtitle && <p className="text-gray-600 text-sm">{subtitle}</p>}
       </div>
     );
   }
@@ -119,27 +127,51 @@ export default function Spinner({
 
   const modal = (
     <div 
-      className="fixed inset-0 bg-black/75 backdrop-blur-sm flex flex-col items-center justify-center z-[2000]" 
+      className="fixed inset-0 bg-black/75 backdrop-blur-sm flex flex-col items-center justify-center z-[2000] transition-opacity duration-200 ease-in-out" 
       style={{
-        opacity: isVisible ? 1 : 0,
-        transition: 'opacity 200ms ease-in-out'
+        opacity: isVisible ? 1 : 0
       }}
       role="dialog" 
       aria-modal="true" 
       aria-labelledby="spinner-title" 
       aria-describedby="spinner-subtitle"
     >
-      <div className="flex flex-col items-center text-center">
-        {/* Google-style GIF spinner */}
-        <div className="mb-4">
-          <img 
-            src={gifSrc} 
-            alt="Loading..." 
-            className="w-16 h-16 object-contain"
-          />
+      <div className="flex flex-col items-center text-center animate-fade-in-up">
+        {/* Spinner content */}
+        <div className="mb-6">
+          {type === 'gif' ? (
+            <img 
+              src={gifSrc} 
+              alt="Loading..." 
+              className="w-16 h-16 sm:w-20 sm:h-20 object-contain"
+            />
+          ) : (
+            <div className="w-16 h-16 rounded-full border-4 border-transparent border-t-white border-l-white animate-spin transform rotate-45" />
+          )}
         </div>
-        <h2 id="spinner-title" className="text-white text-xl font-normal mb-2 drop-shadow-md">{title}</h2>
-        {subtitle && <p id="spinner-subtitle" className="text-white/90 text-sm drop-shadow-sm">{subtitle}</p>}
+        
+        {/* Text content */}
+        <h2 id="spinner-title" className="text-white text-xl sm:text-2xl font-normal mb-2 drop-shadow-md max-w-sm px-4">
+          {title}
+        </h2>
+        {subtitle && (
+          <p id="spinner-subtitle" className="text-white/90 text-sm sm:text-base drop-shadow-sm max-w-md px-4">
+            {subtitle}
+          </p>
+        )}
+        
+        {/* Progress bar if provided */}
+        {typeof clamped === 'number' && (
+          <div className="w-64 sm:w-80 mt-6 px-4">
+            <div className="h-2 bg-white/20 rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-gradient-to-r from-blue-400 to-blue-500 rounded-full transition-all duration-300 ease-out"
+                style={{ width: `${clamped}%` }}
+              />
+            </div>
+            <p className="text-white/80 text-sm mt-2 text-center">{clamped}%</p>
+          </div>
+        )}
       </div>
     </div>
   );
