@@ -160,8 +160,6 @@ const ParentDashboard: React.FC = () => {
   };
 
   return (
-      <div className="w-full bg-[#f0f7ff] min-h-[70vh] relative">
-
         <div className="grid grid-cols-1 lg:grid-cols-[2fr,minmax(260px,1fr)] gap-6">
           {/* Left column: kids list + selected detail */}
           <div className="space-y-6">
@@ -357,7 +355,6 @@ const ParentDashboard: React.FC = () => {
             )}
           </div>
         </div>
-      </div>
   );
 };
 

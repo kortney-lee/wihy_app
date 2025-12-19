@@ -34,7 +34,7 @@ import { logger } from '../../utils/logger';
 import { authService } from '../../services/authService';
 
 // Tab type definition - matches chartTypes.ts tabView values
-type SearchTab = 'overview' | 'charts' | 'consumption' | 'fitness' | 'coach' | 'parent';
+type SearchTab = 'overview' | 'charts' | 'consumption' | 'fitness' | 'coach';
 
 // Tab configuration
 const TAB_CONFIG = {
@@ -42,8 +42,7 @@ const TAB_CONFIG = {
   charts: { label: 'My Progress', value: 'charts' as SearchTab },
   consumption: { label: 'Consumption', value: 'consumption' as SearchTab },
   fitness: { label: 'Fitness', value: 'fitness' as SearchTab },
-  coach: { label: 'Coach Portal', value: 'coach' as SearchTab },
-  parent: { label: 'Parent Portal', value: 'parent' as SearchTab }
+  coach: { label: 'Coach Portal', value: 'coach' as SearchTab }
 };
 
 const TABS = Object.values(TAB_CONFIG);
@@ -1450,12 +1449,6 @@ const SearchResults: React.FC<SearchResultsProps> = ({
               {activeTab === 'coach' && (
                 <>
                   <CoachDashboard />
-                </>
-              )}
-
-              {activeTab === 'parent' && (
-                <>
-                  <ParentDashboard />
                 </>
               )}
             </div>
