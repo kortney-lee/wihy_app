@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Save, Copy, Lightbulb, X } from 'lucide-react';
+import { Save, Copy, Lightbulb, X, FileText, FlaskConical, NotebookPen, ExternalLink, Info } from 'lucide-react';
 
 /** ---- CONFIG ---- */
 const RESEARCH_API_BASE =
@@ -187,188 +187,319 @@ const ExpandedResearchResult: React.FC<ExpandedResearchResultProps> = ({
             <div className="flex flex-wrap gap-3">
               <button
                 type="button"
-                className="flex items-center gap-2 px-4 py-2.5 text-sm sm:text-base bg-white/80 backdrop-blur-sm text-gray-700 rounded-2xl hover:bg-white transition-all duration-300 border border-gray-200/50 shadow-sm"
+                className="flex items-center gap-2 px-4 py-2.5 text-sm sm:text-base bg-white/80 backdrop-blur-sm text-gray-700 rounded-2xl hover:bg-white transition-all duration-300 border border-gray-200/50"
               >
                 <Save className="w-4 h-4" />
                 Save Study
               </button>
               <button
                 type="button"
-                className="flex items-center gap-2 px-4 py-2.5 text-sm sm:text-base bg-white/80 backdrop-blur-sm text-gray-700 rounded-2xl hover:bg-white transition-all duration-300 border border-gray-200/50 shadow-sm"
+                className="flex items-center gap-2 px-4 py-2.5 text-sm sm:text-base bg-white/80 backdrop-blur-sm text-gray-700 rounded-2xl hover:bg-white transition-all duration-300 border border-gray-200/50"
               >
                 <Copy className="w-4 h-4" />
                 Copy Citation
               </button>
+              
+              {/* Direct Access Links */}
+              {(study.links?.pmcWebsite || articleContent?.links?.pmcWebsite) && (
+                <a
+                  href={study.links?.pmcWebsite || articleContent?.links?.pmcWebsite}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 px-4 py-2.5 text-sm sm:text-base bg-white/80 backdrop-blur-sm text-gray-700 rounded-2xl hover:bg-white transition-all duration-300 border border-gray-200/50"
+                >
+                  <ExternalLink className="w-4 h-4" />
+                  View on PMC
+                </a>
+              )}
+              {study.links?.pubmedLink && (
+                <a
+                  href={study.links.pubmedLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 px-4 py-2.5 text-sm sm:text-base bg-white/80 backdrop-blur-sm text-gray-700 rounded-2xl hover:bg-white transition-all duration-300 border border-gray-200/50"
+                >
+                  <ExternalLink className="w-4 h-4" />
+                  View on PubMed
+                </a>
+              )}
+              {(study.links?.pdfDownload || articleContent?.links?.pdfDownload) && (
+                <a
+                  href={study.links?.pdfDownload || articleContent?.links?.pdfDownload}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 px-4 py-2.5 text-sm sm:text-base bg-white/80 backdrop-blur-sm text-gray-700 rounded-2xl hover:bg-white transition-all duration-300 border border-gray-200/50"
+                >
+                  <ExternalLink className="w-4 h-4" />
+                  Download PDF
+                </a>
+              )}
+              
               <button
                 type="button"
                 onClick={() => {
                   setClaimText('');
                   setModalTab('evidence');
                 }}
-                className="flex items-center gap-2 px-4 py-2.5 text-sm sm:text-base bg-gradient-to-r from-blue-500/20 to-indigo-500/20 backdrop-blur-sm text-blue-700 rounded-2xl hover:from-blue-500/30 hover:to-indigo-500/30 transition-all duration-300 border border-blue-200/50 shadow-sm"
+                className="flex items-center gap-2 px-4 py-2.5 text-sm sm:text-base bg-gradient-to-r from-blue-500/20 to-indigo-500/20 backdrop-blur-sm text-blue-700 rounded-2xl hover:from-blue-500/30 hover:to-indigo-500/30 transition-all duration-300 border border-blue-200/50"
               >
                 <Lightbulb className="w-4 h-4" />
-                Evaluate Evidence
+                Review Evidence
               </button>
             </div>
           </div>
         </div>
 
-        {/* Modal Tabs - Full Screen Wihy Apple style */}
-        <div className="flex bg-white/60 backdrop-blur-xl border-0 mx-6 sm:mx-8 lg:mx-12 rounded-2xl p-1.5 mb-6 flex-shrink-0">
-          <button
-            type="button"
-            onClick={() => setModalTab('overview')}
-            className={`flex-1 px-4 sm:px-8 py-3 sm:py-4 text-sm sm:text-base font-semibold rounded-xl transition-all duration-300 ${
-              modalTab === 'overview'
-                ? 'bg-white text-blue-600 shadow-lg'
-                : 'text-gray-600 hover:text-gray-900 hover:bg-white/60'
-            }`}
-          >
-            📋 Overview
-          </button>
-          <button
-            type="button"
-            onClick={() => setModalTab('evidence')}
-            className={`flex-1 px-4 sm:px-8 py-3 sm:py-4 text-sm sm:text-base font-semibold rounded-xl transition-all duration-300 ${
-              modalTab === 'evidence'
-                ? 'bg-white text-blue-600 shadow-lg'
-                : 'text-gray-600 hover:text-gray-900 hover:bg-white/60'
-            }`}
-          >
-            🔬 Evidence Review
-          </button>
-          <button
-            type="button"
-            onClick={() => setModalTab('notes')}
-            className={`flex-1 px-4 sm:px-8 py-3 sm:py-4 text-sm sm:text-base font-semibold rounded-xl transition-all duration-300 ${
-              modalTab === 'notes'
-                ? 'bg-white text-blue-600 shadow-lg'
-                : 'text-gray-600 hover:text-gray-900 hover:bg-white/60'
-            }`}
-          >
-            📝 Notes
-          </button>
-        </div>
-
         {/* Modal Content - Full Screen Wihy styled */}
         <div className="flex-1 overflow-y-auto px-6 sm:px-8 lg:px-12 pb-8">
+          {/* Modal Tabs - Inside content area */}
+          <div className="flex bg-white/60 backdrop-blur-xl border-0 rounded-2xl p-1.5 mt-6 mb-6 flex-shrink-0">
+            <button
+              type="button"
+              onClick={() => setModalTab('overview')}
+              className={`flex items-center gap-2 flex-1 px-4 sm:px-8 py-3 sm:py-4 text-sm sm:text-base font-semibold rounded-xl transition-all duration-300 ${
+                modalTab === 'overview'
+                  ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg shadow-blue-500/25'
+                  : 'text-blue-600 hover:text-blue-700 hover:bg-blue-50/80 bg-blue-50/40'
+              }`}
+            >
+              <FileText className="w-4 h-4" />
+              Overview
+            </button>
+            <button
+              type="button"
+              onClick={() => setModalTab('evidence')}
+              className={`flex items-center gap-2 flex-1 px-4 sm:px-8 py-3 sm:py-4 text-sm sm:text-base font-semibold rounded-xl transition-all duration-300 ${
+                modalTab === 'evidence'
+                  ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-lg shadow-emerald-500/25'
+                  : 'text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50/80 bg-emerald-50/40'
+              }`}
+            >
+              <FlaskConical className="w-4 h-4" />
+              Evidence Review
+            </button>
+            <button
+              type="button"
+              onClick={() => setModalTab('notes')}
+              className={`flex items-center gap-2 flex-1 px-4 sm:px-8 py-3 sm:py-4 text-sm sm:text-base font-semibold rounded-xl transition-all duration-300 ${
+                modalTab === 'notes'
+                  ? 'bg-gradient-to-r from-purple-500 to-purple-600 text-white shadow-lg shadow-purple-500/25'
+                  : 'text-purple-600 hover:text-purple-700 hover:bg-purple-50/80 bg-purple-50/40'
+              }`}
+            >
+              <NotebookPen className="w-4 h-4" />
+              Notes
+            </button>
+          </div>
           {/* Loading handled by custom overlay spinner */}
 
           {/* OVERVIEW TAB */}
           {modalTab === 'overview' && !loadingArticle && (
-            <div className="max-w-none space-y-4 sm:space-y-6">
+            <div className="max-w-none">
               {articleContent && (
-                <>
-                  {/* WIHY Summary - Enhanced glass design */}
-                  <div 
-                    className="bg-gradient-to-br from-blue-500/10 via-indigo-500/10 to-purple-500/10 backdrop-blur-xl border border-white/20 p-4 sm:p-6"
-                    style={{
-                      borderRadius: '20px',
-                      boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.2)'
-                    }}
-                  >
-                    <h4 className="text-base sm:text-lg font-bold bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent mb-4">
-                      🧠 WIHY Summary
-                    </h4>
-                    <p className="text-sm sm:text-base text-gray-800 leading-relaxed">
-                      {articleContent.content?.abstract || study.abstract || 'Summary not available.'}
-                    </p>
-                  </div>
-
-                  {/* Key Findings - Glass card */}
-                  <div 
-                    className="bg-white/60 backdrop-blur-xl border border-white/20 p-4 sm:p-6"
-                    style={{
-                      borderRadius: '20px',
-                      boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
-                    }}
-                  >
-                    <h4 className="text-base sm:text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-                      <span>🔍</span> Key Findings
-                    </h4>
-                    <ul className="space-y-3 text-sm sm:text-base text-gray-700">
-                      <li className="flex items-start gap-3">
-                        <span className="text-green-600 mt-1">✓</span>
-                        <span>Primary outcome showed significant improvement (p &lt; 0.05)</span>
-                      </li>
-                      <li className="flex items-start gap-3">
-                        <span className="text-green-600 mt-1">✓</span>
-                        <span>Effect size was moderate (Cohen's d = 0.6)</span>
-                      </li>
-                      <li className="flex items-start gap-3">
-                        <span className="text-green-600 mt-1">✓</span>
-                        <span>Results consistent across subgroups</span>
-                      </li>
-                    </ul>
-                  </div>
-
-                  {/* Study Details - Glass design with modern badges */}
-                  <div 
-                    className="bg-white/60 backdrop-blur-xl border border-white/20 p-4 sm:p-6"
-                    style={{
-                      borderRadius: '20px',
-                      boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
-                    }}
-                  >
-                    <h4 className="text-base sm:text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-                      <span>📊</span> Study Details
-                    </h4>
-                    <div className="flex flex-wrap gap-3">
-                      <div className="px-4 py-2 bg-gradient-to-r from-emerald-400/20 to-green-400/20 backdrop-blur-sm text-emerald-700 rounded-2xl text-xs sm:text-sm font-semibold border border-emerald-200/50">
-                        👥 Population: Adults 18-65
-                      </div>
-                      <div className="px-4 py-2 bg-gradient-to-r from-blue-400/20 to-indigo-400/20 backdrop-blur-sm text-blue-700 rounded-2xl text-xs sm:text-sm font-semibold border border-blue-200/50">
-                        🔬 Sample: n=50
-                      </div>
-                      <div className="px-4 py-2 bg-gradient-to-r from-purple-400/20 to-violet-400/20 backdrop-blur-sm text-purple-700 rounded-2xl text-xs sm:text-sm font-semibold border border-purple-200/50">
-                        ⏱️ Duration: 4 weeks
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  {/* Left Column (Wider) - Main Content */}
+                  <div className="lg:col-span-2 space-y-6">
+                    {/* WIHY Summary - Enhanced glass design */}
+                    <div 
+                      className="bg-gradient-to-br from-blue-500/10 via-indigo-500/10 to-purple-500/10 backdrop-blur-xl border border-white/20 p-6"
+                      style={{
+                        borderRadius: '20px'
+                      }}
+                    >
+                      <h4 className="text-lg font-bold bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent mb-4 flex items-center gap-2">
+                        <Lightbulb className="w-5 h-5 text-blue-600" />
+                        WIHY Summary
+                      </h4>
+                      <div className="text-base text-gray-800 leading-relaxed space-y-4">
+                        {(articleContent.content?.abstract || study.abstract) ? (
+                          (articleContent.content?.abstract || study.abstract)
+                            .split('. ')
+                            .reduce((acc, sentence, index, array) => {
+                              if (index % 3 === 0) {
+                                acc.push([sentence + (index < array.length - 1 ? '.' : '')]);
+                              } else {
+                                acc[acc.length - 1].push(sentence + (index < array.length - 1 ? '.' : ''));
+                              }
+                              return acc;
+                            }, [])
+                            .map((paragraph, idx) => (
+                              <p key={idx}>{paragraph.join(' ')}</p>
+                            ))
+                        ) : (
+                          <p>Summary not available.</p>
+                        )}
                       </div>
                     </div>
+
+                    {/* Body/Abstract Content */}
+                    {articleContent.content?.bodyParagraphs && articleContent.content.bodyParagraphs.length > 0 && (
+                      <div 
+                        className="bg-white/60 backdrop-blur-xl border border-white/20 p-6"
+                        style={{
+                          borderRadius: '20px'
+                        }}
+                      >
+                        <h4 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                          <FileText className="w-5 h-5" />
+                          Article Content
+                        </h4>
+                        <div className="space-y-4 text-gray-700 leading-relaxed">
+                          {articleContent.content.bodyParagraphs.slice(0, 3).map((paragraph, idx) => {
+                            // Clean and format paragraph
+                            let cleanParagraph = paragraph
+                              .replace(/&#x[0-9a-fA-F]{2,4};/g, '') // Remove HTML entities
+                              .replace(/\s+/g, ' ') // Normalize spaces
+                              .trim();
+                            
+                            // If it's a metadata block, try to extract meaningful parts
+                            if (cleanParagraph.includes('Frontiers') || cleanParagraph.includes('PMC') || cleanParagraph.length > 800) {
+                              // Try to extract the title and author information
+                              const titleMatch = cleanParagraph.match(/([A-Z][a-z\s]+(?:type\s2\s)?diabetes[^A-Z]*)/i);
+                              const authorsMatch = cleanParagraph.match(/([A-Z][a-z]+(?:\s[A-Z][a-z]+)*(?:\s\d+\s?\*?\s?){1,3}(?:[A-Z][a-z]+\s?)+)/g);
+                              
+                              if (titleMatch || authorsMatch) {
+                                return (
+                                  <div key={idx} className="space-y-3 border-l-4 border-blue-200 pl-4 bg-blue-50/30 rounded-r-lg p-4">
+                                    <h5 className="font-semibold text-gray-900">Study Information</h5>
+                                    {titleMatch && (
+                                      <p className="text-sm"><strong>Title:</strong> {titleMatch[1].trim()}</p>
+                                    )}
+                                    {authorsMatch && authorsMatch.length > 0 && (
+                                      <p className="text-sm"><strong>Authors:</strong> {authorsMatch.slice(0, 3).join(', ')}...</p>
+                                    )}
+                                    <p className="text-xs text-gray-500 italic">
+                                      Use the access links above to view the complete published study.
+                                    </p>
+                                  </div>
+                                );
+                              }
+                            }
+                            
+                            // For regular content, split into readable chunks
+                            if (cleanParagraph.length > 100 && cleanParagraph.includes('.')) {
+                              const sentences = cleanParagraph.split(/(?<=[.!?])\s+/);
+                              const chunks = [];
+                              for (let i = 0; i < sentences.length; i += 2) {
+                                chunks.push(sentences.slice(i, i + 2).join(' '));
+                              }
+                              
+                              return (
+                                <div key={idx} className="space-y-3">
+                                  {chunks.map((chunk, chunkIdx) => (
+                                    chunk.trim() && <p key={`${idx}-${chunkIdx}`} className="text-sm leading-relaxed">{chunk}</p>
+                                  ))}
+                                </div>
+                              );
+                            }
+                            
+                            // For shorter content, display as is
+                            return cleanParagraph.length > 20 ? (
+                              <p key={idx} className="text-sm leading-relaxed">{cleanParagraph}</p>
+                            ) : null;
+                          }).filter(Boolean)}
+                        </div>
+                      </div>
+                    )}
                   </div>
 
-                  {/* What this study implies - Modern card */}
-                  <div 
-                    className="bg-white/60 backdrop-blur-xl border border-white/20 p-4 sm:p-6"
-                    style={{
-                      borderRadius: '20px',
-                      boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
-                    }}
-                  >
-                    <h4 className="text-base sm:text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-                      <span>💡</span> What this study implies
-                    </h4>
-                    <p className="text-sm sm:text-base text-gray-700 leading-relaxed">
-                      This research provides moderate-quality evidence supporting the claim.
-                      Results should be interpreted with caution due to small sample size.
-                    </p>
-                  </div>
-
-                  {/* Related studies - Modern link cards */}
-                  <div 
-                    className="bg-white/60 backdrop-blur-xl border border-white/20 p-4 sm:p-6"
-                    style={{
-                      borderRadius: '20px',
-                      boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
-                    }}
-                  >
-                    <h4 className="text-base sm:text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-                      <span>🔗</span> Related studies
-                    </h4>
-                    <div className="space-y-3">
-                      <a href="#" className="block p-3 bg-blue-50/80 backdrop-blur-sm border border-blue-200/50 rounded-xl hover:bg-blue-100/80 transition-all duration-300">
-                        <span className="text-sm sm:text-base text-blue-700 hover:text-blue-900">
-                          Similar findings in larger cohort (2023) →
-                        </span>
-                      </a>
-                      <a href="#" className="block p-3 bg-blue-50/80 backdrop-blur-sm border border-blue-200/50 rounded-xl hover:bg-blue-100/80 transition-all duration-300">
-                        <span className="text-sm sm:text-base text-blue-700 hover:text-blue-900">
-                          Meta-analysis confirms effect (2024) →
-                        </span>
-                      </a>
+                  {/* Right Column (Narrower) - Study Details & Links */}
+                  <div className="space-y-6">
+                    {/* Study Details - Compact card */}
+                    <div 
+                      className="bg-white/70 backdrop-blur-xl border border-white/20 p-4"
+                      style={{
+                        borderRadius: '16px'
+                      }}
+                    >
+                      <h4 className="text-base font-bold text-gray-900 mb-4 flex items-center gap-2">
+                        <Info className="w-4 h-4" />
+                        Study Details
+                      </h4>
+                      <div className="space-y-3">
+                        {study.studyType && (
+                          <div className="flex justify-between text-sm">
+                            <span className="text-gray-600">Type:</span>
+                            <span className="font-medium text-gray-900 capitalize">
+                              {study.studyType.replace(/_/g, ' ')}
+                            </span>
+                          </div>
+                        )}
+                        {study.evidenceLevel && (
+                          <div className="flex justify-between text-sm">
+                            <span className="text-gray-600">Evidence Level:</span>
+                            <span className="font-medium text-gray-900 capitalize">
+                              {study.evidenceLevel.replace(/_/g, ' ')}
+                            </span>
+                          </div>
+                        )}
+                        {study.researchArea && (
+                          <div className="flex justify-between text-sm">
+                            <span className="text-gray-600">Area:</span>
+                            <span className="font-medium text-gray-900">
+                              {study.researchArea}
+                            </span>
+                          </div>
+                        )}
+                        {study.relevanceScore && (
+                          <div className="flex justify-between text-sm">
+                            <span className="text-gray-600">Relevance:</span>
+                            <span className="font-medium text-gray-900">
+                              {Math.round(study.relevanceScore * 100)}%
+                            </span>
+                          </div>
+                        )}
+                      </div>
                     </div>
+
+                    {/* Links - Compact card */}
+                    {(study.links?.pmcWebsite || study.links?.pubmedLink || study.links?.pdfDownload || articleContent.links?.pmcWebsite || articleContent.links?.pdfDownload) && (
+                      <div 
+                        className="bg-white/70 backdrop-blur-xl border border-white/20 p-4"
+                        style={{
+                          borderRadius: '16px'
+                        }}
+                      >
+                        <h4 className="text-base font-bold text-gray-900 mb-4 flex items-center gap-2">
+                          <ExternalLink className="w-4 h-4" />
+                          Access
+                        </h4>
+                        <div className="space-y-2">
+                          {(study.links?.pmcWebsite || articleContent.links?.pmcWebsite) && (
+                            <a 
+                              href={study.links?.pmcWebsite || articleContent.links?.pmcWebsite}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="block w-full p-2 text-sm bg-blue-50/80 text-blue-700 rounded-lg hover:bg-blue-100/80 transition-colors text-center"
+                            >
+                              View on PMC
+                            </a>
+                          )}
+                          {study.links?.pubmedLink && (
+                            <a 
+                              href={study.links.pubmedLink}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="block w-full p-2 text-sm bg-green-50/80 text-green-700 rounded-lg hover:bg-green-100/80 transition-colors text-center"
+                            >
+                              View on PubMed
+                            </a>
+                          )}
+                          {(study.links?.pdfDownload || articleContent.links?.pdfDownload) && (
+                            <a 
+                              href={study.links?.pdfDownload || articleContent.links?.pdfDownload}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="block w-full p-2 text-sm bg-purple-50/80 text-purple-700 rounded-lg hover:bg-purple-100/80 transition-colors text-center"
+                            >
+                              Download PDF
+                            </a>
+                          )}
+                        </div>
+                      </div>
+                    )}
                   </div>
-                </>
+                </div>
               )}
             </div>
           )}
@@ -380,23 +511,20 @@ const ExpandedResearchResult: React.FC<ExpandedResearchResultProps> = ({
               <div 
                 className="bg-white/70 backdrop-blur-xl border border-white/20 p-4 sm:p-6"
                 style={{
-                  borderRadius: '20px',
-                  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
+                  borderRadius: '20px'
                 }}
               >
                 <h4 className="text-base sm:text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-                  <span>🔬</span> Evaluate a claim
+                  <FlaskConical className="w-5 h-5" />
+                  What does the evidence say?
                 </h4>
                 
                 <textarea
                   value={claimText}
                   onChange={(e) => setClaimText(e.target.value)}
-                  placeholder="Enter a health claim to evaluate..."
+                  placeholder="Enter a claim you want to understand..."
                   rows={4}
                   className="w-full px-4 py-3 text-sm sm:text-base bg-white/80 backdrop-blur-sm border border-white/30 rounded-2xl mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-400/50 transition-all duration-300"
-                  style={{
-                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)'
-                  }}
                 />
 
                 {/* Example chips - Modern design */}
@@ -424,9 +552,9 @@ const ExpandedResearchResult: React.FC<ExpandedResearchResultProps> = ({
                   type="button"
                   onClick={runClaimEvaluation}
                   disabled={!claimText.trim() || loadingClaim}
-                  className="w-full px-4 py-3 sm:py-4 bg-gradient-to-r from-blue-500 to-indigo-500 text-white text-sm sm:text-base font-bold rounded-2xl hover:from-blue-600 hover:to-indigo-600 disabled:from-gray-300 disabled:to-gray-400 disabled:cursor-not-allowed transition-all duration-300 shadow-lg"
+                  className="w-full px-4 py-3 sm:py-4 bg-gradient-to-r from-blue-500 to-indigo-500 text-white text-sm sm:text-base font-bold rounded-2xl hover:from-blue-600 hover:to-indigo-600 disabled:from-gray-300 disabled:to-gray-400 disabled:cursor-not-allowed transition-all duration-300"
                 >
-                  🚀 Evaluate evidence
+                  {loadingClaim ? 'Reviewing evidence...' : 'Review the evidence'}
                 </button>
               </div>
 
@@ -435,37 +563,37 @@ const ExpandedResearchResult: React.FC<ExpandedResearchResultProps> = ({
                 <div 
                   className="bg-white/70 backdrop-blur-xl border border-white/20 p-4 sm:p-6 space-y-6"
                   style={{
-                    borderRadius: '20px',
-                    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
+                    borderRadius: '20px'
                   }}
                 >
                   <h4 className="text-base sm:text-lg font-bold text-gray-900 flex items-center gap-2">
-                    <span>📊</span> Evidence Snapshot
+                    <Info className="w-5 h-5" />
+                    Evidence Snapshot
                   </h4>
                   
                   {/* Evidence metrics grid - Glass cards */}
                   <div className="grid grid-cols-2 gap-3 sm:gap-4">
                     <div className="bg-gradient-to-br from-blue-400/20 to-indigo-400/20 backdrop-blur-sm border border-blue-200/30 p-3 sm:p-4 rounded-2xl">
-                      <div className="text-xs sm:text-sm font-medium text-blue-700 mb-2">📈 Evidence strength</div>
+                      <div className="text-xs sm:text-sm font-medium text-blue-700 mb-2">Evidence strength</div>
                       <div className="text-sm sm:text-base font-bold text-blue-800">
-                        {claimResult.verification_result?.evidence_strength || 'N/A'}
+                        {claimResult.verification_result?.evidence_strength || 'Not available'}
                       </div>
                     </div>
                     <div className="bg-gradient-to-br from-green-400/20 to-emerald-400/20 backdrop-blur-sm border border-green-200/30 p-3 sm:p-4 rounded-2xl">
-                      <div className="text-xs sm:text-sm font-medium text-green-700 mb-2">🎯 Certainty</div>
+                      <div className="text-xs sm:text-sm font-medium text-green-700 mb-2">Certainty</div>
                       <div className="text-sm sm:text-base font-bold text-green-800">
                         {claimResult.verification_result?.confidence_level
                           ? `${(claimResult.verification_result.confidence_level * 100).toFixed(0)}%`
-                          : 'N/A'}
+                          : 'Not available'}
                       </div>
                     </div>
                     <div className="bg-gradient-to-br from-purple-400/20 to-violet-400/20 backdrop-blur-sm border border-purple-200/30 p-3 sm:p-4 rounded-2xl">
-                      <div className="text-xs sm:text-sm font-medium text-purple-700 mb-2">📚 Study coverage</div>
-                      <div className="text-sm sm:text-base font-bold text-purple-800">18 studies</div>
+                      <div className="text-xs sm:text-sm font-medium text-purple-700 mb-2">Study coverage</div>
+                      <div className="text-sm sm:text-base font-bold text-purple-800">Not available</div>
                     </div>
                     <div className="bg-gradient-to-br from-orange-400/20 to-amber-400/20 backdrop-blur-sm border border-orange-200/30 p-3 sm:p-4 rounded-2xl">
-                      <div className="text-xs sm:text-sm font-medium text-orange-700 mb-2">🤝 Consensus</div>
-                      <div className="text-sm sm:text-base font-bold text-orange-800">Mixed</div>
+                      <div className="text-xs sm:text-sm font-medium text-orange-700 mb-2">Consensus</div>
+                      <div className="text-sm sm:text-base font-bold text-orange-800">Not available</div>
                     </div>
                   </div>
 
@@ -473,7 +601,7 @@ const ExpandedResearchResult: React.FC<ExpandedResearchResultProps> = ({
                   <div className="space-y-4 sm:space-y-6">
                     <div className="bg-green-50/80 backdrop-blur-sm border border-green-200/30 p-4 rounded-2xl">
                       <h5 className="text-sm sm:text-base font-bold text-green-800 mb-3 flex items-center gap-2">
-                        <span>✅</span> What the evidence supports
+                        <span className="text-green-600">✓</span> What the evidence supports
                       </h5>
                       <ul className="space-y-2 text-sm text-green-700">
                         <li className="flex items-start gap-2">
@@ -491,7 +619,7 @@ const ExpandedResearchResult: React.FC<ExpandedResearchResultProps> = ({
 
                     <div className="bg-yellow-50/80 backdrop-blur-sm border border-yellow-200/30 p-4 rounded-2xl">
                       <h5 className="text-sm sm:text-base font-bold text-yellow-800 mb-3 flex items-center gap-2">
-                        <span>⚠️</span> What is uncertain / overstated
+                        <span className="text-yellow-600">!</span> What is uncertain / overstated
                       </h5>
                       <ul className="space-y-2 text-sm text-yellow-700">
                         <li className="flex items-start gap-2">
@@ -507,14 +635,14 @@ const ExpandedResearchResult: React.FC<ExpandedResearchResultProps> = ({
 
                     <div className="bg-red-50/80 backdrop-blur-sm border border-red-200/30 p-4 rounded-2xl">
                       <h5 className="text-sm sm:text-base font-bold text-red-800 mb-3 flex items-center gap-2">
-                        <span>🤔</span> Why confusion happens
+                        <span className="text-red-600">?</span> Why confusion happens
                       </h5>
                       <div className="flex flex-wrap gap-2">
                         <span className="px-3 py-1.5 bg-red-100/80 backdrop-blur-sm text-red-700 rounded-xl text-xs sm:text-sm font-medium border border-red-200/50">
-                          📊 Correlation misread
+                          Correlation misread
                         </span>
                         <span className="px-3 py-1.5 bg-red-100/80 backdrop-blur-sm text-red-700 rounded-xl text-xs sm:text-sm font-medium border border-red-200/50">
-                          🐁 Animal data over-applied
+                          Animal data over-applied
                         </span>
                       </div>
                     </div>
@@ -534,12 +662,12 @@ const ExpandedResearchResult: React.FC<ExpandedResearchResultProps> = ({
               <div 
                 className="bg-white/70 backdrop-blur-xl border border-white/20 p-4 sm:p-6"
                 style={{
-                  borderRadius: '20px',
-                  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
+                  borderRadius: '20px'
                 }}
               >
                 <h4 className="text-base sm:text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-                  <span>📝</span> Your research notes
+                  <NotebookPen className="w-5 h-5" />
+                  Your research notes
                 </h4>
                 <textarea
                   value={userNotes}
@@ -547,24 +675,23 @@ const ExpandedResearchResult: React.FC<ExpandedResearchResultProps> = ({
                   placeholder="Add your insights, questions, and observations about this research..."
                   rows={12}
                   className="w-full px-4 py-3 text-sm sm:text-base bg-white/80 backdrop-blur-sm border border-white/30 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-400/50 transition-all duration-300 resize-none"
-                  style={{
-                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)'
-                  }}
                 />
               </div>
 
               <div className="flex gap-3">
                 <button
                   type="button"
-                  className="flex-1 px-4 py-3 bg-gradient-to-r from-blue-500 to-indigo-500 text-white text-sm sm:text-base font-bold rounded-2xl hover:from-blue-600 hover:to-indigo-600 transition-all duration-300 shadow-lg"
+                  className="flex items-center gap-2 flex-1 px-4 py-3 bg-gradient-to-r from-blue-500 to-indigo-500 text-white text-sm sm:text-base font-bold rounded-2xl hover:from-blue-600 hover:to-indigo-600 transition-all duration-300"
                 >
-                  💾 Save Notes
+                  <Save className="w-4 h-4" />
+                  Save notes
                 </button>
                 <button
                   type="button"
-                  className="px-4 py-3 bg-white/70 backdrop-blur-sm border border-white/30 text-gray-700 text-sm sm:text-base font-medium rounded-2xl hover:bg-white/90 transition-all duration-300"
+                  className="flex items-center gap-2 px-4 py-3 bg-white/70 backdrop-blur-sm border border-white/30 text-gray-700 text-sm sm:text-base font-medium rounded-2xl hover:bg-white/90 transition-all duration-300"
                 >
-                  📤 Export
+                  <ExternalLink className="w-4 h-4" />
+                  Export
                 </button>
               </div>
             </div>
@@ -616,10 +743,10 @@ const ExpandedResearchResult: React.FC<ExpandedResearchResultProps> = ({
               />
             </div>
             <h2 id="claim-spinner-title" className="text-white text-xl font-normal mb-2 drop-shadow-md">
-              Evaluating Evidence...
+              Reviewing Evidence...
             </h2>
             <p id="claim-spinner-subtitle" className="text-white/90 text-sm drop-shadow-sm">
-              Analyzing claim against study data
+              Analyzing claim against research data
             </p>
           </div>
         </div>
