@@ -225,11 +225,11 @@ const ResearchPanel: React.FC<ResearchPanelProps> = ({
 
         {/* Research Grid - only show when not loading */}
         {!loading && !isHeaderLoading && searchResults.length > 0 && (
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div className="grid gap-3 sm:gap-4 md:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {searchResults.map((study) => (
               <article 
                 key={study.id}
-                className="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-lg transition-all duration-300 cursor-pointer group"
+                className="bg-white border border-gray-200 rounded-lg sm:rounded-xl p-3 sm:p-4 md:p-6 hover:shadow-lg transition-all duration-300 cursor-pointer group touch-manipulation"
                 style={{ pointerEvents: 'auto', zIndex: 1 }}
                 onClick={(e) => {
                   e.preventDefault();
@@ -316,17 +316,17 @@ const ResearchPanel: React.FC<ResearchPanelProps> = ({
         onAskArticle={onAskArticle}
       />
 
-      {/* Custom Spinner Overlay - Same style as spinner.tsx but no portal */}
+      {/* Loading Spinner - Inline to avoid portal interference */}
       {(loading || isHeaderLoading) && (
         <div 
           className="fixed inset-0 bg-black/75 backdrop-blur-sm flex flex-col items-center justify-center z-[2000]"
+          style={{ minHeight: '100dvh', width: '100dvw' }}
           role="dialog" 
           aria-modal="true" 
           aria-labelledby="spinner-title" 
           aria-describedby="spinner-subtitle"
         >
           <div className="flex flex-col items-center text-center">
-            {/* GIF spinner - same as spinner.tsx */}
             <div className="mb-4">
               <img 
                 src="/assets/whatishealthyspinner.gif" 
