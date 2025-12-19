@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Search, Filter, Clock, Bookmark, TrendingUp, FileText, Lightbulb } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Search, Filter, Clock, Bookmark, TrendingUp, FileText, Lightbulb, X } from 'lucide-react';
 import Header from '../shared/Header';
 import ResearchPanel from './ResearchPanel';
 
@@ -19,10 +19,19 @@ const ResearchDashboard: React.FC<ResearchDashboardProps> = ({
   const [showFilters, setShowFilters] = useState(false);
   const [activeWorkspace, setActiveWorkspace] = useState<string | null>(null);
   const [searchFromHeader, setSearchFromHeader] = useState<string | null>(null);
-  const [recentSearches] = useState(['intermittent fasting', 'omega-3 benefits', 'creatine safety']);
+  const [recentSearches, setRecentSearches] = useState(() => {
+    // Load recent searches from localStorage or use defaults
+    const stored = localStorage.getItem('wihy_recent_searches');
+    return stored ? JSON.parse(stored) : ['intermittent fasting', 'omega-3 benefits', 'creatine safety'];
+  });
   const [savedCollections] = useState(['Heart Health', 'Brain Function', 'Muscle Building']);
   const [navigationHistory, setNavigationHistory] = useState<string[]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
+
+  // Debug: Track recentSearches changes
+  useEffect(() => {
+    console.log('🔄 recentSearches state updated:', recentSearches);
+  }, [recentSearches]);
   
   const commonQueries = [
     'Latest nutrition research',
@@ -40,6 +49,14 @@ const ResearchDashboard: React.FC<ResearchDashboardProps> = ({
       const timestamp = Date.now();
       const cacheData = { query: trimmedQuery, timestamp, results: null };
       localStorage.setItem(cacheKey, JSON.stringify(cacheData));
+      
+      // Update recent searches - add to front, remove if already exists, limit to 5
+      const updatedRecentSearches = [
+        trimmedQuery,
+        ...recentSearches.filter(search => search !== trimmedQuery)
+      ].slice(0, 5);
+      setRecentSearches(updatedRecentSearches);
+      localStorage.setItem('wihy_recent_searches', JSON.stringify(updatedRecentSearches));
       
       // Update navigation history
       const newHistory = navigationHistory.slice(0, historyIndex + 1);
@@ -65,6 +82,37 @@ const ResearchDashboard: React.FC<ResearchDashboardProps> = ({
       setSearchFromHeader(null);
       setHistoryIndex(-1);
     }
+  };
+
+  const clearRecentSearches = () => {
+    console.log('🔥 Clear button clicked!'); // Debug log
+    console.log('🔍 Before clear - recentSearches:', recentSearches); // Debug log
+    console.log('🔍 Before clear - localStorage:', localStorage.getItem('wihy_recent_searches')); // Debug log
+    
+    // Clear the state
+    setRecentSearches([]);
+    
+    // Clear from localStorage
+    localStorage.removeItem('wihy_recent_searches');
+    
+    // Also clear search cache entries
+    let clearedCount = 0;
+    for (let i = localStorage.length - 1; i >= 0; i--) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith('research_cache_')) {
+        localStorage.removeItem(key);
+        clearedCount++;
+      }
+    }
+    
+    console.log('✅ State cleared, localStorage removed'); // Debug log
+    console.log(`✅ Cleared ${clearedCount} cache entries from localStorage`); // Debug log
+    
+    // Force a re-render check
+    setTimeout(() => {
+      console.log('⏰ After timeout - recentSearches:', recentSearches);
+      console.log('⏰ After timeout - localStorage:', localStorage.getItem('wihy_recent_searches'));
+    }, 100);
   };
 
   const handleForwardNavigation = () => {
@@ -290,18 +338,34 @@ const ResearchDashboard: React.FC<ResearchDashboardProps> = ({
           <div className="lg:col-span-1 space-y-4">
             {/* Recent searches */}
             <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl border border-gray-200 p-4">
-              <h3 className="text-sm font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent mb-3">Recent Searches</h3>
-              <div className="space-y-2">
-                {recentSearches.map((search, idx) => (
+              <div className="flex items-center justify-between mb-3 overflow-hidden">
+                <h3 className="text-sm font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">Recent Searches</h3>
+                {recentSearches.length > 0 && (
                   <button
-                    key={idx}
                     type="button"
-                    onClick={() => handleHeaderSearch(search)}
-                    className="block w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 rounded-xl transition-all duration-200"
+                    onClick={clearRecentSearches}
+                    className="flex items-center justify-center min-w-[44px] h-[44px] bg-gradient-to-r from-pink-100 to-pink-200 text-pink-600 rounded-2xl shadow-sm transition-all duration-300 transform active:scale-95"
+                    title="Clear recent search"
                   >
-                    {search}
+                    <X className="w-5 h-5" />
                   </button>
-                ))}
+                )}
+              </div>
+              <div className="space-y-2">
+                {recentSearches.length > 0 ? (
+                  recentSearches.map((search, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => handleHeaderSearch(search)}
+                      className="block w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 rounded-xl transition-all duration-200"
+                    >
+                      {search}
+                    </button>
+                  ))
+                ) : (
+                  <p className="text-xs text-gray-500 text-center py-4">No recent searches</p>
+                )}
               </div>
             </div>
 
