@@ -21,7 +21,7 @@ import CoachDashboard from './components/dashboard/CoachDashboard';
 import ParentDashboardPage from './pages/ParentDashboard';
 import MyProgressDashboardPage from './pages/MyProgressDashboard';
 import OverviewDashboardPage from './pages/OverviewDashboard';
-import ConsumptionDashboardPage from './pages/ConsumptionDashboard';
+import IntakeConsumptionDashboardPage from './pages/IntakeConsumptionDashboard';
 import FitnessDashboardPage from './pages/FitnessDashboard';
 import CoachDashboardPage from './pages/CoachDashboard';
 import OverviewDashboard from './components/dashboard/OverviewDashboard';
@@ -587,7 +587,7 @@ const App: React.FC = () => {
             <Route path="/parent" element={<ParentDashboardPage windowWidth={window.innerWidth} />} />
             <Route path="/myprogress" element={<MyProgressDashboardPage windowWidth={window.innerWidth} />} />
             <Route path="/overview" element={<OverviewDashboardPage windowWidth={window.innerWidth} />} />
-            <Route path="/consumption" element={<ConsumptionDashboardPage windowWidth={window.innerWidth} />} />
+            <Route path="/intake" element={<IntakeConsumptionDashboardPage windowWidth={window.innerWidth} />} />
             <Route path="/fitness" element={<FitnessDashboardPage windowWidth={window.innerWidth} />} />
             <Route path="/coach" element={<CoachDashboardPage windowWidth={window.innerWidth} />} />
             <Route path="/dashboard" element={<DashboardPage />} />

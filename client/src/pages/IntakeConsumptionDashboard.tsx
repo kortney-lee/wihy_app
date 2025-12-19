@@ -2,11 +2,11 @@ import React from 'react';
 import Header from '../components/shared/Header';
 import ConsumptionDashboard from '../components/dashboard/ConsumptionDashboard';
 
-interface ConsumptionDashboardPageProps {
+interface IntakeConsumptionDashboardPageProps {
   windowWidth: number;
 }
 
-const ConsumptionDashboardPage: React.FC<ConsumptionDashboardPageProps> = ({ windowWidth }) => {
+const IntakeConsumptionDashboardPage: React.FC<IntakeConsumptionDashboardPageProps> = ({ windowWidth }) => {
   // Mock handlers for dashboard interactions
   const handleAnalyze = (userMessage: string, assistantMessage: string) => {
     console.log('Analyze clicked:', { userMessage, assistantMessage });
@@ -51,4 +51,4 @@ const ConsumptionDashboardPage: React.FC<ConsumptionDashboardPageProps> = ({ win
   );
 };
 
-export default ConsumptionDashboardPage;
+export default IntakeConsumptionDashboardPage;
