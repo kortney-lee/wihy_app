@@ -1,9 +1,62 @@
 import React, { useState, useMemo } from "react";
 import { WihyCoachModel } from "./MyProgressDashboard";
+import FitnessDashboard from "./FitnessDashboard";
+import type { ExerciseRowView } from "./WorkoutProgramGrid";
+import type { FitnessDashboardModel, ProgramVariantMap } from "./FitnessDashboard";
 
 // -----------------------------------------------------------------
 // TYPE DEFINITIONS (nutrition features)
 // -----------------------------------------------------------------
+
+// Meal program types
+export type MealType = "BREAKFAST" | "LUNCH" | "DINNER" | "SNACK";
+
+export type CoachMealItem = {
+  id: string;
+  name: string;
+  servings?: number;
+  notes?: string;
+  calories?: number;
+  protein_g?: number;
+  carbs_g?: number;
+  fat_g?: number;
+  tags?: string[];
+};
+
+export type CoachMealDay = {
+  id: string;
+  label: string;
+  meals: Partial<Record<MealType, CoachMealItem[]>>;
+};
+
+export type CoachMealProgram = {
+  programTitle?: string;
+  programDescription?: string;
+  days: CoachMealDay[];
+};
+
+// Workout program types
+export type CoachWorkoutDay = { id: string; label: string; rows: ExerciseRowView[] };
+export type CoachWorkoutLevel = { id: string; label: string; days: CoachWorkoutDay[] };
+export type CoachWorkoutPhase = { id: string; name: string; levels: CoachWorkoutLevel[] };
+
+export type CoachWorkoutProgram = {
+  programTitle?: string;
+  programDescription?: string;
+  phases: CoachWorkoutPhase[];
+};
+
+// Nutrition dashboard model (scaffold)
+export type NutritionDashboardModel = {
+  title: string;
+  subtitle?: string;
+  days: { id: string; label: string }[];
+  variants: Record<string, Partial<Record<MealType, CoachMealItem[]>>>;
+  defaultDayId?: string;
+  programTitle?: string;
+  programDescription?: string;
+};
+
 export type DietTag = {
   id: string;
   name: string;
@@ -142,12 +195,98 @@ function makeId(prefix: string) {
   return `${prefix}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 }
 
+// Adapter functions
+const buildProgramKey = (phaseId: string, levelId: string, dayId: string) =>
+  `${phaseId}__${levelId}__${dayId}`;
+
+function buildFitnessModelFromCoachPlan(plan: CoachPlan): FitnessDashboardModel {
+  const wp = plan.workoutProgram;
+
+  // Safe fallback
+  if (!wp || !wp.phases?.length) {
+    return {
+      title: "Start Your Workout",
+      subtitle: "Your coach hasn't assigned a workout yet.",
+      phases: [{ id: "phase1", name: "Phase 1" }],
+      levels: [{ id: "beginner", label: "Beginner" }],
+      days: [{ id: "day1", label: "Day 1" }],
+      variants: {},
+      programTitle: "Workout plan",
+      programDescription: "No workout program assigned.",
+      defaultPhaseId: "phase1",
+      defaultLevelId: "beginner",
+      defaultDayId: "day1",
+    };
+  }
+
+  const phases = wp.phases.map((p) => ({ id: p.id, name: p.name }));
+  const firstPhase = wp.phases[0];
+  const levels = firstPhase.levels.map((l) => ({ id: l.id, label: l.label }));
+  const firstLevel = firstPhase.levels[0];
+  const days = firstLevel.days.map((d) => ({ id: d.id, label: d.label }));
+
+  const variants: ProgramVariantMap = {};
+  for (const phase of wp.phases) {
+    for (const level of phase.levels) {
+      for (const day of level.days) {
+        variants[buildProgramKey(phase.id, level.id, day.id)] = day.rows;
+      }
+    }
+  }
+
+  return {
+    title: "Start Your Workout",
+    subtitle: "Choose your workout and start moving.",
+    phases,
+    levels,
+    days,
+    variants,
+    programTitle: wp.programTitle ?? "Workout plan",
+    programDescription: wp.programDescription ?? "Coach-assigned program.",
+    defaultPhaseId: firstPhase.id,
+    defaultLevelId: firstLevel.id,
+    defaultDayId: firstLevel.days[0]?.id ?? "day1",
+  };
+}
+
+function buildNutritionModelFromCoachPlan(plan: CoachPlan): NutritionDashboardModel {
+  const mp = plan.mealProgram;
+
+  if (!mp || !mp.days?.length) {
+    return {
+      title: "Meals",
+      subtitle: "Your coach hasn't assigned a meal plan yet.",
+      days: [{ id: "day1", label: "Day 1" }],
+      variants: { day1: {} },
+      defaultDayId: "day1",
+      programTitle: "Meal plan",
+      programDescription: "No meal program assigned.",
+    };
+  }
+
+  const days = mp.days.map((d) => ({ id: d.id, label: d.label }));
+  const variants: NutritionDashboardModel["variants"] = {};
+  mp.days.forEach((d) => (variants[d.id] = d.meals ?? {}));
+
+  return {
+    title: "Meals",
+    subtitle: "Meals assigned by your coach.",
+    days,
+    variants,
+    defaultDayId: mp.days[0].id,
+    programTitle: mp.programTitle ?? "Meal plan",
+    programDescription: mp.programDescription ?? "Coach-assigned meals.",
+  };
+}
+
 // Extended plan with nutrition
-export interface CoachPlan extends Omit<WihyCoachModel, 'shoppingList'> {
+export interface CoachPlan extends Omit<WihyCoachModel, 'shoppingList' | 'workoutProgram'> {
   goals?: string[];           // Simple array of goal strings
   diets?: DietTag[];          // Custom diet patterns
   shoppingList?: CoachShoppingListItem[];
   dietGoals?: DietGoalKey[];  // Selected from the 11 core diet approaches
+  workoutProgram?: CoachWorkoutProgram;  // feeds FitnessDashboard (overrides WihyCoachModel)
+  mealProgram?: CoachMealProgram;        // feeds NutritionDashboard
 }
 
 export type CoachClient = {
@@ -160,7 +299,7 @@ export type CoachClient = {
 };
 
 // Tab keys
-export type TabKey = "plan" | "actions" | "shopping" | "preview";
+export type TabKey = "plan" | "actions" | "meals" | "shopping" | "preview";
 
 // -----------------------------------------------------------------
 // SEED DATA
@@ -219,6 +358,84 @@ const seedClients: CoachClient[] = [
         { id: "p1", title: "Track daily calories" },
         { id: "p2", title: "Stay hydrated" },
       ],
+      workoutProgram: {
+        programTitle: "Fat Loss Foundation",
+        programDescription: "A beginner-friendly program focused on building habits and burning calories.",
+        phases: [{
+          id: "phase1",
+          name: "Foundation Phase",
+          levels: [{
+            id: "beginner",
+            label: "Beginner",
+            days: [{
+              id: "day1",
+              label: "Day 1 - Full Body",
+              rows: [
+                {
+                  meta: { 
+                    id: "ex1", 
+                    name: "Bodyweight Squats", 
+                    equipment: "NONE", 
+                    fitnessLoad: { STRENGTH: 2, CARDIO: 1 },
+                    muscleLoad: { QUADS: 3, GLUTES: 3 }
+                  },
+                  prescription: { exerciseId: "ex1", sets: 3, intensityLabel: "3 x 12-15 @ bodyweight" }
+                },
+                {
+                  meta: { 
+                    id: "ex2", 
+                    name: "Push-ups (Modified)", 
+                    equipment: "NONE", 
+                    fitnessLoad: { STRENGTH: 2 },
+                    muscleLoad: { CHEST: 3, ARMS: 2 }
+                  },
+                  prescription: { exerciseId: "ex2", sets: 3, intensityLabel: "3 x 8-12 @ bodyweight" }
+                },
+                {
+                  meta: { 
+                    id: "ex3", 
+                    name: "Walking", 
+                    equipment: "NONE", 
+                    fitnessLoad: { CARDIO: 3, ENDURANCE: 1 },
+                    muscleLoad: { QUADS: 1, CALVES: 1 }
+                  },
+                  prescription: { exerciseId: "ex3", sets: 1, intensityLabel: "20min @ light pace" }
+                }
+              ]
+            }]
+          }]
+        }]
+      },
+      mealProgram: {
+        programTitle: "Healthy Habits Meal Plan",
+        programDescription: "Simple, nutritious meals to support your weight loss goals.",
+        days: [
+          {
+            id: "day1",
+            label: "Day 1",
+            meals: {
+              BREAKFAST: [{
+                id: "meal1",
+                name: "Greek Yogurt with Berries",
+                notes: "Use plain Greek yogurt for lower sugar",
+                tags: ["High Protein", "Probiotics"]
+              }],
+              LUNCH: [{
+                id: "meal2",
+                name: "Grilled Chicken Salad",
+                notes: "Mixed greens, olive oil dressing",
+                tags: ["High Protein", "Low Carb"]
+              }],
+              DINNER: [{
+                id: "meal3",
+                name: "Salmon with Roasted Vegetables",
+                notes: "Broccoli, bell peppers, olive oil",
+                tags: ["Omega-3", "Fiber"]
+              }]
+            }
+          }
+        ]
+      }
     },
   },
   {
@@ -273,6 +490,90 @@ const seedClients: CoachClient[] = [
         { id: "p1", title: "Progressive overload" },
         { id: "p2", title: "Sleep 8 hours" },
       ],
+      workoutProgram: {
+        programTitle: "Strength & Mass Builder",
+        programDescription: "Intermediate program focused on building strength and muscle mass.",
+        phases: [{
+          id: "phase1",
+          name: "Hypertrophy Phase",
+          levels: [{
+            id: "intermediate",
+            label: "Intermediate",
+            days: [{
+              id: "day1",
+              label: "Day 1 - Upper Body",
+              rows: [
+                {
+                  meta: { 
+                    id: "ex1", 
+                    name: "Bench Press", 
+                    equipment: "BARBELL", 
+                    fitnessLoad: { STRENGTH: 3 },
+                    muscleLoad: { CHEST: 3, ARMS: 2 }
+                  },
+                  prescription: { exerciseId: "ex1", sets: 4, intensityLabel: "4 x 8-10 @ 75-80% 1RM" }
+                },
+                {
+                  meta: { 
+                    id: "ex2", 
+                    name: "Barbell Rows", 
+                    equipment: "BARBELL", 
+                    fitnessLoad: { STRENGTH: 3 },
+                    muscleLoad: { BACK: 3, ARMS: 1 }
+                  },
+                  prescription: { exerciseId: "ex2", sets: 4, intensityLabel: "4 x 8-10 @ 75-80% 1RM" }
+                },
+                {
+                  meta: { 
+                    id: "ex3", 
+                    name: "Overhead Press", 
+                    equipment: "BARBELL", 
+                    fitnessLoad: { STRENGTH: 3 },
+                    muscleLoad: { SHOULDERS: 3, ARMS: 2 }
+                  },
+                  prescription: { exerciseId: "ex3", sets: 3, intensityLabel: "3 x 10-12 @ 70-75% 1RM" }
+                }
+              ]
+            }]
+          }]
+        }]
+      },
+      mealProgram: {
+        programTitle: "Mass Gaining Protocol",
+        programDescription: "High-calorie, high-protein meals to support muscle growth.",
+        days: [
+          {
+            id: "day1",
+            label: "Day 1",
+            meals: {
+              BREAKFAST: [{
+                id: "meal1",
+                name: "Steak and Eggs",
+                notes: "6oz ribeye with 3 whole eggs",
+                tags: ["High Protein", "High Fat"]
+              }],
+              LUNCH: [{
+                id: "meal2",
+                name: "Ground Beef Bowl",
+                notes: "1lb ground beef, 80/20 blend",
+                tags: ["High Protein", "Zero Carb"]
+              }],
+              DINNER: [{
+                id: "meal3",
+                name: "Pork Chops",
+                notes: "8oz bone-in pork chops",
+                tags: ["High Protein", "Carnivore"]
+              }],
+              SNACK: [{
+                id: "meal4",
+                name: "Protein Shake",
+                notes: "50g whey protein with whole milk",
+                tags: ["Post Workout", "High Protein"]
+              }]
+            }
+          }
+        ]
+      }
     },
   },
 ];
@@ -285,6 +586,14 @@ export default function CoachDashboard() {
   const [search, setSearch] = useState("");
   const [selectedClient, setSelectedClient] = useState<CoachClient | null>(null);
   const [activeTab, setActiveTab] = useState<TabKey>("plan");
+  const [clientViewTab, setClientViewTab] = useState<"workouts" | "meals">("workouts");
+
+  // Meal editing states
+  const [mealDayId, setMealDayId] = useState<string>("day1");
+  const [newMealType, setNewMealType] = useState<MealType>("BREAKFAST");
+  const [newMealName, setNewMealName] = useState("");
+  const [newMealNotes, setNewMealNotes] = useState("");
+  const [newMealTags, setNewMealTags] = useState("");
 
   // Edit states for Goals & Diets tab
   const [editingGoals, setEditingGoals] = useState(false);
@@ -308,6 +617,26 @@ export default function CoachDashboard() {
   const [newShoppingQty, setNewShoppingQty] = useState("");
   const [newShoppingNote, setNewShoppingNote] = useState("");
   const [newShoppingOptional, setNewShoppingOptional] = useState(false);
+
+  // MyProgress aggregation (must be at component level, not inside conditional render functions)
+  const myProgressModel = React.useMemo(() => {
+    if (!selectedClient) return null;
+    
+    const { buildMyProgressCoachModel } = require('../../services/coachAggregators');
+    return buildMyProgressCoachModel({
+      plan: selectedClient.plan,
+      workoutSelection: { phaseId: "phase1", levelId: "beginner", dayId: "day1" },
+      mealDayId: "day1",
+      todayStats: {
+        dateISO: new Date().toISOString().split('T')[0],
+        mealsLogged: 2,
+        calories: 1800,
+        protein: 120,
+        hydrationCups: 6,
+        hydrationGoalCups: 8,
+      }
+    });
+  }, [selectedClient]);
 
   // Filter clients by search
   const filteredClients = useMemo(() => {
@@ -941,19 +1270,391 @@ export default function CoachDashboard() {
   }
 
   // -----------------------------------------------------------------
-  // RENDER HELPERS: Preview Tab (MyProgressDashboard placeholder)
+  // RENDER HELPERS: Meals Tab
+  // -----------------------------------------------------------------
+  const mealTypes: { key: MealType; label: string }[] = [
+    { key: "BREAKFAST", label: "Breakfast" },
+    { key: "LUNCH", label: "Lunch" },
+    { key: "DINNER", label: "Dinner" },
+    { key: "SNACK", label: "Snack" },
+  ];
+
+  function ensureMealProgram(plan: CoachPlan): CoachMealProgram {
+    if (plan.mealProgram?.days?.length) return plan.mealProgram;
+    return {
+      programTitle: "Meal plan",
+      programDescription: "Coach-assigned meals.",
+      days: [
+        { id: "day1", label: "Day 1", meals: {} },
+        { id: "day2", label: "Day 2", meals: {} },
+        { id: "day3", label: "Day 3", meals: {} },
+      ],
+    };
+  }
+
+  function renderMeals() {
+    if (!selectedClient) return null;
+
+    const mp = ensureMealProgram(selectedClient.plan);
+    const day = mp.days.find((d) => d.id === mealDayId) ?? mp.days[0];
+
+    const updateClientPlan = (nextPlan: CoachPlan) => {
+      setClients((prev) =>
+        prev.map((c) => (c.id === selectedClient.id ? { ...c, plan: nextPlan } : c))
+      );
+      setSelectedClient((prev) => (prev ? { ...prev, plan: nextPlan } : prev));
+    };
+
+    const handleAddMeal = () => {
+      if (!newMealName.trim()) return;
+
+      const item: CoachMealItem = {
+        id: makeId("meal"),
+        name: newMealName.trim(),
+        notes: newMealNotes.trim() || undefined,
+        tags: newMealTags
+          .split(",")
+          .map((t) => t.trim())
+          .filter(Boolean),
+      };
+
+      const next: CoachMealProgram = {
+        ...mp,
+        days: mp.days.map((d) => {
+          if (d.id !== day.id) return d;
+          const current = d.meals?.[newMealType] ?? [];
+          return {
+            ...d,
+            meals: {
+              ...(d.meals ?? {}),
+              [newMealType]: [...current, item],
+            },
+          };
+        }),
+      };
+
+      updateClientPlan({ ...selectedClient.plan, mealProgram: next });
+      setNewMealName("");
+      setNewMealNotes("");
+      setNewMealTags("");
+    };
+
+    const handleRemoveMeal = (mealType: MealType, id: string) => {
+      const next: CoachMealProgram = {
+        ...mp,
+        days: mp.days.map((d) => {
+          if (d.id !== day.id) return d;
+          const current = d.meals?.[mealType] ?? [];
+          return {
+            ...d,
+            meals: {
+              ...(d.meals ?? {}),
+              [mealType]: current.filter((m) => m.id !== id),
+            },
+          };
+        }),
+      };
+      updateClientPlan({ ...selectedClient.plan, mealProgram: next });
+    };
+
+    const Chip = ({ label }: { label: string }) => (
+      <span className="inline-flex items-center rounded-full border border-gray-200 bg-gray-50 px-2.5 py-1 text-[11px] font-medium text-gray-700">
+        {label}
+      </span>
+    );
+
+    return (
+      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+        {/* Header */}
+        <div className="px-4 py-3 border-b border-gray-200 flex items-center justify-between gap-3">
+          <div>
+            <h3 className="text-sm font-semibold text-gray-900">Meals</h3>
+            <p className="text-xs text-gray-500">Build the client's meal plan by day.</p>
+          </div>
+
+          {/* Day selector (WIHY segmented) */}
+          <div className="flex gap-1 bg-gray-100 p-1 rounded-full overflow-x-auto">
+            {mp.days.map((d) => (
+              <button
+                key={d.id}
+                type="button"
+                onClick={() => setMealDayId(d.id)}
+                className={`px-4 py-2 text-xs font-semibold rounded-full transition whitespace-nowrap ${
+                  d.id === mealDayId ? "bg-white text-gray-900 shadow-sm" : "text-gray-600 hover:text-gray-900"
+                }`}
+              >
+                {d.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Builder */}
+        <div className="p-4 grid grid-cols-1 lg:grid-cols-3 gap-4">
+          {/* Add Meal */}
+          <div className="rounded-2xl border border-gray-200 bg-white p-4">
+            <div className="text-sm font-semibold text-gray-900 mb-2">Add item</div>
+
+            <label className="block text-xs font-medium text-gray-600 mb-1">Meal type</label>
+            <select
+              value={newMealType}
+              onChange={(e) => setNewMealType(e.target.value as MealType)}
+              className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm"
+            >
+              {mealTypes.map((m) => (
+                <option key={m.key} value={m.key}>
+                  {m.label}
+                </option>
+              ))}
+            </select>
+
+            <label className="block text-xs font-medium text-gray-600 mt-3 mb-1">Meal name</label>
+            <input
+              value={newMealName}
+              onChange={(e) => setNewMealName(e.target.value)}
+              placeholder="e.g., Chicken bowl with veggies"
+              className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm"
+            />
+
+            <label className="block text-xs font-medium text-gray-600 mt-3 mb-1">Notes (optional)</label>
+            <input
+              value={newMealNotes}
+              onChange={(e) => setNewMealNotes(e.target.value)}
+              placeholder="e.g., no cheese, add salsa"
+              className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm"
+            />
+
+            <label className="block text-xs font-medium text-gray-600 mt-3 mb-1">Tags (comma separated)</label>
+            <input
+              value={newMealTags}
+              onChange={(e) => setNewMealTags(e.target.value)}
+              placeholder="High Protein, Fiber"
+              className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm"
+            />
+
+            <button
+              type="button"
+              onClick={handleAddMeal}
+              className="mt-4 w-full inline-flex items-center justify-center rounded-full bg-gray-900 text-white px-4 py-2.5 text-sm font-semibold hover:bg-gray-800 transition"
+            >
+              Add
+            </button>
+          </div>
+
+          {/* Meal columns */}
+          <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
+            {mealTypes.map((mt) => {
+              const items = day.meals?.[mt.key] ?? [];
+              return (
+                <div key={mt.key} className="rounded-2xl border border-gray-200 bg-white p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="text-sm font-semibold text-gray-900">{mt.label}</div>
+                    <div className="text-xs text-gray-500">{items.length}</div>
+                  </div>
+
+                  <div className="mt-3 space-y-2">
+                    {items.length === 0 ? (
+                      <div className="text-xs text-gray-500 rounded-xl border border-dashed border-gray-200 p-3">
+                        No items yet.
+                      </div>
+                    ) : (
+                      items.map((m) => (
+                        <div key={m.id} className="rounded-xl border border-gray-200 bg-white p-3">
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="min-w-0">
+                              <div className="text-sm font-semibold text-gray-900 truncate">{m.name}</div>
+                              {m.notes && (
+                                <div className="mt-1 text-xs text-gray-600">{m.notes}</div>
+                              )}
+                              {m.tags?.length ? (
+                                <div className="mt-2 flex flex-wrap gap-2">
+                                  {m.tags.map((t) => (
+                                    <Chip key={t} label={t} />
+                                  ))}
+                                </div>
+                              ) : null}
+                            </div>
+
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveMeal(mt.key, m.id)}
+                              className="shrink-0 text-xs font-semibold text-gray-500 hover:text-gray-900"
+                            >
+                              Remove
+                            </button>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // -----------------------------------------------------------------
+  // RENDER HELPERS: Preview Tab (dual preview system)
   // -----------------------------------------------------------------
   function renderPreview() {
     if (!selectedClient) return null;
+
+    const fitnessModel = buildFitnessModelFromCoachPlan(selectedClient.plan);
+    const nutritionModel = buildNutritionModelFromCoachPlan(selectedClient.plan);
+
     return (
-      <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
-        <h3 className="text-lg font-bold text-gray-800 mb-3">
-          Client View Preview
-        </h3>
-        <p className="text-sm text-gray-600">
-          Here you could embed the <code>MyProgressDashboard</code> component
-          to show how the client sees their plan.
-        </p>
+      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200">
+          <div>
+            <h3 className="text-sm font-semibold text-gray-900">Client view</h3>
+            <p className="text-xs text-gray-500">Preview what the client sees.</p>
+          </div>
+
+          {/* WIHY segmented control */}
+          <div className="flex gap-1 bg-gray-100 p-1 rounded-full">
+            <button
+              type="button"
+              onClick={() => setClientViewTab("workouts")}
+              className={`px-4 py-2 text-xs font-semibold rounded-full transition ${
+                clientViewTab === "workouts"
+                  ? "bg-white text-gray-900 shadow-sm"
+                  : "text-gray-600 hover:text-gray-900"
+              }`}
+            >
+              Workouts
+            </button>
+            <button
+              type="button"
+              onClick={() => setClientViewTab("meals")}
+              className={`px-4 py-2 text-xs font-semibold rounded-full transition ${
+                clientViewTab === "meals"
+                  ? "bg-white text-gray-900 shadow-sm"
+                  : "text-gray-600 hover:text-gray-900"
+              }`}
+            >
+              Meals
+            </button>
+          </div>
+        </div>
+
+        <div className="p-4">
+          {clientViewTab === "workouts" ? (
+            <div className="rounded-2xl border border-gray-200 overflow-hidden h-[740px]">
+              <FitnessDashboard data={fitnessModel} />
+            </div>
+          ) : clientViewTab === "meals" ? (
+            <MealsPreviewWIHY model={nutritionModel} />
+          ) : (
+            <div className="text-center py-8 text-gray-500">
+              Preview mode coming soon
+            </div>
+          )}
+        </div>
+        
+        {/* Debug: Show aggregated model structure */}
+        <div className="px-4 pb-4">
+          <details className="text-xs">
+            <summary className="cursor-pointer text-gray-500 mb-2">🔧 MyProgress Aggregation (Debug)</summary>
+            <div className="bg-gray-50 p-3 rounded border text-gray-700 font-mono text-xs overflow-auto max-h-40">
+              <div><strong>Data Flow Summary:</strong></div>
+              <div>• Coach Plan → Aggregator → MyProgress</div>
+              <div>• Workout Rows: {myProgressModel?.workoutProgram?.length ?? 0}</div>
+              <div>• Meals Planned: {myProgressModel?.consumption?.mealsPlanned ?? 0}</div>
+              <div>• Meals Logged: {myProgressModel?.consumption?.mealsLogged ?? 0}</div>
+              <div>• Actions: {myProgressModel?.actions?.length ?? 0}</div>
+              <div>• Priorities: {myProgressModel?.priorities?.length ?? 0}</div>
+              <div>• Shopping Items: {myProgressModel?.shoppingList?.length ?? 0}</div>
+              <div>• Calories: {myProgressModel?.consumption?.calories ?? 0}</div>
+              <div>• Protein: {myProgressModel?.consumption?.protein ?? 0}g</div>
+              <div>• Hydration: {myProgressModel?.hydration?.cups ?? 0}/{myProgressModel?.hydration?.goalCups ?? 0} cups</div>
+            </div>
+          </details>
+        </div>
+      </div>
+    );
+  }
+
+  // -----------------------------------------------------------------
+  // MEALS PREVIEW COMPONENT
+  // -----------------------------------------------------------------
+  function MealsPreviewWIHY({ model }: { model: NutritionDashboardModel }) {
+    const [dayId, setDayId] = React.useState(model.defaultDayId ?? model.days[0]?.id ?? "day1");
+    const day = model.days.find((d) => d.id === dayId) ?? model.days[0];
+    const meals = model.variants[dayId] ?? {};
+
+    const Chip = ({ label }: { label: string }) => (
+      <span className="inline-flex items-center rounded-full border border-gray-200 bg-gray-50 px-2.5 py-1 text-[11px] font-medium text-gray-700">
+        {label}
+      </span>
+    );
+
+    const order: { key: MealType; label: string }[] = [
+      { key: "BREAKFAST", label: "Breakfast" },
+      { key: "LUNCH", label: "Lunch" },
+      { key: "DINNER", label: "Dinner" },
+      { key: "SNACK", label: "Snack" },
+    ];
+
+    return (
+      <div className="rounded-2xl border border-gray-200 bg-white overflow-hidden">
+        <div className="px-4 py-3 border-b border-gray-200 flex items-center justify-between gap-3">
+          <div>
+            <div className="text-sm font-semibold text-gray-900">{model.programTitle ?? model.title}</div>
+            {model.programDescription && <div className="text-xs text-gray-500">{model.programDescription}</div>}
+          </div>
+
+          <div className="flex gap-1 bg-gray-100 p-1 rounded-full overflow-x-auto">
+            {model.days.map((d) => (
+              <button
+                key={d.id}
+                type="button"
+                onClick={() => setDayId(d.id)}
+                className={`px-4 py-2 text-xs font-semibold rounded-full transition whitespace-nowrap ${
+                  d.id === dayId ? "bg-white text-gray-900 shadow-sm" : "text-gray-600 hover:text-gray-900"
+                }`}
+              >
+                {d.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+          {order.map((mt) => {
+            const items = meals[mt.key] ?? [];
+            return (
+              <div key={mt.key} className="rounded-2xl border border-gray-200 p-4">
+                <div className="flex items-center justify-between">
+                  <div className="text-sm font-semibold text-gray-900">{mt.label}</div>
+                  <div className="text-xs text-gray-500">{items.length}</div>
+                </div>
+
+                <div className="mt-3 space-y-2">
+                  {items.length === 0 ? (
+                    <div className="text-xs text-gray-500 rounded-xl border border-dashed border-gray-200 p-3">
+                      No items yet.
+                    </div>
+                  ) : (
+                    items.map((m) => (
+                      <div key={m.id} className="rounded-xl border border-gray-200 p-3">
+                        <div className="text-sm font-semibold text-gray-900">{m.name}</div>
+                        {m.notes && <div className="mt-1 text-xs text-gray-600">{m.notes}</div>}
+                        {m.tags?.length ? (
+                          <div className="mt-2 flex flex-wrap gap-2">
+                            {m.tags.map((t) => <Chip key={t} label={t} />)}
+                          </div>
+                        ) : null}
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </div>
     );
   }
@@ -963,7 +1664,7 @@ export default function CoachDashboard() {
   // -----------------------------------------------------------------
   return (
     <div
-      className="min-h-screen p-6 overflow-auto"
+      className="min-h-screen pt-20 px-6 pb-6 overflow-auto"
       style={{ backgroundColor: "#f0f7ff" }}
     >
       <div className="max-w-7xl mx-auto">
@@ -1039,6 +1740,16 @@ export default function CoachDashboard() {
                     Actions
                   </button>
                   <button
+                    onClick={() => setActiveTab("meals")}
+                    className={`px-6 py-4 text-[15px] font-medium rounded-t-lg whitespace-nowrap leading-normal transition-colors ${
+                      activeTab === "meals"
+                        ? "bg-white text-gray-900 border border-gray-200 border-b-white -mb-px"
+                        : "bg-transparent text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                    }`}
+                  >
+                    Meals
+                  </button>
+                  <button
                     onClick={() => setActiveTab("shopping")}
                     className={`px-6 py-4 text-[15px] font-medium rounded-t-lg whitespace-nowrap leading-normal transition-colors ${
                       activeTab === "shopping"
@@ -1063,6 +1774,7 @@ export default function CoachDashboard() {
                 {/* Tab Content */}
                 {activeTab === "plan" && renderGoalsAndDiets()}
                 {activeTab === "actions" && renderActions()}
+                {activeTab === "meals" && renderMeals()}
                 {activeTab === "shopping" && renderShopping()}
                 {activeTab === "preview" && renderPreview()}
               </>
