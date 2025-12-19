@@ -73,6 +73,7 @@ const Header: React.FC<HeaderProps> = ({
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState('Searching...');
+  const [showNavMenu, setShowNavMenu] = useState(false);
   
   const navigate = useNavigate();
   const location = useLocation();
@@ -887,48 +888,134 @@ const Header: React.FC<HeaderProps> = ({
         paddingTop: PlatformDetectionService.isNative() ? '48px' : undefined
       }}>
         {/* === TOP BAR: Login + Settings Menu === */}
-        <div className={CSS_CLASSES.VHEALTH_TOPBAR}>
-          {/* Left side: Empty space for better layout */}
-          <div style={{ display: 'flex', alignItems: 'center', flex: 1 }}>
-            {/* Empty - keeps layout balanced */}
+        <div className={CSS_CLASSES.VHEALTH_TOPBAR} style={{ justifyContent: 'space-between', padding: '8px 12px' }}>
+          {/* Left corner: Navigation Hamburger */}
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <button
+              onClick={() => setShowNavMenu(!showNavMenu)}
+              className="settings-menu-button w-10 h-10 rounded-xl bg-gray-100/60 hover:bg-gray-200/80 flex items-center justify-center text-gray-700 hover:text-gray-900 transition-all duration-200 backdrop-blur-sm"
+              aria-label="Navigation menu"
+              title="Menu"
+              type="button"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
           </div>
-          {/* Right side: Authentication */}
+          
+          {/* Right side: Identity (UserPreference as Green Avatar) */}
           <div className={CSS_CLASSES.VHEALTH_TOPBAR_RIGHT} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             {(() => {
               const isAuthed = authService.getState().isAuthenticated;
               
-              // Signed out = show user/login icon
-              if (!isAuthed && showLogin && !PlatformDetectionService.isNative()) {
-                return (
-                  <div 
-                    className={CSS_CLASSES.HEADER_AUTH_WRAPPER}
-                    style={{
-                      minWidth: '48px',
-                      minHeight: '48px',
-                      padding: '4px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center'
-                    }}>
-                    <MultiAuthLogin 
-                      position="inline"
-                      onUserChange={(user) => console.log('User changed in header:', user)}
-                      onSignIn={(user) => console.log('User signed in from header:', user)}
-                      onSignOut={() => console.log('User signed out from header')}
-                    />
-                  </div>
-                );
-              }
-              
-              // Signed in = show hamburger (UserPreference)
-              if (isAuthed) {
-                return <UserPreference />;
+              if (showLogin && !PlatformDetectionService.isNative()) {
+                if (isAuthed) {
+                  // Show UserPreference as green avatar identity
+                  return <UserPreference />;
+                } else {
+                  // Show login for non-authenticated users
+                  return (
+                    <div 
+                      className={CSS_CLASSES.HEADER_AUTH_WRAPPER}
+                      style={{
+                        minWidth: '48px',
+                        minHeight: '48px',
+                        padding: '4px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}>
+                      <MultiAuthLogin 
+                        position="inline"
+                        onUserChange={(user) => console.log('User changed in header:', user)}
+                        onSignIn={(user) => console.log('User signed in from header:', user)}
+                        onSignOut={() => console.log('User signed out from header')}
+                      />
+                    </div>
+                  );
+                }
               }
               
               return null;
             })()}
           </div>
         </div>
+        
+        {/* Navigation Menu Dropdown */}
+        {showNavMenu && (
+          <div 
+            className="fixed inset-0 bg-black/20 z-[9999]" 
+            onClick={() => setShowNavMenu(false)}
+          >
+            <div 
+              className="nav-menu-container absolute top-16 left-2 bg-white rounded-lg shadow-lg border border-gray-200 py-2 min-w-[200px] z-[10000]"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button 
+                className="w-full text-left px-4 py-2 hover:bg-gray-100 transition-colors duration-200 flex items-center gap-3"
+                onClick={() => {
+                  navigate('/');
+                  setShowNavMenu(false);
+                }}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style={{ color: '#5f6368' }}>
+                  <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+                </svg>
+                Home
+              </button>
+              <button 
+                className="w-full text-left px-4 py-2 hover:bg-gray-100 transition-colors duration-200 flex items-center gap-3"
+                onClick={() => {
+                  navigate('/dashboard');
+                  setShowNavMenu(false);
+                }}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style={{ color: '#5f6368' }}>
+                  <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/>
+                </svg>
+                Dashboard
+              </button>
+              <button 
+                className="w-full text-left px-4 py-2 hover:bg-gray-100 transition-colors duration-200 flex items-center gap-3"
+                onClick={() => {
+                  navigate('/parent');
+                  setShowNavMenu(false);
+                }}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style={{ color: '#5f6368' }}>
+                  <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                </svg>
+                Parent Dashboard
+              </button>
+              <button 
+                className="w-full text-left px-4 py-2 hover:bg-gray-100 transition-colors duration-200 flex items-center gap-3"
+                onClick={() => {
+                  navigate('/research');
+                  setShowNavMenu(false);
+                }}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style={{ color: '#5f6368' }}>
+                  <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+                </svg>
+                Research
+              </button>
+              <div className="border-t border-gray-200 my-2"></div>
+              <button 
+                className="w-full text-left px-4 py-2 hover:bg-gray-100 transition-colors duration-200 flex items-center gap-3"
+                onClick={() => {
+                  navigate('/about');
+                  setShowNavMenu(false);
+                }}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style={{ color: '#5f6368' }}>
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/>
+                </svg>
+                About
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* === MAIN BAR: Logo + Search === */}
         <div className={CSS_CLASSES.VHEALTH_MAINBAR}>

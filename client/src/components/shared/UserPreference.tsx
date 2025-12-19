@@ -136,21 +136,33 @@ const UserPreference: React.FC<UserPreferenceProps> = () => {
   };
 
   // Signed out: show user icon (your MultiAuthLogin already handles this in Header)
-  // Signed in: show hamburger icon
+  // Signed in: show green avatar for identity
   if (!isAuthed) return null;
 
   return (
     <>
-      {/* Hamburger trigger */}
+      {/* Green Avatar Identity Trigger */}
       <button
         onClick={() => setOpen(true)}
-        className="settings-menu-button w-10 h-10 rounded-xl bg-gray-100/60 hover:bg-gray-200/80 flex items-center justify-center text-gray-700 hover:text-gray-900 transition-all duration-200 backdrop-blur-sm"
-        title="Menu"
+        className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-100 to-green-200 flex items-center justify-center shadow-sm hover:shadow-md transition-all duration-200"
+        title="Account Settings"
         type="button"
       >
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-        </svg>
+        {user?.picture ? (
+          <img 
+            src={user.picture} 
+            alt="Profile" 
+            className="w-8 h-8 rounded-full object-cover"
+          />
+        ) : (
+          <svg 
+            viewBox="0 0 24 24" 
+            fill="currentColor" 
+            className="w-6 h-6 text-emerald-600"
+          >
+            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+          </svg>
+        )}
       </button>
 
       {/* Drawer */}
@@ -177,8 +189,22 @@ const UserPreference: React.FC<UserPreferenceProps> = () => {
             {/* user silhouette */}
             <div className="px-6 py-5 border-b border-blue-200 bg-white/60 backdrop-blur-sm">
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-100 to-indigo-200 flex items-center justify-center text-blue-700 font-semibold text-lg shadow-sm">
-                  {initials}
+                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-emerald-100 to-green-200 flex items-center justify-center shadow-sm">
+                  {user?.picture ? (
+                    <img 
+                      src={user.picture} 
+                      alt="Profile" 
+                      className="w-10 h-10 rounded-full object-cover"
+                    />
+                  ) : (
+                    <svg 
+                      viewBox="0 0 24 24" 
+                      fill="currentColor" 
+                      className="w-8 h-8 text-emerald-600"
+                    >
+                      <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                    </svg>
+                  )}
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="text-base font-semibold text-vh-ink truncate">{user?.name || 'Account'}</div>
