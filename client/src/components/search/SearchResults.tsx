@@ -9,19 +9,11 @@ import ResearchQualityGauge from '../charts/cards/ResearchQualityGauge';
 import ResultQualityPie from '../charts/cards/ResultQualityPie';
 import MembersCard from '../charts/individual/MembersCard';
 import AnalyzeWithWihyButton from '../charts/shared/AnalyzeWithWihyButton';
-import DashboardCharts from '../charts/grids/DashboardCharts';
 import QuickInsights from '../charts/cards/QuickInsights';
 import BloodPressureChart from '../charts/individual/BloodPressureChart';
 import { ChartType, CHART_TYPE_CONFIGS, getChartTypesByPriority, getChartTypesByTab } from '../charts/chartTypes';
 import FullScreenChat, { FullScreenChatRef } from '../ui/FullScreenChat';
-import MyProgressDashboard, { WihyCoachModel } from '../dashboard/MyProgressDashboard';
-import CoachDashboard from '../dashboard/CoachDashboard';
-import ParentDashboard from '../dashboard/ParentDashboard';
-import ConsumptionDashboard from '../dashboard/ConsumptionDashboard';
-import ResearchDashboard from '../dashboard/ResearchDashboard';
-import FitnessDashboard, { FitnessDashboardModel, buildProgramKey } from '../dashboard/FitnessDashboard';
-import OverviewDashboard from '../dashboard/OverviewDashboard';
-import { ExerciseRowView } from '../dashboard/WorkoutProgramGrid';
+
 import { CSS_CLASSES } from '../../constants/cssConstants';
 import '../../styles/VHealthSearch.css';
 import '../../styles/Dashboard.css';
@@ -33,19 +25,8 @@ import Spinner from '../ui/Spinner';
 import { logger } from '../../utils/logger';
 import { authService } from '../../services/authService';
 
-// Tab type definition - matches chartTypes.ts tabView values
-type SearchTab = 'overview' | 'charts' | 'consumption' | 'fitness' | 'coach';
-
-// Tab configuration
-const TAB_CONFIG = {
-  overview: { label: 'Dashboard', value: 'overview' as SearchTab },
-  charts: { label: 'My Progress', value: 'charts' as SearchTab },
-  consumption: { label: 'Intake & Consumption', value: 'consumption' as SearchTab },
-  fitness: { label: 'Fitness', value: 'fitness' as SearchTab },
-  coach: { label: 'Coach Portal', value: 'coach' as SearchTab }
-};
-
-const TABS = Object.values(TAB_CONFIG);
+// Tab type definition - for search result organization
+type SearchTab = 'results' | 'charts' | 'research';
 
 // Handle ResizeObserver errors - suppress harmless loop notifications
 const resizeObserverErrorHandler = (error: ErrorEvent) => {
@@ -176,7 +157,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({
   const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1200);
   const [isChatOpen, setIsChatOpen] = useState(false);
   const chatRef = useRef<FullScreenChatRef>(null);
-  const [activeTab, setActiveTab] = useState<SearchTab>('overview');
+  const [activeTab, setActiveTab] = useState<SearchTab>('results');
 
   const navigate = useNavigate();
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -190,42 +171,6 @@ const SearchResults: React.FC<SearchResultsProps> = ({
     darkModeQuery.addEventListener('change', handler);
     return () => darkModeQuery.removeEventListener('change', handler);
   }, []);
-
-
-
-
-
-  // Tab bar styles - Responsive with mobile-friendly touch targets
-  const tabBarStyles = {
-    tab: {
-      padding: windowWidth < 768 ? '10px 16px' : '12px 20px',
-      borderRadius: windowWidth < 768 ? '20px' : '24px',
-      fontSize: windowWidth < 768 ? '14px' : '15px',
-      fontWeight: 600 as const,
-      cursor: 'pointer',
-      border: 'none',
-      transition: 'all 0.2s ease',
-      outline: 'none',
-      whiteSpace: 'nowrap' as const,
-      userSelect: 'none' as const,
-      minHeight: windowWidth < 768 ? '44px' : 'auto', // Minimum touch target size
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center'
-    },
-    tabActive: {
-      background: '#111827',
-      color: '#ffffff'
-    },
-    tabInactive: {
-      background: '#f3f4f6',
-      color: '#111827'
-    },
-    tabHover: {
-      background: '#e5e7eb',
-      color: '#111827'
-    }
-  };
 
   // Extract dynamic health data from API response
   const healthMetrics = extractHealthMetrics(apiResponse);
@@ -316,12 +261,14 @@ const SearchResults: React.FC<SearchResultsProps> = ({
   }, [autoOpenChat, isChatOpen, hasAutoOpened]);
   
   // Overview tab now shows dashboard directly instead of navigating
-  // useEffect(() => {
-  //   if (activeTab === 'overview') {
-  //     console.log('🔍 Navigating to overview dashboard from SearchResults');
-  //     navigate('/overview');
-  //   }
-  // }, [activeTab, navigate]);
+  useEffect(() => {
+    // Auto-redirect to overview dashboard after search results load
+    // This provides a seamless flow from search to dashboard
+    if (results && !isLoading && query) {
+      console.log('🔍 Auto-redirecting to overview dashboard from SearchResults');
+      navigate('/overview');
+    }
+  }, [results, isLoading, query, navigate]);
 
   // Header search state - independent from main search
   const [headerSearchResults, setHeaderSearchResults] = useState<string>('');
@@ -883,19 +830,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({
             </div>
             */}
 
-            {/* Render dashboard content based on active tab */}
-            {activeTab === 'overview' ? (
-              <OverviewDashboard onAnalyze={handleAddToChatConversation} />
-            ) : (
-              <div style={{
-                padding: windowWidth < 768 ? '5px 8px 0 8px' : '10px 20px',
-                maxWidth: '100%',
-                overflowX: 'hidden'
-              }}>
-                {/* Other dashboard tabs would render here */}
-                <p>Dashboard content for {activeTab} tab would appear here.</p>
-              </div>
-            )}
+            {/* Search Results Content - Removed since FullScreenChat handles display */}
           </>
         ) : (
           !isLoading && !isSearching && (
