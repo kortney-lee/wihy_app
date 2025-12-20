@@ -262,13 +262,13 @@ const SearchResults: React.FC<SearchResultsProps> = ({
   
   // Overview tab now shows dashboard directly instead of navigating
   useEffect(() => {
-    // Auto-redirect to overview dashboard after search results load
-    // This provides a seamless flow from search to dashboard
-    if (results && !isLoading && query) {
+    // Only auto-redirect to overview dashboard if chat is not supposed to auto-open
+    // This preserves the conversation flow when chat interaction is expected
+    if (results && !isLoading && query && !autoOpenChat && !isChatOpen) {
       console.log('🔍 Auto-redirecting to overview dashboard from SearchResults');
       navigate('/overview');
     }
-  }, [results, isLoading, query, navigate]);
+  }, [results, isLoading, query, autoOpenChat, isChatOpen, navigate]);
 
   // Header search state - independent from main search
   const [headerSearchResults, setHeaderSearchResults] = useState<string>('');
@@ -732,7 +732,14 @@ const SearchResults: React.FC<SearchResultsProps> = ({
               <FullScreenChat
                 ref={chatRef}
                 isOpen={isChatOpen}
-                onClose={() => setIsChatOpen(false)}
+                onClose={() => {
+                  setIsChatOpen(false);
+                  // Navigate to overview dashboard after chat interaction
+                  setTimeout(() => {
+                    console.log('🔍 Navigating to overview dashboard after chat close');
+                    navigate('/overview');
+                  }, 100);
+                }}
                 onViewCharts={() => setIsChatOpen(false)} // Close chat to view charts behind it
                 initialQuery={query}
               initialResponse={(() => {
