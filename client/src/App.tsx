@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { BrowserRouter as Router, Routes, Route, useSearchParams, useNavigate, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useSearchParams, useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import VHealthSearch from './components/search/VHealthSearch';
 import SearchResults from './components/search/SearchResults';
@@ -18,12 +18,6 @@ import NewsPage from './pages/NewsPage';
 import NutritionFactsPage from './pages/NutritionFacts';
 import DebugFullScreen from './pages/DebugFullScreen';
 import CoachDashboard from './components/dashboard/CoachDashboard';
-import ParentDashboardPage from './pages/ParentDashboard';
-import MyProgressDashboardPage from './pages/MyProgressDashboard';
-import OverviewDashboardPage from './pages/OverviewDashboard';
-import IntakeConsumptionDashboardPage from './pages/IntakeConsumptionDashboard';
-import FitnessDashboardPage from './pages/FitnessDashboard';
-import CoachDashboardPage from './pages/CoachDashboard';
 import OverviewDashboard from './components/dashboard/OverviewDashboard';
 import ResearchDashboard from './components/dashboard/ResearchDashboard';
 import DashboardPage from './components/dashboard/DashboardPage';
@@ -584,15 +578,15 @@ const App: React.FC = () => {
             <Route path="/new-about" element={<NewAboutpage />} />
             <Route path="/news" element={<NewsPage />} />
             <Route path="/research" element={<ResearchDashboard period="week" onAnalyze={() => {}} onSearch={() => {}} windowWidth={window.innerWidth} />} />
-            <Route path="/parent" element={<ParentDashboardPage windowWidth={window.innerWidth} />} />
-            <Route path="/myprogress" element={<MyProgressDashboardPage windowWidth={window.innerWidth} />} />
-            <Route path="/overview" element={<OverviewDashboardPage windowWidth={window.innerWidth} />} />
-            <Route path="/intake" element={<IntakeConsumptionDashboardPage windowWidth={window.innerWidth} />} />
-            <Route path="/fitness" element={<FitnessDashboardPage windowWidth={window.innerWidth} />} />
-            <Route path="/coach" element={<CoachDashboardPage windowWidth={window.innerWidth} />} />
-            <Route path="/dashboard" element={<DashboardPage />} />
-            <Route path="/dashboard/overview" element={<OverviewDashboardPage windowWidth={window.innerWidth} />} />
-            <Route path="/dashboard/parent" element={<ParentDashboardPage windowWidth={window.innerWidth} />} />
+
+            <Route path="/dashboard" element={<Navigate to="/overview" replace />} />
+            <Route path="/overview" element={<DashboardPage dashboardType="overview" />} />
+            <Route path="/myprogress" element={<DashboardPage dashboardType="myprogress" />} />
+            <Route path="/intake" element={<DashboardPage dashboardType="intake" />} />
+            <Route path="/fitness" element={<DashboardPage dashboardType="fitness" />} />
+            <Route path="/coach" element={<DashboardPage dashboardType="coach" />} />
+            <Route path="/parent" element={<DashboardPage dashboardType="parent" />} />
+
             <Route path="/dashboard/predictive" element={<PredictiveDashboard />} />
             <Route path="/tracking-dashboard" element={<TrackingDashboard />} />
             <Route path="/manager-dashboard" element={<ManagerDashboard />} />

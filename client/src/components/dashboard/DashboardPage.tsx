@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { authService } from '../../services/authService';
 import { PlatformDetectionService } from '../../services/shared/platformDetectionService';
 import ImageUploadModal from '../ui/ImageUploadModal';
@@ -20,39 +20,44 @@ import Header from '../shared/Header';
 
 import { logger } from '../../utils/logger';
 
-// Tab type definition
-type DashboardTab = 'overview' | 'charts' | 'consumption' | 'research' | 'fitness' | 'coach' | 'parent';
-
-// Tab configuration
-const TAB_CONFIG = {
-  overview: { label: 'Overview', value: 'overview' as DashboardTab },
-  charts: { label: 'My Progress', value: 'charts' as DashboardTab },
-  consumption: { label: 'Consumption', value: 'consumption' as DashboardTab },
-  research: { label: 'Research', value: 'research' as DashboardTab },
-  fitness: { label: 'Fitness', value: 'fitness' as DashboardTab },
-  coach: { label: 'Coach Portal', value: 'coach' as DashboardTab },
-  parent: { label: 'Parent Portal', value: 'parent' as DashboardTab }
-};
-
-const TABS = Object.values(TAB_CONFIG);
+// Dashboard type definition
+type DashboardType = 'overview' | 'myprogress' | 'intake' | 'research' | 'fitness' | 'coach' | 'parent';
 
 interface DashboardPageProps {
-  initialTab?: DashboardTab;
+  dashboardType?: DashboardType;
   apiResponse?: any;
 }
 
 const DashboardPage: React.FC<DashboardPageProps> = ({
-  initialTab = 'overview',
+  dashboardType,
   apiResponse
 }) => {
-  const [activeTab, setActiveTab] = useState<DashboardTab>(initialTab);
+  const location = useLocation();
+  const navigate = useNavigate();
+  
+  // Determine dashboard type from URL path
+  const getDashboardType = (): DashboardType => {
+    if (dashboardType) return dashboardType;
+    
+    const path = location.pathname;
+    if (path.includes('/overview')) return 'overview';
+    if (path.includes('/myprogress')) return 'myprogress';
+    if (path.includes('/intake')) return 'intake';
+    if (path.includes('/research')) return 'research';
+    if (path.includes('/fitness')) return 'fitness';
+    if (path.includes('/coach')) return 'coach';
+    if (path.includes('/parent')) return 'parent';
+    
+    return 'overview'; // default
+  };
+  
+  const currentDashboard = getDashboardType();
   const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1200);
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
 
   const [isDarkMode, setIsDarkMode] = useState(false);
   const chatRef = useRef<FullScreenChatRef>(null);
-  const navigate = useNavigate();
 
   // Detect dark mode
   useEffect(() => {
@@ -239,37 +244,7 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
     defaultDayId: "day1"
   };
 
-  // Tab bar styles - Responsive with mobile-friendly touch targets
-  const tabBarStyles = {
-    tab: {
-      padding: windowWidth < 768 ? '10px 16px' : '12px 20px',
-      borderRadius: windowWidth < 768 ? '20px' : '24px',
-      fontSize: windowWidth < 768 ? '14px' : '15px',
-      fontWeight: 600 as const,
-      cursor: 'pointer',
-      border: 'none',
-      transition: 'all 0.2s ease',
-      outline: 'none',
-      whiteSpace: 'nowrap' as const,
-      userSelect: 'none' as const,
-      minHeight: windowWidth < 768 ? '44px' : 'auto',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center'
-    },
-    tabActive: {
-      background: '#111827',
-      color: '#ffffff'
-    },
-    tabInactive: {
-      background: '#f3f4f6',
-      color: '#111827'
-    },
-    tabHover: {
-      background: '#e5e7eb',
-      color: '#111827'
-    }
-  };
+
 
   // Universal Search handler for chat
   const handleUniversalSearch = async (searchQuery: string | any) => {
@@ -427,53 +402,17 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
             </button>
           )}
 
-          {/* Tab Navigation */}
-          <div style={{ 
-            display: 'flex', 
-            justifyContent: 'center', 
-            alignItems: 'center', 
-            marginTop: windowWidth < 768 ? '0px' : '80px',
-            marginBottom: windowWidth < 768 ? '12px' : '24px',
-            padding: windowWidth < 768 ? '0 8px' : '0 20px',
-            paddingTop: windowWidth < 768 ? '20px' : '0'
-          }}>
-            <div className="results-tabs" style={{
-              display: 'flex',
-              gap: windowWidth < 768 ? '6px' : '8px',
-              alignItems: 'center',
-              flexWrap: 'wrap',
-              justifyContent: 'center',
-              maxWidth: '100%'
-            }}>
-              {TABS.map(tab => {
-                const active = activeTab === tab.value;
-                return (
-                  <button
-                    key={tab.value}
-                    onClick={() => setActiveTab(tab.value)}
-                    style={{
-                      ...tabBarStyles.tab,
-                      ...(active ? tabBarStyles.tabActive : tabBarStyles.tabInactive)
-                    }}
-                  >
-                    {tab.label}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
           {/* Dashboard Content */}
           <div className="health-dashboard-content" style={{
-            padding: windowWidth < 768 ? '5px 8px 0 8px' : '10px 20px',
+            padding: windowWidth < 768 ? '25px 8px 0 8px' : '30px 20px',
             maxWidth: '100%',
             overflowX: 'hidden'
           }}>
-            {activeTab === 'overview' && (
+            {(currentDashboard === 'overview' || !currentDashboard) && (
               <OverviewDashboard onAnalyze={handleAddToChatConversation} />
             )}
 
-            {activeTab === 'charts' && (
+            {currentDashboard === 'myprogress' && (
               <MyProgressDashboard 
                 coach={mockCoachData}
                 onToggleAction={(actionId) => console.log('Toggle action:', actionId)}
@@ -484,7 +423,7 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
               />
             )}
 
-            {activeTab === 'research' && (
+            {currentDashboard === 'research' && (
               <ResearchDashboard
                 period={getDashboardPeriod()}
                 onAnalyze={handleAddToChatConversation}
@@ -493,7 +432,7 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
               />
             )}
 
-            {activeTab === 'consumption' && (
+            {currentDashboard === 'intake' && (
               <ConsumptionDashboard
                 period={getDashboardPeriod()}
                 onAnalyze={handleAddToChatConversation}
@@ -501,16 +440,16 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
               />
             )}
 
-            {activeTab === 'fitness' && (
+            {currentDashboard === 'fitness' && (
               <FitnessDashboard
                 data={mockFitnessDashboard}
                 onStartSession={(params) => console.log('Start session:', params)}
               />
             )}
 
-            {activeTab === 'coach' && <CoachDashboard />}
+            {currentDashboard === 'coach' && <CoachDashboard />}
 
-            {activeTab === 'parent' && <ParentDashboard />}
+            {currentDashboard === 'parent' && <ParentDashboard />}
           </div>
         </div>
       </div>

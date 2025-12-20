@@ -2,10 +2,10 @@
 import React, { useState } from "react";
 import DashboardCharts from "../charts/grids/DashboardCharts";
 import { ChartType, getChartTypesByTab } from "../charts/chartTypes";
-import QuickInsights from "../charts/cards/QuickInsights";
-import HealthRiskChart from "../charts/individual/HealthRiskChart";
 import NutritionAnalysisCard from "../charts/individual/NutritionAnalysisCard";
 import NovaChart from "../charts/cards/NovaChart";
+import QuickInsights from "../charts/cards/QuickInsights";
+import HealthRiskChart from "../charts/individual/HealthRiskChart";
 import PredictiveDashboard from "../../pages/PredictiveDashboard";
 
 interface OverviewDashboardProps {
@@ -108,18 +108,41 @@ const OverviewDashboard: React.FC<OverviewDashboardProps> = ({ onAnalyze }) => {
 
   const renderSummary = () => (
     <section className="max-w-6xl mx-auto pt-4 pb-6">
-      <div className="grid gap-4 md:grid-cols-2">
-        {/* Left: Quick Insights - displayed as a card */}
-        <QuickInsights />
+      <div className="text-center py-6">
+        <h2 className="text-xl font-semibold text-gray-900 mb-2">Dashboard Overview</h2>
+        <p className="text-gray-600 mb-6">
+          Your personalized health dashboard with key insights and health metrics.
+        </p>
+      </div>
+      
+      {/* Main Dashboard Cards */}
+      <div className="grid gap-6 md:grid-cols-2 mb-6">
+        <QuickInsights onAnalyze={onAnalyze} />
+        <HealthRiskChart onAnalyze={onAnalyze} />
+      </div>
 
-        {/* Right: Health Risk Assessment - Risk Factors chart */}
-        <HealthRiskChart 
-          period="week"
-          chartType="risk-factors"
-          title="Health Risk Assessment - Risk Factors"
-          showLabels={true}
-          onAnalyze={onAnalyze}
-        />
+      {/* Navigation Overview Cards */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 max-w-4xl mx-auto">
+        <div className="bg-white rounded-lg border border-gray-200 p-4 text-center">
+          <div className="text-2xl mb-2">📊</div>
+          <h3 className="font-medium text-gray-900">Insights</h3>
+          <p className="text-sm text-gray-600">Behavioral patterns</p>
+        </div>
+        <div className="bg-white rounded-lg border border-gray-200 p-4 text-center">
+          <div className="text-2xl mb-2">💪</div>
+          <h3 className="font-medium text-gray-900">Wellness</h3>
+          <p className="text-sm text-gray-600">Recovery & wellbeing</p>
+        </div>
+        <div className="bg-white rounded-lg border border-gray-200 p-4 text-center">
+          <div className="text-2xl mb-2">📈</div>
+          <h3 className="font-medium text-gray-900">Trends</h3>
+          <p className="text-sm text-gray-600">Long-term patterns</p>
+        </div>
+        <div className="bg-white rounded-lg border border-gray-200 p-4 text-center">
+          <div className="text-2xl mb-2">🔮</div>
+          <h3 className="font-medium text-gray-900">Predictive</h3>
+          <p className="text-sm text-gray-600">AI-powered insights</p>
+        </div>
       </div>
     </section>
   );
