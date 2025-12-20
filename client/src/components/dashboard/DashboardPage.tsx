@@ -380,7 +380,7 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
       </div>
 
       {/* Main Content Area with Dashboard Layout */}
-      <div className={CSS_CLASSES.DASHBOARD_CONTAINER} style={{ paddingTop: windowWidth < 768 ? '220px' : windowWidth < 1200 ? '220px' : '100px' }}>
+      <div className={CSS_CLASSES.DASHBOARD_CONTAINER} style={{ paddingTop: windowWidth < 768 ? '280px' : windowWidth < 1200 ? '260px' : '140px' }}>
 
         
         <div className={CSS_CLASSES.DASHBOARD_MAIN_CONTENT}>
