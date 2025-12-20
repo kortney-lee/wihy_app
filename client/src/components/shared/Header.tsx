@@ -3,6 +3,7 @@ import React, { useState, useRef, useEffect, useLayoutEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import MultiAuthLogin from './MultiAuthLogin';
 import UserPreference from './UserPreference';
+import HistoryNav from './HistoryNav';
 import { authService } from '../../services/authService';
 import ImageUploadModal from '../ui/ImageUploadModal';
 import { wihyAPI } from '../../services/wihyAPI';
@@ -73,7 +74,6 @@ const Header: React.FC<HeaderProps> = ({
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState('Searching...');
-  const [showNavMenu, setShowNavMenu] = useState(false);
   
   const navigate = useNavigate();
   const location = useLocation();
@@ -889,19 +889,9 @@ const Header: React.FC<HeaderProps> = ({
       }}>
         {/* === TOP BAR: Login + Settings Menu === */}
         <div className={CSS_CLASSES.VHEALTH_TOPBAR} style={{ justifyContent: 'space-between', padding: '8px 12px' }}>
-          {/* Left corner: Navigation Hamburger */}
+          {/* Left corner: Navigation HistoryNav */}
           <div style={{ display: 'flex', alignItems: 'center' }}>
-            <button
-              onClick={() => setShowNavMenu(!showNavMenu)}
-              className="settings-menu-button w-10 h-10 rounded-xl bg-gray-100/60 flex items-center justify-center text-gray-700 backdrop-blur-sm"
-              aria-label="Navigation menu"
-              title="Menu"
-              type="button"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            </button>
+            <HistoryNav />
           </div>
           
           {/* Right side: Identity (UserPreference as Green Avatar) */}
@@ -942,141 +932,6 @@ const Header: React.FC<HeaderProps> = ({
           </div>
         </div>
         
-        {/* Navigation Menu Dropdown */}
-        {showNavMenu && (
-          <div 
-            className="fixed inset-0 bg-black/20 z-[9999]" 
-            onClick={() => setShowNavMenu(false)}
-          >
-            <div 
-              className="nav-menu-container absolute top-16 left-2 bg-white rounded-lg shadow-lg border border-gray-200 py-2 min-w-[200px] z-[10000]"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <button 
-                className="w-full text-left px-4 py-2 hover:bg-gray-100 transition-colors duration-200 flex items-center gap-3"
-                onClick={() => {
-                  navigate('/');
-                  setShowNavMenu(false);
-                }}
-              >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style={{ color: '#5f6368' }}>
-                  <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
-                </svg>
-                Home
-              </button>
-              <button 
-                className="w-full text-left px-4 py-2 hover:bg-gray-100 transition-colors duration-200 flex items-center gap-3"
-                onClick={() => {
-                  navigate('/dashboard');
-                  setShowNavMenu(false);
-                }}
-              >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style={{ color: '#5f6368' }}>
-                  <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/>
-                </svg>
-                Dashboard
-              </button>
-              <button 
-                className="w-full text-left px-4 py-2 hover:bg-gray-100 transition-colors duration-200 flex items-center gap-3"
-                onClick={() => {
-                  navigate('/overview');
-                  setShowNavMenu(false);
-                }}
-              >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style={{ color: '#5f6368' }}>
-                  <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/>
-                </svg>
-                Overview
-              </button>
-              <button 
-                className="w-full text-left px-4 py-2 hover:bg-gray-100 transition-colors duration-200 flex items-center gap-3"
-                onClick={() => {
-                  navigate('/myprogress');
-                  setShowNavMenu(false);
-                }}
-              >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style={{ color: '#5f6368' }}>
-                  <path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/>
-                </svg>
-                My Progress
-              </button>
-              <button 
-                className="w-full text-left px-4 py-2 hover:bg-gray-100 transition-colors duration-200 flex items-center gap-3"
-                onClick={() => {
-                  navigate('/intake');
-                  setShowNavMenu(false);
-                }}
-              >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style={{ color: '#5f6368' }}>
-                  <path d="M11 9h2V6h3V4h-3V1h-2v3H8v2h3v3zm-4 9c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zm10 0c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2zm-9.83-3.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03L21.7 4H5.21l-.94-2H1v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.13 0-.25-.11-.25-.25z"/>
-                </svg>
-                Intake & Consumption
-              </button>
-              <button 
-                className="w-full text-left px-4 py-2 hover:bg-gray-100 transition-colors duration-200 flex items-center gap-3"
-                onClick={() => {
-                  navigate('/fitness');
-                  setShowNavMenu(false);
-                }}
-              >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style={{ color: '#5f6368' }}>
-                  <path d="M20.57 14.86L22 13.43 20.57 12 17 15.57 8.43 7 12 3.43 10.57 2 9.14 3.43 7.71 2 5.57 4.14 4.14 2.71 2.71 4.14l1.43 1.43L2 7.71l1.43 1.43L2 10.57 3.43 12 7 8.43 15.57 17 12 20.57 13.43 22l1.43-1.43L16.29 22l2.14-2.14 1.43 1.43 1.43-1.43-1.43-1.43L22 16.29z"/>
-                </svg>
-                Fitness
-              </button>
-              <button 
-                className="w-full text-left px-4 py-2 hover:bg-gray-100 transition-colors duration-200 flex items-center gap-3"
-                onClick={() => {
-                  navigate('/coach');
-                  setShowNavMenu(false);
-                }}
-              >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style={{ color: '#5f6368' }}>
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-                </svg>
-                Coach Portal
-              </button>
-              <button 
-                className="w-full text-left px-4 py-2 hover:bg-gray-100 transition-colors duration-200 flex items-center gap-3"
-                onClick={() => {
-                  navigate('/parent');
-                  setShowNavMenu(false);
-                }}
-              >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style={{ color: '#5f6368' }}>
-                  <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-                </svg>
-                Parent Dashboard
-              </button>
-              <button 
-                className="w-full text-left px-4 py-2 hover:bg-gray-100 transition-colors duration-200 flex items-center gap-3"
-                onClick={() => {
-                  navigate('/research');
-                  setShowNavMenu(false);
-                }}
-              >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style={{ color: '#5f6368' }}>
-                  <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
-                </svg>
-                Research
-              </button>
-              <div className="border-t border-gray-200 my-2"></div>
-              <button 
-                className="w-full text-left px-4 py-2 hover:bg-gray-100 transition-colors duration-200 flex items-center gap-3"
-                onClick={() => {
-                  navigate('/about');
-                  setShowNavMenu(false);
-                }}
-              >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style={{ color: '#5f6368' }}>
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/>
-                </svg>
-                About
-              </button>
-            </div>
-          </div>
-        )}
-
         {/* === MAIN BAR: Logo + Search === */}
         <div className={CSS_CLASSES.VHEALTH_MAINBAR}>
           {/* Logo Section */}
