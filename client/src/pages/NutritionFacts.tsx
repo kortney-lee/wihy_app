@@ -39,6 +39,8 @@ interface IngredientAnalysisState {
   loading: boolean;
   analyses: IngredientAnalysis[];
   error: string | null;
+  loadingIngredients: Set<string>; // Track which ingredients are being analyzed
+  analyzedIngredients: Map<string, IngredientAnalysis>; // Store individual results
 }
 
 interface LocationState {
@@ -88,7 +90,9 @@ const NutritionFactsPage: React.FC = () => {
   const [ingredientAnalysis, setIngredientAnalysis] = useState<IngredientAnalysisState>({
     loading: false,
     analyses: [],
-    error: null
+    error: null,
+    loadingIngredients: new Set(),
+    analyzedIngredients: new Map()
   });
   
   // Chat pre-loading state
@@ -116,6 +120,39 @@ const NutritionFactsPage: React.FC = () => {
       overviewRef.current.scrollTop = overviewScrollPos.current;
     }
   }, [viewMode]);
+  
+  // Auto-switch to chat for unknown products
+  useEffect(() => {
+    if (nutritionfacts && viewMode === "overview") {
+      const isUnknownProduct = nutritionfacts.name === "Unknown product" || 
+                              (!nutritionfacts.ingredientsText && !nutritionfacts.imageUrl && 
+                               (!nutritionfacts.name || nutritionfacts.name === "Unknown product"));
+      
+      if (isUnknownProduct && !initialQuery) {
+        setInitialQuery(`I scanned a product but couldn't find detailed information about it. Can you help me analyze this product?`);
+        setViewMode("chat");
+      }
+    }
+  }, [nutritionfacts, viewMode, initialQuery]);
+  
+  // Handle unknown value clicks - prompt Wihy for analysis
+  const handleUnknownHealthScore = () => {
+    const productName = nutritionfacts?.name || "this food";
+    setInitialQuery(`I can't find health score data for ${productName}. Can you analyze its nutritional value and give it a health score out of 100?`);
+    setViewMode("chat");
+  };
+
+  const handleUnknownGrade = () => {
+    const productName = nutritionfacts?.name || "this food";
+    setInitialQuery(`I can't find grade information for ${productName}. Can you analyze its overall quality and assign it a letter grade?`);
+    setViewMode("chat");
+  };
+
+  const handleUnknownNova = () => {
+    const productName = nutritionfacts?.name || "this food";
+    setInitialQuery(`I can't find NOVA classification data for ${productName}. Can you analyze its processing level and classify it according to the NOVA system?`);
+    setViewMode("chat");
+  };
   
   const handleTouchStart = (e: React.TouchEvent) => {
     touchStartX.current = e.touches[0].clientX;
@@ -242,7 +279,8 @@ const NutritionFactsPage: React.FC = () => {
       const response = await fetch(`${WIHY_API_BASE}/api/openfda/ingredient/${encodeURIComponent(ingredient.trim())}`);
       
       if (!response.ok) {
-        throw new Error(`FDA API Error: ${response.status}`);
+        // For FDA API errors (500, 404, etc), return "no results" and try wihy fallback
+        return await fallbackToWihyLookup(ingredient.trim());
       }
       
       const data = await response.json();
@@ -259,86 +297,133 @@ const NutritionFactsPage: React.FC = () => {
       };
     } catch (error: any) {
       console.error(`Error analyzing ingredient "${ingredient}":`, error);
-      return {
-        ingredient: ingredient.trim(),
-        success: false,
-        safety_score: 0,
-        risk_level: 'low',
-        recall_count: 0,
-        adverse_event_count: 0,
-        recommendations: [],
-        fda_status: 'Analysis failed',
-        analysis_summary: 'Unable to analyze this ingredient',
-        error: error.message || 'Unknown error'
-      };
+      // Network errors also get wihy fallback
+      return await fallbackToWihyLookup(ingredient.trim());
     }
   };
 
-  const analyzeAllIngredients = async (ingredientsText: string) => {
-    if (!ingredientsText) return;
+  // Fallback function to query wihy when FDA fails
+  const fallbackToWihyLookup = async (ingredient: string): Promise<IngredientAnalysis> => {
+    try {
+      const response = await fetch(`${WIHY_API_BASE}/api/ask`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          query: `Tell me about the ingredient: ${ingredient}. Is it safe? What should I know about it?`,
+          context: { ingredient_lookup: true }
+        })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        return {
+          ingredient: ingredient,
+          success: true,
+          safety_score: 0,
+          risk_level: 'low',
+          recall_count: 0,
+          adverse_event_count: 0,
+          recommendations: [],
+          fda_status: 'Wihy Analysis',
+          analysis_summary: data.response || data.answer || 'Analysis complete'
+        };
+      }
+    } catch (error) {
+      console.error(`Wihy fallback failed for ingredient "${ingredient}":`, error);
+    }
     
-    setIngredientAnalysis(prev => ({ ...prev, loading: true, error: null }));
+    // Final fallback - no results but no error display
+    return {
+      ingredient: ingredient,
+      success: false,
+      safety_score: 0,
+      risk_level: 'low',
+      recall_count: 0,
+      adverse_event_count: 0,
+      recommendations: [],
+      fda_status: 'No results',
+      analysis_summary: 'No analysis available'
+    };
+  };
+
+  // Analyze individual ingredient on demand
+  const analyzeIndividualIngredient = async (ingredient: string) => {
+    const trimmedIngredient = ingredient.trim();
+    
+    // Don't analyze if already analyzing or already analyzed
+    if (ingredientAnalysis.loadingIngredients.has(trimmedIngredient) || 
+        ingredientAnalysis.analyzedIngredients.has(trimmedIngredient)) {
+      return;
+    }
+    
+    // Add to loading set
+    setIngredientAnalysis(prev => ({ 
+      ...prev, 
+      loadingIngredients: new Set([...prev.loadingIngredients, trimmedIngredient]),
+      error: null 
+    }));
     
     try {
-      const ingredients = ingredientsText.split(',').map(ing => ing.trim()).filter(ing => ing.length > 0);
+      debug.logEvent('Starting individual FDA analysis', { ingredient: trimmedIngredient });
       
-      if (ingredients.length === 0) {
-        throw new Error('No ingredients found to analyze');
-      }
+      const analysis = await analyzeIngredient(trimmedIngredient);
       
-      debug.logEvent('Starting FDA ingredient analysis', { count: ingredients.length, ingredients });
-      
-      // Analyze ingredients in batches of 3 to avoid overwhelming the API
-      const batchSize = 3;
-      const allAnalyses: IngredientAnalysis[] = [];
-      
-      for (let i = 0; i < ingredients.length; i += batchSize) {
-        const batch = ingredients.slice(i, i + batchSize);
+      // Update state with analysis result
+      setIngredientAnalysis(prev => {
+        const newLoadingIngredients = new Set(prev.loadingIngredients);
+        newLoadingIngredients.delete(trimmedIngredient);
         
-        const batchPromises = batch.map(ingredient => analyzeIngredient(ingredient));
-        const batchResults = await Promise.all(batchPromises);
+        const newAnalyzedIngredients = new Map(prev.analyzedIngredients);
+        newAnalyzedIngredients.set(trimmedIngredient, analysis);
         
-        allAnalyses.push(...batchResults);
-        
-        // Small delay between batches to be API-friendly
-        if (i + batchSize < ingredients.length) {
-          await new Promise(resolve => setTimeout(resolve, 500));
-        }
-      }
-      
-      setIngredientAnalysis({
-        loading: false,
-        analyses: allAnalyses,
-        error: null
+        return {
+          ...prev,
+          loadingIngredients: newLoadingIngredients,
+          analyzedIngredients: newAnalyzedIngredients,
+          error: null
+        };
       });
       
-      debug.logEvent('FDA ingredient analysis completed', { 
-        total: allAnalyses.length, 
-        successful: allAnalyses.filter(a => a.success).length,
-        avgSafetyScore: allAnalyses.reduce((sum, a) => sum + a.safety_score, 0) / allAnalyses.length
+      debug.logEvent('Individual FDA analysis completed', { 
+        ingredient: trimmedIngredient,
+        success: analysis.success,
+        safetyScore: analysis.safety_score
       });
       
     } catch (error: any) {
-      console.error('Error analyzing ingredients:', error);
-      setIngredientAnalysis({
-        loading: false,
-        analyses: [],
-        error: error.message || 'Failed to analyze ingredients'
+      console.error(`Error analyzing ingredient "${trimmedIngredient}":`, error);
+      
+      // Remove from loading and add error result
+      setIngredientAnalysis(prev => {
+        const newLoadingIngredients = new Set(prev.loadingIngredients);
+        newLoadingIngredients.delete(trimmedIngredient);
+        
+        const newAnalyzedIngredients = new Map(prev.analyzedIngredients);
+        newAnalyzedIngredients.set(trimmedIngredient, {
+          ingredient: trimmedIngredient,
+          success: false,
+          safety_score: 0,
+          risk_level: 'low',
+          recall_count: 0,
+          adverse_event_count: 0,
+          recommendations: [],
+          fda_status: 'No data available',
+          analysis_summary: 'Unable to analyze this ingredient',
+          error: error.message || 'Unknown error'
+        });
+        
+        return {
+          ...prev,
+          loadingIngredients: newLoadingIngredients,
+          analyzedIngredients: newAnalyzedIngredients
+        };
       });
     }
   };
 
-  // Auto-analyze ingredients when nutrition facts data is loaded
-  useEffect(() => {
-    if (nutritionfacts?.ingredientsText && !ingredientAnalysis.loading && ingredientAnalysis.analyses.length === 0) {
-      // Add small delay to avoid immediate API calls on page load
-      const timer = setTimeout(() => {
-        analyzeAllIngredients(nutritionfacts.ingredientsText!);
-      }, 1000);
-      
-      return () => clearTimeout(timer);
-    }
-  }, [nutritionfacts?.ingredientsText]);
+  // On-demand FDA analysis - removed auto-analysis to prevent API spam
 
   // Pre-load chat response when nutrition facts data is available
   const preloadChatResponse = async (askWihyQuery: string) => {
@@ -370,9 +455,13 @@ const NutritionFactsPage: React.FC = () => {
         debug.logEvent('Chat response pre-loaded successfully');
       } else {
         console.warn('Failed to pre-load chat response:', response.status);
+        // Mark as preloaded to prevent retries on 404/500 errors
+        setChatPreloaded(true);
       }
     } catch (error) {
       console.error('Error pre-loading chat response:', error);
+      // Mark as preloaded to prevent retries on network errors
+      setChatPreloaded(true);
     } finally {
       setChatLoading(false);
     }
@@ -446,7 +535,7 @@ const NutritionFactsPage: React.FC = () => {
             alert(barcodeResult.error || 'Barcode not found in database');
           } catch (error) {
             console.error('Error during camera barcode processing:', error);
-            alert('Barcode scanning failed. Please try again.');
+            alert('Please try scanning again.');
           }
         },
         () => {
@@ -472,7 +561,7 @@ const NutritionFactsPage: React.FC = () => {
           <p className="text-gray-600 mb-4">No nutrition facts to display</p>
           <button
             onClick={() => navigate('/')}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg"
           >
             Go to Search
           </button>
@@ -490,12 +579,12 @@ const NutritionFactsPage: React.FC = () => {
     <div className="min-h-screen" style={{ backgroundColor: '#f0f7ff' }}>
       {/* History Sidebar */}
       {showHistory && (
-        <div className="fixed left-0 top-0 bottom-0 w-80 bg-white border-r border-gray-200 shadow-lg z-50 flex flex-col">
+        <div className="fixed left-0 top-0 bottom-0 w-80 bg-white border-r border-gray-200 z-50 flex flex-col">
           <div className="flex items-center justify-between p-4 border-b border-gray-200">
             <h3 className="text-lg font-semibold text-gray-800">Scan History</h3>
             <button
               onClick={() => setShowHistory(false)}
-              className="text-gray-500 hover:text-gray-700 text-xl"
+              className="text-gray-500 text-xl"
               title="Close History"
             >
               ✕
@@ -503,7 +592,7 @@ const NutritionFactsPage: React.FC = () => {
           </div>
           <div className="flex-1 flex items-center justify-center p-8">
             <div className="text-center text-gray-500">
-              <div className="text-4xl mb-4">📱</div>
+              <div className="text-4xl mb-4 text-gray-400">No Data</div>
               <p className="text-sm">No scan history available</p>
               <p className="text-xs mt-1 opacity-75">Previous scans will appear here</p>
             </div>
@@ -548,7 +637,7 @@ const NutritionFactsPage: React.FC = () => {
                     ? "opacity-100 translate-x-0 pointer-events-auto" 
                     : "opacity-0 -translate-x-full pointer-events-none absolute inset-0"
                 }`
-          } overflow-y-auto`}
+          } overflow-hidden`}
           style={{ backgroundColor: '#f0f7ff', height: 'calc(100vh - 73px)' }}
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
@@ -573,21 +662,68 @@ const NutritionFactsPage: React.FC = () => {
                 return "bg-red-500";
               };
 
+              // Enhanced Debug logging
+              console.log('NutritionFacts rendering data:', {
+                name: product.name,
+                imageUrl: product.imageUrl,
+                imageUrlType: typeof product.imageUrl,
+                imageUrlLength: product.imageUrl?.length,
+                ingredientsText: product.ingredientsText,
+                hasProduct: !!product,
+                productKeys: Object.keys(product),
+                fullProduct: product
+              });
+              
+              console.log('Image URL detailed check:', {
+                hasImageUrl: !!imageUrl,
+                imageUrlValue: imageUrl,
+                imageUrlTruthy: imageUrl ? 'truthy' : 'falsy'
+              });
+
               return (
                 <>
                   {/* Product Header */}
-                  <div className="bg-white rounded-2xl border-0 p-6 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] hover:-translate-y-2 active:scale-95 active:shadow-md active:translate-y-0 cursor-pointer transform">
+                  <div className="bg-white rounded-2xl border-0 p-6">
                     <div className="flex items-start gap-6">
-                      {imageUrl && (
-                        <div className="relative group">
-                          <img
-                            src={imageUrl}
-                            alt={name || "Product"}
-                            className="w-32 h-32 object-contain rounded-2xl border-0 bg-gradient-to-br from-white to-gray-50 shadow-lg group-hover:scale-110 group-hover:-translate-y-2 transition-all duration-300 cursor-pointer"
-                          />
-                          <div className="absolute inset-0 rounded-2xl bg-gradient-to-t from-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                      <div className="relative group overflow-hidden">
+                        {/* Enhanced framed product image - Always show container */}
+                        <div className="p-3 bg-gradient-to-br from-white via-gray-50 to-white rounded-3xl border-4 border-white overflow-hidden">
+                          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-gray-50 to-white">
+                            {imageUrl ? (
+                              <img
+                                src={imageUrl}
+                                alt={name || "Product"}
+                                className="w-32 h-32 object-contain rounded-2xl bg-white p-2"
+                                onError={(e) => {
+                                  console.log('Image failed to load:', imageUrl);
+                                  e.currentTarget.style.display = 'none';
+                                  const placeholder = e.currentTarget.nextElementSibling as HTMLElement;
+                                  if (placeholder) {
+                                    placeholder.style.display = 'flex';
+                                  }
+                                }}
+                                onLoad={() => {
+                                  console.log('Image loaded successfully:', imageUrl);
+                                }}
+                              />
+                            ) : null}
+                            {/* Placeholder for when no image or image fails to load */}
+                            <div className="w-32 h-32 bg-gray-100 rounded-2xl flex items-center justify-center" style={{display: imageUrl ? 'none' : 'flex'}}>
+                              <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                              </svg>
+                            </div>
+                            {/* Decorative frame overlay */}
+                            <div className="absolute inset-0 rounded-2xl bg-gradient-to-t from-black/5 via-transparent to-white/20 opacity-0" />
+                            {/* Frame shine effect */}
+                            <div className="absolute -inset-1 rounded-3xl bg-gradient-to-r from-blue-400/20 via-purple-400/20 to-blue-400/20 opacity-0 blur-sm" />
+                          </div>
+                          {/* Frame caption */}
+                          <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 bg-white px-3 py-1 rounded-full border border-gray-200 opacity-0">
+                            <span className="text-xs font-medium text-gray-600">Product Image</span>
+                          </div>
                         </div>
-                      )}
+                      </div>
                       <div className="flex-1 space-y-3">
                         <h1 className="text-2xl font-bold text-gray-900 leading-tight bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
                           {name || "Food item"}
@@ -595,38 +731,43 @@ const NutritionFactsPage: React.FC = () => {
                         {brand && (
                           <p className="text-base text-gray-600 font-medium">{brand}</p>
                         )}
-                        {typeof healthScore === "number" && (
-                          <div className="flex items-center gap-3 mt-4">
-                            <div className="relative hover:-translate-y-1 transition-transform duration-200 cursor-pointer">
-                              <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full ${getScoreColor(healthScore)} shadow-lg`} />
-                              <div className="absolute inset-0 rounded-full bg-white/30 animate-pulse" />
-                            </div>
-                            <span className="text-xl font-bold text-gray-900">
-                              {healthScore}<span className="text-sm text-gray-500">/100</span>
-                            </span>
-                            {grade && (
-                              <span className="px-3 py-1 bg-gradient-to-r from-blue-500 to-purple-500 text-white text-sm font-bold rounded-full shadow-lg hover:-translate-y-1 transition-all duration-200 cursor-pointer transform active:scale-95">{grade}</span>
-                            )}
+                        <div className="flex items-center gap-3 mt-4">
+                          <div className="relative">
+                            <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full ${getScoreColor(healthScore)}`} />
+                            <div className="absolute inset-0 rounded-full bg-white/30 animate-pulse" />
                           </div>
-                        )}
-                        {novaScore && (
-                          <div className="mt-3">
-                            <span className="inline-flex items-center px-4 py-2 rounded-full text-sm font-bold bg-gradient-to-r from-orange-400 to-red-500 text-white shadow-lg gap-2 hover:-translate-y-1 transition-all duration-200 cursor-pointer transform active:scale-95">
-                              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                              </svg>
-                              NOVA {novaScore}
-                              {ultraProcessed && " · Ultra-processed"}
-                            </span>
-                          </div>
-                        )}
+                          <span 
+                            className={`text-xl font-bold text-gray-900 ${typeof healthScore !== "number" ? "cursor-pointer hover:text-blue-600" : ""}`}
+                            onClick={typeof healthScore !== "number" ? handleUnknownHealthScore : undefined}
+                          >
+                            {typeof healthScore === "number" ? healthScore : 0}<span className="text-sm text-gray-500">/100</span>
+                          </span>
+                          <span 
+                            className={`px-3 py-1 bg-gradient-to-r from-blue-500 to-purple-500 text-white text-sm font-bold rounded-full ${!grade ? "cursor-pointer hover:bg-gradient-to-r hover:from-blue-600 hover:to-purple-600" : ""}`}
+                            onClick={!grade ? handleUnknownGrade : undefined}
+                          >
+                            {grade || 'U'}
+                          </span>
+                        </div>
+                        <div className="mt-3">
+                          <span 
+                            className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-bold bg-gradient-to-r from-orange-400 to-red-500 text-white gap-2 ${!novaScore ? "cursor-pointer hover:from-orange-500 hover:to-red-600" : ""}`}
+                            onClick={!novaScore ? handleUnknownNova : undefined}
+                          >
+                            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                            </svg>
+                            NOVA {novaScore || 'U'}
+                            {ultraProcessed && " · Ultra-processed"}
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </div>
 
                   {/* Nutrition Facts */}
                   {(calories || macros) && (
-                    <div className="bg-white rounded-2xl border-0 p-6 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2 active:scale-95 active:shadow-md active:translate-y-0 cursor-pointer transform">
+                    <div className="bg-white rounded-2xl border-0 p-6">
                       <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center gap-2">
                         <svg className="w-6 h-6 text-blue-600" viewBox="0 0 24 24" fill="currentColor">
                           <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/>
@@ -640,7 +781,7 @@ const NutritionFactsPage: React.FC = () => {
                       </h2>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {calories && (
-                          <div className="flex justify-between items-center p-3 bg-gradient-to-r from-orange-50 to-red-50 rounded-lg border-l-4 border-orange-400 hover:bg-gradient-to-r hover:from-orange-100 hover:to-red-100 transition-all duration-200 cursor-pointer">
+                          <div className="flex justify-between items-center p-3 bg-gradient-to-r from-orange-50 to-red-50 rounded-lg border-l-4 border-orange-400">
                             <span className="text-sm font-medium text-gray-700 flex items-center gap-2">
                               <svg className="w-4 h-4 text-orange-600" viewBox="0 0 24 24" fill="currentColor">
                                 <path d="M13.5.67s.74 2.65.74 4.8c0 2.06-1.35 3.73-3.41 3.73-2.07 0-3.63-1.67-3.63-3.73l.03-.36C5.21 7.51 4 10.62 4 14c0 4.42 3.58 8 8 8s8-3.58 8-8C20 8.61 17.41 3.8 13.5.67zM11.71 19c-1.78 0-3.22-1.4-3.22-3.14 0-1.62 1.05-2.76 2.81-3.12 1.77-.36 3.6-1.21 4.62-2.58.39 1.29.59 2.65.59 4.04 0 2.65-2.15 4.8-4.8 4.8z"/>
@@ -651,7 +792,7 @@ const NutritionFactsPage: React.FC = () => {
                           </div>
                         )}
                         {macros?.protein !== undefined && (
-                          <div className="flex justify-between items-center p-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border-l-4 border-blue-400 hover:bg-gradient-to-r hover:from-blue-100 hover:to-indigo-100 transition-all duration-200 cursor-pointer">
+                          <div className="flex justify-between items-center p-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border-l-4 border-blue-400">
                             <span className="text-sm font-medium text-gray-700 flex items-center gap-2">
                               <svg className="w-4 h-4 text-blue-600" viewBox="0 0 24 24" fill="currentColor">
                                 <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
@@ -662,7 +803,7 @@ const NutritionFactsPage: React.FC = () => {
                           </div>
                         )}
                         {macros?.carbs !== undefined && (
-                          <div className="flex justify-between items-center p-3 bg-gradient-to-r from-yellow-50 to-amber-50 rounded-lg border-l-4 border-yellow-400 hover:bg-gradient-to-r hover:from-yellow-100 hover:to-amber-100 transition-all duration-200 cursor-pointer">
+                          <div className="flex justify-between items-center p-3 bg-gradient-to-r from-yellow-50 to-amber-50 rounded-lg border-l-4 border-yellow-400">
                             <span className="text-sm font-medium text-gray-700 flex items-center gap-2">
                               <svg className="w-4 h-4 text-yellow-600" viewBox="0 0 24 24" fill="currentColor">
                                 <path d="M18 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM9 4h2v3l-1-.75L9 7V4zm9 16H6V4h1v6l2.5-1.5L12 10V4h6v16z"/>
@@ -673,7 +814,7 @@ const NutritionFactsPage: React.FC = () => {
                           </div>
                         )}
                         {macros?.fat !== undefined && (
-                          <div className="flex justify-between items-center p-3 bg-gradient-to-r from-purple-50 to-violet-50 rounded-lg border-l-4 border-purple-400 hover:bg-gradient-to-r hover:from-purple-100 hover:to-violet-100 transition-all duration-200 cursor-pointer">
+                          <div className="flex justify-between items-center p-3 bg-gradient-to-r from-purple-50 to-violet-50 rounded-lg border-l-4 border-purple-400">
                             <span className="text-sm font-medium text-gray-700 flex items-center gap-2">
                               <svg className="w-4 h-4 text-purple-600" viewBox="0 0 24 24" fill="currentColor">
                                 <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
@@ -684,7 +825,7 @@ const NutritionFactsPage: React.FC = () => {
                           </div>
                         )}
                         {macros?.fiber !== undefined && (
-                          <div className="flex justify-between items-center p-3 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border-l-4 border-green-400 hover:bg-gradient-to-r hover:from-green-100 hover:to-emerald-100 transition-all duration-200 cursor-pointer">
+                          <div className="flex justify-between items-center p-3 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border-l-4 border-green-400">
                             <span className="text-sm font-medium text-gray-700 flex items-center gap-2">
                               <svg className="w-4 h-4 text-green-600" viewBox="0 0 24 24" fill="currentColor">
                                 <path d="M17 8C8 10 5.9 16.17 3.82 21.34l1.89.66C7.84 17.17 9.64 12.65 17 11.24V17l7-7-7-7v5.76z"/>
@@ -695,7 +836,7 @@ const NutritionFactsPage: React.FC = () => {
                           </div>
                         )}
                         {macros?.sugar !== undefined && (
-                          <div className="flex justify-between items-center p-3 bg-gradient-to-r from-pink-50 to-rose-50 rounded-lg border-l-4 border-pink-400 hover:bg-gradient-to-r hover:from-pink-100 hover:to-rose-100 transition-all duration-200 cursor-pointer">
+                          <div className="flex justify-between items-center p-3 bg-gradient-to-r from-pink-50 to-rose-50 rounded-lg border-l-4 border-pink-400">
                             <span className="text-sm font-medium text-gray-700 flex items-center gap-2">
                               <svg className="w-4 h-4 text-pink-600" viewBox="0 0 24 24" fill="currentColor">
                                 <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm3.5 6L12 10.5 8.5 8 12 5.5 15.5 8zM7.34 9.66L4.66 12l2.68 2.34L10 12l-2.66-2.34zm9.32 4.68L14 12l2.66-2.34L19.34 12l-2.68 2.34z"/>
@@ -711,7 +852,7 @@ const NutritionFactsPage: React.FC = () => {
 
                   {/* Enhanced Ingredients Card with FDA Analysis */}
                   {product.ingredientsText && (
-                    <div className="bg-white rounded-2xl border-0 p-6 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2 active:scale-95 active:shadow-md active:translate-y-0 cursor-pointer transform">
+                    <div className="bg-white rounded-2xl border-0 p-6">
                       <div className="flex items-center justify-between mb-4">
                         <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
                           <svg className="w-6 h-6 text-blue-600" viewBox="0 0 24 24" fill="currentColor">
@@ -719,16 +860,6 @@ const NutritionFactsPage: React.FC = () => {
                           </svg>
                           <span className="text-gray-900">Ingredients & FDA Analysis</span>
                         </h2>
-                        
-                        {ingredientAnalysis.loading && (
-                          <div className="flex items-center gap-2 text-sm text-blue-600">
-                            <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none">
-                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
-                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
-                            </svg>
-                            Analyzing ingredients...
-                          </div>
-                        )}
                         
                         {chatLoading && (
                           <div className="flex items-center gap-2 text-sm text-green-600">
@@ -738,146 +869,126 @@ const NutritionFactsPage: React.FC = () => {
                             </svg>
                             Preparing chat...
                           </div>
-                        )}
-                        
-                        {!ingredientAnalysis.loading && ingredientAnalysis.analyses.length === 0 && !ingredientAnalysis.error && (
-                          <button
-                            onClick={() => analyzeAllIngredients(product.ingredientsText!)}
-                            className="px-3 py-1 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors"
-                          >
-                            🔬 Analyze Safety
-                          </button>
-                        )}
+                        )}        
                       </div>
                       
-                      {/* Error State */}
-                      {ingredientAnalysis.error && (
-                        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
-                          ⚠️ Analysis Error: {ingredientAnalysis.error}
-                          <button
-                            onClick={() => analyzeAllIngredients(product.ingredientsText!)}
-                            className="ml-2 underline hover:no-underline"
-                          >
-                            Retry
-                          </button>
-                        </div>
-                      )}
+                      {/* Error State - Removed to prevent technical error messages from showing to users */}
                       
                       <div className="space-y-3">
-                        {/* Show analyzed ingredients if available */}
-                        {ingredientAnalysis.analyses.length > 0 ? (
-                          ingredientAnalysis.analyses.map((analysis, idx) => {
-                            const getRiskColor = (risk: string) => {
+                        {/* Clickable ingredient list with on-demand FDA analysis */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                          {product.ingredientsText.split(',').map((ingredient, idx) => {
+                            const trimmedIngredient = ingredient.trim();
+                            const analysis = ingredientAnalysis.analyzedIngredients.get(trimmedIngredient);
+                            const isLoading = ingredientAnalysis.loadingIngredients.has(trimmedIngredient);
+                            
+                            const getRiskColor = (risk?: string) => {
                               switch (risk) {
                                 case 'low': return { bg: 'from-green-50 to-emerald-50', border: 'border-green-400', text: 'text-green-600', badge: 'bg-green-500' };
                                 case 'moderate': return { bg: 'from-yellow-50 to-amber-50', border: 'border-yellow-400', text: 'text-yellow-600', badge: 'bg-yellow-500' };
                                 case 'high': return { bg: 'from-orange-50 to-red-50', border: 'border-orange-400', text: 'text-orange-600', badge: 'bg-orange-500' };
                                 case 'very_high': return { bg: 'from-red-50 to-pink-50', border: 'border-red-400', text: 'text-red-600', badge: 'bg-red-500' };
-                                default: return { bg: 'from-gray-50 to-slate-50', border: 'border-gray-400', text: 'text-gray-600', badge: 'bg-gray-500' };
+                                default: return { bg: 'from-blue-50 to-indigo-50', border: 'border-blue-400', text: 'text-blue-600', badge: 'bg-blue-500' };
                               }
                             };
                             
-                            const colors = getRiskColor(analysis.risk_level);
+                            const defaultColors = [
+                              { bg: 'from-blue-50 to-indigo-50', border: 'border-blue-400', text: 'text-blue-600', badge: 'bg-blue-500' },
+                              { bg: 'from-green-50 to-emerald-50', border: 'border-green-400', text: 'text-green-600', badge: 'bg-green-500' },
+                              { bg: 'from-purple-50 to-violet-50', border: 'border-purple-400', text: 'text-purple-600', badge: 'bg-purple-500' },
+                              { bg: 'from-pink-50 to-rose-50', border: 'border-pink-400', text: 'text-pink-600', badge: 'bg-pink-500' },
+                              { bg: 'from-orange-50 to-amber-50', border: 'border-orange-400', text: 'text-orange-600', badge: 'bg-orange-500' },
+                              { bg: 'from-teal-50 to-cyan-50', border: 'border-teal-400', text: 'text-teal-600', badge: 'bg-teal-500' },
+                            ];
+                            
+                            const colors = analysis ? getRiskColor(analysis.risk_level) : defaultColors[idx % defaultColors.length];
                             
                             return (
-                              <div key={idx} className={`p-4 bg-gradient-to-r ${colors.bg} rounded-lg border-l-4 ${colors.border} hover:shadow-md transition-all duration-200`}>
-                                <div className="flex items-start justify-between mb-2">
-                                  <div className="flex-1">
-                                    <div className="flex items-center gap-2 mb-1">
-                                      <span className="font-semibold text-gray-800">{analysis.ingredient}</span>
-                                      <span className={`px-2 py-1 ${colors.badge} text-white text-xs rounded-full font-bold`}>
-                                        {analysis.safety_score}/100
-                                      </span>
-                                      <span className={`px-2 py-1 bg-white/80 ${colors.text} text-xs rounded-full font-medium border`}>
-                                        {analysis.risk_level.replace('_', ' ').toUpperCase()}
-                                      </span>
+                              <div key={idx} 
+                                className={`p-3 bg-gradient-to-r ${colors.bg} rounded-lg border-l-4 ${colors.border} cursor-pointer`}
+                                onClick={() => !isLoading && !analysis && analyzeIndividualIngredient(trimmedIngredient)}
+                              >
+                                <div className="flex items-center justify-between">
+                                  <span className="text-sm font-medium text-gray-700">{trimmedIngredient}</span>
+                                  
+                                  {isLoading && (
+                                    <svg className="w-4 h-4 animate-spin text-blue-600" viewBox="0 0 24 24" fill="none">
+                                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+                                    </svg>
+                                  )}
+                                  
+                                  {analysis && (
+                                    <div className="flex items-center gap-2">
+                                      {analysis.success ? (
+                                        <>
+                                          <span className={`px-2 py-1 ${colors.badge} text-white text-xs rounded-full font-bold`}>
+                                            {analysis.safety_score}/100
+                                          </span>
+                                          <span className={`px-2 py-1 bg-white/80 ${colors.text} text-xs rounded-full font-medium border`}>
+                                            {analysis.risk_level.replace('_', ' ').toUpperCase()}
+                                          </span>
+                                        </>
+                                      ) : (
+                                        <span className="text-gray-400 text-xs">No data</span>
+                                      )}
                                     </div>
-                                    
-                                    {analysis.success ? (
-                                      <div className="text-sm text-gray-700 space-y-1">
-                                        <p><strong>FDA Status:</strong> {analysis.fda_status}</p>
-                                        {(analysis.recall_count > 0 || analysis.adverse_event_count > 0) && (
-                                          <div className="flex gap-4 text-xs">
-                                            {analysis.recall_count > 0 && (
-                                              <span className="text-red-600">🚨 Recalls: {analysis.recall_count}</span>
-                                            )}
-                                            {analysis.adverse_event_count > 0 && (
-                                              <span className="text-orange-600">⚠️ Adverse Events: {analysis.adverse_event_count}</span>
-                                            )}
-                                          </div>
-                                        )}
-                                        {analysis.analysis_summary && (
-                                          <p className="text-xs text-gray-600 italic">{analysis.analysis_summary}</p>
-                                        )}
-                                      </div>
-                                    ) : (
-                                      <p className="text-sm text-gray-600">❌ {analysis.error || 'Analysis unavailable'}</p>
-                                    )}
-                                  </div>
+                                  )}
                                 </div>
                                 
-                                {/* Recommendations */}
-                                {analysis.recommendations.length > 0 && (
-                                  <div className="mt-3 pt-2 border-t border-white/50">
-                                    <h4 className="text-xs font-semibold text-gray-700 mb-1">Recommendations:</h4>
-                                    <div className="space-y-1">
-                                      {analysis.recommendations.slice(0, 2).map((rec, recIdx) => (
-                                        <div key={recIdx} className="text-xs text-gray-600 flex items-start gap-1">
-                                          <span className="text-blue-500">•</span>
-                                          <span><strong>{rec.type}:</strong> {rec.message}</span>
-                                        </div>
-                                      ))}
-                                    </div>
+                                {/* Show detailed analysis if available */}
+                                {analysis && analysis.success && (
+                                  <div className="mt-2 pt-2 border-t border-white/50 text-xs text-gray-600 space-y-1">
+                                    <p><strong>FDA Status:</strong> {analysis.fda_status}</p>
+                                    {(analysis.recall_count > 0 || analysis.adverse_event_count > 0) && (
+                                      <div className="flex gap-3">
+                                        {analysis.recall_count > 0 && (
+                                          <span className="text-red-600">Recalls: {analysis.recall_count}</span>
+                                        )}
+                                        {analysis.adverse_event_count > 0 && (
+                                          <span className="text-orange-600">Events: {analysis.adverse_event_count}</span>
+                                        )}
+                                      </div>
+                                    )}
+                                    {analysis.analysis_summary && (
+                                      <p className="italic">{analysis.analysis_summary}</p>
+                                    )}
+                                  </div>
+                                )}
+                                
+                                {analysis && !analysis.success && (
+                                  <div className="mt-2 pt-2 border-t border-white/50 text-xs text-gray-500">
+                                    {analysis.error === 'No results found' ? 'No results found' : (analysis.error || 'Analysis unavailable')}
                                   </div>
                                 )}
                               </div>
                             );
-                          })
-                        ) : (
-                          /* Fallback to basic ingredient list if no analysis */
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                            {product.ingredientsText.split(',').map((ingredient, idx) => {
-                              const colors = [
-                                { bg: 'from-blue-50 to-indigo-50', border: 'border-blue-400' },
-                                { bg: 'from-green-50 to-emerald-50', border: 'border-green-400' },
-                                { bg: 'from-purple-50 to-violet-50', border: 'border-purple-400' },
-                                { bg: 'from-pink-50 to-rose-50', border: 'border-pink-400' },
-                                { bg: 'from-orange-50 to-amber-50', border: 'border-orange-400' },
-                                { bg: 'from-teal-50 to-cyan-50', border: 'border-teal-400' },
-                              ];
-                              const color = colors[idx % colors.length];
-                              return (
-                                <div key={idx} className={`flex items-center p-3 bg-gradient-to-r ${color.bg} rounded-lg border-l-4 ${color.border} hover:bg-gradient-to-r transition-all duration-200 cursor-pointer`}>
-                                  <span className="text-sm font-medium text-gray-700">{ingredient.trim()}</span>
-                                </div>
-                              );
-                            })}
-                          </div>
-                        )}
+                          })}
+                        </div>
                         
-                        {/* Summary Stats */}
-                        {ingredientAnalysis.analyses.length > 0 && (
+                        {/* Summary Stats - only show if we have analyzed ingredients */}
+                        {ingredientAnalysis.analyzedIngredients.size > 0 && (
                           <div className="mt-4 pt-4 border-t border-gray-200">
                             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
                               <div className="bg-blue-50 p-3 rounded-lg">
-                                <div className="text-lg font-bold text-blue-600">{ingredientAnalysis.analyses.length}</div>
-                                <div className="text-xs text-blue-600">Ingredients</div>
+                                <div className="text-lg font-bold text-blue-600">{ingredientAnalysis.analyzedIngredients.size}</div>
+                                <div className="text-xs text-blue-600">Analyzed</div>
                               </div>
                               <div className="bg-green-50 p-3 rounded-lg">
                                 <div className="text-lg font-bold text-green-600">
-                                  {Math.round(ingredientAnalysis.analyses.reduce((sum, a) => sum + a.safety_score, 0) / ingredientAnalysis.analyses.length)}
+                                  {ingredientAnalysis.analyzedIngredients.size > 0 ? Math.round(Array.from(ingredientAnalysis.analyzedIngredients.values()).reduce((sum, a) => sum + a.safety_score, 0) / ingredientAnalysis.analyzedIngredients.size) : 0}
                                 </div>
                                 <div className="text-xs text-green-600">Avg Safety</div>
                               </div>
                               <div className="bg-orange-50 p-3 rounded-lg">
                                 <div className="text-lg font-bold text-orange-600">
-                                  {ingredientAnalysis.analyses.filter(a => a.risk_level === 'high' || a.risk_level === 'very_high').length}
+                                  {Array.from(ingredientAnalysis.analyzedIngredients.values()).filter(a => a.risk_level === 'high' || a.risk_level === 'very_high').length}
                                 </div>
                                 <div className="text-xs text-orange-600">High Risk</div>
                               </div>
                               <div className="bg-red-50 p-3 rounded-lg">
                                 <div className="text-lg font-bold text-red-600">
-                                  {ingredientAnalysis.analyses.reduce((sum, a) => sum + a.recall_count + a.adverse_event_count, 0)}
+                                  {Array.from(ingredientAnalysis.analyzedIngredients.values()).reduce((sum, a) => sum + a.recall_count + a.adverse_event_count, 0)}
                                 </div>
                                 <div className="text-xs text-red-600">Total Issues</div>
                               </div>
@@ -892,7 +1003,7 @@ const NutritionFactsPage: React.FC = () => {
 
                   {/* Additives Card */}
                   {product.additives && Object.keys(product.additives).length > 0 && (
-                    <div className="bg-white rounded-2xl border-0 p-6 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2 active:scale-95 active:shadow-md active:translate-y-0 cursor-pointer transform">
+                    <div className="bg-white rounded-2xl border-0 p-6 cursor-pointer transform">
                       <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center gap-2">
                         <svg className="w-6 h-6 text-orange-600" viewBox="0 0 24 24" fill="currentColor">
                           <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
@@ -902,7 +1013,7 @@ const NutritionFactsPage: React.FC = () => {
                       
                       <div className="space-y-2">
                         {Object.entries(product.additives).map(([code, name], idx) => (
-                          <div key={idx} className="flex items-center gap-3 p-3 bg-gradient-to-r from-orange-50 to-amber-50 rounded-lg border-l-4 border-orange-400 hover:bg-gradient-to-r hover:from-orange-100 hover:to-amber-100 transition-all duration-200 cursor-pointer">
+                          <div key={idx} className="flex items-center gap-3 p-3 bg-gradient-to-r from-orange-50 to-amber-50 rounded-lg border-l-4 border-orange-400 cursor-pointer">
                             <span className="px-2 py-1 bg-orange-600 text-white text-xs font-bold rounded-full">{code}</span>
                             <span className="text-sm font-medium text-gray-700">{name as string}</span>
                           </div>
@@ -913,7 +1024,7 @@ const NutritionFactsPage: React.FC = () => {
 
                   {/* Areas of Concern */}
                   {negatives.length > 0 && (
-                    <div className="bg-white rounded-2xl border-0 p-6 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2 active:scale-95 active:shadow-md active:translate-y-0 cursor-pointer transform">
+                    <div className="bg-white rounded-2xl border-0 p-6 cursor-pointer transform">
                       <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center gap-2">
                         <svg className="w-6 h-6 text-red-600" viewBox="0 0 24 24" fill="currentColor">
                           <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/>
@@ -922,7 +1033,7 @@ const NutritionFactsPage: React.FC = () => {
                       </h2>
                       <div className="space-y-4">
                         {negatives.map((negative, idx) => (
-                          <div key={idx} className="flex items-start gap-4 p-4 bg-gradient-to-r from-red-50 to-pink-50 rounded-xl border-l-4 border-red-400 hover:bg-gradient-to-r hover:from-red-100 hover:to-pink-100 transition-all duration-200 cursor-pointer">
+                          <div key={idx} className="flex items-start gap-4 p-4 bg-gradient-to-r from-red-50 to-pink-50 rounded-xl border-l-4 border-red-400 cursor-pointer">
                             <span className="w-4 h-4 rounded-full bg-gradient-to-r from-red-500 to-pink-500 mt-1 flex-shrink-0" />
                             <div className="flex-1">
                               <p className="text-base font-bold text-gray-900">{negative.label}</p>
@@ -938,7 +1049,7 @@ const NutritionFactsPage: React.FC = () => {
 
                   {/* Positive Aspects */}
                   {positives.length > 0 && (
-                    <div className="bg-white rounded-2xl border-0 p-6 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2 active:scale-95 active:shadow-md active:translate-y-0 cursor-pointer transform">
+                    <div className="bg-white rounded-2xl border-0 p-6 cursor-pointer transform">
                       <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center gap-2">
                         <svg className="w-6 h-6 text-green-600" viewBox="0 0 24 24" fill="currentColor">
                           <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
@@ -947,7 +1058,7 @@ const NutritionFactsPage: React.FC = () => {
                       </h2>
                       <div className="space-y-4">
                         {positives.map((positive, idx) => (
-                          <div key={idx} className="flex items-start gap-4 p-4 bg-gradient-to-r from-emerald-50 to-green-50 rounded-xl border-l-4 border-emerald-400 hover:bg-gradient-to-r hover:from-emerald-100 hover:to-green-100 transition-all duration-200 cursor-pointer">
+                          <div key={idx} className="flex items-start gap-4 p-4 bg-gradient-to-r from-emerald-50 to-green-50 rounded-xl border-l-4 border-emerald-400 cursor-pointer">
                             <span className="w-4 h-4 rounded-full bg-gradient-to-r from-emerald-500 to-green-500 mt-1 flex-shrink-0" />
                             <div className="flex-1">
                               <p className="text-base font-bold text-gray-900">{positive.label}</p>

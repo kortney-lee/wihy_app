@@ -15,7 +15,7 @@ export const normalizeBarcodeScan = (scanResult: any): NutritionFactsData => {
     source: 'barcode',
     name: data.product?.name || metadata.product_name,
     brand: data.product?.brand || metadata.brand,
-    imageUrl: data.product?.image_url,
+    imageUrl: scanResult.image_url || data.product?.image_url || data.image_url || metadata.image_url,
     
     // Health scores
     healthScore: data.health_score || metadata.health_score,
@@ -35,7 +35,7 @@ export const normalizeBarcodeScan = (scanResult: any): NutritionFactsData => {
     servingSize: '100g',
     
     // Ingredients and additives
-    ingredientsText: scanMetadata.ingredients_text || metadata.ingredients_text,
+    ingredientsText: scanResult.ingredients_text || scanMetadata.ingredients_text || metadata.ingredients_text || data.ingredients_text,
     fdaIngredientAnalysis: scanMetadata.fda_ingredient_analysis || metadata.fda_ingredient_analysis,
     additives: metadata.additives || data.additives || {},
     
