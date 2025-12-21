@@ -637,8 +637,12 @@ const NutritionFactsPage: React.FC = () => {
                     ? "opacity-100 translate-x-0 pointer-events-auto" 
                     : "opacity-0 -translate-x-full pointer-events-none absolute inset-0"
                 }`
-          } overflow-hidden`}
-          style={{ backgroundColor: '#f0f7ff', height: 'calc(100vh - 73px)' }}
+          } overflow-y-auto md:overflow-hidden`}
+          style={{ 
+            backgroundColor: '#f0f7ff', 
+            height: window.innerWidth >= 768 ? 'calc(100vh - 73px)' : 'auto',
+            minHeight: 'calc(100vh - 73px)'
+          }}
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
@@ -685,9 +689,9 @@ const NutritionFactsPage: React.FC = () => {
                   {/* Product Header */}
                   <div className="bg-white rounded-2xl border-0 p-6">
                     <div className="flex items-start gap-6">
-                      <div className="relative group overflow-hidden">
+                      <div className="relative group">
                         {/* Enhanced framed product image - Always show container */}
-                        <div className="p-3 bg-gradient-to-br from-white via-gray-50 to-white rounded-3xl border-4 border-white overflow-hidden">
+                        <div className="p-3 bg-gradient-to-br from-white via-gray-50 to-white rounded-3xl border-4 border-white">
                           <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-gray-50 to-white">
                             {imageUrl ? (
                               <img
