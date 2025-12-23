@@ -163,7 +163,7 @@ const MonitoringDashboard: React.FC = () => {
     autoRefreshInterval.current = setInterval(async () => {
       await loadStatus();
       await loadSummary();
-    }, 30000);
+    }, 30000) as any;
   };
 
   const loadSummary = async () => {
