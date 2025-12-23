@@ -20,6 +20,8 @@ import { normalizeBarcodeScan } from '../../utils/nutritionDataNormalizer';
 import { useDebugLog } from '../debug/DebugOverlay';
 import { saveSessionToHistory } from '../debug/DebugOverlay';
 
+// Pure Tailwind approach - animation defined in CSS files
+
 const rotatingPrompts = [
   "Scan food and explain it",
   "Analyze my meals",
@@ -265,65 +267,10 @@ const VHealthSearch: React.FC = () => {
   }, []);
 
   // ================================
-  // FORCE MOBILE ANIMATION
+  // BORDER ANIMATION
   // ================================
-  useEffect(() => {
-    // Force the animation to work on mobile by applying it directly
-    const forceAnimation = () => {
-      const container = document.querySelector('.search-input-container') as HTMLElement;
-      if (container) {
-        // Try a simpler animation approach for mobile
-        if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
-          // Mobile-specific animation using background-position sweep (matching desktop pattern)
-          container.style.setProperty('border', '2px solid transparent', 'important');
-          container.style.setProperty('background', `
-            linear-gradient(#fff, #fff) padding-box,
-            linear-gradient(90deg, #fa5f06, #ffffff, #C0C0C0, #4cbb17, #1a73e8) border-box
-          `, 'important');
-          container.style.setProperty('background-size', '100% 100%, 200% 100%', 'important');
-          container.style.setProperty('animation', 'none', 'important');
-          
-          // Use background-position animation to match desktop sweep pattern
-          let position = 0;
-          const animateSweep = () => {
-            position = (position + 1) % 200; // 0 to 200% like the original
-            container.style.setProperty('background-position', `0 0, ${position}% 0`, 'important');
-            setTimeout(() => requestAnimationFrame(animateSweep), 22); // ~2.2s for full cycle (200 * 22ms ≈ 4.4s)
-          };
-          animateSweep();
-          
-          container.classList.add('force-mobile-animation');
-          logger.debug('Mobile device detected - custom gradient animation started');
-          debug.logEvent('Mobile animation applied', { isMobile: true, platform: PlatformDetectionService.getPlatform() });
-        } else {
-          // Desktop - use CSS animation
-          debug.logEvent('Desktop animation applied', { isMobile: false });
-          container.style.setProperty('animation', 'wiH-border-sweep 2.2s linear infinite', 'important');
-          container.style.setProperty('background', `
-            linear-gradient(#fff, #fff) padding-box,
-            linear-gradient(90deg, #fa5f06, #ffffff, #C0C0C0, #4cbb17, #1a73e8) border-box
-          `, 'important');
-          container.style.setProperty('background-size', '100% 100%, 200% 100%', 'important');
-          container.style.setProperty('border', '2px solid transparent', 'important');
-          logger.debug('Desktop animation applied');
-        }
-        
-        logger.debug('Forced animation applied to search container');
-      }
-    };
-
-    // Apply immediately and also after a short delay to ensure it sticks
-    forceAnimation();
-    const timeoutId = setTimeout(forceAnimation, 100);
-    
-    // Also apply when the component mounts fully
-    const mountTimeout = setTimeout(forceAnimation, 500);
-    
-    return () => {
-      clearTimeout(timeoutId);
-      clearTimeout(mountTimeout);
-    };
-  }, []);
+  // Animation is now handled by the animate-border-sweep CSS class applied directly to the search-input-container
+  // Following TailwindDemo patterns for cleaner utility-based animations
 
   // ================================
   // UTILITY FUNCTIONS
@@ -1200,13 +1147,9 @@ const VHealthSearch: React.FC = () => {
       )}
       
       {/* AUTHENTICATION COMPONENT - Top-right login/logout (Hidden visually on mobile but still rendered for functionality) */}
-      <div style={{
-        position: 'fixed',
-        top: '20px',
-        right: '20px',
-        zIndex: 10002,
-        display: PlatformDetectionService.isNative() ? 'none' : 'block'
-      }}>
+      <div className={`fixed top-5 right-5 z-[10002] ${
+        PlatformDetectionService.isNative() ? 'hidden' : 'block'
+      }`}>
         {(() => {
           const isAuthed = authService.getState().isAuthenticated;
           
@@ -1246,7 +1189,7 @@ const VHealthSearch: React.FC = () => {
         </div>
         
         {/* SEARCH INPUT SECTION - Main search bar with icons */}
-        <div className="search-input-container">
+        <div className="relative w-full max-w-[584px] mx-auto my-6 p-0 rounded-3xl bg-white transition-shadow duration-200 shadow-[0_2px_5px_1px_rgba(64,60,67,0.16)] hover:shadow-[0_2px_5px_1px_rgba(64,60,67,0.16)] focus-within:shadow-[0_2px_5px_1px_rgba(64,60,67,0.16)] animate-border-sweep border-2 border-transparent" style={{background: 'linear-gradient(#fff, #fff) padding-box, linear-gradient(90deg, #fa5f06, #ffffff, #C0C0C0, #4cbb17, #1a73e8) border-box', backgroundSize: '100% 100%, 200% 100%'}}>
           <form onSubmit={(e) => { 
             e.preventDefault();
             handleSearch();
@@ -1263,19 +1206,10 @@ const VHealthSearch: React.FC = () => {
                 }
               }}
               placeholder={placeholder}
-              className="search-input"
+              className="w-full min-h-[44px] max-h-[40vh] py-2.5 pl-4 pr-[128px] text-base text-gray-800 bg-transparent border-none outline-none rounded-3xl resize-none overflow-hidden font-sans leading-6 placeholder-gray-400 md:min-h-[48px] md:pr-[128px] md:pl-4 md:py-3 focus:text-left disabled:opacity-60 disabled:cursor-not-allowed"
               autoFocus
               disabled={isLoading}
               rows={1}
-              style={{
-                resize: 'none',
-                overflow: 'hidden',
-                minHeight: '44px',
-                height: 'auto',
-                paddingRight: '100px',
-                width: '100%', // Use full width of container
-                boxSizing: 'border-box' // Include padding in width calculation
-              }}
               onInput={(e) => {
                 // Auto-resize height algorithm
                 const target = e.target as HTMLTextAreaElement;
@@ -1287,11 +1221,11 @@ const VHealthSearch: React.FC = () => {
           </form>
 
           {/* SEARCH ICONS - Clear, Camera, Voice input buttons */}
-          <div className="search-icons">
+          <div className="absolute right-2 top-1/2 -translate-y-1/2 flex gap-1.5 items-center bg-white/90 p-1 rounded-2xl md:gap-2 md:p-1">
             {/* CLEAR BUTTON - Clears current search query */}
             {searchQuery && (
               <button 
-                className="icon-button clear-button" 
+                className="w-8 h-8 border-none bg-gray-100 text-gray-500 hover:bg-gray-200 hover:text-blue-600 transition-colors cursor-pointer rounded-full flex items-center justify-center" 
                 onClick={handleClearSearch}
                 aria-label="Clear"
               >
@@ -1305,7 +1239,7 @@ const VHealthSearch: React.FC = () => {
             <button
               type="button"
               onClick={() => setIsUploadModalOpen(true)}
-              className="icon-button"
+              className="w-8 h-8 border-none bg-transparent text-gray-500 hover:bg-gray-100 hover:text-blue-600 transition-colors cursor-pointer rounded-full flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
               aria-label="Upload image"
               disabled={isLoading}
             >
@@ -1350,7 +1284,11 @@ const VHealthSearch: React.FC = () => {
                   setIsListening(false);
                 }
               }}
-              className={`icon-button ${isListening ? 'listening' : ''}`}
+              className={`w-8 h-8 border-none transition-colors cursor-pointer rounded-full flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed ${
+                isListening 
+                  ? 'bg-red-500 text-white' 
+                  : 'bg-transparent text-gray-500 hover:bg-gray-100 hover:text-blue-600'
+              }`}
               aria-label={isListening ? 'Stop listening' : 'Start voice input'}
               disabled={isLoading}
             >
@@ -1370,24 +1308,10 @@ const VHealthSearch: React.FC = () => {
               e.preventDefault();
               handleSearch();
             }}
-            className="search-btn-mobile primary"
+            className={`h-12 !bg-[#4285f4] text-white border-none rounded-3xl text-base font-medium m-2 transition-all duration-200 ease shadow-[0_2px_4px_rgba(0,0,0,0.1)] flex items-center justify-center px-6 ${
+              isLoading || !searchQuery.trim() ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'
+            }`}
             disabled={!searchQuery.trim() || isLoading}
-            style={{
-              width: '100%',
-              maxWidth: '300px',
-              height: '48px',
-              backgroundColor: '#4285f4',
-              color: 'white',
-              border: 'none',
-              borderRadius: '24px',
-              fontSize: '16px',
-              fontWeight: '500',
-              margin: '8px',
-              cursor: isLoading || !searchQuery.trim() ? 'not-allowed' : 'pointer',
-              opacity: isLoading || !searchQuery.trim() ? 0.6 : 1,
-              transition: 'all 0.2s ease',
-              boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-            }}
             onMouseOver={(e) => {
               if (!isLoading && searchQuery.trim()) {
                 e.currentTarget.style.backgroundColor = '#3367d6';
@@ -1412,25 +1336,11 @@ const VHealthSearch: React.FC = () => {
               if (isLoading) return;
               navigate('/research');
             }}
-            className="search-btn-mobile secondary"
+            className={`h-12 !bg-[#f8f9fa] !text-[#3c4043] !border !border-[#f0f0f0] rounded-3xl text-base font-medium m-2 transition-all duration-200 ease shadow-md flex items-center justify-center px-6 ${
+              isLoading ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'
+            }`}
             type="button"
             disabled={isLoading}
-            style={{
-              width: '100%',
-              maxWidth: '300px',
-              height: '48px',
-              backgroundColor: '#f8f9fa',
-              color: '#3c4043',
-              border: '1px solid #f0f0f0',
-              borderRadius: '24px',
-              fontSize: '16px',
-              fontWeight: '500',
-              margin: '8px',
-              cursor: isLoading ? 'not-allowed' : 'pointer',
-              opacity: isLoading ? 0.6 : 1,
-              transition: 'all 0.2s ease',
-              boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-            }}
             onMouseOver={(e) => {
               if (!isLoading) {
                 e.currentTarget.style.backgroundColor = '#f1f3f4';
@@ -1455,49 +1365,14 @@ const VHealthSearch: React.FC = () => {
       
       {/* INLINE RESULTS DISPLAY - Shows search results without navigation */}
       {showResults && (
-        <div 
-          className="inline-results-section"
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'rgba(255, 255, 255, 0.98)',
-            backdropFilter: 'blur(2px)',
-            zIndex: 1000,
-            overflow: 'auto',
-            padding: '20px'
-          }}
-        >
-          <div style={{
-            maxWidth: '1200px',
-            margin: '0 auto',
-            display: 'grid',
-            gridTemplateColumns: window.innerWidth <= 768 ? '1fr' : '2fr 1fr',
-            gap: '20px',
-            minHeight: 'calc(100vh - 40px)'
-          }}>
+        <div className="fixed inset-0 bg-white/98 backdrop-blur-sm z-[1000] overflow-auto p-5">
+          <div className={`max-w-6xl mx-auto gap-5 min-h-[calc(100vh-2.5rem)] ${
+            window.innerWidth <= 768 ? 'grid grid-cols-1' : 'grid grid-cols-3'
+          }`}>
             
             {/* Chat Widget as Main Content */}
-            <div style={{
-              backgroundColor: 'white',
-              borderRadius: '12px',
-              border: '1px solid #e5e7eb',
-              boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-              padding: '24px',
-              display: 'flex',
-              flexDirection: 'column',
-              overflow: 'hidden'
-            }}>
-              <div style={{ 
-                display: 'flex', 
-                justifyContent: 'space-between', 
-                alignItems: 'center', 
-                marginBottom: '20px',
-                borderBottom: '1px solid #e5e7eb',
-                paddingBottom: '15px'
-              }}>
+            <div className="col-span-2 bg-white rounded-xl border border-gray-200 shadow-lg p-6 flex flex-col overflow-hidden">
+              <div className="flex justify-between items-center mb-5 border-b border-gray-200 pb-4">
                 <h2 style={{ 
                   margin: 0, 
                   color: '#1f2937', 
@@ -1535,32 +1410,11 @@ const VHealthSearch: React.FC = () => {
             </div>
 
             {/* Charts Sidebar */}
-            <div style={{
-              padding: '20px',
-              backgroundColor: '#ffffff',
-              borderRadius: '12px',
-              border: '1px solid #e5e7eb',
-              boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-              display: 'flex',
-              flexDirection: 'column',
-              overflow: 'hidden'
-            }}>
-              <h3 style={{ 
-                marginBottom: '20px', 
-                color: '#1f2937', 
-                fontSize: '18px', 
-                fontWeight: '600',
-                flexShrink: 0 
-              }}>
+            <div className="p-5 bg-white rounded-xl border border-gray-200 shadow-lg flex flex-col overflow-hidden">
+              <h3 className="mb-5 text-gray-800 text-lg font-semibold flex-shrink-0">
                 Analysis Charts
               </h3>
-              <div style={{ 
-                display: 'flex', 
-                flexDirection: 'column', 
-                gap: '20px',
-                flex: 1,
-                overflow: 'auto'
-              }}>
+              <div className="flex flex-col gap-5 flex-1 overflow-auto">
                 {currentApiResponse && (
                   <>
                     <div style={{ minHeight: '200px' }}>
@@ -1606,69 +1460,38 @@ const VHealthSearch: React.FC = () => {
 
       {/* BOTTOM NAVIGATION - Mobile-friendly menu (Android standard 56dp height) */}
       {PlatformDetectionService.isNative() && (
-        <div style={{
-          position: 'fixed',
-          bottom: 0,
-          left: 0,
-          right: 0,
-          height: '56px',
-          backgroundColor: isDarkMode ? '#1f1f1f' : '#ffffff',
-          display: 'flex',
-          justifyContent: 'space-around',
-          alignItems: 'center',
-          borderTop: `1px solid ${isDarkMode ? '#2d2d2d' : '#e0e0e0'}`,
-          zIndex: 1200,
-          boxShadow: isDarkMode ? 'none' : '0 -2px 8px rgba(0, 0, 0, 0.1)'
-        }}>
+        <div className={`fixed bottom-0 left-0 right-0 h-14 flex justify-around items-center border-t z-[1200] ${
+          isDarkMode 
+            ? 'bg-gray-800 border-gray-700' 
+            : 'bg-white border-gray-200 shadow-lg'
+        }`}>
           {/* Analyze Nutrition - Links to Search */}
           <button
             onClick={() => {
               setSearchQuery('');
               setShowResults(false);
             }}
-            style={{
-              flex: 1,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'flex-start',
-              background: 'none',
-              border: 'none',
-              color: isDarkMode ? '#e0e0e0' : '#5f6368',
-              padding: '0',
-              cursor: 'pointer',
-              gap: '4px',
-              transition: 'color 0.2s'
-            }}
+            className={`flex-1 flex flex-col items-center justify-start bg-transparent border-none p-0 cursor-pointer gap-1 transition-colors ${
+              isDarkMode ? 'text-gray-200 hover:text-white' : 'text-gray-600 hover:text-blue-600'
+            }`}
           >
             <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
               <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
             </svg>
-            <span style={{ fontSize: '11px', fontWeight: '500' }}>Search</span>
+            <span className="text-[11px] font-medium">Search</span>
           </button>
 
           {/* Scan - Camera/Upload */}
           <button
             onClick={() => setIsUploadModalOpen(true)}
-            style={{
-              flex: 1,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'flex-start',
-              background: 'none',
-              border: 'none',
-              color: isDarkMode ? '#e0e0e0' : '#5f6368',
-              padding: '0',
-              cursor: 'pointer',
-              gap: '4px',
-              transition: 'color 0.2s'
-            }}
+            className={`flex-1 flex flex-col items-center justify-start bg-transparent border-none p-0 cursor-pointer gap-1 transition-colors ${
+              isDarkMode ? 'text-gray-200 hover:text-white' : 'text-gray-600 hover:text-green-600'
+            }`}
           >
             <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
               <path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/>
             </svg>
-            <span style={{ fontSize: '11px', fontWeight: '500' }}>Scan</span>
+            <span className="text-[11px] font-medium">Scan</span>
           </button>
 
           {/* Verify With Evidence - Navigate to Research Dashboard */}
@@ -1676,25 +1499,14 @@ const VHealthSearch: React.FC = () => {
             onClick={() => {
               navigate('/research');
             }}
-            style={{
-              flex: 1,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'flex-start',
-              background: 'none',
-              border: 'none',
-              color: isDarkMode ? '#e0e0e0' : '#5f6368',
-              padding: '0',
-              cursor: 'pointer',
-              gap: '4px',
-              transition: 'color 0.2s'
-            }}
+            className={`flex-1 flex flex-col items-center justify-start bg-transparent border-none p-0 cursor-pointer gap-1 transition-colors ${
+              isDarkMode ? 'text-gray-200 hover:text-white' : 'text-gray-600 hover:text-purple-600'
+            }`}
           >
             <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
               <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/>
             </svg>
-            <span style={{ fontSize: '11px', fontWeight: '500' }}>Research</span>
+            <span className="text-[11px] font-medium">Research</span>
           </button>
 
           {/* Login/Account */}
@@ -1706,25 +1518,14 @@ const VHealthSearch: React.FC = () => {
                 (loginButton as HTMLElement).click();
               }
             }}
-            style={{
-              flex: 1,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'flex-start',
-              background: 'none',
-              border: 'none',
-              color: isDarkMode ? '#e0e0e0' : '#5f6368',
-              padding: '0',
-              cursor: 'pointer',
-              gap: '4px',
-              transition: 'color 0.2s'
-            }}
+            className={`flex-1 flex flex-col items-center justify-start bg-transparent border-none p-0 cursor-pointer gap-1 transition-colors ${
+              isDarkMode ? 'text-gray-200 hover:text-white' : 'text-gray-600 hover:text-blue-600'
+            }`}
           >
             <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
               <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/>
             </svg>
-          <span style={{ fontSize: '11px', fontWeight: '500' }}>Login</span>
+          <span className="text-[11px] font-medium">Login</span>
         </button>
       </div>
     )}

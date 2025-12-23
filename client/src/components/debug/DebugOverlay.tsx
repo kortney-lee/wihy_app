@@ -208,7 +208,7 @@ const DebugOverlay: React.FC<DebugOverlayProps> = ({ pageName }) => {
       const url = args[0].toString();
       addLog('api', `FETCH → ${url}`);
       try {
-        const response = await originalFetch(...args);
+        const response = await originalFetch(url, args[1]);
         addLog('api', `FETCH ← ${url} (${response.status})`, { status: response.status });
         return response;
       } catch (error: any) {

@@ -250,7 +250,7 @@ class SessionManager {
           }
         }
       }
-    }, 5 * 60 * 1000); // 5 minutes
+    }, 5 * 60 * 1000) as any; // 5 minutes
   }
 
   /**

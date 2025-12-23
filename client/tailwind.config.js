@@ -65,6 +65,7 @@ module.exports = {
         'slide-up': 'slideUp 0.6s ease-out forwards',
         'typing': 'typing 1.4s ease-in-out infinite',
         'spin': 'spin 1s linear infinite',
+        'border-sweep': 'wiH-border-sweep 2.2s linear infinite',
       },
       transitionDelay: {
         '0': '0ms',
@@ -103,6 +104,10 @@ module.exports = {
         spin: {
           '0%': { transform: 'rotate(0deg)' },
           '100%': { transform: 'rotate(360deg)' },
+        },
+        'wiH-border-sweep': {
+          '0%': { backgroundPosition: '0 0, 0% 0' },
+          '100%': { backgroundPosition: '0 0, 200% 0' },
         },
         modalSlideIn: {
           '0%': { opacity: '0', transform: 'translate(-50%, -50%) scale(0.95)' },
