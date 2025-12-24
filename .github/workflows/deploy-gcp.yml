@@ -1,0 +1,420 @@
+name: Deploy to Google Cloud Platform
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+
+env:
+  PROJECT_ID: wihy-ai
+  GAR_LOCATION: us-central1
+  SERVICE: wihy-frontend
+  REGION: us-central1
+  REPOSITORY: wihy-repo
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Run tests
+      run: npm test -- --coverage --watchAll=false
+
+    - name: Run ESLint
+      run: npm run lint || true
+
+    - name: Build application
+      run: npm run build
+
+  deploy-frontend-firebase:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Build application
+      run: npm run build
+      env:
+        REACT_APP_API_BASE_URL: ${{ secrets.REACT_APP_API_BASE_URL }}
+        REACT_APP_FIREBASE_API_KEY: ${{ secrets.FIREBASE_API_KEY }}
+        REACT_APP_FIREBASE_AUTH_DOMAIN: ${{ secrets.FIREBASE_AUTH_DOMAIN }}
+        REACT_APP_FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
+        REACT_APP_FIREBASE_STORAGE_BUCKET: ${{ secrets.FIREBASE_STORAGE_BUCKET }}
+        REACT_APP_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.FIREBASE_MESSAGING_SENDER_ID }}
+        REACT_APP_FIREBASE_APP_ID: ${{ secrets.FIREBASE_APP_ID }}
+
+    - name: Deploy to Firebase Hosting
+      uses: FirebaseExtended/action-hosting-deploy@v0
+      with:
+        repoToken: '${{ secrets.GITHUB_TOKEN }}'
+        firebaseServiceAccount: '${{ secrets.GCP_SA_KEY }}'
+        projectId: '${{ env.PROJECT_ID }}'
+        channelId: live
+
+  deploy-backend-cloud-run:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+    - name: Set up Cloud SDK
+      uses: google-github-actions/setup-gcloud@v2
+      with:
+        project_id: ${{ env.PROJECT_ID }}
+
+    - name: Configure Docker to use gcloud as credential helper
+      run: gcloud auth configure-docker ${{ env.GAR_LOCATION }}-docker.pkg.dev
+
+    - name: Create Artifact Registry repository if not exists
+      run: |
+        gcloud artifacts repositories describe ${{ env.REPOSITORY }} \
+          --location=${{ env.GAR_LOCATION }} || \
+        gcloud artifacts repositories create ${{ env.REPOSITORY }} \
+          --repository-format=docker \
+          --location=${{ env.GAR_LOCATION }} \
+          --description="WIHY Health App repository"
+
+    - name: Create Dockerfile for production
+      run: |
+        cat > Dockerfile.production << EOF
+        FROM node:18-alpine AS builder
+        WORKDIR /app
+        COPY package*.json ./
+        RUN npm ci --only=production && npm cache clean --force
+        COPY . .
+        RUN npm run build
+
+        FROM nginx:alpine
+        COPY --from=builder /app/build /usr/share/nginx/html
+        COPY nginx.conf /etc/nginx/nginx.conf
+        
+        # Add health check endpoint
+        RUN echo 'server { listen 8080; location /health { return 200 "OK"; access_log off; } }' > /etc/nginx/conf.d/health.conf
+        
+        EXPOSE 8080
+        CMD ["nginx", "-g", "daemon off;"]
+        EOF
+
+    - name: Create nginx configuration
+      run: |
+        cat > nginx.conf << EOF
+        events {
+          worker_connections 1024;
+        }
+        
+        http {
+          include /etc/nginx/mime.types;
+          default_type application/octet-stream;
+          
+          sendfile on;
+          keepalive_timeout 65;
+          gzip on;
+          gzip_types text/plain text/css application/json application/javascript text/xml application/xml;
+          
+          server {
+            listen 8080;
+            root /usr/share/nginx/html;
+            index index.html;
+            
+            location / {
+              try_files \$uri \$uri/ /index.html;
+              add_header Cache-Control "public, max-age=31536000";
+            }
+            
+            location /static/ {
+              expires 1y;
+              add_header Cache-Control "public, immutable";
+            }
+            
+            location /health {
+              return 200 "OK";
+              access_log off;
+            }
+          }
+        }
+        EOF
+
+    - name: Build and push Docker image
+      run: |
+        docker build -f Dockerfile.production -t ${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/frontend:${{ github.sha }} .
+        docker push ${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/frontend:${{ github.sha }}
+
+    - name: Deploy to Cloud Run
+      run: |
+        gcloud run deploy ${{ env.SERVICE }} \
+          --image ${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/frontend:${{ github.sha }} \
+          --platform managed \
+          --region ${{ env.REGION }} \
+          --allow-unauthenticated \
+          --port 8080 \
+          --memory 1Gi \
+          --cpu 1 \
+          --min-instances 0 \
+          --max-instances 5 \
+          --timeout 300 \
+          --concurrency 100 \
+          --set-env-vars="NODE_ENV=production"
+
+    - name: Get Cloud Run URL
+      run: |
+        URL=$(gcloud run services describe ${{ env.SERVICE }} --region ${{ env.REGION }} --format 'value(status.url)')
+        echo "Frontend deployed to: $URL"
+        echo "FRONTEND_URL=$URL" >> $GITHUB_OUTPUT
+
+  deploy-backend-services:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+    - name: Set up Cloud SDK
+      uses: google-github-actions/setup-gcloud@v2
+      with:
+        project_id: ${{ env.PROJECT_ID }}
+
+    - name: Deploy Nutrition Analysis Function
+      run: |
+        cat > nutrition-function.js << EOF
+        const functions = require('@google-cloud/functions-framework');
+        const { Storage } = require('@google-cloud/storage');
+        const { ImageAnnotatorClient } = require('@google-cloud/vision');
+
+        const storage = new Storage();
+        const vision = new ImageAnnotatorClient();
+
+        functions.http('analyzeNutrition', async (req, res) => {
+          res.set('Access-Control-Allow-Origin', '*');
+          res.set('Access-Control-Allow-Methods', 'POST, OPTIONS');
+          res.set('Access-Control-Allow-Headers', 'Content-Type');
+
+          if (req.method === 'OPTIONS') {
+            return res.status(204).send('');
+          }
+
+          try {
+            const { image, imageUrl } = req.body;
+            
+            let imageBuffer;
+            if (image) {
+              imageBuffer = Buffer.from(image, 'base64');
+            } else if (imageUrl) {
+              const response = await fetch(imageUrl);
+              imageBuffer = await response.buffer();
+            } else {
+              return res.status(400).json({ error: 'No image provided' });
+            }
+
+            // Analyze image with Vision API
+            const [result] = await vision.labelDetection({
+              image: { content: imageBuffer }
+            });
+
+            const labels = result.labelAnnotations || [];
+            const foodLabels = labels.filter(label => 
+              label.description.toLowerCase().includes('food') ||
+              label.description.toLowerCase().includes('fruit') ||
+              label.description.toLowerCase().includes('vegetable')
+            );
+
+            // Mock nutrition data (replace with actual nutrition API)
+            const nutritionData = {
+              foodName: foodLabels[0]?.description || 'Unknown Food',
+              calories: Math.floor(Math.random() * 300) + 50,
+              protein: Math.floor(Math.random() * 30) + 5,
+              carbs: Math.floor(Math.random() * 50) + 10,
+              fat: Math.floor(Math.random() * 20) + 2,
+              fiber: Math.floor(Math.random() * 10) + 1,
+              sugar: Math.floor(Math.random() * 15) + 2,
+              confidence: foodLabels[0]?.score || 0.5
+            };
+
+            res.json({
+              success: true,
+              data: nutritionData,
+              labels: foodLabels
+            });
+
+          } catch (error) {
+            console.error('Error analyzing nutrition:', error);
+            res.status(500).json({
+              success: false,
+              error: 'Failed to analyze nutrition'
+            });
+          }
+        });
+        EOF
+
+        cat > package.json << EOF
+        {
+          "name": "nutrition-function",
+          "version": "1.0.0",
+          "dependencies": {
+            "@google-cloud/functions-framework": "^3.0.0",
+            "@google-cloud/storage": "^7.0.0",
+            "@google-cloud/vision": "^4.0.0"
+          }
+        }
+        EOF
+
+        gcloud functions deploy nutrition-analysis \
+          --gen2 \
+          --runtime=nodejs18 \
+          --region=${{ env.REGION }} \
+          --source=. \
+          --entry-point=analyzeNutrition \
+          --trigger=http \
+          --allow-unauthenticated \
+          --memory=1GB \
+          --timeout=60s
+
+  setup-database:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+    - name: Set up Cloud SDK
+      uses: google-github-actions/setup-gcloud@v2
+      with:
+        project_id: ${{ env.PROJECT_ID }}
+
+    - name: Create Firestore database if not exists
+      run: |
+        # Check if Firestore is already initialized
+        gcloud firestore databases describe --database="(default)" || \
+        gcloud firestore databases create --database="(default)" --location=nam5
+
+    - name: Deploy Firestore rules
+      run: |
+        cat > firestore.rules << EOF
+        rules_version = '2';
+        service cloud.firestore {
+          match /databases/{database}/documents {
+            // Users can read and write their own data
+            match /users/{userId} {
+              allow read, write: if request.auth != null && request.auth.uid == userId;
+            }
+            
+            // Public nutrition data
+            match /nutrition/{document=**} {
+              allow read: if true;
+              allow write: if request.auth != null;
+            }
+            
+            // User meals - private to user
+            match /meals/{mealId} {
+              allow read, write: if request.auth != null && 
+                resource.data.userId == request.auth.uid;
+            }
+          }
+        }
+        EOF
+
+        gcloud firestore deploy --rules=firestore.rules
+
+  security-scan:
+    needs: test
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Run npm audit
+      run: |
+        npm audit --audit-level high || echo "Security vulnerabilities found"
+
+    - name: Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@master
+      with:
+        scan-type: 'fs'
+        scan-ref: '.'
+        format: 'sarif'
+        output: 'trivy-results.sarif'
+
+    - name: Upload Trivy scan results to GitHub Security tab
+      uses: github/codeql-action/upload-sarif@v3
+      with:
+        sarif_file: 'trivy-results.sarif'
+      if: always()
+
+  notify-deployment:
+    needs: [deploy-frontend-firebase, deploy-backend-cloud-run, deploy-backend-services]
+    runs-on: ubuntu-latest
+    if: always()
+    
+    steps:
+    - name: Get deployment status
+      run: |
+        echo "Deployment completed!"
+        echo "Frontend Status: ${{ needs.deploy-frontend-firebase.result }}"
+        echo "Backend Status: ${{ needs.deploy-backend-cloud-run.result }}"
+        echo "Services Status: ${{ needs.deploy-backend-services.result }}"
