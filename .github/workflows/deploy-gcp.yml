@@ -43,9 +43,8 @@ jobs:
     - name: Security Update - CVE-2025-55182 
       run: |
         cd client
-        # Update React to latest stable version to address CVE-2025-55182
-        npm update react react-dom react-scripts
-        npm audit fix --force || echo "Some vulnerabilities may require manual review"
+        # Ensure React is at secure version (18.3.1+) to address CVE-2025-55182
+        npm list react --depth=0 | grep -q "react@18\.3\.[1-9]" || npm install react@^18.3.1 react-dom@^18.3.1
 
     - name: Run tests
       run: npm test -- --coverage --watchAll=false
@@ -87,9 +86,8 @@ jobs:
     - name: Security Update - CVE-2025-55182
       run: |
         cd client
-        # Update React to latest stable version to address CVE-2025-55182
-        npm update react react-dom react-scripts
-        npm audit fix --force || echo "Some vulnerabilities may require manual review"
+        # Ensure React is at secure version (18.3.1+) to address CVE-2025-55182
+        npm list react --depth=0 | grep -q "react@18\.3\.[1-9]" || npm install react@^18.3.1 react-dom@^18.3.1
 
     - name: Build application
       run: npm run build
