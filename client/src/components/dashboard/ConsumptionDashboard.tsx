@@ -36,6 +36,22 @@ const ConsumptionDashboard: React.FC<ConsumptionDashboardProps> = ({
 }) => {
   const [activeSubTab, setActiveSubTab] = useState<'summary' | 'shopping' | 'receipts'>('summary');
   const [timeframe, setTimeframe] = useState<'day' | 'week' | 'month'>(period);
+  
+  // Shopping list state
+  const [shoppingList, setShoppingList] = useState<ShoppingListItem[]>([
+    { id: '1', name: 'Chicken breast', quantity: 2, unit: 'lb', store: 'Aldi', source: 'WIHY', status: 'PLANNED', estimatedCaloriesPerServing: 165 },
+    { id: '2', name: 'Brown rice', quantity: 1, unit: 'bag', store: 'Walmart', source: 'COACH', status: 'PLANNED', estimatedCaloriesPerServing: 215 },
+    { id: '3', name: 'Apples', quantity: 6, unit: 'ct', store: 'Aldi', source: 'USER', status: 'PURCHASED', estimatedCaloriesPerServing: 95 }
+  ]);
+  const [sourceFilter, setSourceFilter] = useState<'ALL' | 'WIHY' | 'COACH' | 'USER'>('ALL');
+  const [showAddItemForm, setShowAddItemForm] = useState(false);
+  const [newItem, setNewItem] = useState({
+    name: '',
+    quantity: 1,
+    unit: '',
+    store: '',
+    estimatedCaloriesPerServing: ''
+  });
 
   // Temporary mock data – you'll swap this for real API data later
   const mockTotals = {
@@ -44,11 +60,10 @@ const ConsumptionDashboard: React.FC<ConsumptionDashboardProps> = ({
     month: { calories: 62000, target: 69000, meals: 104, items: 480 }
   }[timeframe];
 
-  const mockShoppingList: ShoppingListItem[] = [
-    { id: '1', name: 'Chicken breast', quantity: 2, unit: 'lb', store: 'Aldi', source: 'WIHY', status: 'PLANNED', estimatedCaloriesPerServing: 165 },
-    { id: '2', name: 'Brown rice', quantity: 1, unit: 'bag', store: 'Walmart', source: 'COACH', status: 'PLANNED', estimatedCaloriesPerServing: 215 },
-    { id: '3', name: 'Apples', quantity: 6, unit: 'ct', store: 'Aldi', source: 'USER', status: 'PURCHASED', estimatedCaloriesPerServing: 95 }
-  ];
+  // Filter shopping list by source
+  const filteredShoppingList = shoppingList.filter(item => 
+    sourceFilter === 'ALL' || item.source === sourceFilter
+  );
 
   const mockReceipts: ReceiptSummary[] = [
     { id: 'r1', date: '2025-11-30', store: "McDonald's", type: 'FAST_FOOD', itemsCount: 3, totalCalories: 1850, totalSpend: 18.75 },
@@ -56,10 +71,56 @@ const ConsumptionDashboard: React.FC<ConsumptionDashboardProps> = ({
   ];
 
   const handleAskWihyForList = () => {
+    // Add WIHY generated items
+    const wihyItems: ShoppingListItem[] = [
+      { id: Date.now() + '-wihy-1', name: 'Greek yogurt', quantity: 2, unit: 'containers', store: 'Kroger', source: 'WIHY', status: 'PLANNED', estimatedCaloriesPerServing: 150 },
+      { id: Date.now() + '-wihy-2', name: 'Quinoa', quantity: 1, unit: 'bag', store: 'Whole Foods', source: 'WIHY', status: 'PLANNED', estimatedCaloriesPerServing: 220 },
+      { id: Date.now() + '-wihy-3', name: 'Spinach', quantity: 1, unit: 'bunch', store: 'Kroger', source: 'WIHY', status: 'PLANNED', estimatedCaloriesPerServing: 25 }
+    ];
+    setShoppingList(prev => [...prev, ...wihyItems]);
     onAnalyze(
       'Generate a healthy shopping list based on my current goals.',
-      'Opening WIHY to generate a smart shopping list using your health goals and recent intake.'
+      'Generated personalized shopping suggestions based on your health goals and nutritional needs.'
     );
+  };
+  
+  const handleImportCoachItems = () => {
+    const coachItems: ShoppingListItem[] = [
+      { id: Date.now() + '-coach-1', name: 'Salmon fillet', quantity: 1, unit: 'lb', store: 'Fresh Market', source: 'COACH', status: 'PLANNED', estimatedCaloriesPerServing: 206 },
+      { id: Date.now() + '-coach-2', name: 'Sweet potato', quantity: 3, unit: 'pieces', store: 'Walmart', source: 'COACH', status: 'PLANNED', estimatedCaloriesPerServing: 112 }
+    ];
+    setShoppingList(prev => [...prev, ...coachItems]);
+  };
+  
+  const handleAddItem = () => {
+    if (!newItem.name.trim()) return;
+    
+    const item: ShoppingListItem = {
+      id: Date.now().toString(),
+      name: newItem.name.trim(),
+      quantity: newItem.quantity,
+      unit: newItem.unit.trim() || undefined,
+      store: newItem.store.trim() || undefined,
+      source: 'USER',
+      status: 'PLANNED',
+      estimatedCaloriesPerServing: newItem.estimatedCaloriesPerServing ? parseInt(newItem.estimatedCaloriesPerServing) : undefined
+    };
+    
+    setShoppingList(prev => [...prev, item]);
+    setNewItem({ name: '', quantity: 1, unit: '', store: '', estimatedCaloriesPerServing: '' });
+    setShowAddItemForm(false);
+  };
+  
+  const handleToggleItemStatus = (id: string) => {
+    setShoppingList(prev => prev.map(item => 
+      item.id === id 
+        ? { ...item, status: item.status === 'PLANNED' ? 'PURCHASED' : 'PLANNED' }
+        : item
+    ));
+  };
+  
+  const handleRemoveItem = (id: string) => {
+    setShoppingList(prev => prev.filter(item => item.id !== id));
   };
 
   const handleAnalyzeReceipts = () => {
@@ -70,14 +131,14 @@ const ConsumptionDashboard: React.FC<ConsumptionDashboardProps> = ({
   };
 
   const renderTimeframeSelector = () => (
-    <div className="flex gap-1 sm:gap-2 bg-gradient-to-r from-gray-100 to-gray-200 p-1 rounded-full shadow-sm">
+    <div className="flex gap-1 overflow-x-auto overflow-y-hidden scrollbar-hide">
       {(['day', 'week', 'month'] as const).map(tf => (
         <button
           key={tf}
-          className={`px-3 sm:px-4 py-2 text-sm font-medium rounded-full transition-all duration-200 min-h-[44px] touch-manipulation ${
+          className={`px-4 sm:px-6 py-3 sm:py-4 text-sm sm:text-[15px] font-medium rounded-t-xl transition-all duration-200 relative leading-normal whitespace-nowrap min-h-[44px] touch-manipulation ${
             timeframe === tf
-              ? 'bg-white text-gray-900 shadow-sm'
-              : 'bg-transparent text-gray-600 hover:text-gray-900 hover:bg-white/50'
+              ? 'bg-white text-gray-900 border border-gray-200 border-b-white -mb-px shadow-sm'
+              : 'bg-transparent text-gray-600 hover:text-gray-900 hover:bg-gray-50'
           }`}
           onClick={() => setTimeframe(tf)}
         >
@@ -204,10 +265,16 @@ const ConsumptionDashboard: React.FC<ConsumptionDashboardProps> = ({
               Build my shopping list
             </button>
           </div>
-          <button className="px-3 sm:px-4 py-2 sm:py-3 bg-gradient-to-r from-white to-gray-50 text-gray-700 border border-gray-300 rounded-full hover:from-gray-50 hover:to-gray-100 transition-all duration-200 font-medium text-sm min-h-[44px] touch-manipulation">
+          <button 
+            onClick={handleImportCoachItems}
+            className="px-3 sm:px-4 py-2 sm:py-3 bg-gradient-to-r from-white to-gray-50 text-gray-700 border border-gray-300 rounded-full hover:from-gray-50 hover:to-gray-100 transition-all duration-200 font-medium text-sm min-h-[44px] touch-manipulation"
+          >
             Import coach plan items
           </button>
-          <button className="px-3 sm:px-4 py-2 sm:py-3 bg-gradient-to-r from-white to-gray-50 text-gray-700 border border-gray-300 rounded-full hover:from-gray-50 hover:to-gray-100 transition-all duration-200 font-medium text-sm min-h-[44px] touch-manipulation">
+          <button 
+            onClick={() => setShowAddItemForm(true)}
+            className="px-3 sm:px-4 py-2 sm:py-3 bg-gradient-to-r from-white to-gray-50 text-gray-700 border border-gray-300 rounded-full hover:from-gray-50 hover:to-gray-100 transition-all duration-200 font-medium text-sm min-h-[44px] touch-manipulation"
+          >
             Add item
           </button>
         </div>
@@ -215,10 +282,46 @@ const ConsumptionDashboard: React.FC<ConsumptionDashboardProps> = ({
 
       <div className="flex flex-wrap items-center gap-2 sm:gap-3">
         <span className="text-sm font-medium text-gray-700">Source:</span>
-        <button className="px-3 py-2 text-sm rounded-full bg-gradient-to-r from-gray-900 to-gray-800 text-white shadow-sm min-h-[44px] touch-manipulation">All</button>
-        <button className="px-3 py-2 text-sm rounded-full bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-700 hover:from-blue-200 hover:to-indigo-200 transition-all duration-200 min-h-[44px] touch-manipulation">WIHY</button>
-        <button className="px-3 py-2 text-sm rounded-full bg-gradient-to-r from-green-100 to-emerald-100 text-green-700 hover:from-green-200 hover:to-emerald-200 transition-all duration-200 min-h-[44px] touch-manipulation">Coach</button>
-        <button className="px-3 py-2 text-sm rounded-full bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 hover:from-gray-200 hover:to-gray-300 transition-all duration-200 min-h-[44px] touch-manipulation">My Items</button>
+        <button 
+          onClick={() => setSourceFilter('ALL')}
+          className={`px-4 py-2 text-sm font-medium rounded-xl transition-all duration-200 min-h-[44px] touch-manipulation ${
+            sourceFilter === 'ALL' 
+              ? 'bg-gray-900 text-white shadow-sm'
+              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+          }`}
+        >
+          All
+        </button>
+        <button 
+          onClick={() => setSourceFilter('WIHY')}
+          className={`px-4 py-2 text-sm font-medium rounded-xl transition-all duration-200 min-h-[44px] touch-manipulation ${
+            sourceFilter === 'WIHY'
+              ? 'bg-blue-600 text-white shadow-sm'
+              : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
+          }`}
+        >
+          WIHY
+        </button>
+        <button 
+          onClick={() => setSourceFilter('COACH')}
+          className={`px-4 py-2 text-sm font-medium rounded-xl transition-all duration-200 min-h-[44px] touch-manipulation ${
+            sourceFilter === 'COACH'
+              ? 'bg-green-600 text-white shadow-sm'
+              : 'bg-green-100 text-green-700 hover:bg-green-200'
+          }`}
+        >
+          Coach
+        </button>
+        <button 
+          onClick={() => setSourceFilter('USER')}
+          className={`px-4 py-2 text-sm font-medium rounded-xl transition-all duration-200 min-h-[44px] touch-manipulation ${
+            sourceFilter === 'USER'
+              ? 'bg-gray-600 text-white shadow-sm'
+              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+          }`}
+        >
+          My Items
+        </button>
       </div>
 
       <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
@@ -232,11 +335,21 @@ const ConsumptionDashboard: React.FC<ConsumptionDashboardProps> = ({
               <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Source</th>
               <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Est. kcal / serving</th>
               <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Status</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200">
-            {mockShoppingList.map(item => (
-              <tr key={item.id} className="hover:bg-gray-50 transition-colors">
+            {filteredShoppingList.length === 0 ? (
+              <tr>
+                <td colSpan={7} className="px-4 py-8 text-center text-gray-500">
+                  {sourceFilter === 'ALL' 
+                    ? 'No items in your shopping list yet. Add some items to get started!' 
+                    : `No ${sourceFilter.toLowerCase()} items found.`}
+                </td>
+              </tr>
+            ) : (
+              filteredShoppingList.map(item => (
+                <tr key={item.id} className="hover:bg-gray-50 transition-colors">
                 <td className="px-4 py-3 text-sm text-gray-900">{item.name}</td>
                 <td className="px-4 py-3 text-sm text-gray-600">{item.quantity} {item.unit}</td>
                 <td className="px-4 py-3 text-sm text-gray-600">{item.store || '—'}</td>
@@ -258,12 +371,112 @@ const ConsumptionDashboard: React.FC<ConsumptionDashboardProps> = ({
                     {item.status === 'PLANNED' ? 'Planned' : 'Purchased'}
                   </span>
                 </td>
+                <td className="px-4 py-3">
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => handleToggleItemStatus(item.id)}
+                      className={`text-xs px-2 py-1 rounded-full transition-colors ${
+                        item.status === 'PLANNED'
+                          ? 'bg-green-100 text-green-700 hover:bg-green-200'
+                          : 'bg-yellow-100 text-yellow-700 hover:bg-yellow-200'
+                      }`}
+                    >
+                      {item.status === 'PLANNED' ? 'Mark Purchased' : 'Mark Planned'}
+                    </button>
+                    <button
+                      onClick={() => handleRemoveItem(item.id)}
+                      className="text-xs px-2 py-1 rounded-full bg-red-100 text-red-700 hover:bg-red-200 transition-colors"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                </td>
               </tr>
-            ))}
+              ))
+            )}
           </tbody>
         </table>
         </div>
       </div>
+      
+      {/* Add Item Modal */}
+      {showAddItemForm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-md">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Add New Item</h3>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Item Name *</label>
+                <input
+                  type="text"
+                  value={newItem.name}
+                  onChange={(e) => setNewItem(prev => ({ ...prev, name: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Enter item name"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Quantity</label>
+                  <input
+                    type="number"
+                    min="1"
+                    value={newItem.quantity}
+                    onChange={(e) => setNewItem(prev => ({ ...prev, quantity: parseInt(e.target.value) || 1 }))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Unit</label>
+                  <input
+                    type="text"
+                    value={newItem.unit}
+                    onChange={(e) => setNewItem(prev => ({ ...prev, unit: e.target.value }))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="lb, oz, ct, etc."
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Store</label>
+                <input
+                  type="text"
+                  value={newItem.store}
+                  onChange={(e) => setNewItem(prev => ({ ...prev, store: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Walmart, Kroger, etc."
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Est. Calories per Serving</label>
+                <input
+                  type="number"
+                  min="0"
+                  value={newItem.estimatedCaloriesPerServing}
+                  onChange={(e) => setNewItem(prev => ({ ...prev, estimatedCaloriesPerServing: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Optional"
+                />
+              </div>
+            </div>
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => setShowAddItemForm(false)}
+                className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleAddItem}
+                disabled={!newItem.name.trim()}
+                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                Add Item
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 
@@ -341,18 +554,8 @@ const ConsumptionDashboard: React.FC<ConsumptionDashboardProps> = ({
     <div className="w-full h-full bg-[#f0f7ff] overflow-hidden flex flex-col">
       <div className="flex-1 overflow-auto p-3 sm:p-4 lg:p-6">
         <div className="max-w-7xl mx-auto">
-          {/* Purpose statement */}
-          <div className="text-center mb-3 sm:mb-4">
-            <p className="text-gray-600 text-sm sm:text-base">
-              Track what you eat, what you buy, and how it adds up over time.
-            </p>
-          </div>
-
-      <div className="flex flex-col items-center text-center gap-4 mb-4">
-        {renderTimeframeSelector()}
-      </div>
-
-          <div className="flex gap-1 mb-6 border-b border-gray-200 overflow-x-auto overflow-y-hidden scrollbar-hide">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6 border-b border-gray-200 pb-0">
+            <div className="flex gap-1 overflow-x-auto overflow-y-hidden scrollbar-hide">
             <button
               className={`px-4 sm:px-6 py-3 sm:py-4 text-sm sm:text-[15px] font-medium rounded-t-xl transition-all duration-200 relative leading-normal whitespace-nowrap min-h-[44px] touch-manipulation ${
                 activeSubTab === 'summary'
@@ -384,6 +587,11 @@ const ConsumptionDashboard: React.FC<ConsumptionDashboardProps> = ({
               Purchases & Receipts
             </button>
           </div>
+          
+          <div className="flex-shrink-0">
+            {renderTimeframeSelector()}
+          </div>
+        </div>
 
           <div className="mt-3 sm:mt-4">
             {activeSubTab === 'summary' && renderSummary()}

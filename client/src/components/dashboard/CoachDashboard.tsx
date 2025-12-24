@@ -287,6 +287,8 @@ export interface CoachPlan extends Omit<WihyCoachModel, 'shoppingList' | 'workou
   dietGoals?: DietGoalKey[];  // Selected from the 11 core diet approaches
   workoutProgram?: CoachWorkoutProgram;  // feeds FitnessDashboard (overrides WihyCoachModel)
   mealProgram?: CoachMealProgram;        // feeds NutritionDashboard
+  instacartProductsLinkUrl?: string;
+  instacartProductsLinkUpdatedAt?: string;
 }
 
 export type CoachClient = {
@@ -618,6 +620,10 @@ export default function CoachDashboard() {
   const [newShoppingNote, setNewShoppingNote] = useState("");
   const [newShoppingOptional, setNewShoppingOptional] = useState(false);
 
+  // Instacart state
+  const [generatingInstacartLink, setGeneratingInstacartLink] = useState(false);
+  const [instacartSuccessMessage, setInstacartSuccessMessage] = useState('');
+
   // MyProgress aggregation (must be at component level, not inside conditional render functions)
   const myProgressModel = React.useMemo(() => {
     if (!selectedClient) return null;
@@ -793,6 +799,41 @@ export default function CoachDashboard() {
       (i) => i.id !== itemId
     );
     handleSaveToLocalClient(updated);
+  }
+
+  // Instacart integration
+  async function handleGenerateInstacartLink() {
+    if (!selectedClient || !selectedClient.plan.shoppingList?.length) return;
+    
+    setGeneratingInstacartLink(true);
+    setInstacartSuccessMessage('');
+    
+    try {
+      // Format items for Instacart API
+      const items = selectedClient.plan.shoppingList.map(item => ({
+        name: item.item,
+        quantity: item.quantity || '1',
+        category: item.category
+      }));
+      
+      // Mock API call - replace with actual Instacart API
+      await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate API delay
+      
+      const mockInstacartUrl = `https://instacart.com/store/kroger/cart?items=${encodeURIComponent(JSON.stringify(items))}`;
+      
+      // Update client with link
+      const updated = { ...selectedClient };
+      updated.plan.instacartProductsLinkUrl = mockInstacartUrl;
+      updated.plan.instacartProductsLinkUpdatedAt = new Date().toISOString();
+      handleSaveToLocalClient(updated);
+      
+      setInstacartSuccessMessage('Smart shopping list generated! Client can now access their personalized list.');
+      
+    } catch (error) {
+      console.error('Failed to generate Instacart link:', error);
+    } finally {
+      setGeneratingInstacartLink(false);
+    }
   }
 
   // -----------------------------------------------------------------
@@ -1263,6 +1304,64 @@ export default function CoachDashboard() {
             >
               Add Item
             </button>
+          </div>
+        )}
+        
+        {/* Instacart Integration */}
+        {selectedClient.plan.shoppingList && selectedClient.plan.shoppingList.length > 0 && (
+          <div className="mt-4 p-3 bg-green-50 rounded-lg border border-green-200">
+            <h4 className="text-sm font-semibold text-green-800 mb-2">
+              🛒 Meal & Grocery Planning
+            </h4>
+            
+            {selectedClient.plan.instacartProductsLinkUrl ? (
+              <div className="space-y-2">
+                <div className="text-xs text-green-700">
+                  ✅ Smart shopping list generated for client
+                </div>
+                {selectedClient.plan.instacartProductsLinkUpdatedAt && (
+                  <div className="text-xs text-gray-500">
+                    Updated: {new Date(selectedClient.plan.instacartProductsLinkUpdatedAt).toLocaleDateString()}
+                  </div>
+                )}
+                <div className="flex gap-2">
+                  <a
+                    href={selectedClient.plan.instacartProductsLinkUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs px-3 py-1 bg-green-600 text-white rounded-full hover:bg-green-700"
+                  >
+                    Preview Cart
+                  </a>
+                  <button
+                    onClick={handleGenerateInstacartLink}
+                    disabled={generatingInstacartLink}
+                    className="text-xs px-3 py-1 bg-blue-600 text-white rounded-full hover:bg-blue-700 disabled:opacity-50"
+                  >
+                    {generatingInstacartLink ? 'Updating...' : 'Update Link'}
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <div className="text-xs text-gray-600">
+                  Combine WIHY suggestions, coach plans, and your own items into one smart list.
+                </div>
+                <button
+                  onClick={handleGenerateInstacartLink}
+                  disabled={generatingInstacartLink || !selectedClient.plan.shoppingList?.length}
+                  className="text-xs px-3 py-1 bg-green-600 text-white rounded-full hover:bg-green-700 disabled:opacity-50"
+                >
+                  {generatingInstacartLink ? 'Generating...' : 'Generate Smart List'}
+                </button>
+              </div>
+            )}
+            
+            {instacartSuccessMessage && (
+              <div className="mt-2 text-xs text-green-700 bg-green-100 p-2 rounded">
+                {instacartSuccessMessage}
+              </div>
+            )}
           </div>
         )}
       </div>
