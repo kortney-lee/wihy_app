@@ -147,7 +147,7 @@ const ResearchDashboard: React.FC<ResearchDashboardProps> = ({
       />
       
       {/* Main content area */}
-      <div className="flex-1 overflow-auto pt-[220px] sm:pt-[240px] lg:pt-[260px]">
+      <div className="flex-1 overflow-auto pt-[176px] sm:pt-[192px] lg:pt-[208px]">
 
         {/* Search filters section */}
         {showFilters && (

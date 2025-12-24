@@ -120,30 +120,6 @@ const OverviewDashboard: React.FC<OverviewDashboardProps> = ({ onAnalyze }) => {
         <QuickInsights onAnalyze={onAnalyze} />
         <HealthRiskChart onAnalyze={onAnalyze} />
       </div>
-
-      {/* Navigation Overview Cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 max-w-4xl mx-auto">
-        <div className="bg-white rounded-lg border border-gray-200 p-4 text-center">
-          <div className="text-2xl mb-2">📊</div>
-          <h3 className="font-medium text-gray-900">Insights</h3>
-          <p className="text-sm text-gray-600">Behavioral patterns</p>
-        </div>
-        <div className="bg-white rounded-lg border border-gray-200 p-4 text-center">
-          <div className="text-2xl mb-2">💪</div>
-          <h3 className="font-medium text-gray-900">Wellness</h3>
-          <p className="text-sm text-gray-600">Recovery & wellbeing</p>
-        </div>
-        <div className="bg-white rounded-lg border border-gray-200 p-4 text-center">
-          <div className="text-2xl mb-2">📈</div>
-          <h3 className="font-medium text-gray-900">Trends</h3>
-          <p className="text-sm text-gray-600">Long-term patterns</p>
-        </div>
-        <div className="bg-white rounded-lg border border-gray-200 p-4 text-center">
-          <div className="text-2xl mb-2">🔮</div>
-          <h3 className="font-medium text-gray-900">Predictive</h3>
-          <p className="text-sm text-gray-600">AI-powered insights</p>
-        </div>
-      </div>
     </section>
   );
 
@@ -270,7 +246,59 @@ const OverviewDashboard: React.FC<OverviewDashboardProps> = ({ onAnalyze }) => {
     <div className="w-full bg-[#f0f7ff] min-h-[70vh] px-2 sm:px-4 pb-8 overflow-x-hidden">
       {/* Page header */}
       <header className="flex flex-col items-center text-center gap-2 pt-5 pb-3">
-        {renderViewTabs()}
+        {/* Navigation Overview Cards */}
+        <div className="grid gap-4 grid-cols-2 md:grid-cols-3 lg:grid-cols-5 max-w-5xl mx-auto w-full px-4">
+          <button
+            onClick={() => setViewTab("summary")}
+            className={`bg-white rounded-lg border border-gray-200 p-4 text-center transition-all duration-200 hover:shadow-md hover:border-blue-300 ${
+              viewTab === "summary" ? "ring-2 ring-blue-500 border-blue-500" : ""
+            }`}
+          >
+            <div className="text-2xl mb-2">🏠</div>
+            <h3 className="font-medium text-gray-900">Summary</h3>
+            <p className="text-sm text-gray-600">Dashboard overview</p>
+          </button>
+          <button
+            onClick={() => setViewTab("insights")}
+            className={`bg-white rounded-lg border border-gray-200 p-4 text-center transition-all duration-200 hover:shadow-md hover:border-blue-300 ${
+              viewTab === "insights" ? "ring-2 ring-blue-500 border-blue-500" : ""
+            }`}
+          >
+            <div className="text-2xl mb-2">📊</div>
+            <h3 className="font-medium text-gray-900">Insights</h3>
+            <p className="text-sm text-gray-600">Behavioral patterns</p>
+          </button>
+          <button
+            onClick={() => setViewTab("wellness")}
+            className={`bg-white rounded-lg border border-gray-200 p-4 text-center transition-all duration-200 hover:shadow-md hover:border-blue-300 ${
+              viewTab === "wellness" ? "ring-2 ring-blue-500 border-blue-500" : ""
+            }`}
+          >
+            <div className="text-2xl mb-2">💪</div>
+            <h3 className="font-medium text-gray-900">Wellness</h3>
+            <p className="text-sm text-gray-600">Recovery & wellbeing</p>
+          </button>
+          <button
+            onClick={() => setViewTab("trends")}
+            className={`bg-white rounded-lg border border-gray-200 p-4 text-center transition-all duration-200 hover:shadow-md hover:border-blue-300 ${
+              viewTab === "trends" ? "ring-2 ring-blue-500 border-blue-500" : ""
+            }`}
+          >
+            <div className="text-2xl mb-2">📈</div>
+            <h3 className="font-medium text-gray-900">Trends</h3>
+            <p className="text-sm text-gray-600">Long-term patterns</p>
+          </button>
+          <button
+            onClick={() => setViewTab("predictive")}
+            className={`bg-white rounded-lg border border-gray-200 p-4 text-center transition-all duration-200 hover:shadow-md hover:border-blue-300 ${
+              viewTab === "predictive" ? "ring-2 ring-blue-500 border-blue-500" : ""
+            }`}
+          >
+            <div className="text-2xl mb-2">🔮</div>
+            <h3 className="font-medium text-gray-900">Predictive</h3>
+            <p className="text-sm text-gray-600">AI-powered insights</p>
+          </button>
+        </div>
       </header>
 
       {viewTab === "summary" && renderSummary()}
