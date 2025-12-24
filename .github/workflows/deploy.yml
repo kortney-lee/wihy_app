@@ -1,8 +1,10 @@
-name: Deploy to VM with Docker (Auto)
+name: Deploy to VM with Docker (DISABLED)
 
 on:
-  push:
-    branches: [ master, main ]
+  # DISABLED - Using GCP deployment instead
+  # push:
+  #   branches: [ master, main ]
+  workflow_dispatch:
 
 env:
   DOCKER_IMAGE: wihy-ui

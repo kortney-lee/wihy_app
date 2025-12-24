@@ -1,10 +1,10 @@
-name: Deploy to Azure Container Apps (Manual)
+name: Deploy to Azure Container Apps (DISABLED)
 
 on:
-  # Disabled - Using Docker VM deployment instead
+  # DISABLED - Using GCP deployment instead
   # push:
   #   branches: [ main ]
-  workflow_dispatch:
+  # workflow_dispatch:
 
 env:
   REGISTRY_LOGIN_SERVER: wihymlregistry-b6fdh5cmhzgwbbgy.azurecr.io
