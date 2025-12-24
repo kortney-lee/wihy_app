@@ -237,8 +237,7 @@ jobs:
           --max-instances 5 \
           --timeout 300 \
           --concurrency 100 \
-          --set-env-vars="NODE_ENV=production" \
-          --add-cloudsql-instances=${{ env.PROJECT_ID }}:${{ env.REGION }}:wihy-db || true
+          --set-env-vars="NODE_ENV=production"
 
     - name: Set up custom domain mapping (if domain exists)
       run: |
@@ -253,6 +252,72 @@ jobs:
         URL=$(gcloud run services describe ${{ env.SERVICE }} --region ${{ env.REGION }} --format 'value(status.url)')
         echo "Frontend deployed to: $URL"
         echo "FRONTEND_URL=$URL" >> $GITHUB_OUTPUT
+
+  deploy-backend-vm:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+    - name: Set up Cloud SDK
+      uses: google-github-actions/setup-gcloud@v2
+      with:
+        project_id: ${{ env.PROJECT_ID }}
+
+    - name: Create VM instance for backend (if not exists)
+      run: |
+        # Check if VM exists, if not create it
+        if ! gcloud compute instances describe wihy-backend-vm --zone=us-central1-a >/dev/null 2>&1; then
+          gcloud compute instances create wihy-backend-vm \
+            --zone=us-central1-a \
+            --machine-type=e2-medium \
+            --image-family=ubuntu-2004-lts \
+            --image-project=ubuntu-os-cloud \
+            --boot-disk-size=20GB \
+            --boot-disk-type=pd-standard \
+            --tags=wihy-backend,http-server,https-server \
+            --metadata=startup-script='#!/bin/bash
+              apt-get update
+              apt-get install -y docker.io
+              systemctl start docker
+              systemctl enable docker
+              usermod -aG docker ubuntu
+              
+              # Install Node.js
+              curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+              apt-get install -y nodejs
+              
+              # Create application directory
+              mkdir -p /app
+              chown ubuntu:ubuntu /app
+              
+              # Install Docker Compose
+              curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+              chmod +x /usr/local/bin/docker-compose
+              
+              echo "VM setup complete"' || echo "VM already exists or creation failed"
+        fi
+
+    - name: Configure firewall rules for VM
+      run: |
+        # Allow HTTP and HTTPS traffic
+        gcloud compute firewall-rules create allow-wihy-backend \
+          --allow tcp:80,tcp:443,tcp:3000,tcp:8080 \
+          --source-ranges 0.0.0.0/0 \
+          --target-tags wihy-backend \
+          --description="Allow web traffic for WIHY backend" || echo "Firewall rule exists"
 
   deploy-backend-services:
     needs: test
