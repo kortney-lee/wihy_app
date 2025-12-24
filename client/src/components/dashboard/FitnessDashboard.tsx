@@ -176,7 +176,7 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
 
   return (
     <div className="w-full h-full bg-[#f0f7ff] overflow-hidden flex flex-col">
-      <div className="flex-1 overflow-auto pt-16 sm:pt-[240px] lg:pt-[140px] p-4 sm:p-4 lg:p-6">
+      <div className="flex-1 overflow-auto p-3 sm:p-4 lg:p-6">
         <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
         <header className="mb-2">
           <h1 className="text-xl font-semibold text-gray-900">{title}</h1>

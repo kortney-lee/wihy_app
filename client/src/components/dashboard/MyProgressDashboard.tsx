@@ -124,6 +124,7 @@ export type WihyCoachModel = {
   receipts?: Receipt[];
   history?: HistoryEntry[];
   fastFoodDetections?: FastFoodDetection[];
+  instacartProductsLinkUrl?: string;
 };
 
 interface MyProgressDashboardProps {
@@ -837,6 +838,23 @@ const MyProgressDashboard: React.FC<MyProgressDashboardProps> = ({
                   </div>
                 ))}
               </div>
+              
+              {/* Instacart Order Button */}
+              {coach.instacartProductsLinkUrl && (
+                <div className="mt-4 pt-4 border-t border-gray-200/50">
+                  <a
+                    href={coach.instacartProductsLinkUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-semibold px-6 py-3 text-sm transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
+                  >
+                    🛒 View Smart Shopping List
+                  </a>
+                  <p className="text-xs text-gray-500 mt-2 text-center">
+                    WIHY suggestions, coach plans, and your items combined into one smart list
+                  </p>
+                </div>
+              )}
             </section>
           )}
 
