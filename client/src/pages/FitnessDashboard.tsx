@@ -115,7 +115,6 @@ const FitnessDashboardPage: React.FC<FitnessDashboardPageProps> = ({ windowWidth
         margin: '0 auto'
       }}>
         <FitnessDashboard
-          data={mockFitnessDashboard}
           onStartSession={handleStartSession}
         />
       </div>

@@ -26,7 +26,7 @@ import type { ExerciseRowView } from "../components/dashboard/WorkoutProgramGrid
 import type { WihyCoachModel } from "../components/dashboard/MyProgressDashboard";
 
 // Reuse your CoachPlan type from CoachDashboard
-import type { CoachPlan, MealType, CoachMealItem } from "../components/dashboard/CoachDashboard";
+import type { CoachPlan, MealType, CoachMealItem } from "../pages/CoachDashboardPage";
 
 // Your app will have real user tracking types later.
 // For now: keep it optional and pass what you have.

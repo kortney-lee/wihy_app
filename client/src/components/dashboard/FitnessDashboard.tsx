@@ -1,6 +1,8 @@
 // src/components/dashboard/FitnessDashboard.tsx
 import React, { useMemo, useState } from "react";
 import { Heart, Dumbbell, Timer, Move, Target, HelpCircle, X } from 'lucide-react';
+import { useFitness } from '../../contexts/FitnessContext';
+import { useRelationships } from '../../contexts/RelationshipContext';
 import {
   WorkoutProgramGrid,
   ExerciseRowView,
@@ -70,7 +72,6 @@ export interface FitnessDashboardModel {
  */
 
 export interface FitnessDashboardProps {
-  data: FitnessDashboardModel;
   onStartSession?: (params: {
     phaseId: string;
     levelId: string;
@@ -123,9 +124,34 @@ const MobileExerciseCard: React.FC<{ row: ExerciseRowView }> = ({ row }) => {
  */
 
 const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
-  data,
   onStartSession,
 }) => {
+  // Create mock data since context doesn't have these properties yet
+  const mockCurrentWorkout = null;
+  const mockSelectWorkout = (workout: any) => console.log('Select workout:', workout);
+  
+  // Get fitness dashboard model from mock data
+  const data = mockCurrentWorkout || {
+    title: "Start Your Workout",
+    subtitle: "Choose your workout and start moving. Each session is designed to strengthen your body and improve your fitness.",
+    phases: [{ id: "phase1", name: "Phase 1 - Foundation" }],
+    levels: [
+      { id: "beginner", label: "Beginner" },
+      { id: "intermediate", label: "Intermediate" },
+      { id: "advanced", label: "Advanced" }
+    ],
+    days: [
+      { id: "day1", label: "Day 1" },
+      { id: "day2", label: "Day 2" },
+      { id: "day3", label: "Day 3" }
+    ],
+    variants: {},
+    programTitle: "Today's Workout",
+    programDescription: "See which body parts get worked and how hard each exercise will be.",
+    defaultPhaseId: "phase1",
+    defaultLevelId: "beginner",
+    defaultDayId: "day1"
+  };
   const {
     title = "Start Your Workout",
     subtitle = "Choose your workout and start moving. Each session is designed to strengthen your body and improve your fitness.",
@@ -166,6 +192,21 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
 
   const handleStartSession = () => {
     if (!onStartSession) return;
+    
+    // Save workout selection to context
+    if (currentRows.length > 0) {
+      const workoutData = {
+        id: `workout-${Date.now()}`,
+        name: `${currentPhase?.name} - ${currentLevel?.label} - ${currentDay?.label}`,
+        description: data.programDescription || '',
+        exercises: currentRows,
+        duration: 45,
+        difficulty: levelId as 'beginner' | 'intermediate' | 'advanced'
+      };
+      
+      mockSelectWorkout(workoutData);
+    }
+    
     onStartSession({
       phaseId,
       levelId,
