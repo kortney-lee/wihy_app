@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { BrowserRouter as Router, Routes, Route, useSearchParams, useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
+import { RelationshipProvider } from './contexts/RelationshipContext';
+import { MealPlanProvider } from './contexts/MealPlanContext';
+import { FitnessProvider } from './contexts/FitnessContext';
 import VHealthSearch from './components/search/VHealthSearch';
 import SearchResults from './components/search/SearchResults';
 // import HealthNewsFeed from './components/HealthNewsFeed';
@@ -17,7 +20,6 @@ import TailwindDemoPage from './pages/TailwindDemoPage';
 import NewsPage from './pages/NewsPage';
 import NutritionFactsPage from './pages/NutritionFacts';
 import DebugFullScreen from './pages/DebugFullScreen';
-import CoachDashboard from './components/dashboard/CoachDashboard';
 import OverviewDashboard from './components/dashboard/OverviewDashboard';
 import ResearchDashboard from './components/dashboard/ResearchDashboard';
 import DashboardPage from './components/dashboard/DashboardPage';
@@ -30,6 +32,12 @@ import ManagerDashboard from './pages/ManagerDashboard';
 import PayoutSettings from './pages/PayoutSettings';
 import PredictiveDashboard from './pages/PredictiveDashboard';
 import MonitoringDashboard from './pages/MonitoringDashboard';
+import CreateMealsPage from './pages/CreateMealsPage';
+import CoachDashboardPage from './pages/CoachDashboardPage';
+import ClientManagementPage from './pages/ClientManagementPage';
+import CoachSelectionPage from './pages/CoachSelectionPage';
+import ClientOnboardingPage from './pages/ClientOnboardingPage';
+import { SystemIntegrationDemo } from './components/demo/SystemIntegrationDemo';
 
 import AuthCallback from './pages/AuthCallback';
 import { PlatformNavigationExample } from './components/examples/PlatformNavigationExample';
@@ -563,55 +571,67 @@ const App: React.FC = () => {
   
   return (
     <AuthProvider>
-      <Router>
-        <NavigationSetup>
-          <Routes>
-            <Route path="/" element={<VHealthSearch />} />
-            <Route path="/results" element={<ResultsPage />} />
-            <Route path="/nutritionfacts" element={<NutritionFactsPage />} />
-            <Route path="/debug-fullscreen" element={<DebugFullScreen />} />
-            <Route path="/about" element={<AboutPage />} />
-            <Route path="/about" element={<AboutPage />} />
-            <Route path="/investors" element={<InvestorsPage />} />
-            <Route path="/privacy" element={<PrivacyPage />} />
-            <Route path="/terms" element={<TermsPage />} />
-            <Route path="/new-about" element={<NewAboutpage />} />
-            <Route path="/news" element={<NewsPage />} />
-            <Route path="/research" element={<ResearchDashboard period="week" onAnalyze={() => {}} onSearch={() => {}} windowWidth={window.innerWidth} />} />
+      <RelationshipProvider>
+        <FitnessProvider>
+          <MealPlanProvider>
+            <Router>
+              <NavigationSetup>
+                <Routes>
+                  <Route path="/" element={<VHealthSearch />} />
+                  <Route path="/results" element={<ResultsPage />} />
+                  <Route path="/nutritionfacts" element={<NutritionFactsPage />} />
+                  <Route path="/debug-fullscreen" element={<DebugFullScreen />} />
+                  <Route path="/about" element={<AboutPage />} />
+                  <Route path="/about" element={<AboutPage />} />
+                  <Route path="/investors" element={<InvestorsPage />} />
+                  <Route path="/privacy" element={<PrivacyPage />} />
+                  <Route path="/terms" element={<TermsPage />} />
+                  <Route path="/new-about" element={<NewAboutpage />} />
+                  <Route path="/news" element={<NewsPage />} />
+                  <Route path="/research" element={<ResearchDashboard period="week" onAnalyze={() => {}} onSearch={() => {}} windowWidth={window.innerWidth} />} />
 
-            <Route path="/dashboard" element={<Navigate to="/overview" replace />} />
-            <Route path="/overview" element={<DashboardPage dashboardType="overview" />} />
-            <Route path="/myprogress" element={<DashboardPage dashboardType="myprogress" />} />
-            <Route path="/intake" element={<DashboardPage dashboardType="intake" />} />
-            <Route path="/fitness" element={<DashboardPage dashboardType="fitness" />} />
-            <Route path="/coach" element={<DashboardPage dashboardType="coach" />} />
-            <Route path="/parent" element={<DashboardPage dashboardType="parent" />} />
+                  <Route path="/dashboard" element={<Navigate to="/overview" replace />} />
+                  <Route path="/overview" element={<DashboardPage dashboardType="overview" />} />
+                  <Route path="/myprogress" element={<DashboardPage dashboardType="myprogress" />} />
+                  <Route path="/intake" element={<DashboardPage dashboardType="intake" />} />
+                  <Route path="/fitness" element={<DashboardPage dashboardType="fitness" />} />
+                  <Route path="/coach" element={<CoachDashboardPage />} />
+                  <Route path="/parent" element={<DashboardPage dashboardType="parent" />} />
+                  <Route path="/create-meals" element={<CreateMealsPage />} />
+                  <Route path="/system-demo" element={<SystemIntegrationDemo />} />
+                  <Route path="/coach-dashboard" element={<CoachDashboardPage />} />
+                  <Route path="/client-management" element={<ClientManagementPage />} />
+                  <Route path="/coach-selection" element={<CoachSelectionPage />} />
+                  <Route path="/client-onboarding" element={<ClientOnboardingPage />} />
 
-            <Route path="/dashboard/predictive" element={<PredictiveDashboard />} />
-            <Route path="/tracking-dashboard" element={<TrackingDashboard />} />
-            <Route path="/manager-dashboard" element={<ManagerDashboard />} />
-            <Route path="/tracking-admin" element={<AdminLinkGenerator />} />
-            <Route path="/engagement-signup" element={<EngagementSignup />} />
-            <Route path="/partner-hub" element={<PartnerHub />} />
-            <Route path="/payout-settings" element={<PayoutSettings />} />
-            <Route path="/monitoring-dashboard" element={<MonitoringDashboard />} />
-            <Route path="/engagement-dashboard" element={<EngagementDashboard />} />
-            <Route path="/engagement/:trackingId" element={<EngagementDashboard />} />
+                  <Route path="/dashboard/predictive" element={<PredictiveDashboard />} />
+                  <Route path="/tracking-dashboard" element={<TrackingDashboard />} />
+                  <Route path="/manager-dashboard" element={<ManagerDashboard />} />
+                  <Route path="/tracking-admin" element={<AdminLinkGenerator />} />
+                  <Route path="/engagement-signup" element={<EngagementSignup />} />
+                  <Route path="/partner-hub" element={<PartnerHub />} />
+                  <Route path="/payout-settings" element={<PayoutSettings />} />
+                  <Route path="/monitoring-dashboard" element={<MonitoringDashboard />} />
+                  <Route path="/engagement-dashboard" element={<EngagementDashboard />} />
+                  <Route path="/engagement/:trackingId" element={<EngagementDashboard />} />
 
-            <Route path="/auth/callback" element={<AuthCallback />} />
-            <Route path="/test" element={<TestChartsPage />} />
-            <Route path="/test-grid" element={<TestDashboardGrid />} />
-            <Route path="/test-individual" element={<TestIndividualComponents />} />
-            <Route path="/health-dashboard" element={<ComprehensiveHealthDashboard />} />
-            <Route path="/tailwind-demo" element={<TailwindDemoPage />} />
-            <Route path="/platform-demo" element={<PlatformNavigationExample />} />
-            {/* Demo route - only available in development */}
-            {process.env.NODE_ENV === 'development' && (
-              <Route path="/demo" element={<DemoResultsPage />} />
-            )}
-          </Routes>
-        </NavigationSetup>
-      </Router>
+                  <Route path="/auth/callback" element={<AuthCallback />} />
+                  <Route path="/test" element={<TestChartsPage />} />
+                  <Route path="/test-grid" element={<TestDashboardGrid />} />
+                  <Route path="/test-individual" element={<TestIndividualComponents />} />
+                  <Route path="/health-dashboard" element={<ComprehensiveHealthDashboard />} />
+                  <Route path="/tailwind-demo" element={<TailwindDemoPage />} />
+                  <Route path="/platform-demo" element={<PlatformNavigationExample />} />
+                  {/* Demo route - only available in development */}
+                  {process.env.NODE_ENV === 'development' && (
+                    <Route path="/demo" element={<DemoResultsPage />} />
+                  )}
+                </Routes>
+              </NavigationSetup>
+            </Router>
+          </MealPlanProvider>
+        </FitnessProvider>
+      </RelationshipProvider>
     </AuthProvider>
   );
 };

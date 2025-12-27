@@ -382,6 +382,7 @@ className="bg-white"
 - ✅ NutritionFacts
 - ✅ ProductScanView
 - ✅ FullScreenChat (partial - main container)
+- ✅ CreateMealsPage (two-column meal builder + shopping outputs)
 
 ### Migration Notes
 - Legacy `bg-slate-50` (#f8fafc) should be replaced with `#f0f7ff`
@@ -391,6 +392,49 @@ className="bg-white"
 ---
 
 ## Additional Usage Examples
+
+### Create Meals Page Pattern
+**Two-column layout for meal building and shopping outputs:**
+
+```tsx
+// CreateMealsPage - Specialized two-column layout
+<div style={{ backgroundColor: '#f0f7ff' }} className="create-meals-page">
+  {/* Standard top navigation */}
+  <div className="bg-white">
+    {/* Back button, title */}
+  </div>
+
+  {/* Standard header section */}
+  <div className="bg-white border-b">
+    {/* Page title, plan selector, goal chips, actions */}
+  </div>
+
+  {/* Two-column main content */}
+  <div className="main-content grid-cols-2">
+    {/* Left: Meal Program Builder */}
+    <div className="left-column">
+      <MealProgramBuilder />
+    </div>
+    
+    {/* Right: Shopping Outputs */}  
+    <div className="right-column">
+      <ShoppingOutputs />
+    </div>
+  </div>
+</div>
+```
+
+### Specialized Component Colors
+```css
+/* Kelly Green for success states and prep batches */
+background-color: #4cbb17; 
+
+/* Orange for primary meal actions */
+background-color: #fa5f06;
+
+/* Success green for Instacart and positive actions */
+background-color: #10b981;
+```
 
 ### Subtle Borders
 

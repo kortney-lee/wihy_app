@@ -5,7 +5,6 @@ import { PlatformDetectionService } from '../../services/shared/platformDetectio
 import ImageUploadModal from '../ui/ImageUploadModal';
 import FullScreenChat, { FullScreenChatRef } from '../ui/FullScreenChat';
 import MyProgressDashboard, { WihyCoachModel } from './MyProgressDashboard';
-import CoachDashboard from './CoachDashboard';
 import ParentDashboard from './ParentDashboard';
 import ConsumptionDashboard from './ConsumptionDashboard';
 import ResearchDashboard from './ResearchDashboard';
@@ -414,7 +413,6 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
 
             {currentDashboard === 'myprogress' && (
               <MyProgressDashboard 
-                coach={mockCoachData}
                 onToggleAction={(actionId) => console.log('Toggle action:', actionId)}
                 onStartWorkout={() => console.log('Start workout')}
                 onAddHydration={() => console.log('Add hydration')}
@@ -442,12 +440,9 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
 
             {currentDashboard === 'fitness' && (
               <FitnessDashboard
-                data={mockFitnessDashboard}
                 onStartSession={(params) => console.log('Start session:', params)}
               />
             )}
-
-            {currentDashboard === 'coach' && <CoachDashboard />}
 
             {currentDashboard === 'parent' && <ParentDashboard />}
           </div>

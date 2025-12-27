@@ -1,6 +1,11 @@
 // src/components/dashboard/MyProgressDashboard.tsx
 import React, { useState, useMemo, useCallback, useRef, useEffect } from "react";
 import { WorkoutProgramGrid, ExerciseRowView } from "./WorkoutProgramGrid";
+import { useFitness } from '../../contexts/FitnessContext';
+import { useRelationships } from '../../contexts/RelationshipContext';
+import { useMealPlans } from '../../contexts/MealPlanContext';
+import Header from '../shared/Header';
+import { PlatformDetectionService } from '../../services/shared/platformDetectionService';
 
 type Priority = {
   id: string;
@@ -128,7 +133,6 @@ export type WihyCoachModel = {
 };
 
 interface MyProgressDashboardProps {
-  coach: WihyCoachModel;
   // optional callbacks for interaction
   onToggleAction?: (actionId: string) => void;
   onStartWorkout?: () => void;
@@ -266,13 +270,134 @@ const MenuIcon: React.FC<{ className?: string }> = ({ className }) => (
 // -----------------------------------------------------------
 
 const MyProgressDashboard: React.FC<MyProgressDashboardProps> = ({
-  coach,
   onToggleAction,
   onStartWorkout,
   onAddHydration,
   onLogMeal,
   onEducationClick,
 }) => {
+  // Window width state for responsive design
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+
+  useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Use contexts for data
+  const { todayWorkoutByUserId } = useFitness();
+  const { selectedClientId, myRole, coachClients, currentUserId } = useRelationships();
+  const { shoppingList } = useMealPlans();
+
+  // Derived values
+  const currentWorkout = currentUserId ? todayWorkoutByUserId[currentUserId] : null;
+  const isCoachMode = myRole === 'coach';
+  const selectedClient = selectedClientId ? coachClients.find(c => c.id === selectedClientId) : null;
+  
+  // Create coach model from context data
+  const coach = useMemo(() => {
+    const mockActions = [
+      {
+        id: 'workout-1',
+        type: 'workout' as ActionType,
+        title: 'Complete Today\'s Workout',
+        description: currentWorkout?.name || 'Full body workout',
+        status: 'pending' as ActionStatus,
+        meta: currentWorkout?.totalDuration ? `${currentWorkout.totalDuration} minutes` : '20-25 minutes'
+      },
+      {
+        id: 'meal-1',
+        type: 'meal' as ActionType,
+        title: 'Log Breakfast',
+        description: 'Track your morning meal',
+        status: 'completed' as ActionStatus
+      },
+      {
+        id: 'hydration-1',
+        type: 'hydration' as ActionType,
+        title: 'Drink Water',
+        description: 'Stay hydrated throughout the day',
+        status: 'in_progress' as ActionStatus,
+        meta: '6/8 cups'
+      }
+    ];
+    
+    const clientName = isCoachMode && selectedClient ? selectedClient.name : "Your";
+    
+    return {
+      summary: {
+        name: clientName,
+        totalCalories: 1847,
+        targetCalories: 2000,
+        workoutsCompleted: 3,
+        workoutsPlanned: 5,
+        currentStreak: 7
+      },
+      motivation: isCoachMode && selectedClient ? 
+        `${selectedClient.name} is making great progress! Keep up the momentum.` :
+        "You're doing great! Keep up the momentum.",
+      priorities: [
+        { id: '1', title: 'Complete workout', description: 'Finish today\'s exercise routine' },
+        { id: '2', title: 'Log meals', description: 'Track your nutrition intake' },
+        { id: '3', title: 'Stay hydrated', description: 'Drink enough water' }
+      ],
+      actions: mockActions,
+      workout: currentWorkout ? {
+        title: currentWorkout.name,
+        durationLabel: `${currentWorkout.totalDuration || 25} min`,
+        intensityLabel: 'Moderate',
+        steps: [
+          { id: '1', label: 'Warm up', detail: '5 minutes' },
+          { id: '2', label: 'Main workout', detail: `${(currentWorkout.totalDuration || 25) - 10} minutes` },
+          { id: '3', label: 'Cool down', detail: '5 minutes' }
+        ]
+      } : undefined,
+      workoutProgram: [],
+      consumption: {
+        mealsLogged: 2,
+        mealsPlanned: 3,
+        calories: 1847,
+        caloriesTarget: 2000,
+        protein: 85,
+        proteinTarget: 120
+      },
+      hydration: {
+        cupsLogged: 6,
+        cupsTarget: 8,
+        cups: 6,
+        goalCups: 8
+      },
+      streaks: [
+        { id: 'workout', label: 'Workout Streak', count: 7, unit: 'days' },
+        { id: 'logging', label: 'Logging Streak', count: 14, unit: 'days' }
+      ],
+      checkin: {
+        mood: 'happy' as const,
+        energy: 4,
+        sleep: 7.5,
+        stress: 2,
+        notes: 'Feeling great today!',
+        question: 'How are you feeling today?',
+        inputType: 'mood' as 'mood' | 'text' | 'options',
+        options: ['Great', 'Good', 'Okay', 'Tired']
+      },
+      education: {
+        currentModule: 'Nutrition Basics',
+        progress: 75,
+        nextLesson: 'Macronutrient Balance',
+        title: 'Understanding Macronutrients',
+        summary: 'Learn about proteins, carbs, and fats in your diet',
+        linkLabel: 'Continue Learning'
+      },
+      shoppingList: shoppingList || [],
+      receipts: [],
+      history: [],
+      fastFoodDetections: [],
+      instacartProductsLinkUrl: 'https://instacart.com/example-list'
+    };
+  }, [currentWorkout, selectedClient, shoppingList, isCoachMode]);
+  
   const {
     summary,
     motivation,
@@ -285,7 +410,6 @@ const MyProgressDashboard: React.FC<MyProgressDashboardProps> = ({
     streaks = [],
     checkin,
     education,
-    shoppingList = [],
     receipts = [],
     history = [],
     fastFoodDetections = [],
@@ -298,16 +422,6 @@ const MyProgressDashboard: React.FC<MyProgressDashboardProps> = ({
 
   // Workout sub-tab: Today workout vs Program grid
   const [workoutTab, setWorkoutTab] = useState<"today" | "program">("today");
-
-  // Horizontal scroll/swipe navigation refs and state
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const [isDragging, setIsDragging] = useState(false);
-  const [startX, setStartX] = useState(0);
-  const [scrollLeft, setScrollLeft] = useState(0);
-
-  // View tab indices for horizontal navigation
-  const viewTabs = ["today", "week", "history"] as const;
-  const currentTabIndex = viewTabs.indexOf(viewTab);
 
   const hasCoachFocus = Boolean(motivation) || priorities.length > 0;
 
@@ -354,99 +468,11 @@ const MyProgressDashboard: React.FC<MyProgressDashboardProps> = ({
     [onToggleAction]
   );
 
-  // Horizontal swipe navigation handlers
-  const handleMouseDown = useCallback((e: React.MouseEvent) => {
-    if (!scrollContainerRef.current) return;
-    
-    setIsDragging(true);
-    setStartX(e.pageX - scrollContainerRef.current.offsetLeft);
-    setScrollLeft(scrollContainerRef.current.scrollLeft);
-  }, []);
-
-  const handleMouseMove = useCallback((e: React.MouseEvent) => {
-    if (!isDragging || !scrollContainerRef.current) return;
-    
-    e.preventDefault();
-    const x = e.pageX - scrollContainerRef.current.offsetLeft;
-    const walk = (x - startX) * 2; // Scroll speed multiplier
-    scrollContainerRef.current.scrollLeft = scrollLeft - walk;
-  }, [isDragging, startX, scrollLeft]);
-
-  const handleMouseUp = useCallback(() => {
-    if (!scrollContainerRef.current || !isDragging) return;
-    
-    setIsDragging(false);
-    
-    // Snap to nearest section based on scroll position
-    const containerWidth = scrollContainerRef.current.clientWidth;
-    const scrollPosition = scrollContainerRef.current.scrollLeft;
-    const sectionIndex = Math.round(scrollPosition / containerWidth);
-    const newTab = viewTabs[Math.max(0, Math.min(sectionIndex, viewTabs.length - 1))];
-    
-    if (newTab !== viewTab) {
-      setViewTab(newTab);
-    }
-    
-    // Smooth scroll to the correct position
-    scrollContainerRef.current.scrollTo({
-      left: sectionIndex * containerWidth,
-      behavior: 'smooth'
-    });
-  }, [isDragging, viewTab, viewTabs]);
-
-  // Touch handlers for mobile swipe navigation
-  const handleTouchStart = useCallback((e: React.TouchEvent) => {
-    if (!scrollContainerRef.current) return;
-    
-    const touch = e.touches[0];
-    setStartX(touch.pageX - scrollContainerRef.current.offsetLeft);
-    setScrollLeft(scrollContainerRef.current.scrollLeft);
-  }, []);
-
-  const handleTouchMove = useCallback((e: React.TouchEvent) => {
-    if (!scrollContainerRef.current) return;
-    
-    const touch = e.touches[0];
-    const x = touch.pageX - scrollContainerRef.current.offsetLeft;
-    const walk = (x - startX) * 1.5; // Touch scroll speed
-    scrollContainerRef.current.scrollLeft = scrollLeft - walk;
-  }, [startX, scrollLeft]);
-
-  const handleTouchEnd = useCallback(() => {
-    if (!scrollContainerRef.current) return;
-    
-    // Snap to nearest section
-    const containerWidth = scrollContainerRef.current.clientWidth;
-    const scrollPosition = scrollContainerRef.current.scrollLeft;
-    const sectionIndex = Math.round(scrollPosition / containerWidth);
-    const newTab = viewTabs[Math.max(0, Math.min(sectionIndex, viewTabs.length - 1))];
-    
-    if (newTab !== viewTab) {
-      setViewTab(newTab);
-    }
-    
-    scrollContainerRef.current.scrollTo({
-      left: sectionIndex * containerWidth,
-      behavior: 'smooth'
-    });
-  }, [viewTab, viewTabs]);
-
-  // Scroll to active tab when tab changes via buttons
-  useEffect(() => {
-    if (scrollContainerRef.current) {
-      const containerWidth = scrollContainerRef.current.clientWidth;
-      scrollContainerRef.current.scrollTo({
-        left: currentTabIndex * containerWidth,
-        behavior: 'smooth'
-      });
-    }
-  }, [currentTabIndex]);
-
   const renderCoachFocus = () => {
     if (!hasCoachFocus) return null;
 
     return (
-      <section className="rounded-2xl bg-white/70 backdrop-blur-sm border border-white/20 shadow-xl p-8 mb-8 overflow-hidden transition-all duration-300 hover:bg-white/80 hover:shadow-2xl transform hover:-translate-y-1">
+      <section className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm mb-6">
         <h2 className="text-xl font-semibold text-gray-900 mb-4">
           Coach Focus
         </h2>
@@ -461,7 +487,7 @@ const MyProgressDashboard: React.FC<MyProgressDashboardProps> = ({
             {priorities.map((p) => (
               <div
                 key={p.id}
-                className="rounded-xl bg-gradient-to-r from-gray-50/80 to-gray-100/60 backdrop-blur-sm border border-gray-200/50 shadow-md px-4 py-3 text-sm text-gray-800 max-w-full transition-all duration-200 hover:from-gray-100/80 hover:to-gray-200/60 hover:shadow-lg"
+                className="bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-sm text-gray-800 max-w-full hover:bg-gray-100 transition-colors"
               >
                 <div className="flex items-center gap-2 mb-1">
                   <DotIcon className="h-3 w-3 text-[#fa5f06]" />
@@ -489,7 +515,7 @@ const MyProgressDashboard: React.FC<MyProgressDashboardProps> = ({
 
           {/* Action List */}
           {actions.length > 0 && (
-            <section className="rounded-2xl bg-white/70 backdrop-blur-sm border border-white/20 shadow-lg p-6 overflow-hidden transition-all duration-300 hover:bg-white/80 hover:shadow-xl">
+            <section className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm mb-6">
               <div className="flex items-center justify-start mb-4 gap-3">
                 <h2 className="text-xl font-semibold text-gray-900 truncate">
                   Your Actions Today
@@ -501,7 +527,7 @@ const MyProgressDashboard: React.FC<MyProgressDashboardProps> = ({
                     key={action.id}
                     type="button"
                     onClick={() => handleActionToggle(action.id)}
-                    className="w-full text-left flex gap-3 rounded-xl bg-gradient-to-r from-gray-50/80 to-gray-100/60 backdrop-blur-sm border border-gray-200/50 shadow-md hover:from-gray-100/80 hover:to-gray-200/60 hover:shadow-lg transition-all duration-200 px-4 py-3.5"
+                    className="w-full text-left flex gap-3 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 transition-colors px-4 py-3.5"
                   >
                     <div className="flex flex-col justify-center">
                       <span
@@ -543,7 +569,7 @@ const MyProgressDashboard: React.FC<MyProgressDashboardProps> = ({
 
           {/* Workout module */}
           {workout && (
-            <section className="rounded-2xl bg-white/70 backdrop-blur-sm border border-white/20 shadow-lg p-6 overflow-hidden transition-all duration-300 hover:bg-white/80 hover:shadow-xl">
+            <section className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm mb-6">
               <div className="flex items-center justify-start mb-4 gap-3">
                 <h2 className="text-xl font-semibold text-gray-900 truncate">
                   Your Workout
@@ -551,14 +577,14 @@ const MyProgressDashboard: React.FC<MyProgressDashboardProps> = ({
               </div>
 
               {/* Tabs */}
-              <div className="flex gap-2 mb-6 p-1 bg-gray-100/50 rounded-xl backdrop-blur-sm shadow-md overflow-hidden">
+              <div className="flex gap-1 mb-6 border-b border-gray-200">
                 <button
                   type="button"
                   onClick={() => setWorkoutTab("today")}
-                  className={`px-6 py-3 text-sm font-medium rounded-lg whitespace-nowrap leading-normal transition-all duration-200 ${
+                  className={`px-6 py-3 text-sm font-medium rounded-t-lg whitespace-nowrap leading-normal transition-colors ${
                     workoutTab === "today"
-                      ? "bg-white text-gray-900 shadow-lg"
-                      : "bg-transparent text-gray-600 hover:text-gray-900 hover:bg-white/50 hover:shadow-sm"
+                      ? "bg-white text-gray-900 border border-gray-200 border-b-white -mb-px"
+                      : "bg-transparent text-gray-600 hover:text-gray-900 hover:bg-gray-50"
                   }`}
                 >
                   Today
@@ -566,10 +592,10 @@ const MyProgressDashboard: React.FC<MyProgressDashboardProps> = ({
                 <button
                   type="button"
                   onClick={() => setWorkoutTab("program")}
-                  className={`px-6 py-3 text-sm font-medium rounded-lg whitespace-nowrap leading-normal transition-all duration-200 ${
+                  className={`px-6 py-3 text-sm font-medium rounded-t-lg whitespace-nowrap leading-normal transition-colors ${
                     workoutTab === "program"
-                      ? "bg-white text-gray-900 shadow-md"
-                      : "bg-transparent text-gray-600 hover:text-gray-900 hover:bg-white/50 hover:shadow-sm"
+                      ? "bg-white text-gray-900 border border-gray-200 border-b-white -mb-px"
+                      : "bg-transparent text-gray-600 hover:text-gray-900 hover:bg-gray-50"
                   }`}
                 >
                   Program
@@ -579,7 +605,7 @@ const MyProgressDashboard: React.FC<MyProgressDashboardProps> = ({
               {/* Today Tab Content */}
               {workoutTab === "today" && (
                 <>
-                  <div className="rounded-xl bg-gradient-to-r from-gray-50/80 to-gray-100/60 backdrop-blur-sm border border-gray-200/50 shadow-lg p-4 mb-4">
+                  <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-4">
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                       <div>
                         <p className="text-sm font-medium text-gray-900">
@@ -599,7 +625,7 @@ const MyProgressDashboard: React.FC<MyProgressDashboardProps> = ({
                       <button
                         type="button"
                         onClick={onStartWorkout}
-                        className="inline-flex items-center justify-center rounded-xl bg-[#fa5f06] px-6 py-3 text-sm font-semibold text-white shadow-lg hover:bg-[#e5520a] hover:shadow-xl transition-all duration-200"
+                        className="inline-flex items-center justify-center rounded-lg bg-[#fa5f06] px-6 py-3 text-sm font-semibold text-white shadow hover:bg-[#e5520a] transition-colors"
                       >
                         Start Workout
                       </button>
@@ -643,7 +669,7 @@ const MyProgressDashboard: React.FC<MyProgressDashboardProps> = ({
         <div className="space-y-8 p-2">
           {/* Meals & logging */}
           {consumption && (
-            <section className="rounded-2xl bg-white/70 backdrop-blur-sm border border-white/20 shadow-xl p-8 overflow-hidden transition-all duration-300 hover:bg-white/80 hover:shadow-2xl transform hover:-translate-y-1">
+            <section className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm mb-6">
               <div className="flex items-center justify-between mb-4 gap-3">
                 <h2 className="text-xl font-semibold text-gray-900 truncate">
                   Meals Today
@@ -651,7 +677,7 @@ const MyProgressDashboard: React.FC<MyProgressDashboardProps> = ({
                 <button
                   type="button"
                   onClick={onLogMeal}
-                  className="inline-flex items-center justify-center rounded-xl bg-[#fa5f06] px-5 py-2.5 text-sm font-semibold text-white shadow-lg hover:bg-[#e5520a] hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 whitespace-nowrap shrink-0"
+                  className="inline-flex items-center justify-center rounded-lg bg-[#fa5f06] px-5 py-2.5 text-sm font-semibold text-white shadow hover:bg-[#e5520a] transition-colors whitespace-nowrap shrink-0"
                 >
                   Log meal
                 </button>
@@ -692,7 +718,7 @@ const MyProgressDashboard: React.FC<MyProgressDashboardProps> = ({
 
           {/* Hydration */}
           {hydration && (
-            <section className="rounded-2xl bg-white/70 backdrop-blur-sm border border-white/20 shadow-xl p-8 overflow-hidden transition-all duration-300 hover:bg-white/80 hover:shadow-2xl transform hover:-translate-y-1">
+            <section className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm mb-6">
               <div className="flex items-center justify-between mb-4 gap-3">
                 <h2 className="text-xl font-semibold text-gray-900 truncate">
                   Hydration
@@ -700,7 +726,7 @@ const MyProgressDashboard: React.FC<MyProgressDashboardProps> = ({
                 <button
                   type="button"
                   onClick={onAddHydration}
-                  className="inline-flex items-center justify-center rounded-xl bg-[#fa5f06] px-5 py-2.5 text-sm font-semibold text-white shadow-lg hover:bg-[#e5520a] hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 whitespace-nowrap shrink-0"
+                  className="inline-flex items-center justify-center rounded-lg bg-[#fa5f06] px-5 py-2.5 text-sm font-semibold text-white shadow hover:bg-[#e5520a] transition-colors whitespace-nowrap shrink-0"
                 >
                   Add cup
                 </button>
@@ -715,7 +741,7 @@ const MyProgressDashboard: React.FC<MyProgressDashboardProps> = ({
                 </span>
                 {typeof hydration.cups === "number" &&
                   typeof hydration.goalCups === "number" && (
-                    <div className="flex-1 ml-3 h-2 rounded-full bg-gray-200/60 overflow-hidden backdrop-blur-sm">
+                    <div className="flex-1 ml-3 h-2 rounded-full bg-gray-200 overflow-hidden">
                       <div
                         className="h-full bg-gradient-to-r from-[#fa5f06] to-[#e5520a] transition-all duration-300 rounded-full"
                         style={{
@@ -737,7 +763,7 @@ const MyProgressDashboard: React.FC<MyProgressDashboardProps> = ({
 
           {/* Fast-Food Detection */}
           {fastFoodDetections.length > 0 && (
-            <section className="rounded-2xl bg-white/70 backdrop-blur-sm border border-white/20 shadow-lg p-6 overflow-hidden transition-all duration-300 hover:bg-white/80 hover:shadow-xl">
+            <section className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm mb-6">
               <div className="min-w-0">
                 <h2 className="text-xl font-semibold text-gray-900 mb-4">
                   Fast-Food Detected
@@ -747,7 +773,7 @@ const MyProgressDashboard: React.FC<MyProgressDashboardProps> = ({
                 {fastFoodDetections.map((f, idx) => (
                   <div
                     key={`${f.chain}-${f.meal}-${idx}`}
-                    className="rounded-lg bg-gray-50 border border-gray-200 p-3 text-sm text-gray-800 min-w-0"
+                    className="bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm text-gray-800 min-w-0"
                   >
                     <p className="font-semibold truncate">
                       {f.chain} - {f.meal}
@@ -763,14 +789,14 @@ const MyProgressDashboard: React.FC<MyProgressDashboardProps> = ({
           )}
 
           {/* Receipts */}
-          <section className="rounded-2xl bg-white/70 backdrop-blur-sm border border-white/20 shadow-xl p-8 overflow-hidden transition-all duration-300 hover:bg-white/80 hover:shadow-2xl transform hover:-translate-y-1">
+          <section className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm mb-6">
             <div className="flex items-center justify-between mb-4 gap-3">
               <h2 className="text-xl font-semibold text-gray-900 truncate">
                 Receipts
               </h2>
               <button
                 type="button"
-                className="inline-flex items-center justify-center rounded-xl bg-[#fa5f06] px-5 py-2.5 text-sm font-semibold text-white shadow-lg hover:bg-[#e5520a] hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 whitespace-nowrap shrink-0"
+                className="inline-flex items-center justify-center rounded-lg bg-[#fa5f06] px-5 py-2.5 text-sm font-semibold text-white shadow hover:bg-[#e5520a] transition-colors whitespace-nowrap shrink-0"
                 // hook this into your receipt upload flow
                 onClick={() => {
                   /* TODO: open receipt upload */
@@ -808,45 +834,36 @@ const MyProgressDashboard: React.FC<MyProgressDashboardProps> = ({
 
           {/* Shopping List */}
           {shoppingList.length > 0 && (
-            <section className="rounded-2xl bg-white/70 backdrop-blur-sm border border-white/20 shadow-lg p-6 overflow-hidden transition-all duration-300 hover:bg-white/80 hover:shadow-xl">
+            <section className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm mb-6">
               <div className="min-w-0">
                 <h2 className="text-xl font-semibold text-gray-900 mb-4">
                   Shopping List
                 </h2>
               </div>
               <div className="space-y-2 min-w-0">
-                {shoppingList.map((item) => (
+                {shoppingList.map((item, index) => (
                   <div
-                    key={item.id}
-                    className="flex items-center justify-between rounded-xl bg-gradient-to-r from-gray-50/80 to-gray-100/60 backdrop-blur-sm border border-gray-200/50 shadow-md px-4 py-3 text-sm min-w-0"
+                    key={`${item.name}-${index}`}
+                    className="flex items-center justify-between bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-sm min-w-0"
                   >
                     <span
-                      className={
-                        item.completed
-                          ? "line-through text-gray-400 truncate"
-                          : "text-gray-800 truncate"
-                      }
+                      className="text-gray-800 truncate"
                     >
-                      {item.item}
-                      {item.qty ? ` - ${item.qty}` : ""}
+                      {item.name}
+                      {item.quantity ? ` - ${item.quantity} ${item.unit}` : ""}
                     </span>
-                    {item.completed && (
-                      <span className="text-emerald-600">
-                        <CheckIcon className="h-3 w-3" />
-                      </span>
-                    )}
                   </div>
                 ))}
               </div>
               
               {/* Instacart Order Button */}
               {coach.instacartProductsLinkUrl && (
-                <div className="mt-4 pt-4 border-t border-gray-200/50">
+                <div className="mt-4 pt-4 border-t border-gray-200">
                   <a
                     href={coach.instacartProductsLinkUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-semibold px-6 py-3 text-sm transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
+                    className="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-semibold px-6 py-3 text-sm transition-colors shadow"
                   >
                     🛒 View Smart Shopping List
                   </a>
@@ -860,7 +877,7 @@ const MyProgressDashboard: React.FC<MyProgressDashboardProps> = ({
 
           {/* Streaks */}
           {streaks.length > 0 && (
-            <section className="rounded-2xl bg-white/70 backdrop-blur-sm border border-white/20 shadow-lg p-6 overflow-hidden transition-all duration-300 hover:bg-white/80 hover:shadow-xl">
+            <section className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm mb-6">
               <div className="min-w-0">
                 <h2 className="text-xl font-semibold text-gray-900 mb-4">
                   Your Streaks
@@ -870,7 +887,7 @@ const MyProgressDashboard: React.FC<MyProgressDashboardProps> = ({
                 {streaks.map((s) => (
                   <div
                     key={s.id}
-                    className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-gray-50/80 to-gray-100/60 backdrop-blur-sm border border-gray-200/50 shadow-md px-4 py-2 text-sm text-gray-700 transition-all duration-200 hover:shadow-lg"
+                    className="inline-flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
                   >
                     <DotIcon className="h-2.5 w-2.5 text-[#fa5f06]" />
                     <span>{s.label}</span>
@@ -882,7 +899,7 @@ const MyProgressDashboard: React.FC<MyProgressDashboardProps> = ({
 
           {/* Check-in */}
           {checkin && (
-            <section className="rounded-2xl bg-white/70 backdrop-blur-sm border border-white/20 shadow-lg p-6 overflow-hidden transition-all duration-300 hover:bg-white/80 hover:shadow-xl">
+            <section className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm mb-6">
               <div className="min-w-0">
                 <h2 className="text-xl font-semibold text-gray-900 mb-4">
                   Daily Check-In
@@ -894,13 +911,13 @@ const MyProgressDashboard: React.FC<MyProgressDashboardProps> = ({
 
               {checkin.inputType === "mood" && (
                 <div className="flex gap-3">
-                  <button className="h-10 w-10 rounded-full bg-gradient-to-r from-gray-50/80 to-gray-100/60 backdrop-blur-sm border border-gray-200/50 shadow-md hover:bg-gray-200 hover:shadow-lg flex items-center justify-center transition-all duration-200">
+                  <button className="h-10 w-10 rounded-full bg-gray-50 border border-gray-200 hover:bg-gray-100 flex items-center justify-center transition-colors">
                     <MoodHappyIcon />
                   </button>
-                  <button className="h-10 w-10 rounded-full bg-gradient-to-r from-gray-50/80 to-gray-100/60 backdrop-blur-sm border border-gray-200/50 shadow-md hover:bg-gray-200 hover:shadow-lg flex items-center justify-center transition-all duration-200">
+                  <button className="h-10 w-10 rounded-full bg-gray-50 border border-gray-200 hover:bg-gray-100 flex items-center justify-center transition-colors">
                     <MoodNeutralIcon />
                   </button>
-                  <button className="h-10 w-10 rounded-full bg-gradient-to-r from-gray-50/80 to-gray-100/60 backdrop-blur-sm border border-gray-200/50 shadow-md hover:bg-gray-200 hover:shadow-lg flex items-center justify-center transition-all duration-200">
+                  <button className="h-10 w-10 rounded-full bg-gray-50 border border-gray-200 hover:bg-gray-100 flex items-center justify-center transition-colors">
                     <MoodSadIcon />
                   </button>
                 </div>
@@ -908,7 +925,7 @@ const MyProgressDashboard: React.FC<MyProgressDashboardProps> = ({
 
               {checkin.inputType === "text" && (
                 <textarea
-                  className="mt-1 w-full rounded-xl bg-gradient-to-r from-gray-50/80 to-gray-100/60 backdrop-blur-sm border border-gray-200/50 shadow-md px-4 py-3 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 focus:shadow-lg transition-all duration-200"
+                  className="mt-1 w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all"
                   rows={3}
                   placeholder="Type a short reflection..."
                 />
@@ -920,7 +937,7 @@ const MyProgressDashboard: React.FC<MyProgressDashboardProps> = ({
                     <button
                       key={opt}
                       type="button"
-                      className="rounded-xl bg-gradient-to-r from-gray-50/80 to-gray-100/60 backdrop-blur-sm border border-gray-200/50 shadow-md px-4 py-2 text-sm text-gray-700 hover:bg-gray-200 hover:shadow-lg transition-all duration-200"
+                      className="bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
                     >
                       {opt}
                     </button>
@@ -932,7 +949,7 @@ const MyProgressDashboard: React.FC<MyProgressDashboardProps> = ({
 
           {/* Education tile */}
           {education && (
-            <section className="rounded-2xl bg-emerald-50 border border-emerald-200 shadow-xl p-8 hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300">
+            <section className="bg-emerald-50 border border-emerald-200 rounded-lg shadow-sm p-6 mb-6">
               <h2 className="text-xl font-semibold text-emerald-900 mb-4">
                 Learn One Thing Today
               </h2>
@@ -945,7 +962,7 @@ const MyProgressDashboard: React.FC<MyProgressDashboardProps> = ({
               <button
                 type="button"
                 onClick={onEducationClick}
-                className="mt-4 inline-flex items-center text-sm font-semibold text-emerald-700 hover:text-emerald-800 transition-colors duration-200"
+                className="mt-4 inline-flex items-center text-sm font-semibold text-emerald-700 hover:text-emerald-800 transition-colors"
               >
                 {education.linkLabel ?? "Read More →"}
               </button>
@@ -960,7 +977,7 @@ const MyProgressDashboard: React.FC<MyProgressDashboardProps> = ({
     return (
       <div className="grid grid-cols-1 lg:grid-cols-[2fr,minmax(260px,1fr)] gap-6">
         {/* Left: weekly snapshot */}
-        <section className="rounded-2xl bg-white/70 backdrop-blur-sm border border-white/20 p-6 overflow-hidden transition-all duration-300 hover:bg-white/80">
+        <section className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
           <div className="min-w-0">
             <h2 className="text-xl font-semibold text-gray-900 mb-4">
               This Week at a Glance
@@ -974,7 +991,7 @@ const MyProgressDashboard: React.FC<MyProgressDashboardProps> = ({
           ) : (
             <>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-                <div className="rounded-xl bg-gradient-to-r from-gray-50/80 to-gray-100/60 backdrop-blur-sm border border-gray-200/50 shadow-sm p-4">
+                <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
                   <p className="text-xs uppercase tracking-wide text-gray-600">
                     Avg Calories
                   </p>
@@ -982,7 +999,7 @@ const MyProgressDashboard: React.FC<MyProgressDashboardProps> = ({
                     {averageFromWeek("calories")}
                   </p>
                 </div>
-                <div className="rounded-xl bg-gradient-to-r from-gray-50/80 to-gray-100/60 backdrop-blur-sm border border-gray-200/50 shadow-sm p-4">
+                <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
                   <p className="text-xs uppercase tracking-wide text-gray-600">
                     Avg Protein
                   </p>
@@ -990,7 +1007,7 @@ const MyProgressDashboard: React.FC<MyProgressDashboardProps> = ({
                     {averageFromWeek("protein")}g
                   </p>
                 </div>
-                <div className="rounded-xl bg-gradient-to-r from-gray-50/80 to-gray-100/60 backdrop-blur-sm border border-gray-200/50 shadow-sm p-4">
+                <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
                   <p className="text-xs uppercase tracking-wide text-gray-600">
                     Avg Carbs
                   </p>
@@ -998,7 +1015,7 @@ const MyProgressDashboard: React.FC<MyProgressDashboardProps> = ({
                     {averageFromWeek("carbs")}g
                   </p>
                 </div>
-                <div className="rounded-xl bg-gradient-to-r from-gray-50/80 to-gray-100/60 backdrop-blur-sm border border-gray-200/50 shadow-sm p-4">
+                <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
                   <p className="text-xs uppercase tracking-wide text-gray-600">
                     Avg Fat
                   </p>
@@ -1012,7 +1029,7 @@ const MyProgressDashboard: React.FC<MyProgressDashboardProps> = ({
                 {weekHistory.map((d) => (
                   <div
                     key={d.date}
-                    className="rounded-lg bg-gray-50 border border-gray-200 p-2 min-w-0"
+                    className="bg-gray-50 border border-gray-200 rounded-lg p-2 min-w-0"
                   >
                     <p className="font-semibold text-gray-900">{d.date}</p>
                     <p className="text-gray-700">
@@ -1032,7 +1049,7 @@ const MyProgressDashboard: React.FC<MyProgressDashboardProps> = ({
           {renderCoachFocus()}
 
           {streaks.length > 0 && (
-            <section className="rounded-2xl bg-white/70 backdrop-blur-sm border border-white/20 shadow-lg p-6 overflow-hidden transition-all duration-300 hover:bg-white/80 hover:shadow-xl">
+            <section className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm mb-6">
               <div className="min-w-0">
                 <h2 className="text-xl font-semibold text-gray-900 mb-4">
                   Your Streaks
@@ -1042,7 +1059,7 @@ const MyProgressDashboard: React.FC<MyProgressDashboardProps> = ({
                 {streaks.map((s) => (
                   <div
                     key={s.id}
-                    className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-gray-50/80 to-gray-100/60 backdrop-blur-sm border border-gray-200/50 shadow-md px-4 py-2 text-sm text-gray-700"
+                    className="inline-flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 text-sm text-gray-700"
                   >
                     <DotIcon className="h-2.5 w-2.5 text-[#fa5f06]" />
                     <span>{s.label}</span>
@@ -1053,7 +1070,7 @@ const MyProgressDashboard: React.FC<MyProgressDashboardProps> = ({
           )}
 
           {education && (
-            <section className="rounded-lg bg-emerald-50 border border-emerald-200 p-4">
+            <section className="bg-emerald-50 border border-emerald-200 rounded-lg p-4">
               <h2 className="text-lg font-semibold text-emerald-900 mb-3">
                 Learn One Thing This Week
               </h2>
@@ -1079,7 +1096,7 @@ const MyProgressDashboard: React.FC<MyProgressDashboardProps> = ({
 
   const renderHistoryView = () => {
     return (
-      <section className="rounded-2xl bg-white/70 backdrop-blur-sm border border-white/20 shadow-lg p-6 overflow-hidden transition-all duration-300 hover:bg-white/80 hover:shadow-xl">
+      <section className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
         <h2 className="text-xl font-semibold text-gray-900 mb-4">
           Nutrition History
         </h2>
@@ -1093,7 +1110,7 @@ const MyProgressDashboard: React.FC<MyProgressDashboardProps> = ({
             {history.map((d) => (
               <div
                 key={d.date}
-                className="rounded-lg bg-gray-50 border border-gray-200 p-2"
+                className="bg-gray-50 border border-gray-200 rounded-lg p-2"
               >
                 <p className="font-semibold text-gray-900">{d.date}</p>
                 <p className="text-gray-700">
@@ -1110,115 +1127,92 @@ const MyProgressDashboard: React.FC<MyProgressDashboardProps> = ({
   };
 
   return (
-    <div className="w-full bg-blue-50 min-h-[70vh] relative">
-      {/* Header - Fixed position for tab navigation */}
-      <header className="sticky top-0 z-10 bg-blue-50/90 backdrop-blur-sm border-b border-white/20 pb-4 pt-6 px-6 sm:px-8">
-        {/* View Tabs */}
-        <div className="flex justify-center">
-          <div className="flex gap-2 bg-white/60 backdrop-blur-sm p-1.5 rounded-2xl border border-white/30 shadow-lg">
-            {viewTabs.map((tab, index) => (
+    <>
+      {/* Fixed Header */}
+      <div className={`fixed top-0 left-0 right-0 z-50 bg-white ${PlatformDetectionService.isNative() ? 'pt-12' : ''}`}>
+        <Header
+          variant="results"
+          showLogin={true}
+          showSearchInput={true}
+          onSearchSubmit={() => {}}
+          onChatMessage={() => {}}
+          isInChatMode={false}
+          showProgressMenu={true}
+          onProgressMenuClick={undefined}
+        />
+      </div>
+
+      {/* Main Container */}
+      <div 
+        className="min-h-screen bg-[#f0f7ff] overflow-hidden"
+        style={{ paddingTop: windowWidth < 768 ? '320px' : windowWidth < 1200 ? '300px' : '180px' }}
+      >
+        <div 
+          className="w-full min-h-screen bg-[#f0f7ff]"
+          style={{
+            padding: windowWidth < 768 ? '5px 8px 0 8px' : '10px 20px',
+            paddingTop: 0,
+            maxWidth: '100%',
+            overflowX: 'hidden'
+          }}
+        >
+          {/* Tab Navigation */}
+          <div className="bg-white border-b border-gray-200 p-4 mb-6 rounded-lg shadow-sm">
+            <div className="flex justify-between items-center mb-4">
+              <div>
+                <h1 className="text-xl font-bold text-gray-800 m-0">
+                  {isCoachMode && selectedClient ? `${selectedClient.name}'s Progress` : 'My Progress'}
+                </h1>
+                {isCoachMode && selectedClient && (
+                  <p className="text-sm text-gray-600 mt-1">{selectedClient.email}</p>
+                )}
+              </div>
+            </div>
+            
+            {/* Tab buttons */}
+            <div className="flex gap-1 border-b border-gray-200 overflow-x-auto overflow-y-hidden scrollbar-hide">
               <button
-                key={tab}
-                type="button"
-                onClick={() => setViewTab(tab)}
-                className={`px-6 py-3 text-sm font-medium rounded-xl transition-all duration-200 ${
-                  viewTab === tab
-                    ? "bg-white text-gray-900 shadow-lg border border-gray-200/50"
-                    : "bg-transparent text-gray-600 hover:text-gray-900 hover:bg-white/50 hover:shadow-md"
+                onClick={() => setViewTab("today")}
+                className={`px-6 py-4 text-[15px] font-medium rounded-t-lg whitespace-nowrap leading-normal transition-colors ${
+                  viewTab === "today"
+                    ? "bg-white text-gray-900 border border-gray-200 border-b-white -mb-px"
+                    : "bg-transparent text-gray-600 hover:text-gray-900 hover:bg-gray-50"
                 }`}
               >
-                {tab === "today"
-                  ? "Today"
-                  : tab === "week"
-                  ? "Week"
-                  : "History"}
+                Today
               </button>
-            ))}
+              <button
+                onClick={() => setViewTab("week")}
+                className={`px-6 py-4 text-[15px] font-medium rounded-t-lg whitespace-nowrap leading-normal transition-colors ${
+                  viewTab === "week"
+                    ? "bg-white text-gray-900 border border-gray-200 border-b-white -mb-px"
+                    : "bg-transparent text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                }`}
+              >
+                Week
+              </button>
+              <button
+                onClick={() => setViewTab("history")}
+                className={`px-6 py-4 text-[15px] font-medium rounded-t-lg whitespace-nowrap leading-normal transition-colors ${
+                  viewTab === "history"
+                    ? "bg-white text-gray-900 border border-gray-200 border-b-white -mb-px"
+                    : "bg-transparent text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                }`}
+              >
+                History
+              </button>
+            </div>
           </div>
-        </div>
-        
-        {/* Swipe hint for mobile */}
-        <div className="flex justify-center mt-3 md:hidden">
-          <span className="text-xs text-gray-500 flex items-center gap-1">
-            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16l-4-4m0 0l4-4m-4 4h18" />
-            </svg>
-            Swipe to navigate
-            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-            </svg>
-          </span>
-        </div>
-      </header>
 
-      {/* Horizontal Scroll Container - Swipeable Dashboard Sections */}
-      <div 
-        ref={scrollContainerRef}
-        className="horizontal-scroll-container flex overflow-x-auto snap-x snap-mandatory scrollbar-hide cursor-grab active:cursor-grabbing"
-        style={{
-          scrollBehavior: isDragging ? 'auto' : 'smooth',
-          WebkitOverflowScrolling: 'touch'
-        }}
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseUp}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
-      >
-        {/* Today Section */}
-        <div className="snap-start flex-shrink-0 w-full px-6 sm:px-8 py-6">
-          {renderTodayView()}
-        </div>
-
-        {/* Week Section */}
-        <div className="snap-start flex-shrink-0 w-full px-6 sm:px-8 py-6">
-          {renderWeekView()}
-        </div>
-
-        {/* History Section */}
-        <div className="snap-start flex-shrink-0 w-full px-6 sm:px-8 py-6">
-          <div className="max-w-3xl mx-auto">
-            {renderHistoryView()}
+          {/* Tab Content */}
+          <div className="tab-content">
+            {viewTab === "today" && renderTodayView()}
+            {viewTab === "week" && renderWeekView()}
+            {viewTab === "history" && renderHistoryView()}
           </div>
         </div>
       </div>
-
-      {/* CSS for horizontal scrolling behavior */}
-      <style dangerouslySetInnerHTML={{
-        __html: `
-          .horizontal-scroll-container {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-          }
-          
-          .horizontal-scroll-container::-webkit-scrollbar {
-            display: none;
-          }
-          
-          .scrollbar-hide {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-          }
-          
-          .scrollbar-hide::-webkit-scrollbar {
-            display: none;
-          }
-          
-          .horizontal-scroll-container.cursor-grab:active {
-            cursor: grabbing !important;
-          }
-          
-          .horizontal-scroll-container * {
-            user-select: none;
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-          }
-        `
-      }} />
-    </div>
+    </>
   );
 };
 
