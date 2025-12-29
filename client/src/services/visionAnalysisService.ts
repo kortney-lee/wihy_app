@@ -58,7 +58,7 @@ const getWihyApiUrl = () => {
 const WIHY_API_BASE = getWihyApiUrl();
 
 // Debug logging for Scanner API
-console.log('🔍 WIHY SCANNER API CONFIG DEBUG:', {
+console.log('[SEARCH] WIHY SCANNER API CONFIG DEBUG:', {
   NODE_ENV: process.env.NODE_ENV,
   REACT_APP_WIHY_API_URL: process.env.REACT_APP_WIHY_API_URL,
   FINAL_API_URL: WIHY_API_BASE,
@@ -130,7 +130,7 @@ class VisionAnalysisService {
         const confidence = Math.min(avgTransitions / 20, 1); // Normalize to 0-1
         const hasBarcodeLikePattern = confidence > 0.3; // Threshold for barcode detection
         
-        console.log('🔍 Pattern Analysis:', {
+        console.log('[SEARCH] Pattern Analysis:', {
           avgTransitions,
           confidence: Math.round(confidence * 100) + '%',
           hasBarcodeLikePattern,
@@ -207,7 +207,7 @@ class VisionAnalysisService {
    * Optimized for food product barcodes (UPC/EAN formats)
    */
   private async detectBarcodes(imageFile: File): Promise<string[]> {
-    console.log('🔍 Starting hybrid barcode detection...', {
+    console.log('[SEARCH] Starting hybrid barcode detection...', {
       fileName: imageFile.name,
       fileSize: imageFile.size,
       fileType: imageFile.type
@@ -217,18 +217,18 @@ class VisionAnalysisService {
     const patternAnalysis = await this.analyzeImagePattern(imageFile);
     
     if (!patternAnalysis.hasBarcodeLikePattern) {
-      console.log('📷 No barcode pattern detected, skipping barcode scanning');
+      console.log('[CAMERA] No barcode pattern detected, skipping barcode scanning');
       return [];
     }
     
-    console.log('📊 Barcode pattern detected, proceeding with detection...');
+    console.log('[CHART] Barcode pattern detected, proceeding with detection...');
     
     const detectedBarcodes: string[] = [];
     
     // Method 1: Try native BarcodeDetector (fast path)
     if ('BarcodeDetector' in window) {
       try {
-        console.log('🚀 Trying native BarcodeDetector (fast path)...');
+        console.log('[ROCKET] Trying native BarcodeDetector (fast path)...');
         
         const barcodeDetector = new (window as any).BarcodeDetector({
           formats: ['ean_13', 'ean_8', 'upc_a', 'upc_e'] // Food retail formats
@@ -239,13 +239,13 @@ class VisionAnalysisService {
         if (barcodes.length > 0) {
           barcodes.forEach((barcode: any) => {
             const normalizedBarcode = this.normalizeToGTIN14(barcode.rawValue);
-            console.log('✅ Native detector found:', barcode.rawValue, '→', normalizedBarcode);
+            console.log('[OK] Native detector found:', barcode.rawValue, '→', normalizedBarcode);
             detectedBarcodes.push(normalizedBarcode);
           });
           return [...new Set(detectedBarcodes)]; // Remove duplicates
         }
       } catch (nativeError) {
-        console.log('⚠️ Native BarcodeDetector failed:', nativeError.message);
+        console.log('[!] Native BarcodeDetector failed:', nativeError.message);
       }
     } else {
       console.log('ℹ️ Native BarcodeDetector not supported');
@@ -253,7 +253,7 @@ class VisionAnalysisService {
     
     // Method 2: QuaggaJS fallback (reliable cross-browser solution)
     try {
-      console.log('🔍 Falling back to QuaggaJS detection...');
+      console.log('[SEARCH] Falling back to QuaggaJS detection...');
       
       const quaggaResult = await quaggaBarcodeScanner.scanImageFile(imageFile);
       
@@ -261,16 +261,16 @@ class VisionAnalysisService {
         for (const barcode of quaggaResult.barcodes) {
           const normalizedBarcode = this.normalizeToGTIN14(barcode);
           detectedBarcodes.push(normalizedBarcode);
-          console.log('✅ QuaggaJS detected:', barcode, '→', normalizedBarcode);
+          console.log('[OK] QuaggaJS detected:', barcode, '→', normalizedBarcode);
         }
       }
       
     } catch (quaggaError) {
-      console.log('⚠️ QuaggaJS detection failed:', quaggaError.message || quaggaError);
+      console.log('[!] QuaggaJS detection failed:', quaggaError.message || quaggaError);
     }
     
     const uniqueBarcodes = [...new Set(detectedBarcodes)];
-    console.log('🎯 Final detected barcodes (GTIN-14):', uniqueBarcodes);
+    console.log('[TARGET] Final detected barcodes (GTIN-14):', uniqueBarcodes);
     
     return uniqueBarcodes;
   }
@@ -280,31 +280,31 @@ class VisionAnalysisService {
    */
   async analyzeImage(imageFile: File): Promise<VisionAnalysisResult> {
     try {
-      console.log('🔍 Starting WIHY image analysis...');
+      console.log('[SEARCH] Starting WIHY image analysis...');
       
       // Get basic image information
       const imageInfo = this.getImageInfo(imageFile);
       console.log('Image info:', imageInfo);
 
       // Try hybrid barcode detection 
-      console.log('🔍 Starting hybrid barcode detection...');
+      console.log('[SEARCH] Starting hybrid barcode detection...');
       const detectedBarcodes = await this.detectBarcodes(imageFile);
       
-      console.log('🔍 Barcode detection result:', detectedBarcodes);
+      console.log('[SEARCH] Barcode detection result:', detectedBarcodes);
       
       // If we found barcodes, scan them instead of doing image analysis
       if (detectedBarcodes.length > 0) {
-        console.log('🎯 Barcodes detected, performing barcode scan:', detectedBarcodes);
+        console.log('[TARGET] Barcodes detected, performing barcode scan:', detectedBarcodes);
         
         try {
           // Scan the first detected barcode
           const barcodeResult = await this.scanBarcode(detectedBarcodes[0]);
-          console.log('📊 Barcode scan result:', barcodeResult);
+          console.log('[CHART] Barcode scan result:', barcodeResult);
           
           // Add the detected barcodes to the result
           if (barcodeResult.success && barcodeResult.data) {
             barcodeResult.data.barcodes = detectedBarcodes;
-            console.log('✅ Returning barcode analysis result');
+            console.log('[OK] Returning barcode analysis result');
             return barcodeResult;
           }
         } catch (barcodeError) {
@@ -358,14 +358,14 @@ class VisionAnalysisService {
    * Analyze image using WIHY Scanner API (supports File objects and URLs)
    */
   private async analyzeWithWihyAPI(input: File | string, userContext = {}): Promise<any> {
-    console.log('🔍 Analyzing with WIHY Scanner API...');
+    console.log('[SEARCH] Analyzing with WIHY Scanner API...');
     
     // Create FormData for the image upload
     const formData = new FormData();
     
     if (typeof input === 'string') {
       // URL analysis - fetch the image first
-      console.log('🌐 Analyzing image from URL:', input);
+      console.log(' Analyzing image from URL:', input);
       
       const imageResponse = await fetch(input);
       if (!imageResponse.ok) {
@@ -376,7 +376,7 @@ class VisionAnalysisService {
       formData.append('image', blob, 'url-image.jpg');
     } else {
       // File upload analysis
-      console.log('📁 Analyzing uploaded file:', input.name);
+      console.log('[FOLDER] Analyzing uploaded file:', input.name);
       formData.append('image', input);
     }
     
@@ -403,7 +403,7 @@ class VisionAnalysisService {
    */
   async analyzeImageUrl(imageUrl: string, userContext = {}): Promise<VisionAnalysisResult> {
     try {
-      console.log('🔍 Analyzing image from URL with WIHY Scanner API');
+      console.log('[SEARCH] Analyzing image from URL with WIHY Scanner API');
       
       const wihyResult = await this.analyzeWithWihyAPI(imageUrl, {
         ...userContext,
@@ -661,7 +661,7 @@ class VisionAnalysisService {
    */
   async scanBarcode(barcode: string, userContext = {}): Promise<VisionAnalysisResult> {
     try {
-      console.log('🔍 Scanning barcode with WIHY Scanner API:', barcode);
+      console.log('[SEARCH] Scanning barcode with WIHY Scanner API:', barcode);
       
       // Use the correct GET endpoint for barcode lookup
       const url = `${WIHY_API_BASE}/api/barcode/${encodeURIComponent(barcode)}`;
@@ -800,40 +800,40 @@ class VisionAnalysisService {
 
     // Barcode detection info
     if (data.barcodes && data.barcodes.length > 0) {
-      parts.push(`📱 Barcode detected: ${data.barcodes[0]}`);
+      parts.push(`[MOBILE] Barcode detected: ${data.barcodes[0]}`);
     }
 
     // WIHY Scanner results
     if (data.verdict) {
-      parts.push(`🎯 ${data.verdict}`);
+      parts.push(`[TARGET] ${data.verdict}`);
     }
 
     // Health information
     if (data.healthScore !== undefined && data.novaGroup !== undefined) {
-      parts.push(`📊 Health Score: ${data.healthScore}/100`);
-      parts.push(`🏷️ ${data.novaDescription}`);
+      parts.push(`[CHART] Health Score: ${data.healthScore}/100`);
+      parts.push(`️ ${data.novaDescription}`);
     }
 
     // Detected foods
     if (data.foodItems && data.foodItems.length > 0) {
-      parts.push(`🍎 Detected: ${data.foodItems.join(', ')}`);
+      parts.push(` Detected: ${data.foodItems.join(', ')}`);
     }
 
     // Recommendations
     if (data.recommendations && data.recommendations.length > 0) {
-      parts.push(`💡 Recommendations:`);
+      parts.push(`[BULB] Recommendations:`);
       data.recommendations.forEach(rec => parts.push(`  • ${rec}`));
     }
 
     // Warnings
     if (data.warnings && data.warnings.length > 0) {
-      parts.push(`⚠️ Warnings:`);
+      parts.push(`[!] Warnings:`);
       data.warnings.forEach(warning => parts.push(`  • ${warning}`));
     }
 
     // Data sources
     if (data.dataSources && data.dataSources.length > 0) {
-      parts.push(`📋 Data from: ${data.dataSources.join(' • ')}`);
+      parts.push(`[PAGE] Data from: ${data.dataSources.join(' • ')}`);
     }
 
     // Fallback to basic info
@@ -842,7 +842,7 @@ class VisionAnalysisService {
         parts.push(data.description);
       }
       if (data.imageInfo) {
-        parts.push(`📁 ${data.imageInfo.name} (${data.imageInfo.size})`);
+        parts.push(`[FOLDER] ${data.imageInfo.name} (${data.imageInfo.size})`);
       }
     }
 
@@ -951,13 +951,13 @@ class VisionAnalysisService {
         
         return {
           healthy: hasService,
-          message: hasService ? '✅ WIHY Scanner API is healthy' : '⚠️ API service degraded',
+          message: hasService ? '[OK] WIHY Scanner API is healthy' : '[!] API service degraded',
           latency
         };
       } else {
         return {
           healthy: false,
-          message: `❌ API Error: ${response.status}`,
+          message: `[X] API Error: ${response.status}`,
           latency
         };
       }
@@ -965,7 +965,7 @@ class VisionAnalysisService {
     } catch (error) {
       return {
         healthy: false,
-        message: `❌ Connection failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+        message: `[X] Connection failed: ${error instanceof Error ? error.message : 'Unknown error'}`
       };
     }
   }

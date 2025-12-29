@@ -1,17 +1,17 @@
 # WiHy API v4.0.0 Enhanced Analysis Update
 
-## ✅ **What Was Added**
+## [OK] **What Was Added**
 
-### 🧠 **Enhanced Analysis Support**
+###  **Enhanced Analysis Support**
 The WiHy API now supports the `analyse` parameter for OpenAI-powered enhanced analysis as documented in the API specification.
 
-### 🔄 **Updated Interfaces**
+### [CYCLE] **Updated Interfaces**
 
 #### **HealthQuestionRequest** (updated)
 ```typescript
 export interface HealthQuestionRequest {
   query: string;
-  analyse?: boolean; // 🆕 Optional OpenAI enhanced analysis
+  analyse?: boolean; // [NEW] Optional OpenAI enhanced analysis
   user_context?: {
     age?: number;
     health_goals?: string[];
@@ -28,13 +28,13 @@ export interface HealthQuestionRequest {
 export interface HealthQuestionResponse {
   success: boolean;
   data: { /* existing data structure */ };
-  analysis?: { // 🆕 Enhanced analysis structure
+  analysis?: { // [NEW] Enhanced analysis structure
     summary: string;
     recommendations: string[];
     confidence_score: number;
     charts?: { /* chart data */ };
     metadata?: { /* metadata */ };
-    openai_analysis?: { // 🆕 OpenAI analysis section
+    openai_analysis?: { // [NEW] OpenAI analysis section
       summary: string;
       details: string;
       sources: string[];
@@ -48,7 +48,7 @@ export interface HealthQuestionResponse {
 }
 ```
 
-### 🚀 **New Methods**
+### [ROCKET] **New Methods**
 
 #### **1. askWithAnalysis() - Flexible Analysis Control**
 ```typescript
@@ -76,7 +76,7 @@ const response = await wihyAPI.askWithEnhancedAnalysis(
 );
 ```
 
-### 🔄 **Updated Legacy Methods**
+### [CYCLE] **Updated Legacy Methods**
 
 #### **askEnhancedHealthQuestion() - Now supports analyse parameter**
 ```typescript
@@ -98,7 +98,7 @@ const response3 = await wihyAPI.askEnhancedHealthQuestion({
 });
 ```
 
-### 📊 **Enhanced Response Handling**
+### [CHART] **Enhanced Response Handling**
 
 #### **Improved Format Output**
 The `formatResponse()` method now handles OpenAI analysis:
@@ -124,7 +124,7 @@ const citations = wihyAPI.extractCitations(response);
 const benefits = wihyAPI.extractBenefits(response);
 ```
 
-## 🎯 **Usage Examples**
+## [TARGET] **Usage Examples**
 
 ### **Basic Health Question**
 ```typescript
@@ -143,7 +143,7 @@ const basicResponse = await wihyAPI.askHealthQuestion({
 ```typescript
 const enhancedResponse = await wihyAPI.askHealthQuestion({
   query: "What foods help with energy?",
-  analyse: true, // 🧠 Enables OpenAI analysis
+  analyse: true, //  Enables OpenAI analysis
   user_context: {
     age: 28,
     health_goals: ['energy', 'focus'],
@@ -169,32 +169,32 @@ const recommendations = wihyAPI.extractRecommendations(response);
 const formatted = wihyAPI.formatWihyResponse(response);
 ```
 
-## 🔬 **Analysis Levels**
+##  **Analysis Levels**
 
 ### **Standard Analysis** (`analyse: false` or omitted)
-- ✅ Fast WIHY model responses
-- ✅ Health insights and recommendations  
-- ✅ Charts and visualizations
-- ✅ Quick results
+- [OK] Fast WIHY model responses
+- [OK] Health insights and recommendations  
+- [OK] Charts and visualizations
+- [OK] Quick results
 
 ### **Enhanced Analysis** (`analyse: true`)
-- ✅ Everything from Standard Analysis
-- ✅ Scientific research backing
-- ✅ Medical journal citations
-- ✅ Detailed explanations
-- ✅ Related health topics
-- ✅ Evidence-based recommendations
-- ✅ Medical disclaimers
+- [OK] Everything from Standard Analysis
+- [OK] Scientific research backing
+- [OK] Medical journal citations
+- [OK] Detailed explanations
+- [OK] Related health topics
+- [OK] Evidence-based recommendations
+- [OK] Medical disclaimers
 
-## 🎉 **Benefits**
+## [PARTY] **Benefits**
 
-1. **🧠 Comprehensive Analysis**: Get both fast WIHY insights + deep scientific explanations
-2. **📚 Research Backing**: Access to medical journal citations and studies
-3. **🔗 Topic Expansion**: Discover related health concepts
-4. **⚕️ Medical Context**: Proper disclaimers and educational framing
-5. **🚀 Flexible Usage**: Choose analysis depth based on your needs
-6. **🔄 Full Compatibility**: All existing code continues to work
+1. ** Comprehensive Analysis**: Get both fast WIHY insights + deep scientific explanations
+2. **[BOOKS] Research Backing**: Access to medical journal citations and studies
+3. **[LINK] Topic Expansion**: Discover related health concepts
+4. **️ Medical Context**: Proper disclaimers and educational framing
+5. **[ROCKET] Flexible Usage**: Choose analysis depth based on your needs
+6. **[CYCLE] Full Compatibility**: All existing code continues to work
 
-## 🚀 **Ready to Use!**
+## [ROCKET] **Ready to Use!**
 
-The enhanced WiHy API v4.0.0 is now ready with full support for the `analyse` parameter. Choose your analysis level and get the health intelligence you need! 🎯
+The enhanced WiHy API v4.0.0 is now ready with full support for the `analyse` parameter. Choose your analysis level and get the health intelligence you need! [TARGET]

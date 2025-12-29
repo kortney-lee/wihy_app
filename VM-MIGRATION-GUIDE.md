@@ -123,7 +123,7 @@ ssh wihyadmin@$NEW_VM_IP "chmod +x *.sh"
 ## DNS Update Procedure
 
 ### 1. Update DNS Records
-**⚠️ Critical: Update DNS before SSL setup**
+**[!] Critical: Update DNS before SSL setup**
 
 Update the following DNS records at your domain registrar:
 ```
@@ -297,7 +297,7 @@ Wait 24-48 hours and monitor:
 - [ ] Update team documentation with new VM details
 
 ### 3. Clean Up Old VM
-**⚠️ Only after confirming new VM is stable**
+**[!] Only after confirming new VM is stable**
 ```bash
 # Shutdown old VM (don't delete yet)
 az vm deallocate --resource-group wihy-ui-rg --name wihy-ui-prod-vm

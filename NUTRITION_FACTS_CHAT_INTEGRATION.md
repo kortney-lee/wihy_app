@@ -13,25 +13,25 @@ To enhance mobile readability and user comprehension, the NutritionFacts interfa
 #### Nutrient Category Colors
 
 **Macronutrients (Primary Energy Sources)**
-- **🟢 Protein**: Green (#16a34a) - Essential for muscle building and repair
-- **🟠 Carbohydrates**: Orange (#ea580c) - Primary energy source
-- **🟡 Fats**: Yellow/Gold (#eab308) - Essential fats and energy storage
-- **🔴 Calories**: Red (#dc2626) - Total energy content (most prominent)
+- ** Protein**: Green (#16a34a) - Essential for muscle building and repair
+- ** Carbohydrates**: Orange (#ea580c) - Primary energy source
+- ** Fats**: Yellow/Gold (#eab308) - Essential fats and energy storage
+- ** Calories**: Red (#dc2626) - Total energy content (most prominent)
 
 **Vitamins (Micronutrients)**
-- **🟣 Fat-Soluble Vitamins**: Purple (#7c3aed) - A, D, E, K
-- **🔵 Water-Soluble Vitamins**: Blue (#2563eb) - B-Complex, C
-- **🟤 Vitamin B-Complex**: Brown (#a16207) - B1, B2, B6, B12, Folate, etc.
+- ** Fat-Soluble Vitamins**: Purple (#7c3aed) - A, D, E, K
+- ** Water-Soluble Vitamins**: Blue (#2563eb) - B-Complex, C
+- ** Vitamin B-Complex**: Brown (#a16207) - B1, B2, B6, B12, Folate, etc.
 
 **Minerals (Essential Elements)**
-- **🟦 Major Minerals**: Dark Blue (#1e40af) - Calcium, Phosphorus, Magnesium
-- **🟨 Electrolytes**: Bright Yellow (#facc15) - Sodium, Potassium, Chloride
-- **🟧 Trace Minerals**: Orange-Red (#f97316) - Iron, Zinc, Copper, Selenium
+- ** Major Minerals**: Dark Blue (#1e40af) - Calcium, Phosphorus, Magnesium
+- ** Electrolytes**: Bright Yellow (#facc15) - Sodium, Potassium, Chloride
+- ** Trace Minerals**: Orange-Red (#f97316) - Iron, Zinc, Copper, Selenium
 
 **Health Impact Indicators**
-- **✅ Beneficial**: Bright Green (#22c55e) - High in good nutrients
-- **⚠️ Moderate**: Amber (#f59e0b) - Watch portions/amounts  
-- **❌ Concerning**: Red (#ef4444) - High in sodium, sugar, saturated fat
+- **[OK] Beneficial**: Bright Green (#22c55e) - High in good nutrients
+- **[!] Moderate**: Amber (#f59e0b) - Watch portions/amounts  
+- **[X] Concerning**: Red (#ef4444) - High in sodium, sugar, saturated fat
 
 #### Mobile-Specific Visual Enhancements
 
@@ -55,16 +55,16 @@ To enhance mobile readability and user comprehension, the NutritionFacts interfa
 ```
 
 **Ingredient Quality Indicators**
-- **🌿 Whole/Natural**: Green (#059669) - Whole grains, fresh fruits, vegetables
-- **⚗️ Processed**: Orange (#ea580c) - Modified starches, preservatives
-- **🚫 Ultra-Processed**: Red (#dc2626) - Artificial additives, high sodium/sugar
-- **❓ Unknown/Unclear**: Gray (#6b7280) - Unrecognized ingredients
+- ** Whole/Natural**: Green (#059669) - Whole grains, fresh fruits, vegetables
+- **️ Processed**: Orange (#ea580c) - Modified starches, preservatives
+- ** Ultra-Processed**: Red (#dc2626) - Artificial additives, high sodium/sugar
+- ** Unknown/Unclear**: Gray (#6b7280) - Unrecognized ingredients
 
 **Allergen & Dietary Warnings**
-- **🚨 Major Allergens**: Bold Red Background (#fef2f2 bg, #dc2626 text)
-- **🥜 Contains Nuts**: Orange Alert (#fed7aa bg, #ea580c text)
-- **🥛 Contains Dairy**: Blue Alert (#dbeafe bg, #2563eb text)
-- **🌾 Contains Gluten**: Yellow Alert (#fef3c7 bg, #d97706 text)
+- ** Major Allergens**: Bold Red Background (#fef2f2 bg, #dc2626 text)
+- ** Contains Nuts**: Orange Alert (#fed7aa bg, #ea580c text)
+- ** Contains Dairy**: Blue Alert (#dbeafe bg, #2563eb text)
+- ** Contains Gluten**: Yellow Alert (#fef3c7 bg, #d97706 text)
 
 ### Mobile Color Legend
 
@@ -72,27 +72,27 @@ To enhance mobile readability and user comprehension, the NutritionFacts interfa
 ```typescript
 const ColorLegend = {
   macronutrients: {
-    protein: { color: '#16a34a', icon: '💪', label: 'Protein' },
-    carbs: { color: '#ea580c', icon: '⚡', label: 'Carbs' },
-    fat: { color: '#eab308', icon: '🧈', label: 'Fats' },
-    calories: { color: '#dc2626', icon: '🔥', label: 'Calories' }
+    protein: { color: '#16a34a', icon: '[STRONG]', label: 'Protein' },
+    carbs: { color: '#ea580c', icon: '[LIGHTNING]', label: 'Carbs' },
+    fat: { color: '#eab308', icon: '', label: 'Fats' },
+    calories: { color: '#dc2626', icon: '[FIRE]', label: 'Calories' }
   },
   
   vitamins: {
-    fatSoluble: { color: '#7c3aed', icon: '🟣', label: 'Vitamins A,D,E,K' },
-    waterSoluble: { color: '#2563eb', icon: '🔵', label: 'Vitamins B,C' }
+    fatSoluble: { color: '#7c3aed', icon: '', label: 'Vitamins A,D,E,K' },
+    waterSoluble: { color: '#2563eb', icon: '', label: 'Vitamins B,C' }
   },
   
   minerals: {
-    major: { color: '#1e40af', icon: '🟦', label: 'Major Minerals' },
-    trace: { color: '#f97316', icon: '🟧', label: 'Trace Minerals' },
-    electrolytes: { color: '#facc15', icon: '⚡', label: 'Electrolytes' }
+    major: { color: '#1e40af', icon: '', label: 'Major Minerals' },
+    trace: { color: '#f97316', icon: '', label: 'Trace Minerals' },
+    electrolytes: { color: '#facc15', icon: '[LIGHTNING]', label: 'Electrolytes' }
   },
   
   healthImpact: {
-    beneficial: { color: '#22c55e', icon: '✅', label: 'Good for you' },
-    moderate: { color: '#f59e0b', icon: '⚠️', label: 'Watch amounts' },
-    concerning: { color: '#ef4444', icon: '❌', label: 'Limit intake' }
+    beneficial: { color: '#22c55e', icon: '[OK]', label: 'Good for you' },
+    moderate: { color: '#f59e0b', icon: '[!]', label: 'Watch amounts' },
+    concerning: { color: '#ef4444', icon: '[X]', label: 'Limit intake' }
   }
 };
 ```

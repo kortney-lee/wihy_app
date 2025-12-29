@@ -140,20 +140,20 @@ class WihyScanningService {
    */
   async testConnection(): Promise<{ available: boolean; error?: string }> {
     try {
-      console.log('🔍 Testing WiHy Scanning API connectivity via Universal Search...');
+      console.log('[SEARCH] Testing WiHy Scanning API connectivity via Universal Search...');
       
       // Test Universal Search API since that's what handles the business logic
       const universalSearchTest = await universalSearchService.testConnection();
       
       if (universalSearchTest.available) {
-        console.log('✅ Universal Search API available for scanning');
+        console.log('[OK] Universal Search API available for scanning');
         return { available: true };
       } else {
-        console.warn('⚠️ Universal Search API not available:', universalSearchTest.error);
+        console.warn('[!] Universal Search API not available:', universalSearchTest.error);
         return { available: false, error: universalSearchTest.error };
       }
     } catch (error) {
-      console.error('❌ WiHy Scanning API connectivity test failed:', error);
+      console.error('[X] WiHy Scanning API connectivity test failed:', error);
       return { 
         available: false, 
         error: error instanceof Error ? error.message : 'Connection failed' 
@@ -189,9 +189,9 @@ class WihyScanningService {
         imageData = image;
       }
 
-      console.log('🔍 WiHy Scanning API - image scan via /scan endpoint');
-      console.log('📡 API Endpoint: Using /api/scan directly (no /ask redirect)');
-      console.log('📤 Request payload:', {
+      console.log('[SEARCH] WiHy Scanning API - image scan via /scan endpoint');
+      console.log('[ANTENNA] API Endpoint: Using /api/scan directly (no /ask redirect)');
+      console.log('[OUTBOX] Request payload:', {
         imageDataLength: imageData.length,
         context: image instanceof File ? `Image analysis: ${image.name}` : 'Image analysis',
         userContext: {
@@ -219,12 +219,12 @@ class WihyScanningService {
       });
 
       if (!response.ok) {
-        console.error(`❌ WiHy Scanner API - HTTP Error: ${response.status} ${response.statusText}`);
+        console.error(`[X] WiHy Scanner API - HTTP Error: ${response.status} ${response.statusText}`);
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
 
       const scannerData = await response.json();
-      console.log('✅ WiHy Scanner API - initial image response:', scannerData);
+      console.log('[OK] WiHy Scanner API - initial image response:', scannerData);
 
       // Return the scanner result directly (no need for second /ask call)
       const scanResult: ScanResult = {
@@ -246,15 +246,15 @@ class WihyScanningService {
         processing_time: scannerData.processing_time
       };
       
-      console.log('✅ WiHy Scanning API - image scan completed (single /scan request):', scanResult);
+      console.log('[OK] WiHy Scanning API - image scan completed (single /scan request):', scanResult);
       return scanResult;
 
       // Fallback: Use scanner data only if Universal Search fails
-      console.log('⚠️ Universal Search enhancement failed, using scanner data only');
+      console.log('[!] Universal Search enhancement failed, using scanner data only');
 
       
     } catch (error) {
-      console.error('❌ WiHy Scanning API - image scan error:', error);
+      console.error('[X] WiHy Scanning API - image scan error:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Image scanning failed',
@@ -346,7 +346,7 @@ class WihyScanningService {
    */
   async scanBarcode(barcode: string, userContext?: any): Promise<BarcodeScanResult> {
     try {
-      console.log('🔍 WiHy Scanning API - barcode scan via /api/scan:', barcode);
+      console.log('[SEARCH] WiHy Scanning API - barcode scan via /api/scan:', barcode);
 
       // Step 1: Get product data from Scanner API
       const response = await fetch(`${this.baseUrl}/api/scan`, {
@@ -371,7 +371,7 @@ class WihyScanningService {
       }
 
       const scannerData = await response.json();
-      console.log('✅ Scanner API response:', scannerData);
+      console.log('[OK] Scanner API response:', scannerData);
 
       // Step 2: Pass scanner result to Universal Search /ask for conversational analysis
       // Extract product information to build a rich context query
@@ -392,18 +392,18 @@ Provide detailed health analysis and answer user questions about this product.`;
 
       // Create a session ID for this barcode scan to enable chat continuity
       const sessionId = `barcode_${barcode}_${Date.now()}`;
-      console.log('📱 Creating chat session:', sessionId);
+      console.log('[MOBILE] Creating chat session:', sessionId);
 
       // Don't call Universal Search immediately - let the chat widget handle that when user asks questions
       // Just return the Scanner API data with the session ID for chat continuity
-      console.log('🔍 Returning Scanner API data for immediate display, chat will handle questions');
+      console.log('[SEARCH] Returning Scanner API data for immediate display, chat will handle questions');
       return this.transformScannerDataToBarcodeScanResult(scannerData, barcode, sessionId);
 
       // REMOVED: Immediate Universal Search call - this was causing duplicate API calls
       // The chat widget will call the /ask endpoint when the user actually asks a question
 
     } catch (error) {
-      console.error('❌ WiHy Scanning API - barcode scan error:', error);
+      console.error('[X] WiHy Scanning API - barcode scan error:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Barcode scanning failed'
@@ -416,7 +416,7 @@ Provide detailed health analysis and answer user questions about this product.`;
    */
   async scanProductName(productName: string, userContext?: ScanRequest['context']): Promise<ScanResult> {
     try {
-      console.log('🔍 WiHy Scanning API - product name scan via Universal Search:', productName);
+      console.log('[SEARCH] WiHy Scanning API - product name scan via Universal Search:', productName);
 
       // Use Universal Search API for food name searching with rich business logic
       const universalSearchResult = await universalSearchService.search({
@@ -449,7 +449,7 @@ Provide detailed health analysis and answer user questions about this product.`;
           processing_time: universalSearchResult.processing_time_ms
         };
 
-        console.log('✅ Universal Search product name scan successful');
+        console.log('[OK] Universal Search product name scan successful');
         return transformedResult;
       } else {
         return {
@@ -460,7 +460,7 @@ Provide detailed health analysis and answer user questions about this product.`;
       }
 
     } catch (error) {
-      console.error('❌ WiHy Scanning API - product name scan error:', error);
+      console.error('[X] WiHy Scanning API - product name scan error:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Product scanning failed',
@@ -474,7 +474,7 @@ Provide detailed health analysis and answer user questions about this product.`;
    */
   async getServiceStatus(): Promise<ScanServiceStatus> {
     try {
-      console.log('🔍 WiHy Scanning API - checking service status');
+      console.log('[SEARCH] WiHy Scanning API - checking service status');
 
       const response = await fetch(`${this.baseUrl}/api/scan/status`, {
         method: 'GET',
@@ -488,12 +488,12 @@ Provide detailed health analysis and answer user questions about this product.`;
       }
 
       const data = await response.json();
-      console.log('✅ WiHy Scanning API - service status:', data);
+      console.log('[OK] WiHy Scanning API - service status:', data);
 
       return data;
 
     } catch (error) {
-      console.error('❌ WiHy Scanning API - service status error:', error);
+      console.error('[X] WiHy Scanning API - service status error:', error);
       return {
         success: false,
         services: {
@@ -514,7 +514,7 @@ Provide detailed health analysis and answer user questions about this product.`;
    */
   async getScanHistory(userId: string, limit: number = 50, includeImages: boolean = true): Promise<ScanHistory> {
     try {
-      console.log('🔍 WiHy Scanning API - getting scan history for user:', userId);
+      console.log('[SEARCH] WiHy Scanning API - getting scan history for user:', userId);
 
       const params = new URLSearchParams({
         userId,
@@ -534,12 +534,12 @@ Provide detailed health analysis and answer user questions about this product.`;
       }
 
       const data = await response.json();
-      console.log('✅ WiHy Scanning API - scan history:', data);
+      console.log('[OK] WiHy Scanning API - scan history:', data);
 
       return data;
 
     } catch (error) {
-      console.error('❌ WiHy Scanning API - scan history error:', error);
+      console.error('[X] WiHy Scanning API - scan history error:', error);
       return {
         success: false,
         count: 0,
@@ -618,12 +618,12 @@ Provide detailed health analysis and answer user questions about this product.`;
       let formatted = result.analysis.summary || 'Food item analyzed';
       
       if (result.analysis.recommendations && result.analysis.recommendations.length > 0) {
-        formatted += '\n\n🔸 Recommendations:\n';
+        formatted += '\n\n Recommendations:\n';
         formatted += result.analysis.recommendations.map(rec => `• ${rec}`).join('\n');
       }
 
       if (result.analysis.confidence_score) {
-        formatted += `\n\n📊 Confidence: ${Math.round(result.analysis.confidence_score * 100)}%`;
+        formatted += `\n\n[CHART] Confidence: ${Math.round(result.analysis.confidence_score * 100)}%`;
       }
 
       return formatted;
@@ -631,17 +631,17 @@ Provide detailed health analysis and answer user questions about this product.`;
 
     // Handle barcode scan result
     if ('product' in result && result.product) {
-      let formatted = `📦 ${result.product.name}`;
+      let formatted = `[PACKAGE] ${result.product.name}`;
       
       if (result.product.brand) {
         formatted += ` by ${result.product.brand}`;
       }
 
       if (result.nutrition) {
-        formatted += `\n\n📊 Health Score: ${result.nutrition.grade} (${result.nutrition.score}/100)`;
+        formatted += `\n\n[CHART] Health Score: ${result.nutrition.grade} (${result.nutrition.score}/100)`;
         
         const nutrition = result.nutrition.per_100g;
-        formatted += `\n\n🥄 Per 100g:`;
+        formatted += `\n\n Per 100g:`;
         formatted += `\n• Calories: ${nutrition.energy_kcal} kcal`;
         formatted += `\n• Protein: ${nutrition.proteins}g`;
         formatted += `\n• Carbs: ${nutrition.carbohydrates}g`;
@@ -653,12 +653,12 @@ Provide detailed health analysis and answer user questions about this product.`;
       }
 
       if (result.health_analysis?.recommendations && result.health_analysis.recommendations.length > 0) {
-        formatted += '\n\n🔸 Recommendations:\n';
+        formatted += '\n\n Recommendations:\n';
         formatted += result.health_analysis.recommendations.map(rec => `• ${rec}`).join('\n');
       }
 
       if (result.health_analysis?.alerts && result.health_analysis.alerts.length > 0) {
-        formatted += '\n\n⚠️ Health Alerts:\n';
+        formatted += '\n\n[!] Health Alerts:\n';
         formatted += result.health_analysis.alerts.map(alert => `• ${alert.message}`).join('\n');
       }
 

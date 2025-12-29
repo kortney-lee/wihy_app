@@ -390,13 +390,13 @@ echo "Certificate expires: $EXPIRY_TIMESTAMP"
 echo "Days until expiry: $DAYS_UNTIL_EXPIRY"
 
 if [ $DAYS_UNTIL_EXPIRY -lt 30 ]; then
-    echo "STATUS: ⚠️  WARNING - Certificate expires in $DAYS_UNTIL_EXPIRY days"
+    echo "STATUS: [!]  WARNING - Certificate expires in $DAYS_UNTIL_EXPIRY days"
     exit 1
 elif [ $DAYS_UNTIL_EXPIRY -lt 60 ]; then
-    echo "STATUS: ⚡ CAUTION - Certificate expires in $DAYS_UNTIL_EXPIRY days"
+    echo "STATUS: [LIGHTNING] CAUTION - Certificate expires in $DAYS_UNTIL_EXPIRY days"
     exit 0
 else
-    echo "STATUS: ✅ OK - Certificate expires in $DAYS_UNTIL_EXPIRY days"
+    echo "STATUS: [OK] OK - Certificate expires in $DAYS_UNTIL_EXPIRY days"
     exit 0
 fi
 EOF

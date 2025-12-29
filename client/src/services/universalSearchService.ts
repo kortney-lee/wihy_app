@@ -279,7 +279,7 @@ class UniversalSearchService {
    */
   async testConnection(): Promise<{ available: boolean; error?: string }> {
     try {
-      console.log('🔍 Testing Universal Search API connectivity...');
+      console.log('[SEARCH] Testing Universal Search API connectivity...');
       const response = await fetch(`${this.baseUrl}/ask`, {
         method: 'POST',
         headers: {
@@ -292,14 +292,14 @@ class UniversalSearchService {
       });
       
       if (response.ok) {
-        console.log('✅ Universal Search API is available');
+        console.log('[OK] Universal Search API is available');
         return { available: true };
       } else {
-        console.warn(`⚠️ Universal Search API returned ${response.status}`);
+        console.warn(`[!] Universal Search API returned ${response.status}`);
         return { available: false, error: `HTTP ${response.status}` };
       }
     } catch (error) {
-      console.error('❌ Universal Search API connectivity test failed:', error);
+      console.error('[X] Universal Search API connectivity test failed:', error);
       return { 
         available: false, 
         error: error instanceof Error ? error.message : 'Connection failed' 
@@ -312,9 +312,9 @@ class UniversalSearchService {
    */
   async search(request: UniversalSearchRequest): Promise<UniversalSearchResponse> {
     try {
-      console.log('🔍 Universal Search API - starting search');
-      console.log('📡 API Endpoint:', `${this.baseUrl}/ask`);
-      console.log('📤 Request payload:', {
+      console.log('[SEARCH] Universal Search API - starting search');
+      console.log('[ANTENNA] API Endpoint:', `${this.baseUrl}/ask`);
+      console.log('[OUTBOX] Request payload:', {
         query: request.query,
         type: request.type || 'auto',
         sessionId: request.sessionId,
@@ -342,24 +342,24 @@ class UniversalSearchService {
       });
 
       if (!response.ok) {
-        console.error(`❌ ML WiHY /ask API - HTTP Error: ${response.status} ${response.statusText}`);
-        console.error('📡 Response headers:', Object.fromEntries(response.headers.entries()));
+        console.error(`[X] ML WiHY /ask API - HTTP Error: ${response.status} ${response.statusText}`);
+        console.error('[ANTENNA] Response headers:', Object.fromEntries(response.headers.entries()));
         
         // Try to get error details from response body
         let errorDetails = '';
         try {
           const errorData = await response.text();
           errorDetails = errorData;
-          console.error('📄 Error response body:', errorData);
+          console.error('[FILE] Error response body:', errorData);
         } catch (e) {
-          console.error('❌ Could not read error response body');
+          console.error('[X] Could not read error response body');
         }
         
         throw new Error(`HTTP ${response.status}: ${response.statusText}${errorDetails ? ` - ${errorDetails}` : ''}`);
       }
 
       const data = await response.json();
-      console.log('✅ Universal Search API - response received:', data);
+      console.log('[OK] Universal Search API - response received:', data);
 
       // The API should return a success field, but check for valid data as backup
       const hasValidData = data.results && (
@@ -389,7 +389,7 @@ class UniversalSearchService {
       };
       
     } catch (error) {
-      console.error('❌ Universal Search API - search error:', error);
+      console.error('[X] Universal Search API - search error:', error);
       return {
         success: false,
         query: request.query,
@@ -535,7 +535,7 @@ class UniversalSearchService {
     const { type = 'auto', userContext = {}, enableFallback = true } = options || {};
     
     try {
-      console.log('🔍 Smart Search attempting Universal Search for:', query);
+      console.log('[SEARCH] Smart Search attempting Universal Search for:', query);
       
       // First try Universal Search
       const connectionTest = await this.testConnection();
@@ -552,7 +552,7 @@ class UniversalSearchService {
         });
         
         if (universalResult.success) {
-          console.log('✅ Smart Search - Universal Search successful');
+          console.log('[OK] Smart Search - Universal Search successful');
           return {
             success: true,
             source: 'universal',
@@ -563,11 +563,11 @@ class UniversalSearchService {
       
       // Fall back to legacy search if provided and enabled
       if (enableFallback && legacySearchFn) {
-        console.log('🔄 Smart Search falling back to legacy search');
+        console.log('[CYCLE] Smart Search falling back to legacy search');
         const legacyResult = await legacySearchFn(query);
         
         if (legacyResult && legacyResult.success) {
-          console.log('✅ Smart Search - Legacy search successful');
+          console.log('[OK] Smart Search - Legacy search successful');
           return {
             success: true,
             source: 'legacy',
@@ -584,12 +584,12 @@ class UniversalSearchService {
       };
       
     } catch (error) {
-      console.error('❌ Smart Search error:', error);
+      console.error('[X] Smart Search error:', error);
       
       // Try legacy search as last resort
       if (enableFallback && legacySearchFn) {
         try {
-          console.log('🆘 Smart Search last resort - trying legacy search');
+          console.log(' Smart Search last resort - trying legacy search');
           const legacyResult = await legacySearchFn(query);
           
           if (legacyResult && legacyResult.success) {
@@ -600,7 +600,7 @@ class UniversalSearchService {
             };
           }
         } catch (legacyError) {
-          console.error('❌ Legacy search also failed:', legacyError);
+          console.error('[X] Legacy search also failed:', legacyError);
         }
       }
       
@@ -714,19 +714,19 @@ class UniversalSearchService {
       case 'barcode':
       case 'food':
         if (result.results.metadata) {
-          formatted += `🍎 Product Analysis: ${result.results.metadata.product_name}\n`;
-          formatted += `📊 Health Score: ${result.results.metadata.health_score}/100 (Grade ${result.results.metadata.grade})\n`;
-          formatted += `🏭 Processing Level: ${result.results.metadata.processing_level}\n`;
+          formatted += ` Product Analysis: ${result.results.metadata.product_name}\n`;
+          formatted += `[CHART] Health Score: ${result.results.metadata.health_score}/100 (Grade ${result.results.metadata.grade})\n`;
+          formatted += ` Processing Level: ${result.results.metadata.processing_level}\n`;
           
           if (result.results.metadata.nutrition_analysis?.positive_aspects) {
-            formatted += `\n✅ Positive Aspects:\n`;
+            formatted += `\n[OK] Positive Aspects:\n`;
             formatted += result.results.metadata.nutrition_analysis.positive_aspects
               .map(aspect => `• ${aspect.message}`)
               .join('\n') + '\n';
           }
           
           if (result.results.metadata.nutrition_analysis?.areas_of_concern) {
-            formatted += `\n⚠️ Areas of Concern:\n`;
+            formatted += `\n[!] Areas of Concern:\n`;
             formatted += result.results.metadata.nutrition_analysis.areas_of_concern
               .map(concern => `• ${concern.message}`)
               .join('\n') + '\n';
@@ -735,7 +735,7 @@ class UniversalSearchService {
         break;
       
       case 'research':
-        formatted += `🔬 Research Results: Found ${result.results.total_found || 0} articles\n`;
+        formatted += ` Research Results: Found ${result.results.total_found || 0} articles\n`;
         if (result.results.evidence_level) {
           formatted += `� Evidence Level: ${result.results.evidence_level}\n`;
         }
@@ -749,19 +749,19 @@ class UniversalSearchService {
       
       case 'health':
         if (result.results.risk_assessment) {
-          formatted += `🏥 Health Assessment\n`;
-          formatted += `🎯 Risk Level: ${result.results.risk_assessment.overallRiskLevel}\n`;
-          formatted += `📊 Health Score: ${result.results.risk_assessment.healthScore}/100\n`;
+          formatted += ` Health Assessment\n`;
+          formatted += `[TARGET] Risk Level: ${result.results.risk_assessment.overallRiskLevel}\n`;
+          formatted += `[CHART] Health Score: ${result.results.risk_assessment.healthScore}/100\n`;
           
           if (result.results.risk_assessment.riskFactors.length > 0) {
-            formatted += `\n⚠️ Risk Factors:\n`;
+            formatted += `\n[!] Risk Factors:\n`;
             formatted += result.results.risk_assessment.riskFactors
               .map(factor => `• ${factor}`)
               .join('\n') + '\n';
           }
           
           if (result.results.prevention_strategies && result.results.prevention_strategies.length > 0) {
-            formatted += `\n💡 Prevention Strategies:\n`;
+            formatted += `\n[BULB] Prevention Strategies:\n`;
             formatted += result.results.prevention_strategies
               .map(strategy => `• ${strategy.strategy}`)
               .join('\n') + '\n';
@@ -770,20 +770,20 @@ class UniversalSearchService {
         break;
       
       case 'news':
-        formatted += `📰 Health News: Found ${result.results.total_found || 0} articles\n\n`;
+        formatted += ` Health News: Found ${result.results.total_found || 0} articles\n\n`;
         if (result.results.news_articles && result.results.news_articles.length > 0) {
           formatted += result.results.news_articles.slice(0, 3)
-            .map(article => `📌 ${article.title}\n${article.description}\n`)
+            .map(article => `[PIN] ${article.title}\n${article.description}\n`)
             .join('\n');
         }
         break;
       
       case 'meal_education':
         if (result.results.education_summary) {
-          formatted += `📚 Meal Education: ${result.results.education_summary.topic}\n\n`;
+          formatted += `[BOOKS] Meal Education: ${result.results.education_summary.topic}\n\n`;
           
           if (result.results.education_summary.key_points.length > 0) {
-            formatted += `🔍 Key Points:\n`;
+            formatted += `[SEARCH] Key Points:\n`;
             formatted += result.results.education_summary.key_points
               .map(point => `• ${point}`)
               .join('\n') + '\n\n';
@@ -799,26 +799,26 @@ class UniversalSearchService {
         break;
       
       default:
-        formatted += `✅ Search completed for: ${result.query}\n`;
+        formatted += `[OK] Search completed for: ${result.query}\n`;
         if (result.results.summary) {
-          formatted += `📋 ${result.results.summary}\n`;
+          formatted += `[PAGE] ${result.results.summary}\n`;
         }
     }
     
     // Add recommendations if available
     if (result.recommendations && result.recommendations.length > 0) {
-      formatted += `\n🎯 Recommendations:\n`;
+      formatted += `\n[TARGET] Recommendations:\n`;
       formatted += result.recommendations.map(rec => `• ${rec}`).join('\n');
       formatted += '\n\n';
     }
     
     // Add medical disclaimer for health-related queries
     if (result.results.medical_disclaimer) {
-      formatted += `⚕️ Medical Disclaimer: ${result.results.medical_disclaimer}\n\n`;
+      formatted += `️ Medical Disclaimer: ${result.results.medical_disclaimer}\n\n`;
     }
     
     // Data source
-    formatted += `📋 Data from: Universal Search API (${result.detected_type})`;
+    formatted += `[PAGE] Data from: Universal Search API (${result.detected_type})`;
 
     return formatted.trim();
   }

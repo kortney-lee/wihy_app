@@ -140,19 +140,19 @@ openssl s_client -connect wihy.ai:443
 
 ## Reference: Working vs Broken Configuration
 
-### ✅ Working (`wihy-ml-vmNSG`):
+### [OK] Working (`wihy-ml-vmNSG`):
 ```
 allow-https     | Priority 910 | Protocol Tcp | Port 443
 ```
 
-### ❌ Old Insecure Configuration:
+### [X] Old Insecure Configuration:
 ```
 open-port-80    | Priority 900 | Protocol * | Port 80
 allow-https     | Priority 910 | Protocol Tcp | Port 443
 # Both HTTP and HTTPS exposed - security risk
 ```
 
-### ✅ Secure Configuration (HTTPS only):
+### [OK] Secure Configuration (HTTPS only):
 ```
 allow-https     | Priority 910 | Protocol Tcp | Port 443
 # Port 80 removed for security - HTTPS only access

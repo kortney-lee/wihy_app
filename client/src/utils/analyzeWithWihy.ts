@@ -147,7 +147,7 @@ function showAnalysisModal(content: string, response: any): void {
     <div class="wihy-modal-overlay">
       <div class="wihy-modal-content">
         <div class="wihy-modal-header">
-          <h3>🤖 WIHY Analysis</h3>
+          <h3> WIHY Analysis</h3>
           <button class="wihy-modal-close">&times;</button>
         </div>
         
@@ -181,7 +181,7 @@ function showAnalysisModal(content: string, response: any): void {
           
           ${response.chart_data?.chart_metadata ? `
             <div class="wihy-research-data">
-              <h4>📊 Research Analysis:</h4>
+              <h4>[CHART] Research Analysis:</h4>
               <div class="research-grid">
                 <div class="research-item">
                   <strong>Quality Score:</strong> 

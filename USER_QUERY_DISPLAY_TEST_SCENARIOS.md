@@ -142,7 +142,7 @@
 **Expected Result:**
 - Chat opens with user message: "Uploaded image: [filename].jpg"
 - Followed by vision analysis with warning:
-  "⚠️ Note: Using basic vision analysis as food database lookup failed."
+  "[!] Note: Using basic vision analysis as food database lookup failed."
 
 **Verification:**
 - Fallback triggered
@@ -223,9 +223,9 @@
 
 ### Expected Console Logs:
 ```
-🔍 Handling barcode scan: 049000050103
-🔍 SEARCH RESULTS: New query - ...
-📱 Opening FullScreenChat with...
+[SEARCH] Handling barcode scan: 049000050103
+[SEARCH] SEARCH RESULTS: New query - ...
+[MOBILE] Opening FullScreenChat with...
 ```
 
 ### Check for:
@@ -301,14 +301,14 @@
 
 ## Acceptance Criteria
 
-✅ **Pass Criteria:**
+[OK] **Pass Criteria:**
 - All test cases pass
 - No console errors
 - User sees what they scanned/uploaded
 - Chat flow is natural and clear
 - Mobile and desktop work correctly
 
-❌ **Fail Criteria:**
+[X] **Fail Criteria:**
 - User query not displayed
 - Wrong query displayed
 - Chat crashes

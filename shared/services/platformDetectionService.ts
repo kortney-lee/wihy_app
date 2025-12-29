@@ -48,7 +48,7 @@ export class PlatformDetectionService {
    * Log current platform info (useful for debugging)
    */
   static logPlatformInfo(): void {
-    console.log('🔍 Platform Detection:', {
+    console.log('[SEARCH] Platform Detection:', {
       isNative: this.isNative(),
       isWeb: this.isWeb(),
       isIOS: this.isIOS(),

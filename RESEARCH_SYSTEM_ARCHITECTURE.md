@@ -3,7 +3,7 @@
 ## Overview
 The WIHY Research System is a comprehensive scientific research search and analysis platform built with React (web) that can be adapted for React Native. This document explains the architecture, API integration, and state management patterns.
 
-## 📱 System Components
+## [MOBILE] System Components
 
 ### 1. ResearchDashboard (Main Container)
 **Purpose:** Primary research interface that manages navigation between dashboard view and active research sessions
@@ -41,7 +41,7 @@ const [selectedStudy, setSelectedStudy] = useState<ResearchSearchResult | null>(
 const [showModal, setShowModal] = useState(false);
 ```
 
-## 🔌 API Integration
+## [PLUG] API Integration
 
 ### Research Search Endpoint
 ```typescript
@@ -91,7 +91,7 @@ type ResearchSearchResponse = {
 };
 ```
 
-## 💾 Caching Strategy
+## [DISK] Caching Strategy
 
 ### 1. Search Results Cache
 ```typescript
@@ -115,7 +115,7 @@ const updatedRecentSearches = [
 localStorage.setItem('wihy_recent_searches', JSON.stringify(updatedRecentSearches));
 ```
 
-## 🎨 UI/UX Patterns
+## [ART] UI/UX Patterns
 
 ### 1. Search Flow
 1. User enters search query in header
@@ -149,7 +149,7 @@ localStorage.setItem('wihy_recent_searches', JSON.stringify(updatedRecentSearche
 <div className="grid gap-3 sm:gap-4 md:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
 ```
 
-## 🎨 Layout Patterns & Design System
+## [ART] Layout Patterns & Design System
 
 ### 1. Color Palette
 ```typescript
@@ -545,7 +545,7 @@ const ComponentSizes = {
 };
 ```
 
-## 📱 React Native Adaptation Strategy
+## [MOBILE] React Native Adaptation Strategy
 
 ### 1. Component Mapping
 | Web Component | React Native Equivalent | Notes |
@@ -1110,7 +1110,7 @@ const useResearchSearch = () => {
 };
 ```
 
-## 🔧 Implementation Checklist
+## [TOOL] Implementation Checklist
 
 ### Phase 1: Core Components
 - [ ] Set up React Navigation structure
@@ -1139,7 +1139,7 @@ const useResearchSearch = () => {
 - [ ] Add pagination for large result sets
 - [ ] Create accessibility features
 
-## 🚀 Getting Started
+## [ROCKET] Getting Started
 
 1. **Install Dependencies:**
 ```bash
@@ -1157,7 +1157,7 @@ Start with the ResearchAPI service and basic StudyCard component, then build up 
 4. **Test Integration:**
 Use the same API endpoint (`https://services.wihy.ai/api/research/search`) to ensure compatibility
 
-## 📋 Key Differences: Web vs React Native
+## [PAGE] Key Differences: Web vs React Native
 
 | Feature | Web Implementation | React Native Adaptation |
 |---------|-------------------|------------------------|

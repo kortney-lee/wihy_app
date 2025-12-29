@@ -62,7 +62,7 @@ class SessionManager {
    * Checks auth state and creates/restores session
    */
   async initialize(): Promise<SessionInfo> {
-    console.log('🔑 SESSION MANAGER: Initializing...');
+    console.log('[KEY] SESSION MANAGER: Initializing...');
 
     // Check if we have a stored session
     const storedSession = this.getStoredSession();
@@ -84,12 +84,12 @@ class SessionManager {
       this.setSession(session);
       this.initializeServices(session);
       
-      console.log('🔑 SESSION MANAGER: Authenticated session created:', session.sessionId);
+      console.log('[KEY] SESSION MANAGER: Authenticated session created:', session.sessionId);
       return session;
       
     } else if (storedSession && !this.isSessionExpired(storedSession)) {
       // Restore stored session if not expired
-      console.log('🔑 SESSION MANAGER: Found stored session, validating...');
+      console.log('[KEY] SESSION MANAGER: Found stored session, validating...');
       
       // Validate backend session if it was created via backend
       if (storedSession.isBackendSession) {
@@ -104,17 +104,17 @@ class SessionManager {
           this.initializeServices(storedSession);
           this.startValidationInterval();
           
-          console.log('🔑 SESSION MANAGER: Restored backend session:', storedSession.sessionId);
+          console.log('[KEY] SESSION MANAGER: Restored backend session:', storedSession.sessionId);
           return storedSession;
         } else {
-          console.log('🔑 SESSION MANAGER: Stored backend session invalid, creating new...');
+          console.log('[KEY] SESSION MANAGER: Stored backend session invalid, creating new...');
         }
       } else {
         // Client-only session, restore it
         this.setSession(storedSession);
         this.initializeServices(storedSession);
         
-        console.log('🔑 SESSION MANAGER: Restored client session:', storedSession.sessionId);
+        console.log('[KEY] SESSION MANAGER: Restored client session:', storedSession.sessionId);
         return storedSession;
       }
     }
@@ -128,7 +128,7 @@ class SessionManager {
       this.startValidationInterval();
     }
     
-    console.log('🔑 SESSION MANAGER: Created new temporary session:', session.sessionId);
+    console.log('[KEY] SESSION MANAGER: Created new temporary session:', session.sessionId);
     return session;
   }
 
@@ -152,7 +152,7 @@ class SessionManager {
         if (response.ok) {
           const data: BackendAnonymousSessionResponse = await response.json();
           
-          console.log('🔑 SESSION MANAGER: Created backend anonymous session');
+          console.log('[KEY] SESSION MANAGER: Created backend anonymous session');
           return {
             sessionId: data.session_id,
             userId: null,
@@ -164,10 +164,10 @@ class SessionManager {
             isBackendSession: true
           };
         } else {
-          console.warn('🔑 SESSION MANAGER: Backend session creation failed, using client fallback');
+          console.warn('[KEY] SESSION MANAGER: Backend session creation failed, using client fallback');
         }
       } catch (error) {
-        console.warn('🔑 SESSION MANAGER: Backend unavailable, using client fallback:', error);
+        console.warn('[KEY] SESSION MANAGER: Backend unavailable, using client fallback:', error);
       }
     }
     
@@ -211,7 +211,7 @@ class SessionManager {
       
       return { valid: false, session_id: sessionId, created_at: '', expires_at: '', request_count: 0 };
     } catch (error) {
-      console.warn('🔑 SESSION MANAGER: Backend validation failed:', error);
+      console.warn('[KEY] SESSION MANAGER: Backend validation failed:', error);
       // On network error, assume valid to allow offline usage
       return { valid: true, session_id: sessionId, created_at: '', expires_at: '', request_count: 0 };
     }
@@ -233,11 +233,11 @@ class SessionManager {
         
         if (!validation.valid) {
           if (validation.throttled) {
-            console.warn('🔑 SESSION MANAGER: Session throttled until', validation.throttle_until);
+            console.warn('[KEY] SESSION MANAGER: Session throttled until', validation.throttle_until);
             // Notify listeners about throttle
             this.notifyListeners({ ...this.currentSession, requestCount: -1 }); // -1 indicates throttled
           } else {
-            console.log('🔑 SESSION MANAGER: Session expired, creating new...');
+            console.log('[KEY] SESSION MANAGER: Session expired, creating new...');
             const newSession = await this.createTemporarySession();
             this.setSession(newSession);
             this.initializeServices(newSession);
@@ -276,7 +276,7 @@ class SessionManager {
     }
     conversationService.setSessionId(session.sessionId);
     
-    console.log('🔑 SESSION MANAGER: Services initialized with session:', session.sessionId);
+    console.log('[KEY] SESSION MANAGER: Services initialized with session:', session.sessionId);
   }
 
   /**
@@ -284,7 +284,7 @@ class SessionManager {
    * Call this when user logs in/out
    */
   async handleAuthChange(user: User | null): Promise<SessionInfo> {
-    console.log('🔑 SESSION MANAGER: Auth state changed:', user ? 'logged in' : 'logged out');
+    console.log('[KEY] SESSION MANAGER: Auth state changed:', user ? 'logged in' : 'logged out');
     
     // Stop validation interval when auth state changes
     this.stopValidationInterval();
@@ -332,9 +332,9 @@ class SessionManager {
       await fetch(`${this.backendUrl}/api/session/anonymous/${sessionId}`, {
         method: 'DELETE'
       });
-      console.log('🔑 SESSION MANAGER: Revoked backend session:', sessionId);
+      console.log('[KEY] SESSION MANAGER: Revoked backend session:', sessionId);
     } catch (error) {
-      console.warn('🔑 SESSION MANAGER: Failed to revoke backend session:', error);
+      console.warn('[KEY] SESSION MANAGER: Failed to revoke backend session:', error);
     }
   }
 
@@ -416,7 +416,7 @@ class SessionManager {
       
       return session;
     } catch (error) {
-      console.error('🔑 SESSION MANAGER: Failed to parse stored session:', error);
+      console.error('[KEY] SESSION MANAGER: Failed to parse stored session:', error);
       return null;
     }
   }
@@ -461,7 +461,7 @@ class SessionManager {
     this.stopValidationInterval();
     this.currentSession = null;
     this.clearStoredSession();
-    console.log('🔑 SESSION MANAGER: Session cleared');
+    console.log('[KEY] SESSION MANAGER: Session cleared');
   }
 
   /**

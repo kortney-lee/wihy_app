@@ -79,7 +79,7 @@ export class WIHYApiClient {
         throw new Error('Query must be between 1 and 2000 characters');
       }
 
-      console.log('🔍 WIHY CLIENT: Asking health question:', query.substring(0, 100) + '...');
+      console.log('[SEARCH] WIHY CLIENT: Asking health question:', query.substring(0, 100) + '...');
 
       const response = await fetch(`${this.baseUrl}/ask`, {
         method: 'POST',
@@ -97,7 +97,7 @@ export class WIHYApiClient {
 
       const data: AskResponse = await response.json();
 
-      console.log('🔍 WIHY CLIENT: Health question response received:', {
+      console.log('[SEARCH] WIHY CLIENT: Health question response received:', {
         type: data.type,
         source: data.source,
         confidence: data.confidence,
@@ -124,7 +124,7 @@ export class WIHYApiClient {
    */
   async checkHealth(): Promise<HealthCheckResponse | null> {
     try {
-      console.log('🔍 WIHY CLIENT: Checking system health');
+      console.log('[SEARCH] WIHY CLIENT: Checking system health');
 
       const response = await fetch(`${this.baseUrl}/health`, {
         method: 'GET',
@@ -141,7 +141,7 @@ export class WIHYApiClient {
 
       const data: HealthCheckResponse = await response.json();
 
-      console.log('🔍 WIHY CLIENT: Health check completed:', {
+      console.log('[SEARCH] WIHY CLIENT: Health check completed:', {
         status: data.status,
         servicesAvailable: Object.values(data.services).filter(s => s === 'available').length,
         totalServices: Object.keys(data.services).length
@@ -168,7 +168,7 @@ export class WIHYApiClient {
    */
   async getApiInfo(): Promise<ApiInfoResponse | null> {
     try {
-      console.log('🔍 WIHY CLIENT: Getting API information');
+      console.log('[SEARCH] WIHY CLIENT: Getting API information');
 
       const response = await fetch(`${this.baseUrl}/`, {
         method: 'GET',
@@ -185,7 +185,7 @@ export class WIHYApiClient {
 
       const data: ApiInfoResponse = await response.json();
 
-      console.log('🔍 WIHY CLIENT: API info received:', {
+      console.log('[SEARCH] WIHY CLIENT: API info received:', {
         version: data.version,
         status: data.status,
         endpointsCount: data.endpoints?.length || 0

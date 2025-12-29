@@ -52,7 +52,7 @@ Once `?debug=true` is set, the debug overlay automatically adds it to all naviga
   └─ Originating page
   └─ Log type
   └─ Message
-  └─ Optional: 📋 View Data (expandable)
+  └─ Optional: [PAGE] View Data (expandable)
 ```
 
 ## What Gets Tracked
@@ -77,7 +77,7 @@ Once `?debug=true` is set, the debug overlay automatically adds it to all naviga
 
 **3. Barcode is detected**
 ```
-+8.789s [ImageUploadModal] SCAN: ✅ BARCODE DETECTED!
++8.789s [ImageUploadModal] SCAN: [OK] BARCODE DETECTED!
   Data: { barcode: "012000161155", format: "ean_13" }
 +8.790s [ImageUploadModal] API: Calling wihyScanningService.scanBarcode
   Data: { barcode: "012000161155" }
@@ -135,7 +135,7 @@ When you click **Export**, you get a JSON file like:
       "time": "+8.789s",
       "page": "ImageUploadModal",
       "type": "scan",
-      "message": "✅ BARCODE DETECTED!",
+      "message": "[OK] BARCODE DETECTED!",
       "data": {
         "barcode": "012000161155",
         "format": "ean_13"

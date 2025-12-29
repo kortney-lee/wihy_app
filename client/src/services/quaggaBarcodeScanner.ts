@@ -58,7 +58,7 @@ class QuaggaBarcodeScanner {
         }
         
         this.isInitialized = true;
-        console.log('✅ QuaggaJS initialized successfully');
+        console.log('[OK] QuaggaJS initialized successfully');
         resolve();
       });
     });
@@ -69,12 +69,12 @@ class QuaggaBarcodeScanner {
    */
   async scanImageFile(imageFile: File): Promise<QuaggaBarcodeResult> {
     try {
-      console.log('🔍 QuaggaJS: Scanning image file for barcodes');
+      console.log('[SEARCH] QuaggaJS: Scanning image file for barcodes');
       
       const barcodes = await this.processImageWithQuagga(imageFile);
       
       if (barcodes.length > 0) {
-        console.log('✅ QuaggaJS detected barcodes:', barcodes);
+        console.log('[OK] QuaggaJS detected barcodes:', barcodes);
         return {
           success: true,
           barcodes: barcodes
@@ -88,7 +88,7 @@ class QuaggaBarcodeScanner {
         };
       }
     } catch (error) {
-      console.error('❌ QuaggaJS scanning error:', error);
+      console.error('[X] QuaggaJS scanning error:', error);
       return {
         success: false,
         barcodes: [],
@@ -126,7 +126,7 @@ class QuaggaBarcodeScanner {
 
           const tryDecode = () => {
             attemptCount++;
-            console.log(`🔍 QuaggaJS attempt ${attemptCount}/${maxAttempts}`);
+            console.log(`[SEARCH] QuaggaJS attempt ${attemptCount}/${maxAttempts}`);
 
             // Try different image processing techniques for better detection
             const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
@@ -167,7 +167,7 @@ class QuaggaBarcodeScanner {
               if (result && result.codeResult && result.codeResult.code) {
                 const barcode = result.codeResult.code;
                 const normalizedBarcode = this.normalizeBarcode(barcode);
-                console.log(`✅ QuaggaJS detected: ${barcode} → ${normalizedBarcode}`);
+                console.log(`[OK] QuaggaJS detected: ${barcode} → ${normalizedBarcode}`);
                 
                 if (!detectedBarcodes.includes(normalizedBarcode)) {
                   detectedBarcodes.push(normalizedBarcode);
@@ -175,7 +175,7 @@ class QuaggaBarcodeScanner {
                 resolve(detectedBarcodes);
               } else if (attemptCount < maxAttempts) {
                 // Try again with image enhancement
-                console.log('⚠️ No barcode found, retrying with enhancement...');
+                console.log('[!] No barcode found, retrying with enhancement...');
                 setTimeout(tryDecode, 100);
               } else {
                 console.log('ℹ️ QuaggaJS: No barcodes detected after all attempts');
@@ -202,7 +202,7 @@ class QuaggaBarcodeScanner {
    */
   async startLiveScanning(videoElement: HTMLVideoElement, onDetected: (barcode: string) => void): Promise<void> {
     try {
-      console.log('📹 Starting QuaggaJS live camera scanning');
+      console.log('[VIDEO] Starting QuaggaJS live camera scanning');
       
       const config = {
         inputStream: {
@@ -250,13 +250,13 @@ class QuaggaBarcodeScanner {
         if (result && result.codeResult) {
           const barcode = result.codeResult.code;
           const normalizedBarcode = this.normalizeBarcode(barcode);
-          console.log('📱 QuaggaJS live detection:', barcode, '→', normalizedBarcode);
+          console.log('[MOBILE] QuaggaJS live detection:', barcode, '→', normalizedBarcode);
           onDetected(normalizedBarcode);
         }
       });
 
     } catch (error) {
-      console.error('❌ QuaggaJS live scanning failed:', error);
+      console.error('[X] QuaggaJS live scanning failed:', error);
       throw error;
     }
   }
@@ -267,9 +267,9 @@ class QuaggaBarcodeScanner {
   stopLiveScanning(): void {
     try {
       Quagga.stop();
-      console.log('🛑 QuaggaJS live scanning stopped');
+      console.log(' QuaggaJS live scanning stopped');
     } catch (error) {
-      console.error('⚠️ Error stopping QuaggaJS:', error);
+      console.error('[!] Error stopping QuaggaJS:', error);
     }
   }
 

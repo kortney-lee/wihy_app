@@ -635,11 +635,11 @@ jobs:
         
         # Check if React version is vulnerable (anything below 18.3.1)
         if [ "$(printf '%s\n' "18.3.1" "$REACT_VERSION" | sort -V | head -n1)" != "18.3.1" ]; then
-          echo "❌ VULNERABLE: React version $REACT_VERSION is vulnerable to CVE-2025-55182"
+          echo "[X] VULNERABLE: React version $REACT_VERSION is vulnerable to CVE-2025-55182"
           echo "Please update to React 18.3.1 or higher"
           exit 1
         else
-          echo "✅ SECURE: React version $REACT_VERSION is not vulnerable to CVE-2025-55182"
+          echo "[OK] SECURE: React version $REACT_VERSION is not vulnerable to CVE-2025-55182"
         fi
 
     - name: Run npm audit
@@ -676,8 +676,8 @@ jobs:
         echo "Security Status: ${{ needs.setup-security-and-networking.result }}"
         echo "Monitoring Status: ${{ needs.setup-monitoring.result }}"
         echo ""
-        echo "🔒 SSL/TLS: Automatically enabled on all GCP services"
-        echo "🌐 Frontend URL: https://${{ env.CUSTOM_DOMAIN }} (Custom Domain)"
-        echo "🌐 Firebase URL: https://${{ env.PROJECT_ID }}.web.app (Backup)"
-        echo "⚡ Backend URL: Available after Cloud Run deployment"
-        echo "📊 Monitoring: Cloud Operations enabled"
+        echo "[LOCK] SSL/TLS: Automatically enabled on all GCP services"
+        echo "[GLOBE] Frontend URL: https://${{ env.CUSTOM_DOMAIN }} (Custom Domain)"
+        echo "[GLOBE] Firebase URL: https://${{ env.PROJECT_ID }}.web.app (Backup)"
+        echo "[LIGHTNING] Backend URL: Available after Cloud Run deployment"
+        echo "[CHART] Monitoring: Cloud Operations enabled"

@@ -26,7 +26,7 @@ class Logger {
 
   debug(message: string, ...args: any[]): void {
     if (this.shouldLog('debug')) {
-      console.log(`🔍 [DEBUG] ${message}`, ...args);
+      console.log(`[SEARCH] [DEBUG] ${message}`, ...args);
     }
   }
 
@@ -38,40 +38,40 @@ class Logger {
 
   warn(message: string, ...args: any[]): void {
     if (this.shouldLog('warn')) {
-      console.warn(`⚠️ [WARN] ${message}`, ...args);
+      console.warn(`[!] [WARN] ${message}`, ...args);
     }
   }
 
   error(message: string, ...args: any[]): void {
     if (this.shouldLog('error')) {
-      console.error(`❌ [ERROR] ${message}`, ...args);
+      console.error(`[X] [ERROR] ${message}`, ...args);
     }
   }
 
   // API-specific logging
   apiRequest(message: string, data?: any): void {
     if (this.shouldLog('debug')) {
-      console.log(`🌐 [API] ${message}`, data || '');
+      console.log(` [API] ${message}`, data || '');
     }
   }
 
   apiResponse(message: string, data?: any): void {
     if (this.shouldLog('debug')) {
-      console.log(`📡 [RESPONSE] ${message}`, data || '');
+      console.log(`[ANTENNA] [RESPONSE] ${message}`, data || '');
     }
   }
 
   // User action logging
   userAction(message: string, data?: any): void {
     if (this.shouldLog('info')) {
-      console.log(`👤 [USER] ${message}`, data || '');
+      console.log(` [USER] ${message}`, data || '');
     }
   }
 
   // Cache operations
   cache(message: string, data?: any): void {
     if (this.shouldLog('debug')) {
-      console.log(`💾 [CACHE] ${message}`, data || '');
+      console.log(`[DISK] [CACHE] ${message}`, data || '');
     }
   }
 }

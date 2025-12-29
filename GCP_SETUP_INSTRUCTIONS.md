@@ -28,7 +28,7 @@ gcloud services enable artifactregistry.googleapis.com
 gcloud services enable vision.googleapis.com
 gcloud services enable firebase.googleapis.com
 
-echo "✅ GCP project setup complete!"
+echo "[OK] GCP project setup complete!"
 ```
 
 ## Service Account Setup
@@ -70,7 +70,7 @@ gcloud projects add-iam-policy-binding $PROJECT_ID \
 gcloud iam service-accounts keys create github-actions-key.json \
     --iam-account=github-actions-deploy@$PROJECT_ID.iam.gserviceaccount.com
 
-echo "✅ Service account created! Store github-actions-key.json content in GitHub secret 'GCP_SA_KEY'"
+echo "[OK] Service account created! Store github-actions-key.json content in GitHub secret 'GCP_SA_KEY'"
 ```
 
 ## Firebase Setup
@@ -98,7 +98,7 @@ firebase use $PROJECT_ID
 # Create Firebase service account for GitHub Actions
 firebase projects:addfirebase $PROJECT_ID
 
-echo "✅ Firebase setup complete!"
+echo "[OK] Firebase setup complete!"
 ```
 
 ## Required GitHub Secrets

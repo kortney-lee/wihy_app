@@ -205,36 +205,36 @@ export async function responseFormattingExample() {
 // ============================================================================
 
 export async function runAllExamples() {
-  console.log('🚀 Starting WIHY API Examples...\n');
+  console.log('[ROCKET] Starting WIHY API Examples...\n');
 
   try {
     console.log('1. Basic Health Question:');
     await basicHealthQuestion();
-    console.log('✅ Basic health question completed\n');
+    console.log('[OK] Basic health question completed\n');
 
     console.log('2. Enhanced Health Analysis:');
     await enhancedHealthAnalysis();
-    console.log('✅ Enhanced analysis completed\n');
+    console.log('[OK] Enhanced analysis completed\n');
 
     console.log('3. Chat Session Example:');
     await chatSessionExample();
-    console.log('✅ Chat session completed\n');
+    console.log('[OK] Chat session completed\n');
 
     console.log('4. System Health Check:');
     await systemHealthCheck();
-    console.log('✅ System health check completed\n');
+    console.log('[OK] System health check completed\n');
 
     console.log('5. Legacy API Example:');
     await legacyApiExample();
-    console.log('✅ Legacy API example completed\n');
+    console.log('[OK] Legacy API example completed\n');
 
     console.log('6. Response Formatting Example:');
     await responseFormattingExample();
-    console.log('✅ Response formatting completed\n');
+    console.log('[OK] Response formatting completed\n');
 
-    console.log('🎉 All WIHY API examples completed successfully!');
+    console.log('[PARTY] All WIHY API examples completed successfully!');
   } catch (error) {
-    console.error('❌ Error running examples:', error);
+    console.error('[X] Error running examples:', error);
   }
 }
 

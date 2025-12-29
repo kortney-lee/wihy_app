@@ -117,7 +117,7 @@ export const useUniversalSearch = (options: UseUniversalSearchOptions = {}) => {
     try {
       // Check cache first if enabled
       if (enableCaching && cacheRef.current.has(cacheKey)) {
-        console.log('🔍 Using cached universal search results for:', request.query);
+        console.log('[SEARCH] Using cached universal search results for:', request.query);
         const cachedResult = cacheRef.current.get(cacheKey)!;
         
         updateState({
@@ -135,7 +135,7 @@ export const useUniversalSearch = (options: UseUniversalSearchOptions = {}) => {
         throw new Error(`Universal Search API unavailable: ${connectionTest.error}`);
       }
 
-      console.log('🔍 Making universal search request:', fullRequest);
+      console.log('[SEARCH] Making universal search request:', fullRequest);
       
       // Make the search request
       const result = await universalSearchService.search(fullRequest);
@@ -165,7 +165,7 @@ export const useUniversalSearch = (options: UseUniversalSearchOptions = {}) => {
 
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Search failed';
-      console.error('❌ Universal search error:', error);
+      console.error('[X] Universal search error:', error);
       
       updateState({
         error: errorMessage,
@@ -281,7 +281,7 @@ export const useUniversalSearch = (options: UseUniversalSearchOptions = {}) => {
    */
   const clearCache = useCallback(() => {
     cacheRef.current.clear();
-    console.log('🗑️ Universal search cache cleared');
+    console.log('[TRASH] Universal search cache cleared');
   }, []);
 
   /**

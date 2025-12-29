@@ -23,7 +23,7 @@ onAnalysisComplete({
   data: scanResult,
   summary: wihyScanningService.formatScanResult(scanResult),
   chatData: wihyScanningService.extractChatData(scanResult),
-  userQuery: `Uploaded image: ${file.name}`  // ✅ Added
+  userQuery: `Uploaded image: ${file.name}`  // [OK] Added
 });
 ```
 
@@ -35,7 +35,7 @@ onAnalysisComplete({
   data: barcodeResult,
   summary: wihyScanningService.formatScanResult(barcodeResult),
   chatData: wihyScanningService.extractChatData(barcodeResult),
-  userQuery: `Scanned barcode: ${barcode}`  // ✅ Added
+  userQuery: `Scanned barcode: ${barcode}`  // [OK] Added
 });
 ```
 
@@ -47,7 +47,7 @@ onAnalysisComplete({
   data: searchResult,
   summary: wihyScanningService.formatScanResult(searchResult),
   chatData: wihyScanningService.extractChatData(searchResult),
-  userQuery: `Searched for: ${productName}`  // ✅ Added
+  userQuery: `Searched for: ${productName}`  // [OK] Added
 });
 ```
 
@@ -58,8 +58,8 @@ onAnalysisComplete({
   type: 'vision_analysis',
   scanType: 'vision',
   data: visionResult,
-  summary: `${visionAnalysisService.formatForDisplay(visionResult)}\n\n⚠️ Note: Using basic vision analysis as food database lookup failed.`,
-  userQuery: `Uploaded image: ${file.name}`  // ✅ Added
+  summary: `${visionAnalysisService.formatForDisplay(visionResult)}\n\n[!] Note: Using basic vision analysis as food database lookup failed.`,
+  userQuery: `Uploaded image: ${file.name}`  // [OK] Added
 });
 
 // When scanning fails
@@ -67,8 +67,8 @@ onAnalysisComplete({
   type: 'vision_analysis',
   scanType: 'vision',
   data: visionResult,
-  summary: `${visionAnalysisService.formatForDisplay(visionResult)}\n\n⚠️ Note: Using basic vision analysis as food database lookup failed.`,
-  userQuery: `Uploaded image: ${file.name}`  // ✅ Added
+  summary: `${visionAnalysisService.formatForDisplay(visionResult)}\n\n[!] Note: Using basic vision analysis as food database lookup failed.`,
+  userQuery: `Uploaded image: ${file.name}`  // [OK] Added
 });
 ```
 
@@ -114,7 +114,7 @@ useEffect(() => {
     
     // Extract userQuery from response if available
     if (typeof initialResponse === 'object' && initialResponse.userQuery) {
-      userQueryMessage = initialResponse.userQuery;  // ✅ Use userQuery if present
+      userQueryMessage = initialResponse.userQuery;  // [OK] Use userQuery if present
     }
     
     // ... format responseMessage ...
@@ -123,7 +123,7 @@ useEffect(() => {
       {
         id: '1',
         type: 'user',
-        message: userQueryMessage,  // ✅ Use extracted userQuery
+        message: userQueryMessage,  // [OK] Use extracted userQuery
         timestamp: new Date()
       },
       {
@@ -147,7 +147,7 @@ useEffect(() => {
 
 Coca-Cola Classic is a carbonated soft drink...
 ```
-❌ Users don't know what was scanned
+[X] Users don't know what was scanned
 
 ### After
 ```
@@ -159,7 +159,7 @@ Scanned barcode: 049000050103
 
 Coca-Cola Classic is a carbonated soft drink...
 ```
-✅ Users can see exactly what they scanned
+[OK] Users can see exactly what they scanned
 
 ## Test Cases
 
@@ -241,10 +241,10 @@ type AnalysisResult = {
 5. **Debugging Aid:** Developers can see the full interaction flow
 
 ## Status
-✅ Implementation Complete
-✅ No TypeScript Errors
-✅ All analysis paths covered
-✅ Backward compatible (userQuery is optional)
+[OK] Implementation Complete
+[OK] No TypeScript Errors
+[OK] All analysis paths covered
+[OK] Backward compatible (userQuery is optional)
 
 ## Next Steps
 1. Test all input methods (camera, file, barcode, product search, URL)

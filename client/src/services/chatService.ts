@@ -62,23 +62,23 @@ class ChatService {
    */
   async sendDirectMessage(query: string, sessionId?: string, askWihy?: string): Promise<ChatResponse | null> {
     try {
-      console.log('🔍 CHAT SERVICE: Sending message to /ask endpoint');
+      console.log('[SEARCH] CHAT SERVICE: Sending message to /ask endpoint');
 
       const request: any = { query };
       
       // Include session_id if provided for conversation context
       if (sessionId) {
         request.session_id = sessionId;
-        console.log('🔍 CHAT SERVICE: Including session_id for conversation context:', sessionId);
+        console.log('[SEARCH] CHAT SERVICE: Including session_id for conversation context:', sessionId);
       }
 
       // Include ask_wihy if provided from scan API
       if (askWihy) {
         request.ask_wihy = askWihy;
-        console.log('🔍 CHAT SERVICE: Including ask_wihy from scan API');
+        console.log('[SEARCH] CHAT SERVICE: Including ask_wihy from scan API');
       }
 
-      console.log('🔍 CHAT SERVICE: Request:', { 
+      console.log('[SEARCH] CHAT SERVICE: Request:', { 
         query: query.substring(0, 100) + '...',
         hasSessionId: Boolean(sessionId)
       });
@@ -95,7 +95,7 @@ class ChatService {
 
       const data: ChatResponse = await response.json();
 
-      console.log('🔍 CHAT SERVICE: Response received from /ask endpoint:', {
+      console.log('[SEARCH] CHAT SERVICE: Response received from /ask endpoint:', {
         type: data.type,
         source: data.source,
         confidence: data.confidence,
@@ -121,12 +121,12 @@ class ChatService {
     useCustomModel: boolean = false
   ): Promise<ChatMessageResponse | null> {
     if (!this.currentSessionId) {
-      console.log('🔍 CHAT SERVICE: No session available, falling back to direct message');
+      console.log('[SEARCH] CHAT SERVICE: No session available, falling back to direct message');
       return null;
     }
 
     try {
-      console.log('🔍 CHAT SERVICE: Sending session message:', {
+      console.log('[SEARCH] CHAT SERVICE: Sending session message:', {
         sessionId: this.currentSessionId,
         message: message.substring(0, 100) + '...',
         messageType,
@@ -154,7 +154,7 @@ class ChatService {
 
       const data: ChatMessageResponse = await response.json();
 
-      console.log('🔍 CHAT SERVICE: Session message response:', {
+      console.log('[SEARCH] CHAT SERVICE: Session message response:', {
         success: data.success,
         messageId: data.message_id,
         modelUsed: data.model_used,
@@ -191,7 +191,7 @@ class ChatService {
    */
   setSessionId(sessionId: string): void {
     this.currentSessionId = sessionId;
-    console.log('🔍 CHAT SERVICE: Session ID set:', sessionId);
+    console.log('[SEARCH] CHAT SERVICE: Session ID set:', sessionId);
   }
 
   /**
@@ -200,7 +200,7 @@ class ChatService {
   clearSession(): void {
     this.currentSessionId = null;
     this.conversationId = null;
-    console.log('🔍 CHAT SERVICE: Session cleared, using direct chat');
+    console.log('[SEARCH] CHAT SERVICE: Session cleared, using direct chat');
   }
 
   /**

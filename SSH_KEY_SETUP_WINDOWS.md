@@ -1,8 +1,8 @@
 # SSH Key Setup Instructions for Windows
 
-## 🔑 **Issue:** Your GitHub secret `VM_SSH_PRIVATE_KEY` contains an invalid SSH key
+## [KEY] **Issue:** Your GitHub secret `VM_SSH_PRIVATE_KEY` contains an invalid SSH key
 
-## 🛠️ **Solution:** Generate a new SSH key pair and update GitHub secrets
+## [TOOLS] **Solution:** Generate a new SSH key pair and update GitHub secrets
 
 ### **Step 1: Generate SSH Key (Windows)**
 
@@ -94,7 +94,7 @@ git commit -m "Update: Fixed SSH key for deployment"
 git push origin main
 ```
 
-## 🚨 **Common Issues & Solutions**
+##  **Common Issues & Solutions**
 
 ### **Issue: "Load key error in libcrypto"**
 - Your private key is malformed or incomplete
@@ -109,7 +109,7 @@ git push origin main
 - Use RSA format: `ssh-keygen -t rsa -b 4096`
 - Don't use newer formats like Ed25519 if VM doesn't support them
 
-## ✅ **Expected Private Key Format**
+## [OK] **Expected Private Key Format**
 
 Your GitHub secret should look exactly like this:
 
@@ -121,7 +121,7 @@ MIIJKAIBAAKCAgEA1234567890abcdef...
 -----END RSA PRIVATE KEY-----
 ```
 
-## 🎯 **Quick Fix Command Sequence**
+## [TARGET] **Quick Fix Command Sequence**
 
 If you want to do this quickly:
 
@@ -142,6 +142,6 @@ Write-Host "=== END PUBLIC KEY ===" -ForegroundColor Yellow
 
 After running this, copy the private key to GitHub secret `VM_SSH_PRIVATE_KEY` and add the public key to your VM's authorized_keys file.
 
-## 🚀 **Ready to Deploy!**
+## [ROCKET] **Ready to Deploy!**
 
 Once you've completed these steps, your GitHub Actions deployment will authenticate successfully and deploy your application to the VM.

@@ -14,7 +14,7 @@ export class AdaptiveCameraService {
    */
   static async captureImage(): Promise<string> {
     if (PlatformDetectionService.isNative()) {
-      console.log('📱 Using native Capacitor Camera');
+      console.log('[MOBILE] Using native Capacitor Camera');
       
       // Use Capacitor Camera on mobile
       const image = await Camera.getPhoto({
@@ -27,7 +27,7 @@ export class AdaptiveCameraService {
       
       return image.dataUrl!;
     } else {
-      console.log('🌐 Using web getUserMedia API');
+      console.log(' Using web getUserMedia API');
       
       // For web, return a promise that resolves when user captures from web camera
       // This would integrate with your existing web camera logic
@@ -41,7 +41,7 @@ export class AdaptiveCameraService {
    */
   static async selectImage(): Promise<string> {
     if (PlatformDetectionService.isNative()) {
-      console.log('📱 Using native photo picker');
+      console.log('[MOBILE] Using native photo picker');
       
       // Use Capacitor Camera to pick from gallery
       const image = await Camera.getPhoto({
@@ -53,7 +53,7 @@ export class AdaptiveCameraService {
       
       return image.dataUrl!;
     } else {
-      console.log('🌐 Using web file picker');
+      console.log(' Using web file picker');
       
       // For web, return a promise that resolves when user selects file
       // This would integrate with your existing file input logic

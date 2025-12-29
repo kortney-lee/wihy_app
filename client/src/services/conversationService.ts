@@ -117,7 +117,7 @@ class ConversationService {
    */
   setUserId(userId: string): void {
     this.currentUserId = userId;
-    console.log('💬 CONVERSATION: User ID set:', userId);
+    console.log(' CONVERSATION: User ID set:', userId);
   }
 
   /**
@@ -133,7 +133,7 @@ class ConversationService {
   clearUser(): void {
     this.currentUserId = null;
     this.currentSessionId = null;
-    console.log('💬 CONVERSATION: User context cleared');
+    console.log(' CONVERSATION: User context cleared');
   }
 
   // ========================================
@@ -150,12 +150,12 @@ class ConversationService {
     context?: SessionContext
   ): Promise<CreateSessionResponse | null> {
     if (!this.currentUserId) {
-      console.error('💬 CONVERSATION: Cannot create session - no user ID set');
+      console.error(' CONVERSATION: Cannot create session - no user ID set');
       return null;
     }
 
     try {
-      console.log('💬 CONVERSATION: Creating new session:', { sessionName, context });
+      console.log(' CONVERSATION: Creating new session:', { sessionName, context });
 
       const request: CreateSessionRequest = {
         user_id: this.currentUserId,
@@ -180,7 +180,7 @@ class ConversationService {
       // Set as current session
       this.currentSessionId = data.session_id;
 
-      console.log('💬 CONVERSATION: Session created:', {
+      console.log(' CONVERSATION: Session created:', {
         sessionId: data.session_id,
         sessionName: data.session_name
       });
@@ -188,7 +188,7 @@ class ConversationService {
       return data;
 
     } catch (error) {
-      console.error('💬 CONVERSATION: Failed to create session:', error);
+      console.error(' CONVERSATION: Failed to create session:', error);
       return null;
     }
   }
@@ -198,7 +198,7 @@ class ConversationService {
    */
   setSessionId(sessionId: string): void {
     this.currentSessionId = sessionId;
-    console.log('💬 CONVERSATION: Active session set:', sessionId);
+    console.log(' CONVERSATION: Active session set:', sessionId);
   }
 
   /**
@@ -213,7 +213,7 @@ class ConversationService {
    */
   clearSession(): void {
     this.currentSessionId = null;
-    console.log('💬 CONVERSATION: Session cleared');
+    console.log(' CONVERSATION: Session cleared');
   }
 
   // ========================================
@@ -232,12 +232,12 @@ class ConversationService {
     imageUrl?: string
   ): Promise<SendMessageResponse | null> {
     if (!this.currentSessionId) {
-      console.error('💬 CONVERSATION: Cannot send message - no active session');
+      console.error(' CONVERSATION: Cannot send message - no active session');
       return null;
     }
 
     try {
-      console.log('💬 CONVERSATION: Sending message:', {
+      console.log(' CONVERSATION: Sending message:', {
         sessionId: this.currentSessionId,
         messagePreview: message.substring(0, 100) + '...',
         messageType,
@@ -268,7 +268,7 @@ class ConversationService {
 
       const data: SendMessageResponse = await response.json();
 
-      console.log('💬 CONVERSATION: Message sent successfully:', {
+      console.log(' CONVERSATION: Message sent successfully:', {
         messageId: data.message_id,
         modelUsed: data.model_used,
         confidenceScore: data.confidence_score,
@@ -278,7 +278,7 @@ class ConversationService {
       return data;
 
     } catch (error) {
-      console.error('💬 CONVERSATION: Failed to send message:', error);
+      console.error(' CONVERSATION: Failed to send message:', error);
       return null;
     }
   }
@@ -297,12 +297,12 @@ class ConversationService {
     const targetSessionId = sessionId || this.currentSessionId;
 
     if (!targetSessionId) {
-      console.error('💬 CONVERSATION: Cannot get history - no session ID');
+      console.error(' CONVERSATION: Cannot get history - no session ID');
       return null;
     }
 
     try {
-      console.log('💬 CONVERSATION: Fetching conversation history for session:', targetSessionId);
+      console.log(' CONVERSATION: Fetching conversation history for session:', targetSessionId);
 
       const response = await fetch(`${API_BASE}/api/chat/history/${targetSessionId}`);
 
@@ -312,7 +312,7 @@ class ConversationService {
 
       const data: ConversationHistoryResponse = await response.json();
 
-      console.log('💬 CONVERSATION: History retrieved:', {
+      console.log(' CONVERSATION: History retrieved:', {
         sessionId: data.session_id,
         totalMessages: data.total_messages
       });
@@ -320,7 +320,7 @@ class ConversationService {
       return data;
 
     } catch (error) {
-      console.error('💬 CONVERSATION: Failed to get history:', error);
+      console.error(' CONVERSATION: Failed to get history:', error);
       return null;
     }
   }
@@ -333,12 +333,12 @@ class ConversationService {
     filters?: SessionFilters
   ): Promise<SessionListResponse | null> {
     if (!this.currentUserId) {
-      console.error('💬 CONVERSATION: Cannot get sessions - no user ID set');
+      console.error(' CONVERSATION: Cannot get sessions - no user ID set');
       return null;
     }
 
     try {
-      console.log('💬 CONVERSATION: Fetching all sessions for user:', this.currentUserId, filters);
+      console.log(' CONVERSATION: Fetching all sessions for user:', this.currentUserId, filters);
 
       // Build query string from filters
       const queryParams = new URLSearchParams();
@@ -358,7 +358,7 @@ class ConversationService {
 
       const data: SessionListResponse = await response.json();
 
-      console.log('💬 CONVERSATION: Sessions retrieved:', {
+      console.log(' CONVERSATION: Sessions retrieved:', {
         userId: data.user_id,
         totalSessions: data.total_sessions
       });
@@ -366,7 +366,7 @@ class ConversationService {
       return data;
 
     } catch (error) {
-      console.error('💬 CONVERSATION: Failed to get sessions:', error);
+      console.error(' CONVERSATION: Failed to get sessions:', error);
       return null;
     }
   }
@@ -395,7 +395,7 @@ class ConversationService {
    */
   async deleteSession(sessionId: string): Promise<boolean> {
     try {
-      console.log('💬 CONVERSATION: Deleting session:', sessionId);
+      console.log(' CONVERSATION: Deleting session:', sessionId);
 
       const response = await fetch(`${API_BASE}/api/chat/session/delete`, {
         method: 'DELETE',
@@ -409,7 +409,7 @@ class ConversationService {
         throw new Error(`Failed to delete session: ${response.status} ${response.statusText}`);
       }
 
-      console.log('💬 CONVERSATION: Session deleted successfully');
+      console.log(' CONVERSATION: Session deleted successfully');
 
       // Clear current session if it was deleted
       if (this.currentSessionId === sessionId) {
@@ -419,7 +419,7 @@ class ConversationService {
       return true;
 
     } catch (error) {
-      console.error('💬 CONVERSATION: Failed to delete session:', error);
+      console.error(' CONVERSATION: Failed to delete session:', error);
       return false;
     }
   }
@@ -429,12 +429,12 @@ class ConversationService {
    */
   async exportUserData(): Promise<any | null> {
     if (!this.currentUserId) {
-      console.error('💬 CONVERSATION: Cannot export data - no user ID set');
+      console.error(' CONVERSATION: Cannot export data - no user ID set');
       return null;
     }
 
     try {
-      console.log('💬 CONVERSATION: Exporting user data for:', this.currentUserId);
+      console.log(' CONVERSATION: Exporting user data for:', this.currentUserId);
 
       const response = await fetch(`${API_BASE}/api/chat/export/${this.currentUserId}`);
 
@@ -444,12 +444,12 @@ class ConversationService {
 
       const data = await response.json();
 
-      console.log('💬 CONVERSATION: User data exported successfully');
+      console.log(' CONVERSATION: User data exported successfully');
 
       return data;
 
     } catch (error) {
-      console.error('💬 CONVERSATION: Failed to export user data:', error);
+      console.error(' CONVERSATION: Failed to export user data:', error);
       return null;
     }
   }

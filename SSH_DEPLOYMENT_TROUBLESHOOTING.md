@@ -1,10 +1,10 @@
 # GitHub Actions SSH Deployment - Complete Guide
 
-## 📋 Overview
+## [PAGE] Overview
 
 This guide explains how SSH authentication is configured for automated deployments from GitHub Actions to the Azure VM. The system uses public key authentication for secure, passwordless deployments.
 
-## 🏗️ Architecture
+## ️ Architecture
 
 ```
 GitHub Actions Workflow
@@ -18,7 +18,7 @@ Azure VM (4.246.82.249)
 Deployment Complete
 ```
 
-## 🔐 How It Works
+##  How It Works
 
 ### 1. **SSH Key Pair**
 - **Private Key**: Stored in GitHub Secrets (`VM_SSH_PRIVATE_KEY`)
@@ -39,13 +39,13 @@ Deployment Complete
 - **Key Location on VM**: `/home/wihyadmin/.ssh/authorized_keys`
 - **Authentication Method**: Public key only (password auth disabled for security)
 
-## ✅ Current Status
+## [OK] Current Status
 
 SSH authentication is **configured and working**. Last successful connection: `Mon Dec 8 03:42:40 UTC 2025`
 
 ---
 
-## 🔧 Configuration Steps (For Reference)
+## [TOOL] Configuration Steps (For Reference)
 
 ### Initial Setup (Already Completed)
 
@@ -118,7 +118,7 @@ The workflow file (`.github/workflows/deploy.yml`) uses these secrets:
 
 ---
 
-## 🧪 Testing & Verification
+##  Testing & Verification
 
 ### Test SSH Connection Locally
 
@@ -176,7 +176,7 @@ ls -ld ~/.ssh
 
 ---
 
-## 🚨 Troubleshooting
+##  Troubleshooting
 
 ### Common Issues & Solutions
 
@@ -230,11 +230,11 @@ MIIEpAIBAAKCAQEA2...
 ```
 
 **Common Problems:**
-- ❌ Missing `-----BEGIN` or `-----END` lines
-- ❌ Extra spaces before/after the key
-- ❌ Windows line endings (`\r\n` instead of `\n`)
-- ❌ Partial key content (must be complete)
-- ❌ Encrypted key (should be unencrypted for automation)
+- [X] Missing `-----BEGIN` or `-----END` lines
+- [X] Extra spaces before/after the key
+- [X] Windows line endings (`\r\n` instead of `\n`)
+- [X] Partial key content (must be complete)
+- [X] Encrypted key (should be unencrypted for automation)
 
 #### Issue 3: Connection Timeout
 
@@ -271,9 +271,9 @@ ssh -o StrictHostKeyChecking=no wihyadmin@4.246.82.249
 
 ---
 
-## 🔒 Security Best Practices
+## [LOCK] Security Best Practices
 
-### Current Implementation ✅
+### Current Implementation [OK]
 
 1. **Public Key Authentication Only**
    - Password authentication disabled
@@ -305,7 +305,7 @@ ssh -o StrictHostKeyChecking=no wihyadmin@4.246.82.249
 
 ---
 
-## 📊 Monitoring & Logs
+## [CHART] Monitoring & Logs
 
 ### Check SSH Logs on VM
 
@@ -335,7 +335,7 @@ Look for:
 
 ---
 
-## 🔄 Key Rotation Procedure
+## [CYCLE] Key Rotation Procedure
 
 When rotating SSH keys:
 
@@ -363,7 +363,7 @@ When rotating SSH keys:
 
 ---
 
-## ✅ Verification Checklist
+## [OK] Verification Checklist
 
 Before each deployment, verify:
 
@@ -377,7 +377,7 @@ Before each deployment, verify:
 
 ---
 
-## 📚 Additional Resources
+## [BOOKS] Additional Resources
 
 - [GitHub Actions SSH Setup Guide](https://docs.github.com/en/actions/deployment/security-hardening-your-deployments/using-secrets-in-github-actions)
 - [SSH Key Generation Guide](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent)
@@ -385,7 +385,7 @@ Before each deployment, verify:
 
 ---
 
-## 🎯 Quick Reference
+## [TARGET] Quick Reference
 
 ### Essential Commands
 
@@ -417,5 +417,5 @@ VM_SSH_PRIVATE_KEY: <complete private key with BEGIN/END lines>
 ---
 
 **Last Updated**: December 8, 2025  
-**Status**: ✅ SSH authentication working correctly  
+**Status**: [OK] SSH authentication working correctly  
 **Last Successful Connection**: Mon Dec 8 03:42:40 UTC 2025

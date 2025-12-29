@@ -227,7 +227,7 @@ class VHealthNewsClient {
     this.cache = new NewsCache();
     
     // Debug logging
-    console.log('🔍 NEWS API DEBUG:', {
+    console.log('[SEARCH] NEWS API DEBUG:', {
       baseUrl: this.baseUrl,
       isLocalhost: window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1',
       hostname: window.location.hostname,
@@ -254,7 +254,7 @@ class VHealthNewsClient {
       const cached = this.cache.get(cacheParams);
       if (cached) {
         if (process.env.NODE_ENV === 'development') {
-          console.log('📱 Serving from cache:', {
+          console.log('[MOBILE] Serving from cache:', {
             totalArticles: cached.articles.length,
             cacheAge: Math.round((Date.now() - cached.timestamp) / 1000) + 's'
           });
@@ -288,7 +288,7 @@ class VHealthNewsClient {
     const fullUrl = `${this.baseUrl}/api/news/articles?${queryParams}`;
     
     if (process.env.NODE_ENV === 'development') {
-      console.log('🌐 Making API request to:', fullUrl);
+      console.log(' Making API request to:', fullUrl);
     }
 
     const response = await fetch(fullUrl, {
@@ -321,7 +321,7 @@ class VHealthNewsClient {
           image_url: article.image_url ? 'present' : 'null',
           image_status: article.image_status
         }));
-        console.log('📸 Sample image statuses:', imageStatuses);
+        console.log(' Sample image statuses:', imageStatuses);
       }
     }
     

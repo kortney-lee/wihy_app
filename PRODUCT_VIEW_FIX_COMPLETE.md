@@ -55,7 +55,7 @@ Added `metadata: enrichedMetadata` to:
 ```typescript
 if (assistantMessage.type === 'barcode_scan' && metadata) {
   const meta = metadata;
-  const nutritionAnalysis = meta.nutrition_analysis; // ❌ Wrong structure
+  const nutritionAnalysis = meta.nutrition_analysis; // [X] Wrong structure
 ```
 
 **After**:
@@ -65,7 +65,7 @@ const hasProductData = assistantMessage.type === 'barcode_scan' &&
                       assistantMessage.data?.nutrition;
 
 if (hasProductData) {
-  const scanResult = assistantMessage.data; // ✅ Correct: BarcodeScanResult
+  const scanResult = assistantMessage.data; // [OK] Correct: BarcodeScanResult
   const healthAlerts = scanResult.health_analysis?.alerts || [];
 ```
 

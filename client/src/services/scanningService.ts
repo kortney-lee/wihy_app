@@ -84,7 +84,7 @@ export class ScanningService {
     document.body.appendChild(this.scanningContainer);
 
     const handleBarcodeDetected = async (barcode: string) => {
-      console.log('📱 Barcode detected in React component:', barcode);
+      console.log('[MOBILE] Barcode detected in React component:', barcode);
       
       // Hide camera component
       this.hideCameraScanning();
@@ -136,7 +136,7 @@ export class ScanningService {
    * Scan a barcode and return structured result
    */
   async scanBarcode(barcode: string): Promise<ScanResult> {
-    console.log('🔍 Scanning barcode:', barcode);
+    console.log('[SEARCH] Scanning barcode:', barcode);
     
     try {
       const barcodeResult = await wihyScanningService.scanBarcode(barcode);
@@ -157,7 +157,7 @@ export class ScanningService {
         };
       }
     } catch (error) {
-      console.error('❌ Barcode scanning error:', error);
+      console.error('[X] Barcode scanning error:', error);
       return {
         success: false,
         type: 'error',
@@ -170,7 +170,7 @@ export class ScanningService {
    * Process an image file for analysis
    */
   async analyzeImage(file: File): Promise<ScanResult> {
-    console.log('🔍 Analyzing image:', file.name);
+    console.log('[SEARCH] Analyzing image:', file.name);
     
     try {
       // Use existing image processing logic from wihyScanningService
@@ -183,7 +183,7 @@ export class ScanningService {
         userQuery: `Uploaded image: ${file.name}`
       };
     } catch (error) {
-      console.error('❌ Image analysis error:', error);
+      console.error('[X] Image analysis error:', error);
       return {
         success: false,
         type: 'error',

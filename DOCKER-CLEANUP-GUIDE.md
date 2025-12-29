@@ -10,20 +10,20 @@ This document describes the Docker image cleanup system implemented for the WiHy
 **Purpose**: Prevents disk space issues by removing old Docker images and containers
 
 #### What it cleans:
-- ✅ **Old WiHy images**: Keeps latest 2 of each type (`wihy-ui`, `wihy-ui-test`, `wihy-ui-prod`)
-- ✅ **ML/API images**: Keeps latest 1 of each (`wihy-enhanced`, `wihy-ml`, `wihy-trained`)
-- ✅ **Azure registry images**: Removes up to 10 old Azure Container Registry images
-- ✅ **Dangling images**: All untagged/orphaned images
-- ✅ **Old images**: Images older than 24 hours that are unused
-- ✅ **Stopped containers**: All containers not currently running
-- ✅ **Unused volumes**: Orphaned Docker volumes
-- ✅ **Unused networks**: Custom networks no longer in use
+- [OK] **Old WiHy images**: Keeps latest 2 of each type (`wihy-ui`, `wihy-ui-test`, `wihy-ui-prod`)
+- [OK] **ML/API images**: Keeps latest 1 of each (`wihy-enhanced`, `wihy-ml`, `wihy-trained`)
+- [OK] **Azure registry images**: Removes up to 10 old Azure Container Registry images
+- [OK] **Dangling images**: All untagged/orphaned images
+- [OK] **Old images**: Images older than 24 hours that are unused
+- [OK] **Stopped containers**: All containers not currently running
+- [OK] **Unused volumes**: Orphaned Docker volumes
+- [OK] **Unused networks**: Custom networks no longer in use
 
 #### Safety features:
-- ✅ Checks current container is running before cleanup
-- ✅ Keeps newest images to prevent breaking deployments
-- ✅ Uses force removal with error handling
-- ✅ Provides detailed logging of cleanup actions
+- [OK] Checks current container is running before cleanup
+- [OK] Keeps newest images to prevent breaking deployments
+- [OK] Uses force removal with error handling
+- [OK] Provides detailed logging of cleanup actions
 
 ### 2. Manual Cleanup (`manual-cleanup.sh`)
 **When to use**: When you need to manually free disk space on the VM
@@ -39,11 +39,11 @@ ssh wihyadmin@4.246.82.249
 ```
 
 #### Features:
-- 📊 Shows current Docker disk usage
-- 📦 Lists current containers
-- 🤔 Asks for confirmation before cleanup
-- 📋 Uses the same comprehensive cleanup logic
-- 📊 Shows before/after disk usage comparison
+- [CHART] Shows current Docker disk usage
+- [PACKAGE] Lists current containers
+-  Asks for confirmation before cleanup
+- [PAGE] Uses the same comprehensive cleanup logic
+- [CHART] Shows before/after disk usage comparison
 
 ## Deployment Integration
 
@@ -55,7 +55,7 @@ The cleanup is integrated into `.github/workflows/deploy.yml`:
 copy_with_retry "cleanup-docker-images.sh" || exit 1
 
 # Run cleanup before deployment
-echo "🧹 Running comprehensive Docker cleanup..."
+echo " Running comprehensive Docker cleanup..."
 chmod +x ~/cleanup-docker-images.sh
 ~/cleanup-docker-images.sh ${{ env.CONTAINER_NAME }}
 ```
@@ -120,14 +120,14 @@ sudo du -sh /var/lib/docker/*
 ## Best Practices
 
 ### For Developers
-- ✅ Let automatic cleanup handle routine maintenance
-- ✅ Monitor deployment logs for cleanup warnings
-- ✅ Run manual cleanup if deployment fails due to space
+- [OK] Let automatic cleanup handle routine maintenance
+- [OK] Monitor deployment logs for cleanup warnings
+- [OK] Run manual cleanup if deployment fails due to space
 
 ### For Operations
-- 🔍 Check disk usage weekly: `ssh wihyadmin@4.246.82.249 "df -h"`
-- 📊 Review Docker usage monthly: `sudo docker system df`
-- 🧹 Run manual cleanup if disk usage > 80%
+- [SEARCH] Check disk usage weekly: `ssh wihyadmin@4.246.82.249 "df -h"`
+- [CHART] Review Docker usage monthly: `sudo docker system df`
+-  Run manual cleanup if disk usage > 80%
 
 ### Emergency Contacts
 If cleanup scripts fail or disk space becomes critical:
