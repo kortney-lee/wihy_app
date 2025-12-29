@@ -349,7 +349,9 @@ jobs:
         cd functions/nutrition
         
         cat > index.js << EOF
+        const functions = require('@google-cloud/functions-framework');
         const { ImageAnnotatorClient } = require('@google-cloud/vision');
+        const { Storage } = require('@google-cloud/storage');
 
         const storage = new Storage();
         const vision = new ImageAnnotatorClient();
@@ -371,7 +373,7 @@ jobs:
               imageBuffer = Buffer.from(image, 'base64');
             } else if (imageUrl) {
               const response = await fetch(imageUrl);
-              imageBuffer = await response.buffer();
+              imageBuffer = Buffer.from(await response.arrayBuffer());
             } else {
               return res.status(400).json({ error: 'No image provided' });
             }
@@ -420,10 +422,17 @@ jobs:
         {
           "name": "nutrition-function",
           "version": "1.0.0",
+          "main": "index.js",
+          "scripts": {
+            "start": "functions-framework --target=analyzeNutrition --port=8080"
+          },
           "dependencies": {
             "@google-cloud/functions-framework": "^3.0.0",
             "@google-cloud/storage": "^7.0.0",
             "@google-cloud/vision": "^4.0.0"
+          },
+          "engines": {
+            "node": ">=20.0.0"
           }
         }
         EOF
@@ -437,7 +446,8 @@ jobs:
           --trigger-http \
           --allow-unauthenticated \
           --memory=1GB \
-          --timeout=60s
+          --timeout=60s \
+          --set-env-vars="PORT=8080"
 
   setup-security-and-networking:
     needs: test
