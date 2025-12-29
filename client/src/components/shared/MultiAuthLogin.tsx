@@ -362,34 +362,23 @@ const MultiAuthLogin: React.FC<MultiAuthLoginProps> = ({
               </p>
             </div>
             
-            <div className="px-5 py-4 text-center">
-              <input
-                type="email"
-                placeholder="Email address"
-                value={emailData.email}
-                onChange={(e) => setEmailData({ ...emailData, email: e.target.value })}
-                className="w-full px-[18px] py-[14px] border border-[#dadce0] rounded-full text-sm outline-none mb-3 box-border focus:border-blue-500"
-              />
-              
-              <button
-                onClick={() => {
-                  setShowProviders(false);
-                  setShowEmailForm(true);
-                  setEmailMode('signup');
-                }}
-                className="w-full px-[18px] py-[14px] bg-gray-800 text-white border-none rounded-full text-sm font-semibold cursor-pointer transition-all duration-200 hover:bg-gray-700"
-              >
-                Continue
-              </button>
+            <div className="px-5 py-4 flex flex-col gap-3">
+              {authProviders.map((provider) => (
+                <button
+                  key={provider.id}
+                  onClick={() => handleProviderLogin(provider)}
+                  className="flex items-center justify-center gap-3 px-[18px] py-[14px] border border-[#dadce0] rounded-full bg-white cursor-pointer transition-all duration-200 hover:bg-gray-50 hover:border-gray-400 hover:shadow-sm text-sm font-medium text-slate-700"
+                  style={{ borderColor: `${provider.color}20` }}
+                >
+                  <span className="w-5 h-5 flex-shrink-0">{provider.icon}</span>
+                  <span>Continue with {provider.name}</span>
+                </button>
+              ))}
             </div>
 
             <div className="px-5 py-3 text-center">
-              <p className="text-xs text-gray-500 mb-2">
-                We're working hard to bring you a seamless authentication experience. 
-                <strong> Other providers coming soon.</strong>
-              </p>
-              <p className="text-xs text-gray-400">
-                In the meantime, you can continue using WiHY (Beta) to scan foods and ask health questions for free.
+              <p className="text-xs text-gray-500">
+                Choose your preferred sign-in method above. All authentication is secure and encrypted.
               </p>
             </div>
             
