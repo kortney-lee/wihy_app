@@ -60,3 +60,4 @@ export const getWihyEndpoint = (path: string = '') => {
 };
 
 export default API_CONFIG;
+
