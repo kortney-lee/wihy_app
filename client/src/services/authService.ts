@@ -21,6 +21,10 @@ export interface User {
   provider: 'local' | 'google' | 'microsoft' | 'apple' | 'facebook' | 'samsung';
   created_at?: string;
   last_login?: string;
+  role?: 'admin' | 'parent' | 'co-parent' | 'coach' | 'manager' | 'teen' | 'child' | 'user';
+  permissions?: string[];
+  subscription_tier?: 'free' | 'premium' | 'family_basic' | 'family_premium' | 'coach' | 'manager';
+  subscription_status?: 'active' | 'cancelled' | 'expired' | 'trial';
 }
 
 export interface AuthState {
@@ -381,15 +385,31 @@ class AuthService {
    */
   async initiateOAuth(provider: 'google' | 'facebook' | 'microsoft' | 'apple' | 'samsung'): Promise<{ authorization_url: string; state: string }> {
     try {
-      console.log(`Attempting OAuth for ${provider} at: ${WIHY_AUTH_API_BASE}/api/auth/${provider}/authorize`);
+      // Try the new OAuth endpoint structure first
+      console.log(`Attempting OAuth for ${provider} at: ${WIHY_AUTH_API_BASE}/api/oauth/authorize`);
       
-      const response = await fetch(`${WIHY_AUTH_API_BASE}/api/auth/${provider}/authorize`, {
-        method: 'GET',
-        credentials: 'include'
+      const response = await fetch(`${WIHY_AUTH_API_BASE}/api/oauth/authorize`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ provider })
       });
 
       if (!response.ok) {
-        throw new Error(`Auth server responded with ${response.status}: ${response.statusText}`);
+        // Fallback to old endpoint structure
+        console.log(`Falling back to: ${WIHY_AUTH_API_BASE}/api/auth/${provider}/authorize`);
+        const fallbackResponse = await fetch(`${WIHY_AUTH_API_BASE}/api/auth/${provider}/authorize`, {
+          method: 'GET',
+          credentials: 'include'
+        });
+        
+        if (!fallbackResponse.ok) {
+          throw new Error(`Auth server responded with ${fallbackResponse.status}: ${fallbackResponse.statusText}`);
+        }
+        
+        const result = await this.handleResponse<{ authorization_url: string; state: string }>(fallbackResponse);
+        window.location.href = result.authorization_url;
+        return result;
       }
 
       const result = await this.handleResponse<{ authorization_url: string; state: string }>(response);
@@ -575,6 +595,70 @@ class AuthService {
     } else {
       this.setState({ loading: false });
     }
+  }
+
+  // ============================================================
+  // PERMISSIONS & AUTHORIZATION
+  // ============================================================
+
+  /**
+   * Check if current user has a specific permission
+   */
+  hasPermission(permission: string): boolean {
+    const user = this.state.user;
+    if (!user) return false;
+    
+    // Admin has all permissions
+    if (user.role === 'admin') return true;
+    
+    // Check user's permissions array
+    return user.permissions?.includes(permission) || false;
+  }
+
+  /**
+   * Check if current user has a specific role
+   */
+  hasRole(role: string | string[]): boolean {
+    const user = this.state.user;
+    if (!user || !user.role) return false;
+    
+    if (Array.isArray(role)) {
+      return role.includes(user.role);
+    }
+    
+    return user.role === role;
+  }
+
+  /**
+   * Check if current user has active subscription
+   */
+  hasActiveSubscription(): boolean {
+    const user = this.state.user;
+    if (!user) return false;
+    
+    return user.subscription_status === 'active' || user.subscription_status === 'trial';
+  }
+
+  /**
+   * Check if current user has specific subscription tier or higher
+   */
+  hasSubscriptionTier(tier: 'free' | 'premium' | 'family_basic' | 'family_premium' | 'coach' | 'manager'): boolean {
+    const user = this.state.user;
+    if (!user || !user.subscription_tier) return tier === 'free';
+    
+    const tierHierarchy = {
+      'free': 0,
+      'premium': 1,
+      'family_basic': 2,
+      'family_premium': 3,
+      'coach': 2,
+      'manager': 4
+    };
+    
+    const userTierLevel = tierHierarchy[user.subscription_tier] || 0;
+    const requiredTierLevel = tierHierarchy[tier] || 0;
+    
+    return userTierLevel >= requiredTierLevel;
   }
 
   // ============================================================
