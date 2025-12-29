@@ -6,14 +6,14 @@ WiHy UI is a comprehensive React-based health management platform that provides:
 - **Health Dashboard**: Personal health metrics visualization and tracking
 - **News Integration**: Health article analysis with AI-powered insights
 
-## 🚀 Quick Start Guide
+## [ROCKET] Quick Start Guide
 
 ### Prerequisites
 - **Node.js** (version 16 or higher)
 - **npm** (version 8 or higher)
 - **Git** for version control
 
-### 📥 Installation & Setup
+### [INBOX] Installation & Setup
 
 1. **Clone the repository:**
    ```bash
@@ -44,7 +44,7 @@ WiHy UI is a comprehensive React-based health management platform that provides:
    # No backup endpoints needed - ml.wihy.ai is the single production endpoint
    ```
 
-### 🏃‍♂️ Running the Applications
+### ‍️ Running the Applications
 
 #### Start Main Health App (Port 3000)
 ```bash
@@ -61,7 +61,7 @@ PORT=3001 npm start
 ```
 Access at: **http://localhost:3001**
 
-### 🐳 Docker Deployment
+###  Docker Deployment
 
 #### Build and Run Locally
 ```bash
@@ -75,13 +75,13 @@ docker run -d -p 3030:80 --name wihy-ui-app wihy-ui
 ```
 
 #### Docker Image Features
-- ✅ **Multi-stage build** for optimized image size
-- ✅ **Production environment variables** baked into build
-- ✅ **Tailwind CSS** and PostCSS configuration included
-- ✅ **Nginx** web server with SPA routing support
-- ✅ **Health check** endpoint at `/health`
-- ✅ **Gzip compression** enabled for assets
-- ✅ **Security headers** configured
+- [OK] **Multi-stage build** for optimized image size
+- [OK] **Production environment variables** baked into build
+- [OK] **Tailwind CSS** and PostCSS configuration included
+- [OK] **Nginx** web server with SPA routing support
+- [OK] **Health check** endpoint at `/health`
+- [OK] **Gzip compression** enabled for assets
+- [OK] **Security headers** configured
 
 #### Docker Management
 ```bash
@@ -98,22 +98,22 @@ docker logs wihy-ui-app
 curl http://localhost:3030/health
 ```
 
-### 🎯 What Each Application Does
+### [TARGET] What Each Application Does
 
 #### **Main Health App** (localhost:3000)
-- 🍎 **Nutrition Analysis**: Search and analyze food items
-- 🔍 **Health Search**: AI-powered health information lookup
-- 📸 **Image Analysis**: Upload food images for nutritional breakdown
-- 📰 **Health News**: Browse and analyze health articles with "Analyze with WiHy"
-- 🎤 **Voice Search**: Voice-enabled search functionality
+-  **Nutrition Analysis**: Search and analyze food items
+- [SEARCH] **Health Search**: AI-powered health information lookup
+-  **Image Analysis**: Upload food images for nutritional breakdown
+-  **Health News**: Browse and analyze health articles with "Analyze with WiHy"
+- [MIC] **Voice Search**: Voice-enabled search functionality
 
 #### **Health Dashboard** (localhost:3001)
-- 📊 **Health Metrics**: Personal health data visualization
-- 📈 **Charts & Graphs**: Interactive health trend analysis
-- 🎯 **Goal Tracking**: Health and fitness goal management
-- 📅 **Timeline Views**: Historical health data tracking
+- [CHART] **Health Metrics**: Personal health data visualization
+- [UP] **Charts & Graphs**: Interactive health trend analysis
+- [TARGET] **Goal Tracking**: Health and fitness goal management
+-  **Timeline Views**: Historical health data tracking
 
-## 🛠️ Development
+## [TOOLS] Development
 
 ### Project Structure
 ```
@@ -139,7 +139,7 @@ wihy_ui/
 └── package.json           # Root package file
 ```
 
-### 🎨 CSS Architecture
+### [ART] CSS Architecture
 
 This project uses a **modular CSS architecture** for consistent styling across both applications:
 
@@ -158,7 +158,7 @@ This project uses a **modular CSS architecture** for consistent styling across b
 
 Both applications (client & user) share the same styling system for consistency.
 
-### 🔌 API Architecture
+### [PLUG] API Architecture
 
 #### **WiHy Enhanced Model API Integration**
 The main health application integrates with the enhanced WiHy ML API trained on 2,325 health examples:
@@ -191,7 +191,7 @@ The main health application integrates with the enhanced WiHy ML API trained on 
 - **Research Citations**: Scientific backing for recommendations
 - **Progress Metrics**: Trackable health indicators
 
-### 🔧 Troubleshooting
+### [TOOL] Troubleshooting
 
 #### Common Issues:
 
@@ -214,19 +214,19 @@ rm -rf node_modules package-lock.json
 npm install --legacy-peer-deps
 ```
 
-### 🛠️ Fixed Issues & Solutions
+### [TOOLS] Fixed Issues & Solutions
 
 #### Authentication Modal & Header Layout Fixes (October 2025)
 
 This section documents critical fixes for authentication modal positioning and header layout issues. **Reference these solutions if similar problems arise.**
 
-##### ❌ **Problem**: Authentication Modal Not Displaying Properly
+##### [X] **Problem**: Authentication Modal Not Displaying Properly
 - Modal was showing only Google login instead of all 4 providers
 - Login button appeared too small compared to notification bell
 - Modal overlay was covering the entire header
 - Notification badge was positioned over the bell icon
 
-##### ✅ **Root Causes & Solutions**:
+##### [OK] **Root Causes & Solutions**:
 
 **1. CSS Positioning Conflicts**
 ```css
@@ -281,13 +281,13 @@ This section documents critical fixes for authentication modal positioning and h
 }
 ```
 
-##### 📋 **Files Modified**:
+##### [PAGE] **Files Modified**:
 - `user/src/components/components/shared/components/MultiAuthLogin.tsx`
 - `user/src/components/components/shared/components/MultiAuthLogin.css`
 - `user/src/components/components/shared/components/Header.tsx`
 - `user/src/components/components/shared/components/Header.css`
 
-##### 🔍 **Key Lessons Learned**:
+##### [SEARCH] **Key Lessons Learned**:
 
 1. **CSS Specificity**: Use parent selectors (`.vhealth-topbar-right .header-icon-btn`) instead of `!important` when possible
 2. **Z-Index Management**: Maintain clear z-index hierarchy (Header: 2000 → Overlay: 2050 → Modal: 2100)
@@ -295,38 +295,38 @@ This section documents critical fixes for authentication modal positioning and h
 4. **Global Style Conflicts**: Check `globals.css` for conflicting rules when component styles don't apply
 5. **Fixed Positioning**: Be careful with `position: fixed` - it removes elements from normal document flow
 
-##### 🧪 **Testing Checklist**:
+#####  **Testing Checklist**:
 - [ ] Notification bell and login button are same size (36px x 36px)
 - [ ] Badge appears in upper-right corner of notification button
 - [ ] Login modal shows all 4 providers (Google, Microsoft, Apple, Facebook)
 - [ ] Modal overlay appears above header but doesn't cover it inappropriately
 - [ ] Both buttons display inline in header with proper spacing
 
-### 🎨 Key Features
+### [ART] Key Features
 
 #### Recent Updates (October 2025):
-- ✅ **WiHy API Integration**: Complete replacement of OpenAI endpoint with native WiHy API (`http://localhost:8000/wihy/ask-anything`)
-- ✅ **Enhanced Health Analysis**: Integrated comprehensive WiHy response format with risk factors, action items, and biblical wisdom
-- ✅ **TypeScript API Service**: Added robust `wihyAPI.ts` service with full type definitions and error handling
-- ✅ **Modular CSS Architecture**: Implemented unified styling system with modular CSS files (base.css, buttons.css, cards.css, etc.)
-- ✅ **Dashboard Styling Consolidation**: Both client and user apps now share the same CSS architecture for consistent UI
-- ✅ **Brand Asset Updates**: Updated to WIHY branding with new logo assets, removed old placeholder images
-- ✅ **Design System**: Added comprehensive CSS variables for colors, spacing, and layout tokens
-- ✅ **Component Library**: Standardized button, card, and modal components across applications
-- ✅ **Fixed Header Layout**: Implemented responsive fixed header with proper modal positioning
-- ✅ **"Analyze with WiHy" Bug Fix**: Resolved issue where news article analysis wasn't working properly
+- [OK] **WiHy API Integration**: Complete replacement of OpenAI endpoint with native WiHy API (`http://localhost:8000/wihy/ask-anything`)
+- [OK] **Enhanced Health Analysis**: Integrated comprehensive WiHy response format with risk factors, action items, and biblical wisdom
+- [OK] **TypeScript API Service**: Added robust `wihyAPI.ts` service with full type definitions and error handling
+- [OK] **Modular CSS Architecture**: Implemented unified styling system with modular CSS files (base.css, buttons.css, cards.css, etc.)
+- [OK] **Dashboard Styling Consolidation**: Both client and user apps now share the same CSS architecture for consistent UI
+- [OK] **Brand Asset Updates**: Updated to WIHY branding with new logo assets, removed old placeholder images
+- [OK] **Design System**: Added comprehensive CSS variables for colors, spacing, and layout tokens
+- [OK] **Component Library**: Standardized button, card, and modal components across applications
+- [OK] **Fixed Header Layout**: Implemented responsive fixed header with proper modal positioning
+- [OK] **"Analyze with WiHy" Bug Fix**: Resolved issue where news article analysis wasn't working properly
 
 #### Main Features:
-- 🎯 **WiHy-Powered Search**: Native WiHy API integration for personalized health analysis
-- 📰 **News Analysis**: Click "Analyze with WiHy" on any health article for AI insights
-- 🔬 **Risk Assessment**: Detailed health risk factors with prevention strategies
-- ✝️ **Biblical Health Wisdom**: Scripture-based health guidance and principles
-- 📊 **Data Visualization**: Interactive charts and health metrics  
-- 🔄 **Real-time Updates**: Live data synchronization
-- 📱 **Responsive Design**: Works on all device sizes
-- 📈 **Progress Tracking**: Measurable health goals with reassessment timelines
+- [TARGET] **WiHy-Powered Search**: Native WiHy API integration for personalized health analysis
+-  **News Analysis**: Click "Analyze with WiHy" on any health article for AI insights
+-  **Risk Assessment**: Detailed health risk factors with prevention strategies
+- ️ **Biblical Health Wisdom**: Scripture-based health guidance and principles
+- [CHART] **Data Visualization**: Interactive charts and health metrics  
+- [CYCLE] **Real-time Updates**: Live data synchronization
+- [MOBILE] **Responsive Design**: Works on all device sizes
+- [UP] **Progress Tracking**: Measurable health goals with reassessment timelines
 
-## 🌐 Production Deployment
+##  Production Deployment
 
 ### Live Application URLs
 - **Primary Domain**: https://wihy.ai
@@ -350,7 +350,7 @@ This section documents critical fixes for authentication modal positioning and h
 
 For detailed deployment instructions, see [DEPLOYMENT.md](DEPLOYMENT.md) and [DEPLOYMENT-QUICK-REFERENCE.md](DEPLOYMENT-QUICK-REFERENCE.md).
 
-### 📦 Building for Production
+### [PACKAGE] Building for Production
 
 #### Main App:
 ```bash
@@ -364,7 +364,7 @@ cd user
 npm run build
 ```
 
-### 🤝 Contributing
+###  Contributing
 
 1. **Fork the repository**
 2. **Create a feature branch:**
@@ -381,17 +381,17 @@ npm run build
    ```
 5. **Open a Pull Request**
 
-### 📧 Support
+### [EMAIL] Support
 
 For questions or issues:
-- 🐛 **Report bugs**: Open an issue on GitHub
-- 💡 **Feature requests**: Submit an enhancement request
-- 📖 **Documentation**: Check the code comments and component docs
+-  **Report bugs**: Open an issue on GitHub
+- [BULB] **Feature requests**: Submit an enhancement request
+-  **Documentation**: Check the code comments and component docs
 
-### 📄 License
+### [FILE] License
 
 This project is licensed under the ISC License - see the [LICENSE](LICENSE) file for details.
 
 ---
 
-**Made with ❤️ for better health management**
+**Made with ️ for better health management**

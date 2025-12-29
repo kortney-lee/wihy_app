@@ -33,7 +33,7 @@ export const API_CONFIG = {
 } as const;
 
 // Debug logging
-console.log('🔍 API CONFIG DEBUG:', {
+console.log('[SEARCH] API CONFIG DEBUG:', {
   NODE_ENV: process.env.NODE_ENV,
   REACT_APP_WIHY_API_URL: process.env.REACT_APP_WIHY_API_URL,
   REACT_APP_WIHY_AUTH_API_URL: process.env.REACT_APP_WIHY_AUTH_API_URL,
@@ -51,7 +51,7 @@ console.log('🔍 API CONFIG DEBUG:', {
 export const getApiEndpoint = (path: string = '') => {
   const cleanPath = path.startsWith('/') ? path : `/${path}`;
   const fullUrl = `${API_CONFIG.WIHY_API_URL}${cleanPath}`;
-  console.log('🔍 API ENDPOINT DEBUG:', { path, cleanPath, baseURL: API_CONFIG.WIHY_API_URL, fullUrl });
+  console.log('[SEARCH] API ENDPOINT DEBUG:', { path, cleanPath, baseURL: API_CONFIG.WIHY_API_URL, fullUrl });
   return fullUrl;
 };
 

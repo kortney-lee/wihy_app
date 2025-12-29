@@ -76,13 +76,13 @@ export interface ChartTypeConfig {
 
 /**
  * Complete chart type configurations organized by tab:
- * 📊 Overview: Entry point with 6 essential health indicators
- * 📈 My Progress: Empty - no charts assigned
- * 🥗 Consumption: All diet, macro/micro, and food classification data  
- * 🧘 Wellness: Sleep, hydration, body composition, mood, dopamine
- * 💪 Fitness: Activity, steps, active minutes, heart rate
- * 💡 Insights: Risk analysis, nutrition tracking, mood, dopamine
- * 🔬 Research: Evidence, literature, and study quality
+ * [CHART] Overview: Entry point with 6 essential health indicators
+ * [UP] My Progress: Empty - no charts assigned
+ *  Consumption: All diet, macro/micro, and food classification data  
+ *  Wellness: Sleep, hydration, body composition, mood, dopamine
+ * [STRONG] Fitness: Activity, steps, active minutes, heart rate
+ * [BULB] Insights: Risk analysis, nutrition tracking, mood, dopamine
+ *  Research: Evidence, literature, and study quality
  */
 export const CHART_TYPE_CONFIGS: Record<ChartType, ChartTypeConfig> = {
   // --- OVERVIEW (minimal entry point) ---

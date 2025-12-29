@@ -30,7 +30,7 @@
 #### Slate-50 (Deprecated - Legacy Content)
 - **Color**: `#f8fafc`
   - Tailwind: `bg-slate-50`
-  - Usage: ⚠️ Legacy use only - being phased out
+  - Usage: [!] Legacy use only - being phased out
   - RGB: `rgb(248, 250, 252)`
   - Note: Previously used in content areas, now replaced by #f0f7ff
 
@@ -212,9 +212,9 @@
 ## Accessibility
 
 ### Contrast Ratios
-- **Primary Text on White**: ✓ WCAG AAA (>7:1)
-- **Secondary Text on White**: ✓ WCAG AA (>4.5:1)
-- **Orange on White**: ✓ WCAG AA (>4.5:1)
+- **Primary Text on White**:  WCAG AAA (>7:1)
+- **Secondary Text on White**:  WCAG AA (>4.5:1)
+- **Orange on White**:  WCAG AA (>4.5:1)
 
 ### Touch Targets
 - **Minimum Size**: `44x44px` (iOS)
@@ -349,7 +349,7 @@ All new pages in the WiHY application should follow this standardized layout pat
 <div style={{ backgroundColor: '#f0f7ff' }} className="fixed inset-0 z-[10000] flex flex-col">
   {/* Top Navigation */}
   <div className="bg-white px-3 py-2 min-h-[40px]">
-    <button>☰</button>
+    <button></button>
     {/* Other nav items */}
   </div>
 
@@ -377,12 +377,12 @@ className="bg-white"
 ```
 
 ### Pages Using This Pattern
-- ✅ Dashboard (`Dashboard.css`)
-- ✅ SearchResults
-- ✅ NutritionFacts
-- ✅ ProductScanView
-- ✅ FullScreenChat (partial - main container)
-- ✅ CreateMealsPage (two-column meal builder + shopping outputs)
+- [OK] Dashboard (`Dashboard.css`)
+- [OK] SearchResults
+- [OK] NutritionFacts
+- [OK] ProductScanView
+- [OK] FullScreenChat (partial - main container)
+- [OK] CreateMealsPage (two-column meal builder + shopping outputs)
 
 ### Migration Notes
 - Legacy `bg-slate-50` (#f8fafc) should be replaced with `#f0f7ff`

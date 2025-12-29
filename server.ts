@@ -236,11 +236,11 @@ app.use('*', (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`🚀 vHealth server running on port ${PORT}`);
-  console.log(`📱 Health API available at http://localhost:${PORT}/api/health`);
-  console.log(`🍎 OpenFoodFacts API available at http://localhost:${PORT}/api/openfoodfacts`);
-  console.log(`🥗 Nutrition API available at http://localhost:${PORT}/api`);
-  console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`[ROCKET] vHealth server running on port ${PORT}`);
+  console.log(`[MOBILE] Health API available at http://localhost:${PORT}/api/health`);
+  console.log(` OpenFoodFacts API available at http://localhost:${PORT}/api/openfoodfacts`);
+  console.log(` Nutrition API available at http://localhost:${PORT}/api`);
+  console.log(`[CHART] Environment: ${process.env.NODE_ENV || 'development'}`);
 });
 
 export default app;

@@ -19,12 +19,12 @@ VHealthSearch (Landing) → SearchResults → FullChat → Dashboard
 
 ### Mobile Design Patterns (Not Desktop-to-Mobile)
 
-**❌ Wrong Approach**: Making mobile look like desktop
+**[X] Wrong Approach**: Making mobile look like desktop
 - Complex multi-column layouts on mobile
 - Small buttons and dense information
 - Desktop-style menus and navigation
 
-**✅ Correct Approach**: Mobile-native design patterns
+**[OK] Correct Approach**: Mobile-native design patterns
 - **Thumb-First Navigation**: 56dp bottom nav for easy reach
 - **Conversation-Driven**: Chat overlay as primary interaction
 - **Context-Aware States**: Dynamic highlighting based on current page

@@ -10,24 +10,24 @@ The Create Meals page provides a complete meal planning solution with a two-colu
 
 ## Key Features
 
-### 🍽️ Meal Planning
+### ️ Meal Planning
 - **Meal Cards**: Editable meals with servings, tags (Breakfast/Lunch/Dinner/Snack), and ingredient lists
 - **Prep Batches**: Reusable ingredient prep that feeds into multiple meals
 - **Smart Input**: Parse "chicken breast 2 lb" into structured ingredient data
 - **Goal-based Planning**: High protein, Low sodium, Vegan, Leviticus 11, etc.
 
-### 📋 Shopping List Generation
+### [PAGE] Shopping List Generation
 - **Auto-deduplication**: Combines repeated ingredients across meals
 - **Quantity Summing**: Adds quantities when units match
 - **Category Grouping**: Organizes by Produce, Protein, Dairy, Frozen, Pantry, Other
 - **Validation**: Flags items that need review (mismatched units, empty items)
 
-### 🛒 Instacart Integration
+### [CART] Instacart Integration
 - **One-click Ordering**: Generate Instacart links with pre-filled shopping list
 - **Store Selection**: Choose preferred store (Costco, Kroger, Safeway, etc.)
 - **Link Management**: Copy, regenerate, and track order status
 
-### 👨‍🍳 Coach/Client Support
+### ‍ Coach/Client Support
 - **Coach Mode**: Create meal plans and publish to clients
 - **Client View**: Receive meal plans with shopping lists in MyProgress
 - **Permission Handling**: Different views and actions based on user role
@@ -136,22 +136,22 @@ src/
 ## Future Enhancements
 
 ### V1 Shipped Features
-- ✅ Meal cards with ingredient lists
-- ✅ Combined shopping list generation  
-- ✅ Instacart link generation
-- ✅ Basic prep batch system
+- [OK] Meal cards with ingredient lists
+- [OK] Combined shopping list generation  
+- [OK] Instacart link generation
+- [OK] Basic prep batch system
 
 ### V2 Planned Features
-- 📅 Calendar-based meal planning
-- 🏷️ Ingredient template library
-- 🧮 Nutrition calculation per meal
-- 🔄 Recipe import from external sources
-- 📱 Native mobile optimizations
-- 🤖 AI-powered meal suggestions
+-  Calendar-based meal planning
+- ️ Ingredient template library
+- [ABACUS] Nutrition calculation per meal
+- [CYCLE] Recipe import from external sources
+- [MOBILE] Native mobile optimizations
+-  AI-powered meal suggestions
 
 ### V3 Future Features  
-- 🚚 Multiple grocery delivery services
-- 💰 Price comparison and budgeting
-- 📊 Nutrition goal tracking
-- 👥 Household meal planning
-- 🔄 Automated recurring meal plans
+-  Multiple grocery delivery services
+- [MONEY] Price comparison and budgeting
+- [CHART] Nutrition goal tracking
+-  Household meal planning
+- [CYCLE] Automated recurring meal plans

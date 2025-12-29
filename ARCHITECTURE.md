@@ -1,10 +1,10 @@
 # WIHY UI - Serverless Container Architecture
 
-## 🏗️ Architecture Overview
+## ️ Architecture Overview
 
 This project has been configured as a **serverless containerized React application** optimized for Azure Container Apps deployment with auto-scaling capabilities.
 
-## 📦 Container Architecture
+## [PACKAGE] Container Architecture
 
 ### Multi-Stage Docker Build
 ```dockerfile
@@ -29,7 +29,7 @@ FROM nginx:alpine AS production
 - **Performance**: Nginx with gzip compression and caching
 - **SPA Support**: Proper routing fallback for React Router
 
-## 🚀 Deployment Options
+## [ROCKET] Deployment Options
 
 ### 1. Azure Container Apps (Recommended)
 **Serverless, auto-scaling container platform**
@@ -82,7 +82,7 @@ az webapp create \
   --deployment-container-image-name ghcr.io/your-username/wihy-ui:latest
 ```
 
-## 🔄 CI/CD Workflows
+## [CYCLE] CI/CD Workflows
 
 ### GitHub Actions Pipelines
 
@@ -104,7 +104,7 @@ az webapp create \
 - **Target**: Azure Static Web Apps
 - **Features**: Global CDN, serverless functions
 
-## 🛠️ Development Workflow
+## [TOOLS] Development Workflow
 
 ### Local Development
 ```bash
@@ -142,7 +142,7 @@ npm run build:prod
 npm run serve:prod
 ```
 
-## 📊 Scaling & Performance
+## [CHART] Scaling & Performance
 
 ### Auto-Scaling Configuration
 ```yaml
@@ -166,7 +166,7 @@ scale:
 - **Bundle Optimization**: Code splitting and tree shaking
 - **Image Optimization**: Compressed assets and lazy loading
 
-## 🔒 Security Features
+## [LOCK] Security Features
 
 ### Container Security
 - **Non-root User**: Application runs as unprivileged user
@@ -180,7 +180,7 @@ scale:
 - **HTTPS Enforcement**: Automatic SSL/TLS termination
 - **CORS Configuration**: Proper cross-origin resource sharing
 
-## 🌍 Environment Management
+## [GLOBE] Environment Management
 
 ### Environment Configuration
 ```bash
@@ -198,7 +198,7 @@ REACT_APP_ENV=production
 - **Staging**: Container Apps with staging configuration
 - **Production**: Container Apps with production optimizations
 
-## 📈 Monitoring & Observability
+## [UP] Monitoring & Observability
 
 ### Health Monitoring
 - **Health Endpoint**: `/health` returns container status
@@ -212,7 +212,7 @@ REACT_APP_ENV=production
 - **Error Rates**: Alert on application errors
 - **Performance**: Monitor response times
 
-## 🚢 Migration Path
+##  Migration Path
 
 ### From Static to Container Apps
 1. **Current State**: Static web app deployment
@@ -229,7 +229,7 @@ REACT_APP_ENV=production
 - **Global Performance**: Edge deployment capabilities
 - **Container Flexibility**: Easy scaling and updates
 
-## 🎯 Next Steps
+## [TARGET] Next Steps
 
 ### Immediate Actions
 1. **Install Docker** (if testing locally)
@@ -245,7 +245,7 @@ REACT_APP_ENV=production
 - **Monitoring Dashboard**: Custom metrics and alerts
 - **A/B Testing**: Traffic splitting capabilities
 
-## 📚 Resources
+## [BOOKS] Resources
 
 ### Documentation
 - [Azure Container Apps Documentation](https://docs.microsoft.com/azure/container-apps/)
@@ -259,6 +259,6 @@ REACT_APP_ENV=production
 
 ---
 
-**Architecture Status**: ✅ Complete - Ready for deployment
+**Architecture Status**: [OK] Complete - Ready for deployment
 **Last Updated**: December 2024
 **Version**: 1.0.0 - Serverless Container Architecture

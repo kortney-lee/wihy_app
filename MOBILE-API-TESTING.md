@@ -1,11 +1,11 @@
 # Mobile API Testing Guide
 
-## 🚨 Problem: API calls not working on mobile browsers
+##  Problem: API calls not working on mobile browsers
 
 ### Root Cause
 Mobile browsers cannot access `localhost:8000` because localhost refers to the mobile device itself, not your development machine.
 
-## ✅ Solutions Implemented
+## [OK] Solutions Implemented
 
 ### 1. **Production-First Configuration (Recommended)**
 By default, all API calls go to production servers:
@@ -22,7 +22,7 @@ Use environment variables to enable local development when needed:
 ### 3. **Environment Variable Override**
 You can explicitly set API URLs using environment variables.
 
-## 📱 **Mobile Testing Setup**
+## [MOBILE] **Mobile Testing Setup**
 
 ### Quick Start (Recommended)
 By default, mobile devices will use production APIs. No setup needed!
@@ -108,13 +108,13 @@ http://YOUR_IP_ADDRESS:3000
 http://192.168.1.100:3000
 ```
 
-## 🔍 **Debugging Mobile API Issues**
+## [SEARCH] **Debugging Mobile API Issues**
 
 ### Check Browser Console
 
 Open browser dev tools on your mobile device and look for:
 ```
-🔍 API CONFIG DEBUG: {
+[SEARCH] API CONFIG DEBUG: {
   DETECTION_REASON: "MOBILE_OR_REMOTE",
   FINAL_URL: "http://192.168.1.100:8000",
   IS_MOBILE: true,
@@ -125,30 +125,30 @@ Open browser dev tools on your mobile device and look for:
 ### Common Issues & Solutions
 
 1. **"Failed to fetch" Error**
-   - ✅ Check if API server is running on port 8000
-   - ✅ Verify IP address is correct
-   - ✅ Ensure firewall allows connections on port 8000
+   - [OK] Check if API server is running on port 8000
+   - [OK] Verify IP address is correct
+   - [OK] Ensure firewall allows connections on port 8000
 
 2. **CORS Errors**
-   - ✅ API server needs to allow requests from your IP
-   - ✅ Check server CORS configuration
+   - [OK] API server needs to allow requests from your IP
+   - [OK] Check server CORS configuration
 
 3. **Network Timeout**
-   - ✅ Both devices must be on same WiFi network
-   - ✅ Corporate networks may block cross-device communication
+   - [OK] Both devices must be on same WiFi network
+   - [OK] Corporate networks may block cross-device communication
 
-## 🖥️ **Desktop Development**
+## [DESKTOP] **Desktop Development**
 
 For desktop development, the app still uses `localhost:8000` automatically. No changes needed.
 
-## 🌐 **Production Deployment**
+##  **Production Deployment**
 
 For production, set the environment variable to your deployed API:
 ```env
 REACT_APP_WIHY_API_URL=https://your-api-domain.com
 ```
 
-## 📋 **Testing Checklist**
+## [PAGE] **Testing Checklist**
 
 - [ ] API server running on port 8000
 - [ ] Can access API from development machine: `http://localhost:8000`
@@ -160,11 +160,11 @@ REACT_APP_WIHY_API_URL=https://your-api-domain.com
 - [ ] Both devices on same network
 - [ ] Firewall allows port 8000 connections
 
-## 🔧 **Automatic Features**
+## [TOOL] **Automatic Features**
 
 The app now automatically:
-- ✅ Detects mobile browsers
-- ✅ Uses current hostname instead of localhost when appropriate
-- ✅ Provides detailed debug logging
-- ✅ Falls back gracefully for different environments
-- ✅ Supports explicit environment variable override
+- [OK] Detects mobile browsers
+- [OK] Uses current hostname instead of localhost when appropriate
+- [OK] Provides detailed debug logging
+- [OK] Falls back gracefully for different environments
+- [OK] Supports explicit environment variable override

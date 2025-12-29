@@ -2,13 +2,13 @@
 import { wihyScanningService } from '../src/services/wihyScanningService';
 
 async function testScanningService() {
-  console.log('🧪 Testing Wihy Scanning Service Integration...\n');
+  console.log(' Testing Wihy Scanning Service Integration...\n');
 
   try {
     // Test 1: Service Status
     console.log('1️⃣ Testing service status...');
     const status = await wihyScanningService.getServiceStatus();
-    console.log('Status:', status.success ? '✅ Online' : '❌ Offline');
+    console.log('Status:', status.success ? '[OK] Online' : '[X] Offline');
     console.log('Services:', status.services);
     console.log('Capabilities:', status.capabilities);
     console.log('');
@@ -16,7 +16,7 @@ async function testScanningService() {
     // Test 2: Barcode Scanning (using Coca-Cola barcode from API docs)
     console.log('2️⃣ Testing barcode scanning...');
     const barcodeResult = await wihyScanningService.scanBarcode('049000042566');
-    console.log('Barcode scan:', barcodeResult.success ? '✅ Success' : '❌ Failed');
+    console.log('Barcode scan:', barcodeResult.success ? '[OK] Success' : '[X] Failed');
     if (barcodeResult.success && barcodeResult.product) {
       console.log('Product:', barcodeResult.product.name);
       console.log('Brand:', barcodeResult.product.brand);
@@ -30,7 +30,7 @@ async function testScanningService() {
     // Test 3: Product Name Search
     console.log('3️⃣ Testing product name search...');
     const searchResult = await wihyScanningService.scanProductName('Greek Yogurt');
-    console.log('Product search:', searchResult.success ? '✅ Success' : '❌ Failed');
+    console.log('Product search:', searchResult.success ? '[OK] Success' : '[X] Failed');
     if (searchResult.success && searchResult.analysis) {
       console.log('Summary:', searchResult.analysis.summary?.substring(0, 100) + '...');
       console.log('Confidence:', Math.round((searchResult.analysis.confidence_score || 0) * 100) + '%');
@@ -40,10 +40,10 @@ async function testScanningService() {
     }
     console.log('');
 
-    console.log('🎉 Scanning service integration test completed!');
+    console.log('[PARTY] Scanning service integration test completed!');
 
   } catch (error) {
-    console.error('❌ Test failed:', error);
+    console.error('[X] Test failed:', error);
   }
 }
 

@@ -36,7 +36,7 @@ class HealthStatusService {
    */
   async getHealthCheck(): Promise<HealthCheckResponse | null> {
     try {
-      console.log('🔍 HEALTH STATUS: Checking system health');
+      console.log('[SEARCH] HEALTH STATUS: Checking system health');
 
       const response = await fetch(`${this.baseURL}/health`, {
         method: 'GET',
@@ -51,7 +51,7 @@ class HealthStatusService {
 
       const data: HealthCheckResponse = await response.json();
 
-      console.log('🔍 HEALTH STATUS: Health check received:', {
+      console.log('[SEARCH] HEALTH STATUS: Health check received:', {
         status: data.status,
         servicesAvailable: Object.values(data.services).filter(s => s === 'available').length,
         totalServices: Object.keys(data.services).length
@@ -70,7 +70,7 @@ class HealthStatusService {
    */
   async getApiInfo(): Promise<ApiInfoResponse | null> {
     try {
-      console.log('🔍 HEALTH STATUS: Getting API info');
+      console.log('[SEARCH] HEALTH STATUS: Getting API info');
 
       const response = await fetch(`${this.baseURL}/`, {
         method: 'GET',
@@ -85,7 +85,7 @@ class HealthStatusService {
 
       const data: ApiInfoResponse = await response.json();
 
-      console.log('🔍 HEALTH STATUS: API info received:', {
+      console.log('[SEARCH] HEALTH STATUS: API info received:', {
         status: data.status,
         version: data.version,
         endpointsCount: data.endpoints?.length || 0

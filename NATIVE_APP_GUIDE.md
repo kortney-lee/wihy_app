@@ -1,6 +1,6 @@
 # WIHY Health Scanner - Native Android App
 
-## ✅ APK Successfully Built!
+## [OK] APK Successfully Built!
 
 **Location**: `mobile/android/app/build/outputs/apk/debug/app-debug.apk`
 **Size**: ~311 MB
@@ -8,7 +8,7 @@
 
 ---
 
-## 📱 Installation Options
+## [MOBILE] Installation Options
 
 ### Option 1: Install via USB (Fastest)
 
@@ -39,7 +39,7 @@
 
 ---
 
-## 🧪 Testing Checklist
+##  Testing Checklist
 
 Once installed, test these features:
 
@@ -54,7 +54,7 @@ Once installed, test these features:
 
 ---
 
-## 🐛 Debugging
+##  Debugging
 
 ### View Live Logs (USB connected):
 ```powershell
@@ -73,7 +73,7 @@ adb uninstall com.wihy.healthscanner
 
 ---
 
-## 🔄 Rebuild After Changes
+## [CYCLE] Rebuild After Changes
 
 After making code changes:
 
@@ -87,19 +87,19 @@ cd client; npm run build; cd ..\mobile; npx cap sync android
 
 ---
 
-## 📊 Performance Comparison: Emulator vs Real Device
+## [CHART] Performance Comparison: Emulator vs Real Device
 
 | Metric | Emulator | Real Device |
 |--------|----------|-------------|
-| Heat | 🔥🔥🔥 High | ❄️ Cool |
-| Speed | 🐌 Slow | 🚀 Fast |
-| Camera | 🎥 Simulated | 📷 Real Hardware |
-| Battery | N/A | ⚡ Monitor Usage |
-| Accuracy | ~80% | 💯 100% |
+| Heat | [FIRE][FIRE][FIRE] High | ️ Cool |
+| Speed |  Slow | [ROCKET] Fast |
+| Camera |  Simulated | [CAMERA] Real Hardware |
+| Battery | N/A | [LIGHTNING] Monitor Usage |
+| Accuracy | ~80% |  100% |
 
 ---
 
-## 🎯 Next Steps
+## [TARGET] Next Steps
 
 1. Install APK on your physical Android device
 2. Test all scanning features with real products
@@ -109,7 +109,7 @@ cd client; npm run build; cd ..\mobile; npx cap sync android
 
 ---
 
-## 📝 Known Issues
+## [MEMO] Known Issues
 
 - **First Launch**: May take 5-10 seconds to initialize
 - **Permissions**: Camera permission required for scanning
@@ -118,7 +118,7 @@ cd client; npm run build; cd ..\mobile; npx cap sync android
 
 ---
 
-## 🚀 Production Build (When Ready)
+## [ROCKET] Production Build (When Ready)
 
 For app store deployment:
 

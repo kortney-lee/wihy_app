@@ -71,11 +71,11 @@ Charts are automatically sorted by priority (100 = highest priority, always show
 
 ### Category-Based Organization
 Visual badges indicate chart categories with color coding:
-- 🔴 health - Core health metrics
-- 🟢 activity - Physical activity & lifestyle  
-- 🟡 nutrition - Diet & nutrition analysis
-- 🔵 research - Scientific research data
-- 🟣 analysis - Advanced analytics
+-  health - Core health metrics
+-  activity - Physical activity & lifestyle  
+-  nutrition - Diet & nutrition analysis
+-  research - Scientific research data
+-  analysis - Advanced analytics
 
 ### Flexible Configuration
 ```typescript

@@ -1,4 +1,4 @@
-# 🚨 Deployment Troubleshooting Guide
+#  Deployment Troubleshooting Guide
 
 ## Step 1: Check GitHub Actions Status
 
@@ -8,7 +8,7 @@
 
 ### Common GitHub Actions Errors:
 
-#### ❌ Error: "azure_static_web_apps_api_token not found"
+#### [X] Error: "azure_static_web_apps_api_token not found"
 **Solution**: You need to set up Azure Static Web App first:
 1. Go to Azure Portal → Create a resource → Static Web Apps
 2. Connect to GitHub repository: `kortney-lee/wihy_ui`
@@ -18,7 +18,7 @@
    - Output location: `build`
 4. This will automatically add the secret to your GitHub repository
 
-#### ❌ Error: "npm ci failed" or dependency issues
+#### [X] Error: "npm ci failed" or dependency issues
 **Solution**: Clear and reinstall dependencies:
 ```bash
 cd client
@@ -27,7 +27,7 @@ npm install
 npm run build
 ```
 
-#### ❌ Error: "Build failed" with TypeScript errors
+#### [X] Error: "Build failed" with TypeScript errors
 **Solution**: The package.json versions have been updated, but you may need to:
 1. Delete `node_modules` and `package-lock.json` in both root and client folders
 2. Run `npm install` in root directory
@@ -102,18 +102,18 @@ vercel --prod
 
 ## Common Application Issues:
 
-### ❌ "Cannot read properties of undefined"
+### [X] "Cannot read properties of undefined"
 Usually OAuth configuration issues. Check:
 1. OAuth client IDs are set correctly
 2. Redirect URIs match your deployment URL
 3. Environment variables are available in production
 
-### ❌ API calls failing (CORS errors)
+### [X] API calls failing (CORS errors)
 1. Make sure your API server allows requests from your Static Web App domain
 2. Check `REACT_APP_API_BASE_URL` is correctly set
 3. Verify API endpoints are accessible
 
-### ❌ Routing not working (404 on refresh)
+### [X] Routing not working (404 on refresh)
 The `staticwebapp.config.json` should handle this, but verify:
 1. File exists in root directory
 2. Contains the proper fallback configuration

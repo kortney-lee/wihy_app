@@ -1114,7 +1114,7 @@ class WihyAPIService {
       
       // Add recommendations if available
       if (analysis.recommendations?.length) {
-        formatted += `\n\n## 📋 Recommendations\n`;
+        formatted += `\n\n## [PAGE] Recommendations\n`;
         analysis.recommendations.forEach(rec => {
           formatted += `- ${rec}\n`;
         });
@@ -1122,7 +1122,7 @@ class WihyAPIService {
       
       // Add enhanced analysis if available
       if (analysis.openai_analysis) {
-        formatted += `\n\n## 🔬 Enhanced Analysis\n`;
+        formatted += `\n\n##  Enhanced Analysis\n`;
         formatted += analysis.openai_analysis.summary;
         
         if (analysis.openai_analysis.details) {
@@ -1170,21 +1170,21 @@ class WihyAPIService {
       // Add health insights if available
       if (data.health_insights) {
         if (data.health_insights.key_benefits?.length) {
-          formatted += `\n\n## 🌟 Key Benefits\n`;
+          formatted += `\n\n## [STAR] Key Benefits\n`;
           data.health_insights.key_benefits.forEach(benefit => {
             formatted += `- ${benefit}\n`;
           });
         }
         
         if (data.health_insights.potential_risks?.length) {
-          formatted += `\n\n## ⚠️ Potential Risks\n`;
+          formatted += `\n\n## [!] Potential Risks\n`;
           data.health_insights.potential_risks.forEach(risk => {
             formatted += `- ${risk}\n`;
           });
         }
         
         if (data.health_insights.recommendations?.length) {
-          formatted += `\n\n## 📋 Recommendations\n`;
+          formatted += `\n\n## [PAGE] Recommendations\n`;
           data.health_insights.recommendations.forEach(rec => {
             formatted += `- ${rec}\n`;
           });
@@ -1230,7 +1230,7 @@ class WihyAPIService {
     
     // Personalized Analysis
     if (wihy_response.personalized_analysis) {
-      formatted += `## 🎯 Personalized Health Analysis\n\n`;
+      formatted += `## [TARGET] Personalized Health Analysis\n\n`;
       
       // Risk Factors
       if (wihy_response.personalized_analysis.identified_risk_factors?.length > 0) {
@@ -1245,7 +1245,7 @@ class WihyAPIService {
       
       // Priority Goals
       if (wihy_response.personalized_analysis.priority_health_goals?.length > 0) {
-        formatted += `### 🎯 Priority Health Goals:\n`;
+        formatted += `### [TARGET] Priority Health Goals:\n`;
         wihy_response.personalized_analysis.priority_health_goals.forEach(goal => {
           formatted += `- ${goal}\n`;
         });
@@ -1254,7 +1254,7 @@ class WihyAPIService {
       
       // Action Items
       if (wihy_response.personalized_analysis.action_items?.length > 0) {
-        formatted += `### 📋 Action Items:\n`;
+        formatted += `### [PAGE] Action Items:\n`;
         wihy_response.personalized_analysis.action_items.forEach((action, index) => {
           formatted += `#### ${index + 1}. ${action.action}\n`;
           formatted += `- **Priority:** ${action.priority}\n`;
@@ -1273,7 +1273,7 @@ class WihyAPIService {
     
     // Research Foundation
     if (wihy_response.research_foundation?.length > 0) {
-      formatted += `## 📚 Research Foundation\n\n`;
+      formatted += `## [BOOKS] Research Foundation\n\n`;
       wihy_response.research_foundation.forEach(research => {
         formatted += `- **${research.citation_text}** (${research.study_type})\n`;
         formatted += `  ${research.key_finding}\n\n`;
@@ -1282,7 +1282,7 @@ class WihyAPIService {
     
     // Progress Tracking
     if (wihy_response.progress_tracking) {
-      formatted += `## 📊 Progress Tracking\n\n`;
+      formatted += `## [CHART] Progress Tracking\n\n`;
       formatted += `**Key Metrics to Track:**\n`;
       wihy_response.progress_tracking.key_metrics.forEach(metric => {
         formatted += `- ${metric}\n`;
@@ -1292,7 +1292,7 @@ class WihyAPIService {
     
     // Biblical Wisdom
     if (wihy_response.biblical_wisdom?.length > 0) {
-      formatted += `## ✝️ Biblical Wisdom\n\n`;
+      formatted += `## ️ Biblical Wisdom\n\n`;
       wihy_response.biblical_wisdom.forEach(wisdom => {
         formatted += `> ${wisdom}\n\n`;
       });
@@ -1440,9 +1440,9 @@ What specific aspect of health would you like to explore further?`;
     }
     
     if (response.data.training_status) {
-      let message = `🔄 ${response.data.training_status}`;
+      let message = `[CYCLE] ${response.data.training_status}`;
       if (response.data.available_models && response.data.available_models.length > 0) {
-        message += `\n\n📊 Available models: ${response.data.available_models.join(', ')}`;
+        message += `\n\n[CHART] Available models: ${response.data.available_models.join(', ')}`;
       }
       return message;
     }
