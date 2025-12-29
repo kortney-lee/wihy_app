@@ -446,8 +446,7 @@ jobs:
           --trigger-http \
           --allow-unauthenticated \
           --memory=1GB \
-          --timeout=60s \
-          --set-env-vars="PORT=8080"
+          --timeout=60s
 
   setup-security-and-networking:
     needs: test
