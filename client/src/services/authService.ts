@@ -381,10 +381,16 @@ class AuthService {
    */
   async initiateOAuth(provider: 'google' | 'facebook' | 'microsoft' | 'apple' | 'samsung'): Promise<{ authorization_url: string; state: string }> {
     try {
+      console.log(`Attempting OAuth for ${provider} at: ${WIHY_AUTH_API_BASE}/api/auth/${provider}/authorize`);
+      
       const response = await fetch(`${WIHY_AUTH_API_BASE}/api/auth/${provider}/authorize`, {
         method: 'GET',
         credentials: 'include'
       });
+
+      if (!response.ok) {
+        throw new Error(`Auth server responded with ${response.status}: ${response.statusText}`);
+      }
 
       const result = await this.handleResponse<{ authorization_url: string; state: string }>(response);
       
@@ -394,6 +400,13 @@ class AuthService {
       return result;
     } catch (error) {
       console.error(`OAuth ${provider} initiation failed:`, error);
+      const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+      
+      // Provide helpful error message
+      if (errorMsg.includes('Failed to fetch')) {
+        throw new Error(`Authentication server is not available. Please use email sign-in or try again later. (Server: ${WIHY_AUTH_API_BASE})`);
+      }
+      
       throw error;
     }
   }
