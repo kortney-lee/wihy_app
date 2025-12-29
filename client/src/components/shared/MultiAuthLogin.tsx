@@ -40,6 +40,7 @@ const MultiAuthLogin: React.FC<MultiAuthLoginProps> = ({
   const [showProviders, setShowProviders] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [oauthError, setOauthError] = useState('');
   
   // Email form state
   const [showEmailForm, setShowEmailForm] = useState(false);
@@ -195,8 +196,12 @@ const MultiAuthLogin: React.FC<MultiAuthLoginProps> = ({
   };
 
   const handleProviderLogin = async (provider: AuthProvider) => {
+    console.log('🔵 handleProviderLogin called with provider:', provider);
+    setOauthError(''); // Clear previous errors
+    
     // Handle email provider differently - show email form
     if (provider.id === 'email') {
+      console.log('📧 Email provider selected, showing email form');
       setShowProviders(false);
       setShowEmailForm(true);
       setEmailMode('signin');
@@ -204,21 +209,31 @@ const MultiAuthLogin: React.FC<MultiAuthLoginProps> = ({
     }
 
     // Use auth service for OAuth providers
+    console.log('🔐 OAuth provider selected:', provider.id);
     try {
       if (provider.id === 'google') {
+        console.log('📱 Initiating Google OAuth...');
         await authService.initiateOAuth('google');
       } else if (provider.id === 'microsoft') {
+        console.log('📱 Initiating Microsoft OAuth...');
         await authService.initiateOAuth('microsoft');
       } else if (provider.id === 'facebook') {
+        console.log('📱 Initiating Facebook OAuth...');
         await authService.initiateOAuth('facebook');
       } else if (provider.id === 'apple') {
+        console.log('📱 Initiating Apple OAuth...');
         await authService.initiateOAuth('apple');
       } else if (provider.id === 'samsung') {
+        console.log('📱 Initiating Samsung OAuth...');
         await authService.initiateOAuth('samsung');
+      } else {
+        console.warn('⚠️ Unknown provider:', provider.id);
       }
     } catch (error) {
+      console.error('❌ OAuth initiation error:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to initiate authentication. Please try email sign-in instead.';
+      setOauthError(errorMessage);
       safeLog('OAuth initiation error', error);
-      setEmailError('Failed to initiate authentication. Please try again.');
     }
   };
 
@@ -362,20 +377,43 @@ const MultiAuthLogin: React.FC<MultiAuthLoginProps> = ({
               </p>
             </div>
             
-            <div className="px-5 py-4 flex flex-col gap-3">
+            <div className="px-5 py-4 flex flex-col gap-3 pointer-events-auto">
               {authProviders.map((provider) => (
                 <button
                   key={provider.id}
-                  onClick={() => handleProviderLogin(provider)}
-                  className="flex items-center justify-center gap-3 px-[18px] py-[14px] border border-[#dadce0] rounded-full bg-white cursor-pointer transition-all duration-200 hover:bg-gray-50 hover:border-gray-400 hover:shadow-sm text-sm font-medium text-slate-700"
+                  type="button"
+                  onClick={(e) => {
+                    console.log('🖱️ Button clicked for provider:', provider.name, provider.id);
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleProviderLogin(provider);
+                  }}
+                  className="flex items-center justify-center gap-3 px-[18px] py-[14px] border border-[#dadce0] rounded-full bg-white cursor-pointer transition-all duration-200 hover:bg-gray-50 hover:border-gray-400 hover:shadow-sm text-sm font-medium text-slate-700 pointer-events-auto"
                   style={{ borderColor: `${provider.color}20` }}
                 >
-                  <span className="w-5 h-5 flex-shrink-0">{provider.icon}</span>
-                  <span>Continue with {provider.name}</span>
+                  <span className="w-5 h-5 flex-shrink-0 pointer-events-none">{provider.icon}</span>
+                  <span className="pointer-events-none">Continue with {provider.name}</span>
                 </button>
               ))}
             </div>
 
+            {oauthError && (
+              <div className="px-5 pb-3">
+                <div className="bg-orange-50 border border-orange-200 rounded-lg p-3 text-sm text-orange-800">
+                  <div className="flex items-start gap-2">
+                    <svg className="w-5 h-5 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                    </svg>
+                    <div>
+                      <p className="font-semibold mb-1">Authentication Temporarily Unavailable</p>
+                      <p className="text-xs">{oauthError}</p>
+                      <p className="text-xs mt-2">Please use <strong>email sign-in</strong> below instead.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+            
             <div className="px-5 py-3 text-center">
               <p className="text-xs text-gray-500">
                 Choose your preferred sign-in method above. All authentication is secure and encrypted.
