@@ -305,14 +305,14 @@ const NutritionFactsPage: React.FC = () => {
   // Fallback function to query wihy when FDA fails
   const fallbackToWihyLookup = async (ingredient: string): Promise<IngredientAnalysis> => {
     try {
-      const response = await fetch(`${WIHY_API_BASE}/api/ask`, {
+      const response = await fetch(`${WIHY_API_BASE}/ask`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           query: `Tell me about the ingredient: ${ingredient}. Is it safe? What should I know about it?`,
-          context: { ingredient_lookup: true }
+          user_context: { ingredient_lookup: true }
         })
       });
 
@@ -433,17 +433,19 @@ const NutritionFactsPage: React.FC = () => {
     debug.logEvent('Pre-loading chat response', { query: askWihyQuery });
     
     try {
-      const response = await fetch('https://services.wihy.ai/api/ask', {
+      const response = await fetch('https://ml.wihy.ai/ask', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           query: askWihyQuery,
-          context: {
-            product_name: nutritionfacts?.name,
-            nutrition_data: nutritionfacts,
-            session_id: sessionId
+          session_id: sessionId,
+          user_context: {
+            productData: {
+              name: nutritionfacts?.name,
+              nutrition: nutritionfacts
+            }
           }
         })
       });
