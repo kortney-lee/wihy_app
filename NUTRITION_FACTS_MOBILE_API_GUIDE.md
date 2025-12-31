@@ -448,6 +448,112 @@ FDA database queried for safety data
 Display: safety score, recalls, adverse events
 ```
 
+### State Management
+
+**File**: `client/src/pages/NutritionFacts.tsx` (lines 91-96)
+
+The component uses a sophisticated state structure to track individual ingredient analyses:
+
+```typescript
+interface IngredientAnalysisState {
+  loading: boolean;                              // Global loading flag (deprecated)
+  analyses: IngredientAnalysis[];                // Array of all analyses (deprecated)
+  error: string | null;                          // Global error message
+  loadingIngredients: Set<string>;               // Track which ingredients are being analyzed
+  analyzedIngredients: Map<string, IngredientAnalysis>; // Store individual results by ingredient name
+}
+
+const [ingredientAnalysis, setIngredientAnalysis] = useState<IngredientAnalysisState>({
+  loading: false,
+  analyses: [],
+  error: null,
+  loadingIngredients: new Set(),
+  analyzedIngredients: new Map()
+});
+```
+
+**Key Design Decisions:**
+- **Set for loading state**: Allows multiple ingredients to be analyzed simultaneously
+- **Map for results**: O(1) lookup by ingredient name, prevents duplicates
+- **Individual tracking**: Each ingredient has independent loading/success/error states
+
+### Data Flow Architecture
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  NutritionFacts Component State                             │
+│                                                              │
+│  ingredientAnalysis: {                                       │
+│    loadingIngredients: Set(['Sugar', 'Salt']),              │
+│    analyzedIngredients: Map({                               │
+│      'Water': { success: true, safety_score: 95, ... },    │
+│      'Sugar': { success: true, safety_score: 65, ... }     │
+│    })                                                        │
+│  }                                                           │
+└─────────────────────────────────────────────────────────────┘
+         │
+         │ User clicks "Sugar" ingredient
+         ▼
+┌─────────────────────────────────────────────────────────────┐
+│  analyzeIndividualIngredient('Sugar')                        │
+│                                                              │
+│  1. Check if already analyzed or loading                     │
+│  2. Add to loadingIngredients Set                           │
+│  3. Call analyzeIngredient('Sugar')                         │
+│  4. Update analyzedIngredients Map with result              │
+│  5. Remove from loadingIngredients Set                      │
+└─────────────────────────────────────────────────────────────┘
+         │
+         ▼
+┌─────────────────────────────────────────────────────────────┐
+│  analyzeIngredient('Sugar')                                  │
+│                                                              │
+│  Try: GET /api/openfda/ingredient/Sugar                     │
+│       ↓                                                      │
+│    ✅ Success → Return FDA data                             │
+│    ❌ Error → fallbackToWihyLookup('Sugar')                 │
+└─────────────────────────────────────────────────────────────┘
+         │
+         ▼ (if FDA fails)
+┌─────────────────────────────────────────────────────────────┐
+│  fallbackToWihyLookup('Sugar')                               │
+│                                                              │
+│  POST /api/ask                                               │
+│  Body: {                                                     │
+│    query: "Tell me about the ingredient: Sugar...",         │
+│    context: { ingredient_lookup: true }                     │
+│  }                                                           │
+│       ↓                                                      │
+│  Return Wihy AI analysis                                    │
+└─────────────────────────────────────────────────────────────┘
+         │
+         ▼
+┌─────────────────────────────────────────────────────────────┐
+│  State Updated                                               │
+│                                                              │
+│  analyzedIngredients.set('Sugar', {                         │
+│    ingredient: 'Sugar',                                     │
+│    success: true,                                           │
+│    safety_score: 65,                                        │
+│    risk_level: 'moderate',                                  │
+│    recall_count: 0,                                         │
+│    adverse_event_count: 3,                                  │
+│    fda_status: 'GRAS',                                      │
+│    analysis_summary: '...'                                  │
+│  })                                                          │
+└─────────────────────────────────────────────────────────────┘
+         │
+         ▼
+┌─────────────────────────────────────────────────────────────┐
+│  Component Re-renders                                        │
+│                                                              │
+│  - Ingredient card shows analysis inline                     │
+│  - Safety score badge displays                              │
+│  - Risk color applied (green/yellow/orange/red)             │
+│  - Summary stats updated                                    │
+└─────────────────────────────────────────────────────────────┘
+```
+
 ### Implementation
 
 **File**: `client/src/pages/NutritionFacts.tsx` (lines 274-350)
@@ -546,6 +652,298 @@ If FDA database returns no results or errors:
 2. Uses Wihy AI to analyze the ingredient
 3. Returns conversational analysis instead of structured FDA data
 4. Prevents user-facing errors
+
+---
+
+## 5. Rendering Logic: How Analysis Results Display
+
+### Ingredient List Rendering
+
+**File**: `client/src/pages/NutritionFacts.tsx` (lines 876-965)
+
+Each ingredient is rendered as a clickable card that shows analysis results inline:
+
+```typescript
+{product.ingredientsText.split(',').map((ingredient, idx) => {
+  const trimmedIngredient = ingredient.trim();
+  
+  // 1️⃣ RETRIEVE ANALYSIS DATA from state Map
+  const analysis = ingredientAnalysis.analyzedIngredients.get(trimmedIngredient);
+  const isLoading = ingredientAnalysis.loadingIngredients.has(trimmedIngredient);
+  
+  // 2️⃣ DETERMINE COLOR SCHEME based on risk level
+  const getRiskColor = (risk?: string) => {
+    switch (risk) {
+      case 'low': 
+        return { 
+          bg: 'from-green-50 to-emerald-50', 
+          border: 'border-green-400', 
+          text: 'text-green-600', 
+          badge: 'bg-green-500' 
+        };
+      case 'moderate': 
+        return { 
+          bg: 'from-yellow-50 to-amber-50', 
+          border: 'border-yellow-400', 
+          text: 'text-yellow-600', 
+          badge: 'bg-yellow-500' 
+        };
+      case 'high': 
+        return { 
+          bg: 'from-orange-50 to-red-50', 
+          border: 'border-orange-400', 
+          text: 'text-orange-600', 
+          badge: 'bg-orange-500' 
+        };
+      case 'very_high': 
+        return { 
+          bg: 'from-red-50 to-pink-50', 
+          border: 'border-red-400', 
+          text: 'text-red-600', 
+          badge: 'bg-red-500' 
+        };
+      default: 
+        return { 
+          bg: 'from-blue-50 to-indigo-50', 
+          border: 'border-blue-400', 
+          text: 'text-blue-600', 
+          badge: 'bg-blue-500' 
+        };
+    }
+  };
+  
+  const colors = analysis ? getRiskColor(analysis.risk_level) : defaultColors[idx % 6];
+  
+  // 3️⃣ RENDER INGREDIENT CARD with conditional states
+  return (
+    <div 
+      key={idx} 
+      className={`p-3 bg-gradient-to-r ${colors.bg} rounded-lg border-l-4 ${colors.border} cursor-pointer`}
+      onClick={() => !isLoading && !analysis && analyzeIndividualIngredient(trimmedIngredient)}
+    >
+      <div className="flex items-center justify-between">
+        <span className="text-sm font-medium text-gray-700">{trimmedIngredient}</span>
+        
+        {/* 4️⃣ LOADING SPINNER - shows while API call in progress */}
+        {isLoading && (
+          <svg className="w-4 h-4 animate-spin text-blue-600" viewBox="0 0 24 24" fill="none">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+          </svg>
+        )}
+        
+        {/* 5️⃣ SUCCESS BADGE - shows safety score when analysis complete */}
+        {analysis && analysis.success && (
+          <div className="flex items-center gap-2">
+            <span className={`w-6 h-6 rounded-full ${colors.badge} flex items-center justify-center text-white text-xs font-bold`}>
+              {analysis.safety_score || '?'}
+            </span>
+            <span className={`text-xs font-bold ${colors.text}`}>
+              {analysis.risk_level.toUpperCase()}
+            </span>
+          </div>
+        )}
+      </div>
+      
+      {/* 6️⃣ DETAILED ANALYSIS - expands inline after successful analysis */}
+      {analysis && analysis.success && (
+        <div className="mt-2 pt-2 border-t border-white/50 text-xs text-gray-600 space-y-1">
+          <p><strong>FDA Status:</strong> {analysis.fda_status}</p>
+          
+          {/* Show recall/adverse event counts if any */}
+          {(analysis.recall_count > 0 || analysis.adverse_event_count > 0) && (
+            <div className="flex gap-3">
+              {analysis.recall_count > 0 && (
+                <span className="text-red-600">⚠️ {analysis.recall_count} recalls</span>
+              )}
+              {analysis.adverse_event_count > 0 && (
+                <span className="text-orange-600">⚠️ {analysis.adverse_event_count} events</span>
+              )}
+            </div>
+          )}
+          
+          {/* Summary from FDA or Wihy AI */}
+          {analysis.analysis_summary && (
+            <p className="italic">{analysis.analysis_summary}</p>
+          )}
+        </div>
+      )}
+      
+      {/* 7️⃣ ERROR STATE - shows friendly message on failure */}
+      {analysis && !analysis.success && (
+        <div className="mt-2 pt-2 border-t border-white/50 text-xs text-gray-500">
+          {analysis.error === 'No results found' ? 'No results found' : (analysis.error || 'Analysis unavailable')}
+        </div>
+      )}
+    </div>
+  );
+})}
+```
+
+### Data Nesting Structure
+
+The analysis data is nested as follows:
+
+```typescript
+// TOP LEVEL: Component State
+ingredientAnalysis: {
+  
+  // LOADING TRACKER: Set of ingredient names currently being analyzed
+  loadingIngredients: Set<string>
+    ├─ "Sugar"
+    ├─ "Salt"
+    └─ "Water"
+  
+  // RESULTS STORAGE: Map of ingredient name → analysis object
+  analyzedIngredients: Map<string, IngredientAnalysis>
+    ├─ "Water": {
+    │    ingredient: "Water",
+    │    success: true,
+    │    safety_score: 95,
+    │    risk_level: "low",
+    │    recall_count: 0,
+    │    adverse_event_count: 0,
+    │    recommendations: [],
+    │    fda_status: "GRAS - Generally Recognized as Safe",
+    │    analysis_summary: "Water is essential for life..."
+    │  }
+    │
+    ├─ "Sugar": {
+    │    ingredient: "Sugar",
+    │    success: true,
+    │    safety_score: 65,
+    │    risk_level: "moderate",
+    │    recall_count: 0,
+    │    adverse_event_count: 3,
+    │    recommendations: [
+    │      {
+    │        type: "consumption",
+    │        message: "Limit daily intake to less than 10% of total calories"
+    │      },
+    │      {
+    │        type: "health_concern",
+    │        message: "High consumption linked to obesity and diabetes risk"
+    │      }
+    │    ],
+    │    fda_status: "GRAS",
+    │    analysis_summary: "Sugar is a GRAS substance but excessive consumption..."
+    │  }
+    │
+    └─ "Salt": {
+         ingredient: "Salt",
+         success: true,
+         safety_score: 70,
+         risk_level: "moderate",
+         ...
+       }
+}
+```
+
+### Rendering State Transitions
+
+```
+┌─────────────────────────────────────────┐
+│  INITIAL STATE (Not Analyzed)           │
+│  ┌───────────────────────────────────┐  │
+│  │  Sugar                            │  │
+│  │                                   │  │
+│  │  [Blue card, no badge]            │  │
+│  └───────────────────────────────────┘  │
+│  ↓ User clicks                          │
+└─────────────────────────────────────────┘
+         │
+         ▼
+┌─────────────────────────────────────────┐
+│  LOADING STATE                           │
+│  ┌───────────────────────────────────┐  │
+│  │  Sugar              🔄 [spinner]  │  │
+│  │                                   │  │
+│  │  [Blue card + loading spinner]    │  │
+│  └───────────────────────────────────┘  │
+│  ↓ API returns data                     │
+└─────────────────────────────────────────┘
+         │
+         ▼
+┌─────────────────────────────────────────┐
+│  SUCCESS STATE (FDA Data)                │
+│  ┌───────────────────────────────────┐  │
+│  │  Sugar              [65] MODERATE │  │
+│  │  ─────────────────────────────    │  │
+│  │  FDA Status: GRAS                 │  │
+│  │  ⚠️ 3 adverse events              │  │
+│  │  "Excessive consumption..."        │  │
+│  │                                   │  │
+│  │  [Yellow card + safety badge]     │  │
+│  └───────────────────────────────────┘  │
+└─────────────────────────────────────────┘
+```
+
+### Summary Statistics Rendering
+
+**File**: `client/src/pages/NutritionFacts.tsx` (lines 974-1002)
+
+After ingredients are analyzed, summary stats are calculated in real-time:
+
+```typescript
+{ingredientAnalysis.analyzedIngredients.size > 0 && (
+  <div className="mt-4 pt-4 border-t border-gray-200">
+    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
+      {/* Total Analyzed Count */}
+      <div className="bg-blue-50 p-3 rounded-lg">
+        <div className="text-lg font-bold text-blue-600">
+          {ingredientAnalysis.analyzedIngredients.size}
+        </div>
+        <div className="text-xs text-blue-600">Analyzed</div>
+      </div>
+      
+      {/* Average Safety Score - calculated from Map values */}
+      <div className="bg-green-50 p-3 rounded-lg">
+        <div className="text-lg font-bold text-green-600">
+          {Math.round(
+            Array.from(ingredientAnalysis.analyzedIngredients.values())
+              .reduce((sum, a) => sum + a.safety_score, 0) / 
+            ingredientAnalysis.analyzedIngredients.size
+          )}
+        </div>
+        <div className="text-xs text-green-600">Avg Safety</div>
+      </div>
+      
+      {/* High Risk Count - filter by risk_level */}
+      <div className="bg-orange-50 p-3 rounded-lg">
+        <div className="text-lg font-bold text-orange-600">
+          {Array.from(ingredientAnalysis.analyzedIngredients.values())
+            .filter(a => a.risk_level === 'high' || a.risk_level === 'very_high')
+            .length}
+        </div>
+        <div className="text-xs text-orange-600">High Risk</div>
+      </div>
+      
+      {/* Total Issues - sum of recalls + adverse events */}
+      <div className="bg-red-50 p-3 rounded-lg">
+        <div className="text-lg font-bold text-red-600">
+          {Array.from(ingredientAnalysis.analyzedIngredients.values())
+            .reduce((sum, a) => sum + a.recall_count + a.adverse_event_count, 0)}
+        </div>
+        <div className="text-xs text-red-600">Total Issues</div>
+      </div>
+    </div>
+  </div>
+)}
+```
+
+**Data Source for Stats:**
+- All stats calculated from `ingredientAnalysis.analyzedIngredients.values()`
+- Real-time updates as new ingredients are analyzed
+- Uses Array methods: `reduce()`, `filter()`, `length`
+
+### Key Rendering Features
+
+1. **On-Demand Analysis**: Ingredients only analyzed when clicked (no auto-analysis)
+2. **Visual Feedback**: Spinner shows during API call, badge appears on completion
+3. **Color Coding**: Card background changes based on risk level (green/yellow/orange/red)
+4. **Inline Expansion**: Analysis details appear under ingredient name (no modals)
+5. **Persistent State**: Once analyzed, results stay visible (stored in Map)
+6. **Real-Time Stats**: Summary calculations update as each ingredient completes
 
 ---
 
