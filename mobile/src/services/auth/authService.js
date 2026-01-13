@@ -144,10 +144,10 @@ class MobileAuthService {
     }
   }
 
-  // Local login
-  async loginLocal(email, password) {
+  // Login user
+  async login(email, password) {
     try {
-      const response = await fetch(`${AUTH_BASE_URL}/api/auth/local/login`, {
+      const response = await fetch(`${AUTH_BASE_URL}/api/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -172,12 +172,12 @@ class MobileAuthService {
   // Register new user
   async register(email, password, name) {
     try {
-      const response = await fetch(`${AUTH_BASE_URL}/api/auth/local/register`, {
+      const response = await fetch(`${AUTH_BASE_URL}/api/auth/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ email, password, name })
+        body: JSON.stringify({ email, password, name, terms_accepted: true })
       });
 
       const data = await response.json();

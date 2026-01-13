@@ -28,13 +28,15 @@ export const AUTH_CONFIG = {
     // Authentication
     health: '/api/health',
     providers: '/api/auth/providers',
-    localLogin: '/api/auth/local/login',
-    localRegister: '/api/auth/local/register',
-    googleAuth: '/api/auth/google/authorize',
-    facebookAuth: '/api/auth/facebook/authorize',
-    microsoftAuth: '/api/auth/microsoft/authorize',
+    login: '/api/auth/login',
+    register: '/api/auth/register',
+    googleAuth: '/api/auth/google',
+    facebookAuth: '/api/auth/facebook',
+    microsoftAuth: '/api/auth/microsoft',
+    appleAuth: '/api/auth/apple',
     verify: '/api/auth/verify',
     logout: '/api/auth/logout',
+    forgotPassword: '/api/auth/forgot-password',
     
     // User Management
     userProfile: '/api/users/me',
@@ -314,28 +316,21 @@ class AuthService {
   }
 
   /**
-   * Local authentication - Login
+   * Login user with email/password
    */
-  async loginLocal(
+  async login(
     email: string,
-    password: string,
-    redirectUri?: string,
-    state?: string
+    password: string
   ): Promise<LoginResponse> {
     const startTime = Date.now();
-    const endpoint = `${this.baseUrl}${AUTH_CONFIG.endpoints.localLogin}`;
+    const endpoint = `${this.baseUrl}${AUTH_CONFIG.endpoints.login}`;
     
-    console.log('=== LOCAL LOGIN API CALL ===');
+    console.log('=== LOGIN API CALL ===');
     console.log('Endpoint:', endpoint);
     console.log('Email:', email);
-    console.log('Redirect URI:', redirectUri || 'none (direct response)');
     
     try {
-      const body: any = { email, password };
-      if (redirectUri) {
-        body.redirect_uri = redirectUri;
-        body.state = state || `local-login-${Date.now()}`;
-      }
+      const body = { email, password };
       
       const response = await fetchWithLogging(endpoint, {
         method: 'POST',
@@ -368,10 +363,10 @@ class AuthService {
           await this.storeUserData(data.user);
         }
         
-        console.log('=== LOCAL LOGIN SUCCESS ===');
+        console.log('=== LOGIN SUCCESS ===');
         return data;
       } else {
-        console.log('=== LOCAL LOGIN FAILED ===');
+        console.log('=== LOGIN FAILED ===');
         return {
           success: false,
           error: data.error || data.message || 'Login failed',
@@ -379,7 +374,7 @@ class AuthService {
       }
     } catch (error: any) {
       const responseTime = Date.now() - startTime;
-      console.error('=== LOCAL LOGIN ERROR ===');
+      console.error('=== LOGIN ERROR ===');
       console.error('Error after', responseTime, 'ms:', error);
       console.error('Error message:', error.message);
       
@@ -391,30 +386,30 @@ class AuthService {
   }
 
   /**
-   * Local authentication - Register
-   * Per FINAL_AUTH_PAYMENT_ARCHITECTURE spec
+   * Register new user
    */
-  async registerLocal(
+  async register(
     email: string,
     password: string,
     name: string,
     options?: RegistrationOptions
   ): Promise<LoginResponse> {
     const startTime = Date.now();
-    const endpoint = `${this.baseUrl}${AUTH_CONFIG.endpoints.localRegister}`;
+    const endpoint = `${this.baseUrl}${AUTH_CONFIG.endpoints.register}`;
     
-    console.log('=== LOCAL REGISTER API CALL ===');
+    console.log('=== REGISTER API CALL ===');
     console.log('Endpoint:', endpoint);
     console.log('Email:', email);
     console.log('Name:', name);
     if (options?.plan) console.log('Plan:', options.plan);
     
     try {
-      // Build request body per spec
+      // Build request body per API spec
       const body: any = { 
         email, 
         password, 
         name,
+        terms_accepted: true,  // Required by API
         ...(options?.phone && { phone: options.phone }),
         ...(options?.plan && { plan: options.plan }),
         ...(options?.referralCode && { referralCode: options.referralCode }),
@@ -454,7 +449,7 @@ class AuthService {
         console.log('=== LOCAL REGISTER SUCCESS ===');
         return data;
       } else {
-        console.log('=== LOCAL REGISTER FAILED ===');
+        console.log('=== REGISTER FAILED ===');
         return {
           success: false,
           error: data.error || data.message || 'Registration failed',
@@ -462,7 +457,7 @@ class AuthService {
       }
     } catch (error: any) {
       const responseTime = Date.now() - startTime;
-      console.error('=== LOCAL REGISTER ERROR ===');
+      console.error('=== REGISTER ERROR ===');
       console.error('Error after', responseTime, 'ms:', error);
       
       return {
@@ -558,7 +553,7 @@ class AuthService {
    * Auth service handles OAuth provider exchange and redirects back with session_token
    */
   getOAuthUrl(
-    provider: 'google' | 'facebook' | 'microsoft',
+    provider: 'google' | 'facebook' | 'microsoft' | 'apple',
     state?: string
   ): string {
     const stateParam = state || this.generateState();
@@ -575,6 +570,9 @@ class AuthService {
         break;
       case 'microsoft':
         endpoint = AUTH_CONFIG.endpoints.microsoftAuth;
+        break;
+      case 'apple':
+        endpoint = AUTH_CONFIG.endpoints.appleAuth;
         break;
     }
     
@@ -2182,7 +2180,7 @@ class AuthService {
    * Request password reset email
    */
   async requestPasswordReset(email: string): Promise<{ success: boolean; error?: string }> {
-    const endpoint = `${this.baseUrl}/api/auth/forgot-password`;
+    const endpoint = `${this.baseUrl}${AUTH_CONFIG.endpoints.forgotPassword}`;
     
     console.log('=== REQUEST PASSWORD RESET ===');
     console.log('Email:', email);

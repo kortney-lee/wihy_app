@@ -285,8 +285,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     let authResult;
     
     if (credentials.isRegister && credentials.name) {
-      // Register new user (per FINAL_AUTH_PAYMENT_ARCHITECTURE spec)
-      authResult = await authService.registerLocal(
+      // Register new user
+      authResult = await authService.register(
         credentials.email,
         credentials.password,
         credentials.name,
@@ -298,7 +298,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       );
     } else {
       // Login existing user
-      authResult = await authService.loginLocal(
+      authResult = await authService.login(
         credentials.email,
         credentials.password
       );
