@@ -245,8 +245,8 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
               <div className="pricing-hero-icon">
                 <Image 
                   source={require('../../assets/whatishealthyspinner.gif')} 
-                  style={{ width: 48, height: 48 }}
-                  resizeMode="contain"
+                  style={{ width: 88, height: 88 }}
+                  resizeMode="cover"
                 />
               </div>
               <h1 className="pricing-hero-title">Unlock Your Full Potential</h1>
