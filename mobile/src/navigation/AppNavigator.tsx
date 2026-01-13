@@ -179,12 +179,8 @@ function TabNavigator() {
   const [showPlansModal, setShowPlansModal] = React.useState(false);
 
   const handleHealthTabPress = (navigation: any) => {
-    // Check if user is on free plan
-    if (user?.plan === 'free') {
-      setShowPlansModal(true);
-      return;
-    }
-    // Otherwise navigate normally
+    // Free users now have access to basic health dashboards (Overview, Consumption)
+    // No plan check needed - all users can access Health tab
     navigation.navigate('Health');
   };
 
@@ -291,15 +287,7 @@ function TabNavigator() {
       <Tab.Screen
         name="Health"
         component={HealthHub}
-        listeners={({ navigation }) => ({
-          tabPress: (e) => {
-            // Show plans modal if user is not logged in OR is on free plan
-            if (!user || user?.plan === 'free') {
-              e.preventDefault();
-              setShowPlansModal(true);
-            }
-          },
-        })}
+        // Free users CAN access Health tab - they get limited dashboards (Overview, Consumption)
       />
       <Tab.Screen
         name="Profile"
