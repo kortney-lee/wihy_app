@@ -57,7 +57,7 @@ export function WebTopNav({ activeTab = 'none' }: WebTopNavProps) {
     <nav className="web-top-nav">
       <div className="web-nav-left">
         <button 
-          onClick={() => navigation.navigate('WihyHome')} 
+          onClick={() => navigation.navigate('Main')} 
           className={`web-nav-item nav-home ${activeTab === 'home' ? 'active' : ''}`} 
           type="button"
         >
