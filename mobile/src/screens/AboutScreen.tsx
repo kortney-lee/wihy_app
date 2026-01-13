@@ -254,9 +254,9 @@ export default function AboutScreen() {
             <p className="pricing-footer-copyright">© 2026 WIHY. All rights reserved.</p>
             <p className="pricing-footer-disclaimer">This page is for education and information only and is not a substitute for professional medical advice.</p>
             <div className="pricing-footer-links">
-              <a href="#" onClick={(e) => { e.preventDefault(); handlePrivacyPress(); }}>Privacy Policy</a>
+              <a href="/privacy" onClick={(e) => { e.preventDefault(); handlePrivacyPress(); }}>Privacy Policy</a>
               <span className="pricing-footer-separator">•</span>
-              <a href="#" onClick={(e) => { e.preventDefault(); handleTermsPress(); }}>Terms of Service</a>
+              <a href="/terms" onClick={(e) => { e.preventDefault(); handleTermsPress(); }}>Terms of Service</a>
               <span className="pricing-footer-separator">•</span>
               <a href="mailto:info@wihy.ai">Contact Us</a>
             </div>
