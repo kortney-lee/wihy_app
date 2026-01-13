@@ -243,10 +243,10 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
           <div className="pricing-hero">
             <div className="pricing-hero-inner">
               <div className="pricing-hero-icon">
-                <img 
-                  src={require('../../assets/whatishealthyspinner.gif')} 
-                  alt="WiHY" 
+                <Image 
+                  source={require('../../assets/whatishealthyspinner.gif')} 
                   style={{ width: 48, height: 48 }}
+                  resizeMode="contain"
                 />
               </div>
               <h1 className="pricing-hero-title">Unlock Your Full Potential</h1>
