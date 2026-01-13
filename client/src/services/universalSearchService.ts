@@ -2,6 +2,7 @@
 // Uses services.wihy.ai Universal Search API with automatic query routing and AI enhancement
 
 import { API_CONFIG } from '../config/apiConfig';
+import { authService } from './authService';
 
 // ================================
 // TYPE DEFINITIONS
@@ -282,9 +283,7 @@ class UniversalSearchService {
       console.log('[SEARCH] Testing Universal Search API connectivity...');
       const response = await fetch(`${this.baseUrl}/ask`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: authService.getAuthenticatedHeaders(),
         body: JSON.stringify({
           query: 'test connection',
           type: 'auto'
@@ -324,9 +323,7 @@ class UniversalSearchService {
 
       const response = await fetch(`${this.baseUrl}/ask`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: authService.getAuthenticatedHeaders(),
         body: JSON.stringify({
           query: request.query,
           type: request.type || 'auto',

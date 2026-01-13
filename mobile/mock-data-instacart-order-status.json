@@ -1,0 +1,219 @@
+{
+  "success": true,
+  "order_id": "order_muscle_family_001",
+  "cart_id": "cart_muscle_family_001_instacart",
+  "status": "in_progress",
+  "created_at": "2026-01-04T14:30:00Z",
+  "updated_at": "2026-01-04T15:45:00Z",
+  "estimated_delivery": "2026-01-04T19:30:00Z",
+  "delivery_window": {
+    "start": "2026-01-04T18:00:00Z",
+    "end": "2026-01-04T20:00:00Z"
+  },
+  "order_timeline": [
+    {
+      "status": "order_placed",
+      "timestamp": "2026-01-04T14:30:00Z",
+      "message": "Order placed successfully",
+      "completed": true
+    },
+    {
+      "status": "shopper_assigned",
+      "timestamp": "2026-01-04T14:35:00Z",
+      "message": "Shopper Sarah has been assigned to your order",
+      "completed": true,
+      "shopper": {
+        "name": "Sarah M.",
+        "rating": 4.9,
+        "total_orders": 1247,
+        "profile_image": "https://images.instacart.com/shopper/sarah_m.jpg"
+      }
+    },
+    {
+      "status": "shopping_started",
+      "timestamp": "2026-01-04T15:10:00Z",
+      "message": "Sarah has started shopping at Costco",
+      "completed": true
+    },
+    {
+      "status": "shopping_in_progress",
+      "timestamp": "2026-01-04T15:45:00Z",
+      "message": "Sarah is shopping - 38 of 56 items found",
+      "completed": false,
+      "progress": {
+        "items_found": 38,
+        "items_total": 56,
+        "percentage": 67.9
+      }
+    },
+    {
+      "status": "checkout",
+      "timestamp": null,
+      "message": "Checking out",
+      "completed": false
+    },
+    {
+      "status": "out_for_delivery",
+      "timestamp": null,
+      "message": "On the way",
+      "completed": false
+    },
+    {
+      "status": "delivered",
+      "timestamp": null,
+      "message": "Delivered",
+      "completed": false
+    }
+  ],
+  "shopper": {
+    "name": "Sarah M.",
+    "rating": 4.9,
+    "total_orders": 1247,
+    "profile_image": "https://images.instacart.com/shopper/sarah_m.jpg",
+    "contact_available": true,
+    "chat_url": "instacart://chat/shopper_sarah_m"
+  },
+  "items_status": {
+    "total_requested": 56,
+    "found": 38,
+    "pending": 18,
+    "out_of_stock": 2,
+    "substitutions_needed": 2
+  },
+  "substitutions": [
+    {
+      "item_id": "ic_item_008",
+      "original_item": "Rao's Marinara Sauce, 32 oz",
+      "substitution_offered": "Victoria Marinara Sauce, 32 oz",
+      "price_difference": -0.50,
+      "status": "pending_approval",
+      "shopper_note": "Rao's is out of stock. Victoria is a similar premium brand and $0.50 cheaper. Approve?",
+      "image_original": "https://images.instacart.com/raos-marinara.jpg",
+      "image_substitution": "https://images.instacart.com/victoria-marinara.jpg",
+      "action_required": true
+    },
+    {
+      "item_id": "ic_item_042",
+      "original_item": "Kirkland Signature Mixed Berries, 3 lbs",
+      "substitution_offered": "Kirkland Signature Mixed Berries, 4 lbs",
+      "price_difference": 2.00,
+      "status": "pending_approval",
+      "shopper_note": "3 lb bag out of stock. 4 lb bag available for $2 more. Approve?",
+      "image_original": "https://images.instacart.com/berries-3lb.jpg",
+      "image_substitution": "https://images.instacart.com/berries-4lb.jpg",
+      "action_required": true
+    }
+  ],
+  "out_of_stock_items": [
+    {
+      "item_id": "ic_item_025",
+      "name": "Whole wheat pizza dough - Trader Joe's",
+      "reason": "Not available at Costco",
+      "refund_amount": 4.00
+    },
+    {
+      "item_id": "ic_item_053",
+      "name": "BBQ Sauce - Sweet Baby Ray's, 18 oz",
+      "reason": "Out of stock",
+      "refund_amount": 3.00
+    }
+  ],
+  "cost_summary": {
+    "original_estimate": 302.39,
+    "current_total": 293.39,
+    "items_subtotal": 255.83,
+    "delivery_fee": 3.99,
+    "service_fee": 5.99,
+    "tax": 25.58,
+    "tip": 20.00,
+    "refunds": -7.00,
+    "substitution_adjustments": -0.50,
+    "final_total": 313.39
+  },
+  "delivery_info": {
+    "delivery_address": {
+      "street": "123 Main Street",
+      "city": "Seattle",
+      "state": "WA",
+      "zip": "98103",
+      "delivery_notes": "Leave at front door. Ring doorbell."
+    },
+    "delivery_window": {
+      "start": "2026-01-04T18:00:00Z",
+      "end": "2026-01-04T20:00:00Z"
+    },
+    "estimated_arrival": "2026-01-04T19:30:00Z",
+    "tracking_url": "https://www.instacart.com/orders/track/order_muscle_family_001"
+  },
+  "live_updates": [
+    {
+      "timestamp": "2026-01-04T15:45:23Z",
+      "message": "Sarah found Kirkland Signature Chicken Breast (10 lbs)",
+      "item_id": "ic_item_001",
+      "type": "item_found"
+    },
+    {
+      "timestamp": "2026-01-04T15:42:15Z",
+      "message": "Sarah found Optimum Nutrition Protein Powder (5 lbs) - ON SALE!",
+      "item_id": "ic_item_006",
+      "type": "item_found",
+      "savings": 5.00
+    },
+    {
+      "timestamp": "2026-01-04T15:38:42Z",
+      "message": "Rao's Marinara is out of stock. Substitution needed.",
+      "item_id": "ic_item_008",
+      "type": "substitution_needed"
+    },
+    {
+      "timestamp": "2026-01-04T15:10:00Z",
+      "message": "Sarah started shopping at Costco Wholesale - Seattle",
+      "type": "shopping_started"
+    }
+  ],
+  "actions_available": [
+    {
+      "action": "approve_all_substitutions",
+      "label": "Approve All Substitutions",
+      "endpoint": "POST /api/instacart/orders/:orderId/approve-substitutions",
+      "enabled": true
+    },
+    {
+      "action": "approve_individual_substitution",
+      "label": "Approve Individual Item",
+      "endpoint": "POST /api/instacart/orders/:orderId/substitutions/:itemId/approve",
+      "enabled": true
+    },
+    {
+      "action": "reject_substitution",
+      "label": "Reject Substitution",
+      "endpoint": "POST /api/instacart/orders/:orderId/substitutions/:itemId/reject",
+      "enabled": true
+    },
+    {
+      "action": "message_shopper",
+      "label": "Message Sarah",
+      "endpoint": "instacart://chat/shopper_sarah_m",
+      "enabled": true
+    },
+    {
+      "action": "cancel_order",
+      "label": "Cancel Order",
+      "endpoint": "POST /api/instacart/orders/:orderId/cancel",
+      "enabled": true,
+      "warning": "Cancellation may incur fees if shopping has started"
+    },
+    {
+      "action": "update_tip",
+      "label": "Update Tip",
+      "endpoint": "POST /api/instacart/orders/:orderId/update-tip",
+      "enabled": true
+    }
+  ],
+  "notifications_enabled": true,
+  "notification_preferences": {
+    "push": true,
+    "sms": false,
+    "email": true
+  }
+}

@@ -20,9 +20,9 @@
 ### Background Colors
 
 #### Light Blue (Primary Page Background)
-- **Color**: `#f0f7ff`
+- **Color**: `#e0f2fe`
   - Usage: **STANDARD for all new pages** - Main page background, content areas
-  - RGB: `rgb(240, 247, 255)`
+  - RGB: `rgb(224, 242, 254)`
   - Components: Dashboard, SearchResults, NutritionFacts, ProductScanView
   - Description: Very light blue with subtle warmth
   - **Pattern**: Use this as the default background for all new page designs
@@ -32,14 +32,14 @@
   - Tailwind: `bg-slate-50`
   - Usage: [!] Legacy use only - being phased out
   - RGB: `rgb(248, 250, 252)`
-  - Note: Previously used in content areas, now replaced by #f0f7ff
+  - Note: Previously used in content areas, now replaced by #e0f2fe
 
 #### Pure White
 - **Color**: `#ffffff`
   - Usage: Headers, navigation bars, cards, input fields, modals
   - RGB: `rgb(255, 255, 255)`
   - Components: Top navigation bars, header sections, card containers, modal backgrounds
-  - **Pattern**: Use for UI elements that sit on top of the #f0f7ff background
+  - **Pattern**: Use for UI elements that sit on top of the #e0f2fe background
 
 ### Text Colors
 
@@ -60,10 +60,10 @@
 ### Accent Colors
 
 #### Light Blue (Page Background)
-- **Light Blue**: `#f0f7ff`
+- **Light Blue**: `#e0f2fe`
   - Usage: **PRIMARY** page background color - standard for all pages
-  - RGB: `rgb(240, 247, 255)`
-  - Hex: `#f0f7ff`
+  - RGB: `rgb(224, 242, 254)`
+  - Hex: `#e0f2fe`
   - Description: Soft, calming blue background that provides subtle color while maintaining readability
 
 #### Success Green
@@ -227,7 +227,7 @@
 
 ```tsx
 // Page container - Light blue background
-<div style={{ backgroundColor: '#f0f7ff' }} className="...">
+<div style={{ backgroundColor: '#e0f2fe' }} className="...">
   
   {/* Top Navigation Bar - White background */}
   <div className="bg-white">
@@ -240,7 +240,7 @@
   </div>
   
   {/* Main Content Area - Light blue background */}
-  <div style={{ backgroundColor: '#f0f7ff' }}>
+  <div style={{ backgroundColor: '#e0f2fe' }}>
     {/* White cards with content */}
     <div className="bg-white rounded-xl">
       {/* Content */}
@@ -259,7 +259,7 @@ padding: 12px 24px;
 
 ### Page Background (Standard Pattern)
 ```css
-background-color: #f0f7ff; /* Light Blue - USE THIS FOR ALL NEW PAGES */
+background-color: #e0f2fe; /* Light Blue - USE THIS FOR ALL NEW PAGES */
 ```
 
 ### Navigation & Headers
@@ -286,11 +286,11 @@ border: 1px solid #e5e7eb; /* Light Gray */
 All new pages in the WiHY application should follow this standardized layout pattern:
 
 #### 1. Page Container (Outermost Layer)
-- **Background**: `#f0f7ff` (Light Blue)
+- **Background**: `#e0f2fe` (Light Blue)
 - **Purpose**: Provides subtle colored frame for the entire page
 - **Properties**: 
   ```css
-  background-color: #f0f7ff;
+  background-color: #e0f2fe;
   position: fixed;
   inset: 0;
   z-index: 10000;
@@ -319,12 +319,12 @@ All new pages in the WiHY application should follow this standardized layout pat
   ```
 
 #### 4. Main Content Area
-- **Background**: `#f0f7ff` (Light Blue)
+- **Background**: `#e0f2fe` (Light Blue)
 - **Purpose**: Scrollable content container
 - **Contains**: White cards with actual content
 - **Properties**:
   ```css
-  background-color: #f0f7ff;
+  background-color: #e0f2fe;
   flex: 1;
   overflow-y: auto;
   padding: 16px;
@@ -346,7 +346,7 @@ All new pages in the WiHY application should follow this standardized layout pat
 
 #### React Component Structure
 ```tsx
-<div style={{ backgroundColor: '#f0f7ff' }} className="fixed inset-0 z-[10000] flex flex-col">
+<div style={{ backgroundColor: '#e0f2fe' }} className="fixed inset-0 z-[10000] flex flex-col">
   {/* Top Navigation */}
   <div className="bg-white px-3 py-2 min-h-[40px]">
     <button></button>
@@ -359,7 +359,7 @@ All new pages in the WiHY application should follow this standardized layout pat
   </div>
 
   {/* Main Content */}
-  <div className="flex-1 overflow-y-auto" style={{ backgroundColor: '#f0f7ff' }}>
+  <div className="flex-1 overflow-y-auto" style={{ backgroundColor: '#e0f2fe' }}>
     <div className="bg-white rounded-xl border border-gray-200 p-4 m-4">
       {/* Content */}
     </div>
@@ -370,7 +370,7 @@ All new pages in the WiHY application should follow this standardized layout pat
 #### CSS/Inline Styles
 ```tsx
 // Use inline style for the exact blue color
-style={{ backgroundColor: '#f0f7ff' }}
+style={{ backgroundColor: '#e0f2fe' }}
 
 // Use Tailwind for white backgrounds
 className="bg-white"
@@ -385,7 +385,7 @@ className="bg-white"
 - [OK] CreateMealsPage (two-column meal builder + shopping outputs)
 
 ### Migration Notes
-- Legacy `bg-slate-50` (#f8fafc) should be replaced with `#f0f7ff`
+- Legacy `bg-slate-50` (#f8fafc) should be replaced with `#e0f2fe`
 - All new pages must use this pattern for consistency
 - Existing pages should be gradually migrated to this standard
 
@@ -398,7 +398,7 @@ className="bg-white"
 
 ```tsx
 // CreateMealsPage - Specialized two-column layout
-<div style={{ backgroundColor: '#f0f7ff' }} className="create-meals-page">
+<div style={{ backgroundColor: '#e0f2fe' }} className="create-meals-page">
   {/* Standard top navigation */}
   <div className="bg-white">
     {/* Back button, title */}

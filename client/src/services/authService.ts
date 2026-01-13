@@ -136,11 +136,24 @@ class AuthService {
   /**
    * Get authenticated headers for API requests (public method for other services)
    * Includes session token if user is authenticated
+   * Includes WIHY OAuth client credentials for API authentication
    */
   getAuthenticatedHeaders(): HeadersInit {
     const headers: HeadersInit = {
       'Content-Type': 'application/json',
     };
+    
+    // Add WIHY OAuth Client Credentials
+    // Default to frontend credentials, but can be overridden based on context
+    const clientId = process.env.EXPO_PUBLIC_WIHY_FRONTEND_CLIENT_ID || 
+                     process.env.REACT_APP_WIHY_FRONTEND_CLIENT_ID;
+    const clientSecret = process.env.EXPO_PUBLIC_WIHY_FRONTEND_CLIENT_SECRET || 
+                        process.env.REACT_APP_WIHY_FRONTEND_CLIENT_SECRET;
+    
+    if (clientId && clientSecret) {
+      headers['X-Client-ID'] = clientId;
+      headers['X-Client-Secret'] = clientSecret;
+    }
     
     // Load token from storage if not in memory
     if (!this.sessionToken && typeof window !== 'undefined') {

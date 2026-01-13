@@ -1,0 +1,778 @@
+{
+  "success": true,
+  "shopping_list_id": "list_muscle_family_001",
+  "program_id": "prog_muscle_family_001",
+  "date_range": {
+    "start_date": "2026-01-06",
+    "end_date": "2026-01-12"
+  },
+  "total_items": 48,
+  "estimated_cost": {
+    "min": 298.00,
+    "max": 332.00,
+    "average": 315.00
+  },
+  "store_breakdown": {
+    "Costco": {
+      "items": 38,
+      "estimated_cost": 265.00
+    },
+    "Regular Grocery": {
+      "items": 10,
+      "estimated_cost": 50.00
+    }
+  },
+  "items_by_category": {
+    "Proteins (HIGH PRIORITY for Muscle Building)": [
+      {
+        "item_id": "item_001",
+        "name": "Chicken breast",
+        "quantity": 10,
+        "unit": "lbs",
+        "brand": "Kirkland Signature",
+        "cost": 30.00,
+        "aisle": "Meat",
+        "muscle_building_note": "Primary lean protein source",
+        "used_in_meals": ["Grilled Chicken & Rice Power Bowl", "Grilled Chicken Caesar Salad", "Chicken Skewers"],
+        "checked": false
+      },
+      {
+        "item_id": "item_002",
+        "name": "Eggs",
+        "quantity": 60,
+        "unit": "large",
+        "brand": "Kirkland Signature",
+        "cost": 12.00,
+        "aisle": "Dairy",
+        "muscle_building_note": "Complete protein, rich in leucine",
+        "used_in_meals": ["Protein-Packed Scramble", "Breakfast Burrito Bowl", "Veggie Omelet", "French Toast"],
+        "checked": false
+      },
+      {
+        "item_id": "item_003",
+        "name": "Greek yogurt (nonfat)",
+        "quantity": 4,
+        "unit": "tubs (32 oz)",
+        "brand": "Fage Total 0%",
+        "cost": 24.00,
+        "aisle": "Dairy",
+        "muscle_building_note": "Casein protein for overnight recovery",
+        "used_in_meals": ["Greek Yogurt Bowl with Granola"],
+        "checked": false
+      },
+      {
+        "item_id": "item_004",
+        "name": "Ground beef (90/10)",
+        "quantity": 6,
+        "unit": "lbs",
+        "brand": "Kirkland Signature",
+        "cost": 24.00,
+        "aisle": "Meat",
+        "muscle_building_note": "Creatine + iron + complete protein",
+        "used_in_meals": ["Beef & Sweet Potato Power Plate"],
+        "checked": false
+      },
+      {
+        "item_id": "item_005",
+        "name": "Salmon fillets",
+        "quantity": 3,
+        "unit": "lbs",
+        "brand": "Wild-caught",
+        "cost": 36.00,
+        "aisle": "Seafood",
+        "muscle_building_note": "Omega-3s reduce inflammation",
+        "used_in_meals": ["Salmon & Quinoa Power Bowl"],
+        "checked": false
+      },
+      {
+        "item_id": "item_006",
+        "name": "Protein powder (vanilla)",
+        "quantity": 1,
+        "unit": "container (5 lbs)",
+        "brand": "Optimum Nutrition Gold Standard",
+        "cost": 50.00,
+        "aisle": "Sports Nutrition",
+        "muscle_building_note": "Quick protein for pre/post workout",
+        "used_in_meals": ["Protein Oatmeal Power Bowl", "Protein French Toast"],
+        "checked": false
+      },
+      {
+        "item_id": "item_007",
+        "name": "Ground turkey (93/7)",
+        "quantity": 6,
+        "unit": "lbs",
+        "brand": "Kirkland Signature",
+        "cost": 18.00,
+        "aisle": "Meat",
+        "muscle_building_note": "Lean protein, low fat",
+        "used_in_meals": ["Turkey Chili with Beans", "Turkey Meatballs with Pasta"],
+        "checked": false
+      },
+      {
+        "item_id": "item_008",
+        "name": "Sirloin steak",
+        "quantity": 3,
+        "unit": "lbs",
+        "brand": "USDA Choice",
+        "cost": 15.00,
+        "aisle": "Meat",
+        "muscle_building_note": "Creatine + iron for strength",
+        "used_in_meals": ["Steak & Rice Bowl"],
+        "checked": false
+      },
+      {
+        "item_id": "item_009",
+        "name": "Chicken thighs (boneless, skinless)",
+        "quantity": 4,
+        "unit": "lbs",
+        "brand": "Kirkland Signature",
+        "cost": 10.00,
+        "aisle": "Meat",
+        "muscle_building_note": "Higher fat for hormone production",
+        "used_in_meals": ["Baked Chicken Thighs with Roasted Vegetables"],
+        "checked": false
+      },
+      {
+        "item_id": "item_010",
+        "name": "Rotisserie chicken",
+        "quantity": 2,
+        "unit": "whole chickens",
+        "brand": "Costco rotisserie",
+        "cost": 10.00,
+        "aisle": "Deli",
+        "muscle_building_note": "Budget protein, meal prep friendly",
+        "used_in_meals": ["Pulled Chicken Sandwiches"],
+        "checked": false
+      },
+      {
+        "item_id": "item_011",
+        "name": "Shrimp (peeled, deveined)",
+        "quantity": 3,
+        "unit": "lbs",
+        "brand": "Frozen (Costco)",
+        "cost": 12.00,
+        "aisle": "Seafood/Frozen",
+        "muscle_building_note": "Lean protein, quick cooking",
+        "used_in_meals": ["Shrimp Stir-Fry with Noodles"],
+        "checked": false
+      },
+      {
+        "item_id": "item_012",
+        "name": "Pork tenderloin",
+        "quantity": 3,
+        "unit": "lbs",
+        "brand": "Kirkland Signature",
+        "cost": 12.00,
+        "aisle": "Meat",
+        "muscle_building_note": "Lean pork, versatile",
+        "used_in_meals": ["Pork Tenderloin with Roasted Potatoes"],
+        "checked": false
+      },
+      {
+        "item_id": "item_013",
+        "name": "Beef chuck roast",
+        "quantity": 4,
+        "unit": "lbs",
+        "brand": "USDA Choice",
+        "cost": 12.00,
+        "aisle": "Meat",
+        "muscle_building_note": "Slow cooker protein",
+        "used_in_meals": ["Slow Cooker Pot Roast"],
+        "checked": false
+      },
+      {
+        "item_id": "item_014",
+        "name": "Chicken sausage",
+        "quantity": 2,
+        "unit": "lbs",
+        "brand": "Kirkland Signature",
+        "cost": 6.00,
+        "aisle": "Meat",
+        "muscle_building_note": "Lean sausage for pizza",
+        "used_in_meals": ["Homemade Pizza Night"],
+        "checked": false
+      }
+    ],
+    "Complex Carbs (Energy for Training)": [
+      {
+        "item_id": "item_015",
+        "name": "Brown rice",
+        "quantity": 1,
+        "unit": "bag (10 lbs)",
+        "brand": "Kirkland Signature",
+        "cost": 12.00,
+        "aisle": "Grains",
+        "muscle_building_note": "Sustained energy, glycogen replenishment",
+        "used_in_meals": ["Grilled Chicken & Rice Power Bowl", "Breakfast Burrito Bowl", "Steak & Rice Bowl", "Chicken Skewers"],
+        "checked": false
+      },
+      {
+        "item_id": "item_016",
+        "name": "Sweet potatoes",
+        "quantity": 15,
+        "unit": "large",
+        "brand": "Organic",
+        "cost": 10.50,
+        "aisle": "Produce",
+        "muscle_building_note": "High-quality carbs for muscle glycogen",
+        "used_in_meals": ["Beef & Sweet Potato Power Plate"],
+        "checked": false
+      },
+      {
+        "item_id": "item_017",
+        "name": "Oats (old-fashioned)",
+        "quantity": 1,
+        "unit": "container (10 lbs)",
+        "brand": "Quaker",
+        "cost": 15.00,
+        "aisle": "Cereal",
+        "muscle_building_note": "Pre-workout fuel",
+        "used_in_meals": ["Protein Oatmeal Power Bowl"],
+        "checked": false
+      },
+      {
+        "item_id": "item_018",
+        "name": "Whole wheat bread",
+        "quantity": 3,
+        "unit": "loaves",
+        "brand": "Dave's Killer Bread",
+        "cost": 15.00,
+        "aisle": "Bakery",
+        "muscle_building_note": "Whole grains for fiber",
+        "used_in_meals": ["Protein-Packed Scramble", "Pulled Chicken Sandwiches", "Veggie Omelet", "French Toast"],
+        "checked": false
+      },
+      {
+        "item_id": "item_019",
+        "name": "Quinoa",
+        "quantity": 1,
+        "unit": "bag (4 lbs)",
+        "brand": "Kirkland Signature",
+        "cost": 12.00,
+        "aisle": "Grains",
+        "muscle_building_note": "Complete protein + complex carb",
+        "used_in_meals": ["Salmon & Quinoa Power Bowl"],
+        "checked": false
+      },
+      {
+        "item_id": "item_020",
+        "name": "Kodiak Cakes Pancake Mix",
+        "quantity": 1,
+        "unit": "box (4.5 lbs)",
+        "brand": "Kodiak Cakes",
+        "cost": 12.00,
+        "aisle": "Baking",
+        "muscle_building_note": "High-protein pancakes",
+        "used_in_meals": ["Protein Pancakes with Berries"],
+        "checked": false
+      },
+      {
+        "item_id": "item_021",
+        "name": "White rice",
+        "quantity": 1,
+        "unit": "bag (10 lbs)",
+        "brand": "Kirkland Signature",
+        "cost": 10.00,
+        "aisle": "Grains",
+        "muscle_building_note": "Fast-digesting post-workout carb",
+        "used_in_meals": ["Steak & Rice Bowl"],
+        "checked": false
+      },
+      {
+        "item_id": "item_022",
+        "name": "Red potatoes",
+        "quantity": 4,
+        "unit": "lbs",
+        "brand": "Fresh",
+        "cost": 4.00,
+        "aisle": "Produce",
+        "muscle_building_note": "Potassium for muscle function",
+        "used_in_meals": ["Pork Tenderloin with Roasted Potatoes"],
+        "checked": false
+      },
+      {
+        "item_id": "item_023",
+        "name": "Russet potatoes",
+        "quantity": 3,
+        "unit": "lbs",
+        "brand": "Fresh",
+        "cost": 3.00,
+        "aisle": "Produce",
+        "muscle_building_note": "Starchy carbs for recovery",
+        "used_in_meals": ["Slow Cooker Pot Roast"],
+        "checked": false
+      },
+      {
+        "item_id": "item_024",
+        "name": "Whole wheat pasta",
+        "quantity": 2,
+        "unit": "boxes (16 oz)",
+        "brand": "Barilla",
+        "cost": 4.00,
+        "aisle": "Pasta",
+        "muscle_building_note": "Complex carbs + fiber",
+        "used_in_meals": ["Turkey Meatballs with Pasta"],
+        "checked": false
+      },
+      {
+        "item_id": "item_025",
+        "name": "Whole wheat pizza dough",
+        "quantity": 2,
+        "unit": "packages",
+        "brand": "Trader Joe's",
+        "cost": 4.00,
+        "aisle": "Bakery",
+        "muscle_building_note": "Homemade pizza base",
+        "used_in_meals": ["Homemade Pizza Night"],
+        "checked": false
+      },
+      {
+        "item_id": "item_026",
+        "name": "Black beans",
+        "quantity": 2,
+        "unit": "cans (15 oz)",
+        "brand": "Kirkland Signature",
+        "cost": 2.00,
+        "aisle": "Canned Goods",
+        "muscle_building_note": "Plant protein + fiber",
+        "used_in_meals": ["Breakfast Burrito Bowl"],
+        "checked": false
+      },
+      {
+        "item_id": "item_027",
+        "name": "Lo mein noodles",
+        "quantity": 1,
+        "unit": "package (16 oz)",
+        "brand": "Asian noodles",
+        "cost": 2.00,
+        "aisle": "International",
+        "muscle_building_note": "Quick cooking carbs",
+        "used_in_meals": ["Shrimp Stir-Fry with Noodles"],
+        "checked": false
+      }
+    ],
+    "Vegetables (Recovery & Vitamins)": [
+      {
+        "item_id": "item_028",
+        "name": "Broccoli florets",
+        "quantity": 5,
+        "unit": "lbs",
+        "brand": "Fresh",
+        "cost": 7.50,
+        "aisle": "Produce",
+        "muscle_building_note": "Vitamin C for recovery",
+        "used_in_meals": ["Grilled Chicken & Rice Power Bowl"],
+        "checked": false
+      },
+      {
+        "item_id": "item_029",
+        "name": "Spinach",
+        "quantity": 2,
+        "unit": "containers (16 oz)",
+        "brand": "Organic",
+        "cost": 5.00,
+        "aisle": "Produce",
+        "muscle_building_note": "Iron, nitrates for performance",
+        "used_in_meals": ["Protein-Packed Scramble"],
+        "checked": false
+      },
+      {
+        "item_id": "item_030",
+        "name": "Green beans",
+        "quantity": 6,
+        "unit": "lbs",
+        "brand": "Fresh or frozen",
+        "cost": 9.00,
+        "aisle": "Produce/Frozen",
+        "muscle_building_note": "Low-calorie vegetables",
+        "used_in_meals": ["Beef & Sweet Potato Power Plate", "Pork Tenderloin"],
+        "checked": false
+      },
+      {
+        "item_id": "item_031",
+        "name": "Asparagus",
+        "quantity": 2,
+        "unit": "lbs",
+        "brand": "Fresh",
+        "cost": 6.00,
+        "aisle": "Produce",
+        "muscle_building_note": "Vitamins A, C, K",
+        "used_in_meals": ["Salmon & Quinoa Power Bowl"],
+        "checked": false
+      },
+      {
+        "item_id": "item_032",
+        "name": "Brussels sprouts",
+        "quantity": 2,
+        "unit": "lbs",
+        "brand": "Fresh",
+        "cost": 6.00,
+        "aisle": "Produce",
+        "muscle_building_note": "Cruciferous vegetable",
+        "used_in_meals": ["Baked Chicken Thighs with Roasted Vegetables"],
+        "checked": false
+      },
+      {
+        "item_id": "item_033",
+        "name": "Carrots (baby)",
+        "quantity": 4,
+        "unit": "lbs",
+        "brand": "Fresh",
+        "cost": 6.00,
+        "aisle": "Produce",
+        "muscle_building_note": "Beta-carotene for immune function",
+        "used_in_meals": ["Baked Chicken Thighs", "Slow Cooker Pot Roast"],
+        "checked": false
+      },
+      {
+        "item_id": "item_034",
+        "name": "Stir-fry vegetables (frozen blend)",
+        "quantity": 4,
+        "unit": "bags (16 oz)",
+        "brand": "Kirkland Signature",
+        "cost": 6.00,
+        "aisle": "Frozen",
+        "muscle_building_note": "Convenient vegetable mix",
+        "used_in_meals": ["Steak & Rice Bowl", "Shrimp Stir-Fry"],
+        "checked": false
+      },
+      {
+        "item_id": "item_035",
+        "name": "Bell peppers",
+        "quantity": 4,
+        "unit": "medium",
+        "brand": "Fresh",
+        "cost": 4.00,
+        "aisle": "Produce",
+        "muscle_building_note": "Vitamin C rich",
+        "used_in_meals": ["Veggie Omelet"],
+        "checked": false
+      },
+      {
+        "item_id": "item_036",
+        "name": "Mushrooms",
+        "quantity": 2,
+        "unit": "packages (8 oz)",
+        "brand": "Fresh",
+        "cost": 4.00,
+        "aisle": "Produce",
+        "muscle_building_note": "Umami flavor, low calorie",
+        "used_in_meals": ["Veggie Omelet"],
+        "checked": false
+      },
+      {
+        "item_id": "item_037",
+        "name": "Zucchini",
+        "quantity": 3,
+        "unit": "medium",
+        "brand": "Fresh",
+        "cost": 3.00,
+        "aisle": "Produce",
+        "muscle_building_note": "Low-carb vegetable",
+        "used_in_meals": ["Grilled Chicken & Vegetable Skewers"],
+        "checked": false
+      },
+      {
+        "item_id": "item_038",
+        "name": "Cherry tomatoes",
+        "quantity": 2,
+        "unit": "pints",
+        "brand": "Fresh",
+        "cost": 6.00,
+        "aisle": "Produce",
+        "muscle_building_note": "Lycopene for recovery",
+        "used_in_meals": ["Grilled Chicken & Vegetable Skewers"],
+        "checked": false
+      },
+      {
+        "item_id": "item_039",
+        "name": "Romaine lettuce",
+        "quantity": 2,
+        "unit": "heads",
+        "brand": "Fresh",
+        "cost": 3.00,
+        "aisle": "Produce",
+        "muscle_building_note": "Low-calorie greens",
+        "used_in_meals": ["Grilled Chicken Caesar Salad"],
+        "checked": false
+      },
+      {
+        "item_id": "item_040",
+        "name": "Onions (yellow)",
+        "quantity": 2,
+        "unit": "large",
+        "brand": "Fresh",
+        "cost": 2.00,
+        "aisle": "Produce",
+        "muscle_building_note": "Flavor base for cooking",
+        "used_in_meals": ["Slow Cooker Pot Roast", "Turkey Chili"],
+        "checked": false
+      }
+    ],
+    "Fruits": [
+      {
+        "item_id": "item_041",
+        "name": "Bananas",
+        "quantity": 10,
+        "unit": "medium",
+        "brand": "Fresh",
+        "cost": 3.00,
+        "aisle": "Produce",
+        "muscle_building_note": "Quick carbs, potassium",
+        "used_in_meals": ["Protein Oatmeal Power Bowl"],
+        "checked": false
+      },
+      {
+        "item_id": "item_042",
+        "name": "Mixed berries (frozen blend)",
+        "quantity": 2,
+        "unit": "bags (3 lbs)",
+        "brand": "Kirkland Signature",
+        "cost": 8.00,
+        "aisle": "Frozen",
+        "muscle_building_note": "Antioxidants for recovery",
+        "used_in_meals": ["Protein Pancakes", "Greek Yogurt Bowl"],
+        "checked": false
+      },
+      {
+        "item_id": "item_043",
+        "name": "Strawberries",
+        "quantity": 2,
+        "unit": "lbs",
+        "brand": "Fresh",
+        "cost": 6.00,
+        "aisle": "Produce",
+        "muscle_building_note": "Vitamin C",
+        "used_in_meals": ["Protein French Toast"],
+        "checked": false
+      },
+      {
+        "item_id": "item_044",
+        "name": "Avocados",
+        "quantity": 4,
+        "unit": "medium",
+        "brand": "Fresh",
+        "cost": 6.00,
+        "aisle": "Produce",
+        "muscle_building_note": "Healthy fats",
+        "used_in_meals": ["Breakfast Burrito Bowl"],
+        "checked": false
+      }
+    ],
+    "Dairy & Cheese": [
+      {
+        "item_id": "item_045",
+        "name": "Cheddar cheese (shredded)",
+        "quantity": 2,
+        "unit": "bags (2 lbs)",
+        "brand": "Kirkland Signature",
+        "cost": 8.00,
+        "aisle": "Dairy",
+        "muscle_building_note": "Calcium + protein",
+        "used_in_meals": ["Protein-Packed Scramble", "Breakfast Burrito Bowl"],
+        "checked": false
+      },
+      {
+        "item_id": "item_046",
+        "name": "Mozzarella cheese (shredded)",
+        "quantity": 1,
+        "unit": "bag (3 lbs)",
+        "brand": "Kirkland Signature",
+        "cost": 8.00,
+        "aisle": "Dairy",
+        "muscle_building_note": "Pizza cheese",
+        "used_in_meals": ["Homemade Pizza Night"],
+        "checked": false
+      },
+      {
+        "item_id": "item_047",
+        "name": "Parmesan cheese (shredded)",
+        "quantity": 1,
+        "unit": "container (16 oz)",
+        "brand": "Kirkland Signature",
+        "cost": 6.00,
+        "aisle": "Dairy",
+        "muscle_building_note": "Flavor enhancer",
+        "used_in_meals": ["Grilled Chicken Caesar Salad"],
+        "checked": false
+      },
+      {
+        "item_id": "item_048",
+        "name": "Milk (whole or 2%)",
+        "quantity": 1,
+        "unit": "gallon",
+        "brand": "Kirkland Signature",
+        "cost": 4.00,
+        "aisle": "Dairy",
+        "muscle_building_note": "Calcium + protein",
+        "used_in_meals": ["Protein French Toast", "Cooking"],
+        "checked": false
+      }
+    ],
+    "Pantry & Condiments": [
+      {
+        "item_id": "item_049",
+        "name": "Almond butter",
+        "quantity": 1,
+        "unit": "jar (26 oz)",
+        "brand": "Kirkland Signature",
+        "cost": 8.00,
+        "aisle": "Spreads",
+        "muscle_building_note": "Healthy fats, vitamin E",
+        "used_in_meals": ["Protein Oatmeal Power Bowl"],
+        "checked": false
+      },
+      {
+        "item_id": "item_050",
+        "name": "Olive oil (extra virgin)",
+        "quantity": 1,
+        "unit": "bottle (2L)",
+        "brand": "Kirkland Signature",
+        "cost": 15.00,
+        "aisle": "Oils",
+        "muscle_building_note": "Healthy fats for cooking",
+        "used_in_meals": ["Multiple meals - cooking oil"],
+        "checked": false
+      },
+      {
+        "item_id": "item_051",
+        "name": "Teriyaki sauce",
+        "quantity": 1,
+        "unit": "bottle (20 oz)",
+        "brand": "Kikkoman",
+        "cost": 4.00,
+        "aisle": "International",
+        "muscle_building_note": "Flavor for chicken/rice",
+        "used_in_meals": ["Grilled Chicken & Rice Power Bowl"],
+        "checked": false
+      },
+      {
+        "item_id": "item_052",
+        "name": "Marinara sauce",
+        "quantity": 2,
+        "unit": "jars (32 oz)",
+        "brand": "Rao's",
+        "cost": 10.00,
+        "aisle": "Pasta Sauce",
+        "muscle_building_note": "Tomato sauce for pasta",
+        "used_in_meals": ["Turkey Meatballs with Pasta", "Homemade Pizza"],
+        "checked": false
+      },
+      {
+        "item_id": "item_053",
+        "name": "BBQ sauce",
+        "quantity": 1,
+        "unit": "bottle (18 oz)",
+        "brand": "Sweet Baby Ray's",
+        "cost": 3.00,
+        "aisle": "Condiments",
+        "muscle_building_note": "Sauce for pulled chicken",
+        "used_in_meals": ["Pulled Chicken Sandwiches"],
+        "checked": false
+      },
+      {
+        "item_id": "item_054",
+        "name": "Caesar dressing",
+        "quantity": 1,
+        "unit": "bottle (32 oz)",
+        "brand": "Kirkland Signature",
+        "cost": 5.00,
+        "aisle": "Dressings",
+        "muscle_building_note": "Salad dressing",
+        "used_in_meals": ["Grilled Chicken Caesar Salad"],
+        "checked": false
+      },
+      {
+        "item_id": "item_055",
+        "name": "Salsa",
+        "quantity": 1,
+        "unit": "jar (24 oz)",
+        "brand": "Kirkland Signature",
+        "cost": 5.00,
+        "aisle": "Condiments",
+        "muscle_building_note": "Low-calorie flavor",
+        "used_in_meals": ["Breakfast Burrito Bowl"],
+        "checked": false
+      },
+      {
+        "item_id": "item_056",
+        "name": "Maple syrup (pure)",
+        "quantity": 1,
+        "unit": "bottle (32 oz)",
+        "brand": "Pure maple",
+        "cost": 10.00,
+        "aisle": "Breakfast",
+        "muscle_building_note": "Natural sweetener",
+        "used_in_meals": ["Protein Pancakes", "Protein French Toast"],
+        "checked": false
+      },
+      {
+        "item_id": "item_057",
+        "name": "Honey",
+        "quantity": 1,
+        "unit": "jar (3 lbs)",
+        "brand": "Kirkland Signature",
+        "cost": 10.00,
+        "aisle": "Spreads",
+        "muscle_building_note": "Natural sweetener, quick carbs",
+        "used_in_meals": ["Greek Yogurt Bowl"],
+        "checked": false
+      },
+      {
+        "item_id": "item_058",
+        "name": "Granola",
+        "quantity": 1,
+        "unit": "bag (35 oz)",
+        "brand": "Nature Valley",
+        "cost": 8.00,
+        "aisle": "Cereal",
+        "muscle_building_note": "Crunchy topping for yogurt",
+        "used_in_meals": ["Greek Yogurt Bowl"],
+        "checked": false
+      },
+      {
+        "item_id": "item_059",
+        "name": "Diced tomatoes (canned)",
+        "quantity": 4,
+        "unit": "cans (28 oz)",
+        "brand": "Kirkland Signature",
+        "cost": 4.00,
+        "aisle": "Canned Goods",
+        "muscle_building_note": "Base for chili",
+        "used_in_meals": ["Turkey Chili with Beans"],
+        "checked": false
+      },
+      {
+        "item_id": "item_060",
+        "name": "Kidney beans (canned)",
+        "quantity": 4,
+        "unit": "cans (15 oz)",
+        "brand": "Kirkland Signature",
+        "cost": 4.00,
+        "aisle": "Canned Goods",
+        "muscle_building_note": "Plant protein + fiber",
+        "used_in_meals": ["Turkey Chili with Beans"],
+        "checked": false
+      }
+    ]
+  },
+  "meal_prep_tips": [
+    "Cook all brown rice on Sunday (4-6 cups dry) and refrigerate for the week",
+    "Grill extra chicken breasts for quick meal assembly",
+    "Prep vegetables on Sunday: wash, chop, store in containers",
+    "Hard-boil 12 eggs for quick protein snacks",
+    "Freeze individual portions of turkey chili for easy reheating"
+  ],
+  "shopping_strategy": {
+    "costco_trip": {
+      "estimated_time": "60-75 minutes",
+      "focus": "Buy all proteins and bulk items",
+      "tip": "Go early Saturday morning to avoid crowds"
+    },
+    "regular_grocery": {
+      "estimated_time": "20-30 minutes",
+      "focus": "Fresh produce and specialty items",
+      "tip": "Check for sales on organic vegetables"
+    }
+  }
+}

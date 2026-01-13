@@ -1,0 +1,325 @@
+{
+  "success": true,
+  "cart_id": "cart_muscle_family_001_instacart",
+  "shopping_list_id": "list_muscle_family_001",
+  "created_at": "2026-01-04T14:30:00Z",
+  "cart_url": "https://www.instacart.com/store/checkout_v3?cart_id=cart_muscle_family_001_instacart",
+  "mobile_deep_link": "instacart://cart/cart_muscle_family_001_instacart",
+  "qr_code_url": "https://api.wihy.ai/instacart/qr/cart_muscle_family_001_instacart.png",
+  "store": {
+    "name": "Costco Wholesale",
+    "location": "Seattle, WA 98103",
+    "available_delivery_slots": [
+      {
+        "date": "2026-01-04",
+        "time": "18:00-20:00",
+        "delivery_fee": 3.99,
+        "service_fee": 5.99,
+        "available": true
+      },
+      {
+        "date": "2026-01-05",
+        "time": "10:00-12:00",
+        "delivery_fee": 3.99,
+        "service_fee": 5.99,
+        "available": true
+      },
+      {
+        "date": "2026-01-05",
+        "time": "14:00-16:00",
+        "delivery_fee": 5.99,
+        "service_fee": 5.99,
+        "available": true
+      }
+    ],
+    "express_available": false,
+    "minimum_order": 35.00
+  },
+  "items_summary": {
+    "total_requested": 60,
+    "successfully_matched": 56,
+    "out_of_stock": 2,
+    "substitution_suggested": 2,
+    "match_rate": 93.3
+  },
+  "cart_items": [
+    {
+      "item_id": "ic_item_001",
+      "original_request": "Chicken breast - Kirkland Signature - 10 lbs",
+      "matched_product": {
+        "product_id": "kirkland_chicken_breast_001",
+        "name": "Kirkland Signature Boneless Skinless Chicken Breast, 10 lbs",
+        "brand": "Kirkland Signature",
+        "size": "10 lbs",
+        "price": 32.99,
+        "original_price": 32.99,
+        "on_sale": false,
+        "image_url": "https://images.instacart.com/chicken-breast.jpg",
+        "match_confidence": "exact"
+      },
+      "quantity": 1,
+      "subtotal": 32.99
+    },
+    {
+      "item_id": "ic_item_002",
+      "original_request": "Eggs - Kirkland Signature - 60 large",
+      "matched_product": {
+        "product_id": "kirkland_eggs_60ct",
+        "name": "Kirkland Signature Cage Free Eggs, 24 count",
+        "brand": "Kirkland Signature",
+        "size": "24 count",
+        "price": 6.99,
+        "original_price": 6.99,
+        "on_sale": false,
+        "image_url": "https://images.instacart.com/eggs-24.jpg",
+        "match_confidence": "partial",
+        "note": "You requested 60 eggs. Added qty 3 for 72 total eggs."
+      },
+      "quantity": 3,
+      "subtotal": 20.97
+    },
+    {
+      "item_id": "ic_item_003",
+      "original_request": "Greek yogurt (nonfat) - Fage Total 0% - 4 tubs (32 oz)",
+      "matched_product": {
+        "product_id": "fage_total_0_32oz",
+        "name": "Fage Total 0% Greek Yogurt, 32 oz",
+        "brand": "Fage",
+        "size": "32 oz",
+        "price": 6.49,
+        "original_price": 6.99,
+        "on_sale": true,
+        "sale_savings": 2.00,
+        "image_url": "https://images.instacart.com/fage-yogurt.jpg",
+        "match_confidence": "exact"
+      },
+      "quantity": 4,
+      "subtotal": 25.96
+    },
+    {
+      "item_id": "ic_item_004",
+      "original_request": "Ground beef (90/10) - Kirkland Signature - 6 lbs",
+      "matched_product": {
+        "product_id": "kirkland_ground_beef_9010",
+        "name": "Kirkland Signature Lean Ground Beef 90/10, 6 lbs",
+        "brand": "Kirkland Signature",
+        "size": "6 lbs",
+        "price": 26.99,
+        "original_price": 26.99,
+        "on_sale": false,
+        "image_url": "https://images.instacart.com/ground-beef.jpg",
+        "match_confidence": "exact"
+      },
+      "quantity": 1,
+      "subtotal": 26.99
+    },
+    {
+      "item_id": "ic_item_005",
+      "original_request": "Salmon fillets - Wild-caught - 3 lbs",
+      "matched_product": {
+        "product_id": "wild_salmon_fillet",
+        "name": "Wild Caught Sockeye Salmon Fillet, 3 lbs",
+        "brand": "Kirkland Signature",
+        "size": "3 lbs",
+        "price": 39.99,
+        "original_price": 39.99,
+        "on_sale": false,
+        "image_url": "https://images.instacart.com/salmon-fillet.jpg",
+        "match_confidence": "exact"
+      },
+      "quantity": 1,
+      "subtotal": 39.99
+    },
+    {
+      "item_id": "ic_item_006",
+      "original_request": "Protein powder (vanilla) - Optimum Nutrition Gold Standard - 1 container (5 lbs)",
+      "matched_product": {
+        "product_id": "on_gold_standard_vanilla_5lb",
+        "name": "Optimum Nutrition Gold Standard 100% Whey Protein Vanilla, 5 lbs",
+        "brand": "Optimum Nutrition",
+        "size": "5 lbs",
+        "price": 54.99,
+        "original_price": 59.99,
+        "on_sale": true,
+        "sale_savings": 5.00,
+        "image_url": "https://images.instacart.com/on-protein.jpg",
+        "match_confidence": "exact"
+      },
+      "quantity": 1,
+      "subtotal": 54.99
+    },
+    {
+      "item_id": "ic_item_007",
+      "original_request": "Ground turkey (93/7) - Kirkland Signature - 6 lbs",
+      "matched_product": {
+        "product_id": "kirkland_ground_turkey_937",
+        "name": "Kirkland Signature Lean Ground Turkey 93/7, 6 lbs",
+        "brand": "Kirkland Signature",
+        "size": "6 lbs",
+        "price": 19.99,
+        "original_price": 19.99,
+        "on_sale": false,
+        "image_url": "https://images.instacart.com/ground-turkey.jpg",
+        "match_confidence": "exact"
+      },
+      "quantity": 1,
+      "subtotal": 19.99
+    },
+    {
+      "item_id": "ic_item_008",
+      "original_request": "Rao's Marinara Sauce - 2 jars (32 oz)",
+      "matched_product": null,
+      "status": "out_of_stock",
+      "substitution": {
+        "product_id": "victoria_marinara_32oz",
+        "name": "Victoria Marinara Sauce, 32 oz",
+        "brand": "Victoria",
+        "size": "32 oz",
+        "price": 4.99,
+        "original_price": 4.99,
+        "on_sale": false,
+        "image_url": "https://images.instacart.com/victoria-marinara.jpg",
+        "reason": "Rao's Marinara is out of stock. Victoria Marinara is a similar premium brand.",
+        "approve_substitution": false
+      },
+      "quantity": 2,
+      "subtotal": 0.00,
+      "note": "Out of stock - substitution suggested"
+    },
+    {
+      "item_id": "ic_item_009",
+      "original_request": "Brown rice - Kirkland Signature - 1 bag (10 lbs)",
+      "matched_product": {
+        "product_id": "kirkland_brown_rice_10lb",
+        "name": "Kirkland Signature Organic Brown Rice, 10 lbs",
+        "brand": "Kirkland Signature",
+        "size": "10 lbs",
+        "price": 13.99,
+        "original_price": 13.99,
+        "on_sale": false,
+        "image_url": "https://images.instacart.com/brown-rice.jpg",
+        "match_confidence": "exact"
+      },
+      "quantity": 1,
+      "subtotal": 13.99
+    },
+    {
+      "item_id": "ic_item_010",
+      "original_request": "Sweet potatoes - Organic - 15 large",
+      "matched_product": {
+        "product_id": "organic_sweet_potatoes_5lb",
+        "name": "Organic Sweet Potatoes, 5 lbs",
+        "brand": "Organic",
+        "size": "5 lbs (approx 5-6 potatoes)",
+        "price": 4.99,
+        "original_price": 4.99,
+        "on_sale": false,
+        "image_url": "https://images.instacart.com/sweet-potatoes.jpg",
+        "match_confidence": "partial",
+        "note": "You requested 15 potatoes. Added qty 3 bags for approx 15-18 potatoes."
+      },
+      "quantity": 3,
+      "subtotal": 14.97
+    }
+  ],
+  "unmatched_items": [
+    {
+      "item_id": "item_008",
+      "original_request": "Rao's Marinara Sauce - 2 jars (32 oz)",
+      "reason": "Out of stock",
+      "substitution_offered": true,
+      "substitution_product": "Victoria Marinara Sauce, 32 oz",
+      "action_required": "Approve substitution or remove from cart"
+    },
+    {
+      "item_id": "item_025",
+      "original_request": "Whole wheat pizza dough - Trader Joe's - 2 packages",
+      "reason": "Not available at Costco",
+      "substitution_offered": false,
+      "suggestion": "Purchase separately at Trader Joe's or use pre-made pizza dough available at Costco"
+    }
+  ],
+  "cost_breakdown": {
+    "subtotal": 265.83,
+    "delivery_fee": 3.99,
+    "service_fee": 5.99,
+    "tax": 26.58,
+    "tip": 0.00,
+    "total_before_tip": 302.39,
+    "estimated_total": 302.39,
+    "savings": 7.00,
+    "comparison_to_in_store": {
+      "in_store_total": 298.00,
+      "instacart_total": 302.39,
+      "convenience_fee": 4.39,
+      "time_saved": "90 minutes",
+      "worth_it": true
+    }
+  },
+  "delivery_options": {
+    "standard_delivery": {
+      "available": true,
+      "fee": 3.99,
+      "time_slots": 3,
+      "earliest": "2026-01-04T18:00:00Z"
+    },
+    "express_delivery": {
+      "available": false,
+      "reason": "Not available for Costco orders"
+    },
+    "pickup": {
+      "available": true,
+      "fee": 0.00,
+      "location": "Costco Wholesale - Seattle, WA 98103",
+      "earliest": "2026-01-05T10:00:00Z"
+    }
+  },
+  "next_steps": [
+    {
+      "step": 1,
+      "action": "Review cart items",
+      "description": "Check matched products and quantities",
+      "completed": false
+    },
+    {
+      "step": 2,
+      "action": "Approve/reject substitutions",
+      "description": "2 items need your decision",
+      "completed": false,
+      "items_pending": ["Rao's Marinara Sauce"]
+    },
+    {
+      "step": 3,
+      "action": "Select delivery time",
+      "description": "Choose from 3 available slots",
+      "completed": false
+    },
+    {
+      "step": 4,
+      "action": "Add tip for shopper",
+      "description": "Recommended: $15-30 for large orders",
+      "completed": false
+    },
+    {
+      "step": 5,
+      "action": "Complete checkout",
+      "description": "Finalize payment and delivery",
+      "completed": false
+    }
+  ],
+  "helpful_tips": [
+    "💡 Your cart matches 93.3% of requested items - excellent match rate!",
+    "💰 You're saving $7.00 with current sales",
+    "⏰ Estimated delivery time: 60-90 minutes after order placement",
+    "📦 Large order tip: Consider $20-30 tip for shopper",
+    "🛒 Missing items from other stores (like Trader Joe's) can be added in separate orders"
+  ],
+  "instacart_express_promo": {
+    "eligible": true,
+    "offer": "Try Instacart Express for free delivery on orders over $35",
+    "annual_fee": 99.00,
+    "savings_estimate": "Save $200+/year on delivery fees",
+    "free_trial_available": true,
+    "trial_duration_days": 14
+  }
+}
