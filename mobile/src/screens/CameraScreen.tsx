@@ -296,7 +296,7 @@ export default function CameraScreen() {
             // Boolean flags
             is_healthy: result.is_healthy,
             is_processed: result.is_processed,
-            has_health_alerts: result.has_health_alerts,
+            has_health_alerts: result.health_alerts?.length > 0,
             
             // Additional images
             image_nutrition_url: result.image_nutrition_url,
@@ -304,73 +304,6 @@ export default function CameraScreen() {
             
             // Chat Integration
             askWihy: result.ask_wihy || `Tell me about ${result.product_name}`,
-            
-            // Full API response
-            analysis: result,
-            analyzed: true,
-          };
-        } else {
-          // Legacy nested API response structure
-          const metadata = result.analysis?.metadata || {};
-          const nutrition = metadata.nutrition_facts || {};
-          const nutritionAnalysis = metadata.nutrition_analysis || {};
-          const charts = result.analysis?.charts || {};
-          
-          foodItemData = {
-            // Product Information
-            name: metadata.product_name || 'Unknown Product',
-            brand: metadata.brand,
-            barcode: metadata.barcode || data,
-            categories: metadata.categories || [],
-            
-            // Image Display - prioritize user's captured photo
-            capturedImage: capturedPhotoUri,
-            image_url: result.image_url || metadata.image_url,
-            imageUrl: result.image_url || metadata.image_url,
-            
-            // Nutrition Facts (per 100g)
-            calories: nutrition.calories || 0,
-            servingSize: { amount: 100, unit: 'g' },
-            macros: {
-              protein: nutrition.protein || 0,
-              carbs: nutrition.carbohydrates || 0,
-              fat: nutrition.fat || 0,
-              fiber: nutrition.fiber || 0,
-              sugar: nutrition.sugars || 0,
-              saturated_fat: nutrition.saturated_fat || 0,
-              sodium: nutrition.sodium || 0,
-            },
-            
-            // Health Scoring
-            health_score: metadata.health_score || 0,
-            nutrition_score: 0,
-            grade: metadata.grade || 'N/A',
-            confidence: result.analysis?.confidence_score || 1,
-            
-            // Processing Level
-            nova_group: metadata.nova_group || 1,
-            processing_level: (metadata as any).processing_level || '',
-            total_additives: metadata.additives?.total_count || 0,
-            
-            // Health Insights
-            health_summary: result.analysis?.summary || '',
-            health_alerts: nutritionAnalysis.health_alerts || [],
-            health_positive: nutritionAnalysis.positive_aspects || [],
-            health_concerns: nutritionAnalysis.areas_of_concern || [],
-            
-            // Ingredients & Allergens
-            ingredientsText: metadata.ingredients_text || '',
-            ingredients: metadata.ingredients_text 
-              ? metadata.ingredients_text.split(',').map((i: string) => i.trim()) 
-              : [],
-            allergens: metadata.allergens || [],
-            additives: metadata.additives || [],
-            
-            // Chart Data
-            charts: charts,
-            
-            // Chat Integration
-            askWihy: metadata.ask_wihy || `Tell me about ${metadata.product_name}`,
             
             // Full API response
             analysis: result,
@@ -385,7 +318,7 @@ export default function CameraScreen() {
             sessionId: `barcode_${data}_${Date.now()}`,
             timestamp: result.timestamp || new Date().toISOString(),
             scanType: 'barcode',
-            processing_time: result.processing_time || 0,
+            processing_time: result.processing_time_ms || 0,
           },
         });
         // Reset states immediately to allow next scan
@@ -393,12 +326,12 @@ export default function CameraScreen() {
         setIsScanning(false);
         // lastScannedBarcode will auto-reset after 2 seconds
       } else {
-        console.log('[CameraScreen] Product not found:', result.error);
+        console.log('[CameraScreen] Product not found');
         setBarcodeProcessing(false);
         setIsScanning(false);
         Alert.alert(
           'Product Not Found',
-          result.error || 'Could not find this barcode in our database. Try taking a photo of the nutrition label instead.',
+          'Could not find this barcode in our database. Try taking a photo of the nutrition label instead.',
           [
             { text: 'OK', onPress: () => {
               setLastScannedBarcode(null);
@@ -565,73 +498,6 @@ export default function CameraScreen() {
               analysis: result,
               analyzed: true,
             };
-          } else {
-            // Legacy nested API response structure
-            const metadata = result.analysis?.metadata || {};
-            const nutrition = metadata.nutrition_facts || {};
-            const nutritionAnalysis = metadata.nutrition_analysis || {};
-            const charts = result.analysis?.charts || {};
-            
-            foodItemData = {
-              // Product Information
-              name: metadata.product_name || 'Unknown Product',
-              brand: metadata.brand,
-              barcode: metadata.barcode || lastScannedBarcode,
-              categories: metadata.categories || [],
-              
-              // Image Display - prioritize user's captured photo
-              capturedImage: capturedPhotoUri,
-              image_url: result.image_url || metadata.image_url,
-              imageUrl: result.image_url || metadata.image_url,
-              
-              // Nutrition Facts (per 100g)
-              calories: nutrition.calories || 0,
-              servingSize: { amount: 100, unit: 'g' },
-              macros: {
-                protein: nutrition.protein || 0,
-                carbs: nutrition.carbohydrates || 0,
-                fat: nutrition.fat || 0,
-                fiber: nutrition.fiber || 0,
-                sugar: nutrition.sugars || 0,
-                saturated_fat: nutrition.saturated_fat || 0,
-                sodium: nutrition.sodium || 0,
-              },
-              
-              // Health Scoring
-              health_score: metadata.health_score || 0,
-              nutrition_score: 0,
-              grade: metadata.grade || 'N/A',
-              confidence: result.analysis?.confidence_score || 1,
-              
-              // Processing Level
-              nova_group: metadata.nova_group || 1,
-              processing_level: (metadata as any).processing_level || '',
-              total_additives: metadata.additives?.total_count || 0,
-              
-              // Health Insights
-              health_summary: result.analysis?.summary || '',
-              health_alerts: nutritionAnalysis.health_alerts || [],
-              health_positive: nutritionAnalysis.positive_aspects || [],
-              health_concerns: nutritionAnalysis.areas_of_concern || [],
-              
-              // Ingredients & Allergens
-              ingredientsText: metadata.ingredients_text || '',
-              ingredients: metadata.ingredients_text 
-                ? metadata.ingredients_text.split(',').map((i: string) => i.trim()) 
-                : [],
-              allergens: metadata.allergens || [],
-              additives: metadata.additives || [],
-              
-              // Chart Data
-              charts: charts,
-              
-              // Chat Integration
-              askWihy: metadata.ask_wihy || `Tell me about ${metadata.product_name}`,
-              
-              // Full API response
-              analysis: result,
-              analyzed: true,
-            };
           }
           
           navigation.navigate('NutritionFacts', {
@@ -640,7 +506,7 @@ export default function CameraScreen() {
               sessionId: `barcode_${lastScannedBarcode}_${Date.now()}`,
               timestamp: result.timestamp || new Date().toISOString(),
               scanType: 'barcode',
-              processing_time: result.processing_time || 0,
+              processing_time: result.processing_time_ms || 0,
             },
           });
           setBarcodeProcessing(false);
@@ -652,7 +518,7 @@ export default function CameraScreen() {
           setIsProcessing(false);
           Alert.alert(
             'Product Not Found',
-            result.error || 'Could not find this barcode in our database. Try taking a photo of the nutrition label instead.',
+            'Could not find this barcode in our database. Try taking a photo of the nutrition label instead.',
             [
               { text: 'OK', onPress: () => setLastScannedBarcode(null) },
               { 
@@ -695,11 +561,11 @@ export default function CameraScreen() {
 
           if (result.success && result.analysis) {
             const analysis = result.analysis;
-            const metadata = analysis.metadata || {};
+            const metadata = result.metadata as any || {};
             const nutritionFacts = metadata.nutrition_facts || {};
             const nutritionAnalysis = metadata.nutrition_analysis || {};
-            const detectedFoods = (metadata as any).detected_foods || [];
-            const detectedText = (metadata as any).detected_text || [];
+            const detectedFoods = metadata.detected_foods || [];
+            const detectedText = metadata.detected_text || [];
             
             navigation.navigate('NutritionFacts', {
               foodItem: {
@@ -734,7 +600,7 @@ export default function CameraScreen() {
                   servingRecommendations: nutritionAnalysis.serving_recommendations || {},
                   
                   // Charts
-                  charts: analysis.charts || {},
+                  charts: {},
                   
                   // Full metadata
                   metadata: metadata,
@@ -785,7 +651,7 @@ export default function CameraScreen() {
             setIsProcessing(false);
             Alert.alert(
               'Analysis Failed',
-              result.error || 'Could not analyze the food photo. Please try again.',
+              'Could not analyze the food photo. Please try again.',
               [{ text: 'OK' }]
             );
           }
