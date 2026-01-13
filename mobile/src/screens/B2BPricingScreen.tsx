@@ -183,7 +183,11 @@ export const B2BPricingScreen: React.FC<Props> = ({ navigation }) => {
           <div className="pricing-hero pricing-hero-b2b">
             <div className="pricing-hero-inner">
               <div className="pricing-hero-icon">
-                <Ionicons name="business" size={48} color="#fff" />
+                <img 
+                  src={require('../../assets/whatishealthyspinner.gif')} 
+                  alt="WiHY" 
+                  style={{ width: 48, height: 48 }}
+                />
               </div>
               <h1 className="pricing-hero-title">Enterprise Solutions</h1>
               <p className="pricing-hero-subtitle">
