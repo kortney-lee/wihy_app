@@ -24,33 +24,33 @@ if (Platform.OS === 'web') {
 const isWeb = Platform.OS === 'web';
 const SUCCESS_GREEN = '#22c55e';
 
-// B2B/Enterprise Plans
+// B2B/Enterprise Plans - No pricing displayed (contact sales model)
 const B2B_PLANS = [
   {
     id: 'workplace-core',
     name: 'Workplace Core',
-    pricePerUser: 3.00,
-    minSeats: 25,
     tagline: 'Essential wellness for small teams',
+    description: 'Perfect for teams of 25+ employees looking to kickstart their wellness journey.',
     features: [
       'Basic health tracking',
       'Team wellness dashboard',
       'Monthly health reports',
       'Email support',
+      'Onboarding assistance',
     ],
     icon: 'business',
   },
   {
     id: 'workplace-plus',
     name: 'Workplace Plus',
-    pricePerUser: 5.00,
-    minSeats: 50,
     tagline: 'Full wellness suite for growing teams',
+    description: 'Comprehensive solution for mid-sized organizations with 50+ employees.',
     features: [
       'Full nutrition & fitness tools',
-      'Admin portal',
-      'Custom challenges',
+      'Admin portal with analytics',
+      'Custom challenges & programs',
       'Priority support',
+      'Quarterly business reviews',
     ],
     popular: true,
     icon: 'trending-up',
@@ -58,14 +58,15 @@ const B2B_PLANS = [
   {
     id: 'corporate-enterprise',
     name: 'Enterprise',
-    pricePerUser: 7.00,
-    minSeats: 100,
     tagline: 'Complete solution for large organizations',
+    description: 'Tailored enterprise deployment for organizations with 100+ employees.',
     features: [
-      'SSO integration',
-      'Custom branding',
+      'SSO & SAML integration',
+      'Custom branding & white-label',
       'Dedicated success manager',
-      'API access',
+      'Full API access',
+      'Custom integrations',
+      'SLA guarantees',
     ],
     icon: 'globe',
   },
@@ -75,36 +76,32 @@ const VERTICAL_PLANS = [
   {
     id: 'k12-school',
     name: 'K-12 Schools',
-    pricePerUser: 1.50,
-    unit: 'student',
     tagline: 'Student wellness programs',
+    description: 'Age-appropriate health education and tracking for students.',
     icon: 'school',
     color: '#f59e0b',
   },
   {
     id: 'university',
     name: 'Universities',
-    pricePerUser: 2.50,
-    unit: 'student',
     tagline: 'Campus-wide health initiatives',
+    description: 'Comprehensive wellness programs for students and staff.',
     icon: 'library',
     color: '#8b5cf6',
   },
   {
-    id: 'hospital',
+    id: 'healthcare',
     name: 'Healthcare',
-    pricePerUser: 5.00,
-    unit: 'user',
     tagline: 'Patient & staff wellness',
+    description: 'HIPAA-compliant solutions for healthcare organizations.',
     icon: 'medkit',
     color: '#ef4444',
   },
   {
     id: 'hospitality',
     name: 'Hospitality',
-    pricePerUser: 4.00,
-    unit: 'resident',
     tagline: 'Guest & resident programs',
+    description: 'Wellness amenities for hotels, resorts, and senior living.',
     icon: 'bed',
     color: '#06b6d4',
   },
@@ -129,8 +126,10 @@ export const B2BPricingScreen: React.FC<Props> = ({ navigation }) => {
     }
   };
 
-  const formatPrice = (price: number) => {
-    return price.toFixed(2).replace(/\.00$/, '');
+  const handleRequestDemo = () => {
+    if (typeof window !== 'undefined') {
+      window.location.href = 'mailto:enterprise@wihy.app?subject=Request%20Demo';
+    }
   };
 
   // Web Navigation Header Component
@@ -222,10 +221,9 @@ export const B2BPricingScreen: React.FC<Props> = ({ navigation }) => {
                   <p className="pricing-card-tagline">{plan.tagline}</p>
                   
                   <div className="pricing-card-price">
-                    <span className="pricing-amount">${formatPrice(plan.pricePerUser)}</span>
-                    <span className="pricing-period">/user/month</span>
+                    <span className="pricing-custom">Custom Pricing</span>
                   </div>
-                  <p className="pricing-min-seats">Minimum {plan.minSeats} seats</p>
+                  <p className="pricing-description">{plan.description}</p>
 
                   <ul className="pricing-features">
                     {plan.features.map((feature, index) => (
@@ -241,7 +239,7 @@ export const B2BPricingScreen: React.FC<Props> = ({ navigation }) => {
                     className="pricing-btn pricing-btn-outline"
                     type="button"
                   >
-                    Contact Sales
+                    Get a Quote
                   </button>
                 </div>
               ))}
@@ -268,18 +266,14 @@ export const B2BPricingScreen: React.FC<Props> = ({ navigation }) => {
                   </div>
                   <h3 className="pricing-card-name">{plan.name}</h3>
                   <p className="pricing-card-tagline">{plan.tagline}</p>
-                  
-                  <div className="pricing-card-price">
-                    <span className="pricing-amount">${formatPrice(plan.pricePerUser)}</span>
-                    <span className="pricing-period">/{plan.unit}/mo</span>
-                  </div>
+                  <p className="pricing-description">{plan.description}</p>
 
                   <button
-                    onClick={handleContactSales}
+                    onClick={handleRequestDemo}
                     className="pricing-btn pricing-btn-outline"
                     type="button"
                   >
-                    Contact Sales
+                    Request Demo
                   </button>
                 </div>
               ))}
