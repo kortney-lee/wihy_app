@@ -19,6 +19,13 @@ import { colors, shadows, borderRadius } from '../theme/design-tokens';
 import { checkoutService } from '../services/checkoutService';
 import { useAuth } from '../context/AuthContext';
 
+// Import CSS for web only
+if (Platform.OS === 'web') {
+  require('../styles/web-landing.css');
+}
+
+const isWeb = Platform.OS === 'web';
+
 // Consumer Plans - Correct pricing from PRICING_QUICK_REFERENCE.md
 const CONSUMER_PLANS = [
   {
@@ -289,9 +296,312 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
     return price.toFixed(2).replace(/\.00$/, '');
   };
 
+  // Web Navigation Header Component
+  const WebNavHeader = () => (
+    <nav className="web-top-nav">
+      <div className="web-nav-left">
+        <button onClick={() => navigation.navigate('WihyHome')} className="web-nav-item nav-home" type="button">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+            <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+          </svg>
+          <span>Home</span>
+        </button>
+        <button onClick={() => navigation.navigate('Health')} className="web-nav-item nav-health" type="button">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+          </svg>
+          <span>Health</span>
+        </button>
+        <button onClick={() => navigation.navigate('Chat')} className="web-nav-item nav-chat" type="button">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+            <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/>
+          </svg>
+          <span>Chat</span>
+        </button>
+      </div>
+      <div className="web-nav-right">
+        <button onClick={() => {
+          if (user) {
+            navigation.navigate('Profile');
+          } else {
+            navigation.navigate('Login' as any);
+          }
+        }} className="web-nav-item profile" type="button">
+          <svg viewBox="0 0 24 24" width="24" height="24">
+            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+          </svg>
+        </button>
+      </div>
+    </nav>
+  );
+
+  // Web render with CSS navigation
+  if (isWeb) {
+    return (
+      <div style={{ minHeight: '100vh', backgroundColor: '#ffffff' }}>
+        {/* @ts-ignore */}
+        <WebNavHeader />
+        
+        <div style={{ paddingTop: 60 }}>
+          <ScrollView 
+            style={styles.scrollView}
+            contentContainerStyle={styles.scrollContent}
+            showsVerticalScrollIndicator={false}
+          >
+            {/* Hero Section - Light Blue Gradient */}
+            <View style={styles.heroSection}>
+              <View style={[styles.heroContent, isDesktop && styles.heroContentDesktop]}>
+                <View style={styles.heroIconContainer}>
+                  <Ionicons name="sparkles" size={48} color="#fff" />
+                </View>
+                <Text style={styles.heroTitle}>Unlock Your Full Potential</Text>
+                <Text style={styles.heroSubtitle}>
+                  Choose the plan that fits how you live — or how you coach.
+                </Text>
+              </View>
+            </View>
+
+            {/* Consumer Plans Section */}
+            <View style={[styles.section, isDesktop && styles.sectionDesktop]}>
+              <Text style={styles.sectionLabel}>FOR INDIVIDUALS & FAMILIES</Text>
+              <Text style={styles.sectionTitle}>Personal & Family Plans</Text>
+              
+              {/* Billing Toggle */}
+              <View style={styles.billingToggleContainer}>
+                <View style={styles.billingToggle}>
+                  <Pressable
+                    style={[
+                      styles.billingOption,
+                      billingCycle === 'monthly' && styles.billingOptionActive,
+                    ]}
+                    onPress={() => setBillingCycle('monthly')}
+                  >
+                    <Text style={[
+                      styles.billingOptionText,
+                      billingCycle === 'monthly' && styles.billingOptionTextActive,
+                    ]}>Monthly</Text>
+                  </Pressable>
+                  <Pressable
+                    style={[
+                      styles.billingOption,
+                      billingCycle === 'yearly' && styles.billingOptionActive,
+                    ]}
+                    onPress={() => setBillingCycle('yearly')}
+                  >
+                    <Text style={[
+                      styles.billingOptionText,
+                      billingCycle === 'yearly' && styles.billingOptionTextActive,
+                    ]}>Yearly</Text>
+                    <View style={styles.saveBadge}>
+                      <Text style={styles.saveBadgeText}>Save 20%</Text>
+                    </View>
+                  </Pressable>
+                </View>
+              </View>
+
+              {/* Consumer Plan Cards */}
+              <View style={[styles.plansGrid, isDesktop && styles.plansGridDesktop]}>
+                {CONSUMER_PLANS.map((plan) => (
+                  <View 
+                    key={plan.id}
+                    style={[
+                      styles.planCard,
+                      plan.popular && styles.planCardPopular,
+                      isDesktop && styles.planCardDesktop,
+                    ]}
+                  >
+                    {plan.popular && (
+                      <View style={styles.popularBadge}>
+                        <Text style={styles.popularBadgeText}>Most Popular</Text>
+                      </View>
+                    )}
+                    
+                    <View style={styles.planHeader}>
+                      <View style={[styles.planIconContainer, plan.popular && styles.planIconContainerPopular]}>
+                        <Ionicons 
+                          name={plan.icon as any} 
+                          size={24} 
+                          color={plan.popular ? '#fff' : colors.primary} 
+                        />
+                      </View>
+                      <Text style={styles.planName}>{plan.name}</Text>
+                      <Text style={styles.planTagline}>{plan.tagline}</Text>
+                    </View>
+
+                    <View style={styles.pricingContainer}>
+                      {plan.setupFee ? (
+                        <>
+                          <Text style={styles.priceAmount}>${formatPrice(plan.setupFee)}</Text>
+                          <Text style={styles.pricePeriod}>setup + 1% commission</Text>
+                        </>
+                      ) : plan.monthlyPrice === 0 ? (
+                        <>
+                          <Text style={styles.priceAmount}>Free</Text>
+                          <Text style={styles.pricePeriod}>forever</Text>
+                        </>
+                      ) : (
+                        <>
+                          <Text style={styles.priceAmount}>
+                            ${billingCycle === 'yearly' && plan.yearlyPrice 
+                              ? formatPrice(plan.yearlyPrice / 12) 
+                              : formatPrice(plan.monthlyPrice)}
+                          </Text>
+                          <Text style={styles.pricePeriod}>/month</Text>
+                          {billingCycle === 'yearly' && plan.yearlyPrice && (
+                            <Text style={styles.yearlyTotal}>
+                              ${formatPrice(plan.yearlyPrice)}/year
+                            </Text>
+                          )}
+                        </>
+                      )}
+                    </View>
+
+                    <View style={styles.featuresContainer}>
+                      {plan.features.map((feature, index) => (
+                        <View key={index} style={styles.featureRow}>
+                          <Ionicons name="checkmark-circle" size={18} color={colors.success} />
+                          <Text style={styles.featureText}>{feature}</Text>
+                        </View>
+                      ))}
+                    </View>
+
+                    <Pressable
+                      style={({ pressed }) => [
+                        styles.subscribeButton,
+                        plan.popular && styles.subscribeButtonPopular,
+                        pressed && styles.subscribeButtonPressed,
+                        isLoading && styles.subscribeButtonDisabled,
+                      ]}
+                      onPress={() => handleSubscribe(plan.id)}
+                      disabled={isLoading}
+                    >
+                      {isLoading ? (
+                        <ActivityIndicator size="small" color="#fff" />
+                      ) : (
+                        <Text style={[
+                          styles.subscribeButtonText,
+                          plan.popular && styles.subscribeButtonTextPopular,
+                        ]}>
+                          {plan.monthlyPrice === 0 ? 'Get Started' : 'Subscribe'}
+                        </Text>
+                      )}
+                    </Pressable>
+                  </View>
+                ))}
+              </View>
+            </View>
+
+            {/* B2B Plans Section */}
+            <View style={[styles.section, styles.sectionB2B, isDesktop && styles.sectionDesktop]}>
+              <Text style={styles.sectionLabel}>FOR BUSINESSES & ORGANIZATIONS</Text>
+              <Text style={styles.sectionTitle}>Enterprise Solutions</Text>
+              <Text style={styles.sectionSubtitle}>
+                Custom wellness programs for teams of all sizes
+              </Text>
+
+              <View style={[styles.plansGrid, isDesktop && styles.plansGridDesktop]}>
+                {B2B_PLANS.map((plan) => (
+                  <View 
+                    key={plan.id}
+                    style={[
+                      styles.planCard,
+                      styles.planCardB2B,
+                      plan.popular && styles.planCardPopular,
+                      isDesktop && styles.planCardDesktop,
+                    ]}
+                  >
+                    {plan.popular && (
+                      <View style={styles.popularBadge}>
+                        <Text style={styles.popularBadgeText}>Most Popular</Text>
+                      </View>
+                    )}
+                    
+                    <View style={styles.planHeader}>
+                      <View style={[styles.planIconContainer, styles.planIconContainerB2B]}>
+                        <Ionicons 
+                          name={plan.icon as any} 
+                          size={24} 
+                          color="#fff" 
+                        />
+                      </View>
+                      <Text style={styles.planName}>{plan.name}</Text>
+                      <Text style={styles.planTagline}>{plan.tagline}</Text>
+                    </View>
+
+                    <View style={styles.pricingContainer}>
+                      <Text style={styles.priceAmount}>${formatPrice(plan.pricePerUser)}</Text>
+                      <Text style={styles.pricePeriod}>/user/month</Text>
+                      <Text style={styles.minSeats}>Min {plan.minSeats} seats</Text>
+                    </View>
+
+                    <View style={styles.featuresContainer}>
+                      {plan.features.map((feature, index) => (
+                        <View key={index} style={styles.featureRow}>
+                          <Ionicons name="checkmark-circle" size={18} color={colors.success} />
+                          <Text style={styles.featureText}>{feature}</Text>
+                        </View>
+                      ))}
+                    </View>
+
+                    <Pressable
+                      style={({ pressed }) => [
+                        styles.subscribeButton,
+                        styles.contactSalesButton,
+                        pressed && styles.subscribeButtonPressed,
+                      ]}
+                      onPress={handleContactSales}
+                    >
+                      <Text style={styles.contactSalesText}>Contact Sales</Text>
+                    </Pressable>
+                  </View>
+                ))}
+              </View>
+            </View>
+
+            {/* Vertical Markets */}
+            <View style={[styles.section, isDesktop && styles.sectionDesktop]}>
+              <Text style={styles.sectionLabel}>SPECIALIZED SOLUTIONS</Text>
+              <Text style={styles.sectionTitle}>Industry-Specific Plans</Text>
+
+              <View style={[styles.verticalsGrid, isDesktop && styles.verticalsGridDesktop]}>
+                {VERTICAL_PLANS.map((plan) => (
+                  <Pressable 
+                    key={plan.id}
+                    style={({ pressed }) => [
+                      styles.verticalCard,
+                      pressed && styles.verticalCardPressed,
+                    ]}
+                    onPress={handleContactSales}
+                  >
+                    <View style={[styles.verticalIconContainer, { backgroundColor: plan.color }]}>
+                      <Ionicons name={plan.icon as any} size={28} color="#fff" />
+                    </View>
+                    <Text style={styles.verticalName}>{plan.name}</Text>
+                    <Text style={styles.verticalTagline}>{plan.tagline}</Text>
+                    <Text style={styles.contactSalesText}>Contact Sales for Enterprise Pricing</Text>
+                  </Pressable>
+                ))}
+              </View>
+            </View>
+
+            {/* FAQ Section */}
+            <View style={[styles.section, styles.faqSection, isDesktop && styles.sectionDesktop]}>
+              <Text style={styles.sectionLabel}>FREQUENTLY ASKED</Text>
+              <Text style={styles.sectionTitle}>Questions?</Text>
+              <Text style={styles.infoText}>
+                Contact us at support@wihy.app or visit our FAQ for more information about plans and billing.
+              </Text>
+            </View>
+          </ScrollView>
+        </div>
+      </div>
+    );
+  }
+
+  // Native app render
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      {/* Header with Logo */}
+      {/* Native Header with Logo */}
       <View style={styles.header}>
         <Pressable 
           onPress={() => navigation.navigate('WihyHome')} 
