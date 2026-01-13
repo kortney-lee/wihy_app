@@ -5,13 +5,11 @@ on:
     branches: [main, develop]
     paths:
       - 'mobile/**'
-      - 'shared/**'
       - '.github/workflows/build-mobile-ios.yml'
   pull_request:
     branches: [main]
     paths:
       - 'mobile/**'
-      - 'shared/**'
   workflow_dispatch:
 
 jobs:
@@ -32,41 +30,36 @@ jobs:
         cache: 'npm'
         cache-dependency-path: mobile/package-lock.json
 
-    - name: Install root workspace dependencies
-      run: npm ci
-      working-directory: .
-
-    - name: Install mobile dependencies
-      run: npm ci
-
-    - name: Setup Ruby (for CocoaPods)
-      uses: ruby/setup-ruby@v1
+    - name: Setup Expo
+      uses: expo/expo-github-action@v8
       with:
-        ruby-version: '3.0'
-        bundler-cache: true
+        expo-version: latest
+        eas-version: latest
+        token: ${{ secrets.EXPO_TOKEN }}
 
-    - name: Install CocoaPods
-      run: |
-        cd ios
-        pod install
+    - name: Install dependencies
+      run: npm ci
 
-    - name: Build iOS app (Simulator)
+    - name: Create .env file
       run: |
-        npx react-native run-ios --simulator="iPhone 15 Pro" --configuration Release || echo "Build completed with warnings"
+        echo "EXPO_PUBLIC_API_URL=${{ secrets.REACT_APP_API_BASE_URL }}" >> .env
+        echo "EXPO_PUBLIC_AUTH_URL=${{ secrets.REACT_APP_AUTH_API_URL }}" >> .env
+
+    - name: EAS Build (Preview)
+      if: github.ref != 'refs/heads/main'
+      run: eas build --platform ios --profile preview --non-interactive --no-wait
       env:
         EXPO_PUBLIC_API_URL: ${{ secrets.REACT_APP_API_BASE_URL }}
         EXPO_PUBLIC_AUTH_URL: ${{ secrets.REACT_APP_AUTH_API_URL }}
 
-    - name: Archive iOS app (Production)
+    - name: EAS Build (Production)
       if: github.ref == 'refs/heads/main'
-      run: |
-        echo "iOS production build would be archived here"
-        # Add TestFlight/App Store deployment steps as needed
-        
-    - name: Upload build artifacts
-      uses: actions/upload-artifact@v4
-      if: github.ref == 'refs/heads/main'
-      with:
-        name: ios-build
-        path: mobile/ios/build/
-        retention-days: 7
+      run: eas build --platform ios --profile production --non-interactive
+      env:
+        EXPO_PUBLIC_API_URL: ${{ secrets.REACT_APP_API_BASE_URL }}
+        EXPO_PUBLIC_AUTH_URL: ${{ secrets.REACT_APP_AUTH_API_URL }}
+
+    - name: Submit to TestFlight
+      if: github.ref == 'refs/heads/main' && success()
+      run: eas submit --platform ios --profile production --latest --non-interactive
+      continue-on-error: true
