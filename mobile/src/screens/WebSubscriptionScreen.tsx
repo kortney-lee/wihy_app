@@ -338,16 +338,21 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
   // Web render with CSS navigation
   if (isWeb) {
     return (
-      <div style={{ minHeight: '100vh', backgroundColor: '#ffffff' }}>
+      <div style={{ 
+        minHeight: '100vh', 
+        backgroundColor: '#ffffff',
+        display: 'flex',
+        flexDirection: 'column',
+      }}>
         {/* @ts-ignore */}
         <WebNavHeader />
         
-        <div style={{ paddingTop: 60 }}>
-          <ScrollView 
-            style={styles.scrollView}
-            contentContainerStyle={styles.scrollContent}
-            showsVerticalScrollIndicator={false}
-          >
+        <div style={{ 
+          paddingTop: 60,
+          flex: 1,
+          overflowY: 'auto',
+          overflowX: 'hidden',
+        }}>
             {/* Hero Section - Light Blue Gradient */}
             <View style={styles.heroSection}>
               <View style={[styles.heroContent, isDesktop && styles.heroContentDesktop]}>
@@ -592,7 +597,9 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
                 Contact us at support@wihy.app or visit our FAQ for more information about plans and billing.
               </Text>
             </View>
-          </ScrollView>
+            
+            {/* Bottom padding for scroll */}
+            <div style={{ height: 60 }} />
         </div>
       </div>
     );
