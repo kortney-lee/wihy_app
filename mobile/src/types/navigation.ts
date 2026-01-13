@@ -16,9 +16,11 @@ export type RootStackParamList = {
   Profile: undefined;
   Camera: { mode?: 'barcode' | 'food' | 'pill' | 'label' };
   WihyHomeScreen: undefined;
+  WihyHome: undefined;
   ResearchDashboard: undefined;
   Permissions: undefined;
   Subscription: undefined;
+  B2BPricing: undefined;
   ScanHistory: undefined;
   CoachDashboardPage: undefined;
   FamilyDashboardPage: undefined;

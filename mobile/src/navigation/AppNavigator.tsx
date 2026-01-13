@@ -47,6 +47,7 @@ import MealPlanDetails from '../screens/MealPlanDetails';
 import EnrollmentScreen from '../screens/EnrollmentScreen';
 import OnboardingFlow from '../screens/OnboardingFlow';
 import { SubscriptionScreen } from '../screens/SubscriptionScreen';
+import { B2BPricingScreen } from '../screens/B2BPricingScreen';
 
 const Tab = createBottomTabNavigator<TabParamList>();
 const Stack = createStackNavigator<RootStackParamList>();
@@ -488,6 +489,14 @@ export default function AppNavigator() {
         <Stack.Screen
           name="Subscription"
           component={SubscriptionScreen}
+          options={{
+            presentation: 'modal',
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="B2BPricing"
+          component={B2BPricingScreen}
           options={{
             presentation: 'modal',
             headerShown: false,
