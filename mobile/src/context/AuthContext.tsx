@@ -25,7 +25,7 @@ export interface User {
   preferences: UserPreferences;
   
   // Plan-based access control (NEW)
-  plan: 'free' | 'premium' | 'family-basic' | 'family-premium' | 'coach' | 'coach-family' 
+  plan: 'free' | 'premium' | 'family-basic' | 'family-pro' | 'family-premium' | 'coach' | 'coach-family' 
     | 'workplace-core' | 'workplace-plus' | 'corporate-enterprise' | 'k12-school' 
     | 'university' | 'hospital' | 'hospitality';
   addOns?: string[];  // e.g., ['ai', 'instacart']
