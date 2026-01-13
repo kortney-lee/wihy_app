@@ -9,8 +9,12 @@ import {
   Pressable,
   ActivityIndicator,
   Alert,
+  Platform,
+  Linking,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { checkoutService } from '../services/checkoutService';
+import { useAuth } from '../context/AuthContext';
 // import { purchaseService } from '../services/purchaseService'; // Requires production build
 
 // Map plan IDs to in-app purchase product IDs
@@ -171,6 +175,41 @@ export default function PlansModal({
       return;
     }
     
+    // Use web checkout for web platform
+    if (Platform.OS === 'web') {
+      setPurchasing(true);
+      try {
+        // Map plan IDs to checkout service plan IDs
+        const checkoutPlanMap: Record<string, string> = {
+          'premium': 'premium',
+          'family-basic': 'family_basic',
+          'family-premium': 'family_premium',
+          'coach': 'coach',
+        };
+        
+        const checkoutPlanId = checkoutPlanMap[planId] || planId;
+        const result = await checkoutService.initiateCheckout(checkoutPlanId);
+        
+        if (result.success && result.checkoutUrl) {
+          // Open Stripe checkout in new tab
+          if (typeof window !== 'undefined') {
+            window.open(result.checkoutUrl, '_blank');
+          } else {
+            await Linking.openURL(result.checkoutUrl);
+          }
+          onClose();
+        } else {
+          Alert.alert('Error', result.error || 'Failed to start checkout');
+        }
+      } catch (error) {
+        Alert.alert('Error', 'Failed to start checkout. Please try again.');
+      } finally {
+        setPurchasing(false);
+      }
+      return;
+    }
+    
+    // Native in-app purchases require production build
     Alert.alert(
       'Subscription Upgrade',
       `You selected: ${selectedPlan?.displayName || planId}\n\n` +
