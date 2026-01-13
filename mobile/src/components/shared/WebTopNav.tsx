@@ -2,7 +2,7 @@ import React, { useContext, useState } from 'react';
 import { Platform } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { AuthContext } from '../../context/AuthContext';
-import { LoginModal } from '../auth/LoginModal';
+import MultiAuthLogin from '../auth/MultiAuthLogin';
 
 const isWeb = Platform.OS === 'web';
 
@@ -119,7 +119,7 @@ export function WebTopNav({ activeTab = 'none' }: WebTopNavProps) {
         </button>
       </div>
     </nav>
-    <LoginModal visible={showLoginModal} onClose={() => setShowLoginModal(false)} />
+    <MultiAuthLogin visible={showLoginModal} onClose={() => setShowLoginModal(false)} onSignIn={() => setShowLoginModal(false)} />
     </>
   );
 }
