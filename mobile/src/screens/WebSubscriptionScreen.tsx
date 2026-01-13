@@ -15,18 +15,19 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../types/navigation';
-import { colors, shadows, borderRadius } from '../theme/design-tokens';
+import { colors, borderRadius } from '../theme/design-tokens';
 import { checkoutService } from '../services/checkoutService';
 import { useAuth } from '../context/AuthContext';
 
 // Import CSS for web only
 if (Platform.OS === 'web') {
   require('../styles/web-landing.css');
+  require('../styles/pricing.css');
 }
 
 const isWeb = Platform.OS === 'web';
 
-// Consumer Plans - Correct pricing from PRICING_QUICK_REFERENCE.md
+// Consumer Plans
 const CONSUMER_PLANS = [
   {
     id: 'free',
@@ -40,7 +41,6 @@ const CONSUMER_PLANS = [
       'Medication tracking',
       'Basic health dashboard',
     ],
-    stripeLink: null, // No payment needed
     icon: 'gift',
   },
   {
@@ -55,7 +55,6 @@ const CONSUMER_PLANS = [
       'Meal planning and tracking',
       'Optional WIHY Coach (AI)',
     ],
-    stripeLink: 'https://buy.stripe.com/YOUR_PREMIUM_LINK',
     icon: 'person',
   },
   {
@@ -70,30 +69,28 @@ const CONSUMER_PLANS = [
       'Individual accounts for everyone',
       'Optional WIHY Coach (AI)',
     ],
-    stripeLink: 'https://buy.stripe.com/YOUR_FAMILY_BASIC_LINK',
     icon: 'people',
   },
   {
     id: 'family-premium',
     name: 'Family Premium',
-    monthlyPrice: 34.99,
-    yearlyPrice: 349,
+    monthlyPrice: 49.99,
+    yearlyPrice: 499,
     tagline: 'For entire households — no limits',
     features: [
-      'Unlimited household members',
+      'Up to 5 family members',
       'Every member gets their own login',
       'WIHY Coach (AI) included',
       'Instacart Pro included',
     ],
     popular: true,
-    stripeLink: 'https://buy.stripe.com/YOUR_FAMILY_PREMIUM_LINK',
     icon: 'home',
   },
   {
     id: 'coach',
     name: 'Coach Platform',
     setupFee: 99.99,
-    monthlyPrice: 29.99,
+    commission: '1%',
     tagline: 'For health & fitness professionals',
     features: [
       'Unlimited clients',
@@ -101,131 +98,46 @@ const CONSUMER_PLANS = [
       'Progress tracking & reporting',
       'Full app access for yourself',
     ],
-    stripeLink: 'https://buy.stripe.com/YOUR_COACH_LINK',
     icon: 'fitness',
   },
 ];
 
-// B2B/Enterprise Plans
-const B2B_PLANS = [
-  {
-    id: 'workplace-core',
-    name: 'Workplace Core',
-    pricePerUser: 3.00,
-    minSeats: 25,
-    tagline: 'Essential wellness for small teams',
-    features: [
-      'Basic health tracking',
-      'Team wellness dashboard',
-      'Monthly health reports',
-      'Email support',
-    ],
-    icon: 'business',
-  },
-  {
-    id: 'workplace-plus',
-    name: 'Workplace Plus',
-    pricePerUser: 5.00,
-    minSeats: 50,
-    tagline: 'Full wellness suite for growing teams',
-    features: [
-      'Full nutrition & fitness tools',
-      'Admin portal',
-      'Custom challenges',
-      'Priority support',
-    ],
-    popular: true,
-    icon: 'trending-up',
-  },
-  {
-    id: 'corporate-enterprise',
-    name: 'Enterprise',
-    pricePerUser: 7.00,
-    minSeats: 100,
-    tagline: 'Complete solution for large organizations',
-    features: [
-      'SSO integration',
-      'Custom branding',
-      'Dedicated success manager',
-      'API access',
-    ],
-    icon: 'globe',
-  },
-];
-
-const VERTICAL_PLANS = [
-  {
-    id: 'k12-school',
-    name: 'K-12 Schools',
-    pricePerUser: 1.50,
-    unit: 'student',
-    icon: 'school',
-    color: '#f59e0b',
-  },
-  {
-    id: 'university',
-    name: 'Universities',
-    pricePerUser: 2.50,
-    unit: 'student',
-    icon: 'library',
-    color: '#8b5cf6',
-  },
-  {
-    id: 'hospital',
-    name: 'Healthcare',
-    pricePerUser: 5.00,
-    unit: 'user',
-    icon: 'medkit',
-    color: '#ef4444',
-  },
-  {
-    id: 'hospitality',
-    name: 'Hospitality',
-    pricePerUser: 4.00,
-    unit: 'resident',
-    icon: 'bed',
-    color: '#06b6d4',
-  },
-];
-
-type SubscriptionScreenNavigationProp = StackNavigationProp<
-  RootStackParamList,
-  'Subscription'
->;
+type SubscriptionScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Subscription'>;
 
 interface Props {
   navigation: SubscriptionScreenNavigationProp;
 }
 
 export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
-  const [selectedPlan, setSelectedPlan] = useState<string>('family-premium');
-  const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
-  const [isLoading, setIsLoading] = useState(false);
   const { width } = useWindowDimensions();
   const { user } = useAuth();
-  
+  const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
+  const [isLoading, setIsLoading] = useState(false);
+
   const isDesktop = width >= 1024;
-  const isTablet = width >= 768;
+  const isTablet = width >= 640;
+
+  const formatPrice = (price: number) => {
+    return price.toFixed(2).replace(/\.00$/, '');
+  };
 
   const handleSubscribe = async (planId: string) => {
     const plan = CONSUMER_PLANS.find(p => p.id === planId);
     if (!plan) return;
 
-    // Free plan - redirect to registration (no payment needed)
+    // Free plan - redirect to registration
     if (planId === 'free') {
       if (!user?.email) {
-        // Not logged in - go to registration with plan parameter
         if (Platform.OS === 'web' && typeof window !== 'undefined') {
           window.location.href = '/register?plan=free';
         } else {
           navigation.navigate('Register' as any, { plan: 'free' });
         }
       } else {
-        // Already logged in with free plan
         if (Platform.OS === 'web' && typeof window !== 'undefined') {
-          window.alert('You are already on the Free plan. Explore the app or upgrade to unlock more features!');
+          window.alert('You are already on the Free plan!');
         } else {
-          Alert.alert('Free Plan', 'You are already on the Free plan. Explore the app or upgrade to unlock more features!');
+          Alert.alert('Free Plan', 'You are already on the Free plan!');
         }
       }
       return;
@@ -234,38 +146,25 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
     // Paid plans - check if user is logged in
     if (!user?.email) {
       if (Platform.OS === 'web' && typeof window !== 'undefined') {
-        const proceed = window.confirm(
-          'You need to be signed in to subscribe.\n\nWould you like to sign in now?'
-        );
+        const proceed = window.confirm('You need to be signed in to subscribe.\n\nWould you like to sign in now?');
         if (proceed) {
           navigation.navigate('Login' as any);
         }
       } else {
-        Alert.alert(
-          'Sign In Required',
-          'You need to be signed in to subscribe.',
-          [
-            { text: 'Cancel', style: 'cancel' },
-            { text: 'Sign In', onPress: () => navigation.navigate('Login' as any) },
-          ]
-        );
+        Alert.alert('Sign In Required', 'You need to be signed in to subscribe.', [
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'Sign In', onPress: () => navigation.navigate('Login' as any) },
+        ]);
       }
       return;
     }
 
     setIsLoading(true);
-    
     try {
-      // Determine plan ID based on billing cycle
-      const checkoutPlanId = billingCycle === 'yearly' && plan.yearlyPrice 
-        ? `${planId}-yearly` 
-        : planId;
-
-      // Initiate checkout with the checkout service
+      const checkoutPlanId = billingCycle === 'yearly' && plan.yearlyPrice ? `${planId}-yearly` : planId;
       const response = await checkoutService.initiateCheckout(checkoutPlanId, user.email);
       
       if (response.success && response.checkoutUrl) {
-        // Open Stripe checkout
         if (Platform.OS === 'web' && typeof window !== 'undefined') {
           window.location.href = response.checkoutUrl;
         } else {
@@ -286,17 +185,7 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
     }
   };
 
-  const handleContactSales = () => {
-    if (typeof window !== 'undefined') {
-      window.location.href = 'mailto:enterprise@wihy.app?subject=Enterprise%20Inquiry';
-    }
-  };
-
-  const formatPrice = (price: number) => {
-    return price.toFixed(2).replace(/\.00$/, '');
-  };
-
-  // Web Navigation Header Component
+  // Web Navigation Header
   const WebNavHeader = () => (
     <nav className="web-top-nav">
       <div className="web-nav-left">
@@ -335,271 +224,167 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
     </nav>
   );
 
-  // Web render with CSS navigation
+  // Determine grid columns based on screen size
+  const getGridClass = () => {
+    if (isDesktop) return 'pricing-grid pricing-grid-5';
+    if (isTablet) return 'pricing-grid pricing-grid-2';
+    return 'pricing-grid pricing-grid-1';
+  };
+
+  // Web render
   if (isWeb) {
     return (
-      <div style={{ 
-        minHeight: '100vh', 
-        backgroundColor: '#ffffff',
-        display: 'flex',
-        flexDirection: 'column',
-      }}>
+      <div className="pricing-page">
         {/* @ts-ignore */}
         <WebNavHeader />
         
-        <div style={{ 
-          paddingTop: 60,
-          flex: 1,
-          overflowY: 'auto',
-          overflowX: 'hidden',
-        }}>
-            {/* Hero Section - Light Blue Gradient */}
-            <View style={styles.heroSection}>
-              <View style={[styles.heroContent, isDesktop && styles.heroContentDesktop]}>
-                <View style={styles.heroIconContainer}>
-                  <Ionicons name="sparkles" size={48} color="#fff" />
-                </View>
-                <Text style={styles.heroTitle}>Unlock Your Full Potential</Text>
-                <Text style={styles.heroSubtitle}>
-                  Choose the plan that fits how you live — or how you coach.
-                </Text>
-              </View>
-            </View>
+        <div className="pricing-content">
+          {/* Hero Section */}
+          <div className="pricing-hero">
+            <div className="pricing-hero-inner">
+              <div className="pricing-hero-icon">
+                <Ionicons name="sparkles" size={48} color="#fff" />
+              </div>
+              <h1 className="pricing-hero-title">Unlock Your Full Potential</h1>
+              <p className="pricing-hero-subtitle">
+                Choose the plan that fits how you live — or how you coach.
+              </p>
+            </div>
+          </div>
 
-            {/* Consumer Plans Section */}
-            <View style={[styles.section, isDesktop && styles.sectionDesktop]}>
-              <Text style={styles.sectionLabel}>FOR INDIVIDUALS & FAMILIES</Text>
-              <Text style={styles.sectionTitle}>Personal & Family Plans</Text>
-              
-              {/* Billing Toggle */}
-              <View style={styles.billingToggleContainer}>
-                <View style={styles.billingToggle}>
-                  <Pressable
-                    style={[
-                      styles.billingOption,
-                      billingCycle === 'monthly' && styles.billingOptionActive,
-                    ]}
-                    onPress={() => setBillingCycle('monthly')}
-                  >
-                    <Text style={[
-                      styles.billingOptionText,
-                      billingCycle === 'monthly' && styles.billingOptionTextActive,
-                    ]}>Monthly</Text>
-                  </Pressable>
-                  <Pressable
-                    style={[
-                      styles.billingOption,
-                      billingCycle === 'yearly' && styles.billingOptionActive,
-                    ]}
-                    onPress={() => setBillingCycle('yearly')}
-                  >
-                    <Text style={[
-                      styles.billingOptionText,
-                      billingCycle === 'yearly' && styles.billingOptionTextActive,
-                    ]}>Yearly</Text>
-                    <View style={styles.saveBadge}>
-                      <Text style={styles.saveBadgeText}>Save 20%</Text>
-                    </View>
-                  </Pressable>
-                </View>
-              </View>
+          {/* Consumer Plans Section */}
+          <section className="pricing-section">
+            <p className="pricing-section-label">FOR INDIVIDUALS & FAMILIES</p>
+            <h2 className="pricing-section-title">Personal & Family Plans</h2>
 
-              {/* Consumer Plan Cards */}
-              <View style={[styles.plansGrid, isDesktop && styles.plansGridDesktop]}>
-                {CONSUMER_PLANS.map((plan) => (
-                  <View 
-                    key={plan.id}
-                    style={[
-                      styles.planCard,
-                      plan.popular && styles.planCardPopular,
-                      isDesktop && styles.planCardDesktop,
-                    ]}
-                  >
-                    {plan.popular && (
-                      <View style={styles.popularBadge}>
-                        <Text style={styles.popularBadgeText}>Most Popular</Text>
-                      </View>
+            {/* Billing Toggle */}
+            <div className="pricing-toggle-container">
+              <div className="pricing-toggle">
+                <button
+                  className={`pricing-toggle-btn ${billingCycle === 'monthly' ? 'active' : ''}`}
+                  onClick={() => setBillingCycle('monthly')}
+                  type="button"
+                >
+                  Monthly
+                </button>
+                <button
+                  className={`pricing-toggle-btn ${billingCycle === 'yearly' ? 'active' : ''}`}
+                  onClick={() => setBillingCycle('yearly')}
+                  type="button"
+                >
+                  Yearly
+                  <span className="pricing-save-badge">Save 20%</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Plan Cards */}
+            <div className={getGridClass()}>
+              {CONSUMER_PLANS.map((plan) => (
+                <div 
+                  key={plan.id}
+                  className={`pricing-card ${plan.popular ? 'pricing-card-popular' : ''}`}
+                >
+                  {plan.popular && (
+                    <div className="pricing-badge">Most Popular</div>
+                  )}
+                  
+                  <div className="pricing-card-icon">
+                    <Ionicons name={plan.icon as any} size={28} color={colors.primary} />
+                  </div>
+                  <h3 className="pricing-card-name">{plan.name}</h3>
+                  <p className="pricing-card-tagline">{plan.tagline}</p>
+                  
+                  <div className="pricing-card-price">
+                    {plan.setupFee ? (
+                      <>
+                        <span className="pricing-amount">${formatPrice(plan.setupFee)}</span>
+                        <span className="pricing-period"> setup + {plan.commission}</span>
+                      </>
+                    ) : plan.monthlyPrice === 0 ? (
+                      <>
+                        <span className="pricing-amount">Free</span>
+                        <span className="pricing-period"> forever</span>
+                      </>
+                    ) : (
+                      <>
+                        <span className="pricing-amount">
+                          ${billingCycle === 'yearly' && plan.yearlyPrice 
+                            ? formatPrice(plan.yearlyPrice / 12) 
+                            : formatPrice(plan.monthlyPrice)}
+                        </span>
+                        <span className="pricing-period">/month</span>
+                      </>
                     )}
-                    
-                    <View style={styles.planHeader}>
-                      <View style={[styles.planIconContainer, plan.popular && styles.planIconContainerPopular]}>
-                        <Ionicons 
-                          name={plan.icon as any} 
-                          size={24} 
-                          color={plan.popular ? '#fff' : colors.primary} 
-                        />
-                      </View>
-                      <Text style={styles.planName}>{plan.name}</Text>
-                      <Text style={styles.planTagline}>{plan.tagline}</Text>
-                    </View>
+                  </div>
+                  {billingCycle === 'yearly' && plan.yearlyPrice && plan.yearlyPrice > 0 && (
+                    <p className="pricing-yearly-note">${formatPrice(plan.yearlyPrice)}/year</p>
+                  )}
 
-                    <View style={styles.pricingContainer}>
-                      {plan.setupFee ? (
-                        <>
-                          <Text style={styles.priceAmount}>${formatPrice(plan.setupFee)}</Text>
-                          <Text style={styles.pricePeriod}>setup + 1% commission</Text>
-                        </>
-                      ) : plan.monthlyPrice === 0 ? (
-                        <>
-                          <Text style={styles.priceAmount}>Free</Text>
-                          <Text style={styles.pricePeriod}>forever</Text>
-                        </>
-                      ) : (
-                        <>
-                          <Text style={styles.priceAmount}>
-                            ${billingCycle === 'yearly' && plan.yearlyPrice 
-                              ? formatPrice(plan.yearlyPrice / 12) 
-                              : formatPrice(plan.monthlyPrice)}
-                          </Text>
-                          <Text style={styles.pricePeriod}>/month</Text>
-                          {billingCycle === 'yearly' && plan.yearlyPrice && (
-                            <Text style={styles.yearlyTotal}>
-                              ${formatPrice(plan.yearlyPrice)}/year
-                            </Text>
-                          )}
-                        </>
-                      )}
-                    </View>
+                  <ul className="pricing-features">
+                    {plan.features.map((feature, index) => (
+                      <li key={index} className="pricing-feature">
+                        <Ionicons name="checkmark-circle" size={18} color={colors.success} />
+                        <span>{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
 
-                    <View style={styles.featuresContainer}>
-                      {plan.features.map((feature, index) => (
-                        <View key={index} style={styles.featureRow}>
-                          <Ionicons name="checkmark-circle" size={18} color={colors.success} />
-                          <Text style={styles.featureText}>{feature}</Text>
-                        </View>
-                      ))}
-                    </View>
-
-                    <Pressable
-                      style={({ pressed }) => [
-                        styles.subscribeButton,
-                        plan.popular && styles.subscribeButtonPopular,
-                        pressed && styles.subscribeButtonPressed,
-                        isLoading && styles.subscribeButtonDisabled,
-                      ]}
-                      onPress={() => handleSubscribe(plan.id)}
-                      disabled={isLoading}
-                    >
-                      {isLoading ? (
-                        <ActivityIndicator size="small" color="#fff" />
-                      ) : (
-                        <Text style={[
-                          styles.subscribeButtonText,
-                          plan.popular && styles.subscribeButtonTextPopular,
-                        ]}>
-                          {plan.monthlyPrice === 0 ? 'Get Started' : 'Subscribe'}
-                        </Text>
-                      )}
-                    </Pressable>
-                  </View>
-                ))}
-              </View>
-            </View>
-
-            {/* B2B Plans Section */}
-            <View style={[styles.section, styles.sectionB2B, isDesktop && styles.sectionDesktop]}>
-              <Text style={styles.sectionLabel}>FOR BUSINESSES & ORGANIZATIONS</Text>
-              <Text style={styles.sectionTitle}>Enterprise Solutions</Text>
-              <Text style={styles.sectionSubtitle}>
-                Custom wellness programs for teams of all sizes
-              </Text>
-
-              <View style={[styles.plansGrid, isDesktop && styles.plansGridDesktop]}>
-                {B2B_PLANS.map((plan) => (
-                  <View 
-                    key={plan.id}
-                    style={[
-                      styles.planCard,
-                      styles.planCardB2B,
-                      plan.popular && styles.planCardPopular,
-                      isDesktop && styles.planCardDesktop,
-                    ]}
+                  <button
+                    onClick={() => handleSubscribe(plan.id)}
+                    className={`pricing-btn ${plan.popular ? 'pricing-btn-popular' : 'pricing-btn-primary'}`}
+                    disabled={isLoading}
+                    type="button"
                   >
-                    {plan.popular && (
-                      <View style={styles.popularBadge}>
-                        <Text style={styles.popularBadgeText}>Most Popular</Text>
-                      </View>
-                    )}
-                    
-                    <View style={styles.planHeader}>
-                      <View style={[styles.planIconContainer, styles.planIconContainerB2B]}>
-                        <Ionicons 
-                          name={plan.icon as any} 
-                          size={24} 
-                          color="#fff" 
-                        />
-                      </View>
-                      <Text style={styles.planName}>{plan.name}</Text>
-                      <Text style={styles.planTagline}>{plan.tagline}</Text>
-                    </View>
+                    {isLoading ? 'Loading...' : plan.monthlyPrice === 0 ? 'Get Started' : 'Subscribe'}
+                  </button>
+                </div>
+              ))}
+            </div>
+          </section>
 
-                    <View style={styles.pricingContainer}>
-                      <Text style={styles.priceAmount}>${formatPrice(plan.pricePerUser)}</Text>
-                      <Text style={styles.pricePeriod}>/user/month</Text>
-                      <Text style={styles.minSeats}>Min {plan.minSeats} seats</Text>
-                    </View>
+          {/* B2B Link Section */}
+          <section className="pricing-section pricing-section-alt">
+            <div className="pricing-cta-box">
+              <Ionicons name="business" size={32} color={colors.primary} />
+              <h3>Looking for Enterprise Solutions?</h3>
+              <p>We offer custom wellness programs for businesses, schools, and healthcare organizations.</p>
+              <button
+                onClick={() => navigation.navigate('B2BPricing' as any)}
+                className="pricing-btn pricing-btn-outline pricing-btn-lg"
+                type="button"
+              >
+                View Enterprise Plans →
+              </button>
+            </div>
+          </section>
 
-                    <View style={styles.featuresContainer}>
-                      {plan.features.map((feature, index) => (
-                        <View key={index} style={styles.featureRow}>
-                          <Ionicons name="checkmark-circle" size={18} color={colors.success} />
-                          <Text style={styles.featureText}>{feature}</Text>
-                        </View>
-                      ))}
-                    </View>
+          {/* Trust Section */}
+          <section className="pricing-section">
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '32px', flexWrap: 'wrap', marginBottom: '16px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Ionicons name="shield-checkmark" size={20} color={colors.primary} />
+                <span style={{ fontSize: '14px', color: '#6b7280' }}>Secure Payments</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Ionicons name="refresh" size={20} color={colors.primary} />
+                <span style={{ fontSize: '14px', color: '#6b7280' }}>Cancel Anytime</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Ionicons name="card" size={20} color={colors.primary} />
+                <span style={{ fontSize: '14px', color: '#6b7280' }}>30-Day Guarantee</span>
+              </div>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '6px' }}>
+              <Ionicons name="lock-closed" size={14} color="#9ca3af" />
+              <span style={{ fontSize: '12px', color: '#9ca3af' }}>Powered by Stripe</span>
+            </div>
+          </section>
 
-                    <Pressable
-                      style={({ pressed }) => [
-                        styles.subscribeButton,
-                        styles.contactSalesButton,
-                        pressed && styles.subscribeButtonPressed,
-                      ]}
-                      onPress={handleContactSales}
-                    >
-                      <Text style={styles.contactSalesText}>Contact Sales</Text>
-                    </Pressable>
-                  </View>
-                ))}
-              </View>
-            </View>
-
-            {/* Vertical Markets */}
-            <View style={[styles.section, isDesktop && styles.sectionDesktop]}>
-              <Text style={styles.sectionLabel}>SPECIALIZED SOLUTIONS</Text>
-              <Text style={styles.sectionTitle}>Industry-Specific Plans</Text>
-
-              <View style={[styles.verticalsGrid, isDesktop && styles.verticalsGridDesktop]}>
-                {VERTICAL_PLANS.map((plan) => (
-                  <Pressable 
-                    key={plan.id}
-                    style={({ pressed }) => [
-                      styles.verticalCard,
-                      pressed && styles.verticalCardPressed,
-                    ]}
-                    onPress={handleContactSales}
-                  >
-                    <View style={[styles.verticalIconContainer, { backgroundColor: plan.color }]}>
-                      <Ionicons name={plan.icon as any} size={28} color="#fff" />
-                    </View>
-                    <Text style={styles.verticalName}>{plan.name}</Text>
-                    <Text style={styles.verticalTagline}>{plan.tagline}</Text>
-                    <Text style={styles.contactSalesText}>Contact Sales for Enterprise Pricing</Text>
-                  </Pressable>
-                ))}
-              </View>
-            </View>
-
-            {/* FAQ Section */}
-            <View style={[styles.section, styles.faqSection, isDesktop && styles.sectionDesktop]}>
-              <Text style={styles.sectionLabel}>FREQUENTLY ASKED</Text>
-              <Text style={styles.sectionTitle}>Questions?</Text>
-              <Text style={styles.infoText}>
-                Contact us at support@wihy.app or visit our FAQ for more information about plans and billing.
-              </Text>
-            </View>
-            
-            {/* Bottom padding for scroll */}
-            <div style={{ height: 60 }} />
+          {/* Footer */}
+          <footer className="pricing-footer">
+            <p>Questions? Contact us at <a href="mailto:support@wihy.app">support@wihy.app</a></p>
+          </footer>
         </div>
       </div>
     );
@@ -608,13 +393,10 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
   // Native app render
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      {/* Native Header with Logo */}
       <View style={styles.header}>
         <Pressable 
           onPress={() => navigation.navigate('WihyHome')} 
-          style={({ pressed }) => [styles.logoButton, pressed && styles.logoButtonPressed]}
-          accessibilityRole="button"
-          accessibilityLabel="Go to WiHY Home"
+          style={styles.logoButton}
         >
           <Image
             source={require('../../assets/Logo_wihy.png')}
@@ -623,12 +405,7 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
           />
         </Pressable>
         <Text style={styles.headerTitle}>Choose Your Plan</Text>
-        <Pressable 
-          onPress={() => navigation.goBack()} 
-          style={({ pressed }) => [styles.backButton, pressed && styles.backButtonPressed]}
-          accessibilityRole="button"
-          accessibilityLabel="Go back"
-        >
+        <Pressable onPress={() => navigation.goBack()} style={styles.closeButton}>
           <Ionicons name="close" size={24} color={colors.text} />
         </Pressable>
       </View>
@@ -638,269 +415,110 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* Hero Section - Light Blue Gradient */}
+        {/* Hero */}
         <View style={styles.heroSection}>
-          <View style={[styles.heroContent, isDesktop && styles.heroContentDesktop]}>
-            <View style={styles.heroIconContainer}>
-              <Ionicons name="sparkles" size={48} color="#fff" />
-            </View>
-            <Text style={styles.heroTitle}>Unlock Your Full Potential</Text>
-            <Text style={styles.heroSubtitle}>
-              Choose the plan that fits how you live — or how you coach.
-            </Text>
+          <View style={styles.heroIcon}>
+            <Ionicons name="sparkles" size={40} color="#fff" />
           </View>
+          <Text style={styles.heroTitle}>Unlock Your Full Potential</Text>
+          <Text style={styles.heroSubtitle}>Choose the plan that fits how you live.</Text>
         </View>
 
-        {/* Consumer Plans Section */}
-        <View style={[styles.section, isDesktop && styles.sectionDesktop]}>
-          <Text style={styles.sectionLabel}>FOR INDIVIDUALS & FAMILIES</Text>
-          <Text style={styles.sectionTitle}>Personal & Family Plans</Text>
-          
-          {/* Billing Toggle */}
-          <View style={styles.billingToggleContainer}>
-            <View style={styles.billingToggle}>
-              <Pressable
-                style={[
-                  styles.billingOption,
-                  billingCycle === 'monthly' && styles.billingOptionActive,
-                ]}
-                onPress={() => setBillingCycle('monthly')}
-              >
-                <Text style={[
-                  styles.billingOptionText,
-                  billingCycle === 'monthly' && styles.billingOptionTextActive,
-                ]}>Monthly</Text>
-              </Pressable>
-              <Pressable
-                style={[
-                  styles.billingOption,
-                  billingCycle === 'yearly' && styles.billingOptionActive,
-                ]}
-                onPress={() => setBillingCycle('yearly')}
-              >
-                <Text style={[
-                  styles.billingOptionText,
-                  billingCycle === 'yearly' && styles.billingOptionTextActive,
-                ]}>Yearly</Text>
-                <View style={styles.saveBadge}>
-                  <Text style={styles.saveBadgeText}>Save 36%</Text>
-                </View>
-              </Pressable>
+        {/* Billing Toggle */}
+        <View style={styles.toggleContainer}>
+          <Pressable
+            style={[styles.toggleBtn, billingCycle === 'monthly' && styles.toggleBtnActive]}
+            onPress={() => setBillingCycle('monthly')}
+          >
+            <Text style={[styles.toggleText, billingCycle === 'monthly' && styles.toggleTextActive]}>Monthly</Text>
+          </Pressable>
+          <Pressable
+            style={[styles.toggleBtn, billingCycle === 'yearly' && styles.toggleBtnActive]}
+            onPress={() => setBillingCycle('yearly')}
+          >
+            <Text style={[styles.toggleText, billingCycle === 'yearly' && styles.toggleTextActive]}>Yearly</Text>
+            <View style={styles.saveBadge}>
+              <Text style={styles.saveBadgeText}>Save 20%</Text>
             </View>
-          </View>
-
-          {/* Consumer Plans Grid */}
-          <View style={[
-            styles.plansGrid,
-            isTablet && styles.plansGridTablet,
-            isDesktop && styles.plansGridDesktop,
-          ]}>
-            {CONSUMER_PLANS.map((plan) => {
-              const isSelected = selectedPlan === plan.id;
-              const displayPrice = billingCycle === 'yearly' && plan.yearlyPrice 
-                ? plan.yearlyPrice 
-                : plan.monthlyPrice;
-              const displayPeriod = billingCycle === 'yearly' ? 'year' : 'month';
-              
-              return (
-                <Pressable
-                  key={plan.id}
-                  style={[
-                    styles.planCard,
-                    isSelected && styles.planCardSelected,
-                    plan.popular && styles.planCardPopular,
-                  ]}
-                  onPress={() => setSelectedPlan(plan.id)}
-                >
-                  {plan.popular && (
-                    <View style={styles.popularBadge}>
-                      <Ionicons name="star" size={14} color="#fff" />
-                      <Text style={styles.popularBadgeText}>Most Popular</Text>
-                    </View>
-                  )}
-
-                  <View style={[styles.planHeader, plan.popular && styles.planHeaderPopular]}>
-                    <View style={[styles.planIconContainer, isSelected && styles.planIconContainerSelected]}>
-                      <Ionicons 
-                        name={plan.icon as any} 
-                        size={24} 
-                        color={isSelected ? '#fff' : colors.primary} 
-                      />
-                    </View>
-                    <Text style={styles.planName}>{plan.name}</Text>
-                  </View>
-
-                  <View style={styles.pricingContainer}>
-                    {plan.setupFee && (
-                      <Text style={styles.setupFee}>
-                        ${formatPrice(plan.setupFee)} setup fee
-                      </Text>
-                    )}
-                    <View style={styles.priceRow}>
-                      <Text style={styles.priceCurrency}>$</Text>
-                      <Text style={styles.priceAmount}>{formatPrice(displayPrice)}</Text>
-                      <Text style={styles.pricePeriod}>/{displayPeriod}</Text>
-                    </View>
-                    {billingCycle === 'yearly' && plan.yearlyPrice && (
-                      <Text style={styles.yearlyNote}>
-                        billed annually
-                      </Text>
-                    )}
-                  </View>
-
-                  <Text style={styles.planTagline}>{plan.tagline}</Text>
-
-                  <View style={styles.featuresList}>
-                    {plan.features.map((feature, idx) => (
-                      <View key={idx} style={styles.featureRow}>
-                        <View style={styles.featureCheck}>
-                          <Ionicons name="checkmark" size={14} color="#fff" />
-                        </View>
-                        <Text style={styles.featureText}>{feature}</Text>
-                      </View>
-                    ))}
-                  </View>
-
-                  <Pressable
-                    style={({ pressed }) => [
-                      styles.ctaButton,
-                      isSelected && styles.ctaButtonSelected,
-                      pressed && styles.ctaButtonPressed,
-                      isLoading && styles.ctaButtonLoading,
-                    ]}
-                    onPress={() => handleSubscribe(plan.id)}
-                    disabled={isLoading}
-                  >
-                    {isLoading && selectedPlan === plan.id ? (
-                      <ActivityIndicator color={isSelected ? '#fff' : colors.primary} size="small" />
-                    ) : (
-                      <>
-                        <Text style={[
-                          styles.ctaButtonText,
-                          isSelected && styles.ctaButtonTextSelected,
-                        ]}>
-                          {isSelected ? 'Get Started' : 'Select Plan'}
-                        </Text>
-                        {isSelected && (
-                          <Ionicons name="arrow-forward" size={18} color="#fff" style={{ marginLeft: 8 }} />
-                        )}
-                      </>
-                    )}
-                  </Pressable>
-                </Pressable>
-              );
-            })}
-          </View>
+          </Pressable>
         </View>
 
-        {/* B2B Section - Light Blue Background */}
-        <View style={styles.b2bSection}>
-          <View style={[styles.b2bContent, isDesktop && styles.b2bContentDesktop]}>
-            <View style={styles.b2bHeader}>
-              <View style={styles.b2bIconContainer}>
-                <Ionicons name="business" size={32} color={colors.primary} />
+        {/* Plan Cards */}
+        {CONSUMER_PLANS.map((plan) => (
+          <View key={plan.id} style={[styles.planCard, plan.popular && styles.planCardPopular]}>
+            {plan.popular && (
+              <View style={styles.popularBadge}>
+                <Text style={styles.popularBadgeText}>Most Popular</Text>
               </View>
-              <Text style={styles.b2bLabel}>FOR ORGANIZATIONS</Text>
-              <Text style={styles.b2bTitle}>Enterprise & B2B Solutions</Text>
-              <Text style={styles.b2bSubtitle}>
-                Empower your team, students, or community with wellness at scale
-              </Text>
+            )}
+            
+            <View style={styles.planCardIcon}>
+              <Ionicons name={plan.icon as any} size={24} color={colors.primary} />
+            </View>
+            <Text style={styles.planCardName}>{plan.name}</Text>
+            <Text style={styles.planCardTagline}>{plan.tagline}</Text>
+            
+            <View style={styles.priceRow}>
+              {plan.setupFee ? (
+                <>
+                  <Text style={styles.priceAmount}>${formatPrice(plan.setupFee)}</Text>
+                  <Text style={styles.pricePeriod}> setup + {plan.commission}</Text>
+                </>
+              ) : plan.monthlyPrice === 0 ? (
+                <Text style={styles.priceAmount}>Free</Text>
+              ) : (
+                <>
+                  <Text style={styles.priceAmount}>
+                    ${billingCycle === 'yearly' && plan.yearlyPrice 
+                      ? formatPrice(plan.yearlyPrice / 12) 
+                      : formatPrice(plan.monthlyPrice)}
+                  </Text>
+                  <Text style={styles.pricePeriod}>/month</Text>
+                </>
+              )}
             </View>
 
-            {/* B2B Plans Grid */}
-            <View style={[
-              styles.b2bPlansGrid,
-              isTablet && styles.b2bPlansGridTablet,
-            ]}>
-              {B2B_PLANS.map((plan) => (
-                <View key={plan.id} style={[styles.b2bCard, plan.popular && styles.b2bCardPopular]}>
-                  {plan.popular && (
-                    <View style={styles.b2bPopularBadge}>
-                      <Text style={styles.b2bPopularBadgeText}>Recommended</Text>
-                    </View>
-                  )}
-                  <View style={styles.b2bCardIcon}>
-                    <Ionicons name={plan.icon as any} size={28} color={colors.primary} />
-                  </View>
-                  <Text style={styles.b2bCardName}>{plan.name}</Text>
-                  <View style={styles.b2bPriceRow}>
-                    <Text style={styles.b2bPrice}>${formatPrice(plan.pricePerUser)}</Text>
-                    <Text style={styles.b2bPriceUnit}>/user/mo</Text>
-                  </View>
-                  <Text style={styles.b2bMinSeats}>Min. {plan.minSeats} seats</Text>
-                  <Text style={styles.b2bTagline}>{plan.tagline}</Text>
-                  <View style={styles.b2bFeatures}>
-                    {plan.features.map((feature, idx) => (
-                      <View key={idx} style={styles.b2bFeatureRow}>
-                        <Ionicons name="checkmark-circle" size={16} color="#4CAF50" />
-                        <Text style={styles.b2bFeatureText}>{feature}</Text>
-                      </View>
-                    ))}
-                  </View>
+            <View style={styles.featuresList}>
+              {plan.features.map((feature, idx) => (
+                <View key={idx} style={styles.featureRow}>
+                  <Ionicons name="checkmark-circle" size={16} color={colors.success} />
+                  <Text style={styles.featureText}>{feature}</Text>
                 </View>
               ))}
             </View>
 
-            {/* Industry Verticals */}
-            <View style={styles.verticalsSection}>
-              <Text style={styles.verticalsTitle}>Industry-Specific Solutions</Text>
-              <View style={[styles.verticalsGrid, isTablet && styles.verticalsGridTablet]}>
-                {VERTICAL_PLANS.map((plan) => (
-                  <View key={plan.id} style={styles.verticalCard}>
-                    <View style={[styles.verticalIcon, { backgroundColor: plan.color + '15' }]}>
-                      <Ionicons name={plan.icon as any} size={28} color={plan.color} />
-                    </View>
-                    <Text style={styles.verticalName}>{plan.name}</Text>
-                    <Text style={styles.verticalPrice}>
-                      ${formatPrice(plan.pricePerUser)}<Text style={styles.verticalPriceUnit}>/{plan.unit}/mo</Text>
-                    </Text>
-                  </View>
-                ))}
-              </View>
-            </View>
-
-            {/* Contact Sales CTA */}
             <Pressable
-              style={({ pressed }) => [styles.contactSalesButton, pressed && styles.contactSalesButtonPressed]}
-              onPress={handleContactSales}
+              style={[styles.subscribeBtn, plan.popular && styles.subscribeBtnPopular]}
+              onPress={() => handleSubscribe(plan.id)}
+              disabled={isLoading}
             >
-              <Ionicons name="mail" size={20} color="#fff" />
-              <Text style={styles.contactSalesText}>Contact Sales for Enterprise Pricing</Text>
-              <Ionicons name="arrow-forward" size={20} color="#fff" />
+              {isLoading ? (
+                <ActivityIndicator size="small" color="#fff" />
+              ) : (
+                <Text style={styles.subscribeBtnText}>
+                  {plan.monthlyPrice === 0 ? 'Get Started' : 'Subscribe'}
+                </Text>
+              )}
             </Pressable>
           </View>
-        </View>
+        ))}
 
-        {/* Trust Section */}
-        <View style={[styles.trustSection, isDesktop && styles.trustSectionDesktop]}>
-          <View style={styles.trustRow}>
-            <View style={styles.trustItem}>
-              <Ionicons name="shield-checkmark" size={20} color={colors.primary} />
-              <Text style={styles.trustText}>Secure Payments</Text>
-            </View>
-            <View style={styles.trustDivider} />
-            <View style={styles.trustItem}>
-              <Ionicons name="refresh" size={20} color={colors.primary} />
-              <Text style={styles.trustText}>Cancel Anytime</Text>
-            </View>
-            <View style={styles.trustDivider} />
-            <View style={styles.trustItem}>
-              <Ionicons name="card" size={20} color={colors.primary} />
-              <Text style={styles.trustText}>30-Day Guarantee</Text>
-            </View>
+        {/* B2B Link */}
+        <Pressable 
+          style={styles.b2bLink}
+          onPress={() => navigation.navigate('B2BPricing' as any)}
+        >
+          <Ionicons name="business" size={24} color={colors.primary} />
+          <View style={styles.b2bLinkText}>
+            <Text style={styles.b2bLinkTitle}>Enterprise Solutions</Text>
+            <Text style={styles.b2bLinkSubtitle}>For businesses & organizations</Text>
           </View>
-          <View style={styles.poweredBy}>
-            <Ionicons name="lock-closed" size={14} color={colors.textMuted} />
-            <Text style={styles.poweredByText}>Powered by Stripe</Text>
-          </View>
-        </View>
+          <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
+        </Pressable>
 
-        {/* FAQ Section */}
-        <View style={[styles.infoSection, isDesktop && styles.infoSectionDesktop]}>
-          <Text style={styles.infoTitle}>Questions?</Text>
-          <Text style={styles.infoText}>
-            Contact us at support@wihy.app or visit our FAQ for more information about plans and billing.
-          </Text>
+        {/* Footer */}
+        <View style={styles.footer}>
+          <Text style={styles.footerText}>Questions? support@wihy.app</Text>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -910,674 +528,233 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#ffffff',
+    backgroundColor: '#fff',
   },
-  
-  // Header
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingVertical: 12,
-    backgroundColor: '#fff',
     borderBottomWidth: 1,
-    borderBottomColor: colors.border,
+    borderBottomColor: '#e5e7eb',
   },
   logoButton: {
     padding: 4,
-    borderRadius: borderRadius.md,
-  },
-  logoButtonPressed: {
-    opacity: 0.7,
   },
   headerLogo: {
     width: 80,
     height: 32,
   },
-  backButton: {
+  headerTitle: {
+    fontSize: 17,
+    fontWeight: '600',
+    color: '#1f2937',
+  },
+  closeButton: {
     width: 40,
     height: 40,
-    borderRadius: borderRadius.md,
+    borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  backButtonPressed: {
-    backgroundColor: colors.buttonSecondary,
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: colors.text,
-  },
-
-  // Scroll
   scrollView: {
     flex: 1,
   },
   scrollContent: {
-    paddingBottom: 60,
+    paddingBottom: 40,
   },
-
-  // Hero Section - Primary Blue Gradient (matching mobile)
   heroSection: {
-    backgroundColor: `${colors.primary}15`,
-    ...Platform.select({
-      web: {
-        background: `linear-gradient(135deg, ${colors.primary}12 0%, ${colors.primary}20 50%, ${colors.primary}30 100%)`,
-      } as any,
-    }),
-    paddingTop: 48,
-    paddingBottom: 48,
-    paddingHorizontal: 20,
-  },
-  heroContent: {
+    backgroundColor: '#e8f0fe',
+    padding: 32,
     alignItems: 'center',
-    maxWidth: 600,
-    alignSelf: 'center',
-    width: '100%',
   },
-  heroContentDesktop: {
-    maxWidth: 800,
-  },
-  heroIconContainer: {
-    width: 88,
-    height: 88,
-    borderRadius: 44,
+  heroIcon: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
     backgroundColor: colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 24,
-    ...shadows.lg,
+    marginBottom: 16,
   },
   heroTitle: {
-    fontSize: 32,
+    fontSize: 24,
     fontWeight: '800',
-    color: colors.text,
+    color: '#1f2937',
     textAlign: 'center',
-    marginBottom: 12,
-  },
-  heroSubtitle: {
-    fontSize: 18,
-    color: colors.textMuted,
-    textAlign: 'center',
-    lineHeight: 28,
-  },
-
-  // Section
-  section: {
-    paddingHorizontal: 16,
-    paddingTop: 48,
-    paddingBottom: 32,
-    backgroundColor: '#ffffff',
-  },
-  sectionDesktop: {
-    paddingHorizontal: 40,
-    maxWidth: 1200,
-    alignSelf: 'center',
-    width: '100%',
-  },
-  sectionLabel: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: colors.primary,
-    textAlign: 'center',
-    letterSpacing: 1,
     marginBottom: 8,
   },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: colors.text,
+  heroSubtitle: {
+    fontSize: 16,
+    color: '#6b7280',
     textAlign: 'center',
-    marginBottom: 32,
   },
-
-  // Billing Toggle
-  billingToggleContainer: {
-    alignItems: 'center',
-    marginBottom: 32,
-  },
-  billingToggle: {
+  toggleContainer: {
     flexDirection: 'row',
-    backgroundColor: colors.buttonSecondary,
-    borderRadius: borderRadius.pill,
+    backgroundColor: '#f3f4f6',
+    borderRadius: 28,
     padding: 4,
+    marginHorizontal: 24,
+    marginTop: 24,
+    marginBottom: 16,
   },
-  billingOption: {
+  toggleBtn: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: borderRadius.pill,
+    borderRadius: 24,
+    gap: 6,
   },
-  billingOptionActive: {
-    backgroundColor: colors.primary,
+  toggleBtnActive: {
+    backgroundColor: '#fff',
   },
-  billingOptionText: {
+  toggleText: {
     fontSize: 14,
-    fontWeight: '600',
-    color: colors.textMuted,
+    fontWeight: '500',
+    color: '#6b7280',
   },
-  billingOptionTextActive: {
-    color: '#fff',
+  toggleTextActive: {
+    color: '#1f2937',
   },
   saveBadge: {
-    backgroundColor: '#E8F5E9',
-    paddingHorizontal: 8,
+    backgroundColor: '#dcfce7',
+    paddingHorizontal: 6,
     paddingVertical: 2,
-    borderRadius: 12,
-    marginLeft: 8,
+    borderRadius: 8,
   },
   saveBadgeText: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: '#4CAF50',
+    fontSize: 10,
+    fontWeight: '600',
+    color: '#16a34a',
   },
-
-  // Plans Grid
-  plansGrid: {
-    gap: 16,
-    alignItems: 'center',
-    width: '100%',
-    paddingHorizontal: 16,
-  },
-  plansGridTablet: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'center',
-    paddingHorizontal: 0,
-  },
-  plansGridDesktop: {
-    flexDirection: 'row',
-    flexWrap: 'nowrap',
-    justifyContent: 'center',
-    gap: 20,
-  },
-
-  // Plan Card
   planCard: {
     backgroundColor: '#fff',
-    borderRadius: borderRadius.lg,
-    padding: 24,
-    borderWidth: 2,
-    borderColor: colors.border,
-    position: 'relative',
-    ...Platform.select({
-      web: {
-        width: '100%',
-        maxWidth: 320,
-      },
-    }),
-    ...shadows.sm,
-  },
-  planCardSelected: {
-    borderColor: colors.primary,
-    ...shadows.md,
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
+    borderRadius: 16,
+    marginHorizontal: 16,
+    marginBottom: 16,
+    padding: 20,
   },
   planCardPopular: {
-    borderColor: '#4CAF50',
-    marginTop: 12,
+    borderColor: '#22c55e',
+    borderWidth: 2,
   },
   popularBadge: {
     position: 'absolute',
-    top: -14,
-    left: '50%',
-    transform: [{ translateX: -55 }],
-    backgroundColor: '#4CAF50',
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 6,
-    paddingHorizontal: 14,
-    borderRadius: 20,
-    gap: 6,
+    top: -12,
+    alignSelf: 'center',
+    backgroundColor: '#22c55e',
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 12,
   },
   popularBadgeText: {
+    fontSize: 11,
+    fontWeight: '600',
     color: '#fff',
-    fontSize: 12,
-    fontWeight: '700',
   },
-
-  // Plan Header
-  planHeader: {
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  planHeaderPopular: {
-    marginTop: 8,
-  },
-  planIconContainer: {
+  planCardIcon: {
     width: 48,
     height: 48,
-    borderRadius: 24,
-    backgroundColor: `${colors.primary}15`,
+    borderRadius: 12,
+    backgroundColor: '#e8f0fe',
     justifyContent: 'center',
     alignItems: 'center',
+    alignSelf: 'center',
     marginBottom: 12,
   },
-  planIconContainerSelected: {
-    backgroundColor: colors.primary,
-  },
-  planName: {
+  planCardName: {
     fontSize: 18,
     fontWeight: '700',
-    color: colors.text,
-  },
-
-  // Pricing
-  pricingContainer: {
-    alignItems: 'center',
-    marginBottom: 16,
-    minHeight: 70,
-  },
-  setupFee: {
-    fontSize: 12,
-    color: colors.textMuted,
+    color: '#1f2937',
+    textAlign: 'center',
     marginBottom: 4,
+  },
+  planCardTagline: {
+    fontSize: 13,
+    color: '#6b7280',
+    textAlign: 'center',
+    marginBottom: 16,
   },
   priceRow: {
     flexDirection: 'row',
     alignItems: 'baseline',
-  },
-  priceCurrency: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: colors.text,
+    justifyContent: 'center',
+    marginBottom: 16,
   },
   priceAmount: {
     fontSize: 32,
     fontWeight: '800',
-    color: colors.text,
-    letterSpacing: -1,
+    color: '#1f2937',
   },
   pricePeriod: {
     fontSize: 14,
-    color: colors.textMuted,
-    marginLeft: 2,
+    color: '#6b7280',
   },
-  yearlyNote: {
-    fontSize: 12,
-    color: colors.textMuted,
-    marginTop: 4,
-  },
-
-  // Tagline
-  planTagline: {
-    fontSize: 13,
-    color: colors.textMuted,
-    textAlign: 'center',
-    lineHeight: 18,
-    marginBottom: 16,
-    minHeight: 36,
-  },
-
-  // Features
   featuresList: {
-    marginBottom: 20,
+    marginBottom: 16,
   },
   featureRow: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
-    marginBottom: 10,
-  },
-  featureCheck: {
-    width: 18,
-    height: 18,
-    borderRadius: 9,
-    backgroundColor: '#4CAF50',
-    justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 8,
-    marginTop: 1,
+    gap: 8,
+    marginBottom: 8,
   },
   featureText: {
-    fontSize: 13,
-    color: colors.text,
-    flex: 1,
-    lineHeight: 18,
-  },
-
-  // CTA Button
-  ctaButton: {
-    backgroundColor: colors.buttonSecondary,
-    paddingVertical: 12,
-    borderRadius: borderRadius.md,
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexDirection: 'row',
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  ctaButtonSelected: {
-    backgroundColor: colors.primary,
-    borderColor: colors.primary,
-  },
-  ctaButtonPressed: {
-    opacity: 0.9,
-  },
-  ctaButtonLoading: {
-    opacity: 0.7,
-  },
-  ctaButtonText: {
     fontSize: 14,
-    fontWeight: '600',
-    color: colors.text,
-  },
-  ctaButtonTextSelected: {
-    color: '#fff',
-  },
-
-  // B2B Section - Primary Blue Background (matching mobile)
-  b2bSection: {
-    backgroundColor: `${colors.primary}08`,
-    ...Platform.select({
-      web: {
-        background: `linear-gradient(180deg, ${colors.primary}08 0%, ${colors.primary}15 100%)`,
-      } as any,
-    }),
-    paddingVertical: 56,
-    paddingHorizontal: 16,
-  },
-  b2bContent: {
-    maxWidth: 1000,
-    alignSelf: 'center',
-    width: '100%',
-  },
-  b2bContentDesktop: {
-    maxWidth: 1200,
-  },
-  b2bHeader: {
-    alignItems: 'center',
-    marginBottom: 40,
-  },
-  b2bIconContainer: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: '#fff',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 16,
-    ...shadows.sm,
-  },
-  b2bLabel: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: colors.primary,
-    letterSpacing: 1,
-    marginBottom: 8,
-  },
-  b2bTitle: {
-    fontSize: 28,
-    fontWeight: '700',
-    color: colors.text,
-    textAlign: 'center',
-    marginBottom: 12,
-  },
-  b2bSubtitle: {
-    fontSize: 16,
-    color: colors.textMuted,
-    textAlign: 'center',
-    maxWidth: 500,
-    lineHeight: 24,
-  },
-
-  // B2B Plans Grid
-  b2bPlansGrid: {
-    gap: 16,
-    marginBottom: 40,
-    alignItems: 'center',
-    width: '100%',
-    paddingHorizontal: 16,
-  },
-  b2bPlansGridTablet: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 20,
-    paddingHorizontal: 0,
-  },
-
-  // B2B Card
-  b2bCard: {
-    backgroundColor: '#fff',
-    borderRadius: borderRadius.lg,
-    padding: 24,
-    borderWidth: 1,
-    borderColor: colors.border,
-    ...Platform.select({
-      web: {
-        width: '100%',
-        maxWidth: 320,
-      },
-    }),
-    ...shadows.sm,
-  },
-  b2bCardPopular: {
-    borderColor: colors.primary,
-    borderWidth: 2,
-  },
-  b2bPopularBadge: {
-    position: 'absolute',
-    top: -10,
-    right: 16,
-    backgroundColor: colors.primary,
-    paddingVertical: 4,
-    paddingHorizontal: 12,
-    borderRadius: 12,
-  },
-  b2bPopularBadgeText: {
-    color: '#fff',
-    fontSize: 11,
-    fontWeight: '700',
-  },
-  b2bCardIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 12,
-    backgroundColor: `${colors.primary}15`,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  b2bCardName: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: colors.text,
-    marginBottom: 8,
-  },
-  b2bPriceRow: {
-    flexDirection: 'row',
-    alignItems: 'baseline',
-    marginBottom: 4,
-  },
-  b2bPrice: {
-    fontSize: 28,
-    fontWeight: '800',
-    color: colors.text,
-  },
-  b2bPriceUnit: {
-    fontSize: 14,
-    color: colors.textMuted,
-    marginLeft: 4,
-  },
-  b2bMinSeats: {
-    fontSize: 12,
-    color: colors.textMuted,
-    marginBottom: 12,
-  },
-  b2bTagline: {
-    fontSize: 14,
-    color: colors.textMuted,
-    marginBottom: 16,
-    lineHeight: 20,
-  },
-  b2bFeatures: {
-    gap: 8,
-  },
-  b2bFeatureRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  b2bFeatureText: {
-    fontSize: 13,
-    color: colors.text,
+    color: '#374151',
     flex: 1,
   },
-
-  // Verticals Section
-  verticalsSection: {
-    marginBottom: 40,
-    width: '100%',
-    paddingHorizontal: 16,
-  },
-  verticalsTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: colors.text,
-    textAlign: 'center',
-    marginBottom: 24,
-  },
-  verticalsGrid: {
-    gap: 16,
+  subscribeBtn: {
+    backgroundColor: colors.primary,
+    paddingVertical: 14,
+    borderRadius: 12,
     alignItems: 'center',
-    width: '100%',
   },
-  verticalsGridTablet: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'center',
-    gap: 20,
+  subscribeBtnPopular: {
+    backgroundColor: '#22c55e',
   },
-  verticalCard: {
-    backgroundColor: '#fff',
-    borderRadius: borderRadius.lg,
-    padding: 24,
-    alignItems: 'center',
-    width: '100%',
-    maxWidth: 320,
-    ...shadows.sm,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  verticalIcon: {
-    width: 56,
-    height: 56,
-    borderRadius: 16,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  verticalName: {
+  subscribeBtnText: {
     fontSize: 15,
-    fontWeight: '700',
-    color: colors.text,
-    textAlign: 'center',
-    marginBottom: 8,
-  },
-  verticalPrice: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: colors.primary,
-    textAlign: 'center',
-  },
-  verticalPriceUnit: {
-    fontSize: 12,
-    fontWeight: '500',
-    color: colors.textMuted,
-  },
-
-  // Contact Sales Button
-  contactSalesButton: {
-    backgroundColor: colors.primary,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 16,
-    paddingHorizontal: 32,
-    borderRadius: borderRadius.md,
-    gap: 12,
-    alignSelf: 'center',
-    ...shadows.sm,
-  },
-  contactSalesButtonPressed: {
-    opacity: 0.9,
-  },
-  contactSalesText: {
-    fontSize: 16,
     fontWeight: '600',
     color: '#fff',
   },
-
-  // Trust Section
-  trustSection: {
-    paddingVertical: 48,
-    paddingHorizontal: 16,
-    alignItems: 'center',
-    backgroundColor: '#fff',
-  },
-  trustSectionDesktop: {
-    maxWidth: 1200,
-    alignSelf: 'center',
-    width: '100%',
-  },
-  trustRow: {
+  b2bLink: {
     flexDirection: 'row',
     alignItems: 'center',
-    flexWrap: 'wrap',
-    justifyContent: 'center',
-    gap: 8,
+    backgroundColor: '#f9fafb',
+    marginHorizontal: 16,
+    marginVertical: 24,
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
+    gap: 12,
   },
-  trustItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    paddingHorizontal: 12,
+  b2bLinkText: {
+    flex: 1,
   },
-  trustDivider: {
-    width: 1,
-    height: 16,
-    backgroundColor: colors.border,
-  },
-  trustText: {
-    fontSize: 13,
-    color: colors.textMuted,
-    fontWeight: '500',
-  },
-  poweredBy: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    marginTop: 16,
-    opacity: 0.7,
-  },
-  poweredByText: {
-    fontSize: 12,
-    color: colors.textMuted,
-  },
-
-  // Info Section
-  infoSection: {
-    paddingVertical: 40,
-    paddingHorizontal: 20,
-    alignItems: 'center',
-    backgroundColor: colors.buttonSecondary,
-  },
-  infoSectionDesktop: {
-    maxWidth: 600,
-    alignSelf: 'center',
-    width: '100%',
-  },
-  infoTitle: {
-    fontSize: 16,
+  b2bLinkTitle: {
+    fontSize: 15,
     fontWeight: '600',
-    color: colors.text,
-    marginBottom: 8,
+    color: '#1f2937',
   },
-  infoText: {
-    fontSize: 14,
-    color: colors.textMuted,
-    textAlign: 'center',
-    lineHeight: 22,
+  b2bLinkSubtitle: {
+    fontSize: 13,
+    color: '#6b7280',
+  },
+  footer: {
+    padding: 24,
+    alignItems: 'center',
+  },
+  footerText: {
+    fontSize: 13,
+    color: '#9ca3af',
   },
 });
+
+export default SubscriptionScreen;

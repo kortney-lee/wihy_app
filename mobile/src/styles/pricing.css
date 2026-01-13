@@ -1,0 +1,535 @@
+/* ═══════════════════════════════════════════════════════════
+   WiHY Pricing Page Styles
+   Responsive CSS for subscription/pricing pages
+   ═══════════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════════
+   BASE LAYOUT
+   ═══════════════════════════════════════════════════════════ */
+.pricing-page {
+  min-height: 100vh;
+  background-color: #ffffff;
+  display: flex;
+  flex-direction: column;
+}
+
+.pricing-content {
+  padding-top: 60px; /* Account for fixed nav */
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   HERO SECTION
+   ═══════════════════════════════════════════════════════════ */
+.pricing-hero {
+  background: linear-gradient(135deg, #e8f0fe 0%, #d3e3fd 50%, #c2d9fc 100%);
+  padding: 48px 24px;
+  text-align: center;
+}
+
+.pricing-hero-b2b {
+  background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 50%, #d1d5db 100%);
+}
+
+.pricing-hero-inner {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.pricing-hero-icon {
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  background-color: var(--wihy-blue, #1a73e8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 24px;
+  box-shadow: 0 8px 24px rgba(26, 115, 232, 0.3);
+}
+
+.pricing-hero-title {
+  font-size: 32px;
+  font-weight: 800;
+  color: #1f2937;
+  margin: 0 0 12px;
+  line-height: 1.2;
+}
+
+.pricing-hero-subtitle {
+  font-size: 18px;
+  color: #6b7280;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.pricing-link-btn {
+  margin-top: 20px;
+  padding: 10px 20px;
+  background: transparent;
+  border: 1px solid #6b7280;
+  border-radius: 24px;
+  color: #6b7280;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pricing-link-btn:hover {
+  background: #f3f4f6;
+  border-color: #1a73e8;
+  color: #1a73e8;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   SECTION LAYOUT
+   ═══════════════════════════════════════════════════════════ */
+.pricing-section {
+  padding: 48px 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.pricing-section-alt {
+  background-color: #f9fafb;
+}
+
+.pricing-section-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--wihy-blue, #1a73e8);
+  text-align: center;
+  letter-spacing: 1px;
+  margin: 0 0 8px;
+  text-transform: uppercase;
+}
+
+.pricing-section-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #1f2937;
+  text-align: center;
+  margin: 0 0 32px;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   BILLING TOGGLE
+   ═══════════════════════════════════════════════════════════ */
+.pricing-toggle-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 32px;
+}
+
+.pricing-toggle {
+  display: flex;
+  background-color: #f3f4f6;
+  border-radius: 28px;
+  padding: 4px;
+}
+
+.pricing-toggle-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 24px;
+  border: none;
+  border-radius: 24px;
+  background: transparent;
+  color: #6b7280;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pricing-toggle-btn.active {
+  background-color: #ffffff;
+  color: #1f2937;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.pricing-save-badge {
+  background-color: #dcfce7;
+  color: #16a34a;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   PRICING GRID
+   ═══════════════════════════════════════════════════════════ */
+.pricing-grid {
+  display: grid;
+  gap: 24px;
+  width: 100%;
+}
+
+.pricing-grid-1 {
+  grid-template-columns: 1fr;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.pricing-grid-2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.pricing-grid-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.pricing-grid-4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.pricing-grid-5 {
+  grid-template-columns: repeat(5, 1fr);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   PRICING CARD
+   ═══════════════════════════════════════════════════════════ */
+.pricing-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.pricing-card:hover {
+  border-color: #d1d5db;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.pricing-card-popular {
+  border-color: #22c55e;
+  border-width: 2px;
+}
+
+.pricing-card-popular:hover {
+  border-color: #16a34a;
+}
+
+.pricing-card-vertical {
+  border-top-width: 4px;
+}
+
+.pricing-badge {
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #22c55e;
+  color: #ffffff;
+  padding: 4px 16px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.pricing-card-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  background-color: #e8f0fe;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+}
+
+.pricing-card-icon-colored {
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+}
+
+.pricing-card-name {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1f2937;
+  text-align: center;
+  margin: 0 0 4px;
+}
+
+.pricing-card-tagline {
+  font-size: 14px;
+  color: #6b7280;
+  text-align: center;
+  margin: 0 0 20px;
+  min-height: 40px;
+}
+
+.pricing-card-price {
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+.pricing-amount {
+  font-size: 36px;
+  font-weight: 800;
+  color: #1f2937;
+}
+
+.pricing-period {
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.pricing-yearly-note {
+  font-size: 12px;
+  color: #6b7280;
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.pricing-min-seats {
+  font-size: 12px;
+  color: #9ca3af;
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   FEATURES LIST
+   ═══════════════════════════════════════════════════════════ */
+.pricing-features {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 24px;
+  flex: 1;
+}
+
+.pricing-feature {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 12px;
+  font-size: 14px;
+  color: #374151;
+}
+
+.pricing-feature span {
+  flex: 1;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   BUTTONS
+   ═══════════════════════════════════════════════════════════ */
+.pricing-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 14px 24px;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  font-family: inherit;
+}
+
+.pricing-btn-primary {
+  background-color: var(--wihy-blue, #1a73e8);
+  color: #ffffff;
+}
+
+.pricing-btn-primary:hover {
+  background-color: #1557b0;
+}
+
+.pricing-btn-outline {
+  background-color: transparent;
+  border: 1px solid #d1d5db;
+  color: #374151;
+}
+
+.pricing-btn-outline:hover {
+  background-color: #f9fafb;
+  border-color: #9ca3af;
+}
+
+.pricing-btn-popular {
+  background-color: #22c55e;
+  color: #ffffff;
+}
+
+.pricing-btn-popular:hover {
+  background-color: #16a34a;
+}
+
+.pricing-btn-lg {
+  padding: 16px 32px;
+  font-size: 16px;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   CTA SECTION
+   ═══════════════════════════════════════════════════════════ */
+.pricing-cta-section {
+  text-align: center;
+}
+
+.pricing-cta-box {
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 40px;
+  background: linear-gradient(135deg, #e8f0fe 0%, #d3e3fd 100%);
+  border-radius: 20px;
+}
+
+.pricing-cta-box h3 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 16px 0 8px;
+}
+
+.pricing-cta-box p {
+  font-size: 14px;
+  color: #6b7280;
+  margin: 0 0 24px;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   FOOTER
+   ═══════════════════════════════════════════════════════════ */
+.pricing-footer {
+  padding: 32px 24px;
+  text-align: center;
+  border-top: 1px solid #e5e7eb;
+}
+
+.pricing-footer p {
+  font-size: 14px;
+  color: #6b7280;
+  margin: 0;
+}
+
+.pricing-footer a {
+  color: var(--wihy-blue, #1a73e8);
+  text-decoration: none;
+}
+
+.pricing-footer a:hover {
+  text-decoration: underline;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   RESPONSIVE BREAKPOINTS
+   ═══════════════════════════════════════════════════════════ */
+
+/* Mobile - up to 639px */
+@media (max-width: 639px) {
+  .pricing-hero {
+    padding: 32px 16px;
+  }
+  
+  .pricing-hero-icon {
+    width: 72px;
+    height: 72px;
+  }
+  
+  .pricing-hero-title {
+    font-size: 26px;
+  }
+  
+  .pricing-hero-subtitle {
+    font-size: 16px;
+  }
+  
+  .pricing-section {
+    padding: 32px 16px;
+  }
+  
+  .pricing-section-title {
+    font-size: 24px;
+    margin-bottom: 24px;
+  }
+  
+  .pricing-card {
+    padding: 20px;
+  }
+  
+  .pricing-amount {
+    font-size: 32px;
+  }
+  
+  .pricing-toggle-btn {
+    padding: 8px 16px;
+    font-size: 13px;
+  }
+  
+  .pricing-grid {
+    gap: 16px;
+  }
+}
+
+/* Tablet - 640px to 1023px */
+@media (min-width: 640px) and (max-width: 1023px) {
+  .pricing-hero {
+    padding: 40px 24px;
+  }
+  
+  .pricing-section {
+    padding: 40px 24px;
+  }
+  
+  .pricing-grid {
+    gap: 20px;
+  }
+}
+
+/* Desktop - 1024px and up */
+@media (min-width: 1024px) {
+  .pricing-hero {
+    padding: 64px 40px;
+  }
+  
+  .pricing-hero-title {
+    font-size: 40px;
+  }
+  
+  .pricing-hero-subtitle {
+    font-size: 20px;
+  }
+  
+  .pricing-section {
+    padding: 64px 40px;
+  }
+  
+  .pricing-section-title {
+    font-size: 32px;
+  }
+  
+  .pricing-card {
+    padding: 32px;
+  }
+}
+
+/* Large Desktop - 1280px and up */
+@media (min-width: 1280px) {
+  .pricing-section {
+    max-width: 1400px;
+  }
+}
