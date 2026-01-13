@@ -1,0 +1,15 @@
+# .firebaserc
+{
+  "projects": {
+    "default": "wihy-ai"
+  },
+  "targets": {
+    "wihy-ai": {
+      "hosting": {
+        "production": [
+          "wihy-ai"
+        ]
+      }
+    }
+  }
+}
