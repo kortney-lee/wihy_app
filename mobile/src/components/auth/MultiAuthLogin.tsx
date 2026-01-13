@@ -14,6 +14,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { AuthContext } from '../../context/AuthContext';
 import { colors, sizes } from '../../theme/design-tokens';
 import { getResponsiveIconSize } from '../../utils/responsive';
+import SvgIcon from '../shared/SvgIcon';
 
 interface MultiAuthLoginProps {
   onUserChange?: (user: any) => void;
@@ -155,6 +156,16 @@ export default function MultiAuthLogin({
       >
         <View style={styles.modalOverlay}>
           <View style={styles.providerContainer}>
+            {/* Close button for web */}
+            {Platform.OS === 'web' && onClose && (
+              <TouchableOpacity 
+                style={styles.closeButton} 
+                onPress={onClose}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              >
+                <Text style={styles.closeButtonText}>✕</Text>
+              </TouchableOpacity>
+            )}
             <Text style={styles.title}>{title}</Text>
 
             {activeProviders.map((provider, index) => (
@@ -173,7 +184,7 @@ export default function MultiAuthLogin({
                 onPressOut={() => console.log(`[Auth] PressOut: ${provider.id}`)}
                 hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
               >
-                <Ionicons
+                <SvgIcon
                   name={provider.icon as any}
                   size={getResponsiveIconSize(sizes.icons.md)}
                   color={provider.color}
@@ -198,31 +209,42 @@ export default function MultiAuthLogin({
               <Text style={styles.cancelText}>Cancel</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity
-              style={styles.devButton}
-              onPress={async () => {
-                try {
-                  const newUser = await signIn('dev', {
-                    email: 'dev@wihy.app',
-                    name: 'Dev User',
-                  });
-                  console.log('[DevLogin] success', newUser);
-                  setShowEmailForm(false);
-                  setIsSignUp(false);
-                  onUserChange?.(newUser);
-                  onSignIn?.();
-                  // Allow state to propagate before closing
-                  setTimeout(() => onClose?.(), 50);
-                } catch (error) {
-                  console.error('[DevLogin] failed', error);
-                  const message = error instanceof Error ? error.message : 'Could not sign in automatically';
-                  Alert.alert('Dev Login Failed', message);
-                }
-              }}
-            >
-              <Ionicons name="rocket" size={20} color="#fff" style={{ marginRight: 8 }} />
-              <Text style={styles.devText}>Dev Login</Text>
-            </TouchableOpacity>
+            {/* Show dev login only in development mode (native or localhost) */}
+            {__DEV__ && (Platform.OS !== 'web' || 
+              (typeof window !== 'undefined' && 
+               (window.location.hostname === 'localhost' || 
+                window.location.hostname === '127.0.0.1' ||
+                window.location.hostname.includes('192.168.')))) && (
+              <TouchableOpacity
+                style={styles.devButton}
+                onPress={async () => {
+                  try {
+                    const newUser = await signIn('dev', {
+                      email: 'dev@wihy.app',
+                      name: 'Dev User',
+                    });
+                    console.log('[DevLogin] success', newUser);
+                    setShowEmailForm(false);
+                    setIsSignUp(false);
+                    onUserChange?.(newUser);
+                    onSignIn?.();
+                    // Allow state to propagate before closing
+                    setTimeout(() => onClose?.(), 50);
+                  } catch (error) {
+                    console.error('[DevLogin] failed', error);
+                    const message = error instanceof Error ? error.message : 'Could not sign in automatically';
+                    if (Platform.OS === 'web' && typeof window !== 'undefined') {
+                      window.alert('Dev Login Failed: ' + message);
+                    } else {
+                      Alert.alert('Dev Login Failed', message);
+                    }
+                  }
+                }}
+              >
+                <SvgIcon name="rocket" size={20} color="#fff" style={{ marginRight: 8 }} />
+                <Text style={styles.devText}>Dev Login</Text>
+              </TouchableOpacity>
+            )}
           </View>
         </View>
       </Modal>
@@ -331,22 +353,25 @@ const styles = StyleSheet.create({
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.45)',
-    justifyContent: 'flex-end',
-    alignItems: 'stretch',
+    justifyContent: Platform.OS === 'web' ? 'center' : 'flex-end',
+    alignItems: Platform.OS === 'web' ? 'center' : 'stretch',
   },
   providerContainer: {
-    backgroundColor: '#f1f5f9',
-    borderTopLeftRadius: 28,
-    borderTopRightRadius: 28,
+    backgroundColor: '#ffffff',
+    borderRadius: Platform.OS === 'web' ? 20 : 0,
+    borderTopLeftRadius: Platform.OS === 'web' ? 20 : 28,
+    borderTopRightRadius: Platform.OS === 'web' ? 20 : 28,
     padding: 24,
-    width: '100%',
-    maxHeight: '85%',
+    width: Platform.OS === 'web' ? 420 : '100%',
+    maxWidth: Platform.OS === 'web' ? '90%' : undefined,
+    maxHeight: Platform.OS === 'web' ? '80%' : '85%',
     shadowColor: '#000000',
-    shadowOffset: { width: 0, height: -6 },
-    shadowOpacity: 0.2,
-    shadowRadius: 12,
+    shadowOffset: { width: 0, height: Platform.OS === 'web' ? 4 : -6 },
+    shadowOpacity: Platform.OS === 'web' ? 0.15 : 0.2,
+    shadowRadius: Platform.OS === 'web' ? 20 : 12,
     elevation: 18,
-    borderTopWidth: 1,
+    borderWidth: Platform.OS === 'web' ? 0 : 1,
+    borderTopWidth: Platform.OS === 'web' ? 0 : 1,
     borderColor: '#e2e8f0',
   },
   title: {
@@ -476,5 +501,22 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     fontSize: 14,
     fontWeight: '600',
+  },
+  closeButton: {
+    position: 'absolute',
+    top: 16,
+    right: 16,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#f3f4f6',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 10,
+  },
+  closeButtonText: {
+    fontSize: 18,
+    color: '#6b7280',
+    fontWeight: '400',
   },
 });

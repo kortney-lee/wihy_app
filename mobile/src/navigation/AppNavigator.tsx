@@ -1,6 +1,6 @@
 import React, { useContext, useState } from 'react';
 import { View, TouchableOpacity, Text, StyleSheet, Platform } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, useNavigation } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
 import type { CompositeNavigationProp } from '@react-navigation/native';
@@ -11,6 +11,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { TabParamList, RootStackParamList } from '../types/navigation';
 import { getResponsiveIconSize, getResponsiveButtonSize } from '../utils/responsive';
 import { sizes } from '../theme/design-tokens';
+import SvgIcon from '../components/shared/SvgIcon';
 
 // Auth Components
 import MultiAuthLogin from '../components/auth/MultiAuthLogin';
@@ -61,20 +62,32 @@ export type FullChatNavigationProp = CompositeNavigationProp<
 function ProfileScreenComponent() {
   const { user } = useContext(AuthContext);
   const [showLogin, setShowLogin] = useState(false);
+  const navigation = useNavigation<any>();
 
   React.useEffect(() => {
+    // On web, redirect to Home when not authenticated
+    if (Platform.OS === 'web' && !user) {
+      navigation.navigate('Home');
+      return;
+    }
     // Only show login if user is not authenticated and modal is not already visible
     if (!user) {
       setShowLogin(true);
     } else {
       setShowLogin(false);
     }
-  }, [user]); // Only depend on user, not showLogin
+  }, [user, navigation]);
 
   if (user) {
     return <Profile />;
   }
 
+  // On web, show nothing while redirecting
+  if (Platform.OS === 'web') {
+    return null;
+  }
+
+  // Native: show login gate when not authenticated
   return (
     <View style={styles.loginGateContainer}>
       <Text style={styles.loginGateTitle}>Sign in to view your profile</Text>
@@ -159,7 +172,7 @@ function TabNavigator() {
               borderWidth: focused ? 1 : 0.5,
               borderColor: focused ? '#3b82f6' : '#e2e8f0',
             }}>
-              <Ionicons
+              <SvgIcon
                 name={iconName}
                 size={iconSize}
                 color={iconColor}

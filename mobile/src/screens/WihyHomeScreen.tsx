@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useContext } from 'react';
+import React, { useMemo, useState, useContext, useEffect } from 'react';
 import {
   View,
   Text,
@@ -24,6 +24,7 @@ import { getResponsiveFontSize, getResponsiveButtonSize, getResponsiveSpacing, i
 import { colors, shadows, radii, spacing } from '../theme/design-tokens';
 import { Ionicons } from '@expo/vector-icons';
 import { AuthContext } from '../context/AuthContext';
+import MultiAuthLogin from '../components/auth/MultiAuthLogin';
 
 // Import CSS for web only
 if (Platform.OS === 'web') {
@@ -49,6 +50,10 @@ export default function WihyHomeScreen({}: Props = {}) {
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [uploadTextInput, setUploadTextInput] = useState('');
   const { user } = useContext(AuthContext);
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  
+  // Don't auto-show login modal - let user interact first
+  // Modal will be triggered by clicking profile icon or protected features
   
   // Check if user is on free plan
   const isFreeUser = !user || user.plan === 'free';
@@ -232,7 +237,13 @@ export default function WihyHomeScreen({}: Props = {}) {
             </button>
           </div>
           <div className="web-nav-right">
-            <button onClick={() => navigation.navigate('Profile')} className="web-nav-item profile" type="button">
+            <button onClick={() => {
+              if (user) {
+                navigation.navigate('Profile');
+              } else {
+                setShowLoginModal(true);
+              }
+            }} className="web-nav-item profile" type="button">
               <svg viewBox="0 0 24 24" width="24" height="24">
                 <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
               </svg>
@@ -430,6 +441,13 @@ export default function WihyHomeScreen({}: Props = {}) {
             </div>
           </div>
         )}
+        
+        {/* Login modal overlay for web */}
+        <MultiAuthLogin
+          visible={showLoginModal}
+          onClose={() => setShowLoginModal(false)}
+          onSignIn={() => setShowLoginModal(false)}
+        />
       </div>
     );
   }
@@ -494,6 +512,15 @@ export default function WihyHomeScreen({}: Props = {}) {
           </TouchableWithoutFeedback>
         </KeyboardAvoidingView>
       </SafeAreaView>
+      
+      {/* Login modal overlay for web */}
+      {isWeb && (
+        <MultiAuthLogin
+          visible={showLoginModal}
+          onClose={() => setShowLoginModal(false)}
+          onSignIn={() => setShowLoginModal(false)}
+        />
+      )}
     </>
   );
 }

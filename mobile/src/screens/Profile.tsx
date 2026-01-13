@@ -25,6 +25,7 @@ import { getResponsiveIconSize } from '../utils/responsive';
 import { DevPlanSwitcher } from '../components/DevPlanSwitcher';
 import PlansModal from '../components/PlansModal';
 import { hasFamilyAccess, hasCoachAccess } from '../utils/capabilities';
+import SvgIcon from '../components/shared/SvgIcon';
 
 const isWeb = Platform.OS === 'web';
 
@@ -160,25 +161,40 @@ export default function Profile() {
   };
 
   const handleSignOut = () => {
-    Alert.alert(
-      'Sign Out',
-      'Are you sure you want to sign out?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Sign Out',
-          onPress: async () => {
-            try {
-              await signOut();
-              // Navigation will be handled by the auth state change
-            } catch (error) {
-              Alert.alert('Error', 'Failed to sign out');
-            }
+    if (isWeb) {
+      // Use native confirm dialog on web
+      if (window.confirm('Are you sure you want to sign out?')) {
+        signOut().then(() => {
+          // Navigate to Home after sign out on web
+          navigation.reset({
+            index: 0,
+            routes: [{ name: 'MainTabs' as any }],
+          });
+        }).catch(() => {
+          window.alert('Failed to sign out');
+        });
+      }
+    } else {
+      Alert.alert(
+        'Sign Out',
+        'Are you sure you want to sign out?',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          {
+            text: 'Sign Out',
+            onPress: async () => {
+              try {
+                await signOut();
+                // Navigation will be handled by the auth state change
+              } catch (error) {
+                Alert.alert('Error', 'Failed to sign out');
+              }
+            },
+            style: 'destructive',
           },
-          style: 'destructive',
-        },
-      ]
-    );
+        ]
+      );
+    }
   };
 
   // Check if dev/admin mode (show all options)
@@ -430,7 +446,7 @@ export default function Profile() {
           styles.settingsIcon,
           item.destructive && { backgroundColor: '#fee2e2' },
         ]}>
-          <Ionicons
+          <SvgIcon
             name={item.icon as any}
             size={getResponsiveIconSize(sizes.icons.md)}
             color={item.destructive ? '#ef4444' : '#3b82f6'}
@@ -457,7 +473,7 @@ export default function Profile() {
             thumbColor="#ffffff"
           />
         ) : item.type === 'navigation' ? (
-          <Ionicons name="chevron-forward" size={getResponsiveIconSize(sizes.icons.md)} color="#9ca3af" />
+          <SvgIcon name="chevron-forward" size={getResponsiveIconSize(sizes.icons.md)} color="#9ca3af" />
         ) : null}
       </View>
     </Pressable>
@@ -477,19 +493,19 @@ export default function Profile() {
               {userInfo.picture ? (
                 <Image source={{ uri: userInfo.picture }} style={styles.avatarImage} />
               ) : (
-                <Ionicons name="person" size={getResponsiveIconSize(sizes.icons.xxl)} color="#3b82f6" />
+                <SvgIcon name="person" size={getResponsiveIconSize(sizes.icons.xxl)} color="#3b82f6" />
               )}
             </View>
             {isPremium && (
               <View style={styles.premiumBadge}>
-                <Ionicons name="star" size={16} color="#fbbf24" />
+                <SvgIcon name="star" size={16} color="#fbbf24" />
               </View>
             )}
           </View>
           <Text style={styles.userName}>{userInfo.name}</Text>
           {isPremium && (
             <View style={styles.premiumLabel}>
-              <Ionicons name="checkmark-circle" size={14} color="#fbbf24" />
+              <SvgIcon name="checkmark-circle" size={14} color="#fbbf24" />
               <Text style={styles.premiumLabelText}>Premium Member</Text>
             </View>
           )}
@@ -497,7 +513,7 @@ export default function Profile() {
           <Text style={styles.memberSince}>Member since {userInfo.memberSince}</Text>
 
           <Pressable style={styles.editButton} onPress={handleEditProfile}>
-            <Ionicons name="pencil" size={getResponsiveIconSize(sizes.icons.sm)} color="#3b82f6" />
+            <SvgIcon name="pencil" size={getResponsiveIconSize(sizes.icons.sm)} color="#3b82f6" />
             <Text style={styles.editButtonText}>Edit Profile</Text>
           </Pressable>
         </View>
