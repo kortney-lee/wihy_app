@@ -90,8 +90,8 @@ export default function FamilyDashboardPage({
   const handleShareGuardianCode = async () => {
     try {
       await Share.share({
-        message: `Join our WIHY Health family! Use this Guardian Code: ${guardianCode}\n\nDownload the app and enter this code to join our family health tracking.`,
-        title: 'Join WIHY Health Family',
+        message: `Join our WIHY AI family! Use this Guardian Code: ${guardianCode}\n\nDownload the app: https://wihy.ai\n\nEnter this code to join our family health tracking.`,
+        title: 'Join WIHY AI Family',
       });
     } catch (error) {
       console.error('Error sharing:', error);
