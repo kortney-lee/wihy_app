@@ -7,10 +7,12 @@
    BASE LAYOUT
    ═══════════════════════════════════════════════════════════ */
 .pricing-page {
-  min-height: 100vh;
+  height: 100vh;
+  max-height: 100vh;
   background-color: #ffffff;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 .pricing-content {
@@ -18,6 +20,7 @@
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
+  -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
 }
 
 /* ═══════════════════════════════════════════════════════════
