@@ -242,8 +242,8 @@ export default function EnrollmentScreen() {
   const shareGuardianCode = async (code: string) => {
     try {
       await Share.share({
-        message: `Join our family on WiHY Health! Use this code: ${code}\n\nDownload WiHY: https://wihy.health/app`,
-        title: 'Join My Family on WiHY',
+        message: `Join our family on WIHY AI! Use this code: ${code}\n\nDownload WIHY: https://wihy.ai`,
+        title: 'Join My Family on WIHY',
       });
     } catch (error) {
       console.error('Error sharing:', error);
@@ -360,7 +360,7 @@ export default function EnrollmentScreen() {
       } else {
         // Fallback to share invite link
         await Share.share({
-          message: `Join me on WiHY Health as my coaching client!\n\nSign up here: https://wihy.health/coach-invite?coach=${coachId}\n\nI'll help you reach your health goals with personalized nutrition and fitness guidance.`,
+          message: `Join me on WIHY AI as my coaching client!\n\nSign up here: https://wihy.ai/coach-invite?coach=${coachId}\n\nI'll help you reach your health goals with personalized nutrition and fitness guidance.`,
           title: 'Coach Invitation',
         });
         setClientEmail('');
@@ -369,7 +369,7 @@ export default function EnrollmentScreen() {
       // Fallback to share invite link if invitation endpoint fails
       try {
         await Share.share({
-          message: `Join me on WiHY Health as my coaching client!\n\nSign up here: https://wihy.health/coach-invite?coach=${coachId}\n\nI'll help you reach your health goals with personalized nutrition and fitness guidance.`,
+          message: `Join me on WIHY AI as my coaching client!\n\nSign up here: https://wihy.ai/coach-invite?coach=${coachId}\n\nI'll help you reach your health goals with personalized nutrition and fitness guidance.`,
           title: 'Coach Invitation',
         });
         setClientEmail('');

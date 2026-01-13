@@ -159,7 +159,7 @@ export default function ShoppingListScreen({ route, navigation, isDashboardMode 
       });
 
       await Share.share({
-        message: listText,
+        message: listText + '\n📱 Created with WIHY AI - https://wihy.ai',
         title: 'Shopping List',
       });
     } catch (error) {
