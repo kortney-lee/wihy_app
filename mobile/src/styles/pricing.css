@@ -24,13 +24,13 @@
    HERO SECTION
    ═══════════════════════════════════════════════════════════ */
 .pricing-hero {
-  background: #ffffff;
+  background: linear-gradient(135deg, #e8f0fe 0%, #d3e3fd 50%, #c2d9fc 100%);
   padding: 48px 24px;
   text-align: center;
 }
 
 .pricing-hero-b2b {
-  background: #ffffff;
+  background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 50%, #d1d5db 100%);
 }
 
 .pricing-hero-inner {
@@ -47,8 +47,14 @@
   align-items: center;
   justify-content: center;
   margin: 0 auto 24px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-  border: 1px solid #e5e7eb;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.pricing-hero-icon img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover;
 }
 
 .pricing-hero-title {
