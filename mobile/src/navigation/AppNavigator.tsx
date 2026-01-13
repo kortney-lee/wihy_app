@@ -1,8 +1,9 @@
 import React, { useContext, useState } from 'react';
 import { View, TouchableOpacity, Text, StyleSheet, Platform } from 'react-native';
-import { NavigationContainer, useNavigation } from '@react-navigation/native';
+import { NavigationContainer, useNavigation, LinkingOptions } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
+import * as Linking from 'expo-linking';
 import type { CompositeNavigationProp } from '@react-navigation/native';
 import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import type { StackNavigationProp } from '@react-navigation/stack';
@@ -55,6 +56,64 @@ import PrivacyScreen from '../screens/PrivacyScreen';
 
 const Tab = createBottomTabNavigator<TabParamList>();
 const Stack = createStackNavigator<RootStackParamList>();
+
+// Web URL linking configuration - maps URL paths to screens
+// This ensures backward compatibility with wihy.ai/about, wihy.ai/privacy, etc.
+const prefix = Linking.createURL('/');
+
+const linking: LinkingOptions<RootStackParamList> = {
+  prefixes: [
+    prefix,
+    'https://wihy.ai',
+    'https://www.wihy.ai',
+    'http://localhost:19006', // Expo web dev
+    'http://localhost:3000',  // Local dev
+  ],
+  config: {
+    screens: {
+      Main: {
+        path: '',
+        screens: {
+          Home: '',
+          Scan: 'scan',
+          Chat: 'chat',
+          Health: 'health',
+          Profile: 'profile',
+          CoachSelection: 'coach-selection',
+          NutritionFacts: 'nutrition-facts',
+        },
+      },
+      // Legacy web routes - maintain backward compatibility
+      About: 'about',
+      Terms: 'terms',
+      Privacy: 'privacy',
+      Subscription: 'subscription',
+      B2BPricing: 'pricing',
+      FullChat: 'fullchat',
+      NutritionFacts: 'nutritionfacts',
+      Camera: 'camera',
+      ResearchDashboard: 'research',
+      Permissions: 'permissions',
+      ScanHistory: 'scan-history',
+      CoachDashboardPage: 'coach-dashboard',
+      FamilyDashboardPage: 'family-dashboard',
+      ParentDashboard: 'parent-dashboard',
+      ClientManagement: 'client-management',
+      ClientOnboarding: 'client-onboarding',
+      ShoppingList: 'shopping-list',
+      MealDetails: 'meal-details',
+      MealPreferences: 'meal-preferences',
+      IntegrationTest: 'integration-test',
+      ClientProgress: 'client-progress',
+      FitnessProgramDetails: 'fitness-program',
+      MealPlanDetails: 'meal-plan',
+      Enrollment: 'enrollment',
+      CreateMeals: 'create-meals',
+      PostPaymentRegistration: 'register',
+      OnboardingFlow: 'onboarding',
+    },
+  },
+};
 
 // Re-export types for convenience
 export type { TabParamList, RootStackParamList } from '../types/navigation';
@@ -285,7 +344,7 @@ export default function AppNavigator() {
   // Show onboarding flow for first-time users who haven't completed it
   if (user && user.isFirstTimeUser && !user.onboardingCompleted) {
     return (
-      <NavigationContainer>
+      <NavigationContainer linking={linking}>
         <Stack.Navigator
           screenOptions={{
             headerShown: false,
@@ -314,7 +373,7 @@ export default function AppNavigator() {
   }
 
   return (
-    <NavigationContainer>
+    <NavigationContainer linking={linking}>
       <Stack.Navigator
         screenOptions={{
           headerShown: false,

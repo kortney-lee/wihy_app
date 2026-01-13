@@ -372,7 +372,7 @@ export default function TermsScreen() {
             <p className="pricing-footer-copyright">© 2026 WIHY. All rights reserved.</p>
             <p className="pricing-footer-disclaimer">Last Updated: December 2, 2025</p>
             <div className="pricing-footer-links">
-              <a href="#" onClick={(e) => { e.preventDefault(); handlePrivacyPress(); }}>Privacy Policy</a>
+              <a href="/privacy" onClick={(e) => { e.preventDefault(); handlePrivacyPress(); }}>Privacy Policy</a>
               <span className="pricing-footer-separator">•</span>
               <a href="#" onClick={(e) => { e.preventDefault(); handleAboutPress(); }}>About</a>
               <span className="pricing-footer-separator">•</span>
