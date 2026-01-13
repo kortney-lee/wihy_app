@@ -21,6 +21,12 @@ export type RootStackParamList = {
   Permissions: undefined;
   Subscription: undefined;
   B2BPricing: undefined;
+  PostPaymentRegistration: { 
+    email?: string; 
+    planId?: string; 
+    planName?: string; 
+    sessionId?: string;
+  };
   ScanHistory: undefined;
   CoachDashboardPage: undefined;
   FamilyDashboardPage: undefined;

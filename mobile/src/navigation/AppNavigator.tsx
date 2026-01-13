@@ -48,6 +48,7 @@ import EnrollmentScreen from '../screens/EnrollmentScreen';
 import OnboardingFlow from '../screens/OnboardingFlow';
 import { SubscriptionScreen } from '../screens/SubscriptionScreen';
 import { B2BPricingScreen } from '../screens/B2BPricingScreen';
+import { PostPaymentRegistrationScreen } from '../screens/PostPaymentRegistrationScreen';
 
 const Tab = createBottomTabNavigator<TabParamList>();
 const Stack = createStackNavigator<RootStackParamList>();
@@ -500,6 +501,14 @@ export default function AppNavigator() {
           options={{
             presentation: 'modal',
             headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="PostPaymentRegistration"
+          component={PostPaymentRegistrationScreen}
+          options={{
+            headerShown: false,
+            gestureEnabled: false, // Prevent back gesture during registration
           }}
         />
       </Stack.Navigator>

@@ -58,6 +58,12 @@ interface AuthContextType {
   signIn: (provider: string, credentials?: any) => Promise<User>;
   signOut: () => Promise<void>;
   updateUser: (userData: Partial<User>) => Promise<User>;
+  createAccountAfterPayment: (data: {
+    email: string;
+    password: string;
+    planId: string;
+    stripeSessionId?: string;
+  }) => Promise<User>;
 }
 
 export const AuthContext = createContext<AuthContextType>({
@@ -70,6 +76,9 @@ export const AuthContext = createContext<AuthContextType>({
     throw new Error('AuthContext not initialized');
   },
   updateUser: async () => {
+    throw new Error('AuthContext not initialized');
+  },
+  createAccountAfterPayment: async () => {
     throw new Error('AuthContext not initialized');
   },
 });
@@ -363,12 +372,59 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     };
   };
 
+  // Create account after successful Stripe payment (new subscription flow)
+  const createAccountAfterPayment = async (data: {
+    email: string;
+    password: string;
+    planId: string;
+    stripeSessionId?: string;
+  }): Promise<User> => {
+    setLoading(true);
+    
+    try {
+      // Register with the backend, linking to the Stripe payment
+      const authResult = await authService.registerAfterPayment(
+        data.email,
+        data.password,
+        {
+          planId: data.planId,
+          stripeSessionId: data.stripeSessionId,
+        }
+      );
+
+      if (!authResult.success || !authResult.user) {
+        throw new Error(authResult.error || 'Failed to create account');
+      }
+
+      // Convert to User format and set state
+      const userData = await convertUserData(authResult.user);
+      
+      // Mark as new user with the purchased plan
+      const planFromId = data.planId.replace('-yearly', '').replace('-monthly', '') as User['plan'];
+      userData.plan = planFromId;
+      userData.capabilities = getPlanCapabilities(planFromId, []);
+      userData.isFirstTimeUser = true;
+      
+      const normalizedUser = normalizeUser(userData);
+      setUser(normalizedUser);
+      await saveUserData(normalizedUser);
+      
+      return normalizedUser;
+    } catch (error) {
+      console.error('Create account after payment error:', error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const value: AuthContextType = {
     user,
     loading,
     signIn,
     signOut,
     updateUser,
+    createAccountAfterPayment,
   };
 
   return (

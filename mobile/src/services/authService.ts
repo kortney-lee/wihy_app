@@ -473,6 +473,87 @@ class AuthService {
   }
 
   /**
+   * Register account after successful Stripe payment
+   * This creates an account linked to an existing payment session
+   * Per subscription flow: Email → Stripe checkout → Password creation
+   */
+  async registerAfterPayment(
+    email: string,
+    password: string,
+    options: {
+      planId: string;
+      stripeSessionId?: string;
+    }
+  ): Promise<LoginResponse> {
+    const startTime = Date.now();
+    // Use a dedicated endpoint for post-payment registration
+    const endpoint = `${this.baseUrl}/api/auth/register-after-payment`;
+    
+    console.log('=== REGISTER AFTER PAYMENT API CALL ===');
+    console.log('Endpoint:', endpoint);
+    console.log('Email:', email);
+    console.log('Plan ID:', options.planId);
+    console.log('Stripe Session:', options.stripeSessionId);
+    
+    try {
+      const body = { 
+        email, 
+        password, 
+        planId: options.planId,
+        stripeSessionId: options.stripeSessionId,
+      };
+      
+      const response = await fetchWithLogging(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(body),
+      });
+
+      const responseTime = Date.now() - startTime;
+      console.log(`Response Status: ${response.status} (${responseTime}ms)`);
+
+      const data = await response.json();
+      console.log('Response Data:', JSON.stringify(data, null, 2));
+
+      if (response.ok && data.success) {
+        // Store session token and user data
+        const authToken = data.token || data.session_token;
+        if (authToken) {
+          await this.storeSessionToken(authToken);
+          
+          if (data.expiresIn) {
+            const expiryTime = Date.now() + (data.expiresIn * 1000);
+            await AsyncStorage.setItem(STORAGE_KEYS.TOKEN_EXPIRY, expiryTime.toString());
+          }
+        }
+        if (data.user) {
+          await this.storeUserData(data.user);
+        }
+        
+        console.log('=== REGISTER AFTER PAYMENT SUCCESS ===');
+        return data;
+      } else {
+        console.log('=== REGISTER AFTER PAYMENT FAILED ===');
+        return {
+          success: false,
+          error: data.error || data.message || 'Account creation failed',
+        };
+      }
+    } catch (error: any) {
+      const responseTime = Date.now() - startTime;
+      console.error('=== REGISTER AFTER PAYMENT ERROR ===');
+      console.error('Error after', responseTime, 'ms:', error);
+      
+      return {
+        success: false,
+        error: error.message || 'Network error during account creation',
+      };
+    }
+  }
+
+  /**
    * Get OAuth authorization URL for mobile redirect flow
    * Auth service handles OAuth provider exchange and redirects back with session_token
    */
