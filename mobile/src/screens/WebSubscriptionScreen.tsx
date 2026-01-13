@@ -9,6 +9,7 @@ import {
   useWindowDimensions,
   ActivityIndicator,
   Alert,
+  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -290,16 +291,29 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      {/* Header */}
+      {/* Header with Logo */}
       <View style={styles.header}>
+        <Pressable 
+          onPress={() => navigation.navigate('WihyHome')} 
+          style={({ pressed }) => [styles.logoButton, pressed && styles.logoButtonPressed]}
+          accessibilityRole="button"
+          accessibilityLabel="Go to WiHY Home"
+        >
+          <Image
+            source={require('../../assets/Logo_wihy.png')}
+            style={styles.headerLogo}
+            resizeMode="contain"
+          />
+        </Pressable>
+        <Text style={styles.headerTitle}>Choose Your Plan</Text>
         <Pressable 
           onPress={() => navigation.goBack()} 
           style={({ pressed }) => [styles.backButton, pressed && styles.backButtonPressed]}
+          accessibilityRole="button"
+          accessibilityLabel="Go back"
         >
-          <Ionicons name="arrow-back" size={24} color={colors.text} />
+          <Ionicons name="close" size={24} color={colors.text} />
         </Pressable>
-        <Text style={styles.headerTitle}>Choose Your Plan</Text>
-        <View style={styles.headerSpacer} />
       </View>
 
       <ScrollView 
@@ -593,6 +607,17 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
   },
+  logoButton: {
+    padding: 4,
+    borderRadius: borderRadius.md,
+  },
+  logoButtonPressed: {
+    opacity: 0.7,
+  },
+  headerLogo: {
+    width: 80,
+    height: 32,
+  },
   backButton: {
     width: 40,
     height: 40,
@@ -607,9 +632,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '600',
     color: colors.text,
-  },
-  headerSpacer: {
-    width: 40,
   },
 
   // Scroll
