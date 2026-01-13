@@ -275,7 +275,7 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
   const WebNavHeader = () => (
     <nav className="web-top-nav">
       <div className="web-nav-left">
-        <button onClick={() => navigation.navigate('WihyHome')} className="web-nav-item nav-home" type="button">
+        <button onClick={() => navigation.navigate('Main')} className="web-nav-item nav-home" type="button">
           <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
             <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
           </svg>
@@ -509,7 +509,7 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
     <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.header}>
         <Pressable 
-          onPress={() => navigation.navigate('WihyHome')} 
+          onPress={() => navigation.navigate('Main')} 
           style={styles.logoButton}
         >
           <Image
