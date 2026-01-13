@@ -7,12 +7,16 @@ import {
   Pressable,
   Platform,
   useWindowDimensions,
+  ActivityIndicator,
+  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../types/navigation';
 import { colors, shadows, borderRadius } from '../theme/design-tokens';
+import { checkoutService } from '../services/checkoutService';
+import { useAuth } from '../context/AuthContext';
 
 // Consumer Plans - Correct pricing from PRICING_QUICK_REFERENCE.md
 const CONSUMER_PLANS = [
@@ -173,21 +177,69 @@ interface Props {
 export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
   const [selectedPlan, setSelectedPlan] = useState<string>('family-premium');
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
+  const [isLoading, setIsLoading] = useState(false);
   const { width } = useWindowDimensions();
+  const { user } = useAuth();
   
   const isDesktop = width >= 1024;
   const isTablet = width >= 768;
 
-  const handleSubscribe = (planId: string) => {
+  const handleSubscribe = async (planId: string) => {
     const plan = CONSUMER_PLANS.find(p => p.id === planId);
-    if (plan?.stripeLink && !plan.stripeLink.includes('YOUR_')) {
-      if (typeof window !== 'undefined') {
-        window.open(plan.stripeLink, '_blank');
+    if (!plan) return;
+
+    // Check if user is logged in
+    if (!user?.email) {
+      if (Platform.OS === 'web' && typeof window !== 'undefined') {
+        const proceed = window.confirm(
+          'You need to be signed in to subscribe.\n\nWould you like to sign in now?'
+        );
+        if (proceed) {
+          navigation.navigate('Login' as any);
+        }
+      } else {
+        Alert.alert(
+          'Sign In Required',
+          'You need to be signed in to subscribe.',
+          [
+            { text: 'Cancel', style: 'cancel' },
+            { text: 'Sign In', onPress: () => navigation.navigate('Login' as any) },
+          ]
+        );
       }
-    } else {
-      if (typeof window !== 'undefined') {
-        window.alert(`You selected ${plan?.name}!\n\nStripe checkout integration coming soon.`);
+      return;
+    }
+
+    setIsLoading(true);
+    
+    try {
+      // Determine plan ID based on billing cycle
+      const checkoutPlanId = billingCycle === 'yearly' && plan.yearlyPrice 
+        ? `${planId}-yearly` 
+        : planId;
+
+      // Initiate checkout with the checkout service
+      const response = await checkoutService.initiateCheckout(checkoutPlanId, user.email);
+      
+      if (response.success && response.checkoutUrl) {
+        // Open Stripe checkout
+        if (Platform.OS === 'web' && typeof window !== 'undefined') {
+          window.location.href = response.checkoutUrl;
+        } else {
+          await checkoutService.openCheckout(response.checkoutUrl);
+        }
+      } else {
+        throw new Error(response.error || 'Failed to create checkout session');
       }
+    } catch (error: any) {
+      console.error('Checkout error:', error);
+      if (Platform.OS === 'web' && typeof window !== 'undefined') {
+        window.alert(`Checkout Error\n\n${error.message || 'Please try again.'}`);
+      } else {
+        Alert.alert('Checkout Error', error.message || 'Please try again.');
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -348,17 +400,25 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
                       styles.ctaButton,
                       isSelected && styles.ctaButtonSelected,
                       pressed && styles.ctaButtonPressed,
+                      isLoading && styles.ctaButtonLoading,
                     ]}
                     onPress={() => handleSubscribe(plan.id)}
+                    disabled={isLoading}
                   >
-                    <Text style={[
-                      styles.ctaButtonText,
-                      isSelected && styles.ctaButtonTextSelected,
-                    ]}>
-                      {isSelected ? 'Get Started' : 'Select Plan'}
-                    </Text>
-                    {isSelected && (
-                      <Ionicons name="arrow-forward" size={18} color="#fff" style={{ marginLeft: 8 }} />
+                    {isLoading && selectedPlan === plan.id ? (
+                      <ActivityIndicator color={isSelected ? '#fff' : colors.primary} size="small" />
+                    ) : (
+                      <>
+                        <Text style={[
+                          styles.ctaButtonText,
+                          isSelected && styles.ctaButtonTextSelected,
+                        ]}>
+                          {isSelected ? 'Get Started' : 'Select Plan'}
+                        </Text>
+                        {isSelected && (
+                          <Ionicons name="arrow-forward" size={18} color="#fff" style={{ marginLeft: 8 }} />
+                        )}
+                      </>
                     )}
                   </Pressable>
                 </Pressable>
@@ -820,6 +880,9 @@ const styles = StyleSheet.create({
   },
   ctaButtonPressed: {
     opacity: 0.9,
+  },
+  ctaButtonLoading: {
+    opacity: 0.7,
   },
   ctaButtonText: {
     fontSize: 14,
