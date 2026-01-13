@@ -399,8 +399,8 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
                       </>
                     ) : plan.monthlyPrice === 0 ? (
                       <>
-                        <span className="pricing-amount">Free</span>
-                        <span className="pricing-period"> forever</span>
+                        <span className="pricing-amount">$0</span>
+                        <span className="pricing-period">/month</span>
                       </>
                     ) : (
                       <>
