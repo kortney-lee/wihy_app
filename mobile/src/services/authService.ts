@@ -12,13 +12,13 @@
  */
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { WIHY_NATIVE_2025_CLIENT_ID } from '@env';
+import { WIHY_NATIVE_CLIENT_ID } from '@env';
 import { fetchWithLogging } from '../utils/apiLogger';
 
 // Auth configuration - Only your client credentials needed
 export const AUTH_CONFIG = {
   baseUrl: 'https://auth.wihy.ai',
-  clientId: WIHY_NATIVE_2025_CLIENT_ID || 'wihy_native_2025',
+  clientId: WIHY_NATIVE_CLIENT_ID || 'wihy_native_2025',
   // SECURITY: Mobile apps are PUBLIC clients - NEVER use client secret
   // OAuth flow: Auth service handles ALL provider configurations server-side
   // Mobile receives session_token directly via redirect (PKCE flow)
