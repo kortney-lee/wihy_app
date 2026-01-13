@@ -9,12 +9,15 @@ import {
   StyleSheet,
   Alert,
   Platform,
+  ActivityIndicator,
+  Image,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AuthContext } from '../../context/AuthContext';
 import { colors, sizes } from '../../theme/design-tokens';
 import { getResponsiveIconSize } from '../../utils/responsive';
 import SvgIcon from '../shared/SvgIcon';
+import { authService } from '../../services/authService';
 
 interface MultiAuthLoginProps {
   onUserChange?: (user: any) => void;
@@ -64,18 +67,29 @@ export default function MultiAuthLogin({
 }: MultiAuthLoginProps) {
   const { user, loading, signIn, signOut } = useContext(AuthContext);
   const [showEmailForm, setShowEmailForm] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
+  const [resetEmail, setResetEmail] = useState('');
+  const [resetSent, setResetSent] = useState(false);
+  const [resetLoading, setResetLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     if (!visible) {
       setShowEmailForm(false);
+      setShowForgotPassword(false);
       setIsSignUp(false);
       setEmail('');
       setPassword('');
       setName('');
+      setResetEmail('');
+      setResetSent(false);
+      setError('');
+      setShowPassword(false);
     }
   }, [visible]);
 
@@ -105,18 +119,25 @@ export default function MultiAuthLogin({
   };
 
   const handleEmailAuth = async () => {
+    setError('');
+    
     if (!email || !password) {
-      Alert.alert('Error', 'Please fill in all required fields');
+      setError('Please fill in all required fields');
       return;
     }
 
     if (isSignUp && !name) {
-      Alert.alert('Error', 'Please enter your name');
+      setError('Please enter your name');
       return;
     }
 
     try {
-      const newUser = await signIn('email', { email, password, name: isSignUp ? name : undefined });
+      const newUser = await signIn('email', { 
+        email, 
+        password, 
+        name: isSignUp ? name : undefined,
+        isRegister: isSignUp 
+      });
       onUserChange?.(newUser);
       onSignIn?.();
       setShowEmailForm(false);
@@ -124,9 +145,29 @@ export default function MultiAuthLogin({
       setEmail('');
       setPassword('');
       setName('');
+      setError('');
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to authenticate';
-      Alert.alert('Authentication Error', message);
+      setError(message);
+    }
+  };
+
+  const handleForgotPassword = async () => {
+    if (!resetEmail) {
+      setError('Please enter your email address');
+      return;
+    }
+
+    setResetLoading(true);
+    setError('');
+
+    try {
+      await authService.requestPasswordReset(resetEmail);
+      setResetSent(true);
+    } catch (err: any) {
+      setError(err.message || 'Failed to send reset email');
+    } finally {
+      setResetLoading(false);
     }
   };
 
@@ -251,67 +292,180 @@ export default function MultiAuthLogin({
 
       {/* Email Form Modal */}
       <Modal
-        visible={showEmailForm}
+        visible={showEmailForm && !showForgotPassword}
         animationType="slide"
         transparent={true}
         presentationStyle="overFullScreen"
         onRequestClose={() => setShowEmailForm(false)}
       >
         <View style={styles.modalOverlay}>
-          <View style={styles.emailFormContainer}>
-            <Text style={styles.formTitle}>
-              {isSignUp ? 'Create Account' : 'Sign In'}
-            </Text>
-
-            {isSignUp && (
-              <TextInput
-                style={styles.input}
-                placeholder="Full Name"
-                placeholderTextColor={colors.placeholder}
-                value={name}
-                onChangeText={setName}
-                autoCapitalize="words"
-                textContentType="name"
-              />
+          <View style={[styles.emailFormContainer, Platform.OS === 'web' && styles.emailFormContainerWeb]}>
+            {/* Close button for web */}
+            {Platform.OS === 'web' && (
+              <TouchableOpacity 
+                style={styles.closeButton} 
+                onPress={() => setShowEmailForm(false)}
+              >
+                <Text style={styles.closeButtonText}>✕</Text>
+              </TouchableOpacity>
             )}
 
-            <TextInput
-              style={styles.input}
-              placeholder="Email"
-              placeholderTextColor={colors.placeholder}
-              value={email}
-              onChangeText={setEmail}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              textContentType="emailAddress"
-            />
+            {/* Logo/Icon for web */}
+            {Platform.OS === 'web' && (
+              <View style={styles.formLogoContainer}>
+                <Image 
+                  source={require('../../../assets/Logo_wihy.png')} 
+                  style={styles.formLogo}
+                  resizeMode="contain"
+                />
+              </View>
+            )}
 
-            <TextInput
-              style={styles.input}
-              placeholder="Password"
-              placeholderTextColor={colors.placeholder}
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry
-              textContentType="password"
-            />
+            <Text style={styles.formTitle}>
+              {isSignUp ? 'Create Account' : 'Welcome Back'}
+            </Text>
+            
+            {Platform.OS === 'web' && (
+              <Text style={styles.formSubtitle}>
+                {isSignUp ? 'Start your health journey today' : 'Sign in to continue'}
+              </Text>
+            )}
+
+            {error ? (
+              <View style={styles.errorContainer}>
+                <Ionicons name="alert-circle" size={16} color="#dc2626" />
+                <Text style={styles.errorText}>{error}</Text>
+              </View>
+            ) : null}
+
+            {isSignUp && (
+              <View style={styles.inputContainer}>
+                <Text style={styles.inputLabel}>Full Name</Text>
+                <View style={styles.inputWrapper}>
+                  <Ionicons name="person-outline" size={20} color="#9ca3af" style={styles.inputIcon} />
+                  <TextInput
+                    style={styles.input}
+                    placeholder="John Doe"
+                    placeholderTextColor={colors.placeholder}
+                    value={name}
+                    onChangeText={setName}
+                    autoCapitalize="words"
+                    textContentType="name"
+                  />
+                </View>
+              </View>
+            )}
+
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Email</Text>
+              <View style={styles.inputWrapper}>
+                <Ionicons name="mail-outline" size={20} color="#9ca3af" style={styles.inputIcon} />
+                <TextInput
+                  style={styles.input}
+                  placeholder="you@example.com"
+                  placeholderTextColor={colors.placeholder}
+                  value={email}
+                  onChangeText={setEmail}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  textContentType="emailAddress"
+                />
+              </View>
+            </View>
+
+            <View style={styles.inputContainer}>
+              <View style={styles.labelRow}>
+                <Text style={styles.inputLabel}>Password</Text>
+                {!isSignUp && (
+                  <TouchableOpacity onPress={() => {
+                    setShowForgotPassword(true);
+                    setResetEmail(email);
+                  }}>
+                    <Text style={styles.forgotLink}>Forgot password?</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+              <View style={styles.inputWrapper}>
+                <Ionicons name="lock-closed-outline" size={20} color="#9ca3af" style={styles.inputIcon} />
+                <TextInput
+                  style={[styles.input, styles.passwordInput]}
+                  placeholder="••••••••"
+                  placeholderTextColor={colors.placeholder}
+                  value={password}
+                  onChangeText={setPassword}
+                  secureTextEntry={!showPassword}
+                  textContentType="password"
+                />
+                <TouchableOpacity 
+                  onPress={() => setShowPassword(!showPassword)}
+                  style={styles.eyeButton}
+                >
+                  <Ionicons 
+                    name={showPassword ? 'eye-off-outline' : 'eye-outline'} 
+                    size={20} 
+                    color="#9ca3af" 
+                  />
+                </TouchableOpacity>
+              </View>
+            </View>
 
             <TouchableOpacity
-              style={styles.submitButton}
+              style={[styles.submitButton, loading && styles.submitButtonDisabled]}
               onPress={handleEmailAuth}
               disabled={loading}
             >
-              <Text style={styles.submitText}>
-                {loading ? 'Please wait...' : (isSignUp ? 'Create Account' : 'Sign In')}
-              </Text>
+              {loading ? (
+                <ActivityIndicator size="small" color="#fff" />
+              ) : (
+                <Text style={styles.submitText}>
+                  {isSignUp ? 'Create Account' : 'Sign In'}
+                </Text>
+              )}
             </TouchableOpacity>
+
+            {Platform.OS === 'web' && (
+              <View style={styles.dividerContainer}>
+                <View style={styles.dividerLine} />
+                <Text style={styles.dividerText}>or continue with</Text>
+                <View style={styles.dividerLine} />
+              </View>
+            )}
+
+            {Platform.OS === 'web' && (
+              <View style={styles.socialButtonsRow}>
+                <TouchableOpacity 
+                  style={styles.socialButton}
+                  onPress={() => handleProviderPress('google')}
+                >
+                  <SvgIcon name="logo-google" size={20} color="#DB4437" />
+                </TouchableOpacity>
+                <TouchableOpacity 
+                  style={styles.socialButton}
+                  onPress={() => handleProviderPress('apple')}
+                >
+                  <SvgIcon name="logo-apple" size={20} color="#000" />
+                </TouchableOpacity>
+                <TouchableOpacity 
+                  style={styles.socialButton}
+                  onPress={() => handleProviderPress('microsoft')}
+                >
+                  <SvgIcon name="logo-microsoft" size={20} color="#00BCF2" />
+                </TouchableOpacity>
+              </View>
+            )}
 
             <TouchableOpacity
               style={styles.toggleButton}
-              onPress={() => setIsSignUp(!isSignUp)}
+              onPress={() => {
+                setIsSignUp(!isSignUp);
+                setError('');
+              }}
             >
               <Text style={styles.toggleText}>
-                {isSignUp ? 'Already have an account? Sign In' : 'Need an account? Sign Up'}
+                {isSignUp ? 'Already have an account? ' : "Don't have an account? "}
+                <Text style={styles.toggleTextBold}>
+                  {isSignUp ? 'Sign In' : 'Sign Up'}
+                </Text>
               </Text>
             </TouchableOpacity>
 
@@ -319,10 +473,120 @@ export default function MultiAuthLogin({
               style={styles.cancelButton}
               onPress={() => {
                 setShowEmailForm(false);
+                setError('');
               }}
             >
               <Text style={styles.cancelText}>Back</Text>
             </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Forgot Password Modal */}
+      <Modal
+        visible={showForgotPassword}
+        animationType="slide"
+        transparent={true}
+        presentationStyle="overFullScreen"
+        onRequestClose={() => setShowForgotPassword(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={[styles.emailFormContainer, Platform.OS === 'web' && styles.emailFormContainerWeb]}>
+            {/* Close button for web */}
+            {Platform.OS === 'web' && (
+              <TouchableOpacity 
+                style={styles.closeButton} 
+                onPress={() => {
+                  setShowForgotPassword(false);
+                  setResetSent(false);
+                  setResetEmail('');
+                }}
+              >
+                <Text style={styles.closeButtonText}>✕</Text>
+              </TouchableOpacity>
+            )}
+
+            {resetSent ? (
+              <>
+                <View style={styles.successIconContainer}>
+                  <Ionicons name="checkmark-circle" size={64} color="#22c55e" />
+                </View>
+                <Text style={styles.formTitle}>Check Your Email</Text>
+                <Text style={styles.resetSuccessText}>
+                  We've sent password reset instructions to{'\n'}
+                  <Text style={styles.resetEmailHighlight}>{resetEmail}</Text>
+                </Text>
+                <Text style={styles.resetHelpText}>
+                  Didn't receive the email? Check your spam folder or try again.
+                </Text>
+                <TouchableOpacity
+                  style={styles.submitButton}
+                  onPress={() => {
+                    setShowForgotPassword(false);
+                    setResetSent(false);
+                    setResetEmail('');
+                  }}
+                >
+                  <Text style={styles.submitText}>Back to Sign In</Text>
+                </TouchableOpacity>
+              </>
+            ) : (
+              <>
+                <View style={styles.resetIconContainer}>
+                  <Ionicons name="key-outline" size={48} color={colors.primary} />
+                </View>
+                <Text style={styles.formTitle}>Reset Password</Text>
+                <Text style={styles.formSubtitle}>
+                  Enter your email address and we'll send you instructions to reset your password.
+                </Text>
+
+                {error ? (
+                  <View style={styles.errorContainer}>
+                    <Ionicons name="alert-circle" size={16} color="#dc2626" />
+                    <Text style={styles.errorText}>{error}</Text>
+                  </View>
+                ) : null}
+
+                <View style={styles.inputContainer}>
+                  <Text style={styles.inputLabel}>Email Address</Text>
+                  <View style={styles.inputWrapper}>
+                    <Ionicons name="mail-outline" size={20} color="#9ca3af" style={styles.inputIcon} />
+                    <TextInput
+                      style={styles.input}
+                      placeholder="you@example.com"
+                      placeholderTextColor={colors.placeholder}
+                      value={resetEmail}
+                      onChangeText={setResetEmail}
+                      keyboardType="email-address"
+                      autoCapitalize="none"
+                      textContentType="emailAddress"
+                    />
+                  </View>
+                </View>
+
+                <TouchableOpacity
+                  style={[styles.submitButton, resetLoading && styles.submitButtonDisabled]}
+                  onPress={handleForgotPassword}
+                  disabled={resetLoading}
+                >
+                  {resetLoading ? (
+                    <ActivityIndicator size="small" color="#fff" />
+                  ) : (
+                    <Text style={styles.submitText}>Send Reset Link</Text>
+                  )}
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.cancelButton}
+                  onPress={() => {
+                    setShowForgotPassword(false);
+                    setError('');
+                  }}
+                >
+                  <Text style={styles.cancelText}>Back to Sign In</Text>
+                </TouchableOpacity>
+              </>
+            )}
           </View>
         </View>
       </Modal>
@@ -352,7 +616,7 @@ const styles = StyleSheet.create({
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.45)',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: Platform.OS === 'web' ? 'center' : 'flex-end',
     alignItems: Platform.OS === 'web' ? 'center' : 'stretch',
   },
@@ -407,12 +671,12 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   emailFormContainer: {
-    backgroundColor: '#f1f5f9',
+    backgroundColor: '#ffffff',
     borderTopLeftRadius: 28,
     borderTopRightRadius: 28,
     padding: 24,
     width: '100%',
-    maxHeight: '85%',
+    maxHeight: '90%',
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: -6 },
     shadowOpacity: 0.2,
@@ -421,62 +685,171 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderColor: '#e2e8f0',
   },
-  formTitle: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: colors.text,
-    marginBottom: 24,
-    textAlign: 'center',
+  emailFormContainerWeb: {
+    borderRadius: 20,
+    width: 420,
+    maxWidth: '95%',
+    padding: 32,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.15,
+    shadowRadius: 24,
+    borderTopWidth: 0,
   },
-  input: {
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
-    borderRadius: 14,
-    paddingVertical: 14,
-    paddingHorizontal: 18,
-    fontSize: 16,
-    marginBottom: 16,
-    backgroundColor: '#ffffff',
-    color: colors.text,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 3,
-    elevation: 1,
-  },
-  submitButton: {
-    backgroundColor: '#3b82f6',
-    borderRadius: 14,
-    paddingVertical: 16,
+  formLogoContainer: {
     alignItems: 'center',
     marginBottom: 16,
-    shadowColor: '#3b82f6',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 6,
-    elevation: 3,
+  },
+  formLogo: {
+    width: 120,
+    height: 40,
+  },
+  formTitle: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: colors.text,
+    marginBottom: 4,
+    textAlign: 'center',
+  },
+  formSubtitle: {
+    fontSize: 14,
+    color: colors.textMuted,
+    textAlign: 'center',
+    marginBottom: 24,
+    lineHeight: 20,
+  },
+  inputContainer: {
+    marginBottom: 16,
+  },
+  inputLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#374151',
+    marginBottom: 6,
+  },
+  labelRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+  forgotLink: {
+    fontSize: 13,
+    color: colors.primary,
+    fontWeight: '500',
+  },
+  inputWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#e5e7eb',
+    borderRadius: 12,
+    backgroundColor: '#f9fafb',
+    paddingHorizontal: 12,
+  },
+  inputIcon: {
+    marginRight: 10,
+  },
+  input: {
+    flex: 1,
+    paddingVertical: 14,
+    fontSize: 16,
+    color: colors.text,
+  },
+  passwordInput: {
+    paddingRight: 40,
+  },
+  eyeButton: {
+    padding: 8,
+    position: 'absolute',
+    right: 4,
+  },
+  errorContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fef2f2',
     borderWidth: 1,
-    borderColor: '#2563eb',
+    borderColor: '#fecaca',
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 16,
+  },
+  errorText: {
+    fontSize: 13,
+    color: '#dc2626',
+    marginLeft: 8,
+    flex: 1,
+  },
+  submitButton: {
+    backgroundColor: colors.primary,
+    borderRadius: 12,
+    paddingVertical: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+    marginTop: 8,
+    shadowColor: colors.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 3,
+    minHeight: 52,
+  },
+  submitButtonDisabled: {
+    backgroundColor: '#9ca3af',
+    shadowOpacity: 0,
   },
   submitText: {
-    color: 'white',
+    color: '#ffffff',
     fontSize: 16,
     fontWeight: '600',
+  },
+  dividerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 20,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: '#e5e7eb',
+  },
+  dividerText: {
+    fontSize: 13,
+    color: '#9ca3af',
+    paddingHorizontal: 16,
+  },
+  socialButtonsRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 16,
+    marginBottom: 16,
+  },
+  socialButton: {
+    width: 52,
+    height: 52,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#ffffff',
   },
   toggleButton: {
     paddingVertical: 8,
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: 8,
   },
   toggleText: {
-    color: colors.primary,
+    color: colors.textMuted,
     fontSize: 14,
-    fontWeight: '500',
+  },
+  toggleTextBold: {
+    color: colors.primary,
+    fontWeight: '600',
   },
   cancelButton: {
     paddingVertical: 12,
     alignItems: 'center',
-    marginTop: 8,
   },
   cancelText: {
     color: colors.textMuted,
@@ -489,6 +862,8 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     backgroundColor: '#10b981',
     alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
     borderWidth: 1,
     borderColor: '#059669',
     shadowColor: '#10b981',
@@ -518,5 +893,33 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: '#6b7280',
     fontWeight: '400',
+  },
+  // Forgot Password Styles
+  resetIconContainer: {
+    alignItems: 'center',
+    marginBottom: 16,
+    marginTop: 8,
+  },
+  successIconContainer: {
+    alignItems: 'center',
+    marginBottom: 16,
+    marginTop: 8,
+  },
+  resetSuccessText: {
+    fontSize: 15,
+    color: colors.textMuted,
+    textAlign: 'center',
+    marginBottom: 8,
+    lineHeight: 22,
+  },
+  resetEmailHighlight: {
+    color: colors.text,
+    fontWeight: '600',
+  },
+  resetHelpText: {
+    fontSize: 13,
+    color: '#9ca3af',
+    textAlign: 'center',
+    marginBottom: 24,
   },
 });

@@ -2177,6 +2177,39 @@ class AuthService {
       return null;
     }
   }
+
+  /**
+   * Request password reset email
+   */
+  async requestPasswordReset(email: string): Promise<{ success: boolean; error?: string }> {
+    const endpoint = `${this.baseUrl}/api/auth/forgot-password`;
+    
+    console.log('=== REQUEST PASSWORD RESET ===');
+    console.log('Email:', email);
+    
+    try {
+      const response = await fetchWithLogging(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
+      });
+      
+      if (response.ok) {
+        console.log('Password reset email sent successfully');
+        return { success: true };
+      } else {
+        const errorData = await response.json().catch(() => ({}));
+        const errorMessage = errorData.error || 'Failed to send reset email';
+        console.error('Password reset request failed:', errorMessage);
+        return { success: false, error: errorMessage };
+      }
+    } catch (error: any) {
+      console.error('Password reset request error:', error);
+      return { success: false, error: error.message || 'Network error' };
+    }
+  }
 }
 
 export const authService = new AuthService();
