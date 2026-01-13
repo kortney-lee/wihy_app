@@ -2,6 +2,7 @@ import React, { createContext, useState, useEffect, ReactNode } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { authService, UserData } from '../services/authService';
 import { enhancedAuthService } from '../services/enhancedAuthService';
+import { appleAuthService } from '../services/appleAuthService';
 import { getPlanCapabilities, Capabilities } from '../utils/capabilities';
 
 interface UserPreferences {
@@ -324,19 +325,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   const handleAppleAuth = async (): Promise<User> => {
-    // Apple Sign In - would use expo-apple-authentication
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    return {
-      id: 'apple-' + Date.now(),
-      name: 'Apple User',
-      email: 'user@icloud.com',
-      provider: 'apple',
-      memberSince: new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
-      healthScore: 92,
-      streakDays: 20,
-      preferences: { ...defaultPreferences },
-    };
+    // Use Apple Sign-In service
+    const result = await appleAuthService.signInWithApple();
+    
+    if (!result.success || !result.user) {
+      throw new Error(result.error || 'Apple authentication failed');
+    }
+    
+    return convertUserData(result.user);
   };
 
   const handleMicrosoftAuth = async (): Promise<User> => {

@@ -29,6 +29,14 @@ export { notificationService } from './notificationService';
 export { debugLogService } from './debugLogService';
 export { consumptionService } from './consumptionService';
 
+// NEW: Export Checkout & Subscription Services
+export { checkoutService, WIHY_PLANS } from './checkoutService';
+export type { Plan, CheckoutResult, PaymentStatus } from './checkoutService';
+
+// NEW: Export Apple Sign-In Service
+export { appleAuthService } from './appleAuthService';
+export type { AppleAuthResult } from './appleAuthService';
+
 // NEW: Export Offline-First Architecture Services (services.wihy.ai)
 export { mealProgramService } from './mealProgramService';
 export { workoutLogService } from './workoutLogService';
