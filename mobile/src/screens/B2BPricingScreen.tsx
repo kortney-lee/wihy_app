@@ -337,9 +337,9 @@ export const B2BPricingScreen: React.FC<Props> = ({ navigation }) => {
             <p className="pricing-footer-copyright">© 2026 WIHY. All rights reserved.</p>
             <p className="pricing-footer-disclaimer">This page is for education and information only and is not a substitute for professional medical advice.</p>
             <div className="pricing-footer-links">
-              <a href="/privacy">Privacy Policy</a>
+              <a href="#" onClick={(e) => { e.preventDefault(); navigation.navigate('Privacy'); }}>Privacy Policy</a>
               <span className="pricing-footer-separator">•</span>
-              <a href="/terms">Terms of Service</a>
+              <a href="#" onClick={(e) => { e.preventDefault(); navigation.navigate('Terms'); }}>Terms of Service</a>
               <span className="pricing-footer-separator">•</span>
               <a href="mailto:enterprise@wihy.app">Contact Sales</a>
             </div>
