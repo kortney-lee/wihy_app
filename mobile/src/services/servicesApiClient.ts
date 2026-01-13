@@ -7,7 +7,7 @@
  * Base URL: https://services.wihy.ai
  */
 
-import authService from './auth/authService';
+import { authService } from './authService';
 import { storageService } from './storage/storageService';
 import { connectivityService } from './connectivity/connectivityService';
 
@@ -63,7 +63,7 @@ class ServicesApiClient {
    * Get authorization headers
    */
   private async getAuthHeaders(): Promise<Record<string, string>> {
-    const token = await authService.getToken();
+    const token = await authService.getSessionToken();
     if (!token) {
       throw new Error('No authentication token. Please log in.');
     }

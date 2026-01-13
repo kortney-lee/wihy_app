@@ -1,4 +1,4 @@
-import authService from './auth/authService';
+import { authService } from './authService';
 
 const API_BASE_URL = __DEV__ 
   ? 'http://localhost:3000' 
@@ -12,7 +12,7 @@ export const makeAuthenticatedRequest = async (
   endpoint,
   options = {}
 ) => {
-  const token = await authService.getToken();
+  const token = await authService.getSessionToken();
   
   if (!token) {
     throw new Error('No authentication token found. Please log in first.');
