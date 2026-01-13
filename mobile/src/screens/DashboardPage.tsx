@@ -227,12 +227,15 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
     const titleSize = isWeb && !isMobileWeb ? 14 : layout.rfs(16);
     const subtitleSize = isWeb && !isMobileWeb ? 11 : layout.rfs(12);
     
+    // Check if user has premium access (not free plan)
+    const isFreeUser = !user || user.plan === 'free';
+    
     return (
     <SafeAreaView style={styles.healthMainContent} edges={['left', 'right']}>
       {/* Fixed Header - Outside ScrollView */}
       <GradientDashboardHeader
         title="Health Dashboard"
-        subtitle="Your comprehensive health overview"
+        subtitle={isFreeUser ? "Basic health overview" : "Your comprehensive health overview"}
         gradient="healthHub"
         badge={{ icon: "fitness", text: "Active Today" }}
       />
@@ -248,7 +251,7 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
           paddingHorizontal: layout.horizontalPadding,
         }
       ]}>
-        {/* Overview Dashboard */}
+        {/* Overview Dashboard - Available to ALL users */}
         <TouchableOpacity
           style={[styles.dashboardCard, styles.overviewCard, { width: cardWidth as any }]}
           onPress={() => setSelectedDashboard('overview')}
@@ -260,7 +263,20 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
           <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>Health metrics</Text>
         </TouchableOpacity>
 
-        {/* Progress Dashboard */}
+        {/* Nutrition Dashboard - Available to ALL users (scan history, food analysis) */}
+        <TouchableOpacity
+          style={[styles.dashboardCard, styles.nutritionCard, { width: cardWidth as any }]}
+          onPress={() => setSelectedDashboard('nutrition')}
+        >
+          <View style={[styles.cardIconContainer, { width: iconContainerSize, height: iconContainerSize, borderRadius: iconContainerSize / 2 }]}>
+            <Ionicons name="nutrition" size={iconSize} color="#ffffff" />
+          </View>
+          <Text style={[styles.cardTitle, { fontSize: titleSize }]}>Nutrition</Text>
+          <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>Scan history</Text>
+        </TouchableOpacity>
+
+        {/* Progress Dashboard - Premium only */}
+        {!isFreeUser && (
         <TouchableOpacity
           style={[styles.dashboardCard, styles.progressCard, { width: cardWidth as any }]}
           onPress={() => setSelectedDashboard('progress')}
@@ -271,18 +287,8 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
           <Text style={[styles.cardTitle, { fontSize: titleSize }]}>Progress</Text>
           <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>Track goals</Text>
         </TouchableOpacity>
+        )}
 
-        {/* Nutrition Dashboard */}
-        <TouchableOpacity
-          style={[styles.dashboardCard, styles.nutritionCard, { width: cardWidth as any }]}
-          onPress={() => setSelectedDashboard('nutrition')}
-        >
-          <View style={[styles.cardIconContainer, { width: iconContainerSize, height: iconContainerSize, borderRadius: iconContainerSize / 2 }]}>
-            <Ionicons name="nutrition" size={iconSize} color="#ffffff" />
-          </View>
-          <Text style={[styles.cardTitle, { fontSize: titleSize }]}>Nutrition</Text>
-          <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>Food analysis</Text>
-        </TouchableOpacity>
         {/* Create Meals Card (premium+ users) */}
         {hasMealsAccess(user) && (
           <TouchableOpacity
@@ -297,7 +303,8 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
           </TouchableOpacity>
         )}
 
-        {/* Research Card */}
+        {/* Research Card - Premium only */}
+        {!isFreeUser && (
         <TouchableOpacity
           style={[styles.dashboardCard, styles.researchCard, { width: cardWidth as any }]}
           onPress={() => setSelectedDashboard('research')}
@@ -308,8 +315,10 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
           <Text style={[styles.cardTitle, { fontSize: titleSize }]}>Research</Text>
           <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>Health insights</Text>
         </TouchableOpacity>
+        )}
 
-        {/* Fitness Dashboard */}
+        {/* Fitness Dashboard - Premium only */}
+        {!isFreeUser && (
         <TouchableOpacity
           style={[styles.dashboardCard, styles.fitnessCard, { width: cardWidth as any }]}
           onPress={() => setSelectedDashboard('fitness')}
@@ -320,8 +329,9 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
           <Text style={[styles.cardTitle, { fontSize: titleSize }]}>Fitness</Text>
           <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>Workout plans</Text>
         </TouchableOpacity>
+        )}
 
-        {/* Find a Coach */}
+        {/* Find a Coach - Available to all */}
         <TouchableOpacity
           style={[styles.dashboardCard, styles.coachCard, { width: cardWidth as any }]}
           onPress={() => handleNavigateToDashboard('findCoach')}
