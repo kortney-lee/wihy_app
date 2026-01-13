@@ -1,397 +1,117 @@
-# WiHy UI - Health Management Platform
+# WiHy Client - Mobile App
 
 ## Overview
-WiHy UI is a comprehensive React-based health management platform that provides:
-- **Main Health App**: Nutrition analysis, food search, and health information
+WiHy Client is a React Native mobile application for iOS and Android that provides comprehensive health management features including:
+- **Nutrition Analysis**: Food scanning and nutritional information
 - **Health Dashboard**: Personal health metrics visualization and tracking
-- **News Integration**: Health article analysis with AI-powered insights
+- **AI-Powered Chat**: Health insights and recommendations
+- **Meal Planning**: AI-generated meal plans and shopping lists
+- **Fitness Tracking**: Workout programs and progress monitoring
 
-## [ROCKET] Quick Start Guide
+This repository contains the mobile client application only. The web application has been moved to [Web_app_old](https://github.com/kortney-lee/Web_app_old).
+
+## Quick Start
 
 ### Prerequisites
 - **Node.js** (version 16 or higher)
-- **npm** (version 8 or higher)
-- **Git** for version control
+- **npm** or **yarn**
+- **Expo CLI**: `npm install -g expo-cli`
+- **iOS Development**: Xcode (macOS only)
+- **Android Development**: Android Studio with SDK
 
-### [INBOX] Installation & Setup
+### Installation
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/kortney-lee/wihy_ui.git
-   cd wihy_ui
+   git clone https://github.com/kortney-lee/wihy_client.git
+   cd wihy_client
    ```
 
-2. **Install dependencies for all applications:**
+2. **Install dependencies:**
    ```bash
-   # Install root dependencies
-   npm install --legacy-peer-deps
-   
-   # Install client app dependencies
-   cd client
-   npm install --legacy-peer-deps
-   cd ..
-   
-   # Install user dashboard dependencies
-   cd user
-   npm install --legacy-peer-deps
-   cd ..
+   cd mobile
+   npm install
    ```
 
-3. **Configure WiHy API (Optional):**
+3. **Configure environment:**
    ```bash
-   # Production API endpoint (ONLY ENDPOINT WE USE):
-   export REACT_APP_WIHY_API_URL=https://ml.wihy.ai
-   # No backup endpoints needed - ml.wihy.ai is the single production endpoint
+   cp .env.example .env
+   # Edit .env with your API endpoints
    ```
 
-### ‍️ Running the Applications
+### Running the App
 
-#### Start Main Health App (Port 3000)
+#### Development with Expo
 ```bash
-cd client
+cd mobile
 npm start
 ```
-Access at: **http://localhost:3000**
 
-#### Start Health Dashboard (Port 3001)
+#### iOS (macOS only)
 ```bash
-# In a new terminal window
-cd user
-PORT=3001 npm start
+cd mobile
+npm run ios
 ```
-Access at: **http://localhost:3001**
 
-###  Docker Deployment
-
-#### Build and Run Locally
+#### Android
 ```bash
-# Build the Docker image
-docker build -t wihy-ui .
-
-# Run the container
-docker run -d -p 3030:80 --name wihy-ui-app wihy-ui
-
-# Access at http://localhost:3030
+cd mobile
+npm run android
 ```
 
-#### Docker Image Features
-- [OK] **Multi-stage build** for optimized image size
-- [OK] **Production environment variables** baked into build
-- [OK] **Tailwind CSS** and PostCSS configuration included
-- [OK] **Nginx** web server with SPA routing support
-- [OK] **Health check** endpoint at `/health`
-- [OK] **Gzip compression** enabled for assets
-- [OK] **Security headers** configured
+## Project Structure
 
-#### Docker Management
+```
+mobile/
+├── android/          # Android native code
+├── ios/              # iOS native code
+├── src/              # Application source code
+│   ├── components/   # Reusable components
+│   ├── screens/      # Screen components
+│   ├── services/     # API services
+│   ├── navigation/   # Navigation configuration
+│   └── utils/        # Utility functions
+├── app.json          # Expo configuration
+└── package.json      # Dependencies
+```
+
+## Build & Deployment
+
+### Android APK Build
 ```bash
-# Stop container
-docker stop wihy-ui-app
-
-# Remove container
-docker rm wihy-ui-app
-
-# View logs
-docker logs wihy-ui-app
-
-# Check health
-curl http://localhost:3030/health
+cd mobile
+./build-release-apk.ps1
 ```
 
-### [TARGET] What Each Application Does
+### iOS Build
+See [IOS_DEBUG_SETUP.md](IOS_DEBUG_SETUP.md) for detailed iOS build instructions.
 
-#### **Main Health App** (localhost:3000)
--  **Nutrition Analysis**: Search and analyze food items
-- [SEARCH] **Health Search**: AI-powered health information lookup
--  **Image Analysis**: Upload food images for nutritional breakdown
--  **Health News**: Browse and analyze health articles with "Analyze with WiHy"
-- [MIC] **Voice Search**: Voice-enabled search functionality
+### GitHub Actions
+- **build-mobile-ios.yml**: Automated iOS builds
+- **build-mobile-android.yml**: Automated Android builds
 
-#### **Health Dashboard** (localhost:3001)
-- [CHART] **Health Metrics**: Personal health data visualization
-- [UP] **Charts & Graphs**: Interactive health trend analysis
-- [TARGET] **Goal Tracking**: Health and fitness goal management
--  **Timeline Views**: Historical health data tracking
+## Documentation
 
-## [TOOLS] Development
+- [Mobile App Specification](MOBILE_APP_SPECIFICATION.md)
+- [Mobile App Pages Overview](MOBILE_APP_PAGES_OVERVIEW.md)
+- [Mobile Deployment Strategy](MOBILE_DEPLOYMENT_STRATEGY.md)
+- [Native App Guide](NATIVE_APP_GUIDE.md)
+- [Android Build Commands](ANDROID_BUILD_COMMANDS.md)
+- [iOS Debug Setup](IOS_DEBUG_SETUP.md)
 
-### Project Structure
-```
-wihy_ui/
-├── client/                 # Main health application
-│   ├── src/
-│   │   ├── components/     # React components
-│   │   ├── services/       # API services
-│   │   ├── styles/         # Modular CSS architecture
-│   │   │   ├── base.css    # CSS variables & foundations
-│   │   │   ├── buttons.css # Button component styles
-│   │   │   ├── cards.css   # Card & layout styles
-│   │   │   └── VHealthSearch.css # Main CSS import hub
-│   │   └── types/          # TypeScript types
-│   └── package.json
-├── user/                   # Health dashboard
-│   ├── src/
-│   │   ├── components/     # Dashboard components
-│   │   ├── services/       # Data services
-│   │   ├── styles/         # Shared styling system
-│   │   └── types/          # TypeScript types
-│   └── package.json
-└── package.json           # Root package file
-```
+## API Configuration
 
-### [ART] CSS Architecture
+The mobile app connects to the WiHy API:
+- **Production API**: https://ml.wihy.ai
+- **Auth API**: Configured in .env
 
-This project uses a **modular CSS architecture** for consistent styling across both applications:
+See [MOBILE-API-TESTING.md](MOBILE-API-TESTING.md) for API testing guidelines.
 
-#### Core CSS Files:
-- **`base.css`**: CSS custom properties (variables) and foundational styles
-- **`buttons.css`**: All button component styles (.btn, .btn-tab, .badge-dot, etc.)
-- **`cards.css`**: Card layouts, sections, and dashboard components
-- **`modals.css`**: Modal dialog styling
-- **`utilities.css`**: Utility classes and helper styles
-- **`VHealthSearch.css`**: Main CSS import hub that imports all modular styles
+## Related Repositories
 
-#### Design System:
-- **Color Variables**: `--ink-*`, `--slate-*`, `--blue-*`, `--green-*`, etc.
-- **Layout Tokens**: `--radius-*`, `--shadow-*` for consistent spacing and effects
-- **Component Classes**: Reusable components like `.card`, `.btn`, `.progress`, etc.
+- **Web Application**: [Web_app_old](https://github.com/kortney-lee/Web_app_old)
+- **Previous Repository**: [wihy_app](https://github.com/kortney-lee/wihy_app) (archived)
 
-Both applications (client & user) share the same styling system for consistency.
+## License
 
-### [PLUG] API Architecture
-
-#### **WiHy Enhanced Model API Integration**
-The main health application integrates with the enhanced WiHy ML API trained on 2,325 health examples:
-
-**Primary Endpoint**: `POST https://ml.wihy.ai/ask`
-
-**All Environments**: Production uses only `https://ml.wihy.ai` - no backup endpoints needed.
-
-**Key Features**:
-- **Personalized Health Analysis**: User context-aware responses with risk factors and action items
-- **Biblical Wisdom Integration**: Health advice grounded in biblical principles  
-- **Research Foundation**: Evidence-based citations and study references
-- **Progress Tracking**: Metrics and reassessment timelines
-- **Comprehensive TypeScript Support**: Full type definitions in `wihyAPI.ts`
-
-**Service Architecture**:
-```typescript
-// client/src/services/wihyAPI.ts
-- UserContext interface for personalized queries
-- WihyRequest/WihyResponse with complete type safety
-- Structured response formatting for existing UI components
-- Error handling and timeout management (30s)
-- Response transformation for SearchResults display
-```
-
-**Response Structure**:
-- **Risk Factors**: Identified health risks with prevalence and preventability scores  
-- **Action Items**: Priority-based health recommendations with evidence levels
-- **Biblical Wisdom**: Scripture-based health principles
-- **Research Citations**: Scientific backing for recommendations
-- **Progress Metrics**: Trackable health indicators
-
-### [TOOL] Troubleshooting
-
-#### Common Issues:
-
-**TypeScript Version Conflicts:**
-```bash
-# Use legacy peer deps flag for installation
-npm install --legacy-peer-deps
-```
-
-**Port Already in Use:**
-```bash
-# For custom ports
-PORT=3002 npm start  # Use different port
-```
-
-**Dependencies Issues:**
-```bash
-# Clear node_modules and reinstall
-rm -rf node_modules package-lock.json
-npm install --legacy-peer-deps
-```
-
-### [TOOLS] Fixed Issues & Solutions
-
-#### Authentication Modal & Header Layout Fixes (October 2025)
-
-This section documents critical fixes for authentication modal positioning and header layout issues. **Reference these solutions if similar problems arise.**
-
-##### [X] **Problem**: Authentication Modal Not Displaying Properly
-- Modal was showing only Google login instead of all 4 providers
-- Login button appeared too small compared to notification bell
-- Modal overlay was covering the entire header
-- Notification badge was positioned over the bell icon
-
-##### [OK] **Root Causes & Solutions**:
-
-**1. CSS Positioning Conflicts**
-```css
-/* ISSUE: Global styles overriding component styles */
-/* globals.css was setting header-icon-btn to 44px, Header.css to 36px */
-
-/* SOLUTION: Increased CSS specificity in Header.css */
-.vhealth-topbar-right .header-icon-btn {
-  width: 36px !important;
-  height: 36px !important;
-  /* Higher specificity overrides global styles */
-}
-```
-
-**2. Z-Index Layering Problems**
-```css
-/* ISSUE: Modal z-index (999, 1600) lower than header z-index (2000-2001) */
-
-/* SOLUTION: Updated z-index hierarchy */
-.auth-overlay { z-index: 2050; }           /* Above header */
-.providers-popup { z-index: 2100; }       /* Above overlay */
-.user-dropdown { z-index: 2100; }         /* Above overlay */
-```
-
-**3. Badge Positioning Conflicts**
-```css
-/* ISSUE: Badge positioned inside button (top: 6px) instead of outside */
-
-/* SOLUTION: Negative positioning with high specificity */
-.vhealth-topbar-right .header-icon-btn .badge-dot {
-  top: -6px !important;    /* Outside button area */
-  right: -6px !important;  /* Upper-right corner */
-  z-index: 10 !important;  /* Above other elements */
-}
-```
-
-**4. Inline Layout Implementation**
-```tsx
-// ISSUE: Login component using fixed positioning broke flex layout
-
-// SOLUTION: Added position prop with inline variant
-<MultiAuthLogin position="inline" />
-
-// CSS variants for different contexts
-.multi-auth-container.inline {
-  position: static;          /* Participates in flex flow */
-  display: inline-flex;      /* Inline with notification bell */
-}
-
-.multi-auth-container.top-right {
-  position: fixed;           /* Modal overlay context */
-}
-```
-
-##### [PAGE] **Files Modified**:
-- `user/src/components/components/shared/components/MultiAuthLogin.tsx`
-- `user/src/components/components/shared/components/MultiAuthLogin.css`
-- `user/src/components/components/shared/components/Header.tsx`
-- `user/src/components/components/shared/components/Header.css`
-
-##### [SEARCH] **Key Lessons Learned**:
-
-1. **CSS Specificity**: Use parent selectors (`.vhealth-topbar-right .header-icon-btn`) instead of `!important` when possible
-2. **Z-Index Management**: Maintain clear z-index hierarchy (Header: 2000 → Overlay: 2050 → Modal: 2100)
-3. **Component Variants**: Use position props for different rendering contexts (inline vs modal)
-4. **Global Style Conflicts**: Check `globals.css` for conflicting rules when component styles don't apply
-5. **Fixed Positioning**: Be careful with `position: fixed` - it removes elements from normal document flow
-
-#####  **Testing Checklist**:
-- [ ] Notification bell and login button are same size (36px x 36px)
-- [ ] Badge appears in upper-right corner of notification button
-- [ ] Login modal shows all 4 providers (Google, Microsoft, Apple, Facebook)
-- [ ] Modal overlay appears above header but doesn't cover it inappropriately
-- [ ] Both buttons display inline in header with proper spacing
-
-### [ART] Key Features
-
-#### Recent Updates (October 2025):
-- [OK] **WiHy API Integration**: Complete replacement of OpenAI endpoint with native WiHy API (`http://localhost:8000/wihy/ask-anything`)
-- [OK] **Enhanced Health Analysis**: Integrated comprehensive WiHy response format with risk factors, action items, and biblical wisdom
-- [OK] **TypeScript API Service**: Added robust `wihyAPI.ts` service with full type definitions and error handling
-- [OK] **Modular CSS Architecture**: Implemented unified styling system with modular CSS files (base.css, buttons.css, cards.css, etc.)
-- [OK] **Dashboard Styling Consolidation**: Both client and user apps now share the same CSS architecture for consistent UI
-- [OK] **Brand Asset Updates**: Updated to WIHY branding with new logo assets, removed old placeholder images
-- [OK] **Design System**: Added comprehensive CSS variables for colors, spacing, and layout tokens
-- [OK] **Component Library**: Standardized button, card, and modal components across applications
-- [OK] **Fixed Header Layout**: Implemented responsive fixed header with proper modal positioning
-- [OK] **"Analyze with WiHy" Bug Fix**: Resolved issue where news article analysis wasn't working properly
-
-#### Main Features:
-- [TARGET] **WiHy-Powered Search**: Native WiHy API integration for personalized health analysis
--  **News Analysis**: Click "Analyze with WiHy" on any health article for AI insights
--  **Risk Assessment**: Detailed health risk factors with prevention strategies
-- ️ **Biblical Health Wisdom**: Scripture-based health guidance and principles
-- [CHART] **Data Visualization**: Interactive charts and health metrics  
-- [CYCLE] **Real-time Updates**: Live data synchronization
-- [MOBILE] **Responsive Design**: Works on all device sizes
-- [UP] **Progress Tracking**: Measurable health goals with reassessment timelines
-
-##  Production Deployment
-
-### Live Application URLs
-- **Primary Domain**: https://wihy.ai
-- **Azure URL**: https://wihy-ui-prod.westus2.cloudapp.azure.com
-- **Health Check**: https://wihy.ai/health
-
-### Production Infrastructure
-- **Server**: Azure VM (4.246.82.249)
-- **Container**: Docker with Nginx reverse proxy
-- **Ports**: External 80/443 → Internal 3000
-- **SSL**: Let's Encrypt (auto-renewal)
-- **API**: Enhanced WiHy ML API (ml.wihy.ai) - 2,325 training examples
-- **Deployment**: Automated via GitHub Actions
-
-### Deployment Process
-1. **Push to main** triggers automatic deployment
-2. **Docker build** creates optimized production image
-3. **Health checks** verify container functionality
-4. **Zero-downtime deployment** to production VM
-5. **SSL verification** ensures HTTPS functionality
-
-For detailed deployment instructions, see [DEPLOYMENT.md](DEPLOYMENT.md) and [DEPLOYMENT-QUICK-REFERENCE.md](DEPLOYMENT-QUICK-REFERENCE.md).
-
-### [PACKAGE] Building for Production
-
-#### Main App:
-```bash
-cd client
-npm run build
-```
-
-#### Dashboard:
-```bash
-cd user  
-npm run build
-```
-
-###  Contributing
-
-1. **Fork the repository**
-2. **Create a feature branch:**
-   ```bash
-   git checkout -b feature/amazing-feature
-   ```
-3. **Commit your changes:**
-   ```bash
-   git commit -m 'Add amazing feature'
-   ```
-4. **Push to the branch:**
-   ```bash
-   git push origin feature/amazing-feature
-   ```
-5. **Open a Pull Request**
-
-### [EMAIL] Support
-
-For questions or issues:
--  **Report bugs**: Open an issue on GitHub
-- [BULB] **Feature requests**: Submit an enhancement request
--  **Documentation**: Check the code comments and component docs
-
-### [FILE] License
-
-This project is licensed under the ISC License - see the [LICENSE](LICENSE) file for details.
-
----
-
-**Made with ️ for better health management**
+Copyright © 2024 WiHy. All rights reserved.
