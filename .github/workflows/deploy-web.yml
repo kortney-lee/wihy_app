@@ -173,22 +173,20 @@ jobs:
         FROM node:20-alpine AS builder
         WORKDIR /app
         
-        # Copy package files for both root and client
-        COPY package*.json ./
-        COPY client/package*.json ./client/
+        # Copy package files for mobile
+        COPY mobile/package*.json ./mobile/
         
-        # Install dependencies for both root and client
-        RUN npm ci && npm cache clean --force
-        RUN cd client && npm ci && npm cache clean --force
+        # Install dependencies for mobile
+        RUN cd mobile && npm ci && npm cache clean --force
         
         # Copy source code
-        COPY . .
+        COPY mobile ./mobile
         
-        # Build the React app
-        RUN npm run build
+        # Build the Expo web app
+        RUN cd mobile && npx expo export --platform web
 
         FROM nginx:alpine
-        COPY --from=builder /app/client/build /usr/share/nginx/html
+        COPY --from=builder /app/mobile/dist /usr/share/nginx/html
         COPY nginx.conf /etc/nginx/nginx.conf
         
         # Add health check endpoint
