@@ -71,6 +71,20 @@ const ADD_ONS: AddOn[] = [
 
 const PLANS: Plan[] = [
   {
+    id: 'free',
+    displayName: 'Free',
+    price: '$0/mo',
+    description: 'Essential features to get started',
+    features: [
+      'Barcode scanning',
+      'Photo food analysis',
+      'Medication tracking',
+      'Basic health dashboard',
+      'Browse coaches',
+    ],
+    color: '#6b7280',
+  },
+  {
     id: 'premium',
     displayName: 'Premium',
     price: '$12.99/mo',
@@ -157,6 +171,20 @@ export default function PlansModal({
 
   const handleSelectPlan = async (planId: string) => {
     const selectedPlan = PLANS.find(p => p.id === planId);
+    
+    // Free plan - no payment needed, just close modal
+    if (planId === 'free') {
+      onClose();
+      if (onSelectPlan) {
+        onSelectPlan(planId);
+      }
+      Alert.alert(
+        'Free Plan',
+        'You are on the Free plan. Enjoy the basic features or upgrade anytime to unlock more!',
+        [{ text: 'OK' }]
+      );
+      return;
+    }
     
     // Check if this is a family or coach plan that requires enrollment
     if (planId === 'coach') {
