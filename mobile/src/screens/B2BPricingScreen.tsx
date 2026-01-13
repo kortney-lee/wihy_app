@@ -24,6 +24,31 @@ if (Platform.OS === 'web') {
 const isWeb = Platform.OS === 'web';
 const SUCCESS_GREEN = '#22c55e';
 
+// SVG icons for web (Ionicons don't render properly on web)
+const WebIcon = ({ name, size = 24, color = '#3b82f6' }: { name: string; size?: number; color?: string }) => {
+  const icons: Record<string, string> = {
+    'business': 'M12 7V3H2v18h20V7H12zM6 19H4v-2h2v2zm0-4H4v-2h2v2zm0-4H4V9h2v2zm0-4H4V5h2v2zm4 12H8v-2h2v2zm0-4H8v-2h2v2zm0-4H8V9h2v2zm0-4H8V5h2v2zm10 12h-8v-2h2v-2h-2v-2h2v-2h-2V9h8v10zm-2-8h-2v2h2v-2zm0 4h-2v2h2v-2z',
+    'trending-up': 'M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z',
+    'globe': 'M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zm6.93 6h-2.95c-.32-1.25-.78-2.45-1.38-3.56 1.84.63 3.37 1.91 4.33 3.56zM12 4.04c.83 1.2 1.48 2.53 1.91 3.96h-3.82c.43-1.43 1.08-2.76 1.91-3.96zM4.26 14C4.1 13.36 4 12.69 4 12s.1-1.36.26-2h3.38c-.08.66-.14 1.32-.14 2 0 .68.06 1.34.14 2H4.26zm.82 2h2.95c.32 1.25.78 2.45 1.38 3.56-1.84-.63-3.37-1.9-4.33-3.56zm2.95-8H5.08c.96-1.66 2.49-2.93 4.33-3.56C8.81 5.55 8.35 6.75 8.03 8zM12 19.96c-.83-1.2-1.48-2.53-1.91-3.96h3.82c-.43 1.43-1.08 2.76-1.91 3.96zM14.34 14H9.66c-.09-.66-.16-1.32-.16-2 0-.68.07-1.35.16-2h4.68c.09.65.16 1.32.16 2 0 .68-.07 1.34-.16 2zm.25 5.56c.6-1.11 1.06-2.31 1.38-3.56h2.95c-.96 1.65-2.49 2.93-4.33 3.56zM16.36 14c.08-.66.14-1.32.14-2 0-.68-.06-1.34-.14-2h3.38c.16.64.26 1.31.26 2s-.1 1.36-.26 2h-3.38z',
+    'school': 'M5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82zM12 3L1 9l11 6 9-4.91V17h2V9L12 3z',
+    'library': 'M12 11.55C9.64 9.35 6.48 8 3 8v11c3.48 0 6.64 1.35 9 3.55 2.36-2.19 5.52-3.55 9-3.55V8c-3.48 0-6.64 1.35-9 3.55zM12 8c1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3 1.34 3 3 3z',
+    'medkit': 'M20 6h-4V4c0-1.1-.9-2-2-2h-4c-1.1 0-2 .9-2 2v2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zM10 4h4v2h-4V4zm6 11h-3v3h-2v-3H8v-2h3v-3h2v3h3v2z',
+    'bed': 'M7 13c1.66 0 3-1.34 3-3S8.66 7 7 7s-3 1.34-3 3 1.34 3 3 3zm12-6h-8v7H3V5H1v15h2v-3h18v3h2v-9c0-2.21-1.79-4-4-4z',
+    'checkmark-circle': 'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z',
+    'person': 'M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z',
+    'people': 'M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z',
+    'mail': 'M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z',
+  };
+  
+  const path = icons[name] || icons['business'];
+  
+  return (
+    <svg viewBox="0 0 24 24" width={size} height={size} fill={color}>
+      <path d={path} />
+    </svg>
+  );
+};
+
 // B2B/Enterprise Plans - No pricing displayed (contact sales model)
 const B2B_PLANS = [
   {
@@ -219,7 +244,7 @@ export const B2BPricingScreen: React.FC<Props> = ({ navigation }) => {
                   )}
                   
                   <div className="pricing-card-icon">
-                    <Ionicons name={plan.icon as any} size={28} color={colors.primary} />
+                    <WebIcon name={plan.icon} size={28} color={colors.primary} />
                   </div>
                   <h3 className="pricing-card-name">{plan.name}</h3>
                   <p className="pricing-card-tagline">{plan.tagline}</p>
@@ -232,7 +257,7 @@ export const B2BPricingScreen: React.FC<Props> = ({ navigation }) => {
                   <ul className="pricing-features">
                     {plan.features.map((feature, index) => (
                       <li key={index} className="pricing-feature">
-                        <Ionicons name="checkmark-circle" size={18} color={SUCCESS_GREEN} />
+                        <WebIcon name="checkmark-circle" size={18} color={SUCCESS_GREEN} />
                         <span>{feature}</span>
                       </li>
                     ))}
@@ -266,7 +291,7 @@ export const B2BPricingScreen: React.FC<Props> = ({ navigation }) => {
                     className="pricing-card-icon-colored"
                     style={{ backgroundColor: `${plan.color}15` }}
                   >
-                    <Ionicons name={plan.icon as any} size={28} color={plan.color} />
+                    <WebIcon name={plan.icon} size={28} color={plan.color} />
                   </div>
                   <h3 className="pricing-card-name">{plan.name}</h3>
                   <p className="pricing-card-tagline">{plan.tagline}</p>
@@ -287,7 +312,7 @@ export const B2BPricingScreen: React.FC<Props> = ({ navigation }) => {
           {/* CTA Section */}
           <section className="pricing-section pricing-cta-section">
             <div className="pricing-cta-box">
-              <Ionicons name="mail" size={32} color={colors.primary} />
+              <WebIcon name="mail" size={32} color={colors.primary} />
               <h3>Ready to get started?</h3>
               <p>Contact our sales team for a custom quote tailored to your organization.</p>
               <button
@@ -295,7 +320,7 @@ export const B2BPricingScreen: React.FC<Props> = ({ navigation }) => {
                 className="pricing-btn pricing-btn-primary pricing-btn-lg"
                 type="button"
               >
-                <Ionicons name="mail" size={20} color="#fff" />
+                <WebIcon name="mail" size={20} color="#fff" />
                 Contact Sales
               </button>
             </div>
