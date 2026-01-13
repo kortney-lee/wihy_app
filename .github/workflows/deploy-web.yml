@@ -127,7 +127,7 @@ jobs:
       uses: FirebaseExtended/action-hosting-deploy@v0
       with:
         repoToken: '${{ secrets.GITHUB_TOKEN }}'
-        firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_WIHY_AI }}'
+        firebaseServiceAccount: '${{ secrets.GCP_SA_KEY }}'
         projectId: '${{ env.PROJECT_ID }}'
         channelId: live
         entryPoint: ./
