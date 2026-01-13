@@ -49,4 +49,9 @@ export type RootStackParamList = {
   
   // Enrollment for coaches and parents
   Enrollment: { tab?: 'parent' | 'coach' } | undefined;
+  
+  // Legal and info pages
+  About: undefined;
+  Terms: undefined;
+  Privacy: undefined;
 };
