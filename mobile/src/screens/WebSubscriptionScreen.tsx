@@ -293,6 +293,12 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
           </svg>
           <span>Chat</span>
         </button>
+        <button onClick={() => navigation.navigate('About')} className="web-nav-item nav-about" type="button">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+          </svg>
+          <span>About</span>
+        </button>
       </div>
       <div className="web-nav-right">
         <button onClick={() => {
@@ -473,7 +479,15 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
 
           {/* Footer */}
           <footer className="pricing-footer">
-            <p>Questions? Contact us at <a href="mailto:support@wihy.app">support@wihy.app</a></p>
+            <p className="pricing-footer-copyright">© 2026 WIHY. All rights reserved.</p>
+            <p className="pricing-footer-disclaimer">This page is for education and information only and is not a substitute for professional medical advice.</p>
+            <div className="pricing-footer-links">
+              <a href="/privacy">Privacy Policy</a>
+              <span className="pricing-footer-separator">•</span>
+              <a href="/terms">Terms of Service</a>
+              <span className="pricing-footer-separator">•</span>
+              <a href="mailto:support@wihy.app">Contact Us</a>
+            </div>
           </footer>
         </div>
 
