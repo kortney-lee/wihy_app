@@ -184,6 +184,20 @@
   fill: #3d9614;
 }
 
+.web-nav-item.nav-about {
+  color: #6366f1;
+}
+.web-nav-item.nav-about svg {
+  fill: #6366f1;
+}
+.web-nav-item.nav-about:hover {
+  color: #4f46e5;
+  background: #eef2ff;
+}
+.web-nav-item.nav-about:hover svg {
+  fill: #4f46e5;
+}
+
 /* Hide on desktop, show on mobile */
 .web-nav-item.mobile-only {
   display: none;
