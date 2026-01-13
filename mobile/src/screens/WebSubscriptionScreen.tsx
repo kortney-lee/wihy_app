@@ -21,6 +21,21 @@ import { useAuth } from '../context/AuthContext';
 // Consumer Plans - Correct pricing from PRICING_QUICK_REFERENCE.md
 const CONSUMER_PLANS = [
   {
+    id: 'free',
+    name: 'Free',
+    monthlyPrice: 0,
+    yearlyPrice: 0,
+    tagline: 'Get started with essential features',
+    features: [
+      'Barcode scanning',
+      'Photo food analysis',
+      'Medication tracking',
+      'Basic health dashboard',
+    ],
+    stripeLink: null, // No payment needed
+    icon: 'gift',
+  },
+  {
     id: 'premium',
     name: 'Premium',
     monthlyPrice: 12.99,
@@ -188,7 +203,27 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
     const plan = CONSUMER_PLANS.find(p => p.id === planId);
     if (!plan) return;
 
-    // Check if user is logged in
+    // Free plan - redirect to registration (no payment needed)
+    if (planId === 'free') {
+      if (!user?.email) {
+        // Not logged in - go to registration with plan parameter
+        if (Platform.OS === 'web' && typeof window !== 'undefined') {
+          window.location.href = '/register?plan=free';
+        } else {
+          navigation.navigate('Register' as any, { plan: 'free' });
+        }
+      } else {
+        // Already logged in with free plan
+        if (Platform.OS === 'web' && typeof window !== 'undefined') {
+          window.alert('You are already on the Free plan. Explore the app or upgrade to unlock more features!');
+        } else {
+          Alert.alert('Free Plan', 'You are already on the Free plan. Explore the app or upgrade to unlock more features!');
+        }
+      }
+      return;
+    }
+
+    // Paid plans - check if user is logged in
     if (!user?.email) {
       if (Platform.OS === 'web' && typeof window !== 'undefined') {
         const proceed = window.confirm(

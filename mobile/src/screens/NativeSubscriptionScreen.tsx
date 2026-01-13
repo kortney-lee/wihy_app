@@ -18,21 +18,27 @@ import { RootStackParamList } from '../types/navigation';
 // Subscription plans for native
 const NATIVE_PLANS = [
   {
+    id: 'free',
+    name: 'Free',
+    price: '$0/month',
+    description: 'Essential features to get started',
+  },
+  {
     id: 'premium_monthly',
     name: 'Premium',
-    price: '$9.99/month',
+    price: '$12.99/month',
     description: 'Full access to all health tracking features',
   },
   {
     id: 'family_basic_monthly',
     name: 'Family Basic',
-    price: '$14.99/month',
+    price: '$24.99/month',
     description: 'Health tracking for the whole family',
   },
   {
     id: 'family_premium_monthly',
     name: 'Family Premium',
-    price: '$24.99/month',
+    price: '$34.99/month',
     description: 'Complete family wellness solution',
     popular: true,
   },
@@ -59,6 +65,16 @@ export const NativeSubscriptionScreen: React.FC<Props> = ({ navigation }) => {
   const [purchasing, setPurchasing] = useState(false);
 
   const handlePurchase = async (planId: string) => {
+    // Free plan - no payment needed
+    if (planId === 'free') {
+      Alert.alert(
+        'Free Plan',
+        'You are on the Free plan. Enjoy the basic features or upgrade anytime!',
+        [{ text: 'OK' }]
+      );
+      return;
+    }
+    
     setPurchasing(true);
     try {
       // TODO: Integrate with expo-in-app-purchases when installed
