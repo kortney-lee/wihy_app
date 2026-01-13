@@ -1,117 +1,116 @@
-# WiHy Client - Mobile App
+# Wihy Native
 
-## Overview
-WiHy Client is a React Native mobile application for iOS and Android that provides comprehensive health management features including:
-- **Nutrition Analysis**: Food scanning and nutritional information
-- **Health Dashboard**: Personal health metrics visualization and tracking
-- **AI-Powered Chat**: Health insights and recommendations
-- **Meal Planning**: AI-generated meal plans and shopping lists
-- **Fitness Tracking**: Workout programs and progress monitoring
+A React Native application built with TypeScript for Android and iOS platforms.
 
-This repository contains the mobile client application only. The web application has been moved to [Web_app_old](https://github.com/kortney-lee/Web_app_old).
-
-## Quick Start
+## Getting Started
 
 ### Prerequisites
-- **Node.js** (version 16 or higher)
-- **npm** or **yarn**
-- **Expo CLI**: `npm install -g expo-cli`
-- **iOS Development**: Xcode (macOS only)
-- **Android Development**: Android Studio with SDK
+
+- Node.js (>= 18)
+- npm or yarn
+- For Android development:
+  - Android Studio
+  - Android SDK
+  - Java Development Kit (JDK)
+- For iOS development (macOS only):
+  - Xcode
+  - iOS Simulator
+  - CocoaPods
 
 ### Installation
 
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/kortney-lee/wihy_client.git
-   cd wihy_client
-   ```
+1. Install dependencies:
+```bash
+npm install
+```
 
-2. **Install dependencies:**
-   ```bash
-   cd mobile
-   npm install
-   ```
-
-3. **Configure environment:**
-   ```bash
-   cp .env.example .env
-   # Edit .env with your API endpoints
-   ```
+2. For iOS (macOS only):
+```bash
+cd ios && pod install && cd ..
+```
 
 ### Running the App
 
-#### Development with Expo
+#### Android
 ```bash
-cd mobile
-npm start
+npm run android
 ```
 
 #### iOS (macOS only)
 ```bash
-cd mobile
 npm run ios
 ```
 
+#### Start Metro bundler separately
+```bash
+npm start
+```
+
+### Building for Production
+
 #### Android
 ```bash
-cd mobile
-npm run android
+npm run build:android
 ```
 
-## Project Structure
-
-```
-mobile/
-├── android/          # Android native code
-├── ios/              # iOS native code
-├── src/              # Application source code
-│   ├── components/   # Reusable components
-│   ├── screens/      # Screen components
-│   ├── services/     # API services
-│   ├── navigation/   # Navigation configuration
-│   └── utils/        # Utility functions
-├── app.json          # Expo configuration
-└── package.json      # Dependencies
-```
-
-## Build & Deployment
-
-### Android APK Build
+#### iOS
 ```bash
-cd mobile
-./build-release-apk.ps1
+npm run build:ios
 ```
 
-### iOS Build
-See [IOS_DEBUG_SETUP.md](IOS_DEBUG_SETUP.md) for detailed iOS build instructions.
+### Project Structure
 
-### GitHub Actions
-- **build-mobile-ios.yml**: Automated iOS builds
-- **build-mobile-android.yml**: Automated Android builds
+```
+src/
+├── App.tsx              # Main app component with navigation
+├── screens/
+│   ├── HomeScreen.tsx   # Home screen component
+│   └── AboutScreen.tsx  # About screen component
+android/                 # Android-specific code and configuration
+ios/                     # iOS-specific code and configuration
+```
 
-## Documentation
+### Features
 
-- [Mobile App Specification](MOBILE_APP_SPECIFICATION.md)
-- [Mobile App Pages Overview](MOBILE_APP_PAGES_OVERVIEW.md)
-- [Mobile Deployment Strategy](MOBILE_DEPLOYMENT_STRATEGY.md)
-- [Native App Guide](NATIVE_APP_GUIDE.md)
-- [Android Build Commands](ANDROID_BUILD_COMMANDS.md)
-- [iOS Debug Setup](IOS_DEBUG_SETUP.md)
+- ✅ React Navigation for screen navigation
+- ✅ TypeScript for type safety
+- ✅ Safe Area handling for modern devices
+- ✅ Cross-platform compatibility (Android & iOS)
+- ✅ Modern React Native architecture
 
-## API Configuration
+### Development
 
-The mobile app connects to the WiHy API:
-- **Production API**: https://ml.wihy.ai
-- **Auth API**: Configured in .env
+This project follows React Native best practices and includes:
 
-See [MOBILE-API-TESTING.md](MOBILE-API-TESTING.md) for API testing guidelines.
+- TypeScript configuration
+- ESLint for code linting
+- Metro bundler configuration
+- Platform-specific optimizations
 
-## Related Repositories
+### Troubleshooting
 
-- **Web Application**: [Web_app_old](https://github.com/kortney-lee/Web_app_old)
-- **Previous Repository**: [wihy_app](https://github.com/kortney-lee/wihy_app) (archived)
+If you encounter issues:
+
+1. Clean the project:
+```bash
+npx react-native clean
+```
+
+2. Reset Metro bundler cache:
+```bash
+npm start -- --reset-cache
+```
+
+3. For Android, clean and rebuild:
+```bash
+cd android && ./gradlew clean && cd ..
+```
+
+4. For iOS, clean and reinstall pods:
+```bash
+cd ios && rm -rf Pods && pod install && cd ..
+```
 
 ## License
 
-Copyright © 2024 WiHy. All rights reserved.
+This project is licensed under the MIT License.
