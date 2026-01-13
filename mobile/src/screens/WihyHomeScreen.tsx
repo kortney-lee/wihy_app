@@ -69,6 +69,9 @@ export default function WihyHomeScreen({}: Props = {}) {
   
   // Tablet detection
   const isTabletDevice = width >= TABLET_BREAKPOINT;
+  
+  // Desktop detection for web features
+  const isDesktop = width >= 1024;
 
   // Handle search submission
   const handleAnalyze = () => {
@@ -300,16 +303,18 @@ export default function WihyHomeScreen({}: Props = {}) {
                 </button>
               )}
               
-              {/* Camera Button - Opens Upload Modal on Web */}
-              <button
-                onClick={() => setShowUploadModal(true)}
-                className="web-icon-button"
-                type="button"
-              >
-                <svg viewBox="0 0 24 24" width="20" height="20" fill="#5f6368">
-                  <path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/>
-                </svg>
-              </button>
+              {/* Camera Button - Opens Upload Modal on Web (Desktop only) */}
+              {isDesktop && (
+                <button
+                  onClick={() => setShowUploadModal(true)}
+                  className="web-icon-button"
+                  type="button"
+                >
+                  <svg viewBox="0 0 24 24" width="20" height="20" fill="#5f6368">
+                    <path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/>
+                  </svg>
+                </button>
+              )}
               
               {/* Voice Button */}
               <button
