@@ -40,7 +40,9 @@
         "buildType": "apk"
       },
       "env": {
-        "APP_ENV": "preview"
+        "APP_ENV": "preview",
+        "EXPO_PUBLIC_API_URL": "$EXPO_PUBLIC_API_URL",
+        "EXPO_PUBLIC_AUTH_URL": "$EXPO_PUBLIC_AUTH_URL"
       },
       "channel": "preview"
     },
@@ -53,7 +55,9 @@
         "autoIncrement": true
       },
       "env": {
-        "APP_ENV": "production"
+        "APP_ENV": "production",
+        "EXPO_PUBLIC_API_URL": "$EXPO_PUBLIC_API_URL",
+        "EXPO_PUBLIC_AUTH_URL": "$EXPO_PUBLIC_AUTH_URL"
       },
       "channel": "production"
     }

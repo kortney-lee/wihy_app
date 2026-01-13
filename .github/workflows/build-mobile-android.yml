@@ -5,13 +5,11 @@ on:
     branches: [main, develop]
     paths:
       - 'mobile/**'
-      - 'shared/**'
       - '.github/workflows/build-mobile-android.yml'
   pull_request:
     branches: [main]
     paths:
       - 'mobile/**'
-      - 'shared/**'
   workflow_dispatch:
 
 jobs:
@@ -32,67 +30,42 @@ jobs:
         cache: 'npm'
         cache-dependency-path: mobile/package-lock.json
 
+    - name: Setup Expo
+      uses: expo/expo-github-action@v8
+      with:
+        expo-version: latest
+        eas-version: latest
+        token: ${{ secrets.EXPO_TOKEN }}
+
     - name: Setup JDK
       uses: actions/setup-java@v4
       with:
         distribution: 'temurin'
         java-version: '17'
-        cache: 'gradle'
 
-    - name: Install root workspace dependencies
-      run: npm ci
-      working-directory: .
-
-    - name: Install mobile dependencies
+    - name: Install dependencies
       run: npm ci
 
-    - name: Make gradlew executable
-      run: chmod +x android/gradlew
-
-    - name: Build Android Debug APK
-      if: github.ref != 'refs/heads/main'
+    - name: Create .env file
       run: |
-        cd android
-        ./gradlew assembleDebug
+        echo "EXPO_PUBLIC_API_URL=${{ secrets.REACT_APP_API_BASE_URL }}" >> .env
+        echo "EXPO_PUBLIC_AUTH_URL=${{ secrets.REACT_APP_AUTH_API_URL }}" >> .env
+
+    - name: EAS Build (Preview)
+      if: github.ref != 'refs/heads/main'
+      run: eas build --platform android --profile preview --non-interactive --no-wait
       env:
         EXPO_PUBLIC_API_URL: ${{ secrets.REACT_APP_API_BASE_URL }}
         EXPO_PUBLIC_AUTH_URL: ${{ secrets.REACT_APP_AUTH_API_URL }}
 
-    - name: Build Android Release APK
+    - name: EAS Build (Production)
       if: github.ref == 'refs/heads/main'
-      run: |
-        cd android
-        ./gradlew assembleRelease
+      run: eas build --platform android --profile production --non-interactive
       env:
         EXPO_PUBLIC_API_URL: ${{ secrets.REACT_APP_API_BASE_URL }}
         EXPO_PUBLIC_AUTH_URL: ${{ secrets.REACT_APP_AUTH_API_URL }}
 
-    - name: Upload Release APK
-      if: github.ref == 'refs/heads/main'
-      uses: actions/upload-artifact@v4
-      with:
-        name: app-release.apk
-        path: mobile/android/app/build/outputs/apk/release/app-release.apk
-        retention-days: 30
-
-    - name: Upload Debug APK
-      if: github.ref != 'refs/heads/main'
-      uses: actions/upload-artifact@v4
-      with:
-        name: app-debug.apk
-        path: mobile/android/app/build/outputs/apk/debug/app-debug.apk
-        retention-days: 7
-
-    - name: Build Android App Bundle (AAB) for Play Store
-      if: github.ref == 'refs/heads/main'
-      run: |
-        cd android
-        ./gradlew bundleRelease
-
-    - name: Upload App Bundle
-      if: github.ref == 'refs/heads/main'
-      uses: actions/upload-artifact@v4
-      with:
-        name: app-release.aab
-        path: mobile/android/app/build/outputs/bundle/release/app-release.aab
-        retention-days: 30
+    - name: Submit to Google Play (Internal Testing)
+      if: github.ref == 'refs/heads/main' && success()
+      run: eas submit --platform android --profile production --latest --non-interactive
+      continue-on-error: true
