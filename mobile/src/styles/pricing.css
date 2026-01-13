@@ -307,6 +307,24 @@
   margin-bottom: 16px;
 }
 
+.pricing-custom {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1a73e8;
+  background: linear-gradient(135deg, #1a73e8 0%, #6366f1 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.pricing-description {
+  font-size: 13px;
+  color: #6b7280;
+  text-align: center;
+  margin: 0 0 20px;
+  line-height: 1.5;
+}
+
 /* ═══════════════════════════════════════════════════════════
    FEATURES LIST
    ═══════════════════════════════════════════════════════════ */
