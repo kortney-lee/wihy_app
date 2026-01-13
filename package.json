@@ -1,33 +1,41 @@
 {
-  "name": "vhealth",
+  "name": "wihy-monorepo",
   "version": "1.0.0",
+  "description": "WiHY AI - Unified Web & Mobile Repository",
   "private": true,
+  "workspaces": [
+    "web",
+    "web/client",
+    "mobile",
+    "shared"
+  ],
   "scripts": {
-    "start": "cd client && npm start",
-    "build": "cd client && npm run build",
-    "test": "cd client && npm test",
-    "dev": "docker-compose up wihy-ui-dev",
-    "dev:prod": "docker-compose up wihy-ui-prod",
-    "docker:build": "docker build -t wihy-ui .",
-    "docker:run": "docker run -p 8080:80 wihy-ui",
-    "deploy": "npm run build",
-    "deploy:cache-bust": "powershell -ExecutionPolicy Bypass -File deploy-with-cache-bust.ps1"
+    "web:dev": "npm run start --workspace=web/client",
+    "web:build": "npm run build --workspace=web/client",
+    "web:test": "npm run test --workspace=web/client",
+    "mobile:ios": "npm run ios --workspace=mobile",
+    "mobile:android": "npm run android --workspace=mobile",
+    "mobile:start": "npm run start --workspace=mobile",
+    "install:all": "npm install && npm install --workspaces",
+    "clean": "npm run clean --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kortney-lee/wihy_app.git"
+  },
+  "keywords": [
+    "wihy",
+    "nutrition",
+    "health",
+    "monorepo",
+    "web",
+    "mobile"
+  ],
+  "author": "Wihy.ai",
+  "license": "MIT",
   "devDependencies": {
-    "@types/node": "^20.11.24",
-    "concurrently": "^8.2.2",
-    "typescript": "^4.9.5"
-  },
-  "dependencies": {
-    "@stripe/react-stripe-js": "^5.4.1",
-    "@stripe/stripe-js": "^8.6.0",
-    "dotenv": "^16.4.5",
-    "stripe": "^20.1.0"
-  },
-  "description": "vhealth is a React application designed to provide a comprehensive health management platform. This application allows users to track their health metrics, manage appointments, and access health-related resources.",
-  "main": "config-overrides.js",
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs"
+    "npm-run-all": "^4.1.5"
+  }
 }

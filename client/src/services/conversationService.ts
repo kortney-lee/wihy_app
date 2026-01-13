@@ -11,6 +11,7 @@
  */
 
 import { API_CONFIG } from '../config/apiConfig';
+import { authService } from './authService';
 
 const API_BASE = API_CONFIG.WIHY_API_URL;
 
@@ -165,9 +166,7 @@ class ConversationService {
 
       const response = await fetch(`${API_BASE}/api/chat/session/create`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
+        headers: authService.getAuthenticatedHeaders(),
         body: JSON.stringify(request)
       });
 
@@ -256,9 +255,7 @@ class ConversationService {
 
       const response = await fetch(`${API_BASE}/api/chat/message/send`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
+        headers: authService.getAuthenticatedHeaders(),
         body: JSON.stringify(request)
       });
 
@@ -399,9 +396,7 @@ class ConversationService {
 
       const response = await fetch(`${API_BASE}/api/chat/session/delete`, {
         method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json'
-        },
+        headers: authService.getAuthenticatedHeaders(),
         body: JSON.stringify({ session_id: sessionId })
       });
 

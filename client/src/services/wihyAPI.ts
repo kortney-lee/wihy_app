@@ -657,7 +657,7 @@ class WihyAPIService {
       
       const response = await fetch(endpoint, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authService.getAuthenticatedHeaders(),
         body: JSON.stringify(request),
         signal: controller.signal
       });
@@ -728,7 +728,7 @@ class WihyAPIService {
       
       const response = await fetch(endpoint, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authService.getAuthenticatedHeaders(),
         body: JSON.stringify(request),
         signal: controller.signal
       });
@@ -760,7 +760,7 @@ class WihyAPIService {
       
       const response = await fetch(endpoint, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authService.getAuthenticatedHeaders(),
         body: JSON.stringify(request),
         signal: controller.signal
       });
@@ -805,7 +805,7 @@ class WihyAPIService {
       
       const response = await fetch(endpoint, {
         method: 'GET',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authService.getAuthenticatedHeaders(),
         signal: controller.signal
       });
 
@@ -841,7 +841,7 @@ class WihyAPIService {
       
       const response = await fetch(endpoint, {
         method: 'GET',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authService.getAuthenticatedHeaders(),
         signal: controller.signal
       });
 
@@ -941,7 +941,7 @@ class WihyAPIService {
       
       const response = await fetch(endpoint, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authService.getAuthenticatedHeaders(),
         body: JSON.stringify(requestBody),
         signal: controller.signal
       });
@@ -1063,7 +1063,7 @@ class WihyAPIService {
       
       const response = await fetch(endpoint, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authService.getAuthenticatedHeaders(),
         body: JSON.stringify(request)
       });
 

@@ -4,6 +4,8 @@
  * Base URL: https://ml.wihy.ai
  */
 
+import { authService } from './authService';
+
 // Types based on the API documentation
 export interface WIHYRequest {
   query: string;
@@ -98,7 +100,7 @@ export class WIHYClient {
 
       const response = await fetch(`${this.baseURL}/ask`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authService.getAuthenticatedHeaders(),
         body: JSON.stringify(requestBody)
       });
 
@@ -136,7 +138,7 @@ export class WIHYClient {
       
       const response = await fetch(`${this.baseURL}/ask`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authService.getAuthenticatedHeaders(),
         body: JSON.stringify(requestBody)
       });
 
@@ -165,7 +167,7 @@ export class WIHYClient {
     try {
       const response = await fetch(`${this.baseURL}/api/research/articles?topic=${encodeURIComponent(topic)}&limit=${limit}`, {
         method: 'GET',
-        headers: { 'Content-Type': 'application/json' }
+        headers: authService.getAuthenticatedHeaders()
       });
 
       if (!response.ok) {

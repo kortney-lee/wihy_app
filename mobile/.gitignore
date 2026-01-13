@@ -1,0 +1,92 @@
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Native folders - Build artifacts only (keep directories in git)
+# android/
+# ios/
+
+# React Native
+.react-native/
+
+# Xcode
+ios/build/
+ios/Pods/
+ios/*.xcworkspace
+ios/*.xcuserdata/
+ios/Podfile.lock
+
+# Android
+android/app/build/
+android/build/
+android/.gradle/
+android/local.properties
+android/gradle.properties.bak
+
+# Flipper
+ios/Podfile.lock
+
+# Metro
+.metro-health-check*
+.metro-cache/
+
+# Temporary files
+*.tmp
+*.temp
+
+# Logs
+logs
+*.log
+
+# Environment
+.env
+.env.local
+.env.production
+
+# App configuration (contains sensitive keys and environment-specific settings)
+app.json
+
+# Editor directories and files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Bundle artifacts
+*.jsbundle
+
+# CocoaPods
+ios/Pods/
+
+# Fastlane
+ios/fastlane/report.xml
+ios/fastlane/Preview.html
+ios/fastlane/screenshots
+ios/fastlane/test_output
+
+# Buck
+buck-out/
+
+# Watchman
+.watchmanconfig
+
+# Jest
+coverage/
+
+# Testing
+__tests__/
+
+# Debug
+*.hprofbuild-*.tar.gz
+*.tar.gz

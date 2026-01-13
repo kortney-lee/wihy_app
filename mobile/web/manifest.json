@@ -1,0 +1,76 @@
+{
+  "name": "WIHY AI - World's Smartest Health Search Engine",
+  "short_name": "WIHY AI",
+  "description": "Evidence-based nutrition and fitness answers for individuals, plus a coaching platform after login to track client success.",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#ffffff",
+  "theme_color": "#0AAE5E",
+  "icons": [
+    {
+      "src": "/assets/favicon-64.png",
+      "sizes": "64x64",
+      "type": "image/png"
+    },
+    {
+      "src": "/assets/favicon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/assets/favicon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["health", "fitness", "lifestyle", "medical"],
+  "lang": "en-US",
+  "dir": "ltr",
+  "prefer_related_applications": false,
+  "related_applications": [
+    {
+      "platform": "play",
+      "url": "https://play.google.com/store/apps/details?id=com.wihy.app",
+      "id": "com.wihy.app"
+    },
+    {
+      "platform": "itunes",
+      "url": "https://apps.apple.com/app/wihy-ai/id123456789"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/assets/screenshots/home.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Home screen showing nutrition search"
+    },
+    {
+      "src": "/assets/screenshots/dashboard.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Health dashboard with insights"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Scan Food",
+      "short_name": "Scan",
+      "description": "Quickly scan food for nutrition analysis",
+      "url": "/scan",
+      "icons": [{ "src": "/assets/icons/scan.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "My Progress",
+      "short_name": "Progress",
+      "description": "View your health progress",
+      "url": "/progress",
+      "icons": [{ "src": "/assets/icons/progress.png", "sizes": "96x96" }]
+    }
+  ]
+}

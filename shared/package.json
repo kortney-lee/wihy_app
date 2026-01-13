@@ -1,0 +1,17 @@
+{
+  "name": "@wihy/shared",
+  "version": "1.0.0",
+  "description": "Shared utilities for WiHY web and mobile",
+  "main": "index.ts",
+  "private": true,
+  "scripts": {
+    "test": "echo \"No tests yet\" && exit 0"
+  },
+  "keywords": [
+    "wihy",
+    "shared",
+    "utilities"
+  ],
+  "author": "Wihy.ai",
+  "license": "MIT"
+}

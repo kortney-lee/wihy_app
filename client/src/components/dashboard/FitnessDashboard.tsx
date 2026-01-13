@@ -1,394 +1,449 @@
 // src/components/dashboard/FitnessDashboard.tsx
-import React, { useMemo, useState } from "react";
-import { Heart, Dumbbell, Timer, Move, Target, HelpCircle, X } from 'lucide-react';
-import { useFitness } from '../../contexts/FitnessContext';
-import { useRelationships } from '../../contexts/RelationshipContext';
+// Enhanced Fitness Dashboard - AI-Powered Workout Generation
+import React, { useState, useCallback } from "react";
 import {
-  WorkoutProgramGrid,
-  ExerciseRowView,
-  ExerciseMeta,
-  ExercisePrescription,
-  FitnessComponent,
-  MuscleGroup,
-  LoadLevel,
-} from "./WorkoutProgramGrid";
+  FitnessLevelSelection,
+  FitnessGoalSelection,
+  WorkoutPreview,
+  WorkoutExecution,
+  FitnessCalendar,
+  EnhancedFitnessDashboard,
+  WorkoutConfig
+} from '../fitness';
+import {
+  FitnessLevel,
+  FitnessProgram,
+  CalendarData,
+  SavedProgram,
+  ExerciseCompletion
+} from '../../types/fitness';
+
+// Re-export types for backward compatibility
+export type { ExerciseRowView, ExerciseMeta, ExercisePrescription } from "./WorkoutProgramGrid";
 
 /**
- * High-level program configuration
+ * Props for the FitnessDashboard component
  */
-
-export interface FitnessPhase {
-  id: string;          // "phase1"
-  name: string;        // "Phase 1 - Foundation"
-}
-
-export interface ProgramLevel {
-  id: string;          // "beginner" | "intermediate" | "advanced"
-  label: string;
-}
-
-export interface ProgramDay {
-  id: string;          // "day1"
-  label: string;       // "Day 1", "Full body A", etc.
-}
-
-/**
- * All program variants (phase + level + day) stored in a map
- * key: "phaseId__levelId__dayId"
- */
-
-export type ProgramVariantMap = Record<string, ExerciseRowView[]>;
-
-export const buildProgramKey = (
-  phaseId: string,
-  levelId: string,
-  dayId: string
-): string => `${phaseId}__${levelId}__${dayId}`;
-
-/**
- * Main model for the dashboard
- */
-
-export interface FitnessDashboardModel {
-  title?: string;
-  subtitle?: string;
-
-  phases: FitnessPhase[];
-  levels: ProgramLevel[];
-  days: ProgramDay[];
-
-  variants: ProgramVariantMap;
-
-  programTitle?: string;
-  programDescription?: string;
-
-  defaultPhaseId?: string;
-  defaultLevelId?: string;
-  defaultDayId?: string;
-}
-
-/**
- * Props
- */
-
 export interface FitnessDashboardProps {
   onStartSession?: (params: {
     phaseId: string;
     levelId: string;
     dayId: string;
-    rows: ExerciseRowView[];
+    rows: any[];
   }) => void;
 }
 
+type FlowStep = 
+  | 'dashboard'
+  | 'level-selection'
+  | 'goal-selection'
+  | 'workout-preview'
+  | 'workout-execution'
+  | 'calendar'
+  | 'workout-complete';
+
+// Mock data for demonstration
+const mockSavedPrograms: SavedProgram[] = [
+  {
+    program_id: 'prog_001',
+    name: 'Chest & Triceps Program',
+    created_at: '2026-01-01T10:00:00Z',
+    duration_weeks: 4,
+    total_workouts: 12,
+    completed_workouts: 5,
+    current_week: 2,
+    current_day: 2,
+    completion_percentage: 42,
+    is_favorite: true,
+    times_completed: 0,
+    last_completed: '2026-01-04T14:30:00Z'
+  }
+];
+
+const mockRecentWorkouts = [
+  {
+    id: 'w1',
+    name: 'Chest & Triceps - Day 5',
+    date: '2026-01-04T14:30:00Z',
+    duration: 38,
+    caloriesBurned: 320,
+    muscleGroups: ['Chest', 'Triceps']
+  }
+];
+
 /**
- * Mobile-friendly card view for each exercise
+ * Enhanced Fitness Dashboard Component
+ * Replaces the old static workout selector with AI-powered workout generation
  */
-
-const MobileExerciseCard: React.FC<{ row: ExerciseRowView }> = ({ row }) => {
-  const { meta, prescription } = row;
-
-  return (
-    <div className="bg-white rounded-2xl border border-gray-200 p-5 mb-4 shadow-sm transition-all duration-300 hover:shadow-md touch-manipulation">
-      <div className="flex justify-between items-start mb-3">
-        <div className="flex-1 min-w-0">
-          <p className="text-base font-semibold text-gray-900 truncate leading-snug">{meta.name}</p>
-          <p className="text-sm text-gray-500 mt-1">
-            {meta.equipment === "NONE" ? "Bodyweight" : meta.equipment}
-          </p>
-        </div>
-        <span className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-gray-100 to-gray-200 px-4 py-2 text-sm font-semibold text-gray-700 ml-3 flex-shrink-0 min-h-[36px]">
-          {prescription.sets} sets
-        </span>
-      </div>
-      <p className="text-base text-gray-700 mb-4 leading-relaxed">
-        {prescription.intensityLabel}
-      </p>
-
-      <div className="flex flex-wrap gap-2 text-sm text-gray-600">
-        <span className="px-3 py-2 rounded-full bg-gradient-to-r from-red-50 to-red-100 text-red-700 border border-red-200 min-h-[32px] flex items-center">
-          Cardio load {meta.fitnessLoad.CARDIO ?? 0}/3
-        </span>
-        <span className="px-3 py-2 rounded-full bg-gradient-to-r from-blue-50 to-blue-100 text-blue-700 border border-blue-200 min-h-[32px] flex items-center">
-          Strength load {meta.fitnessLoad.STRENGTH ?? 0}/3
-        </span>
-        <span className="px-3 py-2 rounded-full bg-gradient-to-r from-green-50 to-green-100 text-green-700 border border-green-200 min-h-[32px] flex items-center">
-          Mobility load {meta.fitnessLoad.MOBILITY ?? 0}/3
-        </span>
-      </div>
-    </div>
-  );
-};
-
-/**
- * Main dashboard component
- */
-
 const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
   onStartSession,
 }) => {
-  // Create mock data since context doesn't have these properties yet
-  const mockCurrentWorkout = null;
-  const mockSelectWorkout = (workout: any) => console.log('Select workout:', workout);
+  // Flow state
+  const [currentStep, setCurrentStep] = useState<FlowStep>('dashboard');
+  const [fitnessLevel, setFitnessLevel] = useState<FitnessLevel>('intermediate');
+  const [isFirstTimeUser, setIsFirstTimeUser] = useState(false);
   
-  // Get fitness dashboard model from mock data
-  const data = mockCurrentWorkout || {
-    title: "Start Your Workout",
-    subtitle: "Choose your workout and start moving. Each session is designed to strengthen your body and improve your fitness.",
-    phases: [{ id: "phase1", name: "Phase 1 - Foundation" }],
-    levels: [
-      { id: "beginner", label: "Beginner" },
-      { id: "intermediate", label: "Intermediate" },
-      { id: "advanced", label: "Advanced" }
-    ],
-    days: [
-      { id: "day1", label: "Day 1" },
-      { id: "day2", label: "Day 2" },
-      { id: "day3", label: "Day 3" }
-    ],
-    variants: {},
-    programTitle: "Today's Workout",
-    programDescription: "See which body parts get worked and how hard each exercise will be.",
-    defaultPhaseId: "phase1",
-    defaultLevelId: "beginner",
-    defaultDayId: "day1"
-  };
-  const {
-    title = "Start Your Workout",
-    subtitle = "Choose your workout and start moving. Each session is designed to strengthen your body and improve your fitness.",
-    phases,
-    levels,
-    days,
-    variants,
-    programTitle = "Today's Workout",
-    programDescription = "See which body parts get worked and how hard each exercise will be.",
-    defaultPhaseId,
-    defaultLevelId,
-    defaultDayId,
-  } = data;
+  // Workout state
+  const [generatedProgram, setGeneratedProgram] = useState<FitnessProgram | null>(null);
+  const [programId, setProgramId] = useState<string | null>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  
+  // Calendar state
+  const [calendarData, setCalendarData] = useState<CalendarData | null>(null);
 
-  const initialPhaseId = defaultPhaseId || (phases[0]?.id ?? "");
-  const initialLevelId = defaultLevelId || (levels[0]?.id ?? "");
-  const initialDayId = defaultDayId || (days[0]?.id ?? "");
+  // Handle fitness level selection
+  const handleSelectFitnessLevel = useCallback((level: FitnessLevel) => {
+    setFitnessLevel(level);
+    setIsFirstTimeUser(false);
+    setCurrentStep('goal-selection');
+  }, []);
 
-  const [phaseId, setPhaseId] = useState<string>(initialPhaseId);
-  const [levelId, setLevelId] = useState<string>(initialLevelId);
-  const [dayId, setDayId] = useState<string>(initialDayId);
-  const [showTooltip, setShowTooltip] = useState<boolean>(true); // Show by default for new users
-  const [simplifiedView, setSimplifiedView] = useState<boolean>(true); // Start with simplified view
-
-  const programKey = useMemo(
-    () => buildProgramKey(phaseId, levelId, dayId),
-    [phaseId, levelId, dayId]
-  );
-
-  const currentRows: ExerciseRowView[] = useMemo(
-    () => variants[programKey] || [],
-    [variants, programKey]
-  );
-
-  const currentPhase = phases.find((p) => p.id === phaseId);
-  const currentLevel = levels.find((l) => l.id === levelId);
-  const currentDay = days.find((d) => d.id === dayId);
-
-  const handleStartSession = () => {
-    if (!onStartSession) return;
+  // Handle workout generation
+  const handleGenerateWorkout = useCallback(async (config: WorkoutConfig) => {
+    setIsGenerating(true);
     
-    // Save workout selection to context
-    if (currentRows.length > 0) {
-      const workoutData = {
-        id: `workout-${Date.now()}`,
-        name: `${currentPhase?.name} - ${currentLevel?.label} - ${currentDay?.label}`,
-        description: data.programDescription || '',
-        exercises: currentRows,
-        duration: 45,
-        difficulty: levelId as 'beginner' | 'intermediate' | 'advanced'
-      };
+    try {
+      // Simulate API call - in production, call the actual API
+      await new Promise(resolve => setTimeout(resolve, 1500));
       
-      mockSelectWorkout(workoutData);
+      const mockProgram: FitnessProgram = {
+        program_id: `prog_${Date.now()}`,
+        name: config.goalText || `${config.targetMuscles.join(' & ')} Workout`,
+        description: config.description,
+        duration_weeks: 4,
+        days_per_week: config.daysPerWeek || 3,
+        difficulty: config.difficulty,
+        total_workouts: 12,
+        supports_quick_workouts: config.duration <= 20,
+        workouts: [
+          {
+            workout_id: 'workout_001',
+            day: 1,
+            week: 1,
+            scheduled_date: new Date().toISOString().split('T')[0],
+            name: `Week 1 Day 1 - ${config.targetMuscles[0] || 'Full Body'} Focus`,
+            focus: config.targetMuscles.length > 0 
+              ? `${config.targetMuscles[0]} (Primary)${config.targetMuscles.length > 1 ? `, ${config.targetMuscles[1]} (Secondary)` : ''}`
+              : 'Full Body',
+            type: 'strength',
+            estimated_duration: config.duration,
+            difficulty: config.difficulty,
+            is_rest_day: false,
+            exercises: [
+              {
+                exercise_id: 'ex_001',
+                name: 'Dumbbell Bench Press',
+                target_muscle: 'Chest',
+                secondary_muscles: ['Triceps', 'Shoulders'],
+                sets: config.difficulty === 'beginner' ? 3 : 4,
+                reps: config.difficulty === 'beginner' ? '8-10' : config.difficulty === 'intermediate' ? '10-12' : '12-15',
+                rest_seconds: config.difficulty === 'beginner' ? 120 : config.difficulty === 'intermediate' ? 90 : 60,
+                equipment: ['dumbbells', 'bench'],
+                instructions: [
+                  'Lie flat on bench with dumbbells at chest level',
+                  'Press weights up until arms fully extended',
+                  'Lower slowly to starting position'
+                ],
+                weight_recommendation: 'Moderate - 60% of max',
+                form_tips: ['Keep feet flat on floor', 'Maintain slight arch in lower back']
+              },
+              {
+                exercise_id: 'ex_002',
+                name: 'Incline Dumbbell Press',
+                target_muscle: 'Chest',
+                secondary_muscles: ['Triceps', 'Shoulders'],
+                sets: 3,
+                reps: '10-12',
+                rest_seconds: 90,
+                equipment: ['dumbbells', 'bench'],
+                instructions: ['Set bench to 30-45 degree incline', 'Press weights up until arms fully extended']
+              },
+              {
+                exercise_id: 'ex_003',
+                name: 'Dumbbell Flyes',
+                target_muscle: 'Chest',
+                sets: 3,
+                reps: '12-15',
+                rest_seconds: 60,
+                equipment: ['dumbbells', 'bench'],
+                instructions: ['Lie flat with dumbbells above chest', 'Lower out to sides with slight bend in elbows']
+              },
+              {
+                exercise_id: 'ex_004',
+                name: 'Tricep Dips',
+                target_muscle: 'Triceps',
+                secondary_muscles: ['Chest', 'Shoulders'],
+                sets: 3,
+                reps: '8-12',
+                rest_seconds: 90,
+                equipment: ['dip bars'],
+                instructions: ['Grip dip bars with arms straight', 'Lower until upper arms parallel to ground']
+              }
+            ],
+            warm_up: {
+              duration_minutes: 5,
+              activities: [
+                { name: 'Arm Circles', duration_seconds: 60 },
+                { name: 'Push-ups', reps: 10 }
+              ]
+            },
+            cool_down: {
+              duration_minutes: 5,
+              activities: [
+                { name: 'Chest Stretch', duration_seconds: 30 },
+                { name: 'Tricep Stretch', duration_seconds: 30 }
+              ]
+            }
+          }
+        ],
+        progress_tracking: {
+          current_week: 1,
+          current_day: 1,
+          completed_workouts: 0,
+          total_workouts: 12,
+          completion_percentage: 0
+        }
+      };
+
+      setGeneratedProgram(mockProgram);
+      setProgramId(mockProgram.program_id);
+      setCurrentStep('workout-preview');
+    } catch (error) {
+      console.error('Failed to generate workout:', error);
+    } finally {
+      setIsGenerating(false);
+    }
+  }, []);
+
+  // Handle quick workout
+  const handleQuickWorkout = useCallback((type: string, duration: number) => {
+    const config: WorkoutConfig = {
+      description: `Quick ${duration}-minute ${type} workout`,
+      difficulty: fitnessLevel,
+      duration,
+      equipment: ['bodyweight', 'dumbbells'],
+      targetMuscles: type === 'cardio' || type === 'hiit' ? [] : ['chest', 'arms', 'core'],
+      daysPerWeek: 5
+    };
+    handleGenerateWorkout(config);
+  }, [fitnessLevel, handleGenerateWorkout]);
+
+  // Handle program save
+  const handleSaveProgram = useCallback(async () => {
+    if (!programId) return;
+    setIsSaving(true);
+    try {
+      await new Promise(resolve => setTimeout(resolve, 500));
+      console.log('Program saved!');
+    } catch (error) {
+      console.error('Failed to save program:', error);
+    } finally {
+      setIsSaving(false);
+    }
+  }, [programId]);
+
+  // Handle workout completion
+  const handleWorkoutComplete = useCallback(async (completionData: {
+    completed_at: string;
+    duration_minutes: number;
+    exercises_completed: ExerciseCompletion[];
+  }) => {
+    console.log('Workout completed:', completionData);
+    
+    // Call legacy onStartSession if provided for backward compatibility
+    if (onStartSession && generatedProgram) {
+      onStartSession({
+        phaseId: 'ai-generated',
+        levelId: fitnessLevel,
+        dayId: 'day1',
+        rows: generatedProgram.workouts[0]?.exercises || []
+      });
     }
     
-    onStartSession({
-      phaseId,
-      levelId,
-      dayId,
-      rows: currentRows,
-    });
+    setCurrentStep('workout-complete');
+  }, [onStartSession, generatedProgram, fitnessLevel]);
+
+  // Handle calendar view
+  const handleViewCalendar = useCallback(async (selectedProgramId?: string) => {
+    const today = new Date();
+    const mockCalendarData: CalendarData = {
+      success: true,
+      program_id: selectedProgramId || programId || 'default',
+      program_name: 'Workout Program',
+      calendar_days: Array.from({ length: 31 }, (_, i) => {
+        const date = new Date(today.getFullYear(), today.getMonth(), i + 1);
+        const dateStr = date.toISOString().split('T')[0];
+        const isRestDay = date.getDay() === 0 || date.getDay() === 6;
+        const isPast = date < today;
+        
+        return {
+          date: dateStr,
+          workouts: isRestDay ? [] : [{
+            workout_id: `workout_${i + 1}`,
+            name: `Week ${Math.ceil((i + 1) / 7)} Day ${(i % 7) + 1}`,
+            type: 'strength',
+            week: Math.ceil((i + 1) / 7),
+            day: (i % 7) + 1,
+            estimated_duration: 35,
+            is_rest_day: false,
+            is_completed: isPast && !isRestDay,
+            exercise_count: 5,
+            interval_count: 0
+          }],
+          has_workout: !isRestDay,
+          has_rest_day: isRestDay,
+          all_completed: isPast && !isRestDay
+        };
+      }),
+      summary: {
+        total_days: 31,
+        workout_days: 22,
+        rest_days: 9,
+        completed_days: 8,
+        completion_percentage: 36
+      }
+    };
+    
+    setCalendarData(mockCalendarData);
+    setCurrentStep('calendar');
+  }, [programId]);
+
+  // Render current step
+  const renderCurrentStep = () => {
+    switch (currentStep) {
+      case 'level-selection':
+        return (
+          <FitnessLevelSelection
+            onSelectLevel={handleSelectFitnessLevel}
+            currentLevel={fitnessLevel}
+            isOnboarding={isFirstTimeUser}
+          />
+        );
+
+      case 'goal-selection':
+        return (
+          <FitnessGoalSelection
+            fitnessLevel={fitnessLevel}
+            onGenerateWorkout={handleGenerateWorkout}
+            onChangeFitnessLevel={() => setCurrentStep('level-selection')}
+            isGenerating={isGenerating}
+          />
+        );
+
+      case 'workout-preview':
+        if (!generatedProgram || !programId) {
+          return (
+            <div className="flex items-center justify-center min-h-[400px]">
+              <p className="text-gray-500">No workout generated</p>
+            </div>
+          );
+        }
+        return (
+          <WorkoutPreview
+            program={generatedProgram}
+            programId={programId}
+            onStartWorkout={() => setCurrentStep('workout-execution')}
+            onSaveProgram={handleSaveProgram}
+            onBack={() => setCurrentStep('goal-selection')}
+            isSaving={isSaving}
+          />
+        );
+
+      case 'workout-execution':
+        if (!generatedProgram || !programId) {
+          return (
+            <div className="flex items-center justify-center min-h-[400px]">
+              <p className="text-gray-500">No workout to execute</p>
+            </div>
+          );
+        }
+        return (
+          <WorkoutExecution
+            program={generatedProgram}
+            programId={programId}
+            onComplete={handleWorkoutComplete}
+            onExit={() => setCurrentStep('workout-preview')}
+          />
+        );
+
+      case 'calendar':
+        return (
+          <FitnessCalendar
+            programId={programId || 'default'}
+            programName={generatedProgram?.name || calendarData?.program_name}
+            calendarData={calendarData || undefined}
+            onBack={() => setCurrentStep('dashboard')}
+            onStartWorkout={() => setCurrentStep('workout-execution')}
+          />
+        );
+
+      case 'workout-complete':
+        return (
+          <div className="min-h-[400px] flex items-center justify-center p-4 rounded-2xl" style={{ backgroundColor: '#f0f7ff' }}>
+            <div className="max-w-md w-full text-center">
+              <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6" style={{ backgroundColor: '#4cbb17' }}>
+                <svg className="w-10 h-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <h2 className="text-2xl font-bold mb-2" style={{ color: '#1f2937' }}>Workout Complete!</h2>
+              <p className="mb-6" style={{ color: '#6b7280' }}>Great job! Your progress has been saved.</p>
+              
+              <div className="space-y-3">
+                <button
+                  onClick={() => setCurrentStep('calendar')}
+                  className="w-full py-3 text-white font-semibold rounded-xl"
+                  style={{ backgroundColor: '#fa5f06' }}
+                >
+                  View Calendar
+                </button>
+                <button
+                  onClick={() => setCurrentStep('dashboard')}
+                  className="w-full py-3 font-semibold rounded-xl"
+                  style={{ backgroundColor: '#fa5f0615', color: '#fa5f06', border: '2px solid #fa5f0630' }}
+                >
+                  Back to Dashboard
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+
+      case 'dashboard':
+      default:
+        return (
+          <EnhancedFitnessDashboard
+            userFitnessLevel={fitnessLevel}
+            savedPrograms={mockSavedPrograms}
+            recentWorkouts={mockRecentWorkouts}
+            onStartNewWorkout={() => {
+              if (isFirstTimeUser) {
+                setCurrentStep('level-selection');
+              } else {
+                setCurrentStep('goal-selection');
+              }
+            }}
+            onQuickWorkout={handleQuickWorkout}
+            onSelectProgram={(id) => {
+              setProgramId(id);
+              handleViewCalendar(id);
+            }}
+            onViewCalendar={() => handleViewCalendar()}
+            onViewHistory={() => console.log('View history')}
+            onChangeFitnessLevel={() => setCurrentStep('level-selection')}
+          />
+        );
+    }
   };
 
   return (
-    <div className="w-full h-full bg-[#f0f7ff] overflow-hidden flex flex-col">
-      <div className="flex-1 overflow-auto p-3 sm:p-4 lg:p-6">
-        <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
-        <header className="mb-2">
-          <h1 className="text-xl font-semibold text-gray-900">{title}</h1>
-          <p className="text-sm text-gray-600 mt-1 max-w-3xl">{subtitle}</p>
-        </header>
-        {/* HOW TO READ THIS PROGRAM (Tooltip) */}
-        <div className="relative mb-4">
-          <div className="flex items-center justify-between gap-3 mb-3">
-            <div className="flex gap-1 bg-white/70 backdrop-blur border border-gray-200 rounded-full p-1">
-              <button
-                type="button"
-                onClick={() => setShowTooltip(!showTooltip)}
-                className={`px-4 py-2 text-sm font-medium rounded-full transition ${
-                  showTooltip ? "bg-white text-gray-900 shadow-sm" : "text-gray-600 hover:text-gray-900"
-                }`}
-              >
-                Guide
-              </button>
-              <button
-                type="button"
-                onClick={() => setSimplifiedView(!simplifiedView)}
-                className={`px-4 py-2 text-sm font-medium rounded-full transition ${
-                  simplifiedView ? "bg-white text-gray-900 shadow-sm" : "text-gray-600 hover:text-gray-900"
-                }`}
-              >
-                {simplifiedView ? "Simplified" : "Detailed"}
-              </button>
-            </div>
-          </div>
-          
-          {showTooltip && (
-            <div className="mt-3 bg-white rounded-2xl border border-gray-200 shadow-lg p-5 animate-in slide-in-from-top-2">
-              <div className="grid gap-4 text-sm text-gray-700">
-                <div className="bg-blue-50 p-4 rounded-lg">
-                  <h4 className="font-semibold text-blue-900 mb-2">Quick guide</h4>
-                  <p className="text-blue-800 leading-relaxed">
-                    <span className="font-medium">Sets</span> = how many rounds • 
-                    <span className="font-medium">Intensity</span> = how challenging • 
-                    <span className="font-medium">Colored bars</span> = which body areas get worked
-                  </p>
-                </div>
-                
-                {!simplifiedView && (
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <p className="text-gray-700 text-sm leading-relaxed">
-                      <strong>Blue bars:</strong> How much your heart and muscles work<br/>
-                      <strong>Green bars:</strong> Which body parts get the most attention<br/>
-                      Darker colors = more work for that area
-                    </p>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Controls: Phase selector, Level toggle, Day picker, Start session */}
-        <section className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5 sm:p-6">
-          <div className="grid gap-5 sm:grid-cols-[2fr,2fr,3fr] items-start">
-            {/* Phase selector */}
-            <div>
-              <label className="block text-sm sm:text-sm font-semibold text-gray-700 mb-3">
-                Workout Type
-              </label>
-              <select
-                className="w-full rounded-xl border border-gray-300 bg-white px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 min-h-[44px]"
-                value={phaseId}
-                onChange={(e) => setPhaseId(e.target.value)}
-              >
-                {phases.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Level toggle */}
-            <div>
-              <p className="block text-sm sm:text-sm font-semibold text-gray-700 mb-3">
-                Difficulty
-              </p>
-              <div className="flex flex-wrap gap-2">
-                {levels.map((level) => (
-                  <button
-                    key={level.id}
-                    type="button"
-                    onClick={() => setLevelId(level.id)}
-                    className={`px-4 sm:px-4 py-3 rounded-full text-sm sm:text-sm font-medium border transition-all duration-200 min-h-[48px] touch-manipulation ${
-                      levelId === level.id
-                        ? "bg-gradient-to-r from-blue-500 to-blue-600 border-blue-500 text-white shadow-sm"
-                        : "bg-gradient-to-r from-gray-50 to-gray-100 border-gray-300 text-gray-700 hover:from-gray-100 hover:to-gray-200"
-                    }`}
-                  >
-                    {level.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Day picker */}
-            <div className="min-w-0">
-              <p className="block text-sm sm:text-sm font-semibold text-gray-700 mb-3">
-                Session
-              </p>
-              <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide touch-pan-x min-w-full" style={{ WebkitOverflowScrolling: 'touch', scrollBehavior: 'smooth', touchAction: 'pan-x' }}>
-                {days.map((day) => (
-                  <button
-                    key={day.id}
-                    type="button"
-                    onClick={() => setDayId(day.id)}
-                    className={`px-4 sm:px-4 py-3 rounded-full text-sm sm:text-sm font-medium border whitespace-nowrap transition-all duration-200 min-h-[48px] touch-manipulation flex-shrink-0 ${
-                      dayId === day.id
-                        ? "bg-gradient-to-r from-gray-900 to-gray-800 border-gray-900 text-white shadow-sm"
-                        : "bg-gradient-to-r from-gray-50 to-gray-100 border-gray-300 text-gray-700 hover:from-gray-100 hover:to-gray-200"
-                    }`}
-                  >
-                    {day.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Session context + Start button */}
-          <div className="mt-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div className="text-sm sm:text-sm text-gray-600">
-              <p className="font-semibold text-gray-800 mb-2">
-                Ready to start: {currentPhase ? currentPhase.name : "Workout"} • {currentLevel ? currentLevel.label : "Level"} • {currentDay ? currentDay.label : "Session"}
-              </p>
-              {programDescription && (
-                <p className="max-w-2xl text-gray-600">{programDescription}</p>
-              )}
-            </div>
-            <button
-              type="button"
-              onClick={handleStartSession}
-              disabled={currentRows.length === 0}
-              className={`inline-flex items-center justify-center rounded-full px-7 py-3.5 text-sm font-semibold transition-all w-full sm:w-auto
-                ${currentRows.length === 0
-                  ? "bg-gray-200 text-gray-500 cursor-not-allowed"
-                  : "bg-gray-900 text-white hover:bg-gray-800 active:bg-gray-900 shadow-sm"
-                }`}
-            >
-              Start workout
-            </button>
-          </div>
-        </section>
-
-        {/* Desktop: Program grid */}
-        <section className="hidden sm:block">
-          <WorkoutProgramGrid title={programTitle} rows={currentRows} simplifiedView={simplifiedView} />
-        </section>
-
-        {/* Mobile: Card list */}
-        <section className="sm:hidden">
-          <h2 className="text-lg sm:text-base font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent mb-5">
-            Your Exercises
-          </h2>
-          {currentRows.length === 0 && (
-            <div className="bg-white rounded-2xl border border-gray-200 p-6 text-center">
-              <p className="text-sm text-gray-500">
-                Choose your workout type, difficulty, and session above to see your exercises!
-              </p>
-            </div>
-          )}
-          {currentRows.map((row) => (
-            <MobileExerciseCard key={row.meta.id} row={row} />
-          ))}
-        </section>
-        </div>
+    <div 
+      className="w-full min-h-full"
+      style={{ backgroundColor: '#e0f2fe' }}
+    >
+      <div className="max-w-5xl mx-auto p-4 lg:p-6">
+        {renderCurrentStep()}
       </div>
     </div>
   );
@@ -396,62 +451,41 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
 
 export default FitnessDashboard;
 
-/**
- * Optional: Adapter types to auto-type ExerciseRowView
- * from your service payloads.
- */
-
-export interface ServiceExerciseDto {
+// Legacy exports for backward compatibility
+export interface FitnessPhase {
   id: string;
   name: string;
-  equipment: "NONE" | "DUMBBELLS" | "BARBELL" | "MACHINE";
-  fitnessLoad?: Partial<Record<FitnessComponent, LoadLevel>>;
-  muscleLoad?: Partial<Record<MuscleGroup, LoadLevel>>;
-  sets: number;
-  intensityLabel: string;
 }
 
-export function mapServiceExerciseToRow(
-  dto: ServiceExerciseDto
-): ExerciseRowView {
-  const meta: ExerciseMeta = {
-    id: dto.id,
-    name: dto.name,
-    equipment: dto.equipment,
-    fitnessLoad: dto.fitnessLoad ?? {},
-    muscleLoad: dto.muscleLoad ?? {},
-  };
-
-  const prescription: ExercisePrescription = {
-    exerciseId: dto.id,
-    sets: dto.sets,
-    intensityLabel: dto.intensityLabel,
-  };
-
-  return { meta, prescription };
+export interface ProgramLevel {
+  id: string;
+  label: string;
 }
 
-export type ServiceProgramConfig = {
-  [phaseId: string]: {
-    [levelId: string]: {
-      [dayId: string]: ServiceExerciseDto[];
-    };
-  };
-};
+export interface ProgramDay {
+  id: string;
+  label: string;
+}
 
-export function buildProgramVariantsFromService(
-  config: ServiceProgramConfig
-): ProgramVariantMap {
-  const variants: ProgramVariantMap = {};
+export type ProgramVariantMap = Record<string, any[]>;
 
-  Object.entries(config).forEach(([phaseId, levels]) => {
-    Object.entries(levels).forEach(([levelId, days]) => {
-      Object.entries(days).forEach(([dayId, exercises]) => {
-        const key = buildProgramKey(phaseId, levelId, dayId);
-        variants[key] = exercises.map(mapServiceExerciseToRow);
-      });
-    });
-  });
+export const buildProgramKey = (
+  phaseId: string,
+  levelId: string,
+  dayId: string
+): string => `${phaseId}__${levelId}__${dayId}`;
 
-  return variants;
+// Legacy model type for backward compatibility
+export interface FitnessDashboardModel {
+  title?: string;
+  subtitle?: string;
+  phases: FitnessPhase[];
+  levels: ProgramLevel[];
+  days: ProgramDay[];
+  variants: ProgramVariantMap;
+  programTitle?: string;
+  programDescription?: string;
+  defaultPhaseId?: string;
+  defaultLevelId?: string;
+  defaultDayId?: string;
 }

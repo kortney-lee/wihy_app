@@ -1,0 +1,965 @@
+/* ═══════════════════════════════════════════════════════════
+   WiHY Web Landing Page Styles
+   Pure CSS - No Tailwind/NativeWind
+   
+   Key Measurements (VHealthSearch.tsx spec):
+   - Search bar: max-width 584px (Google standard)
+   - Search bar height: 44px min (mobile), 48px min (desktop)
+   - Border radius: 24px
+   - Logo margin-bottom: 32px (2rem)
+   - Search margin: 24px auto
+   - Input padding: 10px top/bottom, 16px left, 128px right (for icons)
+   - Icon container: absolute, right 8px, gap 6px
+   - Icon buttons: 32×32px circles
+   ═══════════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════════
+   CSS VARIABLES
+   ═══════════════════════════════════════════════════════════ */
+:root {
+  /* Brand Colors */
+  --wihy-orange: #fa5f06;
+  --wihy-green: #4cbb17;
+  --wihy-blue: #1a73e8;
+  --wihy-silver: #C0C0C0;
+  
+  /* Theme */
+  --vh-accent: #1a73e8;
+  --vh-ink: #202124;
+  --vh-muted: #5f6368;
+  --vh-surface: #ffffff;
+  
+  /* Dimensions - Wide search bar like wihy.ai */
+  --search-max-width: 100%;
+  --search-height-mobile: 52px;
+  --search-height-desktop: 56px;
+  --search-border-radius: 28px;
+  --icon-size: 36px;
+  --icons-container-right: 16px;
+  --icons-gap: 12px;
+  
+  /* Padding */
+  --input-padding-y: 16px;
+  --input-padding-left: 24px;
+  --input-padding-right: 100px;
+  
+  /* Spacing */
+  --logo-margin-bottom: 48px;
+  --search-margin-y: 0;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   BORDER SWEEP ANIMATION
+   ═══════════════════════════════════════════════════════════ */
+@keyframes wiH-border-sweep {
+  0%   { background-position: 0 0, 0% 0; }
+  100% { background-position: 0 0, 200% 0; }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   TOP NAVIGATION BAR
+   ═══════════════════════════════════════════════════════════ */
+.web-top-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  z-index: 1000;
+}
+
+.web-nav-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.web-nav-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.web-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border: none;
+  background: transparent;
+  border-radius: 24px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: #5f6368;
+  transition: all 0.2s ease;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.web-nav-item:hover {
+  background: #f1f3f4;
+  color: #1a73e8;
+}
+
+.web-nav-item.active {
+  background: #e8f0fe;
+  color: #1a73e8;
+}
+
+.web-nav-item svg {
+  flex-shrink: 0;
+}
+
+/* Nav item colors - matching mobile tab bar */
+.web-nav-item.nav-home {
+  color: #1f2937;
+}
+.web-nav-item.nav-home svg {
+  fill: #1f2937;
+}
+.web-nav-item.nav-home:hover,
+.web-nav-item.nav-home.active {
+  color: #1f2937;
+  background: #f1f5f9;
+}
+
+.web-nav-item.nav-dashboard {
+  color: #1a73e8;
+}
+.web-nav-item.nav-dashboard svg {
+  fill: #1a73e8;
+}
+.web-nav-item.nav-dashboard:hover {
+  color: #1557b0;
+  background: #e8f0fe;
+}
+.web-nav-item.nav-dashboard:hover svg {
+  fill: #1557b0;
+}
+
+.web-nav-item.nav-health {
+  color: #fa5f06;
+}
+.web-nav-item.nav-health svg {
+  fill: #fa5f06;
+}
+.web-nav-item.nav-health:hover {
+  color: #e55205;
+  background: #fff7ed;
+}
+.web-nav-item.nav-health:hover svg {
+  fill: #e55205;
+}
+
+.web-nav-item.nav-scan {
+  color: #1f2937;
+}
+.web-nav-item.nav-scan svg {
+  fill: #1f2937;
+}
+.web-nav-item.nav-scan:hover {
+  color: #111827;
+  background: #f1f5f9;
+}
+.web-nav-item.nav-scan:hover svg {
+  fill: #111827;
+}
+
+.web-nav-item.nav-chat {
+  color: #4cbb17;
+}
+.web-nav-item.nav-chat svg {
+  fill: #4cbb17;
+}
+.web-nav-item.nav-chat:hover {
+  color: #3d9614;
+  background: #f0fdf4;
+}
+.web-nav-item.nav-chat:hover svg {
+  fill: #3d9614;
+}
+
+/* Hide on desktop, show on mobile */
+.web-nav-item.mobile-only {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .web-nav-item.mobile-only {
+    display: flex;
+  }
+}
+
+/* Profile button - exact spec from MultiAuthLogin.tsx */
+.web-nav-item.profile {
+  background: linear-gradient(to bottom right, #dbeafe, #bfdbfe);
+  border-radius: 9999px;
+  padding: 0;
+  width: 40px;
+  height: 40px;
+  justify-content: center;
+  color: #2563eb;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.web-nav-item.profile svg {
+  fill: #2563eb;
+  width: 24px;
+  height: 24px;
+}
+
+.web-nav-item.profile:hover {
+  background: linear-gradient(to bottom right, #bfdbfe, #93c5fd);
+  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.1);
+  transform: scale(1.05);
+}
+
+.web-nav-item.profile:active {
+  transform: scale(0.98);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   SEARCH LANDING PAGE
+   ═══════════════════════════════════════════════════════════ */
+.web-search-landing {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  min-height: 100vh;
+  padding-top: 25vh;
+  padding-left: 20px;
+  padding-right: 20px;
+  padding-bottom: 20px;
+  background-color: #ffffff;
+}
+
+.web-search-container {
+  width: 100%;
+  max-width: 1200px;
+  text-align: center;
+  padding: 0 24px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   LOGO SECTION
+   Gap to search: 56px total (32px logo margin + 24px search margin)
+   ═══════════════════════════════════════════════════════════ */
+.web-logo-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0 0 var(--logo-margin-bottom) 0; /* 32px bottom margin */
+  width: 100%;
+}
+
+.web-logo-image {
+  width: 600px;
+  height: auto;
+  max-height: 140px;
+  object-fit: contain;
+  display: block;
+  margin: 0 auto;
+  cursor: pointer;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   SEARCH INPUT CONTAINER WITH BORDER SWEEP
+   Width: 100% of container (wide like wihy.ai)
+   Height: 56px min (desktop)
+   Border radius: 28px
+   No box-shadow - just the border sweep
+   ═══════════════════════════════════════════════════════════ */
+.web-search-input-container {
+  position: relative;
+  width: 100%;
+  max-width: var(--search-max-width); /* 100% */
+  min-height: var(--search-height-desktop); /* 56px */
+  margin: var(--search-margin-y) auto; /* 0 auto */
+  padding: 0;
+  border-radius: var(--search-border-radius); /* 28px */
+  box-shadow: none;
+  transition: box-shadow 200ms;
+  
+  /* Border Sweep Animation */
+  border: 2px solid transparent;
+  background:
+    linear-gradient(#fff, #fff) padding-box,
+    linear-gradient(90deg, var(--wihy-orange), #ffffff, var(--wihy-silver), var(--wihy-green), var(--wihy-blue)) border-box;
+  background-size: 100% 100%, 200% 100%;
+  animation: wiH-border-sweep 2.2s linear infinite;
+}
+
+.web-search-input-container:hover,
+.web-search-input-container:focus-within {
+  box-shadow: none;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   SEARCH INPUT FIELD
+   Padding: 14px top/bottom, 24px left, 100px right (for icons)
+   Text aligned left like wihy.ai
+   ═══════════════════════════════════════════════════════════ */
+.web-search-input {
+  width: 100%;
+  height: var(--search-height-desktop); /* 56px */
+  padding: 0 var(--input-padding-right) 0 var(--input-padding-left);
+  /* padding: 0 100px 0 24px */
+  font-size: 18px;
+  line-height: var(--search-height-desktop); /* Match height for vertical centering */
+  border: none;
+  outline: none;
+  border-radius: var(--search-border-radius); /* 28px */
+  background: transparent;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: var(--vh-ink); /* #202124 */
+  text-align: left;
+  resize: none;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.web-search-input::placeholder {
+  color: #9ca3af;
+  font-size: 18px;
+  text-align: left;
+  line-height: var(--search-height-desktop); /* 56px - vertical center */
+}
+
+.web-search-input:focus {
+  text-align: left;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   ICONS CONTAINER (Clear, Camera, Voice)
+   Position: absolute, right 8px, top 50%, translateY(-50%)
+   Gap: 6px - Matches VHealthSearch.tsx exactly
+   Semi-transparent white background
+   ═══════════════════════════════════════════════════════════ */
+.web-search-icons {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  background-color: rgba(255, 255, 255, 0.9);
+  padding: 2px;
+  border-radius: 20px;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   ICON BUTTONS
+   Size: 36×36px with 24px icons
+   ═══════════════════════════════════════════════════════════ */
+.web-icon-button {
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #70757a;
+  transition: color 0.2s ease, background-color 0.2s ease;
+}
+
+.web-icon-button:hover {
+  background-color: #f1f3f4;
+  color: #1a73e8;
+}
+
+.web-icon-button svg {
+  width: 24px;
+  height: 24px;
+  fill: currentColor;
+}
+
+/* Clear button has gray background */
+.web-icon-button.clear-btn {
+  background: #f8f9fa;
+}
+
+.web-icon-button.clear-btn:hover {
+  background: #e8eaed;
+}
+
+/* Voice button listening state */
+.web-icon-button.listening {
+  background: #ea4335 !important;
+  color: white !important;
+}
+
+.web-login-btn svg {
+  width: 24px;
+  height: 24px;
+  fill: #2563eb;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   ACTION BUTTONS
+   ═══════════════════════════════════════════════════════════ */
+.web-search-buttons {
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+  margin-top: 24px;
+  margin-bottom: 32px;
+  width: 100%;
+  padding: 16px 20px;
+  align-items: center;
+}
+
+.web-search-btn {
+  background: #f8f9fa;
+  color: #1f2937;
+  border: 1px solid #e5e7eb;
+  border-radius: 24px;
+  font-size: 14px;
+  padding: 10px 20px;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s, transform 0.06s ease;
+  min-width: 140px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(255, 255, 255, 0.8);
+}
+
+.web-search-btn:hover {
+  background: #e9eef6;
+  border-color: #d3d9e3;
+  box-shadow: 0 4px 14px rgba(255, 255, 255, 0.9);
+}
+
+.web-search-btn.primary:hover {
+  background: var(--wihy-orange) !important;
+  color: white !important;
+  border-color: var(--wihy-orange) !important;
+  box-shadow: 0 8px 20px rgba(250, 95, 6, 0.4) !important;
+  transform: translateY(-2px) !important;
+}
+
+.web-search-btn.secondary:hover {
+  background: var(--wihy-green) !important;
+  color: white !important;
+  border-color: var(--wihy-green) !important;
+  box-shadow: 0 8px 20px rgba(76, 187, 23, 0.4) !important;
+  transform: translateY(-2px) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   RESPONSIVE DESIGN
+   
+   Breakpoints:
+   - Mobile: < 768px (search bar 100%, height 44px min)
+   - Tablet/Desktop: ≥ 768px (search bar 584px max, height 48px min)
+   - Small mobile: < 480px (logo 90%, max 320px)
+   ═══════════════════════════════════════════════════════════ */
+
+/* Mobile: < 768px */
+@media (max-width: 768px) {
+  :root {
+    --input-padding-right: 108px; /* Less padding for smaller icons */
+  }
+  
+  .web-search-landing {
+    padding-top: 20vh;
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+  
+  .web-search-container {
+    padding: 0 16px;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  .web-logo-container {
+    margin-bottom: 32px;
+    max-width: calc(100% - 32px);
+  }
+
+  .web-logo-image {
+    width: 100%;
+    max-width: 320px;
+    height: auto !important;
+  }
+
+  .web-search-input-container {
+    max-width: 100%;
+    min-height: var(--search-height-mobile); /* 44px */
+  }
+
+  .web-search-input {
+    min-height: var(--search-height-mobile); /* 44px */
+    font-size: 16px; /* Prevent zoom on iOS */
+    padding-right: var(--input-padding-right); /* 108px */
+  }
+
+  .web-search-icons {
+    right: 6px;
+    gap: 4px;
+    padding: 2px;
+  }
+
+  .web-icon-button {
+    width: 28px;
+    height: 28px;
+  }
+
+  .web-icon-button svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .web-login-container {
+    top: 20px;
+    right: 16px;
+  }
+  
+  .web-search-buttons {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .web-search-btn {
+    width: 100%;
+    max-width: 300px;
+  }
+}
+
+/* Small mobile: < 480px */
+@media (max-width: 480px) {
+  :root {
+    --input-padding-right: 96px; /* Even less for very small screens */
+  }
+  
+  .web-search-landing {
+    padding-top: 18vh;
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+  
+  .web-logo-container {
+    margin-bottom: 24px;
+    max-width: calc(100% - 24px);
+  }
+  
+  .web-logo-image {
+    width: 100%;
+    max-width: 260px;
+    height: auto !important;
+  }
+
+  .web-search-icons {
+    right: 4px;
+    gap: 2px;
+  }
+
+  .web-icon-button {
+    width: 24px;
+    height: 24px;
+  }
+
+  .web-icon-button svg {
+    width: 16px;
+    height: 16px;
+  }
+  
+  .web-search-input {
+    padding-right: var(--input-padding-right); /* 96px */
+  }
+}
+
+/* Desktop: ≥ 769px */
+@media (min-width: 769px) {
+  .web-search-input-container {
+    max-width: var(--search-max-width); /* 584px */
+    min-height: var(--search-height-desktop); /* 48px */
+  }
+  
+  .web-search-input {
+    min-height: var(--search-height-desktop); /* 48px */
+  }
+  
+  .web-logo-image {
+    width: 600px;
+    max-height: 180px;
+  }
+  
+  .web-search-buttons {
+    flex-direction: row;
+  }
+  
+  .web-search-btn {
+    min-width: 180px;
+  }
+}
+
+/* Very large screens: ≥ 1400px */
+@media (min-width: 1400px) {
+  .web-search-container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   IMAGE UPLOAD MODAL
+   Matches wihy.ai upload modal design
+   ═══════════════════════════════════════════════════════════ */
+.web-upload-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  padding: 20px;
+}
+
+.web-upload-modal {
+  background: #ffffff;
+  border-radius: 24px;
+  width: 420px;
+  max-width: 95vw;
+  max-height: 90vh;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+  position: relative;
+}
+
+.web-upload-modal-header {
+  text-align: center;
+  padding: 24px 24px 16px 24px;
+  position: relative;
+}
+
+.web-upload-modal-title {
+  font-size: 24px;
+  font-weight: 600;
+  color: #202124;
+  margin: 0 0 4px 0;
+}
+
+.web-upload-modal-subtitle {
+  font-size: 14px;
+  color: #5f6368;
+  margin: 0;
+}
+
+.web-upload-modal-close {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: none;
+  border: none;
+  font-size: 28px;
+  color: #5f6368;
+  cursor: pointer;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background-color 0.2s;
+}
+
+.web-upload-modal-close:hover {
+  background: #f1f3f4;
+}
+
+.web-upload-modal-content {
+  padding: 0 24px 24px 24px;
+}
+
+/* Choose File Button - Green */
+.web-upload-choose-file {
+  width: 100%;
+  height: 56px;
+  background: linear-gradient(135deg, #4cbb17, #3da014);
+  color: white;
+  border: none;
+  border-radius: 28px;
+  font-size: 18px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 20px;
+  transition: all 0.2s;
+  box-shadow: 0 4px 12px rgba(76, 187, 23, 0.3);
+}
+
+.web-upload-choose-file:hover {
+  background: linear-gradient(135deg, #5acc28, #4cbb17);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(76, 187, 23, 0.4);
+}
+
+.web-upload-choose-file svg {
+  width: 24px;
+  height: 24px;
+}
+
+/* Drag & Drop Area */
+.web-upload-drop-zone {
+  border: 2px dashed #dadce0;
+  border-radius: 16px;
+  padding: 40px 24px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s;
+  background: #fafbfc;
+  margin-bottom: 20px;
+}
+
+.web-upload-drop-zone:hover {
+  border-color: #4cbb17;
+  background: #f8fff5;
+}
+
+.web-upload-drop-zone.dragging {
+  border-color: #4cbb17;
+  background: #eafbe5;
+  transform: scale(1.01);
+}
+
+.web-upload-drop-icon {
+  width: 48px;
+  height: 48px;
+  color: #9aa0a6;
+  margin: 0 auto 16px auto;
+}
+
+.web-upload-drop-text {
+  font-size: 16px;
+  color: #5f6368;
+  margin: 0;
+}
+
+/* OR Divider */
+.web-upload-divider {
+  text-align: center;
+  margin: 20px 0;
+  color: #9aa0a6;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* Text Input for barcode/product name */
+.web-upload-text-input {
+  width: 100%;
+  height: 52px;
+  padding: 14px 20px;
+  font-size: 16px;
+  border: 1px solid #dadce0;
+  border-radius: 26px;
+  background: #ffffff;
+  color: #202124;
+  outline: none;
+  transition: all 0.2s;
+  box-sizing: border-box;
+  margin-bottom: 16px;
+}
+
+.web-upload-text-input::placeholder {
+  color: #9aa0a6;
+}
+
+.web-upload-text-input:focus {
+  border-color: #4cbb17;
+  box-shadow: 0 0 0 2px rgba(76, 187, 23, 0.2);
+}
+
+/* Analyze Button with Border Sweep */
+.web-upload-analyze-btn {
+  width: 100%;
+  height: 56px;
+  background: linear-gradient(#fff, #fff) padding-box,
+              linear-gradient(90deg, var(--wihy-orange), #ffffff, var(--wihy-silver), var(--wihy-green), var(--wihy-blue)) border-box;
+  background-size: 100% 100%, 200% 100%;
+  animation: wiH-border-sweep 2.2s linear infinite;
+  border: 2px solid transparent;
+  border-radius: 28px;
+  font-size: 18px;
+  font-weight: 600;
+  color: #4cbb17;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.web-upload-analyze-btn:hover {
+  background: linear-gradient(#f8fff5, #f8fff5) padding-box,
+              linear-gradient(90deg, var(--wihy-orange), #ffffff, var(--wihy-silver), var(--wihy-green), var(--wihy-blue)) border-box;
+  background-size: 100% 100%, 200% 100%;
+}
+
+/* Hidden file input */
+.web-upload-file-input {
+  display: none;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   RESPONSIVE - TOP NAV BAR
+   ═══════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  .web-top-nav {
+    padding: 0 12px;
+  }
+
+  .web-nav-left {
+    gap: 4px;
+  }
+
+  .web-nav-item {
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+
+  .web-nav-item span {
+    display: none;
+  }
+
+  .web-nav-item {
+    padding: 8px;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .web-top-nav {
+    height: 56px;
+    padding: 0 8px;
+  }
+
+  .web-nav-item {
+    width: 36px;
+    height: 36px;
+    padding: 6px;
+  }
+
+  .web-nav-item svg {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   GENERIC WEB PAGE WRAPPER (for all pages with top nav)
+   ═══════════════════════════════════════════════════════════ */
+.web-page-wrapper {
+  position: relative;
+  background: #f8fafc;
+  min-height: 100vh;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.web-page-content {
+  padding-top: 60px; /* Account for fixed nav */
+}
+
+/* Override React Native flex container behavior on web for proper scrolling */
+.web-page-content > div,
+.web-page-content > div > div,
+.web-page-content > div > div > div,
+.web-page-content > div > div > div > div {
+  flex: none !important;
+  flex-shrink: 0 !important;
+  min-height: auto !important;
+  height: auto !important;
+  max-height: none !important;
+}
+
+/* Profile page specific (legacy support) */
+.web-profile-wrapper {
+  position: relative;
+  background: #f8fafc;
+  min-height: 100vh;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.web-profile-content {
+  padding-top: 60px;
+}
+
+.web-profile-content > div,
+.web-profile-content > div > div,
+.web-profile-content > div > div > div {
+  flex: none !important;
+  min-height: auto !important;
+  height: auto !important;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   WEB CHAT PAGE STYLES
+   ═══════════════════════════════════════════════════════════ */
+.web-chat-page.web-page-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: #f8fafc;
+}
+
+.web-chat-page .web-page-content {
+  flex: 1;
+  overflow-y: auto;
+  padding-bottom: 100px; /* Space for fixed input */
+}
+
+/* Ensure chat messages area scrolls */
+.web-chat-page .web-page-content > div {
+  height: auto !important;
+  min-height: auto !important;
+  flex: none !important;
+}
+
+/* Fixed input container at bottom - uses same search bar styles as home */
+.web-chat-input-fixed {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #ffffff;
+  padding: 16px 0 24px 0;
+  border-top: 1px solid #e5e7eb;
+  z-index: 100;
+}
+
+.web-chat-input-fixed .web-search-container {
+  padding: 0 24px;
+}
+
+/* Send button active state */
+.web-icon-button.send-active {
+  background: #e8f0fe;
+}
+
+.web-icon-button.send-active:hover {
+  background: #d2e3fc;

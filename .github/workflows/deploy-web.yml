@@ -1,0 +1,131 @@
+name: Deploy Web App (Firebase)
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'web/**'
+      - 'shared/**'
+      - '.github/workflows/deploy-web.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'web/**'
+      - 'shared/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+  security-events: write
+
+env:
+  PROJECT_ID: wihy-ai
+  CUSTOM_DOMAIN: wihy.ai
+
+jobs:
+  test-web:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        cache-dependency-path: |
+          web/package-lock.json
+          web/client/package-lock.json
+
+    - name: Install root workspace dependencies
+      run: npm ci
+      working-directory: .
+
+    - name: Install web dependencies
+      run: |
+        npm ci
+        cd client && npm ci
+
+    - name: Security Update - CVE-2025-55182 
+      run: |
+        cd client
+        npm list react --depth=0 | grep -q "react@18\.3\.[1-9]" || npm install react@^18.3.1 react-dom@^18.3.1
+
+    - name: Run tests
+      run: npm test -- --coverage --watchAll=false
+      working-directory: web/client
+
+    - name: Run ESLint
+      run: npm run lint || true
+      working-directory: web/client
+
+    - name: Build web application
+      run: npm run build
+      working-directory: web/client
+
+  deploy-web-firebase:
+    needs: test-web
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    defaults:
+      run:
+        working-directory: web
+    
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        cache-dependency-path: |
+          web/package-lock.json
+          web/client/package-lock.json
+
+    - name: Install root workspace dependencies
+      run: npm ci
+      working-directory: .
+
+    - name: Install web dependencies
+      run: |
+        npm ci
+        cd client && npm ci
+
+    - name: Security Update - CVE-2025-55182
+      run: |
+        cd client
+        npm list react --depth=0 | grep -q "react@18\.3\.[1-9]" || npm install react@^18.3.1 react-dom@^18.3.1
+
+    - name: Build web application
+      run: npm run build
+      working-directory: web/client
+      env:
+        REACT_APP_API_BASE_URL: ${{ secrets.REACT_APP_API_BASE_URL }}
+        REACT_APP_WIHY_API_URL: https://ml.wihy.ai
+        REACT_APP_AUTH_API_URL: https://auth.wihy.ai
+
+    - name: Deploy to Firebase Hosting
+      uses: FirebaseExtended/action-hosting-deploy@v0
+      with:
+        repoToken: ${{ secrets.GITHUB_TOKEN }}
+        firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_WIHY_AI }}
+        channelId: live
+        projectId: wihy-ai
+        entryPoint: web
+
+    - name: Verify deployment
+      run: |
+        echo "Web app deployed to https://wihy.ai"
+        curl -I https://wihy.ai || echo "Deployment verification pending DNS propagation"

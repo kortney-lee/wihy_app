@@ -1,0 +1,1555 @@
+{
+  "success": true,
+  "program_id": "prog_muscle_family_001",
+  "name": "Muscle Building Family Meal Plan",
+  "description": "7-day high-protein plan optimized for muscle gain",
+  "duration_days": 7,
+  "total_meals": 28,
+  "family_size": 5,
+  "weekly_cost": {
+    "total": 315.00,
+    "per_person": 63.00,
+    "per_meal": 11.25
+  },
+  "weekly_macros_per_person": {
+    "avg_daily_calories": 2380,
+    "avg_daily_protein": 142,
+    "avg_daily_carbs": 268,
+    "avg_daily_fat": 66
+  },
+  "days": [
+    {
+      "day_number": 1,
+      "day_name": "Monday - High Protein Start",
+      "date": "2026-01-06",
+      "total_daily_cost": 45.00,
+      "daily_macros_per_person": {
+        "calories": 2400,
+        "protein": 145,
+        "carbs": 270,
+        "fat": 67
+      },
+      "meals": [
+        {
+          "meal_id": "muscle_meal_001",
+          "meal_type": "breakfast",
+          "meal_name": "Protein-Packed Scramble with Toast",
+          "servings": 5,
+          "prep_time": 10,
+          "cook_time": 15,
+          "total_time": 25,
+          "cost_per_serving": 2.20,
+          "total_cost": 11.00,
+          "nutrition_per_serving": {
+            "calories": 480,
+            "protein": 38,
+            "carbs": 48,
+            "fat": 16,
+            "fiber": 6
+          },
+          "muscle_building_benefits": [
+            "38g protein for morning muscle recovery",
+            "Complex carbs for sustained energy during workouts",
+            "Eggs contain leucine - key amino acid for muscle growth"
+          ],
+          "ingredients": [
+            {
+              "name": "Eggs",
+              "amount": 15,
+              "unit": "large",
+              "brand": "Kirkland Signature (Costco)",
+              "aisle": "Dairy",
+              "cost": 4.99
+            },
+            {
+              "name": "Egg whites (liquid)",
+              "amount": 1,
+              "unit": "cup",
+              "brand": "Kirkland Signature",
+              "aisle": "Dairy",
+              "cost": 1.50,
+              "notes": "Extra protein boost"
+            },
+            {
+              "name": "Whole wheat bread",
+              "amount": 10,
+              "unit": "slices",
+              "brand": "Dave's Killer Bread (Costco)",
+              "aisle": "Bakery",
+              "cost": 2.50
+            },
+            {
+              "name": "Cheddar cheese",
+              "amount": 1,
+              "unit": "cup shredded",
+              "brand": "Kirkland Signature",
+              "aisle": "Dairy",
+              "cost": 1.50
+            },
+            {
+              "name": "Spinach",
+              "amount": 2,
+              "unit": "cups",
+              "brand": "Organic (Costco)",
+              "aisle": "Produce",
+              "cost": 0.50
+            }
+          ],
+          "instructions": [
+            "Whisk 15 whole eggs + 1 cup egg whites in large bowl",
+            "Heat large skillet over medium heat with cooking spray",
+            "Add spinach, cook until wilted (2 minutes)",
+            "Pour in egg mixture, scramble gently until just set",
+            "Add shredded cheese, fold in",
+            "Toast bread slices",
+            "Serve scramble with 2 slices toast per person"
+          ],
+          "post_workout": false,
+          "tags": ["high-protein", "muscle-building", "family-friendly", "budget-friendly"]
+        },
+        {
+          "meal_id": "muscle_meal_002",
+          "meal_type": "lunch",
+          "meal_name": "Grilled Chicken & Rice Power Bowl",
+          "servings": 5,
+          "prep_time": 15,
+          "cook_time": 25,
+          "total_time": 40,
+          "cost_per_serving": 3.40,
+          "total_cost": 17.00,
+          "nutrition_per_serving": {
+            "calories": 620,
+            "protein": 52,
+            "carbs": 68,
+            "fat": 14,
+            "fiber": 8
+          },
+          "muscle_building_benefits": [
+            "52g lean protein from chicken breast",
+            "Brown rice provides sustained energy for afternoon workouts",
+            "Broccoli rich in vitamins C & K for recovery",
+            "Perfect post-training meal"
+          ],
+          "ingredients": [
+            {
+              "name": "Chicken breast",
+              "amount": 3.5,
+              "unit": "lbs",
+              "brand": "Kirkland Signature (Costco)",
+              "aisle": "Meat",
+              "cost": 10.50,
+              "notes": "~11 oz per person for muscle building"
+            },
+            {
+              "name": "Brown rice",
+              "amount": 2.5,
+              "unit": "cups dry",
+              "brand": "Kirkland Signature",
+              "aisle": "Grains",
+              "cost": 2.00
+            },
+            {
+              "name": "Broccoli florets",
+              "amount": 5,
+              "unit": "cups",
+              "brand": "Fresh (Costco)",
+              "aisle": "Produce",
+              "cost": 3.50
+            },
+            {
+              "name": "Teriyaki sauce",
+              "amount": 0.5,
+              "unit": "cup",
+              "brand": "Kikkoman",
+              "aisle": "International",
+              "cost": 1.00
+            }
+          ],
+          "instructions": [
+            "Cook brown rice: 2.5 cups dry rice + 5 cups water, simmer 40 min",
+            "Season chicken breasts with salt, pepper, garlic powder",
+            "Grill or pan-cook chicken 6-7 minutes per side (165°F internal)",
+            "Steam broccoli for 6 minutes until tender-crisp",
+            "Slice chicken into strips",
+            "Assemble bowls: 1 cup rice, 7 oz sliced chicken, 1 cup broccoli",
+            "Drizzle with teriyaki sauce"
+          ],
+          "meal_prep_friendly": true,
+          "post_workout": true,
+          "timing_note": "Ideal within 2 hours after weight training",
+          "tags": ["high-protein", "muscle-building", "meal-prep", "post-workout"]
+        },
+        {
+          "meal_id": "muscle_meal_003",
+          "meal_type": "dinner",
+          "meal_name": "Beef & Sweet Potato Power Plate",
+          "servings": 5,
+          "prep_time": 15,
+          "cook_time": 30,
+          "total_time": 45,
+          "cost_per_serving": 3.40,
+          "total_cost": 17.00,
+          "nutrition_per_serving": {
+            "calories": 700,
+            "protein": 55,
+            "carbs": 58,
+            "fat": 24,
+            "fiber": 8
+          },
+          "muscle_building_benefits": [
+            "55g protein + creatine from beef for muscle growth",
+            "Sweet potatoes high in complex carbs for glycogen replenishment",
+            "Beef provides iron and B-vitamins for energy production",
+            "Perfect evening meal for overnight muscle recovery"
+          ],
+          "ingredients": [
+            {
+              "name": "Lean ground beef (90/10)",
+              "amount": 3,
+              "unit": "lbs",
+              "brand": "Kirkland Signature (Costco)",
+              "aisle": "Meat",
+              "cost": 12.00,
+              "notes": "~10 oz per person"
+            },
+            {
+              "name": "Sweet potatoes",
+              "amount": 5,
+              "unit": "large",
+              "brand": "Organic (Costco)",
+              "aisle": "Produce",
+              "cost": 3.50
+            },
+            {
+              "name": "Green beans",
+              "amount": 2,
+              "unit": "lbs",
+              "brand": "Fresh or frozen",
+              "aisle": "Produce/Frozen",
+              "cost": 1.50
+            }
+          ],
+          "instructions": [
+            "Preheat oven to 400°F",
+            "Pierce sweet potatoes with fork, bake 45 minutes until tender",
+            "Brown ground beef in large skillet over medium-high heat",
+            "Season beef with salt, pepper, onion powder, paprika",
+            "Steam or sauté green beans for 8-10 minutes",
+            "Split sweet potatoes, add butter if desired",
+            "Serve: 1 sweet potato, 10 oz cooked beef, generous portion green beans"
+          ],
+          "post_workout": false,
+          "bedtime_protein": true,
+          "timing_note": "Eat 2-3 hours before bed for optimal overnight recovery",
+          "tags": ["high-protein", "muscle-building", "complex-carbs", "family-dinner"]
+        }
+      ],
+      "daily_tips": [
+        "Eat breakfast within 1 hour of waking to kickstart protein synthesis",
+        "Have lunch post-workout if training in morning/afternoon",
+        "Drink at least 80 oz water throughout the day (16 oz per person)"
+      ]
+    },
+    {
+      "day_number": 2,
+      "day_name": "Tuesday - Recovery Day",
+      "date": "2026-01-07",
+      "total_daily_cost": 42.00,
+      "daily_macros_per_person": {
+        "calories": 2350,
+        "protein": 140,
+        "carbs": 265,
+        "fat": 65
+      },
+      "meals": [
+        {
+          "meal_id": "muscle_meal_004",
+          "meal_type": "breakfast",
+          "meal_name": "Protein Oatmeal Power Bowl",
+          "servings": 5,
+          "prep_time": 10,
+          "cook_time": 10,
+          "total_time": 20,
+          "cost_per_serving": 2.20,
+          "total_cost": 11.00,
+          "nutrition_per_serving": {
+            "calories": 450,
+            "protein": 32,
+            "carbs": 62,
+            "fat": 10,
+            "fiber": 8
+          },
+          "muscle_building_benefits": [
+            "Oats provide sustained energy + beta-glucan for recovery",
+            "Protein powder adds 20g extra protein",
+            "Perfect pre-workout meal (eat 1-2 hours before training)"
+          ],
+          "ingredients": [
+            {
+              "name": "Old-fashioned oats",
+              "amount": 5,
+              "unit": "cups dry",
+              "brand": "Quaker (Costco)",
+              "cost": 2.50,
+              "aisle": "Cereal"
+            },
+            {
+              "name": "Protein powder (vanilla)",
+              "amount": 5,
+              "unit": "scoops",
+              "brand": "Optimum Nutrition Gold Standard (Costco)",
+              "aisle": "Sports Nutrition",
+              "cost": 5.00,
+              "notes": "~24g protein per scoop"
+            },
+            {
+              "name": "Bananas",
+              "amount": 5,
+              "unit": "medium",
+              "cost": 1.50,
+              "aisle": "Produce"
+            },
+            {
+              "name": "Almond butter",
+              "amount": 5,
+              "unit": "tbsp",
+              "brand": "Kirkland Signature",
+              "cost": 2.00,
+              "aisle": "Spreads"
+            }
+          ],
+          "instructions": [
+            "Cook oats: 5 cups oats + 10 cups water, simmer 10 minutes",
+            "Stir in 5 scoops protein powder until smooth",
+            "Divide into 5 bowls",
+            "Top each with sliced banana and 1 tbsp almond butter",
+            "Optional: add cinnamon, honey"
+          ],
+          "pre_workout": true,
+          "timing_note": "Eat 1-2 hours before weight training",
+          "tags": ["high-protein", "pre-workout", "complex-carbs"]
+        },
+        {
+          "meal_id": "muscle_meal_005",
+          "meal_type": "lunch",
+          "meal_name": "Salmon & Quinoa Power Bowl",
+          "servings": 5,
+          "prep_time": 10,
+          "cook_time": 20,
+          "total_time": 30,
+          "cost_per_serving": 3.60,
+          "total_cost": 18.00,
+          "nutrition_per_serving": {
+            "calories": 580,
+            "protein": 48,
+            "carbs": 52,
+            "fat": 18,
+            "fiber": 7
+          },
+          "muscle_building_benefits": [
+            "Salmon rich in omega-3s for reducing inflammation",
+            "Quinoa is complete protein (all 9 amino acids)",
+            "Great for recovery days between training sessions"
+          ],
+          "ingredients": [
+            {
+              "name": "Salmon fillets",
+              "amount": 3,
+              "unit": "lbs",
+              "brand": "Wild-caught (Costco)",
+              "cost": 12.00,
+              "aisle": "Seafood"
+            },
+            {
+              "name": "Quinoa",
+              "amount": 2,
+              "unit": "cups dry",
+              "brand": "Kirkland Signature",
+              "cost": 3.00,
+              "aisle": "Grains"
+            },
+            {
+              "name": "Asparagus",
+              "amount": 2,
+              "unit": "lbs",
+              "brand": "Fresh",
+              "cost": 3.00,
+              "aisle": "Produce"
+            }
+          ],
+          "instructions": [
+            "Cook quinoa: 2 cups quinoa + 4 cups water, simmer 15 min",
+            "Season salmon with salt, pepper, lemon juice",
+            "Bake salmon at 400°F for 12-15 minutes",
+            "Roast asparagus at 400°F for 10 minutes",
+            "Divide quinoa into bowls, top with salmon and asparagus"
+          ],
+          "post_workout": false,
+          "tags": ["high-protein", "omega-3", "recovery"]
+        },
+        {
+          "meal_id": "muscle_meal_006",
+          "meal_type": "dinner",
+          "meal_name": "Turkey Chili with Beans",
+          "servings": 5,
+          "prep_time": 15,
+          "cook_time": 30,
+          "total_time": 45,
+          "cost_per_serving": 2.60,
+          "total_cost": 13.00,
+          "nutrition_per_serving": {
+            "calories": 640,
+            "protein": 58,
+            "carbs": 64,
+            "fat": 16,
+            "fiber": 14
+          },
+          "muscle_building_benefits": [
+            "Lean turkey provides 50g+ protein per serving",
+            "Beans add extra protein + fiber for satiety",
+            "One-pot meal, great for batch cooking"
+          ],
+          "ingredients": [
+            {
+              "name": "Ground turkey (93/7)",
+              "amount": 3,
+              "unit": "lbs",
+              "brand": "Kirkland Signature",
+              "cost": 9.00,
+              "aisle": "Meat"
+            },
+            {
+              "name": "Kidney beans",
+              "amount": 2,
+              "unit": "cans (15 oz)",
+              "brand": "Kirkland Signature",
+              "cost": 2.00,
+              "aisle": "Canned Goods"
+            },
+            {
+              "name": "Diced tomatoes",
+              "amount": 2,
+              "unit": "cans (28 oz)",
+              "brand": "Kirkland Signature",
+              "cost": 2.00,
+              "aisle": "Canned Goods"
+            }
+          ],
+          "instructions": [
+            "Brown ground turkey in large pot",
+            "Add diced tomatoes, kidney beans, chili seasoning",
+            "Simmer for 30 minutes",
+            "Serve in bowls, optional toppings: cheese, sour cream"
+          ],
+          "meal_prep_friendly": true,
+          "tags": ["high-protein", "high-fiber", "batch-cooking"]
+        }
+      ],
+      "daily_tips": [
+        "Tuesday is recovery day - focus on omega-3s and sleep",
+        "Protein oatmeal is perfect pre-workout if training today",
+        "Hydrate well - aim for 80+ oz water"
+      ]
+    },
+    {
+      "day_number": 3,
+      "day_name": "Wednesday - Strength Building",
+      "date": "2026-01-08",
+      "total_daily_cost": 47.00,
+      "daily_macros_per_person": {
+        "calories": 2420,
+        "protein": 148,
+        "carbs": 272,
+        "fat": 68
+      },
+      "meals": [
+        {
+          "meal_id": "muscle_meal_007",
+          "meal_type": "breakfast",
+          "meal_name": "Protein Pancakes with Berries",
+          "servings": 5,
+          "prep_time": 10,
+          "cook_time": 15,
+          "total_time": 25,
+          "cost_per_serving": 2.40,
+          "total_cost": 12.00,
+          "nutrition_per_serving": {
+            "calories": 500,
+            "protein": 35,
+            "carbs": 58,
+            "fat": 14,
+            "fiber": 6
+          },
+          "muscle_building_benefits": [
+            "35g protein from Kodiak Cakes mix + eggs",
+            "Complex carbs for morning energy",
+            "Berries provide antioxidants for recovery"
+          ],
+          "ingredients": [
+            {
+              "name": "Kodiak Cakes Pancake Mix",
+              "amount": 5,
+              "unit": "cups",
+              "brand": "Kodiak Cakes (Costco)",
+              "cost": 6.00,
+              "aisle": "Baking"
+            },
+            {
+              "name": "Eggs",
+              "amount": 5,
+              "unit": "large",
+              "brand": "Kirkland Signature",
+              "cost": 1.00,
+              "aisle": "Dairy"
+            },
+            {
+              "name": "Mixed berries",
+              "amount": 3,
+              "unit": "cups",
+              "brand": "Frozen (Costco)",
+              "cost": 3.00,
+              "aisle": "Frozen"
+            },
+            {
+              "name": "Maple syrup",
+              "amount": 0.5,
+              "unit": "cup",
+              "brand": "Pure maple syrup",
+              "cost": 2.00,
+              "aisle": "Breakfast"
+            }
+          ],
+          "instructions": [
+            "Mix Kodiak Cakes according to package directions, add 1 egg per serving",
+            "Cook pancakes on griddle until golden brown",
+            "Top with mixed berries and maple syrup",
+            "Serve 3-4 pancakes per person"
+          ],
+          "post_workout": false,
+          "tags": ["high-protein", "family-favorite", "breakfast"]
+        },
+        {
+          "meal_id": "muscle_meal_008",
+          "meal_type": "lunch",
+          "meal_name": "Steak & Rice Bowl",
+          "servings": 5,
+          "prep_time": 10,
+          "cook_time": 15,
+          "total_time": 25,
+          "cost_per_serving": 4.00,
+          "total_cost": 20.00,
+          "nutrition_per_serving": {
+            "calories": 680,
+            "protein": 56,
+            "carbs": 65,
+            "fat": 22,
+            "fiber": 5
+          },
+          "muscle_building_benefits": [
+            "56g protein + creatine from beef",
+            "Iron and B12 for energy production",
+            "Perfect post-workout meal"
+          ],
+          "ingredients": [
+            {
+              "name": "Sirloin steak",
+              "amount": 3,
+              "unit": "lbs",
+              "brand": "USDA Choice (Costco)",
+              "cost": 15.00,
+              "aisle": "Meat"
+            },
+            {
+              "name": "White rice",
+              "amount": 2.5,
+              "unit": "cups dry",
+              "brand": "Kirkland Signature",
+              "cost": 2.00,
+              "aisle": "Grains"
+            },
+            {
+              "name": "Stir-fry vegetables",
+              "amount": 2,
+              "unit": "bags (16 oz)",
+              "brand": "Frozen blend (Costco)",
+              "cost": 3.00,
+              "aisle": "Frozen"
+            }
+          ],
+          "instructions": [
+            "Cook white rice according to package",
+            "Season and grill steak to medium (145°F), rest 5 minutes",
+            "Stir-fry vegetables in wok",
+            "Slice steak, serve over rice with vegetables"
+          ],
+          "post_workout": true,
+          "timing_note": "Best within 2 hours after training",
+          "tags": ["high-protein", "post-workout", "creatine"]
+        },
+        {
+          "meal_id": "muscle_meal_009",
+          "meal_type": "dinner",
+          "meal_name": "Baked Chicken Thighs with Roasted Vegetables",
+          "servings": 5,
+          "prep_time": 15,
+          "cook_time": 35,
+          "total_time": 50,
+          "cost_per_serving": 3.00,
+          "total_cost": 15.00,
+          "nutrition_per_serving": {
+            "calories": 620,
+            "protein": 57,
+            "carbs": 38,
+            "fat": 26,
+            "fiber": 8
+          },
+          "muscle_building_benefits": [
+            "57g protein from chicken thighs",
+            "Healthy fats for hormone production",
+            "Vegetables provide recovery nutrients"
+          ],
+          "ingredients": [
+            {
+              "name": "Chicken thighs (boneless, skinless)",
+              "amount": 4,
+              "unit": "lbs",
+              "brand": "Kirkland Signature",
+              "cost": 10.00,
+              "aisle": "Meat"
+            },
+            {
+              "name": "Brussels sprouts",
+              "amount": 2,
+              "unit": "lbs",
+              "brand": "Fresh",
+              "cost": 3.00,
+              "aisle": "Produce"
+            },
+            {
+              "name": "Carrots",
+              "amount": 2,
+              "unit": "lbs",
+              "brand": "Baby carrots",
+              "cost": 2.00,
+              "aisle": "Produce"
+            }
+          ],
+          "instructions": [
+            "Preheat oven to 425°F",
+            "Season chicken with garlic, paprika, salt, pepper",
+            "Toss vegetables with olive oil, salt, pepper",
+            "Bake chicken and vegetables for 35 minutes",
+            "Serve chicken with roasted vegetables"
+          ],
+          "meal_prep_friendly": true,
+          "tags": ["high-protein", "roasted", "meal-prep"]
+        }
+      ],
+      "daily_tips": [
+        "Wednesday is training day - prioritize post-workout nutrition",
+        "Steak provides creatine naturally for strength gains",
+        "Get 7-9 hours sleep tonight for recovery"
+      ]
+    },
+    {
+      "day_number": 4,
+      "day_name": "Thursday - Active Recovery",
+      "date": "2026-01-09",
+      "total_daily_cost": 43.00,
+      "daily_macros_per_person": {
+        "calories": 2340,
+        "protein": 138,
+        "carbs": 262,
+        "fat": 64
+      },
+      "meals": [
+        {
+          "meal_id": "muscle_meal_010",
+          "meal_type": "breakfast",
+          "meal_name": "Greek Yogurt Bowl with Granola",
+          "servings": 5,
+          "prep_time": 5,
+          "cook_time": 0,
+          "total_time": 5,
+          "cost_per_serving": 2.20,
+          "total_cost": 11.00,
+          "nutrition_per_serving": {
+            "calories": 420,
+            "protein": 30,
+            "carbs": 52,
+            "fat": 12,
+            "fiber": 6
+          },
+          "muscle_building_benefits": [
+            "30g protein from Greek yogurt (casein)",
+            "Granola provides complex carbs",
+            "Quick breakfast for busy mornings"
+          ],
+          "ingredients": [
+            {
+              "name": "Greek yogurt (plain, nonfat)",
+              "amount": 5,
+              "unit": "cups (7 oz each)",
+              "brand": "Fage Total 0%",
+              "cost": 6.00,
+              "aisle": "Dairy"
+            },
+            {
+              "name": "Granola",
+              "amount": 2.5,
+              "unit": "cups",
+              "brand": "Nature Valley",
+              "cost": 3.00,
+              "aisle": "Cereal"
+            },
+            {
+              "name": "Honey",
+              "amount": 5,
+              "unit": "tbsp",
+              "brand": "Pure honey",
+              "cost": 1.00,
+              "aisle": "Spreads"
+            },
+            {
+              "name": "Mixed berries",
+              "amount": 2.5,
+              "unit": "cups",
+              "brand": "Frozen blend",
+              "cost": 1.00,
+              "aisle": "Frozen"
+            }
+          ],
+          "instructions": [
+            "Divide Greek yogurt into bowls",
+            "Top with 1/2 cup granola per serving",
+            "Add mixed berries",
+            "Drizzle with honey"
+          ],
+          "post_workout": false,
+          "tags": ["high-protein", "quick", "no-cook"]
+        },
+        {
+          "meal_id": "muscle_meal_011",
+          "meal_type": "lunch",
+          "meal_name": "Pulled Chicken Sandwiches",
+          "servings": 5,
+          "prep_time": 10,
+          "cook_time": 20,
+          "total_time": 30,
+          "cost_per_serving": 3.00,
+          "total_cost": 15.00,
+          "nutrition_per_serving": {
+            "calories": 580,
+            "protein": 48,
+            "carbs": 62,
+            "fat": 16,
+            "fiber": 8
+          },
+          "muscle_building_benefits": [
+            "48g lean protein from chicken",
+            "Whole grain buns provide complex carbs",
+            "Budget-friendly using rotisserie chicken"
+          ],
+          "ingredients": [
+            {
+              "name": "Rotisserie chicken",
+              "amount": 2,
+              "unit": "whole chickens",
+              "brand": "Costco rotisserie",
+              "cost": 10.00,
+              "aisle": "Deli"
+            },
+            {
+              "name": "Whole grain buns",
+              "amount": 5,
+              "unit": "buns",
+              "brand": "Dave's Killer Bread",
+              "cost": 3.00,
+              "aisle": "Bakery"
+            },
+            {
+              "name": "BBQ sauce",
+              "amount": 1,
+              "unit": "cup",
+              "brand": "Sweet Baby Ray's",
+              "cost": 2.00,
+              "aisle": "Condiments"
+            }
+          ],
+          "instructions": [
+            "Shred rotisserie chicken meat",
+            "Mix with BBQ sauce, heat in pan",
+            "Toast buns",
+            "Serve pulled chicken on buns with coleslaw"
+          ],
+          "meal_prep_friendly": true,
+          "tags": ["high-protein", "quick", "budget-friendly"]
+        },
+        {
+          "meal_id": "muscle_meal_012",
+          "meal_type": "dinner",
+          "meal_name": "Shrimp Stir-Fry with Noodles",
+          "servings": 5,
+          "prep_time": 15,
+          "cook_time": 15,
+          "total_time": 30,
+          "cost_per_serving": 3.40,
+          "total_cost": 17.00,
+          "nutrition_per_serving": {
+            "calories": 660,
+            "protein": 60,
+            "carbs": 72,
+            "fat": 18,
+            "fiber": 6
+          },
+          "muscle_building_benefits": [
+            "60g protein from shrimp",
+            "Low fat, high protein seafood",
+            "Quick cooking for busy evenings"
+          ],
+          "ingredients": [
+            {
+              "name": "Shrimp (peeled, deveined)",
+              "amount": 3,
+              "unit": "lbs",
+              "brand": "Frozen (Costco)",
+              "cost": 12.00,
+              "aisle": "Seafood/Frozen"
+            },
+            {
+              "name": "Lo mein noodles",
+              "amount": 1,
+              "unit": "package (16 oz)",
+              "brand": "Asian noodles",
+              "cost": 2.00,
+              "aisle": "International"
+            },
+            {
+              "name": "Stir-fry vegetables",
+              "amount": 2,
+              "unit": "bags",
+              "brand": "Frozen blend",
+              "cost": 3.00,
+              "aisle": "Frozen"
+            }
+          ],
+          "instructions": [
+            "Cook noodles according to package",
+            "Stir-fry shrimp in wok with vegetables",
+            "Add soy sauce, garlic, ginger",
+            "Toss with noodles, serve hot"
+          ],
+          "post_workout": false,
+          "tags": ["high-protein", "quick", "seafood"]
+        }
+      ],
+      "daily_tips": [
+        "Thursday is active recovery - light cardio or stretching",
+        "Shrimp provides lean protein with minimal fat",
+        "Focus on hydration and mobility work"
+      ]
+    },
+    {
+      "day_number": 5,
+      "day_name": "Friday - Power Day",
+      "date": "2026-01-10",
+      "total_daily_cost": 48.00,
+      "daily_macros_per_person": {
+        "calories": 2450,
+        "protein": 150,
+        "carbs": 275,
+        "fat": 70
+      },
+      "meals": [
+        {
+          "meal_id": "muscle_meal_013",
+          "meal_type": "breakfast",
+          "meal_name": "Breakfast Burrito Bowl",
+          "servings": 5,
+          "prep_time": 10,
+          "cook_time": 15,
+          "total_time": 25,
+          "cost_per_serving": 2.60,
+          "total_cost": 13.00,
+          "nutrition_per_serving": {
+            "calories": 520,
+            "protein": 40,
+            "carbs": 55,
+            "fat": 18,
+            "fiber": 10
+          },
+          "muscle_building_benefits": [
+            "40g protein from eggs and black beans",
+            "High fiber for satiety",
+            "Complex carbs for energy"
+          ],
+          "ingredients": [
+            {
+              "name": "Eggs",
+              "amount": 10,
+              "unit": "large",
+              "brand": "Kirkland Signature",
+              "cost": 3.00,
+              "aisle": "Dairy"
+            },
+            {
+              "name": "Black beans",
+              "amount": 2,
+              "unit": "cans (15 oz)",
+              "brand": "Kirkland Signature",
+              "cost": 2.00,
+              "aisle": "Canned Goods"
+            },
+            {
+              "name": "Brown rice",
+              "amount": 2,
+              "unit": "cups cooked",
+              "brand": "Leftover from earlier",
+              "cost": 1.00,
+              "aisle": "Grains"
+            },
+            {
+              "name": "Salsa",
+              "amount": 1,
+              "unit": "cup",
+              "brand": "Kirkland Signature",
+              "cost": 2.00,
+              "aisle": "Condiments"
+            },
+            {
+              "name": "Avocado",
+              "amount": 2,
+              "unit": "medium",
+              "brand": "Fresh",
+              "cost": 3.00,
+              "aisle": "Produce"
+            },
+            {
+              "name": "Cheese",
+              "amount": 1,
+              "unit": "cup shredded",
+              "brand": "Kirkland Signature",
+              "cost": 2.00,
+              "aisle": "Dairy"
+            }
+          ],
+          "instructions": [
+            "Scramble eggs in large pan",
+            "Heat black beans and brown rice",
+            "Build bowls: rice, beans, scrambled eggs",
+            "Top with salsa, cheese, sliced avocado"
+          ],
+          "post_workout": false,
+          "tags": ["high-protein", "high-fiber", "filling"]
+        },
+        {
+          "meal_id": "muscle_meal_014",
+          "meal_type": "lunch",
+          "meal_name": "Turkey Meatballs with Pasta",
+          "servings": 5,
+          "prep_time": 20,
+          "cook_time": 25,
+          "total_time": 45,
+          "cost_per_serving": 3.20,
+          "total_cost": 16.00,
+          "nutrition_per_serving": {
+            "calories": 680,
+            "protein": 54,
+            "carbs": 78,
+            "fat": 18,
+            "fiber": 6
+          },
+          "muscle_building_benefits": [
+            "54g lean protein from turkey",
+            "Pasta provides carbs for energy",
+            "Marinara sauce adds lycopene for recovery"
+          ],
+          "ingredients": [
+            {
+              "name": "Ground turkey",
+              "amount": 3,
+              "unit": "lbs",
+              "brand": "Kirkland Signature",
+              "cost": 9.00,
+              "aisle": "Meat"
+            },
+            {
+              "name": "Whole wheat pasta",
+              "amount": 1,
+              "unit": "box (16 oz)",
+              "brand": "Barilla",
+              "cost": 2.00,
+              "aisle": "Pasta"
+            },
+            {
+              "name": "Marinara sauce",
+              "amount": 1,
+              "unit": "jar (32 oz)",
+              "brand": "Rao's",
+              "cost": 5.00,
+              "aisle": "Pasta Sauce"
+            }
+          ],
+          "instructions": [
+            "Form turkey into meatballs (1.5 oz each)",
+            "Bake at 400°F for 20 minutes",
+            "Cook pasta according to package",
+            "Heat marinara sauce, add meatballs",
+            "Serve meatballs and sauce over pasta"
+          ],
+          "meal_prep_friendly": true,
+          "post_workout": true,
+          "tags": ["high-protein", "family-favorite", "meal-prep"]
+        },
+        {
+          "meal_id": "muscle_meal_015",
+          "meal_type": "dinner",
+          "meal_name": "Pork Tenderloin with Roasted Potatoes",
+          "servings": 5,
+          "prep_time": 15,
+          "cook_time": 30,
+          "total_time": 45,
+          "cost_per_serving": 3.80,
+          "total_cost": 19.00,
+          "nutrition_per_serving": {
+            "calories": 720,
+            "protein": 56,
+            "carbs": 68,
+            "fat": 22,
+            "fiber": 8
+          },
+          "muscle_building_benefits": [
+            "56g protein from pork tenderloin",
+            "Potatoes provide complex carbs",
+            "Complete meal with vegetables"
+          ],
+          "ingredients": [
+            {
+              "name": "Pork tenderloin",
+              "amount": 3,
+              "unit": "lbs",
+              "brand": "Kirkland Signature",
+              "cost": 12.00,
+              "aisle": "Meat"
+            },
+            {
+              "name": "Red potatoes",
+              "amount": 4,
+              "unit": "lbs",
+              "brand": "Fresh",
+              "cost": 4.00,
+              "aisle": "Produce"
+            },
+            {
+              "name": "Green beans",
+              "amount": 2,
+              "unit": "lbs",
+              "brand": "Fresh",
+              "cost": 3.00,
+              "aisle": "Produce"
+            }
+          ],
+          "instructions": [
+            "Season pork with rosemary, garlic, salt, pepper",
+            "Roast at 425°F for 25-30 minutes (145°F internal)",
+            "Cut potatoes into wedges, toss with oil, roast 30 min",
+            "Steam green beans",
+            "Slice pork, serve with potatoes and green beans"
+          ],
+          "post_workout": false,
+          "tags": ["high-protein", "roasted", "family-dinner"]
+        }
+      ],
+      "daily_tips": [
+        "Friday is power day - train hard with compound lifts",
+        "Turkey meatballs are perfect post-workout",
+        "Meal prep extra for weekend convenience"
+      ]
+    },
+    {
+      "day_number": 6,
+      "day_name": "Saturday - Family Day",
+      "date": "2026-01-11",
+      "total_daily_cost": 45.00,
+      "daily_macros_per_person": {
+        "calories": 2380,
+        "protein": 142,
+        "carbs": 270,
+        "fat": 66
+      },
+      "meals": [
+        {
+          "meal_id": "muscle_meal_016",
+          "meal_type": "breakfast",
+          "meal_name": "Protein French Toast",
+          "servings": 5,
+          "prep_time": 10,
+          "cook_time": 15,
+          "total_time": 25,
+          "cost_per_serving": 2.40,
+          "total_cost": 12.00,
+          "nutrition_per_serving": {
+            "calories": 480,
+            "protein": 32,
+            "carbs": 62,
+            "fat": 14,
+            "fiber": 6
+          },
+          "muscle_building_benefits": [
+            "32g protein from eggs and bread",
+            "Family favorite breakfast",
+            "Complex carbs for weekend energy"
+          ],
+          "ingredients": [
+            {
+              "name": "Whole wheat bread",
+              "amount": 10,
+              "unit": "slices",
+              "brand": "Dave's Killer Bread",
+              "cost": 3.00,
+              "aisle": "Bakery"
+            },
+            {
+              "name": "Eggs",
+              "amount": 8,
+              "unit": "large",
+              "brand": "Kirkland Signature",
+              "cost": 2.00,
+              "aisle": "Dairy"
+            },
+            {
+              "name": "Milk",
+              "amount": 1,
+              "unit": "cup",
+              "brand": "Kirkland Signature",
+              "cost": 0.50,
+              "aisle": "Dairy"
+            },
+            {
+              "name": "Protein powder",
+              "amount": 3,
+              "unit": "scoops",
+              "brand": "Vanilla whey",
+              "cost": 3.00,
+              "aisle": "Sports Nutrition"
+            },
+            {
+              "name": "Maple syrup",
+              "amount": 0.5,
+              "unit": "cup",
+              "brand": "Pure maple",
+              "cost": 2.00,
+              "aisle": "Breakfast"
+            },
+            {
+              "name": "Strawberries",
+              "amount": 2,
+              "unit": "cups sliced",
+              "brand": "Fresh",
+              "cost": 1.50,
+              "aisle": "Produce"
+            }
+          ],
+          "instructions": [
+            "Whisk eggs, milk, protein powder, cinnamon",
+            "Dip bread slices in egg mixture",
+            "Cook on griddle until golden brown",
+            "Serve with maple syrup and strawberries"
+          ],
+          "post_workout": false,
+          "tags": ["high-protein", "family-favorite", "weekend"]
+        },
+        {
+          "meal_id": "muscle_meal_017",
+          "meal_type": "lunch",
+          "meal_name": "Grilled Chicken Caesar Salad",
+          "servings": 5,
+          "prep_time": 15,
+          "cook_time": 15,
+          "total_time": 30,
+          "cost_per_serving": 3.20,
+          "total_cost": 16.00,
+          "nutrition_per_serving": {
+            "calories": 580,
+            "protein": 52,
+            "carbs": 42,
+            "fat": 22,
+            "fiber": 6
+          },
+          "muscle_building_benefits": [
+            "52g protein from chicken breast",
+            "Lighter lunch for active weekend",
+            "Caesar dressing provides healthy fats"
+          ],
+          "ingredients": [
+            {
+              "name": "Chicken breast",
+              "amount": 3,
+              "unit": "lbs",
+              "brand": "Kirkland Signature",
+              "cost": 9.00,
+              "aisle": "Meat"
+            },
+            {
+              "name": "Romaine lettuce",
+              "amount": 2,
+              "unit": "heads",
+              "brand": "Fresh",
+              "cost": 3.00,
+              "aisle": "Produce"
+            },
+            {
+              "name": "Caesar dressing",
+              "amount": 1,
+              "unit": "cup",
+              "brand": "Kirkland Signature",
+              "cost": 2.00,
+              "aisle": "Dressings"
+            },
+            {
+              "name": "Parmesan cheese",
+              "amount": 1,
+              "unit": "cup shredded",
+              "brand": "Kirkland Signature",
+              "cost": 2.00,
+              "aisle": "Dairy"
+            }
+          ],
+          "instructions": [
+            "Grill chicken breasts, slice into strips",
+            "Chop romaine lettuce",
+            "Toss lettuce with Caesar dressing",
+            "Top with grilled chicken and Parmesan"
+          ],
+          "post_workout": false,
+          "tags": ["high-protein", "salad", "light"]
+        },
+        {
+          "meal_id": "muscle_meal_018",
+          "meal_type": "dinner",
+          "meal_name": "Homemade Pizza Night",
+          "servings": 5,
+          "prep_time": 20,
+          "cook_time": 15,
+          "total_time": 35,
+          "cost_per_serving": 3.40,
+          "total_cost": 17.00,
+          "nutrition_per_serving": {
+            "calories": 720,
+            "protein": 58,
+            "carbs": 82,
+            "fat": 24,
+            "fiber": 8
+          },
+          "muscle_building_benefits": [
+            "58g protein from chicken sausage and cheese",
+            "Family-friendly Saturday dinner",
+            "Whole wheat crust provides complex carbs"
+          ],
+          "ingredients": [
+            {
+              "name": "Whole wheat pizza dough",
+              "amount": 2,
+              "unit": "packages",
+              "brand": "Trader Joe's",
+              "cost": 4.00,
+              "aisle": "Bakery"
+            },
+            {
+              "name": "Chicken sausage",
+              "amount": 2,
+              "unit": "lbs",
+              "brand": "Kirkland Signature",
+              "cost": 6.00,
+              "aisle": "Meat"
+            },
+            {
+              "name": "Mozzarella cheese",
+              "amount": 3,
+              "unit": "cups shredded",
+              "brand": "Kirkland Signature",
+              "cost": 4.00,
+              "aisle": "Dairy"
+            },
+            {
+              "name": "Pizza sauce",
+              "amount": 1,
+              "unit": "jar (16 oz)",
+              "brand": "Rao's",
+              "cost": 3.00,
+              "aisle": "Pasta Sauce"
+            }
+          ],
+          "instructions": [
+            "Preheat oven to 475°F",
+            "Roll out pizza dough on baking sheet",
+            "Spread sauce, add cheese and sliced sausage",
+            "Bake 12-15 minutes until crust is golden",
+            "Cut into slices and serve"
+          ],
+          "meal_prep_friendly": false,
+          "tags": ["high-protein", "family-favorite", "weekend"]
+        }
+      ],
+      "daily_tips": [
+        "Saturday is family day - enjoy relaxed meals together",
+        "If training today, eat breakfast 1-2 hours before",
+        "Pizza night is a reward - enjoy with family!"
+      ]
+    },
+    {
+      "day_number": 7,
+      "day_name": "Sunday - Meal Prep Day",
+      "date": "2026-01-12",
+      "total_daily_cost": 45.00,
+      "daily_macros_per_person": {
+        "calories": 2400,
+        "protein": 145,
+        "carbs": 268,
+        "fat": 67
+      },
+      "meals": [
+        {
+          "meal_id": "muscle_meal_019",
+          "meal_type": "breakfast",
+          "meal_name": "Veggie Omelet with Toast",
+          "servings": 5,
+          "prep_time": 10,
+          "cook_time": 15,
+          "total_time": 25,
+          "cost_per_serving": 2.20,
+          "total_cost": 11.00,
+          "nutrition_per_serving": {
+            "calories": 460,
+            "protein": 35,
+            "carbs": 42,
+            "fat": 18,
+            "fiber": 6
+          },
+          "muscle_building_benefits": [
+            "35g protein from eggs",
+            "Vegetables provide vitamins for recovery",
+            "Complete breakfast to start meal prep day"
+          ],
+          "ingredients": [
+            {
+              "name": "Eggs",
+              "amount": 15,
+              "unit": "large",
+              "brand": "Kirkland Signature",
+              "cost": 4.00,
+              "aisle": "Dairy"
+            },
+            {
+              "name": "Bell peppers",
+              "amount": 2,
+              "unit": "medium",
+              "brand": "Fresh",
+              "cost": 2.00,
+              "aisle": "Produce"
+            },
+            {
+              "name": "Mushrooms",
+              "amount": 1,
+              "unit": "package (8 oz)",
+              "brand": "Fresh",
+              "cost": 2.00,
+              "aisle": "Produce"
+            },
+            {
+              "name": "Whole wheat toast",
+              "amount": 10,
+              "unit": "slices",
+              "brand": "Dave's Killer Bread",
+              "cost": 3.00,
+              "aisle": "Bakery"
+            }
+          ],
+          "instructions": [
+            "Sauté diced peppers and mushrooms",
+            "Beat eggs, pour over vegetables",
+            "Cook omelet until set, fold in half",
+            "Serve with whole wheat toast"
+          ],
+          "post_workout": false,
+          "tags": ["high-protein", "vegetarian-option", "vegetables"]
+        },
+        {
+          "meal_id": "muscle_meal_020",
+          "meal_type": "lunch",
+          "meal_name": "Slow Cooker Pot Roast",
+          "servings": 5,
+          "prep_time": 15,
+          "cook_time": 240,
+          "total_time": 255,
+          "cost_per_serving": 3.80,
+          "total_cost": 19.00,
+          "nutrition_per_serving": {
+            "calories": 680,
+            "protein": 58,
+            "carbs": 62,
+            "fat": 20,
+            "fiber": 8
+          },
+          "muscle_building_benefits": [
+            "58g protein from beef roast",
+            "Slow cooking makes meat tender",
+            "Perfect for Sunday meal prep"
+          ],
+          "ingredients": [
+            {
+              "name": "Beef chuck roast",
+              "amount": 4,
+              "unit": "lbs",
+              "brand": "USDA Choice",
+              "cost": 12.00,
+              "aisle": "Meat"
+            },
+            {
+              "name": "Potatoes",
+              "amount": 3,
+              "unit": "lbs",
+              "brand": "Russet",
+              "cost": 3.00,
+              "aisle": "Produce"
+            },
+            {
+              "name": "Carrots",
+              "amount": 2,
+              "unit": "lbs",
+              "brand": "Baby carrots",
+              "cost": 2.00,
+              "aisle": "Produce"
+            },
+            {
+              "name": "Onions",
+              "amount": 2,
+              "unit": "large",
+              "brand": "Fresh",
+              "cost": 2.00,
+              "aisle": "Produce"
+            }
+          ],
+          "instructions": [
+            "Place roast in slow cooker",
+            "Add potatoes, carrots, onions around roast",
+            "Add beef broth, seasonings",
+            "Cook on low for 8 hours",
+            "Shred beef, serve with vegetables"
+          ],
+          "meal_prep_friendly": true,
+          "tags": ["high-protein", "slow-cooker", "comfort-food"]
+        },
+        {
+          "meal_id": "muscle_meal_021",
+          "meal_type": "dinner",
+          "meal_name": "Grilled Chicken & Vegetable Skewers",
+          "servings": 5,
+          "prep_time": 20,
+          "cook_time": 15,
+          "total_time": 35,
+          "cost_per_serving": 3.00,
+          "total_cost": 15.00,
+          "nutrition_per_serving": {
+            "calories": 620,
+            "protein": 52,
+            "carbs": 68,
+            "fat": 18,
+            "fiber": 8
+          },
+          "muscle_building_benefits": [
+            "52g lean protein from chicken",
+            "Grilled vegetables for nutrients",
+            "Light dinner to end the week"
+          ],
+          "ingredients": [
+            {
+              "name": "Chicken breast",
+              "amount": 3,
+              "unit": "lbs",
+              "brand": "Kirkland Signature",
+              "cost": 9.00,
+              "aisle": "Meat"
+            },
+            {
+              "name": "Zucchini",
+              "amount": 3,
+              "unit": "medium",
+              "brand": "Fresh",
+              "cost": 2.00,
+              "aisle": "Produce"
+            },
+            {
+              "name": "Cherry tomatoes",
+              "amount": 2,
+              "unit": "pints",
+              "brand": "Fresh",
+              "cost": 3.00,
+              "aisle": "Produce"
+            },
+            {
+              "name": "Brown rice",
+              "amount": 2.5,
+              "unit": "cups dry",
+              "brand": "Kirkland Signature",
+              "cost": 1.00,
+              "aisle": "Grains"
+            }
+          ],
+          "instructions": [
+            "Cut chicken and vegetables into chunks",
+            "Thread onto skewers alternating chicken and vegetables",
+            "Grill for 12-15 minutes, turning occasionally",
+            "Serve over brown rice"
+          ],
+          "post_workout": false,
+          "tags": ["high-protein", "grilled", "vegetables"]
+        }
+      ],
+      "daily_tips": [
+        "Sunday is meal prep day - cook extras for the week",
+        "Pot roast leftovers can be used for quick meals",
+        "Review next week's plan and prep shopping list"
+      ]
+    }
+  ],
+  "muscle_building_program_tips": [
+    "💪 **Protein Timing**: Spread protein evenly across 3 meals (40-50g each) for optimal muscle protein synthesis",
+    "🏋️ **Post-Workout**: Consume lunch within 2 hours after weight training for best recovery",
+    "😴 **Bedtime Protein**: Greek yogurt snack provides slow-digesting casein for overnight muscle repair",
+    "💧 **Hydration**: Drink 80+ oz water daily (16 oz per family member). Dehydration impairs muscle recovery",
+    "🍽️ **Calorie Surplus**: Plan provides slight surplus (~200-300 cal/day) needed for muscle growth",
+    "📊 **Progressive Overload**: Increase weights gradually in gym + ensure adequate protein intake",
+    "😊 **Consistency**: Muscle building requires 8-12 weeks. Stick to plan for best results",
+    "🥛 **Leucine-Rich Foods**: Eggs, chicken, beef, Greek yogurt trigger muscle protein synthesis",
+    "⏰ **Meal Prep Sunday**: Cook chicken, rice, sweet potatoes in bulk to save time during week"
+  ],
+  "light_weight_training_guide": {
+    "recommended_schedule": "3-4 days per week (Monday, Wednesday, Friday, +optional Saturday)",
+    "workout_duration": "45-60 minutes per session",
+    "meal_timing_for_workouts": {
+      "pre_workout": "Eat Protein Oatmeal 1-2 hours before gym (Day 2 breakfast)",
+      "post_workout": "Eat Chicken & Rice Bowl within 2 hours after (Day 1 lunch)",
+      "rest_days": "Still maintain high protein intake for recovery"
+    },
+    "beginner_tips": [
+      "Focus on form over heavy weight",
+      "Start with 3 sets of 8-12 reps per exercise",
+      "Rest 60-90 seconds between sets",
+      "Include compound exercises: squats, bench press, rows, deadlifts",
+      "Sleep 7-9 hours nightly - muscle grows during rest!"
+    ]
+  },
+  "family_modifications": {
+    "for_kids_under_12": "Reduce portion sizes by 30%, focus on whole foods",
+    "for_teens_in_sports": "May need additional snacks or larger portions",
+    "non_training_family_members": "Adjust portions down slightly if not weight training"
+  },
+  "cost_savings_tips": [
+    "Buy in bulk at Costco - saves $50-80/week vs regular grocery",
+    "Rotisserie chicken ($4.99) = 2-3 meals worth of protein",
+    "Freeze extra chicken breasts to prevent waste",
+    "Cook rice and sweet potatoes in bulk on Sundays",
+    "Protein powder = $1.25/serving vs $3+ protein bar"
+  ]
+}
