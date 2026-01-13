@@ -1,7 +1,8 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import { Platform } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { AuthContext } from '../../context/AuthContext';
+import { LoginModal } from '../auth/LoginModal';
 
 const isWeb = Platform.OS === 'web';
 
@@ -23,6 +24,7 @@ interface WebTopNavProps {
 export function WebTopNav({ activeTab = 'none' }: WebTopNavProps) {
   const navigation = useNavigation<any>();
   const { user } = useContext(AuthContext);
+  const [showLoginModal, setShowLoginModal] = useState(false);
   
   // Check if user is on free plan
   const isFreeUser = !user || user.plan === 'free';
@@ -41,11 +43,21 @@ export function WebTopNav({ activeTab = 'none' }: WebTopNavProps) {
     }
   };
 
+  // Handle profile button click
+  const handleProfilePress = () => {
+    if (user) {
+      navigation.navigate('Profile');
+    } else {
+      setShowLoginModal(true);
+    }
+  };
+
   return (
+    <>
     <nav className="web-top-nav">
       <div className="web-nav-left">
         <button 
-          onClick={() => navigation.navigate('Home')} 
+          onClick={() => navigation.navigate('WihyHome')} 
           className={`web-nav-item nav-home ${activeTab === 'home' ? 'active' : ''}`} 
           type="button"
         >
@@ -85,7 +97,7 @@ export function WebTopNav({ activeTab = 'none' }: WebTopNavProps) {
           <span>Chat</span>
         </button>
         <button 
-          onClick={() => navigation.navigate('About')} 
+          onClick={() => navigation.navigate('About' as any)} 
           className="web-nav-item nav-about" 
           type="button"
         >
@@ -97,7 +109,7 @@ export function WebTopNav({ activeTab = 'none' }: WebTopNavProps) {
       </div>
       <div className="web-nav-right">
         <button 
-          onClick={() => navigation.navigate('Profile')} 
+          onClick={handleProfilePress} 
           className={`web-nav-item profile ${activeTab === 'profile' ? 'active' : ''}`} 
           type="button"
         >
@@ -107,6 +119,8 @@ export function WebTopNav({ activeTab = 'none' }: WebTopNavProps) {
         </button>
       </div>
     </nav>
+    <LoginModal visible={showLoginModal} onClose={() => setShowLoginModal(false)} />
+    </>
   );
 }
 
