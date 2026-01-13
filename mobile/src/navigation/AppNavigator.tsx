@@ -49,6 +49,9 @@ import OnboardingFlow from '../screens/OnboardingFlow';
 import { SubscriptionScreen } from '../screens/SubscriptionScreen';
 import { B2BPricingScreen } from '../screens/B2BPricingScreen';
 import { PostPaymentRegistrationScreen } from '../screens/PostPaymentRegistrationScreen';
+import AboutScreen from '../screens/AboutScreen';
+import TermsScreen from '../screens/TermsScreen';
+import PrivacyScreen from '../screens/PrivacyScreen';
 
 const Tab = createBottomTabNavigator<TabParamList>();
 const Stack = createStackNavigator<RootStackParamList>();
@@ -509,6 +512,30 @@ export default function AppNavigator() {
           options={{
             headerShown: false,
             gestureEnabled: false, // Prevent back gesture during registration
+          }}
+        />
+        <Stack.Screen
+          name="About"
+          component={AboutScreen}
+          options={{
+            presentation: 'card',
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="Terms"
+          component={TermsScreen}
+          options={{
+            presentation: 'card',
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="Privacy"
+          component={PrivacyScreen}
+          options={{
+            presentation: 'card',
+            headerShown: false,
           }}
         />
       </Stack.Navigator>
