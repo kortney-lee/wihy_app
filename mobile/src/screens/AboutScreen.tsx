@@ -132,9 +132,266 @@ export default function AboutScreen() {
           <section className="pricing-section">
             <p className="pricing-section-label">OUR MISSION</p>
             <h2 className="pricing-section-title">Search Food Like You Search the Internet</h2>
-            <p style={{ fontSize: '16px', color: '#6b7280', lineHeight: 1.6, textAlign: 'center', marginBottom: '24px', maxWidth: '700px', marginLeft: 'auto', marginRight: 'auto' }}>
+            <p style={{ fontSize: '16px', color: '#6b7280', lineHeight: 1.6, textAlign: 'center', marginBottom: '40px', maxWidth: '700px', marginLeft: 'auto', marginRight: 'auto' }}>
               Search, seek, and ask to understand what you eat through food and ingredient scanning. WIHY lets you search food the same way you search the internet, but with evidence instead of opinions.
             </p>
+            
+            {/* Story Section with Screenshots */}
+            <div style={{ maxWidth: '1000px', margin: '0 auto 48px' }}>
+              
+              {/* Step 1: Scan */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '40px', marginBottom: '64px', flexDirection: 'row' }}>
+                <div style={{ flex: 1 }}>
+                  <div style={{ background: 'linear-gradient(135deg, #e8f0fe 0%, #d3e3fd 100%)', borderRadius: '20px', padding: '32px', boxShadow: '0 8px 24px rgba(0,0,0,0.1)' }}>
+                    <div style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      {/* Phone Mockup Frame */}
+                      <div style={{ 
+                        position: 'relative', 
+                        width: '300px', 
+                        height: '600px',
+                        background: '#1f2937',
+                        borderRadius: '40px',
+                        padding: '12px',
+                        boxShadow: '0 20px 60px rgba(0,0,0,0.3)'
+                      }}>
+                        {/* Screen Notch */}
+                        <div style={{
+                          position: 'absolute',
+                          top: '0',
+                          left: '50%',
+                          transform: 'translateX(-50%)',
+                          width: '150px',
+                          height: '28px',
+                          background: '#1f2937',
+                          borderBottomLeftRadius: '20px',
+                          borderBottomRightRadius: '20px',
+                          zIndex: 10
+                        }}></div>
+                        {/* Screen Content */}
+                        <div style={{ 
+                          width: '100%', 
+                          height: '100%', 
+                          background: '#ffffff',
+                          borderRadius: '32px',
+                          overflow: 'hidden',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center'
+                        }}>
+                          <Image 
+                            source={require('../../assets/CameraScreen.png')} 
+                            style={{ width: '100%', height: '100%', objectFit: 'cover' } as any}
+                            resizeMode="cover"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div style={{ flex: 1 }}>
+                  <h3 style={{ fontSize: '28px', fontWeight: '700', color: '#1f2937', marginBottom: '16px' }}>1. Scan Anything</h3>
+                  <div style={{ borderLeft: '4px solid #fa5f06', paddingLeft: '20px' }}>
+                    <p style={{ fontSize: '16px', color: '#6b7280', lineHeight: 1.8, marginBottom: '12px' }}>
+                      Point your camera at any food, barcode, nutrition label, or ingredient list. WIHY instantly recognizes what you're looking at.
+                    </p>
+                    <p style={{ fontSize: '16px', color: '#6b7280', lineHeight: 1.8 }}>
+                      Works with barcodes, photos, screenshots, or even handwritten lists.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Step 2: Understand */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '40px', marginBottom: '64px', flexDirection: 'row-reverse' }}>
+                <div style={{ flex: 1 }}>
+                  <div style={{ background: 'linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)', borderRadius: '20px', padding: '32px', boxShadow: '0 8px 24px rgba(0,0,0,0.1)' }}>
+                    <div style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      {/* Phone Mockup Frame */}
+                      <div style={{ 
+                        position: 'relative', 
+                        width: '300px', 
+                        height: '600px',
+                        background: '#1f2937',
+                        borderRadius: '40px',
+                        padding: '12px',
+                        boxShadow: '0 20px 60px rgba(0,0,0,0.3)'
+                      }}>
+                        {/* Screen Notch */}
+                        <div style={{
+                          position: 'absolute',
+                          top: '0',
+                          left: '50%',
+                          transform: 'translateX(-50%)',
+                          width: '150px',
+                          height: '28px',
+                          background: '#1f2937',
+                          borderBottomLeftRadius: '20px',
+                          borderBottomRightRadius: '20px',
+                          zIndex: 10
+                        }}></div>
+                        {/* Screen Content */}
+                        <div style={{ 
+                          width: '100%', 
+                          height: '100%', 
+                          background: '#ffffff',
+                          borderRadius: '32px',
+                          overflow: 'hidden',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center'
+                        }}>
+                          <Image 
+                            source={require('../../assets/NutritionAnalysis.png')} 
+                            style={{ width: '100%', height: '100%', objectFit: 'cover' } as any}
+                            resizeMode="cover"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div style={{ flex: 1 }}>
+                  <h3 style={{ fontSize: '28px', fontWeight: '700', color: '#1f2937', marginBottom: '16px' }}>2. Understand Instantly</h3>
+                  <div style={{ borderLeft: '4px solid #4cbb17', paddingLeft: '20px' }}>
+                    <p style={{ fontSize: '16px', color: '#6b7280', lineHeight: 1.8, marginBottom: '12px' }}>
+                      See complete nutrition breakdowns, ingredient processing levels (NOVA groups), additives, and allergens—all explained in plain language.
+                    </p>
+                    <p style={{ fontSize: '16px', color: '#6b7280', lineHeight: 1.8 }}>
+                      No guessing. Just facts backed by 35+ million research articles.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Step 3: Ask */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '40px', marginBottom: '64px', flexDirection: 'row' }}>
+                <div style={{ flex: 1 }}>
+                  <div style={{ background: 'linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%)', borderRadius: '20px', padding: '32px', boxShadow: '0 8px 24px rgba(0,0,0,0.1)' }}>
+                    <div style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      {/* Phone Mockup Frame */}
+                      <div style={{ 
+                        position: 'relative', 
+                        width: '300px', 
+                        height: '600px',
+                        background: '#1f2937',
+                        borderRadius: '40px',
+                        padding: '12px',
+                        boxShadow: '0 20px 60px rgba(0,0,0,0.3)'
+                      }}>
+                        {/* Screen Notch */}
+                        <div style={{
+                          position: 'absolute',
+                          top: '0',
+                          left: '50%',
+                          transform: 'translateX(-50%)',
+                          width: '150px',
+                          height: '28px',
+                          background: '#1f2937',
+                          borderBottomLeftRadius: '20px',
+                          borderBottomRightRadius: '20px',
+                          zIndex: 10
+                        }}></div>
+                        {/* Screen Content */}
+                        <div style={{ 
+                          width: '100%', 
+                          height: '100%', 
+                          background: '#ffffff',
+                          borderRadius: '32px',
+                          overflow: 'hidden',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center'
+                        }}>
+                          <Image 
+                            source={require('../../assets/WihyHomescreen.png')} 
+                            style={{ width: '100%', height: '100%', objectFit: 'cover' } as any}
+                            resizeMode="cover"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div style={{ flex: 1 }}>
+                  <h3 style={{ fontSize: '28px', fontWeight: '700', color: '#1f2937', marginBottom: '16px' }}>3. Ask Anything</h3>
+                  <div style={{ borderLeft: '4px solid #1a73e8', paddingLeft: '20px' }}>
+                    <p style={{ fontSize: '16px', color: '#6b7280', lineHeight: 1.8, marginBottom: '12px' }}>
+                      Chat with WIHY about what you scanned. "Is this good for weight loss?" "Are these additives safe?" "How does this compare to alternatives?"
+                    </p>
+                    <p style={{ fontSize: '16px', color: '#6b7280', lineHeight: 1.8 }}>
+                      Get personalized, evidence-based answers—not generic advice.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Step 4: Track */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '40px', flexDirection: 'row-reverse' }}>
+                <div style={{ flex: 1 }}>
+                  <div style={{ background: 'linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%)', borderRadius: '20px', padding: '32px', boxShadow: '0 8px 24px rgba(0,0,0,0.1)' }}>
+                    <div style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      {/* Phone Mockup Frame */}
+                      <div style={{ 
+                        position: 'relative', 
+                        width: '300px', 
+                        height: '600px',
+                        background: '#1f2937',
+                        borderRadius: '40px',
+                        padding: '12px',
+                        boxShadow: '0 20px 60px rgba(0,0,0,0.3)'
+                      }}>
+                        {/* Screen Notch */}
+                        <div style={{
+                          position: 'absolute',
+                          top: '0',
+                          left: '50%',
+                          transform: 'translateX(-50%)',
+                          width: '150px',
+                          height: '28px',
+                          background: '#1f2937',
+                          borderBottomLeftRadius: '20px',
+                          borderBottomRightRadius: '20px',
+                          zIndex: 10
+                        }}></div>
+                        {/* Screen Content */}
+                        <div style={{ 
+                          width: '100%', 
+                          height: '100%', 
+                          background: '#ffffff',
+                          borderRadius: '32px',
+                          overflow: 'hidden',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center'
+                        }}>
+                          <Image 
+                            source={require('../../assets/MyProgressScreen.png')} 
+                            style={{ width: '100%', height: '100%', objectFit: 'cover' } as any}
+                            resizeMode="cover"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div style={{ flex: 1 }}>
+                  <h3 style={{ fontSize: '28px', fontWeight: '700', color: '#1f2937', marginBottom: '16px' }}>4. Track My Progress</h3>
+                  <div style={{ borderLeft: '4px solid #9333ea', paddingLeft: '20px' }}>
+                    <p style={{ fontSize: '16px', color: '#6b7280', lineHeight: 1.8, marginBottom: '12px' }}>
+                      See your health patterns over time. Track nutrition trends, monitor fitness progress, and visualize how your habits are impacting your health goals.
+                    </p>
+                    <p style={{ fontSize: '16px', color: '#6b7280', lineHeight: 1.8, marginBottom: '12px' }}>
+                      Your data works for you—revealing insights and predicting where you're heading.
+                    </p>
+                    <p style={{ fontSize: '14px', color: '#9333ea', fontWeight: '600', lineHeight: 1.8 }}>
+                      ⭐ Available with paid subscription only
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+            
             <div style={{ textAlign: 'center' }}>
               <button 
                 onClick={handleSubscribePress}

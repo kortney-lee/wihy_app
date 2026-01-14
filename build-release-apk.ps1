@@ -3,26 +3,24 @@
 Write-Host "Building WiHY - Release APK" -ForegroundColor Cyan
 Write-Host ""
 
-# Step 1: Build React app
-Write-Host "Step 1/4: Building React production bundle..." -ForegroundColor Yellow
-Set-Location "c:\repo\wihy_ui_clean\client"
-npm run build
+# Step 1: Navigate to mobile directory
+Write-Host "Step 1/3: Navigating to mobile directory..." -ForegroundColor Yellow
+Set-Location "c:\repo\wihy_ui_clean\mobile"
 if ($LASTEXITCODE -ne 0) {
-    Write-Host "React build failed!" -ForegroundColor Red
+    Write-Host "Failed to navigate to mobile directory!" -ForegroundColor Red
     exit 1
 }
-Write-Host "React build complete" -ForegroundColor Green
+Write-Host "Directory set" -ForegroundColor Green
 Write-Host ""
 
-# Step 2: Sync to Android
-Write-Host "Step 2/4: Syncing to Android project..." -ForegroundColor Yellow
-Set-Location "c:\repo\wihy_ui_clean\mobile"
-npx cap sync android
+# Step 2: Build with EAS
+Write-Host "Step 2/3: Building APK with EAS..." -ForegroundColor Yellow
+eas build --platform android --profile preview
 if ($LASTEXITCODE -ne 0) {
-    Write-Host "Capacitor sync failed!" -ForegroundColor Red
+    Write-Host "EAS build failed!" -ForegroundColor Red
     exit 1
 }
-Write-Host "Sync complete" -ForegroundColor Green
+Write-Host "Build queued" -ForegroundColor Green
 Write-Host ""
 
 # Step 3: Generate debug keystore if needed
