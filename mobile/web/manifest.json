@@ -9,18 +9,18 @@
   "theme_color": "#0AAE5E",
   "icons": [
     {
-      "src": "/assets/app_icon.png",
+      "src": "/assets/wihyfavicon.png",
       "sizes": "64x64",
       "type": "image/png"
     },
     {
-      "src": "/assets/app_icon.png",
+      "src": "/assets/wihyfaviconandriod.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/assets/app_n.png",
+      "src": "/assets/wihyfaviconandriod.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"

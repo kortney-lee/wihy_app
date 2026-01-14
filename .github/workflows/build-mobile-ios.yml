@@ -1,16 +1,21 @@
 name: Build Mobile App (iOS)
 
+# DISABLED - Using EAS Build instead
+# Uncomment to re-enable GitHub Actions builds
+# on:
+#   push:
+#     branches: [main, develop]
+#     paths:
+#       - 'mobile/**'
+#       - '.github/workflows/build-mobile-ios.yml'
+#   pull_request:
+#     branches: [main]
+#     paths:
+#       - 'mobile/**'
+#   workflow_dispatch:
+
 on:
-  push:
-    branches: [main, develop]
-    paths:
-      - 'mobile/**'
-      - '.github/workflows/build-mobile-ios.yml'
-  pull_request:
-    branches: [main]
-    paths:
-      - 'mobile/**'
-  workflow_dispatch:
+  workflow_dispatch:  # Manual trigger only
 
 jobs:
   build-ios:
