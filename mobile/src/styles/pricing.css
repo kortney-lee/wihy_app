@@ -602,11 +602,11 @@
   border-radius: 12px;
   padding: 18px;
   margin-top: auto;
-  /* Border Sweep Animation */
+  /* Border Sweep Animation - matches search bar */
   border: 2px solid transparent;
   background:
-    linear-gradient(#f0fdf4, #f0fdf4) padding-box,
-    linear-gradient(90deg, #22c55e, #ffffff, #86efac, #16a34a, #22c55e) border-box;
+    linear-gradient(#ffffff, #ffffff) padding-box,
+    linear-gradient(90deg, #fa5f06, #ffffff, #C0C0C0, #4cbb17, #1a73e8) border-box;
   background-size: 100% 100%, 200% 100%;
   animation: wiH-border-sweep 2.2s linear infinite;
 }
@@ -617,7 +617,7 @@
 }
 
 .comparison-wihy-box .comparison-label {
-  color: #166534;
+  color: #1f2937;
   font-weight: 800;
   font-size: 13px;
   margin-bottom: 8px;
