@@ -112,7 +112,7 @@ export default function AboutScreen() {
         
         <div className="pricing-content">
           {/* Hero Section */}
-          <div className="pricing-hero" style={{ background: 'linear-gradient(135deg, #e0f7e6 0%, #f0fdf4 100%)' }}>
+          <div className="pricing-hero">
             <div className="pricing-hero-inner">
               <div className="pricing-hero-icon">
                 <Image 
@@ -121,21 +121,18 @@ export default function AboutScreen() {
                   resizeMode="contain"
                 />
               </div>
-              <h1 className="pricing-hero-title" style={{ color: DARK_GRAY }}>About WIHY</h1>
-              <p className="pricing-hero-subtitle" style={{ color: '#666' }}>
+              <h1 className="pricing-hero-title">About WIHY</h1>
+              <p className="pricing-hero-subtitle">
                 The World's Smartest Health Search Engine
               </p>
-              <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginTop: '16px' }}>
-                <span style={{ background: WIHY_GREEN, color: '#fff', padding: '6px 12px', borderRadius: '16px', fontSize: '12px', fontWeight: 600 }}>Health Search</span>
-                <span style={{ background: WIHY_GREEN, color: '#fff', padding: '6px 12px', borderRadius: '16px', fontSize: '12px', fontWeight: 600 }}>Evidence Based</span>
-              </div>
             </div>
           </div>
 
           {/* Mission Section */}
-          <section style={{ padding: '48px 24px', maxWidth: '800px', margin: '0 auto' }}>
-            <h2 style={{ fontSize: '24px', fontWeight: 700, color: DARK_GRAY, marginBottom: '16px', textAlign: 'center' }}>Our Mission</h2>
-            <p style={{ fontSize: '16px', color: '#666', lineHeight: 1.6, textAlign: 'center', marginBottom: '24px' }}>
+          <section className="pricing-section">
+            <p className="pricing-section-label">OUR MISSION</p>
+            <h2 className="pricing-section-title">Search Food Like You Search the Internet</h2>
+            <p style={{ fontSize: '16px', color: '#6b7280', lineHeight: 1.6, textAlign: 'center', marginBottom: '24px', maxWidth: '700px', marginLeft: 'auto', marginRight: 'auto' }}>
               Search, seek, and ask to understand what you eat through food and ingredient scanning. WIHY lets you search food the same way you search the internet, but with evidence instead of opinions.
             </p>
             <div style={{ textAlign: 'center' }}>
@@ -150,103 +147,95 @@ export default function AboutScreen() {
           </section>
 
           {/* Features Grid */}
-          <section style={{ padding: '48px 24px', background: '#f8fafc' }}>
-            <h2 style={{ fontSize: '24px', fontWeight: 700, color: DARK_GRAY, marginBottom: '32px', textAlign: 'center' }}>What WIHY Does</h2>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px', maxWidth: '1200px', margin: '0 auto' }}>
+          <section className="pricing-section pricing-section-alt">
+            <p className="pricing-section-label">WHAT WIHY DOES</p>
+            <h2 className="pricing-section-title">Intelligent Health Features</h2>
+            <div className="pricing-grid pricing-grid-3" style={{ maxWidth: '1200px', margin: '0 auto' }}>
               
               {/* Health Search */}
-              <div style={{ background: '#fff', borderRadius: '12px', padding: '24px', border: '1px solid #e5e7eb' }}>
-                <div style={{ width: '48px', height: '48px', background: '#e0f7e6', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px' }}>
-                  <svg viewBox="0 0 24 24" width="24" height="24" fill={WIHY_GREEN}>
+              <div className="pricing-card">
+                <div className="pricing-card-icon">
+                  <svg viewBox="0 0 24 24" width="28" height="28" fill="#1a73e8">
                     <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
                   </svg>
                 </div>
-                <h3 style={{ fontSize: '18px', fontWeight: 600, color: DARK_GRAY, marginBottom: '8px' }}>Health Search</h3>
-                <p style={{ fontSize: '14px', color: '#666', lineHeight: 1.5 }}>
-                  Ask health and nutrition questions and get research-backed answers. Powered by 35+ million scientific research articles.
-                </p>
+                <h3 className="pricing-card-name">Health Search</h3>
+                <p className="pricing-card-tagline">Ask health and nutrition questions and get research-backed answers. Powered by 35+ million scientific research articles.</p>
               </div>
 
               {/* Universal Scanning */}
-              <div style={{ background: '#fff', borderRadius: '12px', padding: '24px', border: '1px solid #e5e7eb' }}>
-                <div style={{ width: '48px', height: '48px', background: '#e0f7e6', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px' }}>
-                  <svg viewBox="0 0 24 24" width="24" height="24" fill={WIHY_GREEN}>
+              <div className="pricing-card">
+                <div className="pricing-card-icon">
+                  <svg viewBox="0 0 24 24" width="28" height="28" fill="#1a73e8">
                     <path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/>
                   </svg>
                 </div>
-                <h3 style={{ fontSize: '18px', fontWeight: 600, color: DARK_GRAY, marginBottom: '8px' }}>Universal Scanning</h3>
-                <p style={{ fontSize: '14px', color: '#666', lineHeight: 1.5 }}>
-                  Scan barcodes, take photos, upload ingredients, or import receipts. WIHY detects, verifies, and analyzes automatically.
-                </p>
+                <h3 className="pricing-card-name">Universal Scanning</h3>
+                <p className="pricing-card-tagline">Scan barcodes, take photos, upload ingredients, or import receipts. WIHY detects, verifies, and analyzes automatically.</p>
               </div>
 
               {/* Nutrition Analysis */}
-              <div style={{ background: '#fff', borderRadius: '12px', padding: '24px', border: '1px solid #e5e7eb' }}>
-                <div style={{ width: '48px', height: '48px', background: '#e0f7e6', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px' }}>
-                  <svg viewBox="0 0 24 24" width="24" height="24" fill={WIHY_GREEN}>
+              <div className="pricing-card">
+                <div className="pricing-card-icon">
+                  <svg viewBox="0 0 24 24" width="28" height="28" fill="#1a73e8">
                     <path d="M17 8C8 10 5.9 16.17 3.82 21.34l1.89.66.95-2.3c.48.17.98.3 1.34.3C19 20 22 3 22 3c-1 2-8 2.25-13 3.25S2 11.5 2 13.5s1.75 3.75 1.75 3.75C7 8 17 8 17 8z"/>
                   </svg>
                 </div>
-                <h3 style={{ fontSize: '18px', fontWeight: 600, color: DARK_GRAY, marginBottom: '8px' }}>Nutrition Analysis</h3>
-                <p style={{ fontSize: '14px', color: '#666', lineHeight: 1.5 }}>
-                  Understand nutrition in plain language. Analyze macros, micros, additives, processing level, and portion impact.
-                </p>
+                <h3 className="pricing-card-name">Nutrition Analysis</h3>
+                <p className="pricing-card-tagline">Understand nutrition in plain language. Analyze macros, micros, additives, processing level, and portion impact.</p>
               </div>
 
               {/* Predictive Insights */}
-              <div style={{ background: '#fff', borderRadius: '12px', padding: '24px', border: '1px solid #e5e7eb' }}>
-                <div style={{ width: '48px', height: '48px', background: '#e0f7e6', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px' }}>
-                  <svg viewBox="0 0 24 24" width="24" height="24" fill={WIHY_GREEN}>
+              <div className="pricing-card">
+                <div className="pricing-card-icon">
+                  <svg viewBox="0 0 24 24" width="28" height="28" fill="#1a73e8">
                     <path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/>
                   </svg>
                 </div>
-                <h3 style={{ fontSize: '18px', fontWeight: 600, color: DARK_GRAY, marginBottom: '8px' }}>Predictive Insights</h3>
-                <p style={{ fontSize: '14px', color: '#666', lineHeight: 1.5 }}>
-                  See where your habits are heading. Detect patterns, predict outcomes, and get early awareness of health shifts.
-                </p>
+                <h3 className="pricing-card-name">Predictive Insights</h3>
+                <p className="pricing-card-tagline">See where your habits are heading. Detect patterns, predict outcomes, and get early awareness of health shifts.</p>
               </div>
 
               {/* Fact Check */}
-              <div style={{ background: '#fff', borderRadius: '12px', padding: '24px', border: '1px solid #e5e7eb' }}>
-                <div style={{ width: '48px', height: '48px', background: '#e0f7e6', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px' }}>
-                  <svg viewBox="0 0 24 24" width="24" height="24" fill={WIHY_GREEN}>
+              <div className="pricing-card">
+                <div className="pricing-card-icon">
+                  <svg viewBox="0 0 24 24" width="28" height="28" fill="#1a73e8">
                     <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
                   </svg>
                 </div>
-                <h3 style={{ fontSize: '18px', fontWeight: 600, color: DARK_GRAY, marginBottom: '8px' }}>Fact Check</h3>
-                <p style={{ fontSize: '14px', color: '#666', lineHeight: 1.5 }}>
-                  Verify health claims with real evidence. See strength of evidence, level of certainty, and what research actually supports.
-                </p>
+                <h3 className="pricing-card-name">Fact Check</h3>
+                <p className="pricing-card-tagline">Verify health claims with real evidence. See strength of evidence, level of certainty, and what research actually supports.</p>
               </div>
 
               {/* Connected Platform */}
-              <div style={{ background: '#fff', borderRadius: '12px', padding: '24px', border: '1px solid #e5e7eb' }}>
-                <div style={{ width: '48px', height: '48px', background: '#e0f7e6', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px' }}>
-                  <svg viewBox="0 0 24 24" width="24" height="24" fill={WIHY_GREEN}>
+              <div className="pricing-card">
+                <div className="pricing-card-icon">
+                  <svg viewBox="0 0 24 24" width="28" height="28" fill="#1a73e8">
                     <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z"/>
                   </svg>
                 </div>
-                <h3 style={{ fontSize: '18px', fontWeight: 600, color: DARK_GRAY, marginBottom: '8px' }}>Connected Platform</h3>
-                <p style={{ fontSize: '14px', color: '#666', lineHeight: 1.5 }}>
-                  Progress tracking, nutrition, research, fitness, and coaching unified in one place for you and your family.
-                </p>
+                <h3 className="pricing-card-name">Connected Platform</h3>
+                <p className="pricing-card-tagline">Progress tracking, nutrition, research, fitness, and coaching unified in one place for you and your family.</p>
               </div>
             </div>
           </section>
 
           {/* CTA Section */}
-          <section style={{ padding: '48px 24px', textAlign: 'center' }}>
-            <h2 style={{ fontSize: '24px', fontWeight: 700, color: DARK_GRAY, marginBottom: '16px' }}>Experience WIHY Intelligence</h2>
-            <p style={{ fontSize: '16px', color: '#666', marginBottom: '24px', maxWidth: '500px', margin: '0 auto 24px' }}>
-              WIHY is in early access. Join the beta and be among the first to experience intelligent health search.
-            </p>
-            <button 
-              onClick={handleKickstarterPress}
-              className="pricing-btn pricing-btn-primary pricing-btn-lg"
-              type="button"
-            >
-              Join the WIHY Beta
-            </button>
+          <section className="pricing-section">
+            <div className="pricing-cta-box">
+              <svg viewBox="0 0 24 24" width="32" height="32" fill="#1a73e8">
+                <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+              </svg>
+              <h3>Experience WIHY Intelligence</h3>
+              <p>WIHY is in early access. Join the beta and be among the first to experience intelligent health search.</p>
+              <button 
+                onClick={handleKickstarterPress}
+                className="pricing-btn pricing-btn-primary pricing-btn-lg"
+                type="button"
+              >
+                Join the WIHY Beta
+              </button>
+            </div>
           </section>
 
           {/* Footer */}
