@@ -548,8 +548,8 @@
 
 .comparison-card:hover {
   transform: translateY(-5px);
-  border-color: #22c55e;
-  box-shadow: 0 12px 32px rgba(34, 197, 94, 0.25);
+  border-color: #fa5f06;
+  box-shadow: 0 12px 32px rgba(250, 95, 6, 0.25);
 }
 
 .comparison-card-header {
@@ -599,15 +599,19 @@
 }
 
 .comparison-wihy-box {
-  background: #f0fdf4;
+  background: #fff7ed;
   border-radius: 12px;
   padding: 18px;
   margin-top: auto;
-  border: 2px solid #86efac;
+  border: 2px solid #fed7aa;
 }
 
 .comparison-wihy-box .comparison-label {
-  display: none;
+  color: #ea580c;
+  font-weight: 800;
+  font-size: 13px;
+  margin-bottom: 8px;
+  display: block;
 }
 
 .comparison-wihy-box .comparison-value {
