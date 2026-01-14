@@ -564,8 +564,9 @@ export default function CameraScreen() {
             const metadata = result.metadata as any || {};
             const nutritionFacts = metadata.nutrition_facts || {};
             const nutritionAnalysis = metadata.nutrition_analysis || {};
-            const detectedFoods = metadata.detected_foods || [];
-            const detectedText = metadata.detected_text || [];
+            // NOTE: Jan 13, 2026 breaking change - detected_foods moved to analysis, not metadata
+            const detectedFoods = analysis.detected_foods || [];
+            const detectedText = analysis.detected_text || [];
             
             navigation.navigate('NutritionFacts', {
               foodItem: {
@@ -796,22 +797,26 @@ export default function CameraScreen() {
 
           if (result.success && result.analysis) {
             const { analysis } = result;
-            const metadata = (analysis as any).metadata || {};
-            const detectedText = (metadata as any).detected_text || [];
-            const productName = metadata.product_name || 'Product Label';
-            const charts = (analysis as any).charts || {};
-            const nutritionAnalysis = metadata.nutrition_analysis || {};
+            // NOTE: Jan 13, 2026 breaking change - greenwashing data is in analysis (not nested in metadata)
+            const greenwashingScore = analysis.greenwashing_score || 0;
+            const greenwashingFlags = analysis.greenwashing_flags || [];
+            const detectedClaims = analysis.detected_claims || [];
+            const detectedText = analysis.full_text || '';
+            const productName = analysis.product_name || 'Product Label';
+            const charts = (result as any).charts || {};
+            const recommendations = analysis.recommendations || [];
             
             // Navigate to results screen with full data
             navigation.navigate('NutritionFacts', {
               foodItem: {
                 name: productName,
-                brand: metadata.brand || '',
+                brand: analysis.brand || '',
                 image_url: result.image_url || photo.uri,
                 imageUrl: result.image_url || photo.uri,
                 capturedImage: photo.uri,
                 
                 // Label-specific data - pass the full analysis
+                // Jan 13, 2026: All greenwashing data is in analysis, not metadata
                 labelData: {
                   // Basic info
                   productName,
@@ -819,52 +824,51 @@ export default function CameraScreen() {
                   
                   // Detected content
                   detectedText: detectedText,
-                  detectedFoods: (metadata as any).detected_foods || [],
+                  detectedClaims: detectedClaims,
+                  greenwashingFlags: greenwashingFlags,
                   
-                  // Health scoring
-                  healthScore: metadata.health_score || 0,
-                  nutritionGrade: metadata.nutrition_grade || {},
-                  novaGroup: metadata.nova_group || 1,
-                  
-                  // Nutrition analysis details
-                  nutritionAnalysis: nutritionAnalysis,
-                  healthAlerts: nutritionAnalysis.health_alerts || [],
-                  positiveAspects: nutritionAnalysis.positive_aspects || [],
-                  areasOfConcern: nutritionAnalysis.areas_of_concern || [],
-                  servingRecommendations: nutritionAnalysis.serving_recommendations || {},
+                  // Greenwashing scoring
+                  greenwashingScore: greenwashingScore,
+                  sustainabilityScore: analysis.sustainability_score || 0,
+                  detectedCertifications: analysis.certifications || [],
+                  healthClaims: analysis.health_claims || [],
+                  ingredientsList: analysis.ingredients_list || [],
                   
                   // Charts
                   charts: charts,
                   
-                  // Full metadata for reference
-                  metadata: metadata,
+                  // Recommendations
+                  recommendations: recommendations,
+                  
+                  // Full analysis object
+                  analysis: analysis,
                 },
                 
-                // Display data (from API response if available)
-                calories: metadata.nutrition_facts?.calories || 0,
+                // Display data (greenwashing scoring)
+                health_score: greenwashingScore, // Use greenwashing score as proxy
+                grade: greenwashingScore > 50 ? 'C' : greenwashingScore > 25 ? 'B' : 'A',
+                sustainability: analysis.sustainability_score || 0,
                 servingSize: { amount: 100, unit: 'g' },
                 macros: {
-                  protein: metadata.nutrition_facts?.protein || 0,
-                  carbs: metadata.nutrition_facts?.carbohydrates || 0,
-                  fat: metadata.nutrition_facts?.fat || 0,
-                  fiber: metadata.nutrition_facts?.fiber || 0,
-                  sugar: metadata.nutrition_facts?.sugars || 0,
+                  protein: 0,
+                  carbs: 0,
+                  fat: 0,
+                  fiber: 0,
+                  sugar: 0,
                 },
                 
                 // Health info
-                health_score: metadata.health_score || 0,
-                grade: metadata.nutrition_grade?.grade || 'N/A',
                 analyzed: true,
-                askWihy: `Analyze the health claims on this ${productName}`,
+                askWihy: `Analyze the health claims and sustainability of ${productName}`,
                 
-                // Full analysis object
-                analysis: analysis,
+                // Full result object
+                scan_result: result,
               },
               context: {
                 sessionId: `label_${Date.now()}`,
                 timestamp: (result as any).timestamp || new Date().toISOString(),
                 scanType: 'label',
-                scan_id: (metadata as any).scan_id,
+                scan_id: result.scan_id,
               },
             });
           } else {

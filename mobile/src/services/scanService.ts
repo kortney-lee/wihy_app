@@ -364,6 +364,104 @@ class ScanService {
   }
 
   /**
+   * Scan a recipe image for ingredient and instruction extraction
+   * API v6.0: POST /api/scan/recipe
+   * Returns nested response structure with analysis object containing recipe details
+   * 
+   * @param imageUri - Image URI (URL or base64)
+   * @param userContext - Optional user context
+   * @returns Recipe scan result with ingredients, instructions, nutrition estimates
+   */
+  async scanRecipe(imageUri: string, userContext?: any): Promise<any> {
+    const startTime = Date.now();
+    const endpoint = `${this.baseUrl}/api/scan/recipe`;
+    
+    console.log('=== RECIPE SCAN API CALL ===');
+    console.log('Endpoint:', endpoint);
+    console.log('Image URI:', imageUri.substring(0, 50) + '...');
+    console.log('User Context:', userContext);
+    
+    try {
+      let imageData = imageUri;
+      if (!imageUri.startsWith('data:image')) {
+        console.log('Converting image to base64...');
+        imageData = await this.convertImageToBase64(imageUri);
+        console.log('Image converted, size:', imageData.length, 'chars');
+      }
+
+      const requestBody = {
+        image_url: imageData.substring(0, 100) + '... [truncated]',
+        user_context: {
+          userId: getDefaultUserContext().userId,
+          trackHistory: true,
+          ...userContext,
+        },
+      };
+      
+      console.log('Request Body (truncated image):', JSON.stringify(requestBody, null, 2));
+
+      const response = await fetchWithLogging(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'User-Agent': 'WIHY-Mobile/2.0.1',
+          'X-Client-Version': '2.0.1',
+          'X-Platform': 'react-native',
+        },
+        body: JSON.stringify({
+          image_url: imageData,
+          user_context: {
+            userId: getDefaultUserContext().userId,
+            trackHistory: true,
+            ...userContext,
+          },
+        }),
+      });
+
+      const responseTime = Date.now() - startTime;
+      console.log(`Response Status: ${response.status} (${responseTime}ms)`);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error(`Recipe scan HTTP error ${response.status}:`, errorText);
+        console.log('=== RECIPE SCAN FAILED ===');
+        throw new Error(`Failed to analyze recipe (${response.status})`);
+      }
+
+      const data = await response.json();
+      console.log('Response Data:', JSON.stringify(data, null, 2));
+      console.log('=== RECIPE SCAN SUCCESS ===');
+      
+      // API v6.0 returns nested structure with analysis object
+      // {
+      //   "success": true,
+      //   "scan_id": "scan_recipe_abc123",
+      //   "analysis": {
+      //     "recipe_title": "...",
+      //     "ingredients": [...],
+      //     "instructions": [...],
+      //     "servings": 6,
+      //     ...
+      //   },
+      //   "timestamp": "...",
+      //   "processing_time_ms": 3124
+      // }
+      return data;
+    } catch (error: any) {
+      const responseTime = Date.now() - startTime;
+      console.error('=== RECIPE SCAN ERROR ===');
+      console.error('Error after', responseTime, 'ms:', error);
+      console.error('Error message:', error.message);
+      console.error('Error stack:', error.stack);
+      return {
+        success: false,
+        error: error.message || 'Failed to scan recipe. Please ensure the image is clear and try again.',
+      };
+    }
+  }
+
+  /**
    * Scan a pill for identification
    */
   async scanPill(
