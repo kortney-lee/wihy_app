@@ -225,12 +225,17 @@
 }
 
 .pricing-card-popular {
-  border-color: #22c55e;
-  border-width: 2px;
+  border: 2px solid transparent;
+  background:
+    linear-gradient(#ffffff, #ffffff) padding-box,
+    linear-gradient(90deg, #fa5f06, #ffffff, #C0C0C0, #4cbb17, #1a73e8) border-box;
+  background-size: 100% 100%, 200% 100%;
+  animation: wiH-border-sweep 2.2s linear infinite;
 }
 
 .pricing-card-popular:hover {
-  border-color: #16a34a;
+  transform: translateY(-5px);
+  box-shadow: 0 12px 32px rgba(250, 95, 6, 0.25);
 }
 
 .pricing-card-vertical {
