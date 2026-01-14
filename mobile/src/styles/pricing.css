@@ -559,17 +559,17 @@
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
 }
 
-/* Stacked card positions - straight row, overlapping */
-.comparison-card:nth-child(1) { left: calc(50% - 450px); z-index: 1; opacity: 0.6; }
-.comparison-card:nth-child(2) { left: calc(50% - 400px); z-index: 2; opacity: 0.7; }
-.comparison-card:nth-child(3) { left: calc(50% - 350px); z-index: 3; opacity: 0.8; }
-.comparison-card:nth-child(4) { left: calc(50% - 300px); z-index: 4; opacity: 0.85; }
-.comparison-card:nth-child(5) { left: calc(50% - 180px); z-index: 10; opacity: 1; } /* Center/Focus */
-.comparison-card:nth-child(6) { left: calc(50% - 60px); z-index: 4; opacity: 0.85; }
-.comparison-card:nth-child(7) { left: calc(50% - 10px); z-index: 3; opacity: 0.8; }
-.comparison-card:nth-child(8) { left: calc(50% + 40px); z-index: 2; opacity: 0.7; }
-.comparison-card:nth-child(9) { left: calc(50% + 90px); z-index: 1; opacity: 0.6; }
-.comparison-card:nth-child(10) { left: calc(50% + 140px); z-index: 0; opacity: 0.5; }
+/* Stacked card positions - straight row, overlapping - MyFitnessPal on top */
+.comparison-card:nth-child(1) { left: calc(50% - 180px); z-index: 10; } /* MyFitnessPal - Top/Focus */
+.comparison-card:nth-child(2) { left: calc(50% - 450px); z-index: 1; }
+.comparison-card:nth-child(3) { left: calc(50% - 400px); z-index: 2; }
+.comparison-card:nth-child(4) { left: calc(50% - 350px); z-index: 3; }
+.comparison-card:nth-child(5) { left: calc(50% - 300px); z-index: 4; }
+.comparison-card:nth-child(6) { left: calc(50% - 60px); z-index: 4; }
+.comparison-card:nth-child(7) { left: calc(50% - 10px); z-index: 3; }
+.comparison-card:nth-child(8) { left: calc(50% + 40px); z-index: 2; }
+.comparison-card:nth-child(9) { left: calc(50% + 90px); z-index: 1; }
+.comparison-card:nth-child(10) { left: calc(50% + 140px); z-index: 0; }
 
 .comparison-card:hover {
   transform: translateY(-10px) scale(1.02);

@@ -144,6 +144,15 @@ const COMPARISON_DISCLAIMER =
 
 const COMPARISONS: ComparisonItem[] = [
   {
+    id: "myfitnesspal",
+    appName: "MyFitnessPal",
+    statedFocus: "Food and fitness tracking with a large database",
+    scopeNotes:
+      "Tracking/logging centric. Insights depend on what the user logs and reviews over time.",
+    wihyApproach:
+      "Turns inputs into contextual insights and generates individualized meal/workout recommendations.",
+  },
+  {
     id: "cal-ai",
     appName: "Cal AI",
     statedFocus: "Photo/barcode scanning for fast nutrition tracking",
@@ -160,15 +169,6 @@ const COMPARISONS: ComparisonItem[] = [
       "Score-based guidance. Deeper personalization and lifestyle planning are typically outside a scanner-first workflow.",
     wihyApproach:
       "Explains relevance to the individual and can generate personalized meal and workout recommendations using user inputs.",
-  },
-  {
-    id: "myfitnesspal",
-    appName: "MyFitnessPal",
-    statedFocus: "Food and fitness tracking with a large database",
-    scopeNotes:
-      "Tracking/logging centric. Insights depend on what the user logs and reviews over time.",
-    wihyApproach:
-      "Turns inputs into contextual insights and generates individualized meal/workout recommendations.",
   },
   {
     id: "cronometer",
