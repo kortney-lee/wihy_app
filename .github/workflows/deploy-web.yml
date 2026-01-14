@@ -123,9 +123,8 @@ jobs:
         WIHY_NATIVE_CLIENT_SECRET: ${{ secrets.WIHY_NATIVE_CLIENT_SECRET }}
         NODE_ENV: production
 
-    - name: Copy web assets (favicon, manifest, index.html)
+    - name: Copy web assets (favicon, manifest only - NOT index.html)
       run: |
-        cp web/index.html dist/index.html
         cp web/manifest.json dist/manifest.json
         cp assets/Favicon.png dist/assets/Favicon.png
 
