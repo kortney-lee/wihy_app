@@ -209,18 +209,19 @@
    ═══════════════════════════════════════════════════════════ */
 .pricing-card {
   background: #ffffff;
-  border: 1px solid #e5e7eb;
+  border: 2px solid #e5e7eb;
   border-radius: 16px;
   padding: 24px;
   display: flex;
   flex-direction: column;
   position: relative;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
 }
 
 .pricing-card:hover {
-  border-color: #d1d5db;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  transform: translateY(-5px);
+  border-color: #22c55e;
+  box-shadow: 0 12px 32px rgba(34, 197, 94, 0.25);
 }
 
 .pricing-card-popular {
@@ -547,8 +548,8 @@
 
 .comparison-card:hover {
   transform: translateY(-5px);
-  border-color: #fa5f06;
-  box-shadow: 0 12px 32px rgba(250, 95, 6, 0.25);
+  border-color: #22c55e;
+  box-shadow: 0 12px 32px rgba(34, 197, 94, 0.25);
 }
 
 .comparison-card-header {
@@ -567,11 +568,7 @@
 }
 
 .comparison-vs {
-  font-size: 12px;
-  font-weight: 700;
-  color: #fa5f06;
-  text-transform: uppercase;
-  letter-spacing: 1px;
+  display: none;
 }
 
 .comparison-card-body {
@@ -602,21 +599,22 @@
 }
 
 .comparison-wihy-box {
-  background: #fff7ed;
+  background: #f0fdf4;
   border-radius: 12px;
-  padding: 16px;
+  padding: 18px;
   margin-top: auto;
-  border: 2px solid #fed7aa;
+  border: 2px solid #86efac;
 }
 
 .comparison-wihy-box .comparison-label {
-  color: #ea580c;
-  font-weight: 800;
+  display: none;
 }
 
 .comparison-wihy-box .comparison-value {
   color: #000000;
   font-weight: 500;
+  font-size: 15px;
+  line-height: 1.7;
 }
 
 /* Disclaimer */

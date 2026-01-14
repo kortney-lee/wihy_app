@@ -557,7 +557,6 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
                   <div key={item.id} className="comparison-card">
                     <div className="comparison-card-header">
                       <span className="comparison-app-name">{item.appName}</span>
-                      <span className="comparison-vs">vs WiHY</span>
                     </div>
 
                     <div className="comparison-card-body">
@@ -572,7 +571,6 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
                       </div>
 
                       <div className="comparison-wihy-box">
-                        <span className="comparison-label">WiHY Approach</span>
                         <span className="comparison-value">{item.wihyApproach}</span>
                       </div>
                     </div>
@@ -778,42 +776,38 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
               key={item.id}
               style={{
                 backgroundColor: '#fff',
-                borderWidth: 1,
+                borderWidth: 2,
                 borderColor: '#e5e7eb',
                 borderRadius: 16,
                 padding: 16,
                 marginBottom: 12,
               }}
             >
-              <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10 }}>
-                <Text style={{ fontSize: 15, fontWeight: '800', color: '#111827' }}>{item.appName}</Text>
-                <Text style={{ fontSize: 12, fontWeight: '800', color: '#6b7280' }}>vs WiHY</Text>
+              <View style={{ marginBottom: 10 }}>
+                <Text style={{ fontSize: 18, fontWeight: '800', color: '#000000' }}>{item.appName}</Text>
               </View>
 
               <View style={{ borderTopWidth: 1, borderTopColor: '#f1f5f9', paddingTop: 10 }}>
-                <Text style={{ fontSize: 11, fontWeight: '800', color: '#64748b', marginBottom: 4 }}>
+                <Text style={{ fontSize: 11, fontWeight: '800', color: '#6b7280', marginBottom: 4 }}>
                   Their Stated Focus
                 </Text>
-                <Text style={{ fontSize: 13, color: '#111827', marginBottom: 10 }}>{item.statedFocus}</Text>
+                <Text style={{ fontSize: 14, color: '#000000', marginBottom: 10, lineHeight: 20 }}>{item.statedFocus}</Text>
 
-                <Text style={{ fontSize: 11, fontWeight: '800', color: '#64748b', marginBottom: 4 }}>
+                <Text style={{ fontSize: 11, fontWeight: '800', color: '#6b7280', marginBottom: 4 }}>
                   Scope Notes
                 </Text>
-                <Text style={{ fontSize: 13, color: '#111827', marginBottom: 12 }}>{item.scopeNotes}</Text>
+                <Text style={{ fontSize: 14, color: '#000000', marginBottom: 12, lineHeight: 20 }}>{item.scopeNotes}</Text>
 
                 <View
                   style={{
-                    backgroundColor: '#fff7ed',
-                    borderWidth: 1,
-                    borderColor: '#fed7aa',
+                    backgroundColor: '#f0fdf4',
+                    borderWidth: 2,
+                    borderColor: '#86efac',
                     borderRadius: 14,
-                    padding: 12,
+                    padding: 14,
                   }}
                 >
-                  <Text style={{ fontSize: 11, fontWeight: '900', color: '#9a3412', marginBottom: 4 }}>
-                    WiHY Approach
-                  </Text>
-                  <Text style={{ fontSize: 13, color: '#111827' }}>{item.wihyApproach}</Text>
+                  <Text style={{ fontSize: 15, color: '#000000', lineHeight: 22, fontWeight: '500' }}>{item.wihyApproach}</Text>
                 </View>
               </View>
             </View>
