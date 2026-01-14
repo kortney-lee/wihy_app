@@ -55,6 +55,7 @@ export default function Profile() {
   const [biometricsEnabled, setBiometricsEnabled] = useState(defaultPreferences.biometrics);
   const [darkModeEnabled, setDarkModeEnabled] = useState(defaultPreferences.darkMode);
   const [analyticsEnabled, setAnalyticsEnabled] = useState(defaultPreferences.analytics);
+  const [autoScanEnabled, setAutoScanEnabled] = useState(defaultPreferences.autoScan);
   const [isPremium, setIsPremium] = useState(false);
   const [loadingSubscription, setLoadingSubscription] = useState(false);
   const [showPlansModal, setShowPlansModal] = useState(false);
@@ -77,6 +78,7 @@ export default function Profile() {
     setBiometricsEnabled(prefs.biometrics ?? defaultPreferences.biometrics);
     setDarkModeEnabled(prefs.darkMode ?? defaultPreferences.darkMode);
     setAnalyticsEnabled(prefs.analytics ?? defaultPreferences.analytics);
+    setAutoScanEnabled(prefs.autoScan ?? defaultPreferences.autoScan);
   }, [user, userInfo.preferences, defaultPreferences]);
 
   const checkSubscriptionStatus = useCallback(async () => {
@@ -387,6 +389,18 @@ export default function Profile() {
           onToggle: async (value) => {
             setAnalyticsEnabled(value);
             await persistPreferences({ analytics: value });
+          },
+        },
+        {
+          id: 'auto-scan',
+          title: 'Auto Scan',
+          subtitle: autoScanEnabled ? 'Automatically scan barcodes' : 'Enable quick barcode scanning',
+          type: 'toggle' as const,
+          icon: 'barcode',
+          value: autoScanEnabled,
+          onToggle: async (value) => {
+            setAutoScanEnabled(value);
+            await persistPreferences({ autoScan: value });
           },
         },
       ],
