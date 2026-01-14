@@ -46,8 +46,8 @@ export default function AboutScreen() {
     }));
   };
 
-  const handleKickstarterPress = () => {
-    Linking.openURL('https://www.kickstarter.com/projects/wihy/wihy-a-new-way-to-explore-food-knowledge-and-choices');
+  const handleSubscribePress = () => {
+    Linking.openURL('https://wihy.ai/pricing');
   };
 
   const handlePrivacyPress = () => {
@@ -137,11 +137,11 @@ export default function AboutScreen() {
             </p>
             <div style={{ textAlign: 'center' }}>
               <button 
-                onClick={handleKickstarterPress}
+                onClick={handleSubscribePress}
                 className="pricing-btn pricing-btn-primary pricing-btn-lg"
                 type="button"
               >
-                Join the WIHY Beta
+                Get Started with WIHY
               </button>
             </div>
           </section>
@@ -227,13 +227,13 @@ export default function AboutScreen() {
                 <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
               </svg>
               <h3>Experience WIHY Intelligence</h3>
-              <p>WIHY is in early access. Join the beta and be among the first to experience intelligent health search.</p>
+              <p>Start your journey to understanding what you eat with evidence-based health insights.</p>
               <button 
-                onClick={handleKickstarterPress}
+                onClick={handleSubscribePress}
                 className="pricing-btn pricing-btn-primary pricing-btn-lg"
                 type="button"
               >
-                Join the WIHY Beta
+                Get Started Today
               </button>
             </div>
           </section>
@@ -361,7 +361,7 @@ export default function AboutScreen() {
           <Text style={styles.mainCTAText}>
             Search, seek, and ask to understand what you eat through food and ingredient scanning.
           </Text>
-          <CTAButton onPress={handleKickstarterPress} text="Join the WIHY Beta" />
+          <CTAButton onPress={handleSubscribePress} text="Get Started with WIHY" />
         </View>
 
         {/* Features */}
@@ -429,9 +429,9 @@ export default function AboutScreen() {
         <View style={styles.footerCTASection}>
           <Text style={styles.footerCTATitle}>Experience WIHY Intelligence</Text>
           <Text style={styles.footerCTASubtitle}>
-            WIHY is in early access. Join the beta today.
+            Start your journey to understanding what you eat.
           </Text>
-          <CTAButton onPress={handleKickstarterPress} text="Join the WIHY Beta" />
+          <CTAButton onPress={handleSubscribePress} text="Get Started Today" />
         </View>
 
         {/* Footer */}
