@@ -113,6 +113,8 @@
 
 .web-nav-item svg {
   flex-shrink: 0;
+  width: 24px;
+  height: 24px;
 }
 
 /* Nav item colors - matching mobile tab bar */
@@ -246,7 +248,7 @@
   align-items: center;
   justify-content: flex-start;
   min-height: 100vh;
-  padding-top: 25vh;
+  padding-top: 35vh;
   padding-left: 20px;
   padding-right: 20px;
   padding-bottom: 20px;
@@ -491,7 +493,7 @@
   }
   
   .web-search-landing {
-    padding-top: 20vh;
+    padding-top: 35vh;
     padding-left: 16px;
     padding-right: 16px;
   }
@@ -563,7 +565,7 @@
   }
   
   .web-search-landing {
-    padding-top: 18vh;
+    padding-top: 35vh;
     padding-left: 12px;
     padding-right: 12px;
   }
