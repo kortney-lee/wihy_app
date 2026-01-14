@@ -808,7 +808,7 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
                     padding: 14,
                   }}
                 >
-                  <Text style={{ fontSize: 13, fontWeight: '800', color: '#ea580c', marginBottom: 8 }}>
+                  <Text style={{ fontSize: 13, fontWeight: '800', color: '#000000', marginBottom: 8 }}>
                     WiHY Approach
                   </Text>
                   <Text style={{ fontSize: 15, color: '#000000', lineHeight: 22, fontWeight: '500' }}>{item.wihyApproach}</Text>
