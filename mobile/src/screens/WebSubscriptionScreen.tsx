@@ -281,13 +281,13 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
           </svg>
           <span>Home</span>
         </button>
-        <button onClick={() => navigation.navigate('Health')} className="web-nav-item nav-health" type="button">
+        <button onClick={() => navigation.navigate('Main')} className="web-nav-item nav-health" type="button">
           <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
             <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
           </svg>
           <span>Health</span>
         </button>
-        <button onClick={() => navigation.navigate('Chat')} className="web-nav-item nav-chat" type="button">
+        <button onClick={() => navigation.navigate('FullChat')} className="web-nav-item nav-chat" type="button">
           <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
             <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/>
           </svg>
@@ -420,7 +420,7 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
                   <ul className="pricing-features">
                     {plan.features.map((feature, index) => (
                       <li key={index} className="pricing-feature">
-                        <WebIcon name="checkmark-circle" size={18} color={colors.success} />
+                        <WebIcon name="checkmark-circle" size={18} color="#22c55e" />
                         <span>{feature}</span>
                       </li>
                     ))}
@@ -831,7 +831,7 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
             <View style={styles.featuresList}>
               {plan.features.map((feature, idx) => (
                 <View key={idx} style={styles.featureRow}>
-                  <Ionicons name="checkmark-circle" size={16} color={colors.success} />
+                  <Ionicons name="checkmark-circle" size={16} color="#22c55e" />
                   <Text style={styles.featureText}>{feature}</Text>
                 </View>
               ))}
