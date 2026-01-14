@@ -494,10 +494,10 @@
 }
 
 /* ═══════════════════════════════════════════════════════════
-   COMPARISON SECTION - Modern Card Layout
+   COMPARISON SECTION - Premium Card Layout (uKonnect Style)
    ═══════════════════════════════════════════════════════════ */
 .comparison-section {
-  background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+  background: #ffffff;
   padding: 64px 24px;
 }
 
@@ -514,14 +514,14 @@
 .comparison-header h2 {
   font-size: 32px;
   font-weight: 800;
-  color: #1f2937;
+  color: #000000;
   margin: 0 0 16px;
   letter-spacing: -0.5px;
 }
 
 .comparison-header p {
   font-size: 18px;
-  color: #6b7280;
+  color: #333333;
   max-width: 600px;
   margin: 0 auto;
   line-height: 1.6;
@@ -531,25 +531,24 @@
 .comparison-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-  gap: 20px;
+  gap: 24px;
 }
 
-/* Individual Comparison Card */
+/* Individual Comparison Card - Premium Style */
 .comparison-card {
   background: #ffffff;
   border-radius: 16px;
-  padding: 24px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
-  border: 1px solid #e5e7eb;
-  transition: all 0.2s ease;
+  padding: 28px;
+  border: 2px solid #e5e7eb;
+  transition: all 0.3s ease;
   display: flex;
   flex-direction: column;
 }
 
 .comparison-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-  border-color: #d1d5db;
+  transform: translateY(-5px);
+  border-color: #fa5f06;
+  box-shadow: 0 12px 32px rgba(250, 95, 6, 0.25);
 }
 
 .comparison-card-header {
@@ -562,15 +561,15 @@
 }
 
 .comparison-app-name {
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 700;
-  color: #1f2937;
+  color: #000000;
 }
 
 .comparison-vs {
   font-size: 12px;
-  font-weight: 600;
-  color: #9ca3af;
+  font-weight: 700;
+  color: #fa5f06;
   text-transform: uppercase;
   letter-spacing: 1px;
 }
@@ -593,29 +592,30 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.8px;
-  color: #9ca3af;
+  color: #6b7280;
 }
 
 .comparison-value {
   font-size: 14px;
   line-height: 1.6;
-  color: #4b5563;
+  color: #000000;
 }
 
 .comparison-wihy-box {
-  background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+  background: #fff7ed;
   border-radius: 12px;
   padding: 16px;
   margin-top: auto;
-  border: 1px solid #a7f3d0;
+  border: 2px solid #fed7aa;
 }
 
 .comparison-wihy-box .comparison-label {
-  color: #059669;
+  color: #ea580c;
+  font-weight: 800;
 }
 
 .comparison-wihy-box .comparison-value {
-  color: #065f46;
+  color: #000000;
   font-weight: 500;
 }
 
@@ -626,18 +626,18 @@
   padding: 20px 24px;
   background: #ffffff;
   border-radius: 12px;
-  border: 1px solid #e5e7eb;
+  border: 2px solid #e5e7eb;
 }
 
 .comparison-disclaimer p {
   font-size: 13px;
-  color: #6b7280;
+  color: #333333;
   margin: 0;
   line-height: 1.7;
 }
 
 .comparison-disclaimer strong {
-  color: #374151;
+  color: #fa5f06;
 }
 
 /* Mobile Responsive */
