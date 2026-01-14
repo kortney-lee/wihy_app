@@ -566,12 +566,12 @@ export default function CameraScreen() {
             const nutritionAnalysis = metadata.nutrition_analysis || {};
             // NOTE: Jan 13, 2026 breaking change - detected_foods moved to analysis, not metadata
             const detectedFoods = analysis.detected_foods || [];
-            const detectedText = analysis.detected_text || [];
+            const detectedText = (analysis as any).detected_text || [];
             
             navigation.navigate('NutritionFacts', {
               foodItem: {
                 // Product Information
-                name: detectedFoods[0]?.name || metadata.product_name || 'Food Item',
+                name: detectedFoods[0] || metadata.product_name || 'Food Item',
                 brand: metadata.brand,
                 categories: ['Food Photo Analysis'],
                 
@@ -630,7 +630,7 @@ export default function CameraScreen() {
                 nova_group: metadata.nova_group || 1,
                 
                 // Chat Integration
-                askWihy: `Tell me about the nutritional value of this ${detectedFoods[0]?.name || 'food'}`,
+                askWihy: `Tell me about the nutritional value of this ${detectedFoods[0] || 'food'}`,
                 
                 // Full analysis data
                 analysis: analysis,

@@ -137,6 +137,7 @@ type ComparisonItem = {
   statedFocus: string;
   scopeNotes: string;
   wihyApproach: string;
+  color: string;
 };
 
 const COMPARISON_DISCLAIMER =
@@ -151,6 +152,7 @@ const COMPARISONS: ComparisonItem[] = [
       "Tracking/logging centric. Insights depend on what the user logs and reviews over time.",
     wihyApproach:
       "Turns inputs into contextual insights and generates individualized meal/workout recommendations.",
+    color: "#0099FF",
   },
   {
     id: "cal-ai",
@@ -160,6 +162,7 @@ const COMPARISONS: ComparisonItem[] = [
       "Primarily designed for tracking. Ingredient processing context and individualized planning may not be central to the core workflow.",
     wihyApproach:
       "Adds ingredient + processing context and can generate individualized meals and workouts based on the user's goals, preferences, and constraints.",
+    color: "#FF6B35",
   },
   {
     id: "yuka",
@@ -169,6 +172,7 @@ const COMPARISONS: ComparisonItem[] = [
       "Score-based guidance. Deeper personalization and lifestyle planning are typically outside a scanner-first workflow.",
     wihyApproach:
       "Explains relevance to the individual and can generate personalized meal and workout recommendations using user inputs.",
+    color: "#4CAF50",
   },
   {
     id: "cronometer",
@@ -178,6 +182,7 @@ const COMPARISONS: ComparisonItem[] = [
       "Designed for depth and precision; typically benefits from consistent entry and review.",
     wihyApproach:
       "Automates interpretation and connects nutrition patterns to behavior and lifestyle context.",
+    color: "#9C27B0",
   },
   {
     id: "lifesum",
@@ -187,6 +192,7 @@ const COMPARISONS: ComparisonItem[] = [
       "Plan-and-tracking oriented; explanation depth varies by feature set and content model.",
     wihyApproach:
       "Adds research-informed explanations and generates recommendations based on user-specific constraints.",
+    color: "#00BCD4",
   },
   {
     id: "noom",
@@ -196,6 +202,7 @@ const COMPARISONS: ComparisonItem[] = [
       "Curriculum/behavior oriented; nutrition depth and outputs vary by program design.",
     wihyApproach:
       "Integrates behavior signals with food/ingredient context and produces individualized meal and workout recommendations.",
+    color: "#FF9800",
   },
   {
     id: "fitbit",
@@ -205,6 +212,7 @@ const COMPARISONS: ComparisonItem[] = [
       "Wearable-first experience; food insights are typically part of a broader activity platform.",
     wihyApproach:
       "Acts as an interpretation layer across food + activity and generates user-specific plans.",
+    color: "#00D4AA",
   },
   {
     id: "apple-health",
@@ -214,6 +222,7 @@ const COMPARISONS: ComparisonItem[] = [
       "Primarily aggregates and displays data; recommendations depend on connected apps and sources.",
     wihyApproach:
       "Interprets patterns and offers individualized meal/workout recommendations based on user inputs and connected data where available.",
+    color: "#E91E63",
   },
   {
     id: "samsung-food",
@@ -223,6 +232,7 @@ const COMPARISONS: ComparisonItem[] = [
       "Cooking and meal planning oriented; health-intelligence depth depends on recipe metadata and integrations.",
     wihyApproach:
       "Adds ingredient/processing context and tailors recommendations to the individual.",
+    color: "#3F51B5",
   },
   {
     id: "appediet",
@@ -232,6 +242,7 @@ const COMPARISONS: ComparisonItem[] = [
       "Logging/scanning oriented; broader coaching, behavior, and environment workflows may not be central to the core product design.",
     wihyApproach:
       "Connects food + behavior + activity and generates individualized meals and workouts based on user-specific inputs.",
+    color: "#FFEB3B",
   },
 ];
 
@@ -555,8 +566,8 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
               <div className="comparison-grid">
                 {COMPARISONS.map((item) => (
                   <div key={item.id} className="comparison-card">
-                    <div className="comparison-card-header">
-                      <span className="comparison-app-name">{item.appName}</span>
+                    <div className="comparison-card-header" style={{ borderBottomColor: item.color }}>
+                      <span className="comparison-app-name" style={{ color: item.color }}>{item.appName}</span>
                     </div>
 
                     <div className="comparison-card-body">
