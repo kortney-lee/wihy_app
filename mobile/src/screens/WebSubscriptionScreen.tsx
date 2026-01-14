@@ -571,6 +571,7 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
                       </div>
 
                       <div className="comparison-wihy-box">
+                        <span className="comparison-label">WiHY Approach</span>
                         <span className="comparison-value">{item.wihyApproach}</span>
                       </div>
                     </div>
@@ -800,13 +801,16 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
 
                 <View
                   style={{
-                    backgroundColor: '#f0fdf4',
+                    backgroundColor: '#fff7ed',
                     borderWidth: 2,
-                    borderColor: '#86efac',
+                    borderColor: '#fed7aa',
                     borderRadius: 14,
                     padding: 14,
                   }}
                 >
+                  <Text style={{ fontSize: 13, fontWeight: '800', color: '#ea580c', marginBottom: 8 }}>
+                    WiHY Approach
+                  </Text>
                   <Text style={{ fontSize: 15, color: '#000000', lineHeight: 22, fontWeight: '500' }}>{item.wihyApproach}</Text>
                 </View>
               </View>
