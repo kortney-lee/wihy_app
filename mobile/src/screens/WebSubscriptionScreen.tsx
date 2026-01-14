@@ -149,29 +149,29 @@ const COMPARISONS: ComparisonItem[] = [
     appName: "MyFitnessPal",
     statedFocus: "Food and fitness tracking with a large database",
     scopeNotes:
-      "Tracking/logging centric. Insights depend on what the user logs and reviews over time.",
+      "Calorie counter and macro tracker. Users manually log meals and exercises. Offers community support and barcode scanning.",
     wihyApproach:
-      "Turns inputs into contextual insights and generates individualized meal/workout recommendations.",
+      "Automatically generates personalized meal plans AND workout programs based on your goals. Syncs nutrition with fitness (adjusts calories on workout days, recommends post-workout meals). Evidence-based insights from 35+ million research articles and over 4 million things we know about food.",
     color: "#0099FF",
   },
   {
     id: "cal-ai",
     appName: "Cal AI",
-    statedFocus: "Photo/barcode scanning for fast nutrition tracking",
+    statedFocus: "Photo-based calorie and macro tracking",
     scopeNotes:
-      "Primarily designed for tracking. Ingredient processing context and individualized planning may not be central to the core workflow.",
+      "Uses computer vision to estimate calories from food photos. Focused on quick logging and tracking.",
     wihyApproach:
-      "Adds ingredient + processing context and can generate individualized meals and workouts based on the user's goals, preferences, and constraints.",
+      "Scans barcodes AND photos, plus explains ingredient processing (NOVA groups, additives). Generates individualized meal plans and workouts. Connects nutrition patterns to behavior and lifestyle context.",
     color: "#FF6B35",
   },
   {
     id: "yuka",
     appName: "Yuka",
-    statedFocus: "Product scoring based on nutrition-related factors and ingredients",
+    statedFocus: "Product scoring based on nutrition and ingredient analysis",
     scopeNotes:
-      "Score-based guidance. Deeper personalization and lifestyle planning are typically outside a scanner-first workflow.",
+      "Scans products and provides health scores. Recommends healthier alternatives. Focus is on product-level evaluation.",
     wihyApproach:
-      "Explains relevance to the individual and can generate personalized meal and workout recommendations using user inputs.",
+      "Goes beyond scores—explains WHY ingredients matter to YOU based on your health profile. Generates meal plans and workouts tailored to individual constraints and goals. Backed by research, not just ratings.",
     color: "#4CAF50",
   },
   {
@@ -179,69 +179,69 @@ const COMPARISONS: ComparisonItem[] = [
     appName: "Cronometer",
     statedFocus: "Detailed nutrient tracking with emphasis on micronutrients",
     scopeNotes:
-      "Designed for depth and precision; typically benefits from consistent entry and review.",
+      "Comprehensive nutrition database tracking 84+ micronutrients. Popular with biohackers and precision nutrition enthusiasts.",
     wihyApproach:
-      "Automates interpretation and connects nutrition patterns to behavior and lifestyle context.",
+      "Automates interpretation of nutrition data and connects it to behavior patterns. Generates personalized meal plans and workouts. Predicts health trends based on your patterns—no manual analysis needed.",
     color: "#9C27B0",
   },
   {
     id: "lifesum",
     appName: "Lifesum",
-    statedFocus: "Healthy eating plans, tracking, and recipes",
+    statedFocus: "Diet plans, calorie counting, and macro tracking",
     scopeNotes:
-      "Plan-and-tracking oriented; explanation depth varies by feature set and content model.",
+      "Offers pre-made diet plans (keto, Mediterranean, etc.) and recipe suggestions. Includes barcode scanner and meal logging.",
     wihyApproach:
-      "Adds research-informed explanations and generates recommendations based on user-specific constraints.",
+      "Creates meal plans from scratch based on YOUR constraints (dietary restrictions, calorie targets, cooking skill). Generates workouts too. Combines food + fitness + behavior for comprehensive health intelligence.",
     color: "#00BCD4",
   },
   {
     id: "noom",
     appName: "Noom",
-    statedFocus: "Behavior-change program with lessons and tracking tools",
+    statedFocus: "Psychology-based weight loss program with coaching",
     scopeNotes:
-      "Curriculum/behavior oriented; nutrition depth and outputs vary by program design.",
+      "Structured curriculum with daily lessons. Assigns human coaches. Uses color-coded food system (green, yellow, red).",
     wihyApproach:
-      "Integrates behavior signals with food/ingredient context and produces individualized meal and workout recommendations.",
+      "Integrates behavior insights with food scanning and ingredient analysis. Generates personalized meal plans AND workout programs based on your goals. Research-backed answers from 35+ million scientific articles.",
     color: "#FF9800",
   },
   {
     id: "fitbit",
     appName: "Fitbit",
-    statedFocus: "Activity and wearable ecosystem with optional nutrition logging",
+    statedFocus: "Activity tracking and wearable devices",
     scopeNotes:
-      "Wearable-first experience; food insights are typically part of a broader activity platform.",
+      "Tracks steps, heart rate, sleep, and exercise. Offers basic food logging. Strength is in activity and biometric tracking.",
     wihyApproach:
-      "Acts as an interpretation layer across food + activity and generates user-specific plans.",
+      "Acts as an intelligence layer across food AND activity data. Generates personalized meal plans synced with workout programs (adjusts nutrition on training vs rest days). Explains how food impacts fitness performance.",
     color: "#00D4AA",
   },
   {
     id: "apple-health",
     appName: "Apple Health",
-    statedFocus: "Health data aggregation, trends, and highlights",
+    statedFocus: "Health data aggregation and dashboard",
     scopeNotes:
-      "Primarily aggregates and displays data; recommendations depend on connected apps and sources.",
+      "Centralizes health data from various apps and devices. Displays trends and summaries. Recommendations come from connected third-party apps.",
     wihyApproach:
-      "Interprets patterns and offers individualized meal/workout recommendations based on user inputs and connected data where available.",
+      "Interprets health data patterns and generates actionable insights. Creates personalized meal plans AND workout programs. Scans food with camera, explains ingredient processing, and connects it all to your health trends.",
     color: "#E91E63",
   },
   {
     id: "samsung-food",
     appName: "Samsung Food",
-    statedFocus: "Recipes, meal planning, and shopping workflows",
+    statedFocus: "Recipe discovery and meal planning",
     scopeNotes:
-      "Cooking and meal planning oriented; health-intelligence depth depends on recipe metadata and integrations.",
+      "Offers recipes, grocery lists, and meal planning tools. Integrates with Samsung smart appliances. Focus is on cooking and recipes.",
     wihyApproach:
-      "Adds ingredient/processing context and tailors recommendations to the individual.",
+      "Generates custom meal plans based on your goals, dietary needs, and preferences. Adds ingredient processing context (NOVA groups, additives). Creates workout programs too—combines nutrition + fitness intelligence.",
     color: "#3F51B5",
   },
   {
     id: "appediet",
     appName: "Appediet",
-    statedFocus: "AI food scanning and logging for calories and nutrition estimates",
+    statedFocus: "Photo-based food recognition and calorie tracking",
     scopeNotes:
-      "Logging/scanning oriented; broader coaching, behavior, and environment workflows may not be central to the core product design.",
+      "Uses image recognition to identify food and estimate calories. Designed for quick meal logging without manual entry.",
     wihyApproach:
-      "Connects food + behavior + activity and generates individualized meals and workouts based on user-specific inputs.",
+      "Scans food AND generates personalized meal plans + workout programs. Connects food, behavior, and activity patterns. Explains ingredient processing and health impacts. Backed by 35+ million research articles—not just calorie estimates.",
     color: "#FFEB3B",
   },
 ];

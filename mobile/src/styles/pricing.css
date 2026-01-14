@@ -555,22 +555,22 @@
   display: flex;
   flex-direction: column;
   position: absolute;
-  width: 400px;
-  min-height: 380px;
+  width: 480px;
+  height: 480px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
 }
 
 /* Stacked card positions - spread across full width, left card on top */
-.comparison-card:nth-child(1) { left: 0%; z-index: 10; } /* MyFitnessPal - Top/Front */
-.comparison-card:nth-child(2) { left: 7%; z-index: 9; }
-.comparison-card:nth-child(3) { left: 14%; z-index: 8; }
-.comparison-card:nth-child(4) { left: 21%; z-index: 7; }
-.comparison-card:nth-child(5) { left: 28%; z-index: 6; }
-.comparison-card:nth-child(6) { left: 35%; z-index: 5; }
-.comparison-card:nth-child(7) { left: 42%; z-index: 4; }
-.comparison-card:nth-child(8) { left: 49%; z-index: 3; }
-.comparison-card:nth-child(9) { left: 56%; z-index: 2; }
-.comparison-card:nth-child(10) { left: 63%; z-index: 1; }
+.comparison-card:nth-child(1) { left: -5%; z-index: 10; } /* MyFitnessPal - Top/Front */
+.comparison-card:nth-child(2) { left: 2%; z-index: 9; }
+.comparison-card:nth-child(3) { left: 9%; z-index: 8; }
+.comparison-card:nth-child(4) { left: 16%; z-index: 7; }
+.comparison-card:nth-child(5) { left: 23%; z-index: 6; }
+.comparison-card:nth-child(6) { left: 30%; z-index: 5; }
+.comparison-card:nth-child(7) { left: 37%; z-index: 4; }
+.comparison-card:nth-child(8) { left: 44%; z-index: 3; }
+.comparison-card:nth-child(9) { left: 51%; z-index: 2; }
+.comparison-card:nth-child(10) { left: 58%; z-index: 1; }
 
 .comparison-card:hover {
   transform: translateY(-10px) scale(1.02);
@@ -661,7 +661,7 @@
 
 .comparison-wihy-box .comparison-value {
   color: #1f2937;
-  font-weight: 600;
+  font-weight: 400;
   font-size: 15px;
   line-height: 1.7;
 }

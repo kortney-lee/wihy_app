@@ -1,14 +1,12 @@
 # Quick Development Build Script
-# Builds React app and syncs to mobile WITHOUT opening Android Studio
+# Starts Expo development server in mobile directory
 # Useful for iterative development
 
-Write-Host "⚡ Quick build for mobile testing..." -ForegroundColor Cyan
+Write-Host "⚡ Starting Expo development server..." -ForegroundColor Cyan
 
-# Build and sync
-Set-Location client
-npm run build
-Set-Location ..\mobile
-npx cap sync android
+# Navigate to mobile and start Expo
+Set-Location mobile
+npx expo start
 Set-Location ..
 
-Write-Host "✅ Build synced! Now run the app from Android Studio." -ForegroundColor Green
+Write-Host "✅ Expo server started!" -ForegroundColor Green

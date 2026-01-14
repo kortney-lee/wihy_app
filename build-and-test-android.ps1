@@ -4,28 +4,26 @@
 Write-Host "🏗️  Building WIHY for Android..." -ForegroundColor Cyan
 Write-Host ""
 
-# Step 1: Build React app
-Write-Host "📦 Step 1: Building React production bundle..." -ForegroundColor Yellow
-Set-Location client
-npm run build
+# Step 1: Navigate to mobile directory
+Write-Host "📱 Step 1: Navigating to mobile directory..." -ForegroundColor Yellow
+Set-Location mobile
 
 if ($LASTEXITCODE -ne 0) {
-    Write-Host "❌ React build failed!" -ForegroundColor Red
+    Write-Host "❌ Failed to navigate to mobile directory!" -ForegroundColor Red
     exit 1
 }
-Write-Host "✅ React build complete!" -ForegroundColor Green
+Write-Host "✅ Directory set!" -ForegroundColor Green
 Write-Host ""
 
-# Step 2: Sync to Android
-Write-Host "🔄 Step 2: Syncing to Android native project..." -ForegroundColor Yellow
-Set-Location ..\mobile
-npx cap sync android
+# Step 2: Start Expo development server
+Write-Host "🚀 Step 2: Starting Expo development server..." -ForegroundColor Yellow
+npx expo start
 
 if ($LASTEXITCODE -ne 0) {
-    Write-Host "❌ Capacitor sync failed!" -ForegroundColor Red
+    Write-Host "❌ Expo start failed!" -ForegroundColor Red
     exit 1
 }
-Write-Host "✅ Sync complete!" -ForegroundColor Green
+Write-Host "✅ Expo server started!" -ForegroundColor Green
 Write-Host ""
 
 # Step 3: Open in Android Studio

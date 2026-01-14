@@ -251,7 +251,22 @@ class HealthDataService {
         return false;
       }
 
+      // Check if we already have permissions (avoid the uninitialized delegate crash)
+      try {
+        const grantedPermissions = await HealthConnectModule.getGrantedPermissions();
+        if (grantedPermissions && grantedPermissions.length > 0) {
+          console.log('[HealthDataService] Health Connect already has permissions:', grantedPermissions.length);
+          this.isInitialized = true;
+          this.hasPermissions = true;
+          return true;
+        }
+      } catch (permCheckError) {
+        console.log('[HealthDataService] Could not check existing permissions:', permCheckError);
+      }
+
       // Request permissions for all data types
+      // Note: This may fail if the Activity result launcher is not initialized
+      // The user should open Health Connect settings manually in this case
       const permissions = [
         { accessType: 'read' as const, recordType: 'Steps' as const },
         { accessType: 'read' as const, recordType: 'Distance' as const },
@@ -262,15 +277,28 @@ class HealthDataService {
         { accessType: 'read' as const, recordType: 'ExerciseSession' as const },
       ];
 
-      const granted = await HealthConnectModule.requestPermission(permissions);
-      
-      if (granted) {
-        console.log('[HealthDataService] Health Connect permissions granted');
-        this.isInitialized = true;
-        this.hasPermissions = true;
-        return true;
-      } else {
-        console.log('[HealthDataService] Health Connect permissions denied');
+      try {
+        const granted = await HealthConnectModule.requestPermission(permissions);
+        
+        if (granted) {
+          console.log('[HealthDataService] Health Connect permissions granted');
+          this.isInitialized = true;
+          this.hasPermissions = true;
+          return true;
+        } else {
+          console.log('[HealthDataService] Health Connect permissions denied');
+          this.isInitialized = true;
+          this.hasPermissions = false;
+          return false;
+        }
+      } catch (permError: any) {
+        // Handle the UninitializedPropertyAccessException gracefully
+        if (permError?.message?.includes('lateinit') || permError?.message?.includes('requestPermission has not been initialized')) {
+          console.log('[HealthDataService] Health Connect permission delegate not initialized - this is expected in development builds');
+          console.log('[HealthDataService] User should grant permissions via Health Connect app settings');
+        } else {
+          console.error('[HealthDataService] Health Connect permission request failed:', permError);
+        }
         this.isInitialized = true;
         this.hasPermissions = false;
         return false;
