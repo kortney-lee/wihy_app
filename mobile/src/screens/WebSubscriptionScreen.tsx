@@ -571,7 +571,7 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
                       </div>
 
                       <div className="comparison-wihy-box">
-                        <span className="comparison-label">WiHY Approach</span>
+                        <span className="comparison-label">WiHY Delivers</span>
                         <span className="comparison-value">{item.wihyApproach}</span>
                       </div>
                     </div>
@@ -809,7 +809,7 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
                   }}
                 >
                   <Text style={{ fontSize: 13, fontWeight: '800', color: '#000000', marginBottom: 8 }}>
-                    WiHY Approach
+                    WiHY Delivers
                   </Text>
                   <Text style={{ fontSize: 15, color: '#000000', lineHeight: 22, fontWeight: '500' }}>{item.wihyApproach}</Text>
                 </View>
