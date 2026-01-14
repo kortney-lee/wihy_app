@@ -130,6 +130,111 @@ const CONSUMER_PLANS = [
   },
 ];
 
+// Comparison data for legal-safe copy
+type ComparisonItem = {
+  id: string;
+  appName: string;
+  statedFocus: string;
+  scopeNotes: string;
+  wihyApproach: string;
+};
+
+const COMPARISON_DISCLAIMER =
+  "Comparison reflects each product's publicly stated primary focus and typical use. Features may vary by plan, region, and updates. This is not a comprehensive feature audit.";
+
+const COMPARISONS: ComparisonItem[] = [
+  {
+    id: "cal-ai",
+    appName: "Cal AI",
+    statedFocus: "Photo/barcode scanning for fast nutrition tracking",
+    scopeNotes:
+      "Primarily designed for tracking. Ingredient processing context and individualized planning may not be central to the core workflow.",
+    wihyApproach:
+      "Adds ingredient + processing context and can generate individualized meals and workouts based on the user's goals, preferences, and constraints.",
+  },
+  {
+    id: "yuka",
+    appName: "Yuka",
+    statedFocus: "Product scoring based on nutrition-related factors and ingredients",
+    scopeNotes:
+      "Score-based guidance. Deeper personalization and lifestyle planning are typically outside a scanner-first workflow.",
+    wihyApproach:
+      "Explains relevance to the individual and can generate personalized meal and workout recommendations using user inputs.",
+  },
+  {
+    id: "myfitnesspal",
+    appName: "MyFitnessPal",
+    statedFocus: "Food and fitness tracking with a large database",
+    scopeNotes:
+      "Tracking/logging centric. Insights depend on what the user logs and reviews over time.",
+    wihyApproach:
+      "Turns inputs into contextual insights and generates individualized meal/workout recommendations.",
+  },
+  {
+    id: "cronometer",
+    appName: "Cronometer",
+    statedFocus: "Detailed nutrient tracking with emphasis on micronutrients",
+    scopeNotes:
+      "Designed for depth and precision; typically benefits from consistent entry and review.",
+    wihyApproach:
+      "Automates interpretation and connects nutrition patterns to behavior and lifestyle context.",
+  },
+  {
+    id: "lifesum",
+    appName: "Lifesum",
+    statedFocus: "Healthy eating plans, tracking, and recipes",
+    scopeNotes:
+      "Plan-and-tracking oriented; explanation depth varies by feature set and content model.",
+    wihyApproach:
+      "Adds research-informed explanations and generates recommendations based on user-specific constraints.",
+  },
+  {
+    id: "noom",
+    appName: "Noom",
+    statedFocus: "Behavior-change program with lessons and tracking tools",
+    scopeNotes:
+      "Curriculum/behavior oriented; nutrition depth and outputs vary by program design.",
+    wihyApproach:
+      "Integrates behavior signals with food/ingredient context and produces individualized meal and workout recommendations.",
+  },
+  {
+    id: "fitbit",
+    appName: "Fitbit",
+    statedFocus: "Activity and wearable ecosystem with optional nutrition logging",
+    scopeNotes:
+      "Wearable-first experience; food insights are typically part of a broader activity platform.",
+    wihyApproach:
+      "Acts as an interpretation layer across food + activity and generates user-specific plans.",
+  },
+  {
+    id: "apple-health",
+    appName: "Apple Health",
+    statedFocus: "Health data aggregation, trends, and highlights",
+    scopeNotes:
+      "Primarily aggregates and displays data; recommendations depend on connected apps and sources.",
+    wihyApproach:
+      "Interprets patterns and offers individualized meal/workout recommendations based on user inputs and connected data where available.",
+  },
+  {
+    id: "samsung-food",
+    appName: "Samsung Food",
+    statedFocus: "Recipes, meal planning, and shopping workflows",
+    scopeNotes:
+      "Cooking and meal planning oriented; health-intelligence depth depends on recipe metadata and integrations.",
+    wihyApproach:
+      "Adds ingredient/processing context and tailors recommendations to the individual.",
+  },
+  {
+    id: "appediet",
+    appName: "Appediet",
+    statedFocus: "AI food scanning and logging for calories and nutrition estimates",
+    scopeNotes:
+      "Logging/scanning oriented; broader coaching, behavior, and environment workflows may not be central to the core product design.",
+    wihyApproach:
+      "Connects food + behavior + activity and generates individualized meals and workouts based on user-specific inputs.",
+  },
+];
+
 type SubscriptionScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Subscription'>;
 
 interface Props {
@@ -448,229 +553,35 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
               </div>
               
               <div className="comparison-grid">
-                {/* Cal AI */}
-                <div className="comparison-card">
-                  <div className="comparison-card-header">
-                    <span className="comparison-app-name">Cal AI</span>
-                    <span className="comparison-vs">vs WiHY</span>
-                  </div>
-                  <div className="comparison-card-body">
-                    <div className="comparison-row">
-                      <span className="comparison-label">Their Focus</span>
-                      <span className="comparison-value">Photo/barcode scanning for fast calorie & nutrient tracking</span>
+                {COMPARISONS.map((item) => (
+                  <div key={item.id} className="comparison-card">
+                    <div className="comparison-card-header">
+                      <span className="comparison-app-name">{item.appName}</span>
+                      <span className="comparison-vs">vs WiHY</span>
                     </div>
-                    <div className="comparison-row">
-                      <span className="comparison-label">What's Missing</span>
-                      <span className="comparison-value">Ingredient processing context and safety analysis outside core focus</span>
-                    </div>
-                    <div className="comparison-wihy-box">
-                      <span className="comparison-label">WiHY Adds</span>
-                      <span className="comparison-value">Ingredient + processing context with individualized meal & workout plans</span>
-                    </div>
-                  </div>
-                </div>
 
-                {/* Yuka */}
-                <div className="comparison-card">
-                  <div className="comparison-card-header">
-                    <span className="comparison-app-name">Yuka</span>
-                    <span className="comparison-vs">vs WiHY</span>
-                  </div>
-                  <div className="comparison-card-body">
-                    <div className="comparison-row">
-                      <span className="comparison-label">Their Focus</span>
-                      <span className="comparison-value">Product scores based on nutritional quality, additives, and organic factors</span>
-                    </div>
-                    <div className="comparison-row">
-                      <span className="comparison-label">What's Missing</span>
-                      <span className="comparison-value">Personalization and deeper lifestyle planning not the stated focus</span>
-                    </div>
-                    <div className="comparison-wihy-box">
-                      <span className="comparison-label">WiHY Adds</span>
-                      <span className="comparison-value">Explains why products matter for YOUR goals + generates personalized plans</span>
-                    </div>
-                  </div>
-                </div>
+                    <div className="comparison-card-body">
+                      <div className="comparison-row">
+                        <span className="comparison-label">Their Stated Focus</span>
+                        <span className="comparison-value">{item.statedFocus}</span>
+                      </div>
 
-                {/* MyFitnessPal */}
-                <div className="comparison-card">
-                  <div className="comparison-card-header">
-                    <span className="comparison-app-name">MyFitnessPal</span>
-                    <span className="comparison-vs">vs WiHY</span>
-                  </div>
-                  <div className="comparison-card-body">
-                    <div className="comparison-row">
-                      <span className="comparison-label">Their Focus</span>
-                      <span className="comparison-value">Food & fitness tracking with large database for calories and macros</span>
-                    </div>
-                    <div className="comparison-row">
-                      <span className="comparison-label">What's Missing</span>
-                      <span className="comparison-value">Logging-centric; insights depend entirely on manual user input</span>
-                    </div>
-                    <div className="comparison-wihy-box">
-                      <span className="comparison-label">WiHY Adds</span>
-                      <span className="comparison-value">Reduces friction by turning inputs into insights + personalized meal & workout plans</span>
-                    </div>
-                  </div>
-                </div>
+                      <div className="comparison-row">
+                        <span className="comparison-label">Scope Notes</span>
+                        <span className="comparison-value">{item.scopeNotes}</span>
+                      </div>
 
-                {/* Cronometer */}
-                <div className="comparison-card">
-                  <div className="comparison-card-header">
-                    <span className="comparison-app-name">Cronometer</span>
-                    <span className="comparison-vs">vs WiHY</span>
-                  </div>
-                  <div className="comparison-card-body">
-                    <div className="comparison-row">
-                      <span className="comparison-label">Their Focus</span>
-                      <span className="comparison-value">Deep nutrition tracking with emphasis on vitamins & minerals</span>
-                    </div>
-                    <div className="comparison-row">
-                      <span className="comparison-label">What's Missing</span>
-                      <span className="comparison-value">Requires consistent manual entry; primary mission is nutrient tracking only</span>
-                    </div>
-                    <div className="comparison-wihy-box">
-                      <span className="comparison-label">WiHY Adds</span>
-                      <span className="comparison-value">Automates interpretation and connects nutrition to behavior & environment</span>
+                      <div className="comparison-wihy-box">
+                        <span className="comparison-label">WiHY Approach</span>
+                        <span className="comparison-value">{item.wihyApproach}</span>
+                      </div>
                     </div>
                   </div>
-                </div>
-
-                {/* Lifesum */}
-                <div className="comparison-card">
-                  <div className="comparison-card-header">
-                    <span className="comparison-app-name">Lifesum</span>
-                    <span className="comparison-vs">vs WiHY</span>
-                  </div>
-                  <div className="comparison-card-body">
-                    <div className="comparison-row">
-                      <span className="comparison-label">Their Focus</span>
-                      <span className="comparison-value">Healthy eating tracking with personalized feedback and recipes</span>
-                    </div>
-                    <div className="comparison-row">
-                      <span className="comparison-label">What's Missing</span>
-                      <span className="comparison-value">Eating plans/tracking focus; clinical-level interpretation not stated role</span>
-                    </div>
-                    <div className="comparison-wihy-box">
-                      <span className="comparison-label">WiHY Adds</span>
-                      <span className="comparison-value">Research-informed explanations + generates outputs from user-specific constraints</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Noom */}
-                <div className="comparison-card">
-                  <div className="comparison-card-header">
-                    <span className="comparison-app-name">Noom</span>
-                    <span className="comparison-vs">vs WiHY</span>
-                  </div>
-                  <div className="comparison-card-body">
-                    <div className="comparison-row">
-                      <span className="comparison-label">Their Focus</span>
-                      <span className="comparison-value">Psychology-based behavior change program with lessons & food logging</span>
-                    </div>
-                    <div className="comparison-row">
-                      <span className="comparison-label">What's Missing</span>
-                      <span className="comparison-value">Nutrition depth may be secondary to behavioral curriculum coaching</span>
-                    </div>
-                    <div className="comparison-wihy-box">
-                      <span className="comparison-label">WiHY Adds</span>
-                      <span className="comparison-value">Merges behavior signals with ingredient/nutrition context for personalized plans</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Fitbit */}
-                <div className="comparison-card">
-                  <div className="comparison-card-header">
-                    <span className="comparison-app-name">Fitbit</span>
-                    <span className="comparison-vs">vs WiHY</span>
-                  </div>
-                  <div className="comparison-card-body">
-                    <div className="comparison-row">
-                      <span className="comparison-label">Their Focus</span>
-                      <span className="comparison-value">Food logging and macro planning within wearable fitness ecosystem</span>
-                    </div>
-                    <div className="comparison-row">
-                      <span className="comparison-label">What's Missing</span>
-                      <span className="comparison-value">Activity ecosystem first; food intelligence typically lighter than dedicated apps</span>
-                    </div>
-                    <div className="comparison-wihy-box">
-                      <span className="comparison-label">WiHY Adds</span>
-                      <span className="comparison-value">Acts as food/lifestyle intelligence layer across all your trackers</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Apple Health */}
-                <div className="comparison-card">
-                  <div className="comparison-card-header">
-                    <span className="comparison-app-name">Apple Health</span>
-                    <span className="comparison-vs">vs WiHY</span>
-                  </div>
-                  <div className="comparison-card-body">
-                    <div className="comparison-row">
-                      <span className="comparison-label">Their Focus</span>
-                      <span className="comparison-value">Central hub to organize health data with charts, trends, and highlights</span>
-                    </div>
-                    <div className="comparison-row">
-                      <span className="comparison-label">What's Missing</span>
-                      <span className="comparison-value">Aggregation + visualization focus; lifestyle planning varies by connected apps</span>
-                    </div>
-                    <div className="comparison-wihy-box">
-                      <span className="comparison-label">WiHY Adds</span>
-                      <span className="comparison-value">Interprets patterns and generates actionable meal & workout recommendations</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Samsung Food */}
-                <div className="comparison-card">
-                  <div className="comparison-card-header">
-                    <span className="comparison-app-name">Samsung Food</span>
-                    <span className="comparison-vs">vs WiHY</span>
-                  </div>
-                  <div className="comparison-card-body">
-                    <div className="comparison-row">
-                      <span className="comparison-label">Their Focus</span>
-                      <span className="comparison-value">Recipe organization, meal planning, and grocery shopping workflows</span>
-                    </div>
-                    <div className="comparison-row">
-                      <span className="comparison-label">What's Missing</span>
-                      <span className="comparison-value">Cooking/meal planning focus; not positioned as health-risk analysis engine</span>
-                    </div>
-                    <div className="comparison-wihy-box">
-                      <span className="comparison-label">WiHY Adds</span>
-                      <span className="comparison-value">Ingredient/processing context with personalized health-based recommendations</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Appediet */}
-                <div className="comparison-card">
-                  <div className="comparison-card-header">
-                    <span className="comparison-app-name">Appediet</span>
-                    <span className="comparison-vs">vs WiHY</span>
-                  </div>
-                  <div className="comparison-card-body">
-                    <div className="comparison-row">
-                      <span className="comparison-label">Their Focus</span>
-                      <span className="comparison-value">AI food scanner with photo/barcode logging for calories & nutrients</span>
-                    </div>
-                    <div className="comparison-row">
-                      <span className="comparison-label">What's Missing</span>
-                      <span className="comparison-value">Diet logging tool; broader behavior system analysis not core function</span>
-                    </div>
-                    <div className="comparison-wihy-box">
-                      <span className="comparison-label">WiHY Adds</span>
-                      <span className="comparison-value">Connects food + behavior + activity for user-specific meal & workout plans</span>
-                    </div>
-                  </div>
-                </div>
+                ))}
               </div>
               
               <div className="comparison-disclaimer">
-                <p><strong>Note:</strong> This comparison is based on each app's official description and stated primary focus. These apps may have additional features not described here. Our goal is to help you understand how WiHY's approach to personalized health intelligence differs.</p>
+                <p><strong>Note:</strong> {COMPARISON_DISCLAIMER}</p>
               </div>
             </div>
           </section>
@@ -852,6 +763,62 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
             </Pressable>
           </View>
         ))}
+
+        {/* How WiHY Compares - Native */}
+        <View style={{ paddingHorizontal: 16, marginTop: 8 }}>
+          <Text style={{ fontSize: 18, fontWeight: '800', color: '#1f2937', marginBottom: 8 }}>
+            How WiHY Compares
+          </Text>
+          <Text style={{ fontSize: 13, color: '#6b7280', marginBottom: 12 }}>
+            {COMPARISON_DISCLAIMER}
+          </Text>
+
+          {COMPARISONS.map((item) => (
+            <View
+              key={item.id}
+              style={{
+                backgroundColor: '#fff',
+                borderWidth: 1,
+                borderColor: '#e5e7eb',
+                borderRadius: 16,
+                padding: 16,
+                marginBottom: 12,
+              }}
+            >
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10 }}>
+                <Text style={{ fontSize: 15, fontWeight: '800', color: '#111827' }}>{item.appName}</Text>
+                <Text style={{ fontSize: 12, fontWeight: '800', color: '#6b7280' }}>vs WiHY</Text>
+              </View>
+
+              <View style={{ borderTopWidth: 1, borderTopColor: '#f1f5f9', paddingTop: 10 }}>
+                <Text style={{ fontSize: 11, fontWeight: '800', color: '#64748b', marginBottom: 4 }}>
+                  Their Stated Focus
+                </Text>
+                <Text style={{ fontSize: 13, color: '#111827', marginBottom: 10 }}>{item.statedFocus}</Text>
+
+                <Text style={{ fontSize: 11, fontWeight: '800', color: '#64748b', marginBottom: 4 }}>
+                  Scope Notes
+                </Text>
+                <Text style={{ fontSize: 13, color: '#111827', marginBottom: 12 }}>{item.scopeNotes}</Text>
+
+                <View
+                  style={{
+                    backgroundColor: '#fff7ed',
+                    borderWidth: 1,
+                    borderColor: '#fed7aa',
+                    borderRadius: 14,
+                    padding: 12,
+                  }}
+                >
+                  <Text style={{ fontSize: 11, fontWeight: '900', color: '#9a3412', marginBottom: 4 }}>
+                    WiHY Approach
+                  </Text>
+                  <Text style={{ fontSize: 13, color: '#111827' }}>{item.wihyApproach}</Text>
+                </View>
+              </View>
+            </View>
+          ))}
+        </View>
 
         {/* B2B Link */}
         <Pressable 
