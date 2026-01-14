@@ -801,14 +801,14 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
 
                 <View
                   style={{
-                    backgroundColor: '#f0fdf4',
+                    backgroundColor: '#ffffff',
                     borderWidth: 2,
-                    borderColor: '#86efac',
+                    borderColor: '#fa5f06',
                     borderRadius: 14,
                     padding: 14,
                   }}
                 >
-                  <Text style={{ fontSize: 13, fontWeight: '800', color: '#166534', marginBottom: 8 }}>
+                  <Text style={{ fontSize: 13, fontWeight: '800', color: '#1f2937', marginBottom: 8 }}>
                     WiHY Delivers
                   </Text>
                   <Text style={{ fontSize: 15, color: '#000000', lineHeight: 22, fontWeight: '500' }}>{item.wihyApproach}</Text>
