@@ -599,11 +599,21 @@
 }
 
 .comparison-wihy-box {
-  background: #f0fdf4;
   border-radius: 12px;
   padding: 18px;
   margin-top: auto;
-  border: 2px solid #86efac;
+  /* Border Sweep Animation */
+  border: 2px solid transparent;
+  background:
+    linear-gradient(#f0fdf4, #f0fdf4) padding-box,
+    linear-gradient(90deg, #22c55e, #ffffff, #86efac, #16a34a, #22c55e) border-box;
+  background-size: 100% 100%, 200% 100%;
+  animation: wiH-border-sweep 2.2s linear infinite;
+}
+
+@keyframes wiH-border-sweep {
+  0%   { background-position: 0 0, 0% 0; }
+  100% { background-position: 0 0, 200% 0; }
 }
 
 .comparison-wihy-box .comparison-label {
