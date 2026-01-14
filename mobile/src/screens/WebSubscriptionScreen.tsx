@@ -439,6 +439,95 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
             </div>
           </section>
 
+          {/* Comparison Table Section */}
+          <section className="comparison-section">
+            <div className="comparison-container">
+              <div className="comparison-header">
+                <h2>How WiHY Compares</h2>
+                <p>See how WiHY's approach differs from other popular health and nutrition apps</p>
+              </div>
+              
+              <div className="comparison-table-wrapper">
+                <table className="comparison-table">
+                  <thead>
+                    <tr>
+                      <th>App</th>
+                      <th className="th-focus">Primary Focus</th>
+                      <th className="th-scope">Scope-Based Constraints</th>
+                      <th>WiHY Differentiation</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><div className="comparison-app-name"><span className="comparison-app-logo">CA</span>Cal AI</div></td>
+                      <td>Photo/barcode/description → calories & nutrient breakdown (fast tracking)</td>
+                      <td>Emphasis is on tracking/logging nutrition; ingredient processing/safety context may be outside core focus</td>
+                      <td>WiHY adds ingredient + processing context and can generate individualized meals + workouts based on user inputs</td>
+                    </tr>
+                    <tr>
+                      <td><div className="comparison-app-name"><span className="comparison-app-logo">Y</span>Yuka</div></td>
+                      <td>Product score based on nutritional quality, additives, and organic dimension</td>
+                      <td>Score-based output; personalization and deeper lifestyle planning are not its stated focus</td>
+                      <td>WiHY explains why a product matters for your goals and patterns; can generate personalized meal/workout plans</td>
+                    </tr>
+                    <tr>
+                      <td><div className="comparison-app-name"><span className="comparison-app-logo">AD</span>Appediet</div></td>
+                      <td>AI food scanner + photo/barcode logging; calories & nutritional breakdown</td>
+                      <td>Primarily a diet logging / calorie & nutrient breakdown tool; broader behavior system analysis is not core stated function</td>
+                      <td>WiHY connects food + behavior + activity and outputs user-specific meal + workout plans</td>
+                    </tr>
+                    <tr>
+                      <td><div className="comparison-app-name"><span className="comparison-app-logo">MF</span>MyFitnessPal</div></td>
+                      <td>Food & fitness tracking: calories, macros, and micronutrients; large database & logging</td>
+                      <td>Logging-centric; insights depend on what the user logs; broader "food-system" interpretation not its stated core</td>
+                      <td>WiHY reduces friction by turning inputs into insights + personalized plans (meals + workouts)</td>
+                    </tr>
+                    <tr>
+                      <td><div className="comparison-app-name"><span className="comparison-app-logo">C</span>Cronometer</div></td>
+                      <td>Nutrition tracking emphasizing macros + vitamins/minerals (micronutrients)</td>
+                      <td>Deep tracking generally requires consistent entry/review; its primary mission is nutrient tracking</td>
+                      <td>WiHY can automate interpretation and connect to behavior/environment context</td>
+                    </tr>
+                    <tr>
+                      <td><div className="comparison-app-name"><span className="comparison-app-logo">L</span>Lifesum</div></td>
+                      <td>Healthy eating app: tracking intake/exercise + personalized feedback, recipes, meal plans</td>
+                      <td>Focus is eating plans/tracking; clinical-level interpretation isn't its stated role</td>
+                      <td>WiHY adds research-informed explanation + can generate meal/workout outputs from user-specific constraints</td>
+                    </tr>
+                    <tr>
+                      <td><div className="comparison-app-name"><span className="comparison-app-logo">N</span>Noom</div></td>
+                      <td>Psychology/behavior-change program with lessons + food logging; "rooted in psychology"</td>
+                      <td>Behavior curriculum focus; nutrition depth may be secondary to behavioral coaching</td>
+                      <td>WiHY merges behavior signals with ingredient/nutrition context and produces personalized meals + workouts</td>
+                    </tr>
+                    <tr>
+                      <td><div className="comparison-app-name"><span className="comparison-app-logo">FB</span>Fitbit</div></td>
+                      <td>Food logging and macro/calorie deficit planning inside its fitness ecosystem</td>
+                      <td>Wearable/activity ecosystem first; food intelligence is typically lighter than dedicated nutrition platforms</td>
+                      <td>WiHY acts as the food/lifestyle intelligence layer across trackers + creates user-specific plans</td>
+                    </tr>
+                    <tr>
+                      <td><div className="comparison-app-name"><span className="comparison-app-logo">AH</span>Apple Health</div></td>
+                      <td>Central hub to organize health data; charts, trends, highlights</td>
+                      <td>Aggregation + visualization focus; deeper lifestyle planning varies by connected apps</td>
+                      <td>WiHY interprets patterns and generates next-step actions (meals + workouts) based on the user</td>
+                    </tr>
+                    <tr>
+                      <td><div className="comparison-app-name"><span className="comparison-app-logo">SF</span>Samsung Food</div></td>
+                      <td>Recipe organization + meal planning + grocery lists/shopping workflows</td>
+                      <td>Primarily cooking/meal planning; not positioned as a health-risk/ingredient-science engine</td>
+                      <td>WiHY adds ingredient/processing context and personalized health-based recommendations</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              
+              <div className="comparison-disclaimer">
+                <p><strong>Note:</strong> This comparison is based on each app's official description and stated primary focus. We acknowledge that these apps may have additional features not described here. Our goal is to help you understand how WiHY's approach to personalized health intelligence differs from other tools.</p>
+              </div>
+            </div>
+          </section>
+
           {/* B2B Link Section */}
           <section className="pricing-section pricing-section-alt">
             <div className="pricing-cta-box">
