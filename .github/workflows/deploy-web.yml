@@ -123,10 +123,8 @@ jobs:
         WIHY_NATIVE_CLIENT_SECRET: ${{ secrets.WIHY_NATIVE_CLIENT_SECRET }}
         NODE_ENV: production
 
-    - name: Copy web assets (favicon, manifest only - NOT index.html)
-      run: |
-        cp web/manifest.json dist/manifest.json
-        cp assets/Favicon.png dist/assets/Favicon.png
+    - name: Inject SEO and copy assets
+      run: node scripts/inject-seo.js
 
     - name: Deploy to Firebase Hosting
       uses: FirebaseExtended/action-hosting-deploy@v0
