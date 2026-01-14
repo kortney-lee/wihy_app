@@ -174,34 +174,79 @@
 }
 
 /* ═══════════════════════════════════════════════════════════
-   PRICING GRID
+   PRICING GRID - Photo Stack Layout
    ═══════════════════════════════════════════════════════════ */
 .pricing-grid {
-  display: grid;
-  gap: 24px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: flex-start;
   width: 100%;
+  position: relative;
+  padding: 40px 0;
 }
 
 .pricing-grid-1 {
-  grid-template-columns: 1fr;
   max-width: 400px;
   margin: 0 auto;
 }
 
-.pricing-grid-2 {
-  grid-template-columns: repeat(2, 1fr);
+.pricing-grid-1 .pricing-card {
+  width: 100%;
 }
 
-.pricing-grid-3 {
-  grid-template-columns: repeat(3, 1fr);
+.pricing-grid-2 .pricing-card {
+  width: calc(50% - 12px);
 }
 
-.pricing-grid-4 {
-  grid-template-columns: repeat(4, 1fr);
+.pricing-grid-3 .pricing-card {
+  width: calc(33.33% - 16px);
 }
 
-.pricing-grid-5 {
-  grid-template-columns: repeat(5, 1fr);
+.pricing-grid-4 .pricing-card {
+  width: calc(25% - 18px);
+}
+
+.pricing-grid-5 .pricing-card {
+  width: 220px;
+  flex-shrink: 0;
+}
+
+/* Photo Stack Effect - Cards fan out from center */
+.pricing-grid-5 .pricing-card:nth-child(1) {
+  transform: rotate(-4deg) translateY(10px);
+  z-index: 1;
+  margin-right: -15px;
+}
+
+.pricing-grid-5 .pricing-card:nth-child(2) {
+  transform: rotate(-2deg) translateY(5px);
+  z-index: 2;
+  margin-right: -15px;
+}
+
+.pricing-grid-5 .pricing-card:nth-child(3) {
+  transform: rotate(0deg);
+  z-index: 5;
+  margin: 0 -10px;
+}
+
+.pricing-grid-5 .pricing-card:nth-child(4) {
+  transform: rotate(2deg) translateY(5px);
+  z-index: 2;
+  margin-left: -15px;
+}
+
+.pricing-grid-5 .pricing-card:nth-child(5) {
+  transform: rotate(4deg) translateY(10px);
+  z-index: 1;
+  margin-left: -15px;
+}
+
+/* Hover resets rotation and brings card forward */
+.pricing-grid-5 .pricing-card:hover {
+  transform: rotate(0deg) translateY(-10px) scale(1.02);
+  z-index: 10;
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -225,12 +270,23 @@
 }
 
 .pricing-card-popular {
-  border-color: #22c55e;
-  border-width: 2px;
+  /* Border Sweep Animation - matches WiHY brand */
+  border: 2px solid transparent;
+  background:
+    linear-gradient(#ffffff, #ffffff) padding-box,
+    linear-gradient(90deg, #fa5f06, #ffffff, #C0C0C0, #4cbb17, #1a73e8) border-box;
+  background-size: 100% 100%, 200% 100%;
+  animation: pricing-border-sweep 2.2s linear infinite;
+  box-shadow: 0 8px 24px rgba(34, 197, 94, 0.2);
+}
+
+@keyframes pricing-border-sweep {
+  0%   { background-position: 0 0, 0% 0; }
+  100% { background-position: 0 0, 200% 0; }
 }
 
 .pricing-card-popular:hover {
-  border-color: #16a34a;
+  box-shadow: 0 16px 40px rgba(34, 197, 94, 0.3);
 }
 
 .pricing-card-vertical {
