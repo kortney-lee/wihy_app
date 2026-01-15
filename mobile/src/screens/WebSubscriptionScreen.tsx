@@ -14,7 +14,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { RootStackParamList } from '../types/navigation';
+import { RootStackParamList, TabParamList } from '../types/navigation';
 import { colors, borderRadius } from '../theme/design-tokens';
 import { checkoutService } from '../services/checkoutService';
 import { useAuth } from '../context/AuthContext';
@@ -388,7 +388,7 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
   };
 
   // Navigate to tab screens (inside Main TabNavigator)
-  const navigateToTab = (tabName: string) => {
+  const navigateToTab = (tabName: keyof TabParamList) => {
     navigation.navigate('Main', { screen: tabName });
   };
 
