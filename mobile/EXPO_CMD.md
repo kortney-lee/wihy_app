@@ -111,3 +111,5 @@ ets build the release for apple - cd /Users/kortney/Desktop/wihy_native_app && e
 npx expo prebuild --clean
 
 eas build --platform ios --profile production
+
+cd /Users/kortney/Desktop/wihy_app/mobile && npx expo run:ios --simulator "iPhone 17 Pro"

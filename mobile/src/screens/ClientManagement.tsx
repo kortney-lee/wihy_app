@@ -1,20 +1,20 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   View,
   Text,
   StyleSheet,
-  ScrollView,
   Pressable,
   TextInput,
   Alert,
   ActivityIndicator,
   RefreshControl,
   Platform,
+  Animated,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { dashboardColors, GradientDashboardHeader, WebPageWrapper } from '../components/shared';
+import { dashboardColors, WebPageWrapper } from '../components/shared';
 
 const isWeb = Platform.OS === 'web';
 import { dashboardTheme } from '../theme/dashboardTheme';
@@ -49,6 +49,31 @@ export default function ClientManagement() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  
+  // Collapsing header animation
+  const scrollY = useRef(new Animated.Value(0)).current;
+  const insets = useSafeAreaInsets();
+  const HEADER_MAX_HEIGHT = 140;
+  const HEADER_MIN_HEIGHT = 0;
+  const HEADER_SCROLL_DISTANCE = HEADER_MAX_HEIGHT - HEADER_MIN_HEIGHT;
+
+  const headerHeight = scrollY.interpolate({
+    inputRange: [0, HEADER_SCROLL_DISTANCE],
+    outputRange: [HEADER_MAX_HEIGHT, HEADER_MIN_HEIGHT],
+    extrapolate: 'clamp',
+  });
+
+  const headerOpacity = scrollY.interpolate({
+    inputRange: [0, HEADER_SCROLL_DISTANCE / 2],
+    outputRange: [1, 0],
+    extrapolate: 'clamp',
+  });
+
+  const titleScale = scrollY.interpolate({
+    inputRange: [0, HEADER_SCROLL_DISTANCE],
+    outputRange: [1, 0.9],
+    extrapolate: 'clamp',
+  });
 
   // Load clients on mount
   useEffect(() => {
@@ -343,19 +368,29 @@ export default function ClientManagement() {
   return (
     <WebPageWrapper activeTab="health">
       <View style={[styles.container, isWeb && { flex: undefined, minHeight: undefined }]}>
-        {!isWeb && <View style={styles.statusBarBackground} />}
-        <SafeAreaView style={styles.safeArea} edges={['left', 'right']}>
-          {/* Fixed Header */}
-          <GradientDashboardHeader
-            title="Client Management"
-            subtitle="Track client progress & engagement"
-            gradient="clientManagement"
-            badge={{ text: `${clients.filter(c => c.status === 'active').length} of ${clients.length} clients active` }}
-          />
+        {/* Status bar area - solid color */}
+        <View style={{ height: insets.top, backgroundColor: '#8b5cf6' }} />
         
-        <ScrollView 
+        {/* Collapsing Header */}
+        <Animated.View style={[styles.collapsibleHeader, { height: headerHeight }]}>
+          <Animated.View style={[styles.headerContent, { opacity: headerOpacity, transform: [{ scale: titleScale }] }]}>
+            <Text style={styles.headerTitle}>Client Management</Text>
+            <Text style={styles.headerSubtitle}>Track client progress & engagement</Text>
+            <View style={styles.statsRow}>
+              <Text style={styles.statsLabel}>Active Clients</Text>
+              <Text style={styles.statsValue}>{clients.filter(c => c.status === 'active').length} / {clients.length}</Text>
+            </View>
+          </Animated.View>
+        </Animated.View>
+        
+        <Animated.ScrollView 
           style={styles.scrollView} 
           showsVerticalScrollIndicator={false}
+          scrollEventThrottle={16}
+          onScroll={Animated.event(
+            [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+            { useNativeDriver: false }
+          )}
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
           }
@@ -503,8 +538,10 @@ export default function ClientManagement() {
               ))
             )}
           </View>
-        </ScrollView>
-        </SafeAreaView>
+          
+          {/* Bottom spacing */}
+          <View style={{ height: 100 }} />
+        </Animated.ScrollView>
       </View>
     </WebPageWrapper>
   );
@@ -515,71 +552,46 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#e0f2fe',
   },
-  statusBarBackground: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    height: 60,
-    backgroundColor: '#8b5cf6', // Purple gradient top color
-  },
-  safeArea: {
-    flex: 1,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  header: {
-    paddingHorizontal: dashboardTheme.header.paddingHorizontal,
-    paddingTop: dashboardTheme.header.paddingTop,
-    paddingBottom: dashboardTheme.header.paddingBottom,
-    shadowColor: '#8b5cf6',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    elevation: 8,
+  collapsibleHeader: {
+    backgroundColor: '#8b5cf6',
+    overflow: 'hidden',
   },
   headerContent: {
-    alignItems: 'flex-start',
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 20,
   },
   headerTitle: {
     fontSize: 28,
-    fontWeight: '800',
+    fontWeight: '700',
     color: '#ffffff',
-    letterSpacing: -0.5,
-    marginBottom: 6,
-    textShadowColor: 'rgba(0, 0, 0, 0.1)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 2,
+    marginBottom: 4,
   },
   headerSubtitle: {
     fontSize: 16,
     color: 'rgba(255, 255, 255, 0.9)',
-    fontWeight: '500',
-    marginBottom: 16,
-    letterSpacing: 0.2,
+    marginBottom: 12,
   },
-  headerStats: {
-    alignSelf: 'stretch',
-  },
-  statBadge: {
+  statsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: 'rgba(255, 255, 255, 0.2)',
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.3)',
   },
-  headerStatText: {
+  statsLabel: {
     fontSize: 14,
+    color: 'rgba(255, 255, 255, 0.9)',
+    marginRight: 8,
+  },
+  statsValue: {
+    fontSize: 18,
+    fontWeight: '700',
     color: '#ffffff',
-    fontWeight: '600',
-    textAlign: 'center',
   },
-  contentWrapper: {
-    flex: 1,
-  },
-  innerContainer: {
+  scrollView: {
     flex: 1,
   },
   searchContainer: {

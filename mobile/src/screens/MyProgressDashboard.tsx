@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect, useCallback, useContext } from 'react';
+import React, { useState, useMemo, useEffect, useCallback, useContext, useRef } from 'react';
 import {
   View,
   Text,
@@ -9,8 +9,11 @@ import {
   Alert,
   Dimensions,
   ActivityIndicator,
+  Animated,
+  StatusBar,
+  Platform,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { GradientDashboardHeader } from '../components/shared';
@@ -1022,38 +1025,103 @@ const MyProgressDashboard: React.FC<MyProgressDashboardProps> = ({
     return ['#ef4444', '#dc2626'] as const;
   };
 
+  // Collapsing header animation
+  const scrollY = useRef(new Animated.Value(0)).current;
+  const insets = useSafeAreaInsets();
+  
+  const HEADER_MAX_HEIGHT = 140;
+  const HEADER_MIN_HEIGHT = 0;
+  const HEADER_SCROLL_DISTANCE = HEADER_MAX_HEIGHT - HEADER_MIN_HEIGHT;
+
+  // Interpolate header height
+  const headerHeight = scrollY.interpolate({
+    inputRange: [0, HEADER_SCROLL_DISTANCE],
+    outputRange: [HEADER_MAX_HEIGHT, HEADER_MIN_HEIGHT],
+    extrapolate: 'clamp',
+  });
+
+  // Interpolate header opacity
+  const headerOpacity = scrollY.interpolate({
+    inputRange: [0, HEADER_SCROLL_DISTANCE / 2],
+    outputRange: [1, 0],
+    extrapolate: 'clamp',
+  });
+
+  // Interpolate title scale
+  const titleScale = scrollY.interpolate({
+    inputRange: [0, HEADER_SCROLL_DISTANCE],
+    outputRange: [1, 0.8],
+    extrapolate: 'clamp',
+  });
+
+  // Interpolate title translateY
+  const titleTranslateY = scrollY.interpolate({
+    inputRange: [0, HEADER_SCROLL_DISTANCE],
+    outputRange: [0, -20],
+    extrapolate: 'clamp',
+  });
+
   return (
     <View style={styles.container}>
-      <ScrollView showsVerticalScrollIndicator={false}>
-        {/* Header - Using dedicated GradientDashboardHeader component */}
-        <GradientDashboardHeader
-          title="My Progress"
-          subtitle="Track your daily health journey"
-          gradient="progress"
-          badge={{ text: `Today's Progress: ${Math.round(dailyProgress)}%` }}
-        />
+      {/* Status bar area - Always red */}
+      <View style={{ height: insets.top, backgroundColor: '#dc2626' }} />
+      
+      {/* Collapsing Header */}
+      <Animated.View style={[styles.collapsibleHeader, { height: headerHeight, backgroundColor: '#dc2626' }]}>
+        <LinearGradient
+          colors={['#dc2626', '#dc2626']}
+          style={styles.headerGradient}
+        >
+          <Animated.View 
+            style={[
+              styles.headerContent,
+              { 
+                opacity: headerOpacity,
+                transform: [
+                  { scale: titleScale },
+                  { translateY: titleTranslateY }
+                ]
+              }
+            ]}
+          >
+            <Text style={styles.collapsibleHeaderTitle}>My Progress</Text>
+            <Text style={styles.collapsibleHeaderSubtitle}>Track your daily health journey</Text>
+            <View style={styles.progressBadge}>
+              <Text style={styles.progressBadgeText}>Today's Progress: {Math.round(dailyProgress)}%</Text>
+            </View>
+          </Animated.View>
+        </LinearGradient>
+      </Animated.View>
 
-        {/* Period Selector */}
-        <View style={styles.periodSelector}>
-          {(['today', 'week', 'month'] as const).map(period => (
-            <TouchableOpacity
-              key={period}
-              style={[
-                styles.periodButton,
-                selectedPeriod === period && styles.periodButtonActive,
-              ]}
-              onPress={() => setSelectedPeriod(period)}
-            >
-              <Text style={[
-                styles.periodText,
-                selectedPeriod === period && styles.periodTextActive,
-              ]}>
-                {period.charAt(0).toUpperCase() + period.slice(1)}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
+      {/* Period Selector - Fixed outside ScrollView */}
+      <View style={styles.periodSelector}>
+        {(['today', 'week', 'month'] as const).map(period => (
+          <TouchableOpacity
+            key={period}
+            style={[
+              styles.periodButton,
+              selectedPeriod === period && styles.periodButtonActive,
+            ]}
+            onPress={() => setSelectedPeriod(period)}
+          >
+            <Text style={[
+              styles.periodText,
+              selectedPeriod === period && styles.periodTextActive,
+            ]}>
+              {period.charAt(0).toUpperCase() + period.slice(1)}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
 
+      <Animated.ScrollView 
+        showsVerticalScrollIndicator={false}
+        onScroll={Animated.event(
+          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+          { useNativeDriver: false }
+        )}
+        scrollEventThrottle={16}
+      >
         {/* Progress Cards */}
         <View style={[styles.progressSection, { paddingHorizontal: layout.horizontalPadding }]}>
           <View style={styles.sectionHeader}>
@@ -1360,7 +1428,7 @@ const MyProgressDashboard: React.FC<MyProgressDashboardProps> = ({
 
         {/* Bottom spacing for tab navigation */}
         <View style={{ height: 100 }} />
-      </ScrollView>
+      </Animated.ScrollView>
     </View>
   );
 };
@@ -1382,6 +1450,48 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: dashboardTheme.colors.background,
+  },
+
+  // Collapsible header styles
+  collapsibleHeader: {
+    overflow: 'hidden',
+  },
+
+  headerGradient: {
+    flex: 1,
+    justifyContent: 'flex-end',
+  },
+
+  headerContent: {
+    paddingHorizontal: dashboardTheme.spacing.lg,
+    paddingBottom: dashboardTheme.spacing.md,
+  },
+
+  collapsibleHeaderTitle: {
+    fontSize: 28,
+    fontWeight: '700',
+    color: '#ffffff',
+    marginBottom: 4,
+  },
+
+  collapsibleHeaderSubtitle: {
+    fontSize: 14,
+    color: 'rgba(255,255,255,0.9)',
+    marginBottom: 12,
+  },
+
+  progressBadge: {
+    backgroundColor: 'rgba(0,0,0,0.2)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    alignSelf: 'flex-start',
+  },
+
+  progressBadgeText: {
+    color: '#ffffff',
+    fontSize: 13,
+    fontWeight: '600',
   },
 
   header: {

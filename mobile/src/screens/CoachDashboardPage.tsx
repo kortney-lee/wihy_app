@@ -1,13 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
-  ScrollView,
   Dimensions,
   Platform,
+  Animated,
+  Pressable,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import type { CompositeNavigationProp } from '@react-navigation/native';
@@ -16,7 +18,7 @@ import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import type { TabParamList, RootStackParamList } from '../types/navigation';
 import { dashboardTheme } from '../theme/dashboardTheme';
 import { HamburgerMenu } from '../components/shared/HamburgerMenu';
-import { GradientDashboardHeader, WebPageWrapper } from '../components/shared';
+import { WebPageWrapper } from '../components/shared';
 import { AuthContext } from '../context/AuthContext';
 import CoachDashboard from './CoachDashboard';
 import CoachOverview from './CoachOverview';
@@ -55,6 +57,31 @@ const CoachDashboardPage: React.FC<CoachDashboardPageProps> = ({ showMenuFromHea
   const { user } = React.useContext(AuthContext);
   const [showHamburgerMenu, setShowHamburgerMenu] = useState(false);
   const [selectedView, setSelectedView] = useState<CoachViewType | null>(null); // Start with hub view
+
+  // Collapsing header animation
+  const scrollY = useRef(new Animated.Value(0)).current;
+  const insets = useSafeAreaInsets();
+  const HEADER_MAX_HEIGHT = 140;
+  const HEADER_MIN_HEIGHT = 0;
+  const HEADER_SCROLL_DISTANCE = HEADER_MAX_HEIGHT - HEADER_MIN_HEIGHT;
+
+  const headerHeight = scrollY.interpolate({
+    inputRange: [0, HEADER_SCROLL_DISTANCE],
+    outputRange: [HEADER_MAX_HEIGHT, HEADER_MIN_HEIGHT],
+    extrapolate: 'clamp',
+  });
+
+  const headerOpacity = scrollY.interpolate({
+    inputRange: [0, HEADER_SCROLL_DISTANCE / 2],
+    outputRange: [1, 0],
+    extrapolate: 'clamp',
+  });
+
+  const titleScale = scrollY.interpolate({
+    inputRange: [0, HEADER_SCROLL_DISTANCE],
+    outputRange: [1, 0.8],
+    extrapolate: 'clamp',
+  });
 
   // Reset view state when user plan changes (dev mode switcher)
   React.useEffect(() => {
@@ -210,17 +237,29 @@ const CoachDashboardPage: React.FC<CoachDashboardPageProps> = ({ showMenuFromHea
         />
       )}
 
-      {/* Fixed Header - Outside ScrollView */}
-      <GradientDashboardHeader
-        title="Coach Hub"
-        subtitle="Manage clients and grow your business"
-        gradient="coach"
-        badge={{ icon: "briefcase", text: "Active Today" }}
-      />
+      {/* Status bar area - solid color */}
+      <View style={{ height: insets.top, backgroundColor: '#3b82f6' }} />
+      
+      {/* Collapsing Header */}
+      <Animated.View style={[styles.collapsibleHeader, { height: headerHeight }]}>
+        <Animated.View style={[styles.headerContent, { opacity: headerOpacity, transform: [{ scale: titleScale }] }]}>
+          <Text style={styles.headerTitle}>Coach Hub</Text>
+          <Text style={styles.headerSubtitle}>Manage clients and grow your business</Text>
+          <View style={styles.statsRow}>
+            <Ionicons name="briefcase" size={14} color="#ffffff" style={{ marginRight: 6 }} />
+            <Text style={styles.statsLabel}>Active Today</Text>
+          </View>
+        </Animated.View>
+      </Animated.View>
 
-      <ScrollView
+      <Animated.ScrollView
         style={{ flex: 1, backgroundColor: '#e0f2fe' }}
         showsVerticalScrollIndicator={false}
+        scrollEventThrottle={16}
+        onScroll={Animated.event(
+          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+          { useNativeDriver: false }
+        )}
       >
         {/* Dashboard Grid */}
         <View style={[styles.dashboardGrid, isWeb && { maxWidth: 800, alignSelf: 'center', width: '100%' }]}>
@@ -278,7 +317,7 @@ const CoachDashboardPage: React.FC<CoachDashboardPageProps> = ({ showMenuFromHea
         
         {/* Bottom spacing for tab bar */}
         <View style={{ height: 100 }} />
-      </ScrollView>
+      </Animated.ScrollView>
       </View>
     </WebPageWrapper>
   );
@@ -288,6 +327,40 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: dashboardTheme.colors.background,
+  },
+  collapsibleHeader: {
+    backgroundColor: '#3b82f6',
+    overflow: 'hidden',
+  },
+  headerContent: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+  },
+  headerTitle: {
+    fontSize: 28,
+    fontWeight: '700',
+    color: '#ffffff',
+    marginBottom: 4,
+  },
+  headerSubtitle: {
+    fontSize: 16,
+    color: 'rgba(255, 255, 255, 0.9)',
+    marginBottom: 12,
+  },
+  statsRow: {
+    flexDirection: 'row',
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    alignItems: 'center',
+  },
+  statsLabel: {
+    fontSize: 14,
+    color: '#ffffff',
+    fontWeight: '500',
   },
   scrollView: {
     flex: 1,

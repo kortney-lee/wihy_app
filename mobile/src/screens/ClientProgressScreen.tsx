@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   View,
   Text,
@@ -10,14 +10,15 @@ import {
   Dimensions,
   Alert,
   Platform,
+  Animated,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import type { StackNavigationProp } from '@react-navigation/stack';
 import type { RootStackParamList } from '../types/navigation';
-import { GradientDashboardHeader, WebPageWrapper } from '../components/shared';
+import { WebPageWrapper } from '../components/shared';
 import { coachService, fitnessService, nutritionService, mealService, ClientNote, NoteCategory } from '../services';
 import { healthDataService, HealthMetrics, WeeklyHealthData } from '../services/healthDataService';
 import { useAuth } from '../context/AuthContext';
@@ -180,6 +181,31 @@ export default function ClientProgressScreen() {
   const [showAddNoteModal, setShowAddNoteModal] = useState(false);
   const [newNoteText, setNewNoteText] = useState('');
   const [newNoteCategory, setNewNoteCategory] = useState<NoteCategory>('general');
+
+  // Collapsing header animation
+  const scrollY = useRef(new Animated.Value(0)).current;
+  const insets = useSafeAreaInsets();
+  const HEADER_MAX_HEIGHT = 140;
+  const HEADER_MIN_HEIGHT = 0;
+  const HEADER_SCROLL_DISTANCE = HEADER_MAX_HEIGHT - HEADER_MIN_HEIGHT;
+
+  const headerHeight = scrollY.interpolate({
+    inputRange: [0, HEADER_SCROLL_DISTANCE],
+    outputRange: [HEADER_MAX_HEIGHT, HEADER_MIN_HEIGHT],
+    extrapolate: 'clamp',
+  });
+
+  const headerOpacity = scrollY.interpolate({
+    inputRange: [0, HEADER_SCROLL_DISTANCE / 2],
+    outputRange: [1, 0],
+    extrapolate: 'clamp',
+  });
+
+  const titleScale = scrollY.interpolate({
+    inputRange: [0, HEADER_SCROLL_DISTANCE],
+    outputRange: [1, 0.8],
+    extrapolate: 'clamp',
+  });
 
   // Load device health data (platform-specific)
   const loadDeviceHealthData = useCallback(async () => {
@@ -1305,46 +1331,61 @@ export default function ClientProgressScreen() {
 
   return (
     <WebPageWrapper activeTab="health">
-      <SafeAreaView style={[styles.container, isWeb && { flex: undefined, minHeight: undefined }]} edges={['left', 'right']}>
-        <ScrollView
-        showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
-      >
-        {/* Header */}
-        <GradientDashboardHeader
-          title={progressData?.client.name || clientName || 'Client Progress'}
-          subtitle={progressData?.client.email || 'Detailed progress view'}
-          gradient="coach"
-          showBackButton={true}
-          onBackPress={() => navigation.goBack()}
-        />
-
-        {/* Tab Bar */}
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.tabBar}>
-          {tabs.map((tab) => (
-            <Pressable
-              key={tab.id}
-              style={[styles.tab, activeTab === tab.id && styles.tabActive]}
-              onPress={() => setActiveTab(tab.id)}
-            >
-              <Ionicons
-                name={tab.icon as any}
-                size={18}
-                color={activeTab === tab.id ? '#3b82f6' : '#6b7280'}
-              />
-              <Text style={[styles.tabText, activeTab === tab.id && styles.tabTextActive]}>
-                {tab.label}
-              </Text>
+      <View style={[styles.container, isWeb && { flex: undefined, minHeight: undefined }]}>
+        {/* Status bar area - solid color */}
+        <View style={{ height: insets.top, backgroundColor: '#3b82f6' }} />
+        
+        {/* Collapsing Header */}
+        <Animated.View style={[styles.collapsibleHeader, { height: headerHeight }]}>
+          <Animated.View style={[styles.headerContent, { opacity: headerOpacity, transform: [{ scale: titleScale }] }]}>
+            {/* Back Button */}
+            <Pressable style={styles.backButton} onPress={() => navigation.goBack()}>
+              <Ionicons name="arrow-back" size={24} color="#ffffff" />
             </Pressable>
-          ))}
-        </ScrollView>
+            <Text style={styles.headerTitle}>{progressData?.client.name || clientName || 'Client Progress'}</Text>
+            <Text style={styles.headerSubtitle}>{progressData?.client.email || 'Detailed progress view'}</Text>
+          </Animated.View>
+        </Animated.View>
 
-        {/* Tab Content */}
-        {renderTabContent()}
-      </ScrollView>
-      </SafeAreaView>
+        <Animated.ScrollView
+          style={styles.scrollView}
+          showsVerticalScrollIndicator={false}
+          scrollEventThrottle={16}
+          onScroll={Animated.event(
+            [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+            { useNativeDriver: false }
+          )}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
+        >
+          {/* Tab Bar */}
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.tabBar}>
+            {tabs.map((tab) => (
+              <Pressable
+                key={tab.id}
+                style={[styles.tab, activeTab === tab.id && styles.tabActive]}
+                onPress={() => setActiveTab(tab.id)}
+              >
+                <Ionicons
+                  name={tab.icon as any}
+                  size={18}
+                  color={activeTab === tab.id ? '#3b82f6' : '#6b7280'}
+                />
+                <Text style={[styles.tabText, activeTab === tab.id && styles.tabTextActive]}>
+                  {tab.label}
+                </Text>
+              </Pressable>
+            ))}
+          </ScrollView>
+
+          {/* Tab Content */}
+          {renderTabContent()}
+          
+          {/* Bottom spacing */}
+          <View style={{ height: 100 }} />
+        </Animated.ScrollView>
+      </View>
     </WebPageWrapper>
   );
 }
@@ -1437,6 +1478,36 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f9fafb',
+  },
+  collapsibleHeader: {
+    backgroundColor: '#3b82f6',
+    overflow: 'hidden',
+  },
+  headerContent: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+  },
+  headerTitle: {
+    fontSize: 28,
+    fontWeight: '700',
+    color: '#ffffff',
+    marginBottom: 4,
+  },
+  headerSubtitle: {
+    fontSize: 16,
+    color: 'rgba(255, 255, 255, 0.9)',
+  },
+  backButton: {
+    position: 'absolute',
+    left: 16,
+    top: '50%',
+    marginTop: -12,
+    padding: 4,
+  },
+  scrollView: {
+    flex: 1,
   },
   loadingContainer: {
     flex: 1,

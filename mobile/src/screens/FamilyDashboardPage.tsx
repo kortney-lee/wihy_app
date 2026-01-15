@@ -1,4 +1,4 @@
-import React, { useState, useContext, useRef } from 'react';
+import React, { useState, useContext, useRef, useEffect } from 'react';
 import {
   View,
   Text,
@@ -15,6 +15,7 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { GradientDashboardHeader, WebPageWrapper } from '../components/shared';
+import { HamburgerMenu } from '../components/shared/HamburgerMenu';
 import { AuthContext } from '../context/AuthContext';
 import { hasAIAccess, hasInstacartAccess } from '../utils/capabilities';
 import type { DashboardContext } from './HealthHub';
@@ -46,6 +47,14 @@ export default function FamilyDashboardPage({
 }: FamilyDashboardPageProps) {
   const { user } = useContext(AuthContext);
   const [showAddMember, setShowAddMember] = useState(false);
+  const [showHamburgerMenu, setShowHamburgerMenu] = useState(false);
+  
+  // Handle Health tab clicks from parent HealthHub
+  useEffect(() => {
+    if (showMenuFromHealthTab) {
+      setShowHamburgerMenu(true);
+    }
+  }, [showMenuFromHealthTab]);
   
   // Collapsing header animation
   const scrollY = useRef(new Animated.Value(0)).current;
@@ -158,6 +167,29 @@ export default function FamilyDashboardPage({
   return (
     <WebPageWrapper activeTab="health">
       <View style={[styles.container, isWeb && { flex: undefined, minHeight: undefined }]}>
+        {/* Hamburger Menu for navigation */}
+        {showHamburgerMenu && (
+          <HamburgerMenu
+            visible={showHamburgerMenu}
+            onClose={() => {
+              setShowHamburgerMenu(false);
+              onMenuClose?.();
+            }}
+            onNavigateToDashboard={(dashboardType) => {
+              setShowHamburgerMenu(false);
+              onMenuClose?.();
+              // Navigate to different contexts
+              if (dashboardType === null || dashboardType === 'personal') {
+                onContextChange?.('personal');
+              } else if (dashboardType === 'coach') {
+                onContextChange?.('coach');
+              }
+              // Stay on family if 'family' is selected
+            }}
+            context="family"
+          />
+        )}
+        
         {/* Status bar area - solid color */}
         <View style={{ height: insets.top, backgroundColor: '#0ea5e9' }} />
         

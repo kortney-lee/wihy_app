@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect, useCallback } from 'react';
+import React, { useState, useContext, useEffect, useCallback, useRef } from 'react';
 import {
   View,
   Text,
@@ -9,8 +9,9 @@ import {
   Alert,
   Platform,
   Image,
+  Animated,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { useNavigation } from '@react-navigation/native';
@@ -279,6 +280,18 @@ export default function Profile() {
       title: 'Preferences',
       items: [
         {
+          id: 'auto-scan',
+          title: 'Auto Scan',
+          subtitle: autoScanEnabled ? 'Automatically scan barcodes' : 'Enable quick barcode scanning',
+          type: 'toggle' as const,
+          icon: 'barcode',
+          value: autoScanEnabled,
+          onToggle: async (value) => {
+            setAutoScanEnabled(value);
+            await persistPreferences({ autoScan: value });
+          },
+        },
+        {
           id: 'notifications',
           title: 'Notifications',
           subtitle: notificationsEnabled ? 'Reminders enabled' : 'Enable health reminders',
@@ -391,18 +404,6 @@ export default function Profile() {
             await persistPreferences({ analytics: value });
           },
         },
-        {
-          id: 'auto-scan',
-          title: 'Auto Scan',
-          subtitle: autoScanEnabled ? 'Automatically scan barcodes' : 'Enable quick barcode scanning',
-          type: 'toggle' as const,
-          icon: 'barcode',
-          value: autoScanEnabled,
-          onToggle: async (value) => {
-            setAutoScanEnabled(value);
-            await persistPreferences({ autoScan: value });
-          },
-        },
       ],
     },
     {
@@ -493,15 +494,49 @@ export default function Profile() {
     </Pressable>
   );
 
+  // Collapsing header animation
+  const scrollY = useRef(new Animated.Value(0)).current;
+  const insets = useSafeAreaInsets();
+  
+  // Profile header is taller than progress header
+  const HEADER_MAX_HEIGHT = 220;
+  const HEADER_MIN_HEIGHT = 0;
+  const HEADER_SCROLL_DISTANCE = HEADER_MAX_HEIGHT - HEADER_MIN_HEIGHT;
+
+  const headerHeight = scrollY.interpolate({
+    inputRange: [0, HEADER_SCROLL_DISTANCE],
+    outputRange: [HEADER_MAX_HEIGHT, HEADER_MIN_HEIGHT],
+    extrapolate: 'clamp',
+  });
+
+  const headerOpacity = scrollY.interpolate({
+    inputRange: [0, HEADER_SCROLL_DISTANCE / 2],
+    outputRange: [1, 0],
+    extrapolate: 'clamp',
+  });
+
+  const avatarScale = scrollY.interpolate({
+    inputRange: [0, HEADER_SCROLL_DISTANCE],
+    outputRange: [1, 0.5],
+    extrapolate: 'clamp',
+  });
+
   const mainContent = (
-    <SafeAreaView style={[styles.container, isWeb && { flex: undefined, minHeight: undefined }]} edges={['left', 'right']}>
-      {/* Profile Header - Fixed at top, does not scroll */}
-      <GradientDashboardHeader
-        title=""
-        gradient="profile"
-        style={styles.profileHeader}
-      >
-        <View style={styles.profileHeaderContent}>
+    <View style={[styles.container, isWeb && { flex: undefined, minHeight: undefined }]}>
+      {/* Status bar area - Always blue */}
+      <View style={{ height: insets.top, backgroundColor: '#3B82F6' }} />
+      
+      {/* Collapsible Profile Header */}
+      <Animated.View style={[styles.collapsibleHeader, { height: headerHeight, backgroundColor: '#3B82F6' }]}>
+        <Animated.View 
+          style={[
+            styles.profileHeaderContent,
+            { 
+              opacity: headerOpacity,
+              transform: [{ scale: avatarScale }]
+            }
+          ]}
+        >
           <View style={styles.avatarContainer}>
             <View style={styles.avatar}>
               {userInfo.picture ? (
@@ -525,19 +560,19 @@ export default function Profile() {
           )}
           <Text style={styles.userEmail}>{userInfo.email}</Text>
           <Text style={styles.memberSince}>Member since {userInfo.memberSince}</Text>
-
-          <Pressable style={styles.editButton} onPress={handleEditProfile}>
-            <SvgIcon name="pencil" size={getResponsiveIconSize(sizes.icons.sm)} color="#3b82f6" />
-            <Text style={styles.editButtonText}>Edit Profile</Text>
-          </Pressable>
-        </View>
-      </GradientDashboardHeader>
+        </Animated.View>
+      </Animated.View>
 
       {/* Scrollable Content */}
-      <ScrollView 
+      <Animated.ScrollView 
         showsVerticalScrollIndicator={false}
         style={isWeb ? { flex: undefined } : undefined}
         contentContainerStyle={isWeb ? { flexGrow: undefined } : undefined}
+        scrollEventThrottle={16}
+        onScroll={Animated.event(
+          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+          { useNativeDriver: false }
+        )}
       >
         {/* Stats Cards */}
         <View style={styles.statsContainer}>
@@ -575,7 +610,7 @@ export default function Profile() {
 
         {/* Bottom spacing for tab navigation */}
         <View style={{ height: 100 }} />
-      </ScrollView>
+      </Animated.ScrollView>
       
       <PlansModal
         visible={showPlansModal}
@@ -592,7 +627,7 @@ export default function Profile() {
 
       {/* Dev Plan Switcher - Remove in Production */}
       <DevPlanSwitcher />
-    </SafeAreaView>
+    </View>
   );
 
   // Return wrapped content for web, or direct content for native
@@ -604,6 +639,11 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: dashboardTheme.colors.background,
   },
+  collapsibleHeader: {
+    overflow: 'hidden',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   profileHeader: {
     paddingTop: 40, // Account for status bar since gradient goes to top
     paddingBottom: 16,
@@ -611,6 +651,7 @@ const styles = StyleSheet.create({
   },
   profileHeaderContent: {
     alignItems: 'center',
+    paddingVertical: 16,
   },
   avatarContainer: {
     marginBottom: 16,
