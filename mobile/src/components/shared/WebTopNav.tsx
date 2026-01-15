@@ -33,20 +33,31 @@ export function WebTopNav({ activeTab = 'none' }: WebTopNavProps) {
   if (!isWeb) {
     return null;
   }
+
+  // Navigate to a tab screen (inside Main TabNavigator)
+  // From Stack screens, we need to specify Main + screen
+  const navigateToTab = (tabName: string) => {
+    navigation.navigate('Main', { screen: tabName });
+  };
+
+  // Navigate to a Stack screen (outside TabNavigator)
+  const navigateToStack = (screenName: string) => {
+    navigation.navigate(screenName as any);
+  };
   
   // Handle health button click - show subscription for free users
   const handleHealthPress = () => {
     if (isFreeUser) {
-      navigation.navigate('Subscription');
+      navigateToStack('Subscription');
     } else {
-      navigation.navigate('Health');
+      navigateToTab('Health');
     }
   };
 
   // Handle profile button click
   const handleProfilePress = () => {
     if (user) {
-      navigation.navigate('Profile');
+      navigateToTab('Profile');
     } else {
       setShowLoginModal(true);
     }
@@ -57,7 +68,7 @@ export function WebTopNav({ activeTab = 'none' }: WebTopNavProps) {
     <nav className="web-top-nav">
       <div className="web-nav-left">
         <button 
-          onClick={() => navigation.navigate('Main')} 
+          onClick={() => navigateToTab('Home')} 
           className={`web-nav-item nav-home ${activeTab === 'home' ? 'active' : ''}`} 
           type="button"
         >
@@ -77,7 +88,7 @@ export function WebTopNav({ activeTab = 'none' }: WebTopNavProps) {
           <span>Health</span>
         </button>
         <button 
-          onClick={() => navigation.navigate('Scan')} 
+          onClick={() => navigateToTab('Scan')} 
           className="web-nav-item nav-scan mobile-only" 
           type="button"
         >
@@ -87,7 +98,7 @@ export function WebTopNav({ activeTab = 'none' }: WebTopNavProps) {
           <span>Scan</span>
         </button>
         <button 
-          onClick={() => navigation.navigate('Chat')} 
+          onClick={() => navigateToTab('Chat')} 
           className={`web-nav-item nav-chat ${activeTab === 'chat' ? 'active' : ''}`} 
           type="button"
         >
@@ -97,7 +108,7 @@ export function WebTopNav({ activeTab = 'none' }: WebTopNavProps) {
           <span>Chat</span>
         </button>
         <button 
-          onClick={() => navigation.navigate('About' as any)} 
+          onClick={() => navigateToStack('About')} 
           className="web-nav-item nav-about" 
           type="button"
         >
