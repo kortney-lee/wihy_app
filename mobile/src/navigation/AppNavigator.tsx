@@ -29,6 +29,8 @@ import WihyHomeScreen from '../screens/WihyHomeScreen';
 import ResearchScreen from '../screens/ResearchScreen';
 import Profile from '../screens/Profile';
 import NutritionFacts from '../screens/NutritionFacts';
+import BeautyFacts from '../screens/BeautyFacts';
+import PetFoodFacts from '../screens/PetFoodFacts';
 import PermissionsScreen from '../screens/PermissionsScreen';
 import ScanHistoryScreen from '../screens/ScanHistoryScreen';
 import CoachDashboardPage from '../screens/CoachDashboardPage';
@@ -91,6 +93,8 @@ const linking: LinkingOptions<RootStackParamList> = {
       B2BPricing: 'pricing',
       FullChat: 'fullchat',
       NutritionFacts: 'nutritionfacts',
+      BeautyFacts: 'beautyfacts',
+      PetFoodFacts: 'petfoodfacts',
       Camera: 'camera',
       ResearchDashboard: 'research',
       Permissions: 'permissions',
@@ -386,6 +390,22 @@ export default function AppNavigator() {
         <Stack.Screen
           name="NutritionFacts"
           component={NutritionFacts}
+          options={{
+            presentation: 'modal',
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="BeautyFacts"
+          component={BeautyFacts}
+          options={{
+            presentation: 'modal',
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="PetFoodFacts"
+          component={PetFoodFacts}
           options={{
             presentation: 'modal',
             headerShown: false,
