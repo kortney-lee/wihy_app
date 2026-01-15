@@ -31,6 +31,9 @@ import Profile from '../screens/Profile';
 import NutritionFacts from '../screens/NutritionFacts';
 import BeautyFacts from '../screens/BeautyFacts';
 import PetFoodFacts from '../screens/PetFoodFacts';
+import FoodPhotoFacts from '../screens/FoodPhotoFacts';
+import PillIdentification from '../screens/PillIdentification';
+import LabelReader from '../screens/LabelReader';
 import PermissionsScreen from '../screens/PermissionsScreen';
 import ScanHistoryScreen from '../screens/ScanHistoryScreen';
 import CoachDashboardPage from '../screens/CoachDashboardPage';
@@ -406,6 +409,30 @@ export default function AppNavigator() {
         <Stack.Screen
           name="PetFoodFacts"
           component={PetFoodFacts}
+          options={{
+            presentation: 'modal',
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="FoodPhotoFacts"
+          component={FoodPhotoFacts}
+          options={{
+            presentation: 'modal',
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="PillIdentification"
+          component={PillIdentification}
+          options={{
+            presentation: 'modal',
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="LabelReader"
+          component={LabelReader}
           options={{
             presentation: 'modal',
             headerShown: false,

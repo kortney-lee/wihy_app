@@ -280,6 +280,218 @@ export default function WihyHomeScreen({}: Props = {}) {
             timestamp: new Date().toISOString(),
           },
         });
+      } else if (searchQuery === 'photo salad') {
+        // Demo: Navigate to FoodPhotoFacts with mock salad data
+        console.log('Navigating to FoodPhotoFacts...');
+        navigation.navigate('FoodPhotoFacts', {
+          photoData: {
+            success: true,
+            scan_id: `photo_demo_${Date.now()}`,
+            scan_type: 'food_photo',
+            image_url: null,
+            timestamp: new Date().toISOString(),
+            processing_time: 1.2,
+            analysis: {
+              detected_foods: ['Mixed Green Salad', 'Cherry Tomatoes', 'Cucumber', 'Feta Cheese', 'Olive Oil Dressing'],
+              confidence_score: 0.94,
+              meal_type: 'Lunch',
+              summary: 'A healthy Mediterranean-style mixed green salad with fresh vegetables and feta cheese. Good source of fiber and vitamins.',
+            },
+            metadata: {
+              product_name: 'Mixed Green Salad',
+              health_score: 92,
+              nutrition_score: 88,
+              nutrition_grade: { grade: 'A', score: 92 },
+              nova_group: 1,
+              processing_level: 'unprocessed',
+              vision_confidence: 0.94,
+              detected_foods: ['Mixed Green Salad', 'Cherry Tomatoes', 'Cucumber', 'Feta Cheese'],
+              nutrition_facts: {
+                serving_size: '1 bowl (250g)',
+                serving_size_g: 250,
+                servings_per_container: 1,
+                calories: 185,
+                calories_serving: 185,
+                protein: 8,
+                carbohydrates: 12,
+                fat: 14,
+                saturated_fat: 4,
+                fiber: 4,
+                sugars: 6,
+                sodium: 380,
+                cholesterol: 20,
+                trans_fat: 0,
+                polyunsaturated_fat: 2,
+                monounsaturated_fat: 8,
+                potassium: 450,
+                calcium: 150,
+                iron: 2,
+                vitamin_a: 3500,
+                vitamin_c: 25,
+                vitamin_d: 0,
+              },
+              nutrition_analysis: {
+                health_alerts: [],
+                positive_aspects: [
+                  'High in dietary fiber',
+                  'Rich in vitamins A and C',
+                  'Good source of healthy fats from olive oil',
+                  'Low in processed ingredients'
+                ],
+                areas_of_concern: [
+                  'Moderate sodium from feta cheese'
+                ],
+              },
+              categories: ['Salads', 'Lunch', 'Mediterranean'],
+            },
+            ask_wihy: 'Tell me about the health benefits of this salad and how it fits into a balanced diet',
+          },
+          capturedImage: null,
+          context: {
+            sessionId: `photo_salad_${Date.now()}`,
+            query: 'photo salad',
+            type: 'search',
+            scanType: 'demo',
+            timestamp: new Date().toISOString(),
+          },
+        });
+      } else if (searchQuery === 'pill aspirin') {
+        // Demo: Navigate to PillIdentification with mock aspirin data
+        console.log('Navigating to PillIdentification...');
+        navigation.navigate('PillIdentification', {
+          pillData: {
+            scanId: `pill_demo_${Date.now()}`,
+            matches: [
+              {
+                rxcui: '1191',
+                name: 'Aspirin',
+                brandName: 'Bayer Aspirin',
+                ndc11: '00280130005',
+                imprint: 'BAYER',
+                color: 'White',
+                shape: 'Round',
+                confidence: 0.95,
+                image_url: null,
+              },
+              {
+                rxcui: '1191',
+                name: 'Aspirin',
+                brandName: 'Generic Aspirin',
+                ndc11: '00904197260',
+                imprint: 'ASA',
+                color: 'White',
+                shape: 'Round',
+                confidence: 0.82,
+                image_url: null,
+              }
+            ],
+            topMatch: {
+              name: 'Aspirin',
+              brandName: 'Bayer Aspirin',
+              genericName: 'Acetylsalicylic Acid',
+              imprint: 'BAYER',
+              color: 'White',
+              shape: 'Round',
+              rxcui: '1191',
+              confidence: 0.95,
+              dosage: '325mg',
+              manufacturer: 'Bayer Healthcare',
+            },
+          },
+          capturedImage: null,
+          context: {
+            sessionId: `pill_aspirin_${Date.now()}`,
+            query: 'pill aspirin',
+            type: 'search',
+            scanType: 'demo',
+            timestamp: new Date().toISOString(),
+          },
+        });
+      } else if (searchQuery === 'label organic') {
+        // Demo: Navigate to LabelReader with mock organic label data
+        console.log('Navigating to LabelReader...');
+        navigation.navigate('LabelReader', {
+          labelData: {
+            productName: 'Organic Valley Whole Milk',
+            summary: 'Certified organic milk with verified claims. Some marketing language may be exaggerated.',
+            detectedText: 'USDA ORGANIC | Pasture-Raised | Non-GMO Project Verified | From Family Farms | Grade A | rBGH Free | Heart Healthy | Farm Fresh Goodness',
+            detectedClaims: [
+              {
+                claim: 'USDA Organic',
+                category: 'certification',
+                verified: true,
+                needs_verification: false,
+                description: 'USDA certified organic product meeting federal organic standards',
+              },
+              {
+                claim: 'Pasture-Raised',
+                category: 'marketing',
+                verified: false,
+                needs_verification: true,
+                description: 'Implies cows have access to pasture, but standards vary',
+              },
+              {
+                claim: 'Non-GMO Project Verified',
+                category: 'certification',
+                verified: true,
+                needs_verification: false,
+                description: 'Third-party verified to meet Non-GMO Project standards',
+              },
+              {
+                claim: 'Heart Healthy',
+                category: 'health',
+                verified: false,
+                needs_verification: true,
+                description: 'Health claim that may require FDA substantiation',
+              },
+              {
+                claim: 'Farm Fresh Goodness',
+                category: 'marketing',
+                verified: false,
+                needs_verification: false,
+                description: 'Generic marketing term with no specific meaning',
+              }
+            ],
+            greenwashingFlags: [
+              {
+                flag: 'Unverified Health Claim',
+                severity: 'medium',
+                detail: 'The "Heart Healthy" claim may not meet FDA requirements for health claims',
+                claim_text: 'Heart Healthy',
+              },
+              {
+                flag: 'Vague Marketing Language',
+                severity: 'low',
+                detail: '"Farm Fresh Goodness" is a marketing term with no regulated definition',
+                claim_text: 'Farm Fresh Goodness',
+              },
+              {
+                flag: 'Verified Organic Certification',
+                severity: 'positive',
+                detail: 'USDA Organic certification is legitimate and verified',
+                claim_text: 'USDA ORGANIC',
+              }
+            ],
+            greenwashingScore: 28,
+            sustainabilityScore: 75,
+            detectedCertifications: ['USDA Organic', 'Non-GMO Project'],
+            healthClaims: ['Heart Healthy', 'rBGH Free'],
+            ingredientsList: ['Organic Whole Milk', 'Vitamin D3'],
+            recommendations: [
+              'The organic and non-GMO certifications are legitimate',
+              'Be cautious of "Heart Healthy" claims without FDA backing',
+              'Marketing terms like "Farm Fresh" are not regulated'
+            ],
+          },
+          capturedImage: null,
+          context: {
+            sessionId: `label_organic_${Date.now()}`,
+            query: 'label organic',
+            type: 'search',
+            scanType: 'demo',
+            timestamp: new Date().toISOString(),
+          },
+        });
       } else {
         // Navigate directly to FullChat for all other queries
         navigation.navigate('FullChat', {
