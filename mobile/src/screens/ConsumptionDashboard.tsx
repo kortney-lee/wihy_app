@@ -14,7 +14,7 @@ import {
   RefreshControl,
   Modal,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { GradientDashboardHeader } from '../components/shared';
@@ -121,6 +121,32 @@ const ConsumptionDashboard: React.FC<ConsumptionDashboardProps> = ({
   const [selectedTab, setSelectedTab] = useState<'nutrition' | 'meals' | 'recipes' | 'shopping'>('nutrition');
   const [searchQuery, setSearchQuery] = useState('');
   const circularProgress = useRef(new Animated.Value(0)).current;
+  
+  // Collapsing header animation
+  const scrollY = useRef(new Animated.Value(0)).current;
+  const insets = useSafeAreaInsets();
+  
+  const HEADER_MAX_HEIGHT = 140;
+  const HEADER_MIN_HEIGHT = 0;
+  const HEADER_SCROLL_DISTANCE = HEADER_MAX_HEIGHT - HEADER_MIN_HEIGHT;
+
+  const headerHeight = scrollY.interpolate({
+    inputRange: [0, HEADER_SCROLL_DISTANCE],
+    outputRange: [HEADER_MAX_HEIGHT, HEADER_MIN_HEIGHT],
+    extrapolate: 'clamp',
+  });
+
+  const headerOpacity = scrollY.interpolate({
+    inputRange: [0, HEADER_SCROLL_DISTANCE / 2],
+    outputRange: [1, 0],
+    extrapolate: 'clamp',
+  });
+
+  const titleScale = scrollY.interpolate({
+    inputRange: [0, HEADER_SCROLL_DISTANCE],
+    outputRange: [1, 0.8],
+    extrapolate: 'clamp',
+  });
   
   // API State
   const [dailySummary, setDailySummary] = useState<DailySummary | null>(null);
@@ -1254,23 +1280,68 @@ const ConsumptionDashboard: React.FC<ConsumptionDashboardProps> = ({
 
   return (
     <View style={styles.container}>
-      {/* Header - Fixed at top, does not scroll */}
-      <GradientDashboardHeader
-        title="Nutrition Analysis"
-        subtitle="Track your daily nutrition intake"
-        gradient="consumption"
-        badge={{
-          text: `${Math.round((nutritionGoals.calories.current / nutritionGoals.calories.target) * 100)}% daily goal achieved`
-        }}
-      />
+      {/* Status bar area - Always deep orange */}
+      <View style={{ height: insets.top, backgroundColor: '#ea580c' }} />
+      
+      {/* Collapsing Header */}
+      <Animated.View style={[styles.collapsibleHeader, { height: headerHeight, backgroundColor: '#ea580c' }]}>
+        <Animated.View 
+          style={[
+            styles.headerContent,
+            { 
+              opacity: headerOpacity,
+              transform: [{ scale: titleScale }]
+            }
+          ]}
+        >
+          <Text style={styles.collapsibleHeaderTitle}>Nutrition Analysis</Text>
+          <Text style={styles.collapsibleHeaderSubtitle}>Track your daily nutrition intake</Text>
+          <View style={styles.progressBadge}>
+            <Text style={styles.progressBadgeText}>{Math.round((nutritionGoals.calories.current / nutritionGoals.calories.target) * 100)}% daily goal achieved</Text>
+          </View>
+        </Animated.View>
+      </Animated.View>
 
-      <ScrollView 
+      {/* Tab Selector - Fixed below header */}
+      <View style={styles.tabContainer}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.tabScrollContent}
+          keyboardShouldPersistTaps="handled"
+        >
+          {['nutrition', 'meals', 'recipes', 'shopping'].map(tab => (
+            <TouchableOpacity
+              key={tab}
+              style={[
+                styles.tabButton,
+                selectedTab === tab && styles.tabButtonActive,
+              ]}
+              onPress={() => setSelectedTab(tab as any)}
+            >
+              <Text style={[
+                styles.tabText,
+                selectedTab === tab && styles.tabTextActive,
+              ]}>
+                {tab.charAt(0).toUpperCase() + tab.slice(1)}
+              </Text>
+            </TouchableOpacity>
+          ))}
+          </ScrollView>
+        </View>
+
+      <Animated.ScrollView 
         showsVerticalScrollIndicator={false} 
         keyboardShouldPersistTaps="handled"
+        scrollEventThrottle={16}
+        onScroll={Animated.event(
+          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+          { useNativeDriver: false }
+        )}
         refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-          }
-        >
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
         {/* Search Bar */}
         <View style={styles.searchContainer}>
           <View style={styles.searchInputContainer}>
@@ -1285,36 +1356,6 @@ const ConsumptionDashboard: React.FC<ConsumptionDashboardProps> = ({
           </View>
         </View>
 
-
-
-        {/* Tab Selector */}
-        <View style={styles.tabContainer}>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.tabScrollContent}
-            keyboardShouldPersistTaps="handled"
-          >
-            {['nutrition', 'meals', 'recipes', 'shopping'].map(tab => (
-              <TouchableOpacity
-                key={tab}
-                style={[
-                  styles.tabButton,
-                  selectedTab === tab && styles.tabButtonActive,
-                ]}
-                onPress={() => setSelectedTab(tab as any)}
-              >
-                <Text style={[
-                  styles.tabText,
-                  selectedTab === tab && styles.tabTextActive,
-                ]}>
-                  {tab.charAt(0).toUpperCase() + tab.slice(1)}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-        </View>
-
         {/* Dynamic Content Area */}
         <View style={[styles.contentArea, { paddingHorizontal: layout.horizontalPadding }]}>
           {renderTabContent()}
@@ -1322,7 +1363,7 @@ const ConsumptionDashboard: React.FC<ConsumptionDashboardProps> = ({
 
         {/* Bottom spacing for tab navigation */}
         <View style={{ height: 100 }} />
-      </ScrollView>
+      </Animated.ScrollView>
       
       {/* Confirmation Modal */}
       {renderConfirmationModal()}
@@ -1333,6 +1374,38 @@ const ConsumptionDashboard: React.FC<ConsumptionDashboardProps> = ({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: dashboardTheme.colors.background,
+  },
+  collapsibleHeader: {
+    overflow: 'hidden',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  headerContent: {
+    alignItems: 'center',
+    paddingVertical: 16,
+  },
+  collapsibleHeaderTitle: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#ffffff',
+  },
+  collapsibleHeaderSubtitle: {
+    fontSize: 16,
+    color: 'rgba(255,255,255,0.9)',
+    marginTop: 4,
+  },
+  progressBadge: {
+    backgroundColor: 'rgba(0,0,0,0.2)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    marginTop: 12,
+  },
+  progressBadgeText: {
+    color: '#ffffff',
+    fontSize: 14,
+    fontWeight: '600',
   },
   centerContent: {
     justifyContent: 'center',
