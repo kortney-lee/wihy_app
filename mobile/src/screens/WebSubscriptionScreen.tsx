@@ -17,6 +17,7 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList, TabParamList } from '../types/navigation';
 import { colors, borderRadius } from '../theme/design-tokens';
 import { checkoutService } from '../services/checkoutService';
+import { purchaseService } from '../services/purchaseService';
 import { useAuth } from '../context/AuthContext';
 import EmailCheckoutModal from '../components/checkout/EmailCheckoutModal';
 
@@ -321,29 +322,161 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
     }
   };
 
+  // Map plan IDs to native store product IDs
+  const getNativeProductId = (planId: string, yearly: boolean): string => {
+    const suffix = yearly ? '_yearly' : '_monthly';
+    const mapping: Record<string, string> = {
+      'premium': `com.wihy.native.premium${suffix}`,
+      'family-basic': `com.wihy.native.family_basic${suffix}`,
+      'family-pro': `com.wihy.native.family_premium${suffix}`,
+      'coach': `com.wihy.native.coach${suffix}`,
+    };
+    return mapping[planId] || planId;
+  };
+
   const handleSubscribe = async (planId: string) => {
     const plan = CONSUMER_PLANS.find(p => p.id === planId);
     if (!plan) return;
 
-    // Free plan - redirect to registration
+    // Free plan - login or signup (no payment required)
     if (planId === 'free') {
       if (!user?.email) {
+        // Not logged in - prompt to login or signup
         if (Platform.OS === 'web' && typeof window !== 'undefined') {
+          // On web, redirect to register page with free plan
           window.location.href = '/register?plan=free';
         } else {
-          navigation.navigate('Register' as any, { plan: 'free' });
+          // On native, show login/signup options
+          Alert.alert(
+            'Get Started Free',
+            'Create an account or sign in to access your free plan.',
+            [
+              { text: 'Cancel', style: 'cancel' },
+              { 
+                text: 'Sign In', 
+                onPress: () => navigation.navigate('Login' as any, { plan: 'free' })
+              },
+              { 
+                text: 'Create Account', 
+                onPress: () => navigation.navigate('Register' as any, { plan: 'free' })
+              },
+            ]
+          );
         }
       } else {
-        if (Platform.OS === 'web' && typeof window !== 'undefined') {
-          window.alert('You are already on the Free plan!');
-        } else {
-          Alert.alert('Free Plan', 'You are already on the Free plan!');
-        }
+        // Already logged in - navigate to main app
+        navigation.navigate('Main');
       }
       return;
     }
 
-    // For logged-in users, go directly to checkout
+    // iOS: Use Apple In-App Purchases (required by App Store policy)
+    if (Platform.OS === 'ios') {
+      // Require login first so we can associate purchase with user account
+      if (!user?.email) {
+        Alert.alert(
+          'Sign In Required',
+          'Please sign in or create an account before subscribing. This lets us sync your subscription across devices.',
+          [
+            { text: 'Cancel', style: 'cancel' },
+            { 
+              text: 'Sign In', 
+              onPress: () => navigation.navigate('Login' as any, { returnTo: 'Subscription', planId })
+            },
+            { 
+              text: 'Create Account', 
+              onPress: () => navigation.navigate('Register' as any, { returnTo: 'Subscription', planId })
+            },
+          ]
+        );
+        return;
+      }
+
+      setIsLoading(true);
+      try {
+        // Initialize purchase service if needed
+        await purchaseService.initialize();
+        
+        const productId = getNativeProductId(planId, billingCycle === 'yearly');
+        console.log('[Subscription] iOS In-App Purchase:', productId);
+        
+        // Trigger the purchase - listener in purchaseService will handle completion
+        await purchaseService.purchase(productId);
+        
+        // Note: Purchase completion is handled by the purchase listener
+        // The UI should update when the listener verifies the purchase with backend
+      } catch (error: any) {
+        console.error('[Subscription] iOS purchase error:', error);
+        Alert.alert(
+          'Purchase Error',
+          error.message || 'Unable to complete purchase. Please try again.'
+        );
+      } finally {
+        setIsLoading(false);
+      }
+      return;
+    }
+
+    // Android: Use Google Play Billing (preferred) or Stripe
+    if (Platform.OS === 'android') {
+      // Require login first so we can associate purchase with user account
+      if (!user?.email) {
+        Alert.alert(
+          'Sign In Required',
+          'Please sign in or create an account before subscribing. This lets us sync your subscription across devices.',
+          [
+            { text: 'Cancel', style: 'cancel' },
+            { 
+              text: 'Sign In', 
+              onPress: () => navigation.navigate('Login' as any, { returnTo: 'Subscription', planId })
+            },
+            { 
+              text: 'Create Account', 
+              onPress: () => navigation.navigate('Register' as any, { returnTo: 'Subscription', planId })
+            },
+          ]
+        );
+        return;
+      }
+
+      setIsLoading(true);
+      try {
+        // Try Google Play Billing first
+        await purchaseService.initialize();
+        const productId = getNativeProductId(planId, billingCycle === 'yearly');
+        const products = purchaseService.getProducts();
+        
+        // Check if product is available in Google Play
+        const googlePlayProduct = products.find(p => p.productId === productId);
+        
+        if (googlePlayProduct) {
+          console.log('[Subscription] Android Google Play purchase:', productId);
+          await purchaseService.purchase(productId);
+        } else {
+          // Fallback to Stripe for Android if product not in Google Play
+          console.log('[Subscription] Android Stripe fallback:', planId);
+          const checkoutPlanId = billingCycle === 'yearly' && plan.yearlyPrice ? `${planId}-yearly` : planId;
+          const response = await checkoutService.initiateCheckout(checkoutPlanId, user.email);
+          
+          if (response.success && response.checkoutUrl) {
+            await checkoutService.openCheckout(response.checkoutUrl);
+          } else {
+            throw new Error(response.error || 'Failed to create checkout session');
+          }
+        }
+      } catch (error: any) {
+        console.error('[Subscription] Android purchase error:', error);
+        Alert.alert(
+          'Purchase Error',
+          error.message || 'Unable to complete purchase. Please try again.'
+        );
+      } finally {
+        setIsLoading(false);
+      }
+      return;
+    }
+
+    // Web: Use Stripe checkout
     if (user?.email) {
       setIsLoading(true);
       try {
@@ -351,20 +484,16 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
         const response = await checkoutService.initiateCheckout(checkoutPlanId, user.email);
         
         if (response.success && response.checkoutUrl) {
-          if (Platform.OS === 'web' && typeof window !== 'undefined') {
+          if (typeof window !== 'undefined') {
             window.location.href = response.checkoutUrl;
-          } else {
-            await checkoutService.openCheckout(response.checkoutUrl);
           }
         } else {
           throw new Error(response.error || 'Failed to create checkout session');
         }
       } catch (error: any) {
-        console.error('Checkout error:', error);
-        if (Platform.OS === 'web' && typeof window !== 'undefined') {
+        console.error('[Subscription] Web checkout error:', error);
+        if (typeof window !== 'undefined') {
           window.alert(`Checkout Error\n\n${error.message || 'Please try again.'}`);
-        } else {
-          Alert.alert('Checkout Error', error.message || 'Please try again.');
         }
       } finally {
         setIsLoading(false);
@@ -372,7 +501,7 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
       return;
     }
 
-    // For new users, show email collection modal
+    // For new users on web, show email collection modal
     setSelectedPlan(plan);
     setShowEmailModal(true);
   };
