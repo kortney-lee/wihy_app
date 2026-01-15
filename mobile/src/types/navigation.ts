@@ -8,8 +8,10 @@ export type TabParamList = {
   NutritionFacts: { foodItem: any; context?: any };
 };
 
+import { NavigatorScreenParams } from '@react-navigation/native';
+
 export type RootStackParamList = {
-  Main: undefined;
+  Main: NavigatorScreenParams<TabParamList> | undefined;
   FullChat: { context?: any; initialMessage?: string };
   NutritionFacts: { foodItem: any; context?: any };
   Dashboard: { filter?: string };
