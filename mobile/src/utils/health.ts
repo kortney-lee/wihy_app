@@ -1,9 +1,22 @@
 // Apple HealthKit and Google Fit integration using native SDKs.
-import HealthKit, {
-  HKQuantityTypeIdentifier,
-} from '@kingstinct/react-native-healthkit';
-import GoogleFit, { Scopes } from 'react-native-google-fit';
 import { Platform } from 'react-native';
+
+// Conditional imports for native modules (not available on web)
+let HealthKit: any;
+let HKQuantityTypeIdentifier: any;
+let GoogleFit: any;
+let Scopes: any;
+
+if (Platform.OS === 'ios') {
+  const healthKit = require('@kingstinct/react-native-healthkit');
+  HealthKit = healthKit.default;
+  HKQuantityTypeIdentifier = healthKit.HKQuantityTypeIdentifier;
+}
+
+if (Platform.OS === 'android') {
+  GoogleFit = require('react-native-google-fit').default;
+  Scopes = require('react-native-google-fit').Scopes;
+}
 
 export type HealthPermission = {
   read: string[];

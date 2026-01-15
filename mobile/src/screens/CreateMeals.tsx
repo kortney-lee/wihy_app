@@ -14,14 +14,15 @@ import {
   Dimensions,
   RefreshControl,
   useWindowDimensions,
+  Animated,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { dashboardColors, GradientDashboardHeader } from '../components/shared';
+import { dashboardColors } from '../components/shared';
 import { dashboardTheme } from '../theme/dashboardTheme';
 import { SweepBorder } from '../components/SweepBorder';
 import { AuthContext } from '../context/AuthContext';
@@ -177,6 +178,31 @@ export default function CreateMeals() {
   const userId = user?.id;
   const navigation = useNavigation<NavigationProp>();
   const scrollViewRef = useRef<ScrollView>(null);
+  
+  // Collapsing header animation
+  const scrollY = useRef(new Animated.Value(0)).current;
+  const insets = useSafeAreaInsets();
+  const HEADER_MAX_HEIGHT = 140;
+  const HEADER_MIN_HEIGHT = 0;
+  const HEADER_SCROLL_DISTANCE = HEADER_MAX_HEIGHT - HEADER_MIN_HEIGHT;
+
+  const headerHeight = scrollY.interpolate({
+    inputRange: [0, HEADER_SCROLL_DISTANCE],
+    outputRange: [HEADER_MAX_HEIGHT, HEADER_MIN_HEIGHT],
+    extrapolate: 'clamp',
+  });
+
+  const headerOpacity = scrollY.interpolate({
+    inputRange: [0, HEADER_SCROLL_DISTANCE / 2],
+    outputRange: [1, 0],
+    extrapolate: 'clamp',
+  });
+
+  const titleScale = scrollY.interpolate({
+    inputRange: [0, HEADER_SCROLL_DISTANCE],
+    outputRange: [1, 0.8],
+    extrapolate: 'clamp',
+  });
   
   // View Mode State
   const [viewMode, setViewMode] = useState<ViewMode>('dashboard');
@@ -1579,13 +1605,17 @@ export default function CreateMeals() {
 
   // Render Dashboard View
   const renderDashboard = () => (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#e0f2fe' }} edges={['left', 'right']}>
-      {/* Fixed Header - Outside ScrollView */}
-      <GradientDashboardHeader
-        title="Meal Planning"
-        subtitle="Plan your nutrition journey"
-        gradient="createMeals"
-      />
+    <View style={{ flex: 1, backgroundColor: '#e0f2fe' }}>
+      {/* Status bar area - solid color */}
+      <View style={{ height: insets.top, backgroundColor: '#ef4444' }} />
+      
+      {/* Collapsing Header */}
+      <Animated.View style={[styles.collapsibleHeader, { height: headerHeight }]}>
+        <Animated.View style={[styles.dashboardHeaderContent, { opacity: headerOpacity, transform: [{ scale: titleScale }] }]}>
+          <Text style={styles.dashboardHeaderTitle}>Meal Planning</Text>
+          <Text style={styles.dashboardHeaderSubtitle}>Plan your nutrition journey</Text>
+        </Animated.View>
+      </Animated.View>
       
       {/* Create AI Meal Plan Button - Outside Header */}
       <View style={styles.createButtonContainer}>
@@ -1609,10 +1639,15 @@ export default function CreateMeals() {
         </TouchableOpacity>
       </View>
 
-      <ScrollView
+      <Animated.ScrollView
         ref={scrollViewRef}
         showsVerticalScrollIndicator={false}
         style={{ flex: 1 }}
+        scrollEventThrottle={16}
+        onScroll={Animated.event(
+          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+          { useNativeDriver: false }
+        )}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#ef4444" />
         }
@@ -1853,8 +1888,8 @@ export default function CreateMeals() {
       </View>
 
       <View style={{ height: 120 }} />
-    </ScrollView>
-    </SafeAreaView>
+    </Animated.ScrollView>
+    </View>
   );
 
   // Render Library View
@@ -3064,20 +3099,23 @@ export default function CreateMeals() {
     })?.meals || [];
     
     return (
-      <SafeAreaView style={styles.calendarContainer} edges={['left', 'right']}>
-        {/* Header - Using GradientDashboardHeader */}
-        <GradientDashboardHeader
-          title="Meal Calendar"
-          subtitle={activeMealPlan ? `${activeMealPlan.name}` : 'No active meal plan'}
-          gradient="mealCalendar"
-          showBackButton
-          onBackPress={() => setViewMode('dashboard')}
-          rightAction={{
-            icon: 'add',
-            onPress: () => setShowPlanGenerator(true)
-          }}
-          style={styles.calendarHeader}
-        />
+      <View style={styles.calendarContainer}>
+        {/* Status bar area - solid color */}
+        <View style={{ height: insets.top, backgroundColor: '#f59e0b' }} />
+        
+        {/* Collapsing Header */}
+        <Animated.View style={[styles.collapsibleHeader, { height: headerHeight, backgroundColor: '#f59e0b' }]}>
+          <Animated.View style={[styles.dashboardHeaderContent, { opacity: headerOpacity, transform: [{ scale: titleScale }] }]}>
+            <Pressable style={styles.calendarBackButton} onPress={() => setViewMode('dashboard')}>
+              <Ionicons name="arrow-back" size={24} color="#ffffff" />
+            </Pressable>
+            <Text style={styles.dashboardHeaderTitle}>Meal Calendar</Text>
+            <Text style={styles.dashboardHeaderSubtitle}>{activeMealPlan ? `${activeMealPlan.name}` : 'No active meal plan'}</Text>
+            <Pressable style={styles.calendarAddButton} onPress={() => setShowPlanGenerator(true)}>
+              <Ionicons name="add" size={24} color="#ffffff" />
+            </Pressable>
+          </Animated.View>
+        </Animated.View>
         
         <ScrollView style={styles.calendarContent} showsVerticalScrollIndicator={false}>
           {/* Month Navigation */}
@@ -3240,7 +3278,7 @@ export default function CreateMeals() {
           
           <View style={{ height: 100 }} />
         </ScrollView>
-      </SafeAreaView>
+      </View>
     );
   };
 
@@ -3884,6 +3922,40 @@ export default function CreateMeals() {
 }
 
 const styles = StyleSheet.create({
+  collapsibleHeader: {
+    backgroundColor: '#ef4444',
+    overflow: 'hidden',
+  },
+  dashboardHeaderContent: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+  },
+  dashboardHeaderTitle: {
+    fontSize: 28,
+    fontWeight: '700',
+    color: '#ffffff',
+    marginBottom: 4,
+  },
+  dashboardHeaderSubtitle: {
+    fontSize: 16,
+    color: 'rgba(255, 255, 255, 0.9)',
+  },
+  calendarBackButton: {
+    position: 'absolute',
+    left: 16,
+    top: '50%',
+    marginTop: -12,
+    padding: 4,
+  },
+  calendarAddButton: {
+    position: 'absolute',
+    right: 16,
+    top: '50%',
+    marginTop: -12,
+    padding: 4,
+  },
   header: {
     paddingHorizontal: dashboardTheme.header.paddingHorizontal,
     paddingTop: dashboardTheme.header.paddingTop,

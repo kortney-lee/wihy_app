@@ -1,21 +1,21 @@
-import React, { useState, useContext, useEffect, useCallback } from 'react';
+import React, { useState, useContext, useEffect, useCallback, useRef } from 'react';
 import {
   View,
   Text,
   StyleSheet,
-  ScrollView,
   TouchableOpacity,
   Dimensions,
   RefreshControl,
   ActivityIndicator,
   Platform,
+  Animated,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { AuthContext } from '../context/AuthContext';
 import { hasAIAccess } from '../utils/capabilities';
-import { GradientDashboardHeader, WebPageWrapper } from '../components/shared';
+import { WebPageWrapper } from '../components/shared';
 import { coachService, CoachOverview as CoachOverviewData } from '../services';
 
 const isWeb = Platform.OS === 'web';
@@ -36,6 +36,31 @@ export default function CoachOverview() {
   const [refreshing, setRefreshing] = useState(false);
   const [overviewData, setOverviewData] = useState<CoachOverviewData | null>(null);
   const [error, setError] = useState<string | null>(null);
+  
+  // Collapsing header animation
+  const scrollY = useRef(new Animated.Value(0)).current;
+  const insets = useSafeAreaInsets();
+  const HEADER_MAX_HEIGHT = 140;
+  const HEADER_MIN_HEIGHT = 0;
+  const HEADER_SCROLL_DISTANCE = HEADER_MAX_HEIGHT - HEADER_MIN_HEIGHT;
+
+  const headerHeight = scrollY.interpolate({
+    inputRange: [0, HEADER_SCROLL_DISTANCE],
+    outputRange: [HEADER_MAX_HEIGHT, HEADER_MIN_HEIGHT],
+    extrapolate: 'clamp',
+  });
+
+  const headerOpacity = scrollY.interpolate({
+    inputRange: [0, HEADER_SCROLL_DISTANCE / 2],
+    outputRange: [1, 0],
+    extrapolate: 'clamp',
+  });
+
+  const titleScale = scrollY.interpolate({
+    inputRange: [0, HEADER_SCROLL_DISTANCE],
+    outputRange: [1, 0.9],
+    extrapolate: 'clamp',
+  });
 
   // Load coach overview data
   const loadOverviewData = useCallback(async () => {
@@ -122,18 +147,11 @@ export default function CoachOverview() {
   if (loading) {
     return (
       <View style={styles.container}>
-        <View style={styles.statusBarBackground} />
-        <SafeAreaView style={styles.safeArea} edges={['left', 'right']}>
-          <GradientDashboardHeader
-            title="Coach Overview"
-            subtitle="Revenue & quick actions"
-            gradient="coachOverview"
-          />
-          <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color="#3b82f6" />
-            <Text style={styles.loadingText}>Loading overview...</Text>
-          </View>
-        </SafeAreaView>
+        <View style={{ height: insets.top, backgroundColor: '#3b82f6' }} />
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#3b82f6" />
+          <Text style={styles.loadingText}>Loading overview...</Text>
+        </View>
       </View>
     );
   }
@@ -141,21 +159,29 @@ export default function CoachOverview() {
   return (
     <WebPageWrapper activeTab="health">
       <View style={[styles.container, isWeb && { flex: undefined, minHeight: undefined }]}>
-        {/* Status bar background - matches header gradient */}
-        {!isWeb && <View style={styles.statusBarBackground} />}
+        {/* Status bar area - solid color */}
+        <View style={{ height: insets.top, backgroundColor: '#3b82f6' }} />
         
-        <SafeAreaView style={styles.safeArea} edges={['left', 'right']}>
-          {/* Fixed Header - Outside ScrollView */}
-          <GradientDashboardHeader
-            title="Coach Overview"
-            subtitle="Revenue & quick actions"
-            gradient="coachOverview"
-            badge={{ icon: "trending-up", text: `${revenueStats.activeClients} active clients` }}
-          />
+        {/* Collapsing Header */}
+        <Animated.View style={[styles.collapsibleHeader, { height: headerHeight }]}>
+          <Animated.View style={[styles.headerContent, { opacity: headerOpacity, transform: [{ scale: titleScale }] }]}>
+            <Text style={styles.headerTitle}>Coach Overview</Text>
+            <Text style={styles.headerSubtitle}>Revenue & quick actions</Text>
+            <View style={styles.statsRow}>
+              <Text style={styles.statsLabel}>Active Clients</Text>
+              <Text style={styles.statsValue}>{revenueStats.activeClients}</Text>
+            </View>
+          </Animated.View>
+        </Animated.View>
 
-        <ScrollView 
+        <Animated.ScrollView 
           style={styles.scrollView} 
           showsVerticalScrollIndicator={false}
+          scrollEventThrottle={16}
+          onScroll={Animated.event(
+            [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+            { useNativeDriver: false }
+          )}
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
           }
@@ -292,9 +318,8 @@ export default function CoachOverview() {
           </View>
 
           {/* Bottom spacing */}
-          <View style={{ height: 40 }} />
-        </ScrollView>
-        </SafeAreaView>
+          <View style={{ height: 100 }} />
+        </Animated.ScrollView>
       </View>
     </WebPageWrapper>
   );
@@ -305,16 +330,44 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#e0f2fe',
   },
-  statusBarBackground: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    height: 60,
-    backgroundColor: '#3b82f6', // coachOverview gradient top color
+  collapsibleHeader: {
+    backgroundColor: '#3b82f6',
+    overflow: 'hidden',
   },
-  safeArea: {
+  headerContent: {
     flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+  },
+  headerTitle: {
+    fontSize: 28,
+    fontWeight: '700',
+    color: '#ffffff',
+    marginBottom: 4,
+  },
+  headerSubtitle: {
+    fontSize: 16,
+    color: 'rgba(255, 255, 255, 0.9)',
+    marginBottom: 12,
+  },
+  statsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+  },
+  statsLabel: {
+    fontSize: 14,
+    color: 'rgba(255, 255, 255, 0.9)',
+    marginRight: 8,
+  },
+  statsValue: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#ffffff',
   },
   scrollView: {
     flex: 1,

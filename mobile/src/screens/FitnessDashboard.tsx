@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect, useCallback, memo } from 'react';
+import React, { useState, useMemo, useEffect, useCallback, memo, useRef } from 'react';
 import {
   View,
   Text,
@@ -12,6 +12,7 @@ import {
   RefreshControl,
   TextInput,
   Modal,
+  Animated,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Picker } from '@react-native-picker/picker';
@@ -295,6 +296,30 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
 }) => {
   const { userId } = useAuth();
   const insets = useSafeAreaInsets();
+  
+  // Collapsing header animation
+  const scrollY = useRef(new Animated.Value(0)).current;
+  const HEADER_MAX_HEIGHT = 140;
+  const HEADER_MIN_HEIGHT = 0;
+  const HEADER_SCROLL_DISTANCE = HEADER_MAX_HEIGHT - HEADER_MIN_HEIGHT;
+
+  const headerHeight = scrollY.interpolate({
+    inputRange: [0, HEADER_SCROLL_DISTANCE],
+    outputRange: [HEADER_MAX_HEIGHT, HEADER_MIN_HEIGHT],
+    extrapolate: 'clamp',
+  });
+
+  const headerOpacity = scrollY.interpolate({
+    inputRange: [0, HEADER_SCROLL_DISTANCE / 2],
+    outputRange: [1, 0],
+    extrapolate: 'clamp',
+  });
+
+  const titleScale = scrollY.interpolate({
+    inputRange: [0, HEADER_SCROLL_DISTANCE],
+    outputRange: [1, 0.8],
+    extrapolate: 'clamp',
+  });
   
   // API State
   const [workout, setWorkout] = useState<DailyWorkout | null>(null);
@@ -3467,18 +3492,26 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
   // Temporarily simplified render for debugging
   return (
     <View style={styles.container}>
-      <SafeAreaView style={styles.safeArea} edges={['left', 'right']}>
         {renderGoalSelector()}
         {renderWorkoutCompleteModal()}
         {renderDeleteConfirmationModal()}
         
-        {/* Fixed Header - Outside ScrollView */}
-        <GradientDashboardHeader
-          title={displayData.title}
-          subtitle={displayData.subtitle}
-          gradient="fitness"
-          badge={workout ? { icon: "sparkles-outline", text: "Personalized for you" } : undefined}
-        />
+        {/* Status bar area - solid color */}
+        <View style={{ height: insets.top, backgroundColor: '#fa5f06' }} />
+        
+        {/* Collapsing Header */}
+        <Animated.View style={[styles.animatedHeader, { height: headerHeight }]}>
+          <Animated.View style={[styles.animatedHeaderContent, { opacity: headerOpacity, transform: [{ scale: titleScale }] }]}>
+            <Text style={styles.animatedHeaderTitle}>{displayData.title}</Text>
+            <Text style={styles.animatedHeaderSubtitle}>{displayData.subtitle}</Text>
+            {workout && (
+              <View style={styles.animatedHeaderStatsRow}>
+                <Ionicons name="sparkles-outline" size={14} color="#ffffff" style={{ marginRight: 6 }} />
+                <Text style={styles.animatedHeaderStatsLabel}>Personalized for you</Text>
+              </View>
+            )}
+          </Animated.View>
+        </Animated.View>
         
         {/* Create Custom Workout Button - Outside Header for split effect */}
         <View style={styles.createButtonContainer}>
@@ -3502,9 +3535,14 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
           </TouchableOpacity>
         </View>
 
-        <ScrollView 
+        <Animated.ScrollView 
           style={styles.scrollView}
           showsVerticalScrollIndicator={false}
+          scrollEventThrottle={16}
+          onScroll={Animated.event(
+            [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+            { useNativeDriver: false }
+          )}
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
           }
@@ -4233,8 +4271,7 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
         </View>
       )}
 
-      </ScrollView>
-      </SafeAreaView>
+      </Animated.ScrollView>
     </View>
   );
 };

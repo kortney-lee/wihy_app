@@ -15,6 +15,40 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#e0f2fe',
   },
+  animatedHeader: {
+    backgroundColor: '#fa5f06',
+    overflow: 'hidden',
+  },
+  animatedHeaderContent: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+  },
+  animatedHeaderTitle: {
+    fontSize: 28,
+    fontWeight: '700',
+    color: '#ffffff',
+    marginBottom: 4,
+  },
+  animatedHeaderSubtitle: {
+    fontSize: 16,
+    color: 'rgba(255, 255, 255, 0.9)',
+    marginBottom: 12,
+  },
+  animatedHeaderStatsRow: {
+    flexDirection: 'row',
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    alignItems: 'center',
+  },
+  animatedHeaderStatsLabel: {
+    fontSize: 14,
+    color: '#ffffff',
+    fontWeight: '500',
+  },
   statusBarBackground: {
     position: 'absolute',
     top: 0,

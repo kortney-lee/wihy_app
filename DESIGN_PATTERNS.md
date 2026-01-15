@@ -1054,6 +1054,210 @@ colors={['#8b5cf6', '#7c3aed']}
 
 ---
 
+## 📱 PATTERN C: Collapsing Header (Space-Saving Animation)
+
+**Use this pattern when you want the header to shrink as the user scrolls, giving more screen space for content while keeping the status bar colored.**
+
+### When to Use:
+- ✅ MyProgressDashboard - Health metrics need more visible space
+- ✅ Profile - User info collapses to show settings
+- ✅ Any screen where header content is "nice to have" but not critical while scrolling
+- ✅ Screens with tall headers that take up too much initial space
+
+### Visual Behavior:
+- On load: Full header visible with title, subtitle, badges, avatar, etc.
+- On scroll: Header smoothly collapses to height 0
+- Status bar area: Always stays the same color (red/blue/etc.) for continuity
+- When scrolled back to top: Header expands back
+
+### Key Imports:
+```tsx
+import React, { useRef } from 'react';
+import { View, Text, StyleSheet, Animated, Platform } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+```
+
+### Implementation Pattern:
+
+**Step 1: Add scroll animation refs and values**
+```tsx
+export default function MyScreen() {
+  const scrollY = useRef(new Animated.Value(0)).current;
+  const insets = useSafeAreaInsets();
+  
+  // Header animation configuration
+  const HEADER_MAX_HEIGHT = 140;  // Adjust based on header content
+  const HEADER_MIN_HEIGHT = 0;    // Collapses completely
+  const HEADER_SCROLL_DISTANCE = HEADER_MAX_HEIGHT - HEADER_MIN_HEIGHT;
+
+  // Animated values
+  const headerHeight = scrollY.interpolate({
+    inputRange: [0, HEADER_SCROLL_DISTANCE],
+    outputRange: [HEADER_MAX_HEIGHT, HEADER_MIN_HEIGHT],
+    extrapolate: 'clamp',
+  });
+
+  const headerOpacity = scrollY.interpolate({
+    inputRange: [0, HEADER_SCROLL_DISTANCE / 2],
+    outputRange: [1, 0],
+    extrapolate: 'clamp',
+  });
+
+  const titleScale = scrollY.interpolate({
+    inputRange: [0, HEADER_SCROLL_DISTANCE],
+    outputRange: [1, 0.8],
+    extrapolate: 'clamp',
+  });
+
+  const titleTranslateY = scrollY.interpolate({
+    inputRange: [0, HEADER_SCROLL_DISTANCE],
+    outputRange: [0, -20],
+    extrapolate: 'clamp',
+  });
+```
+
+**Step 2: Structure the return with fixed status bar + collapsing header**
+```tsx
+  return (
+    <View style={styles.container}>
+      {/* Status bar area - Always solid color (matches header) */}
+      <View style={{ height: insets.top, backgroundColor: '#dc2626' }} />
+      
+      {/* Collapsing Header */}
+      <Animated.View style={[
+        styles.collapsibleHeader, 
+        { height: headerHeight, backgroundColor: '#dc2626' }
+      ]}>
+        <Animated.View 
+          style={[
+            styles.headerContent,
+            { 
+              opacity: headerOpacity,
+              transform: [
+                { scale: titleScale },
+                { translateY: titleTranslateY }
+              ]
+            }
+          ]}
+        >
+          <Text style={styles.headerTitle}>My Progress</Text>
+          <Text style={styles.headerSubtitle}>Track your daily health journey</Text>
+          <View style={styles.badge}>
+            <Text style={styles.badgeText}>Today's Progress: 40%</Text>
+          </View>
+        </Animated.View>
+      </Animated.View>
+
+      {/* Fixed elements below header (optional - e.g., tab selector) */}
+      <View style={styles.tabSelector}>
+        {/* Today / Week / Month buttons */}
+      </View>
+
+      {/* Scrollable Content */}
+      <Animated.ScrollView 
+        showsVerticalScrollIndicator={false}
+        scrollEventThrottle={16}
+        onScroll={Animated.event(
+          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+          { useNativeDriver: false }
+        )}
+      >
+        {/* Your content here */}
+        <View style={{ height: 100 }} /> {/* Bottom spacing */}
+      </Animated.ScrollView>
+    </View>
+  );
+}
+```
+
+**Step 3: Required styles**
+```tsx
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#f5f5f5',
+  },
+  collapsibleHeader: {
+    overflow: 'hidden',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  headerContent: {
+    alignItems: 'center',
+    paddingVertical: 16,
+  },
+  headerTitle: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#ffffff',
+  },
+  headerSubtitle: {
+    fontSize: 16,
+    color: 'rgba(255,255,255,0.9)',
+    marginTop: 4,
+  },
+  badge: {
+    backgroundColor: 'rgba(0,0,0,0.2)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    marginTop: 12,
+  },
+  badgeText: {
+    color: '#ffffff',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+});
+```
+
+### Profile Screen Variation (Taller header with avatar):
+```tsx
+// For Profile screen - taller header with more content
+const HEADER_MAX_HEIGHT = 220;  // Taller for avatar + name + email
+
+// Avatar-specific animation
+const avatarScale = scrollY.interpolate({
+  inputRange: [0, HEADER_SCROLL_DISTANCE],
+  outputRange: [1, 0.5],
+  extrapolate: 'clamp',
+});
+
+// Profile header content
+<Animated.View style={[
+  styles.collapsibleHeader, 
+  { height: headerHeight, backgroundColor: '#3B82F6' }  // Blue for profile
+]}>
+  <Animated.View style={[
+    styles.profileContent,
+    { opacity: headerOpacity, transform: [{ scale: avatarScale }] }
+  ]}>
+    <View style={styles.avatar}>
+      <Image source={{ uri: user.picture }} style={styles.avatarImage} />
+    </View>
+    <Text style={styles.userName}>{user.name}</Text>
+    <Text style={styles.userEmail}>{user.email}</Text>
+  </Animated.View>
+</Animated.View>
+```
+
+### Screens Using Collapsing Headers:
+| Screen | Header Color | Max Height | Content |
+|--------|--------------|------------|---------|
+| MyProgressDashboard | `#dc2626` (Red) | 140px | Title, subtitle, progress badge |
+| Profile | `#3B82F6` (Blue) | 220px | Avatar, name, email, member since |
+
+### Key Rules:
+- ✅ Status bar area is a separate `<View>` with solid color (not LinearGradient)
+- ✅ Use `Animated.View` for the collapsing header container
+- ✅ Use `Animated.ScrollView` (not regular ScrollView)
+- ✅ Set `scrollEventThrottle={16}` for smooth animation
+- ✅ Use `useNativeDriver: false` (height animations don't support native driver)
+- ✅ `extrapolate: 'clamp'` prevents values going beyond min/max
+- ✅ Keep same color for status bar and header for seamless look
+
+---
+
 **Problem: Extra white space above dashboard colored header (MOST COMMON)**
 ```tsx
 // ❌ WRONG - Dashboard inside DashboardPage with extra SafeAreaView

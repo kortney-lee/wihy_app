@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Dimensions, ActivityIndicator, Linking, Modal, Pressable, useWindowDimensions, Animated } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Dimensions, ActivityIndicator, Linking, Modal, Pressable, useWindowDimensions, Animated, Platform, StatusBar } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -720,8 +720,9 @@ const OverviewDashboard: React.FC<BaseDashboardProps> = ({ onAnalyze }) => {
 
   return (
     <View style={styles.container}>
+      <StatusBar barStyle="light-content" backgroundColor="#059669" />
       {/* Status bar area - Always emerald */}
-      <View style={{ height: insets.top, backgroundColor: '#059669' }} />
+      <View style={{ height: Platform.OS === 'android' ? StatusBar.currentHeight || 0 : insets.top, backgroundColor: '#059669' }} />
       
       {/* Collapsing Header */}
       <Animated.View style={[styles.collapsibleHeader, { height: headerHeight, backgroundColor: '#059669' }]}>
