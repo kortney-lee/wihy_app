@@ -103,29 +103,73 @@ const STORAGE_KEYS = {
   TOKEN_EXPIRY: '@wihy_token_expiry',
 };
 
-export interface UserData {
-  email: string;
-  name: string;
-  provider: 'local' | 'google' | 'facebook' | 'microsoft';
-  profile_data?: any;
-  id?: string;
+// User settings nested in user object
+export interface UserSettings {
+  notificationsEnabled: boolean;
+  privacyLevel: 'public' | 'friends' | 'private';
+  unitsMetric: boolean;
 }
 
-export interface LoginResponse {
+export interface UserData {
+  id: string;              // User ID (UUID) - maps to userId
+  email: string;
+  name: string;
+  role?: 'user' | 'coach' | 'admin';
+  provider?: 'local' | 'google' | 'facebook' | 'microsoft' | 'apple';
+  dateOfBirth?: string | null;
+  gender?: 'male' | 'female' | 'other' | null;
+  height?: number | null;
+  weight?: number | null;
+  activityLevel?: 'sedentary' | 'light' | 'moderate' | 'active' | 'very_active' | null;
+  goals?: string[] | null;
+  avatar?: string | null;
+  emailVerified?: boolean;
+  lastLogin?: string | null;
+  settings?: UserSettings;
+  createdAt?: string;
+  profile_data?: any;      // Legacy field for backwards compatibility
+}
+
+// Auth data nested inside response.data
+export interface AuthData {
+  user: UserData;
+  token: string;
+  refreshToken?: string;
+  expiresIn: string;       // e.g., "24h" or "7d"
+}
+
+// API Response wrapper - all responses have this structure
+export interface ApiResponse<T = any> {
   success: boolean;
-  session_token?: string;  // Legacy field
-  token?: string;          // Per spec: JWT token
-  expiresIn?: number;      // Per spec: token expiration in seconds
-  user?: UserData;
   message?: string;
   error?: string;
+  data?: T;
+}
+
+// Login/Register response follows ApiResponse<AuthData> structure
+export interface LoginResponse {
+  success: boolean;
+  message?: string;
+  error?: string;
+  data?: AuthData;
+  // Legacy flat fields for backwards compatibility
+  session_token?: string;
+  token?: string;
+  expiresIn?: number | string;
+  user?: UserData;
 }
 
 // Registration options per spec
 export interface RegistrationOptions {
   phone?: string;
-  plan?: string;
+  plan?: string;           // 'free', 'premium', 'family-basic', 'family-pro', 'coach'
   referralCode?: string;
+  date_of_birth?: string;
+  gender?: string;
+  height?: number;
+  weight?: number;
+  activity_level?: string;
+  goals?: string[];
 }
 
 export interface TokenResponse {
@@ -343,33 +387,70 @@ class AuthService {
       const responseTime = Date.now() - startTime;
       console.log(`Response Status: ${response.status} (${responseTime}ms)`);
 
-      const data = await response.json();
-      console.log('Response Data:', JSON.stringify(data, null, 2));
+      const responseData = await response.json();
+      console.log('Response Data:', JSON.stringify(responseData, null, 2));
 
-      if (response.ok && data.success) {
-        // Store session token and user data
-        // Handle both 'token' (per spec) and 'session_token' (legacy) formats
-        const authToken = data.token || data.session_token;
+      if (response.ok && responseData.success) {
+        // Handle nested data structure: response.data.user, response.data.token
+        // Also support legacy flat structure for backwards compatibility
+        const authData = responseData.data;
+        const user = authData?.user || responseData.user;
+        const authToken = authData?.token || responseData.token || responseData.session_token;
+        const refreshToken = authData?.refreshToken || responseData.refreshToken;
+        const expiresIn = authData?.expiresIn || responseData.expiresIn;
+        
         if (authToken) {
           await this.storeSessionToken(authToken);
           
+          // Store refresh token if provided
+          if (refreshToken) {
+            await AsyncStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, refreshToken);
+          }
+          
           // Store token expiry if provided
-          if (data.expiresIn) {
-            const expiryTime = Date.now() + (data.expiresIn * 1000);
+          if (expiresIn) {
+            // Handle both string ("24h", "7d") and number (seconds) formats
+            let expiryMs: number;
+            if (typeof expiresIn === 'string') {
+              if (expiresIn.endsWith('h')) {
+                expiryMs = parseInt(expiresIn) * 60 * 60 * 1000;
+              } else if (expiresIn.endsWith('d')) {
+                expiryMs = parseInt(expiresIn) * 24 * 60 * 60 * 1000;
+              } else {
+                expiryMs = parseInt(expiresIn) * 1000;
+              }
+            } else {
+              expiryMs = expiresIn * 1000;
+            }
+            const expiryTime = Date.now() + expiryMs;
             await AsyncStorage.setItem(STORAGE_KEYS.TOKEN_EXPIRY, expiryTime.toString());
           }
         }
-        if (data.user) {
-          await this.storeUserData(data.user);
+        
+        if (user) {
+          await this.storeUserData(user);
         }
         
         console.log('=== LOGIN SUCCESS ===');
-        return data;
+        // Return in expected format with nested data
+        return {
+          success: true,
+          message: responseData.message,
+          data: {
+            user: user,
+            token: authToken,
+            refreshToken: refreshToken,
+            expiresIn: expiresIn,
+          },
+          // Also include flat fields for legacy compatibility
+          user: user,
+          token: authToken,
+        };
       } else {
         console.log('=== LOGIN FAILED ===');
         return {
           success: false,
-          error: data.error || data.message || 'Login failed',
+          error: responseData.error || responseData.message || 'Login failed',
         };
       }
     } catch (error: any) {
@@ -387,6 +468,8 @@ class AuthService {
 
   /**
    * Register new user
+   * For free tier: Just registers the user with plan='free', no payment needed
+   * For paid tiers: User should complete payment first via checkoutService
    */
   async register(
     email: string,
@@ -405,14 +488,21 @@ class AuthService {
     
     try {
       // Build request body per API spec
+      // Free tier defaults - no payment required
       const body: any = { 
         email, 
         password, 
         name,
         terms_accepted: true,  // Required by API
+        plan: options?.plan || 'free',  // Default to free tier
         ...(options?.phone && { phone: options.phone }),
-        ...(options?.plan && { plan: options.plan }),
         ...(options?.referralCode && { referralCode: options.referralCode }),
+        ...(options?.date_of_birth && { date_of_birth: options.date_of_birth }),
+        ...(options?.gender && { gender: options.gender }),
+        ...(options?.height && { height: options.height }),
+        ...(options?.weight && { weight: options.weight }),
+        ...(options?.activity_level && { activity_level: options.activity_level }),
+        ...(options?.goals && { goals: options.goals }),
       };
       
       const response = await fetchWithLogging(endpoint, {
@@ -426,33 +516,70 @@ class AuthService {
       const responseTime = Date.now() - startTime;
       console.log(`Response Status: ${response.status} (${responseTime}ms)`);
 
-      const data = await response.json();
-      console.log('Response Data:', JSON.stringify(data, null, 2));
+      const responseData = await response.json();
+      console.log('Response Data:', JSON.stringify(responseData, null, 2));
 
-      if (response.ok && data.success) {
-        // Store session token and user data
-        // Handle both 'token' (per spec) and 'session_token' (legacy) formats
-        const authToken = data.token || data.session_token;
+      if (response.ok && responseData.success) {
+        // Handle nested data structure: response.data.user, response.data.token
+        // Also support legacy flat structure for backwards compatibility
+        const authData = responseData.data;
+        const user = authData?.user || responseData.user;
+        const authToken = authData?.token || responseData.token || responseData.session_token;
+        const refreshToken = authData?.refreshToken || responseData.refreshToken;
+        const expiresIn = authData?.expiresIn || responseData.expiresIn;
+        
         if (authToken) {
           await this.storeSessionToken(authToken);
           
+          // Store refresh token if provided
+          if (refreshToken) {
+            await AsyncStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, refreshToken);
+          }
+          
           // Store token expiry if provided
-          if (data.expiresIn) {
-            const expiryTime = Date.now() + (data.expiresIn * 1000);
+          if (expiresIn) {
+            // Handle both string ("24h", "7d") and number (seconds) formats
+            let expiryMs: number;
+            if (typeof expiresIn === 'string') {
+              if (expiresIn.endsWith('h')) {
+                expiryMs = parseInt(expiresIn) * 60 * 60 * 1000;
+              } else if (expiresIn.endsWith('d')) {
+                expiryMs = parseInt(expiresIn) * 24 * 60 * 60 * 1000;
+              } else {
+                expiryMs = parseInt(expiresIn) * 1000;
+              }
+            } else {
+              expiryMs = expiresIn * 1000;
+            }
+            const expiryTime = Date.now() + expiryMs;
             await AsyncStorage.setItem(STORAGE_KEYS.TOKEN_EXPIRY, expiryTime.toString());
           }
         }
-        if (data.user) {
-          await this.storeUserData(data.user);
+        
+        if (user) {
+          await this.storeUserData(user);
         }
         
-        console.log('=== LOCAL REGISTER SUCCESS ===');
-        return data;
+        console.log('=== REGISTER SUCCESS ===');
+        // Return in expected format with nested data
+        return {
+          success: true,
+          message: responseData.message,
+          data: {
+            user: user,
+            token: authToken,
+            refreshToken: refreshToken,
+            expiresIn: expiresIn,
+          },
+          // Also include flat fields for legacy compatibility
+          user: user,
+          token: authToken,
+        };
       } else {
         console.log('=== REGISTER FAILED ===');
         return {
           success: false,
-          error: data.error || data.message || 'Registration failed',
+          error: responseData.error || responseData.message || 'Registration failed',
         };
       }
     } catch (error: any) {
@@ -471,10 +598,12 @@ class AuthService {
    * Register account after successful Stripe payment
    * This creates an account linked to an existing payment session
    * Per subscription flow: Email → Stripe checkout → Password creation
+   * NOTE: Free tier users should use register() directly, not this method
    */
   async registerAfterPayment(
     email: string,
     password: string,
+    name: string,
     options: {
       planId: string;
       stripeSessionId?: string;
@@ -493,9 +622,11 @@ class AuthService {
     try {
       const body = { 
         email, 
-        password, 
+        password,
+        name,
         planId: options.planId,
         stripeSessionId: options.stripeSessionId,
+        terms_accepted: true,
       };
       
       const response = await fetchWithLogging(endpoint, {
@@ -509,31 +640,64 @@ class AuthService {
       const responseTime = Date.now() - startTime;
       console.log(`Response Status: ${response.status} (${responseTime}ms)`);
 
-      const data = await response.json();
-      console.log('Response Data:', JSON.stringify(data, null, 2));
+      const responseData = await response.json();
+      console.log('Response Data:', JSON.stringify(responseData, null, 2));
 
-      if (response.ok && data.success) {
-        // Store session token and user data
-        const authToken = data.token || data.session_token;
+      if (response.ok && responseData.success) {
+        // Handle nested data structure
+        const authData = responseData.data;
+        const user = authData?.user || responseData.user;
+        const authToken = authData?.token || responseData.token || responseData.session_token;
+        const refreshToken = authData?.refreshToken || responseData.refreshToken;
+        const expiresIn = authData?.expiresIn || responseData.expiresIn;
+        
         if (authToken) {
           await this.storeSessionToken(authToken);
           
-          if (data.expiresIn) {
-            const expiryTime = Date.now() + (data.expiresIn * 1000);
+          if (refreshToken) {
+            await AsyncStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, refreshToken);
+          }
+          
+          if (expiresIn) {
+            let expiryMs: number;
+            if (typeof expiresIn === 'string') {
+              if (expiresIn.endsWith('h')) {
+                expiryMs = parseInt(expiresIn) * 60 * 60 * 1000;
+              } else if (expiresIn.endsWith('d')) {
+                expiryMs = parseInt(expiresIn) * 24 * 60 * 60 * 1000;
+              } else {
+                expiryMs = parseInt(expiresIn) * 1000;
+              }
+            } else {
+              expiryMs = expiresIn * 1000;
+            }
+            const expiryTime = Date.now() + expiryMs;
             await AsyncStorage.setItem(STORAGE_KEYS.TOKEN_EXPIRY, expiryTime.toString());
           }
         }
-        if (data.user) {
-          await this.storeUserData(data.user);
+        
+        if (user) {
+          await this.storeUserData(user);
         }
         
         console.log('=== REGISTER AFTER PAYMENT SUCCESS ===');
-        return data;
+        return {
+          success: true,
+          message: responseData.message,
+          data: {
+            user: user,
+            token: authToken,
+            refreshToken: refreshToken,
+            expiresIn: expiresIn,
+          },
+          user: user,
+          token: authToken,
+        };
       } else {
         console.log('=== REGISTER AFTER PAYMENT FAILED ===');
         return {
           success: false,
-          error: data.error || data.message || 'Account creation failed',
+          error: responseData.error || responseData.message || 'Account creation failed',
         };
       }
     } catch (error: any) {
