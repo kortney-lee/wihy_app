@@ -6,7 +6,10 @@ import type {
   FoodPhotoScanResult,
   PillScanResult,
   LabelScanResult,
-  ScanHistoryResult 
+  ScanHistoryResult,
+  AskWihyResponse,
+  BeautyProductResponse,
+  PetFoodProductResponse 
 } from './types';
 
 class ScanService {
@@ -14,6 +17,78 @@ class ScanService {
 
   constructor() {
     this.baseUrl = API_CONFIG.baseUrl;
+  }
+
+  /**
+   * Universal Ask WiHY endpoint - auto-detects product type
+   * API v6.1: POST /api/scan/ask_wihy
+   * Searches ALL databases: Food, Beauty, Pet Food
+   * Returns product_type to determine which screen to navigate to
+   */
+  async askWihy(query: string, mode: 'auto' | 'barcode' | 'photo' | 'pill' | 'label' = 'auto', userContext?: any): Promise<AskWihyResponse> {
+    const startTime = Date.now();
+    const endpoint = `${this.baseUrl}/api/scan/ask_wihy`;
+    
+    console.log('=== ASK WIHY API CALL ===');
+    console.log('Endpoint:', endpoint);
+    console.log('Query:', query);
+    console.log('Mode:', mode);
+    
+    try {
+      const requestBody = {
+        query,
+        mode,
+        user_context: {
+          include_charts: true,
+          userId: getDefaultUserContext().userId,
+          ...userContext,
+        },
+      };
+      
+      console.log('Request Body:', JSON.stringify(requestBody, null, 2));
+      
+      const response = await fetchWithLogging(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      const responseTime = Date.now() - startTime;
+      console.log(`Response Status: ${response.status} (${responseTime}ms)`);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error(`Ask WiHY HTTP error ${response.status}:`, errorText);
+        console.log('=== ASK WIHY FAILED ===');
+        throw new Error(`Product not found (${response.status})`);
+      }
+
+      const data = await response.json();
+      console.log('Response product_type:', data.product_type);
+      console.log('Response found:', data.found);
+      console.log('=== ASK WIHY SUCCESS ===');
+      
+      return data;
+    } catch (error: any) {
+      const responseTime = Date.now() - startTime;
+      console.error('=== ASK WIHY ERROR ===');
+      console.error('Error after', responseTime, 'ms:', error);
+      return {
+        success: false,
+        found: false,
+        product_type: 'unknown',
+        query_info: {
+          original_query: query,
+          query_type: 'barcode',
+          detected_mode: mode,
+          user_mode: mode,
+        },
+        message: error.message || 'Failed to search. Please try again.',
+        timestamp: new Date().toISOString(),
+      };
+    }
   }
 
   /**

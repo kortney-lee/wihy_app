@@ -412,11 +412,191 @@ export type ScanResponse =
   | LabelScanResponse;
 
 // ========================================
+// BEAUTY PRODUCT SCAN RESPONSE
+// Used by: /api/scan/beauty, /api/scan/ask_wihy (product_type: beauty)
+// ========================================
+export interface BeautyIngredientConcern {
+  ingredient: string;
+  reason: string;
+}
+
+export interface BeautyProductResponse {
+  success: boolean;
+  found: boolean;
+  search_type: 'barcode' | 'text';
+  search_value: string;
+  product_type: 'beauty';
+  
+  product: {
+    barcode: string;
+    name: string;
+    brand: string;
+    category: string;
+    quantity?: string;
+    packaging?: string;
+    origin_countries?: string;
+    certifications?: string;
+    image_url: string | null;
+  };
+  
+  ingredients: {
+    full_list: string;
+    concerns: BeautyIngredientConcern[];
+    warnings: string[];
+    has_fragrance: boolean;
+    has_parabens: boolean;
+    has_sulfates: boolean;
+  };
+  
+  metadata: {
+    product_type: 'beauty';
+    data_source: 'openbeautyfacts';
+    database_size?: string;
+  };
+  
+  timestamp: string;
+  
+  // AI Context
+  ask_wihy?: string;
+}
+
+// ========================================
+// PET FOOD PRODUCT SCAN RESPONSE
+// Used by: /api/scan/petfood, /api/scan/ask_wihy (product_type: pet_food)
+// ========================================
+export interface PetFoodIngredientConcern {
+  ingredient: string;
+  reason: string;
+}
+
+export interface PetFoodProductResponse {
+  success: boolean;
+  found: boolean;
+  search_type: 'barcode' | 'text';
+  search_value: string;
+  product_type: 'pet_food';
+  
+  product: {
+    barcode: string;
+    name: string;
+    brand: string;
+    category: string;
+    quantity?: string;
+    packaging?: string;
+    origin_countries?: string;
+    certifications?: string;
+    image_url: string | null;
+  };
+  
+  nutrition: {
+    grade: string;
+    per_100g: {
+      energy_kcal: number;
+      protein_g: number;
+      fat_g: number;
+      carbohydrates_g?: number;
+    };
+  };
+  
+  ingredients: {
+    full_list: string;
+    protein_sources: string[];
+    concerns: PetFoodIngredientConcern[];
+    has_grain: boolean;
+    has_byproducts: boolean;
+    has_artificial: boolean;
+  };
+  
+  pet_info: {
+    suggested_pet_type: 'dog' | 'cat' | 'bird' | 'fish' | 'other';
+    user_pet_type?: string;
+  };
+  
+  metadata: {
+    product_type: 'pet_food';
+    data_source: 'openpetfoodfacts';
+    database_size?: string;
+  };
+  
+  timestamp: string;
+  
+  // AI Context
+  ask_wihy?: string;
+}
+
+// ========================================
+// ASK WIHY UNIVERSAL RESPONSE
+// Used by: /api/scan/ask_wihy
+// ========================================
+export interface AskWihyQueryInfo {
+  original_query: string;
+  query_type: 'barcode' | 'text' | 'image';
+  detected_mode: string;
+  user_mode: string;
+}
+
+export interface AskWihyResponse {
+  success: boolean;
+  found: boolean;
+  product_type: 'food' | 'beauty' | 'pet_food' | 'pill' | 'unknown';
+  
+  // Product info (varies by product_type)
+  product?: {
+    barcode: string;
+    name: string;
+    brand: string;
+    category: string;
+    image_url: string | null;
+  };
+  
+  // Food-specific analysis
+  analysis?: {
+    health_score: number;
+    nutrition_grade: string;
+    nova_group: number;
+    calories_per_serving: number;
+    summary: string;
+  };
+  
+  // Beauty-specific ingredients
+  ingredients?: BeautyProductResponse['ingredients'] | PetFoodProductResponse['ingredients'];
+  
+  // Pet food-specific nutrition
+  nutrition?: PetFoodProductResponse['nutrition'];
+  
+  // Pet info
+  pet_info?: PetFoodProductResponse['pet_info'];
+  
+  // Query metadata
+  query_info: AskWihyQueryInfo;
+  
+  // Not found info
+  message?: string;
+  suggestions?: string[];
+  databases_searched?: string[];
+  
+  data_source?: string;
+  timestamp: string;
+}
+
+// ========================================
+// UNION TYPE FOR ALL SCAN RESPONSES (updated)
+// ========================================
+export type ScanResponse = 
+  | BarcodeScanResponse 
+  | PhotoScanResponse 
+  | RecipeScanResponse 
+  | LabelScanResponse
+  | BeautyProductResponse
+  | PetFoodProductResponse;
+
+// ========================================
 // LEGACY ALIASES (for backward compatibility)
 // ========================================
 export type BarcodeScanResult = BarcodeScanResponse;
 export type ImageScanResult = PhotoScanResponse;
 export type FoodPhotoScanResult = PhotoScanResponse;
+export type LabelScanResult = LabelScanResponse;
     confidence_score?: number;
     charts?: any;
     visualizations?: any;

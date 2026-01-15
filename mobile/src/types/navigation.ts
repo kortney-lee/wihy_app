@@ -14,6 +14,8 @@ export type RootStackParamList = {
   Main: NavigatorScreenParams<TabParamList> | undefined;
   FullChat: { context?: any; initialMessage?: string };
   NutritionFacts: { foodItem: any; context?: any };
+  BeautyFacts: { product: any; context?: any };
+  PetFoodFacts: { product: any; context?: any };
   Dashboard: { filter?: string };
   Profile: undefined;
   Camera: { mode?: 'barcode' | 'food' | 'pill' | 'label' };
