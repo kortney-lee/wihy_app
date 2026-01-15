@@ -16,6 +16,9 @@ export type RootStackParamList = {
   NutritionFacts: { foodItem: any; context?: any };
   BeautyFacts: { product: any; context?: any };
   PetFoodFacts: { product: any; context?: any };
+  FoodPhotoFacts: { photoData: any; context?: any; capturedImage?: string };
+  PillIdentification: { pillData: any; context?: any; capturedImage?: string };
+  LabelReader: { labelData: any; context?: any; capturedImage?: string };
   Dashboard: { filter?: string };
   Profile: undefined;
   Camera: { mode?: 'barcode' | 'food' | 'pill' | 'label' };

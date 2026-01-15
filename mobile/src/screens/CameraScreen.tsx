@@ -612,82 +612,43 @@ export default function CameraScreen() {
             const nutritionAnalysis = metadata.nutrition_analysis || {};
             // NOTE: Jan 13, 2026 breaking change - detected_foods moved to analysis, not metadata
             const detectedFoods = analysis.detected_foods || [];
-            const detectedText = (analysis as any).detected_text || [];
             
-            navigation.navigate('NutritionFacts', {
-              foodItem: {
-                // Product Information
-                name: detectedFoods[0] || metadata.product_name || 'Food Item',
-                brand: metadata.brand,
-                categories: ['Food Photo Analysis'],
-                
-                // Image Display Container - captured photo
+            // Navigate to FoodPhotoFacts screen
+            navigation.navigate('FoodPhotoFacts', {
+              photoData: {
+                success: true,
+                scan_id: result.scan_id || `photo_${Date.now()}`,
+                scan_type: 'food_photo',
                 image_url: result.image_url || photo.uri,
-                imageUrl: result.image_url || photo.uri,
-                capturedImage: photo.uri, // Local photo URI for display
-                
-                // Food Photo specific data
-                foodPhotoData: {
-                  // Summary & Detection
-                  summary: analysis.summary || '',
-                  detectedFoods: detectedFoods,
-                  detectedText: detectedText,
-                  confidenceScore: (metadata as any).vision_confidence || analysis.confidence_score || 0,
-                  
-                  // Health & Nutrition
-                  healthScore: metadata.health_score || 0,
-                  nutritionGrade: (metadata as any).nutrition_grade || {},
-                  novaGroup: metadata.nova_group || 1,
-                  
-                  // Nutrition Analysis
-                  nutritionAnalysis: nutritionAnalysis,
-                  healthAlerts: nutritionAnalysis.health_alerts || [],
-                  positiveAspects: nutritionAnalysis.positive_aspects || [],
-                  areasOfConcern: nutritionAnalysis.areas_of_concern || [],
-                  servingRecommendations: nutritionAnalysis.serving_recommendations || {},
-                  
-                  // Charts
-                  charts: {},
-                  
-                  // Full metadata
-                  metadata: metadata,
-                },
-                
-                // Nutrition Facts from AI analysis
-                nutrition_facts: nutritionFacts,
-                calories: nutritionFacts.calories || 0,
-                servingSize: { 
-                  amount: 100, 
-                  unit: 'g' 
-                },
-                macros: {
-                  protein: nutritionFacts.proteins || 0,
-                  carbs: nutritionFacts.carbohydrates || 0,
-                  fat: nutritionFacts.fat || 0,
-                  fiber: nutritionFacts.fiber || 0,
-                  sugar: nutritionFacts.sugars || 0,
-                  saturated_fat: nutritionFacts.saturated_fat || 0,
-                  sodium: nutritionFacts.sodium || 0,
-                },
-                
-                // Health Scoring
-                health_score: metadata.health_score || 0,
-                grade: (metadata as any).nutrition_grade?.grade || 'N/A',
-                nova_group: metadata.nova_group || 1,
-                
-                // Chat Integration
-                askWihy: `Tell me about the nutritional value of this ${detectedFoods[0] || 'food'}`,
-                
-                // Full analysis data
-                analysis: analysis,
-                analyzed: true,
-              },
-              context: {
-                sessionId: result.scan_id || 
-                          (metadata as any).scan_id ||
-                          `photo_${Date.now()}`,
                 timestamp: result.timestamp || new Date().toISOString(),
-                scanType: 'photo',
+                processing_time: (result as any).processing_time || 0,
+                analysis: {
+                  detected_foods: detectedFoods,
+                  confidence_score: (metadata as any).vision_confidence || analysis.confidence_score || 0,
+                  meal_type: (analysis as any).meal_type || '',
+                  summary: analysis.summary || '',
+                },
+                metadata: {
+                  product_name: detectedFoods[0] || metadata.product_name || 'Food Item',
+                  health_score: metadata.health_score || 0,
+                  nutrition_score: metadata.nutrition_score || 0,
+                  nutrition_grade: (metadata as any).nutrition_grade || { grade: 'C', score: 50 },
+                  nova_group: metadata.nova_group || 3,
+                  processing_level: metadata.processing_level || 'processed',
+                  vision_confidence: (metadata as any).vision_confidence || 0,
+                  detected_foods: detectedFoods,
+                  nutrition_facts: nutritionFacts,
+                  nutrition_analysis: nutritionAnalysis,
+                  categories: metadata.categories || [],
+                  estimated_ingredients: metadata.estimated_ingredients,
+                },
+                ask_wihy: `Tell me about the nutritional value of this ${detectedFoods[0] || 'food'}`,
+              },
+              capturedImage: photo.uri,
+              context: {
+                sessionId: result.scan_id || `photo_${Date.now()}`,
+                timestamp: result.timestamp || new Date().toISOString(),
+                scanType: 'food_photo',
                 scan_id: (metadata as any).scan_id,
                 detectedFoods: detectedFoods,
                 confidence_score: (metadata as any).vision_confidence || 0,
@@ -736,51 +697,26 @@ export default function CameraScreen() {
           setIsProcessing(false);
 
           if (result.success && result.matches && result.matches.length > 0) {
-            // Navigate to a results screen to display all matches
+            // Navigate to PillIdentification screen
             const topMatch = result.matches[0];
-            navigation.navigate('NutritionFacts', {
-              foodItem: {
-                name: topMatch.name || 'Unknown Medication',
-                brand: topMatch.brandName || '',
-                image_url: (result as any).image_url || photo.uri,
-                imageUrl: (result as any).image_url || photo.uri,
-                capturedImage: photo.uri,
-                
-                // Pill-specific data
-                pillData: {
-                  scanId: result.scanId,
-                  matches: result.matches,
-                  topMatch: {
-                    name: topMatch.name,
-                    brandName: topMatch.brandName,
-                    genericName: (topMatch as any).genericName || '',
-                    imprint: topMatch.imprint || 'N/A',
-                    color: topMatch.color || 'N/A',
-                    shape: topMatch.shape || 'N/A',
-                    rxcui: topMatch.rxcui,
-                    confidence: topMatch.confidence || 0,
-                    dosage: (topMatch as any).dosage || '',
-                    manufacturer: (topMatch as any).manufacturer || '',
-                  },
+            navigation.navigate('PillIdentification', {
+              pillData: {
+                scanId: result.scanId,
+                matches: result.matches,
+                topMatch: {
+                  name: topMatch.name,
+                  brandName: topMatch.brandName,
+                  genericName: (topMatch as any).genericName || '',
+                  imprint: topMatch.imprint || 'N/A',
+                  color: topMatch.color || 'N/A',
+                  shape: topMatch.shape || 'N/A',
+                  rxcui: topMatch.rxcui,
+                  confidence: topMatch.confidence || 0,
+                  dosage: (topMatch as any).dosage || '',
+                  manufacturer: (topMatch as any).manufacturer || '',
                 },
-                
-                // Display data
-                calories: 0,
-                servingSize: { amount: 1, unit: 'pill' },
-                macros: {
-                  protein: 0,
-                  carbs: 0,
-                  fat: 0,
-                  fiber: 0,
-                  sugar: 0,
-                },
-                
-                // Metadata
-                health_score: 0,
-                grade: 'N/A',
-                analyzed: true,
-                askWihy: `Tell me about ${topMatch.name || 'this medication'}`,
               },
+              capturedImage: photo.uri,
               context: {
                 sessionId: `pill_${result.scanId || Date.now()}`,
                 timestamp: (result as any).timestamp || new Date().toISOString(),
@@ -852,64 +788,35 @@ export default function CameraScreen() {
             const charts = (result as any).charts || {};
             const recommendations = analysis.recommendations || [];
             
-            // Navigate to results screen with full data
-            navigation.navigate('NutritionFacts', {
-              foodItem: {
-                name: productName,
-                brand: analysis.brand || '',
-                image_url: result.image_url || photo.uri,
-                imageUrl: result.image_url || photo.uri,
-                capturedImage: photo.uri,
+            // Navigate to LabelReader screen
+            navigation.navigate('LabelReader', {
+              labelData: {
+                // Basic info
+                productName,
+                summary: (analysis as any).summary || '',
                 
-                // Label-specific data - pass the full analysis
-                // Jan 13, 2026: All greenwashing data is in analysis, not metadata
-                labelData: {
-                  // Basic info
-                  productName,
-                  summary: (analysis as any).summary || '',
-                  
-                  // Detected content
-                  detectedText: detectedText,
-                  detectedClaims: detectedClaims,
-                  greenwashingFlags: greenwashingFlags,
-                  
-                  // Greenwashing scoring
-                  greenwashingScore: greenwashingScore,
-                  sustainabilityScore: analysis.sustainability_score || 0,
-                  detectedCertifications: analysis.certifications || [],
-                  healthClaims: analysis.health_claims || [],
-                  ingredientsList: analysis.ingredients_list || [],
-                  
-                  // Charts
-                  charts: charts,
-                  
-                  // Recommendations
-                  recommendations: recommendations,
-                  
-                  // Full analysis object
-                  analysis: analysis,
-                },
+                // Detected content
+                detectedText: detectedText,
+                detectedClaims: detectedClaims,
+                greenwashingFlags: greenwashingFlags,
                 
-                // Display data (greenwashing scoring)
-                health_score: greenwashingScore, // Use greenwashing score as proxy
-                grade: greenwashingScore > 50 ? 'C' : greenwashingScore > 25 ? 'B' : 'A',
-                sustainability: analysis.sustainability_score || 0,
-                servingSize: { amount: 100, unit: 'g' },
-                macros: {
-                  protein: 0,
-                  carbs: 0,
-                  fat: 0,
-                  fiber: 0,
-                  sugar: 0,
-                },
+                // Greenwashing scoring
+                greenwashingScore: greenwashingScore,
+                sustainabilityScore: analysis.sustainability_score || 0,
+                detectedCertifications: analysis.certifications || [],
+                healthClaims: analysis.health_claims || [],
+                ingredientsList: analysis.ingredients_list || [],
                 
-                // Health info
-                analyzed: true,
-                askWihy: `Analyze the health claims and sustainability of ${productName}`,
+                // Charts
+                charts: charts,
                 
-                // Full result object
-                scan_result: result,
+                // Recommendations
+                recommendations: recommendations,
+                
+                // Full analysis object
+                analysis: analysis,
               },
+              capturedImage: photo.uri,
               context: {
                 sessionId: `label_${Date.now()}`,
                 timestamp: (result as any).timestamp || new Date().toISOString(),
