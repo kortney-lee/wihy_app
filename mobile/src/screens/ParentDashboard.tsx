@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useContext } from 'react';
+import React, { useState, useEffect, useCallback, useContext, useRef } from 'react';
 import {
   View,
   Text,
@@ -9,8 +9,9 @@ import {
   ActivityIndicator,
   Dimensions,
   Platform,
+  Animated,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { dashboardColors, GradientDashboardHeader, WebPageWrapper } from '../components/shared';
@@ -48,6 +49,31 @@ export default function ParentDashboard() {
   const [familyStats, setFamilyStats] = useState<FamilyDashboardData['family_stats'] | null>(null);
   const [recentActivity, setRecentActivity] = useState<FamilyDashboardData['recent_activity']>([]);
   const [error, setError] = useState<string | null>(null);
+
+  // Collapsing header animation
+  const scrollY = useRef(new Animated.Value(0)).current;
+  const insets = useSafeAreaInsets();
+  const HEADER_MAX_HEIGHT = 140;
+  const HEADER_MIN_HEIGHT = 0;
+  const HEADER_SCROLL_DISTANCE = HEADER_MAX_HEIGHT - HEADER_MIN_HEIGHT;
+
+  const headerHeight = scrollY.interpolate({
+    inputRange: [0, HEADER_SCROLL_DISTANCE],
+    outputRange: [HEADER_MAX_HEIGHT, HEADER_MIN_HEIGHT],
+    extrapolate: 'clamp',
+  });
+
+  const headerOpacity = scrollY.interpolate({
+    inputRange: [0, HEADER_SCROLL_DISTANCE / 2],
+    outputRange: [1, 0],
+    extrapolate: 'clamp',
+  });
+
+  const titleScale = scrollY.interpolate({
+    inputRange: [0, HEADER_SCROLL_DISTANCE],
+    outputRange: [1, 0.9],
+    extrapolate: 'clamp',
+  });
 
   // Load family data from API
   const loadFamilyData = useCallback(async () => {
@@ -354,18 +380,32 @@ export default function ParentDashboard() {
   return (
     <WebPageWrapper activeTab="health">
       <View style={[styles.container, isWeb && { flex: undefined, minHeight: undefined }]}>
-        <SafeAreaView style={styles.safeArea} edges={['left', 'right']}>
-          {/* Fixed Header */}
-          <GradientDashboardHeader
-            title="Family Dashboard"
-            subtitle={family?.name || "Track your family's health journey"}
-            gradient="parent"
-            badge={familyMembers.length > 0 ? { text: `${familyMembers.length + 1} family members` } : undefined}
-          />
+        {/* Status bar area - solid color */}
+        <View style={{ height: insets.top, backgroundColor: '#f59e0b' }} />
+        
+        {/* Collapsing Header */}
+        <Animated.View style={[styles.collapsibleHeader, { height: headerHeight }]}>
+          <Animated.View style={[styles.headerContent, { opacity: headerOpacity, transform: [{ scale: titleScale }] }]}>
+            <Text style={styles.headerTitle}>Family Dashboard</Text>
+            <Text style={styles.headerSubtitle}>{family?.name || "Track your family's health journey"}</Text>
+            {familyMembers.length > 0 && (
+              <View style={styles.headerStats}>
+                <View style={styles.headerStatBadge}>
+                  <Text style={styles.headerStatText}>{familyMembers.length + 1} family members</Text>
+                </View>
+              </View>
+            )}
+          </Animated.View>
+        </Animated.View>
 
-        <ScrollView 
+        <Animated.ScrollView 
           style={styles.scrollView}
           showsVerticalScrollIndicator={false}
+          scrollEventThrottle={16}
+          onScroll={Animated.event(
+            [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+            { useNativeDriver: false }
+          )}
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
           }
@@ -460,8 +500,7 @@ export default function ParentDashboard() {
 
             {/* Bottom spacing */}
             <View style={{ height: 40 }} />
-          </ScrollView>
-        </SafeAreaView>
+          </Animated.ScrollView>
       </View>
     </WebPageWrapper>
   );
@@ -472,6 +511,47 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: dashboardTheme.colors.background,
   },
+  
+  // Collapsing Header
+  collapsibleHeader: {
+    backgroundColor: '#f59e0b',
+    overflow: 'hidden',
+  },
+  headerContent: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    paddingHorizontal: 20,
+    paddingBottom: 16,
+  },
+  headerTitle: {
+    fontSize: 28,
+    fontWeight: '800',
+    color: '#ffffff',
+    marginBottom: 8,
+  },
+  headerSubtitle: {
+    fontSize: 16,
+    color: 'rgba(255, 255, 255, 0.9)',
+    marginBottom: 16,
+  },
+  headerStats: {
+    flexDirection: 'row',
+  },
+  headerStatBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    gap: 6,
+  },
+  headerStatText: {
+    fontSize: 13,
+    color: '#ffffff',
+    fontWeight: '600',
+  },
+  
   safeArea: {
     flex: 1,
   },

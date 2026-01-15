@@ -1,6 +1,6 @@
-import React, { useState, useMemo, useEffect, useCallback } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Dimensions, ActivityIndicator, Linking, Modal, Pressable, useWindowDimensions } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Dimensions, ActivityIndicator, Linking, Modal, Pressable, useWindowDimensions, Animated } from 'react-native';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { GradientDashboardHeader } from '../components/shared';
@@ -37,6 +37,32 @@ const OverviewDashboard: React.FC<BaseDashboardProps> = ({ onAnalyze }) => {
   const [showPermissionModal, setShowPermissionModal] = useState(false);
   const [recentScans, setRecentScans] = useState<ScanHistoryItem[]>([]);
   const [scansLoading, setScansLoading] = useState(false);
+
+  // Collapsing header animation
+  const scrollY = useRef(new Animated.Value(0)).current;
+  const insets = useSafeAreaInsets();
+  
+  const HEADER_MAX_HEIGHT = 140;
+  const HEADER_MIN_HEIGHT = 0;
+  const HEADER_SCROLL_DISTANCE = HEADER_MAX_HEIGHT - HEADER_MIN_HEIGHT;
+
+  const headerHeight = scrollY.interpolate({
+    inputRange: [0, HEADER_SCROLL_DISTANCE],
+    outputRange: [HEADER_MAX_HEIGHT, HEADER_MIN_HEIGHT],
+    extrapolate: 'clamp',
+  });
+
+  const headerOpacity = scrollY.interpolate({
+    inputRange: [0, HEADER_SCROLL_DISTANCE / 2],
+    outputRange: [1, 0],
+    extrapolate: 'clamp',
+  });
+
+  const titleScale = scrollY.interpolate({
+    inputRange: [0, HEADER_SCROLL_DISTANCE],
+    outputRange: [1, 0.8],
+    extrapolate: 'clamp',
+  });
 
   // Load recent scans
   const loadRecentScans = useCallback(async () => {
@@ -694,44 +720,51 @@ const OverviewDashboard: React.FC<BaseDashboardProps> = ({ onAnalyze }) => {
 
   return (
     <View style={styles.container}>
-      {/* Status bar background - matches header gradient */}
-      <View style={styles.statusBarBackground} />
+      {/* Status bar area - Always emerald */}
+      <View style={{ height: insets.top, backgroundColor: '#059669' }} />
       
-      <SafeAreaView style={styles.safeArea} edges={['left', 'right']}>
-        {/* Fixed Header - Outside ScrollView */}
-        <GradientDashboardHeader
-          title="Health Overview"
-          subtitle="Your personalized health dashboard"
-          gradient="overview"
-          badge={{
-            text: new Date().toLocaleDateString('en-US', {
+      {/* Collapsing Header */}
+      <Animated.View style={[styles.collapsibleHeader, { height: headerHeight, backgroundColor: '#059669' }]}>
+        <Animated.View 
+          style={[
+            styles.headerContent,
+            { 
+              opacity: headerOpacity,
+              transform: [{ scale: titleScale }]
+            }
+          ]}
+        >
+          <Text style={styles.collapsibleHeaderTitle}>Health Overview</Text>
+          <Text style={styles.collapsibleHeaderSubtitle}>Your personalized health dashboard</Text>
+          <View style={styles.progressBadge}>
+            <Text style={styles.progressBadgeText}>{new Date().toLocaleDateString('en-US', {
               weekday: 'long',
               month: 'long',
               day: 'numeric',
-            })
-          }}
-        />
+            })}</Text>
+          </View>
+        </Animated.View>
+      </Animated.View>
 
-        <ScrollView showsVerticalScrollIndicator={false} style={styles.scrollView}>
-        {/* Tab Selector */}
-        <View style={styles.tabContainer}>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.tabScrollContent}
-          >
-            {TABS.map(tab => (
-              <TouchableOpacity
-                key={tab}
-                style={[
-                  styles.tabButton,
-                  selectedTab === tab && styles.tabButtonActive,
-                ]}
-                onPress={() => setSelectedTab(tab)}
-              >
-                <Text style={[
-                  styles.tabText,
-                  selectedTab === tab && styles.tabTextActive,
+      {/* Tab Selector - Fixed below header */}
+      <View style={styles.tabContainer}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.tabScrollContent}
+        >
+          {TABS.map(tab => (
+            <TouchableOpacity
+              key={tab}
+              style={[
+                styles.tabButton,
+                selectedTab === tab && styles.tabButtonActive,
+              ]}
+              onPress={() => setSelectedTab(tab)}
+            >
+              <Text style={[
+                styles.tabText,
+                selectedTab === tab && styles.tabTextActive,
                 ]}>
                   {tab}
                 </Text>
@@ -740,15 +773,23 @@ const OverviewDashboard: React.FC<BaseDashboardProps> = ({ onAnalyze }) => {
           </ScrollView>
         </View>
 
+      <Animated.ScrollView 
+        showsVerticalScrollIndicator={false} 
+        style={styles.scrollView}
+        scrollEventThrottle={16}
+        onScroll={Animated.event(
+          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+          { useNativeDriver: false }
+        )}
+      >
         {/* Dynamic Content Area */}
         <View style={[styles.contentArea, { paddingHorizontal: layout.horizontalPadding }]}>
           {renderTabContent()}
         </View>
 
         {/* Bottom spacing for tab navigation */}
-        <View style={{ height: 20 }} />
-      </ScrollView>
-      </SafeAreaView>
+        <View style={{ height: 100 }} />
+      </Animated.ScrollView>
 
       {/* Health Permission Modal */}
       <Modal
@@ -854,6 +895,37 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#e0f2fe',
   },
+  collapsibleHeader: {
+    overflow: 'hidden',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  headerContent: {
+    alignItems: 'center',
+    paddingVertical: 16,
+  },
+  collapsibleHeaderTitle: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#ffffff',
+  },
+  collapsibleHeaderSubtitle: {
+    fontSize: 16,
+    color: 'rgba(255,255,255,0.9)',
+    marginTop: 4,
+  },
+  progressBadge: {
+    backgroundColor: 'rgba(0,0,0,0.2)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    marginTop: 12,
+  },
+  progressBadgeText: {
+    color: '#ffffff',
+    fontSize: 14,
+    fontWeight: '600',
+  },
   statusBarBackground: {
     position: 'absolute',
     top: 0,
@@ -879,10 +951,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.15,
     shadowRadius: 8,
     elevation: 8,
-  },
-
-  headerContent: {
-    alignItems: 'flex-start',
   },
 
   headerTitle: {

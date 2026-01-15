@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -11,8 +11,9 @@ import {
   ActivityIndicator,
   RefreshControl,
   Platform,
+  Animated,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
@@ -40,6 +41,31 @@ type TabType = 'goals' | 'actions' | 'meals' | 'shopping' | 'client-view';
 export default function CoachDashboard() {
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   const { coachId } = useAuth();
+  
+  // Collapsing header animation
+  const scrollY = useRef(new Animated.Value(0)).current;
+  const insets = useSafeAreaInsets();
+  const HEADER_MAX_HEIGHT = 140;
+  const HEADER_MIN_HEIGHT = 0;
+  const HEADER_SCROLL_DISTANCE = HEADER_MAX_HEIGHT - HEADER_MIN_HEIGHT;
+
+  const headerHeight = scrollY.interpolate({
+    inputRange: [0, HEADER_SCROLL_DISTANCE],
+    outputRange: [HEADER_MAX_HEIGHT, HEADER_MIN_HEIGHT],
+    extrapolate: 'clamp',
+  });
+
+  const headerOpacity = scrollY.interpolate({
+    inputRange: [0, HEADER_SCROLL_DISTANCE / 2],
+    outputRange: [1, 0],
+    extrapolate: 'clamp',
+  });
+
+  const titleScale = scrollY.interpolate({
+    inputRange: [0, HEADER_SCROLL_DISTANCE],
+    outputRange: [1, 0.9],
+    extrapolate: 'clamp',
+  });
   
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
@@ -476,20 +502,34 @@ export default function CoachDashboard() {
 
   return (
     <WebPageWrapper activeTab="health">
-      <SafeAreaView style={[styles.container, isWeb && { flex: undefined, minHeight: undefined }]} edges={['left', 'right']}>
-        <ScrollView 
-        showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
-      >
-        {/* Header - Using dedicated GradientDashboardHeader component */}
-        <GradientDashboardHeader
-          title="Coach Dashboard"
-          subtitle="Manage your clients & programs"
-          gradient="coach"
-          badge={{ text: `${clients.length} active clients` }}
-        />
+      <View style={[styles.container, isWeb && { flex: undefined, minHeight: undefined }]}>
+        {/* Status bar area - solid color */}
+        <View style={{ height: insets.top, backgroundColor: '#3b82f6' }} />
+        
+        {/* Collapsing Header */}
+        <Animated.View style={[styles.collapsibleHeader, { height: headerHeight }]}>
+          <Animated.View style={[styles.headerContent, { opacity: headerOpacity, transform: [{ scale: titleScale }] }]}>
+            <Text style={styles.headerTitle}>Coach Dashboard</Text>
+            <Text style={styles.headerSubtitle}>Manage your clients & programs</Text>
+            <View style={styles.headerStats}>
+              <View style={styles.headerStatBadge}>
+                <Text style={styles.headerStatText}>{clients.length} active clients</Text>
+              </View>
+            </View>
+          </Animated.View>
+        </Animated.View>
+
+        <Animated.ScrollView 
+          showsVerticalScrollIndicator={false}
+          scrollEventThrottle={16}
+          onScroll={Animated.event(
+            [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+            { useNativeDriver: false }
+          )}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
+        >
 
         {!selectedClient ? (
           /* Client List View */
@@ -580,7 +620,7 @@ export default function CoachDashboard() {
             {renderTabContent()}
           </View>
         )}
-      </ScrollView>
+      </Animated.ScrollView>
       
       {/* Client Invitation Modal */}
       {showInviteModal && (
@@ -628,7 +668,7 @@ export default function CoachDashboard() {
           </View>
         </View>
       )}
-      </SafeAreaView>
+      </View>
     </WebPageWrapper>
   );
 }
@@ -638,6 +678,47 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#e0f2fe',
   },
+  
+  // Collapsing Header
+  collapsibleHeader: {
+    backgroundColor: '#3b82f6',
+    overflow: 'hidden',
+  },
+  headerContent: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    paddingHorizontal: 20,
+    paddingBottom: 16,
+  },
+  headerTitle: {
+    fontSize: 28,
+    fontWeight: '800',
+    color: '#ffffff',
+    marginBottom: 8,
+  },
+  headerSubtitle: {
+    fontSize: 16,
+    color: 'rgba(255, 255, 255, 0.9)',
+    marginBottom: 16,
+  },
+  headerStats: {
+    flexDirection: 'row',
+  },
+  headerStatBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    gap: 6,
+  },
+  headerStatText: {
+    fontSize: 13,
+    color: '#ffffff',
+    fontWeight: '600',
+  },
+  
   loadingContainer: {
     alignItems: 'center',
     justifyContent: 'center',
@@ -674,9 +755,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.15,
     shadowRadius: 8,
     elevation: 8,
-  },
-  headerContent: {
-    alignItems: 'flex-start',
   },
   headerTitle: {
     fontSize: 28,

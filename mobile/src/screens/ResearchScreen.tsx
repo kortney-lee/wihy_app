@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -9,8 +9,9 @@ import {
   Modal,
   ActivityIndicator,
   RefreshControl,
+  Animated,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { GradientDashboardHeader } from '../components/shared';
@@ -190,6 +191,31 @@ export default function ResearchScreen({ isDashboardMode = false }: ResearchScre
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const [query, setQuery] = useState('');
   const [error, setError] = useState<string | null>(null);
+
+  // Collapsing header animation
+  const scrollY = useRef(new Animated.Value(0)).current;
+  const insets = useSafeAreaInsets();
+  const HEADER_MAX_HEIGHT = 140;
+  const HEADER_MIN_HEIGHT = 0;
+  const HEADER_SCROLL_DISTANCE = HEADER_MAX_HEIGHT - HEADER_MIN_HEIGHT;
+
+  const headerHeight = scrollY.interpolate({
+    inputRange: [0, HEADER_SCROLL_DISTANCE],
+    outputRange: [HEADER_MAX_HEIGHT, HEADER_MIN_HEIGHT],
+    extrapolate: 'clamp',
+  });
+
+  const headerOpacity = scrollY.interpolate({
+    inputRange: [0, HEADER_SCROLL_DISTANCE / 2],
+    outputRange: [1, 0],
+    extrapolate: 'clamp',
+  });
+
+  const titleScale = scrollY.interpolate({
+    inputRange: [0, HEADER_SCROLL_DISTANCE],
+    outputRange: [1, 0.9],
+    extrapolate: 'clamp',
+  });
 
   // Load recent searches on mount
   useEffect(() => {
@@ -433,16 +459,32 @@ export default function ResearchScreen({ isDashboardMode = false }: ResearchScre
 
   // Dashboard view (default state)
   return (
-    <SafeAreaView style={styles.container} edges={['left', 'right']}>
-      {/* Fixed Header - Outside ScrollView */}
-      <GradientDashboardHeader
-        title="Research"
-        subtitle="Evidence-based health insights"
-        gradient="research"
-        badge={{ icon: "document-text", text: "12 new papers this month" }}
-      />
+    <View style={styles.container}>
+      {/* Status bar area - solid color */}
+      <View style={{ height: insets.top, backgroundColor: '#8b5cf6' }} />
+      
+      {/* Collapsing Header */}
+      <Animated.View style={[styles.collapsibleHeader, { height: headerHeight }]}>
+        <Animated.View style={[styles.headerContent, { opacity: headerOpacity, transform: [{ scale: titleScale }] }]}>
+          <Text style={styles.headerTitle}>Research</Text>
+          <Text style={styles.headerSubtitle}>Evidence-based health insights</Text>
+          <View style={styles.headerStats}>
+            <View style={styles.headerStatBadge}>
+              <Ionicons name="document-text" size={14} color="#fff" />
+              <Text style={styles.headerStatText}>12 new papers this month</Text>
+            </View>
+          </View>
+        </Animated.View>
+      </Animated.View>
 
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <Animated.ScrollView 
+        showsVerticalScrollIndicator={false}
+        scrollEventThrottle={16}
+        onScroll={Animated.event(
+          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+          { useNativeDriver: false }
+        )}
+      >
         {/* Search Bar */}
         <View style={styles.searchSection}>
           <View style={styles.searchBar}>
@@ -559,8 +601,8 @@ export default function ResearchScreen({ isDashboardMode = false }: ResearchScre
         </View>
 
         <View style={{ height: 40 }} />
-      </ScrollView>
-    </SafeAreaView>
+      </Animated.ScrollView>
+    </View>
   );
 }
 
@@ -568,6 +610,18 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#e0f2fe',
+  },
+  
+  // Collapsing Header
+  collapsibleHeader: {
+    backgroundColor: '#8b5cf6',
+    overflow: 'hidden',
+  },
+  headerContent: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    paddingHorizontal: 20,
+    paddingBottom: 16,
   },
   
   // Header

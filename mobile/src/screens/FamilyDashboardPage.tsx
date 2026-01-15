@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useRef } from 'react';
 import {
   View,
   Text,
@@ -9,8 +9,9 @@ import {
   Dimensions,
   Share,
   Platform,
+  Animated,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { GradientDashboardHeader, WebPageWrapper } from '../components/shared';
@@ -45,6 +46,31 @@ export default function FamilyDashboardPage({
 }: FamilyDashboardPageProps) {
   const { user } = useContext(AuthContext);
   const [showAddMember, setShowAddMember] = useState(false);
+  
+  // Collapsing header animation
+  const scrollY = useRef(new Animated.Value(0)).current;
+  const insets = useSafeAreaInsets();
+  const HEADER_MAX_HEIGHT = 140;
+  const HEADER_MIN_HEIGHT = 0;
+  const HEADER_SCROLL_DISTANCE = HEADER_MAX_HEIGHT - HEADER_MIN_HEIGHT;
+
+  const headerHeight = scrollY.interpolate({
+    inputRange: [0, HEADER_SCROLL_DISTANCE],
+    outputRange: [HEADER_MAX_HEIGHT, HEADER_MIN_HEIGHT],
+    extrapolate: 'clamp',
+  });
+
+  const headerOpacity = scrollY.interpolate({
+    inputRange: [0, HEADER_SCROLL_DISTANCE / 2],
+    outputRange: [1, 0],
+    extrapolate: 'clamp',
+  });
+
+  const titleScale = scrollY.interpolate({
+    inputRange: [0, HEADER_SCROLL_DISTANCE],
+    outputRange: [1, 0.9],
+    extrapolate: 'clamp',
+  });
   
   // Mock family data - replace with real data from backend
   const [familyMembers, setFamilyMembers] = useState<FamilyMember[]>([
@@ -131,21 +157,31 @@ export default function FamilyDashboardPage({
 
   return (
     <WebPageWrapper activeTab="health">
-      <SafeAreaView style={[styles.container, isWeb && { flex: undefined, minHeight: undefined }]} edges={['left', 'right']}>
-        {/* Fixed Header - Outside ScrollView */}
-        <GradientDashboardHeader
-          title="Family Health"
-          subtitle="Track your family's health journey"
-          gradient="family"
-          style={styles.headerBanner}
-        >
-        <View style={styles.statsRow}>
-          <Text style={styles.statsLabel}>Family Health Score</Text>
-          <Text style={styles.statsValue}>89%</Text>
-        </View>
-      </GradientDashboardHeader>
+      <View style={[styles.container, isWeb && { flex: undefined, minHeight: undefined }]}>
+        {/* Status bar area - solid color */}
+        <View style={{ height: insets.top, backgroundColor: '#0ea5e9' }} />
+        
+        {/* Collapsing Header */}
+        <Animated.View style={[styles.collapsibleHeader, { height: headerHeight }]}>
+          <Animated.View style={[styles.headerContent, { opacity: headerOpacity, transform: [{ scale: titleScale }] }]}>
+            <Text style={styles.headerTitle}>Family Health</Text>
+            <Text style={styles.headerSubtitle}>Track your family's health journey</Text>
+            <View style={styles.statsRow}>
+              <Text style={styles.statsLabel}>Family Health Score</Text>
+              <Text style={styles.statsValue}>89%</Text>
+            </View>
+          </Animated.View>
+        </Animated.View>
 
-      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+      <Animated.ScrollView 
+        style={styles.scrollView} 
+        showsVerticalScrollIndicator={false}
+        scrollEventThrottle={16}
+        onScroll={Animated.event(
+          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+          { useNativeDriver: false }
+        )}
+      >
         {/* Family Members - Metric Style */}
         <View style={styles.metricsSection}>
           <Text style={styles.sectionTitle}>Today's Metrics</Text>
@@ -279,8 +315,8 @@ export default function FamilyDashboardPage({
 
         {/* Bottom spacing */}
         <View style={{ height: 40 }} />
-        </ScrollView>
-      </SafeAreaView>
+        </Animated.ScrollView>
+      </View>
     </WebPageWrapper>
   );
 }
@@ -293,6 +329,30 @@ const styles = StyleSheet.create({
   scrollView: {
     flex: 1,
   },
+  
+  // Collapsing Header
+  collapsibleHeader: {
+    backgroundColor: '#0ea5e9',
+    overflow: 'hidden',
+  },
+  headerContent: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    paddingHorizontal: 20,
+    paddingBottom: 16,
+  },
+  headerTitle: {
+    fontSize: 28,
+    fontWeight: '800',
+    color: '#ffffff',
+    marginBottom: 8,
+  },
+  headerSubtitle: {
+    fontSize: 16,
+    color: 'rgba(255, 255, 255, 0.9)',
+    marginBottom: 16,
+  },
+  
   headerBanner: {
     padding: 24,
     paddingTop: 20,
