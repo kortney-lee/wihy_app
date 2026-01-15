@@ -175,6 +175,111 @@ export default function WihyHomeScreen({}: Props = {}) {
             timestamp: new Date().toISOString(),
           },
         });
+      } else if (searchQuery === 'beauty rose') {
+        // Demo: Navigate to BeautyFacts with mock rose oil serum data
+        console.log('Navigating to BeautyFacts...');
+        navigation.navigate('BeautyFacts', {
+          product: {
+            success: true,
+            found: true,
+            search_type: 'text',
+            search_value: 'rose oil serum',
+            product_type: 'beauty',
+            product: {
+              barcode: '3700591912345',
+              name: 'Rose Oil Face Serum',
+              brand: 'Beauty Botanica',
+              category: 'Face serums, Skincare',
+              quantity: '30ml',
+              packaging: 'Glass dropper bottle',
+              origin_countries: 'France',
+              certifications: 'Cruelty-free, Vegan',
+              image_url: null,
+            },
+            ingredients: {
+              full_list: 'Rosa Damascena Flower Oil, Squalane, Jojoba Seed Oil, Tocopherol (Vitamin E), Rosmarinus Officinalis (Rosemary) Leaf Extract, Helianthus Annuus (Sunflower) Seed Oil, Rosa Canina Fruit Oil, Fragrance',
+              concerns: [
+                {
+                  ingredient: 'Fragrance',
+                  reason: 'May contain undisclosed allergens that could cause sensitivity'
+                }
+              ],
+              warnings: [],
+              has_fragrance: true,
+              has_parabens: false,
+              has_sulfates: false,
+            },
+            metadata: {
+              product_type: 'beauty',
+              data_source: 'openbeautyfacts',
+              database_size: '61,237 products',
+            },
+            timestamp: new Date().toISOString(),
+          },
+          context: {
+            sessionId: `beauty_rose_${Date.now()}`,
+            query: 'beauty rose',
+            type: 'search',
+            scanType: 'manual',
+            timestamp: new Date().toISOString(),
+          },
+        });
+      } else if (searchQuery === 'pet chicken') {
+        // Demo: Navigate to PetFoodFacts with mock dog food data
+        console.log('Navigating to PetFoodFacts...');
+        navigation.navigate('PetFoodFacts', {
+          product: {
+            success: true,
+            found: true,
+            search_type: 'text',
+            search_value: 'chicken dog food',
+            product_type: 'pet_food',
+            product: {
+              barcode: '0017800158718',
+              name: 'Chicken & Rice Adult Dog Food',
+              brand: 'Healthy Paws',
+              category: 'Dry dog food, Adult dog food',
+              quantity: '6.8kg',
+              packaging: 'Bag',
+              origin_countries: 'United States',
+              certifications: 'AAFCO approved',
+              image_url: null,
+            },
+            nutrition: {
+              grade: 'A',
+              per_100g: {
+                energy_kcal: 365,
+                protein_g: 28,
+                fat_g: 15,
+                carbohydrates_g: 42,
+              },
+            },
+            ingredients: {
+              full_list: 'Deboned Chicken, Brown Rice, Chicken Meal, Oatmeal, Barley, Chicken Fat (preserved with Mixed Tocopherols), Dried Beet Pulp, Flaxseed, Natural Chicken Flavor, Fish Oil, Potassium Chloride, Salt, Choline Chloride, Dried Chicory Root, Vitamin E Supplement, Zinc Proteinate',
+              protein_sources: ['Deboned Chicken', 'Chicken Meal'],
+              concerns: [],
+              has_grain: true,
+              has_byproducts: false,
+              has_artificial: false,
+            },
+            pet_info: {
+              suggested_pet_type: 'dog',
+            },
+            metadata: {
+              product_type: 'pet_food',
+              data_source: 'openpetfoodfacts',
+              database_size: '14,828 products',
+            },
+            timestamp: new Date().toISOString(),
+          },
+          context: {
+            sessionId: `pet_chicken_${Date.now()}`,
+            query: 'pet chicken',
+            type: 'search',
+            scanType: 'manual',
+            timestamp: new Date().toISOString(),
+          },
+        });
       } else {
         // Navigate directly to FullChat for all other queries
         navigation.navigate('FullChat', {
