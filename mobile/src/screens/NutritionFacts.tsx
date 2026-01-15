@@ -26,9 +26,6 @@ import { DashboardGradientType } from '../components/shared';
 import { SweepBorder } from '../components/SweepBorder';
 import type {
   BarcodeScanResponse,
-  PhotoScanResponse,
-  RecipeScanResponse,
-  LabelScanResponse,
   ScanResponse,
 } from '../services/types';
 
@@ -43,20 +40,10 @@ type RouteProps = RouteProp<RootStackParamList, 'NutritionFacts'>;
 // TYPE GUARDS for different scan responses
 // ========================================
 
+// NutritionFacts now only handles barcode/product scans
+// Food photos go to FoodPhotoFacts, Pills go to PillIdentification, Labels go to LabelReader
 function isBarcodeScanResponse(item: ScanResponse): item is BarcodeScanResponse {
   return item.scan_type === 'barcode' || item.scan_type === 'image' || item.scan_type === 'product_name';
-}
-
-function isPhotoScanResponse(item: ScanResponse): item is PhotoScanResponse {
-  return item.scan_type === 'food_photo';
-}
-
-function isRecipeScanResponse(item: ScanResponse): item is RecipeScanResponse {
-  return item.scan_type === 'recipe';
-}
-
-function isLabelScanResponse(item: ScanResponse): item is LabelScanResponse {
-  return item.scan_type === 'label';
 }
 
 // ========================================
@@ -66,52 +53,41 @@ function isLabelScanResponse(item: ScanResponse): item is LabelScanResponse {
 function getProductName(item: ScanResponse | null): string {
   if (!item) return 'Unknown';
   if (isBarcodeScanResponse(item)) return item.product_name;
-  if (isPhotoScanResponse(item)) return item.metadata.product_name;
-  if (isRecipeScanResponse(item)) return item.analysis.meal_name;
-  if (isLabelScanResponse(item)) return item.analysis.product_name;
   return 'Unknown';
 }
 
 function getImageUrl(item: ScanResponse | null): string | null {
   if (!item) return null;
   if (isBarcodeScanResponse(item)) return item.image_url;
-  if (isPhotoScanResponse(item)) return item.image_url;
-  if (isRecipeScanResponse(item)) return item.image_url;
-  if (isLabelScanResponse(item)) return item.image_url;
   return null;
 }
 
 function getCalories(item: ScanResponse | null): number {
   if (!item) return 0;
   if (isBarcodeScanResponse(item)) return item.calories;
-  if (isPhotoScanResponse(item)) return item.metadata.nutrition_facts.calories;
-  if (isRecipeScanResponse(item)) return item.analysis.nutrition_facts.calories;
   return 0;
 }
 
 function getHealthScore(item: ScanResponse | null): number {
   if (!item) return 0;
   if (isBarcodeScanResponse(item)) return item.health_score;
-  if (isPhotoScanResponse(item)) return item.metadata.health_score;
   return 0;
 }
 
 function getNutritionGrade(item: ScanResponse | null): 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | null {
   if (!item) return null;
   if (isBarcodeScanResponse(item)) return item.nutrition_grade;
-  if (isPhotoScanResponse(item)) return item.metadata.nutrition_grade.grade;
   return null;
 }
 
 function getServingSize(item: ScanResponse | null): string {
   if (!item) return '1 serving';
   if (isBarcodeScanResponse(item)) return item.serving_size;
-  if (isPhotoScanResponse(item)) return item.metadata.nutrition_facts.serving_size;
-  if (isRecipeScanResponse(item)) return item.analysis.nutrition_facts.serving_size;
   return '1 serving';
 }
 
-type ScanType = 'barcode' | 'image' | 'product_name' | 'recipe' | 'label' | 'food_photo';
+// NutritionFacts only handles these scan types now
+type ScanType = 'barcode' | 'image' | 'product_name';
 
 // Helper function to check if product is unknown
 const isUnknownProduct = (name: string | undefined): boolean => {
@@ -262,12 +238,6 @@ export default function NutritionFacts() {
   const openChatWithContext = (chatContext: any) => {
     const productName = foodItem && isBarcodeScanResponse(foodItem)
       ? foodItem.product_name
-      : foodItem && isPhotoScanResponse(foodItem)
-      ? foodItem.metadata.product_name
-      : foodItem && isRecipeScanResponse(foodItem)
-      ? foodItem.analysis.meal_name
-      : foodItem && isLabelScanResponse(foodItem)
-      ? foodItem.analysis.product_name
       : 'this food';
 
     // Navigate to FullChat with nutrition context
@@ -484,8 +454,6 @@ export default function NutritionFacts() {
       case 'barcode': return 'Nutrition Facts';
       case 'image': return 'Photo Analysis';
       case 'product_name': return 'Product Search';
-      case 'recipe': return 'Recipe Analysis';
-      case 'label': return 'Claims Checker';
       default: return 'Nutrition Facts';
     }
   };
@@ -495,8 +463,6 @@ export default function NutritionFacts() {
       case 'barcode': return 'barcode-outline' as keyof typeof Ionicons.glyphMap;
       case 'image': return 'camera-outline' as keyof typeof Ionicons.glyphMap;
       case 'product_name': return 'search-outline' as keyof typeof Ionicons.glyphMap;
-      case 'recipe': return 'restaurant-outline' as keyof typeof Ionicons.glyphMap;
-      case 'label': return 'document-text-outline' as keyof typeof Ionicons.glyphMap;
       default: return 'barcode-outline' as keyof typeof Ionicons.glyphMap;
     }
   };
@@ -506,8 +472,6 @@ export default function NutritionFacts() {
       case 'barcode': return ['#3b82f6', '#2563eb']; // Blue
       case 'image': return ['#10b981', '#059669']; // Green
       case 'product_name': return ['#8b5cf6', '#7c3aed']; // Purple
-      case 'recipe': return ['#f59e0b', '#d97706']; // Orange
-      case 'label': return ['#ef4444', '#dc2626']; // Red
       default: return ['#3b82f6', '#2563eb'];
     }
   };
@@ -517,8 +481,6 @@ export default function NutritionFacts() {
       case 'barcode': return 'nutritionFacts';
       case 'image': return 'nutritionPhoto';
       case 'product_name': return 'nutritionFacts';
-      case 'recipe': return 'nutritionFacts';
-      case 'label': return 'nutritionLabel';
       default: return 'nutritionFacts';
     }
   };
@@ -527,8 +489,6 @@ export default function NutritionFacts() {
   const isBarcode = scanType === 'barcode';
   const isImageScan = scanType === 'image';
   const isProductSearch = scanType === 'product_name';
-  const isRecipe = scanType === 'recipe';
-  const isLabel = scanType === 'label';
 
   return (
     <SafeAreaView style={styles.container} edges={['left', 'right']}>
@@ -631,11 +591,7 @@ export default function NutritionFacts() {
           </>
         )}
 
-        {/* TODO: Photo Scan UI - Implement using PhotoScanResponse type */}
-        {/* TODO: Recipe Scan UI - Implement using RecipeScanResponse type */}
-        {/* TODO: Label Scan UI - Implement using LabelScanResponse type */}
-
-        {/* Barcode Scan: Macronutrients (continued from barcode section above) */}
+        {/* Barcode Scan: Macronutrients */}
         {foodItem && isBarcodeScanResponse(foodItem) && (
           <>
         {/* Macronutrients */}
@@ -1892,614 +1848,6 @@ const styles = StyleSheet.create({
     marginLeft: 12,
   },
 
-  // Captured Image Styles (shared by food photo, pill, label)
-  capturedImageContainer: {
-    marginBottom: 16,
-    borderRadius: 12,
-    overflow: 'hidden',
-    backgroundColor: '#f3f4f6',
-  },
-
-  capturedImage: {
-    width: '100%',
-    height: 200,
-    backgroundColor: '#e5e7eb',
-  },
-
-  // Food Photo Data Styles
-  foodPhotoSection: {
-    marginBottom: 12,
-  },
-
-  foodPhotoCard: {
-    marginBottom: 12,
-  },
-
-  foodPhotoSummary: {
-    padding: 12,
-    backgroundColor: '#dcfce7',
-    borderRadius: 8,
-    borderLeftWidth: 4,
-    borderLeftColor: '#10b981',
-    marginBottom: 16,
-  },
-
-  foodPhotoSummaryText: {
-    fontSize: 14,
-    color: '#065f46',
-    lineHeight: 20,
-  },
-
-  detectedFoodsSection: {
-    marginBottom: 16,
-  },
-
-  detectedFoodsTitle: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#065f46',
-    marginBottom: 8,
-  },
-
-  detectedFoodItem: {
-    padding: 12,
-    backgroundColor: '#ffffff',
-    borderRadius: 8,
-    marginBottom: 8,
-    borderWidth: 1,
-    borderColor: '#d1fae5',
-  },
-
-  detectedFoodHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 4,
-  },
-
-  detectedFoodName: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: '#047857',
-    flex: 1,
-  },
-
-  detectedFoodConfidence: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#10b981',
-  },
-
-  detectedFoodCategory: {
-    fontSize: 12,
-    color: '#059669',
-    fontStyle: 'italic',
-  },
-
-  foodPhotoDetectedText: {
-    marginBottom: 16,
-  },
-
-  foodPhotoDetectedTextTitle: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#065f46',
-    marginBottom: 8,
-  },
-
-  foodPhotoDetectedTextItem: {
-    fontSize: 13,
-    color: '#047857',
-    paddingLeft: 8,
-    marginBottom: 4,
-  },
-
-  confidenceSection: {
-    marginBottom: 16,
-  },
-
-  confidenceLabel: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#065f46',
-    marginBottom: 6,
-  },
-
-  confidenceBar: {
-    height: 8,
-    backgroundColor: '#d1fae5',
-    borderRadius: 4,
-    overflow: 'hidden',
-    marginBottom: 4,
-  },
-
-  confidenceFill: {
-    height: '100%',
-    borderRadius: 4,
-  },
-
-  confidenceText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#059669',
-    textAlign: 'right',
-  },
-
-  foodPhotoAlertsSection: {
-    marginHorizontal: 16,
-    marginBottom: 12,
-  },
-
-  foodPhotoAlertsList: {
-    gap: 12,
-  },
-
-  foodPhotoAlertBar: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 16,
-    borderRadius: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-
-  foodPhotoAlertBarLeft: {
-    flex: 1,
-  },
-
-  foodPhotoAlertBarTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#ffffff',
-  },
-
-  foodPhotoAlertBarSubtitle: {
-    fontSize: 13,
-    color: '#ffffff',
-    opacity: 0.9,
-    marginTop: 2,
-  },
-
-  foodPhotoAlertBarRight: {
-    marginLeft: 12,
-  },
-
-  foodPhotoPositiveSection: {
-    marginHorizontal: 16,
-    marginBottom: 12,
-  },
-
-  foodPhotoPositiveList: {
-    gap: 12,
-  },
-
-  foodPhotoPositiveBar: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 16,
-    borderRadius: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-
-  foodPhotoPositiveBarLeft: {
-    flex: 1,
-  },
-
-  foodPhotoPositiveBarTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#ffffff',
-  },
-
-  foodPhotoPositiveBarSubtitle: {
-    fontSize: 13,
-    color: '#ffffff',
-    opacity: 0.9,
-    marginTop: 2,
-  },
-
-  foodPhotoPositiveBarRight: {
-    marginLeft: 12,
-  },
-
-  // Pill Data Styles
-  pillDataSection: {
-    marginBottom: 12,
-  },
-
-  pillCard: {
-    marginBottom: 12,
-  },
-
-  pillHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    marginBottom: 16,
-    paddingBottom: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#fde68a',
-  },
-
-  pillName: {
-    flex: 1,
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#92400e',
-  },
-
-  pillRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingVertical: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: '#fef3c7',
-  },
-
-  pillLabel: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#78350f',
-  },
-
-  pillValue: {
-    fontSize: 14,
-    color: '#92400e',
-  },
-
-  pillAlternatives: {
-    marginTop: 16,
-    paddingTop: 16,
-    borderTopWidth: 2,
-    borderTopColor: '#fde68a',
-  },
-
-  pillAlternativesTitle: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#92400e',
-    marginBottom: 8,
-  },
-
-  alternativeRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingVertical: 6,
-  },
-
-  alternativeName: {
-    fontSize: 13,
-    color: '#78350f',
-    flex: 1,
-  },
-
-  alternativeConfidence: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#f59e0b',
-  },
-
-  // Label Data Styles
-  labelDataSection: {
-    marginBottom: 12,
-  },
-
-  labelCard: {
-    marginBottom: 12,
-  },
-
-  labelHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    marginBottom: 16,
-    paddingBottom: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#fecaca',
-  },
-
-  labelProductName: {
-    flex: 1,
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#991b1b',
-  },
-
-  labelScoreContainer: {
-    flexDirection: 'row',
-    gap: 12,
-    marginBottom: 16,
-  },
-
-  labelScoreBox: {
-    flex: 1,
-    alignItems: 'center',
-    padding: 16,
-    backgroundColor: '#ffffff',
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#e5e7eb',
-  },
-
-  labelScoreLabel: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#6b7280',
-    marginBottom: 8,
-  },
-
-  labelScoreValue: {
-    fontSize: 32,
-    fontWeight: '700',
-  },
-
-  labelGradeBox: {
-    flex: 1,
-    alignItems: 'center',
-    padding: 16,
-    backgroundColor: '#ffffff',
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#e5e7eb',
-  },
-
-  labelGradeLabel: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#6b7280',
-    marginBottom: 8,
-  },
-
-  labelGradeValue: {
-    fontSize: 32,
-    fontWeight: '700',
-  },
-
-  labelGradeDescription: {
-    fontSize: 11,
-    color: '#6b7280',
-    marginTop: 4,
-    textAlign: 'center',
-  },
-
-  detectedTextSection: {
-    marginBottom: 16,
-  },
-
-  detectedTextTitle: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#991b1b',
-    marginBottom: 8,
-  },
-
-  detectedTextList: {
-    gap: 6,
-  },
-
-  detectedTextItem: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 8,
-    paddingLeft: 8,
-  },
-
-  detectedTextContent: {
-    flex: 1,
-    fontSize: 13,
-    color: '#7f1d1d',
-    lineHeight: 18,
-  },
-
-  labelNovaSection: {
-    marginBottom: 16,
-  },
-
-  labelNovaTitle: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#991b1b',
-    marginBottom: 8,
-  },
-
-  labelNovaBox: {
-    padding: 12,
-    backgroundColor: '#f3f4f6',
-    borderRadius: 8,
-  },
-
-  labelNovaGroup: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#1f2937',
-    marginBottom: 4,
-  },
-
-  labelNovaDescription: {
-    fontSize: 13,
-    color: '#6b7280',
-  },
-
-  labelPositiveSection: {
-    marginHorizontal: 16,
-    marginBottom: 12,
-  },
-
-  labelPositiveList: {
-    gap: 12,
-  },
-
-  labelPositiveBar: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 16,
-    borderRadius: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-
-  labelPositiveBarLeft: {
-    flex: 1,
-  },
-
-  labelPositiveBarTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#ffffff',
-  },
-
-  labelPositiveBarSubtitle: {
-    fontSize: 13,
-    color: '#ffffff',
-    opacity: 0.9,
-    marginTop: 2,
-  },
-
-  labelPositiveBarRight: {
-    marginLeft: 12,
-  },
-
-  labelAlertsSection: {
-    marginHorizontal: 16,
-    marginBottom: 12,
-  },
-
-  labelAlertsList: {
-    gap: 12,
-  },
-
-  labelAlertBar: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 16,
-    borderRadius: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-
-  labelAlertBarLeft: {
-    flex: 1,
-  },
-
-  labelAlertBarTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#ffffff',
-  },
-
-  labelAlertBarSubtitle: {
-    fontSize: 13,
-    color: '#ffffff',
-    opacity: 0.9,
-    marginTop: 2,
-  },
-
-  labelAlertBarRight: {
-    marginLeft: 12,
-  },
-
-  labelConcernsSection: {
-    marginHorizontal: 16,
-    marginBottom: 12,
-  },
-
-  labelConcernsList: {
-    gap: 12,
-  },
-
-  labelConcernBar: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 16,
-    borderRadius: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-
-  labelConcernBarLeft: {
-    flex: 1,
-  },
-
-  labelConcernBarTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#ffffff',
-  },
-
-  labelConcernBarSubtitle: {
-    fontSize: 13,
-    color: '#ffffff',
-    opacity: 0.9,
-    marginTop: 2,
-  },
-
-  labelConcernBarRight: {
-    marginLeft: 12,
-  },
-
-  labelServingSection: {
-    padding: 12,
-    backgroundColor: '#f0f9ff',
-    borderRadius: 8,
-    borderLeftWidth: 4,
-    borderLeftColor: '#3b82f6',
-  },
-
-  labelServingTitle: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#1e40af',
-    marginBottom: 8,
-  },
-
-  labelServingText: {
-    fontSize: 13,
-    color: '#1e3a8a',
-    marginBottom: 4,
-  },
-
-  labelPairingsSection: {
-    marginTop: 8,
-    paddingTop: 8,
-    borderTopWidth: 1,
-    borderTopColor: '#bfdbfe',
-  },
-
-  labelPairingsTitle: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#1e40af',
-    marginBottom: 4,
-  },
-
-  labelPairingText: {
-    fontSize: 12,
-    color: '#3730a3',
-    paddingLeft: 8,
-    marginBottom: 2,
-  },
-
   // Type Header (per scan type)
   typeHeaderSection: {
     marginHorizontal: 16,
@@ -2539,253 +1887,5 @@ const styles = StyleSheet.create({
   capturedImageSection: {
     marginHorizontal: 16,
     marginBottom: 12,
-  },
-
-  // Food Photo Styles
-  foodPhotoSummarySection: {
-    marginHorizontal: 16,
-    marginBottom: 12,
-  },
-
-  foodPhotoSummaryBar: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 16,
-    borderRadius: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-
-  foodPhotoSummaryBarLeft: {
-    flex: 1,
-  },
-
-  foodPhotoSummaryBarText: {
-    fontSize: 14,
-    color: '#ffffff',
-    lineHeight: 20,
-  },
-
-  foodPhotoSummaryBarRight: {
-    marginLeft: 12,
-  },
-
-  detectedFoodsList: {
-    gap: 12,
-  },
-
-  detectedFoodBar: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 16,
-    borderRadius: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-
-  detectedFoodBarLeft: {
-    flex: 1,
-  },
-
-  detectedFoodBarTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#ffffff',
-  },
-
-  detectedFoodBarSubtitle: {
-    fontSize: 13,
-    color: '#ffffff',
-    opacity: 0.9,
-    marginTop: 2,
-  },
-
-  detectedFoodBarRight: {
-    marginLeft: 12,
-  },
-
-  confidenceBadge: {
-    backgroundColor: 'rgba(255,255,255,0.25)',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-
-  confidenceBadgeText: {
-    fontSize: 12,
-    fontWeight: 'bold',
-    color: '#ffffff',
-  },
-
-  // Pill Styles
-  pillDetailsSection: {
-    marginHorizontal: 16,
-    marginBottom: 12,
-  },
-
-  pillDetailsList: {
-    gap: 12,
-  },
-
-  pillDetailBar: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 16,
-    borderRadius: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-
-  pillDetailBarLeft: {
-    flex: 1,
-  },
-
-  pillDetailBarTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#ffffff',
-  },
-
-  pillDetailBarSubtitle: {
-    fontSize: 13,
-    color: '#ffffff',
-    opacity: 0.9,
-    marginTop: 2,
-  },
-
-  pillDetailBarRight: {
-    marginLeft: 12,
-  },
-
-  pillAlternativesSection: {
-    marginHorizontal: 16,
-    marginBottom: 12,
-  },
-
-  pillAlternativesList: {
-    gap: 12,
-  },
-
-  pillAlternativeBar: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 16,
-    borderRadius: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-
-  pillAlternativeBarLeft: {
-    flex: 1,
-  },
-
-  pillAlternativeBarTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#ffffff',
-  },
-
-  pillAlternativeBarSubtitle: {
-    fontSize: 13,
-    color: '#ffffff',
-    opacity: 0.9,
-    marginTop: 2,
-  },
-
-  pillAlternativeBarRight: {
-    marginLeft: 12,
-  },
-
-  // Label Summary and Score Styles
-  labelSummarySection: {
-    marginHorizontal: 16,
-    marginBottom: 12,
-  },
-
-  labelSummaryBar: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 16,
-    borderRadius: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-
-  labelSummaryBarLeft: {
-    flex: 1,
-  },
-
-  labelSummaryBarText: {
-    fontSize: 14,
-    color: '#ffffff',
-    lineHeight: 20,
-  },
-
-  labelSummaryBarRight: {
-    marginLeft: 12,
-  },
-
-  labelScoreSection: {
-    marginHorizontal: 16,
-    marginBottom: 12,
-  },
-
-  labelScoreGrid: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-
-  labelNovaBar: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 16,
-    borderRadius: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-
-  labelNovaBarLeft: {
-    flex: 1,
-  },
-
-  labelNovaBarTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#ffffff',
-  },
-
-  labelNovaBarSubtitle: {
-    fontSize: 13,
-    color: '#ffffff',
-    opacity: 0.9,
-    marginTop: 2,
-  },
-
-  labelNovaBarRight: {
-    marginLeft: 12,
   },
 });
