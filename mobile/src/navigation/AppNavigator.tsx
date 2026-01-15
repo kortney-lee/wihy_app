@@ -381,7 +381,6 @@ export default function AppNavigator() {
           options={{
             presentation: 'card',
             headerShown: false,
-            animation: 'slide_from_right',
           }}
         />
         <Stack.Screen

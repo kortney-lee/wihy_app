@@ -50,6 +50,9 @@ export type RootStackParamList = {
   // Enrollment for coaches and parents
   Enrollment: { tab?: 'parent' | 'coach' } | undefined;
   
+  // Onboarding flow
+  OnboardingFlow: undefined;
+  
   // Legal and info pages
   About: undefined;
   Terms: undefined;

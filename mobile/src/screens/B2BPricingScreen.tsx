@@ -157,29 +157,39 @@ export const B2BPricingScreen: React.FC<Props> = ({ navigation }) => {
     }
   };
 
+  // Navigate to tab screens (inside Main TabNavigator)
+  const navigateToTab = (tabName: string) => {
+    navigation.navigate('Main', { screen: tabName });
+  };
+
+  // Navigate to stack screens
+  const navigateToStackScreen = (screenName: string) => {
+    navigation.navigate(screenName as any);
+  };
+
   // Web Navigation Header Component
   const WebNavHeader = () => (
     <nav className="web-top-nav">
       <div className="web-nav-left">
-        <button onClick={() => navigation.navigate('Main')} className="web-nav-item nav-home" type="button">
+        <button onClick={() => navigateToTab('Home')} className="web-nav-item nav-home" type="button">
           <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
             <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
           </svg>
           <span>Home</span>
         </button>
-        <button onClick={() => navigation.navigate('Main' as any)} className="web-nav-item nav-health" type="button">
+        <button onClick={() => navigateToStackScreen('Subscription')} className="web-nav-item nav-health" type="button">
           <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
             <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
           </svg>
           <span>Health</span>
         </button>
-        <button onClick={() => navigation.navigate('FullChat')} className="web-nav-item nav-chat" type="button">
+        <button onClick={() => navigateToTab('Chat')} className="web-nav-item nav-chat" type="button">
           <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
             <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/>
           </svg>
           <span>Chat</span>
         </button>
-        <button onClick={() => navigation.navigate('About' as any)} className="web-nav-item nav-about" type="button">
+        <button onClick={() => navigateToStackScreen('About')} className="web-nav-item nav-about" type="button">
           <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
             <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
           </svg>
@@ -189,9 +199,9 @@ export const B2BPricingScreen: React.FC<Props> = ({ navigation }) => {
       <div className="web-nav-right">
         <button onClick={() => {
           if (user) {
-            navigation.navigate('Profile');
+            navigateToTab('Profile');
           } else {
-            navigation.navigate('Main' as any);
+            navigateToTab('Home');
           }
         }} className="web-nav-item profile" type="button">
           <svg viewBox="0 0 24 24" width="24" height="24">
