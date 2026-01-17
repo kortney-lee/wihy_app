@@ -116,12 +116,12 @@ export default function AboutScreen() {
   // Web render
   if (isWeb) {
     return (
-      <div className="pricing-page">
+      <div className="about-page">
         {/* @ts-ignore */}
         <WebNavHeader />
         
-        <div className="pricing-content">
-          {/* Hero Section */}
+        <div className="about-content">
+          {/* HERO */}
           <div className="pricing-hero">
             <div className="pricing-hero-inner">
               <div className="pricing-hero-icon">
@@ -131,365 +131,321 @@ export default function AboutScreen() {
                   resizeMode="contain"
                 />
               </div>
-              <h1 className="pricing-hero-title">About WIHY</h1>
+              <h1 className="pricing-hero-title">WiHY — What Is Healthy for You</h1>
               <p className="pricing-hero-subtitle">
-                The World's Smartest Health Search Engine
+                Ask health questions. Scan food. Get clear answers with sources — and next steps you can use.
               </p>
             </div>
           </div>
 
-          {/* About Section */}
+          {/* SECTION 1: What We Do */}
           <section className="pricing-section">
             <p className="pricing-section-label">ABOUT WIHY</p>
-            <h2 className="pricing-section-title">The World's Smartest Health Search Engine</h2>
-            <p style={{ fontSize: '16px', color: '#6b7280', lineHeight: 1.6, textAlign: 'center', marginBottom: '40px', maxWidth: '700px', marginLeft: 'auto', marginRight: 'auto' }}>
-              WIHY empowers you to make informed health decisions by scanning food, asking questions, and receiving evidence-based answers. Our platform combines cutting-edge AI with over 35 million research articles to help you understand what you eat.
-            </p>
+            <h2 className="pricing-section-title">What We Do</h2>
             
-            <div style={{ textAlign: 'center', marginBottom: '48px' }}>
-              <button 
-                onClick={handleSubscribePress}
-                className="pricing-btn pricing-btn-primary pricing-btn-lg"
-                type="button"
-              >
-                Explore WIHY Plans
-              </button>
-            </div>
-
-            {/* Company Info Grid */}
-            <div className="about-features-grid" style={{ marginTop: '48px' }}>
-              
-              {/* Mission */}
+            <div className="about-features-grid">
               <div className="pricing-card">
                 <div className="pricing-card-icon">
                   <svg viewBox="0 0 24 24" width="28" height="28" fill="#1a73e8">
                     <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
                   </svg>
                 </div>
-                <h3 className="pricing-card-name">Our Mission</h3>
-                <p className="pricing-card-tagline">Make health information accessible and understandable for everyone through evidence-based technology.</p>
+                <h3 className="pricing-card-name">Health Made Clear</h3>
+                <p className="pricing-card-tagline">We translate complex health information into answers you can understand and act on.</p>
               </div>
 
-              {/* Research Backed */}
               <div className="pricing-card">
                 <div className="pricing-card-icon">
                   <svg viewBox="0 0 24 24" width="28" height="28" fill="#1a73e8">
                     <path d="M5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82zM12 3L1 9l11 6 9-4.91V17h2V9L12 3z"/>
                   </svg>
                 </div>
-                <h3 className="pricing-card-name">Research Backed</h3>
-                <p className="pricing-card-tagline">Every answer is supported by scientific research from our database of 35+ million peer-reviewed articles.</p>
+                <h3 className="pricing-card-name">Science You Can Trust</h3>
+                <p className="pricing-card-tagline">Every answer draws from 35+ million peer-reviewed research articles — not trends or opinions.</p>
               </div>
 
-              {/* Privacy First */}
               <div className="pricing-card">
                 <div className="pricing-card-icon">
                   <svg viewBox="0 0 24 24" width="28" height="28" fill="#1a73e8">
                     <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/>
                   </svg>
                 </div>
-                <h3 className="pricing-card-name">Privacy First</h3>
-                <p className="pricing-card-tagline">Your health data is yours. We use industry-leading encryption and never sell your personal information.</p>
+                <h3 className="pricing-card-name">Your Data, Your Control</h3>
+                <p className="pricing-card-tagline">Your health information stays private. We use encryption and never sell your data.</p>
               </div>
-
             </div>
           </section>
 
-          {/* Contact Section */}
+          {/* SECTION 2: Why WiHY Exists */}
           <section className="pricing-section pricing-section-alt">
-            <p className="pricing-section-label">GET IN TOUCH</p>
-            <h2 className="pricing-section-title">Contact Us</h2>
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', marginTop: '32px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <svg viewBox="0 0 24 24" width="20" height="20" fill="#6b7280">
-                  <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
-                </svg>
-                <a href="mailto:info@wihy.ai" style={{ fontSize: '16px', color: '#1a73e8', textDecoration: 'none' }}>info@wihy.ai</a>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <svg viewBox="0 0 24 24" width="20" height="20" fill="#6b7280">
-                  <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z"/>
-                </svg>
-                <a href="https://wihy.ai" target="_blank" rel="noopener noreferrer" style={{ fontSize: '16px', color: '#1a73e8', textDecoration: 'none' }}>wihy.ai</a>
-              </div>
-            </div>
-          </section>
-
-          {/* The Problem We're Solving */}
-          <section className="pricing-section">
-            <p className="pricing-section-label">WHY WIHY EXISTS</p>
-            <h2 className="pricing-section-title">The Problem We're Solving</h2>
+            <p className="pricing-section-label">THE CHALLENGE</p>
+            <h2 className="pricing-section-title">Why WiHY Exists</h2>
             
-            <div style={{ maxWidth: '800px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '24px' }}>
-              <div>
-                <h3 style={{ fontSize: '18px', fontWeight: '700', color: '#1f2937', marginBottom: '8px' }}>Health information is everywhere — but clarity is rare</h3>
-                <p style={{ fontSize: '16px', color: '#6b7280', lineHeight: 1.6 }}>
-                  You're bombarded with conflicting advice, marketing claims, and outdated information. Where do you find answers you can trust?
-                </p>
+            <div className="about-features-grid about-grid-4">
+              <div className="pricing-card">
+                <div className="pricing-card-icon">
+                  <svg viewBox="0 0 24 24" width="28" height="28" fill="#1a73e8">
+                    <path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-1 9h-4v4h-2v-4H9V9h4V5h2v4h4v2z"/>
+                  </svg>
+                </div>
+                <h3 className="pricing-card-name">Health Info Overload</h3>
+                <p className="pricing-card-tagline">Conflicting advice, marketing claims, and outdated information everywhere. Where do you find answers you can trust?</p>
               </div>
 
-              <div>
-                <h3 style={{ fontSize: '18px', fontWeight: '700', color: '#1f2937', marginBottom: '8px' }}>One-size-fits-all advice ignores what matters to you</h3>
-                <p style={{ fontSize: '16px', color: '#6b7280', lineHeight: 1.6 }}>
-                  Generic diet advice doesn't account for your culture, budget, food access, family situation, or stage of life. What's healthy for someone else might not be healthy for you.
-                </p>
+              <div className="pricing-card">
+                <div className="pricing-card-icon">
+                  <svg viewBox="0 0 24 24" width="28" height="28" fill="#1a73e8">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zM4 12c0-4.42 3.58-8 8-8 1.85 0 3.55.63 4.9 1.69L5.69 16.9C4.63 15.55 4 13.85 4 12zm8 8c-1.85 0-3.55-.63-4.9-1.69L18.31 7.1C19.37 8.45 20 10.15 20 12c0 4.42-3.58 8-8 8z"/>
+                  </svg>
+                </div>
+                <h3 className="pricing-card-name">Generic Advice Fails</h3>
+                <p className="pricing-card-tagline">One-size-fits-all approaches ignore culture, budget, access, family, and stage of life.</p>
               </div>
 
-              <div>
-                <h3 style={{ fontSize: '18px', fontWeight: '700', color: '#1f2937', marginBottom: '8px' }}>People are blamed for outcomes without usable tools</h3>
-                <p style={{ fontSize: '16px', color: '#6b7280', lineHeight: 1.6 }}>
-                  You're told "eat healthier" or "exercise more," but not given the actual tools, knowledge, or support to make those decisions in real life.
-                </p>
+              <div className="pricing-card">
+                <div className="pricing-card-icon">
+                  <svg viewBox="0 0 24 24" width="28" height="28" fill="#1a73e8">
+                    <path d="M22.7 19l-9.1-9.1c.9-2.3.4-5-1.5-6.9-2-2-5-2.4-7.4-1.3L9 6 6 9 1.6 4.7C.4 7.1.9 10.1 2.9 12.1c1.9 1.9 4.6 2.4 6.9 1.5l9.1 9.1c.4.4 1 .4 1.4 0l2.3-2.3c.5-.4.5-1.1.1-1.4z"/>
+                  </svg>
+                </div>
+                <h3 className="pricing-card-name">No Tools, No Support</h3>
+                <p className="pricing-card-tagline">You're told "eat healthier" without the actual tools, knowledge, or support to make those decisions.</p>
               </div>
 
-              <div>
-                <h3 style={{ fontSize: '18px', fontWeight: '700', color: '#1f2937', marginBottom: '8px' }}>Research exists, but it isn't written for real people</h3>
-                <p style={{ fontSize: '16px', color: '#6b7280', lineHeight: 1.6 }}>
-                  Scientists publish findings in academic journals. Those findings never reach the people who need them most. The gap between research and reality is huge.
-                </p>
+              <div className="pricing-card">
+                <div className="pricing-card-icon">
+                  <svg viewBox="0 0 24 24" width="28" height="28" fill="#1a73e8">
+                    <path d="M18 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 4h5v8l-2.5-1.5L6 12V4z"/>
+                  </svg>
+                </div>
+                <h3 className="pricing-card-name">Research Stays Hidden</h3>
+                <p className="pricing-card-tagline">Scientists publish findings in journals. Those insights never reach the people who need them.</p>
               </div>
-
-              <p style={{ fontSize: '18px', fontWeight: '700', color: '#1a73e8', textAlign: 'center', paddingTop: '16px', borderTopWidth: '1px', borderTopStyle: 'solid', borderTopColor: '#e5e7eb' }}>
-                WiHY was built to close that gap.
-              </p>
             </div>
           </section>
 
-          {/* What Makes WiHY Different */}
-          <section className="pricing-section pricing-section-alt">
-            <p className="pricing-section-label">WHAT SETS US APART</p>
-            <h2 className="pricing-section-title">Not Another Health App</h2>
-
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px', marginTop: '40px', maxWidth: '1200px', margin: '40px auto 0' }}>
-              
-              {/* Personalized */}
-              <div style={{ padding: '24px', border: '1px solid #e5e7eb', borderRadius: '16px' }}>
-                <h3 style={{ fontSize: '20px', fontWeight: '700', color: '#1f2937', marginBottom: '12px' }}>Personalized, not prescriptive</h3>
-                <p style={{ fontSize: '16px', color: '#6b7280', lineHeight: 1.6 }}>
-                  WiHY adapts to your individual reality — your goals, food access, culture, family situation, and stage of life.
-                </p>
-              </div>
-
-              {/* Research-backed */}
-              <div style={{ padding: '24px', border: '1px solid #e5e7eb', borderRadius: '16px' }}>
-                <h3 style={{ fontSize: '20px', fontWeight: '700', color: '#1f2937', marginBottom: '12px' }}>Research-backed, not trend-driven</h3>
-                <p style={{ fontSize: '16px', color: '#6b7280', lineHeight: 1.6 }}>
-                  Every answer is grounded in peer-reviewed research and trusted data sources, not the latest social media trend.
-                </p>
-              </div>
-
-              {/* Real Life */}
-              <div style={{ padding: '24px', border: '1px solid #e5e7eb', borderRadius: '16px' }}>
-                <h3 style={{ fontSize: '20px', fontWeight: '700', color: '#1f2937', marginBottom: '12px' }}>Built for real life</h3>
-                <p style={{ fontSize: '16px', color: '#6b7280', lineHeight: 1.6 }}>
-                  We account for budgets, time constraints, families, schools, and communities — not just ideal scenarios.
-                </p>
-              </div>
-
-              {/* One Entry Point */}
-              <div style={{ padding: '24px', border: '1px solid #e5e7eb', borderRadius: '16px' }}>
-                <h3 style={{ fontSize: '20px', fontWeight: '700', color: '#1f2937', marginBottom: '12px' }}>One intelligent entry point</h3>
-                <p style={{ fontSize: '16px', color: '#6b7280', lineHeight: 1.6 }}>
-                  Nutrition, fitness, medications, research, and planning — all accessible through one unified system.
-                </p>
-              </div>
-
-              {/* Explainable AI */}
-              <div style={{ padding: '24px', border: '1px solid #e5e7eb', borderRadius: '16px' }}>
-                <h3 style={{ fontSize: '20px', fontWeight: '700', color: '#1f2937', marginBottom: '12px' }}>Explainable AI</h3>
-                <p style={{ fontSize: '16px', color: '#6b7280', lineHeight: 1.6 }}>
-                  You don't just get answers. You see the reasoning behind them, the evidence supporting them, and can make informed decisions.
-                </p>
-              </div>
-
-            </div>
-          </section>
-
-          {/* Our Philosophy */}
+          {/* SECTION 3: What Makes WiHY Different */}
           <section className="pricing-section">
-            <p className="pricing-section-label">OUR BELIEF</p>
-            <h2 className="pricing-section-title">Our Philosophy</h2>
+            <p className="pricing-section-label">OUR APPROACH</p>
+            <h2 className="pricing-section-title">What Makes WiHY Different</h2>
 
-            <div style={{ maxWidth: '800px', margin: '40px auto 0' }}>
-              <p style={{ fontSize: '18px', color: '#6b7280', lineHeight: 1.8, textAlign: 'center', marginBottom: '32px' }}>
-                Health isn't about perfection. It's about alignment — between knowledge, access, behavior, and intention.
-              </p>
+            <div className="about-features-grid">
+              <div className="pricing-card">
+                <div className="pricing-card-icon">
+                  <svg viewBox="0 0 24 24" width="28" height="28" fill="#1a73e8">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                  </svg>
+                </div>
+                <h3 className="pricing-card-name">Made for You</h3>
+                <p className="pricing-card-tagline">Adapts to your goals, culture, budget, family, and stage of life — because your health context is unique.</p>
+              </div>
 
-              <div style={{ padding: '24px', background: '#f0f9ff', borderRadius: '16px', borderLeft: '4px solid #1a73e8' }}>
-                <p style={{ fontSize: '18px', fontWeight: '700', color: '#1f2937', textAlign: 'center', margin: '0 0 8px' }}>Healthy isn't a trend.</p>
-                <p style={{ fontSize: '18px', fontWeight: '700', color: '#1f2937', textAlign: 'center', margin: '8px 0' }}>Healthy is learned.</p>
-                <p style={{ fontSize: '18px', fontWeight: '700', color: '#1f2937', textAlign: 'center', margin: '8px 0 0' }}>Healthy is lived.</p>
+              <div className="pricing-card">
+                <div className="pricing-card-icon">
+                  <svg viewBox="0 0 24 24" width="28" height="28" fill="#1a73e8">
+                    <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+                  </svg>
+                </div>
+                <h3 className="pricing-card-name">Built for Real Life</h3>
+                <p className="pricing-card-tagline">We account for time, money, access, and family — not just ideal scenarios that don't exist.</p>
+              </div>
+
+              <div className="pricing-card">
+                <div className="pricing-card-icon">
+                  <svg viewBox="0 0 24 24" width="28" height="28" fill="#1a73e8">
+                    <path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/>
+                  </svg>
+                </div>
+                <h3 className="pricing-card-name">Everything in One Place</h3>
+                <p className="pricing-card-tagline">Nutrition, fitness, medications, research, and planning — unified through one intelligent system.</p>
+              </div>
+
+              <div className="pricing-card">
+                <div className="pricing-card-icon">
+                  <svg viewBox="0 0 24 24" width="28" height="28" fill="#1a73e8">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/>
+                  </svg>
+                </div>
+                <h3 className="pricing-card-name">Transparent AI</h3>
+                <p className="pricing-card-tagline">You see the reasoning behind every answer — the evidence, the sources, and why it matters for you.</p>
+              </div>
+
+              <div className="pricing-card">
+                <div className="pricing-card-icon">
+                  <svg viewBox="0 0 24 24" width="28" height="28" fill="#1a73e8">
+                    <path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/>
+                  </svg>
+                </div>
+                <h3 className="pricing-card-name">Long-term Focus</h3>
+                <p className="pricing-card-tagline">We help you build sustainable habits, not quick fixes that don't last.</p>
               </div>
             </div>
           </section>
 
-          {/* How WiHY Was Built */}
+          {/* SECTION 4: How WiHY Works */}
           <section className="pricing-section pricing-section-alt">
-            <p className="pricing-section-label">OUR FOUNDATION</p>
-            <h2 className="pricing-section-title">Built From the Ground Up</h2>
+            <p className="pricing-section-label">HOW IT WORKS</p>
+            <h2 className="pricing-section-title">How WiHY Works</h2>
 
-            <div style={{ maxWidth: '800px', margin: '40px auto 0' }}>
-              <p style={{ fontSize: '16px', color: '#6b7280', lineHeight: 1.8, marginBottom: '24px' }}>
-                WiHY was created at the intersection of lived experience, academic research, and technology. It draws from nutrition science, public health, behavioral science, and cultural context — not just algorithms.
-              </p>
+            <div className="about-features-grid">
+              <div className="pricing-card">
+                <div className="pricing-card-icon">
+                  <svg viewBox="0 0 24 24" width="28" height="28" fill="#1a73e8">
+                    <path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-7 9h-2V5h2v6zm0 4h-2v-2h2v2z"/>
+                  </svg>
+                </div>
+                <h3 className="pricing-card-name">Ask WiHY</h3>
+                <p className="pricing-card-tagline">Ask a health or nutrition question in plain language. Get a clear answer with sources you can review.</p>
+              </div>
 
-              <div style={{ padding: '20px', background: '#f9fafb', borderRadius: '12px', borderWidth: '1px', borderStyle: 'solid', borderColor: '#e5e7eb' }}>
-                <p style={{ fontSize: '16px', fontWeight: '600', color: '#1f2937', margin: 0 }}>This isn't theory.</p>
-                <p style={{ fontSize: '16px', fontWeight: '600', color: '#1f2937', margin: '8px 0 0' }}>This is application.</p>
+              <div className="pricing-card">
+                <div className="pricing-card-icon">
+                  <svg viewBox="0 0 24 24" width="28" height="28" fill="#1a73e8">
+                    <path d="M9.5 6.5v3h-3v-3h3M11 5H5v6h6V5zm-1.5 9.5v3h-3v-3h3M11 13H5v6h6v-6zm6.5-6.5v3h-3v-3h3M19 5h-6v6h6V5zm-6 8h1.5v1.5H13V13zm1.5 1.5H16V16h-1.5v-1.5zM16 13h1.5v1.5H16V13zm-3 3h1.5v1.5H13V16zm1.5 1.5H16V19h-1.5v-1.5zM16 16h1.5v1.5H16V16zm1.5-1.5H19V16h-1.5v-1.5zm0 3H19V19h-1.5v-1.5zM19 13h-1.5v1.5H19V13z"/>
+                  </svg>
+                </div>
+                <h3 className="pricing-card-name">Scan Anything</h3>
+                <p className="pricing-card-tagline">Point your camera at a barcode or nutrition label. WiHY tells you what's inside — no guesswork.</p>
+              </div>
+
+              <div className="pricing-card">
+                <div className="pricing-card-icon">
+                  <svg viewBox="0 0 24 24" width="28" height="28" fill="#1a73e8">
+                    <path d="M12 3L1 9l4 2.18v6L12 21l7-3.82v-6l2-1.09V17h2V9L12 3zm6.82 6L12 12.72 5.18 9 12 5.28 18.82 9zM17 15.99l-5 2.73-5-2.73v-3.72L12 15l5-2.73v3.72z"/>
+                  </svg>
+                </div>
+                <h3 className="pricing-card-name">Explain It Clearly</h3>
+                <p className="pricing-card-tagline">Every answer shows you where the information came from and why it matters for your situation.</p>
               </div>
             </div>
           </section>
 
-          {/* Team Section */}
+          {/* SECTION 5: Trust & Privacy */}
           <section className="pricing-section">
+            <p className="pricing-section-label">TRUST & PRIVACY</p>
+            <h2 className="pricing-section-title">Your Data, Your Control</h2>
+
+            <div className="about-features-grid">
+              <div className="pricing-card">
+                <div className="pricing-card-icon">
+                  <svg viewBox="0 0 24 24" width="28" height="28" fill="#1a73e8">
+                    <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/>
+                  </svg>
+                </div>
+                <h3 className="pricing-card-name">Private by Default</h3>
+                <p className="pricing-card-tagline">Your health data is encrypted and never sold. You control what's stored and what's shared.</p>
+              </div>
+
+              <div className="pricing-card">
+                <div className="pricing-card-icon">
+                  <svg viewBox="0 0 24 24" width="28" height="28" fill="#1a73e8">
+                    <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/>
+                  </svg>
+                </div>
+                <h3 className="pricing-card-name">Sources Included</h3>
+                <p className="pricing-card-tagline">Every answer shows where it came from — peer-reviewed journals and verified databases.</p>
+              </div>
+
+              <div className="pricing-card">
+                <div className="pricing-card-icon">
+                  <svg viewBox="0 0 24 24" width="28" height="28" fill="#1a73e8">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                  </svg>
+                </div>
+                <h3 className="pricing-card-name">No Hidden Agendas</h3>
+                <p className="pricing-card-tagline">WiHY doesn't promote products or take sponsorships. Our only job is to help you understand your health.</p>
+              </div>
+            </div>
+          </section>
+
+          {/* SECTION 6: Team */}
+          <section className="pricing-section pricing-section-alt">
             <p className="pricing-section-label">OUR TEAM</p>
             <h2 className="pricing-section-title">The People Behind WiHY</h2>
 
-            <div style={{ maxWidth: '800px', margin: '40px auto 0' }}>
+            <div style={{ maxWidth: '900px', margin: '40px auto 0' }}>
               <p style={{ fontSize: '16px', color: '#6b7280', lineHeight: 1.8, marginBottom: '40px', textAlign: 'center' }}>
-                WiHY is built by a multidisciplinary team spanning health, education, technology, and community work. Our team brings together lived experience, academic training, and real-world problem solving — because health doesn't exist in silos.
+                We're a multidisciplinary team spanning health, education, technology, and community work. We combine lived experience with academic training to solve real-world problems.
               </p>
 
-              {/* Founder Section */}
-              <div style={{ padding: '24px', marginBottom: '40px', border: '2px solid #1a73e8', borderRadius: '16px', backgroundColor: '#f0f9ff' }}>
-                <p style={{ fontSize: '12px', fontWeight: '700', color: '#1a73e8', textTransform: 'uppercase', letterSpacing: '0.8px', margin: '0 0 12px' }}>Founder & Lead Architect</p>
-                <h3 style={{ fontSize: '20px', fontWeight: '700', color: '#1f2937', margin: '0 0 12px' }}>Kortney Lee</h3>
-                <p style={{ fontSize: '14px', color: '#6b7280', fontWeight: '600', margin: '0 0 16px' }}>Founder, WiHY</p>
-                <p style={{ fontSize: '16px', color: '#6b7280', lineHeight: 1.8, marginBottom: '12px' }}>
-                  Kortney founded WiHY to address the disconnect between health research and everyday decision-making. With a background in business, history, and community health education, his work centers on translating complex systems — food, fitness, behavior, and access — into tools people can actually use.
-                </p>
-                <p style={{ fontSize: '16px', color: '#6b7280', lineHeight: 1.8 }}>
-                  WiHY reflects a long-term commitment to generational health, cultural context, and practical solutions over trends.
+              {/* Founder */}
+              <div className="pricing-card" style={{ borderColor: '#1a73e8', backgroundColor: '#f0f9ff', marginBottom: '40px' }}>
+                <p style={{ fontSize: '11px', fontWeight: '800', color: '#1a73e8', textTransform: 'uppercase', letterSpacing: '1px', margin: '0 0 12px' }}>Founder & Lead Architect</p>
+                <h3 style={{ fontSize: '22px', fontWeight: '700', color: '#1f2937', margin: '0 0 4px' }}>Kortney Lee</h3>
+                <p style={{ fontSize: '14px', color: '#1a73e8', fontWeight: '600', margin: '0 0 16px' }}>Founder, WiHY</p>
+                <p className="pricing-card-tagline" style={{ textAlign: 'left' }}>
+                  Founded WiHY to close the disconnect between health research and everyday decision-making. Background in business, history, and community health education. Translates complex systems into tools people can actually use.
                 </p>
               </div>
 
-              {/* Core Team Functions */}
-              <h3 style={{ fontSize: '18px', fontWeight: '700', color: '#1f2937', marginBottom: '24px', marginTop: '40px' }}>Core Team</h3>
-              
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '20px', marginBottom: '40px' }}>
-                
-                {/* Health & Research */}
-                <div style={{ padding: '20px', border: '1px solid #e5e7eb', borderRadius: '12px' }}>
-                  <h4 style={{ fontSize: '16px', fontWeight: '700', color: '#1f2937', marginBottom: '12px' }}>Health & Research</h4>
-                  <p style={{ fontSize: '14px', color: '#6b7280', lineHeight: 1.6, margin: 0 }}>
-                    Nutrition science, public health, behavioral research, and evidence review — ensuring answers are grounded, current, and responsible.
-                  </p>
+              {/* Team Functions */}
+              <h3 style={{ fontSize: '18px', fontWeight: '700', color: '#1f2937', marginBottom: '24px' }}>Core Team Functions</h3>
+              <div className="about-features-grid" style={{ marginBottom: '40px' }}>
+                <div className="pricing-card">
+                  <h3 className="pricing-card-name">Health & Research</h3>
+                  <p className="pricing-card-tagline">Nutrition science, public health, behavioral research — grounded and responsible answers.</p>
                 </div>
 
-                {/* Technology & AI */}
-                <div style={{ padding: '20px', border: '1px solid #e5e7eb', borderRadius: '12px' }}>
-                  <h4 style={{ fontSize: '16px', fontWeight: '700', color: '#1f2937', marginBottom: '12px' }}>Technology & AI</h4>
-                  <p style={{ fontSize: '14px', color: '#6b7280', lineHeight: 1.6, margin: 0 }}>
-                    Engineers, data scientists, and AI specialists building explainable systems that prioritize clarity, privacy, and accuracy.
-                  </p>
+                <div className="pricing-card">
+                  <h3 className="pricing-card-name">Technology & AI</h3>
+                  <p className="pricing-card-tagline">Engineers and data scientists building explainable systems that prioritize clarity and privacy.</p>
                 </div>
 
-                {/* Education & Community */}
-                <div style={{ padding: '20px', border: '1px solid #e5e7eb', borderRadius: '12px' }}>
-                  <h4 style={{ fontSize: '16px', fontWeight: '700', color: '#1f2937', marginBottom: '12px' }}>Education & Community</h4>
-                  <p style={{ fontSize: '14px', color: '#6b7280', lineHeight: 1.6, margin: 0 }}>
-                    Educators and community partners focused on accessibility, literacy, and real-world application across families, schools, and organizations.
-                  </p>
+                <div className="pricing-card">
+                  <h3 className="pricing-card-name">Education & Community</h3>
+                  <p className="pricing-card-tagline">Educators and partners focused on accessibility and real-world application.</p>
                 </div>
 
-                {/* Design & Experience */}
-                <div style={{ padding: '20px', border: '1px solid #e5e7eb', borderRadius: '12px' }}>
-                  <h4 style={{ fontSize: '16px', fontWeight: '700', color: '#1f2937', marginBottom: '12px' }}>Design & Experience</h4>
-                  <p style={{ fontSize: '14px', color: '#6b7280', lineHeight: 1.6, margin: 0 }}>
-                    Designers shaping intuitive interfaces that reduce friction and make health tools usable — not overwhelming.
-                  </p>
+                <div className="pricing-card">
+                  <h3 className="pricing-card-name">Design & Experience</h3>
+                  <p className="pricing-card-tagline">Designers creating intuitive interfaces that are usable, not overwhelming.</p>
                 </div>
-
               </div>
 
-              {/* Values Statement */}
-              <h3 style={{ fontSize: '18px', fontWeight: '700', color: '#1f2937', marginBottom: '20px', marginTop: '40px' }}>How We Work</h3>
-              
-              <div style={{ padding: '24px', background: '#f9fafb', borderRadius: '12px', marginBottom: '40px' }}>
-                {[
-                  'Evidence before opinion',
-                  'Clarity over complexity',
-                  'People before platforms',
-                  'Access over exclusivity',
-                  'Long-term health over short-term metrics',
-                ].map((value, idx) => (
-                  <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: idx < 4 ? '12px' : '0' }}>
-                    <svg viewBox="0 0 24 24" width="18" height="18" fill="#4cbb17">
-                      <path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/>
-                    </svg>
-                    <span style={{ fontSize: '15px', color: '#1f2937', fontWeight: '500' }}>{value}</span>
-                  </div>
-                ))}
-              </div>
-
-              {/* Advisors & Collaborators */}
-              <h3 style={{ fontSize: '18px', fontWeight: '700', color: '#1f2937', marginBottom: '16px' }}>Advisors & Partners</h3>
-              <p style={{ fontSize: '16px', color: '#6b7280', lineHeight: 1.8, marginBottom: '40px' }}>
-                WiHY collaborates with clinicians, educators, researchers, and community leaders to ensure our work reflects both expertise and lived reality. Advisors help guide research priorities, ethical use of AI, and real-world deployment.
-              </p>
-
-              {/* Partnership CTA */}
-              <div style={{ padding: '24px', backgroundColor: '#f0f9ff', borderRadius: '12px', borderLeft: '4px solid #1a73e8', textAlign: 'center' }}>
-                <h4 style={{ fontSize: '18px', fontWeight: '700', color: '#1f2937', marginBottom: '12px' }}>Interested in Working With Us?</h4>
-                <p style={{ fontSize: '15px', color: '#6b7280', lineHeight: 1.6, marginBottom: '20px', margin: '0 0 20px' }}>
-                  WiHY is built through collaboration — with researchers, educators, coaches, and partners who care about meaningful health outcomes.
+              {/* Collaboration */}
+              <div className="pricing-card" style={{ borderColor: '#1a73e8', backgroundColor: '#f0f9ff' }}>
+                <h3 className="pricing-card-name">Advisors & Collaborators</h3>
+                <p className="pricing-card-tagline" style={{ textAlign: 'left' }}>
+                  We collaborate with clinicians, researchers, educators, and community leaders to ensure our work reflects both expertise and lived reality. Partners help guide research priorities and ethical deployment.
                 </p>
-                <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
-                  <button 
-                    onClick={() => Linking.openURL('mailto:info@wihy.ai?subject=Partnership')}
-                    style={{
-                      padding: '10px 20px',
-                      backgroundColor: '#1a73e8',
-                      color: '#fff',
-                      border: 'none',
-                      borderRadius: '8px',
-                      fontSize: '14px',
-                      fontWeight: '600',
-                      cursor: 'pointer',
-                    }}
-                    type="button"
-                  >
-                    Partner With WiHY
-                  </button>
-                  <button 
-                    onClick={handleSubscribePress}
-                    style={{
-                      padding: '10px 20px',
-                      backgroundColor: '#f3f4f6',
-                      color: '#1a73e8',
-                      border: '1px solid #1a73e8',
-                      borderRadius: '8px',
-                      fontSize: '14px',
-                      fontWeight: '600',
-                      cursor: 'pointer',
-                    }}
-                    type="button"
-                  >
-                    For Schools & Organizations
-                  </button>
-                </div>
               </div>
-
             </div>
           </section>
 
-          {/* The Bigger Mission */}
+          {/* SECTION 7: Mission & Call to Action */}
           <section className="pricing-section">
-            <p className="pricing-section-label">WHERE WE'RE GOING</p>
-            <h2 className="pricing-section-title">The Bigger Mission</h2>
+            <p className="pricing-section-label">OUR MISSION</p>
+            <h2 className="pricing-section-title">The Bigger Picture</h2>
 
-            <div style={{ maxWidth: '800px', margin: '40px auto 0' }}>
-              <p style={{ fontSize: '16px', color: '#6b7280', lineHeight: 1.8, marginBottom: '24px' }}>
-                Our mission is to make health understandable, accessible, and actionable — across generations, communities, and systems.
+            <div style={{ maxWidth: '800px', margin: '40px auto 0', textAlign: 'center' }}>
+              <p style={{ fontSize: '18px', color: '#1f2937', lineHeight: 1.8, marginBottom: '24px', fontWeight: '600' }}>
+                Make health understandable, accessible, and actionable — for everyone.
               </p>
 
               <p style={{ fontSize: '16px', color: '#6b7280', lineHeight: 1.8, marginBottom: '12px' }}>
-                WiHY isn't here to replace doctors, coaches, or educators.
+                We're not here to replace doctors, coaches, or educators.
               </p>
 
-              <p style={{ fontSize: '16px', color: '#6b7280', lineHeight: 1.8 }}>
-                It's here to support better decisions, earlier understanding, and long-term change.
+              <p style={{ fontSize: '16px', color: '#6b7280', lineHeight: 1.8, marginBottom: '32px' }}>
+                We're here to help you make better decisions, understand your health earlier, and build habits that last.
               </p>
+
+              <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap' }}>
+                <button 
+                  onClick={() => navigateToTab('Chat')}
+                  className="pricing-btn pricing-btn-primary"
+                  type="button"
+                >
+                  Ask WiHY
+                </button>
+                <button 
+                  onClick={handleSubscribePress}
+                  className="pricing-btn pricing-btn-primary"
+                  type="button"
+                >
+                  Explore Plans
+                </button>
+              </div>
             </div>
           </section>
 
@@ -507,7 +463,6 @@ export default function AboutScreen() {
           </footer>
         </div>
 
-        {/* Login Modal */}
         <MultiAuthLogin 
           visible={showLoginModal} 
           onClose={() => setShowLoginModal(false)} 
@@ -600,13 +555,16 @@ export default function AboutScreen() {
           style={styles.heroSection}
         >
           <Text style={styles.heroTitle}>WIHY</Text>
-          <Text style={styles.heroSubtitle}>The World's Smartest Health Search Engine</Text>
+          <Text style={styles.heroSubtitle}>Health answers you can verify</Text>
           <View style={styles.badgeContainer}>
             <View style={styles.badge}>
-              <Text style={styles.badgeText}>Health Search</Text>
+              <Text style={styles.badgeText}>Ask & Chat</Text>
             </View>
             <View style={styles.badge}>
-              <Text style={styles.badgeText}>Evidence Based</Text>
+              <Text style={styles.badgeText}>Scan Food</Text>
+            </View>
+            <View style={styles.badge}>
+              <Text style={styles.badgeText}>Sources Included</Text>
             </View>
           </View>
         </LinearGradient>
@@ -614,71 +572,124 @@ export default function AboutScreen() {
         {/* Main CTA */}
         <View style={styles.mainCTASection}>
           <Text style={styles.mainCTAText}>
-            Search, seek, and ask to understand what you eat through food and ingredient scanning.
+            WiHY helps you understand food and health in plain language — with sources, context, and next steps.
           </Text>
           <CTAButton onPress={handleSubscribePress} text="Get Started with WIHY" />
         </View>
 
         {/* Features */}
         <FeatureSection
-          id="health-search"
-          title="Health Search"
-          tagline="Explore food with evidence instead of opinions"
-          icon="search"
+          id="ask"
+          title="Ask WiHY"
+          tagline="Get clear answers with sources"
+          icon="chatbubble-ellipses"
           details={[
-            { text: 'WIHY lets you search food the same way you search the internet, but with evidence instead of opinions.' },
-            { text: 'Ask health and nutrition questions and get research-backed answers.' },
-            { heading: 'Powered by Intelligence:', items: [
-              'Fact-checking across 35+ million scientific research articles',
-              'Analysis of 4+ million verified food and ingredient records',
-              'Government-funded nutrition and health data',
+            { text: 'Ask a health question in plain language and WiHY gives you a direct answer — plus the key reasons behind it.' },
+            { heading: 'What you get:', items: [
+              'A clear summary (no jargon)',
+              'Sources you can open',
+              'What to do next (save, log, compare, plan)',
             ]},
           ]}
         />
 
         <FeatureSection
-          id="universal-scanning"
-          title="Universal Scanning"
-          tagline="Instantly understand food and ingredients"
-          icon="camera"
+          id="scan"
+          title="Scan Anything"
+          tagline="Barcode, label, ingredients, or a meal photo"
+          icon="scan"
           details={[
-            { text: 'Scan a barcode, take a photo, upload ingredients, or import a receipt and WIHY breaks it down into clear, understandable insights.' },
-            { heading: 'How It Works:', items: [
-              'Barcode decoding to recognize packaged products',
-              'Food photography to identify meals and whole foods',
-              'Ingredient OCR to read and analyze ingredient lists',
+            { text: 'Scan a barcode, label, ingredient list, or meal photo and WiHY explains what it is and why it matters.' },
+            { heading: 'Scanning modes:', items: [
+              'Barcode scan (packaged products)',
+              'Ingredient scan (label breakdown)',
+              'Meal photo (identify foods + estimate)',
             ]},
           ]}
         />
 
         <FeatureSection
-          id="nutrition-analysis"
-          title="Nutrition Analysis"
-          tagline="Understand nutrition in plain language"
-          icon="leaf"
+          id="explain"
+          title="Explain It Clearly"
+          tagline="What it means for you, not a textbook"
+          icon="information-circle"
           details={[
-            { text: 'After you scan food with WIHY, the system automatically analyzes what you are eating and explains it in plain language.' },
-            { heading: 'What WIHY Analyzes:', items: [
-              'Macronutrients (carbohydrates, protein, fats, fiber)',
-              'Micronutrients (vitamins and minerals)',
-              'Added sugars, sweeteners, and additives',
+            { text: 'WiHY turns nutrition and ingredients into plain-language explanations based on your goals and context.' },
+            { heading: 'What we highlight:', items: [
+              'Added sugars, sodium, fiber, protein',
+              'Common additives and what they do',
+              'Tradeoffs (better, best, and why)',
             ]},
           ]}
         />
 
         {/* Platform Section */}
         <View style={styles.platformSection}>
-          <Text style={styles.platformTitle}>One Connected Platform</Text>
+          <Text style={styles.platformTitle}>One Place to Keep Track</Text>
           <Text style={styles.platformSubtitle}>
-            Progress tracking, nutrition, research, fitness, and coaching unified in one place.
+            Save answers, track patterns, and build routines that actually stick.
           </Text>
           <View style={styles.platformFeatures}>
-            <PlatformFeature title="My Progress" description="Track how your habits change over time." icon="trending-up" />
-            <PlatformFeature title="Consumption" description="Track meals and groceries in one place." icon="restaurant" />
-            <PlatformFeature title="Research" description="Search nutrition research without reading papers." icon="library" />
-            <PlatformFeature title="Fitness" description="Generate workout plans for your goals." icon="fitness" />
+            <PlatformFeature title="Trends" description="See how your habits change over time." icon="trending-up" />
+            <PlatformFeature title="Meals & Groceries" description="Log what you eat and buy." icon="restaurant" />
+            <PlatformFeature title="Sources" description="Access the research behind answers." icon="library" />
+            <PlatformFeature title="Plans" description="Build routines that fit your life." icon="calendar" />
           </View>
         </View>
+
+        {/* Trust & Privacy */}
+        <FeatureSection
+          id="trust"
+          title="Trust & Privacy"
+          tagline="Built to be helpful, not exploitative"
+          icon="shield-checkmark"
+          details={[
+            { text: 'WiHY is designed to help you make better decisions — not to sell your data.' },
+            { heading: 'Our commitments:', items: [
+              'We don\'t sell personal health data',
+              'You control what you save and track',
+              'We prioritize transparent explanations over black-box answers',
+            ]},
+          ]}
+        />
+
+        {/* Founder Card */}
+        <View style={styles.founderCard}>
+          <Text style={styles.founderLabel}>Founder & Lead Architect</Text>
+          <Text style={styles.founderName}>Kortney Lee</Text>
+          <Text style={styles.founderRole}>Founder, WiHY</Text>
+          <Text style={styles.founderBio}>
+            WiHY was built to turn health confusion into clarity — with tools people can actually use, not just advice.
+          </Text>
+        </View>
+
+        {/* Team */}
+        <FeatureSection
+          id="team"
+          title="Our Team"
+          tagline="The people building WiHY"
+          icon="people"
+          details={[
+            {
+              text:
+                "WiHY is built by a team that cares about accuracy, usability, and real-world health outcomes — across families, schools, and communities.",
+            },
+            {
+              heading: "What they do for you:",
+              items: [
+                "Health & Research: keeps recommendations responsible",
+                "Technology & AI: keeps answers fast and explainable",
+                "Education & Community: keeps it usable outside perfect conditions",
+                "Design: keeps it simple",
+              ],
+            },
+            {
+              heading: "Advisors & Collaborators",
+              text:
+                "We work with clinicians, researchers, educators, and community leaders to make sure WiHY reflects both expertise and lived reality.",
+            },
+          ]}
+        />
 
         {/* Footer CTA */}
         <View style={styles.footerCTASection}>
@@ -996,5 +1007,41 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: WIHY_GREEN,
     textDecorationLine: 'underline',
+  },
+  founderCard: {
+    marginHorizontal: 16,
+    marginTop: 16,
+    marginBottom: 8,
+    paddingVertical: 16,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: BORDER_GRAY,
+    backgroundColor: '#f0fdf4',
+  },
+  founderLabel: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: WIHY_GREEN,
+    textTransform: 'uppercase',
+    letterSpacing: 0.8,
+    marginBottom: 8,
+  },
+  founderName: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: DARK_GRAY,
+    marginBottom: 2,
+  },
+  founderRole: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#2f6f15',
+    marginBottom: 10,
+  },
+  founderBio: {
+    fontSize: 14,
+    color: '#666',
+    lineHeight: 20,
   },
 });
