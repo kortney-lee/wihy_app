@@ -215,6 +215,151 @@ export default function AboutScreen() {
             </div>
           </section>
 
+          {/* The Problem We're Solving */}
+          <section className="pricing-section">
+            <p className="pricing-section-label">WHY WIHY EXISTS</p>
+            <h2 className="pricing-section-title">The Problem We're Solving</h2>
+            
+            <div style={{ maxWidth: '800px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+              <div>
+                <h3 style={{ fontSize: '18px', fontWeight: '700', color: '#1f2937', marginBottom: '8px' }}>Health information is everywhere — but clarity is rare</h3>
+                <p style={{ fontSize: '16px', color: '#6b7280', lineHeight: 1.6 }}>
+                  You're bombarded with conflicting advice, marketing claims, and outdated information. Where do you find answers you can trust?
+                </p>
+              </div>
+
+              <div>
+                <h3 style={{ fontSize: '18px', fontWeight: '700', color: '#1f2937', marginBottom: '8px' }}>One-size-fits-all advice ignores what matters to you</h3>
+                <p style={{ fontSize: '16px', color: '#6b7280', lineHeight: 1.6 }}>
+                  Generic diet advice doesn't account for your culture, budget, food access, family situation, or stage of life. What's healthy for someone else might not be healthy for you.
+                </p>
+              </div>
+
+              <div>
+                <h3 style={{ fontSize: '18px', fontWeight: '700', color: '#1f2937', marginBottom: '8px' }}>People are blamed for outcomes without usable tools</h3>
+                <p style={{ fontSize: '16px', color: '#6b7280', lineHeight: 1.6 }}>
+                  You're told "eat healthier" or "exercise more," but not given the actual tools, knowledge, or support to make those decisions in real life.
+                </p>
+              </div>
+
+              <div>
+                <h3 style={{ fontSize: '18px', fontWeight: '700', color: '#1f2937', marginBottom: '8px' }}>Research exists, but it isn't written for real people</h3>
+                <p style={{ fontSize: '16px', color: '#6b7280', lineHeight: 1.6 }}>
+                  Scientists publish findings in academic journals. Those findings never reach the people who need them most. The gap between research and reality is huge.
+                </p>
+              </div>
+
+              <p style={{ fontSize: '18px', fontWeight: '700', color: '#1a73e8', textAlign: 'center', paddingTop: '16px', borderTopWidth: '1px', borderTopStyle: 'solid', borderTopColor: '#e5e7eb' }}>
+                WiHY was built to close that gap.
+              </p>
+            </div>
+          </section>
+
+          {/* What Makes WiHY Different */}
+          <section className="pricing-section pricing-section-alt">
+            <p className="pricing-section-label">WHAT SETS US APART</p>
+            <h2 className="pricing-section-title">Not Another Health App</h2>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px', marginTop: '40px', maxWidth: '1200px', margin: '40px auto 0' }}>
+              
+              {/* Personalized */}
+              <div style={{ padding: '24px', border: '1px solid #e5e7eb', borderRadius: '16px' }}>
+                <h3 style={{ fontSize: '20px', fontWeight: '700', color: '#1f2937', marginBottom: '12px' }}>Personalized, not prescriptive</h3>
+                <p style={{ fontSize: '16px', color: '#6b7280', lineHeight: 1.6 }}>
+                  WiHY adapts to your individual reality — your goals, food access, culture, family situation, and stage of life.
+                </p>
+              </div>
+
+              {/* Research-backed */}
+              <div style={{ padding: '24px', border: '1px solid #e5e7eb', borderRadius: '16px' }}>
+                <h3 style={{ fontSize: '20px', fontWeight: '700', color: '#1f2937', marginBottom: '12px' }}>Research-backed, not trend-driven</h3>
+                <p style={{ fontSize: '16px', color: '#6b7280', lineHeight: 1.6 }}>
+                  Every answer is grounded in peer-reviewed research and trusted data sources, not the latest social media trend.
+                </p>
+              </div>
+
+              {/* Real Life */}
+              <div style={{ padding: '24px', border: '1px solid #e5e7eb', borderRadius: '16px' }}>
+                <h3 style={{ fontSize: '20px', fontWeight: '700', color: '#1f2937', marginBottom: '12px' }}>Built for real life</h3>
+                <p style={{ fontSize: '16px', color: '#6b7280', lineHeight: 1.6 }}>
+                  We account for budgets, time constraints, families, schools, and communities — not just ideal scenarios.
+                </p>
+              </div>
+
+              {/* One Entry Point */}
+              <div style={{ padding: '24px', border: '1px solid #e5e7eb', borderRadius: '16px' }}>
+                <h3 style={{ fontSize: '20px', fontWeight: '700', color: '#1f2937', marginBottom: '12px' }}>One intelligent entry point</h3>
+                <p style={{ fontSize: '16px', color: '#6b7280', lineHeight: 1.6 }}>
+                  Nutrition, fitness, medications, research, and planning — all accessible through one unified system.
+                </p>
+              </div>
+
+              {/* Explainable AI */}
+              <div style={{ padding: '24px', border: '1px solid #e5e7eb', borderRadius: '16px' }}>
+                <h3 style={{ fontSize: '20px', fontWeight: '700', color: '#1f2937', marginBottom: '12px' }}>Explainable AI</h3>
+                <p style={{ fontSize: '16px', color: '#6b7280', lineHeight: 1.6 }}>
+                  You don't just get answers. You see the reasoning behind them, the evidence supporting them, and can make informed decisions.
+                </p>
+              </div>
+
+            </div>
+          </section>
+
+          {/* Our Philosophy */}
+          <section className="pricing-section">
+            <p className="pricing-section-label">OUR BELIEF</p>
+            <h2 className="pricing-section-title">Our Philosophy</h2>
+
+            <div style={{ maxWidth: '800px', margin: '40px auto 0' }}>
+              <p style={{ fontSize: '18px', color: '#6b7280', lineHeight: 1.8, textAlign: 'center', marginBottom: '32px' }}>
+                Health isn't about perfection. It's about alignment — between knowledge, access, behavior, and intention.
+              </p>
+
+              <div style={{ padding: '24px', background: '#f0f9ff', borderRadius: '16px', borderLeft: '4px solid #1a73e8' }}>
+                <p style={{ fontSize: '18px', fontWeight: '700', color: '#1f2937', textAlign: 'center', margin: '0 0 8px' }}>Healthy isn't a trend.</p>
+                <p style={{ fontSize: '18px', fontWeight: '700', color: '#1f2937', textAlign: 'center', margin: '8px 0' }}>Healthy is learned.</p>
+                <p style={{ fontSize: '18px', fontWeight: '700', color: '#1f2937', textAlign: 'center', margin: '8px 0 0' }}>Healthy is lived.</p>
+              </div>
+            </div>
+          </section>
+
+          {/* How WiHY Was Built */}
+          <section className="pricing-section pricing-section-alt">
+            <p className="pricing-section-label">OUR FOUNDATION</p>
+            <h2 className="pricing-section-title">Built From the Ground Up</h2>
+
+            <div style={{ maxWidth: '800px', margin: '40px auto 0' }}>
+              <p style={{ fontSize: '16px', color: '#6b7280', lineHeight: 1.8, marginBottom: '24px' }}>
+                WiHY was created at the intersection of lived experience, academic research, and technology. It draws from nutrition science, public health, behavioral science, and cultural context — not just algorithms.
+              </p>
+
+              <div style={{ padding: '20px', background: '#f9fafb', borderRadius: '12px', borderWidth: '1px', borderStyle: 'solid', borderColor: '#e5e7eb' }}>
+                <p style={{ fontSize: '16px', fontWeight: '600', color: '#1f2937', margin: 0 }}>This isn't theory.</p>
+                <p style={{ fontSize: '16px', fontWeight: '600', color: '#1f2937', margin: '8px 0 0' }}>This is application.</p>
+              </div>
+            </div>
+          </section>
+
+          {/* The Bigger Mission */}
+          <section className="pricing-section">
+            <p className="pricing-section-label">WHERE WE'RE GOING</p>
+            <h2 className="pricing-section-title">The Bigger Mission</h2>
+
+            <div style={{ maxWidth: '800px', margin: '40px auto 0' }}>
+              <p style={{ fontSize: '16px', color: '#6b7280', lineHeight: 1.8, marginBottom: '24px' }}>
+                Our mission is to make health understandable, accessible, and actionable — across generations, communities, and systems.
+              </p>
+
+              <p style={{ fontSize: '16px', color: '#6b7280', lineHeight: 1.8, marginBottom: '12px' }}>
+                WiHY isn't here to replace doctors, coaches, or educators.
+              </p>
+
+              <p style={{ fontSize: '16px', color: '#6b7280', lineHeight: 1.8 }}>
+                It's here to support better decisions, earlier understanding, and long-term change.
+              </p>
+            </div>
+          </section>
+
           {/* Footer */}
           <footer className="pricing-footer">
             <p className="pricing-footer-copyright">© 2026 WIHY. All rights reserved.</p>
