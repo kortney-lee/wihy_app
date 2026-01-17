@@ -14,6 +14,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { EXPO_PUBLIC_WIHY_NATIVE_CLIENT_ID, EXPO_PUBLIC_AUTH_URL } from '@env';
 import { fetchWithLogging } from '../utils/apiLogger';
+import { affiliateService } from './affiliateService';
 
 // Auth configuration - Only your client credentials needed
 export const AUTH_CONFIG = {
@@ -561,6 +562,15 @@ class AuthService {
         }
         
         console.log('=== REGISTER SUCCESS ===');
+        
+        // Track affiliate signup (web only, non-blocking)
+        // Uses email for lead matching; Stripe customer ID matched via webhooks on first payment
+        if (user?.email && user?.name) {
+          affiliateService.trackSignup(user.name, user.email, user.id).catch((err) => {
+            console.log('[Auth] Affiliate tracking skipped:', err);
+          });
+        }
+        
         // Return in expected format with nested data
         return {
           success: true,
@@ -681,6 +691,15 @@ class AuthService {
         }
         
         console.log('=== REGISTER AFTER PAYMENT SUCCESS ===');
+        
+        // Track affiliate signup (web only, non-blocking)
+        // Uses email for lead matching; Stripe customer ID matched via webhooks on first payment
+        if (user?.email && user?.name) {
+          affiliateService.trackSignup(user.name, user.email, user.id).catch((err) => {
+            console.log('[Auth] Affiliate tracking skipped:', err);
+          });
+        }
+        
         return {
           success: true,
           message: responseData.message,
