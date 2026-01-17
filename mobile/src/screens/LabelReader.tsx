@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -10,7 +10,7 @@ import {
   ActivityIndicator,
   Image,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
@@ -86,18 +86,12 @@ export default function LabelReader() {
 
   const { labelData: initialData, context, capturedImage } = (route?.params || {}) as LabelReaderParams;
   
-  const [labelData, setLabelData] = useState<LabelData | null>(null);
+  const [labelData, setLabelData] = useState<LabelData | null>(initialData || null);
   const [expandedFlags, setExpandedFlags] = useState(false);
   const [expandedClaims, setExpandedClaims] = useState(false);
   const [expandedText, setExpandedText] = useState(false);
   const [analyzing, setAnalyzing] = useState(false);
   const [aiAnalysis, setAiAnalysis] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (initialData) {
-      setLabelData(initialData);
-    }
-  }, [initialData]);
 
   const handleBack = () => {
     if (navigation.canGoBack()) {
@@ -155,25 +149,22 @@ export default function LabelReader() {
   const claims = labelData.detectedClaims || [];
   const positiveFlags = flags.filter(f => f.severity === 'positive');
   const concernFlags = flags.filter(f => f.severity !== 'positive');
+  
+  const insets = useSafeAreaInsets();
 
   return (
-    <SafeAreaView style={styles.container} edges={['left', 'right']}>
+    <View style={styles.container}>
       {/* Header */}
       <LinearGradient
         colors={['#ef4444', '#dc2626']}
-        style={styles.header}
+        style={[styles.header, { paddingTop: insets.top + 12 }]}
       >
         <View style={styles.headerContent}>
           <Pressable style={styles.backButton} onPress={handleBack}>
             <Ionicons name="arrow-back" size={24} color="#ffffff" />
           </Pressable>
           <Text style={styles.headerTitle}>Label Reader</Text>
-          <Pressable 
-            style={styles.chatButton}
-            onPress={() => openChatWithContext({ type: 'general' })}
-          >
-            <Ionicons name="chatbubble-ellipses" size={24} color="#ffffff" />
-          </Pressable>
+
         </View>
       </LinearGradient>
 
@@ -446,26 +437,37 @@ export default function LabelReader() {
           </View>
         )}
 
-        {/* Ask WiHY Button */}
-        <TouchableOpacity
-          style={styles.askButton}
-          onPress={() => openChatWithContext({
-            type: 'label_detailed',
-            query: `Analyze all the claims on this product label and tell me which ones are legitimate and which might be misleading`,
-          })}
-        >
-          <LinearGradient
-            colors={['#ef4444', '#dc2626']}
-            style={styles.askButtonGradient}
+        {/* Action Buttons */}
+        <View style={styles.actionSection}>
+          <Pressable
+            style={[styles.actionButton, styles.primaryAction]}
+            onPress={() => openChatWithContext({ type: 'general' })}
           >
             <Ionicons name="chatbubble-ellipses" size={20} color="#ffffff" />
-            <Text style={styles.askButtonText}>Ask WiHY About These Claims</Text>
-          </LinearGradient>
-        </TouchableOpacity>
+            <Text style={styles.primaryActionText}>Ask WiHY</Text>
+          </Pressable>
+          <View style={styles.secondaryActions}>
+            <Pressable
+              style={[styles.actionButton, styles.secondaryAction]}
+              onPress={() => openChatWithContext({ type: 'alternatives' })}
+            >
+              <Ionicons name="swap-horizontal" size={18} color="#6b7280" />
+              <Text style={styles.secondaryActionText}>Compare alternatives</Text>
+            </Pressable>
+
+            <Pressable
+              style={[styles.actionButton, styles.secondaryAction]}
+              onPress={() => Alert.alert('Feature Coming Soon', 'Product tracking feature will be available soon!')}
+            >
+              <Ionicons name="bookmark" size={18} color="#6b7280" />
+              <Text style={styles.secondaryActionText}>Save product</Text>
+            </Pressable>
+          </View>
+        </View>
 
         <View style={{ height: 40 }} />
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -492,7 +494,8 @@ const styles = StyleSheet.create({
   headerContent: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    justifyContent: 'flex-start',
+    gap: 16,
   },
   backButton: {
     width: 40,
@@ -508,14 +511,7 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     flex: 1,
     textAlign: 'center',
-  },
-  chatButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    marginRight: 56,
   },
   content: {
     flex: 1,
@@ -908,21 +904,43 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
 
-  // Ask Button
-  askButton: {
-    marginTop: 16,
+  // Action Section
+  actionSection: {
+    padding: 16,
+    paddingBottom: 32,
   },
-  askButtonGradient: {
+  actionButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    borderRadius: 10,
     gap: 8,
-    paddingVertical: 16,
-    borderRadius: 12,
   },
-  askButtonText: {
-    fontSize: 16,
-    fontWeight: '700',
+  primaryAction: {
+    backgroundColor: '#4cbb17',
+    borderWidth: 1.5,
+    borderColor: '#4cbb17',
+  },
+  primaryActionText: {
     color: '#ffffff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  secondaryActions: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  secondaryAction: {
+    flex: 1,
+    backgroundColor: '#f9fafb',
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
+  },
+  secondaryActionText: {
+    color: '#374151',
+    fontSize: 14,
+    fontWeight: '500',
   },
 });

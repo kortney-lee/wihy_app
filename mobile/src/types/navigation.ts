@@ -5,7 +5,6 @@ export type TabParamList = {
   Health: { openResearchDashboard?: boolean } | undefined;
   Profile: undefined;
   CoachSelection: undefined;
-  NutritionFacts: { foodItem: any; context?: any };
 };
 
 import { NavigatorScreenParams } from '@react-navigation/native';

@@ -307,13 +307,6 @@ function TabNavigator() {
           tabBarButton: () => null, // Hide from tab bar
         }}
       />
-      <Tab.Screen
-        name="NutritionFacts"
-        component={NutritionFacts}
-        options={{
-          tabBarButton: () => null, // Hide from tab bar
-        }}
-      />
     </Tab.Navigator>
 
     {/* Plans Modal for Free Users */}

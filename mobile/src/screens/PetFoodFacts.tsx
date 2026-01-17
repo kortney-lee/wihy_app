@@ -10,7 +10,7 @@ import {
   ActivityIndicator,
   Image,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
@@ -125,14 +125,16 @@ export default function PetFoodFacts() {
     });
   };
 
+  const insets = useSafeAreaInsets();
+
   if (!product) {
     return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.loadingContainer}>
+      <View style={styles.container}>
+        <View style={[styles.loadingContainer, { paddingTop: insets.top }]}>
           <ActivityIndicator size="large" color="#8b5cf6" />
           <Text style={styles.loadingText}>Loading product details...</Text>
         </View>
-      </SafeAreaView>
+      </View>
     );
   }
 
@@ -142,20 +144,17 @@ export default function PetFoodFacts() {
   const gradeColors = getNutritionGradeColor(nutrition.grade);
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <View style={styles.container}>
       {/* Header */}
-      <View style={styles.header}>
+      <LinearGradient
+        colors={['#8b5cf6', '#7c3aed']}
+        style={[styles.header, { paddingTop: insets.top + 12 }]}
+      >
         <TouchableOpacity onPress={handleBack} style={styles.backButton}>
           <Ionicons name="arrow-back" size={24} color="#fff" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>{petEmoji} Pet Food</Text>
-        <TouchableOpacity 
-          onPress={() => openChatWithContext({ type: 'pet-help' })}
-          style={styles.helpButton}
-        >
-          <Ionicons name="chatbubble-ellipses-outline" size={24} color="#fff" />
-        </TouchableOpacity>
-      </View>
+        <Text style={styles.headerTitle}>Pet Food</Text>
+      </LinearGradient>
 
       <ScrollView 
         style={styles.scrollView}
@@ -400,21 +399,39 @@ export default function PetFoodFacts() {
                   ? `This ${pet_info?.suggested_pet_type || 'pet'} food has ${ingredients.concerns.length} ingredient concern(s). Review them above to make an informed decision.`
                   : `This appears to be a quality ${pet_info?.suggested_pet_type || 'pet'} food with ${ingredients.protein_sources.length > 0 ? 'identifiable protein sources' : 'standard ingredients'}.`}
               </Text>
-              <TouchableOpacity 
-                style={[
-                  styles.askWihyButton,
-                  { backgroundColor: hasAnyConcerns ? '#f59e0b' : '#10b981' }
-                ]}
-                onPress={() => openChatWithContext({ 
-                  type: 'pet-food-assessment',
-                  query: `Is ${productInfo.name} by ${productInfo.brand} a good choice for my ${pet_info?.suggested_pet_type || 'pet'}? Give me a full assessment.`
-                })}
-              >
-                <Ionicons name="chatbubble-ellipses" size={18} color="#fff" />
-                <Text style={styles.askWihyText}>Ask WiHY for Full Assessment</Text>
-              </TouchableOpacity>
             </View>
           </SweepBorder>
+        </View>
+
+        {/* Action Buttons */}
+        <View style={styles.actionSection}>
+          <Pressable
+            style={[styles.actionButton, styles.primaryAction]}
+            onPress={() => openChatWithContext({ type: 'general' })}
+          >
+            <Ionicons name="chatbubble-ellipses" size={20} color="#ffffff" />
+            <Text style={styles.primaryActionText}>Ask WiHY</Text>
+          </Pressable>
+          <View style={styles.secondaryActions}>
+            <Pressable
+              style={[styles.actionButton, styles.secondaryAction]}
+              onPress={() => openChatWithContext({ 
+                type: 'pet-food-assessment',
+                query: `Is ${productInfo.name} by ${productInfo.brand} a good choice for my ${pet_info?.suggested_pet_type || 'pet'}? Give me a full assessment.`
+              })}
+            >
+              <Ionicons name="shield-checkmark" size={18} color="#6b7280" />
+              <Text style={styles.secondaryActionText}>Full assessment</Text>
+            </Pressable>
+
+            <Pressable
+              style={[styles.actionButton, styles.secondaryAction]}
+              onPress={() => Alert.alert('Feature Coming Soon', 'Product tracking feature will be available soon!')}
+            >
+              <Ionicons name="bookmark" size={18} color="#6b7280" />
+              <Text style={styles.secondaryActionText}>Save product</Text>
+            </Pressable>
+          </View>
         </View>
 
         {/* Data Source */}
@@ -427,7 +444,7 @@ export default function PetFoodFacts() {
 
         <View style={{ height: 40 }} />
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -468,7 +485,7 @@ function IngredientFlag({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1a1a2e',
+    backgroundColor: '#f8fafc',
   },
   loadingContainer: {
     flex: 1,
@@ -483,10 +500,10 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    justifyContent: 'flex-start',
     paddingHorizontal: 16,
-    paddingVertical: 12,
-    backgroundColor: '#8b5cf6',
+    paddingBottom: 12,
+    gap: 16,
   },
   backButton: {
     padding: 8,
@@ -495,9 +512,9 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '600',
     color: '#fff',
-  },
-  helpButton: {
-    padding: 8,
+    flex: 1,
+    textAlign: 'center',
+    marginRight: 48,
   },
   scrollView: {
     flex: 1,
@@ -568,15 +585,20 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   section: {
-    backgroundColor: '#252547',
+    backgroundColor: '#ffffff',
     borderRadius: 16,
     padding: 16,
     marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   sectionTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#fff',
+    color: '#1f2937',
     marginBottom: 12,
   },
   gradeContainer: {
@@ -606,11 +628,11 @@ const styles = StyleSheet.create({
   },
   nutritionLabel: {
     fontSize: 14,
-    color: '#9ca3af',
+    color: '#6b7280',
   },
   nutritionValue: {
     fontSize: 14,
-    color: '#fff',
+    color: '#1f2937',
     fontWeight: '600',
   },
   proteinSourcesContainer: {
@@ -708,7 +730,7 @@ const styles = StyleSheet.create({
   },
   ingredientsText: {
     fontSize: 13,
-    color: '#d1d5db',
+    color: '#4b5563',
     lineHeight: 20,
   },
   analyzeAllButton: {
@@ -738,11 +760,11 @@ const styles = StyleSheet.create({
   },
   detailLabel: {
     fontSize: 14,
-    color: '#9ca3af',
+    color: '#6b7280',
   },
   detailValue: {
     fontSize: 14,
-    color: '#fff',
+    color: '#1f2937',
     fontWeight: '500',
   },
   assessmentCard: {
@@ -765,20 +787,44 @@ const styles = StyleSheet.create({
   assessmentText: {
     fontSize: 14,
     lineHeight: 20,
-    marginBottom: 16,
   },
-  askWihyButton: {
+  actionSection: {
+    padding: 16,
+    paddingBottom: 32,
+  },
+  actionButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 14,
-    borderRadius: 8,
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    borderRadius: 10,
     gap: 8,
   },
-  askWihyText: {
-    color: '#fff',
-    fontSize: 14,
+  primaryAction: {
+    backgroundColor: '#4cbb17',
+    borderWidth: 1.5,
+    borderColor: '#4cbb17',
+  },
+  primaryActionText: {
+    color: '#ffffff',
+    fontSize: 16,
     fontWeight: '600',
+  },
+  secondaryActions: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  secondaryAction: {
+    flex: 1,
+    backgroundColor: '#f9fafb',
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
+  },
+  secondaryActionText: {
+    color: '#374151',
+    fontSize: 14,
+    fontWeight: '500',
   },
   sourceInfo: {
     flexDirection: 'row',
