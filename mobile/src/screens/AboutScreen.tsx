@@ -29,22 +29,10 @@ const LIGHT_GRAY = '#f5f5f5';
 const DARK_GRAY = '#1a1a1a';
 const BORDER_GRAY = '#e5e7eb';
 
-interface ExpandedSections {
-  [key: string]: boolean;
-}
-
 export default function AboutScreen() {
   const navigation = useNavigation<any>();
   const { user } = useContext(AuthContext);
   const [showLoginModal, setShowLoginModal] = useState(false);
-  const [expandedSections, setExpandedSections] = useState<ExpandedSections>({});
-
-  const toggleSection = (sectionId: string) => {
-    setExpandedSections((prev) => ({
-      ...prev,
-      [sectionId]: !prev[sectionId],
-    }));
-  };
 
   const handleSubscribePress = () => {
     Linking.openURL('https://wihy.ai/pricing');
@@ -58,17 +46,15 @@ export default function AboutScreen() {
     navigation.navigate('Terms' as any);
   };
 
-  // Navigate to tab screens (inside Main TabNavigator)
   const navigateToTab = (tabName: string) => {
     navigation.navigate('Main', { screen: tabName });
   };
 
-  // Navigate to stack screens
   const navigateToStack = (screenName: string) => {
     navigation.navigate(screenName as any);
   };
 
-  // Web Navigation Header Component
+  // Web Navigation Header
   const WebNavHeader = () => (
     <nav className="web-top-nav">
       <div className="web-nav-left">
@@ -121,97 +107,236 @@ export default function AboutScreen() {
         <WebNavHeader />
         
         <div className="pricing-content">
-          {/* Hero Section */}
+          {/* Hero: What WiHY Is */}
           <div className="pricing-hero">
             <div className="pricing-hero-inner">
               <div className="pricing-hero-icon">
-                <Image 
-                  source={require('../../assets/whatishealthyspinner.gif')} 
-                  style={{ width: 88, height: 88 }}
-                  resizeMode="contain"
-                />
+                <svg viewBox="0 0 24 24" width="88" height="88" fill="#1a73e8">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/>
+                </svg>
               </div>
-              <h1 className="pricing-hero-title">About WIHY</h1>
+              <h1 className="pricing-hero-title">WiHY — What Is Healthy for You</h1>
               <p className="pricing-hero-subtitle">
-                The World's Smartest Health Search Engine
+                Personalized health answers, grounded in science, culture, and real life.
               </p>
             </div>
           </div>
 
-          {/* About Section */}
-          <section className="pricing-section">
-            <p className="pricing-section-label">ABOUT WIHY</p>
-            <h2 className="pricing-section-title">The World's Smartest Health Search Engine</h2>
-            <p style={{ fontSize: '16px', color: '#6b7280', lineHeight: 1.6, textAlign: 'center', marginBottom: '40px', maxWidth: '700px', marginLeft: 'auto', marginRight: 'auto' }}>
-              WIHY empowers you to make informed health decisions by scanning food, asking questions, and receiving evidence-based answers. Our platform combines cutting-edge AI with over 35 million research articles to help you understand what you eat.
-            </p>
+          {/* The Problem We're Solving */}
+          <section className="pricing-section pricing-section-alt">
+            <p className="pricing-section-label">WHY WIHY EXISTS</p>
+            <h2 className="pricing-section-title">The Problem We're Solving</h2>
             
-            <div style={{ textAlign: 'center', marginBottom: '48px' }}>
-              <button 
-                onClick={handleSubscribePress}
-                className="pricing-btn pricing-btn-primary pricing-btn-lg"
-                type="button"
-              >
-                Explore WIHY Plans
-              </button>
+            <div style={{ maxWidth: '800px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+              <div>
+                <h3 style={{ fontSize: '18px', fontWeight: '700', color: '#1f2937', marginBottom: '8px' }}>Health information is everywhere — but clarity is rare</h3>
+                <p style={{ fontSize: '16px', color: '#6b7280', lineHeight: 1.6 }}>
+                  You're bombarded with conflicting advice, marketing claims, and outdated information. Where do you find answers you can trust?
+                </p>
+              </div>
+
+              <div>
+                <h3 style={{ fontSize: '18px', fontWeight: '700', color: '#1f2937', marginBottom: '8px' }}>One-size-fits-all advice ignores what matters to you</h3>
+                <p style={{ fontSize: '16px', color: '#6b7280', lineHeight: 1.6 }}>
+                  Generic diet advice doesn't account for your culture, budget, food access, family situation, or stage of life. What's healthy for someone else might not be healthy for you.
+                </p>
+              </div>
+
+              <div>
+                <h3 style={{ fontSize: '18px', fontWeight: '700', color: '#1f2937', marginBottom: '8px' }}>People are blamed for outcomes without usable tools</h3>
+                <p style={{ fontSize: '16px', color: '#6b7280', lineHeight: 1.6 }}>
+                  You're told "eat healthier" or "exercise more," but not given the actual tools, knowledge, or support to make those decisions in real life.
+                </p>
+              </div>
+
+              <div>
+                <h3 style={{ fontSize: '18px', fontWeight: '700', color: '#1f2937', marginBottom: '8px' }}>Research exists, but it isn't written for real people</h3>
+                <p style={{ fontSize: '16px', color: '#6b7280', lineHeight: 1.6 }}>
+                  Scientists publish findings in academic journals. Those findings never reach the people who need them most. The gap between research and reality is huge.
+                </p>
+              </div>
+
+              <p style={{ fontSize: '18px', fontWeight: '700', color: '#1a73e8', textAlign: 'center', paddingTop: '16px', borderTopWidth: '1px', borderTopStyle: 'solid', borderTopColor: '#e5e7eb' }}>
+                WiHY was built to close that gap.
+              </p>
             </div>
+          </section>
 
-            {/* Company Info Grid */}
-            <div className="about-features-grid" style={{ marginTop: '48px' }}>
+          {/* What Makes WiHY Different */}
+          <section className="pricing-section">
+            <p className="pricing-section-label">WHAT SETS US APART</p>
+            <h2 className="pricing-section-title">Not Another Health App</h2>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px', marginTop: '40px', maxWidth: '1200px', margin: '40px auto 0' }}>
               
-              {/* Mission */}
-              <div className="pricing-card">
-                <div className="pricing-card-icon">
-                  <svg viewBox="0 0 24 24" width="28" height="28" fill="#1a73e8">
-                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-                  </svg>
-                </div>
-                <h3 className="pricing-card-name">Our Mission</h3>
-                <p className="pricing-card-tagline">Make health information accessible and understandable for everyone through evidence-based technology.</p>
+              {/* Personalized */}
+              <div style={{ padding: '24px', border: '1px solid #e5e7eb', borderRadius: '16px' }}>
+                <h3 style={{ fontSize: '20px', fontWeight: '700', color: '#1f2937', marginBottom: '12px' }}>Personalized, not prescriptive</h3>
+                <p style={{ fontSize: '16px', color: '#6b7280', lineHeight: 1.6 }}>
+                  WiHY adapts to your individual reality — your goals, food access, culture, family situation, and stage of life.
+                </p>
               </div>
 
-              {/* Research Backed */}
-              <div className="pricing-card">
-                <div className="pricing-card-icon">
-                  <svg viewBox="0 0 24 24" width="28" height="28" fill="#1a73e8">
-                    <path d="M5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82zM12 3L1 9l11 6 9-4.91V17h2V9L12 3z"/>
-                  </svg>
-                </div>
-                <h3 className="pricing-card-name">Research Backed</h3>
-                <p className="pricing-card-tagline">Every answer is supported by scientific research from our database of 35+ million peer-reviewed articles.</p>
+              {/* Research-backed */}
+              <div style={{ padding: '24px', border: '1px solid #e5e7eb', borderRadius: '16px' }}>
+                <h3 style={{ fontSize: '20px', fontWeight: '700', color: '#1f2937', marginBottom: '12px' }}>Research-backed, not trend-driven</h3>
+                <p style={{ fontSize: '16px', color: '#6b7280', lineHeight: 1.6 }}>
+                  Every answer is grounded in peer-reviewed research and trusted data sources, not the latest social media trend.
+                </p>
               </div>
 
-              {/* Privacy First */}
-              <div className="pricing-card">
-                <div className="pricing-card-icon">
-                  <svg viewBox="0 0 24 24" width="28" height="28" fill="#1a73e8">
-                    <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/>
-                  </svg>
-                </div>
-                <h3 className="pricing-card-name">Privacy First</h3>
-                <p className="pricing-card-tagline">Your health data is yours. We use industry-leading encryption and never sell your personal information.</p>
+              {/* Real Life */}
+              <div style={{ padding: '24px', border: '1px solid #e5e7eb', borderRadius: '16px' }}>
+                <h3 style={{ fontSize: '20px', fontWeight: '700', color: '#1f2937', marginBottom: '12px' }}>Built for real life</h3>
+                <p style={{ fontSize: '16px', color: '#6b7280', lineHeight: 1.6 }}>
+                  We account for budgets, time constraints, families, schools, and communities — not just ideal scenarios.
+                </p>
+              </div>
+
+              {/* One Entry Point */}
+              <div style={{ padding: '24px', border: '1px solid #e5e7eb', borderRadius: '16px' }}>
+                <h3 style={{ fontSize: '20px', fontWeight: '700', color: '#1f2937', marginBottom: '12px' }}>One intelligent entry point</h3>
+                <p style={{ fontSize: '16px', color: '#6b7280', lineHeight: 1.6 }}>
+                  Nutrition, fitness, medications, research, and planning — all accessible through one unified system.
+                </p>
+              </div>
+
+              {/* Explainable AI */}
+              <div style={{ padding: '24px', border: '1px solid #e5e7eb', borderRadius: '16px' }}>
+                <h3 style={{ fontSize: '20px', fontWeight: '700', color: '#1f2937', marginBottom: '12px' }}>Explainable AI</h3>
+                <p style={{ fontSize: '16px', color: '#6b7280', lineHeight: 1.6 }}>
+                  You don't just get answers. You see the reasoning behind them, the evidence supporting them, and can make informed decisions.
+                </p>
               </div>
 
             </div>
           </section>
 
-          {/* Contact Section */}
+          {/* What WiHY Does */}
           <section className="pricing-section pricing-section-alt">
-            <p className="pricing-section-label">GET IN TOUCH</p>
-            <h2 className="pricing-section-title">Contact Us</h2>
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', marginTop: '32px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <svg viewBox="0 0 24 24" width="20" height="20" fill="#6b7280">
-                  <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
-                </svg>
-                <a href="mailto:info@wihy.ai" style={{ fontSize: '16px', color: '#1a73e8', textDecoration: 'none' }}>info@wihy.ai</a>
+            <p className="pricing-section-label">WHAT YOU CAN DO</p>
+            <h2 className="pricing-section-title">What WiHY Does</h2>
+
+            <div style={{ maxWidth: '800px', margin: '40px auto 0', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              {[
+                'Ask health questions in plain language',
+                'Analyze foods, meals, and ingredients',
+                'Understand nutrition labels and additives',
+                'Track meals, movement, and habits',
+                'Build realistic plans for individuals or families',
+                'Support coaches, trainers, and nutrition professionals',
+                'Turn research into practical action',
+              ].map((item, idx) => (
+                <div key={idx} style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', paddingBottom: '12px', borderBottomWidth: '1px', borderBottomStyle: 'solid', borderBottomColor: '#e5e7eb' }}>
+                  <svg viewBox="0 0 24 24" width="20" height="20" fill="#4cbb17" style={{ marginTop: '2px', flexShrink: 0 }}>
+                    <path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/>
+                  </svg>
+                  <span style={{ fontSize: '16px', color: '#1f2937' }}>{item}</span>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {/* Who WiHY Is For */}
+          <section className="pricing-section">
+            <p className="pricing-section-label">WHO WE SERVE</p>
+            <h2 className="pricing-section-title">Who WiHY Is For</h2>
+
+            <div style={{ maxWidth: '800px', margin: '40px auto 0', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {[
+                'Individuals and families looking to eat healthier',
+                'Coaches, trainers, and nutrition professionals',
+                'Schools and students',
+                'Healthcare and community organizations',
+                'Employers and wellness programs',
+              ].map((item, idx) => (
+                <p key={idx} style={{ fontSize: '16px', color: '#6b7280', lineHeight: 1.6 }}>• {item}</p>
+              ))}
+              <p style={{ fontSize: '16px', color: '#1a73e8', fontWeight: '600', marginTop: '16px', textAlign: 'center' }}>
+                If health touches your life — WiHY was built for you.
+              </p>
+            </div>
+          </section>
+
+          {/* Our Philosophy */}
+          <section className="pricing-section pricing-section-alt">
+            <p className="pricing-section-label">OUR BELIEF</p>
+            <h2 className="pricing-section-title">Our Philosophy</h2>
+
+            <div style={{ maxWidth: '800px', margin: '40px auto 0' }}>
+              <p style={{ fontSize: '18px', color: '#6b7280', lineHeight: 1.8, textAlign: 'center', marginBottom: '32px' }}>
+                Health isn't about perfection. It's about alignment — between knowledge, access, behavior, and intention.
+              </p>
+
+              <div style={{ padding: '24px', background: '#f0f9ff', borderRadius: '16px', borderLeft: '4px solid #1a73e8' }}>
+                <p style={{ fontSize: '18px', fontWeight: '700', color: '#1f2937', textAlign: 'center', margin: '0 0 8px' }}>Healthy isn't a trend.</p>
+                <p style={{ fontSize: '18px', fontWeight: '700', color: '#1f2937', textAlign: 'center', margin: '8px 0' }}>Healthy is learned.</p>
+                <p style={{ fontSize: '18px', fontWeight: '700', color: '#1f2937', textAlign: 'center', margin: '8px 0 0' }}>Healthy is lived.</p>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <svg viewBox="0 0 24 24" width="20" height="20" fill="#6b7280">
-                  <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z"/>
-                </svg>
-                <a href="https://wihy.ai" target="_blank" rel="noopener noreferrer" style={{ fontSize: '16px', color: '#1a73e8', textDecoration: 'none' }}>wihy.ai</a>
+            </div>
+          </section>
+
+          {/* How WiHY Was Built */}
+          <section className="pricing-section">
+            <p className="pricing-section-label">OUR FOUNDATION</p>
+            <h2 className="pricing-section-title">Built From the Ground Up</h2>
+
+            <div style={{ maxWidth: '800px', margin: '40px auto 0' }}>
+              <p style={{ fontSize: '16px', color: '#6b7280', lineHeight: 1.8, marginBottom: '24px' }}>
+                WiHY was created at the intersection of lived experience, academic research, and technology. It draws from nutrition science, public health, behavioral science, and cultural context — not just algorithms.
+              </p>
+
+              <div style={{ padding: '20px', background: '#f9fafb', borderRadius: '12px', borderWidth: '1px', borderStyle: 'solid', borderColor: '#e5e7eb' }}>
+                <p style={{ fontSize: '16px', fontWeight: '600', color: '#1f2937', margin: 0 }}>This isn't theory.</p>
+                <p style={{ fontSize: '16px', fontWeight: '600', color: '#1f2937', margin: '8px 0 0' }}>This is application.</p>
               </div>
+            </div>
+          </section>
+
+          {/* The Bigger Mission */}
+          <section className="pricing-section pricing-section-alt">
+            <p className="pricing-section-label">WHERE WE'RE GOING</p>
+            <h2 className="pricing-section-title">The Bigger Mission</h2>
+
+            <div style={{ maxWidth: '800px', margin: '40px auto 0' }}>
+              <p style={{ fontSize: '16px', color: '#6b7280', lineHeight: 1.8, marginBottom: '24px' }}>
+                Our mission is to make health understandable, accessible, and actionable — across generations, communities, and systems.
+              </p>
+
+              <p style={{ fontSize: '16px', color: '#6b7280', lineHeight: 1.8, marginBottom: '12px' }}>
+                WiHY isn't here to replace doctors, coaches, or educators.
+              </p>
+
+              <p style={{ fontSize: '16px', color: '#6b7280', lineHeight: 1.8, marginBottom: '24px' }}>
+                It's here to support better decisions, earlier understanding, and long-term change.
+              </p>
+            </div>
+          </section>
+
+          {/* Final CTA */}
+          <section className="pricing-section">
+            <p className="pricing-section-label">READY TO START?</p>
+            <h2 className="pricing-section-title">Start With One Question</h2>
+
+            <p style={{ fontSize: '16px', color: '#6b7280', lineHeight: 1.6, textAlign: 'center', marginBottom: '40px', maxWidth: '600px', marginLeft: 'auto', marginRight: 'auto' }}>
+              Ask WiHY what's healthy for you — and start from there.
+            </p>
+
+            <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap' }}>
+              <button 
+                onClick={() => navigateToTab('Chat')}
+                className="pricing-btn pricing-btn-primary"
+                type="button"
+              >
+                Ask WiHY
+              </button>
+              <button 
+                onClick={handleSubscribePress}
+                className="pricing-btn pricing-btn-primary"
+                type="button"
+              >
+                Explore Features
+              </button>
             </div>
           </section>
 
@@ -229,7 +354,6 @@ export default function AboutScreen() {
           </footer>
         </div>
 
-        {/* Login Modal */}
         <MultiAuthLogin 
           visible={showLoginModal} 
           onClose={() => setShowLoginModal(false)} 
@@ -239,68 +363,7 @@ export default function AboutScreen() {
     );
   }
 
-  // Native render - existing implementation
-  const FeatureSection = ({ id, title, tagline, details, icon }: any) => (
-    <View style={styles.featureSection}>
-      <Pressable
-        onPress={() => toggleSection(id)}
-        style={[styles.featureTitleContainer, { backgroundColor: LIGHT_GRAY }]}
-      >
-        <View style={styles.featureTitleContent}>
-          <Ionicons name={icon} size={24} color={WIHY_GREEN} />
-          <View style={{ flex: 1, marginLeft: 12 }}>
-            <Text style={styles.featureTitle}>{title}</Text>
-            <Text style={styles.featureTagline}>{tagline}</Text>
-          </View>
-        </View>
-        <Ionicons
-          name={expandedSections[id] ? 'chevron-up' : 'chevron-down'}
-          size={24}
-          color={WIHY_GREEN}
-        />
-      </Pressable>
-
-      {expandedSections[id] && (
-        <View style={styles.featureDetailsContainer}>
-          {details.map((detail: any, idx: number) => (
-            <View key={idx}>
-              {detail.heading && (
-                <Text style={styles.detailHeading}>{detail.heading}</Text>
-              )}
-              <Text style={styles.detailText}>{detail.text}</Text>
-              {detail.items && (
-                <View style={styles.detailItemsList}>
-                  {detail.items.map((item: string, i: number) => (
-                    <View key={i} style={styles.detailItem}>
-                      <Text style={styles.detailItemBullet}>•</Text>
-                      <Text style={styles.detailItemText}>{item}</Text>
-                    </View>
-                  ))}
-                </View>
-              )}
-            </View>
-          ))}
-        </View>
-      )}
-    </View>
-  );
-
-  const CTAButton = ({ onPress, text }: any) => (
-    <Pressable onPress={onPress} style={styles.ctaButton}>
-      <Text style={styles.ctaButtonText}>{text}</Text>
-    </Pressable>
-  );
-
-  const PlatformFeature = ({ title, description, icon }: any) => (
-    <View style={styles.platformFeatureCard}>
-      <View style={styles.platformFeatureIconContainer}>
-        <Ionicons name={icon} size={32} color={WIHY_GREEN} />
-      </View>
-      <Text style={styles.platformFeatureTitle}>{title}</Text>
-      <Text style={styles.platformFeatureDescription}>{description}</Text>
-    </View>
-  );
-
+  // Native render
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
@@ -310,126 +373,93 @@ export default function AboutScreen() {
         <Text style={styles.headerTitle}>About WIHY</Text>
         <View style={{ width: 40 }} />
       </View>
-      <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
-        {/* Hero */}
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <LinearGradient
-          colors={['#e0f7e6', '#f0fdf4']}
+          colors={['#e8f0fe', '#d3e3fd']}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={styles.heroSection}
         >
-          <Text style={styles.heroTitle}>WIHY</Text>
-          <Text style={styles.heroSubtitle}>The World's Smartest Health Search Engine</Text>
-          <View style={styles.badgeContainer}>
-            <View style={styles.badge}>
-              <Text style={styles.badgeText}>Health Search</Text>
-            </View>
-            <View style={styles.badge}>
-              <Text style={styles.badgeText}>Evidence Based</Text>
-            </View>
-          </View>
+          <Text style={styles.heroTitle}>WiHY</Text>
+          <Text style={styles.heroSubtitle}>What Is Healthy for You</Text>
+          <Text style={styles.heroDescription}>Personalized health answers, grounded in science, culture, and real life.</Text>
         </LinearGradient>
 
-        {/* Main CTA */}
-        <View style={styles.mainCTASection}>
-          <Text style={styles.mainCTAText}>
-            Search, seek, and ask to understand what you eat through food and ingredient scanning.
-          </Text>
-          <CTAButton onPress={handleSubscribePress} text="Get Started with WIHY" />
-        </View>
-
-        {/* Features */}
-        <FeatureSection
-          id="health-search"
-          title="Health Search"
-          tagline="Explore food with evidence instead of opinions"
-          icon="search"
-          details={[
-            { text: 'WIHY lets you search food the same way you search the internet, but with evidence instead of opinions.' },
-            { text: 'Ask health and nutrition questions and get research-backed answers.' },
-            { heading: 'Powered by Intelligence:', items: [
-              'Fact-checking across 35+ million scientific research articles',
-              'Analysis of 4+ million verified food and ingredient records',
-              'Government-funded nutrition and health data',
-            ]},
-          ]}
-        />
-
-        <FeatureSection
-          id="universal-scanning"
-          title="Universal Scanning"
-          tagline="Instantly understand food and ingredients"
-          icon="camera"
-          details={[
-            { text: 'Scan a barcode, take a photo, upload ingredients, or import a receipt and WIHY breaks it down into clear, understandable insights.' },
-            { heading: 'How It Works:', items: [
-              'Barcode decoding to recognize packaged products',
-              'Food photography to identify meals and whole foods',
-              'Ingredient OCR to read and analyze ingredient lists',
-            ]},
-          ]}
-        />
-
-        <FeatureSection
-          id="nutrition-analysis"
-          title="Nutrition Analysis"
-          tagline="Understand nutrition in plain language"
-          icon="leaf"
-          details={[
-            { text: 'After you scan food with WIHY, the system automatically analyzes what you are eating and explains it in plain language.' },
-            { heading: 'What WIHY Analyzes:', items: [
-              'Macronutrients (carbohydrates, protein, fats, fiber)',
-              'Micronutrients (vitamins and minerals)',
-              'Added sugars, sweeteners, and additives',
-            ]},
-          ]}
-        />
-
-        {/* Platform Section */}
-        <View style={styles.platformSection}>
-          <Text style={styles.platformTitle}>One Connected Platform</Text>
-          <Text style={styles.platformSubtitle}>
-            Progress tracking, nutrition, research, fitness, and coaching unified in one place.
-          </Text>
-          <View style={styles.platformFeatures}>
-            <PlatformFeature title="My Progress" description="Track how your habits change over time." icon="trending-up" />
-            <PlatformFeature title="Consumption" description="Track meals and groceries in one place." icon="restaurant" />
-            <PlatformFeature title="Research" description="Search nutrition research without reading papers." icon="library" />
-            <PlatformFeature title="Fitness" description="Generate workout plans for your goals." icon="fitness" />
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>The Problem We're Solving</Text>
+          <Text style={styles.problemText}>Health information is everywhere — but clarity is rare. One-size-fits-all advice ignores your unique situation. WiHY bridges the gap between scientific research and real life.</Text>
+          <View style={styles.buttonContainer}>
+            <Pressable onPress={handleSubscribePress} style={styles.ctaButton}>
+              <Text style={styles.ctaButtonText}>Explore WIHY</Text>
+            </Pressable>
           </View>
         </View>
 
-        {/* Footer CTA */}
-        <View style={styles.footerCTASection}>
-          <Text style={styles.footerCTATitle}>Experience WIHY Intelligence</Text>
-          <Text style={styles.footerCTASubtitle}>
-            Start your journey to understanding what you eat.
-          </Text>
-          <CTAButton onPress={handleSubscribePress} text="Get Started Today" />
+        <View style={[styles.section, styles.altSection]}>
+          <Text style={styles.sectionTitle}>What Makes Us Different</Text>
+          <View style={styles.pillarGrid}>
+            {[
+              { title: 'Personalized', desc: 'Adapts to your goals, culture, and real life' },
+              { title: 'Research-Backed', desc: 'Grounded in 35M+ scientific articles' },
+              { title: 'For Real Life', desc: 'Accounts for budgets, families, and communities' },
+              { title: 'One Platform', desc: 'Nutrition, fitness, and planning unified' },
+              { title: 'Explainable', desc: 'You see the reasoning behind answers' },
+            ].map((pillar, idx) => (
+              <View key={idx} style={styles.pillarCard}>
+                <Text style={styles.pillarTitle}>{pillar.title}</Text>
+                <Text style={styles.pillarDesc}>{pillar.desc}</Text>
+              </View>
+            ))}
+          </View>
         </View>
 
-        {/* Footer */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>What You Can Do</Text>
+          {[
+            'Ask health questions in plain language',
+            'Analyze foods and ingredients',
+            'Understand nutrition labels',
+            'Track meals and habits',
+            'Build personalized plans',
+          ].map((item, idx) => (
+            <View key={idx} style={styles.listItem}>
+              <Ionicons name="checkmark-circle" size={20} color={WIHY_GREEN} />
+              <Text style={styles.listItemText}>{item}</Text>
+            </View>
+          ))}
+        </View>
+
+        <View style={[styles.section, styles.altSection]}>
+          <Text style={styles.sectionTitle}>Our Philosophy</Text>
+          <Text style={styles.philosophyText}>Health isn't about perfection. It's about alignment between knowledge, access, behavior, and intention.</Text>
+          <View style={styles.highlightBox}>
+            <Text style={styles.highlightText}>Healthy isn't a trend.{'\n'}Healthy is learned.{'\n'}Healthy is lived.</Text>
+          </View>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Start Your Journey</Text>
+          <Text style={styles.ctaText}>Ask WiHY what's healthy for you and start from there.</Text>
+          <View style={styles.ctaButtonContainer}>
+            <Pressable onPress={() => navigateToTab('Chat')} style={styles.ctaButton}>
+              <Text style={styles.ctaButtonText}>Ask WiHY</Text>
+            </Pressable>
+            <Pressable onPress={handleSubscribePress} style={[styles.ctaButton, styles.ctaButtonSecondary]}>
+              <Text style={styles.ctaButtonTextSecondary}>Explore Plans</Text>
+            </Pressable>
+          </View>
+        </View>
+
         <View style={styles.footerSection}>
           <Text style={styles.footerText}>© 2026 WIHY. All rights reserved.</Text>
-          <Text style={styles.footerDisclaimer}>
-            This page is for education and information only and is not a substitute for professional medical advice.
-          </Text>
+          <Text style={styles.footerDisclaimer}>This page is for education and information only.</Text>
           <View style={styles.footerLinks}>
             <Pressable onPress={handlePrivacyPress}>
               <Text style={styles.footerLink}>Privacy Policy</Text>
             </Pressable>
-            <Text style={styles.footerLinkSeparator}>•</Text>
+            <Text style={styles.footerSeparator}>•</Text>
             <Pressable onPress={handleTermsPress}>
-              <Text style={styles.footerLink}>Terms of Service</Text>
-            </Pressable>
-          </View>
-          <View style={styles.footerContact}>
-            <Text style={styles.footerContactLabel}>Contact</Text>
-            <Pressable onPress={() => Linking.openURL('mailto:info@wihy.ai')}>
-              <Text style={styles.footerContactLink}>info@wihy.ai</Text>
+              <Text style={styles.footerLink}>Terms</Text>
             </Pressable>
           </View>
         </View>
@@ -468,211 +498,148 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
   },
   heroSection: {
-    paddingVertical: 32,
+    paddingVertical: 40,
     paddingHorizontal: 20,
     alignItems: 'center',
   },
   heroTitle: {
-    fontSize: 28,
-    fontWeight: '700',
+    fontSize: 32,
+    fontWeight: '800',
     color: DARK_GRAY,
     marginBottom: 8,
   },
   heroSubtitle: {
-    fontSize: 18,
-    fontWeight: '600',
+    fontSize: 20,
+    fontWeight: '700',
     color: DARK_GRAY,
     textAlign: 'center',
-    marginBottom: 16,
+    marginBottom: 12,
   },
-  badgeContainer: {
-    flexDirection: 'row',
-    gap: 8,
-    flexWrap: 'wrap',
-    justifyContent: 'center',
+  heroDescription: {
+    fontSize: 15,
+    color: '#666',
+    textAlign: 'center',
   },
-  badge: {
-    backgroundColor: WIHY_GREEN,
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 16,
-  },
-  badgeText: {
-    color: '#fff',
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  mainCTASection: {
-    paddingVertical: 20,
+  section: {
+    paddingVertical: 32,
     paddingHorizontal: 16,
     borderBottomWidth: 1,
     borderBottomColor: BORDER_GRAY,
   },
-  mainCTAText: {
-    fontSize: 16,
+  altSection: {
+    backgroundColor: LIGHT_GRAY,
+    borderBottomWidth: 0,
+  },
+  sectionTitle: {
+    fontSize: 24,
+    fontWeight: '700',
     color: DARK_GRAY,
-    lineHeight: 24,
     marginBottom: 16,
     textAlign: 'center',
+  },
+  problemText: {
+    fontSize: 15,
+    color: '#666',
+    lineHeight: 24,
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  pillarGrid: {
+    gap: 12,
+  },
+  pillarCard: {
+    backgroundColor: '#fff',
+    paddingVertical: 16,
+    paddingHorizontal: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: BORDER_GRAY,
+  },
+  pillarTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: DARK_GRAY,
+    marginBottom: 6,
+  },
+  pillarDesc: {
+    fontSize: 14,
+    color: '#666',
+    lineHeight: 20,
+  },
+  listItem: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: 16,
+  },
+  listItemText: {
+    fontSize: 15,
+    color: DARK_GRAY,
+    marginLeft: 12,
+    flex: 1,
+    lineHeight: 22,
+  },
+  philosophyText: {
+    fontSize: 15,
+    color: '#666',
+    lineHeight: 24,
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  highlightBox: {
+    backgroundColor: '#fff',
+    paddingVertical: 20,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+    borderLeftWidth: 4,
+    borderLeftColor: '#1a73e8',
+  },
+  highlightText: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: DARK_GRAY,
+    textAlign: 'center',
+    lineHeight: 28,
+  },
+  ctaText: {
+    fontSize: 16,
+    color: '#666',
+    textAlign: 'center',
+    marginBottom: 24,
+    lineHeight: 24,
+  },
+  buttonContainer: {
+    alignItems: 'center',
   },
   ctaButton: {
     backgroundColor: WIHY_GREEN,
     paddingVertical: 12,
     paddingHorizontal: 24,
     borderRadius: 8,
+    minWidth: 180,
     alignItems: 'center',
+  },
+  ctaButtonSecondary: {
+    backgroundColor: '#f3f4f6',
+    borderWidth: 2,
+    borderColor: WIHY_GREEN,
   },
   ctaButtonText: {
     color: '#fff',
     fontSize: 16,
     fontWeight: '600',
   },
-  featureSection: {
-    marginHorizontal: 16,
-    marginVertical: 8,
-    borderRadius: 12,
-    overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: BORDER_GRAY,
-  },
-  featureTitleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 16,
-    paddingHorizontal: 16,
-  },
-  featureTitleContent: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    flex: 1,
-    marginRight: 12,
-  },
-  featureTitle: {
+  ctaButtonTextSecondary: {
+    color: WIHY_GREEN,
     fontSize: 16,
     fontWeight: '600',
-    color: DARK_GRAY,
   },
-  featureTagline: {
-    fontSize: 13,
-    color: '#666',
-    marginTop: 4,
-  },
-  featureDetailsContainer: {
-    backgroundColor: '#fff',
-    paddingVertical: 16,
-    paddingHorizontal: 16,
-    borderTopWidth: 1,
-    borderTopColor: BORDER_GRAY,
-  },
-  detailHeading: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: DARK_GRAY,
-    marginBottom: 8,
-    marginTop: 12,
-  },
-  detailText: {
-    fontSize: 14,
-    color: '#666',
-    lineHeight: 20,
-    marginBottom: 8,
-  },
-  detailItemsList: {
-    marginTop: 8,
-  },
-  detailItem: {
-    flexDirection: 'row',
-    marginBottom: 8,
-  },
-  detailItemBullet: {
-    fontSize: 14,
-    color: WIHY_GREEN,
-    marginRight: 8,
-    fontWeight: '600',
-  },
-  detailItemText: {
-    fontSize: 14,
-    color: '#666',
-    lineHeight: 20,
-    flex: 1,
-  },
-  platformSection: {
-    paddingVertical: 24,
-    paddingHorizontal: 16,
-    borderTopWidth: 1,
-    borderTopColor: BORDER_GRAY,
-    marginTop: 16,
-  },
-  platformTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: DARK_GRAY,
-    marginBottom: 8,
-    textAlign: 'center',
-  },
-  platformSubtitle: {
-    fontSize: 14,
-    color: '#666',
-    textAlign: 'center',
-    marginBottom: 20,
-    lineHeight: 20,
-  },
-  platformFeatures: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
+  ctaButtonContainer: {
+    flexDirection: 'column',
     gap: 12,
-  },
-  platformFeatureCard: {
-    width: '48%',
-    backgroundColor: LIGHT_GRAY,
-    paddingVertical: 16,
-    paddingHorizontal: 12,
-    borderRadius: 12,
     alignItems: 'center',
-  },
-  platformFeatureIconContainer: {
-    marginBottom: 8,
-  },
-  platformFeatureTitle: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: DARK_GRAY,
-    marginBottom: 6,
-    textAlign: 'center',
-  },
-  platformFeatureDescription: {
-    fontSize: 12,
-    color: '#666',
-    textAlign: 'center',
-    lineHeight: 16,
-  },
-  footerCTASection: {
-    paddingVertical: 20,
-    paddingHorizontal: 16,
-    backgroundColor: LIGHT_GRAY,
-    marginHorizontal: 16,
-    marginVertical: 16,
-    borderRadius: 12,
-    alignItems: 'center',
-  },
-  footerCTATitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: DARK_GRAY,
-    marginBottom: 8,
-    textAlign: 'center',
-  },
-  footerCTASubtitle: {
-    fontSize: 14,
-    color: '#666',
-    textAlign: 'center',
-    marginBottom: 16,
-    lineHeight: 20,
   },
   footerSection: {
-    paddingVertical: 20,
+    paddingVertical: 24,
     paddingHorizontal: 16,
     borderTopWidth: 1,
     borderTopColor: BORDER_GRAY,
@@ -686,37 +653,20 @@ const styles = StyleSheet.create({
   footerDisclaimer: {
     fontSize: 12,
     color: '#999',
-    textAlign: 'center',
     marginBottom: 12,
-    lineHeight: 16,
   },
   footerLinks: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    marginBottom: 16,
   },
   footerLink: {
     fontSize: 12,
     color: WIHY_GREEN,
     textDecorationLine: 'underline',
   },
-  footerLinkSeparator: {
+  footerSeparator: {
     fontSize: 12,
     color: '#999',
-  },
-  footerContact: {
-    alignItems: 'center',
-  },
-  footerContactLabel: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: DARK_GRAY,
-    marginBottom: 4,
-  },
-  footerContactLink: {
-    fontSize: 12,
-    color: WIHY_GREEN,
-    textDecorationLine: 'underline',
   },
 });
