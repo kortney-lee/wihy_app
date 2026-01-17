@@ -596,9 +596,9 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
                   resizeMode="cover"
                 />
               </div>
-              <h1 className="pricing-hero-title">Unlock Your Full Potential</h1>
+              <h1 className="pricing-hero-title">Make Every Food Decision Count</h1>
               <p className="pricing-hero-subtitle">
-                Choose the plan that fits how you live — or how you coach.
+                Scan. Understand. Ask. Track. Choose the plan that fits your health journey.
               </p>
             </div>
           </div>
@@ -735,56 +735,73 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
             </div>
           </section>
 
-          {/* B2B Link Section */}
-          <section className="pricing-section pricing-section-alt">
-            <div className="pricing-cta-box">
-              <WebIcon name="business" size={32} color={colors.primary} />
-              <h3>Looking for Enterprise Solutions?</h3>
-              <p>We offer custom wellness programs for businesses, schools, and healthcare organizations.</p>
-              <button
-                onClick={() => navigation.navigate('B2BPricing' as any)}
-                className="pricing-btn pricing-btn-outline pricing-btn-lg"
-                type="button"
-              >
-                View Enterprise Plans →
-              </button>
-            </div>
-          </section>
-
           {/* Mission Section */}
           <section className="pricing-section pricing-section-alt">
-            <p className="pricing-section-label">OUR MISSION</p>
-            <h2 className="pricing-section-title">Search Food Like You Search the Internet</h2>
+            <p className="pricing-section-label">HOW IT WORKS</p>
+            <h2 className="pricing-section-title">Your Journey to Better Health</h2>
             <p className="about-mission-text">
-              Search, seek, and ask to understand what you eat through food and ingredient scanning. WIHY lets you search food the same way you search the internet, but with evidence instead of opinions.
+              WIHY makes understanding what you eat as simple as searching the internet—but with real evidence instead of opinions.
             </p>
             
             {/* Story Section with Screenshots */}
-            <div className="about-story-container">
+            <div style={{ maxWidth: '1000px', margin: '0 auto 48px' }}>
               
               {/* Step 1: Scan */}
-              <div className="about-story-step">
-                <div className="about-story-visual">
-                  <div className="about-story-gradient about-story-gradient-blue">
-                    <div className="about-phone-mockup">
-                      <div className="about-phone-notch"></div>
-                      <div className="about-phone-screen">
-                        <Image 
-                          source={require('../../assets/CameraScreen.png')} 
-                          style={{ width: '100%', height: '100%', objectFit: 'cover' } as any}
-                          resizeMode="cover"
-                        />
+              <div style={{ display: 'flex', alignItems: 'center', gap: '40px', marginBottom: '64px', flexDirection: 'row' }}>
+                <div style={{ flex: 1 }}>
+                  <div style={{ background: 'linear-gradient(135deg, #e8f0fe 0%, #d3e3fd 100%)', borderRadius: '20px', padding: '32px', boxShadow: '0 8px 24px rgba(0,0,0,0.1)' }}>
+                    <div style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      {/* Phone Mockup Frame */}
+                      <div style={{ 
+                        position: 'relative', 
+                        width: '300px', 
+                        height: '600px',
+                        background: '#1f2937',
+                        borderRadius: '40px',
+                        padding: '12px',
+                        boxShadow: '0 20px 60px rgba(0,0,0,0.3)'
+                      }}>
+                        {/* Screen Notch */}
+                        <div style={{
+                          position: 'absolute',
+                          top: '0',
+                          left: '50%',
+                          transform: 'translateX(-50%)',
+                          width: '150px',
+                          height: '28px',
+                          background: '#1f2937',
+                          borderBottomLeftRadius: '20px',
+                          borderBottomRightRadius: '20px',
+                          zIndex: 10
+                        }}></div>
+                        {/* Screen Content */}
+                        <div style={{ 
+                          width: '100%', 
+                          height: '100%', 
+                          background: '#ffffff',
+                          borderRadius: '32px',
+                          overflow: 'hidden',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center'
+                        }}>
+                          <Image 
+                            source={require('../../assets/CameraScreen.png')} 
+                            style={{ width: '100%', height: '100%', objectFit: 'cover' } as any}
+                            resizeMode="cover"
+                          />
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
-                <div className="about-story-content">
-                  <h3 className="about-story-title">1. Scan Anything</h3>
-                  <div className="about-story-border about-story-border-orange">
-                    <p className="about-story-text">
+                <div style={{ flex: 1 }}>
+                  <h3 style={{ fontSize: '28px', fontWeight: '700', color: '#1f2937', marginBottom: '16px' }}>1. Scan Anything</h3>
+                  <div style={{ borderLeft: '4px solid #fa5f06', paddingLeft: '20px' }}>
+                    <p style={{ fontSize: '16px', color: '#6b7280', lineHeight: 1.8, marginBottom: '12px' }}>
                       Point your camera at any food, barcode, nutrition label, or ingredient list. WIHY instantly recognizes what you're looking at.
                     </p>
-                    <p className="about-story-text">
+                    <p style={{ fontSize: '16px', color: '#6b7280', lineHeight: 1.8 }}>
                       Works with barcodes, photos, screenshots, or even handwritten lists.
                     </p>
                   </div>
@@ -792,28 +809,61 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
               </div>
 
               {/* Step 2: Understand */}
-              <div className="about-story-step about-story-step-reverse">
-                <div className="about-story-visual">
-                  <div className="about-story-gradient about-story-gradient-yellow">
-                    <div className="about-phone-mockup">
-                      <div className="about-phone-notch"></div>
-                      <div className="about-phone-screen">
-                        <Image 
-                          source={require('../../assets/NutritionAnalysis.png')} 
-                          style={{ width: '100%', height: '100%', objectFit: 'cover' } as any}
-                          resizeMode="cover"
-                        />
+              <div style={{ display: 'flex', alignItems: 'center', gap: '40px', marginBottom: '64px', flexDirection: 'row-reverse' }}>
+                <div style={{ flex: 1 }}>
+                  <div style={{ background: 'linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)', borderRadius: '20px', padding: '32px', boxShadow: '0 8px 24px rgba(0,0,0,0.1)' }}>
+                    <div style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      {/* Phone Mockup Frame */}
+                      <div style={{ 
+                        position: 'relative', 
+                        width: '300px', 
+                        height: '600px',
+                        background: '#1f2937',
+                        borderRadius: '40px',
+                        padding: '12px',
+                        boxShadow: '0 20px 60px rgba(0,0,0,0.3)'
+                      }}>
+                        {/* Screen Notch */}
+                        <div style={{
+                          position: 'absolute',
+                          top: '0',
+                          left: '50%',
+                          transform: 'translateX(-50%)',
+                          width: '150px',
+                          height: '28px',
+                          background: '#1f2937',
+                          borderBottomLeftRadius: '20px',
+                          borderBottomRightRadius: '20px',
+                          zIndex: 10
+                        }}></div>
+                        {/* Screen Content */}
+                        <div style={{ 
+                          width: '100%', 
+                          height: '100%', 
+                          background: '#ffffff',
+                          borderRadius: '32px',
+                          overflow: 'hidden',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center'
+                        }}>
+                          <Image 
+                            source={require('../../assets/NutritionAnalysis.png')} 
+                            style={{ width: '100%', height: '100%', objectFit: 'cover' } as any}
+                            resizeMode="cover"
+                          />
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
-                <div className="about-story-content">
-                  <h3 className="about-story-title">2. Understand Instantly</h3>
-                  <div className="about-story-border about-story-border-green">
-                    <p className="about-story-text">
+                <div style={{ flex: 1 }}>
+                  <h3 style={{ fontSize: '28px', fontWeight: '700', color: '#1f2937', marginBottom: '16px' }}>2. Understand Instantly</h3>
+                  <div style={{ borderLeft: '4px solid #4cbb17', paddingLeft: '20px' }}>
+                    <p style={{ fontSize: '16px', color: '#6b7280', lineHeight: 1.8, marginBottom: '12px' }}>
                       See complete nutrition breakdowns, ingredient processing levels (NOVA groups), additives, and allergens—all explained in plain language.
                     </p>
-                    <p className="about-story-text">
+                    <p style={{ fontSize: '16px', color: '#6b7280', lineHeight: 1.8 }}>
                       No guessing. Just facts backed by 35+ million research articles.
                     </p>
                   </div>
@@ -821,28 +871,61 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
               </div>
 
               {/* Step 3: Ask */}
-              <div className="about-story-step">
-                <div className="about-story-visual">
-                  <div className="about-story-gradient about-story-gradient-lightblue">
-                    <div className="about-phone-mockup">
-                      <div className="about-phone-notch"></div>
-                      <div className="about-phone-screen">
-                        <Image 
-                          source={require('../../assets/WihyHomescreen.png')} 
-                          style={{ width: '100%', height: '100%', objectFit: 'cover' } as any}
-                          resizeMode="cover"
-                        />
+              <div style={{ display: 'flex', alignItems: 'center', gap: '40px', marginBottom: '64px', flexDirection: 'row' }}>
+                <div style={{ flex: 1 }}>
+                  <div style={{ background: 'linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%)', borderRadius: '20px', padding: '32px', boxShadow: '0 8px 24px rgba(0,0,0,0.1)' }}>
+                    <div style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      {/* Phone Mockup Frame */}
+                      <div style={{ 
+                        position: 'relative', 
+                        width: '300px', 
+                        height: '600px',
+                        background: '#1f2937',
+                        borderRadius: '40px',
+                        padding: '12px',
+                        boxShadow: '0 20px 60px rgba(0,0,0,0.3)'
+                      }}>
+                        {/* Screen Notch */}
+                        <div style={{
+                          position: 'absolute',
+                          top: '0',
+                          left: '50%',
+                          transform: 'translateX(-50%)',
+                          width: '150px',
+                          height: '28px',
+                          background: '#1f2937',
+                          borderBottomLeftRadius: '20px',
+                          borderBottomRightRadius: '20px',
+                          zIndex: 10
+                        }}></div>
+                        {/* Screen Content */}
+                        <div style={{ 
+                          width: '100%', 
+                          height: '100%', 
+                          background: '#ffffff',
+                          borderRadius: '32px',
+                          overflow: 'hidden',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center'
+                        }}>
+                          <Image 
+                            source={require('../../assets/WihyHomescreen.png')} 
+                            style={{ width: '100%', height: '100%', objectFit: 'cover' } as any}
+                            resizeMode="cover"
+                          />
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
-                <div className="about-story-content">
-                  <h3 className="about-story-title">3. Ask Anything</h3>
-                  <div className="about-story-border about-story-border-blue">
-                    <p className="about-story-text">
+                <div style={{ flex: 1 }}>
+                  <h3 style={{ fontSize: '28px', fontWeight: '700', color: '#1f2937', marginBottom: '16px' }}>3. Ask Anything</h3>
+                  <div style={{ borderLeft: '4px solid #1a73e8', paddingLeft: '20px' }}>
+                    <p style={{ fontSize: '16px', color: '#6b7280', lineHeight: 1.8, marginBottom: '12px' }}>
                       Chat with WIHY about what you scanned. "Is this good for weight loss?" "Are these additives safe?" "How does this compare to alternatives?"
                     </p>
-                    <p className="about-story-text">
+                    <p style={{ fontSize: '16px', color: '#6b7280', lineHeight: 1.8 }}>
                       Get personalized, evidence-based answers—not generic advice.
                     </p>
                   </div>
@@ -850,31 +933,64 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
               </div>
 
               {/* Step 4: Track */}
-              <div className="about-story-step about-story-step-reverse">
-                <div className="about-story-visual">
-                  <div className="about-story-gradient about-story-gradient-purple">
-                    <div className="about-phone-mockup">
-                      <div className="about-phone-notch"></div>
-                      <div className="about-phone-screen">
-                        <Image 
-                          source={require('../../assets/MyProgressScreen.png')} 
-                          style={{ width: '100%', height: '100%', objectFit: 'cover' } as any}
-                          resizeMode="cover"
-                        />
+              <div style={{ display: 'flex', alignItems: 'center', gap: '40px', flexDirection: 'row-reverse' }}>
+                <div style={{ flex: 1 }}>
+                  <div style={{ background: 'linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%)', borderRadius: '20px', padding: '32px', boxShadow: '0 8px 24px rgba(0,0,0,0.1)' }}>
+                    <div style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      {/* Phone Mockup Frame */}
+                      <div style={{ 
+                        position: 'relative', 
+                        width: '300px', 
+                        height: '600px',
+                        background: '#1f2937',
+                        borderRadius: '40px',
+                        padding: '12px',
+                        boxShadow: '0 20px 60px rgba(0,0,0,0.3)'
+                      }}>
+                        {/* Screen Notch */}
+                        <div style={{
+                          position: 'absolute',
+                          top: '0',
+                          left: '50%',
+                          transform: 'translateX(-50%)',
+                          width: '150px',
+                          height: '28px',
+                          background: '#1f2937',
+                          borderBottomLeftRadius: '20px',
+                          borderBottomRightRadius: '20px',
+                          zIndex: 10
+                        }}></div>
+                        {/* Screen Content */}
+                        <div style={{ 
+                          width: '100%', 
+                          height: '100%', 
+                          background: '#ffffff',
+                          borderRadius: '32px',
+                          overflow: 'hidden',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center'
+                        }}>
+                          <Image 
+                            source={require('../../assets/MyProgressScreen.png')} 
+                            style={{ width: '100%', height: '100%', objectFit: 'cover' } as any}
+                            resizeMode="cover"
+                          />
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
-                <div className="about-story-content">
-                  <h3 className="about-story-title">4. Track My Progress</h3>
-                  <div className="about-story-border about-story-border-purple">
-                    <p className="about-story-text">
+                <div style={{ flex: 1 }}>
+                  <h3 style={{ fontSize: '28px', fontWeight: '700', color: '#1f2937', marginBottom: '16px' }}>4. Track My Progress</h3>
+                  <div style={{ borderLeft: '4px solid #9333ea', paddingLeft: '20px' }}>
+                    <p style={{ fontSize: '16px', color: '#6b7280', lineHeight: 1.8, marginBottom: '12px' }}>
                       See your health patterns over time. Track nutrition trends, monitor fitness progress, and visualize how your habits are impacting your health goals.
                     </p>
-                    <p className="about-story-text">
+                    <p style={{ fontSize: '16px', color: '#6b7280', lineHeight: 1.8, marginBottom: '12px' }}>
                       Your data works for you—revealing insights and predicting where you're heading.
                     </p>
-                    <p className="about-story-premium">
+                    <p style={{ fontSize: '14px', color: '#9333ea', fontWeight: '600', lineHeight: 1.8 }}>
                       ⭐ Available with paid subscription only
                     </p>
                   </div>
@@ -990,6 +1106,8 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
               <a href="/terms" onClick={(e) => { e.preventDefault(); navigation.navigate('Terms'); }}>Terms of Service</a>
               <span className="pricing-footer-separator">•</span>
               <a href="mailto:support@wihy.app">Contact Us</a>
+              <span className="pricing-footer-separator">•</span>
+              <a href="#" onClick={(e) => { e.preventDefault(); navigation.navigate('B2BPricing' as any); }}>Looking for Enterprise Solutions?</a>
             </div>
           </footer>
         </div>
