@@ -171,7 +171,7 @@ export default function Profile() {
           // Navigate to Home after sign out on web
           navigation.reset({
             index: 0,
-            routes: [{ name: 'MainTabs' as any }],
+            routes: [{ name: 'Main' as any }],
           });
         }).catch(() => {
           window.alert('Failed to sign out');
