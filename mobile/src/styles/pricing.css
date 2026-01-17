@@ -690,40 +690,147 @@
 /* Mobile Responsive */
 @media (max-width: 767px) {
   .comparison-section {
-    padding: 48px 16px;
+    padding: 40px 16px;
+    background: #f9fafb;
+  }
+  
+  .comparison-container {
+    max-width: 100%;
+  }
+  
+  .comparison-header {
+    margin-bottom: 32px;
   }
   
   .comparison-header h2 {
-    font-size: 26px;
+    font-size: 24px;
+    margin-bottom: 12px;
   }
   
   .comparison-header p {
-    font-size: 15px;
+    font-size: 14px;
+    line-height: 1.5;
   }
   
   .comparison-grid {
     flex-direction: column;
     min-height: auto;
-    padding: 20px;
+    padding: 0;
     gap: 16px;
+    width: 100%;
   }
   
   .comparison-card {
-    position: relative;
+    position: static !important;
     left: auto !important;
     width: 100%;
+    height: auto;
     min-height: auto;
     opacity: 1 !important;
     z-index: auto !important;
-    padding: 20px;
+    padding: 16px;
+    border: 1px solid #e5e7eb;
+    margin: 0;
+  }
+  
+  .comparison-card:hover {
+    transform: none;
+    z-index: auto !important;
+    border-color: #fa5f06;
+    box-shadow: 0 4px 12px rgba(250, 95, 6, 0.15);
+  }
+  
+  .comparison-card-header {
+    margin-bottom: 12px;
+    padding-bottom: 12px;
   }
   
   .comparison-app-name {
     font-size: 16px;
+    font-weight: 700;
+  }
+  
+  .comparison-card-body {
+    gap: 12px;
+  }
+  
+  .comparison-row {
+    gap: 4px;
+  }
+  
+  .comparison-label {
+    font-size: 10px;
+    letter-spacing: 0.6px;
   }
   
   .comparison-value {
     font-size: 13px;
+    line-height: 1.5;
+  }
+  
+  .comparison-wihy-box {
+    padding: 14px;
+    margin-top: 12px;
+  }
+  
+  .comparison-wihy-box .comparison-label {
+    font-size: 12px;
+    margin-bottom: 6px;
+  }
+  
+  .comparison-wihy-box .comparison-value {
+    font-size: 14px;
+  }
+  
+  .comparison-disclaimer {
+    margin-top: 24px;
+    padding: 16px;
+    border: 1px solid #e5e7eb;
+  }
+  
+  .comparison-disclaimer p {
+    font-size: 12px;
+    line-height: 1.6;
+  }
+}
+
+@media (max-width: 640px) {
+  .comparison-section {
+    padding: 32px 12px;
+  }
+  
+  .comparison-header h2 {
+    font-size: 22px;
+  }
+  
+  .comparison-header p {
+    font-size: 13px;
+  }
+  
+  .comparison-card {
+    padding: 14px;
+  }
+  
+  .comparison-card-header {
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+  }
+  
+  .comparison-app-name {
+    font-size: 15px;
+  }
+  
+  .comparison-label {
+    font-size: 9px;
+  }
+  
+  .comparison-value {
+    font-size: 12px;
+  }
+  
+  .comparison-wihy-box {
+    padding: 12px;
+    margin-top: 10px;
   }
 }
 
@@ -1054,5 +1161,70 @@
   .about-features-grid {
     grid-template-columns: repeat(3, 1fr);
     gap: 24px;
+  }
+}
+
+/* Story Section - Mobile Responsive Scaling */
+@media (max-width: 767px) {
+  /* Scale down phone mockups */
+  div[style*="width: '300px'"][style*="height: '600px'"] {
+    width: 240px !important;
+    height: 480px !important;
+  }
+  
+  /* Story container - responsive gap and padding */
+  div[style*="gap: '40px'"] {
+    gap: 20px !important;
+  }
+  
+  /* Gradient containers - responsive padding */
+  div[style*="padding: '32px'"] {
+    padding: 20px !important;
+  }
+  
+  /* Story titles - responsive sizing */
+  h3[style*="fontSize: '28px'"] {
+    font-size: 22px !important;
+    margin-bottom: 12px !important;
+  }
+  
+  /* Story text - responsive sizing */
+  p[style*="fontSize: '16px'"] {
+    font-size: 14px !important;
+  }
+  
+  /* Border styling - responsive padding */
+  div[style*="paddingLeft: '20px'"] {
+    padding-left: 16px !important;
+  }
+  
+  /* Story section container margins */
+  div[style*="marginBottom: '64px'"] {
+    margin-bottom: 40px !important;
+  }
+  
+  /* Flex items - full width on mobile */
+  div[style*="flex: 1"] {
+    width: 100% !important;
+  }
+}
+
+@media (max-width: 640px) {
+  /* Even smaller scaling for very small phones */
+  div[style*="width: '300px'"][style*="height: '600px'"] {
+    width: 200px !important;
+    height: 400px !important;
+  }
+  
+  div[style*="padding: '32px'"] {
+    padding: 16px !important;
+  }
+  
+  h3[style*="fontSize: '28px'"] {
+    font-size: 20px !important;
+  }
+  
+  p[style*="fontSize: '16px'"] {
+    font-size: 13px !important;
   }
 }
