@@ -340,6 +340,139 @@ export default function AboutScreen() {
             </div>
           </section>
 
+          {/* Team Section */}
+          <section className="pricing-section">
+            <p className="pricing-section-label">OUR TEAM</p>
+            <h2 className="pricing-section-title">The People Behind WiHY</h2>
+
+            <div style={{ maxWidth: '800px', margin: '40px auto 0' }}>
+              <p style={{ fontSize: '16px', color: '#6b7280', lineHeight: 1.8, marginBottom: '40px', textAlign: 'center' }}>
+                WiHY is built by a multidisciplinary team spanning health, education, technology, and community work. Our team brings together lived experience, academic training, and real-world problem solving — because health doesn't exist in silos.
+              </p>
+
+              {/* Founder Section */}
+              <div style={{ padding: '24px', marginBottom: '40px', border: '2px solid #1a73e8', borderRadius: '16px', backgroundColor: '#f0f9ff' }}>
+                <p style={{ fontSize: '12px', fontWeight: '700', color: '#1a73e8', textTransform: 'uppercase', letterSpacing: '0.8px', margin: '0 0 12px' }}>Founder & Lead Architect</p>
+                <h3 style={{ fontSize: '20px', fontWeight: '700', color: '#1f2937', margin: '0 0 12px' }}>Kortney Lee</h3>
+                <p style={{ fontSize: '14px', color: '#6b7280', fontWeight: '600', margin: '0 0 16px' }}>Founder, WiHY</p>
+                <p style={{ fontSize: '16px', color: '#6b7280', lineHeight: 1.8, marginBottom: '12px' }}>
+                  Kortney founded WiHY to address the disconnect between health research and everyday decision-making. With a background in business, history, and community health education, his work centers on translating complex systems — food, fitness, behavior, and access — into tools people can actually use.
+                </p>
+                <p style={{ fontSize: '16px', color: '#6b7280', lineHeight: 1.8 }}>
+                  WiHY reflects a long-term commitment to generational health, cultural context, and practical solutions over trends.
+                </p>
+              </div>
+
+              {/* Core Team Functions */}
+              <h3 style={{ fontSize: '18px', fontWeight: '700', color: '#1f2937', marginBottom: '24px', marginTop: '40px' }}>Core Team</h3>
+              
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '20px', marginBottom: '40px' }}>
+                
+                {/* Health & Research */}
+                <div style={{ padding: '20px', border: '1px solid #e5e7eb', borderRadius: '12px' }}>
+                  <h4 style={{ fontSize: '16px', fontWeight: '700', color: '#1f2937', marginBottom: '12px' }}>Health & Research</h4>
+                  <p style={{ fontSize: '14px', color: '#6b7280', lineHeight: 1.6, margin: 0 }}>
+                    Nutrition science, public health, behavioral research, and evidence review — ensuring answers are grounded, current, and responsible.
+                  </p>
+                </div>
+
+                {/* Technology & AI */}
+                <div style={{ padding: '20px', border: '1px solid #e5e7eb', borderRadius: '12px' }}>
+                  <h4 style={{ fontSize: '16px', fontWeight: '700', color: '#1f2937', marginBottom: '12px' }}>Technology & AI</h4>
+                  <p style={{ fontSize: '14px', color: '#6b7280', lineHeight: 1.6, margin: 0 }}>
+                    Engineers, data scientists, and AI specialists building explainable systems that prioritize clarity, privacy, and accuracy.
+                  </p>
+                </div>
+
+                {/* Education & Community */}
+                <div style={{ padding: '20px', border: '1px solid #e5e7eb', borderRadius: '12px' }}>
+                  <h4 style={{ fontSize: '16px', fontWeight: '700', color: '#1f2937', marginBottom: '12px' }}>Education & Community</h4>
+                  <p style={{ fontSize: '14px', color: '#6b7280', lineHeight: 1.6, margin: 0 }}>
+                    Educators and community partners focused on accessibility, literacy, and real-world application across families, schools, and organizations.
+                  </p>
+                </div>
+
+                {/* Design & Experience */}
+                <div style={{ padding: '20px', border: '1px solid #e5e7eb', borderRadius: '12px' }}>
+                  <h4 style={{ fontSize: '16px', fontWeight: '700', color: '#1f2937', marginBottom: '12px' }}>Design & Experience</h4>
+                  <p style={{ fontSize: '14px', color: '#6b7280', lineHeight: 1.6, margin: 0 }}>
+                    Designers shaping intuitive interfaces that reduce friction and make health tools usable — not overwhelming.
+                  </p>
+                </div>
+
+              </div>
+
+              {/* Values Statement */}
+              <h3 style={{ fontSize: '18px', fontWeight: '700', color: '#1f2937', marginBottom: '20px', marginTop: '40px' }}>How We Work</h3>
+              
+              <div style={{ padding: '24px', background: '#f9fafb', borderRadius: '12px', marginBottom: '40px' }}>
+                {[
+                  'Evidence before opinion',
+                  'Clarity over complexity',
+                  'People before platforms',
+                  'Access over exclusivity',
+                  'Long-term health over short-term metrics',
+                ].map((value, idx) => (
+                  <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: idx < 4 ? '12px' : '0' }}>
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="#4cbb17">
+                      <path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/>
+                    </svg>
+                    <span style={{ fontSize: '15px', color: '#1f2937', fontWeight: '500' }}>{value}</span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Advisors & Collaborators */}
+              <h3 style={{ fontSize: '18px', fontWeight: '700', color: '#1f2937', marginBottom: '16px' }}>Advisors & Partners</h3>
+              <p style={{ fontSize: '16px', color: '#6b7280', lineHeight: 1.8, marginBottom: '40px' }}>
+                WiHY collaborates with clinicians, educators, researchers, and community leaders to ensure our work reflects both expertise and lived reality. Advisors help guide research priorities, ethical use of AI, and real-world deployment.
+              </p>
+
+              {/* Partnership CTA */}
+              <div style={{ padding: '24px', backgroundColor: '#f0f9ff', borderRadius: '12px', borderLeft: '4px solid #1a73e8', textAlign: 'center' }}>
+                <h4 style={{ fontSize: '18px', fontWeight: '700', color: '#1f2937', marginBottom: '12px' }}>Interested in Working With Us?</h4>
+                <p style={{ fontSize: '15px', color: '#6b7280', lineHeight: 1.6, marginBottom: '20px', margin: '0 0 20px' }}>
+                  WiHY is built through collaboration — with researchers, educators, coaches, and partners who care about meaningful health outcomes.
+                </p>
+                <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
+                  <button 
+                    onClick={() => Linking.openURL('mailto:info@wihy.ai?subject=Partnership')}
+                    style={{
+                      padding: '10px 20px',
+                      backgroundColor: '#1a73e8',
+                      color: '#fff',
+                      border: 'none',
+                      borderRadius: '8px',
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      cursor: 'pointer',
+                    }}
+                    type="button"
+                  >
+                    Partner With WiHY
+                  </button>
+                  <button 
+                    onClick={handleSubscribePress}
+                    style={{
+                      padding: '10px 20px',
+                      backgroundColor: '#f3f4f6',
+                      color: '#1a73e8',
+                      border: '1px solid #1a73e8',
+                      borderRadius: '8px',
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      cursor: 'pointer',
+                    }}
+                    type="button"
+                  >
+                    For Schools & Organizations
+                  </button>
+                </div>
+              </div>
+
+            </div>
+          </section>
+
           {/* The Bigger Mission */}
           <section className="pricing-section">
             <p className="pricing-section-label">WHERE WE'RE GOING</p>
