@@ -210,6 +210,7 @@ class EnhancedAuthService {
   /**
    * OAuth WebView flow for Google/Facebook/Microsoft
    * Auth service handles provider OAuth and returns session_token directly
+   * On web, uses redirect-based OAuth flow
    */
   async authenticateWithOAuth(
     provider: 'google' | 'facebook' | 'microsoft'
@@ -217,7 +218,20 @@ class EnhancedAuthService {
     console.log(`=== OAUTH ${provider.toUpperCase()} WEBVIEW FLOW ===`);
     
     try {
-      // Get OAuth URL
+      // On web, use redirect-based OAuth instead of popup
+      if (typeof window !== 'undefined' && window.location) {
+        console.log('Web detected - using redirect OAuth flow');
+        const webAuthUrl = authService.getWebOAuthUrl(provider);
+        console.log('Redirecting to:', webAuthUrl);
+        window.location.href = webAuthUrl;
+        // Return a pending state - the callback screen will handle completion
+        return {
+          success: false,
+          error: 'Redirecting to OAuth provider...',
+        };
+      }
+      
+      // Get OAuth URL for native
       const authUrl = authService.getOAuthUrl(provider);
       console.log('Opening OAuth URL:', authUrl);
       console.log('Expected redirect: wihy://auth/callback?session_token=...');
