@@ -797,6 +797,54 @@ class AuthService {
   }
 
   /**
+   * Get OAuth URL for web platform with proper redirect URI
+   * Stores state for CSRF verification on callback
+   */
+  async getWebOAuthUrl(
+    provider: 'google' | 'facebook' | 'microsoft' | 'apple'
+  ): Promise<{ url: string; state: string }> {
+    // Generate and store state for CSRF protection
+    const state = this.generateState();
+    await AsyncStorage.setItem('@wihy_oauth_state', state);
+    
+    // Determine web redirect URI
+    let redirectUri: string;
+    if (typeof window !== 'undefined') {
+      redirectUri = `${window.location.origin}/auth/callback`;
+    } else {
+      redirectUri = 'https://wihy.ai/auth/callback';
+    }
+    
+    const scope = encodeURIComponent(AUTH_CONFIG.scopes.join(' '));
+    
+    let endpoint: string;
+    switch (provider) {
+      case 'google':
+        endpoint = AUTH_CONFIG.endpoints.googleAuth;
+        break;
+      case 'facebook':
+        endpoint = AUTH_CONFIG.endpoints.facebookAuth;
+        break;
+      case 'microsoft':
+        endpoint = AUTH_CONFIG.endpoints.microsoftAuth;
+        break;
+      case 'apple':
+        endpoint = AUTH_CONFIG.endpoints.appleAuth;
+        break;
+    }
+    
+    const url = `${this.baseUrl}${endpoint}?` +
+      `redirect_uri=${encodeURIComponent(redirectUri)}&` +
+      `state=${state}`;
+    
+    console.log(`=== WEB OAUTH ${provider.toUpperCase()} URL GENERATED ===`);
+    console.log('URL:', url);
+    console.log('Redirect URI:', redirectUri);
+    
+    return { url, state };
+  }
+
+  /**
    * Exchange authorization code for tokens
    */
   async exchangeCodeForToken(
