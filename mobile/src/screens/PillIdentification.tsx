@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -10,7 +10,7 @@ import {
   ActivityIndicator,
   Image,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
@@ -79,16 +79,10 @@ export default function PillIdentification() {
 
   const { pillData: initialData, context, capturedImage } = (route?.params || {}) as PillIdentificationParams;
   
-  const [pillData, setPillData] = useState<PillData | null>(null);
+  const [pillData, setPillData] = useState<PillData | null>(initialData || null);
   const [selectedMatch, setSelectedMatch] = useState<number>(0);
   const [analyzing, setAnalyzing] = useState(false);
   const [aiAnalysis, setAiAnalysis] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (initialData) {
-      setPillData(initialData);
-    }
-  }, [initialData]);
 
   const handleBack = () => {
     if (navigation.canGoBack()) {
@@ -145,25 +139,21 @@ export default function PillIdentification() {
   const currentMatch = allMatches[selectedMatch] || topMatch;
   const confidence = currentMatch?.confidence || topMatch?.confidence || 0;
   const confidenceColors = getConfidenceColor(confidence);
+  
+  const insets = useSafeAreaInsets();
 
   return (
-    <SafeAreaView style={styles.container} edges={['left', 'right']}>
+    <View style={styles.container}>
       {/* Header */}
       <LinearGradient
         colors={['#f59e0b', '#d97706']}
-        style={styles.header}
+        style={[styles.header, { paddingTop: insets.top + 12 }]}
       >
         <View style={styles.headerContent}>
           <Pressable style={styles.backButton} onPress={handleBack}>
             <Ionicons name="arrow-back" size={24} color="#ffffff" />
           </Pressable>
           <Text style={styles.headerTitle}>Pill Identification</Text>
-          <Pressable 
-            style={styles.chatButton}
-            onPress={() => openChatWithContext({ type: 'general' })}
-          >
-            <Ionicons name="chatbubble-ellipses" size={24} color="#ffffff" />
-          </Pressable>
         </View>
       </LinearGradient>
 
@@ -347,26 +337,37 @@ export default function PillIdentification() {
           </Text>
         </View>
 
-        {/* Ask WiHY Button */}
-        <TouchableOpacity
-          style={styles.askButton}
-          onPress={() => openChatWithContext({
-            type: 'pill_detailed',
-            query: `Tell me everything about ${topMatch?.name || 'this medication'}, including uses, side effects, interactions, and precautions`,
-          })}
-        >
-          <LinearGradient
-            colors={['#f59e0b', '#d97706']}
-            style={styles.askButtonGradient}
+        {/* Action Buttons */}
+        <View style={styles.actionSection}>
+          <Pressable
+            style={[styles.actionButton, styles.primaryAction]}
+            onPress={() => openChatWithContext({ type: 'general' })}
           >
             <Ionicons name="chatbubble-ellipses" size={20} color="#ffffff" />
-            <Text style={styles.askButtonText}>Ask WiHY About This Medication</Text>
-          </LinearGradient>
-        </TouchableOpacity>
+            <Text style={styles.primaryActionText}>Ask WiHY</Text>
+          </Pressable>
+          <View style={styles.secondaryActions}>
+            <Pressable
+              style={[styles.actionButton, styles.secondaryAction]}
+              onPress={() => openChatWithContext({ type: 'alternatives' })}
+            >
+              <Ionicons name="swap-horizontal" size={18} color="#6b7280" />
+              <Text style={styles.secondaryActionText}>Compare alternatives</Text>
+            </Pressable>
+
+            <Pressable
+              style={[styles.actionButton, styles.secondaryAction]}
+              onPress={() => Alert.alert('Feature Coming Soon', 'Medication tracking feature will be available soon!')}
+            >
+              <Ionicons name="calendar" size={18} color="#6b7280" />
+              <Text style={styles.secondaryActionText}>Track medication</Text>
+            </Pressable>
+          </View>
+        </View>
 
         <View style={{ height: 40 }} />
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -393,7 +394,8 @@ const styles = StyleSheet.create({
   headerContent: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    justifyContent: 'flex-start',
+    gap: 16,
   },
   backButton: {
     width: 40,
@@ -409,14 +411,7 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     flex: 1,
     textAlign: 'center',
-  },
-  chatButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    marginRight: 56,
   },
   content: {
     flex: 1,
@@ -661,21 +656,43 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
 
-  // Ask Button
-  askButton: {
-    marginTop: 16,
+  // Action Section
+  actionSection: {
+    padding: 16,
+    paddingBottom: 32,
   },
-  askButtonGradient: {
+  actionButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    borderRadius: 10,
     gap: 8,
-    paddingVertical: 16,
-    borderRadius: 12,
   },
-  askButtonText: {
-    fontSize: 16,
-    fontWeight: '700',
+  primaryAction: {
+    backgroundColor: '#4cbb17',
+    borderWidth: 1.5,
+    borderColor: '#4cbb17',
+  },
+  primaryActionText: {
     color: '#ffffff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  secondaryActions: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  secondaryAction: {
+    flex: 1,
+    backgroundColor: '#f9fafb',
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
+  },
+  secondaryActionText: {
+    color: '#374151',
+    fontSize: 14,
+    fontWeight: '500',
   },
 });

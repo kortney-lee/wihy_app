@@ -11,7 +11,7 @@ import {
   ActivityIndicator,
   Image,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import type { CompositeNavigationProp, RouteProp } from '@react-navigation/native';
@@ -106,12 +106,9 @@ export default function NutritionFacts() {
   const routeParams = route?.params;
   const { foodItem: initialFoodItem, context } = routeParams || { foodItem: null, context: null };
 
-  // Determine if this is modal presentation (from dashboard) or stack navigation (from camera/scan)
-  // Modal contexts: dashboard-access, consumption-dashboard, meal-log
-  const isModalPresentation = context?.type === 'dashboard-access' || 
-                              context?.type === 'consumption-dashboard' ||
-                              context?.type === 'meal-log' ||
-                              context?.isModal === true;
+  // Determine if this is modal presentation - always true now since we navigate as modal
+  // from search, camera, or dashboard
+  const isModalPresentation = true;
 
   // Determine scan type based on API response
   const getScanType = (): ScanType => {
@@ -489,25 +486,24 @@ export default function NutritionFacts() {
   const isBarcode = scanType === 'barcode';
   const isImageScan = scanType === 'image';
   const isProductSearch = scanType === 'product_name';
+  
+  const insets = useSafeAreaInsets();
 
   return (
-    <SafeAreaView style={styles.container} edges={['left', 'right']}>
+    <View style={styles.container}>
       {/* Header */}
       <LinearGradient
         colors={['#3b82f6', '#3b82f6']}
-        style={styles.header}
+        style={[styles.header, { paddingTop: insets.top + 12 }]}
       >
         <View style={styles.headerContent}>
-          {isModalPresentation ? <View style={styles.headerSpacer} /> : null}
-          <Text style={[styles.headerTitle, !isModalPresentation && styles.headerTitleFullWidth]}>{getScanTitle()}</Text>
-          {isModalPresentation ? (
-            <Pressable 
-              style={styles.closeButton}
-              onPress={() => navigation.goBack()}
-            >
-              <Ionicons name="close" size={28} color="#ffffff" />
-            </Pressable>
-          ) : null}
+          <Pressable 
+            style={styles.backButton}
+            onPress={() => navigation.goBack()}
+          >
+            <Ionicons name="arrow-back" size={24} color="#ffffff" />
+          </Pressable>
+          <Text style={styles.headerTitle}>{getScanTitle()}</Text>
         </View>
       </LinearGradient>
 
@@ -790,33 +786,15 @@ export default function NutritionFacts() {
           </>
         )}
 
-        {/* Action Buttons - Inside ScrollView for regular navigation */}
-        {!isModalPresentation && (
-          <View style={styles.actionSection}>
-            <View style={styles.secondaryActions}>
-              <Pressable
-                style={[styles.actionButton, styles.secondaryAction]}
-                onPress={() => openChatWithContext({ type: 'alternatives' })}
-              >
-                <Ionicons name="swap-horizontal" size={18} color="#6b7280" />
-                <Text style={styles.secondaryActionText}>Compare alternatives</Text>
-              </Pressable>
-
-              <Pressable
-                style={[styles.actionButton, styles.secondaryAction]}
-                onPress={() => Alert.alert('Feature Coming Soon', 'Meal planning feature will be available soon!')}
-              >
-                <Ionicons name="calendar" size={18} color="#6b7280" />
-                <Text style={styles.secondaryActionText}>Add to meal plan</Text>
-              </Pressable>
-            </View>
-          </View>
-        )}
-        </ScrollView>
-
-      {/* Action Buttons - Fixed at bottom for modal only */}
-      {isModalPresentation && (
-        <View style={styles.actionSectionFixed}>
+        {/* Action Buttons */}
+        <View style={styles.actionSection}>
+          <Pressable
+            style={[styles.actionButton, styles.primaryAction]}
+            onPress={() => openChatWithContext({ type: 'general' })}
+          >
+            <Ionicons name="chatbubble-ellipses" size={20} color="#ffffff" />
+            <Text style={styles.primaryActionText}>Ask WiHY</Text>
+          </Pressable>
           <View style={styles.secondaryActions}>
             <Pressable
               style={[styles.actionButton, styles.secondaryAction]}
@@ -835,8 +813,10 @@ export default function NutritionFacts() {
             </Pressable>
           </View>
         </View>
-      )}
-    </SafeAreaView>
+
+        <View style={{ height: 40 }} />
+      </ScrollView>
+    </View>
   );
 }
 
@@ -855,17 +835,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-  headerSpacer: {
-    width: 40,
-  },
-  headerTitle: {
-    flex: 1,
-    fontSize: 28,
-    fontWeight: '700',
-    color: '#ffffff',
-    textAlign: 'center',
-  },
-  closeButton: {
+  backButton: {
     width: 40,
     height: 40,
     borderRadius: 20,
@@ -873,9 +843,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  headerTitleFullWidth: {
-    flex: 0,
-    width: '100%',
+  headerTitle: {
+    flex: 1,
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#ffffff',
+    textAlign: 'center',
+  },
+  chatButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   content: {
     flex: 1,
@@ -1229,26 +1210,20 @@ const styles = StyleSheet.create({
     paddingBottom: 32,
   },
 
-  actionSectionFixed: {
-    padding: 16,
-    paddingBottom: 24,
-    backgroundColor: '#ffffff',
-    borderTopWidth: 1,
-    borderTopColor: '#e5e7eb',
-  },
-
   actionButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 16,
-    borderRadius: 12,
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    borderRadius: 10,
     gap: 8,
   },
 
   primaryAction: {
     backgroundColor: '#4cbb17',
-    marginBottom: 12,
+    borderWidth: 1.5,
+    borderColor: '#4cbb17',
   },
 
   primaryActionText: {
@@ -1259,18 +1234,20 @@ const styles = StyleSheet.create({
 
   secondaryActions: {
     flexDirection: 'row',
-    gap: 8,
+    gap: 12,
   },
 
   secondaryAction: {
     flex: 1,
-    backgroundColor: '#f3f4f6',
+    backgroundColor: '#f9fafb',
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
   },
 
   secondaryActionText: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#6b7280',
+    color: '#374151',
   },
 
   loadingContainer: {

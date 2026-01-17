@@ -745,6 +745,9 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     backgroundColor: '#f9fafb',
     paddingHorizontal: 12,
+    ...(Platform.OS === 'web' && {
+      outlineStyle: 'none' as any,
+    }),
   },
   inputIcon: {
     marginRight: 10,
@@ -754,6 +757,11 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     fontSize: 16,
     color: colors.text,
+    ...(Platform.OS === 'web' && {
+      outlineStyle: 'none' as any,
+      border: 'none' as any,
+      backgroundColor: 'transparent',
+    }),
   },
   passwordInput: {
     paddingRight: 40,
