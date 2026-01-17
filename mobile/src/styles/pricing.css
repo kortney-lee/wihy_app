@@ -825,3 +825,234 @@
     max-width: 1400px;
   }
 }
+/* ═══════════════════════════════════════════════════════════
+   ABOUT PAGE STORY SECTION - RESPONSIVE
+   ═══════════════════════════════════════════════════════════ */
+
+/* Mission Text */
+.about-mission-text {
+  font-size: 16px;
+  color: #6b7280;
+  line-height: 1.6;
+  text-align: center;
+  margin-bottom: 40px;
+  max-width: 700px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Story Container */
+.about-story-container {
+  max-width: 1000px;
+  margin: 0 auto 48px;
+}
+
+/* Story Step - Base (Mobile First) */
+.about-story-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  margin-bottom: 48px;
+}
+
+/* Story Visual */
+.about-story-visual {
+  width: 100%;
+  max-width: 280px;
+}
+
+.about-story-gradient {
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.about-story-gradient-blue {
+  background: linear-gradient(135deg, #e8f0fe 0%, #d3e3fd 100%);
+}
+
+.about-story-gradient-yellow {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+}
+
+.about-story-gradient-lightblue {
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+}
+
+.about-story-gradient-purple {
+  background: linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%);
+}
+
+/* Phone Mockup */
+.about-phone-mockup {
+  position: relative;
+  width: 100%;
+  max-width: 240px;
+  aspect-ratio: 9 / 19.5;
+  background: #1f2937;
+  border-radius: 32px;
+  padding: 10px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+}
+
+.about-phone-notch {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 120px;
+  height: 22px;
+  background: #1f2937;
+  border-bottom-left-radius: 16px;
+  border-bottom-right-radius: 16px;
+  z-index: 10;
+}
+
+.about-phone-screen {
+  width: 100%;
+  height: 100%;
+  background: #ffffff;
+  border-radius: 26px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Story Content */
+.about-story-content {
+  width: 100%;
+  flex: 1;
+}
+
+.about-story-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 16px;
+}
+
+.about-story-border {
+  border-left: 4px solid;
+  padding-left: 16px;
+}
+
+.about-story-border-orange {
+  border-color: #fa5f06;
+}
+
+.about-story-border-green {
+  border-color: #4cbb17;
+}
+
+.about-story-border-blue {
+  border-color: #1a73e8;
+}
+
+.about-story-border-purple {
+  border-color: #9333ea;
+}
+
+.about-story-text {
+  font-size: 15px;
+  color: #6b7280;
+  line-height: 1.8;
+  margin-bottom: 12px;
+}
+
+.about-story-premium {
+  font-size: 14px;
+  color: #9333ea;
+  font-weight: 600;
+  line-height: 1.8;
+  margin-top: 8px;
+}
+
+/* Features Grid */
+.about-features-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Tablet - 640px and up */
+@media (min-width: 640px) {
+  .about-mission-text {
+    font-size: 17px;
+  }
+  
+  .about-phone-mockup {
+    max-width: 280px;
+  }
+  
+  .about-phone-notch {
+    width: 140px;
+    height: 26px;
+  }
+  
+  .about-story-title {
+    font-size: 26px;
+  }
+  
+  .about-story-text {
+    font-size: 16px;
+  }
+  
+  .about-features-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Desktop - 768px and up */
+@media (min-width: 768px) {
+  .about-story-step {
+    flex-direction: row;
+    gap: 40px;
+    align-items: center;
+    margin-bottom: 64px;
+  }
+  
+  .about-story-step-reverse {
+    flex-direction: row-reverse;
+  }
+  
+  .about-story-visual {
+    max-width: 350px;
+  }
+  
+  .about-story-gradient {
+    padding: 32px;
+  }
+  
+  .about-phone-mockup {
+    max-width: 300px;
+  }
+  
+  .about-phone-notch {
+    width: 150px;
+    height: 28px;
+  }
+  
+  .about-story-title {
+    font-size: 28px;
+  }
+  
+  .about-story-border {
+    padding-left: 20px;
+  }
+}
+
+/* Large Desktop - 1024px and up */
+@media (min-width: 1024px) {
+  .about-features-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+}

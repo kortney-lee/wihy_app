@@ -138,370 +138,80 @@ export default function AboutScreen() {
             </div>
           </div>
 
-          {/* Mission Section */}
+          {/* About Section */}
           <section className="pricing-section">
-            <p className="pricing-section-label">OUR MISSION</p>
-            <h2 className="pricing-section-title">Search Food Like You Search the Internet</h2>
+            <p className="pricing-section-label">ABOUT WIHY</p>
+            <h2 className="pricing-section-title">The World's Smartest Health Search Engine</h2>
             <p style={{ fontSize: '16px', color: '#6b7280', lineHeight: 1.6, textAlign: 'center', marginBottom: '40px', maxWidth: '700px', marginLeft: 'auto', marginRight: 'auto' }}>
-              Search, seek, and ask to understand what you eat through food and ingredient scanning. WIHY lets you search food the same way you search the internet, but with evidence instead of opinions.
+              WIHY empowers you to make informed health decisions by scanning food, asking questions, and receiving evidence-based answers. Our platform combines cutting-edge AI with over 35 million research articles to help you understand what you eat.
             </p>
             
-            {/* Story Section with Screenshots */}
-            <div style={{ maxWidth: '1000px', margin: '0 auto 48px' }}>
-              
-              {/* Step 1: Scan */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '40px', marginBottom: '64px', flexDirection: 'row' }}>
-                <div style={{ flex: 1 }}>
-                  <div style={{ background: 'linear-gradient(135deg, #e8f0fe 0%, #d3e3fd 100%)', borderRadius: '20px', padding: '32px', boxShadow: '0 8px 24px rgba(0,0,0,0.1)' }}>
-                    <div style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      {/* Phone Mockup Frame */}
-                      <div style={{ 
-                        position: 'relative', 
-                        width: '300px', 
-                        height: '600px',
-                        background: '#1f2937',
-                        borderRadius: '40px',
-                        padding: '12px',
-                        boxShadow: '0 20px 60px rgba(0,0,0,0.3)'
-                      }}>
-                        {/* Screen Notch */}
-                        <div style={{
-                          position: 'absolute',
-                          top: '0',
-                          left: '50%',
-                          transform: 'translateX(-50%)',
-                          width: '150px',
-                          height: '28px',
-                          background: '#1f2937',
-                          borderBottomLeftRadius: '20px',
-                          borderBottomRightRadius: '20px',
-                          zIndex: 10
-                        }}></div>
-                        {/* Screen Content */}
-                        <div style={{ 
-                          width: '100%', 
-                          height: '100%', 
-                          background: '#ffffff',
-                          borderRadius: '32px',
-                          overflow: 'hidden',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center'
-                        }}>
-                          <Image 
-                            source={require('../../assets/CameraScreen.png')} 
-                            style={{ width: '100%', height: '100%', objectFit: 'cover' } as any}
-                            resizeMode="cover"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div style={{ flex: 1 }}>
-                  <h3 style={{ fontSize: '28px', fontWeight: '700', color: '#1f2937', marginBottom: '16px' }}>1. Scan Anything</h3>
-                  <div style={{ borderLeft: '4px solid #fa5f06', paddingLeft: '20px' }}>
-                    <p style={{ fontSize: '16px', color: '#6b7280', lineHeight: 1.8, marginBottom: '12px' }}>
-                      Point your camera at any food, barcode, nutrition label, or ingredient list. WIHY instantly recognizes what you're looking at.
-                    </p>
-                    <p style={{ fontSize: '16px', color: '#6b7280', lineHeight: 1.8 }}>
-                      Works with barcodes, photos, screenshots, or even handwritten lists.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Step 2: Understand */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '40px', marginBottom: '64px', flexDirection: 'row-reverse' }}>
-                <div style={{ flex: 1 }}>
-                  <div style={{ background: 'linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)', borderRadius: '20px', padding: '32px', boxShadow: '0 8px 24px rgba(0,0,0,0.1)' }}>
-                    <div style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      {/* Phone Mockup Frame */}
-                      <div style={{ 
-                        position: 'relative', 
-                        width: '300px', 
-                        height: '600px',
-                        background: '#1f2937',
-                        borderRadius: '40px',
-                        padding: '12px',
-                        boxShadow: '0 20px 60px rgba(0,0,0,0.3)'
-                      }}>
-                        {/* Screen Notch */}
-                        <div style={{
-                          position: 'absolute',
-                          top: '0',
-                          left: '50%',
-                          transform: 'translateX(-50%)',
-                          width: '150px',
-                          height: '28px',
-                          background: '#1f2937',
-                          borderBottomLeftRadius: '20px',
-                          borderBottomRightRadius: '20px',
-                          zIndex: 10
-                        }}></div>
-                        {/* Screen Content */}
-                        <div style={{ 
-                          width: '100%', 
-                          height: '100%', 
-                          background: '#ffffff',
-                          borderRadius: '32px',
-                          overflow: 'hidden',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center'
-                        }}>
-                          <Image 
-                            source={require('../../assets/NutritionAnalysis.png')} 
-                            style={{ width: '100%', height: '100%', objectFit: 'cover' } as any}
-                            resizeMode="cover"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div style={{ flex: 1 }}>
-                  <h3 style={{ fontSize: '28px', fontWeight: '700', color: '#1f2937', marginBottom: '16px' }}>2. Understand Instantly</h3>
-                  <div style={{ borderLeft: '4px solid #4cbb17', paddingLeft: '20px' }}>
-                    <p style={{ fontSize: '16px', color: '#6b7280', lineHeight: 1.8, marginBottom: '12px' }}>
-                      See complete nutrition breakdowns, ingredient processing levels (NOVA groups), additives, and allergens—all explained in plain language.
-                    </p>
-                    <p style={{ fontSize: '16px', color: '#6b7280', lineHeight: 1.8 }}>
-                      No guessing. Just facts backed by 35+ million research articles.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Step 3: Ask */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '40px', marginBottom: '64px', flexDirection: 'row' }}>
-                <div style={{ flex: 1 }}>
-                  <div style={{ background: 'linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%)', borderRadius: '20px', padding: '32px', boxShadow: '0 8px 24px rgba(0,0,0,0.1)' }}>
-                    <div style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      {/* Phone Mockup Frame */}
-                      <div style={{ 
-                        position: 'relative', 
-                        width: '300px', 
-                        height: '600px',
-                        background: '#1f2937',
-                        borderRadius: '40px',
-                        padding: '12px',
-                        boxShadow: '0 20px 60px rgba(0,0,0,0.3)'
-                      }}>
-                        {/* Screen Notch */}
-                        <div style={{
-                          position: 'absolute',
-                          top: '0',
-                          left: '50%',
-                          transform: 'translateX(-50%)',
-                          width: '150px',
-                          height: '28px',
-                          background: '#1f2937',
-                          borderBottomLeftRadius: '20px',
-                          borderBottomRightRadius: '20px',
-                          zIndex: 10
-                        }}></div>
-                        {/* Screen Content */}
-                        <div style={{ 
-                          width: '100%', 
-                          height: '100%', 
-                          background: '#ffffff',
-                          borderRadius: '32px',
-                          overflow: 'hidden',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center'
-                        }}>
-                          <Image 
-                            source={require('../../assets/WihyHomescreen.png')} 
-                            style={{ width: '100%', height: '100%', objectFit: 'cover' } as any}
-                            resizeMode="cover"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div style={{ flex: 1 }}>
-                  <h3 style={{ fontSize: '28px', fontWeight: '700', color: '#1f2937', marginBottom: '16px' }}>3. Ask Anything</h3>
-                  <div style={{ borderLeft: '4px solid #1a73e8', paddingLeft: '20px' }}>
-                    <p style={{ fontSize: '16px', color: '#6b7280', lineHeight: 1.8, marginBottom: '12px' }}>
-                      Chat with WIHY about what you scanned. "Is this good for weight loss?" "Are these additives safe?" "How does this compare to alternatives?"
-                    </p>
-                    <p style={{ fontSize: '16px', color: '#6b7280', lineHeight: 1.8 }}>
-                      Get personalized, evidence-based answers—not generic advice.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Step 4: Track */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '40px', flexDirection: 'row-reverse' }}>
-                <div style={{ flex: 1 }}>
-                  <div style={{ background: 'linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%)', borderRadius: '20px', padding: '32px', boxShadow: '0 8px 24px rgba(0,0,0,0.1)' }}>
-                    <div style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      {/* Phone Mockup Frame */}
-                      <div style={{ 
-                        position: 'relative', 
-                        width: '300px', 
-                        height: '600px',
-                        background: '#1f2937',
-                        borderRadius: '40px',
-                        padding: '12px',
-                        boxShadow: '0 20px 60px rgba(0,0,0,0.3)'
-                      }}>
-                        {/* Screen Notch */}
-                        <div style={{
-                          position: 'absolute',
-                          top: '0',
-                          left: '50%',
-                          transform: 'translateX(-50%)',
-                          width: '150px',
-                          height: '28px',
-                          background: '#1f2937',
-                          borderBottomLeftRadius: '20px',
-                          borderBottomRightRadius: '20px',
-                          zIndex: 10
-                        }}></div>
-                        {/* Screen Content */}
-                        <div style={{ 
-                          width: '100%', 
-                          height: '100%', 
-                          background: '#ffffff',
-                          borderRadius: '32px',
-                          overflow: 'hidden',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center'
-                        }}>
-                          <Image 
-                            source={require('../../assets/MyProgressScreen.png')} 
-                            style={{ width: '100%', height: '100%', objectFit: 'cover' } as any}
-                            resizeMode="cover"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div style={{ flex: 1 }}>
-                  <h3 style={{ fontSize: '28px', fontWeight: '700', color: '#1f2937', marginBottom: '16px' }}>4. Track My Progress</h3>
-                  <div style={{ borderLeft: '4px solid #9333ea', paddingLeft: '20px' }}>
-                    <p style={{ fontSize: '16px', color: '#6b7280', lineHeight: 1.8, marginBottom: '12px' }}>
-                      See your health patterns over time. Track nutrition trends, monitor fitness progress, and visualize how your habits are impacting your health goals.
-                    </p>
-                    <p style={{ fontSize: '16px', color: '#6b7280', lineHeight: 1.8, marginBottom: '12px' }}>
-                      Your data works for you—revealing insights and predicting where you're heading.
-                    </p>
-                    <p style={{ fontSize: '14px', color: '#9333ea', fontWeight: '600', lineHeight: 1.8 }}>
-                      ⭐ Available with paid subscription only
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-            </div>
-            
-            <div style={{ textAlign: 'center' }}>
+            <div style={{ textAlign: 'center', marginBottom: '48px' }}>
               <button 
                 onClick={handleSubscribePress}
                 className="pricing-btn pricing-btn-primary pricing-btn-lg"
                 type="button"
               >
-                Get Started with WIHY
+                Explore WIHY Plans
               </button>
             </div>
-          </section>
 
-          {/* Features Grid */}
-          <section className="pricing-section pricing-section-alt">
-            <p className="pricing-section-label">WHAT WIHY DOES</p>
-            <h2 className="pricing-section-title">Intelligent Health Features</h2>
-            <div className="pricing-grid pricing-grid-3" style={{ maxWidth: '1200px', margin: '0 auto' }}>
+            {/* Company Info Grid */}
+            <div className="about-features-grid" style={{ marginTop: '48px' }}>
               
-              {/* Health Search */}
-              <div className="pricing-card">
-                <div className="pricing-card-icon">
-                  <svg viewBox="0 0 24 24" width="28" height="28" fill="#1a73e8">
-                    <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
-                  </svg>
-                </div>
-                <h3 className="pricing-card-name">Health Search</h3>
-                <p className="pricing-card-tagline">Ask health and nutrition questions and get research-backed answers. Powered by 35+ million scientific research articles.</p>
-              </div>
-
-              {/* Universal Scanning */}
-              <div className="pricing-card">
-                <div className="pricing-card-icon">
-                  <svg viewBox="0 0 24 24" width="28" height="28" fill="#1a73e8">
-                    <path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/>
-                  </svg>
-                </div>
-                <h3 className="pricing-card-name">Universal Scanning</h3>
-                <p className="pricing-card-tagline">Scan barcodes, take photos, upload ingredients, or import receipts. WIHY detects, verifies, and analyzes automatically.</p>
-              </div>
-
-              {/* Nutrition Analysis */}
-              <div className="pricing-card">
-                <div className="pricing-card-icon">
-                  <svg viewBox="0 0 24 24" width="28" height="28" fill="#1a73e8">
-                    <path d="M17 8C8 10 5.9 16.17 3.82 21.34l1.89.66.95-2.3c.48.17.98.3 1.34.3C19 20 22 3 22 3c-1 2-8 2.25-13 3.25S2 11.5 2 13.5s1.75 3.75 1.75 3.75C7 8 17 8 17 8z"/>
-                  </svg>
-                </div>
-                <h3 className="pricing-card-name">Nutrition Analysis</h3>
-                <p className="pricing-card-tagline">Understand nutrition in plain language. Analyze macros, micros, additives, processing level, and portion impact.</p>
-              </div>
-
-              {/* Predictive Insights */}
-              <div className="pricing-card">
-                <div className="pricing-card-icon">
-                  <svg viewBox="0 0 24 24" width="28" height="28" fill="#1a73e8">
-                    <path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/>
-                  </svg>
-                </div>
-                <h3 className="pricing-card-name">Predictive Insights</h3>
-                <p className="pricing-card-tagline">See where your habits are heading. Detect patterns, predict outcomes, and get early awareness of health shifts.</p>
-              </div>
-
-              {/* Fact Check */}
+              {/* Mission */}
               <div className="pricing-card">
                 <div className="pricing-card-icon">
                   <svg viewBox="0 0 24 24" width="28" height="28" fill="#1a73e8">
                     <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
                   </svg>
                 </div>
-                <h3 className="pricing-card-name">Fact Check</h3>
-                <p className="pricing-card-tagline">Verify health claims with real evidence. See strength of evidence, level of certainty, and what research actually supports.</p>
+                <h3 className="pricing-card-name">Our Mission</h3>
+                <p className="pricing-card-tagline">Make health information accessible and understandable for everyone through evidence-based technology.</p>
               </div>
 
-              {/* Connected Platform */}
+              {/* Research Backed */}
               <div className="pricing-card">
                 <div className="pricing-card-icon">
                   <svg viewBox="0 0 24 24" width="28" height="28" fill="#1a73e8">
-                    <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z"/>
+                    <path d="M5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82zM12 3L1 9l11 6 9-4.91V17h2V9L12 3z"/>
                   </svg>
                 </div>
-                <h3 className="pricing-card-name">Connected Platform</h3>
-                <p className="pricing-card-tagline">Progress tracking, nutrition, research, fitness, and coaching unified in one place for you and your family.</p>
+                <h3 className="pricing-card-name">Research Backed</h3>
+                <p className="pricing-card-tagline">Every answer is supported by scientific research from our database of 35+ million peer-reviewed articles.</p>
               </div>
+
+              {/* Privacy First */}
+              <div className="pricing-card">
+                <div className="pricing-card-icon">
+                  <svg viewBox="0 0 24 24" width="28" height="28" fill="#1a73e8">
+                    <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/>
+                  </svg>
+                </div>
+                <h3 className="pricing-card-name">Privacy First</h3>
+                <p className="pricing-card-tagline">Your health data is yours. We use industry-leading encryption and never sell your personal information.</p>
+              </div>
+
             </div>
           </section>
 
-          {/* CTA Section */}
-          <section className="pricing-section">
-            <div className="pricing-cta-box">
-              <svg viewBox="0 0 24 24" width="32" height="32" fill="#1a73e8">
-                <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
-              </svg>
-              <h3>Experience WIHY Intelligence</h3>
-              <p>Start your journey to understanding what you eat with evidence-based health insights.</p>
-              <button 
-                onClick={handleSubscribePress}
-                className="pricing-btn pricing-btn-primary pricing-btn-lg"
-                type="button"
-              >
-                Get Started Today
-              </button>
+          {/* Contact Section */}
+          <section className="pricing-section pricing-section-alt">
+            <p className="pricing-section-label">GET IN TOUCH</p>
+            <h2 className="pricing-section-title">Contact Us</h2>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', marginTop: '32px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="#6b7280">
+                  <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+                </svg>
+                <a href="mailto:info@wihy.ai" style={{ fontSize: '16px', color: '#1a73e8', textDecoration: 'none' }}>info@wihy.ai</a>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="#6b7280">
+                  <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z"/>
+                </svg>
+                <a href="https://wihy.ai" target="_blank" rel="noopener noreferrer" style={{ fontSize: '16px', color: '#1a73e8', textDecoration: 'none' }}>wihy.ai</a>
+              </div>
             </div>
           </section>
 
