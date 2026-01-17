@@ -518,6 +518,247 @@ class CheckoutService {
     }
     return price;
   }
+
+  /**
+   * Get Stripe publishable key for client-side Stripe.js
+   */
+  async getStripeConfig(): Promise<{ success: boolean; publishableKey?: string; error?: string }> {
+    try {
+      const response = await fetchWithLogging(
+        `${this.baseUrl}/api/payment/config`,
+        { method: 'GET' }
+      );
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        return {
+          success: true,
+          publishableKey: data.publishableKey,
+        };
+      }
+
+      return {
+        success: false,
+        error: data.error || 'Failed to get Stripe config',
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        error: error.message || 'Network error',
+      };
+    }
+  }
+
+  /**
+   * Cancel user's subscription
+   */
+  async cancelSubscription(): Promise<{ success: boolean; message?: string; subscriptionId?: string; error?: string }> {
+    try {
+      const sessionToken = await authService.getSessionToken();
+      
+      if (!sessionToken) {
+        return { success: false, error: 'Not authenticated' };
+      }
+
+      const response = await fetchWithLogging(
+        `${this.baseUrl}/api/payment/cancel-subscription`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${sessionToken}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        console.log('=== SUBSCRIPTION CANCELED ===');
+        return {
+          success: true,
+          message: data.message || 'Subscription canceled successfully',
+          subscriptionId: data.subscriptionId,
+        };
+      }
+
+      return {
+        success: false,
+        error: data.error || 'Failed to cancel subscription',
+      };
+    } catch (error: any) {
+      console.error('=== CANCEL SUBSCRIPTION ERROR ===', error);
+      return {
+        success: false,
+        error: error.message || 'Network error',
+      };
+    }
+  }
+
+  /**
+   * Create a direct subscription (for cases where Stripe customer already exists)
+   */
+  async createSubscription(plan: string, priceId: string): Promise<{
+    success: boolean;
+    subscriptionId?: string;
+    status?: string;
+    plan?: string;
+    currentPeriodEnd?: number;
+    error?: string;
+  }> {
+    try {
+      const sessionToken = await authService.getSessionToken();
+      
+      if (!sessionToken) {
+        return { success: false, error: 'Not authenticated' };
+      }
+
+      const response = await fetchWithLogging(
+        `${this.baseUrl}/api/payment/create-subscription`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${sessionToken}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ plan, priceId }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        console.log('=== SUBSCRIPTION CREATED ===');
+        return {
+          success: true,
+          subscriptionId: data.subscriptionId,
+          status: data.status,
+          plan: data.plan,
+          currentPeriodEnd: data.currentPeriodEnd,
+        };
+      }
+
+      return {
+        success: false,
+        error: data.error || 'Failed to create subscription',
+      };
+    } catch (error: any) {
+      console.error('=== CREATE SUBSCRIPTION ERROR ===', error);
+      return {
+        success: false,
+        error: error.message || 'Network error',
+      };
+    }
+  }
+
+  /**
+   * Verify Apple In-App Purchase receipt
+   */
+  async verifyAppleReceipt(receipt: string, bundleId: string): Promise<{
+    success: boolean;
+    valid?: boolean;
+    productId?: string;
+    expiresDate?: number;
+    error?: string;
+  }> {
+    try {
+      const sessionToken = await authService.getSessionToken();
+      
+      if (!sessionToken) {
+        return { success: false, error: 'Not authenticated' };
+      }
+
+      const response = await fetchWithLogging(
+        `${this.baseUrl}/api/iap/verify-receipt`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${sessionToken}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ receipt, bundleId }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        return {
+          success: true,
+          valid: data.valid,
+          productId: data.productId,
+          expiresDate: data.expiresDate,
+        };
+      }
+
+      return {
+        success: false,
+        error: data.error || 'Failed to verify receipt',
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        error: error.message || 'Network error',
+      };
+    }
+  }
+
+  /**
+   * Verify Google Play purchase
+   */
+  async verifyGooglePurchase(
+    packageName: string,
+    productId: string,
+    purchaseToken: string
+  ): Promise<{
+    success: boolean;
+    valid?: boolean;
+    purchaseState?: string;
+    acknowledgementState?: string;
+    error?: string;
+  }> {
+    try {
+      const sessionToken = await authService.getSessionToken();
+      
+      if (!sessionToken) {
+        return { success: false, error: 'Not authenticated' };
+      }
+
+      const response = await fetchWithLogging(
+        `${this.baseUrl}/api/google-play/verify-purchase`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${sessionToken}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ packageName, productId, purchaseToken }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        return {
+          success: true,
+          valid: data.valid,
+          purchaseState: data.purchaseState,
+          acknowledgementState: data.acknowledgementState,
+        };
+      }
+
+      return {
+        success: false,
+        error: data.error || 'Failed to verify purchase',
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        error: error.message || 'Network error',
+      };
+    }
+  }
 }
 
 // Export singleton instance

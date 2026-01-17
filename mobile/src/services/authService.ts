@@ -38,8 +38,10 @@ export const AUTH_CONFIG = {
     microsoftAuth: '/api/auth/microsoft/authorize',
     appleAuth: '/api/auth/apple/authorize',
     verify: '/api/auth/verify',
+    refresh: '/api/auth/refresh',
     logout: '/api/auth/logout',
     forgotPassword: '/api/auth/forgot-password',
+    resetPassword: '/api/auth/reset-password',
     
     // User Management
     userProfile: '/api/users/me',
@@ -923,48 +925,57 @@ class AuthService {
   }
 
   /**
-   * Refresh access token using refresh token
+   * Refresh access token using session token
+   * Uses /api/auth/refresh with Bearer token
    */
   async refreshAccessToken(): Promise<TokenResponse | null> {
-    const refreshToken = await AsyncStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN);
+    const sessionToken = await this.getSessionToken();
     
-    if (!refreshToken) {
-      console.log('No refresh token available');
+    if (!sessionToken) {
+      console.log('No session token available for refresh');
       return null;
     }
     
     const startTime = Date.now();
-    const endpoint = `${this.baseUrl}${AUTH_CONFIG.endpoints.oauthToken}`;
+    const endpoint = `${this.baseUrl}${AUTH_CONFIG.endpoints.refresh}`;
     
     console.log('=== REFRESH TOKEN API CALL ===');
     console.log('Endpoint:', endpoint);
     
     try {
-      const body = new URLSearchParams({
-        grant_type: 'refresh_token',
-        client_id: AUTH_CONFIG.clientId,
-        refresh_token: refreshToken,
-      });
-      
       const response = await fetchWithLogging(endpoint, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
+          'Authorization': `Bearer ${sessionToken}`,
+          'Content-Type': 'application/json',
         },
-        body: body.toString(),
       });
 
       const responseTime = Date.now() - startTime;
       console.log(`Response Status: ${response.status} (${responseTime}ms)`);
 
       if (response.ok) {
-        const data: TokenResponse = await response.json();
+        const data = await response.json();
         
-        // Store new tokens
-        await this.storeTokens(data);
+        if (data.success && data.session_token) {
+          // Store new session token
+          await this.storeSessionToken(data.session_token);
+          
+          // Store expiry if provided
+          if (data.expiresIn) {
+            const expiryTime = Date.now() + (data.expiresIn * 1000);
+            await AsyncStorage.setItem(STORAGE_KEYS.TOKEN_EXPIRY, expiryTime.toString());
+          }
+          
+          console.log('=== REFRESH TOKEN SUCCESS ===');
+          return {
+            access_token: data.session_token,
+            token_type: 'Bearer',
+            expires_in: data.expiresIn || 3600,
+          };
+        }
         
-        console.log('=== REFRESH TOKEN SUCCESS ===');
-        return data;
+        return null;
       } else {
         console.error('=== REFRESH TOKEN FAILED ===');
         return null;
@@ -979,6 +990,7 @@ class AuthService {
 
   /**
    * Verify current session/token
+   * Uses POST /api/auth/verify with token in body
    */
   async verifySession(): Promise<{ valid: boolean; user?: UserData }> {
     const sessionToken = await this.getSessionToken();
@@ -994,9 +1006,11 @@ class AuthService {
     
     try {
       const response = await fetchWithLogging(endpoint, {
+        method: 'POST',
         headers: {
-          'Authorization': `Bearer ${sessionToken}`,
+          'Content-Type': 'application/json',
         },
+        body: JSON.stringify({ token: sessionToken }),
       });
 
       if (response.ok) {
@@ -1007,7 +1021,10 @@ class AuthService {
           await this.storeUserData(data.user);
         }
         
-        return data;
+        return {
+          valid: data.success && data.valid,
+          user: data.user,
+        };
       } else {
         console.log('Session invalid');
         return { valid: false };
@@ -2455,6 +2472,39 @@ class AuthService {
       }
     } catch (error: any) {
       console.error('Password reset request error:', error);
+      return { success: false, error: error.message || 'Network error' };
+    }
+  }
+
+  /**
+   * Complete password reset with token and new password
+   */
+  async resetPassword(token: string, newPassword: string): Promise<{ success: boolean; message?: string; error?: string }> {
+    const endpoint = `${this.baseUrl}${AUTH_CONFIG.endpoints.resetPassword}`;
+    
+    console.log('=== RESET PASSWORD ===');
+    
+    try {
+      const response = await fetchWithLogging(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ token, newPassword }),
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok && data.success) {
+        console.log('Password reset successfully');
+        return { success: true, message: data.message || 'Password reset successfully' };
+      } else {
+        const errorMessage = data.error || 'Failed to reset password';
+        console.error('Password reset failed:', errorMessage);
+        return { success: false, error: errorMessage };
+      }
+    } catch (error: any) {
+      console.error('Password reset error:', error);
       return { success: false, error: error.message || 'Network error' };
     }
   }
