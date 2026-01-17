@@ -59,6 +59,15 @@ export type RootStackParamList = {
   // Onboarding flow
   OnboardingFlow: undefined;
   
+  // Auth callback (web OAuth redirect)
+  AuthCallback: {
+    session_token?: string;
+    provider?: string;
+    state?: string;
+    error?: string;
+    error_description?: string;
+  } | undefined;
+  
   // Legal and info pages
   About: undefined;
   Terms: undefined;

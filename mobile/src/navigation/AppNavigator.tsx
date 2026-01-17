@@ -58,6 +58,7 @@ import { PostPaymentRegistrationScreen } from '../screens/PostPaymentRegistratio
 import AboutScreen from '../screens/AboutScreen';
 import TermsScreen from '../screens/TermsScreen';
 import PrivacyScreen from '../screens/PrivacyScreen';
+import AuthCallbackScreen from '../screens/AuthCallbackScreen';
 
 const Tab = createBottomTabNavigator<TabParamList>();
 const Stack = createStackNavigator<RootStackParamList>();
@@ -118,6 +119,8 @@ const linking: LinkingOptions<RootStackParamList> = {
       CreateMeals: 'create-meals',
       PostPaymentRegistration: 'register',
       OnboardingFlow: 'onboarding',
+      // OAuth callback route for web
+      AuthCallback: 'auth/callback',
     },
   },
 };
@@ -622,6 +625,14 @@ export default function AppNavigator() {
           options={{
             presentation: 'card',
             headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="AuthCallback"
+          component={AuthCallbackScreen}
+          options={{
+            headerShown: false,
+            gestureEnabled: false,
           }}
         />
       </Stack.Navigator>
