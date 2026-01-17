@@ -86,7 +86,6 @@ const linking: LinkingOptions<RootStackParamList> = {
           Health: 'health',
           Profile: 'profile',
           CoachSelection: 'coach-selection',
-          NutritionFacts: 'nutrition-facts',
         },
       },
       // Legacy web routes - maintain backward compatibility
