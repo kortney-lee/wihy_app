@@ -1248,19 +1248,21 @@
 
 /* Story Section - Mobile Responsive Scaling */
 @media (max-width: 767px) {
+  /* Main story containers - stack vertically */
+  div[style*="display: 'flex'"][style*="gap: '40px'"][style*="marginBottom: '64px'"] {
+    flex-direction: column !important;
+    gap: 20px !important;
+    margin-bottom: 40px !important;
+  }
+  
   /* Scale down phone mockups */
   div[style*="width: '300px'"][style*="height: '600px'"] {
     width: 240px !important;
     height: 480px !important;
   }
   
-  /* Story container - responsive gap and padding */
-  div[style*="gap: '40px'"] {
-    gap: 20px !important;
-  }
-  
   /* Gradient containers - responsive padding */
-  div[style*="padding: '32px'"] {
+  div[style*="padding: '32px'"][style*="background: 'linear-gradient'"] {
     padding: 20px !important;
   }
   
@@ -1271,23 +1273,14 @@
   }
   
   /* Story text - responsive sizing */
-  p[style*="fontSize: '16px'"] {
+  p[style*="fontSize: '16px'"][style*="color: '#6b7280'"] {
     font-size: 14px !important;
+    line-height: 1.5 !important;
   }
   
   /* Border styling - responsive padding */
-  div[style*="paddingLeft: '20px'"] {
+  div[style*="borderLeft: '4px solid'"] {
     padding-left: 16px !important;
-  }
-  
-  /* Story section container margins */
-  div[style*="marginBottom: '64px'"] {
-    margin-bottom: 40px !important;
-  }
-  
-  /* Flex items - full width on mobile */
-  div[style*="flex: 1"] {
-    width: 100% !important;
   }
 }
 
@@ -1298,7 +1291,7 @@
     height: 400px !important;
   }
   
-  div[style*="padding: '32px'"] {
+  div[style*="padding: '32px'"][style*="background: 'linear-gradient'"] {
     padding: 16px !important;
   }
   
@@ -1306,7 +1299,7 @@
     font-size: 20px !important;
   }
   
-  p[style*="fontSize: '16px'"] {
+  p[style*="fontSize: '16px'"][style*="color: '#6b7280'"] {
     font-size: 13px !important;
   }
 }
