@@ -260,27 +260,38 @@ class CheckoutService {
         cancelUrl: callbacks.cancelUrl,
       };
 
+      // Get session token for authenticated requests
+      const sessionToken = await authService.getSessionToken();
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
+      if (sessionToken) {
+        headers['Authorization'] = `Bearer ${sessionToken}`;
+      }
+
       const response = await fetchWithLogging(
-        `${this.baseUrl}/api/payment/initiate`,
+        `${this.baseUrl}/api/payment/create-checkout-session`,
         {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
+          headers,
           body: JSON.stringify(request),
         }
       );
 
       const data = await response.json();
 
-      if (response.ok && data.success && data.checkout_url) {
+      // Handle both old (checkout_url) and new (url) response formats
+      const checkoutUrl = data.url || data.checkout_url;
+      const sessionId = data.sessionId || data.session_id;
+
+      if (response.ok && data.success && checkoutUrl) {
         console.log('=== CHECKOUT SESSION CREATED ===');
-        console.log('Checkout URL:', data.checkout_url);
+        console.log('Checkout URL:', checkoutUrl);
         
         return {
           success: true,
-          checkoutUrl: data.checkout_url,
-          sessionId: data.session_id,
+          checkoutUrl: checkoutUrl,
+          sessionId: sessionId,
         };
       }
 
