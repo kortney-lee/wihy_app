@@ -24,17 +24,19 @@ export const AUTH_CONFIG = {
   // OAuth flow: Auth service handles ALL provider configurations server-side
   // Mobile receives session_token directly via redirect (PKCE flow)
   redirectUri: 'wihy://auth/callback',
-  scopes: ['profile', 'email', 'health_data', 'offline_access'],
+  // OAuth scopes - only profile and email are supported by auth service
+  scopes: ['profile', 'email'],
   endpoints: {
     // Authentication
     health: '/api/health',
     providers: '/api/auth/providers',
     login: '/api/auth/login',
     register: '/api/auth/register',
-    googleAuth: '/api/auth/google',
-    facebookAuth: '/api/auth/facebook',
-    microsoftAuth: '/api/auth/microsoft',
-    appleAuth: '/api/auth/apple',
+    // OAuth endpoints require /authorize suffix
+    googleAuth: '/api/auth/google/authorize',
+    facebookAuth: '/api/auth/facebook/authorize',
+    microsoftAuth: '/api/auth/microsoft/authorize',
+    appleAuth: '/api/auth/apple/authorize',
     verify: '/api/auth/verify',
     logout: '/api/auth/logout',
     forgotPassword: '/api/auth/forgot-password',
