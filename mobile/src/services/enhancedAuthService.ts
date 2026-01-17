@@ -221,8 +221,9 @@ class EnhancedAuthService {
       // On web, use redirect-based OAuth instead of popup
       if (typeof window !== 'undefined' && window.location) {
         console.log('Web detected - using redirect OAuth flow');
-        const webAuthUrl = authService.getWebOAuthUrl(provider);
+        const { url: webAuthUrl, state } = await authService.getWebOAuthUrl(provider);
         console.log('Redirecting to:', webAuthUrl);
+        console.log('State stored for CSRF verification:', state);
         window.location.href = webAuthUrl;
         // Return a pending state - the callback screen will handle completion
         return {
