@@ -304,7 +304,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       );
     }
 
+    console.log('=== AUTH CONTEXT: authResult ===');
+    console.log('authResult.success:', authResult.success);
+    console.log('authResult.user:', authResult.user);
+    console.log('authResult.data:', authResult.data);
+    console.log('Full authResult:', JSON.stringify(authResult, null, 2));
+
     if (!authResult.success || !authResult.user) {
+      console.log('=== AUTH CONTEXT: FAILING ===');
+      console.log('Reason: success=', authResult.success, 'user=', authResult.user);
       throw new Error(authResult.error || 'Authentication failed');
     }
 

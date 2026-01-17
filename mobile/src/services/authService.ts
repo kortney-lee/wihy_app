@@ -531,16 +531,25 @@ class AuthService {
         const refreshToken = authData?.refreshToken || responseData.refreshToken;
         const expiresIn = authData?.expiresIn || responseData.expiresIn;
         
+        console.log('=== REGISTER: Parsed data ===');
+        console.log('user:', user);
+        console.log('authToken:', authToken ? 'present' : 'missing');
+        console.log('refreshToken:', refreshToken ? 'present' : 'missing');
+        console.log('expiresIn:', expiresIn);
+        
         if (authToken) {
+          console.log('=== REGISTER: Storing session token ===');
           await this.storeSessionToken(authToken);
           
           // Store refresh token if provided
           if (refreshToken) {
+            console.log('=== REGISTER: Storing refresh token ===');
             await AsyncStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, refreshToken);
           }
           
           // Store token expiry if provided
           if (expiresIn) {
+            console.log('=== REGISTER: Storing token expiry ===');
             // Handle both string ("24h", "7d") and number (seconds) formats
             let expiryMs: number;
             if (typeof expiresIn === 'string') {
@@ -560,21 +569,15 @@ class AuthService {
         }
         
         if (user) {
+          console.log('=== REGISTER: Storing user data ===');
           await this.storeUserData(user);
         }
         
         console.log('=== REGISTER SUCCESS ===');
+        console.log('=== REGISTER: Returning result ===');
         
-        // Track affiliate signup (web only, non-blocking)
-        // Uses email for lead matching; Stripe customer ID matched via webhooks on first payment
-        if (user?.email && user?.name) {
-          affiliateService.trackSignup(user.name, user.email, user.id).catch((err) => {
-            console.log('[Auth] Affiliate tracking skipped:', err);
-          });
-        }
-        
-        // Return in expected format with nested data
-        return {
+        // Build result object and log it before returning
+        const result = {
           success: true,
           message: responseData.message,
           data: {
@@ -587,6 +590,20 @@ class AuthService {
           user: user,
           token: authToken,
         };
+        console.log('=== REGISTER: Result object ===');
+        console.log('result.success:', result.success);
+        console.log('result.user:', result.user);
+        console.log('result.data.user:', result.data.user);
+        
+        // Track affiliate signup (web only, non-blocking)
+        // Uses email for lead matching; Stripe customer ID matched via webhooks on first payment
+        if (user?.email && user?.name) {
+          affiliateService.trackSignup(user.name, user.email, user.id).catch((err) => {
+            console.log('[Auth] Affiliate tracking skipped:', err);
+          });
+        }
+        
+        return result;
       } else {
         console.log('=== REGISTER FAILED ===');
         return {
