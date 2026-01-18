@@ -76,6 +76,7 @@ export const WIHY_PLANS: Plan[] = [
     price: 0,
     interval: 'month',
     description: 'Get started with basic features',
+    stripePriceId: 'free', // Free plan, no Stripe ID needed
     features: [
       'Basic nutrition search',
       'Barcode scanning (5/day)',
@@ -89,6 +90,7 @@ export const WIHY_PLANS: Plan[] = [
     price: 12.99,
     interval: 'month',
     description: 'Full access to WIHY AI',
+    stripePriceId: 'pro_monthly', // Maps to Stripe price ID
     features: [
       'Unlimited nutrition search',
       'Unlimited barcode scanning',
@@ -106,6 +108,7 @@ export const WIHY_PLANS: Plan[] = [
     price: 99.99,
     interval: 'year',
     description: 'Best value - save 36%',
+    stripePriceId: 'pro_yearly', // Maps to Stripe price ID
     features: [
       'All Premium features',
       'Priority support',
@@ -120,6 +123,7 @@ export const WIHY_PLANS: Plan[] = [
     price: 24.99,
     interval: 'month',
     description: 'Perfect for families up to 4',
+    stripePriceId: 'family_basic', // Maps to Stripe price ID
     features: [
       'All Premium features',
       'Up to 4 family members',
@@ -135,6 +139,7 @@ export const WIHY_PLANS: Plan[] = [
     price: 49.99,
     interval: 'month',
     description: 'Growing families up to 8',
+    stripePriceId: 'family_pro', // Maps to Stripe price ID
     features: [
       'All Family Basic features',
       'Up to 8 family members',
@@ -149,6 +154,7 @@ export const WIHY_PLANS: Plan[] = [
     price: 99.99,
     interval: 'one-time',
     description: 'For health & fitness coaches',
+    stripePriceId: 'coach', // Maps to Stripe price ID
     features: [
       'Client management dashboard',
       'Client health tracking',
@@ -268,11 +274,20 @@ class CheckoutService {
       return { success: false, error: errorMsg };
     }
 
+    // Map local plan ID to Stripe price ID
+    const stripePriceId = validPlan.stripePriceId || plan;
+    if (!stripePriceId) {
+      const errorMsg = `No Stripe price ID for plan: ${plan}`;
+      console.error('[Checkout] Stripe Price ID Error:', errorMsg);
+      return { success: false, error: errorMsg };
+    }
+
     const source = this.getPlatformSource();
     const callbacks = this.getCallbackUrls();
 
     console.log('[Checkout] === INITIATING CHECKOUT ===');
-    console.log('[Checkout] Plan:', plan);
+    console.log('[Checkout] Local Plan ID:', plan);
+    console.log('[Checkout] Stripe Price ID:', stripePriceId);
     console.log('[Checkout] Email:', trimmedEmail);
     console.log('[Checkout] Source:', source);
     console.log('[Checkout] Callbacks:', callbacks);
@@ -285,8 +300,9 @@ class CheckoutService {
         initiatedAt: Date.now(),
       }));
 
+      // Use Stripe price ID instead of local plan ID for the API request
       const request: CheckoutRequest = {
-        plan,
+        plan: stripePriceId, // Send Stripe price ID: pro_monthly, pro_yearly, family_basic, family_pro, coach
         email: trimmedEmail,
         source,
         successUrl: callbacks.successUrl,
