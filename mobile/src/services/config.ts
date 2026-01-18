@@ -25,7 +25,13 @@ export const API_CONFIG = {
     pillScan: '/api/v1/medications/pills/scan', // Pill identification
     pillConfirm: '/api/v1/medications/pills/confirm', // Pill confirmation
     labelByNdc: '/api/scan/product', // NDC lookup
-    ask: '/ask', // ML API endpoint (no /api prefix)
+    // ML Chat API endpoints
+    ask: '/api/chat/public/ask', // Public ask endpoint (stateless, no auth)
+    askProtected: '/ask', // Protected ask endpoint (requires Bearer token)
+    chatStartSession: '/api/chat/start-session', // Start a chat session
+    chatSendMessage: '/api/chat/send-message', // Send message in session
+    chatHistory: '/api/chat/session', // Get session history: {id}/history
+    chatUserSessions: '/api/chat/user', // Get user sessions: {userId}/sessions
     fdaIngredient: '/api/openfda/ingredient',
   },
   timeout: 30000, // 30 seconds

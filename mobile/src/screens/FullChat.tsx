@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useCallback, useContext } from 'react';
 import {
   View,
   Text,
@@ -22,6 +22,7 @@ import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import type { TabParamList, RootStackParamList } from '../types/navigation';
 import { GradientDashboardHeader, DASHBOARD_GRADIENTS, WebPageWrapper } from '../components/shared';
 import { chatService } from '../services/chatService';
+import { AuthContext } from '../context/AuthContext';
 import type { CreatedResource, SuggestedAction } from '../services/types';
 
 const isWeb = Platform.OS === 'web';
@@ -65,6 +66,10 @@ export default function FullChat() {
   const scrollViewRef = useRef<ScrollView>(null);
   const messagesEndRef = useRef<View>(null);
   const insets = useSafeAreaInsets();
+  const { user } = useContext(AuthContext);
+
+  // Get user ID for session management
+  const userId = user?.id || `guest_${Date.now()}`;
 
   // Safely extract route params
   const routeParams = route?.params || {};
@@ -80,7 +85,7 @@ export default function FullChat() {
   const [isInitializingSession, setIsInitializingSession] = useState(false);
   
   // Determine if this is a guided flow (from Home screen) or conversation flow (from Chat tab)
-  // Guided flow uses /ask endpoint, conversation flow uses /api/chat/message
+  // Guided flow uses /api/chat/public/ask endpoint, conversation flow uses /api/chat/send-message
   const isGuidedFlow = context?.type === 'search' || context?.type === 'verify';
 
   // Check if nutrition facts are available in context
@@ -114,13 +119,13 @@ export default function FullChat() {
   const dot3Anim = useRef(new Animated.Value(0.3)).current;
 
   // Initialize chat session - only for conversation flow (Chat tab)
-  // Guided flow (Home screen) will get session_id from /ask response
+  // Guided flow (Home screen) uses public/ask which is stateless
   const initializeSession = useCallback(async () => {
     if (sessionId || isInitializingSession || isGuidedFlow) return;
     
     setIsInitializingSession(true);
     try {
-      const session = await chatService.createSession();
+      const session = await chatService.startSession(userId);
       if (session) {
         setSessionId(session.session_id);
         console.log('Chat session initialized:', session.session_id);
@@ -374,49 +379,36 @@ export default function FullChat() {
       let response;
       
       // Route based on flow type:
-      // - Guided flow (Home screen): Always use /ask endpoint
-      // - Conversation flow (Chat tab): Use /api/chat/message with session
+      // - Guided flow (Home screen): Use /api/chat/public/ask (stateless)
+      // - Conversation flow (Chat tab): Use /api/chat/send-message with session
       
       if (isGuidedFlow) {
-        // Guided flow: Use /ask endpoint (pass session_id if we have one for continuity)
-        console.log('=== GUIDED FLOW (/ask) ===');
-        console.log('Session ID:', sessionId || 'none (first call)');
+        // Guided flow: Use public ask endpoint (stateless, no session needed)
+        console.log('=== GUIDED FLOW (/api/chat/public/ask) ===');
         
-        response = await chatService.ask(text, {
-          ...(sessionId && { session_id: sessionId }),
-          ...(context?.productData && { productData: context.productData }),
-          ...(context?.userGoals && { user_goals: context.userGoals }),
-          ...(context?.fitnessLevel && { fitness_level: context.fitnessLevel }),
-        });
-        
-        // Store session ID from /ask response for follow-up calls
-        if (response.session_id && !sessionId) {
-          setSessionId(response.session_id);
-          console.log('Session ID received from /ask:', response.session_id);
-        }
+        response = await chatService.ask(text);
       } else if (sessionId) {
-        // Conversation flow with session: Use /api/chat/message
-        console.log('=== CONVERSATION FLOW (/api/chat/message) ===');
+        // Conversation flow with session: Use /api/chat/send-message
+        console.log('=== CONVERSATION FLOW (/api/chat/send-message) ===');
         console.log('Session ID:', sessionId);
+        console.log('User ID:', userId);
         
-        response = await chatService.sendMessage(text, sessionId, {
+        response = await chatService.sendMessage(text, sessionId, userId, {
           ...(context?.userGoals && { user_goals: context.userGoals }),
           ...(context?.fitnessLevel && { fitness_level: context.fitnessLevel }),
           ...(context?.dietaryRestrictions && { dietary_restrictions: context.dietaryRestrictions }),
         });
       } else {
-        // Conversation flow without session yet: Use /ask as fallback
-        console.log('=== CONVERSATION FLOW FALLBACK (/ask) ===');
+        // Conversation flow without session yet: Start session first
+        console.log('=== CONVERSATION FLOW - STARTING SESSION ===');
         
-        response = await chatService.ask(text, {
-          ...(context?.productData && { productData: context.productData }),
-          ...(context?.userGoals && { user_goals: context.userGoals }),
-          ...(context?.fitnessLevel && { fitness_level: context.fitnessLevel }),
-        });
-        
-        // Store session ID if returned
-        if (response.session_id) {
-          setSessionId(response.session_id);
+        const session = await chatService.startSession(userId);
+        if (session) {
+          setSessionId(session.session_id);
+          response = await chatService.sendMessage(text, session.session_id, userId);
+        } else {
+          // Fallback to public ask if session creation fails
+          response = await chatService.ask(text);
         }
       }
 
@@ -559,6 +551,14 @@ export default function FullChat() {
                 />
               </View>
             </View>
+
+            {/* History button */}
+            <Pressable
+              style={styles.historyButton}
+              onPress={() => navigation.navigate('ChatHistory')}
+            >
+              <Ionicons name="time-outline" size={20} color="#ffffff" />
+            </Pressable>
 
             <Pressable
               style={[
@@ -936,6 +936,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
+  },
+  historyButton: {
+    padding: 8,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
   },
   factsButton: {
     flexDirection: 'row',
