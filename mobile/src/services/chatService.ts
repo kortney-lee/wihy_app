@@ -1,4 +1,4 @@
-import { API_CONFIG } from './config';
+import { API_CONFIG, getMLAuthHeaders } from './config';
 import { fetchWithLogging } from '../utils/apiLogger';
 import type { ChatResponse, CreatedResource, SuggestedAction } from './types';
 
@@ -29,6 +29,17 @@ class ChatService {
 
   constructor() {
     this.mlBaseUrl = API_CONFIG.mlApiUrl; // https://ml.wihy.ai
+  }
+
+  /**
+   * Get headers for ML API requests
+   * Includes optional client identification for analytics/rate limiting
+   */
+  private getHeaders(): Record<string, string> {
+    return {
+      'Content-Type': 'application/json',
+      ...getMLAuthHeaders(), // Optional X-Client-ID and X-Client-Secret
+    };
   }
 
   /**
@@ -65,9 +76,7 @@ class ChatService {
       
       const response = await fetchWithLogging(endpoint, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: this.getHeaders(),
         body: JSON.stringify(requestBody),
       });
 
@@ -114,9 +123,7 @@ class ChatService {
     try {
       const response = await fetchWithLogging(endpoint, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: this.getHeaders(),
         body: JSON.stringify({ user_id: userId }),
       });
 
@@ -189,9 +196,7 @@ class ChatService {
       
       const response = await fetchWithLogging(endpoint, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: this.getHeaders(),
         body: JSON.stringify(requestBody),
       });
 
@@ -238,9 +243,7 @@ class ChatService {
     try {
       const response = await fetchWithLogging(endpoint, {
         method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: this.getHeaders(),
       });
 
       if (!response.ok) {
@@ -269,9 +272,7 @@ class ChatService {
     try {
       const response = await fetchWithLogging(endpoint, {
         method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: this.getHeaders(),
       });
 
       if (!response.ok) {
