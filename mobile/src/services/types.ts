@@ -663,9 +663,20 @@ export interface ChatResponse {
   type?: 'food' | 'ingredient' | 'health' | 'general' | 'fitness_program' | 'meal_program' | 'fitness_combined_program' | 'research_clarification'; // Response type from ML API
   detected_type?: string; // Original detected type from backend
   confidence?: number; // Confidence score (0-1)
-  source?: 'wihy_model_service' | 'openai_enhancer' | 'research_orchestrator' | 'wihy_fitness_service' | 'wihy_meal_service' | 'wihy_interactive_research'; // Response source
+  source?: 'wihy_model_service' | 'openai_enhancer' | 'research_orchestrator' | 'wihy_fitness_service' | 'wihy_meal_service' | 'wihy_interactive_research' | 'wihy_ai' | 'ask' | 'chat'; // Response source
   chart_data?: any; // Optional chart data for visualizations
   error?: string;
+  
+  // ML API response fields
+  traceId?: string; // Trace ID for debugging
+  processingTimeMs?: number; // Processing time in milliseconds
+  modal?: { // Modal info for UI display (from send-message)
+    type: 'info' | 'confirmation' | 'action_required';
+    title: string;
+    content: string;
+    actions: Array<{ type: string; label: string; payload?: any }>;
+    citations?: any[];
+  };
   
   // Created resources - populated when /ask creates programs/plans
   created_resources?: CreatedResource[];

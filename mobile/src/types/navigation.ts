@@ -12,6 +12,7 @@ import { NavigatorScreenParams } from '@react-navigation/native';
 export type RootStackParamList = {
   Main: NavigatorScreenParams<TabParamList> | undefined;
   FullChat: { context?: any; initialMessage?: string };
+  ChatHistory: undefined;
   NutritionFacts: { foodItem: any; context?: any };
   BeautyFacts: { product: any; context?: any };
   PetFoodFacts: { product: any; context?: any };

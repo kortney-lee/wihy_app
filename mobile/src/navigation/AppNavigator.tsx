@@ -59,6 +59,7 @@ import AboutScreen from '../screens/AboutScreen';
 import TermsScreen from '../screens/TermsScreen';
 import PrivacyScreen from '../screens/PrivacyScreen';
 import AuthCallbackScreen from '../screens/AuthCallbackScreen';
+import ChatHistoryScreen from '../screens/ChatHistoryScreen';
 
 const Tab = createBottomTabNavigator<TabParamList>();
 const Stack = createStackNavigator<RootStackParamList>();
@@ -380,6 +381,14 @@ export default function AppNavigator() {
         <Stack.Screen
           name="FullChat"
           component={FullChat}
+          options={{
+            presentation: 'card',
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="ChatHistory"
+          component={ChatHistoryScreen}
           options={{
             presentation: 'card',
             headerShown: false,
