@@ -133,7 +133,20 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         }
       }
     } catch (error) {
-      console.error('Failed to load user data:', error);
+      console.error('[AuthContext] Failed to load user data - allowing app to continue:', error);
+      // Don't block app initialization on network errors
+      // Try fallback to stored data
+      try {
+        const storedData = await AsyncStorage.getItem(STORAGE_KEY);
+        if (storedData) {
+          console.log('[AuthContext] Loaded user from storage fallback');
+          setUser(normalizeUser(JSON.parse(storedData)));
+        } else {
+          console.log('[AuthContext] No stored user data available - starting as guest');
+        }
+      } catch (storageError) {
+        console.error('[AuthContext] Failed to load from storage:', storageError);
+      }
     } finally {
       setLoading(false);
     }

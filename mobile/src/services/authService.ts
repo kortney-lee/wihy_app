@@ -1003,15 +1003,23 @@ class AuthService {
     
     console.log('=== VERIFY SESSION ===');
     console.log('Endpoint:', endpoint);
+    console.log('Base URL:', this.baseUrl);
     
     try {
+      // Add timeout for fetch to prevent hanging
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
+
       const response = await fetchWithLogging(endpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ token: sessionToken }),
+        signal: controller.signal,
       });
+
+      clearTimeout(timeoutId);
 
       if (response.ok) {
         const data = await response.json();
@@ -1026,11 +1034,18 @@ class AuthService {
           user: data.user,
         };
       } else {
-        console.log('Session invalid');
+        console.log('[AuthService] Session invalid - status:', response.status);
         return { valid: false };
       }
-    } catch (error) {
-      console.error('Session verification error:', error);
+    } catch (error: any) {
+      // Log network errors but don't fail auth - allow guest access
+      if (error.name === 'AbortError') {
+        console.error('[AuthService] Session verification timeout - likely network issue', error);
+      } else if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
+        console.error('[AuthService] Network error during session verification:', error.message);
+      } else {
+        console.error('[AuthService] Session verification error:', error);
+      }
       return { valid: false };
     }
   }
