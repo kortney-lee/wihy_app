@@ -10,8 +10,8 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-import { AuthContext, User } from '../context/AuthContext';
-import { getPlanDisplayName, Capabilities } from '../utils/capabilities';
+import { AuthContext } from '../context/AuthContext';
+import { getPlanDisplayName } from '../utils/capabilities';
 
 /**
  * Development Plan Switcher
@@ -19,7 +19,7 @@ import { getPlanDisplayName, Capabilities } from '../utils/capabilities';
  * REMOVE IN PRODUCTION
  */
 
-type PlanType = 'free' | 'premium' | 'family-basic' | 'family-premium' | 'coach' | 'coach-family'
+type PlanType = 'free' | 'premium' | 'family-basic' | 'family-premium' | 'family-pro' | 'coach' | 'coach-family'
   | 'workplace-core' | 'workplace-plus' | 'corporate-enterprise' | 'k12-school' 
   | 'university' | 'hospital' | 'hospitality';
 
@@ -64,6 +64,14 @@ const PLAN_OPTIONS: PlanOption[] = [
     price: '$34.99/mo',
     description: 'Unlimited members, AI + Instacart',
     color: '#a855f7',
+    category: 'consumer',
+  },
+  {
+    id: 'family-pro',
+    displayName: 'Family Pro',
+    price: '$29.99/mo',
+    description: 'Up to 5 members, AI + Instacart',
+    color: '#7c3aed',
     category: 'consumer',
   },
   {
@@ -150,7 +158,9 @@ export const DevPlanSwitcher: React.FC = () => {
   const [aiAddOn, setAiAddOn] = useState(user?.addOns?.includes('ai') || false);
   const [instacartAddOn, setInstacartAddOn] = useState(user?.addOns?.includes('instacart') || false);
 
-  if (!user) return null;
+  const canUseDevTools = __DEV__ || user?.isDeveloper || user?.role === 'admin' || user?.userRole === 'admin';
+
+  if (!user || !canUseDevTools) return null;
 
   const handleApply = async () => {
     const addOns: string[] = [];

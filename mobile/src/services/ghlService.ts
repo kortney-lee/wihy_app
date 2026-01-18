@@ -25,15 +25,19 @@ export interface GHLContactData {
 }
 
 class GHLService {
-  private baseUrl = API_CONFIG.baseUrl;
+  private authUrl = API_CONFIG.authUrl;
 
   /**
    * Check if user has an active premium subscription in GHL
+   * Two-step process:
+   * 1. Get user ID from email: GET /api/users/email/:email
+   * 2. Get GHL status: GET /api/users/:id/ghl-status
    */
   async checkSubscriptionStatus(email: string): Promise<GHLSubscriptionStatus> {
     try {
-      const response = await fetchWithLogging(
-        `${this.baseUrl}/api/ghl/subscription-status?email=${encodeURIComponent(email)}`,
+      // Step 1: Get user by email
+      const userResponse = await fetchWithLogging(
+        `${this.authUrl}/api/users/email/${encodeURIComponent(email)}`,
         {
           method: 'GET',
           headers: {
@@ -42,11 +46,45 @@ class GHLService {
         }
       );
 
-      if (!response.ok) {
-        throw new Error(`GHL API error: ${response.status}`);
+      if (!userResponse.ok) {
+        console.warn(`[GHLService] User not found for email: ${email}`);
+        return {
+          isPremium: false,
+          features: [],
+        };
       }
 
-      const data = await response.json();
+      const userData = await userResponse.json();
+      const userId = userData.data?.user?.id || userData.data?.id;
+
+      if (!userId) {
+        console.warn('[GHLService] No user ID in response');
+        return {
+          isPremium: false,
+          features: [],
+        };
+      }
+
+      // Step 2: Get GHL status for user
+      const ghlResponse = await fetchWithLogging(
+        `${this.authUrl}/api/users/${userId}/ghl-status`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      if (!ghlResponse.ok) {
+        console.warn(`[GHLService] GHL API error: ${ghlResponse.status}`);
+        return {
+          isPremium: false,
+          features: [],
+        };
+      }
+
+      const data = await ghlResponse.json();
       console.log('[GHLService] Subscription status:', data);
 
       return {
@@ -71,7 +109,7 @@ class GHLService {
    */
   async syncContact(contactData: GHLContactData): Promise<boolean> {
     try {
-      const response = await fetchWithLogging(`${this.baseUrl}/api/ghl/sync-contact`, {
+      const response = await fetchWithLogging(`${this.authUrl}/api/users/sync-contact`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -101,7 +139,7 @@ class GHLService {
     transactionId: string
   ): Promise<boolean> {
     try {
-      const response = await fetchWithLogging(`${this.baseUrl}/api/ghl/update-subscription`, {
+      const response = await fetchWithLogging(`${this.authUrl}/api/users/update-ghl-subscription`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -131,7 +169,7 @@ class GHLService {
    */
   async addTags(email: string, tags: string[]): Promise<boolean> {
     try {
-      const response = await fetchWithLogging(`${this.baseUrl}/api/ghl/add-tags`, {
+      const response = await fetchWithLogging(`${this.authUrl}/api/users/ghl-tags`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

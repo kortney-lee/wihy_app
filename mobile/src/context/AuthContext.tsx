@@ -23,6 +23,10 @@ export interface User {
   healthScore: number;
   streakDays: number;
   preferences: UserPreferences;
+
+  // Access control
+  role?: 'user' | 'coach' | 'admin';
+  isDeveloper?: boolean;
   
   // Plan-based access control (NEW)
   plan: 'free' | 'premium' | 'family-basic' | 'family-pro' | 'family-premium' | 'coach' | 'coach-family' 
@@ -149,6 +153,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const plan = existingData?.plan || 'free';
     const addOns = existingData?.addOns || [];
     const capabilities = getPlanCapabilities(plan, addOns);
+
+    // Role / developer flags from server or stored data
+    const roleFromServer = authUser.role || authUser.profile_data?.role;
+    const normalizedRole = roleFromServer ? roleFromServer.toLowerCase() as User['role'] : existingData?.role;
+    const isDeveloperFlag = Boolean(
+      authUser.profile_data?.is_developer ||
+      authUser.profile_data?.isDeveloper ||
+      existingData?.isDeveloper ||
+      normalizedRole === 'admin'
+    );
     
     return {
       id: authUser.id || `${authUser.provider}-${Date.now()}`,
@@ -160,6 +174,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       healthScore: authUser.profile_data?.healthScore || 85,
       streakDays: authUser.profile_data?.streakDays || 0,
       preferences: existingPrefs,
+      role: normalizedRole,
+      isDeveloper: isDeveloperFlag,
       plan,
       addOns,
       capabilities,
@@ -384,6 +400,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const createAccountAfterPayment = async (data: {
     email: string;
     password: string;
+    name?: string;
     planId: string;
     stripeSessionId?: string;
   }): Promise<User> => {
@@ -391,9 +408,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     
     try {
       // Register with the backend, linking to the Stripe payment
+      const name = data.name || data.email;
       const authResult = await authService.registerAfterPayment(
         data.email,
         data.password,
+        name,
         {
           planId: data.planId,
           stripeSessionId: data.stripeSessionId,

@@ -55,8 +55,8 @@ export const AUTH_CONFIG = {
     userCapabilities: '/api/users/me/capabilities',
     
     // Plans
-    plans: '/api/plans',
-    planDetails: '/api/plans',
+    plans: '/api/stripe/plans',
+    planDetails: '/api/stripe/plans',
     
     // Organizations
     organizations: '/api/organizations',
