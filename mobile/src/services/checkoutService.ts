@@ -208,7 +208,7 @@ class CheckoutService {
   async getPlans(): Promise<Plan[]> {
     try {
       const response = await fetchWithLogging(
-        `${this.baseUrl}/api/payment/plans`,
+        `${this.baseUrl}/api/stripe/plans`,
         { method: 'GET' }
       );
 
@@ -270,7 +270,7 @@ class CheckoutService {
       }
 
       const response = await fetchWithLogging(
-        `${this.baseUrl}/api/payment/create-checkout-session`,
+        `${this.baseUrl}/api/stripe/create-checkout-session`,
         {
           method: 'POST',
           headers,

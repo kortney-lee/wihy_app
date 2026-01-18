@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, borderRadius } from '../../theme/design-tokens';
+import { WihyLogo, WihyLogoSvg } from '../shared/WihyLogo';
 
 interface EmailCheckoutModalProps {
   visible: boolean;
@@ -113,16 +114,16 @@ export default function EmailCheckoutModal({
           {/* Header */}
           <div style={{ textAlign: 'center', marginBottom: 24 }}>
             <div style={{
-              width: 64,
-              height: 64,
-              borderRadius: 32,
-              backgroundColor: '#e8f0fe',
+              width: 80,
+              height: 80,
+              borderRadius: 40,
+              backgroundColor: '#f5f5f5',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               margin: '0 auto 16px',
             }}>
-              <Ionicons name="card" size={28} color={colors.primary} />
+              <WihyLogoSvg size={56} variant="gradient" />
             </div>
             <h2 style={{
               fontSize: 24,
@@ -285,7 +286,7 @@ export default function EmailCheckoutModal({
           {/* Header */}
           <View style={styles.header}>
             <View style={styles.iconContainer}>
-              <Ionicons name="card" size={28} color={colors.primary} />
+              <WihyLogo size={40} variant="gradient" />
             </View>
             <Text style={styles.title}>Subscribe to {planName}</Text>
             <Text style={styles.price}>{planPrice}</Text>
