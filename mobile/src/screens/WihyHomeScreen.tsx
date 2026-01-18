@@ -527,13 +527,16 @@ export default function WihyHomeScreen({}: Props = {}) {
   // WEB RENDER - Pure CSS with sweep animation
   if (isWeb) {
     // Navigate to other tabs - since we're inside TabNavigator, use direct navigation
-    const navigateToTab = (tabName: string) => {
+    const navigateToTab = (tabName: 'Home' | 'Scan' | 'Chat' | 'Health' | 'Profile' | 'CoachSelection') => {
+      console.log(`Navigating to tab: ${tabName}`);
       navigation.navigate(tabName as any);
     };
 
-    // Navigate to stack screens (outside TabNavigator)
+    // Navigate to stack screens (outside TabNavigator) - need to use parent navigation
     const navigateToStack = (screenName: string) => {
-      navigation.navigate(screenName as any);
+      console.log(`Navigating to stack: ${screenName}`);
+      // Use parent navigation to go to root stack screens
+      (navigation as any).getParent()?.navigate(screenName);
     };
 
     return (

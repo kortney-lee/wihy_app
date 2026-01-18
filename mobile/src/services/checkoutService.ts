@@ -233,28 +233,61 @@ class CheckoutService {
   /**
    * Initiate a checkout session
    * Returns a Stripe checkout URL
+   * 
+   * REQUIRED: email and plan must be provided
+   * Validates before sending to backend to avoid 400 errors
    */
   async initiateCheckout(plan: string, email: string): Promise<CheckoutResponse> {
+    // CRITICAL VALIDATION: Email and plan are required
+    if (!email || typeof email !== 'string') {
+      const errorMsg = 'Email is required for checkout';
+      console.error('[Checkout] Validation Error:', errorMsg);
+      return { success: false, error: errorMsg };
+    }
+
+    if (!plan || typeof plan !== 'string') {
+      const errorMsg = 'Plan is required for checkout';
+      console.error('[Checkout] Validation Error:', errorMsg);
+      return { success: false, error: errorMsg };
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const trimmedEmail = email.trim();
+    if (!emailRegex.test(trimmedEmail)) {
+      const errorMsg = 'Please provide a valid email address';
+      console.error('[Checkout] Email Validation Error:', errorMsg);
+      return { success: false, error: errorMsg };
+    }
+
+    // Validate plan exists in WIHY_PLANS
+    const validPlan = WIHY_PLANS.find(p => p.id === plan || p.name === plan);
+    if (!validPlan) {
+      const errorMsg = `Invalid plan: ${plan}`;
+      console.error('[Checkout] Plan Validation Error:', errorMsg);
+      return { success: false, error: errorMsg };
+    }
+
     const source = this.getPlatformSource();
     const callbacks = this.getCallbackUrls();
 
-    console.log('=== INITIATING CHECKOUT ===');
-    console.log('Plan:', plan);
-    console.log('Email:', email);
-    console.log('Source:', source);
-    console.log('Callbacks:', callbacks);
+    console.log('[Checkout] === INITIATING CHECKOUT ===');
+    console.log('[Checkout] Plan:', plan);
+    console.log('[Checkout] Email:', trimmedEmail);
+    console.log('[Checkout] Source:', source);
+    console.log('[Checkout] Callbacks:', callbacks);
 
     try {
       // Store pending checkout info for callback handling
       await AsyncStorage.setItem(CHECKOUT_STORAGE_KEY, JSON.stringify({
         plan,
-        email,
+        email: trimmedEmail,
         initiatedAt: Date.now(),
       }));
 
       const request: CheckoutRequest = {
         plan,
-        email,
+        email: trimmedEmail,
         source,
         successUrl: callbacks.successUrl,
         cancelUrl: callbacks.cancelUrl,
@@ -269,6 +302,8 @@ class CheckoutService {
         headers['Authorization'] = `Bearer ${sessionToken}`;
       }
 
+      console.log('[Checkout] Sending request body:', JSON.stringify(request, null, 2));
+
       const response = await fetchWithLogging(
         `${this.baseUrl}/api/stripe/create-checkout-session`,
         {
@@ -280,13 +315,27 @@ class CheckoutService {
 
       const data = await response.json();
 
+      // Log response for debugging
+      console.log('[Checkout] Response status:', response.status);
+      console.log('[Checkout] Response data:', data);
+
+      // Handle 400 Bad Request - usually missing email or plan
+      if (response.status === 400) {
+        const errorMsg = data.error || 'Email and plan are required';
+        console.error('[Checkout] 400 Bad Request:', errorMsg);
+        return {
+          success: false,
+          error: errorMsg,
+        };
+      }
+
       // Handle both old (checkout_url) and new (url) response formats
       const checkoutUrl = data.url || data.checkout_url;
       const sessionId = data.sessionId || data.session_id;
 
       if (response.ok && data.success && checkoutUrl) {
-        console.log('=== CHECKOUT SESSION CREATED ===');
-        console.log('Checkout URL:', checkoutUrl);
+        console.log('[Checkout] === CHECKOUT SESSION CREATED ===');
+        console.log('[Checkout] Checkout URL:', checkoutUrl);
         
         return {
           success: true,
@@ -295,13 +344,14 @@ class CheckoutService {
         };
       }
 
-      console.log('=== CHECKOUT INITIATION FAILED ===');
+      console.log('[Checkout] === CHECKOUT INITIATION FAILED ===');
+      console.log('[Checkout] Response:', data);
       return {
         success: false,
         error: data.error || 'Failed to create checkout session',
       };
     } catch (error: any) {
-      console.error('=== CHECKOUT ERROR ===', error);
+      console.error('[Checkout] === CHECKOUT ERROR ===', error);
       return {
         success: false,
         error: error.message || 'Network error during checkout',

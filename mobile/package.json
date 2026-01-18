@@ -10,6 +10,8 @@
     "start": "react-native start",
     "web": "expo start --web",
     "build:web": "expo export --platform web && node scripts/inject-seo.js",
+    "predeploy": "npm run build:web",
+    "deploy": "echo 'Deploy script placeholder - configure your deployment command here'",
     "test": "jest",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "build:android": "cd android && ./gradlew assembleRelease",

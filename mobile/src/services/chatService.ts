@@ -43,6 +43,16 @@ class ChatService {
   }
 
   /**
+   * Get headers for public/session endpoints (no auth needed)
+   */
+  private getPublicHeaders(): Record<string, string> {
+    return {
+      'Content-Type': 'application/json',
+      // Don't include auth headers - public endpoints don't accept them
+    };
+  }
+
+  /**
    * Ask a quick question via /api/chat/public/ask endpoint (Home screen)
    * This is the stateless Ask endpoint - no session needed, no auth required
    */
@@ -123,7 +133,7 @@ class ChatService {
     try {
       const response = await fetchWithLogging(endpoint, {
         method: 'POST',
-        headers: this.getHeaders(),
+        headers: this.getPublicHeaders(),
         body: JSON.stringify({ user_id: userId }),
       });
 
@@ -196,7 +206,7 @@ class ChatService {
       
       const response = await fetchWithLogging(endpoint, {
         method: 'POST',
-        headers: this.getHeaders(),
+        headers: this.getPublicHeaders(),
         body: JSON.stringify(requestBody),
       });
 
@@ -243,7 +253,7 @@ class ChatService {
     try {
       const response = await fetchWithLogging(endpoint, {
         method: 'GET',
-        headers: this.getHeaders(),
+        headers: this.getPublicHeaders(),
       });
 
       if (!response.ok) {
@@ -272,7 +282,7 @@ class ChatService {
     try {
       const response = await fetchWithLogging(endpoint, {
         method: 'GET',
-        headers: this.getHeaders(),
+        headers: this.getPublicHeaders(),
       });
 
       if (!response.ok) {
