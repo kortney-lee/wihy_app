@@ -41,7 +41,7 @@ export interface User {
   
   // Family info (if applicable)
   familyId?: string;
-  familyRole?: 'owner' | 'member';
+  familyRole?: 'owner' | 'guardian' | 'member' | 'child';
   guardianCode?: string;  // For family plans
   
   // Coach info (if applicable)
@@ -62,6 +62,7 @@ interface AuthContextType {
   signIn: (provider: string, credentials?: any) => Promise<User>;
   signOut: () => Promise<void>;
   updateUser: (userData: Partial<User>) => Promise<User>;
+  refreshUserContext: () => Promise<User | null>;
   createAccountAfterPayment: (data: {
     email: string;
     password: string;
@@ -80,6 +81,9 @@ export const AuthContext = createContext<AuthContextType>({
     throw new Error('AuthContext not initialized');
   },
   updateUser: async () => {
+    throw new Error('AuthContext not initialized');
+  },
+  refreshUserContext: async () => {
     throw new Error('AuthContext not initialized');
   },
   createAccountAfterPayment: async () => {
@@ -153,7 +157,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   const convertUserData = async (authUser: UserData): Promise<User> => {
-    // Try to get existing preferences or use defaults
+    // Get existing preferences from local storage (only for preferences, not auth data)
     const storedData = await AsyncStorage.getItem(STORAGE_KEY);
     const existingData = storedData ? JSON.parse(storedData) : null;
     const existingPrefs = existingData?.preferences || defaultPreferences;
@@ -161,11 +165,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     // Check if this is a first-time user (no stored data = new signup)
     const isFirstTimeUser = !existingData;
     
-    // Determine plan and capabilities
-    // In production, this would come from backend/GHL tags
-    const plan = existingData?.plan || 'free';
-    const addOns = existingData?.addOns || [];
-    const capabilities = getPlanCapabilities(plan, addOns);
+    // ✅ NEW: Use backend data as source of truth, fallback to local storage for offline mode
+    const plan = (authUser.plan || existingData?.plan || 'free') as User['plan'];
+    const addOns = authUser.addOns || existingData?.addOns || [];
+    
+    // ✅ NEW: Use capabilities from backend if available, otherwise compute client-side
+    const capabilities = authUser.capabilities 
+      ? authUser.capabilities 
+      : getPlanCapabilities(plan, addOns);
 
     // Role / developer flags from server or stored data
     const roleFromServer = authUser.role || authUser.profile_data?.role;
@@ -181,24 +188,27 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       id: authUser.id || `${authUser.provider}-${Date.now()}`,
       name: authUser.name,
       email: authUser.email,
-      picture: authUser.profile_data?.picture,
-      provider: authUser.provider,
-      memberSince: authUser.profile_data?.memberSince || new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
-      healthScore: authUser.profile_data?.healthScore || 85,
-      streakDays: authUser.profile_data?.streakDays || 0,
+      picture: authUser.profile_data?.picture || authUser.avatar,
+      provider: authUser.provider || 'local',
+      memberSince: authUser.memberSince || authUser.profile_data?.memberSince || new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
+      healthScore: authUser.healthScore ?? authUser.profile_data?.healthScore ?? 85,
+      streakDays: authUser.streakDays ?? authUser.profile_data?.streakDays ?? 0,
       preferences: existingPrefs,
       role: normalizedRole,
       isDeveloper: isDeveloperFlag,
       plan,
       addOns,
       capabilities,
-      isFirstTimeUser,  // Mark new users
+      isFirstTimeUser,
       onboardingCompleted: existingData?.onboardingCompleted || false,
-      familyId: existingData?.familyId,
-      familyRole: existingData?.familyRole,
-      guardianCode: existingData?.guardianCode,
-      coachId: existingData?.coachId,
-      commissionRate: existingData?.commissionRate,
+      // ✅ NEW: Use backend data for relationships (source of truth)
+      familyId: authUser.familyId ?? existingData?.familyId,
+      familyRole: authUser.familyRole ?? existingData?.familyRole,
+      guardianCode: authUser.guardianCode ?? existingData?.guardianCode,
+      coachId: authUser.coachId ?? existingData?.coachId,
+      commissionRate: authUser.commissionRate ?? existingData?.commissionRate,
+      organizationId: authUser.organizationId ?? existingData?.organizationId,
+      organizationRole: authUser.organizationRole ?? existingData?.organizationRole,
       userRole: existingData?.userRole, // Keep for backward compatibility
     };
   };
@@ -458,12 +468,63 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
+  // ✅ NEW: Refresh user context from backend (call after family/coach operations)
+  const refreshUserContext = async (): Promise<User | null> => {
+    if (!user) {
+      console.log('[AuthContext] No user to refresh');
+      return null;
+    }
+    
+    try {
+      console.log('[AuthContext] Refreshing user context from backend...');
+      
+      // Fetch fresh data from backend
+      const profile = await authService.getUserProfile();
+      
+      if (profile) {
+        // Compute capabilities using profile data or fallback to client-side computation
+        const newPlan = (profile.plan || user.plan) as User['plan'];
+        const newAddOns = profile.addOns || user.addOns || [];
+        const capabilities = getPlanCapabilities(newPlan, newAddOns);
+        
+        // Convert backend profile to User format with proper type casting
+        const updatedUser: User = {
+          ...user,
+          plan: newPlan,
+          addOns: newAddOns,
+          capabilities,
+          familyId: profile.familyId ?? user.familyId,
+          familyRole: (profile.familyRole as User['familyRole']) ?? user.familyRole,
+          guardianCode: profile.guardianCode ?? user.guardianCode,
+          coachId: profile.coachId ?? user.coachId,
+          commissionRate: profile.commissionRate ?? user.commissionRate,
+          organizationId: profile.organizationId ?? user.organizationId,
+          organizationRole: (profile.organizationRole as User['organizationRole']) ?? user.organizationRole,
+          healthScore: profile.healthScore ?? user.healthScore,
+          streakDays: profile.streakDays ?? user.streakDays,
+        };
+        
+        setUser(updatedUser);
+        await saveUserData(updatedUser);
+        
+        console.log('[AuthContext] User context refreshed successfully');
+        return updatedUser;
+      }
+      
+      return user;
+    } catch (error) {
+      console.error('[AuthContext] Failed to refresh user context:', error);
+      return user;
+    }
+  };
+
   const value: AuthContextType = {
     user,
     loading,
     signIn,
     signOut,
     updateUser,
+    refreshUserContext,
     createAccountAfterPayment,
   };
 
@@ -487,5 +548,27 @@ export const useAuth = () => {
     coachId: context.user?.coachId || 'coach_123', // Fallback for development
     isCoach: context.user?.plan?.includes('coach') || false,
     isAuthenticated: !!context.user,
+    // Family helpers
+    isInFamily: !!context.user?.familyId,
+    isFamilyOwner: context.user?.familyRole === 'owner',
+    familyId: context.user?.familyId,
   };
+};
+
+// Hook for checking specific capabilities (feature gating)
+// Returns true if capability exists and is truthy (handles booleans, numbers, and strings)
+export const useCapability = (capability: keyof Capabilities): boolean => {
+  const { user } = React.useContext(AuthContext);
+  const value = user?.capabilities?.[capability];
+  // Handle different capability value types
+  if (typeof value === 'boolean') return value;
+  if (typeof value === 'number') return value > 0 || value === -1; // -1 means unlimited
+  if (typeof value === 'string') return value !== 'none';
+  return false;
+};
+
+// Hook for getting all capabilities
+export const useCapabilities = (): Capabilities | null => {
+  const { user } = React.useContext(AuthContext);
+  return user?.capabilities ?? null;
 };
