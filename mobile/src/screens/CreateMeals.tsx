@@ -33,6 +33,8 @@ import { getMealDiaryService, type Meal, type DietaryPreferences } from '../serv
 import { authService } from '../services/authService';
 import { RootStackParamList } from '../types/navigation';
 import { useDashboardLayout } from '../hooks/useDashboardLayout';
+import { UpgradePrompt } from '../components/UpgradePrompt';
+import { useFeatureAccess } from '../hooks/usePaywall';
 
 // New GoalSelection component for 3-mode meal planning
 import { GoalSelectionMeals, GenerateMealParams } from './meals/GoalSelectionMeals';
@@ -178,6 +180,10 @@ export default function CreateMeals() {
   const userId = user?.id;
   const navigation = useNavigation<NavigationProp>();
   const scrollViewRef = useRef<ScrollView>(null);
+  
+  // Paywall check
+  const hasMealAccess = useFeatureAccess('meals');
+  const [showUpgrade, setShowUpgrade] = useState(false);
   
   // Collapsing header animation
   const scrollY = useRef(new Animated.Value(0)).current;
@@ -1621,7 +1627,13 @@ export default function CreateMeals() {
       <View style={styles.createButtonContainer}>
         <TouchableOpacity
           style={styles.createPlanButtonInHeader}
-          onPress={() => setShowPlanGenerator(true)}
+          onPress={() => {
+            if (!hasMealAccess) {
+              setShowUpgrade(true);
+              return;
+            }
+            setShowPlanGenerator(true);
+          }}
         >
           <LinearGradient
             colors={['#4cbb17', '#22c55e']}
@@ -3905,6 +3917,18 @@ export default function CreateMeals() {
   // Main Return
   return (
     <>
+      {/* Paywall Check */}
+      {!hasMealAccess && (
+        <UpgradePrompt
+          visible={showUpgrade}
+          onClose={() => setShowUpgrade(false)}
+          onUpgrade={() => navigation.navigate('Subscription')}
+          feature="Meal Planning"
+          description="Create AI-powered meal plans, track nutrition, and generate shopping lists with Premium."
+          requiredPlan="Premium"
+        />
+      )}
+
       {/* Content based on view mode */}
       {viewMode === 'dashboard' && renderDashboard()}
       {viewMode === 'create' && renderCreateMealForm()}
@@ -4822,10 +4846,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
-  calendarBackButton: {
-    padding: 8,
-    marginRight: 12,
-  },
+  // Removed duplicate calendarModalBackButton and calendarModalAddButton
   calendarHeaderText: {
     flex: 1,
   },
@@ -4839,9 +4860,7 @@ const styles = StyleSheet.create({
     color: 'rgba(255,255,255,0.8)',
     marginTop: 2,
   },
-  calendarAddButton: {
-    padding: 8,
-  },
+  // Removed duplicate - see calendarModalBackButton and calendarModalAddButton above
   calendarContent: {
     flex: 1,
     backgroundColor: '#f9fafb',

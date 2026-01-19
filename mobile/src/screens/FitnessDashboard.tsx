@@ -41,6 +41,8 @@ import {
 } from '../services';
 import { authService } from '../services/authService';
 import { useAuth } from '../context/AuthContext';
+import { UpgradePrompt } from '../components/UpgradePrompt';
+import { useFeatureAccess } from '../hooks/usePaywall';
 import {
   FITNESS_LEVELS,
   BODY_PARTS,
@@ -296,6 +298,10 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
 }) => {
   const { userId } = useAuth();
   const insets = useSafeAreaInsets();
+  
+  // Paywall check
+  const hasWorkoutAccess = useFeatureAccess('workouts');
+  const [showUpgrade, setShowUpgrade] = useState(false);
   
   // Collapsing header animation
   const scrollY = useRef(new Animated.Value(0)).current;
@@ -1182,6 +1188,10 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
       // Start workout session
       if (!workout) {
         // No workout loaded - prompt to generate one
+        if (!hasWorkoutAccess) {
+          setShowUpgrade(true);
+          return;
+        }
         setShowGoalSelector(true);
         return;
       }
@@ -1218,6 +1228,10 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
 
   // Open modal and reset to first step
   const openGoalSelector = () => {
+    if (!hasWorkoutAccess) {
+      setShowUpgrade(true);
+      return;
+    }
     setModalStep('goals');
     setShowGoalSelector(true);
   };
@@ -3491,7 +3505,20 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
 
   // Temporarily simplified render for debugging
   return (
-    <View style={styles.container}>
+    <>
+      {/* Paywall Check */}
+      {!hasWorkoutAccess && (
+        <UpgradePrompt
+          visible={showUpgrade}
+          onClose={() => setShowUpgrade(false)}
+          onUpgrade={() => {/* Navigate to subscription screen */}}
+          feature="Workout Programs"
+          description="Create AI-powered workout programs, track progress, and get personalized training plans with Premium."
+          requiredPlan="Premium"
+        />
+      )}
+
+      <View style={styles.container}>
         {renderGoalSelector()}
         {renderWorkoutCompleteModal()}
         {renderDeleteConfirmationModal()}
@@ -4272,7 +4299,8 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
       )}
 
       </Animated.ScrollView>
-    </View>
+      </View>
+    </>
   );
 };
 
