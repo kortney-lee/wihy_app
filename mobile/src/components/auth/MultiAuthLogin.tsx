@@ -27,6 +27,8 @@ interface MultiAuthLoginProps {
   title?: string;
   visible?: boolean;
   onClose?: () => void;
+  onSkip?: () => void;
+  skipLabel?: string;
 }
 
 const providers = [
@@ -64,6 +66,8 @@ export default function MultiAuthLogin({
   title = 'Log in or sign up to WIHY',
   visible = false,
   onClose,
+  onSkip,
+  skipLabel = 'Continue without account',
 }: MultiAuthLoginProps) {
   const { user, loading, signIn, signOut } = useContext(AuthContext);
   const [showEmailForm, setShowEmailForm] = useState(false);
@@ -249,6 +253,19 @@ export default function MultiAuthLogin({
             >
               <Text style={styles.cancelText}>Cancel</Text>
             </TouchableOpacity>
+
+            {/* Skip/Continue without account button */}
+            {onSkip && (
+              <TouchableOpacity
+                style={styles.skipButton}
+                onPress={() => {
+                  console.log('Skip button pressed');
+                  onSkip();
+                }}
+              >
+                <Text style={styles.skipText}>{skipLabel}</Text>
+              </TouchableOpacity>
+            )}
 
             {/* Show dev login only in development mode (native or localhost) */}
             {__DEV__ && (Platform.OS !== 'web' || 
@@ -862,6 +879,19 @@ const styles = StyleSheet.create({
   cancelText: {
     color: colors.textMuted,
     fontSize: 14,
+  },
+  skipButton: {
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    marginTop: 8,
+    borderRadius: 12,
+    backgroundColor: colors.primary,
+    alignItems: 'center',
+  },
+  skipText: {
+    color: '#ffffff',
+    fontSize: 15,
+    fontWeight: '600',
   },
   devButton: {
     marginTop: 12,

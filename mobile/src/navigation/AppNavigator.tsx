@@ -59,6 +59,7 @@ import AboutScreen from '../screens/AboutScreen';
 import TermsScreen from '../screens/TermsScreen';
 import PrivacyScreen from '../screens/PrivacyScreen';
 import AuthCallbackScreen from '../screens/AuthCallbackScreen';
+import SubscribeCompleteScreen from '../screens/SubscribeCompleteScreen';
 import ChatHistoryScreen from '../screens/ChatHistoryScreen';
 
 const Tab = createBottomTabNavigator<TabParamList>();
@@ -121,6 +122,8 @@ const linking: LinkingOptions<RootStackParamList> = {
       OnboardingFlow: 'onboarding',
       // OAuth callback route for web
       AuthCallback: 'auth/callback',
+      // Subscribe complete route for OAuth-first flow
+      SubscribeComplete: 'subscribe/complete',
     },
   },
 };
@@ -638,6 +641,14 @@ export default function AppNavigator() {
         <Stack.Screen
           name="AuthCallback"
           component={AuthCallbackScreen}
+          options={{
+            headerShown: false,
+            gestureEnabled: false,
+          }}
+        />
+        <Stack.Screen
+          name="SubscribeComplete"
+          component={SubscribeCompleteScreen}
           options={{
             headerShown: false,
             gestureEnabled: false,

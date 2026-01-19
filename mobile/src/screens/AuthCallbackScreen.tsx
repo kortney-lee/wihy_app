@@ -131,6 +131,31 @@ export default function AuthCallbackScreen() {
             console.log('Context signIn skipped:', e);
           }
 
+          // Check for pending subscription (OAuth-first, then pay flow)
+          if (Platform.OS === 'web' && typeof window !== 'undefined') {
+            const pendingSubscription = sessionStorage.getItem('pendingSubscription');
+            if (pendingSubscription) {
+              console.log('Pending subscription found, checking user plan...');
+              
+              // Check if user already has a paid plan
+              const userPlan = session.user.plan;
+              const isPaidPlan = userPlan && userPlan !== 'free';
+              
+              if (isPaidPlan) {
+                // User already has a paid plan, clear pending subscription
+                console.log('User already has paid plan:', userPlan);
+                sessionStorage.removeItem('pendingSubscription');
+              } else {
+                // User needs to complete payment - redirect to subscribe complete
+                console.log('User needs to complete payment, redirecting to /subscribe/complete');
+                setTimeout(() => {
+                  window.location.href = '/subscribe/complete';
+                }, 1500);
+                return;
+              }
+            }
+          }
+
           // Navigate to dashboard/main
           setTimeout(() => {
             navigation.dispatch(

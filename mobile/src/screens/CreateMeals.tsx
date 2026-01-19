@@ -289,6 +289,8 @@ export default function CreateMeals() {
   // Meal Plan Success Modal state
   const [showMealPlanSuccess, setShowMealPlanSuccess] = useState(false);
   const [acceptedPlan, setAcceptedPlan] = useState<MealPlanResponse | null>(null);
+  const [savingMealPlan, setSavingMealPlan] = useState(false);
+  const [mealPlanSaved, setMealPlanSaved] = useState(false);
 
   // Shopping List Modal state (bottom sheet style)
   const [showShoppingListModal, setShowShoppingListModal] = useState(false);
@@ -786,9 +788,13 @@ export default function CreateMeals() {
         request.mealType = params.mealType as any;
         request.cuisineType = params.cuisineType;
         request.timeConstraint = params.timeConstraint as any;
+        // Build comprehensive description including all user selections
+        const dietaryPart = (params.quickDiets && params.quickDiets.length > 0) 
+          ? ` that is ${params.quickDiets.join(', ')}` 
+          : '';
         request.description = `Generate a single ${params.mealType || 'dinner'}${
           params.cuisineType ? ` (${params.cuisineType} cuisine)` : ''
-        }${params.timeConstraint ? `, ${params.timeConstraint} prep time` : ''}`;
+        }${dietaryPart}${params.timeConstraint ? `, ${params.timeConstraint} prep time` : ''}`;
         request.duration = 1;
       } else if (params.mode === 'plan') {
         request.description = params.description || `Create a ${params.duration || 7}-day meal plan`;
@@ -1000,6 +1006,73 @@ export default function CreateMeals() {
       );
     } finally {
       setGeneratingList(false);
+    }
+  };
+
+  /**
+   * Save the meal plan to user's library for future use
+   */
+  const handleSaveMealPlan = async () => {
+    if (!acceptedPlan) {
+      Alert.alert('Error', 'No meal plan to save');
+      return;
+    }
+
+    setSavingMealPlan(true);
+    try {
+      console.log('[SaveMealPlan] Saving plan:', acceptedPlan.program_id);
+      
+      // Build the meal program data to save
+      const programToSave = {
+        user_id: userId || 'test_user',
+        program_id: acceptedPlan.program_id,
+        name: acceptedPlan.name || `${acceptedPlan.duration_days}-Day Meal Plan`,
+        description: acceptedPlan.description || planDescription,
+        duration_days: acceptedPlan.duration_days || planDuration,
+        servings: acceptedPlan.servings || planServings,
+        days: acceptedPlan.days || [],
+        summary: acceptedPlan.summary,
+        dietary_restrictions: selectedDietaryOptions,
+        created_at: acceptedPlan.created_at || new Date().toISOString(),
+        status: 'active',
+      };
+
+      // Save to backend
+      await mealService.createProgram(programToSave as any);
+      
+      console.log('[SaveMealPlan] Plan saved successfully!');
+      setMealPlanSaved(true);
+      
+      Alert.alert(
+        'Saved! 🎉',
+        'Your meal plan has been saved to your library. Access it anytime from the Consumption Dashboard.',
+        [{ text: 'Great!' }]
+      );
+    } catch (error: any) {
+      console.error('[SaveMealPlan] Error saving:', error);
+      
+      // Fallback: Save to AsyncStorage locally
+      try {
+        const savedPlans = await AsyncStorage.getItem('saved_meal_plans');
+        const plans = savedPlans ? JSON.parse(savedPlans) : [];
+        plans.unshift({
+          ...acceptedPlan,
+          saved_at: new Date().toISOString(),
+        });
+        await AsyncStorage.setItem('saved_meal_plans', JSON.stringify(plans.slice(0, 20))); // Keep last 20
+        
+        setMealPlanSaved(true);
+        Alert.alert(
+          'Saved Locally! 📱',
+          'Your meal plan has been saved to this device.',
+          [{ text: 'OK' }]
+        );
+      } catch (storageError) {
+        console.error('[SaveMealPlan] Storage error:', storageError);
+        Alert.alert('Error', 'Failed to save meal plan. Please try again.');
+      }
+    } finally {
+      setSavingMealPlan(false);
     }
   };
 
@@ -2957,10 +3030,39 @@ export default function CreateMeals() {
                 <Text style={styles.viewCalendarButtonText}>View in Calendar</Text>
               </TouchableOpacity>
 
+              {/* Save Meal Plan Button */}
+              <TouchableOpacity 
+                style={[
+                  styles.saveMealPlanButton,
+                  mealPlanSaved && styles.saveMealPlanButtonSaved
+                ]}
+                onPress={handleSaveMealPlan}
+                disabled={savingMealPlan || mealPlanSaved}
+              >
+                {savingMealPlan ? (
+                  <ActivityIndicator color="#4cbb17" size="small" />
+                ) : (
+                  <Ionicons 
+                    name={mealPlanSaved ? "checkmark-circle" : "bookmark-outline"} 
+                    size={20} 
+                    color={mealPlanSaved ? "#4cbb17" : "#4cbb17"} 
+                  />
+                )}
+                <Text style={[
+                  styles.saveMealPlanButtonText,
+                  mealPlanSaved && styles.saveMealPlanButtonTextSaved
+                ]}>
+                  {mealPlanSaved ? 'Saved to Library!' : 'Save Meal Plan'}
+                </Text>
+              </TouchableOpacity>
+
               {/* Done Button */}
               <TouchableOpacity 
                 style={styles.successDoneButton}
-                onPress={() => setShowMealPlanSuccess(false)}
+                onPress={() => {
+                  setShowMealPlanSuccess(false);
+                  setMealPlanSaved(false); // Reset for next plan
+                }}
               >
                 <Text style={styles.successDoneText}>Done</Text>
               </TouchableOpacity>
@@ -4332,6 +4434,29 @@ const styles = StyleSheet.create({
     color: '#3b82f6',
     fontSize: 16,
     fontWeight: '600',
+  },
+  saveMealPlanButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    paddingVertical: 14,
+    backgroundColor: '#f0fdf4',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#4cbb17',
+  },
+  saveMealPlanButtonSaved: {
+    backgroundColor: '#dcfce7',
+    borderColor: '#22c55e',
+  },
+  saveMealPlanButtonText: {
+    color: '#4cbb17',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  saveMealPlanButtonTextSaved: {
+    color: '#16a34a',
   },
   successDoneButton: {
     alignItems: 'center',

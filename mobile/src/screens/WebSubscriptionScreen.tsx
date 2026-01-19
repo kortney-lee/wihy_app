@@ -18,8 +18,10 @@ import { RootStackParamList, TabParamList } from '../types/navigation';
 import { colors, borderRadius } from '../theme/design-tokens';
 import { checkoutService } from '../services/checkoutService';
 import { purchaseService } from '../services/purchaseService';
+import { authService } from '../services/authService';
 import { useAuth } from '../context/AuthContext';
 import EmailCheckoutModal from '../components/checkout/EmailCheckoutModal';
+import MultiAuthLogin from '../components/auth/MultiAuthLogin';
 import { WebNavHeader } from '../components/web/WebNavHeader';
 
 // Import CSS for web only
@@ -260,6 +262,7 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
   const [isLoading, setIsLoading] = useState(false);
   const [showEmailModal, setShowEmailModal] = useState(false);
+  const [showFreeLoginModal, setShowFreeLoginModal] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<typeof CONSUMER_PLANS[0] | null>(null);
 
   const isDesktop = width >= 1024;
@@ -323,6 +326,40 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
     }
   };
 
+  // Handle OAuth subscription flow - OAuth first, then pay
+  const handleOAuthSubscribe = async (provider: 'google' | 'apple' | 'facebook' | 'microsoft', planId: string) => {
+    if (Platform.OS === 'web' && typeof window !== 'undefined') {
+      // Store pending subscription info for post-OAuth flow
+      const pendingPlanId = billingCycle === 'yearly' && selectedPlan?.yearlyPrice 
+        ? `${selectedPlan.id}-yearly` 
+        : selectedPlan?.id;
+      
+      sessionStorage.setItem('pendingSubscription', JSON.stringify({
+        planId: pendingPlanId,
+        planName: selectedPlan?.name,
+        billingCycle,
+        returnUrl: '/subscribe/complete',
+      }));
+
+      try {
+        // Get OAuth URL and redirect
+        const { url } = await authService.getWebOAuthUrl(provider);
+        window.location.href = url;
+      } catch (error: any) {
+        console.error('OAuth error:', error);
+        window.alert(`OAuth Error: ${error.message || 'Please try again.'}`);
+      }
+    } else {
+      // For native, we would use a WebView-based OAuth flow
+      // For now, show a message
+      Alert.alert(
+        'OAuth Sign In',
+        `OAuth sign-in with ${provider} is currently supported on web only.`,
+        [{ text: 'OK' }]
+      );
+    }
+  };
+
   // Map plan IDs to native store product IDs
   const getNativeProductId = (planId: string, yearly: boolean): string => {
     const suffix = yearly ? '_yearly' : '_monthly';
@@ -342,28 +379,8 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
     // Free plan - login or signup (no payment required)
     if (planId === 'free') {
       if (!user?.email) {
-        // Not logged in - prompt to login or signup
-        if (Platform.OS === 'web' && typeof window !== 'undefined') {
-          // On web, redirect to register page with free plan
-          window.location.href = '/register?plan=free';
-        } else {
-          // On native, show login/signup options
-          Alert.alert(
-            'Get Started Free',
-            'Create an account or sign in to access your free plan.',
-            [
-              { text: 'Cancel', style: 'cancel' },
-              { 
-                text: 'Sign In', 
-                onPress: () => navigation.navigate('Login' as any, { plan: 'free' })
-              },
-              { 
-                text: 'Create Account', 
-                onPress: () => navigation.navigate('Register' as any, { plan: 'free' })
-              },
-            ]
-          );
-        }
+        // Not logged in - show login/signup modal
+        setShowFreeLoginModal(true);
       } else {
         // Already logged in - navigate to main app
         navigation.navigate('Main');
@@ -1068,9 +1085,29 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
           visible={showEmailModal}
           onClose={handleEmailModalClose}
           onContinue={processCheckoutWithEmail}
+          onOAuthSubscribe={handleOAuthSubscribe}
+          planId={selectedPlan?.id}
           planName={selectedPlan?.name || ''}
           planPrice={getSelectedPlanPrice()}
           isLoading={isLoading}
+        />
+
+        {/* Free Plan Login Modal */}
+        <MultiAuthLogin
+          visible={showFreeLoginModal}
+          onClose={() => setShowFreeLoginModal(false)}
+          onSignIn={() => {
+            setShowFreeLoginModal(false);
+            // After successful login, navigate to main
+            navigation.navigate('Main');
+          }}
+          onSkip={() => {
+            setShowFreeLoginModal(false);
+            // Continue without account - go to main with limited features
+            navigation.navigate('Main');
+          }}
+          skipLabel="Continue to Free"
+          title="Get Started Free"
         />
       </div>
     );
@@ -1262,6 +1299,23 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
           <Text style={styles.footerText}>Questions? support@wihy.app</Text>
         </View>
       </ScrollView>
+
+      {/* Free Plan Login Modal (Native) */}
+      <MultiAuthLogin
+        visible={showFreeLoginModal}
+        onClose={() => setShowFreeLoginModal(false)}
+        onSignIn={() => {
+          setShowFreeLoginModal(false);
+          navigation.navigate('Main');
+        }}
+        onSkip={() => {
+          setShowFreeLoginModal(false);
+          // Continue without account - go to main with limited features
+          navigation.navigate('Main');
+        }}
+        skipLabel="Continue to Free"
+        title="Get Started Free"
+      />
     </SafeAreaView>
   );
 };
