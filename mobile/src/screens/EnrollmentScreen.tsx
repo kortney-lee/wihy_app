@@ -94,6 +94,9 @@ export default function EnrollmentScreen() {
     totalRevenue?: number;
   } | null>(null);
 
+  // Get refreshUserContext from AuthContext
+  const { refreshUserContext } = useContext(AuthContext);
+
   useEffect(() => {
     loadUserData();
   }, []);
@@ -195,6 +198,10 @@ export default function EnrollmentScreen() {
         if (normalized) {
           setFamily(normalized);
           setGuardianCode(normalized.guardianCode);
+          
+          // ✅ CRITICAL: Refresh user context to update familyId and capabilities
+          await refreshUserContext();
+          
           Alert.alert(
             'Family Created! 🎉',
             `Share this code with your children to join:\n\n${normalized.guardianCode}`,
@@ -225,6 +232,10 @@ export default function EnrollmentScreen() {
         const normalized = normalizeFamily(result.data);
         if (normalized) {
           setFamily(normalized);
+          
+          // ✅ CRITICAL: Refresh user context to update familyId and capabilities
+          await refreshUserContext();
+          
           Alert.alert('Success! 🎉', `You've joined ${normalized.name}`);
         }
         setJoinCode('');

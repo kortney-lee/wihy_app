@@ -1,800 +1,1001 @@
-# Client Implementation Guide - Complete
+# WIHY Client Implementation Guide
 
-## Overview
+**Version:** 2.0  
+**Last Updated:** January 19, 2026  
+**API Base URL:** `https://auth.wihy.ai`  
+**Status:** ⚠️ **REQUIRES BACKEND UPDATES** - See [AUTH_FAMILY_COACH_INTEGRATION_ANALYSIS.md](AUTH_FAMILY_COACH_INTEGRATION_ANALYSIS.md)
 
-This guide shows how to integrate the WIHY authentication and profile services into your React/React Native application with complete examples and best practices.
+---
+
+## 🎯 Purpose
+
+This guide shows how clients (mobile apps, web apps) should integrate with WIHY's authentication system **once the backend implements the required changes** documented in [AUTH_FAMILY_COACH_INTEGRATION_ANALYSIS.md](AUTH_FAMILY_COACH_INTEGRATION_ANALYSIS.md).
+
+**Key Principle:** Backend returns complete user context on login, including family relationships, coach relationships, and capabilities. Client uses this data for all feature decisions.
+
+---
+
+## 📋 Table of Contents
+
+1. [Quick Start](#quick-start)
+2. [Authentication Flow](#authentication-flow)
+3. [User Context Model](#user-context-model)
+4. [Family Management](#family-management)
+5. [Coach Management](#coach-management)
+6. [Capabilities & Feature Gating](#capabilities--feature-gating)
+7. [Token Management](#token-management)
+8. [Code Examples](#code-examples)
 
 ---
 
 ## Quick Start
 
-### 1. Installation
+### Installation
 
 ```bash
-npm install @react-native-async-storage/async-storage
-npm install expo-local-authentication expo-secure-store
+# React Native
+npm install @react-native-async-storage/async-storage expo-secure-store
+
+# Web
+# No additional dependencies needed - uses localStorage
 ```
 
-**For Web (React):** The services already include web polyfills using `localStorage`.
+### Basic Login
 
-**For React Native:** Replace the polyfills in each service file with actual imports.
+```typescript
+// 1. Login
+const response = await fetch('https://auth.wihy.ai/api/auth/login', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ email, password })
+});
+
+const { data } = await response.json();
+
+// 2. Store tokens securely
+await SecureStorage.set('accessToken', data.token);
+await SecureStorage.set('refreshToken', data.refreshToken);
+
+// 3. Store user context
+await Storage.set('userContext', JSON.stringify(data.user));
+
+// 4. Use capabilities for feature access
+if (data.user.capabilities.meals) {
+  navigation.navigate('MealPlans');
+}
+```
 
 ---
 
-### 2. Setup AuthProvider
+## Authentication Flow
 
-Wrap your app with `AuthProvider`:
+### Login
 
-```tsx
-// App.tsx
-import { AuthProvider } from './src/context/AuthContext';
+**Endpoint:** `POST /api/auth/login`
 
-export default function App() {
-  return (
-    <AuthProvider 
-      onAuthStateChange={(user) => {
-        console.log('Auth state changed:', user?.id);
-      }}
-    >
-      <YourApp />
-    </AuthProvider>
+**Request:**
+```typescript
+interface LoginRequest {
+  email: string;
+  password: string;
+}
+```
+
+**Response:**
+```typescript
+interface LoginResponse {
+  success: boolean;
+  data: {
+    token: string;           // JWT access token (24 hours)
+    refreshToken: string;    // Refresh token (7 days)
+    expiresIn: string;       // "24h"
+    user: UserContext;       // ⭐ Complete user context
+  };
+}
+```
+
+**Example:**
+```typescript
+async function login(email: string, password: string): Promise<UserContext> {
+  const response = await fetch('https://auth.wihy.ai/api/auth/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password })
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || 'Login failed');
+  }
+
+  const { data } = await response.json();
+  
+  // Store tokens
+  await SecureStorage.set('accessToken', data.token);
+  await SecureStorage.set('refreshToken', data.refreshToken);
+  
+  // Store user context
+  await Storage.set('userContext', JSON.stringify(data.user));
+  
+  return data.user;
+}
+```
+
+### Register
+
+**Endpoint:** `POST /api/auth/register`
+
+**Request:**
+```typescript
+interface RegisterRequest {
+  email: string;
+  password: string;
+  name: string;
+  plan?: 'free' | 'premium' | 'family-basic' | 'family-pro' | 'coach';
+  referralCode?: string;
+}
+```
+
+**Response:** Same as login
+
+### OAuth (Google, Apple, Microsoft, Facebook)
+
+**Endpoints:**
+- `GET /api/auth/google/authorize`
+- `GET /api/auth/apple/authorize`
+- `GET /api/auth/microsoft/authorize`
+- `GET /api/auth/facebook/authorize`
+
+**Flow:**
+```typescript
+// 1. Open OAuth URL
+const authUrl = `https://auth.wihy.ai/api/auth/google/authorize?client_id=${CLIENT_ID}&redirect_uri=wihy://callback`;
+await WebBrowser.openAuthSessionAsync(authUrl);
+
+// 2. Handle callback with session_token
+async function handleOAuthCallback(sessionToken: string) {
+  const response = await fetch('https://auth.wihy.ai/api/auth/verify', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ session_token: sessionToken })
+  });
+
+  const { data } = await response.json();
+  
+  await SecureStorage.set('accessToken', data.token);
+  await SecureStorage.set('refreshToken', data.refreshToken);
+  await Storage.set('userContext', JSON.stringify(data.user));
+  
+  return data.user;
+}
+```
+
+---
+
+## User Context Model
+
+### Complete User Context
+
+After login, you receive **everything** you need in one object:
+
+```typescript
+interface UserContext {
+  // Basic Info
+  id: string;
+  email: string;
+  name: string;
+  picture?: string;
+  provider: 'local' | 'google' | 'apple' | 'microsoft' | 'facebook';
+  
+  // Plan & Subscription
+  plan: 'free' | 'premium' | 'family-basic' | 'family-pro' | 'coach' | 'coach-family' 
+    | 'workplace-core' | 'workplace-plus' | 'corporate-enterprise';
+  addOns?: string[];  // ['ai', 'instacart']
+  
+  // Role
+  role?: 'user' | 'coach' | 'admin';
+  
+  // ⭐ Family (populated by backend)
+  familyId?: string | null;
+  familyRole?: 'owner' | 'member' | null;
+  guardianCode?: string | null;  // Only if owner
+  
+  // ⭐ Coach (populated by backend)
+  coachId?: string | null;
+  commissionRate?: number | null;
+  
+  // Organization (populated by backend)
+  organizationId?: string | null;
+  organizationRole?: 'admin' | 'user' | 'student' | 'employee' | null;
+  
+  // Health Stats
+  healthScore?: number;
+  streakDays?: number;
+  memberSince?: string;
+  
+  // ⭐ Capabilities (computed by backend)
+  capabilities: Capabilities;
+}
+```
+
+### Capabilities
+
+Backend computes capabilities based on plan + add-ons:
+
+```typescript
+interface Capabilities {
+  // Core Features
+  meals: boolean;
+  workouts: boolean;
+  family: boolean;
+  familyMembers?: number;      // 0, 3, or 5
+  
+  // Coach Platform
+  coachPlatform: boolean;
+  clientManagement?: boolean;
+  
+  // AI & Integrations
+  wihyAI: boolean;
+  instacart: boolean;
+  
+  // Analytics & Export
+  progressTracking: 'basic' | 'advanced';
+  dataExport: boolean;
+  
+  // API & Development
+  apiAccess: boolean;
+  webhooks: boolean;
+  
+  // B2B/Enterprise
+  adminDashboard: boolean;
+  usageAnalytics: boolean;
+  roleManagement: boolean;
+  whiteLabel: boolean;
+  
+  // Communication
+  communication: 'none' | 'limited' | 'full';
+}
+```
+
+### Refreshing User Context
+
+**CRITICAL:** Call after family/coach operations
+
+**Endpoint:** `GET /api/users/me`
+
+```typescript
+async function refreshUserContext(): Promise<UserContext> {
+  const token = await SecureStorage.get('accessToken');
+  
+  const response = await fetch('https://auth.wihy.ai/api/users/me', {
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+
+  if (!response.ok) {
+    if (response.status === 401) {
+      await refreshTokens();
+      return refreshUserContext();
+    }
+    throw new Error('Failed to fetch user context');
+  }
+
+  const data = await response.json();
+  await Storage.set('userContext', JSON.stringify(data));
+  
+  return data;
+}
+```
+
+### When to Refresh
+
+| Event | Why | Priority |
+|-------|-----|----------|
+| After creating family | `familyId` and `familyRole` update | ⭐ CRITICAL |
+| After joining family | `familyId` and `familyRole` update | ⭐ CRITICAL |
+| After leaving family | `familyId` clears | ⭐ CRITICAL |
+| After becoming coach | `coachId` updates | ⭐ CRITICAL |
+| After plan change | `plan` and `capabilities` update | HIGH |
+| App resumes from background | Detect external changes | MEDIUM |
+
+---
+
+## Family Management
+
+All family endpoints are at `https://services.wihy.ai/api/families`
+
+### Create Family
+
+**Endpoint:** `POST /api/families`
+
+```typescript
+async function createFamily(name: string): Promise<{ family_id: string; guardian_code: string }> {
+  const token = await SecureStorage.get('accessToken');
+  const user = await getUser();
+  
+  const response = await fetch('https://services.wihy.ai/api/families', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ name, creatorId: user.id })
+  });
+
+  const result = await response.json();
+  
+  // ⭐ CRITICAL: Refresh to get updated familyId
+  await refreshUserContext();
+  
+  return result;
+}
+```
+
+### Join Family
+
+**Endpoint:** `POST /api/families/join`
+
+```typescript
+async function joinFamily(guardianCode: string, role: string = 'MEMBER') {
+  const token = await SecureStorage.get('accessToken');
+  const user = await getUser();
+  
+  await fetch('https://services.wihy.ai/api/families/join', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ 
+      userId: user.id,
+      guardianCode,
+      role
+    })
+  });
+
+  // ⭐ CRITICAL: Refresh to get updated familyId
+  await refreshUserContext();
+}
+```
+
+### Get Family Details
+
+**Endpoint:** `GET /api/families/:familyId`
+
+```typescript
+async function getFamily(familyId: string) {
+  const token = await SecureStorage.get('accessToken');
+  
+  const response = await fetch(
+    `https://services.wihy.ai/api/families/${familyId}`,
+    { headers: { 'Authorization': `Bearer ${token}` } }
+  );
+
+  return await response.json();
+}
+```
+
+### Get Family Dashboard
+
+**Endpoint:** `GET /api/families/:familyId/dashboard`
+
+Returns comprehensive family overview:
+- Family members
+- Shared meal plans
+- Shared workouts
+- Family activity feed
+- Family stats
+
+---
+
+## Coach Management
+
+All coaching endpoints are at `https://services.wihy.ai/api/coaching`
+
+### Get Clients
+
+**Endpoint:** `GET /api/coaching/coaches/:coachId/clients`
+
+```typescript
+async function getMyClients(status?: 'ACTIVE' | 'PAUSED' | 'ARCHIVED') {
+  const token = await SecureStorage.get('accessToken');
+  const user = await getUser();
+  
+  if (!user.coachId) {
+    throw new Error('User is not a coach');
+  }
+
+  const params = status ? `?status=${status}` : '';
+  const url = `https://services.wihy.ai/api/coaching/coaches/${user.coachId}/clients${params}`;
+  
+  const response = await fetch(url, {
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+
+  const data = await response.json();
+  return data.clients;
+}
+```
+
+### Invite Client
+
+**Endpoint:** `POST /api/coaching/coaches/:coachId/clients`
+
+```typescript
+async function inviteClient(clientEmail: string, notes?: string) {
+  const token = await SecureStorage.get('accessToken');
+  const user = await getUser();
+  
+  await fetch(
+    `https://services.wihy.ai/api/coaching/coaches/${user.coachId}/clients`,
+    {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ clientEmail, notes })
+    }
+  );
+}
+```
+
+### Get Client Dashboard
+
+**Endpoint:** `GET /api/coaching/coaches/:coachId/clients/:clientId/dashboard`
+
+```typescript
+async function getClientDashboard(clientId: string) {
+  const token = await SecureStorage.get('accessToken');
+  const user = await getUser();
+  
+  const response = await fetch(
+    `https://services.wihy.ai/api/coaching/coaches/${user.coachId}/clients/${clientId}/dashboard`,
+    { headers: { 'Authorization': `Bearer ${token}` } }
+  );
+
+  return await response.json();
+}
+```
+
+### Assign Meal Program
+
+**Endpoint:** `POST /api/coaching/coaches/:coachId/clients/:clientId/meal-programs`
+
+```typescript
+async function assignMealProgram(clientId: string, programId: string, notes?: string) {
+  const token = await SecureStorage.get('accessToken');
+  const user = await getUser();
+  
+  await fetch(
+    `https://services.wihy.ai/api/coaching/coaches/${user.coachId}/clients/${clientId}/meal-programs`,
+    {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ programId, notes })
+    }
   );
 }
 ```
 
 ---
 
-## Basic Usage Examples
+## Capabilities & Feature Gating
 
-### Email/Password Login
+### Rule #1: Use Capabilities, Not Plans
 
-```tsx
-import { useAuth } from './src/context/AuthContext';
+```typescript
+// ❌ WRONG - Never hardcode plan checks
+if (user.plan === 'premium' || user.plan === 'family-pro') {
+  showMealPlans();
+}
 
-function LoginScreen() {
-  const { signIn, loading, error } = useAuth();
-
-  const handleLogin = async () => {
-    try {
-      await signIn('local', {
-        email: 'user@example.com',
-        password: 'password123',
-      });
-      // User is now authenticated
-      navigation.navigate('Home');
-    } catch (err) {
-      console.error('Login failed:', err);
-    }
-  };
-
-  return (
-    <View>
-      {loading ? <ActivityIndicator /> : null}
-      {error ? <Text>{error}</Text> : null}
-      <Button title="Login" onPress={handleLogin} />
-    </View>
-  );
+// ✅ CORRECT - Always use capabilities
+if (user.capabilities.meals) {
+  showMealPlans();
 }
 ```
 
----
+### Common Feature Gates
 
-### Registration
+```typescript
+// Meal plans
+if (user.capabilities.meals) {
+  showMealPlans();
+}
 
-```tsx
-function RegisterScreen() {
-  const { register, loading } = useAuth();
+// Workouts
+if (user.capabilities.workouts) {
+  showWorkouts();
+}
 
-  const handleRegister = async () => {
-    try {
-      await register(
-        'user@example.com',
-        'password123',
-        'John Doe'
-      );
-      navigation.navigate('Home');
-    } catch (err) {
-      console.error('Registration failed:', err);
-    }
-  };
+// Family features
+if (user.capabilities.family && user.familyId) {
+  showFamilyDashboard();
+}
 
-  return <Button title="Sign Up" onPress={handleRegister} />;
+// Create family button
+if (user.capabilities.family && !user.familyId) {
+  showCreateFamilyButton();
+}
+
+// Coach dashboard
+if (user.capabilities.coachPlatform && user.coachId) {
+  showCoachDashboard();
+}
+
+// AI Chat
+if (user.capabilities.wihyAI) {
+  showAIChat();
+}
+
+// Instacart
+if (user.capabilities.instacart) {
+  showInstacartIntegration();
+}
+
+// Data export
+if (user.capabilities.dataExport) {
+  showExportButton();
 }
 ```
 
+### Capabilities by Plan
+
+| Feature | Free | Premium | Family-Pro | Coach | Coach-Family |
+|---------|:----:|:-------:|:----------:|:-----:|:------------:|
+| Meals | ❌ | ✅ | ✅ | ✅ | ✅ |
+| Workouts | ❌ | ✅ | ✅ | ✅ | ✅ |
+| Family | ❌ | ❌ | ✅ (5 members) | ❌ | ✅ (5 members) |
+| Coach Platform | ❌ | ❌ | ❌ | ✅ | ✅ |
+| AI | ❌ | Add-on | Add-on | ✅ | ✅ |
+| Instacart | ❌ | ❌ | ✅ | ✅ | ✅ |
+| Data Export | ❌ | ❌ | ✅ | ✅ | ✅ |
+| API Access | ❌ | ❌ | ❌ | ✅ | ✅ |
+
 ---
 
-### OAuth Login (Google, Facebook, etc.)
+## Token Management
 
-```tsx
-import { WebView } from 'react-native-webview';
+### Token Refresh
 
-function OAuthScreen() {
-  const { getOAuthUrl, handleOAuthCallback } = useAuth();
-  const [authUrl, setAuthUrl] = useState('');
+**Endpoint:** `POST /api/auth/refresh`
 
-  const startOAuth = (provider: 'google' | 'facebook' | 'microsoft') => {
-    const url = getOAuthUrl(provider);
-    setAuthUrl(url);
-  };
+```typescript
+async function refreshTokens(): Promise<boolean> {
+  const refreshToken = await SecureStorage.get('refreshToken');
+  
+  if (!refreshToken) return false;
 
-  const onNavigationStateChange = async (navState: any) => {
-    // Check if it's the callback URL
-    if (navState.url.startsWith('wihy://oauth/callback')) {
-      try {
-        await handleOAuthCallback('google', navState.url);
-        navigation.navigate('Home');
-      } catch (err) {
-        console.error('OAuth failed:', err);
+  const response = await fetch('https://auth.wihy.ai/api/auth/refresh', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ refreshToken })
+  });
+
+  if (!response.ok) {
+    await logout();
+    return false;
+  }
+
+  const { data } = await response.json();
+  
+  await SecureStorage.set('accessToken', data.token);
+  if (data.refreshToken) {
+    await SecureStorage.set('refreshToken', data.refreshToken);
+  }
+  
+  return true;
+}
+```
+
+### Auto-Retry API Client
+
+```typescript
+class ApiClient {
+  async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
+    const token = await SecureStorage.get('accessToken');
+    
+    const response = await fetch(endpoint, {
+      ...options,
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+        ...options.headers
       }
-    }
-  };
+    });
 
-  return (
-    <View>
-      <Button title="Login with Google" onPress={() => startOAuth('google')} />
-      <Button title="Login with Facebook" onPress={() => startOAuth('facebook')} />
-      
-      {authUrl ? (
-        <WebView 
-          source={{ uri: authUrl }}
-          onNavigationStateChange={onNavigationStateChange}
-        />
-      ) : null}
-    </View>
-  );
+    // Auto-refresh on 401
+    if (response.status === 401) {
+      const refreshed = await refreshTokens();
+      if (refreshed) {
+        return this.request(endpoint, options); // Retry
+      }
+      throw new AuthError('Session expired');
+    }
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new ApiError(error.error, response.status);
+    }
+
+    return await response.json();
+  }
 }
 ```
 
 ---
 
-### Biometric Authentication
+## Code Examples
 
-```tsx
-function BiometricLoginScreen() {
-  const { 
-    signInWithBiometric, 
-    isBiometricAvailable, 
-    biometricType,
-    enableBiometric,
-  } = useAuth();
+### UserService (React Native)
 
-  const handleBiometricLogin = async () => {
-    if (!isBiometricAvailable) {
-      Alert.alert('Biometric not available');
-      return;
+```typescript
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as SecureStore from 'expo-secure-store';
+
+class UserService {
+  private cachedUser: UserContext | null = null;
+
+  async getUser(): Promise<UserContext | null> {
+    if (this.cachedUser) return this.cachedUser;
+    
+    const stored = await AsyncStorage.getItem('userContext');
+    if (stored) {
+      this.cachedUser = JSON.parse(stored);
+      return this.cachedUser;
     }
+    
+    return null;
+  }
 
+  async setUser(user: UserContext): Promise<void> {
+    this.cachedUser = user;
+    await AsyncStorage.setItem('userContext', JSON.stringify(user));
+  }
+
+  async clearUser(): Promise<void> {
+    this.cachedUser = null;
+    await AsyncStorage.removeItem('userContext');
+    await SecureStore.deleteItemAsync('accessToken');
+    await SecureStore.deleteItemAsync('refreshToken');
+  }
+
+  async refreshContext(): Promise<UserContext> {
+    const token = await SecureStore.getItemAsync('accessToken');
+    
+    const response = await fetch('https://auth.wihy.ai/api/users/me', {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+
+    const data = await response.json();
+    await this.setUser(data);
+    
+    return data;
+  }
+
+  // Convenience methods
+  async isInFamily(): Promise<boolean> {
+    const user = await this.getUser();
+    return !!user?.familyId;
+  }
+
+  async isCoach(): Promise<boolean> {
+    const user = await this.getUser();
+    return !!user?.coachId;
+  }
+
+  async hasCapability(capability: keyof Capabilities): Promise<boolean> {
+    const user = await this.getUser();
+    return user?.capabilities?.[capability] ?? false;
+  }
+}
+
+export const userService = new UserService();
+```
+
+### Login Screen (React Native)
+
+```typescript
+import React, { useState } from 'react';
+import { View, TextInput, Button, Alert } from 'react-native';
+import * as SecureStore from 'expo-secure-store';
+import { userService } from '../services/userService';
+
+export function LoginScreen({ navigation }) {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  async function handleLogin() {
+    setLoading(true);
+    
     try {
-      await signInWithBiometric();
-      navigation.navigate('Home');
-    } catch (err) {
-      console.error('Biometric login failed:', err);
+      const response = await fetch('https://auth.wihy.ai/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+
+      const result = await response.json();
+
+      if (!result.success) {
+        Alert.alert('Login Failed', result.error);
+        return;
+      }
+
+      // Store tokens
+      await SecureStore.setItemAsync('accessToken', result.data.token);
+      await SecureStore.setItemAsync('refreshToken', result.data.refreshToken);
+      
+      // Store user context
+      await userService.setUser(result.data.user);
+
+      // Navigate based on capabilities
+      if (result.data.user.capabilities.coachPlatform && result.data.user.coachId) {
+        navigation.replace('CoachDashboard');
+      } else if (result.data.user.capabilities.family && result.data.user.familyId) {
+        navigation.replace('FamilyDashboard');
+      } else {
+        navigation.replace('Home');
+      }
+      
+    } catch (error) {
+      Alert.alert('Error', 'Unable to connect');
+    } finally {
+      setLoading(false);
     }
-  };
-
-  const handleEnableBiometric = async () => {
-    const success = await enableBiometric();
-    if (success) {
-      Alert.alert('Biometric login enabled!');
-    }
-  };
-
-  return (
-    <View>
-      {isBiometricAvailable && (
-        <>
-          <Text>Use {biometricType} to login</Text>
-          <Button title="Login with Biometric" onPress={handleBiometricLogin} />
-          <Button title="Enable Biometric" onPress={handleEnableBiometric} />
-        </>
-      )}
-    </View>
-  );
-}
-```
-
----
-
-### Accessing User Data
-
-```tsx
-function ProfileScreen() {
-  const { user, profile, settings, userId } = useAuth();
-
-  if (!user) {
-    return <Text>Not logged in</Text>;
   }
 
   return (
-    <View>
-      <Text>Name: {user.name}</Text>
-      <Text>Email: {user.email}</Text>
-      <Text>Plan: {user.plan}</Text>
-      
-      {/* Extended Profile */}
-      {profile && (
-        <>
-          <Text>Phone: {profile.phone}</Text>
-          <Text>Member Since: {profile.memberSince}</Text>
-        </>
-      )}
-
-      {/* Settings */}
-      {settings && (
-        <Text>Theme: {settings.appPreferences.theme}</Text>
-      )}
-    </View>
-  );
-}
-```
-
----
-
-### Checking Capabilities
-
-```tsx
-function FeatureScreen() {
-  const { capabilities, user } = useAuth();
-
-  // Check if user has access to a feature
-  const canAccessMeals = capabilities?.meals;
-  const canAccessCoaching = capabilities?.coachPlatform;
-
-  return (
-    <View>
-      {canAccessMeals ? (
-        <Button title="View Meals" />
-      ) : (
-        <Text>Upgrade to access meals</Text>
-      )}
-
-      {canAccessCoaching ? (
-        <Button title="Coach Dashboard" />
-      ) : null}
-    </View>
-  );
-}
-```
-
----
-
-### Updating Profile
-
-```tsx
-function EditProfileScreen() {
-  const { updateProfile, profile } = useAuth();
-  
-  const handleSave = async () => {
-    try {
-      await updateProfile({
-        phone: '+1234567890',
-        dateOfBirth: '1990-01-01',
-        gender: 'male',
-        height: 180,
-        weight: 75,
-      });
-      Alert.alert('Profile updated!');
-    } catch (err) {
-      console.error('Update failed:', err);
-    }
-  };
-
-  return (
-    <View>
-      <TextInput placeholder="Phone" />
-      <Button title="Save" onPress={handleSave} />
-    </View>
-  );
-}
-```
-
----
-
-### Updating Settings
-
-```tsx
-function SettingsScreen() {
-  const { settings, updateSettings } = useAuth();
-
-  const handleThemeChange = async (theme: 'light' | 'dark' | 'system') => {
-    await updateSettings({
-      appPreferences: {
-        ...settings?.appPreferences,
-        theme,
-      },
-    });
-  };
-
-  const handleNotificationsToggle = async (enabled: boolean) => {
-    await updateSettings({
-      notifications: {
-        ...settings?.notifications,
-        pushEnabled: enabled,
-      },
-    });
-  };
-
-  return (
-    <View>
-      <Text>Theme</Text>
-      <Button title="Light" onPress={() => handleThemeChange('light')} />
-      <Button title="Dark" onPress={() => handleThemeChange('dark')} />
-      
-      <Switch
-        value={settings?.notifications.pushEnabled}
-        onValueChange={handleNotificationsToggle}
+    <View style={{ padding: 20 }}>
+      <TextInput
+        placeholder="Email"
+        value={email}
+        onChangeText={setEmail}
+        autoCapitalize="none"
+        keyboardType="email-address"
+        style={{ borderWidth: 1, padding: 10, marginBottom: 10 }}
+      />
+      <TextInput
+        placeholder="Password"
+        value={password}
+        onChangeText={setPassword}
+        secureTextEntry
+        style={{ borderWidth: 1, padding: 10, marginBottom: 10 }}
+      />
+      <Button
+        title={loading ? 'Signing in...' : 'Sign In'}
+        onPress={handleLogin}
+        disabled={loading}
       />
     </View>
   );
 }
 ```
 
----
+### Family Screen (React Native)
 
-### Logout
+```typescript
+import React, { useEffect, useState } from 'react';
+import { View, Text, FlatList, Button, Alert, Share } from 'react-native';
+import { userService } from '../services/userService';
+import { api } from '../services/api';
 
-```tsx
-function HomeScreen() {
-  const { signOut } = useAuth();
-
-  const handleLogout = async () => {
-    try {
-      await signOut();
-      navigation.navigate('Login');
-    } catch (err) {
-      console.error('Logout failed:', err);
-    }
-  };
-
-  return (
-    <Button title="Logout" onPress={handleLogout} />
-  );
-}
-```
-
----
-
-## Advanced Usage
-
-### Protected Routes
-
-```tsx
-function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, loading } = useAuth();
-
-  if (loading) {
-    return <LoadingScreen />;
-  }
-
-  if (!isAuthenticated) {
-    return <Navigate to="/login" />;
-  }
-
-  return <>{children}</>;
-}
-
-// Usage
-<ProtectedRoute>
-  <DashboardScreen />
-</ProtectedRoute>
-```
-
----
-
-### Auto-Refresh User Data
-
-```tsx
-function Dashboard() {
-  const { refreshUser, refreshProfile, refreshSettings } = useAuth();
+export function FamilyScreen({ navigation }) {
+  const [family, setFamily] = useState(null);
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Refresh data every 5 minutes
-    const interval = setInterval(() => {
-      refreshUser();
-      refreshProfile();
-      refreshSettings();
-    }, 5 * 60 * 1000);
-
-    return () => clearInterval(interval);
+    loadData();
   }, []);
 
-  return <YourDashboard />;
-}
-```
-
----
-
-### Using Profile Service Directly
-
-```tsx
-import { profileService } from './src/services/profileService';
-
-function AdvancedSettings() {
-  const { userId } = useAuth();
-
-  const enable2FA = async () => {
-    const result = await profileService.enable2FA(userId!, 'authenticator');
-    console.log('2FA Secret:', result.secret);
-    console.log('QR Code:', result.qrCode);
-  };
-
-  const exportData = async () => {
-    const { downloadUrl } = await profileService.exportUserData(userId!);
-    window.open(downloadUrl);
-  };
-
-  const deleteAccount = async () => {
-    if (confirm('Are you sure?')) {
-      await profileService.deleteAccount(userId!, 'DELETE');
-      // User will be logged out
+  async function loadData() {
+    const userData = await userService.getUser();
+    setUser(userData);
+    
+    if (userData?.familyId) {
+      const familyData = await api.get(`/api/families/${userData.familyId}`);
+      setFamily(familyData);
     }
-  };
+    
+    setLoading(false);
+  }
+
+  async function handleCreateFamily() {
+    Alert.prompt('Create Family', 'Enter family name:', async (name) => {
+      if (name) {
+        const result = await api.post('/api/families', { 
+          name,
+          creatorId: user.id
+        });
+        
+        // ⭐ CRITICAL: Refresh context
+        await userService.refreshContext();
+        await loadData();
+        
+        Alert.alert('Success', `Family created! Code: ${result.guardian_code}`);
+      }
+    });
+  }
+
+  async function handleJoinFamily() {
+    Alert.prompt('Join Family', 'Enter guardian code:', async (code) => {
+      if (code) {
+        await api.post('/api/families/join', {
+          userId: user.id,
+          guardianCode: code,
+          role: 'MEMBER'
+        });
+        
+        // ⭐ CRITICAL: Refresh context
+        await userService.refreshContext();
+        await loadData();
+        
+        Alert.alert('Success', 'Joined family!');
+      }
+    });
+  }
+
+  async function handleShareCode() {
+    await Share.share({
+      message: `Join my WIHY family! Use code: ${family.guardian_code}`
+    });
+  }
+
+  if (loading) return <Text>Loading...</Text>;
+
+  // Not in family
+  if (!family) {
+    return (
+      <View style={{ padding: 20 }}>
+        <Text style={{ fontSize: 18, marginBottom: 20 }}>
+          You're not part of a family yet
+        </Text>
+        
+        {user?.capabilities.family && (
+          <>
+            <Button title="Create Family" onPress={handleCreateFamily} />
+            <View style={{ height: 10 }} />
+          </>
+        )}
+        
+        <Button title="Join Family" onPress={handleJoinFamily} />
+      </View>
+    );
+  }
+
+  // In family
+  const canManage = user?.familyRole === 'owner';
 
   return (
-    <View>
-      <Button title="Enable 2FA" onPress={enable2FA} />
-      <Button title="Export My Data" onPress={exportData} />
-      <Button title="Delete Account" onPress={deleteAccount} />
+    <View style={{ flex: 1, padding: 20 }}>
+      <Text style={{ fontSize: 24, fontWeight: 'bold' }}>{family.name}</Text>
+      <Text style={{ fontSize: 16, color: 'gray', marginBottom: 20 }}>
+        {family.members.length} / {family.max_members} members
+      </Text>
+      
+      {canManage && (
+        <View style={{ marginBottom: 20 }}>
+          <Text>Guardian Code: <Text style={{ fontWeight: 'bold' }}>{family.guardian_code}</Text></Text>
+          <Button title="Share Invite Code" onPress={handleShareCode} />
+        </View>
+      )}
+
+      <FlatList
+        data={family.members}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => (
+          <View style={{ 
+            padding: 15, 
+            borderBottomWidth: 1, 
+            borderBottomColor: '#eee'
+          }}>
+            <Text style={{ fontSize: 16, fontWeight: 'bold' }}>{item.name}</Text>
+            <Text style={{ color: 'gray' }}>{item.email} • {item.role}</Text>
+          </View>
+        )}
+      />
     </View>
   );
 }
 ```
 
----
+### Feature Gate Hook (React)
 
-### Password Management
+```typescript
+import { useEffect, useState } from 'react';
+import { userService } from '../services/userService';
 
-```tsx
-import { authService } from './src/services/authService';
+export function useCapability(capability: keyof Capabilities): boolean {
+  const [hasCapability, setHasCapability] = useState(false);
 
-function PasswordScreen() {
-  const handleForgotPassword = async (email: string) => {
-    const result = await authService.forgotPassword(email);
-    if (result.success) {
-      Alert.alert('Check your email for reset link');
+  useEffect(() => {
+    async function check() {
+      const has = await userService.hasCapability(capability);
+      setHasCapability(has);
     }
-  };
+    check();
+  }, [capability]);
 
-  const handleResetPassword = async (token: string, newPassword: string) => {
-    const result = await authService.resetPassword(token, newPassword);
-    if (result.success) {
-      Alert.alert('Password reset successful');
-      navigation.navigate('Login');
-    }
-  };
+  return hasCapability;
+}
 
-  const handleChangePassword = async () => {
-    const result = await authService.changePassword(
-      'currentPassword123',
-      'newPassword456'
+// Usage
+function MealPlansScreen() {
+  const canAccessMeals = useCapability('meals');
+  
+  if (!canAccessMeals) {
+    return (
+      <View>
+        <Text>Upgrade to Premium to access meal plans</Text>
+        <Button title="Upgrade" onPress={() => navigation.navigate('Subscription')} />
+      </View>
     );
-    if (result.success) {
-      Alert.alert('Password changed');
-    }
-  };
-
-  return <View>...</View>;
-}
-```
-
----
-
-### Feature Flags
-
-```tsx
-import { profileService } from './src/services/profileService';
-
-function ExperimentalFeature() {
-  const [enabled, setEnabled] = useState(false);
-
-  useEffect(() => {
-    profileService.isFeatureEnabled('new_dashboard').then(setEnabled);
-  }, []);
-
-  if (!enabled) return null;
-
-  return <NewDashboard />;
-}
-
-// Enable feature flag
-await profileService.setFeatureFlag('new_dashboard', true);
-```
-
----
-
-### Deep Link Handling (OAuth Callback)
-
-```tsx
-import { enhancedAuthService } from './src/services/enhancedAuthService';
-import { Linking } from 'react-native';
-
-function App() {
-  const { handleOAuthCallback } = useAuth();
-
-  useEffect(() => {
-    // Handle initial URL (app opened via deep link)
-    Linking.getInitialURL().then((url) => {
-      if (url) {
-        enhancedAuthService.handleDeepLink(url);
-      }
-    });
-
-    // Listen for deep links while app is running
-    const subscription = Linking.addEventListener('url', ({ url }) => {
-      enhancedAuthService.handleDeepLink(url);
-    });
-
-    return () => subscription.remove();
-  }, []);
-
-  return <Navigation />;
-}
-```
-
----
-
-## API Endpoints
-
-### Auth Service (`auth.wihy.ai` / GCP Cloud Run)
-
-| Endpoint | Method | Purpose |
-|----------|--------|---------|
-| `/api/auth/local/login` | POST | Email/password login |
-| `/api/auth/local/register` | POST | Create account |
-| `/api/auth/verify` | GET | Verify session |
-| `/api/auth/refresh` | POST | Refresh access token |
-| `/api/auth/logout` | POST | Logout |
-| `/api/auth/forgot-password` | POST | Request password reset |
-| `/api/auth/reset-password` | POST | Reset password with token |
-| `/api/auth/change-password` | POST | Change password (authenticated) |
-| `/api/auth/{provider}/authorize` | GET | OAuth authorization URL |
-| `/api/auth/{provider}/callback` | POST | OAuth token exchange |
-
-### Profile Service (`services.wihy.ai`)
-
-| Endpoint | Method | Purpose |
-|----------|--------|---------|
-| `/api/users/:userId/profile` | GET | Get extended profile |
-| `/api/users/:userId/profile` | PUT | Update profile |
-| `/api/users/:userId/avatar` | POST | Upload avatar |
-| `/api/users/:userId/settings` | GET | Get all settings |
-| `/api/users/:userId/settings` | PUT | Update settings |
-| `/api/users/:userId/privacy` | GET | Get privacy settings |
-| `/api/users/:userId/2fa/enable` | POST | Enable 2FA |
-| `/api/users/:userId/2fa/verify` | POST | Verify 2FA code |
-| `/api/users/:userId/2fa/disable` | POST | Disable 2FA |
-| `/api/users/:userId/devices` | GET | Get trusted devices |
-| `/api/users/:userId/devices/:id` | DELETE | Remove device |
-| `/api/users/:userId/login-history` | GET | Get login history |
-| `/api/users/:userId/export` | POST | Export user data (GDPR) |
-| `/api/users/:userId` | DELETE | Delete account |
-
----
-
-## Type Definitions
-
-All types are exported from `src/types/user.ts`:
-
-```tsx
-import {
-  AuthUser,
-  ExtendedUserProfile,
-  ProfileSettings,
-  AppPreferences,
-  NotificationSettings,
-  PrivacySettings,
-  SecuritySettings,
-  UserCapabilities,
-  AuthProvider,
-  PlanType,
-} from './src/types/user';
-```
-
----
-
-## Error Handling
-
-### Global Error Handler
-
-```tsx
-function App() {
-  const { error, clearError } = useAuth();
-
-  useEffect(() => {
-    if (error) {
-      Alert.alert('Error', error, [
-        { text: 'OK', onPress: clearError }
-      ]);
-    }
-  }, [error]);
-
-  return <YourApp />;
-}
-```
-
-### Service-Level Error Handling
-
-```tsx
-try {
-  await authService.login({ email, password });
-} catch (error) {
-  if (error.message.includes('401')) {
-    // Invalid credentials
-  } else if (error.message.includes('Network')) {
-    // Network error
-  } else {
-    // Other error
   }
+  
+  return <MealPlansList />;
 }
 ```
 
 ---
 
-## Environment Configuration
+## Summary
 
-### Development
+### Key Principles
+
+1. **Backend returns everything** - Full user context on login
+2. **Store full context** - Use throughout app session
+3. **Use capabilities** - Never hardcode plan checks
+4. **Refresh after changes** - Keep context in sync after family/coach operations
+5. **Auto-refresh tokens** - Handle 401 gracefully
+
+### Critical Refresh Points
 
 ```typescript
-// IS_DEV = true
-// Points to: https://auth-488727584674.us-central1.run.app
+// ⭐ MUST refresh after these operations:
+await createFamily(name);
+await userService.refreshContext(); // CRITICAL
+
+await joinFamily(code);
+await userService.refreshContext(); // CRITICAL
+
+await leaveFamily();
+await userService.refreshContext(); // CRITICAL
 ```
 
-### Production
+### Quick Reference
 
 ```typescript
-// IS_DEV = false
-// Points to: https://auth.wihy.ai and https://services.wihy.ai
-```
-
-### Override URLs
-
-```typescript
-// In authService.ts or profileService.ts
-const AUTH_BASE_URL = process.env.REACT_APP_AUTH_URL 
-  || (IS_DEV 
-    ? 'https://auth-488727584674.us-central1.run.app' 
-    : 'https://auth.wihy.ai');
-```
-
----
-
-## Best Practices
-
-### 1. Always Check Authentication
-
-```tsx
-const { isAuthenticated, loading } = useAuth();
-
-if (loading) return <LoadingSpinner />;
-if (!isAuthenticated) return <LoginScreen />;
-```
-
-### 2. Handle Token Refresh Automatically
-
-The services handle token refresh automatically. No action needed.
-
-### 3. Clear Errors After Displaying
-
-```tsx
-useEffect(() => {
-  if (error) {
-    showAlert(error);
-    clearError(); // Clear after showing
-  }
-}, [error]);
-```
-
-### 4. Use Capabilities for Feature Access
-
-```tsx
-// ❌ Don't check plan directly
-if (user.plan === 'premium') { ... }
-
-// ✅ Check capabilities
-if (capabilities?.meals) { ... }
-```
-
-### 5. Sync Biometric Settings
-
-```tsx
-// When enabling biometric via profile service
-await profileService.saveLocalSecuritySettings({
-  biometricEnabled: true,
-});
-await enhancedAuthService.enableBiometricLogin();
-```
-
----
-
-## Testing
-
-### Mock Auth Context
-
-```tsx
-import { AuthContext } from './src/context/AuthContext';
-
-const mockAuthValue = {
-  user: { id: '123', email: 'test@example.com', ... },
-  isAuthenticated: true,
-  loading: false,
-  // ... other values
-};
-
-<AuthContext.Provider value={mockAuthValue}>
-  <YourComponent />
-</AuthContext.Provider>
-```
-
-### Test with Dev Auth
-
-```tsx
-// Use handleDevAuth for testing (if implemented)
-const handleDevAuth = async () => {
-  // Bypass OAuth for testing
-  await signIn('local', {
-    email: 'dev@wihy.ai',
-    password: 'dev123',
-  });
-};
-```
-
----
-
-## Troubleshooting
-
-### "Not authenticated" errors
-
-```tsx
-// Check if token exists
-const token = await authService.getStoredToken();
-if (!token) {
-  // User needs to login again
-  navigation.navigate('Login');
+// Check capability
+const user = await userService.getUser();
+if (user.capabilities.meals) {
+  showMealPlans();
 }
-```
 
-### Session expired
+// Check family
+if (user.familyId) {
+  showFamilyDashboard();
+}
 
-```tsx
-// Services automatically refresh tokens
-// If refresh fails, user is logged out
-// Listen to auth state changes:
-onAuthStateChange={(user) => {
-  if (!user) {
-    navigation.navigate('Login');
-  }
-}}
-```
-
-### Biometric not working
-
-```tsx
-// Check availability first
-const { available, type } = await enhancedAuthService.checkBiometricAvailability();
-if (!available) {
-  Alert.alert('Biometric not available on this device');
+// Check coach
+if (user.coachId) {
+  showCoachDashboard();
 }
 ```
 
 ---
 
-## Migration from Old Auth
+## Next Steps
 
-If migrating from an existing auth system:
-
-1. **Wrap app with AuthProvider**
-2. **Replace old login calls with `signIn()`**
-3. **Replace user context with `useAuth()`**
-4. **Update capability checks** from plan-based to capability-based
-5. **Sync biometric settings** if already using biometrics
+1. **Review backend requirements:** See [AUTH_FAMILY_COACH_INTEGRATION_ANALYSIS.md](AUTH_FAMILY_COACH_INTEGRATION_ANALYSIS.md)
+2. **Review API specification:** See [BACKEND_API_REQUIREMENTS.md](BACKEND_API_REQUIREMENTS.md)
+3. **Wait for backend implementation:** All Phase 1 and Phase 2 items must be completed
+4. **Implement this guide:** Once backend is ready, follow the patterns in this guide
 
 ---
 
-## Support
-
-- **Type definitions**: `src/types/user.ts`
-- **Services**: `src/services/`
-- **Context**: `src/context/AuthContext.tsx`
-- **Integration guide**: `AUTH_PROFILE_INTEGRATION.md`
-- **Service overview**: `AUTH_SERVICE_INTEGRATION.md`
+For questions or issues, contact the backend team.

@@ -133,6 +133,32 @@ export interface UserData {
   settings?: UserSettings;
   createdAt?: string;
   profile_data?: any;      // Legacy field for backwards compatibility
+  
+  // Plan & Subscription (from backend)
+  plan?: string;
+  planStatus?: 'active' | 'trial' | 'expired' | 'cancelled';
+  addOns?: string[];
+  
+  // Capabilities (computed by backend based on plan + addOns)
+  capabilities?: import('../utils/capabilities').Capabilities;
+  
+  // Family info (from backend)
+  familyId?: string | null;
+  familyRole?: 'owner' | 'guardian' | 'member' | 'child' | null;
+  guardianCode?: string | null;
+  
+  // Coach info (from backend)
+  coachId?: string | null;
+  commissionRate?: number | null;
+  
+  // Organization info (from backend)
+  organizationId?: string | null;
+  organizationRole?: 'admin' | 'user' | 'student' | 'employee' | null;
+  
+  // Health stats (from backend)
+  healthScore?: number;
+  streakDays?: number;
+  memberSince?: string;
 }
 
 // Auth data nested inside response.data
