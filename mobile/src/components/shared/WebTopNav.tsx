@@ -1,6 +1,6 @@
 import React, { useContext, useState } from 'react';
 import { Platform } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { AuthContext } from '../../context/AuthContext';
 import MultiAuthLogin from '../auth/MultiAuthLogin';
 
@@ -23,6 +23,7 @@ interface WebTopNavProps {
  */
 export function WebTopNav({ activeTab = 'none' }: WebTopNavProps) {
   const navigation = useNavigation<any>();
+  const route = useRoute();
   const { user } = useContext(AuthContext);
   const [showLoginModal, setShowLoginModal] = useState(false);
   
@@ -34,19 +35,56 @@ export function WebTopNav({ activeTab = 'none' }: WebTopNavProps) {
     return null;
   }
 
+  // Determine if we're in a tab screen or stack screen
+  // Tab screens: Home, Scan, Chat, Health, Profile
+  // Stack screens: About, Subscription, Terms, Privacy, B2BPricing
+  const isInTabNavigator = ['Home', 'Scan', 'Chat', 'Health', 'Profile', 'CoachSelection'].includes(route.name);
+  
+  console.log('[WebTopNav] Current route:', route.name, 'isInTabNavigator:', isInTabNavigator);
+
   // Navigate to a tab screen (inside Main TabNavigator)
-  // From Stack screens, we need to specify Main + screen
   const navigateToTab = (tabName: string) => {
-    navigation.navigate('Main', { screen: tabName });
+    console.log('[WebTopNav] navigateToTab called with:', tabName, 'isInTabNavigator:', isInTabNavigator);
+    try {
+      if (isInTabNavigator) {
+        // Already in TabNavigator, navigate directly
+        navigation.navigate(tabName);
+      } else {
+        // In stack screen, navigate to Main then to tab
+        navigation.navigate('Main', { screen: tabName });
+      }
+      console.log('[WebTopNav] navigation.navigate succeeded');
+    } catch (error) {
+      console.error('[WebTopNav] navigation.navigate failed:', error);
+    }
   };
 
   // Navigate to a Stack screen (outside TabNavigator)
   const navigateToStack = (screenName: string) => {
-    navigation.navigate(screenName as any);
+    console.log('[WebTopNav] navigateToStack called with:', screenName, 'isInTabNavigator:', isInTabNavigator);
+    try {
+      if (isInTabNavigator) {
+        // In TabNavigator, use parent navigation to go to stack screens
+        const parent = navigation.getParent();
+        if (parent) {
+          parent.navigate(screenName);
+        } else {
+          // Fallback if no parent
+          navigation.navigate(screenName as any);
+        }
+      } else {
+        // Already in stack, navigate directly
+        navigation.navigate(screenName as any);
+      }
+      console.log('[WebTopNav] navigateToStack succeeded');
+    } catch (error) {
+      console.error('[WebTopNav] navigateToStack failed:', error);
+    }
   };
   
   // Handle health button click - show subscription for free users
   const handleHealthPress = () => {
+    console.log('[WebTopNav] handleHealthPress called, isFreeUser:', isFreeUser);
     if (isFreeUser) {
       navigateToStack('Subscription');
     } else {
@@ -56,6 +94,7 @@ export function WebTopNav({ activeTab = 'none' }: WebTopNavProps) {
 
   // Handle profile button click
   const handleProfilePress = () => {
+    console.log('[WebTopNav] handleProfilePress called, user:', user?.email);
     if (user) {
       navigateToTab('Profile');
     } else {
@@ -68,7 +107,12 @@ export function WebTopNav({ activeTab = 'none' }: WebTopNavProps) {
     <nav className="web-top-nav">
       <div className="web-nav-left">
         <button 
-          onClick={() => navigateToTab('Home')} 
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('[WebTopNav] Home button clicked!');
+            navigateToTab('Home');
+          }} 
           className={`web-nav-item nav-home ${activeTab === 'home' ? 'active' : ''}`} 
           type="button"
         >
@@ -78,7 +122,12 @@ export function WebTopNav({ activeTab = 'none' }: WebTopNavProps) {
           <span>Home</span>
         </button>
         <button 
-          onClick={handleHealthPress} 
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('[WebTopNav] Health button clicked!');
+            handleHealthPress();
+          }} 
           className={`web-nav-item nav-health ${activeTab === 'health' ? 'active' : ''}`} 
           type="button"
         >
@@ -88,7 +137,11 @@ export function WebTopNav({ activeTab = 'none' }: WebTopNavProps) {
           <span>Health</span>
         </button>
         <button 
-          onClick={() => navigateToTab('Scan')} 
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            navigateToTab('Scan');
+          }} 
           className="web-nav-item nav-scan mobile-only" 
           type="button"
         >
@@ -98,7 +151,11 @@ export function WebTopNav({ activeTab = 'none' }: WebTopNavProps) {
           <span>Scan</span>
         </button>
         <button 
-          onClick={() => navigateToTab('Chat')} 
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            navigateToTab('Chat');
+          }} 
           className={`web-nav-item nav-chat ${activeTab === 'chat' ? 'active' : ''}`} 
           type="button"
         >
@@ -108,7 +165,11 @@ export function WebTopNav({ activeTab = 'none' }: WebTopNavProps) {
           <span>Chat</span>
         </button>
         <button 
-          onClick={() => navigateToStack('About')} 
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            navigateToStack('About');
+          }} 
           className="web-nav-item nav-about" 
           type="button"
         >
@@ -120,7 +181,11 @@ export function WebTopNav({ activeTab = 'none' }: WebTopNavProps) {
       </div>
       <div className="web-nav-right">
         <button 
-          onClick={handleProfilePress} 
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            handleProfilePress();
+          }} 
           className={`web-nav-item profile ${activeTab === 'profile' ? 'active' : ''}`} 
           type="button"
         >

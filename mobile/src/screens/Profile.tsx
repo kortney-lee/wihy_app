@@ -64,6 +64,9 @@ export default function Profile() {
   const [showPlansModal, setShowPlansModal] = useState(false);
   const [showAddOnsModal, setShowAddOnsModal] = useState(false);
   
+  // Ref to track if subscription has been checked (prevents infinite calls)
+  const subscriptionCheckedRef = useRef(false);
+  
   // AI Add-on upgrade prompt
   const hasAIAccess = useFeatureAccess('ai');
   const [showAIUpgrade, setShowAIUpgrade] = useState(false);
@@ -80,16 +83,23 @@ export default function Profile() {
   };
 
   const syncFromUser = useCallback(() => {
-    const prefs = (user?.preferences ?? userInfo.preferences ?? defaultPreferences);
+    const prefs = (user?.preferences ?? defaultPreferences);
     setNotificationsEnabled(prefs.notifications ?? defaultPreferences.notifications);
     setBiometricsEnabled(prefs.biometrics ?? defaultPreferences.biometrics);
     setDarkModeEnabled(prefs.darkMode ?? defaultPreferences.darkMode);
     setAnalyticsEnabled(prefs.analytics ?? defaultPreferences.analytics);
     setAutoScanEnabled(prefs.autoScan ?? defaultPreferences.autoScan);
-  }, [user, userInfo.preferences, defaultPreferences]);
+  }, [user?.preferences]);
 
   const checkSubscriptionStatus = useCallback(async () => {
     if (!user?.email) return;
+    
+    // Prevent duplicate calls - only check once per mount
+    if (subscriptionCheckedRef.current) {
+      console.log('[Profile] Subscription already checked, skipping');
+      return;
+    }
+    subscriptionCheckedRef.current = true;
     
     // Skip GHL subscription check in development to avoid 404 errors
     if (__DEV__) {
@@ -111,10 +121,12 @@ export default function Profile() {
     }
   }, [user?.email]);
 
+  // Run once on mount - empty dependency array to prevent re-runs
   useEffect(() => {
     syncFromUser();
     checkSubscriptionStatus();
-  }, [syncFromUser, checkSubscriptionStatus]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleSubscribe = () => {
     if (user?.plan === 'free' || !isPremium) {
