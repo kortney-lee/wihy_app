@@ -216,19 +216,20 @@
   background: #ffffff;
   border: 2px solid #e5e7eb;
   border-radius: 16px;
-  padding: 24px;
+  padding: 14px;
   display: flex;
   flex-direction: column;
   position: relative;
   transition: all 0.3s ease;
   min-width: 0; /* Prevent grid from stretching */
   box-sizing: border-box;
+  transform: scale(0.92);
 }
 
 .pricing-card:hover {
-  transform: translateY(-5px);
+  transform: scale(0.92) translateY(-8px);
   border-color: #22c55e;
-  box-shadow: 0 12px 32px rgba(34, 197, 94, 0.25);
+  box-shadow: 0 16px 40px rgba(34, 197, 94, 0.3);
 }
 
 .pricing-card-popular {
@@ -238,11 +239,13 @@
     linear-gradient(90deg, #fa5f06, #ffffff, #C0C0C0, #4cbb17, #1a73e8) border-box;
   background-size: 100% 100%, 200% 100%;
   animation: wiH-border-sweep 2.2s linear infinite;
+  padding: 14px !important;
+  transform: scale(0.92) !important;
 }
 
 .pricing-card-popular:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 12px 32px rgba(250, 95, 6, 0.25);
+  transform: scale(0.92) translateY(-8px) !important;
+  box-shadow: 0 16px 40px rgba(250, 95, 6, 0.3);
 }
 
 .pricing-card-vertical {

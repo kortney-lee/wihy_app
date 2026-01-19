@@ -655,8 +655,7 @@ export default function AboutScreen() {
 
         {/* Founder Card */}
         <View style={styles.founderCard}>
-          <Text style={styles.founderLabel}>Founder & Lead Architect</Text>
-          <Text style={styles.founderName}>Kortney Lee</Text>
+          <Text style={styles.founderName}></Text>
           <Text style={styles.founderRole}>Founder, WiHY</Text>
           <Text style={styles.founderBio}>
             WiHY was built to turn health confusion into clarity — with tools people can actually use, not just advice.
