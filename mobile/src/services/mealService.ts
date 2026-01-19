@@ -2108,27 +2108,13 @@ class MealService {
 
   /**
    * Get all available diet types
-   * GET /api/meals/diets
+   * Uses built-in diet options (no backend endpoint exists)
    * 
    * Returns list of diets with their descriptions, icons, and categories
    */
   async getDiets(): Promise<DietOption[]> {
-    try {
-      const response = await fetchWithLogging(
-        `${this.baseUrl}/api/meals/diets`
-      );
-      const data = await response.json();
-      
-      if (data.success && data.diets) {
-        return data.diets;
-      }
-      
-      // If API not available, return built-in diet options
-      return this.getBuiltInDietOptions();
-    } catch (error) {
-      console.error('[MealService] Error fetching diets, using built-in:', error);
-      return this.getBuiltInDietOptions();
-    }
+    // Use built-in diet options - no backend endpoint available
+    return this.getBuiltInDietOptions();
   }
 
   /**
