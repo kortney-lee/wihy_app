@@ -4,7 +4,7 @@
  * Handles subscription plan checkout with Stripe integration.
  * Supports all platforms: Web, Android, iOS with proper callback handling.
  * 
- * @see https://auth.wihy.ai for API documentation
+ * @see https://payment.wihy.ai for API documentation
  */
 
 import { Platform, Linking } from 'react-native';
@@ -65,7 +65,7 @@ export interface CheckoutResult {
 // ============= CONSTANTS =============
 
 const CHECKOUT_STORAGE_KEY = '@wihy_pending_checkout';
-const API_BASE_URL = API_CONFIG.authUrl || 'https://auth.wihy.ai';
+const API_BASE_URL = API_CONFIG.paymentUrl || 'https://payment.wihy.ai';
 
 // Available plans
 export const WIHY_PLANS: Plan[] = [

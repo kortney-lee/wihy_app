@@ -275,7 +275,7 @@ const getAuthHeadersForUrl = (url: string): Record<string, string> => {
     // Determine which auth headers to use based on URL
     if (url.includes('ml.wihy.ai')) {
       return getMLAuthHeaders();
-    } else if (url.includes('services.wihy.ai') || url.includes('coaching.wihy.ai') || url.includes('fitness.wihy.ai')) {
+    } else if (url.includes('services.wihy.ai')) {
       return getServicesAuthHeaders();
     }
     return {};

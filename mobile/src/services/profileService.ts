@@ -375,7 +375,7 @@ class ProfileService {
   private cachedSettings: Partial<ProfileSettings> | null = null;
 
   constructor() {
-    this.baseUrl = API_CONFIG.baseUrl;
+    this.baseUrl = API_CONFIG.userUrl || 'https://user.wihy.ai';
   }
 
   // ============= PROFILE CRUD =============
