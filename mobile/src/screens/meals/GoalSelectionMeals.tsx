@@ -280,6 +280,7 @@ export const GoalSelectionMeals: React.FC<GoalSelectionMealsProps> = ({
       params.cuisineType = quickCuisine || undefined;
       params.timeConstraint = quickTime;
       params.quickDiets = quickDiets;
+      params.servings = servings; // Include servings for single meal
     } else if (mode === 'plan') {
       params.planGoal = planGoal || undefined;
       params.duration = duration;
@@ -294,6 +295,7 @@ export const GoalSelectionMeals: React.FC<GoalSelectionMealsProps> = ({
       params.activityLevel = activityLevel;
       params.calorieTarget = calorieTarget ? parseInt(calorieTarget) : undefined;
       params.dietaryRestrictions = programDiets;
+      params.servings = servings; // Include servings for diet programs
       params.duration = DIET_PROGRAMS.find(p => p.id === selectedProgram)?.weeks ? 
         (DIET_PROGRAMS.find(p => p.id === selectedProgram)!.weeks * 7) : 28;
     }
@@ -391,6 +393,12 @@ export const GoalSelectionMeals: React.FC<GoalSelectionMealsProps> = ({
           })}
         </View>
       </View>
+
+      {/* Servings */}
+      <ServingsSelector
+        selectedServings={servings}
+        onServingsChange={setServings}
+      />
 
       {/* Diet Restrictions */}
       <DietSelector

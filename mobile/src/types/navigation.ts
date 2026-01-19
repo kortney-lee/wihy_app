@@ -69,6 +69,9 @@ export type RootStackParamList = {
     error_description?: string;
   } | undefined;
   
+  // Subscribe complete (OAuth-first then pay flow)
+  SubscribeComplete: undefined;
+  
   // Legal and info pages
   About: undefined;
   Terms: undefined;
