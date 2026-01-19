@@ -1429,60 +1429,6 @@ const styles = StyleSheet.create({
     backgroundColor: dashboardTheme.colors.background,
   },
 
-  header: {
-    paddingHorizontal: dashboardTheme.header.paddingHorizontal,
-    paddingTop: dashboardTheme.header.paddingTop,
-    paddingBottom: dashboardTheme.header.paddingBottom,
-    shadowColor: '#059669',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    elevation: 8,
-  },
-
-  headerContent: {
-    alignItems: 'flex-start',
-  },
-
-  headerTitle: {
-    fontSize: 28,
-    fontWeight: '800',
-    color: '#ffffff',
-    letterSpacing: -0.5,
-    marginBottom: 6,
-    textShadowColor: 'rgba(0, 0, 0, 0.1)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 2,
-  },
-
-  headerSubtitle: {
-    fontSize: 16,
-    color: 'rgba(255, 255, 255, 0.9)',
-    fontWeight: '500',
-    marginBottom: 16,
-    letterSpacing: 0.2,
-  },
-
-  headerStats: {
-    alignSelf: 'stretch',
-  },
-
-  statBadge: {
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.3)',
-  },
-
-  headerStatText: {
-    fontSize: 14,
-    color: '#ffffff',
-    fontWeight: '600',
-    textAlign: 'center',
-  },
-
   searchContainer: {
     paddingHorizontal: dashboardTheme.spacing.lg,
     paddingVertical: dashboardTheme.spacing.md,

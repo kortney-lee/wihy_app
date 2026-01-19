@@ -311,9 +311,9 @@ export default function IntegrationTestScreen() {
         userId,
         name: 'Integration Test List',
         items: [
-          { item_name: 'Chicken Breast', quantity: '2 lbs', category: 'protein' },
-          { item_name: 'Spinach', quantity: '1 bunch', category: 'produce' },
-          { item_name: 'Greek Yogurt', quantity: '32 oz', category: 'dairy' },
+          { name: 'Chicken Breast', item_name: 'Chicken Breast', quantity: '2 lbs', category: 'Proteins' },
+          { name: 'Spinach', item_name: 'Spinach', quantity: '1 bunch', category: 'Produce' },
+          { name: 'Greek Yogurt', item_name: 'Greek Yogurt', quantity: '32 oz', category: 'Dairy' },
         ],
       });
       console.log('[Shopping] List created:', JSON.stringify(list, null, 2));

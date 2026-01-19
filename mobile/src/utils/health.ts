@@ -37,8 +37,8 @@ export const requestAppleHealthPermissions = async (
   }
 
   try {
-    const readPermissions = permission.read.map((p) => p as HKQuantityTypeIdentifier);
-    const writePermissions = (permission.write || []).map((p) => p as HKQuantityTypeIdentifier);
+    const readPermissions = permission.read.map((p) => p as (typeof HKQuantityTypeIdentifier)[keyof typeof HKQuantityTypeIdentifier]);
+    const writePermissions = (permission.write || []).map((p) => p as (typeof HKQuantityTypeIdentifier)[keyof typeof HKQuantityTypeIdentifier]);
 
     await HealthKit.requestAuthorization(readPermissions, writePermissions);
 
