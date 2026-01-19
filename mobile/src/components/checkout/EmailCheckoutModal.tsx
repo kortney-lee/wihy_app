@@ -8,10 +8,13 @@ import {
   StyleSheet,
   Platform,
   ActivityIndicator,
+  Image,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, borderRadius } from '../../theme/design-tokens';
-import { WihyLogo, WihyLogoSvg } from '../shared/WihyLogo';
+
+// Import logo image for web compatibility
+const LogoImage = require('../../../assets/Logo_wihy.png');
 
 interface EmailCheckoutModalProps {
   visible: boolean;
@@ -113,18 +116,17 @@ export default function EmailCheckoutModal({
 
           {/* Header */}
           <div style={{ textAlign: 'center', marginBottom: 24 }}>
-            <div style={{
-              width: 80,
-              height: 80,
-              borderRadius: 40,
-              backgroundColor: '#f5f5f5',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              margin: '0 auto 16px',
-            }}>
-              <WihyLogoSvg size={56} variant="gradient" />
-            </div>
+            <img
+              src={LogoImage}
+              alt="WIHY Logo"
+              style={{
+                width: 120,
+                height: 40,
+                marginBottom: 16,
+                display: 'block',
+                margin: '0 auto 16px auto',
+              }}
+            />
             <h2 style={{
               fontSize: 24,
               fontWeight: 700,
@@ -286,7 +288,7 @@ export default function EmailCheckoutModal({
           {/* Header */}
           <View style={styles.header}>
             <View style={styles.iconContainer}>
-              <WihyLogo size={40} variant="gradient" />
+              <Image source={LogoImage} style={{ width: 120, height: 40 }} />
             </View>
             <Text style={styles.title}>Subscribe to {planName}</Text>
             <Text style={styles.price}>{planPrice}</Text>
