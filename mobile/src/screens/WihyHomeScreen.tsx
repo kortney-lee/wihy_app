@@ -714,8 +714,19 @@ export default function WihyHomeScreen({}: Props = {}) {
                     if (file) {
                       console.log('File selected:', file.name);
                       setShowUploadModal(false);
-                      // TODO: Handle file upload
-                      Alert.alert('File Selected', `Selected: ${file.name}`);
+                      
+                      // Convert file to base64 and pass to FoodPhotoFacts
+                      const reader = new FileReader();
+                      reader.onloadend = async () => {
+                        const base64String = reader.result as string;
+                        
+                        // Navigate to FoodPhotoFacts with photo data
+                        navigation.navigate('FoodPhotoFacts', { 
+                          photoData: base64String,
+                          context: 'upload'
+                        });
+                      };
+                      reader.readAsDataURL(file);
                     }
                   }}
                 />
@@ -737,7 +748,19 @@ export default function WihyHomeScreen({}: Props = {}) {
                     if (file && file.type.startsWith('image/')) {
                       console.log('File dropped:', file.name);
                       setShowUploadModal(false);
-                      Alert.alert('File Dropped', `Selected: ${file.name}`);
+                      
+                      // Convert dropped file to base64 and pass to FoodPhotoFacts
+                      const reader = new FileReader();
+                      reader.onloadend = async () => {
+                        const base64String = reader.result as string;
+                        
+                        // Navigate to FoodPhotoFacts with photo data
+                        navigation.navigate('FoodPhotoFacts', { 
+                          photoData: base64String,
+                          context: 'upload'
+                        });
+                      };
+                      reader.readAsDataURL(file);
                     }
                   }}
                   onClick={() => {

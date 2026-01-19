@@ -27,6 +27,8 @@ import { DevPlanSwitcher } from '../components/DevPlanSwitcher';
 import PlansModal from '../components/PlansModal';
 import { hasFamilyAccess, hasCoachAccess } from '../utils/capabilities';
 import SvgIcon from '../components/shared/SvgIcon';
+import { UpgradePrompt } from '../components/UpgradePrompt';
+import { useFeatureAccess } from '../hooks/usePaywall';
 
 const isWeb = Platform.OS === 'web';
 
@@ -61,6 +63,10 @@ export default function Profile() {
   const [loadingSubscription, setLoadingSubscription] = useState(false);
   const [showPlansModal, setShowPlansModal] = useState(false);
   const [showAddOnsModal, setShowAddOnsModal] = useState(false);
+  
+  // AI Add-on upgrade prompt
+  const hasAIAccess = useFeatureAccess('ai');
+  const [showAIUpgrade, setShowAIUpgrade] = useState(false);
 
   // Use user data from context or fallback
   const userInfo = user || {
@@ -225,7 +231,13 @@ export default function Profile() {
           subtitle: 'AI Coach & Instacart • $4.99/mo each',
           type: 'navigation' as const,
           icon: 'sparkles',
-          onPress: () => setShowAddOnsModal(true),
+          onPress: () => {
+            if (!hasAIAccess) {
+              setShowAIUpgrade(true);
+            } else {
+              setShowAddOnsModal(true);
+            }
+          },
         },
         // Family option - only show if user has family access or in dev mode
         ...(showFamilyOption ? [{
@@ -623,6 +635,19 @@ export default function Profile() {
         title="Power-Up Add-ons"
         subtitle="Enhance your WiHY experience"
         showAddOns={true}
+      />
+
+      {/* AI Add-on Upgrade Prompt */}
+      <UpgradePrompt
+        visible={showAIUpgrade}
+        onClose={() => setShowAIUpgrade(false)}
+        onUpgrade={() => {
+          setShowAIUpgrade(false);
+          setShowAddOnsModal(true);
+        }}
+        feature="AI Coach Add-on"
+        description="Get personalized AI-powered health coaching, nutrition advice, and 24/7 support for just $4.99/month."
+        requiredPlan="Premium + AI Add-on"
       />
 
       {/* Dev Plan Switcher - Remove in Production */}
