@@ -72,9 +72,6 @@ export {
   ShoppingListAPI, 
   getShoppingListService, 
   createShoppingListService,
-  type ShoppingList,
-  type ShoppingListItem,
-  type CreateShoppingListRequest,
   type GenerateFromMealPlanRequest,
 } from './shoppingList';
 export { reviewService } from './reviewService';
@@ -176,7 +173,6 @@ export type {
   ScannedRecipe,
   ShoppingListItem as MealShoppingListItem,
   ShoppingList as MealShoppingList,
-  CreateShoppingListRequest,
   SavedMeal,
   QuickTemplatePreset,
   // Progressive Enhancement Types (NEW!)

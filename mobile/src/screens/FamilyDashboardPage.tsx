@@ -179,7 +179,7 @@ export default function FamilyDashboardPage({
               setShowHamburgerMenu(false);
               onMenuClose?.();
               // Navigate to different contexts
-              if (dashboardType === null || dashboardType === 'personal') {
+              if (dashboardType === null) {
                 onContextChange?.('personal');
               } else if (dashboardType === 'coach') {
                 onContextChange?.('coach');

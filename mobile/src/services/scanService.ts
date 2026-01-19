@@ -2,10 +2,13 @@ import { API_CONFIG, getDefaultUserContext } from './config';
 import { fetchWithLogging } from '../utils/apiLogger';
 import type { 
   BarcodeScanResult, 
+  BarcodeScanResponse,
   ImageScanResult, 
   FoodPhotoScanResult,
+  PhotoScanResponse,
   PillScanResult,
   LabelScanResult,
+  LabelScanResponse,
   ScanHistoryResult,
   AskWihyResponse,
   BeautyProductResponse,
@@ -154,7 +157,7 @@ class ScanService {
       return {
         success: false,
         error: error.message || 'Failed to scan barcode. Please try again or take a photo of the nutrition label.',
-      };
+      } as BarcodeScanResponse;
     }
   }
 
@@ -235,7 +238,7 @@ class ScanService {
       return {
         success: false,
         error: error.message || 'Failed to analyze image. Please try again.',
-      };
+      } as PhotoScanResponse;
     }
   }
 
@@ -333,9 +336,11 @@ class ScanService {
       return {
         success: true,
         scan_id: data.analysis?.metadata?.scan_id || `photo_${Date.now()}`,
+        scan_type: 'food_photo' as const,
         analysis: {
           summary: data.analysis?.summary || 'Food photo analyzed successfully',
           confidence_score: data.analysis?.confidence_score || 0.8,
+          meal_type: data.analysis?.meal_type || 'unknown',
           charts: data.analysis?.charts || null,
           metadata: data.analysis?.metadata || {},
           recommendations: data.analysis?.recommendations || [],
@@ -346,6 +351,8 @@ class ScanService {
           nutrition_estimate: data.analysis?.metadata?.nutrition_facts?.per_100g || {},
           confidence: data.analysis?.confidence_score || 0.8,
         },
+        metadata: data.metadata || {},
+        ask_wihy: data.ask_wihy || '',
         image_url: data.image_url || null,
         timestamp: data.timestamp || new Date().toISOString(),
         processing_time: data.processing_time || 0,
@@ -359,7 +366,7 @@ class ScanService {
       return {
         success: false,
         error: error.message || 'Failed to scan food photo. Please ensure the image is clear and try again.',
-      };
+      } as PhotoScanResponse;
     }
   }
 
@@ -434,7 +441,7 @@ class ScanService {
       return {
         success: false,
         error: error.message || 'Failed to scan label',
-      };
+      } as LabelScanResponse;
     }
   }
 

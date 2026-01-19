@@ -9,6 +9,7 @@ export const API_CONFIG = {
   authUrl: 'https://auth.wihy.ai', // Auth service
   paymentUrl: 'https://payment.wihy.ai', // Payment service (Stripe) - fallback: wihy-payment-service-xxx.run.app
   userUrl: 'https://user.wihy.ai', // User service - fallback: wihy-user-service-xxx.run.app
+  coachingUrl: 'https://services.wihy.ai', // Coaching service
   expoProjectId: process.env.EXPO_PUBLIC_PROJECT_ID || 'your-project-id', // For push notifications
   
   // Client credentials for service-to-service auth
@@ -21,6 +22,7 @@ export const API_CONFIG = {
     scan: '/api/scan', // Barcode scan endpoint
     scanPhoto: '/api/scan/photo', // Food photo analysis
     scanLabel: '/api/scan/label', // Label scanning (greenwashing detection)
+    labelScan: '/api/scan/label', // Alias for label scanning
     scanHistory: '/api/scan/history',
     pillScan: '/api/v1/medications/pills/scan', // Pill identification
     pillConfirm: '/api/v1/medications/pills/confirm', // Pill confirmation

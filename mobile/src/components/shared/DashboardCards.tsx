@@ -27,14 +27,24 @@ export const ActionCard: React.FC<ActionCardProps> = ({
 }) => {
   const iconContainerSize = iconSize + 20; // Add padding to icon container
 
-  const CardWrapper = gradient ? LinearGradient : View;
-  const cardProps = gradient
-    ? {
-        colors: [color + '20', color + '10'],
-        start: { x: 0, y: 0 },
-        end: { x: 1, y: 1 },
-      }
-    : {};
+  const cardContent = (
+    <>
+      <View style={[
+        styles.iconContainer,
+        {
+          backgroundColor: gradient ? 'transparent' : color + '20',
+          width: iconContainerSize,
+          height: iconContainerSize,
+        },
+      ]}>
+        <Ionicons name={icon as any} size={iconSize} color={color} />
+      </View>
+      <View style={styles.textContainer}>
+        <Text style={styles.title}>{title}</Text>
+        <Text style={styles.subtitle}>{subtitle}</Text>
+      </View>
+    </>
+  );
 
   return (
     <TouchableOpacity
@@ -42,25 +52,20 @@ export const ActionCard: React.FC<ActionCardProps> = ({
       onPress={onPress}
       activeOpacity={0.7}
     >
-      <CardWrapper
-        {...cardProps}
-        style={styles.card}
-      >
-        <View style={[
-          styles.iconContainer,
-          {
-            backgroundColor: gradient ? 'transparent' : color + '20',
-            width: iconContainerSize,
-            height: iconContainerSize,
-          },
-        ]}>
-          <Ionicons name={icon as any} size={iconSize} color={color} />
+      {gradient ? (
+        <LinearGradient
+          colors={[color + '20', color + '10']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.card}
+        >
+          {cardContent}
+        </LinearGradient>
+      ) : (
+        <View style={styles.card}>
+          {cardContent}
         </View>
-        <View style={styles.textContainer}>
-          <Text style={styles.title}>{title}</Text>
-          <Text style={styles.subtitle}>{subtitle}</Text>
-        </View>
-      </CardWrapper>
+      )}
     </TouchableOpacity>
   );
 };

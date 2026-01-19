@@ -10,8 +10,15 @@
  * 3. Return public URL for storage in database
  */
 
-// @ts-ignore - expo-file-system may not have types in all configurations
+// @ts-ignore - expo-file-system types differ between Expo SDK versions
 import * as FileSystem from 'expo-file-system';
+
+// Type aliases for FileSystem methods that changed in Expo 54
+// @ts-ignore
+const cacheDirectory = FileSystem.cacheDirectory || '';
+// @ts-ignore
+const EncodingType = FileSystem.EncodingType || { Base64: 'base64' };
+
 import { servicesApi } from './servicesApiClient';
 import { GetUploadUrlResponse } from '../types/scan.types';
 
@@ -137,14 +144,14 @@ class UploadService {
     extension: string = 'jpg'
   ): Promise<UploadResult> {
     // Create temporary file
-    const tempUri = `${FileSystem.cacheDirectory}temp_upload_${Date.now()}.${extension}`;
+    const tempUri = `${cacheDirectory}temp_upload_${Date.now()}.${extension}`;
     
     // Remove data URL prefix if present
     const cleanBase64 = base64Data.replace(/^data:image\/\w+;base64,/, '');
     
     // Write base64 to temp file
     await FileSystem.writeAsStringAsync(tempUri, cleanBase64, {
-      encoding: FileSystem.EncodingType.Base64,
+      encoding: EncodingType.Base64,
     });
 
     try {

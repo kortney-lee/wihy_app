@@ -159,7 +159,7 @@ export const B2BPricingScreen: React.FC<Props> = ({ navigation }) => {
   };
 
   // Navigate to tab screens (inside Main TabNavigator)
-  const navigateToTab = (tabName: string) => {
+  const navigateToTab = (tabName: 'Home' | 'Scan' | 'Chat' | 'Health' | 'Profile' | 'CoachSelection') => {
     navigation.navigate('Main', { screen: tabName });
   };
 

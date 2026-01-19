@@ -14,9 +14,12 @@ import { WIHYError, WIHYErrorCode as ErrorCode, createErrorFromResponse, createN
 import { RateLimiter } from '../utils/rateLimiter';
 import type {
   BarcodeScanResult,
+  BarcodeScanResponse,
   FoodPhotoScanResult,
+  PhotoScanResponse,
   PillScanResult,
   LabelScanResult,
+  LabelScanResponse,
   ScanHistoryResult,
   PillMatch,
 } from './types';
@@ -224,7 +227,7 @@ export class WIHYApiService {
       return {
         success: false,
         error: (error as WIHYError).message || 'Failed to scan barcode',
-      };
+      } as BarcodeScanResponse;
     }
   }
 
@@ -293,7 +296,7 @@ export class WIHYApiService {
       return {
         success: false,
         error: (error as WIHYError).message || 'Failed to scan food photo',
-      };
+      } as PhotoScanResponse;
     }
   }
 
@@ -462,7 +465,7 @@ export class WIHYApiService {
       return {
         success: false,
         error: (error as WIHYError).message || 'Failed to scan label',
-      };
+      } as LabelScanResponse;
     }
   }
 

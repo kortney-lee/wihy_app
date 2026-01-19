@@ -30,7 +30,8 @@ interface RevenueStats {
 }
 
 export default function CoachOverview() {
-  const { user, coachId } = useContext(AuthContext);
+  const { user } = useContext(AuthContext);
+  const coachId = user?.coachId;
   const [selectedPeriod, setSelectedPeriod] = useState<'week' | 'month' | 'year'>('month');
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);

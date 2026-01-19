@@ -345,6 +345,9 @@ const styles = StyleSheet.create({
     color: 'rgba(255, 255, 255, 0.8)',
     marginTop: 2,
   },
+  backButton: {
+    padding: 8,
+  },
   
   loadingContainer: {
     flex: 1,
@@ -355,28 +358,6 @@ const styles = StyleSheet.create({
     marginTop: 16,
     fontSize: 16,
     color: '#6b7280',
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    backgroundColor: '#fff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#e5e7eb',
-  },
-  backButton: {
-    padding: 8,
-  },
-  headerTitle: {
-    flex: 1,
-    fontSize: 20,
-    fontWeight: '600',
-    textAlign: 'center',
-    marginRight: 40,
-  },
-  headerSpacer: {
-    width: 40,
   },
   filterContainer: {
     flexDirection: 'row',

@@ -133,8 +133,10 @@ export interface Additive {
 // ========================================
 export interface BarcodeScanResponse {
   success: boolean;
+  error?: string;
   timestamp: string;
   processing_time_ms: number;
+  processing_time?: number;
   scan_type: 'barcode' | 'image' | 'product_name';
   
   // Product Info
@@ -245,6 +247,7 @@ export interface DetectedObject {
 // ========================================
 export interface PhotoScanResponse {
   success: boolean;
+  error?: string;
   scan_id: string;
   scan_type: 'food_photo';
   image_url: string | null;
@@ -259,6 +262,14 @@ export interface PhotoScanResponse {
     confidence_score: number;
     meal_type: string;
     summary: string;
+    charts?: any;
+    visualizations?: any;
+    metadata?: any;
+    recommendations?: string[];
+    openai_analysis?: string | null;
+    nutrition_estimate?: any;
+    confidence?: number;
+    [key: string]: any;
   };
   
   metadata: {
@@ -382,6 +393,7 @@ export interface MarketingClaim {
 
 export interface LabelScanResponse {
   success: boolean;
+  error?: string;
   scan_id: string;
   scan_type: 'label';
   image_url: string | null;
@@ -392,24 +404,22 @@ export interface LabelScanResponse {
     product_name: string;
     confidence: number;
     greenwashing_score: number;
+    sustainability_score?: number;
+    certifications?: string[];
+    health_claims?: string[];
+    ingredients_list?: string[];
     claim_count: number;
     greenwashing_flags: GreenwashingFlag[];
     detected_claims: MarketingClaim[];
     full_text: string;
     recommendations: string[];
+    charts?: any;
+    visualizations?: any;
+    openai_analysis?: string | null;
   };
   
   ask_wihy: string;
 }
-
-// ========================================
-// UNION TYPE FOR ALL SCAN RESPONSES
-// ========================================
-export type ScanResponse = 
-  | BarcodeScanResponse 
-  | PhotoScanResponse 
-  | RecipeScanResponse 
-  | LabelScanResponse;
 
 // ========================================
 // BEAUTY PRODUCT SCAN RESPONSE
@@ -423,6 +433,7 @@ export interface BeautyIngredientConcern {
 export interface BeautyProductResponse {
   success: boolean;
   found: boolean;
+  scan_type?: 'beauty';
   search_type: 'barcode' | 'text';
   search_value: string;
   product_type: 'beauty';
@@ -472,6 +483,7 @@ export interface PetFoodIngredientConcern {
 export interface PetFoodProductResponse {
   success: boolean;
   found: boolean;
+  scan_type?: 'pet_food';
   search_type: 'barcode' | 'text';
   search_value: string;
   product_type: 'pet_food';
@@ -597,12 +609,6 @@ export type BarcodeScanResult = BarcodeScanResponse;
 export type ImageScanResult = PhotoScanResponse;
 export type FoodPhotoScanResult = PhotoScanResponse;
 export type LabelScanResult = LabelScanResponse;
-    confidence_score?: number;
-    charts?: any;
-    visualizations?: any;
-    openai_analysis?: string | null;
-  };
-}
 
 // ========================================
 // PILL SCAN RESULT

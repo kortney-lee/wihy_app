@@ -1238,6 +1238,13 @@ class AuthService {
     ]);
   }
 
+  /**
+   * Clear all authentication tokens (public alias for clearAllData)
+   */
+  async clearTokens(): Promise<void> {
+    await this.clearAllData();
+  }
+
   // === Utility Methods ===
 
   private generateState(): string {

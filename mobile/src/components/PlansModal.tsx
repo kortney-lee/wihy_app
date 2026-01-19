@@ -153,6 +153,7 @@ export default function PlansModal({
   subtitle = 'Choose a plan that works for you',
   showAddOns = false,
 }: PlansModalProps) {
+  const { user } = useAuth();
   const [purchasing, setPurchasing] = useState(false);
   const [initializingPurchases, setInitializingPurchases] = useState(true);
   const [activeTab, setActiveTab] = useState<'plans' | 'addons'>(showAddOns ? 'addons' : 'plans');
@@ -216,7 +217,8 @@ export default function PlansModal({
         };
         
         const checkoutPlanId = checkoutPlanMap[planId] || planId;
-        const result = await checkoutService.initiateCheckout(checkoutPlanId);
+        const userEmail = user?.email || '';
+        const result = await checkoutService.initiateCheckout(checkoutPlanId, userEmail);
         
         if (result.success && result.checkoutUrl) {
           // Open Stripe checkout in new tab
