@@ -27,7 +27,11 @@ interface ErrorLog {
   timestamp: string;
 }
 
-const isDev = __DEV__;
+// Check for dev mode - handle web and native
+const isDev = typeof __DEV__ !== 'undefined' ? __DEV__ : process.env.NODE_ENV !== 'production';
+
+// Force enable logging for debugging (set to true to always log)
+const FORCE_LOGGING = true;
 
 class ApiLogger {
   private activeRequests: Map<string, number> = new Map();
@@ -36,7 +40,7 @@ class ApiLogger {
    * Log API request
    */
   logRequest(method: string, url: string, options?: RequestInit): string {
-    if (!isDev) return '';
+    if (!isDev && !FORCE_LOGGING) return '';
 
     const requestId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     const timestamp = new Date().toISOString();
@@ -93,7 +97,7 @@ class ApiLogger {
    * Log successful API response
    */
   logResponse(requestId: string, response: Response, data?: any): void {
-    if (!isDev) return;
+    if (!isDev && !FORCE_LOGGING) return;
 
     const startTime = this.activeRequests.get(requestId);
     const duration = startTime ? Date.now() - startTime : 0;
@@ -126,7 +130,7 @@ class ApiLogger {
    * Log API error
    */
   logError(requestId: string, error: any, request?: { method: string; url: string; options?: RequestInit }): void {
-    if (!isDev) return;
+    if (!isDev && !FORCE_LOGGING) return;
 
     const startTime = this.activeRequests.get(requestId);
     const duration = startTime ? Date.now() - startTime : 0;
@@ -160,7 +164,7 @@ class ApiLogger {
    * Log general API info
    */
   logInfo(message: string, data?: any): void {
-    if (!isDev) return;
+    if (!isDev && !FORCE_LOGGING) return;
 
     console.log(
       `%c[API INFO] ℹ️ ${message}`,
@@ -173,7 +177,7 @@ class ApiLogger {
    * Log API warning
    */
   logWarning(message: string, data?: any): void {
-    if (!isDev) return;
+    if (!isDev && !FORCE_LOGGING) return;
 
     console.warn(
       `%c[API WARNING] ⚠️ ${message}`,
@@ -241,7 +245,7 @@ class ApiLogger {
    * Log network connectivity status
    */
   logNetworkStatus(isConnected: boolean): void {
-    if (!isDev) return;
+    if (!isDev && !FORCE_LOGGING) return;
 
     console.log(
       `%c[NETWORK] ${isConnected ? '🟢 Connected' : '🔴 Disconnected'}`,
@@ -253,7 +257,7 @@ class ApiLogger {
    * Log cache hit/miss
    */
   logCache(key: string, hit: boolean): void {
-    if (!isDev) return;
+    if (!isDev && !FORCE_LOGGING) return;
 
     console.log(
       `%c[CACHE] ${hit ? '✅ HIT' : '❌ MISS'}: ${key}`,
