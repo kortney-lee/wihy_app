@@ -7,8 +7,8 @@ export const API_CONFIG = {
   servicesUrl: 'https://services.wihy.ai', // Services API
   mlApiUrl: 'https://ml.wihy.ai', // ML API for chat/ask
   authUrl: 'https://auth.wihy.ai', // Auth service
-  coachingUrl: 'https://coaching.wihy.ai', // Coaching service
-  fitnessUrl: 'https://fitness.wihy.ai', // Fitness service
+  paymentUrl: 'https://payment.wihy.ai', // Payment service (Stripe) - fallback: wihy-payment-service-xxx.run.app
+  userUrl: 'https://user.wihy.ai', // User service - fallback: wihy-user-service-xxx.run.app
   expoProjectId: process.env.EXPO_PUBLIC_PROJECT_ID || 'your-project-id', // For push notifications
   
   // Client credentials for service-to-service auth
