@@ -90,6 +90,29 @@ The frontend app (`mealService.ts`) expects various meal endpoints at `services.
 
 ---
 
+### Issue 3: Scan History Endpoint - Database Connection Error
+
+**Endpoint:** `GET /api/scan/history` (or similar scan endpoint)
+
+**Error Response:**
+```json
+{
+  "success": false,
+  "error": "Cannot read properties of null (reading 'connect')"
+}
+```
+
+**Status:** 500 Internal Server Error (260ms)
+
+**Problem:** Database connection is null when trying to query scan history. This indicates:
+1. Database pool not initialized
+2. Connection string misconfigured
+3. Database service not running
+
+**Fix Required:** Ensure database connection is properly initialized before handling requests.
+
+---
+
 ## Currently Working Endpoints
 
 These endpoints appear to be working:
