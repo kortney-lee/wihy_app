@@ -125,11 +125,14 @@ const CONSUMER_PLANS = [
     monthlyPrice: 29.99,
     commission: '1%',
     tagline: 'For health & fitness professionals',
+    note: 'A team member will reach out for training.',
     features: [
       'Unlimited clients',
       'Meal plan and workout creation',
       'Progress tracking & reporting',
       'Full app access for yourself',
+      'Up to 1% affiliate commission',
+      'A team member will reach out for training',
     ],
     icon: 'fitness',
   },
@@ -559,7 +562,7 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
                     {plan.setupFee ? (
                       <>
                         <span className="pricing-amount">${formatPrice(plan.setupFee)}</span>
-                        <span className="pricing-period"> setup + {plan.commission}</span>
+                        <span className="pricing-period"> setup + ${formatPrice(plan.monthlyPrice)}/mo + {plan.commission}</span>
                       </>
                     ) : plan.monthlyPrice === 0 ? (
                       <>
@@ -579,6 +582,9 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
                   </div>
                   {billingCycle === 'yearly' && plan.yearlyPrice && plan.yearlyPrice > 0 && (
                     <p className="pricing-yearly-note">${formatPrice(plan.yearlyPrice)}/year</p>
+                  )}
+                  {plan.note && (
+                    <p className="pricing-note" style={{ fontSize: '12px', color: '#6b7280', fontStyle: 'italic', marginTop: '8px', textAlign: 'center' }}>{plan.note}</p>
                   )}
 
                   <ul className="pricing-features">
@@ -1124,7 +1130,7 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
               {plan.setupFee ? (
                 <>
                   <Text style={styles.priceAmount}>${formatPrice(plan.setupFee)}</Text>
-                  <Text style={styles.pricePeriod}> setup + {plan.commission}</Text>
+                  <Text style={styles.pricePeriod}> setup + ${formatPrice(plan.monthlyPrice)}/mo + {plan.commission}</Text>
                 </>
               ) : plan.monthlyPrice === 0 ? (
                 <Text style={styles.priceAmount}>Free</Text>
@@ -1139,6 +1145,9 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
                 </>
               )}
             </View>
+            {plan.note && (
+              <Text style={{ fontSize: 12, color: '#6b7280', fontStyle: 'italic', textAlign: 'center', marginBottom: 8 }}>{plan.note}</Text>
+            )}
 
             <View style={styles.featuresList}>
               {plan.features.map((feature, idx) => (

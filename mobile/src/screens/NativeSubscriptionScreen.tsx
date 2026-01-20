@@ -45,8 +45,15 @@ const NATIVE_PLANS = [
   {
     id: 'coach',
     name: 'Coach',
-    price: '$99.99 + $29.99/mo',
-    description: 'For fitness and nutrition professionals',
+    price: '$99.99 setup + $29.99/mo',
+    description: 'For health & fitness professionals',
+    features: [
+      'Unlimited clients',
+      'Meal plan & workout creation',
+      'Progress tracking & reporting',
+      'Up to 1% affiliate commission',
+      'A team member will reach out for training',
+    ],
   },
 ];
 
