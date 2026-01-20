@@ -127,10 +127,15 @@ const SvgIcon: React.FC<SvgIconProps> = ({ name, size = 24, color = '#000', styl
         );
 
       case 'mail':
+        // Modern Gmail icon with colorful M design
         return (
-          <Svg width={size} height={size} viewBox="0 0 512 512" fill="none" stroke={color} strokeWidth="32">
-            <Rect x="48" y="96" width="416" height="320" rx="40" ry="40" strokeLinecap="round" strokeLinejoin="round" />
-            <Path d="M112 160l144 112 144-112" strokeLinecap="round" strokeLinejoin="round" />
+          <Svg width={size} height={size} viewBox="0 0 512 512">
+            <Path d="M464 80H48C21.5 80 0 101.5 0 128v256c0 26.5 21.5 48 48 48h416c26.5 0 48-21.5 48-48V128c0-26.5-21.5-48-48-48z" fill="#ECEFF1" />
+            <Path d="M464 80H48l208 152L464 80z" fill="#CFD8DC" />
+            <Path d="M256 232L48 80v304l208-152z" fill="#F44336" />
+            <Path d="M256 232l208-152v304L256 232z" fill="#C62828" />
+            <Path d="M48 384V80l208 152L48 384z" fill="#FBC02D" />
+            <Path d="M464 384V80L256 232l208 152z" fill="#1976D2" />
           </Svg>
         );
 

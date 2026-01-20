@@ -156,7 +156,7 @@ export function WebTopNav({ activeTab = 'none' }: WebTopNavProps) {
             e.stopPropagation();
             navigateToTab('Chat');
           }} 
-          className={`web-nav-item nav-chat web-hide ${activeTab === 'chat' ? 'active' : ''}`} 
+          className={`web-nav-item nav-chat ${activeTab === 'chat' ? 'active' : ''}`} 
           type="button"
         >
           <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
