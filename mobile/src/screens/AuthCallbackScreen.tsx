@@ -173,7 +173,8 @@ export default function AuthCallbackScreen() {
           // Navigate to dashboard/main
           setTimeout(() => {
             if (Platform.OS === 'web' && typeof window !== 'undefined') {
-              window.location.href = '/dashboard';
+              // Use '/' which maps to Main > Home tab in the linking config
+              window.location.href = '/';
             } else {
               navigation.dispatch(
                 CommonActions.reset({
