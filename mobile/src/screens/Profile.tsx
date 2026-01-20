@@ -150,11 +150,8 @@ export default function Profile() {
   };
 
   const handleEditProfile = () => {
-    Alert.alert(
-      'Edit Profile',
-      'Profile editing functionality would open here',
-      [{ text: 'OK' }]
-    );
+    // Navigate to the OnboardingFlow which has profile setup steps
+    navigation.navigate('OnboardingFlow');
   };
 
   const handleHealthData = () => {
