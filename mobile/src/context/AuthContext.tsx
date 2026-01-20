@@ -24,8 +24,9 @@ export interface User {
   streakDays: number;
   preferences: UserPreferences;
 
-  // Access control
-  role?: 'user' | 'coach' | 'admin' | 'family-admin';
+  // Access control - role determines plan override
+  // Roles match plan types: user→free, premium→premium, family-basic, family-pro, coach, employee→coach-family (no dev), admin→admin
+  role?: 'user' | 'premium' | 'family-basic' | 'family-pro' | 'coach' | 'employee' | 'admin';
   status?: 'active' | 'inactive' | 'suspended' | 'pending';
   isDeveloper?: boolean;
   
@@ -54,7 +55,7 @@ export interface User {
   organizationRole?: 'admin' | 'user' | 'student' | 'employee';
   
   // Legacy field (deprecated, keep for migration)
-  userRole?: 'user' | 'coach' | 'parent' | 'admin' | 'family-admin';
+  userRole?: 'user' | 'premium' | 'family-basic' | 'family-pro' | 'coach' | 'employee' | 'admin' | 'parent';
 }
 
 interface AuthContextType {
@@ -180,19 +181,27 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const normalizedRole = roleFromServer ? roleFromServer.toLowerCase().replace('_', '-') as User['role'] : existingData?.role;
     
     // ✅ Role-based plan overrides
-    // Admin gets full access, family-admin gets family-pro features
+    // Each role maps to a specific plan for capabilities
     const getPlanFromRole = (role: User['role'] | undefined, backendPlan: string): User['plan'] => {
-      if (role === 'admin') return 'admin';
-      if (role === 'family-admin') return 'family-pro';
-      return (backendPlan || 'free') as User['plan'];
+      switch (role) {
+        case 'admin':       return 'admin';        // Full access to everything
+        case 'employee':    return 'coach-family'; // Coach + Family, no dev tools
+        case 'coach':       return 'coach';        // Coach platform
+        case 'family-pro':  return 'family-pro';   // Family Pro features
+        case 'family-basic': return 'family-basic'; // Family Basic features
+        case 'premium':     return 'premium';      // Premium features
+        case 'user':        return 'free';         // Free tier
+        default:            return (backendPlan || 'free') as User['plan'];
+      }
     };
     
     const plan = getPlanFromRole(normalizedRole, authUser.plan || existingData?.plan || 'free');
     const addOns = authUser.addOns || existingData?.addOns || [];
     
     // ✅ Use capabilities from backend if available, otherwise compute client-side
-    // For admin/family-admin users, always compute client-side to ensure correct access
-    const shouldComputeClientSide = normalizedRole === 'admin' || normalizedRole === 'family-admin';
+    // For role-based users, always compute client-side to ensure correct access
+    const rolesWithOverride: User['role'][] = ['admin', 'employee', 'coach', 'family-pro', 'family-basic', 'premium'];
+    const shouldComputeClientSide = normalizedRole && rolesWithOverride.includes(normalizedRole);
     const capabilities = (!shouldComputeClientSide && authUser.capabilities)
       ? authUser.capabilities 
       : getPlanCapabilities(plan, addOns);

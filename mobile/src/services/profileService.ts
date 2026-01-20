@@ -18,7 +18,7 @@ const STORAGE_KEYS = {
 
 // ============= TYPE DEFINITIONS =============
 
-export type UserRole = 'user' | 'premium' | 'coach' | 'admin' | 'family-admin' | 'developer';
+export type UserRole = 'user' | 'premium' | 'family-basic' | 'family-pro' | 'coach' | 'employee' | 'admin';
 export type ThemeMode = 'light' | 'dark' | 'system';
 export type UnitSystem = 'metric' | 'imperial';
 export type LanguageCode = 'en' | 'es' | 'fr' | 'de' | 'pt' | 'zh' | 'ja';
