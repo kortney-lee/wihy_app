@@ -59,6 +59,7 @@ export interface User {
 interface AuthContextType {
   user: User | null;
   loading: boolean;
+  initializing: boolean; // True until first auth check completes
   signIn: (provider: string, credentials?: any) => Promise<User>;
   signOut: () => Promise<void>;
   updateUser: (userData: Partial<User>) => Promise<User>;
@@ -74,6 +75,7 @@ interface AuthContextType {
 export const AuthContext = createContext<AuthContextType>({
   user: null,
   loading: false,
+  initializing: true, // Start as true until first auth check
   signIn: async () => {
     throw new Error('AuthContext not initialized');
   },
@@ -112,6 +114,7 @@ const normalizeUser = (userData: Omit<User, 'preferences'> & { preferences?: Par
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(false);
+  const [initializing, setInitializing] = useState(true); // True until first auth check completes
 
   // Load user data on app start
   useEffect(() => {
@@ -153,6 +156,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
     } finally {
       setLoading(false);
+      setInitializing(false); // Auth check complete
     }
   };
 
@@ -550,6 +554,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const value: AuthContextType = {
     user,
     loading,
+    initializing,
     signIn,
     signOut,
     updateUser,

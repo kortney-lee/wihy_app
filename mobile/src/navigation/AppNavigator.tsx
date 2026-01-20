@@ -191,7 +191,7 @@ function ProfileScreenComponent() {
 
 function TabNavigator() {
   const insets = useSafeAreaInsets();
-  const { user } = useContext(AuthContext);
+  const { user, initializing } = useContext(AuthContext);
   const [showPlansModal, setShowPlansModal] = React.useState(false);
 
   return (
@@ -301,7 +301,8 @@ function TabNavigator() {
           tabPress: (e) => {
             // On native platforms (iOS/Android), if user is not logged in,
             // show the PlansModal (Upgrade to Access Features) instead of Health Dashboard
-            if (Platform.OS !== 'web' && !user) {
+            // Skip check while auth is still initializing to avoid false positives
+            if (Platform.OS !== 'web' && !user && !initializing) {
               e.preventDefault();
               setShowPlansModal(true);
             }
