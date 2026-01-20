@@ -229,6 +229,82 @@ The frontend app (`mealService.ts`) expects various meal endpoints at `services.
 
 ---
 
+### Issue 6: Generated Meal Plans Have Sparse/Generic Ingredients
+
+**Problem:** When meal plans are generated via `POST /api/meals/create-from-text`, the returned recipes have sparse or generic ingredient lists without proper amounts.
+
+**Current Response (Example):**
+```json
+{
+  "plan": {
+    "recipes": [
+      {
+        "name": "Garden Herb Omelette",
+        "ingredients": [
+          "Main ingredient",  // ❌ Generic placeholder
+          "Salt and pepper",   // ❌ No amount/unit
+          "Olive oil"          // ❌ No amount/unit
+        ]
+      }
+    ]
+  }
+}
+```
+
+**Expected Response:**
+```json
+{
+  "plan": {
+    "recipes": [
+      {
+        "name": "Garden Herb Omelette",
+        "ingredients": [
+          { "name": "Eggs", "amount": 3, "unit": "large" },
+          { "name": "Fresh Spinach", "amount": 1, "unit": "cup" },
+          { "name": "Cherry Tomatoes", "amount": 0.5, "unit": "cup" },
+          { "name": "Feta Cheese", "amount": 2, "unit": "oz" },
+          { "name": "Olive Oil", "amount": 1, "unit": "tbsp" },
+          { "name": "Salt", "amount": 0.25, "unit": "tsp" },
+          { "name": "Black Pepper", "amount": 0.125, "unit": "tsp" }
+        ]
+      }
+    ]
+  }
+}
+```
+
+**Impact:**
+- Shopping list shows generic items like "Main ingredient"
+- Cannot calculate accurate grocery costs
+- Cannot provide proper quantities for shopping
+
+**Fix Required:**
+1. AI prompt must require specific ingredients with amounts and units
+2. Each ingredient must be a structured object: `{ name, amount, unit }`
+3. Do not use placeholders like "Main ingredient"
+
+---
+
+### Issue 7: Shopping List API Endpoints Return 404
+
+**Endpoints:**
+```
+POST /api/meal-programs/:programId/shopping-list  -> 404 Not Found
+GET  /api/shopping-lists/:listId                   -> 404 Not Found
+PUT  /api/shopping-lists/:listId                   -> 404 Not Found
+```
+
+**Expected:** These endpoints should:
+1. Generate shopping list from a saved meal plan
+2. Retrieve a saved shopping list by ID
+3. Update shopping list (mark items checked, add items)
+
+**Current Workaround:** Client extracts shopping list from meal plan ingredients locally, but data quality depends on Issue 6 being fixed.
+
+**Fix Required:** Deploy `/api/shopping-lists/*` and `/api/meal-programs/*` routes to backend.
+
+---
+
 ## Currently Working Endpoints
 
 These endpoints appear to be working:
