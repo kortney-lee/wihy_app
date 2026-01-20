@@ -3561,7 +3561,7 @@ export default function CreateMeals() {
                       </Text>
                       <Text style={styles.calendarMealName}>{meal.meal_name}</Text>
                       <Text style={styles.calendarMealMacros}>
-                        {meal.calories} cal • {meal.protein}g protein • {meal.carbs}g carbs • {meal.fat}g fat
+                        {meal.calories || 0} cal • {meal.protein || 0}g protein • {meal.carbs || 0}g carbs • {meal.fat || 0}g fat
                       </Text>
                     </View>
                     <Ionicons name="chevron-forward" size={20} color="#9ca3af" />
@@ -3589,15 +3589,26 @@ export default function CreateMeals() {
               <Text style={styles.calendarSummaryTitle}>Plan Summary</Text>
               <View style={styles.calendarSummaryStats}>
                 <View style={styles.calendarSummaryStat}>
-                  <Text style={styles.calendarSummaryValue}>{activeMealPlan.duration_days || 0}</Text>
+                  <Text style={styles.calendarSummaryValue}>{activeMealPlan.duration_days || activeMealPlan.days?.length || 0}</Text>
                   <Text style={styles.calendarSummaryLabel}>Days</Text>
                 </View>
                 <View style={styles.calendarSummaryStat}>
-                  <Text style={styles.calendarSummaryValue}>{activeMealPlan.summary?.total_meals || 0}</Text>
+                  <Text style={styles.calendarSummaryValue}>
+                    {activeMealPlan.summary?.total_meals || 
+                      activeMealPlan.days?.reduce((sum, day) => sum + (day.meals?.length || 0), 0) || 0}
+                  </Text>
                   <Text style={styles.calendarSummaryLabel}>Meals</Text>
                 </View>
                 <View style={styles.calendarSummaryStat}>
-                  <Text style={styles.calendarSummaryValue}>{activeMealPlan.summary?.avg_calories_per_day || 0}</Text>
+                  <Text style={styles.calendarSummaryValue}>
+                    {activeMealPlan.summary?.avg_calories_per_day || 
+                      Math.round((activeMealPlan.days?.reduce((sum, day) => {
+                        const dayCalories = day.meals?.reduce((mealSum, meal: any) => {
+                          return mealSum + (meal.nutrition?.calories || meal.calories || 0);
+                        }, 0) || 0;
+                        return sum + dayCalories;
+                      }, 0) || 0) / (activeMealPlan.days?.length || 1)) || 0}
+                  </Text>
                   <Text style={styles.calendarSummaryLabel}>Avg Cal/Day</Text>
                 </View>
               </View>
