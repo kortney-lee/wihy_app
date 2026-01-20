@@ -25,7 +25,7 @@ export interface User {
   preferences: UserPreferences;
 
   // Access control
-  role?: 'user' | 'coach' | 'admin';
+  role?: 'user' | 'coach' | 'admin' | 'family-admin';
   status?: 'active' | 'inactive' | 'suspended' | 'pending';
   isDeveloper?: boolean;
   
@@ -54,7 +54,7 @@ export interface User {
   organizationRole?: 'admin' | 'user' | 'student' | 'employee';
   
   // Legacy field (deprecated, keep for migration)
-  userRole?: 'user' | 'coach' | 'parent' | 'admin';
+  userRole?: 'user' | 'coach' | 'parent' | 'admin' | 'family-admin';
 }
 
 interface AuthContextType {
@@ -177,18 +177,23 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     
     // Role / developer flags from server or stored data (need this first to determine plan)
     const roleFromServer = authUser.role || authUser.profile_data?.role;
-    const normalizedRole = roleFromServer ? roleFromServer.toLowerCase() as User['role'] : existingData?.role;
+    const normalizedRole = roleFromServer ? roleFromServer.toLowerCase().replace('_', '-') as User['role'] : existingData?.role;
     
-    // ✅ Admin role gets full access regardless of backend plan
-    // This ensures admins can see all dashboards even if backend returns plan: 'free'
-    const plan = normalizedRole === 'admin' 
-      ? 'admin' as User['plan']
-      : (authUser.plan || existingData?.plan || 'free') as User['plan'];
+    // ✅ Role-based plan overrides
+    // Admin gets full access, family-admin gets family-pro features
+    const getPlanFromRole = (role: User['role'] | undefined, backendPlan: string): User['plan'] => {
+      if (role === 'admin') return 'admin';
+      if (role === 'family-admin') return 'family-pro';
+      return (backendPlan || 'free') as User['plan'];
+    };
+    
+    const plan = getPlanFromRole(normalizedRole, authUser.plan || existingData?.plan || 'free');
     const addOns = authUser.addOns || existingData?.addOns || [];
     
     // ✅ Use capabilities from backend if available, otherwise compute client-side
-    // For admin users, always compute client-side to ensure full access
-    const capabilities = (normalizedRole !== 'admin' && authUser.capabilities)
+    // For admin/family-admin users, always compute client-side to ensure correct access
+    const shouldComputeClientSide = normalizedRole === 'admin' || normalizedRole === 'family-admin';
+    const capabilities = (!shouldComputeClientSide && authUser.capabilities)
       ? authUser.capabilities 
       : getPlanCapabilities(plan, addOns);
     
