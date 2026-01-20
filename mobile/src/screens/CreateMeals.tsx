@@ -1602,22 +1602,28 @@ export default function CreateMeals() {
 
   const handleUseTemplate = async (template: LocalMealTemplate) => {
     setMealName(template.name);
-    setCalories(template.nutrition.calories.toString());
-    setProtein(template.nutrition.protein.toString());
-    setCarbs(template.nutrition.carbs.toString());
-    setFat(template.nutrition.fat.toString());
-    setServingSize(template.servings.toString());
-    setSelectedTags(template.tags);
+    setCalories(template.nutrition?.calories?.toString() || '');
+    setProtein(template.nutrition?.protein?.toString() || '');
+    setCarbs(template.nutrition?.carbs?.toString() || '');
+    setFat(template.nutrition?.fat?.toString() || '');
+    setServingSize(template.servings?.toString() || '1');
+    setSelectedTags(template.tags || []);
     
-    const templateIngredients: Ingredient[] = template.ingredients.map((ing, index) => ({
+    // Set meal type based on category if available
+    const category = template.category?.toLowerCase();
+    if (category === 'breakfast' || category === 'lunch' || category === 'dinner' || category === 'snack') {
+      setMealType(category);
+    }
+    
+    const templateIngredients: Ingredient[] = (template.ingredients || []).map((ing, index) => ({
       id: Date.now().toString() + index,
-      name: ing.name,
-      amount: ing.amount.toString(),
-      unit: ing.unit,
+      name: ing.name || '',
+      amount: ing.amount?.toString() || '',
+      unit: ing.unit || '',
     }));
     setIngredients(templateIngredients);
 
-    setNotes(`Template: ${template.description}`);
+    setNotes(template.description ? `Template: ${template.description}` : '');
     setShowTemplates(false);
     setViewMode('create');
 
