@@ -1592,10 +1592,10 @@ export default function CreateMeals() {
     try {
       setShowTemplates(true);
       const allTemplates = await mealService.getTemplates();
-      setTemplates(allTemplates);
+      setTemplates(allTemplates || []);
     } catch (error) {
       console.error('Error loading templates:', error);
-      Alert.alert('Error', 'Failed to load templates');
+      Alert.alert('Error', 'Failed to load templates. Templates endpoint may not be available yet.');
       setShowTemplates(false);
     }
   };
@@ -3251,7 +3251,7 @@ export default function CreateMeals() {
         </View>
         
         <ScrollView style={styles.modalScrollContent}>
-          {templates.length === 0 ? (
+          {(!templates || templates.length === 0) ? (
             <View style={styles.loadingContainer}>
               <ActivityIndicator size="large" color="#3b82f6" />
               <Text style={styles.loadingText}>Loading templates...</Text>
