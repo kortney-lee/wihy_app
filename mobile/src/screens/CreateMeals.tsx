@@ -39,10 +39,7 @@ import { useFeatureAccess } from '../hooks/usePaywall';
 // New GoalSelection component for 3-mode meal planning
 import { GoalSelectionMeals, GenerateMealParams } from './meals/GoalSelectionMeals';
 
-// Mock Data Imports
-import mockMealPlan from '../../mock-data-muscle-building-meal-plan.json';
-import mockCalendarView from '../../mock-data-calendar-view.json';
-import mockShoppingList from '../../mock-data-shopping-list.json';
+// Note: Mock data removed to expose real API issues
 
 type NavigationProp = StackNavigationProp<RootStackParamList>;
 
@@ -464,108 +461,79 @@ export default function CreateMeals() {
             console.log('[CreateMeals] Loaded', userMeals.length, 'meals from API');
           }
         } catch (apiError) {
-          console.log('[CreateMeals] API failed, using mock data:', apiError);
+          console.log('[CreateMeals] API failed to load user meals:', apiError);
         }
+      } else {
+        console.log('[CreateMeals] User or token not available for API call');
       }
       
-      // Fall back to mock data if no API results
-      if (userMeals.length === 0) {
-        console.log('[CreateMeals] Using mock saved meals');
-        userMeals = mockMealPlan.days.flatMap(day => 
-          day.meals.map(meal => ({
-            meal_id: meal.meal_id,
-            user_id: userId || 'mock-user',
-            name: meal.meal_name,
-            nutrition: {
-              calories: meal.nutrition_per_serving.calories,
-              protein: meal.nutrition_per_serving.protein,
-              carbs: meal.nutrition_per_serving.carbs,
-              fat: meal.nutrition_per_serving.fat,
-            },
-            ingredients: meal.ingredients?.map(ing => ({
-              name: ing.name,
-              amount: ing.amount,
-              unit: ing.unit,
-            })) || [],
-            tags: meal.tags || [meal.meal_type],
-            notes: meal.muscle_building_benefits?.join('\n') || '',
-            is_favorite: false,
-            times_logged: Math.floor(Math.random() * 10),
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-            serving_size: meal.servings || 1,
-            preparation_time: meal.prep_time,
-            cooking_time: meal.cook_time,
-            instructions: meal.instructions || [],
-          }))
-        ).slice(0, 10) as SavedMeal[];
-      }
-      
+      // Set saved meals (may be empty if API failed)
       setSavedMeals(userMeals);
       
-      // Set active meal plan from mock data
-      setActiveMealPlan({
-        plan_id: mockMealPlan.program_id,
-        name: mockMealPlan.name,
-        description: mockMealPlan.description,
-        duration_days: mockMealPlan.duration_days,
-        meals_per_day: 3,
-        servings: mockMealPlan.family_size,
-        is_active: true,
-        created_at: new Date().toISOString(),
-        days: mockMealPlan.days.map(day => ({
-          day_number: day.day_number,
-          date: day.date,
-          meals: day.meals.map(m => ({
-            meal_id: m.meal_id,
-            meal_type: m.meal_type as MealType,
-            meal_name: m.meal_name,
-            nutrition: m.nutrition_per_serving,
-          })),
-        })),
-      } as any);
-      
-      // Set today's meals from mock calendar data
-      const today = new Date().toISOString().split('T')[0];
-      const todayCalendar = mockCalendarView.calendar_days.find(d => d.date === today);
-      if (todayCalendar && todayCalendar.meals) {
-        setTodaysMeals(todayCalendar.meals);
-      } else {
-        // Use first day with meals as "today" for demo purposes
-        const firstDayWithMeals = mockCalendarView.calendar_days.find(d => d.has_meals && d.meals);
-        if (firstDayWithMeals && firstDayWithMeals.meals) {
-          setTodaysMeals(firstDayWithMeals.meals);
-        }
+      if (userMeals.length === 0) {
+        console.log('[CreateMeals] No meals available - API returned empty or failed');
       }
       
-      // Set calendar days from mock data - convert to CalendarDay format
-      const convertedCalendarDays = mockCalendarView.calendar_days.map(day => {
-        const meals = day.meals || [];
-        return {
-          date: day.date,
-          day_number: day.day_number || 0,
-          day_name: day.day_name,
-          meals: meals.map((m: any) => ({
-            meal_id: m.meal_id,
-            meal_type: m.meal_type as MealType,
-            meal_name: m.meal_name,
-            calories: m.nutrition_per_serving?.calories || 0,
-            protein: m.nutrition_per_serving?.protein || 0,
-            carbs: m.nutrition_per_serving?.carbs || 0,
-            fat: m.nutrition_per_serving?.fat || 0,
-            servings: 1,
-          })),
-          total_calories: day.daily_macros_per_person?.calories || 0,
-          total_protein: day.daily_macros_per_person?.protein || 0,
-          total_carbs: day.daily_macros_per_person?.carbs || 0,
-          total_fat: day.daily_macros_per_person?.fat || 0,
-          has_breakfast: meals.some((m: any) => m.meal_type === 'breakfast'),
-          has_lunch: meals.some((m: any) => m.meal_type === 'lunch'),
-          has_dinner: meals.some((m: any) => m.meal_type === 'dinner'),
-          has_snacks: meals.some((m: any) => m.meal_type === 'snack'),
-        };
-      }) as CalendarDay[];
-      setCalendarDays(convertedCalendarDays);
+      // Try to load active meal plan from API
+      if (userId && token) {
+        try {
+          console.log('[CreateMeals] Loading active meal plan from API...');
+          const activePlanResponse = await mealService.getActiveMealPlan(userId);
+          if (activePlanResponse && activePlanResponse.has_active_plan && activePlanResponse.plan) {
+            const plan = activePlanResponse.plan;
+            setActiveMealPlan(plan);
+            console.log('[CreateMeals] Loaded active meal plan:', plan.name);
+            
+            // Set today's meals from active plan
+            const today = new Date().toISOString().split('T')[0];
+            const todayDay = plan.days?.find(d => d.date === today);
+            if (todayDay && todayDay.meals) {
+              setTodaysMeals(todayDay.meals);
+            } else if (plan.days && plan.days.length > 0) {
+              // Use first day if today not found
+              const firstDay = plan.days[0];
+              if (firstDay.meals) {
+                setTodaysMeals(firstDay.meals);
+              }
+            }
+            
+            // Set calendar days from active plan
+            if (plan.days) {
+              const convertedDays = plan.days.map(day => {
+                const meals = day.meals || [];
+                return {
+                  date: day.date,
+                  day_number: day.day_number,
+                  day_name: new Date(day.date).toLocaleDateString('en-US', { weekday: 'long' }),
+                  meals: meals.map((m: any) => ({
+                    meal_id: m.meal_id,
+                    meal_type: m.meal_type as MealType,
+                    meal_name: m.meal_name,
+                    calories: m.nutrition?.calories || 0,
+                    protein: m.nutrition?.protein || 0,
+                    carbs: m.nutrition?.carbs || 0,
+                    fat: m.nutrition?.fat || 0,
+                    servings: 1,
+                  })),
+                  total_calories: meals.reduce((sum: number, m: any) => sum + (m.nutrition?.calories || 0), 0),
+                  total_protein: meals.reduce((sum: number, m: any) => sum + (m.nutrition?.protein || 0), 0),
+                  total_carbs: meals.reduce((sum: number, m: any) => sum + (m.nutrition?.carbs || 0), 0),
+                  total_fat: meals.reduce((sum: number, m: any) => sum + (m.nutrition?.fat || 0), 0),
+                  has_breakfast: meals.some((m: any) => m.meal_type === 'breakfast'),
+                  has_lunch: meals.some((m: any) => m.meal_type === 'lunch'),
+                  has_dinner: meals.some((m: any) => m.meal_type === 'dinner'),
+                  has_snacks: meals.some((m: any) => m.meal_type === 'snack'),
+                };
+              }) as CalendarDay[];
+              setCalendarDays(convertedDays);
+            }
+          } else {
+            console.log('[CreateMeals] No active meal plan found');
+          }
+        } catch (planError) {
+          console.log('[CreateMeals] Failed to load active meal plan:', planError);
+        }
+      }
       
     } catch (error) {
       console.log('Error loading dashboard data:', error);
@@ -608,8 +576,10 @@ export default function CreateMeals() {
 
   const hasMealPlanned = (date: Date | null) => {
     if (!date) return false;
-    // Mock: has meal planned every other day
-    return date.getDate() % 2 === 0;
+    // Check if there's a meal planned for this date in the calendar data
+    const dateStr = date.toISOString().split('T')[0];
+    const dayData = calendarDays.find(d => d.date === dateStr);
+    return dayData ? (dayData.meals?.length > 0 || dayData.has_breakfast || dayData.has_lunch || dayData.has_dinner) : false;
   };
 
   const changeMonth = (delta: number) => {
@@ -1368,53 +1338,8 @@ export default function CreateMeals() {
     try {
       const token = await authService.getAccessToken();
       if (!userId || !token) {
-        console.log('[CreateMeals] User or token not available, using mock data');
-        // Fallback to mock data
-        let mockMeals = mockMealPlan.days.flatMap(day => 
-          day.meals.map(meal => ({
-            meal_id: meal.meal_id,
-            user_id: userId || 'mock-user',
-            name: meal.meal_name,
-            nutrition: {
-              calories: meal.nutrition_per_serving.calories,
-              protein: meal.nutrition_per_serving.protein,
-              carbs: meal.nutrition_per_serving.carbs,
-              fat: meal.nutrition_per_serving.fat,
-            },
-            ingredients: meal.ingredients?.map(ing => ({
-              name: ing.name,
-              amount: ing.amount,
-              unit: ing.unit,
-            })) || [],
-            tags: meal.tags || [meal.meal_type],
-            notes: meal.muscle_building_benefits?.join('\n') || '',
-            is_favorite: meal.meal_id.includes('001') || meal.meal_id.includes('003'),
-            times_logged: Math.floor(Math.random() * 15),
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-            serving_size: meal.servings || 1,
-            preparation_time: meal.prep_time,
-            cooking_time: meal.cook_time,
-            instructions: meal.instructions || [],
-          }))
-        ) as SavedMeal[];
-        
-        // Apply filters
-        if (searchQuery?.trim()) {
-          const query = searchQuery.toLowerCase();
-          mockMeals = mockMeals.filter(meal => 
-            meal.name.toLowerCase().includes(query) ||
-            meal.tags?.some(tag => tag.toLowerCase().includes(query))
-          );
-        }
-        
-        if (filterTag) {
-          mockMeals = mockMeals.filter(meal => 
-            meal.tags?.some(tag => tag.toLowerCase().includes(filterTag.toLowerCase()))
-          );
-        }
-        
-        setAllMeals(mockMeals);
+        console.log('[CreateMeals] User or token not available for library load');
+        setAllMeals([]);
         return;
       }
 
@@ -1467,36 +1392,8 @@ export default function CreateMeals() {
       console.log('[CreateMeals] Loaded', apiMeals.length, 'meals from Meal Diary API');
     } catch (error) {
       console.log('[CreateMeals] Error loading library meals:', error);
-      // Fallback to mock data on error
-      let mockMeals = mockMealPlan.days.flatMap(day => 
-        day.meals.map(meal => ({
-          meal_id: meal.meal_id,
-          user_id: userId || 'mock-user',
-          name: meal.meal_name,
-          nutrition: {
-            calories: meal.nutrition_per_serving.calories,
-            protein: meal.nutrition_per_serving.protein,
-            carbs: meal.nutrition_per_serving.carbs,
-            fat: meal.nutrition_per_serving.fat,
-          },
-          ingredients: meal.ingredients?.map(ing => ({
-            name: ing.name,
-            amount: ing.amount,
-            unit: ing.unit,
-          })) || [],
-          tags: meal.tags || [meal.meal_type],
-          notes: meal.muscle_building_benefits?.join('\n') || '',
-          is_favorite: meal.meal_id.includes('001') || meal.meal_id.includes('003'),
-          times_logged: Math.floor(Math.random() * 15),
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-          serving_size: meal.servings || 1,
-          preparation_time: meal.prep_time,
-          cooking_time: meal.cook_time,
-          instructions: meal.instructions || [],
-        }))
-      ) as SavedMeal[];
-      setAllMeals(mockMeals);
+      // Set empty array instead of mock data - let UI show empty state
+      setAllMeals([]);
     } finally {
       setLoadingLibrary(false);
     }
