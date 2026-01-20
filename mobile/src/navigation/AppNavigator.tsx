@@ -60,6 +60,7 @@ import TermsScreen from '../screens/TermsScreen';
 import PrivacyScreen from '../screens/PrivacyScreen';
 import AuthCallbackScreen from '../screens/AuthCallbackScreen';
 import SubscribeCompleteScreen from '../screens/SubscribeCompleteScreen';
+import PaymentSuccessScreen from '../screens/PaymentSuccessScreen';
 import ChatHistoryScreen from '../screens/ChatHistoryScreen';
 
 const Tab = createBottomTabNavigator<TabParamList>();
@@ -124,6 +125,8 @@ const linking: LinkingOptions<RootStackParamList> = {
       AuthCallback: 'auth/callback',
       // Subscribe complete route for OAuth-first flow
       SubscribeComplete: 'subscribe/complete',
+      // Payment success route for Stripe redirect
+      PaymentSuccess: 'payment/success',
     },
   },
 };
@@ -649,6 +652,14 @@ export default function AppNavigator() {
         <Stack.Screen
           name="SubscribeComplete"
           component={SubscribeCompleteScreen}
+          options={{
+            headerShown: false,
+            gestureEnabled: false,
+          }}
+        />
+        <Stack.Screen
+          name="PaymentSuccess"
+          component={PaymentSuccessScreen}
           options={{
             headerShown: false,
             gestureEnabled: false,

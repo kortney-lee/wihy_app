@@ -12,70 +12,14 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, borderRadius } from '../../theme/design-tokens';
-import SvgIcon from '../shared/SvgIcon';
 
 // Import logo image for web compatibility
 const LogoImage = require('../../../assets/Logo_wihy.png');
-
-// Get the proper image URI for web (require returns an object in Expo web)
-const getLogoUri = () => {
-  if (Platform.OS === 'web') {
-    // In Expo web, require() returns an object with uri or default property
-    if (typeof LogoImage === 'string') return LogoImage;
-    if (LogoImage?.uri) return LogoImage.uri;
-    if (LogoImage?.default) return LogoImage.default;
-    // Fallback to asset path
-    return '/assets/?unstable_path=.%2Fassets/Logo_wihy.png';
-  }
-  return LogoImage;
-};
-
-// OAuth providers for subscription flow
-const OAUTH_PROVIDERS = [
-  {
-    id: 'google',
-    name: 'Continue with Google',
-    icon: 'logo-google',
-    color: '#DB4437',
-    bgColor: '#ffffff',
-    textColor: '#374151',
-    borderColor: '#e5e7eb',
-  },
-  {
-    id: 'apple',
-    name: 'Continue with Apple',
-    icon: 'logo-apple',
-    color: '#000000',
-    bgColor: '#000000',
-    textColor: '#ffffff',
-    borderColor: '#000000',
-  },
-  {
-    id: 'facebook',
-    name: 'Continue with Facebook',
-    icon: 'logo-facebook',
-    color: '#1877F2',
-    bgColor: '#1877F2',
-    textColor: '#ffffff',
-    borderColor: '#1877F2',
-  },
-  {
-    id: 'microsoft',
-    name: 'Continue with Microsoft',
-    icon: 'logo-microsoft',
-    color: '#00BCF2',
-    bgColor: '#ffffff',
-    textColor: '#374151',
-    borderColor: '#e5e7eb',
-  },
-];
 
 interface EmailCheckoutModalProps {
   visible: boolean;
   onClose: () => void;
   onContinue: (email: string) => void;
-  onOAuthSubscribe?: (provider: 'google' | 'apple' | 'facebook' | 'microsoft', planId: string) => void;
-  planId?: string;
   planName: string;
   planPrice: string;
   isLoading?: boolean;
@@ -85,15 +29,12 @@ export default function EmailCheckoutModal({
   visible,
   onClose,
   onContinue,
-  onOAuthSubscribe,
-  planId,
   planName,
   planPrice,
   isLoading = false,
 }: EmailCheckoutModalProps) {
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
-  const [loadingProvider, setLoadingProvider] = useState<string | null>(null);
 
   const validateEmail = (email: string): boolean => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -116,21 +57,9 @@ export default function EmailCheckoutModal({
     onContinue(email.trim().toLowerCase());
   };
 
-  const handleOAuthPress = (providerId: 'google' | 'apple' | 'facebook' | 'microsoft') => {
-    if (!onOAuthSubscribe || !planId) {
-      // Fallback: just close the modal if no OAuth handler
-      console.warn('OAuth subscribe handler not provided');
-      return;
-    }
-    
-    setLoadingProvider(providerId);
-    onOAuthSubscribe(providerId, planId);
-  };
-
   const handleClose = () => {
     setEmail('');
     setError('');
-    setLoadingProvider(null);
     onClose();
   };
 
@@ -215,65 +144,6 @@ export default function EmailCheckoutModal({
               {planPrice}
             </p>
           </div>
-
-          {/* OAuth buttons */}
-          {onOAuthSubscribe && planId && (
-            <>
-              <div style={{ marginBottom: 16 }}>
-                {OAUTH_PROVIDERS.map((provider) => (
-                  <button
-                    key={provider.id}
-                    onClick={() => handleOAuthPress(provider.id as 'google' | 'apple' | 'facebook' | 'microsoft')}
-                    disabled={isLoading || loadingProvider !== null}
-                    style={{
-                      width: '100%',
-                      padding: '14px 16px',
-                      fontSize: 15,
-                      fontWeight: 600,
-                      color: provider.textColor,
-                      backgroundColor: loadingProvider === provider.id ? '#f3f4f6' : provider.bgColor,
-                      border: `2px solid ${provider.borderColor}`,
-                      borderRadius: 12,
-                      cursor: isLoading || loadingProvider !== null ? 'not-allowed' : 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: 12,
-                      marginBottom: 10,
-                      transition: 'all 0.2s',
-                      opacity: loadingProvider !== null && loadingProvider !== provider.id ? 0.5 : 1,
-                    }}
-                    type="button"
-                  >
-                    {loadingProvider === provider.id ? (
-                      <ActivityIndicator size="small" color={provider.color} />
-                    ) : (
-                      <Ionicons name={provider.icon as any} size={20} color={provider.color} />
-                    )}
-                    {provider.name}
-                  </button>
-                ))}
-              </div>
-
-              {/* Divider */}
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                marginBottom: 20,
-              }}>
-                <div style={{ flex: 1, height: 1, backgroundColor: '#e5e7eb' }} />
-                <span style={{
-                  padding: '0 16px',
-                  fontSize: 13,
-                  color: '#9ca3af',
-                  fontWeight: 500,
-                }}>
-                  or continue with email
-                </span>
-                <div style={{ flex: 1, height: 1, backgroundColor: '#e5e7eb' }} />
-              </div>
-            </>
-          )}
 
           {/* Email input */}
           <div style={{ marginBottom: 24 }}>
@@ -424,45 +294,6 @@ export default function EmailCheckoutModal({
             <Text style={styles.price}>{planPrice}</Text>
           </View>
 
-          {/* OAuth buttons */}
-          {onOAuthSubscribe && planId && (
-            <>
-              <View style={styles.oauthContainer}>
-                {OAUTH_PROVIDERS.map((provider) => (
-                  <Pressable
-                    key={provider.id}
-                    style={[
-                      styles.oauthButton,
-                      {
-                        backgroundColor: loadingProvider === provider.id ? '#f3f4f6' : provider.bgColor,
-                        borderColor: provider.borderColor,
-                        opacity: loadingProvider !== null && loadingProvider !== provider.id ? 0.5 : 1,
-                      },
-                    ]}
-                    onPress={() => handleOAuthPress(provider.id as 'google' | 'apple' | 'facebook' | 'microsoft')}
-                    disabled={isLoading || loadingProvider !== null}
-                  >
-                    {loadingProvider === provider.id ? (
-                      <ActivityIndicator size="small" color={provider.color} />
-                    ) : (
-                      <Ionicons name={provider.icon as any} size={20} color={provider.color} />
-                    )}
-                    <Text style={[styles.oauthButtonText, { color: provider.textColor }]}>
-                      {provider.name}
-                    </Text>
-                  </Pressable>
-                ))}
-              </View>
-
-              {/* Divider */}
-              <View style={styles.divider}>
-                <View style={styles.dividerLine} />
-                <Text style={styles.dividerText}>or continue with email</Text>
-                <View style={styles.dividerLine} />
-              </View>
-            </>
-          )}
-
           {/* Email input */}
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Email Address</Text>
@@ -482,7 +313,7 @@ export default function EmailCheckoutModal({
 
           {/* Info text */}
           <Text style={styles.info}>
-            Sign in with your preferred method, then complete payment.
+            Enter your email to continue to secure payment.
             You can cancel anytime from your account settings.
           </Text>
 
@@ -620,38 +451,5 @@ const styles = StyleSheet.create({
   signInLink: {
     color: colors.primary,
     fontWeight: '600',
-  },
-  oauthContainer: {
-    marginBottom: 16,
-  },
-  oauthButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 14,
-    borderRadius: 12,
-    borderWidth: 2,
-    marginBottom: 10,
-    gap: 12,
-  },
-  oauthButtonText: {
-    fontSize: 15,
-    fontWeight: '600',
-  },
-  divider: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  dividerLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: '#e5e7eb',
-  },
-  dividerText: {
-    paddingHorizontal: 16,
-    fontSize: 13,
-    color: '#9ca3af',
-    fontWeight: '500',
   },
 });

@@ -326,40 +326,6 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
     }
   };
 
-  // Handle OAuth subscription flow - OAuth first, then pay
-  const handleOAuthSubscribe = async (provider: 'google' | 'apple' | 'facebook' | 'microsoft', planId: string) => {
-    if (Platform.OS === 'web' && typeof window !== 'undefined') {
-      // Store pending subscription info for post-OAuth flow
-      const pendingPlanId = billingCycle === 'yearly' && selectedPlan?.yearlyPrice 
-        ? `${selectedPlan.id}-yearly` 
-        : selectedPlan?.id;
-      
-      sessionStorage.setItem('pendingSubscription', JSON.stringify({
-        planId: pendingPlanId,
-        planName: selectedPlan?.name,
-        billingCycle,
-        returnUrl: '/subscribe/complete',
-      }));
-
-      try {
-        // Get OAuth URL and redirect
-        const { url } = await authService.getWebOAuthUrl(provider);
-        window.location.href = url;
-      } catch (error: any) {
-        console.error('OAuth error:', error);
-        window.alert(`OAuth Error: ${error.message || 'Please try again.'}`);
-      }
-    } else {
-      // For native, we would use a WebView-based OAuth flow
-      // For now, show a message
-      Alert.alert(
-        'OAuth Sign In',
-        `OAuth sign-in with ${provider} is currently supported on web only.`,
-        [{ text: 'OK' }]
-      );
-    }
-  };
-
   // Map plan IDs to native store product IDs
   const getNativeProductId = (planId: string, yearly: boolean): string => {
     const suffix = yearly ? '_yearly' : '_monthly';
@@ -1085,8 +1051,6 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
           visible={showEmailModal}
           onClose={handleEmailModalClose}
           onContinue={processCheckoutWithEmail}
-          onOAuthSubscribe={handleOAuthSubscribe}
-          planId={selectedPlan?.id}
           planName={selectedPlan?.name || ''}
           planPrice={getSelectedPlanPrice()}
           isLoading={isLoading}
