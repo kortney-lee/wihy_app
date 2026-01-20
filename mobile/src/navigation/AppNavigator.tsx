@@ -670,6 +670,15 @@ export default function AppNavigator() {
             gestureEnabled: false,
           }}
         />
+        {/* OnboardingFlow accessible for Edit Profile on mobile */}
+        <Stack.Screen
+          name="OnboardingFlow"
+          component={OnboardingFlow}
+          options={{
+            presentation: 'card',
+            headerShown: false,
+          }}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );
