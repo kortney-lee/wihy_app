@@ -447,37 +447,61 @@ export default function CreateMeals() {
     try {
       setLoadingMeals(true);
       
-      // Use mock data - convert meal plan meals to SavedMeal format
-      const mockSavedMeals = mockMealPlan.days.flatMap(day => 
-        day.meals.map(meal => ({
-          meal_id: meal.meal_id,
-          user_id: userId || 'mock-user',
-          name: meal.meal_name,
-          nutrition: {
-            calories: meal.nutrition_per_serving.calories,
-            protein: meal.nutrition_per_serving.protein,
-            carbs: meal.nutrition_per_serving.carbs,
-            fat: meal.nutrition_per_serving.fat,
-          },
-          ingredients: meal.ingredients?.map(ing => ({
-            name: ing.name,
-            amount: ing.amount,
-            unit: ing.unit,
-          })) || [],
-          tags: meal.tags || [meal.meal_type],
-          notes: meal.muscle_building_benefits?.join('\n') || '',
-          is_favorite: false,
-          times_logged: Math.floor(Math.random() * 10),
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-          serving_size: meal.servings || 1,
-          preparation_time: meal.prep_time,
-          cooking_time: meal.cook_time,
-          instructions: meal.instructions || [],
-        }))
-      ).slice(0, 10) as SavedMeal[];
+      // Try to load user's saved meals from API first
+      let userMeals: SavedMeal[] = [];
+      const token = await authService.getAccessToken();
       
-      setSavedMeals(mockSavedMeals);
+      if (userId && token) {
+        try {
+          console.log('[CreateMeals] Loading user meals from API...');
+          const apiResponse = await mealService.getUserMeals(userId, {
+            limit: 10,
+            sort: 'created_at',
+            order: 'desc',
+          });
+          if (apiResponse?.meals && apiResponse.meals.length > 0) {
+            userMeals = apiResponse.meals;
+            console.log('[CreateMeals] Loaded', userMeals.length, 'meals from API');
+          }
+        } catch (apiError) {
+          console.log('[CreateMeals] API failed, using mock data:', apiError);
+        }
+      }
+      
+      // Fall back to mock data if no API results
+      if (userMeals.length === 0) {
+        console.log('[CreateMeals] Using mock saved meals');
+        userMeals = mockMealPlan.days.flatMap(day => 
+          day.meals.map(meal => ({
+            meal_id: meal.meal_id,
+            user_id: userId || 'mock-user',
+            name: meal.meal_name,
+            nutrition: {
+              calories: meal.nutrition_per_serving.calories,
+              protein: meal.nutrition_per_serving.protein,
+              carbs: meal.nutrition_per_serving.carbs,
+              fat: meal.nutrition_per_serving.fat,
+            },
+            ingredients: meal.ingredients?.map(ing => ({
+              name: ing.name,
+              amount: ing.amount,
+              unit: ing.unit,
+            })) || [],
+            tags: meal.tags || [meal.meal_type],
+            notes: meal.muscle_building_benefits?.join('\n') || '',
+            is_favorite: false,
+            times_logged: Math.floor(Math.random() * 10),
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+            serving_size: meal.servings || 1,
+            preparation_time: meal.prep_time,
+            cooking_time: meal.cook_time,
+            instructions: meal.instructions || [],
+          }))
+        ).slice(0, 10) as SavedMeal[];
+      }
+      
+      setSavedMeals(userMeals);
       
       // Set active meal plan from mock data
       setActiveMealPlan({
@@ -2014,22 +2038,23 @@ export default function CreateMeals() {
                   style={styles.mealTypeRow}
                   onPress={() => {
                     if (mealForType) {
-                      // Show meal details if meal exists
+                      // Show meal details if meal exists - cast to any for flexibility
+                      const meal = mealForType as any;
                       const mealData = {
-                        meal_id: mealForType.meal_id,
-                        name: mealForType.meal_name || mealForType.name,
-                        nutrition: mealForType.nutrition || {
-                          calories: mealForType.calories || 0,
-                          protein: mealForType.protein || 0,
-                          carbs: mealForType.carbs || 0,
-                          fat: mealForType.fat || 0,
+                        meal_id: meal.meal_id,
+                        name: meal.meal_name || meal.name || 'Meal',
+                        nutrition: meal.nutrition || {
+                          calories: meal.calories || 0,
+                          protein: meal.protein || 0,
+                          carbs: meal.carbs || 0,
+                          fat: meal.fat || 0,
                         },
                         tags: [type],
-                        ingredients: mealForType.ingredients || [],
-                        instructions: mealForType.instructions || [],
-                        preparation_time: mealForType.prep_time || 10,
-                        cooking_time: mealForType.cook_time || 15,
-                        serving_size: mealForType.servings || 1,
+                        ingredients: meal.ingredients || [],
+                        instructions: meal.instructions || [],
+                        preparation_time: meal.prep_time || meal.preparation_time || 10,
+                        cooking_time: meal.cook_time || meal.cooking_time || 15,
+                        serving_size: meal.servings || meal.serving_size || 1,
                       };
                       setSelectedMeal(mealData as any);
                       setShowMealDetails(true);
@@ -2046,7 +2071,7 @@ export default function CreateMeals() {
                     <Text style={styles.mealTypeLabel}>{type.charAt(0).toUpperCase() + type.slice(1)}</Text>
                     <Text style={styles.mealTypeName} numberOfLines={1}>
                       {mealForType 
-                        ? (mealForType.meal_name || mealForType.name || 'Meal planned')
+                        ? ((mealForType as any).meal_name || (mealForType as any).name || 'Meal planned')
                         : 'Tap to add meal'}
                     </Text>
                   </View>
