@@ -108,6 +108,78 @@ const STORAGE_KEYS = {
   TOKEN_EXPIRY: '@wihy_token_expiry',
 };
 
+/**
+ * Decode a JWT token without verification (client-side)
+ * Used as fallback when verification endpoint fails
+ * SECURITY: This does NOT verify the signature - use server verification when possible
+ */
+interface JWTPayload {
+  sub?: string;        // User ID
+  email?: string;
+  name?: string;
+  picture?: string;
+  provider?: string;
+  plan?: string;
+  exp?: number;        // Expiration timestamp
+  iat?: number;        // Issued at timestamp
+  sessionId?: string;
+  [key: string]: any;
+}
+
+function decodeJWT(token: string): JWTPayload | null {
+  try {
+    const parts = token.split('.');
+    if (parts.length !== 3) {
+      console.warn('[AuthService] Invalid JWT format - expected 3 parts');
+      return null;
+    }
+    
+    // Decode base64url payload
+    const payload = parts[1];
+    // Handle base64url encoding (replace - with +, _ with /)
+    const base64 = payload.replace(/-/g, '+').replace(/_/g, '/');
+    // Add padding if needed
+    const padded = base64 + '='.repeat((4 - base64.length % 4) % 4);
+    
+    // Decode and parse
+    const decoded = atob(padded);
+    return JSON.parse(decoded);
+  } catch (error) {
+    console.error('[AuthService] Failed to decode JWT:', error);
+    return null;
+  }
+}
+
+/**
+ * Check if a JWT token is expired
+ */
+function isJWTExpired(payload: JWTPayload): boolean {
+  if (!payload.exp) {
+    return false; // No expiration = never expires
+  }
+  const now = Math.floor(Date.now() / 1000);
+  return payload.exp < now;
+}
+
+/**
+ * Convert JWT payload to UserData format
+ */
+function jwtPayloadToUserData(payload: JWTPayload): UserData | null {
+  if (!payload.sub && !payload.email) {
+    return null; // Need at least an ID or email
+  }
+  
+  return {
+    id: payload.sub || payload.email || 'unknown',
+    email: payload.email || '',
+    name: payload.name || payload.email?.split('@')[0] || 'User',
+    avatar: payload.picture,
+    provider: payload.provider as UserData['provider'],
+    plan: payload.plan || 'free', // Default to free plan
+    // Other fields will be undefined, which is fine
+  };
+}
+
 // User settings nested in user object
 export interface UserSettings {
   notificationsEnabled: boolean;
@@ -1023,12 +1095,17 @@ class AuthService {
   /**
    * Verify current session/token
    * Uses POST /api/auth/verify with token in body
+   * Includes retry logic and JWT fallback for resilience
    */
-  async verifySession(): Promise<{ valid: boolean; user?: UserData }> {
+  async verifySession(options?: { 
+    maxRetries?: number; 
+    useFallback?: boolean;
+  }): Promise<{ valid: boolean; user?: UserData; error?: string; usedFallback?: boolean }> {
+    const { maxRetries = 2, useFallback = true } = options || {};
     const sessionToken = await this.getSessionToken();
     
     if (!sessionToken) {
-      return { valid: false };
+      return { valid: false, error: 'No session token' };
     }
     
     const endpoint = `${this.baseUrl}${AUTH_CONFIG.endpoints.verify}`;
@@ -1037,49 +1114,96 @@ class AuthService {
     console.log('Endpoint:', endpoint);
     console.log('Base URL:', this.baseUrl);
     
-    try {
-      // Add timeout for fetch to prevent hanging
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
-
-      const response = await fetchWithLogging(endpoint, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ token: sessionToken }),
-        signal: controller.signal,
-      });
-
-      clearTimeout(timeoutId);
-
-      if (response.ok) {
-        const data = await response.json();
-        console.log('Session valid:', data.valid);
-        
-        if (data.user) {
-          await this.storeUserData(data.user);
+    // First, decode JWT to check if it's expired (client-side check)
+    const jwtPayload = decodeJWT(sessionToken);
+    if (jwtPayload && isJWTExpired(jwtPayload)) {
+      console.warn('[AuthService] JWT token is expired (client-side check)');
+      return { valid: false, error: 'Token expired' };
+    }
+    
+    // Try verification with retries
+    let lastError: string = 'Unknown error';
+    
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      try {
+        if (attempt > 0) {
+          // Exponential backoff: 500ms, 1000ms, 2000ms...
+          const delay = 500 * Math.pow(2, attempt - 1);
+          console.log(`[AuthService] Retry attempt ${attempt} after ${delay}ms`);
+          await new Promise(resolve => setTimeout(resolve, delay));
         }
         
-        return {
-          valid: data.success && data.valid,
-          user: data.user,
-        };
-      } else {
-        console.log('[AuthService] Session invalid - status:', response.status);
-        return { valid: false };
+        // Add timeout for fetch to prevent hanging
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
+
+        const response = await fetchWithLogging(endpoint, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ token: sessionToken }),
+          signal: controller.signal,
+        });
+
+        clearTimeout(timeoutId);
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log('Session verification response:', { success: data.success, valid: data.valid, hasUser: !!data.user });
+          
+          if (data.success && data.valid && data.user) {
+            await this.storeUserData(data.user);
+            return {
+              valid: true,
+              user: data.user,
+            };
+          } else {
+            // Backend returned invalid - extract error message
+            lastError = data.error || data.message || 'Session invalid';
+            console.warn('[AuthService] Backend rejected session:', lastError);
+            // Don't retry if backend explicitly rejected
+            break;
+          }
+        } else {
+          lastError = `HTTP ${response.status}`;
+          console.warn(`[AuthService] Session verification failed - status: ${response.status}`);
+          // Continue to retry on HTTP errors (might be temporary)
+        }
+      } catch (error: any) {
+        if (error.name === 'AbortError') {
+          lastError = 'Request timeout';
+          console.error('[AuthService] Session verification timeout - likely network issue');
+        } else if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
+          lastError = 'Network error';
+          console.error('[AuthService] Network error during session verification:', error.message);
+        } else {
+          lastError = error.message || 'Verification error';
+          console.error('[AuthService] Session verification error:', error);
+        }
+        // Continue to retry on network errors
       }
-    } catch (error: any) {
-      // Log network errors but don't fail auth - allow guest access
-      if (error.name === 'AbortError') {
-        console.error('[AuthService] Session verification timeout - likely network issue', error);
-      } else if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
-        console.error('[AuthService] Network error during session verification:', error.message);
-      } else {
-        console.error('[AuthService] Session verification error:', error);
-      }
-      return { valid: false };
     }
+    
+    // All retries failed - try JWT fallback if enabled
+    if (useFallback && jwtPayload) {
+      console.log('[AuthService] Verification failed, attempting JWT fallback');
+      const fallbackUser = jwtPayloadToUserData(jwtPayload);
+      
+      if (fallbackUser) {
+        console.log('[AuthService] Using JWT payload as fallback user data:', fallbackUser.email);
+        // Store fallback user data
+        await this.storeUserData(fallbackUser);
+        return {
+          valid: true,
+          user: fallbackUser,
+          usedFallback: true,
+          error: `Verification failed (${lastError}), using cached token data`,
+        };
+      }
+    }
+    
+    return { valid: false, error: lastError };
   }
 
   /**

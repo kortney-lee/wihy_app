@@ -109,11 +109,16 @@ export default function AuthCallbackScreen() {
         }
         await authService.storeSessionToken(params.session_token);
 
-        // Verify the session and get user data
-        const session = await authService.verifySession();
+        // Verify the session and get user data (with retry and fallback)
+        const session = await authService.verifySession({ maxRetries: 2, useFallback: true });
         
         if (session.valid && session.user) {
-          console.log('Session verified, user:', session.user.email);
+          // Log if we used fallback mode
+          if (session.usedFallback) {
+            console.warn('Session verified using JWT fallback:', session.error);
+          } else {
+            console.log('Session verified, user:', session.user.email);
+          }
           
           // Store provider info
           if (params.provider) {
@@ -185,7 +190,9 @@ export default function AuthCallbackScreen() {
             }
           }, 1500);
         } else {
-          throw new Error('Session verification failed');
+          // Provide specific error message from verification
+          const errorDetail = session.error || 'Unknown verification error';
+          throw new Error(`Session verification failed: ${errorDetail}`);
         }
       } else {
         throw new Error('No session token received');
@@ -193,7 +200,21 @@ export default function AuthCallbackScreen() {
     } catch (error) {
       console.error('Auth callback error:', error);
       setStatus('error');
-      setErrorMessage(error instanceof Error ? error.message : 'Authentication failed');
+      
+      // Provide user-friendly error messages
+      let userMessage = 'Authentication failed';
+      if (error instanceof Error) {
+        if (error.message.includes('Token expired')) {
+          userMessage = 'Your session has expired. Please try signing in again.';
+        } else if (error.message.includes('Network error') || error.message.includes('timeout')) {
+          userMessage = 'Connection error. Please check your internet and try again.';
+        } else if (error.message.includes('verification failed')) {
+          userMessage = 'Could not verify your account. Please try again or contact support.';
+        } else {
+          userMessage = error.message;
+        }
+      }
+      setErrorMessage(userMessage);
       
       // Redirect to home after delay
       setTimeout(() => {
