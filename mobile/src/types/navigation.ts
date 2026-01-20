@@ -72,6 +72,11 @@ export type RootStackParamList = {
   // Subscribe complete (OAuth-first then pay flow)
   SubscribeComplete: undefined;
   
+  // Payment success (Stripe redirect)
+  PaymentSuccess: {
+    session_id?: string;
+  } | undefined;
+  
   // Legal and info pages
   About: undefined;
   Terms: undefined;

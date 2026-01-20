@@ -104,6 +104,9 @@ export default function AuthCallbackScreen() {
         console.log('Session token received from provider:', params.provider);
         
         // Store the session token
+        if (Platform.OS === 'web' && typeof localStorage !== 'undefined') {
+          localStorage.setItem('accessToken', params.session_token);
+        }
         await authService.storeSessionToken(params.session_token);
 
         // Verify the session and get user data
@@ -131,10 +134,20 @@ export default function AuthCallbackScreen() {
             console.log('Context signIn skipped:', e);
           }
 
-          // Check for pending subscription (OAuth-first, then pay flow)
+          // Check for pending subscription or plan (OAuth-first, then pay flow)
           if (Platform.OS === 'web' && typeof window !== 'undefined') {
+            const pendingPlan = sessionStorage.getItem('pendingPlan');
             const pendingSubscription = sessionStorage.getItem('pendingSubscription');
-            if (pendingSubscription) {
+            
+            if (pendingPlan) {
+              console.log('Found pending plan, redirecting to subscribe/complete');
+              sessionStorage.removeItem('pendingPlan');
+              
+              setTimeout(() => {
+                window.location.href = `/subscribe/complete?plan=${pendingPlan}`;
+              }, 1000);
+              return;
+            } else if (pendingSubscription) {
               console.log('Pending subscription found, checking user plan...');
               
               // Check if user already has a paid plan
@@ -158,12 +171,16 @@ export default function AuthCallbackScreen() {
 
           // Navigate to dashboard/main
           setTimeout(() => {
-            navigation.dispatch(
-              CommonActions.reset({
-                index: 0,
-                routes: [{ name: 'Main' }],
-              })
-            );
+            if (Platform.OS === 'web' && typeof window !== 'undefined') {
+              window.location.href = '/dashboard';
+            } else {
+              navigation.dispatch(
+                CommonActions.reset({
+                  index: 0,
+                  routes: [{ name: 'Main' }],
+                })
+              );
+            }
           }, 1500);
         } else {
           throw new Error('Session verification failed');
