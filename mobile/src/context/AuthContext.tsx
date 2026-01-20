@@ -125,10 +125,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       setLoading(true);
       
-      // First check if we have a valid session
-      const sessionValid = await authService.verifySession();
+      // First check if we have a valid session (with retry and fallback for resilience)
+      const sessionValid = await authService.verifySession({ maxRetries: 1, useFallback: true });
       
       if (sessionValid.valid && sessionValid.user) {
+        // Log if we used fallback mode
+        if (sessionValid.usedFallback) {
+          console.warn('[AuthContext] Loaded user from JWT fallback:', sessionValid.error);
+        }
         // Convert UserData to User format
         const userData = await convertUserData(sessionValid.user);
         setUser(userData);
@@ -136,6 +140,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         // Try loading from local storage as fallback
         const storedData = await AsyncStorage.getItem(STORAGE_KEY);
         if (storedData) {
+          console.log('[AuthContext] No valid session, loaded from local storage');
           setUser(normalizeUser(JSON.parse(storedData)));
         }
       }
@@ -432,11 +437,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     console.log('[AuthContext] handleOAuthCallback - token already stored, verifying session');
     
     // Session token should already be stored by AuthCallbackScreen
-    // Just verify and get user data
-    const session = await authService.verifySession();
+    // Just verify and get user data (with retry and fallback for resilience)
+    const session = await authService.verifySession({ maxRetries: 2, useFallback: true });
     
     if (session.valid && session.user) {
-      console.log('[AuthContext] OAuth session verified, user:', session.user.email);
+      if (session.usedFallback) {
+        console.warn('[AuthContext] OAuth session verified via fallback:', session.error);
+      } else {
+        console.log('[AuthContext] OAuth session verified, user:', session.user.email);
+      }
       return convertUserData(session.user);
     }
     
@@ -449,7 +458,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
     }
     
-    throw new Error('OAuth authentication failed - could not verify session');
+    throw new Error(`OAuth authentication failed: ${session.error || 'Could not verify session'}`);
   };
 
   // Create account after successful Stripe payment (new subscription flow)
