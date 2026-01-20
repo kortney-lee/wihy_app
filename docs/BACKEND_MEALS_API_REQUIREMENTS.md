@@ -162,6 +162,73 @@ The frontend app (`mealService.ts`) expects various meal endpoints at `services.
 
 ---
 
+### Issue 5: Generated Meal Plans Missing Nutrition Data
+
+**Problem:** When meal plans are generated via `POST /api/meals/create-from-text`, the returned recipes don't include complete nutrition information.
+
+**Current Response (Example):**
+```json
+{
+  "plan": {
+    "recipes": [
+      {
+        "id": "recipe_1",
+        "name": "Garden Herb Egg White Scramble with Everything Bagel Avocado Toast",
+        "day": 1,
+        "mealType": "breakfast",
+        "prepTime": 10,
+        "cookTime": 15,
+        "nutritionInfo": null,  // ❌ Missing!
+        "ingredients": [...],
+        "instructions": [...]
+      }
+    ]
+  }
+}
+```
+
+**Expected Response:**
+```json
+{
+  "plan": {
+    "recipes": [
+      {
+        "id": "recipe_1",
+        "name": "Garden Herb Egg White Scramble...",
+        "day": 1,
+        "mealType": "breakfast",
+        "nutritionInfo": {
+          "calories": 283,
+          "protein": 24,
+          "carbs": 28,
+          "fat": 12,
+          "fiber": 6
+        },
+        "ingredients": [...],
+        "instructions": [...]
+      }
+    ],
+    "summary": {
+      "total_meals": 21,
+      "avg_calories_per_day": 1800,
+      "avg_protein_per_day": 120
+    }
+  }
+}
+```
+
+**Impact:** 
+- Calendar shows "NaNg protein • NaNg carbs • NaNg fat"
+- Plan Summary shows "0 Meals", "0 Avg Cal/Day"
+- Meal details show incomplete nutrition facts
+
+**Fix Required:** 
+1. Calculate nutrition for each recipe based on ingredients
+2. Include `nutritionInfo` object with calories, protein, carbs, fat
+3. Include `summary` object with totals
+
+---
+
 ## Currently Working Endpoints
 
 These endpoints appear to be working:
