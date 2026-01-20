@@ -11,8 +11,11 @@ import {
   Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
 import { AuthContext } from '../../context/AuthContext';
 import { colors } from '../../theme/design-tokens';
+import { RootStackParamList } from '../../types/navigation';
 
 interface UserPreferenceProps {
   visible: boolean;
@@ -33,6 +36,7 @@ interface SettingsItem {
 
 export default function UserPreference({ visible, onClose }: UserPreferenceProps) {
   const { user, signOut, updateUser } = useContext(AuthContext);
+  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   const defaultPreferences = {
     notifications: true,
     biometrics: false,
@@ -70,11 +74,9 @@ export default function UserPreference({ visible, onClose }: UserPreferenceProps
   };
 
   const handleEditProfile = () => {
-    Alert.alert(
-      'Edit Profile',
-      'Profile editing functionality would open here',
-      [{ text: 'OK' }]
-    );
+    // Close the modal first, then navigate to OnboardingFlow
+    onClose();
+    navigation.navigate('OnboardingFlow');
   };
 
   const handleHealthData = () => {
