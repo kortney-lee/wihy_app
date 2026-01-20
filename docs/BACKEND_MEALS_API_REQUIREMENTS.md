@@ -9,6 +9,87 @@ The frontend app (`mealService.ts`) expects various meal endpoints at `services.
 
 ---
 
+## 🚨 Known Issues to Fix
+
+### Issue 1: Templates Endpoint Returns Wrong Format
+
+**Endpoint:** `GET /api/meals/templates`
+
+**Current Response (WRONG):**
+```json
+{
+  "success": true,
+  "meal": {
+    "id": "templates",
+    "name": "Sample Meal",
+    "meal_type": "lunch",
+    "nutrition": {...},
+    "ingredients": [...],
+    "user_id": "user_123",
+    "created_at": "2026-01-20T17:19:02.836Z"
+  }
+}
+```
+
+**Expected Response:**
+```json
+{
+  "success": true,
+  "templates": [
+    {
+      "template_id": "tmpl_001",
+      "name": "Quick Oatmeal Bowl",
+      "description": "Hearty oatmeal with fresh berries",
+      "category": "breakfast",
+      "nutrition": { "calories": 350, "protein": 12, "carbs": 55, "fat": 8 },
+      "ingredients": [
+        { "name": "Rolled Oats", "amount": 1, "unit": "cup" },
+        { "name": "Mixed Berries", "amount": 0.5, "unit": "cup" }
+      ],
+      "tags": ["vegetarian", "quick", "high-fiber"],
+      "preparation_time": 5,
+      "cooking_time": 5,
+      "servings": 1
+    },
+    {
+      "template_id": "tmpl_002",
+      "name": "Grilled Chicken Salad",
+      "description": "Protein-rich salad with grilled chicken",
+      "category": "lunch",
+      ...
+    }
+  ]
+}
+```
+
+**Problem:** The endpoint is returning a single `meal` object instead of a `templates` array. This causes `Cannot read property 'length' of undefined` errors in the frontend.
+
+**Fix Required:** Return an array of template objects under the `templates` key.
+
+---
+
+### Issue 2: Create Meal Required Fields
+
+**Endpoint:** `POST /api/meals/create`
+
+**Current Behavior:** Returns 400 error if `meal_type` is missing
+
+**Required Fields:**
+- `user_id` ✅
+- `name` ✅  
+- `meal_type` ✅ (must be: `breakfast`, `lunch`, `dinner`, or `snack`)
+
+**Optional Fields:**
+- `nutrition` - Backend should calculate from ingredients if not provided
+- `ingredients`
+- `tags`
+- `notes`
+- `serving_size`
+- `preparation_time`
+- `cooking_time`
+
+---
+
 ## Currently Working Endpoints
 
 These endpoints appear to be working:
