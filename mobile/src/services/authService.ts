@@ -176,6 +176,8 @@ function jwtPayloadToUserData(payload: JWTPayload): UserData | null {
     avatar: payload.picture,
     provider: payload.provider as UserData['provider'],
     plan: payload.plan || 'free', // Default to free plan
+    role: payload.role, // May be uppercase from backend
+    status: payload.status, // May be uppercase from backend
     // Other fields will be undefined, which is fine
   };
 }
@@ -191,7 +193,8 @@ export interface UserData {
   id: string;              // User ID (UUID) - maps to userId
   email: string;
   name: string;
-  role?: 'user' | 'coach' | 'admin';
+  role?: 'user' | 'coach' | 'admin' | string;  // Backend may send uppercase (ADMIN)
+  status?: 'active' | 'inactive' | 'suspended' | 'pending' | string;  // Backend sends ACTIVE
   provider?: 'local' | 'google' | 'facebook' | 'microsoft' | 'apple';
   dateOfBirth?: string | null;
   gender?: 'male' | 'female' | 'other' | null;
