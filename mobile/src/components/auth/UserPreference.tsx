@@ -9,6 +9,7 @@ import {
   StyleSheet,
   Switch,
   Alert,
+  Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
@@ -74,9 +75,18 @@ export default function UserPreference({ visible, onClose }: UserPreferenceProps
   };
 
   const handleEditProfile = () => {
-    // Close the modal first, then navigate to OnboardingFlow
-    onClose();
-    navigation.navigate('OnboardingFlow');
+    // OnboardingFlow is for mobile only (Android/iOS)
+    if (Platform.OS === 'web') {
+      Alert.alert(
+        'Edit Profile',
+        'Profile editing is available in the mobile app. Download the WIHY app for the full experience!',
+        [{ text: 'OK' }]
+      );
+    } else {
+      // Close the modal first, then navigate to OnboardingFlow
+      onClose();
+      navigation.navigate('OnboardingFlow');
+    }
   };
 
   const handleHealthData = () => {

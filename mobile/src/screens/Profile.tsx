@@ -150,8 +150,17 @@ export default function Profile() {
   };
 
   const handleEditProfile = () => {
-    // Navigate to the OnboardingFlow which has profile setup steps
-    navigation.navigate('OnboardingFlow');
+    // OnboardingFlow is for mobile only (Android/iOS)
+    if (Platform.OS === 'web') {
+      Alert.alert(
+        'Edit Profile',
+        'Profile editing is available in the mobile app. Download the WIHY app for the full experience!',
+        [{ text: 'OK' }]
+      );
+    } else {
+      // Navigate to the OnboardingFlow which has profile setup steps
+      navigation.navigate('OnboardingFlow');
+    }
   };
 
   const handleHealthData = () => {
