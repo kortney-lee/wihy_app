@@ -32,7 +32,7 @@ export interface User {
   // Plan-based access control (NEW)
   plan: 'free' | 'premium' | 'family-basic' | 'family-pro' | 'family-premium' | 'coach' | 'coach-family' 
     | 'workplace-core' | 'workplace-plus' | 'corporate-enterprise' | 'k12-school' 
-    | 'university' | 'hospital' | 'hospitality';
+    | 'university' | 'hospital' | 'hospitality' | 'admin';  // admin = full access
   addOns?: string[];  // e.g., ['ai', 'instacart']
   capabilities: Capabilities;
   
@@ -175,18 +175,22 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     // Check if this is a first-time user (no stored data = new signup)
     const isFirstTimeUser = !existingData;
     
-    // ✅ NEW: Use backend data as source of truth, fallback to local storage for offline mode
-    const plan = (authUser.plan || existingData?.plan || 'free') as User['plan'];
-    const addOns = authUser.addOns || existingData?.addOns || [];
-    
-    // ✅ NEW: Use capabilities from backend if available, otherwise compute client-side
-    const capabilities = authUser.capabilities 
-      ? authUser.capabilities 
-      : getPlanCapabilities(plan, addOns);
-
-    // Role / developer flags from server or stored data
+    // Role / developer flags from server or stored data (need this first to determine plan)
     const roleFromServer = authUser.role || authUser.profile_data?.role;
     const normalizedRole = roleFromServer ? roleFromServer.toLowerCase() as User['role'] : existingData?.role;
+    
+    // ✅ Admin role gets full access regardless of backend plan
+    // This ensures admins can see all dashboards even if backend returns plan: 'free'
+    const plan = normalizedRole === 'admin' 
+      ? 'admin' as User['plan']
+      : (authUser.plan || existingData?.plan || 'free') as User['plan'];
+    const addOns = authUser.addOns || existingData?.addOns || [];
+    
+    // ✅ Use capabilities from backend if available, otherwise compute client-side
+    // For admin users, always compute client-side to ensure full access
+    const capabilities = (normalizedRole !== 'admin' && authUser.capabilities)
+      ? authUser.capabilities 
+      : getPlanCapabilities(plan, addOns);
     
     // Status from server (normalize to lowercase)
     const statusFromServer = authUser.status;
