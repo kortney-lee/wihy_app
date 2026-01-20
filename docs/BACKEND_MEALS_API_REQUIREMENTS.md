@@ -113,6 +113,55 @@ The frontend app (`mealService.ts`) expects various meal endpoints at `services.
 
 ---
 
+### Issue 4: Meal Programs Endpoint Not Deployed
+
+**Endpoint:** `POST /api/meal-programs`
+
+**Error Response:**
+```json
+{
+  "success": false,
+  "error": "Route not found",
+  "path": "/api/meal-programs",
+  "service": "wihy-gateway",
+  "availableRoutes": ["/api/scan/*", "/api/meals/*", "/api/fitness/*", ...]
+}
+```
+
+**Status:** 404 Not Found (711ms)
+
+**Request Body Sent:**
+```json
+{
+  "program_id": "plan_1768929848742",
+  "user_id": "test_user",
+  "name": "7-Day Meal Plan",
+  "description": "Create a 7-day meal plan",
+  "duration_days": 7,
+  "days": [...],
+  "summary": {
+    "total_meals": 21,
+    "avg_calories_per_day": 0,
+    "avg_protein_per_day": 0,
+    "shopping_list_available": true
+  },
+  "dietary_restrictions": [],
+  "servings": 2,
+  "status": "active",
+  "created_at": "2026-01-20T17:24:09.383Z"
+}
+```
+
+**Problem:** The `/api/meal-programs` route is NOT registered in the gateway. The available routes list shows `/api/meals/*` but NOT `/api/meal-programs`.
+
+**Fix Required:** 
+1. Register `/api/meal-programs/*` route in wihy-gateway
+2. Implement the meal programs service endpoints (see endpoints 20-24 in this document)
+
+**Alternative:** Could potentially use `/api/meals/programs` instead to stay under the `/api/meals/*` prefix that is already registered.
+
+---
+
 ## Currently Working Endpoints
 
 These endpoints appear to be working:
