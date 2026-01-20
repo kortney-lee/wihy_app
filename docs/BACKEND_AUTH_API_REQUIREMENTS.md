@@ -29,6 +29,16 @@
 
 ## Role-Based Access Control
 
+### User Roles
+
+```typescript
+export type UserRole = 
+  | 'user'         // Standard user
+  | 'coach'        // Coach with client management
+  | 'admin'        // Full system admin
+  | 'family-admin'; // Family plan administrator
+```
+
 ### How Roles Map to Dashboard Access
 
 The frontend uses the `role` field from the backend to determine user access:
@@ -36,6 +46,7 @@ The frontend uses the `role` field from the backend to determine user access:
 | Role from Backend | Normalized | Plan Override | Available Dashboards |
 |-------------------|------------|---------------|---------------------|
 | `ADMIN` / `admin` | `admin` | `admin` | Personal, Family, Coach, Admin |
+| `FAMILY-ADMIN` / `family-admin` | `family-admin` | `family-pro` | Personal, Family |
 | `coach` | `coach` | (uses backend `plan`) | Personal, Coach |
 | `user` | `user` | (uses backend `plan`) | Based on plan |
 

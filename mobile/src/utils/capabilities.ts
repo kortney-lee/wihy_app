@@ -805,11 +805,12 @@ export const getUpgradeMessage = (
  * @deprecated - Use plan-based capabilities instead
  */
 export const migrateUserRoleToPlan = (
-  userRole?: 'user' | 'coach' | 'parent' | 'admin'
+  userRole?: 'user' | 'coach' | 'parent' | 'admin' | 'family-admin'
 ): User['plan'] => {
   if (!userRole || userRole === 'user') return 'premium';
   if (userRole === 'coach') return 'coach';
   if (userRole === 'parent') return 'family-basic';
-  if (userRole === 'admin') return 'coach-family'; // Admin gets everything
+  if (userRole === 'family-admin') return 'family-pro'; // Family admin gets family pro features
+  if (userRole === 'admin') return 'admin'; // Admin gets everything
   return 'free';
 };
