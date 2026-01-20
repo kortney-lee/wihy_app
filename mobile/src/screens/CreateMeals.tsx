@@ -3567,19 +3567,24 @@ export default function CreateMeals() {
   const renderMealDetailsModal = () => {
     if (!selectedMeal) return null;
     
-    const nutrition = selectedMeal.nutrition;
-    const totalMacros = nutrition.protein + nutrition.carbs + nutrition.fat;
-    const proteinPercent = totalMacros > 0 ? Math.round((nutrition.protein / totalMacros) * 100) : 0;
-    const carbsPercent = totalMacros > 0 ? Math.round((nutrition.carbs / totalMacros) * 100) : 0;
-    const fatPercent = totalMacros > 0 ? Math.round((nutrition.fat / totalMacros) * 100) : 0;
+    const nutrition = selectedMeal.nutrition || { calories: 0, protein: 0, carbs: 0, fat: 0 };
+    const proteinVal = nutrition.protein || 0;
+    const carbsVal = nutrition.carbs || 0;
+    const fatVal = nutrition.fat || 0;
+    const caloriesVal = nutrition.calories || 0;
+    
+    const totalMacros = proteinVal + carbsVal + fatVal;
+    const proteinPercent = totalMacros > 0 ? Math.round((proteinVal / totalMacros) * 100) : 0;
+    const carbsPercent = totalMacros > 0 ? Math.round((carbsVal / totalMacros) * 100) : 0;
+    const fatPercent = totalMacros > 0 ? Math.round((fatVal / totalMacros) * 100) : 0;
     
     // Adjust nutrition based on servings
     const baseServings = selectedMeal.serving_size || 1;
     const ratio = mealServings / baseServings;
-    const adjustedCalories = Math.round(nutrition.calories * ratio);
-    const adjustedProtein = Math.round(nutrition.protein * ratio);
-    const adjustedCarbs = Math.round(nutrition.carbs * ratio);
-    const adjustedFat = Math.round(nutrition.fat * ratio);
+    const adjustedCalories = Math.round(caloriesVal * ratio);
+    const adjustedProtein = Math.round(proteinVal * ratio);
+    const adjustedCarbs = Math.round(carbsVal * ratio);
+    const adjustedFat = Math.round(fatVal * ratio);
     
     return (
       <Modal
