@@ -1,179 +1,100 @@
 # Backend Auth API Requirements
 
-## 🚨 CRITICAL ISSUE: OAuth Callback Session Verification Failed
+## ✅ RESOLVED: OAuth Session Verification Working
 
-**Status:** ⚠️ PARTIALLY MITIGATED - Frontend has fallback, but backend fix still required
+**Status:** ✅ FIXED - OAuth sign-in now working correctly
 
-**Error Observed:**
-```
-URL: https://wihy.ai/auth/callback?session_token=eyJhb...
-Message: "Sign in failed - Session verification failed"
-```
-
-**Screenshot:** User sees red X with "Session verification failed" and "Redirecting to home..."
-
----
-
-## Frontend Mitigations (Deployed Jan 2026)
-
-The frontend now includes resilience features:
-- ✅ **Retry with exponential backoff** (2 retries: 500ms, 1000ms delays)
-- ✅ **JWT fallback mode** - If `/api/auth/verify` fails, frontend decodes JWT payload and uses that data
-- ✅ **Client-side expiration check** - Fails fast if token is expired
-- ✅ **User-friendly error messages** - Clear messages for different failure types
-
-**However, the fallback has limitations:**
-- User data is limited to what's in the JWT (no fresh data from DB)
-- `plan` defaults to `'free'` if not in JWT payload
-- Session revocation won't work (JWT can't be invalidated)
-
-**⚠️ Backend fix is still required for proper functionality.**
-
----
-
-## 🔧 BACKEND ACTION ITEMS (auth.wihy.ai)
-
-### Priority 1: Fix `/api/auth/verify` Endpoint
-
-The endpoint must return `{ success: true, valid: true, user: {...} }` for valid JWTs.
-
-**Current behavior:** Returns `{ success: false, valid: false }` for valid tokens
-
-**Required checks:**
-1. Verify JWT signature using `JWT_SECRET`
-2. Check token is not expired (`exp` claim)
-3. Return user data from database
-
-```javascript
-// POST /api/auth/verify - REQUIRED RESPONSE FORMAT
+**Backend Response (Verified Working):**
+```json
 {
-  success: true,
-  valid: true,
-  user: {
-    id: "uuid",
-    email: "user@example.com",
-    name: "User Name",
-    plan: "free",           // IMPORTANT: Include plan, default to "free"
-    avatar: "https://...",
-    provider: "google"
-  }
+  "valid": true,
+  "success": true,
+  "user": {
+    "id": "b0130eaf-4882-4258-bbb9-66ecc5b1ebac",
+    "email": "kortney@wihy.ai",
+    "name": "Kortney",
+    "firstName": "Kortney",
+    "lastName": "Lee",
+    "role": "ADMIN",
+    "status": "ACTIVE",
+    "plan": "free",
+    "planStatus": "active",
+    "avatar": "https://..."
+  },
+  "tokenValid": true
 }
 ```
 
-### Priority 2: Ensure JWT Contains Required Claims
+---
 
-When generating the session_token during OAuth callback, include:
+## Role-Based Access Control
 
-```javascript
-const sessionToken = jwt.sign({
-  sub: user.id,           // REQUIRED: User ID
-  email: user.email,      // REQUIRED: For fallback
-  name: user.name,        // RECOMMENDED: For fallback
-  plan: user.plan || 'free', // RECOMMENDED: For fallback
-  provider: 'google',     // RECOMMENDED: OAuth provider
-  picture: user.avatar,   // OPTIONAL: User avatar
-  exp: Math.floor(Date.now() / 1000) + (7 * 24 * 60 * 60), // 7 days
-}, process.env.JWT_SECRET);
-```
+### How Roles Map to Dashboard Access
 
-### Priority 3: Environment Variable Consistency
+The frontend uses the `role` field from the backend to determine user access:
 
-Ensure `JWT_SECRET` is identical across:
-- OAuth callback handler (signs token)
-- `/api/auth/verify` endpoint (verifies token)
-- Any other services that verify tokens
+| Role from Backend | Normalized | Plan Override | Available Dashboards |
+|-------------------|------------|---------------|---------------------|
+| `ADMIN` / `admin` | `admin` | `admin` | Personal, Family, Coach, Admin |
+| `coach` | `coach` | (uses backend `plan`) | Personal, Coach |
+| `user` | `user` | (uses backend `plan`) | Based on plan |
 
-```bash
-# Check on auth server
-echo $JWT_SECRET
+### Admin Role Behavior
+
+When `role: "ADMIN"` is returned from the backend:
+
+1. **Role normalized** to lowercase: `ADMIN` → `admin`
+2. **Plan overridden** to `admin` (ignores backend `plan: "free"`)
+3. **Capabilities computed** with full access:
+   - ✅ `meals: true`
+   - ✅ `workouts: true`
+   - ✅ `family: true` (10 members)
+   - ✅ `coachPlatform: true`
+   - ✅ `wihyAI: true`
+   - ✅ `adminDashboard: true`
+   - ✅ All other features enabled
+
+### Key Files
+
+| File | Purpose |
+|------|---------|
+| [capabilities.ts](../mobile/src/utils/capabilities.ts) | Plan/role → capabilities mapping |
+| [AuthContext.tsx](../mobile/src/context/AuthContext.tsx) | Role normalization, plan override |
+| [HealthHub.tsx](../mobile/src/screens/HealthHub.tsx) | Dashboard access checks |
+
+### Capability Functions
+
+```typescript
+// Check dashboard access
+import { hasFamilyAccess, hasCoachAccess, hasAdminAccess } from '../utils/capabilities';
+
+// Returns true for admin users
+hasFamilyAccess(user);  // user.capabilities.family
+hasCoachAccess(user);   // user.capabilities.coachPlatform  
+hasAdminAccess(user);   // user.capabilities.adminDashboard
+
+// Get list of available dashboards
+getAvailableDashboards(user);  // ['personal', 'family', 'coach', 'admin']
 ```
 
 ---
 
-## Issue Analysis
+## Frontend Implementation (Deployed Jan 2026)
 
-### What's Happening
-
-1. User clicks "Sign in with Google" (or other OAuth provider)
-2. Backend successfully completes OAuth flow with provider
-3. Backend generates JWT `session_token` 
-4. Backend redirects to: `https://wihy.ai/auth/callback?session_token=eyJhb...`
-5. Frontend receives the token and calls:
-   ```
-   POST https://auth.wihy.ai/api/auth/verify
-   Body: { "token": "eyJhb..." }
-   ```
-6. **Backend returns `{ success: false, valid: false }`** ← THE PROBLEM
-7. Frontend shows "Session verification failed"
-
-### Root Cause Possibilities
-
-1. **JWT Signing Key Mismatch**
-   - The key used to sign the session_token during OAuth callback differs from the key used in `/api/auth/verify`
-   - Check: `JWT_SECRET` or `AUTH_SECRET` environment variable is the same across all services
-
-2. **Token Not Stored in Database**
-   - OAuth flow generates a JWT but doesn't store a corresponding session record
-   - `/api/auth/verify` checks database for session but finds none
-
-3. **Token Already Expired**
-   - JWT `exp` claim is set to a very short duration
-   - By the time user lands on callback page and verify is called, token is expired
-
-4. **Wrong Token Format Expected**
-   - Backend `/api/auth/verify` expects `access_token` but receives `session_token`
-   - Or expects different JWT claims structure
-
-5. **Service Not Deployed/Running**
-   - The auth service `/api/auth/verify` is not responding correctly
+The frontend includes resilience features:
+- ✅ **Retry with exponential backoff** (2 retries: 500ms, 1000ms delays)
+- ✅ **JWT fallback mode** - If `/api/auth/verify` fails, frontend decodes JWT payload
+- ✅ **Client-side expiration check** - Fails fast if token is expired
+- ✅ **User-friendly error messages** - Clear messages for different failure types
+- ✅ **Role/Status normalization** - Converts `ADMIN` → `admin`, `ACTIVE` → `active`
+- ✅ **Skip onboarding on web** - OnboardingFlow only shows on native (iOS/Android)
+- ✅ **Initializing state** - Prevents PlansModal from showing during auth load
 
 ---
 
-## Expected Flow (Fix Required)
+## Backend Response Format (For Reference)
 
-### OAuth Callback (Backend)
-```javascript
-// After successful OAuth with provider
-app.get('/auth/:provider/callback', async (req, res) => {
-  // 1. Exchange code for provider tokens
-  const { access_token } = await exchangeCodeForTokens(req.query.code);
-  
-  // 2. Get user info from provider
-  const providerUser = await getProviderUserInfo(access_token);
-  
-  // 3. Find or create user in database
-  const user = await findOrCreateUser({
-    email: providerUser.email,
-    provider: req.params.provider,
-    providerId: providerUser.id,
-  });
-  
-  // 4. Create session in database (IMPORTANT!)
-  const session = await createSession({
-    userId: user.id,
-    provider: req.params.provider,
-    expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
-  });
-  
-  // 5. Generate JWT that references the session
-  const sessionToken = jwt.sign(
-    {
-      sub: user.id,
-      sessionId: session.id,  // Link to database session
-      email: user.email,
-      provider: req.params.provider,
-      exp: Math.floor(Date.now() / 1000) + (7 * 24 * 60 * 60), // 7 days
-    },
-    process.env.JWT_SECRET
-  );
-  
-  // 6. Redirect to frontend with token
-  const callbackUrl = `https://wihy.ai/auth/callback?session_token=${sessionToken}&provider=${req.params.provider}`;
-  res.redirect(callbackUrl);
-});
-```
-
-### Verify Endpoint (Backend)
+### POST /api/auth/verify
 ```javascript
 // POST /api/auth/verify
 app.post('/api/auth/verify', async (req, res) => {

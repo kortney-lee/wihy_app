@@ -178,6 +178,27 @@ export const PLAN_CAPABILITIES: Record<string, Capabilities> = {
     communication: 'full',
   },
   
+  // Admin Plan - Full access to everything (for role: 'admin')
+  admin: {
+    meals: true,
+    workouts: true,
+    family: true,
+    familyMembers: 10,        // Admin gets extra capacity
+    coachPlatform: true,
+    clientManagement: true,
+    wihyAI: true,
+    instacart: true,
+    progressTracking: 'advanced',
+    dataExport: true,
+    apiAccess: true,
+    webhooks: true,
+    adminDashboard: true,     // Admin dashboard access
+    usageAnalytics: true,     // Full analytics
+    roleManagement: true,     // Can manage user roles
+    whiteLabel: true,         // All features
+    communication: 'full',
+  },
+  
   // B2B/Enterprise Plans (all include AI + admin features)
   'workplace-core': {
     meals: true,
@@ -417,8 +438,13 @@ export const getUserPermissions = (plan: string, addOns: string[] = []): string[
     permissions.push(...PERMISSIONS.FAMILY);
   }
   
-  if (['coach', 'coach-family'].includes(plan)) {
+  if (['coach', 'coach-family', 'admin'].includes(plan)) {
     permissions.push(...PERMISSIONS.COACH);
+  }
+  
+  // Admin gets all permissions
+  if (plan === 'admin') {
+    permissions.push(...PERMISSIONS.FAMILY);  // Ensure family too
   }
   
   return permissions;
@@ -535,6 +561,7 @@ export const getPlanDisplayName = (plan: string): string => {
     'family-premium': 'Family Premium', // Alias
     'coach': 'Coach Platform',
     'coach-family': 'Coach + Family',
+    'admin': 'Administrator',  // Full access for admin role
     // B2B Plans
     'workplace-core': 'Workplace Wellness - Core',
     'workplace-plus': 'Workplace Wellness - Plus',
