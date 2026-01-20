@@ -3276,21 +3276,23 @@ export default function CreateMeals() {
                 </View>
                 <View style={styles.templateInfo}>
                   <Text style={styles.templateItemTitle}>{template.name}</Text>
-                  <Text style={styles.templateDescription}>{template.description}</Text>
+                  <Text style={styles.templateDescription}>{template.description || ''}</Text>
                   <View style={styles.templateMacros}>
-                    <Text style={styles.macroText}>{template.nutrition.calories} cal</Text>
+                    <Text style={styles.macroText}>{template.nutrition?.calories || 0} cal</Text>
                     <Text style={styles.macroText}>•</Text>
-                    <Text style={styles.macroText}>{template.nutrition.protein}g protein</Text>
+                    <Text style={styles.macroText}>{template.nutrition?.protein || 0}g protein</Text>
                     <Text style={styles.macroText}>•</Text>
-                    <Text style={styles.macroText}>{template.preparation_time + template.cooking_time} min</Text>
+                    <Text style={styles.macroText}>{(template.preparation_time || 0) + (template.cooking_time || 0)} min</Text>
                   </View>
-                  <View style={styles.templateTags}>
-                    {template.tags.slice(0, 3).map((tag) => (
-                      <View key={tag} style={styles.miniTag}>
-                        <Text style={styles.miniTagText}>{tag}</Text>
-                      </View>
-                    ))}
-                  </View>
+                  {(template.tags?.length ?? 0) > 0 && (
+                    <View style={styles.templateTags}>
+                      {template.tags.slice(0, 3).map((tag) => (
+                        <View key={tag} style={styles.miniTag}>
+                          <Text style={styles.miniTagText}>{tag}</Text>
+                        </View>
+                      ))}
+                    </View>
+                  )}
                 </View>
                 <Ionicons name="chevron-forward" size={20} color="#9ca3af" />
               </Pressable>
