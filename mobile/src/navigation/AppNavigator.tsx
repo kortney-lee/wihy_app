@@ -345,7 +345,8 @@ export default function AppNavigator() {
   const { user } = useContext(AuthContext);
 
   // Show onboarding flow for first-time users who haven't completed it
-  if (user && user.isFirstTimeUser && !user.onboardingCompleted) {
+  // Only on native (iOS/Android) - web users go directly to main app
+  if (Platform.OS !== 'web' && user && user.isFirstTimeUser && !user.onboardingCompleted) {
     return (
       <NavigationContainer linking={linking}>
         <Stack.Navigator
