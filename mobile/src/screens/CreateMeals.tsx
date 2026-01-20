@@ -1999,18 +1999,65 @@ export default function CreateMeals() {
           </View>
           
           <View style={styles.todaysMealsCard}>
-            {Object.entries(mealTypeConfig).map(([type, config]) => (
-              <TouchableOpacity key={type} style={styles.mealTypeRow}>
-                <View style={[styles.mealTypeIcon, { backgroundColor: config.bgColor }]}>
-                  <Ionicons name={config.icon as any} size={20} color={config.color} />
-                </View>
-                <View style={styles.mealTypeInfo}>
-                  <Text style={styles.mealTypeLabel}>{type.charAt(0).toUpperCase() + type.slice(1)}</Text>
-                  <Text style={styles.mealTypeName}>Tap to add meal</Text>
-                </View>
-                <Ionicons name="add-circle-outline" size={24} color="#9ca3af" />
-              </TouchableOpacity>
-            ))}
+            {Object.entries(mealTypeConfig).map(([type, config]) => {
+              // Find meal for this type from today's meals or active plan
+              const todayDate = new Date().toISOString().split('T')[0];
+              const todayPlanDay = activeMealPlan?.days?.find(d => d.date === todayDate) 
+                || activeMealPlan?.days?.[0]; // Fallback to first day
+              const mealForType = todayPlanDay?.meals?.find(
+                (m: any) => m.meal_type?.toLowerCase() === type.toLowerCase()
+              );
+              
+              return (
+                <TouchableOpacity 
+                  key={type} 
+                  style={styles.mealTypeRow}
+                  onPress={() => {
+                    if (mealForType) {
+                      // Show meal details if meal exists
+                      const mealData = {
+                        meal_id: mealForType.meal_id,
+                        name: mealForType.meal_name || mealForType.name,
+                        nutrition: mealForType.nutrition || {
+                          calories: mealForType.calories || 0,
+                          protein: mealForType.protein || 0,
+                          carbs: mealForType.carbs || 0,
+                          fat: mealForType.fat || 0,
+                        },
+                        tags: [type],
+                        ingredients: mealForType.ingredients || [],
+                        instructions: mealForType.instructions || [],
+                        preparation_time: mealForType.prep_time || 10,
+                        cooking_time: mealForType.cook_time || 15,
+                        serving_size: mealForType.servings || 1,
+                      };
+                      setSelectedMeal(mealData as any);
+                      setShowMealDetails(true);
+                    } else {
+                      // Navigate to create meal for this type
+                      setViewMode('create');
+                    }
+                  }}
+                >
+                  <View style={[styles.mealTypeIcon, { backgroundColor: config.bgColor }]}>
+                    <Ionicons name={config.icon as any} size={20} color={config.color} />
+                  </View>
+                  <View style={styles.mealTypeInfo}>
+                    <Text style={styles.mealTypeLabel}>{type.charAt(0).toUpperCase() + type.slice(1)}</Text>
+                    <Text style={styles.mealTypeName} numberOfLines={1}>
+                      {mealForType 
+                        ? (mealForType.meal_name || mealForType.name || 'Meal planned')
+                        : 'Tap to add meal'}
+                    </Text>
+                  </View>
+                  {mealForType ? (
+                    <Ionicons name="checkmark-circle" size={24} color="#22c55e" />
+                  ) : (
+                    <Ionicons name="add-circle-outline" size={24} color="#9ca3af" />
+                  )}
+                </TouchableOpacity>
+              );
+            })}
           </View>
         </View>
       )}
