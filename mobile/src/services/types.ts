@@ -666,16 +666,42 @@ export interface ChatResponse {
   response: string;
   session_id?: string;
   timestamp: string;
-  type?: 'food' | 'ingredient' | 'health' | 'general' | 'fitness_program' | 'meal_program' | 'fitness_combined_program' | 'research_clarification'; // Response type from ML API
+  type?: 'food' | 'ingredient' | 'health' | 'general' | 'fitness_program' | 'meal_program' | 'fitness_combined_program' | 'research_clarification' | 'health_info' | 'meal_analysis' | 'barcode' | 'ingredient_analysis' | 'rag'; // Response type from ML API
   detected_type?: string; // Original detected type from backend
   confidence?: number; // Confidence score (0-1)
+  cached?: boolean; // True if response from cache (API v2.0)
   source?: 'wihy_model_service' | 'openai_enhancer' | 'research_orchestrator' | 'wihy_fitness_service' | 'wihy_meal_service' | 'wihy_interactive_research' | 'wihy_ai' | 'ask' | 'chat'; // Response source
   chart_data?: any; // Optional chart data for visualizations
   error?: string;
   
-  // ML API response fields
+  // ML API response fields (v2.0)
   traceId?: string; // Trace ID for debugging
   processingTimeMs?: number; // Processing time in milliseconds
+  
+  // /ask endpoint quick_insights (API v2.0)
+  quick_insights?: {
+    health_score?: number;
+    processing_level?: string;
+    frequency?: string;
+    alternative_score?: number;
+  };
+  
+  // Citations for research-backed responses (API v2.0)
+  citations?: Array<{
+    title: string;
+    sourceType: string;
+    author?: string;
+    year?: number;
+    journal?: string;
+  }>;
+  
+  // Entities detected in response (ModalResponse format)
+  entities?: Array<{
+    type: string;
+    id: string;
+    label: string;
+  }>;
+  
   modal?: { // Modal info for UI display (from send-message)
     type: 'info' | 'confirmation' | 'action_required';
     title: string;
@@ -699,7 +725,7 @@ export interface ChatResponse {
   // Suggested searches from research_clarification responses
   suggested_searches?: string[];
   
-  // Recommendations from the response
+  // Recommendations from the response (API v2.0)
   recommendations?: string[];
 }
 

@@ -947,23 +947,29 @@
    WEB CHAT PAGE STYLES
    ═══════════════════════════════════════════════════════════ */
 .web-chat-page.web-page-wrapper {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-  background: #f8fafc;
+  background: #ffffff;
+  height: 100vh;
+  overflow: hidden;
 }
 
 .web-chat-page .web-page-content {
-  flex: 1;
-  overflow-y: auto;
-  padding-bottom: 100px; /* Space for fixed input */
+  padding-top: 60px;
+  padding-bottom: 0px;
+  height: calc(100vh - 60px);
+  overflow-y: scroll !important;
+  -webkit-overflow-scrolling: touch;
 }
 
-/* Ensure chat messages area scrolls */
-.web-chat-page .web-page-content > div {
-  height: auto !important;
-  min-height: auto !important;
-  flex: none !important;
+/* Hide scrollbars but keep scroll functionality */
+.web-chat-page .web-page-content {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.web-chat-page .web-page-content::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
 }
 
 /* Fixed input container at bottom - uses same search bar styles as home */
@@ -973,8 +979,7 @@
   left: 0;
   right: 0;
   background: #ffffff;
-  padding: 16px 0 24px 0;
-  border-top: 1px solid #e5e7eb;
+  padding: 8px 0 8px 0;
   z-index: 100;
 }
 
