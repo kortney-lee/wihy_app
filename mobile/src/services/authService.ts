@@ -852,11 +852,13 @@ class AuthService {
     const state = this.generateState();
     await AsyncStorage.setItem('@wihy_oauth_state', state);
     
-    // Determine web redirect URI
+    // Determine web redirect URI with fallback
     let redirectUri: string;
     if (typeof window !== 'undefined') {
+      // Use current origin for redirect (works for localhost and production)
       redirectUri = `${window.location.origin}/auth/callback`;
     } else {
+      // Fallback for SSR or non-browser environments
       redirectUri = 'https://wihy.ai/auth/callback';
     }
     
@@ -878,13 +880,17 @@ class AuthService {
         break;
     }
     
+    // CRITICAL: Include redirect_uri parameter so backend knows where to redirect after auth
     const url = `${this.baseUrl}${endpoint}?` +
+      `client_id=${AUTH_CONFIG.clientId}&` +
       `redirect_uri=${encodeURIComponent(redirectUri)}&` +
+      `scope=${scope}&` +
       `state=${state}`;
     
     console.log(`=== WEB OAUTH ${provider.toUpperCase()} URL GENERATED ===`);
     console.log('URL:', url);
     console.log('Redirect URI:', redirectUri);
+    console.log('State:', state);
     
     return { url, state };
   }
