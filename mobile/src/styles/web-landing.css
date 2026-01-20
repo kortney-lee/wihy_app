@@ -123,6 +123,11 @@
   pointer-events: none;
 }
 
+/* Hide web-specific elements */
+.web-hide {
+  display: none !important;
+}
+
 .web-nav-item span {
   pointer-events: none;
 }
