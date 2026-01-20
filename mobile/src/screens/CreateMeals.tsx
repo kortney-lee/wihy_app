@@ -1525,6 +1525,9 @@ export default function CreateMeals() {
     plan.days.forEach(day => {
       day.meals?.forEach(meal => {
         meal.ingredients?.forEach(ingredient => {
+          // Skip if ingredient or name is undefined
+          if (!ingredient?.name) return;
+          
           const name = ingredient.name.toLowerCase();
           let assigned = false;
 
@@ -1533,8 +1536,8 @@ export default function CreateMeals() {
             if (keywords.some(keyword => name.includes(keyword))) {
               categorizedItems[category].push({
                 name: ingredient.name,
-                amount: ingredient.amount,
-                unit: ingredient.unit,
+                amount: ingredient.amount || 0,
+                unit: ingredient.unit || '',
               });
               assigned = true;
               break;
@@ -1545,8 +1548,8 @@ export default function CreateMeals() {
           if (!assigned) {
             categorizedItems.other.push({
               name: ingredient.name,
-              amount: ingredient.amount,
-              unit: ingredient.unit,
+              amount: ingredient.amount || 0,
+              unit: ingredient.unit || '',
             });
           }
         });
@@ -1557,9 +1560,10 @@ export default function CreateMeals() {
     const mergeIngredients = (items: Array<{ name: string; amount: number; unit: string }>) => {
       const merged: Record<string, { name: string; amount: number; unit: string }> = {};
       items.forEach(item => {
-        const key = `${item.name.toLowerCase()}-${item.unit}`;
+        if (!item?.name) return;
+        const key = `${item.name.toLowerCase()}-${item.unit || ''}`;
         if (merged[key]) {
-          merged[key].amount += item.amount;
+          merged[key].amount += item.amount || 0;
         } else {
           merged[key] = { ...item };
         }
