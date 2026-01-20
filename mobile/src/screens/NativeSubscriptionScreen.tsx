@@ -15,7 +15,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../types/navigation';
 
-// Subscription plans for native
+// Subscription plans for native - matches backend plan keys
 const NATIVE_PLANS = [
   {
     id: 'free',
@@ -24,28 +24,28 @@ const NATIVE_PLANS = [
     description: 'Essential features to get started',
   },
   {
-    id: 'premium_monthly',
+    id: 'pro_monthly',
     name: 'Premium',
     price: '$12.99/month',
     description: 'Full access to all health tracking features',
   },
   {
-    id: 'family_basic_monthly',
+    id: 'family_basic',
     name: 'Family Basic',
     price: '$24.99/month',
     description: 'Health tracking for the whole family',
   },
   {
-    id: 'family_premium_monthly',
-    name: 'Family Premium',
-    price: '$34.99/month',
+    id: 'family_pro',
+    name: 'Family Pro',
+    price: '$49.99/month',
     description: 'Complete family wellness solution',
     popular: true,
   },
   {
-    id: 'coach_monthly',
+    id: 'coach',
     name: 'Coach',
-    price: '$29.99/month',
+    price: '$99.99 + $29.99/mo',
     description: 'For fitness and nutrition professionals',
   },
 ];

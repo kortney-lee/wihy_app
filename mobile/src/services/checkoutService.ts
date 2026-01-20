@@ -151,17 +151,18 @@ export const WIHY_PLANS: Plan[] = [
     id: 'coach',
     name: 'coach',
     displayName: 'Coach',
-    price: 99.99,
-    interval: 'one-time',
+    price: 29.99,
+    setupFee: 99.99,
+    interval: 'month',
     description: 'For health & fitness coaches',
     stripePriceId: 'coach', // Maps to Stripe price ID
     features: [
       'Client management dashboard',
       'Client health tracking',
       'Custom meal plan creation',
-      'Revenue sharing (90%)',
+      'Up to 1% affiliate commission',
       'Stripe Connect integration',
-      'White-label options',
+      'Professional tools',
     ],
   },
 ];

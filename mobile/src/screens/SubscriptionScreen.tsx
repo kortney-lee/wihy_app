@@ -13,15 +13,17 @@ interface Props {
 }
 
 // Platform-specific subscription screen
-// Web uses Stripe, Native uses IAP
+// Web uses Stripe checkout with full marketing page
+// Native uses PlansModal for in-app upgrade flow
 export const SubscriptionScreen: React.FC<Props> = (props) => {
   if (Platform.OS === 'web') {
-    // Dynamically import web component to avoid bundling issues
+    // Web: Full subscription page with Stripe checkout
     const { SubscriptionScreen: WebSubscriptionScreen } = require('./WebSubscriptionScreen');
     return <WebSubscriptionScreen {...props} />;
   }
   
-  // Native component with IAP
+  // Native (iOS/Android): Use the simpler native subscription screen
+  // Note: Most native upgrade flows use PlansModal instead
   const { NativeSubscriptionScreen } = require('./NativeSubscriptionScreen');
   return <NativeSubscriptionScreen {...props} />;
 };

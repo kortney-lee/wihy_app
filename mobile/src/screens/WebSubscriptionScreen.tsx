@@ -59,7 +59,7 @@ const WebIcon = ({ name, size = 24, color = '#3b82f6' }: { name: string; size?: 
 };
 
 
-// Consumer Plans
+// Consumer Plans - Matches backend plan keys
 const CONSUMER_PLANS = [
   {
     id: 'free',
@@ -76,10 +76,10 @@ const CONSUMER_PLANS = [
     icon: 'gift',
   },
   {
-    id: 'premium',
+    id: 'pro_monthly',
     name: 'Premium',
     monthlyPrice: 12.99,
-    yearlyPrice: 99,
+    yearlyPrice: 99.99,
     tagline: 'For individuals focused on their health journey',
     features: [
       'Full nutrition and fitness tools',
@@ -90,10 +90,10 @@ const CONSUMER_PLANS = [
     icon: 'person',
   },
   {
-    id: 'family-basic',
+    id: 'family_basic',
     name: 'Family Basic',
     monthlyPrice: 24.99,
-    yearlyPrice: 249,
+    yearlyPrice: 249.99,
     tagline: 'For households with up to 4 members',
     features: [
       'Up to 4 family members',
@@ -104,10 +104,10 @@ const CONSUMER_PLANS = [
     icon: 'people',
   },
   {
-    id: 'family-premium',
-    name: 'Family Premium',
+    id: 'family_pro',
+    name: 'Family Pro',
     monthlyPrice: 49.99,
-    yearlyPrice: 499,
+    yearlyPrice: 499.99,
     tagline: 'For entire households — no limits',
     features: [
       'Up to 5 family members',
@@ -122,6 +122,7 @@ const CONSUMER_PLANS = [
     id: 'coach',
     name: 'Coach Platform',
     setupFee: 99.99,
+    monthlyPrice: 29.99,
     commission: '1%',
     tagline: 'For health & fitness professionals',
     features: [
@@ -356,23 +357,10 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
 
     // iOS: Use Apple In-App Purchases (required by App Store policy)
     if (Platform.OS === 'ios') {
-      // Require login first so we can associate purchase with user account
+      // For new users, show email modal first (consistent with web)
       if (!user?.email) {
-        Alert.alert(
-          'Sign In Required',
-          'Please sign in or create an account before subscribing. This lets us sync your subscription across devices.',
-          [
-            { text: 'Cancel', style: 'cancel' },
-            { 
-              text: 'Sign In', 
-              onPress: () => navigation.navigate('Login' as any, { returnTo: 'Subscription', planId })
-            },
-            { 
-              text: 'Create Account', 
-              onPress: () => navigation.navigate('Register' as any, { returnTo: 'Subscription', planId })
-            },
-          ]
-        );
+        setSelectedPlan(plan);
+        setShowEmailModal(true);
         return;
       }
 
@@ -403,23 +391,10 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
 
     // Android: Use Google Play Billing (preferred) or Stripe
     if (Platform.OS === 'android') {
-      // Require login first so we can associate purchase with user account
+      // For new users, show email modal first (consistent with web)
       if (!user?.email) {
-        Alert.alert(
-          'Sign In Required',
-          'Please sign in or create an account before subscribing. This lets us sync your subscription across devices.',
-          [
-            { text: 'Cancel', style: 'cancel' },
-            { 
-              text: 'Sign In', 
-              onPress: () => navigation.navigate('Login' as any, { returnTo: 'Subscription', planId })
-            },
-            { 
-              text: 'Create Account', 
-              onPress: () => navigation.navigate('Register' as any, { returnTo: 'Subscription', planId })
-            },
-          ]
-        );
+        setSelectedPlan(plan);
+        setShowEmailModal(true);
         return;
       }
 
