@@ -131,14 +131,15 @@ const PLANS: Plan[] = [
   {
     id: 'coach',
     displayName: 'Coach',
-    price: '$99.99 + $29.99/mo',
-    description: 'Setup fee + monthly subscription',
+    price: '$99.99 setup + $29.99/mo',
+    description: 'For health & fitness professionals',
     features: [
-      'All Premium features',
-      'Coach dashboard',
-      'Client management',
+      'Unlimited clients',
+      'Meal plan & workout creation',
+      'Progress tracking & reporting',
+      'Full app access for yourself',
       'Up to 1% affiliate commission',
-      'Professional tools',
+      'A team member will reach out for training',
     ],
     color: '#f97316',
   },
@@ -325,10 +326,12 @@ export default function PlansModal({
                     style={[styles.planColorBadge, { backgroundColor: plan.color }]}
                   />
                   <View style={styles.planHeaderText}>
-                    <Text style={styles.planName}>{plan.displayName}</Text>
+                    <View style={styles.planTitleRow}>
+                      <Text style={styles.planName}>{plan.displayName}</Text>
+                      <Text style={styles.planPrice}>{plan.price}</Text>
+                    </View>
                     <Text style={styles.planDescription}>{plan.description}</Text>
                   </View>
-                  <Text style={styles.planPrice}>{plan.price}</Text>
                 </View>
 
                 <View style={styles.featuresContainer}>
@@ -534,6 +537,13 @@ const styles = StyleSheet.create({
   planHeaderText: {
     flex: 1,
   },
+  planTitleRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
   planName: {
     fontSize: 20,
     fontWeight: '700',
@@ -542,7 +552,7 @@ const styles = StyleSheet.create({
   planDescription: {
     fontSize: 13,
     color: '#6b7280',
-    marginTop: 2,
+    marginTop: 4,
   },
   planPrice: {
     fontSize: 18,
