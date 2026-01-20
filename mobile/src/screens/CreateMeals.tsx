@@ -629,8 +629,74 @@ export default function CreateMeals() {
       // Cast to any for flexible field access during normalization
       const result = apiResult as any;
       
-      // Handle quick mode single meal response - convert to days structure
+      // Handle different API response structures
       let daysArrayFirst = result.days || result.meal_days || [];
+      
+      // Handle plan.plan.recipes structure (from /api/meals/create-from-text)
+      if (daysArrayFirst.length === 0 && result.plan?.plan?.recipes) {
+        console.log('[CreateMeals] Converting plan.plan.recipes to days structure');
+        const recipes = result.plan.plan.recipes;
+        
+        // Group recipes by day
+        const daysMap: { [key: number]: any } = {};
+        for (const recipe of recipes) {
+          const dayNum = recipe.day || 1;
+          if (!daysMap[dayNum]) {
+            daysMap[dayNum] = {
+              date: new Date(Date.now() + (dayNum - 1) * 86400000).toISOString().split('T')[0],
+              day_number: dayNum,
+              day_name: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][(new Date().getDay() + dayNum - 1) % 7],
+              meals: [],
+              total_calories: 0,
+              total_protein: 0,
+              total_carbs: 0,
+              total_fat: 0,
+            };
+          }
+          
+          const nutrition = recipe.nutritionInfo || recipe.nutrition || {};
+          const mealData = {
+            meal_id: recipe.id || `meal_${dayNum}_${recipe.mealType}_${Date.now()}`,
+            meal_type: recipe.mealType || 'dinner',
+            meal_name: recipe.name || 'Meal',
+            description: recipe.description || '',
+            calories: nutrition.calories || nutrition.caloriesPerServing || 0,
+            protein: nutrition.protein || 0,
+            carbs: nutrition.carbs || 0,
+            fat: nutrition.fat || 0,
+            fiber: nutrition.fiber || 0,
+            servings: recipe.servings || planServings,
+            prep_time_min: recipe.prepTime || recipe.prep_time || 0,
+            cook_time_min: recipe.cookTime || recipe.cook_time || 0,
+            ingredients: recipe.ingredients || [],
+            instructions: recipe.instructions || [],
+            image_url: recipe.image_url || recipe.imageUrl,
+            chef_tips: recipe.chefTips || [],
+            seasoning_library: recipe.seasoningLibrary || [],
+          };
+          
+          daysMap[dayNum].meals.push(mealData);
+          daysMap[dayNum].total_calories += mealData.calories;
+          daysMap[dayNum].total_protein += mealData.protein;
+          daysMap[dayNum].total_carbs += mealData.carbs;
+          daysMap[dayNum].total_fat += mealData.fat;
+        }
+        
+        // Convert map to sorted array
+        daysArrayFirst = Object.values(daysMap).sort((a: any, b: any) => a.day_number - b.day_number);
+        
+        // Set has_breakfast/lunch/dinner flags
+        for (const day of daysArrayFirst) {
+          day.has_breakfast = day.meals.some((m: any) => m.meal_type === 'breakfast');
+          day.has_lunch = day.meals.some((m: any) => m.meal_type === 'lunch');
+          day.has_dinner = day.meals.some((m: any) => m.meal_type === 'dinner');
+          day.has_snacks = day.meals.some((m: any) => m.meal_type === 'snack');
+        }
+        
+        console.log(`[CreateMeals] Converted ${recipes.length} recipes into ${daysArrayFirst.length} days`);
+      }
+      
+      // Handle quick mode single meal response - convert to days structure
       if (result.meal && daysArrayFirst.length === 0) {
         const meal = result.meal;
         console.log('[CreateMeals] handleGenerateAIMealPlan: converting single meal to days structure');
@@ -815,8 +881,72 @@ export default function CreateMeals() {
       // Normalize response (same logic as handleGenerateAIMealPlan)
       const result = apiResult as any;
       
-      // Handle quick mode single meal response - convert to days structure
+      // Handle different API response structures
       let daysArray = result.days || result.meal_days || [];
+      
+      // Handle plan.plan.recipes structure (from /api/meals/create-from-text)
+      if (daysArray.length === 0 && result.plan?.plan?.recipes) {
+        console.log('[CreateMeals] Converting plan.plan.recipes to days structure');
+        const recipes = result.plan.plan.recipes;
+        
+        // Group recipes by day
+        const daysMap: { [key: number]: any } = {};
+        for (const recipe of recipes) {
+          const dayNum = recipe.day || 1;
+          if (!daysMap[dayNum]) {
+            daysMap[dayNum] = {
+              date: new Date(Date.now() + (dayNum - 1) * 86400000).toISOString().split('T')[0],
+              day_number: dayNum,
+              day_name: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][(new Date().getDay() + dayNum - 1) % 7],
+              meals: [],
+              total_calories: 0,
+              total_protein: 0,
+              total_carbs: 0,
+              total_fat: 0,
+            };
+          }
+          
+          const nutrition = recipe.nutritionInfo || recipe.nutrition || {};
+          const mealData = {
+            meal_id: recipe.id || `meal_${dayNum}_${recipe.mealType}_${Date.now()}`,
+            meal_type: recipe.mealType || 'dinner',
+            meal_name: recipe.name || 'Meal',
+            description: recipe.description || '',
+            calories: nutrition.calories || nutrition.caloriesPerServing || 0,
+            protein: nutrition.protein || 0,
+            carbs: nutrition.carbs || 0,
+            fat: nutrition.fat || 0,
+            fiber: nutrition.fiber || 0,
+            servings: recipe.servings || request.servings,
+            prep_time_min: recipe.prepTime || recipe.prep_time || 0,
+            cook_time_min: recipe.cookTime || recipe.cook_time || 0,
+            ingredients: recipe.ingredients || [],
+            instructions: recipe.instructions || [],
+            image_url: recipe.image_url || recipe.imageUrl,
+            chef_tips: recipe.chefTips || [],
+            seasoning_library: recipe.seasoningLibrary || [],
+          };
+          
+          daysMap[dayNum].meals.push(mealData);
+          daysMap[dayNum].total_calories += mealData.calories;
+          daysMap[dayNum].total_protein += mealData.protein;
+          daysMap[dayNum].total_carbs += mealData.carbs;
+          daysMap[dayNum].total_fat += mealData.fat;
+        }
+        
+        // Convert map to sorted array
+        daysArray = Object.values(daysMap).sort((a: any, b: any) => a.day_number - b.day_number);
+        
+        // Set has_breakfast/lunch/dinner flags
+        for (const day of daysArray) {
+          day.has_breakfast = day.meals.some((m: any) => m.meal_type === 'breakfast');
+          day.has_lunch = day.meals.some((m: any) => m.meal_type === 'lunch');
+          day.has_dinner = day.meals.some((m: any) => m.meal_type === 'dinner');
+          day.has_snacks = day.meals.some((m: any) => m.meal_type === 'snack');
+        }
+        
+        console.log(`[CreateMeals] Converted ${recipes.length} recipes into ${daysArray.length} days`);
+      }
       
       // If we got a single meal (quick mode), convert it to a day with one meal
       if (result.meal && daysArray.length === 0) {
