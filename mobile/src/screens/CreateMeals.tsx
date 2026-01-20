@@ -256,6 +256,7 @@ export default function CreateMeals() {
   const [protein, setProtein] = useState('');
   const [carbs, setCarbs] = useState('');
   const [fat, setFat] = useState('');
+  const [mealType, setMealType] = useState<'breakfast' | 'lunch' | 'dinner' | 'snack'>('lunch');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [notes, setNotes] = useState('');
   const [ingredients, setIngredients] = useState<Ingredient[]>([]);
@@ -1268,10 +1269,6 @@ export default function CreateMeals() {
       Alert.alert('Missing Information', 'Please enter a meal name');
       return;
     }
-    if (!calories || !protein || !carbs || !fat) {
-      Alert.alert('Missing Information', 'Please enter all nutrition values');
-      return;
-    }
 
     if (!userId) {
       Alert.alert('Error', 'User not authenticated');
@@ -1289,15 +1286,19 @@ export default function CreateMeals() {
           unit: ing.unit,
         }));
 
+      // Build nutrition object only if values provided (backend can calculate from ingredients)
+      const nutrition = (calories || protein || carbs || fat) ? {
+        calories: parseInt(calories) || 0,
+        protein: parseFloat(protein) || 0,
+        carbs: parseFloat(carbs) || 0,
+        fat: parseFloat(fat) || 0,
+      } : undefined;
+
       const mealData = {
         name: mealName.trim(),
+        meal_type: mealType,
         ingredients: mealIngredients,
-        nutrition: {
-          calories: parseInt(calories),
-          protein: parseFloat(protein),
-          carbs: parseFloat(carbs),
-          fat: parseFloat(fat),
-        },
+        nutrition,
         tags: selectedTags,
         notes: notes.trim() || undefined,
         serving_size: parseFloat(servingSize) || 1,
@@ -1331,6 +1332,7 @@ export default function CreateMeals() {
     setProtein('');
     setCarbs('');
     setFat('');
+    setMealType('lunch');
     setSelectedTags([]);
     setNotes('');
     setIngredients([]);
@@ -2353,17 +2355,40 @@ export default function CreateMeals() {
               />
               <Text style={styles.servingUnit}>serving(s)</Text>
             </View>
+
+            <Text style={styles.label}>Meal Type *</Text>
+            <View style={styles.mealTypeContainer}>
+              {(['breakfast', 'lunch', 'dinner', 'snack'] as const).map((type) => (
+                <Pressable
+                  key={type}
+                  style={[
+                    styles.mealTypeButton,
+                    mealType === type && styles.mealTypeButtonSelected,
+                  ]}
+                  onPress={() => setMealType(type)}
+                >
+                  <Text
+                    style={[
+                      styles.mealTypeText,
+                      mealType === type && styles.mealTypeTextSelected,
+                    ]}
+                  >
+                    {type.charAt(0).toUpperCase() + type.slice(1)}
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
           </View>
         </View>
 
         {/* Nutrition Facts */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Nutrition Facts (per serving)</Text>
+          <Text style={styles.sectionTitle}>Nutrition Facts (per serving) - Optional</Text>
           
           <View style={styles.card}>
             <View style={styles.nutritionGrid}>
               <View style={styles.nutritionItem}>
-                <Text style={styles.label}>Calories *</Text>
+                <Text style={styles.label}>Calories</Text>
                 <TextInput
                   style={styles.input}
                   placeholder="0"
@@ -2375,7 +2400,7 @@ export default function CreateMeals() {
               </View>
 
               <View style={styles.nutritionItem}>
-                <Text style={styles.label}>Protein (g) *</Text>
+                <Text style={styles.label}>Protein (g)</Text>
                 <TextInput
                   style={styles.input}
                   placeholder="0"
@@ -2387,7 +2412,7 @@ export default function CreateMeals() {
               </View>
 
               <View style={styles.nutritionItem}>
-                <Text style={styles.label}>Carbs (g) *</Text>
+                <Text style={styles.label}>Carbs (g)</Text>
                 <TextInput
                   style={styles.input}
                   placeholder="0"
@@ -2399,7 +2424,7 @@ export default function CreateMeals() {
               </View>
 
               <View style={styles.nutritionItem}>
-                <Text style={styles.label}>Fat (g) *</Text>
+                <Text style={styles.label}>Fat (g)</Text>
                 <TextInput
                   style={styles.input}
                   placeholder="0"
@@ -4298,6 +4323,32 @@ const styles = StyleSheet.create({
   servingUnit: {
     fontSize: 16,
     color: '#6b7280',
+  },
+  mealTypeContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginTop: 4,
+  },
+  mealTypeButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 20,
+    backgroundColor: '#f3f4f6',
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
+  },
+  mealTypeButtonSelected: {
+    backgroundColor: '#3b5bdb',
+    borderColor: '#3b5bdb',
+  },
+  mealTypeText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#374151',
+  },
+  mealTypeTextSelected: {
+    color: '#ffffff',
   },
   nutritionGrid: {
     flexDirection: 'row',

@@ -1527,8 +1527,9 @@ class MealService {
    */
   async createMeal(userId: string, mealData: {
     name: string;
+    meal_type: 'breakfast' | 'lunch' | 'dinner' | 'snack';
     ingredients: Array<{ name: string; amount: number; unit: string }>;
-    nutrition: { calories: number; protein: number; carbs: number; fat: number };
+    nutrition?: { calories: number; protein: number; carbs: number; fat: number };
     tags: string[];
     notes?: string;
     serving_size?: number;
