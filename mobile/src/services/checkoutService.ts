@@ -268,7 +268,12 @@ class CheckoutService {
     }
 
     // Validate plan exists in WIHY_PLANS
-    const validPlan = WIHY_PLANS.find(p => p.id === plan || p.name === plan);
+    // Accept plan id, name, or stripePriceId (for compatibility with UI components)
+    const validPlan = WIHY_PLANS.find(p => 
+      p.id === plan || 
+      p.name === plan || 
+      p.stripePriceId === plan
+    );
     if (!validPlan) {
       const errorMsg = `Invalid plan: ${plan}`;
       console.error('[Checkout] Plan Validation Error:', errorMsg);
