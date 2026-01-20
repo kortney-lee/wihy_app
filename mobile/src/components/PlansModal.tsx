@@ -85,7 +85,7 @@ const PLANS: Plan[] = [
     color: '#6b7280',
   },
   {
-    id: 'premium',
+    id: 'pro_monthly',
     displayName: 'Premium',
     price: '$12.99/mo',
     description: 'Meals + Workouts',
@@ -99,7 +99,7 @@ const PLANS: Plan[] = [
     color: '#3b82f6',
   },
   {
-    id: 'family-basic',
+    id: 'family_basic',
     displayName: 'Family Basic',
     price: '$24.99/mo',
     description: 'Up to 4 members, add-ons available',
@@ -113,9 +113,9 @@ const PLANS: Plan[] = [
     color: '#8b5cf6',
   },
   {
-    id: 'family-premium',
-    displayName: 'Family Premium',
-    price: '$34.99/mo',
+    id: 'family_pro',
+    displayName: 'Family Pro',
+    price: '$49.99/mo',
     description: 'Unlimited members, AI + Instacart included',
     features: [
       'All Premium features',
@@ -131,13 +131,13 @@ const PLANS: Plan[] = [
   {
     id: 'coach',
     displayName: 'Coach',
-    price: '$29.99/mo',
-    description: '1-to-1 coaching platform',
+    price: '$99.99 + $29.99/mo',
+    description: 'Setup fee + monthly subscription',
     features: [
       'All Premium features',
       'Coach dashboard',
       'Client management',
-      '20% revenue share',
+      'Up to 1% affiliate commission',
       'Professional tools',
     ],
     color: '#f97316',

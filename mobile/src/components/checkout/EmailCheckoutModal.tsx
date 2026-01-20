@@ -116,17 +116,17 @@ export default function EmailCheckoutModal({
 
           {/* Header */}
           <div style={{ textAlign: 'center', marginBottom: 24 }}>
-            <img
-              src={getLogoUri()}
-              alt="WIHY Logo"
-              style={{
-                width: 120,
-                height: 40,
-                marginBottom: 16,
-                display: 'block',
-                margin: '0 auto 16px auto',
-              }}
-            />
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}>
+              <Image
+                source={LogoImage}
+                // @ts-ignore - web style prop
+                style={{
+                  width: 120,
+                  height: 40,
+                }}
+                resizeMode="contain"
+              />
+            </div>
             <h2 style={{
               fontSize: 24,
               fontWeight: 700,

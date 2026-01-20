@@ -194,12 +194,6 @@ function TabNavigator() {
   const { user } = useContext(AuthContext);
   const [showPlansModal, setShowPlansModal] = React.useState(false);
 
-  const handleHealthTabPress = (navigation: any) => {
-    // Free users now have access to basic health dashboards (Overview, Consumption)
-    // No plan check needed - all users can access Health tab
-    navigation.navigate('Health');
-  };
-
   return (
     <>
     <Tab.Navigator
@@ -303,6 +297,17 @@ function TabNavigator() {
       <Tab.Screen
         name="Health"
         component={HealthHub}
+        listeners={() => ({
+          tabPress: (e) => {
+            // On native platforms (iOS/Android), if user is not logged in,
+            // show the PlansModal (Upgrade to Access Features) instead of Health Dashboard
+            if (Platform.OS !== 'web' && !user) {
+              e.preventDefault();
+              setShowPlansModal(true);
+            }
+            // Otherwise, allow normal navigation to Health tab
+          },
+        })}
         // Free users CAN access Health tab - they get limited dashboards (Overview, Consumption)
       />
       <Tab.Screen
