@@ -438,7 +438,7 @@ export default function FullChat() {
         const aiMessage: Message = {
           id: (Date.now() + 1).toString(),
           type: 'ai',
-          content: response.response,
+          content: response.message || response.response || '', // v3.0: use 'message' field
           timestamp: new Date(),
           createdResources: response.created_resources,
           suggestedActions: response.suggested_actions,

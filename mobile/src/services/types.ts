@@ -663,20 +663,22 @@ export interface ScanHistoryResult {
 
 export interface ChatResponse {
   success: boolean;
-  response: string;
+  message: string; // v3.0: renamed from 'response'
+  type: 'food' | 'ingredient' | 'health' | 'general' | 'fitness_program' | 'meal_program' | 'fitness_combined_program' | 'research_clarification' | 'health_info' | 'meal_analysis' | 'barcode' | 'ingredient_analysis' | 'rag'; // Required in v3.0
+  confidence: number; // Required in v3.0: Confidence score (0-1)
+  timestamp: string; // Required in v3.0
+  processing_time_ms: number; // Required in v3.0: renamed from processingTimeMs
+  trace_id: string; // Required in v3.0: renamed from traceId
   session_id?: string;
-  timestamp: string;
-  type?: 'food' | 'ingredient' | 'health' | 'general' | 'fitness_program' | 'meal_program' | 'fitness_combined_program' | 'research_clarification' | 'health_info' | 'meal_analysis' | 'barcode' | 'ingredient_analysis' | 'rag'; // Response type from ML API
-  detected_type?: string; // Original detected type from backend
-  confidence?: number; // Confidence score (0-1)
-  cached?: boolean; // True if response from cache (API v2.0)
-  source?: 'wihy_model_service' | 'openai_enhancer' | 'research_orchestrator' | 'wihy_fitness_service' | 'wihy_meal_service' | 'wihy_interactive_research' | 'wihy_ai' | 'ask' | 'chat'; // Response source
+  user_id?: string;
+  cached?: boolean; // True if response from cache
   chart_data?: any; // Optional chart data for visualizations
   error?: string;
   
-  // ML API response fields (v2.0)
-  traceId?: string; // Trace ID for debugging
-  processingTimeMs?: number; // Processing time in milliseconds
+  // Backward compatibility (deprecated)
+  response?: string; // For old code using 'response' field
+  detected_type?: string; // Deprecated, use 'type'
+  source?: 'wihy_model_service' | 'openai_enhancer' | 'research_orchestrator' | 'wihy_fitness_service' | 'wihy_meal_service' | 'wihy_interactive_research' | 'wihy_ai' | 'ask' | 'chat';
   
   // /ask endpoint quick_insights (API v2.0)
   quick_insights?: {

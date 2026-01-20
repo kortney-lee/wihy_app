@@ -53,9 +53,42 @@ class ChatService {
   }
 
   /**
+   * Get or create session ID for chat continuity
+   * Persists session ID across app lifecycle
+   */
+  private getSessionId(): string {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      let sessionId = localStorage.getItem('wihy_session_id');
+      if (!sessionId) {
+        sessionId = this.generateUUID();
+        localStorage.setItem('wihy_session_id', sessionId);
+      }
+      return sessionId;
+    }
+    // Fallback for environments without localStorage
+    return this.generateUUID();
+  }
+
+  /**
+   * Generate UUID v4
+   */
+  private generateUUID(): string {
+    if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+      return crypto.randomUUID();
+    }
+    // Fallback UUID generation
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+      const r = Math.random() * 16 | 0;
+      const v = c === 'x' ? r : (r & 0x3 | 0x8);
+      return v.toString(16);
+    });
+  }
+
+  /**
    * Ask a health question via /ask endpoint (Universal Health Question)
    * Supports authenticated (Bearer token) and anonymous access (rate-limited)
-   * Uses "query" field per API v2.0 spec
+   * Uses "message" field per API v3.0 spec
+   * session_id is REQUIRED for all calls
    */
   async ask(
     query: string,
@@ -67,22 +100,24 @@ class ChatService {
       user_goals?: string[];
       fitness_level?: string;
       dietary_restrictions?: string[];
+      user_id?: string;
       [key: string]: any;
     }
   ): Promise<ChatResponse> {
     const startTime = Date.now();
     const endpoint = `${this.mlBaseUrl}${API_CONFIG.endpoints.ask}`;
     
-    console.log('=== ASK API CALL (/ask) ===');
+    console.log('=== ASK API CALL (/ask) - v3.0 ===');
     console.log('Endpoint:', endpoint);
     console.log('Query:', query);
     
     try {
-      // Build request body matching ML API v2.0 format - uses "query" field
+      // Build request body matching ML API v3.0 format
+      // Required: message, session_id
       const requestBody: any = {
-        query,
-        ...(context?.session_id && { sessionId: context.session_id }),
-        ...(context?.user_goals && { user_context: { user_id: context.user_id } }),
+        message: query, // v3.0: renamed from 'query'
+        session_id: context?.session_id || this.getSessionId(), // v3.0: required field
+        ...(context?.user_id && { user_id: context.user_id }),
       };
       
       console.log('Request Body:', JSON.stringify(requestBody, null, 2));
@@ -385,20 +420,25 @@ class ChatService {
 
     return {
       success: data.success !== false,
-      response: data.response || data.assistantMessage || '',
+      // v3.0: Use 'message' field (fallback to old 'response' for compatibility)
+      message: data.message || data.response || data.assistantMessage || '',
+      response: data.message || data.response || data.assistantMessage || '', // Backward compatibility
       timestamp: data.timestamp || new Date().toISOString(),
-      type: data.type || data.detected_type,
-      detected_type: data.detected_type,
+      // v3.0: 'type' is required, no longer 'detected_type'
+      type: data.type || data.detected_type || 'general',
+      detected_type: data.detected_type || data.type, // Backward compatibility
+      confidence: data.confidence || 0,
+      // v3.0: Required fields renamed
+      processing_time_ms: data.processing_time_ms || data.processingTimeMs || 0,
+      trace_id: data.trace_id || data.traceId || '',
+      session_id: data.session_id,
+      user_id: data.user_id,
       source: data.source || 'ask',
       cached: data.cached,
-      confidence: data.confidence,
-      session_id: data.session_id,
       // Additional fields from ask response
       recommendations: data.recommendations,
       citations: data.citations,
       quick_insights: data.quick_insights,
-      traceId: data.traceId,
-      processingTimeMs: data.processing_time_ms || data.processingTimeMs,
       suggested_actions,
       created_resources: data.created_resources,
       follow_up_suggestions: data.follow_up_suggestions,
