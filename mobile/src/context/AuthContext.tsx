@@ -246,6 +246,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         case 'dev':
           userData = await handleDevAuth(credentials);
           break;
+        case 'oauth':
+          // Generic OAuth callback - token already stored, just verify and load user
+          userData = await handleOAuthCallback(credentials);
+          break;
         default:
           throw new Error('Unsupported provider');
       }
@@ -417,6 +421,31 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       addOns: ['ai', 'instacart'],
       capabilities: getPlanCapabilities('premium', ['ai', 'instacart']),
     };
+  };
+
+  // Handle OAuth callback when token is already stored (from AuthCallbackScreen)
+  const handleOAuthCallback = async (credentials?: { token?: string }): Promise<User> => {
+    console.log('[AuthContext] handleOAuthCallback - token already stored, verifying session');
+    
+    // Session token should already be stored by AuthCallbackScreen
+    // Just verify and get user data
+    const session = await authService.verifySession();
+    
+    if (session.valid && session.user) {
+      console.log('[AuthContext] OAuth session verified, user:', session.user.email);
+      return convertUserData(session.user);
+    }
+    
+    // If verification failed but we have a token, try getting user profile
+    if (credentials?.token) {
+      console.log('[AuthContext] Session verification failed, trying user profile...');
+      const profile = await authService.getUserProfile();
+      if (profile) {
+        return convertUserData(profile);
+      }
+    }
+    
+    throw new Error('OAuth authentication failed - could not verify session');
   };
 
   // Create account after successful Stripe payment (new subscription flow)
