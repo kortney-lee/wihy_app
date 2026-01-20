@@ -84,6 +84,16 @@ export default function FullChat() {
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [isInitializingSession, setIsInitializingSession] = useState(false);
   
+  // Track the last processed initialMessage to detect new ones
+  const lastProcessedMessage = useRef<string | null>(null);
+  
+  // Reset initialMessageSent when a new initialMessage comes in
+  useEffect(() => {
+    if (initialMessage && initialMessage !== lastProcessedMessage.current) {
+      setInitialMessageSent(false);
+    }
+  }, [initialMessage]);
+  
   // Determine if this is a guided flow (from Home screen) or conversation flow (from Chat tab)
   // Guided flow uses /api/chat/public/ask endpoint, conversation flow uses /api/chat/send-message
   const isGuidedFlow = context?.type === 'search' || context?.type === 'verify';
@@ -275,12 +285,23 @@ export default function FullChat() {
   const scrollToBottom = () => {
     if (isWeb) {
       // Use native DOM scrolling on web
+      // The actual scrollable container is .web-page-content (created by WebPageWrapper)
       setTimeout(() => {
-        const messagesEnd = document.getElementById('messages-end');
-        if (messagesEnd) {
-          messagesEnd.scrollIntoView({ behavior: 'smooth', block: 'end' });
+        // Target the .web-page-content container which is the actual scrollable element
+        const scrollContainer = document.querySelector('.web-chat-page .web-page-content');
+        if (scrollContainer) {
+          scrollContainer.scrollTop = scrollContainer.scrollHeight;
+          console.log('Scrolled to bottom:', scrollContainer.scrollHeight);
         }
       }, 100);
+      
+      // Second scroll attempt after render settles (for long messages/content)
+      setTimeout(() => {
+        const scrollContainer = document.querySelector('.web-chat-page .web-page-content');
+        if (scrollContainer) {
+          scrollContainer.scrollTop = scrollContainer.scrollHeight;
+        }
+      }, 300);
     } else if (scrollViewRef.current) {
       scrollViewRef.current.scrollToEnd({ animated: true });
     }
@@ -288,12 +309,13 @@ export default function FullChat() {
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
+  }, [messages, isTyping]);
 
   // Send initial message if provided
   useEffect(() => {
     if (initialMessage && initialMessage.trim() && !initialMessageSent) {
       setInitialMessageSent(true);
+      lastProcessedMessage.current = initialMessage;
       setTimeout(() => {
         handleSendMessage(initialMessage);
       }, 500);
@@ -535,69 +557,71 @@ export default function FullChat() {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         keyboardVerticalOffset={Platform.OS === 'ios' ? 60 : 80}
       >
-        {/* Chat Header - Using GradientDashboardHeader with custom children */}
-        <GradientDashboardHeader
-          title={getHeaderTitle()}
-          gradient="chat"
-          style={styles.header}
-        >
-          <View style={styles.chatHeaderContent}>
-            <View style={styles.aiAvatarContainer}>
-              <View style={styles.aiAvatar}>
-                <Image
-                  source={require('../../assets/whatishealthyspinner.gif')}
-                  style={styles.avatarImage}
-                  resizeMode="cover"
-                />
+        {/* Chat Header - Using GradientDashboardHeader with custom children - Hidden on web */}
+        {!isWeb && (
+          <GradientDashboardHeader
+            title={getHeaderTitle()}
+            gradient="chat"
+            style={styles.header}
+          >
+            <View style={styles.chatHeaderContent}>
+              <View style={styles.aiAvatarContainer}>
+                <View style={styles.aiAvatar}>
+                  <Image
+                    source={require('../../assets/whatishealthyspinner.gif')}
+                    style={styles.avatarImage}
+                    resizeMode="cover"
+                  />
+                </View>
               </View>
-            </View>
 
-            {/* History button */}
-            <Pressable
-              style={styles.historyButton}
-              onPress={() => navigation.navigate('ChatHistory')}
-            >
-              <Ionicons name="time-outline" size={20} color="#ffffff" />
-            </Pressable>
-
-            <Pressable
-              style={[
-                styles.factsButton,
-                !hasNutritionFacts && styles.factsButtonDisabled
-              ]}
-              onPress={handleViewNutritionFacts}
-              disabled={!hasNutritionFacts}
-            >
-              <Ionicons 
-                name="nutrition" 
-                size={20} 
-                color={hasNutritionFacts ? '#ffffff' : 'rgba(255, 255, 255, 0.5)'} 
-              />
-              <Text style={[
-                styles.factsButtonText,
-                !hasNutritionFacts && styles.factsButtonTextDisabled
-              ]}>
-                Facts
-              </Text>
-            </Pressable>
-
-            {/* Hide close button on web - nav bar handles navigation */}
-            {!isWeb && (
+              {/* History button */}
               <Pressable
-                style={styles.closeButton}
-                onPress={() => {
-                  if (navigation.canGoBack()) {
-                    navigation.goBack();
-                  } else {
-                    navigation.navigate('Home');
-                  }
-                }}
+                style={styles.historyButton}
+                onPress={() => navigation.navigate('ChatHistory')}
               >
-                <Ionicons name="close" size={24} color="#3b82f6" />
+                <Ionicons name="time-outline" size={20} color="#ffffff" />
               </Pressable>
-            )}
-          </View>
-        </GradientDashboardHeader>
+
+              <Pressable
+                style={[
+                  styles.factsButton,
+                  !hasNutritionFacts && styles.factsButtonDisabled
+                ]}
+                onPress={handleViewNutritionFacts}
+                disabled={!hasNutritionFacts}
+              >
+                <Ionicons 
+                  name="nutrition" 
+                  size={20} 
+                  color={hasNutritionFacts ? '#ffffff' : 'rgba(255, 255, 255, 0.5)'} 
+                />
+                <Text style={[
+                  styles.factsButtonText,
+                  !hasNutritionFacts && styles.factsButtonTextDisabled
+                ]}>
+                  Facts
+                </Text>
+              </Pressable>
+
+              {/* Hide close button on web - nav bar handles navigation */}
+              {!isWeb && (
+                <Pressable
+                  style={styles.closeButton}
+                  onPress={() => {
+                    if (navigation.canGoBack()) {
+                      navigation.goBack();
+                    } else {
+                      navigation.navigate('Home');
+                    }
+                  }}
+                >
+                  <Ionicons name="close" size={24} color="#3b82f6" />
+                </Pressable>
+              )}
+            </View>
+          </GradientDashboardHeader>
+        )}
 
         {/* Messages Container */}
         <ScrollView
@@ -605,11 +629,12 @@ export default function FullChat() {
           style={styles.messagesContainer}
           contentContainerStyle={[
             styles.messagesContent, 
-            { paddingBottom: isWeb ? 120 : 12 + bottomInset / 2 }
+            { paddingBottom: isWeb ? 20 : 12 + bottomInset / 2 }
           ]}
           showsVerticalScrollIndicator={false}
+          {...(isWeb ? { nativeID: 'chat-scroll-view' } : {})}
         >
-          {messages.map((message) => (
+          {messages.map((message, messageIndex) => (
             <View
               key={message.id}
               style={[
@@ -682,8 +707,8 @@ export default function FullChat() {
               </View>
             )}
             
-            {/* Follow-up Suggestions */}
-            {message.followUpSuggestions && message.followUpSuggestions.length > 0 && (
+            {/* Follow-up Suggestions - Only show on the last AI message */}
+            {message.followUpSuggestions && message.followUpSuggestions.length > 0 && messageIndex === messages.length - 1 && message.type === 'ai' && (
               <View style={styles.followUpContainer}>
                 <Text style={styles.followUpLabel}>Try asking:</Text>
                 {message.followUpSuggestions.map((suggestion, index) => (
@@ -723,7 +748,7 @@ export default function FullChat() {
         )}
 
         {/* Quick Replies - Dynamic from API or fallback */}
-        {!isTyping && messages.length > 1 && (
+        {!isTyping && messages.length >= 1 && (
           <View style={styles.quickRepliesContainer}>
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
               <View style={styles.quickReplies}>
@@ -741,8 +766,12 @@ export default function FullChat() {
           </View>
         )}
         
-        {/* Scroll anchor for web */}
-        <View nativeID="messages-end" ref={messagesEndRef} style={{ height: 1 }} />
+        {/* Scroll anchor for web - with extra padding to clear fixed input */}
+        {isWeb ? (
+          <div id="messages-end" style={{ height: 70 }} />
+        ) : (
+          <View nativeID="messages-end" ref={messagesEndRef} style={{ height: 1 }} />
+        )}
       </ScrollView>
 
       {/* Input Container - Mobile only, web uses fixed input below */}
@@ -1006,7 +1035,7 @@ const styles = StyleSheet.create({
   },
   messagesContainer: {
     flex: 1,
-    backgroundColor: '#f8fafc',
+    backgroundColor: '#ffffff',
   },
   messagesContent: {
     padding: 16,

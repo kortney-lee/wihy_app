@@ -53,8 +53,9 @@ class ChatService {
   }
 
   /**
-   * Ask a quick question via /api/chat/public/ask endpoint (Home screen)
-   * This is the stateless Ask endpoint - no session needed, no auth required
+   * Ask a health question via /ask endpoint (Universal Health Question)
+   * Supports authenticated (Bearer token) and anonymous access (rate-limited)
+   * Uses "query" field per API v2.0 spec
    */
   async ask(
     query: string,
@@ -72,14 +73,16 @@ class ChatService {
     const startTime = Date.now();
     const endpoint = `${this.mlBaseUrl}${API_CONFIG.endpoints.ask}`;
     
-    console.log('=== ASK API CALL (Public) ===');
+    console.log('=== ASK API CALL (/ask) ===');
     console.log('Endpoint:', endpoint);
     console.log('Query:', query);
     
     try {
-      // Build request body matching ML API format - uses "message" field
+      // Build request body matching ML API v2.0 format - uses "query" field
       const requestBody: any = {
-        message: query,
+        query,
+        ...(context?.session_id && { sessionId: context.session_id }),
+        ...(context?.user_goals && { user_context: { user_id: context.user_id } }),
       };
       
       console.log('Request Body:', JSON.stringify(requestBody, null, 2));
@@ -120,13 +123,13 @@ class ChatService {
   }
 
   /**
-   * Start a new chat session via /api/chat/start-session
+   * Start a new chat session via /chat/start-session
    * Returns session_id for use in send-message calls
    */
   async startSession(userId: string): Promise<{ session_id: string; user_id: string; created_at: string } | null> {
     const endpoint = `${this.mlBaseUrl}${API_CONFIG.endpoints.chatStartSession}`;
     
-    console.log('=== START CHAT SESSION ===');
+    console.log('=== START CHAT SESSION (/chat/start-session) ===');
     console.log('Endpoint:', endpoint);
     console.log('User ID:', userId);
     
@@ -172,8 +175,9 @@ class ChatService {
   }
 
   /**
-   * Send a message in a chat session via /api/chat/send-message
+   * Send a message in a chat session via /chat/send-message
    * Maintains conversation history on the server
+   * Response format: ModalResponse with assistantMessage, actions, entities, etc.
    */
   async sendMessage(
     message: string,
@@ -189,7 +193,7 @@ class ChatService {
     const startTime = Date.now();
     const endpoint = `${this.mlBaseUrl}${API_CONFIG.endpoints.chatSendMessage}`;
     
-    console.log('=== CHAT SEND MESSAGE ===');
+    console.log('=== CHAT SEND MESSAGE (/chat/send-message) ===');
     console.log('Endpoint:', endpoint);
     console.log('Session ID:', sessionId);
     console.log('User ID:', userId);
@@ -242,12 +246,13 @@ class ChatService {
   }
 
   /**
-   * Get chat history for a session via /api/chat/session/{session_id}/history
+   * Get chat history for a session via /chat/session/{session_id}/history
    */
   async getHistory(sessionId: string): Promise<ChatMessage[]> {
     const endpoint = `${this.mlBaseUrl}${API_CONFIG.endpoints.chatHistory}/${sessionId}/history`;
     
     console.log('=== GET CHAT HISTORY ===');
+    console.log('Endpoint:', endpoint);
     console.log('Session ID:', sessionId);
     
     try {
@@ -271,12 +276,13 @@ class ChatService {
   }
 
   /**
-   * Get list of chat sessions for a user via /api/chat/user/{user_id}/sessions
+   * Get list of chat sessions for a user via /chat/user/{user_id}/sessions
    */
   async getUserSessions(userId: string): Promise<ChatSession[]> {
     const endpoint = `${this.mlBaseUrl}${API_CONFIG.endpoints.chatUserSessions}/${userId}/sessions`;
     
     console.log('=== GET USER SESSIONS ===');
+    console.log('Endpoint:', endpoint);
     console.log('User ID:', userId);
     
     try {
@@ -358,7 +364,8 @@ class ChatService {
   }
 
   /**
-   * Parse /api/chat/public/ask response
+   * Parse /ask endpoint response (API v2.0)
+   * Response includes: type, response, confidence, cached, session_id, recommendations, citations, quick_insights
    */
   private parseAskResponse(data: any): ChatResponse {
     // Parse actions to suggested_actions format
@@ -371,27 +378,51 @@ class ChatService {
       }));
     }
 
+    // Also check for suggested_actions in top-level response
+    if (!suggested_actions && data.suggested_actions && Array.isArray(data.suggested_actions)) {
+      suggested_actions = data.suggested_actions;
+    }
+
     return {
       success: data.success !== false,
-      response: data.assistantMessage || data.response || '',
-      timestamp: new Date().toISOString(),
-      type: data.mode || data.detectedIntent,
-      detected_type: data.detectedIntent,
-      source: 'ask',
+      response: data.response || data.assistantMessage || '',
+      timestamp: data.timestamp || new Date().toISOString(),
+      type: data.type || data.detected_type,
+      detected_type: data.detected_type,
+      source: data.source || 'ask',
+      cached: data.cached,
+      confidence: data.confidence,
+      session_id: data.session_id,
       // Additional fields from ask response
+      recommendations: data.recommendations,
+      citations: data.citations,
+      quick_insights: data.quick_insights,
       traceId: data.traceId,
-      processingTimeMs: data.processingTimeMs,
+      processingTimeMs: data.processing_time_ms || data.processingTimeMs,
       suggested_actions,
+      created_resources: data.created_resources,
+      follow_up_suggestions: data.follow_up_suggestions,
+      clarifying_questions: data.clarifying_questions,
+      suggested_searches: data.suggested_searches,
     };
   }
 
   /**
-   * Parse /api/chat/send-message response
+   * Parse /chat/send-message response (ModalResponse format - API v2.0)
+   * Response includes: assistantMessage, citations, actions, entities, traceId, conversationId, mode, detectedIntent
    */
   private parseSendMessageResponse(data: any, sessionId: string): ChatResponse {
-    // Parse modal actions if present
+    // Parse actions from ModalResponse format
     let suggested_actions: SuggestedAction[] | undefined;
-    if (data.modal?.actions && Array.isArray(data.modal.actions)) {
+    if (data.actions && Array.isArray(data.actions)) {
+      suggested_actions = data.actions.map((action: any) => ({
+        action: action.type?.toLowerCase() || action.action,
+        label: action.label,
+        route: action.payload?.route,
+      }));
+    }
+    // Also check modal.actions for backwards compatibility
+    if (!suggested_actions && data.modal?.actions && Array.isArray(data.modal.actions)) {
       suggested_actions = data.modal.actions.map((action: any) => ({
         action: action.type?.toLowerCase() || action.action,
         label: action.label,
@@ -400,15 +431,19 @@ class ChatService {
     }
 
     return {
-      success: true,
+      success: data.success !== false,
       response: data.assistantMessage || data.response || '',
-      session_id: sessionId,
+      session_id: data.conversationId || sessionId,
       timestamp: data.timestamp || new Date().toISOString(),
-      type: data.detectedIntent,
+      type: data.mode || data.detectedIntent,
       detected_type: data.detectedIntent,
       source: data.service || 'wihy_ai',
+      traceId: data.traceId,
+      processingTimeMs: data.processingTimeMs,
       suggested_actions,
-      // Modal info for UI display
+      citations: data.citations,
+      entities: data.entities,
+      // Modal info for UI display (backwards compat)
       modal: data.modal,
     };
   }

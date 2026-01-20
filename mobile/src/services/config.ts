@@ -27,13 +27,14 @@ export const API_CONFIG = {
     pillScan: '/api/v1/medications/pills/scan', // Pill identification
     pillConfirm: '/api/v1/medications/pills/confirm', // Pill confirmation
     labelByNdc: '/api/scan/product', // NDC lookup
-    // ML Chat API endpoints
-    ask: '/api/chat/public/ask', // Public ask endpoint (stateless, no auth)
-    askProtected: '/ask', // Protected ask endpoint (requires Bearer token)
-    chatStartSession: '/api/chat/start-session', // Start a chat session
-    chatSendMessage: '/api/chat/send-message', // Send message in session
-    chatHistory: '/api/chat/session', // Get session history: {id}/history
-    chatUserSessions: '/api/chat/user', // Get user sessions: {userId}/sessions
+    // ML Chat API endpoints (v2.0 - Jan 2026)
+    // See docs: WIHY_ML_CLIENT_API.md
+    ask: '/ask', // Universal health question endpoint (supports anonymous)
+    chatPublic: '/chat/public', // Public chat (one-shot, no session)
+    chatStartSession: '/chat/start-session', // Start a chat session
+    chatSendMessage: '/chat/send-message', // Send message in session  
+    chatHistory: '/chat/session', // Get session history: /{session_id}/history
+    chatUserSessions: '/chat/user', // Get user sessions: /{user_id}/sessions
     fdaIngredient: '/api/openfda/ingredient',
   },
   timeout: 30000, // 30 seconds
