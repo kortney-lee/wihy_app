@@ -26,6 +26,7 @@ export interface User {
 
   // Access control
   role?: 'user' | 'coach' | 'admin';
+  status?: 'active' | 'inactive' | 'suspended' | 'pending';
   isDeveloper?: boolean;
   
   // Plan-based access control (NEW)
@@ -186,6 +187,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     // Role / developer flags from server or stored data
     const roleFromServer = authUser.role || authUser.profile_data?.role;
     const normalizedRole = roleFromServer ? roleFromServer.toLowerCase() as User['role'] : existingData?.role;
+    
+    // Status from server (normalize to lowercase)
+    const statusFromServer = authUser.status;
+    const normalizedStatus = statusFromServer ? statusFromServer.toLowerCase() as User['status'] : existingData?.status;
+    
     const isDeveloperFlag = Boolean(
       authUser.profile_data?.is_developer ||
       authUser.profile_data?.isDeveloper ||
@@ -204,6 +210,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       streakDays: authUser.streakDays ?? authUser.profile_data?.streakDays ?? 0,
       preferences: existingPrefs,
       role: normalizedRole,
+      status: normalizedStatus,
       isDeveloper: isDeveloperFlag,
       plan,
       addOns,
