@@ -18,7 +18,7 @@ import { RootStackParamList } from '../types/navigation';
 import { createInstacartLinkFromMealPlan } from '../services/instacartService';
 import { Ionicons } from '@expo/vector-icons';
 import { AuthContext } from '../context/AuthContext';
-import mockShoppingListData from '../../mock-data-shopping-list.json';
+// Note: Mock data removed to expose real API issues
 import { GradientDashboardHeader } from '../components/shared';
 
 type ShoppingListScreenRouteProp = RouteProp<RootStackParamList, 'ShoppingList'>;
@@ -45,12 +45,12 @@ interface ShoppingItem {
 }
 
 export default function ShoppingListScreen({ route, navigation, isDashboardMode = false }: Props) {
-  // Support both navigation mode (with route params) and dashboard mode (with mock data)
+  // Support both navigation mode (with route params) and dashboard mode (empty data if no params)
   const mealPlanId: number = route?.params?.mealPlanId || 1;
   const shoppingListData = route?.params?.shoppingListData || {
-    totalItems: mockShoppingListData.total_items,
-    itemsByCategory: mockShoppingListData.items_by_category,
-    estimatedCost: mockShoppingListData.estimated_cost,
+    totalItems: 0,
+    itemsByCategory: {},
+    estimatedCost: { min: 0, max: 0 },
   };
   const { user } = useContext(AuthContext);
   const [loading, setLoading] = useState(false);

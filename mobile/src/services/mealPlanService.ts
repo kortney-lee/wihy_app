@@ -1,7 +1,6 @@
 const API_BASE = 'https://services.wihy.ai/api';
 
-// Mock Data Import
-import mockMealPlan from '../../mock-data-muscle-building-meal-plan.json';
+// Note: Mock data removed to expose real API issues
 
 export interface MealPlan {
   id: number;
@@ -250,47 +249,7 @@ export async function getUserMeals(
  */
 export async function getMealDetails(mealId: string): Promise<any> {
   try {
-    // First try to find meal in mock data
-    for (const day of mockMealPlan.days) {
-      const mockMeal = day.meals.find((m: any) => m.meal_id === mealId) as any;
-      if (mockMeal) {
-        return {
-          meal_id: mockMeal.meal_id,
-          name: mockMeal.meal_name,
-          description: mockMeal.muscle_building_benefits?.join(' ') || '',
-          nutrition: {
-            calories: mockMeal.nutrition_per_serving.calories,
-            protein: mockMeal.nutrition_per_serving.protein,
-            carbs: mockMeal.nutrition_per_serving.carbs,
-            fat: mockMeal.nutrition_per_serving.fat,
-            fiber: mockMeal.nutrition_per_serving.fiber,
-          },
-          ingredients: mockMeal.ingredients?.map((ing: any) => ({
-            name: ing.name,
-            amount: ing.amount,
-            unit: ing.unit,
-            notes: ing.notes,
-            category: ing.aisle,
-          })) || [],
-          instructions: mockMeal.instructions?.map((inst: any, index: number) => ({
-            step: index + 1,
-            text: inst,
-          })) || [],
-          tags: mockMeal.tags || [mockMeal.meal_type],
-          notes: mockMeal.muscle_building_benefits?.join('\n'),
-          preparation_time: mockMeal.prep_time,
-          cooking_time: mockMeal.cook_time,
-          servings: mockMeal.servings,
-          is_favorite: false,
-          cost_per_serving: mockMeal.cost_per_serving,
-          difficulty: mockMeal.prep_time < 15 ? 'easy' : mockMeal.prep_time < 30 ? 'medium' : 'hard',
-          meal_type: mockMeal.meal_type,
-          tips: mockMeal.muscle_building_benefits,
-        };
-      }
-    }
-    
-    // Fallback to API if not found in mock data
+    // Fetch from API
     const response = await fetch(`${API_BASE}/meals/${mealId}`);
 
     if (!response.ok) {
