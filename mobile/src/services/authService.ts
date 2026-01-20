@@ -193,7 +193,7 @@ export interface UserData {
   id: string;              // User ID (UUID) - maps to userId
   email: string;
   name: string;
-  role?: 'user' | 'coach' | 'admin' | 'family-admin' | string;  // Backend may send uppercase (ADMIN, FAMILY-ADMIN)
+  role?: 'user' | 'premium' | 'family-basic' | 'family-pro' | 'coach' | 'employee' | 'admin' | string;  // Backend may send uppercase
   status?: 'active' | 'inactive' | 'suspended' | 'pending' | string;  // Backend sends ACTIVE
   provider?: 'local' | 'google' | 'facebook' | 'microsoft' | 'apple';
   dateOfBirth?: string | null;

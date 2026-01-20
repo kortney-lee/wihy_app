@@ -33,22 +33,38 @@
 
 ```typescript
 export type UserRole = 
-  | 'user'         // Standard user
-  | 'coach'        // Coach with client management
-  | 'admin'        // Full system admin
-  | 'family-admin'; // Family plan administrator
+  | 'user'         // Free tier - basic features
+  | 'premium'      // Premium - full nutrition & fitness tools
+  | 'family-basic' // Family Basic - up to 4 family members
+  | 'family-pro'   // Family Pro - up to 5 members, AI included
+  | 'coach'        // Coach Platform - client management
+  | 'employee'     // Employee - coach + family access, NO dev tools
+  | 'admin';       // Admin - full system access including dev tools
 ```
 
-### How Roles Map to Dashboard Access
+### How Roles Map to Plans & Dashboard Access
 
-The frontend uses the `role` field from the backend to determine user access:
+| Role from Backend | Plan Override | Dashboards | Dev Tools |
+|-------------------|--------------|------------|-----------|
+| `ADMIN` / `admin` | `admin` | Personal, Family, Coach, Admin | ✅ Yes |
+| `EMPLOYEE` / `employee` | `coach-family` | Personal, Family, Coach | ❌ No |
+| `COACH` / `coach` | `coach` | Personal, Coach | ❌ No |
+| `FAMILY-PRO` / `family-pro` | `family-pro` | Personal, Family | ❌ No |
+| `FAMILY-BASIC` / `family-basic` | `family-basic` | Personal, Family | ❌ No |
+| `PREMIUM` / `premium` | `premium` | Personal | ❌ No |
+| `USER` / `user` | `free` | Personal (limited) | ❌ No |
 
-| Role from Backend | Normalized | Plan Override | Available Dashboards |
-|-------------------|------------|---------------|---------------------|
-| `ADMIN` / `admin` | `admin` | `admin` | Personal, Family, Coach, Admin |
-| `FAMILY-ADMIN` / `family-admin` | `family-admin` | `family-pro` | Personal, Family |
-| `coach` | `coach` | (uses backend `plan`) | Personal, Coach |
-| `user` | `user` | (uses backend `plan`) | Based on plan |
+### Role → Plan → Pricing Mapping
+
+| Role | Plan | Price | Features |
+|------|------|-------|----------|
+| `user` | `free` | $0/mo | Barcode scanning, photo analysis, basic dashboard |
+| `premium` | `premium` | $12.99/mo | Full nutrition tools, meal planning, optional AI |
+| `family-basic` | `family-basic` | $24.99/mo | Up to 4 members, shared dashboard, optional AI |
+| `family-pro` | `family-pro` | $49.99/mo | Up to 5 members, AI included, Instacart Pro |
+| `coach` | `coach` | $99.99 setup | Client management, meal plans, progress tracking |
+| `employee` | `coach-family` | Internal | Coach + Family features, no dev access |
+| `admin` | `admin` | Internal | Full access including dev tools |
 
 ### Admin Role Behavior
 

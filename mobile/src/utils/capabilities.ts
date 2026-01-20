@@ -802,15 +802,17 @@ export const getUpgradeMessage = (
 
 /**
  * Helper for migrating old userRole to new plan system
- * @deprecated - Use plan-based capabilities instead
+ * Maps role to plan - role determines capabilities
  */
 export const migrateUserRoleToPlan = (
-  userRole?: 'user' | 'coach' | 'parent' | 'admin' | 'family-admin'
+  userRole?: 'user' | 'premium' | 'family-basic' | 'family-pro' | 'coach' | 'employee' | 'admin' | 'parent'
 ): User['plan'] => {
-  if (!userRole || userRole === 'user') return 'premium';
+  if (!userRole || userRole === 'user') return 'free';
+  if (userRole === 'premium') return 'premium';
+  if (userRole === 'parent' || userRole === 'family-basic') return 'family-basic';
+  if (userRole === 'family-pro') return 'family-pro';
   if (userRole === 'coach') return 'coach';
-  if (userRole === 'parent') return 'family-basic';
-  if (userRole === 'family-admin') return 'family-pro'; // Family admin gets family pro features
+  if (userRole === 'employee') return 'coach-family'; // Employee gets coach + family, no dev tools
   if (userRole === 'admin') return 'admin'; // Admin gets everything
   return 'free';
 };
