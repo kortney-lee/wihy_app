@@ -123,9 +123,10 @@ export default function AuthCallbackScreen() {
           setStatus('success');
 
           // Trigger context update via signIn
-          // This will reload user data and update the app state
+          // IMPORTANT: Always use 'oauth' provider since we already have the token
+          // Using the actual provider (google, facebook, etc.) would start a NEW OAuth flow!
           try {
-            await signIn(params.provider || 'oauth', { 
+            await signIn('oauth', { 
               token: params.session_token 
             });
           } catch (e) {
