@@ -2,7 +2,7 @@
 
 ## 🚨 CRITICAL ISSUE: OAuth Callback Session Verification Failed
 
-**Status:** ❌ BLOCKING - Users cannot sign in via OAuth
+**Status:** ⚠️ PARTIALLY MITIGATED - Frontend has fallback, but backend fix still required
 
 **Error Observed:**
 ```
@@ -11,6 +11,82 @@ Message: "Sign in failed - Session verification failed"
 ```
 
 **Screenshot:** User sees red X with "Session verification failed" and "Redirecting to home..."
+
+---
+
+## Frontend Mitigations (Deployed Jan 2026)
+
+The frontend now includes resilience features:
+- ✅ **Retry with exponential backoff** (2 retries: 500ms, 1000ms delays)
+- ✅ **JWT fallback mode** - If `/api/auth/verify` fails, frontend decodes JWT payload and uses that data
+- ✅ **Client-side expiration check** - Fails fast if token is expired
+- ✅ **User-friendly error messages** - Clear messages for different failure types
+
+**However, the fallback has limitations:**
+- User data is limited to what's in the JWT (no fresh data from DB)
+- `plan` defaults to `'free'` if not in JWT payload
+- Session revocation won't work (JWT can't be invalidated)
+
+**⚠️ Backend fix is still required for proper functionality.**
+
+---
+
+## 🔧 BACKEND ACTION ITEMS (auth.wihy.ai)
+
+### Priority 1: Fix `/api/auth/verify` Endpoint
+
+The endpoint must return `{ success: true, valid: true, user: {...} }` for valid JWTs.
+
+**Current behavior:** Returns `{ success: false, valid: false }` for valid tokens
+
+**Required checks:**
+1. Verify JWT signature using `JWT_SECRET`
+2. Check token is not expired (`exp` claim)
+3. Return user data from database
+
+```javascript
+// POST /api/auth/verify - REQUIRED RESPONSE FORMAT
+{
+  success: true,
+  valid: true,
+  user: {
+    id: "uuid",
+    email: "user@example.com",
+    name: "User Name",
+    plan: "free",           // IMPORTANT: Include plan, default to "free"
+    avatar: "https://...",
+    provider: "google"
+  }
+}
+```
+
+### Priority 2: Ensure JWT Contains Required Claims
+
+When generating the session_token during OAuth callback, include:
+
+```javascript
+const sessionToken = jwt.sign({
+  sub: user.id,           // REQUIRED: User ID
+  email: user.email,      // REQUIRED: For fallback
+  name: user.name,        // RECOMMENDED: For fallback
+  plan: user.plan || 'free', // RECOMMENDED: For fallback
+  provider: 'google',     // RECOMMENDED: OAuth provider
+  picture: user.avatar,   // OPTIONAL: User avatar
+  exp: Math.floor(Date.now() / 1000) + (7 * 24 * 60 * 60), // 7 days
+}, process.env.JWT_SECRET);
+```
+
+### Priority 3: Environment Variable Consistency
+
+Ensure `JWT_SECRET` is identical across:
+- OAuth callback handler (signs token)
+- `/api/auth/verify` endpoint (verifies token)
+- Any other services that verify tokens
+
+```bash
+# Check on auth server
+echo $JWT_SECRET
+```
 
 ---
 
@@ -237,12 +313,32 @@ async verifySession(): Promise<{ valid: boolean; user?: UserData }> {
 
 ## Quick Fix Checklist
 
-- [ ] Ensure `JWT_SECRET` is identical across OAuth callback service and verify service
-- [ ] Ensure JWT `exp` claim is at least 1 hour in the future
-- [ ] Ensure session is created in database during OAuth callback
-- [ ] Ensure `/api/auth/verify` endpoint is deployed and running
-- [ ] Test with `curl` to see actual error message from verify endpoint
-- [ ] Check auth service logs for errors during verification
+### Backend Team (auth.wihy.ai)
+- [ ] **Verify JWT_SECRET consistency** - Same key in OAuth callback and /api/auth/verify
+- [ ] **Fix /api/auth/verify** - Must return `{ success: true, valid: true, user: {...} }`
+- [ ] **Include `plan` in user response** - Default to `"free"` for new users
+- [ ] **Include `plan` in JWT payload** - Enables frontend fallback to work correctly
+- [ ] **Set reasonable JWT expiration** - At least 1 hour, recommend 7 days
+- [ ] **Test with curl** - Verify endpoint responds correctly
+- [ ] **Check service logs** - Look for errors during verification
+
+### Testing Commands
+```bash
+# Test verify endpoint directly
+curl -X POST https://auth.wihy.ai/api/auth/verify \
+  -H "Content-Type: application/json" \
+  -d '{"token": "YOUR_JWT_TOKEN_HERE"}'
+
+# Decode JWT to check contents (no verification)
+echo "YOUR_JWT_TOKEN" | cut -d. -f2 | base64 -d 2>/dev/null | jq .
+```
+
+### Frontend (Already Deployed ✅)
+- [x] Retry with exponential backoff (2 retries)
+- [x] JWT fallback when verify fails
+- [x] Client-side expiration check
+- [x] User-friendly error messages
+- [x] `initializing` state prevents premature UI blocking
 
 ---
 
