@@ -922,15 +922,11 @@ class AuthService {
     const state = this.generateState();
     await AsyncStorage.setItem('@wihy_oauth_state', state);
     
-    // Determine web redirect URI with fallback
-    let redirectUri: string;
-    if (typeof window !== 'undefined') {
-      // Use current origin for redirect (works for localhost and production)
-      redirectUri = `${window.location.origin}/auth/callback`;
-    } else {
-      // Fallback for SSR or non-browser environments
-      redirectUri = 'https://wihy.ai/auth/callback';
-    }
+    // Determine web redirect URI
+    // IMPORTANT: Use env variable for production URL to ensure OAuth works in all environments
+    // In local development, OAuth still redirects to production URL which handles the callback
+    const webBaseUrl = process.env.EXPO_PUBLIC_WEB_URL || 'https://wihy.ai';
+    const redirectUri = `${webBaseUrl}/auth/callback`;
     
     const scope = encodeURIComponent(AUTH_CONFIG.scopes.join(' '));
     
