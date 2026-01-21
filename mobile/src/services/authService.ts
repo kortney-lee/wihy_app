@@ -49,19 +49,6 @@ export const AUTH_CONFIG = {
     forgotPassword: '/api/auth/forgot-password',
     resetPassword: '/api/auth/reset-password',
     
-    // === USER SERVICE ENDPOINTS (https://user.wihy.ai) ===
-    // Note: These endpoints are hardcoded to use user.wihy.ai in the methods below
-    // User Management
-    userProfile: '/api/users/me',
-    updateProfile: '/api/users/me',
-    updatePreferences: '/api/users/me/preferences',
-    updatePlan: '/api/users/me/plan',
-    addAddon: '/api/users/me/addons',
-    removeAddon: '/api/users/me/addons',
-    updateHealth: '/api/users/me/health',
-    subscriptionHistory: '/api/users/me/subscriptions',
-    userCapabilities: '/api/users/me/capabilities',
-    
     // Plans
     plans: '/api/stripe/plans',
     planDetails: '/api/stripe/plans',
@@ -1426,37 +1413,6 @@ class AuthService {
   // - getUserPreferences(), updateUserPreferences()
   // - updateUserPlan(), addAddon(), removeAddon(), getSubscriptionHistory()
   // - getUserCapabilities(), updateHealthMetrics(), getUserDashboard()
-
-  /**
-   * Get user capabilities
-   */
-  async getUserCapabilities(): Promise<{
-    plan: string;
-    addOns: string[];
-    capabilities: UserCapabilities;
-    rateLimit?: any;
-  } | null> {
-    const endpoint = `${this.baseUrl}${AUTH_CONFIG.endpoints.userCapabilities}`;
-    const headers = await this.getAuthHeaders();
-    
-    console.log('=== GET USER CAPABILITIES ===');
-    
-    try {
-      const response = await fetchWithLogging(endpoint, { headers });
-      
-      if (response.ok) {
-        const data = await response.json();
-        console.log('Capabilities retrieved for plan:', data.plan);
-        return data;
-      } else {
-        console.error('Failed to get capabilities');
-        return null;
-      }
-    } catch (error) {
-      console.error('Get capabilities error:', error);
-      return null;
-    }
-  }
 
   // ==========================================
   // PLAN ENDPOINTS

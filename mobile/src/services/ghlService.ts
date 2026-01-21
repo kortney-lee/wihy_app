@@ -3,6 +3,9 @@
  * 
  * Manages subscription status and user data sync with GoHighLevel CRM.
  * GHL is used as the source of truth for premium subscription status.
+ * 
+ * NOTE: Uses user.wihy.ai (userUrl) for all user-related endpoints
+ * since user data operations belong to the User Service.
  */
 
 import { API_CONFIG } from './config';
@@ -25,7 +28,7 @@ export interface GHLContactData {
 }
 
 class GHLService {
-  private authUrl = API_CONFIG.authUrl;
+  private userUrl = API_CONFIG.userUrl; // User service for user data
 
   /**
    * Check if user has an active premium subscription in GHL
@@ -37,7 +40,7 @@ class GHLService {
     try {
       // Step 1: Get user by email
       const userResponse = await fetchWithLogging(
-        `${this.authUrl}/api/users/email/${encodeURIComponent(email)}`,
+        `${this.userUrl}/api/users/email/${encodeURIComponent(email)}`,
         {
           method: 'GET',
           headers: {
@@ -67,7 +70,7 @@ class GHLService {
 
       // Step 2: Get GHL status for user
       const ghlResponse = await fetchWithLogging(
-        `${this.authUrl}/api/users/${userId}/ghl-status`,
+        `${this.userUrl}/api/users/${userId}/ghl-status`,
         {
           method: 'GET',
           headers: {
@@ -109,7 +112,7 @@ class GHLService {
    */
   async syncContact(contactData: GHLContactData): Promise<boolean> {
     try {
-      const response = await fetchWithLogging(`${this.authUrl}/api/users/sync-contact`, {
+      const response = await fetchWithLogging(`${this.userUrl}/api/users/sync-contact`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -139,7 +142,7 @@ class GHLService {
     transactionId: string
   ): Promise<boolean> {
     try {
-      const response = await fetchWithLogging(`${this.authUrl}/api/users/update-ghl-subscription`, {
+      const response = await fetchWithLogging(`${this.userUrl}/api/users/update-ghl-subscription`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -169,7 +172,7 @@ class GHLService {
    */
   async addTags(email: string, tags: string[]): Promise<boolean> {
     try {
-      const response = await fetchWithLogging(`${this.authUrl}/api/users/ghl-tags`, {
+      const response = await fetchWithLogging(`${this.userUrl}/api/users/ghl-tags`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
