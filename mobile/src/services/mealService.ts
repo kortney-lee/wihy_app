@@ -1561,31 +1561,25 @@ class MealService {
 
   /**
    * Get all meals for a user with filtering
+   * Uses Meal Diary API: GET /api/users/:userId/meals/diary
    */
   async getUserMeals(userId: string, filters?: {
-    tags?: string;
-    search?: string;
-    sort?: 'created_at' | 'name' | 'calories' | 'times_logged';
-    order?: 'asc' | 'desc';
+    meal_type?: string;
     limit?: number;
     offset?: number;
   }): Promise<{
     meals: SavedMeal[];
-    total_count: number;
-    filtered_count: number;
+    total: number;
     has_more: boolean;
   }> {
     try {
       const params = new URLSearchParams();
       
-      if (filters?.tags) params.append('tags', filters.tags);
-      if (filters?.search) params.append('search', filters.search);
-      if (filters?.sort) params.append('sort', filters.sort);
-      if (filters?.order) params.append('order', filters.order);
+      if (filters?.meal_type) params.append('meal_type', filters.meal_type);
       if (filters?.limit) params.append('limit', filters.limit.toString());
       if (filters?.offset) params.append('offset', filters.offset.toString());
 
-      const url = `${this.baseUrl}/api/meals/user/${userId}${params.toString() ? '?' + params.toString() : ''}`;
+      const url = `${this.baseUrl}/api/users/${userId}/meals/diary${params.toString() ? '?' + params.toString() : ''}`;
       
       const response = await fetchWithLogging(url);
       const result = await response.json();
@@ -1594,11 +1588,30 @@ class MealService {
         throw new Error(result.error || 'Failed to fetch meals');
       }
 
+      // Convert Meal Diary API response to expected format
+      const meals = (result.recent_meals || []).map((meal: any) => ({
+        meal_id: meal.meal_id,
+        user_id: meal.user_id || userId,
+        name: meal.name,
+        nutrition: meal.nutrition,
+        ingredients: Array.isArray(meal.ingredients) 
+          ? meal.ingredients.filter((ing: any) => typeof ing === 'object' && 'amount' in ing)
+          : [],
+        tags: meal.tags || [],
+        notes: '',
+        is_favorite: meal.is_favorite || false,
+        times_logged: meal.times_logged || 0,
+        created_at: meal.created_at || new Date().toISOString(),
+        updated_at: meal.updated_at || new Date().toISOString(),
+        serving_size: meal.serving_size || 1,
+        preparation_time: meal.preparation_time,
+        cooking_time: meal.cooking_time,
+      })) as SavedMeal[];
+
       return {
-        meals: result.meals,
-        total_count: result.total_count,
-        filtered_count: result.filtered_count,
-        has_more: result.pagination?.has_more || false,
+        meals,
+        total: result.total_meals || meals.length,
+        has_more: result.has_more || false,
       };
     } catch (error) {
       console.error('Error fetching meals:', error);
