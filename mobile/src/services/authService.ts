@@ -2090,12 +2090,15 @@ class AuthService {
 
   /**
    * Create coach profile
+   * Note: Coach endpoints go to users service (https://user.wihy.ai)
    */
   async createCoach(
     plan: string,
     commissionRate: number
   ): Promise<ApiResponse<Coach>> {
-    const endpoint = `${this.baseUrl}${AUTH_CONFIG.endpoints.coaches}`;
+    // Coach endpoints are on the users service, not auth service
+    const usersBaseUrl = 'https://user.wihy.ai';
+    const endpoint = `${usersBaseUrl}/api/coaches`;
     const headers = await this.getAuthHeaders();
     
     console.log('=== CREATE COACH PROFILE ===');
@@ -2123,9 +2126,11 @@ class AuthService {
 
   /**
    * Get coach profile
+   * Note: Coach endpoints go to users service (https://user.wihy.ai)
    */
   async getCoach(coachId: string): Promise<Coach | null> {
-    const endpoint = `${this.baseUrl}${AUTH_CONFIG.endpoints.coachDetails}/${coachId}`;
+    const usersBaseUrl = 'https://user.wihy.ai';
+    const endpoint = `${usersBaseUrl}/api/coaches/${coachId}`;
     const headers = await this.getAuthHeaders();
     
     console.log('=== GET COACH PROFILE ===');
@@ -2150,12 +2155,14 @@ class AuthService {
 
   /**
    * Update coach profile
+   * Note: Coach endpoints go to users service (https://user.wihy.ai)
    */
   async updateCoach(
     coachId: string,
     updates: { commissionRate?: number }
   ): Promise<ApiResponse<Coach>> {
-    const endpoint = `${this.baseUrl}${AUTH_CONFIG.endpoints.updateCoach}/${coachId}`;
+    const usersBaseUrl = 'https://user.wihy.ai';
+    const endpoint = `${usersBaseUrl}/api/coaches/${coachId}`;
     const headers = await this.getAuthHeaders();
     
     console.log('=== UPDATE COACH PROFILE ===');
@@ -2183,12 +2190,14 @@ class AuthService {
 
   /**
    * Add client to coach roster
+   * Note: Coach endpoints go to users service (https://user.wihy.ai)
    */
   async addCoachClient(
     coachId: string,
     clientId: string
   ): Promise<ApiResponse<CoachClient>> {
-    const endpoint = `${this.baseUrl}${AUTH_CONFIG.endpoints.addClient}/${coachId}/clients`;
+    const usersBaseUrl = 'https://user.wihy.ai';
+    const endpoint = `${usersBaseUrl}/api/coaches/${coachId}/clients`;
     const headers = await this.getAuthHeaders();
     
     console.log('=== ADD COACH CLIENT ===');
@@ -2216,12 +2225,14 @@ class AuthService {
 
   /**
    * Remove client from coach roster
+   * Note: Coach endpoints go to users service (https://user.wihy.ai)
    */
   async removeCoachClient(
     coachId: string,
     clientId: string
   ): Promise<ApiResponse> {
-    const endpoint = `${this.baseUrl}${AUTH_CONFIG.endpoints.removeClient}/${coachId}/clients/${clientId}`;
+    const usersBaseUrl = 'https://user.wihy.ai';
+    const endpoint = `${usersBaseUrl}/api/coaches/${coachId}/clients/${clientId}`;
     const headers = await this.getAuthHeaders();
     
     console.log('=== REMOVE COACH CLIENT ===');
@@ -2248,6 +2259,7 @@ class AuthService {
 
   /**
    * List coach clients
+   * Note: Coach endpoints go to users service (https://user.wihy.ai)
    */
   async listCoachClients(coachId: string): Promise<{
     coachId: string;
@@ -2255,7 +2267,8 @@ class AuthService {
     totalClients: number;
     activeClients: number;
   } | null> {
-    const endpoint = `${this.baseUrl}${AUTH_CONFIG.endpoints.listClients}/${coachId}/clients`;
+    const usersBaseUrl = 'https://user.wihy.ai';
+    const endpoint = `${usersBaseUrl}/api/coaches/${coachId}/clients`;
     const headers = await this.getAuthHeaders();
     
     console.log('=== LIST COACH CLIENTS ===');
@@ -2279,9 +2292,11 @@ class AuthService {
 
   /**
    * Get coach revenue analytics
+   * Note: Coach endpoints go to users service (https://user.wihy.ai)
    */
   async getCoachRevenue(coachId: string): Promise<any | null> {
-    const endpoint = `${this.baseUrl}${AUTH_CONFIG.endpoints.coachRevenue}/${coachId}/revenue`;
+    const usersBaseUrl = 'https://user.wihy.ai';
+    const endpoint = `${usersBaseUrl}/api/coaches/${coachId}/revenue`;
     const headers = await this.getAuthHeaders();
     
     console.log('=== GET COACH REVENUE ===');
@@ -2305,12 +2320,14 @@ class AuthService {
 
   /**
    * Connect Stripe account for payouts
+   * Note: Coach endpoints go to users service (https://user.wihy.ai)
    */
   async connectCoachStripe(
     coachId: string,
     stripeAccountId: string
   ): Promise<ApiResponse<Coach>> {
-    const endpoint = `${this.baseUrl}${AUTH_CONFIG.endpoints.connectStripe}/${coachId}/stripe`;
+    const usersBaseUrl = 'https://user.wihy.ai';
+    const endpoint = `${usersBaseUrl}/api/coaches/${coachId}/stripe`;
     const headers = await this.getAuthHeaders();
     
     console.log('=== CONNECT COACH STRIPE ===');
@@ -2338,9 +2355,11 @@ class AuthService {
 
   /**
    * Get coach payout history
+   * Note: Coach endpoints go to users service (https://user.wihy.ai)
    */
   async getCoachPayouts(coachId: string): Promise<any | null> {
-    const endpoint = `${this.baseUrl}${AUTH_CONFIG.endpoints.payoutHistory}/${coachId}/payouts`;
+    const usersBaseUrl = 'https://user.wihy.ai';
+    const endpoint = `${usersBaseUrl}/api/coaches/${coachId}/payouts`;
     const headers = await this.getAuthHeaders();
     
     console.log('=== GET COACH PAYOUTS ===');
