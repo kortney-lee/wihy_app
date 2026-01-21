@@ -103,6 +103,8 @@ export default function ParentDashboard() {
       const members = await familyService.getMembers(userFamily.id);
       
       // Transform to ChildHealthData format (only show children, not the current user)
+      // Note: Individual member health data not yet available from API
+      // Using family_stats for aggregate data when available
       const childMembers: ChildHealthData[] = members
         .filter(m => m.role === 'CHILD' || (m.id !== userId && m.role === 'MEMBER'))
         .map(m => ({
@@ -111,9 +113,9 @@ export default function ParentDashboard() {
           age: calculateAge(m.age_group),
           role: m.role,
           avatar: m.avatar_url,
-          healthScore: Math.floor(Math.random() * 20) + 80, // Mock until real health data
-          mealsLogged: Math.floor(Math.random() * 5),
-          workoutsCompleted: Math.floor(Math.random() * 3),
+          healthScore: undefined, // Will show "--" in UI until backend provides per-member data
+          mealsLogged: undefined, // Aggregate data available in familyStats
+          workoutsCompleted: undefined,
           lastActive: m.is_active ? 'Active now' : 'Yesterday',
         }));
 
@@ -159,45 +161,52 @@ export default function ParentDashboard() {
   };
 
   // Progress card data for selected child - matches Health Overview pattern
+  // Note: Per-member health data not yet available from API, showing "--" for unavailable data
   const getChildProgressCards = (child: ChildHealthData) => [
     {
       id: '1',
       title: 'Health Score',
-      value: `${child.healthScore || 85}`,
+      value: child.healthScore !== undefined ? `${child.healthScore}` : '--',
       unit: '/100',
       icon: 'heart',
       color: dashboardColors.success,
-      status: (child.healthScore || 85) >= 80 ? 'good' : (child.healthScore || 85) >= 60 ? 'warning' : 'alert',
-      trend: 'up' as const,
+      status: child.healthScore !== undefined 
+        ? (child.healthScore >= 80 ? 'good' : child.healthScore >= 60 ? 'warning' : 'alert')
+        : 'pending',
+      trend: 'stable' as const,
     },
     {
       id: '2',
       title: 'Meals Today',
-      value: `${child.mealsLogged || 0}`,
+      value: child.mealsLogged !== undefined ? `${child.mealsLogged}` : '--',
       unit: 'meals',
       icon: 'restaurant',
       color: dashboardColors.orange,
-      status: (child.mealsLogged || 0) >= 3 ? 'good' : (child.mealsLogged || 0) >= 1 ? 'warning' : 'alert',
+      status: child.mealsLogged !== undefined
+        ? (child.mealsLogged >= 3 ? 'good' : child.mealsLogged >= 1 ? 'warning' : 'alert')
+        : 'pending',
       trend: 'stable' as const,
     },
     {
       id: '3',
       title: 'Activity',
-      value: `${child.workoutsCompleted || 0}`,
+      value: child.workoutsCompleted !== undefined ? `${child.workoutsCompleted}` : '--',
       unit: 'sessions',
       icon: 'fitness',
       color: dashboardColors.primary,
-      status: (child.workoutsCompleted || 0) >= 1 ? 'good' : 'warning',
+      status: child.workoutsCompleted !== undefined
+        ? (child.workoutsCompleted >= 1 ? 'good' : 'warning')
+        : 'pending',
       trend: 'stable' as const,
     },
     {
       id: '4',
       title: 'Steps',
-      value: '0',
+      value: '--',
       unit: 'steps',
       icon: 'footsteps',
       color: '#3b82f6',
-      status: 'warning' as const,
+      status: 'pending' as const,
       trend: 'stable' as const,
     },
   ];

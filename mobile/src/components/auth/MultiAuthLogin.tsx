@@ -11,8 +11,8 @@ import {
   Platform,
   ActivityIndicator,
   Image,
+  ScrollView,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 import { AuthContext } from '../../context/AuthContext';
 import { colors, sizes } from '../../theme/design-tokens';
 import { getResponsiveIconSize } from '../../utils/responsive';
@@ -187,11 +187,12 @@ export default function MultiAuthLogin({
 
   return (
     <View style={styles.container}>
-      {/* Provider Selection Modal */}
+      {/* Unified Login Modal - Social providers on top, email form below */}
       <Modal
-        visible={visible && !user && !showEmailForm}
+        visible={visible && !user && !showForgotPassword}
         animationType="slide"
         transparent={true}
+        presentationStyle="overFullScreen"
         onRequestClose={() => {
           console.log('Modal onRequestClose called');
           if (onClose) {
@@ -200,7 +201,7 @@ export default function MultiAuthLogin({
         }}
       >
         <View style={styles.modalOverlay}>
-          <View style={styles.providerContainer}>
+          <View style={[styles.emailFormContainer, Platform.OS === 'web' && styles.emailFormContainerWeb]}>
             {/* Close button for web */}
             {Platform.OS === 'web' && onClose && (
               <TouchableOpacity 
@@ -211,158 +212,77 @@ export default function MultiAuthLogin({
                 <Text style={styles.closeButtonText}>✕</Text>
               </TouchableOpacity>
             )}
-            <Text style={styles.title}>{title}</Text>
 
-            {activeProviders.map((provider, index) => (
-              <Pressable
-                key={provider.id}
-                style={({ pressed }) => [
-                  styles.providerButton,
-                  pressed && { opacity: 0.7 },
-                  index === activeProviders.length - 1 && { marginBottom: 20 }
-                ]}
-                onPress={() => {
-                  console.log(`[Auth] Provider button pressed: ${provider.id}`);
-                  handleProviderPress(provider.id);
-                }}
-                onPressIn={() => console.log(`[Auth] PressIn: ${provider.id}`)}
-                onPressOut={() => console.log(`[Auth] PressOut: ${provider.id}`)}
-                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-              >
-                <SvgIcon
-                  name={provider.icon as any}
-                  size={getResponsiveIconSize(sizes.icons.md)}
-                  color={provider.color}
-                  style={styles.providerIcon}
-                />
-                <Text style={styles.providerText}>{provider.name}</Text>
-              </Pressable>
-            ))}
-
-            <TouchableOpacity
-              style={styles.cancelButton}
-              onPress={() => {
-                console.log('Cancel button onPress called');
-                if (onClose) {
-                  console.log('Calling onClose callback');
-                  onClose();
-                } else {
-                  console.log('No onClose callback provided');
-                }
-              }}
+            <ScrollView 
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={styles.scrollContent}
+              keyboardShouldPersistTaps="handled"
             >
-              <Text style={styles.cancelText}>Cancel</Text>
-            </TouchableOpacity>
+              {/* Logo/Icon for web */}
+              {Platform.OS === 'web' && (
+                <View style={styles.formLogoContainer}>
+                  <Image 
+                    source={require('../../../assets/Logo_wihy.png')} 
+                    style={styles.formLogo}
+                    resizeMode="contain"
+                  />
+                </View>
+              )}
 
-            {/* Skip/Continue without account button */}
-            {onSkip && (
-              <TouchableOpacity
-                style={styles.skipButton}
-                onPress={() => {
-                  console.log('Skip button pressed');
-                  onSkip();
-                }}
-              >
-                <Text style={styles.skipText}>{skipLabel}</Text>
-              </TouchableOpacity>
-            )}
-
-            {/* Show dev login only in development mode (native or localhost) */}
-            {__DEV__ && (Platform.OS !== 'web' || 
-              (typeof window !== 'undefined' && 
-               (window.location.hostname === 'localhost' || 
-                window.location.hostname === '127.0.0.1' ||
-                window.location.hostname.includes('192.168.')))) && (
-              <TouchableOpacity
-                style={styles.devButton}
-                onPress={async () => {
-                  try {
-                    const newUser = await signIn('dev', {
-                      email: 'dev@wihy.app',
-                      name: 'Dev User',
-                    });
-                    console.log('[DevLogin] success', newUser);
-                    setShowEmailForm(false);
-                    setIsSignUp(false);
-                    onUserChange?.(newUser);
-                    onSignIn?.();
-                    // Allow state to propagate before closing
-                    setTimeout(() => onClose?.(), 50);
-                  } catch (error) {
-                    console.error('[DevLogin] failed', error);
-                    const message = error instanceof Error ? error.message : 'Could not sign in automatically';
-                    if (Platform.OS === 'web' && typeof window !== 'undefined') {
-                      window.alert('Dev Login Failed: ' + message);
-                    } else {
-                      Alert.alert('Dev Login Failed', message);
-                    }
-                  }
-                }}
-              >
-                <SvgIcon name="rocket" size={20} color="#fff" style={{ marginRight: 8 }} />
-                <Text style={styles.devText}>Dev Login</Text>
-              </TouchableOpacity>
-            )}
-          </View>
-        </View>
-      </Modal>
-
-      {/* Email Form Modal */}
-      <Modal
-        visible={showEmailForm && !showForgotPassword}
-        animationType="slide"
-        transparent={true}
-        presentationStyle="overFullScreen"
-        onRequestClose={() => setShowEmailForm(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={[styles.emailFormContainer, Platform.OS === 'web' && styles.emailFormContainerWeb]}>
-            {/* Close button for web */}
-            {Platform.OS === 'web' && (
-              <TouchableOpacity 
-                style={styles.closeButton} 
-                onPress={() => setShowEmailForm(false)}
-              >
-                <Text style={styles.closeButtonText}>✕</Text>
-              </TouchableOpacity>
-            )}
-
-            {/* Logo/Icon for web */}
-            {Platform.OS === 'web' && (
-              <View style={styles.formLogoContainer}>
-                <Image 
-                  source={require('../../../assets/Logo_wihy.png')} 
-                  style={styles.formLogo}
-                  resizeMode="contain"
-                />
-              </View>
-            )}
-
-            <Text style={styles.formTitle}>
-              {isSignUp ? 'Create Account' : 'Welcome Back'}
-            </Text>
-            
-            {Platform.OS === 'web' && (
-              <Text style={styles.formSubtitle}>
-                {isSignUp ? 'Start your health journey today' : 'Sign in to continue'}
+              <Text style={styles.formTitle}>
+                {isSignUp ? 'Create Account' : 'Welcome Back'}
               </Text>
-            )}
+              
+              {Platform.OS === 'web' && (
+                <Text style={styles.formSubtitle}>
+                  {isSignUp ? 'Start your health journey today' : 'Sign in to continue'}
+                </Text>
+              )}
 
-            {error ? (
-              <View style={styles.errorContainer}>
-                <Ionicons name="alert-circle" size={16} color="#dc2626" />
-                <Text style={styles.errorText}>{error}</Text>
+              {/* Social Providers at TOP */}
+              <View style={styles.socialProvidersSection}>
+                {activeProviders.filter(p => p.id !== 'email').map((provider) => (
+                  <Pressable
+                    key={provider.id}
+                    style={({ pressed }) => [
+                      styles.providerButton,
+                      pressed && { opacity: 0.7 },
+                    ]}
+                    onPress={() => handleProviderPress(provider.id)}
+                  >
+                    <SvgIcon
+                      name={provider.icon as any}
+                      size={getResponsiveIconSize(sizes.icons.md)}
+                      color={provider.color}
+                      style={styles.providerIcon}
+                    />
+                    <Text style={styles.providerText}>{provider.name}</Text>
+                  </Pressable>
+                ))}
               </View>
-            ) : null}
 
-            {isSignUp && (
-              <View style={styles.inputContainer}>
-                <Text style={styles.inputLabel}>Full Name</Text>
-                <View style={styles.inputWrapper}>
-                  <Ionicons name="person-outline" size={20} color="#9ca3af" style={styles.inputIcon} />
-                  <TextInput
-                    style={styles.input}
-                    placeholder="John Doe"
+              {/* Divider */}
+              <View style={styles.dividerContainer}>
+                <View style={styles.dividerLine} />
+                <Text style={styles.dividerText}>or continue with email</Text>
+                <View style={styles.dividerLine} />
+              </View>
+
+              {error ? (
+                <View style={styles.errorContainer}>
+                  <SvgIcon name="alert-circle" size={16} color="#dc2626" />
+                  <Text style={styles.errorText}>{error}</Text>
+                </View>
+              ) : null}
+
+              {isSignUp && (
+                <View style={styles.inputContainer}>
+                  <Text style={styles.inputLabel}>Full Name</Text>
+                  <View style={styles.inputWrapper}>
+                    <SvgIcon name="person-outline" size={20} color="#9ca3af" style={styles.inputIcon} />
+                    <TextInput
+                      style={styles.input}
+                      placeholder="John Doe"
                     placeholderTextColor={colors.placeholder}
                     value={name}
                     onChangeText={setName}
@@ -376,7 +296,7 @@ export default function MultiAuthLogin({
             <View style={styles.inputContainer}>
               <Text style={styles.inputLabel}>Email</Text>
               <View style={styles.inputWrapper}>
-                <Ionicons name="mail-outline" size={20} color="#9ca3af" style={styles.inputIcon} />
+                <SvgIcon name="mail-outline" size={20} color="#9ca3af" style={styles.inputIcon} />
                 <TextInput
                   style={styles.input}
                   placeholder="you@example.com"
@@ -403,7 +323,7 @@ export default function MultiAuthLogin({
                 )}
               </View>
               <View style={styles.inputWrapper}>
-                <Ionicons name="lock-closed-outline" size={20} color="#9ca3af" style={styles.inputIcon} />
+                <SvgIcon name="lock-closed" size={20} color="#9ca3af" style={styles.inputIcon} />
                 <TextInput
                   style={[styles.input, styles.passwordInput]}
                   placeholder="••••••••"
@@ -417,8 +337,8 @@ export default function MultiAuthLogin({
                   onPress={() => setShowPassword(!showPassword)}
                   style={styles.eyeButton}
                 >
-                  <Ionicons 
-                    name={showPassword ? 'eye-off-outline' : 'eye-outline'} 
+                  <SvgIcon 
+                    name={showPassword ? 'eye-off' : 'eye'} 
                     size={20} 
                     color="#9ca3af" 
                   />
@@ -440,37 +360,6 @@ export default function MultiAuthLogin({
               )}
             </TouchableOpacity>
 
-            {Platform.OS === 'web' && (
-              <View style={styles.dividerContainer}>
-                <View style={styles.dividerLine} />
-                <Text style={styles.dividerText}>or continue with</Text>
-                <View style={styles.dividerLine} />
-              </View>
-            )}
-
-            {Platform.OS === 'web' && (
-              <View style={styles.socialButtonsRow}>
-                <TouchableOpacity 
-                  style={styles.socialButton}
-                  onPress={() => handleProviderPress('google')}
-                >
-                  <SvgIcon name="logo-google" size={20} color="#DB4437" />
-                </TouchableOpacity>
-                <TouchableOpacity 
-                  style={styles.socialButton}
-                  onPress={() => handleProviderPress('apple')}
-                >
-                  <SvgIcon name="logo-apple" size={20} color="#000" />
-                </TouchableOpacity>
-                <TouchableOpacity 
-                  style={styles.socialButton}
-                  onPress={() => handleProviderPress('microsoft')}
-                >
-                  <SvgIcon name="logo-microsoft" size={20} color="#00BCF2" />
-                </TouchableOpacity>
-              </View>
-            )}
-
             <TouchableOpacity
               style={styles.toggleButton}
               onPress={() => {
@@ -489,12 +378,63 @@ export default function MultiAuthLogin({
             <TouchableOpacity
               style={styles.cancelButton}
               onPress={() => {
-                setShowEmailForm(false);
+                if (onClose) {
+                  onClose();
+                }
                 setError('');
               }}
             >
-              <Text style={styles.cancelText}>Back</Text>
+              <Text style={styles.cancelText}>Cancel</Text>
             </TouchableOpacity>
+
+              {/* Skip/Continue without account button */}
+              {onSkip && (
+                <TouchableOpacity
+                  style={styles.skipButton}
+                  onPress={() => {
+                    console.log('Skip button pressed');
+                    onSkip();
+                  }}
+                >
+                  <Text style={styles.skipText}>{skipLabel}</Text>
+                </TouchableOpacity>
+              )}
+
+              {/* Show dev login only in development mode */}
+              {__DEV__ && (Platform.OS !== 'web' || 
+                (typeof window !== 'undefined' && 
+                 (window.location.hostname === 'localhost' || 
+                  window.location.hostname === '127.0.0.1' ||
+                  window.location.hostname.includes('192.168.')))) && (
+                <TouchableOpacity
+                  style={styles.devButton}
+                  onPress={async () => {
+                    try {
+                      const newUser = await signIn('dev', {
+                        email: 'dev@wihy.app',
+                        name: 'Dev User',
+                      });
+                      console.log('[DevLogin] success', newUser);
+                      setIsSignUp(false);
+                      onUserChange?.(newUser);
+                      onSignIn?.();
+                      setTimeout(() => onClose?.(), 50);
+                    } catch (error) {
+                      console.error('[DevLogin] failed', error);
+                      const message = error instanceof Error ? error.message : 'Could not sign in automatically';
+                      if (Platform.OS === 'web' && typeof window !== 'undefined') {
+                        window.alert('Dev Login Failed: ' + message);
+                      } else {
+                        Alert.alert('Dev Login Failed', message);
+                      }
+                    }
+                  }}
+                >
+                  <SvgIcon name="rocket" size={20} color="#fff" style={{ marginRight: 8 }} />
+                  <Text style={styles.devText}>Dev Login</Text>
+                </TouchableOpacity>
+              )}
+            </ScrollView>
           </View>
         </View>
       </Modal>
@@ -526,7 +466,7 @@ export default function MultiAuthLogin({
             {resetSent ? (
               <>
                 <View style={styles.successIconContainer}>
-                  <Ionicons name="checkmark-circle" size={64} color="#22c55e" />
+                  <SvgIcon name="checkmark-circle" size={64} color="#22c55e" />
                 </View>
                 <Text style={styles.formTitle}>Check Your Email</Text>
                 <Text style={styles.resetSuccessText}>
@@ -550,7 +490,7 @@ export default function MultiAuthLogin({
             ) : (
               <>
                 <View style={styles.resetIconContainer}>
-                  <Ionicons name="key-outline" size={48} color={colors.primary} />
+                  <SvgIcon name="key" size={48} color={colors.primary} />
                 </View>
                 <Text style={styles.formTitle}>Reset Password</Text>
                 <Text style={styles.formSubtitle}>
@@ -559,7 +499,7 @@ export default function MultiAuthLogin({
 
                 {error ? (
                   <View style={styles.errorContainer}>
-                    <Ionicons name="alert-circle" size={16} color="#dc2626" />
+                    <SvgIcon name="alert-circle" size={16} color="#dc2626" />
                     <Text style={styles.errorText}>{error}</Text>
                   </View>
                 ) : null}
@@ -567,7 +507,7 @@ export default function MultiAuthLogin({
                 <View style={styles.inputContainer}>
                   <Text style={styles.inputLabel}>Email Address</Text>
                   <View style={styles.inputWrapper}>
-                    <Ionicons name="mail-outline" size={20} color="#9ca3af" style={styles.inputIcon} />
+                    <SvgIcon name="mail-outline" size={20} color="#9ca3af" style={styles.inputIcon} />
                     <TextInput
                       style={styles.input}
                       placeholder="you@example.com"
@@ -711,6 +651,10 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.15,
     shadowRadius: 24,
     borderTopWidth: 0,
+    maxHeight: '90%',
+  },
+  scrollContent: {
+    flexGrow: 1,
   },
   formLogoContainer: {
     alignItems: 'center',
@@ -842,6 +786,9 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: '#9ca3af',
     paddingHorizontal: 16,
+  },
+  socialProvidersSection: {
+    marginBottom: 8,
   },
   socialButtonsRow: {
     flexDirection: 'row',

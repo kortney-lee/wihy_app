@@ -1416,18 +1416,37 @@ function calculateTotalMinutes(sessions: any[]): number {
 
 function generateWeeklyProgress(sessions: any[]): Array<{ week: string; workouts: number; minutes: number }> {
   const weeks = ['W1', 'W2', 'W3', 'W4'];
-  return weeks.map((week, i) => ({
-    week,
-    workouts: Math.floor(Math.random() * 4) + 1,
-    minutes: Math.floor(Math.random() * 180) + 60,
-  }));
+  
+  // Calculate actual weekly data from sessions
+  const now = new Date();
+  return weeks.map((week, i) => {
+    // Calculate date range for each week (most recent to oldest)
+    const weekEnd = new Date(now);
+    weekEnd.setDate(weekEnd.getDate() - (i * 7));
+    const weekStart = new Date(weekEnd);
+    weekStart.setDate(weekStart.getDate() - 7);
+    
+    // Filter sessions for this week
+    const weekSessions = sessions.filter(s => {
+      const sessionDate = new Date(s.date || s.completed_at || '');
+      return sessionDate >= weekStart && sessionDate <= weekEnd;
+    });
+    
+    return {
+      week,
+      workouts: weekSessions.length,
+      minutes: weekSessions.reduce((sum, s) => sum + (s.duration_minutes || 45), 0),
+    };
+  });
 }
 
 function generateWeeklyCalories(): Array<{ day: string; calories: number; goal: number }> {
+  // Note: Without meal logging data, showing default goals
+  // Real data should come from nutrition API when available
   const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
   return days.map(day => ({
     day,
-    calories: Math.floor(Math.random() * 500) + 1700,
+    calories: 0, // Will show "No data" state in UI
     goal: 2000,
   }));
 }

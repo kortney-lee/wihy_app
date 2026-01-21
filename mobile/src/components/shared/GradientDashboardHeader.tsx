@@ -1,8 +1,8 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ViewStyle, Platform, useWindowDimensions } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { dashboardTheme } from '../../theme/dashboardTheme';
+import SvgIcon from './SvgIcon';
 
 /**
  * Gradient color presets for different dashboard types
@@ -158,7 +158,7 @@ export const GradientDashboardHeader: React.FC<GradientDashboardHeaderProps> = (
         {/* Back Button */}
         {showBackButton && (
           <TouchableOpacity style={styles.backButton} onPress={onBackPress}>
-            <Ionicons name="arrow-back" size={24} color="#ffffff" />
+            <SvgIcon name="arrow-back" size={24} color="#ffffff" />
           </TouchableOpacity>
         )}
 
@@ -173,7 +173,7 @@ export const GradientDashboardHeader: React.FC<GradientDashboardHeaderProps> = (
               <View style={styles.statBadge}>
                 <View style={styles.headerStatContent}>
                   {badge.icon && (
-                    <Ionicons name={badge.icon as any} size={16} color="#ffffff" />
+                    <SvgIcon name={badge.icon} size={16} color="#ffffff" />
                   )}
                   <Text style={styles.headerStatText}>{badge.text}</Text>
                 </View>
@@ -186,7 +186,7 @@ export const GradientDashboardHeader: React.FC<GradientDashboardHeaderProps> = (
             <View style={styles.statsRow}>
               {stats.map((stat, index) => (
                 <View key={index} style={styles.statItem}>
-                  <Ionicons name={stat.icon as any} size={16} color="#ffffff" />
+                  <SvgIcon name={stat.icon} size={16} color="#ffffff" />
                   <Text style={styles.statValue}>{stat.value}</Text>
                   <Text style={styles.statLabel}>{stat.label}</Text>
                 </View>
@@ -198,14 +198,14 @@ export const GradientDashboardHeader: React.FC<GradientDashboardHeaderProps> = (
         {/* Close Button (for modal presentation) */}
         {showCloseButton && (
           <TouchableOpacity style={styles.closeButton} onPress={onClosePress}>
-            <Ionicons name="close" size={28} color="#ffffff" />
+            <SvgIcon name="close" size={28} color="#ffffff" />
           </TouchableOpacity>
         )}
 
         {/* Right Action (only if no close button) */}
         {!showCloseButton && rightAction && (
           <TouchableOpacity style={styles.rightAction} onPress={rightAction.onPress}>
-            <Ionicons name={rightAction.icon as any} size={24} color="#ffffff" />
+            <SvgIcon name={rightAction.icon} size={24} color="#ffffff" />
           </TouchableOpacity>
         )}
       </View>

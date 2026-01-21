@@ -52,8 +52,57 @@ const SvgIcon: React.FC<SvgIconProps> = ({ name, size = 24, color = '#000', styl
       case 'fitness-outline':
         return (
           <Svg width={size} height={size} viewBox="0 0 512 512" fill="none" stroke={color} strokeWidth="32">
-            <Path d="M352 256l-96 96-96-96" strokeLinecap="round" strokeLinejoin="round" />
-            <Path d="M352 352l-96 96-96-96M352 160l-96 96-96-96" strokeLinecap="round" strokeLinejoin="round" />
+            <Path d="M48 256h48M416 256h48M192 256l32-80 32 80 32-80 32 80M112 192h32v128h-32zM368 192h32v128h-32z" strokeLinecap="round" strokeLinejoin="round" />
+          </Svg>
+        );
+
+      case 'nutrition':
+      case 'nutrition-outline':
+        // Apple icon for nutrition
+        return (
+          <Svg width={size} height={size} viewBox="0 0 512 512" fill={color}>
+            <Path d="M256 80c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48-21.49-48-48-48zm0 64c-8.84 0-16-7.16-16-16s7.16-16 16-16 16 7.16 16 16-7.16 16-16 16z" />
+            <Path d="M420.69 193.77a115.25 115.25 0 00-44.43-32.59A95.57 95.57 0 00344 152.77V128a88 88 0 00-176 0v24.77a95.57 95.57 0 00-32.26 8.41 115.25 115.25 0 00-44.43 32.59C67.47 220.59 48 259.77 48 304c0 102.79 83.89 176 208 176s208-73.21 208-176c0-44.23-19.47-83.41-43.31-110.23zM200 128a56 56 0 01112 0v8.47a143.57 143.57 0 00-56-11.47 143.57 143.57 0 00-56 11.47z" />
+          </Svg>
+        );
+
+      case 'trending-up':
+      case 'trending-up-outline':
+        return (
+          <Svg width={size} height={size} viewBox="0 0 512 512" fill="none" stroke={color} strokeWidth="32">
+            <Polyline points="352 144 464 144 464 256" strokeLinecap="round" strokeLinejoin="round" />
+            <Path d="M48 368l144-144 96 96 160-160" strokeLinecap="round" strokeLinejoin="round" />
+          </Svg>
+        );
+
+      case 'restaurant':
+      case 'restaurant-outline':
+        return (
+          <Svg width={size} height={size} viewBox="0 0 512 512" fill={color}>
+            <Path d="M357.57 223.94a79.48 79.48 0 0056.58-23.44l77-76.95c6.09-6.09 6.65-16 .85-22.39a16 16 0 00-23.17-.56l-68.63 68.58a12.29 12.29 0 01-17.37 0c-4.79-4.78-4.53-12.86.25-17.64l68.33-68.33a16 16 0 00-.56-23.16A15.62 15.62 0 00440.27 56a16.71 16.71 0 00-11.81 4.9l-68.27 68.26a12.29 12.29 0 01-17.37 0c-4.78-4.78-4.53-12.86.25-17.64l68.33-68.31a16 16 0 00-.56-23.16A15.62 15.62 0 00400.26 16a16.73 16.73 0 00-11.81 4.9L311.5 97.85a79.49 79.49 0 00-23.44 56.59v8.23a16 16 0 01-4.69 11.33l-35.61 35.62a4 4 0 01-5.66 0L68.82 36.35a16 16 0 00-22.17-.56c-6.54 6.09-6.75 16.23-.76 22.62l183.56 183.55a4 4 0 010 5.66l-35.62 35.61a16 16 0 01-11.31 4.69h-8.24a79.49 79.49 0 00-56.58 23.44L40.74 388.32c-6.09 6.09-6.65 16-.85 22.38a16 16 0 0023.16.56l68.63-68.58a12.29 12.29 0 0117.37 0c4.79 4.78 4.53 12.86-.25 17.64l-68.32 68.32a16 16 0 00.56 23.16 15.62 15.62 0 0010.58 4.1 16.71 16.71 0 0011.81-4.9l68.27-68.26a12.29 12.29 0 0117.37 0c4.78 4.78 4.53 12.86-.25 17.64l-68.33 68.31a16 16 0 00.56 23.16 15.62 15.62 0 0010.58 4.1 16.73 16.73 0 0011.81-4.9l76.95-76.95a79.48 79.48 0 0023.44-56.58v-8.23a16 16 0 014.69-11.33l35.61-35.62a4 4 0 015.66 0l183.56 183.55c6.4 6.54 16.53 6.33 22.63-.75a16 16 0 00-.56-22.17L275.28 241.64a4 4 0 010-5.66l35.61-35.61a16 16 0 0111.31-4.69h8.23z" />
+          </Svg>
+        );
+
+      case 'library':
+      case 'library-outline':
+        return (
+          <Svg width={size} height={size} viewBox="0 0 512 512" fill={color}>
+            <Path d="M64 480H48a32 32 0 01-32-32V112a32 32 0 0132-32h16a32 32 0 0132 32v336a32 32 0 01-32 32zM240 176a32 32 0 00-32-32h-64a32 32 0 00-32 32v28a4 4 0 004 4h120a4 4 0 004-4zM112 448a32 32 0 0032 32h64a32 32 0 0032-32v-30a2 2 0 00-2-2H114a2 2 0 00-2 2zM114 240h124v192H114zM420 80H300a32 32 0 00-32 32v336a32 32 0 0032 32h120a32 32 0 0032-32V112a32 32 0 00-32-32zm-32 312a8 8 0 01-8 8h-48a8 8 0 01-8-8v-16a8 8 0 018-8h48a8 8 0 018 8zm0-72a8 8 0 01-8 8h-48a8 8 0 01-8-8v-16a8 8 0 018-8h48a8 8 0 018 8zm0-72a8 8 0 01-8 8h-48a8 8 0 01-8-8v-16a8 8 0 018-8h48a8 8 0 018 8zm0-72a8 8 0 01-8 8h-48a8 8 0 01-8-8v-16a8 8 0 018-8h48a8 8 0 018 8z" />
+          </Svg>
+        );
+
+      case 'heart':
+      case 'heart-outline':
+        return (
+          <Svg width={size} height={size} viewBox="0 0 512 512" fill={iconName === 'heart' ? color : 'none'} stroke={iconName === 'heart-outline' ? color : 'none'} strokeWidth="32">
+            <Path d="M352.92 80C288 80 256 144 256 144s-32-64-96.92-64c-52.76 0-94.54 44.14-95.08 96.81-1.1 109.33 86.73 187.08 183 252.42a16 16 0 0018 0c96.26-65.34 184.09-143.09 183-252.42-.54-52.67-42.32-96.81-95.08-96.81z" strokeLinecap="round" strokeLinejoin="round" />
+          </Svg>
+        );
+
+      case 'arrow-back':
+        return (
+          <Svg width={size} height={size} viewBox="0 0 512 512" fill="none" stroke={color} strokeWidth="48">
+            <Path d="M244 400L100 256l144-144M120 256h292" strokeLinecap="round" strokeLinejoin="round" />
           </Svg>
         );
 
@@ -222,6 +271,143 @@ const SvgIcon: React.FC<SvgIconProps> = ({ name, size = 24, color = '#000', styl
         return (
           <Svg width={size} height={size} viewBox="0 0 512 512" fill="none" stroke={color} strokeWidth="32">
             <Path d="M304 336v40a40 40 0 01-40 40H104a40 40 0 01-40-40V136a40 40 0 0140-40h152c22.09 0 48 17.91 48 40v40M368 336l80-80-80-80M176 256h256" strokeLinecap="round" strokeLinejoin="round" />
+          </Svg>
+        );
+
+      case 'people-circle':
+        return (
+          <Svg width={size} height={size} viewBox="0 0 512 512" fill={color}>
+            <Path d="M256 48C141.31 48 48 141.31 48 256s93.31 208 208 208 208-93.31 208-208S370.69 48 256 48zm-50.94 233.19c8.35-23.17 30.04-45.19 50.94-45.19s42.59 22.02 50.94 45.19a6 6 0 01-5.71 7.81H211.77a6 6 0 01-5.71-7.81zM205 192a51 51 0 1151-51 51 51 0 01-51 51zm152 134h-64a8 8 0 010-16h64a8 8 0 010 16zm0-40h-64a8 8 0 010-16h64a8 8 0 010 16z" />
+          </Svg>
+        );
+
+      case 'briefcase':
+        return (
+          <Svg width={size} height={size} viewBox="0 0 512 512" fill={color}>
+            <Path d="M336 80H176a48 48 0 00-48 48v16H64a48 48 0 00-48 48v224a48 48 0 0048 48h384a48 48 0 0048-48V192a48 48 0 00-48-48h-64v-16a48 48 0 00-48-48zm-16 64H192v-16a16 16 0 0116-16h96a16 16 0 0116 16z" />
+          </Svg>
+        );
+
+      case 'compass':
+        return (
+          <Svg width={size} height={size} viewBox="0 0 512 512" fill={color}>
+            <Circle cx="256" cy="256" r="24" />
+            <Path d="M256 48C141.31 48 48 141.31 48 256s93.31 208 208 208 208-93.31 208-208S370.69 48 256 48zm105.07 113.33l-46.88 117.2a64 64 0 01-35.66 35.66l-117.2 46.88a8 8 0 01-10.4-10.4l46.88-117.2a64 64 0 0135.66-35.66l117.2-46.88a8 8 0 0110.4 10.4z" />
+          </Svg>
+        );
+
+      case 'close':
+        return (
+          <Svg width={size} height={size} viewBox="0 0 512 512" fill="none" stroke={color} strokeWidth="32">
+            <Path d="M368 368L144 144M368 144L144 368" strokeLinecap="round" strokeLinejoin="round" />
+          </Svg>
+        );
+
+      case 'refresh':
+        return (
+          <Svg width={size} height={size} viewBox="0 0 512 512" fill="none" stroke={color} strokeWidth="32">
+            <Path d="M320 146s24.36-12-64-12a160 160 0 10160 160" strokeLinecap="round" strokeMiterlimit="10" />
+            <Path d="M256 58l80 80-80 80" strokeLinecap="round" strokeLinejoin="round" />
+          </Svg>
+        );
+
+      case 'card':
+        return (
+          <Svg width={size} height={size} viewBox="0 0 512 512" fill={color}>
+            <Path d="M32 376a56 56 0 0056 56h336a56 56 0 0056-56V222H32zm66-76a30 30 0 0130-30h48a30 30 0 0130 30v20a30 30 0 01-30 30h-48a30 30 0 01-30-30zM424 80H88a56 56 0 00-56 56v26h448v-26a56 56 0 00-56-56z" />
+          </Svg>
+        );
+
+      case 'lock-closed':
+        return (
+          <Svg width={size} height={size} viewBox="0 0 512 512" fill={color}>
+            <Path d="M368 192h-16v-80a96 96 0 10-192 0v80h-16a64.07 64.07 0 00-64 64v176a64.07 64.07 0 0064 64h224a64.07 64.07 0 0064-64V256a64.07 64.07 0 00-64-64zm-48 0H192v-80a64 64 0 11128 0z" />
+          </Svg>
+        );
+
+      case 'business':
+        return (
+          <Svg width={size} height={size} viewBox="0 0 512 512" fill={color}>
+            <Path d="M432 176H320V64a48 48 0 00-48-48H80a48 48 0 00-48 48v416h448V224a48 48 0 00-48-48zM176 400H96v-48h80zm0-96H96v-48h80zm0-96H96v-48h80zm0-96H96V64h80zm80 288h-32v-48h32zm0-96h-32v-48h32zm0-96h-32v-48h32zm0-96h-32V64h32zm176 288H320v-48h112zm0-96H320v-48h112z" />
+          </Svg>
+        );
+
+      case 'chevron-up':
+        return (
+          <Svg width={size} height={size} viewBox="0 0 512 512" fill="none" stroke={color} strokeWidth="48">
+            <Path d="M112 328l144-144 144 144" strokeLinecap="round" strokeLinejoin="round" />
+          </Svg>
+        );
+
+      case 'chevron-down':
+        return (
+          <Svg width={size} height={size} viewBox="0 0 512 512" fill="none" stroke={color} strokeWidth="48">
+            <Path d="M112 184l144 144 144-144" strokeLinecap="round" strokeLinejoin="round" />
+          </Svg>
+        );
+
+      case 'shield-checkmark':
+        return (
+          <Svg width={size} height={size} viewBox="0 0 512 512" fill={color}>
+            <Path d="M479.07 111.35a16 16 0 00-13.15-14.75C421.18 89.32 357.55 77.64 256 48c-101.55 29.64-165.18 41.32-209.92 48.6a16 16 0 00-13.15 14.75c-3.85 52.21-3.43 233.23 204.49 343.87a31.82 31.82 0 0037.16 0C482.5 344.58 482.92 163.56 479.07 111.35zM218.72 351.36l-25.44-25.45a16 16 0 0122.62-22.63l14.53 14.54 67.62-67.62a16 16 0 1122.62 22.62z" />
+          </Svg>
+        );
+
+      case 'alert-circle':
+        return (
+          <Svg width={size} height={size} viewBox="0 0 512 512" fill={color}>
+            <Path d="M256 48C141.31 48 48 141.31 48 256s93.31 208 208 208 208-93.31 208-208S370.69 48 256 48zm0 319.91a20 20 0 1120-20 20 20 0 01-20 20zm21.72-201.15l-5.74 122a16 16 0 01-32 0l-5.74-122a21.73 21.73 0 0121.5-22.69h.21a21.74 21.74 0 0121.73 22.7z" />
+          </Svg>
+        );
+
+      case 'key':
+      case 'key-outline':
+        return (
+          <Svg width={size} height={size} viewBox="0 0 512 512" fill="none" stroke={color} strokeWidth="32">
+            <Path d="M218.1 167.17c0 13 0 25.6 4.1 37.4-43.1 50.6-156.9 184.3-167.5 194.5a20.17 20.17 0 00-6.7 15c0 8.5 5.2 16.7 9.6 21.3 6.6 6.9 34.8 33 40 28 15.4-15 18.5-19 24.8-25.2 9.5-9.3-1-28.3 2.3-36s6.8-9.2 12.5-10.4 15.8 2.9 23.7 3c8.3.1 12.8-3.4 19-9.2 5-4.6 8.6-8.9 8.7-15.6.2-9-12.8-20.9-3.1-30.4s23.7 6.2 34 5 22.8-15.5 24.1-21.6-11.7-21.8-9.7-30.7c.7-3 6.8-10 11.4-11s14 5.5 21.3 3.5 10.2-8.3 10.5-12.7-1.2-8.1-5.7-11.6c-4-3.2-7.2-8.9-6.4-14.8a13.69 13.69 0 015.2-9.3c6.6-5.7 15.4-3.3 20.2-8.9 4.2-4.8 2.7-11.4 3.4-16.9s4.3-12.2 8.8-15.6c5.5-4.1 12.3-4.9 18.2-4.5s12.5-.7 19.1-4.5c12.6-7.2 9.4-29.8 8.4-37.6" strokeLinecap="round" strokeLinejoin="round" />
+            <Circle cx="400" cy="112" r="48" fill="none" stroke={color} strokeLinecap="round" strokeLinejoin="round" strokeWidth="32" />
+          </Svg>
+        );
+
+      case 'eye':
+      case 'eye-outline':
+        return (
+          <Svg width={size} height={size} viewBox="0 0 512 512" fill="none" stroke={color} strokeWidth="32">
+            <Path d="M255.66 112c-77.94 0-157.89 45.11-220.83 135.33a16 16 0 00-.27 17.77C82.92 340.8 161.8 400 255.66 400c92.84 0 173.34-59.38 221.79-135.25a16.14 16.14 0 000-17.47C428.89 172.28 347.8 112 255.66 112z" strokeLinecap="round" strokeLinejoin="round" />
+            <Circle cx="256" cy="256" r="80" fill="none" stroke={color} strokeMiterlimit="10" strokeWidth="32" />
+          </Svg>
+        );
+
+      case 'eye-off':
+      case 'eye-off-outline':
+        return (
+          <Svg width={size} height={size} viewBox="0 0 512 512" fill="none" stroke={color} strokeWidth="32">
+            <Path d="M432 448a15.92 15.92 0 01-11.31-4.69l-352-352a16 16 0 0122.62-22.62l352 352A16 16 0 01432 448zM255.66 384c-41.49 0-81.5-12.28-118.92-36.5-34.07-22-64.74-53.51-88.7-91a16 16 0 010-17.47c23.96-37.5 54.63-69 88.7-91 13.23-8.58 27.11-16 41.63-22.1M382.37 265.38c8.68-13.47 15.11-27.08 18.88-40.38a16 16 0 01.27-17.77C351.18 157.11 306.73 112 229.12 112a188.57 188.57 0 00-46.47 5.77" strokeLinecap="round" strokeLinejoin="round" />
+            <Path d="M201.11 232a64 64 0 0078.89 78.89M332.12 279.88a80 80 0 00-100-100" strokeLinecap="round" strokeMiterlimit="10" strokeWidth="32" />
+          </Svg>
+        );
+
+      case 'mail-outline':
+        return (
+          <Svg width={size} height={size} viewBox="0 0 512 512" fill="none" stroke={color} strokeWidth="32">
+            <Rect x="48" y="96" width="416" height="320" rx="40" ry="40" strokeLinecap="round" strokeLinejoin="round" />
+            <Path d="M112 160l144 112 144-112" strokeLinecap="round" strokeLinejoin="round" />
+          </Svg>
+        );
+
+      case 'person-outline':
+        return (
+          <Svg width={size} height={size} viewBox="0 0 512 512" fill="none" stroke={color} strokeWidth="32">
+            <Path d="M344 144c-3.92 52.87-44 96-88 96s-84.15-43.12-88-96c-4-55 35-96 88-96s92 42 88 96z" strokeLinecap="round" strokeLinejoin="round" />
+            <Path d="M256 304c-87 0-175.3 48-191.64 138.6C62.39 453.52 68.57 464 80 464h352c11.44 0 17.62-10.48 15.65-21.4C431.3 352 343 304 256 304z" strokeMiterlimit="10" />
+          </Svg>
+        );
+
+      case 'lock-closed-outline':
+        return (
+          <Svg width={size} height={size} viewBox="0 0 512 512" fill="none" stroke={color} strokeWidth="32">
+            <Path d="M336 208v-95a80 80 0 00-160 0v95" strokeLinecap="round" strokeLinejoin="round" />
+            <Rect x="96" y="208" width="320" height="272" rx="48" ry="48" strokeLinecap="round" strokeLinejoin="round" />
           </Svg>
         );
 
