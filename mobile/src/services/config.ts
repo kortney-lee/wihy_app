@@ -1,14 +1,23 @@
 // API Configuration
 // Using Expo's built-in env support (SDK 53+)
 // Note: EXPO_PUBLIC_ prefix required for client-side env vars
+//
+// WIHY Microservices Architecture:
+// - Auth Service (auth.wihy.ai): Authentication, login, register, token validation
+// - User Service (user.wihy.ai): User profiles, preferences, family/coach data
+// - Services API (services.wihy.ai): Barcode scanning, meal tracking, workouts
+// - ML API (ml.wihy.ai): AI chat, health questions, personalized recommendations
+// - Payment Service (payment.wihy.ai): Stripe integration, subscriptions
+//
+// See complete API docs: docs/WIHY_API_REFERENCE.md
 
 export const API_CONFIG = {
   baseUrl: 'https://services.wihy.ai',
-  servicesUrl: 'https://services.wihy.ai', // Services API
+  servicesUrl: 'https://services.wihy.ai', // Services API (scanning, meals, workouts)
   mlApiUrl: 'https://ml.wihy.ai', // ML API for chat/ask
-  authUrl: 'https://auth.wihy.ai', // Auth service
-  paymentUrl: 'https://payment.wihy.ai', // Payment service (Stripe) - fallback: wihy-payment-service-xxx.run.app
-  userUrl: 'https://user.wihy.ai', // User service - fallback: wihy-user-service-xxx.run.app
+  authUrl: 'https://auth.wihy.ai', // Auth service (login, register, tokens)
+  paymentUrl: 'https://payment.wihy.ai', // Payment service (Stripe)
+  userUrl: 'https://user.wihy.ai', // User service (profiles, preferences)
   coachingUrl: 'https://services.wihy.ai', // Coaching service
   expoProjectId: process.env.EXPO_PUBLIC_PROJECT_ID || 'your-project-id', // For push notifications
   

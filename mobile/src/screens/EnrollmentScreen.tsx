@@ -19,6 +19,7 @@ import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { AuthContext } from '../context/AuthContext';
 import { authService, Family, FamilyMember, CoachClient, Coach } from '../services/authService';
+import { userService } from '../services/userService';
 import { familyService, FamilyMember as FamilyServiceMember, FamilyRole } from '../services/familyService';
 import { coachService, Client, ClientDashboard } from '../services/coachService';
 import { RootStackParamList } from '../types/navigation';
@@ -104,7 +105,7 @@ export default function EnrollmentScreen() {
   const loadUserData = useCallback(async () => {
     setRefreshing(true);
     try {
-      const profile = await authService.getUserProfile();
+      const profile = await userService.getUserProfile();
       if (profile) {
         // Check if user is part of a family
         if (profile.familyId) {
