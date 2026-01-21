@@ -1289,6 +1289,19 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
 
   // Start workout from preview
   const startWorkoutFromPreview = () => {
+    // Get the selected workout from generated program
+    if (generatedProgram?.program?.workouts && generatedProgram.program.workouts[selectedWorkoutDay]) {
+      const selectedWorkout = generatedProgram.program.workouts[selectedWorkoutDay];
+      
+      // Convert to DailyWorkout format for execution
+      const workoutForExecution = {
+        ...selectedWorkout,
+        exercises: selectedWorkout.exercises || [],
+      };
+      
+      setWorkout(workoutForExecution as any);
+    }
+    
     setCurrentExerciseIndex(0);
     setCurrentSet(1);
     setCompletedSets([]);
