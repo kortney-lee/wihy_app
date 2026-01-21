@@ -143,9 +143,14 @@ export default function EditProfileScreen() {
         </View>
       )}
       
-      {/* Web page title */}
+      {/* Web header with back button */}
       {isWeb && (
-        <Text style={styles.webPageTitle}>Edit Profile</Text>
+        <View style={styles.webHeader}>
+          <Pressable style={styles.backButton} onPress={() => navigation.goBack()}>
+            <SvgIcon name="arrow-back" size={24} color={theme.text} />
+          </Pressable>
+          <Text style={styles.webPageTitle}>Edit Profile</Text>
+        </View>
       )}
 
       {loading ? (
@@ -372,6 +377,13 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: '700',
     color: theme.text,
+    marginBottom: 24,
+    marginTop: 0,
+  },
+  webHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
     marginBottom: 24,
     marginTop: 8,
   },

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   View,
   Text,
@@ -11,12 +11,15 @@ import {
   Platform,
   ActivityIndicator,
   RefreshControl,
+  TouchableOpacity,
+  Animated,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { dashboardColors, GradientDashboardHeader, WebPageWrapper } from '../components/shared';
+import { dashboardColors } from '../components/shared';
 import { dashboardTheme } from '../theme/dashboardTheme';
 import { userService } from '../services/userService';
+import { useDashboardLayout } from '../hooks/useDashboardLayout';
 
 const isWeb = Platform.OS === 'web';
 
@@ -36,6 +39,32 @@ interface Coach {
 }
 
 export default function CoachSelection() {
+  const insets = useSafeAreaInsets();
+  useDashboardLayout(); // For responsive behavior
+  const scrollY = useRef(new Animated.Value(0)).current;
+  
+  // Collapsible header animation constants
+  const HEADER_MAX_HEIGHT = 140;
+  const HEADER_MIN_HEIGHT = 0;
+  
+  const headerHeight = scrollY.interpolate({
+    inputRange: [0, HEADER_MAX_HEIGHT - HEADER_MIN_HEIGHT],
+    outputRange: [HEADER_MAX_HEIGHT, HEADER_MIN_HEIGHT],
+    extrapolate: 'clamp',
+  });
+  
+  const headerOpacity = scrollY.interpolate({
+    inputRange: [0, (HEADER_MAX_HEIGHT - HEADER_MIN_HEIGHT) / 2],
+    outputRange: [1, 0],
+    extrapolate: 'clamp',
+  });
+  
+  const titleScale = scrollY.interpolate({
+    inputRange: [0, HEADER_MAX_HEIGHT - HEADER_MIN_HEIGHT],
+    outputRange: [1, 0.8],
+    extrapolate: 'clamp',
+  });
+
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSpecialty, setSelectedSpecialty] = useState<string | null>('All');
   const [coaches, setCoaches] = useState<Coach[]>([]);
@@ -86,8 +115,8 @@ export default function CoachSelection() {
         name: c.name || c.full_name || 'Unknown Coach',
         title: c.title || c.specialization || 'Health Coach',
         avatar: c.avatar_url || c.avatar,
-        rating: c.rating || c.average_rating || 0,
-        reviews: c.review_count || c.reviews || 0,
+        rating: typeof c.rating === 'object' ? (c.rating?.average || 0) : (c.rating || c.average_rating || 0),
+        reviews: typeof c.rating === 'object' ? (c.rating?.total_reviews || 0) : (c.review_count || c.reviews || 0),
         specialties: c.specialties || c.specialty_areas || [],
         experience: c.experience || c.years_experience ? `${c.years_experience} years` : 'Experienced',
         certification: c.certification || c.certifications?.join(', ') || '',
@@ -300,35 +329,43 @@ export default function CoachSelection() {
   );
 
   return (
-    <WebPageWrapper activeTab="health">
-      <View style={[styles.container, isWeb && { flex: undefined, minHeight: undefined }]}>
-        {/* Status bar background - matches header gradient top color */}
-        {!isWeb && <View style={styles.statusBarBackground} />}
-        
-        <SafeAreaView style={styles.safeArea} edges={['left', 'right']}>
-          {/* Fixed Header - Outside ScrollView */}
-          <GradientDashboardHeader
-            title="Find Your Coach"
-            subtitle="Connect with expert health coaches"
-            gradient="coachSelection"
-            badge={{ text: `${coaches.length} coaches available` }}
-          />
+    <View style={styles.container}>
+      {/* Collapsing Header */}
+      <Animated.View style={[styles.collapsibleHeader, { height: headerHeight }]}>
+        <Animated.View style={[styles.headerContent, { opacity: headerOpacity, transform: [{ scale: titleScale }] }]}>
+          <View style={styles.headerTextContainer}>
+            <Text style={styles.headerTitle}>Find Your Coach</Text>
+            <Text style={styles.headerSubtitle}>Connect with expert health coaches</Text>
+            {coaches.length > 0 && (
+              <View style={styles.badge}>
+                <Text style={styles.badgeText}>{coaches.length} coaches available</Text>
+              </View>
+            )}
+          </View>
+        </Animated.View>
+      </Animated.View>
 
-        <ScrollView
-          showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled"
-          style={styles.scrollView}
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={onRefresh}
-              colors={[dashboardColors.primary]}
-              tintColor={dashboardColors.primary}
-            />
-          }
-        >
-          {renderHeader()}
-        
+      <Animated.ScrollView
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        scrollEventThrottle={16}
+        onScroll={Animated.event(
+          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+          { useNativeDriver: false }
+        )}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={[dashboardColors.primary]}
+            tintColor={dashboardColors.primary}
+          />
+        }
+      >
+        {renderHeader()}
+      
         {isLoading ? (
           <View style={styles.loadingState}>
             <ActivityIndicator size="large" color={dashboardColors.primary} />
@@ -360,12 +397,10 @@ export default function CoachSelection() {
           </View>
         )}
         
-          {/* Bottom spacing for navigation */}
-          <View style={{ height: 100 }} />
-          </ScrollView>
-        </SafeAreaView>
-      </View>
-    </WebPageWrapper>
+        {/* Bottom spacing for navigation */}
+        <View style={{ height: 100 }} />
+      </Animated.ScrollView>
+    </View>
   );
 }
 
@@ -374,32 +409,16 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#e0f2fe',
   },
-  statusBarBackground: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    height: 60,
-    backgroundColor: '#06b6d4', // coachSelection gradient top color
-  },
-  safeArea: {
-    flex: 1,
-  },
-  scrollView: {
-    flex: 1,
-    backgroundColor: '#e0f2fe',
-  },
-  header: {
-    paddingHorizontal: dashboardTheme.header.paddingHorizontal,
-    paddingTop: dashboardTheme.header.paddingTop,
-    paddingBottom: dashboardTheme.header.paddingBottom,
-    shadowColor: '#06b6d4',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    elevation: 8,
+  collapsibleHeader: {
+    backgroundColor: '#06b6d4',
+    overflow: 'hidden',
+    justifyContent: 'flex-end',
   },
   headerContent: {
+    padding: 20,
+    paddingBottom: 16,
+  },
+  headerTextContainer: {
     alignItems: 'flex-start',
   },
   headerTitle: {
@@ -416,8 +435,38 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: 'rgba(255, 255, 255, 0.9)',
     fontWeight: '500',
-    marginBottom: 16,
+    marginBottom: 8,
     letterSpacing: 0.2,
+  },
+  badge: {
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
+  },
+  badgeText: {
+    fontSize: 13,
+    color: '#ffffff',
+    fontWeight: '600',
+  },
+  scrollView: {
+    flex: 1,
+    backgroundColor: '#e0f2fe',
+  },
+  scrollContent: {
+    flexGrow: 1,
+  },
+  header: {
+    paddingHorizontal: dashboardTheme.header.paddingHorizontal,
+    paddingTop: dashboardTheme.header.paddingTop,
+    paddingBottom: dashboardTheme.header.paddingBottom,
+    shadowColor: '#06b6d4',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 8,
   },
   headerStats: {
     alignSelf: 'stretch',

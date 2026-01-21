@@ -15,6 +15,7 @@ import {
   RefreshControl,
   useWindowDimensions,
   Animated,
+  Image,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -25,6 +26,7 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { dashboardColors } from '../components/shared';
 import { dashboardTheme } from '../theme/dashboardTheme';
 import { SweepBorder } from '../components/SweepBorder';
+import SvgIcon from '../components/shared/SvgIcon';
 import { AuthContext } from '../context/AuthContext';
 import { mealService, MealTemplate, QUICK_TEMPLATE_PRESETS, MealType, CookingSkillLevel, MealVariety, TimePerMeal, CreateMealPlanRequest, MealPlanResponse, CalendarDay, SavedMeal, DietOption } from '../services/mealService';
 import { createMealPlan, generateShoppingList } from '../services/mealPlanService';
@@ -38,6 +40,8 @@ import { useFeatureAccess } from '../hooks/usePaywall';
 
 // New GoalSelection component for 3-mode meal planning
 import { GoalSelectionMeals, GenerateMealParams } from './meals/GoalSelectionMeals';
+
+const spinnerGif = require('../../assets/whatishealthyspinner.gif');
 
 // Note: Mock data removed to expose real API issues
 
@@ -172,11 +176,16 @@ interface Ingredient {
   unit: string;
 }
 
-export default function CreateMeals() {
+interface CreateMealsProps {
+  isDashboardMode?: boolean;
+}
+
+export default function CreateMeals({ isDashboardMode = false }: CreateMealsProps) {
   const { user } = useContext(AuthContext);
   const userId = user?.id;
   const navigation = useNavigation<NavigationProp>();
   const scrollViewRef = useRef<ScrollView>(null);
+  const layout = useDashboardLayout();
   
   // Paywall check
   const hasMealAccess = useFeatureAccess('meals');
@@ -1749,6 +1758,43 @@ export default function CreateMeals() {
     <View style={{ flex: 1, backgroundColor: '#e0f2fe' }}>
       {/* Status bar area - solid color */}
       <View style={{ height: insets.top, backgroundColor: '#ef4444' }} />
+      
+      {/* Back to Health Hub button for web - only show when NOT in dashboard mode */}
+      {Platform.OS === 'web' && !isDashboardMode && (
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          style={{
+            position: 'absolute',
+            top: layout.screenWidth < 768 ? 12 : 40,
+            right: layout.screenWidth < 768 ? 12 : 24,
+            zIndex: 99,
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: layout.screenWidth < 768 ? 6 : 10,
+            paddingVertical: layout.screenWidth < 768 ? 4 : 6,
+            paddingLeft: layout.screenWidth < 768 ? 8 : 12,
+            paddingRight: layout.screenWidth < 768 ? 4 : 6,
+            backgroundColor: 'rgba(255,255,255,0.95)',
+            borderRadius: 24,
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.15,
+            shadowRadius: 6,
+          } as any}
+        >
+          <SvgIcon name="arrow-back" size={layout.screenWidth < 768 ? 14 : 16} color="#16a34a" />
+          <Text style={{ fontSize: layout.screenWidth < 768 ? 11 : 13, fontWeight: '600', color: '#16a34a' }}>Health Hub</Text>
+          <Image 
+            source={spinnerGif}
+            resizeMode="cover"
+            style={{
+              width: layout.screenWidth < 768 ? 28 : 36,
+              height: layout.screenWidth < 768 ? 28 : 36,
+              borderRadius: layout.screenWidth < 768 ? 14 : 18,
+            }}
+          />
+        </TouchableOpacity>
+      )}
       
       {/* Collapsing Header */}
       <Animated.View style={[styles.collapsibleHeader, { height: headerHeight }]}>

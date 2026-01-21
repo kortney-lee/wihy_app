@@ -551,7 +551,7 @@ export default function FullChat() {
   };
 
   const mainContent = (
-    <SafeAreaView style={[styles.container, isWeb && { flex: undefined, minHeight: undefined }]} edges={['left', 'right']}>
+    <SafeAreaView style={styles.container} edges={['left', 'right']}>
       <KeyboardAvoidingView
         style={styles.flex}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}

@@ -59,6 +59,7 @@ import AboutScreen from '../screens/AboutScreen';
 import TermsScreen from '../screens/TermsScreen';
 import PrivacyScreen from '../screens/PrivacyScreen';
 import EditProfileScreen from '../screens/EditProfileScreen';
+import ProfileSetupScreen from '../screens/ProfileSetupScreen';
 import HealthDataScreen from '../screens/HealthDataScreen';
 import AuthCallbackScreen from '../screens/AuthCallbackScreen';
 import SubscribeCompleteScreen from '../screens/SubscribeCompleteScreen';
@@ -530,6 +531,14 @@ export default function AppNavigator() {
           }}
         />
         <Stack.Screen
+          name="CoachSelection"
+          component={CoachSelection}
+          options={{
+            presentation: 'card',
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
           name="ShoppingList"
           component={ShoppingListScreen}
           options={{
@@ -653,6 +662,14 @@ export default function AppNavigator() {
         <Stack.Screen
           name="EditProfile"
           component={EditProfileScreen}
+          options={{
+            presentation: 'card',
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="ProfileSetup"
+          component={ProfileSetupScreen}
           options={{
             presentation: 'card',
             headerShown: false,

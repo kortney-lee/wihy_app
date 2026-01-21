@@ -26,6 +26,8 @@ import { useDashboardLayout } from '../hooks/useDashboardLayout';
 import SvgIcon from '../components/shared/SvgIcon';
 // import { useSession } from '../contexts/SessionContext';
 import OverviewDashboard from './OverviewDashboard';
+
+const spinnerGif = require('../../assets/whatishealthyspinner.gif');
 import MyProgressDashboard from './MyProgressDashboard';
 import ConsumptionDashboard from './ConsumptionDashboard';
 import ResearchScreen from './ResearchScreen';
@@ -33,6 +35,7 @@ import FitnessDashboard from './FitnessDashboard';
 import ParentDashboard from './ParentDashboard';
 import CreateMeals from './CreateMeals';
 import ShoppingListScreen from './ShoppingListScreen';
+import CoachSelection from './CoachSelection';
 
 // Note: screenWidth is now handled dynamically via useDashboardLayout
 
@@ -123,7 +126,8 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
   const handleNavigateToDashboard = (dashboardType: 'overview' | 'progress' | 'nutrition' | 'research' | 'fitness' | 'parent' | 'findCoach' | 'coach' | 'meals' | 'clients' | 'onboard' | 'shoppingList' | null) => {
     // Handle special navigation cases
     if (dashboardType === 'findCoach') {
-      navigation.navigate('CoachSelection');
+      // Render inline like Research
+      setSelectedDashboard('findCoach' as any);
       return;
     }
     if (dashboardType === 'coach') {
@@ -184,7 +188,8 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
             <SvgIcon name="arrow-back" size={isMobileWeb ? 14 : 16} color="#16a34a" />
             <Text style={{ fontSize: isMobileWeb ? 11 : 13, fontWeight: '600', color: '#16a34a' }}>Health Hub</Text>
             <Image 
-              source={require('../../assets/whatishealthyspinner.gif')}
+              source={spinnerGif}
+              resizeMode="cover"
               style={{
                 width: isMobileWeb ? 28 : 36,
                 height: isMobileWeb ? 28 : 36,
@@ -199,8 +204,9 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
         {selectedDashboard === 'research' && <ResearchScreen isDashboardMode={true} />}
         {selectedDashboard === 'fitness' && <FitnessDashboard />}
         {selectedDashboard === 'parent' && <ParentDashboard />}
-        {selectedDashboard === 'meals' && <CreateMeals />}
+        {selectedDashboard === 'meals' && <CreateMeals isDashboardMode={true} />}
         {selectedDashboard === 'shoppingList' && <ShoppingListScreen isDashboardMode={true} />}
+        {(selectedDashboard as any) === 'findCoach' && <CoachSelection />}
       </View>
     );
   };

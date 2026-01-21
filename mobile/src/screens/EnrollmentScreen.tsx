@@ -803,9 +803,9 @@ export default function EnrollmentScreen() {
           showLoginModal={showLoginModal}
           setShowLoginModal={setShowLoginModal}
         />
-        <View style={[styles.webContent, { height: 'calc(100vh - 70px)', overflow: 'auto' } as any]}>
-          {/* Header */}
-          <View style={styles.header}>
+        <View style={[styles.webContent, { height: 'calc(100vh - 70px)', overflow: 'auto', paddingTop: 60 } as any]}>
+          {/* Header with back button */}
+          <View style={[styles.header, { marginBottom: 16 }]}>
             <Pressable style={styles.backButton} onPress={() => navigation.goBack()}>
               <SvgIcon name="arrow-back" size={24} color={theme.text} />
             </Pressable>

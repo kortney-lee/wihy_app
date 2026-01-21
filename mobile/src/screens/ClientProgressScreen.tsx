@@ -1332,7 +1332,7 @@ export default function ClientProgressScreen() {
 
   return (
     <WebPageWrapper activeTab="health">
-      <View style={[styles.container, isWeb && { flex: undefined, minHeight: undefined }]}>
+      <View style={styles.container}>
         {/* Status bar area - solid color */}
         <View style={{ height: insets.top, backgroundColor: '#3b82f6' }} />
         

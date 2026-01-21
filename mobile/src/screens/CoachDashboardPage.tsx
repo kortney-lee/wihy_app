@@ -8,6 +8,7 @@ import {
   Platform,
   Animated,
   Pressable,
+  Image,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -20,9 +21,13 @@ import { dashboardTheme } from '../theme/dashboardTheme';
 import { HamburgerMenu } from '../components/shared/HamburgerMenu';
 import { WebPageWrapper } from '../components/shared';
 import { AuthContext } from '../context/AuthContext';
+import { useDashboardLayout } from '../hooks/useDashboardLayout';
+import SvgIcon from '../components/shared/SvgIcon';
 import CoachDashboard from './CoachDashboard';
 import CoachOverview from './CoachOverview';
 import CreateMeals from './CreateMeals';
+
+const spinnerGif = require('../../assets/whatishealthyspinner.gif');
 import ClientManagement from './ClientManagement';
 import ClientOnboarding from './ClientOnboarding';
 
@@ -57,6 +62,8 @@ const CoachDashboardPage: React.FC<CoachDashboardPageProps> = ({ showMenuFromHea
   const { user } = React.useContext(AuthContext);
   const [showHamburgerMenu, setShowHamburgerMenu] = useState(false);
   const [selectedView, setSelectedView] = useState<CoachViewType | null>(null); // Start with hub view
+  const layout = useDashboardLayout();
+  const isMobileWeb = isWeb && layout.screenWidth < 768;
 
   // Collapsing header animation
   const scrollY = useRef(new Animated.Value(0)).current;
@@ -156,7 +163,7 @@ const CoachDashboardPage: React.FC<CoachDashboardPageProps> = ({ showMenuFromHea
       case 'dashboard':
         return <CoachDashboard />;
       case 'meals':
-        return <CreateMeals />;
+        return <CreateMeals isDashboardMode={true} />;
       case 'clients':
         return <ClientManagement />;
       case 'onboard':
@@ -201,14 +208,50 @@ const CoachDashboardPage: React.FC<CoachDashboardPageProps> = ({ showMenuFromHea
           />
         )}
         
+        {/* Back to Coach Hub button for web - in selected view */}
+        {isWeb && (
+          <TouchableOpacity
+            onPress={handleBackToDashboardSelection}
+            style={{
+              position: 'absolute',
+              top: isMobileWeb ? 12 : 40,
+              right: isMobileWeb ? 12 : 24,
+              zIndex: 99,
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: isMobileWeb ? 6 : 10,
+              paddingVertical: isMobileWeb ? 4 : 6,
+              paddingLeft: isMobileWeb ? 8 : 12,
+              paddingRight: isMobileWeb ? 4 : 6,
+              backgroundColor: 'rgba(255,255,255,0.95)',
+              borderRadius: 24,
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.15,
+              shadowRadius: 6,
+            } as any}
+          >
+            <SvgIcon name="arrow-back" size={isMobileWeb ? 14 : 16} color="#3b82f6" />
+            <Text style={{ fontSize: isMobileWeb ? 11 : 13, fontWeight: '600', color: '#3b82f6' }}>Coach Hub</Text>
+            <Image 
+              source={spinnerGif}
+              resizeMode="cover"
+              style={{
+                width: isMobileWeb ? 28 : 36,
+                height: isMobileWeb ? 28 : 36,
+                borderRadius: isMobileWeb ? 14 : 18,
+              }}
+            />
+          </TouchableOpacity>
+        )}
+        
         {renderSelectedView()}
       </View>
     );
   }
 
   return (
-    <WebPageWrapper activeTab="health">
-      <View style={[styles.container, isWeb && { flex: undefined, minHeight: undefined }]}>
+      <View style={styles.container}>
         {showHamburgerMenu && (
         <HamburgerMenu
           visible={showHamburgerMenu}
@@ -319,7 +362,6 @@ const CoachDashboardPage: React.FC<CoachDashboardPageProps> = ({ showMenuFromHea
         <View style={{ height: 100 }} />
       </Animated.ScrollView>
       </View>
-    </WebPageWrapper>
   );
 };
 
