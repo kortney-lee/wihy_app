@@ -11,7 +11,6 @@ import {
   Image,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import type { CompositeNavigationProp } from '@react-navigation/native';
 import type { StackNavigationProp } from '@react-navigation/stack';
@@ -289,7 +288,7 @@ const CoachDashboardPage: React.FC<CoachDashboardPageProps> = ({ showMenuFromHea
           <Text style={styles.headerTitle}>Coach Hub</Text>
           <Text style={styles.headerSubtitle}>Manage clients and grow your business</Text>
           <View style={styles.statsRow}>
-            <Ionicons name="briefcase" size={14} color="#ffffff" style={{ marginRight: 6 }} />
+            <SvgIcon name="briefcase" size={14} color="#ffffff" style={{ marginRight: 6 }} />
             <Text style={styles.statsLabel}>Active Today</Text>
           </View>
         </Animated.View>
@@ -326,7 +325,7 @@ const CoachDashboardPage: React.FC<CoachDashboardPageProps> = ({ showMenuFromHea
                 disabled={!option.available}
               >
                 <View style={[styles.cardIconContainer, isWeb && { marginBottom: 8 }]}>
-                  <Ionicons name={option.icon as any} size={iconSize} color="#ffffff" />
+                  <SvgIcon name={option.icon as any} size={iconSize} color="#ffffff" />
                 </View>
                 <Text style={[styles.cardTitle, { fontSize: titleSize }]}>{option.title}</Text>
                 <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>{option.subtitle}</Text>
@@ -350,7 +349,7 @@ const CoachDashboardPage: React.FC<CoachDashboardPageProps> = ({ showMenuFromHea
               onPress={() => onContextChange('personal')}
             >
               <View style={[styles.cardIconContainer, isWeb && { marginBottom: 8 }]}>
-                <Ionicons name="person" size={isWeb ? 24 : 32} color="#10b981" />
+                <SvgIcon name="person" size={isWeb ? 24 : 32} color="#10b981" />
               </View>
               <Text style={[styles.cardTitle, { color: '#10b981', fontSize: isWeb ? 14 : 16 }]}>Personal</Text>
               <Text style={[styles.cardSubtitle, { color: '#6b7280', fontSize: isWeb ? 11 : 12 }]}>Back to my health</Text>
