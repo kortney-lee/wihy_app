@@ -41,6 +41,15 @@ export type RootStackParamList = {
   ClientManagement: undefined;
   ClientOnboarding: undefined;
   ClientProgress: { clientId: string; clientName?: string };
+  
+  // Coaching Workflow Routes
+  CoachProfileSetup: undefined;
+  CoachSelection: undefined;
+  CoachDetailPage: { coachId: string };
+  RequestCoaching: { coachId: string; coachName: string };
+  AcceptInvitation: { invitationId: string; coachId?: string };
+  SessionBooking: { coachId: string; coachName: string };
+  
   CreateMeals: { showShoppingList?: boolean; shoppingListId?: string } | undefined;
   MealPreferences: { returnTo?: keyof RootStackParamList };
   ShoppingList: { 

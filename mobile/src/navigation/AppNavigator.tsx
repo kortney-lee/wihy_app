@@ -50,6 +50,14 @@ import IntegrationTestScreen from '../screens/IntegrationTestScreen';
 import ClientProgressScreen from '../screens/ClientProgressScreen';
 import FitnessProgramDetails from '../screens/FitnessProgramDetails';
 import MealPlanDetails from '../screens/MealPlanDetails';
+
+// Coaching Workflow Screens
+import CoachProfileSetup from '../screens/CoachProfileSetup';
+import CoachDetailPage from '../screens/CoachDetailPage';
+import RequestCoaching from '../screens/RequestCoaching';
+import AcceptInvitation from '../screens/AcceptInvitation';
+import SessionBooking from '../screens/SessionBooking';
+
 import EnrollmentScreen from '../screens/EnrollmentScreen';
 import OnboardingFlow from '../screens/OnboardingFlow';
 import { SubscriptionScreen } from '../screens/SubscriptionScreen';
@@ -113,6 +121,14 @@ const linking: LinkingOptions<RootStackParamList> = {
       ParentDashboard: 'parent-dashboard',
       ClientManagement: 'client-management',
       ClientOnboarding: 'client-onboarding',
+      
+      // Coaching Workflow Routes
+      CoachProfileSetup: 'coach/setup',
+      CoachDetailPage: 'coach/:coachId',
+      RequestCoaching: 'coach/:coachId/request',
+      AcceptInvitation: 'invitation/:invitationId',
+      SessionBooking: 'coach/:coachId/book',
+      
       ShoppingList: 'shopping-list',
       MealDetails: 'meal-details',
       MealPreferences: 'meal-preferences',
@@ -579,6 +595,49 @@ export default function AppNavigator() {
             headerShown: false,
           }}
         />
+        
+        {/* Coaching Workflow Screens */}
+        <Stack.Screen
+          name="CoachProfileSetup"
+          component={CoachProfileSetup}
+          options={{
+            presentation: 'card',
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="CoachDetailPage"
+          component={CoachDetailPage}
+          options={{
+            presentation: 'card',
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="RequestCoaching"
+          component={RequestCoaching}
+          options={{
+            presentation: 'modal',
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="AcceptInvitation"
+          component={AcceptInvitation}
+          options={{
+            presentation: 'card',
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="SessionBooking"
+          component={SessionBooking}
+          options={{
+            presentation: 'card',
+            headerShown: false,
+          }}
+        />
+        
         <Stack.Screen
           name="FitnessProgramDetails"
           component={FitnessProgramDetails}
