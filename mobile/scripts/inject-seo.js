@@ -28,12 +28,15 @@ function findIoniconsFont() {
 function generateFontStyles(ioniconsPath) {
   if (!ioniconsPath) return '';
   
+  // IMPORTANT: expo/vector-icons uses 'ionicons' (lowercase) as the font-family name
+  // We must match that exactly for the CSS to work
   return `
     <!-- Ionicons Font Preload for reliable icon rendering -->
     <link rel="preload" href="${ioniconsPath}" as="font" type="font/ttf" crossorigin="anonymous" />
-    <style>
+    <style id="expo-ionicons-preload">
+      /* Pre-register ionicons font before JS runs - matches expo-font's dynamic injection */
       @font-face {
-        font-family: 'Ionicons';
+        font-family: "ionicons";
         src: url('${ioniconsPath}') format('truetype');
         font-weight: normal;
         font-style: normal;
