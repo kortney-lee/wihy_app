@@ -23,6 +23,7 @@ import { dashboardColors, GradientDashboardHeader } from '../components/shared';
 import { dashboardTheme } from '../theme/dashboardTheme';
 import { coachService, Client as APIClient, ClientDashboard } from '../services';
 import { useAuth } from '../context/AuthContext';
+import SendInvitation from './SendInvitation';
 
 const isWeb = Platform.OS === 'web';
 
@@ -78,11 +79,8 @@ export default function CoachDashboard() {
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
-  // Client invitation
-  const [showInviteModal, setShowInviteModal] = useState(false);
-  const [inviteEmail, setInviteEmail] = useState('');
-  const [inviteName, setInviteName] = useState('');
-  const [inviteLoading, setInviteLoading] = useState(false);
+  // Client invitation - using SendInvitation modal
+  const [showSendInvitation, setShowSendInvitation] = useState(false);
 
   // Load clients on mount
   useEffect(() => {
@@ -159,33 +157,9 @@ export default function CoachDashboard() {
     setRefreshing(false);
   };
 
-  const handleSendInvitation = async () => {
-    if (!inviteEmail.trim() || !inviteName.trim()) {
-      Alert.alert('Error', 'Please enter both name and email');
-      return;
-    }
-
-    try {
-      setInviteLoading(true);
-      await coachService.sendInvitation({
-        coachId,
-        clientEmail: inviteEmail.trim(),
-        clientName: inviteName.trim(),
-      });
-      
-      Alert.alert('Success', `Invitation sent to ${inviteName}`);
-      setShowInviteModal(false);
-      setInviteEmail('');
-      setInviteName('');
-      
-      // Refresh client list
-      await loadClients();
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Failed to send invitation';
-      Alert.alert('Error', message);
-    } finally {
-      setInviteLoading(false);
-    }
+  const handleInvitationSent = async () => {
+    // Refresh client list after invitation is sent
+    await loadClients();
   };
 
   const handleSearch = async () => {
@@ -553,10 +527,10 @@ export default function CoachDashboard() {
               </Text>
               <Pressable 
                 style={styles.addClientButton}
-                onPress={() => setShowInviteModal(true)}
+                onPress={() => setShowSendInvitation(true)}
               >
                 <Ionicons name="person-add" size={20} color="#3b82f6" />
-                <Text style={styles.addClientText}>Add Client</Text>
+                <Text style={styles.addClientText}>Invite Client</Text>
               </Pressable>
             </View>
 
@@ -623,49 +597,14 @@ export default function CoachDashboard() {
       
       {/* Client Invitation Modal */}
       {showInviteModal && (
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Invite New Client</Text>
-              <Pressable onPress={() => setShowInviteModal(false)}>
-                <Ionicons name="close" size={24} color="#6b7280" />
-              </Pressable>
-            </View>
-            
-            <TextInput
-              style={styles.modalInput}
-              placeholder="Client Name"
-              value={inviteName}
-              onChangeText={setInviteName}
-              placeholderTextColor="#9ca3af"
-            />
-            
-            <TextInput
-              style={styles.modalInput}
-              placeholder="Client Email"
-              value={inviteEmail}
-              onChangeText={setInviteEmail}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              placeholderTextColor="#9ca3af"
-            />
-            
-            <Pressable 
-              style={[styles.modalButton, inviteLoading && styles.modalButtonDisabled]}
-              onPress={handleSendInvitation}
-              disabled={inviteLoading}
-            >
-              {inviteLoading ? (
-                <ActivityIndicator color="#fff" />
-              ) : (
-                <>
-                  <Ionicons name="send" size={20} color="#fff" />
-                  <Text style={styles.modalButtonText}>Send Invitation</Text>
-                </>
-              )}
-            </Pressable>
-          </View>
-        </View>
+        <SendInvitation
+          visible={showSendInvitation}
+          onClose={() => {
+            setShowSendInvitation(false);
+            handleInvitationSent();
+          }}
+          coachId={coachId}
+        />
       )}
     </View>
   );
