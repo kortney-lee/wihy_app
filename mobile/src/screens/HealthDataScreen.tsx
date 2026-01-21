@@ -312,13 +312,13 @@ export default function HealthDataScreen() {
 
   if (isWeb) {
     return (
-      <View style={styles.container}>
+      <View style={[styles.container, { minHeight: '100vh' } as any]}>
         <WebNavHeader 
           activePage="profile" 
           showLoginModal={showLoginModal}
           setShowLoginModal={setShowLoginModal}
         />
-        <View style={styles.webContent}>
+        <View style={[styles.webContent, { height: 'calc(100vh - 70px)', overflow: 'auto' } as any]}>
           {content}
         </View>
       </View>
@@ -336,18 +336,19 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: theme.background,
-  },
+  } as any,
   webContent: {
     flex: 1,
     maxWidth: 800,
     width: '100%',
     alignSelf: 'center',
-  },
+  } as any,
   scrollView: {
     flex: 1,
-  },
+  } as any,
   contentContainer: {
     padding: 16,
+    paddingBottom: isWeb ? 100 : 16,
   },
   header: {
     flexDirection: 'row',

@@ -433,11 +433,14 @@ export default function PlansModal({
   );
 }
 
+const isWeb = Platform.OS === 'web';
+
 const styles = StyleSheet.create({
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'flex-end',
+    ...(isWeb && { alignItems: 'center', justifyContent: 'center' }),
   },
   modalContent: {
     backgroundColor: '#fff',
@@ -445,6 +448,12 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 24,
     maxHeight: '90%',
     paddingBottom: 40,
+    ...(isWeb && { 
+      borderRadius: 24, 
+      maxWidth: 600, 
+      width: '95%',
+      overflow: 'hidden',
+    }),
   },
   header: {
     flexDirection: 'row',
@@ -490,6 +499,7 @@ const styles = StyleSheet.create({
   scrollView: {
     paddingHorizontal: 20,
     paddingTop: 16,
+    ...(isWeb && { maxHeight: '60vh', overflowY: 'auto' }),
   },
   planCard: {
     backgroundColor: '#fff',
