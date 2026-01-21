@@ -3,6 +3,7 @@ export { scanService } from './scanService';
 export { chatService } from './chatService';
 export { fdaService } from './fdaService';
 export { authService } from './authService';
+export { userService } from './userService'; // NEW: User management (user.wihy.ai)
 export { enhancedAuthService } from './enhancedAuthService';
 export { enhancedScanService } from './enhancedScanService';
 // export { purchaseService } from './purchaseService'; // Requires native modules

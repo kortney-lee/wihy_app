@@ -593,8 +593,7 @@ export default function CreateMeals() {
     setIsGeneratingPlan(true);
     try {
       const request: CreateMealPlanRequest = {
-        // Use test_user for unauthenticated testing, otherwise use actual userId
-        userId: userId || 'test_user',
+        userId: userId,
         description: planDescription || 'Create a balanced meal plan',
         duration: planDuration,
         mealsPerDay: {
@@ -820,7 +819,7 @@ export default function CreateMeals() {
       // Build request based on mode - using /api/meals/create-from-text
       const request: CreateMealPlanRequest = {
         mode: params.mode, // CRITICAL: Pass mode for proper endpoint routing
-        userId: userId || 'test_user',
+        userId: userId,
         description: params.description || `Generate ${params.mode} meal`,
         duration: params.duration || (params.mode === 'quick' ? 1 : 7),
         mealsPerDay: params.mealsPerDay ? {
@@ -1149,7 +1148,7 @@ export default function CreateMeals() {
       
       // Build the meal program data to save
       const programToSave = {
-        user_id: userId || 'test_user',
+        user_id: userId,
         program_id: acceptedPlan.program_id,
         name: acceptedPlan.name || `${acceptedPlan.duration_days}-Day Meal Plan`,
         description: acceptedPlan.description || planDescription,

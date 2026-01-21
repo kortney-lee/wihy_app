@@ -2,6 +2,11 @@
  * WIHY Authentication Service
  * Handles OAuth2, local auth, and session management
  * 
+ * Base URL: https://auth.wihy.ai
+ * 
+ * For user profile, preferences, and subscription management,
+ * use userService.ts (https://user.wihy.ai)
+ * 
  * KEY PRINCIPLE: Clients only need their own client_id
  * ==========================================
  * - Your app uses: wihy_native_2025 (client_id only)
@@ -27,6 +32,7 @@ export const AUTH_CONFIG = {
   // OAuth scopes - only profile and email are supported by auth service
   scopes: ['profile', 'email'],
   endpoints: {
+    // === AUTH SERVICE ENDPOINTS (https://auth.wihy.ai) ===
     // Authentication
     health: '/api/health',
     providers: '/api/auth/providers',
@@ -43,6 +49,8 @@ export const AUTH_CONFIG = {
     forgotPassword: '/api/auth/forgot-password',
     resetPassword: '/api/auth/reset-password',
     
+    // === USER SERVICE ENDPOINTS (https://user.wihy.ai) ===
+    // Note: These endpoints are hardcoded to use user.wihy.ai in the methods below
     // User Management
     userProfile: '/api/users/me',
     updateProfile: '/api/users/me',
@@ -1406,254 +1414,18 @@ class AuthService {
   }
 
   // ==========================================
-  // USER MANAGEMENT ENDPOINTS
+  // USER MANAGEMENT ENDPOINTS - MOVED TO userService.ts
   // ==========================================
-
-  /**
-   * Get current user's profile with capabilities
-   */
-  async getUserProfile(): Promise<UserProfile | null> {
-    const endpoint = `${this.baseUrl}${AUTH_CONFIG.endpoints.userProfile}`;
-    const headers = await this.getAuthHeaders();
-    
-    console.log('=== GET USER PROFILE ===');
-    
-    try {
-      const response = await fetchWithLogging(endpoint, { headers });
-      
-      if (response.ok) {
-        const profile: UserProfile = await response.json();
-        console.log('User profile retrieved:', profile.email);
-        return profile;
-      } else {
-        console.error('Failed to get user profile:', response.status);
-        return null;
-      }
-    } catch (error) {
-      console.error('Get user profile error:', error);
-      return null;
-    }
-  }
-
-  /**
-   * Update user profile information
-   */
-  async updateUserProfile(updates: {
-    name?: string;
-    picture?: string;
-  }): Promise<ApiResponse<UserProfile>> {
-    const endpoint = `${this.baseUrl}${AUTH_CONFIG.endpoints.updateProfile}`;
-    const headers = await this.getAuthHeaders();
-    
-    console.log('=== UPDATE USER PROFILE ===');
-    
-    try {
-      const response = await fetchWithLogging(endpoint, {
-        method: 'PUT',
-        headers,
-        body: JSON.stringify(updates),
-      });
-
-      const data = await response.json();
-      
-      if (response.ok) {
-        console.log('Profile updated successfully');
-        return { success: true, data: data.user };
-      } else {
-        return { success: false, error: data.error, message: data.message };
-      }
-    } catch (error: any) {
-      console.error('Update profile error:', error);
-      return { success: false, error: error.message };
-    }
-  }
-
-  /**
-   * Update user preferences
-   */
-  async updateUserPreferences(
-    preferences: Partial<UserPreferences>
-  ): Promise<ApiResponse<UserPreferences>> {
-    const endpoint = `${this.baseUrl}${AUTH_CONFIG.endpoints.updatePreferences}`;
-    const headers = await this.getAuthHeaders();
-    
-    console.log('=== UPDATE USER PREFERENCES ===');
-    
-    try {
-      const response = await fetchWithLogging(endpoint, {
-        method: 'PUT',
-        headers,
-        body: JSON.stringify(preferences),
-      });
-
-      const data = await response.json();
-      
-      if (response.ok) {
-        console.log('Preferences updated successfully');
-        return { success: true, data: data.preferences };
-      } else {
-        return { success: false, error: data.error, message: data.message };
-      }
-    } catch (error: any) {
-      console.error('Update preferences error:', error);
-      return { success: false, error: error.message };
-    }
-  }
-
-  /**
-   * Change user's subscription plan
-   */
-  async updateUserPlan(plan: string): Promise<ApiResponse<UserProfile>> {
-    const endpoint = `${this.baseUrl}${AUTH_CONFIG.endpoints.updatePlan}`;
-    const headers = await this.getAuthHeaders();
-    
-    console.log('=== UPDATE USER PLAN ===');
-    console.log('New plan:', plan);
-    
-    try {
-      const response = await fetchWithLogging(endpoint, {
-        method: 'PUT',
-        headers,
-        body: JSON.stringify({ plan }),
-      });
-
-      const data = await response.json();
-      
-      if (response.ok) {
-        console.log('Plan updated successfully:', plan);
-        return { success: true, data: data.user };
-      } else {
-        return { success: false, error: data.error, message: data.message };
-      }
-    } catch (error: any) {
-      console.error('Update plan error:', error);
-      return { success: false, error: error.message };
-    }
-  }
-
-  /**
-   * Add an add-on (AI or Instacart)
-   */
-  async addAddon(addon: 'ai' | 'instacart'): Promise<ApiResponse<UserProfile>> {
-    const endpoint = `${this.baseUrl}${AUTH_CONFIG.endpoints.addAddon}`;
-    const headers = await this.getAuthHeaders();
-    
-    console.log('=== ADD ADDON ===');
-    console.log('Addon:', addon);
-    
-    try {
-      const response = await fetchWithLogging(endpoint, {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({ addon }),
-      });
-
-      const data = await response.json();
-      
-      if (response.ok) {
-        console.log('Add-on added successfully:', addon);
-        return { success: true, data: data.user };
-      } else {
-        return { success: false, error: data.error, message: data.message };
-      }
-    } catch (error: any) {
-      console.error('Add addon error:', error);
-      return { success: false, error: error.message };
-    }
-  }
-
-  /**
-   * Remove an add-on
-   */
-  async removeAddon(addon: 'ai' | 'instacart'): Promise<ApiResponse<UserProfile>> {
-    const endpoint = `${this.baseUrl}${AUTH_CONFIG.endpoints.removeAddon}/${addon}`;
-    const headers = await this.getAuthHeaders();
-    
-    console.log('=== REMOVE ADDON ===');
-    console.log('Addon:', addon);
-    
-    try {
-      const response = await fetchWithLogging(endpoint, {
-        method: 'DELETE',
-        headers,
-      });
-
-      const data = await response.json();
-      
-      if (response.ok) {
-        console.log('Add-on removed successfully:', addon);
-        return { success: true, data: data.user };
-      } else {
-        return { success: false, error: data.error, message: data.message };
-      }
-    } catch (error: any) {
-      console.error('Remove addon error:', error);
-      return { success: false, error: error.message };
-    }
-  }
-
-  /**
-   * Update health metrics
-   */
-  async updateHealthMetrics(metrics: {
-    healthScore?: number;
-    streakDays?: number;
-    weight?: number;
-    height?: number;
-    age?: number;
-    activityLevel?: string;
-  }): Promise<ApiResponse> {
-    const endpoint = `${this.baseUrl}${AUTH_CONFIG.endpoints.updateHealth}`;
-    const headers = await this.getAuthHeaders();
-    
-    console.log('=== UPDATE HEALTH METRICS ===');
-    
-    try {
-      const response = await fetchWithLogging(endpoint, {
-        method: 'PUT',
-        headers,
-        body: JSON.stringify(metrics),
-      });
-
-      const data = await response.json();
-      
-      if (response.ok) {
-        console.log('Health metrics updated successfully');
-        return { success: true, data: data.metrics };
-      } else {
-        return { success: false, error: data.error, message: data.message };
-      }
-    } catch (error: any) {
-      console.error('Update health metrics error:', error);
-      return { success: false, error: error.message };
-    }
-  }
-
-  /**
-   * Get subscription history
-   */
-  async getSubscriptionHistory(): Promise<any[]> {
-    const endpoint = `${this.baseUrl}${AUTH_CONFIG.endpoints.subscriptionHistory}`;
-    const headers = await this.getAuthHeaders();
-    
-    console.log('=== GET SUBSCRIPTION HISTORY ===');
-    
-    try {
-      const response = await fetchWithLogging(endpoint, { headers });
-      
-      if (response.ok) {
-        const data = await response.json();
-        console.log('Subscription history retrieved');
-        return data.subscriptions || [];
-      } else {
-        console.error('Failed to get subscription history');
-        return [];
-      }
-    } catch (error) {
-      console.error('Get subscription history error:', error);
-      return [];
-    }
-  }
+  // All user profile, preferences, subscription, and health metric methods
+  // have been moved to userService.ts for proper service separation.
+  // Import userService instead: import { userService } from './userService';
+  //
+  // Available methods in userService:
+  // - getUserProfile(), getUserById(), getUserByEmail()
+  // - updateUserProfile(), uploadAvatar(), changePassword()
+  // - getUserPreferences(), updateUserPreferences()
+  // - updateUserPlan(), addAddon(), removeAddon(), getSubscriptionHistory()
+  // - getUserCapabilities(), updateHealthMetrics(), getUserDashboard()
 
   /**
    * Get user capabilities

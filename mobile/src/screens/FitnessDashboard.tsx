@@ -938,7 +938,7 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
 
       // Build the request with all supported API parameters
       const request: CreateProgramRequest = {
-        userId: __DEV__ ? 'test_user' : userId, // Use test_user in dev mode
+        userId: userId,
         description: description,
         difficulty: (levelId as 'beginner' | 'intermediate' | 'advanced') || 'intermediate',
         duration: actualDuration,
@@ -2577,7 +2577,7 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
                   const isFullGymPreset = params.equipment?.length === 1 && params.equipment[0] === 'full_gym';
                   
                   const quickRequest: QuickWorkoutRequest = {
-                    user_id: __DEV__ ? 'test_user' : userId,
+                    user_id: userId,
                     workout_type: workoutTypeMap[params.workoutType || 'full_body'] || 'full_body',
                     intensity: params.intensity || 'moderate',
                     duration: params.duration,
@@ -2708,7 +2708,7 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
                   const apiGoals = (params.goalTags || []).map(g => goalMapping[g] || 'general_fitness');
                   
                   const routineRequest: QuickWorkoutRequest = {
-                    user_id: __DEV__ ? 'test_user' : userId,
+                    user_id: userId,
                     workout_type: workoutTypeMap[params.workoutType || 'full_body'] || 'full_body',
                     intensity: params.intensity || 'moderate',
                     duration: params.duration,
@@ -2904,7 +2904,7 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
                   };
                   
                   const trainingRequest: QuickWorkoutRequest = {
-                    user_id: __DEV__ ? 'test_user' : userId,
+                    user_id: userId,
                     mode: 'training',
                     sport: (isRunningProgram ? runningProgramMap[params.program || ''] : params.program) as any || 'general_fitness',
                     training_phase: 'pre_season', // Default to pre_season

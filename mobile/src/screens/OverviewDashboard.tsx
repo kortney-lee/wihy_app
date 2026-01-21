@@ -18,6 +18,7 @@ import { nutritionService } from '../services/nutritionService';
 import { fitnessService } from '../services/fitnessService';
 import { wihyApiService } from '../services/wihyApiService';
 import type { ScanHistoryItem } from '../services/types';
+import { AuthContext } from '../context/AuthContext';
 
 // Remove static screenWidth - use dynamic values instead
 const BASE_SCREEN_WIDTH = 390; // Reference for scaling
@@ -29,6 +30,7 @@ interface HealthSummaryItem extends BaseMetric {}
 const TABS = ['Summary', 'Insights', 'Wellness', 'Trends', 'Predictive'];
 
 const OverviewDashboard: React.FC<BaseDashboardProps> = ({ onAnalyze }) => {
+  const { user } = React.useContext(AuthContext);
   const layout = useDashboardLayout();
   const { navigation, navigateToCamera, navigateToChat, handleAnalyze } = useDashboardNavigation();
   const [selectedTab, setSelectedTab] = useState('Summary');
@@ -88,7 +90,13 @@ const OverviewDashboard: React.FC<BaseDashboardProps> = ({ onAnalyze }) => {
   const loadHealthData = async () => {
     try {
       setIsLoading(true);
-      const userId = 'test_user'; // Default for demo; in production, get from AuthContext
+      const userId = user?.id;
+
+      if (!userId) {
+        console.error('[OverviewDashboard] User ID not available');
+        setIsLoading(false);
+        return;
+      }
 
       // Try to get health data from tracker first
       const initialized = await healthDataService.initialize();

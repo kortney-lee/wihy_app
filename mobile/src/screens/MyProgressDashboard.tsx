@@ -28,9 +28,9 @@ import { dashboardColors } from '../components/shared';
 import { healthDataService } from '../services/healthDataService';
 import { nutritionService } from '../services/nutritionService';
 import { fitnessService } from '../services/fitnessService';
+import { AuthContext } from '../context/AuthContext';
 import { wihyApiService } from '../services/wihyApiService';
 import { useGoalsDashboard } from '../hooks/useGoalsDashboard';
-import { AuthContext } from '../context/AuthContext';
 import type { HealthTrends } from '../services/wihyApiService';
 
 const { width: screenWidth } = Dimensions.get('window');
@@ -441,7 +441,14 @@ const MyProgressDashboard: React.FC<MyProgressDashboardProps> = ({
    */
   const loadMealAndWorkoutData = async () => {
     try {
-      const userId = 'test_user'; // Default for demo; in production, get from AuthContext
+      const { user } = useContext(AuthContext);
+      const userId = user?.id;
+
+      if (!userId) {
+        console.error('[MyProgressDashboard] User ID not available');
+        return;
+      }
+
       console.log('[MyProgressDashboard] Loading meal and workout data for period:', selectedPeriod);
 
       if (selectedPeriod === 'today') {

@@ -1,6 +1,7 @@
 import React, { createContext, useState, useEffect, ReactNode } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { authService, UserData } from '../services/authService';
+import { userService } from '../services/userService';
 import { enhancedAuthService } from '../services/enhancedAuthService';
 import { appleAuthService } from '../services/appleAuthService';
 import { getPlanCapabilities, Capabilities } from '../utils/capabilities';
@@ -442,8 +443,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const handleDevAuth = async (credentials?: { email?: string; name?: string }): Promise<User> => {
     await new Promise(resolve => setTimeout(resolve, 200));
+    // Generate unique dev user ID to avoid conflicts
+    const devUserId = `dev-user-${Date.now()}-${Math.random().toString(36).substring(7)}`;
     return {
-      id: 'test_user', // Always use test_user for dev mode to match backend test data
+      id: devUserId,
       name: credentials?.name || 'Dev User',
       email: credentials?.email || 'dev@wihy.app',
       provider: 'dev',
@@ -477,7 +480,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     // If verification failed but we have a token, try getting user profile
     if (credentials?.token) {
       console.log('[AuthContext] Session verification failed, trying user profile...');
-      const profile = await authService.getUserProfile();
+      const profile = await userService.getUserProfile();
       if (profile) {
         return convertUserData(profile);
       }
@@ -546,7 +549,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       console.log('[AuthContext] Refreshing user context from backend...');
       
       // Fetch fresh data from backend
-      const profile = await authService.getUserProfile();
+      const profile = await userService.getUserProfile();
       
       if (profile) {
         // Compute capabilities using profile data or fallback to client-side computation
@@ -612,8 +615,8 @@ export const useAuth = () => {
   
   return {
     ...context,
-    userId: context.user?.id || 'test_user', // Fallback for development
-    coachId: context.user?.coachId || 'coach_123', // Fallback for development
+    userId: context.user?.id,
+    coachId: context.user?.coachId,
     isCoach: context.user?.plan?.includes('coach') || false,
     isAuthenticated: !!context.user,
     // Family helpers
