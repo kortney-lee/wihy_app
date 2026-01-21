@@ -198,7 +198,8 @@ export async function createShoppingList(
 }
 
 /**
- * Get user's saved meals
+ * Get user's saved meals from Meal Diary
+ * Uses correct API endpoint: GET /api/users/:userId/meals/diary
  */
 export async function getUserMeals(
   userId: string,
@@ -206,23 +207,23 @@ export async function getUserMeals(
   filterTag?: string | null
 ): Promise<any[]> {
   try {
-    let url = `${API_BASE}/meals/user/${userId}`;
     const params = new URLSearchParams();
     
-    if (searchQuery) {
-      params.append('search', searchQuery);
-    }
+    // Map filter parameters to Meal Diary API format
     if (filterTag && filterTag !== 'Favorites') {
-      params.append('tags', filterTag);
-    }
-    if (filterTag === 'Favorites') {
-      params.append('favorites', 'true');
+      // Map tag to meal_type if it's a meal type
+      const mealTypes = ['breakfast', 'lunch', 'dinner', 'snack'];
+      const lowerTag = filterTag.toLowerCase();
+      if (mealTypes.includes(lowerTag)) {
+        params.append('meal_type', lowerTag);
+      }
     }
     
+    // Set reasonable limit
+    params.append('limit', '50');
+    
     const queryString = params.toString();
-    if (queryString) {
-      url += `?${queryString}`;
-    }
+    const url = `${API_BASE}/users/${userId}/meals/diary${queryString ? '?' + queryString : ''}`;
 
     const response = await fetch(url);
 
@@ -237,7 +238,22 @@ export async function getUserMeals(
     }
 
     const result = await response.json();
-    return result.meals || [];
+    let meals = result.recent_meals || [];
+    
+    // Apply client-side filtering for search and favorites
+    if (searchQuery?.trim()) {
+      const query = searchQuery.toLowerCase();
+      meals = meals.filter((meal: any) => 
+        meal.name?.toLowerCase().includes(query) ||
+        meal.tags?.some((tag: string) => tag.toLowerCase().includes(query))
+      );
+    }
+    
+    if (filterTag === 'Favorites') {
+      meals = meals.filter((meal: any) => meal.is_favorite);
+    }
+    
+    return meals;
   } catch (error) {
     console.error('Error in getUserMeals:', error);
     throw error;
