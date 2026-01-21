@@ -596,7 +596,7 @@ export default function CoachDashboard() {
       </Animated.ScrollView>
       
       {/* Client Invitation Modal */}
-      {showInviteModal && (
+      {showSendInvitation && (
         <SendInvitation
           visible={showSendInvitation}
           onClose={() => {
