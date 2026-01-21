@@ -121,7 +121,8 @@ class FamilyService {
   private baseUrl: string;
 
   constructor() {
-    this.baseUrl = API_CONFIG.baseUrl;
+    // Family endpoints go to User Service (user.wihy.ai) per API Reference
+    this.baseUrl = API_CONFIG.userUrl;
   }
 
   // ============= FAMILY MANAGEMENT =============
