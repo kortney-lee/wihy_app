@@ -188,6 +188,8 @@ export interface UserData {
   id: string;              // User ID (UUID) - maps to userId
   email: string;
   name: string;
+  firstName?: string;      // From API - used to construct name if name is empty
+  lastName?: string;       // From API - used to construct name if name is empty
   role?: 'user' | 'premium' | 'family-basic' | 'family-pro' | 'coach' | 'employee' | 'admin' | string;  // Backend may send uppercase
   status?: 'active' | 'inactive' | 'suspended' | 'pending' | string;  // Backend sends ACTIVE
   provider?: 'local' | 'google' | 'facebook' | 'microsoft' | 'apple';
@@ -1324,7 +1326,19 @@ class AuthService {
   }
 
   private async storeUserData(user: UserData): Promise<void> {
-    await AsyncStorage.setItem(STORAGE_KEYS.USER_DATA, JSON.stringify(user));
+    // Ensure name is always populated - construct from firstName/lastName if missing
+    const userData = { ...user };
+    if (!userData.name || userData.name === 'User' || userData.name === 'Guest') {
+      const firstName = (user as any).firstName || (user as any).first_name || '';
+      const lastName = (user as any).lastName || (user as any).last_name || '';
+      if (firstName || lastName) {
+        userData.name = `${firstName} ${lastName}`.trim();
+      } else if (user.email) {
+        // Fall back to email username
+        userData.name = user.email.split('@')[0];
+      }
+    }
+    await AsyncStorage.setItem(STORAGE_KEYS.USER_DATA, JSON.stringify(userData));
   }
 
   async getSessionToken(): Promise<string | null> {
