@@ -29,12 +29,12 @@ function generateFontStyles(ioniconsPath) {
   if (!ioniconsPath) return '';
   
   // IMPORTANT: expo/vector-icons uses 'ionicons' (lowercase) as the font-family name
-  // We must match that exactly for the CSS to work
+  // The style element MUST have id 'expo-generated-fonts' for expo-font's Font.isLoaded() to find it
   return `
     <!-- Ionicons Font Preload for reliable icon rendering -->
     <link rel="preload" href="${ioniconsPath}" as="font" type="font/ttf" crossorigin="anonymous" />
-    <style id="expo-ionicons-preload">
-      /* Pre-register ionicons font before JS runs - matches expo-font's dynamic injection */
+    <style id="expo-generated-fonts">
+      /* Pre-register ionicons font before JS runs - must use expo-generated-fonts id for Font.isLoaded() */
       @font-face {
         font-family: "ionicons";
         src: url('${ioniconsPath}') format('truetype');
