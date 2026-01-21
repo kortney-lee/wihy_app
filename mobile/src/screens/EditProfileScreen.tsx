@@ -132,14 +132,21 @@ export default function EditProfileScreen() {
       contentContainerStyle={styles.contentContainer}
       keyboardShouldPersistTaps="handled"
     >
-      {/* Header */}
-      <View style={styles.header}>
-        <Pressable style={styles.backButton} onPress={() => navigation.goBack()}>
-          <SvgIcon name="arrow-back" size={24} color={theme.text} />
-        </Pressable>
-        <Text style={styles.headerTitle}>Edit Profile</Text>
-        <View style={styles.headerSpacer} />
-      </View>
+      {/* Header - only show on mobile */}
+      {!isWeb && (
+        <View style={styles.header}>
+          <Pressable style={styles.backButton} onPress={() => navigation.goBack()}>
+            <SvgIcon name="arrow-back" size={24} color={theme.text} />
+          </Pressable>
+          <Text style={styles.headerTitle}>Edit Profile</Text>
+          <View style={styles.headerSpacer} />
+        </View>
+      )}
+      
+      {/* Web page title */}
+      {isWeb && (
+        <Text style={styles.webPageTitle}>Edit Profile</Text>
+      )}
 
       {loading ? (
         <View style={styles.loadingContainer}>
@@ -360,6 +367,13 @@ const styles = StyleSheet.create({
   },
   headerSpacer: {
     width: 40,
+  },
+  webPageTitle: {
+    fontSize: 28,
+    fontWeight: '700',
+    color: theme.text,
+    marginBottom: 24,
+    marginTop: 8,
   },
   loadingContainer: {
     flex: 1,

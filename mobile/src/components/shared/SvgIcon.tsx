@@ -40,6 +40,16 @@ const iconMap: Record<string, string> = {
   'briefcase': 'briefcase',
   'compass': 'compass',
   
+  // Health/Body icons
+  'resize': 'resize',
+  'scale': 'speedometer',
+  'flame': 'flame',
+  'body': 'body',
+  'pulse': 'pulse',
+  'medkit': 'medkit',
+  'thermometer': 'thermometer',
+  'bandage': 'bandage',
+  
   // Communication
   'chatbubble': 'chatbubble',
   'chatbubbles': 'chatbubbles',
@@ -105,9 +115,6 @@ const iconMap: Record<string, string> = {
   'moon': 'moon',
   'water': 'water',
   'leaf': 'leaf',
-  'pulse': 'pulse',
-  'medkit': 'medkit',
-  'body': 'body',
   'walk': 'walk',
   'bicycle': 'bicycle',
   'car': 'car',

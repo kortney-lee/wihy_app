@@ -199,14 +199,21 @@ export default function HealthDataScreen() {
       style={styles.scrollView}
       contentContainerStyle={styles.contentContainer}
     >
-      {/* Header */}
-      <View style={styles.header}>
-        <Pressable style={styles.backButton} onPress={() => navigation.goBack()}>
-          <SvgIcon name="arrow-back" size={24} color={theme.text} />
-        </Pressable>
-        <Text style={styles.headerTitle}>Health Data</Text>
-        <View style={styles.headerSpacer} />
-      </View>
+      {/* Header - only show on mobile */}
+      {!isWeb && (
+        <View style={styles.header}>
+          <Pressable style={styles.backButton} onPress={() => navigation.goBack()}>
+            <SvgIcon name="arrow-back" size={24} color={theme.text} />
+          </Pressable>
+          <Text style={styles.headerTitle}>Health Data</Text>
+          <View style={styles.headerSpacer} />
+        </View>
+      )}
+      
+      {/* Web page title */}
+      {isWeb && (
+        <Text style={styles.webPageTitle}>Health Data</Text>
+      )}
 
       {loading ? (
         <View style={styles.loadingContainer}>
@@ -377,6 +384,13 @@ const styles = StyleSheet.create({
   },
   headerSpacer: {
     width: 40,
+  },
+  webPageTitle: {
+    fontSize: 28,
+    fontWeight: '700',
+    color: theme.text,
+    marginBottom: 24,
+    marginTop: 8,
   },
   loadingContainer: {
     flex: 1,
