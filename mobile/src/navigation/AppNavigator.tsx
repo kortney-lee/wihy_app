@@ -58,6 +58,8 @@ import { PostPaymentRegistrationScreen } from '../screens/PostPaymentRegistratio
 import AboutScreen from '../screens/AboutScreen';
 import TermsScreen from '../screens/TermsScreen';
 import PrivacyScreen from '../screens/PrivacyScreen';
+import EditProfileScreen from '../screens/EditProfileScreen';
+import HealthDataScreen from '../screens/HealthDataScreen';
 import AuthCallbackScreen from '../screens/AuthCallbackScreen';
 import SubscribeCompleteScreen from '../screens/SubscribeCompleteScreen';
 import PaymentSuccessScreen from '../screens/PaymentSuccessScreen';
@@ -643,6 +645,22 @@ export default function AppNavigator() {
         <Stack.Screen
           name="Privacy"
           component={PrivacyScreen}
+          options={{
+            presentation: 'card',
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="EditProfile"
+          component={EditProfileScreen}
+          options={{
+            presentation: 'card',
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="HealthData"
+          component={HealthDataScreen}
           options={{
             presentation: 'card',
             headerShown: false,

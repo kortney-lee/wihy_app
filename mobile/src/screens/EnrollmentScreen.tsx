@@ -14,7 +14,7 @@ import {
   RefreshControl,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
+import SvgIcon from '../components/shared/SvgIcon';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { AuthContext } from '../context/AuthContext';
@@ -450,7 +450,7 @@ export default function EnrollmentScreen() {
           {/* Family Info Card */}
           <View style={styles.familyCard}>
             <View style={styles.familyHeader}>
-              <Ionicons name="home" size={32} color={theme.accent} />
+              <SvgIcon name="home" size={32} color={theme.accent} />
               <View style={styles.familyInfo}>
                 <Text style={styles.familyName}>{family.name}</Text>
                 <Text style={styles.familyMeta}>
@@ -468,13 +468,13 @@ export default function EnrollmentScreen() {
                   style={styles.codeAction}
                   onPress={() => shareGuardianCode(guardianCode)}
                 >
-                  <Ionicons name="share-outline" size={20} color={theme.accent} />
+                  <SvgIcon name="share-outline" size={20} color={theme.accent} />
                 </Pressable>
                 <Pressable
                   style={styles.codeAction}
                   onPress={handleRegenerateCode}
                 >
-                  <Ionicons name="refresh-outline" size={20} color={theme.textSecondary} />
+                  <SvgIcon name="refresh-outline" size={20} color={theme.textSecondary} />
                 </Pressable>
               </View>
               <Text style={styles.codeHint}>Share this code with your children to join</Text>
@@ -487,8 +487,8 @@ export default function EnrollmentScreen() {
             familyMembers.map((member) => (
               <View key={member.userId} style={styles.memberCard}>
                 <View style={styles.memberAvatar}>
-                  <Ionicons
-                    name={member.role === 'guardian' ? 'shield' : 'person'}
+                  <SvgIcon
+                    name={member.role === 'guardian' ? 'shield-checkmark' : 'person'}
                     size={24}
                     color={member.role === 'guardian' ? theme.accent : theme.textSecondary}
                   />
@@ -506,14 +506,14 @@ export default function EnrollmentScreen() {
                     style={styles.removeButton}
                     onPress={() => handleRemoveMember(member.userId, member.name)}
                   >
-                    <Ionicons name="close-circle" size={24} color="#FF6B6B" />
+                    <SvgIcon name="close-circle" size={24} color="#FF6B6B" />
                   </Pressable>
                 )}
               </View>
             ))
           ) : (
             <View style={styles.emptyState}>
-              <Ionicons name="people-outline" size={48} color={theme.textSecondary} />
+              <SvgIcon name="people-outline" size={48} color={theme.textSecondary} />
               <Text style={styles.emptyText}>No family members yet</Text>
               <Text style={styles.emptyHint}>Share your guardian code to invite family</Text>
             </View>
@@ -523,7 +523,7 @@ export default function EnrollmentScreen() {
         <>
           {/* Create Family */}
           <View style={styles.actionCard}>
-            <Ionicons name="home-outline" size={40} color={theme.accent} />
+            <SvgIcon name="home-outline" size={40} color={theme.accent} />
             <Text style={styles.actionTitle}>Create a Family</Text>
             <Text style={styles.actionSubtitle}>
               Set up your family and get a code to share with your children
@@ -544,7 +544,7 @@ export default function EnrollmentScreen() {
                 <ActivityIndicator color="#fff" />
               ) : (
                 <>
-                  <Ionicons name="add-circle" size={20} color="#fff" />
+                  <SvgIcon name="add-circle" size={20} color="#fff" />
                   <Text style={styles.primaryButtonText}>Create Family</Text>
                 </>
               )}
@@ -560,7 +560,7 @@ export default function EnrollmentScreen() {
 
           {/* Join Family */}
           <View style={styles.actionCard}>
-            <Ionicons name="enter-outline" size={40} color={theme.success} />
+            <SvgIcon name="enter-outline" size={40} color={theme.success} />
             <Text style={styles.actionTitle}>Join a Family</Text>
             <Text style={styles.actionSubtitle}>
               Enter the guardian code shared by your parent
@@ -583,7 +583,7 @@ export default function EnrollmentScreen() {
                 <ActivityIndicator color={theme.accent} />
               ) : (
                 <>
-                  <Ionicons name="enter" size={20} color={theme.accent} />
+                  <SvgIcon name="enter" size={20} color={theme.accent} />
                   <Text style={styles.secondaryButtonText}>Join Family</Text>
                 </>
               )}
@@ -601,7 +601,7 @@ export default function EnrollmentScreen() {
           {/* Coach Stats Card */}
           <View style={styles.coachCard}>
             <View style={styles.coachHeader}>
-              <Ionicons name="fitness" size={32} color={theme.accent} />
+              <SvgIcon name="fitness" size={32} color={theme.accent} />
               <View style={styles.coachInfo}>
                 <Text style={styles.coachTitle}>Coach Dashboard</Text>
                 <Text style={styles.coachMeta}>
@@ -631,7 +631,7 @@ export default function EnrollmentScreen() {
                   </>
                 ) : (
                   <>
-                    <Ionicons name="trending-up" size={24} color={theme.success} />
+                    <SvgIcon name="trending-up" size={24} color={theme.success} />
                     <Text style={styles.statLabel}>Revenue</Text>
                   </>
                 )}
@@ -653,7 +653,7 @@ export default function EnrollmentScreen() {
                 autoCapitalize="none"
               />
               <Pressable style={styles.inviteButton} onPress={handleInviteClient}>
-                <Ionicons name="send" size={20} color="#fff" />
+                <SvgIcon name="send" size={20} color="#fff" />
               </Pressable>
             </View>
           </View>
@@ -668,7 +668,7 @@ export default function EnrollmentScreen() {
                 onPress={() => handleViewClientProgress(client)}
               >
                 <View style={styles.clientAvatar}>
-                  <Ionicons name="person" size={24} color={theme.accent} />
+                  <SvgIcon name="person" size={24} color={theme.accent} />
                 </View>
                 <View style={styles.clientInfo}>
                   <Text style={styles.clientName}>{client.name || client.email || 'Client'}</Text>
@@ -696,12 +696,12 @@ export default function EnrollmentScreen() {
                     </Text>
                   )}
                 </View>
-                <Ionicons name="chevron-forward" size={20} color={theme.textSecondary} />
+                <SvgIcon name="chevron-forward" size={20} color={theme.textSecondary} />
               </Pressable>
             ))
           ) : (
             <View style={styles.emptyState}>
-              <Ionicons name="people-outline" size={48} color={theme.textSecondary} />
+              <SvgIcon name="people-outline" size={48} color={theme.textSecondary} />
               <Text style={styles.emptyText}>No clients yet</Text>
               <Text style={styles.emptyHint}>Invite clients using the form above</Text>
             </View>
@@ -710,7 +710,7 @@ export default function EnrollmentScreen() {
       ) : (
         /* Become a Coach */
         <View style={styles.actionCard}>
-          <Ionicons name="ribbon-outline" size={48} color={theme.accent} />
+          <SvgIcon name="ribbon-outline" size={48} color={theme.accent} />
           <Text style={styles.actionTitle}>Become a WiHY Coach</Text>
           <Text style={styles.actionSubtitle}>
             Help your clients achieve their health goals with personalized nutrition and fitness plans
@@ -718,19 +718,19 @@ export default function EnrollmentScreen() {
           
           <View style={styles.benefitsList}>
             <View style={styles.benefitItem}>
-              <Ionicons name="checkmark-circle" size={20} color={theme.success} />
+              <SvgIcon name="checkmark-circle" size={20} color={theme.success} />
               <Text style={styles.benefitText}>Manage unlimited clients</Text>
             </View>
             <View style={styles.benefitItem}>
-              <Ionicons name="checkmark-circle" size={20} color={theme.success} />
+              <SvgIcon name="checkmark-circle" size={20} color={theme.success} />
               <Text style={styles.benefitText}>Track client progress</Text>
             </View>
             <View style={styles.benefitItem}>
-              <Ionicons name="checkmark-circle" size={20} color={theme.success} />
+              <SvgIcon name="checkmark-circle" size={20} color={theme.success} />
               <Text style={styles.benefitText}>Earn commission on referrals</Text>
             </View>
             <View style={styles.benefitItem}>
-              <Ionicons name="checkmark-circle" size={20} color={theme.success} />
+              <SvgIcon name="checkmark-circle" size={20} color={theme.success} />
               <Text style={styles.benefitText}>Access coach analytics</Text>
             </View>
           </View>
@@ -744,7 +744,7 @@ export default function EnrollmentScreen() {
               <ActivityIndicator color="#fff" />
             ) : (
               <>
-                <Ionicons name="rocket" size={20} color="#fff" />
+                <SvgIcon name="rocket" size={20} color="#fff" />
                 <Text style={styles.primaryButtonText}>Start Coaching</Text>
               </>
             )}
@@ -759,7 +759,7 @@ export default function EnrollmentScreen() {
       {/* Header */}
       <View style={styles.header}>
         <Pressable style={styles.backButton} onPress={() => navigation.goBack()}>
-          <Ionicons name="arrow-back" size={24} color={theme.text} />
+          <SvgIcon name="arrow-back" size={24} color={theme.text} />
         </Pressable>
         <View style={styles.headerText}>
           <Text style={styles.headerTitle}>

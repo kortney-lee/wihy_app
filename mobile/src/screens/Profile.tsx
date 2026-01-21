@@ -191,29 +191,11 @@ export default function Profile() {
   };
 
   const handleEditProfile = () => {
-    // OnboardingFlow is for mobile only (Android/iOS)
-    if (Platform.OS === 'web') {
-      Alert.alert(
-        'Edit Profile',
-        'Profile editing is available in the mobile app. Download the WIHY app for the full experience!',
-        [{ text: 'OK' }]
-      );
-    } else {
-      // Navigate to the OnboardingFlow which has profile setup steps
-      navigation.navigate('OnboardingFlow');
-    }
+    navigation.navigate('EditProfile');
   };
 
   const handleHealthData = () => {
-    Alert.alert(
-      'Health Data',
-      'Export or manage your health data',
-      [
-        { text: 'Export Data', onPress: () => console.log('Export data') },
-        { text: 'Delete Data', onPress: () => console.log('Delete data'), style: 'destructive' },
-        { text: 'Cancel', style: 'cancel' },
-      ]
-    );
+    navigation.navigate('HealthData');
   };
 
   const handleSupport = () => {
@@ -343,7 +325,7 @@ export default function Profile() {
           subtitle: 'Control your data sharing',
           type: 'navigation' as const,
           icon: 'shield-checkmark',
-          onPress: () => console.log('Privacy settings'),
+          onPress: () => navigation.navigate('Privacy'),
         },
       ],
     },
