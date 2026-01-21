@@ -104,7 +104,7 @@ export default function ClientManagement() {
         program: getProgramName(apiClient),
         startDate: formatDate(apiClient.joined_date || apiClient.relationship_started),
         lastContact: apiClient.last_active || 'Recently',
-        adherence: apiClient.adherence_rate || Math.floor(Math.random() * 30) + 70, // Fallback
+        adherence: apiClient.adherence_rate || 0, // API required for adherence data
       }));
       
       setClients(mappedClients);

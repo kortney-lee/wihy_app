@@ -11,7 +11,6 @@ import {
   useWindowDimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import type { CompositeNavigationProp } from '@react-navigation/native';
 import type { StackNavigationProp } from '@react-navigation/stack';
@@ -24,6 +23,7 @@ import { GradientDashboardHeader, QuickStartGuide } from '../components/shared';
 import { AuthContext } from '../context/AuthContext';
 import { hasCoachAccess, hasFamilyAccess, hasMealsAccess } from '../utils/capabilities';
 import { useDashboardLayout } from '../hooks/useDashboardLayout';
+import SvgIcon from '../components/shared/SvgIcon';
 // import { useSession } from '../contexts/SessionContext';
 import OverviewDashboard from './OverviewDashboard';
 import MyProgressDashboard from './MyProgressDashboard';
@@ -181,7 +181,7 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
               shadowRadius: 6,
             } as any}
           >
-            <Ionicons name="arrow-back" size={isMobileWeb ? 14 : 16} color="#16a34a" />
+            <SvgIcon name="arrow-back" size={isMobileWeb ? 14 : 16} color="#16a34a" />
             <Text style={{ fontSize: isMobileWeb ? 11 : 13, fontWeight: '600', color: '#16a34a' }}>Health Hub</Text>
             <Image 
               source={require('../../assets/whatishealthyspinner.gif')}
@@ -257,7 +257,7 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
           onPress={() => setSelectedDashboard('overview')}
         >
           <View style={[styles.cardIconContainer, { width: iconContainerSize, height: iconContainerSize, borderRadius: iconContainerSize / 2 }]}>
-            <Ionicons name="analytics" size={iconSize} color="#ffffff" />
+            <SvgIcon name="analytics" size={iconSize} color="#ffffff" />
           </View>
           <Text style={[styles.cardTitle, { fontSize: titleSize }]}>Overview</Text>
           <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>Health metrics</Text>
@@ -269,7 +269,7 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
           onPress={() => setSelectedDashboard('nutrition')}
         >
           <View style={[styles.cardIconContainer, { width: iconContainerSize, height: iconContainerSize, borderRadius: iconContainerSize / 2 }]}>
-            <Ionicons name="nutrition" size={iconSize} color="#ffffff" />
+            <SvgIcon name="nutrition" size={iconSize} color="#ffffff" />
           </View>
           <Text style={[styles.cardTitle, { fontSize: titleSize }]}>Nutrition</Text>
           <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>Scan history</Text>
@@ -282,7 +282,7 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
           onPress={() => setSelectedDashboard('progress')}
         >
           <View style={[styles.cardIconContainer, { width: iconContainerSize, height: iconContainerSize, borderRadius: iconContainerSize / 2 }]}>
-            <Ionicons name="trending-up" size={iconSize} color="#ffffff" />
+            <SvgIcon name="trending-up" size={iconSize} color="#ffffff" />
           </View>
           <Text style={[styles.cardTitle, { fontSize: titleSize }]}>Progress</Text>
           <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>Track goals</Text>
@@ -296,7 +296,7 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
             onPress={() => handleNavigateToDashboard('meals')}
           >
             <View style={[styles.cardIconContainer, { width: iconContainerSize, height: iconContainerSize, borderRadius: iconContainerSize / 2 }]}>
-              <Ionicons name="restaurant" size={iconSize} color="#ffffff" />
+              <SvgIcon name="restaurant" size={iconSize} color="#ffffff" />
             </View>
             <Text style={[styles.cardTitle, { fontSize: titleSize }]}>Create Meals</Text>
             <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>Custom recipes</Text>
@@ -310,7 +310,7 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
           onPress={() => setSelectedDashboard('research')}
         >
           <View style={[styles.cardIconContainer, { width: iconContainerSize, height: iconContainerSize, borderRadius: iconContainerSize / 2 }]}>
-            <Ionicons name="library" size={iconSize} color="#ffffff" />
+            <SvgIcon name="library" size={iconSize} color="#ffffff" />
           </View>
           <Text style={[styles.cardTitle, { fontSize: titleSize }]}>Research</Text>
           <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>Health insights</Text>
@@ -324,7 +324,7 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
           onPress={() => setSelectedDashboard('fitness')}
         >
           <View style={[styles.cardIconContainer, { width: iconContainerSize, height: iconContainerSize, borderRadius: iconContainerSize / 2 }]}>
-            <Ionicons name="fitness" size={iconSize} color="#ffffff" />
+            <SvgIcon name="fitness" size={iconSize} color="#ffffff" />
           </View>
           <Text style={[styles.cardTitle, { fontSize: titleSize }]}>Fitness</Text>
           <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>Workout plans</Text>
@@ -337,7 +337,7 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
           onPress={() => handleNavigateToDashboard('findCoach')}
         >
           <View style={[styles.cardIconContainer, { width: iconContainerSize, height: iconContainerSize, borderRadius: iconContainerSize / 2 }]}>
-            <Ionicons name="people" size={iconSize} color="#ffffff" />
+            <SvgIcon name="people" size={iconSize} color="#ffffff" />
           </View>
           <Text style={[styles.cardTitle, { fontSize: titleSize }]}>Find Coach</Text>
           <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>Expert guidance</Text>
@@ -350,7 +350,7 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
             onPress={() => setSelectedDashboard('parent')}
           >
             <View style={[styles.cardIconContainer, { width: iconContainerSize, height: iconContainerSize, borderRadius: iconContainerSize / 2 }]}>
-              <Ionicons name="heart" size={iconSize} color="#ffffff" />
+              <SvgIcon name="heart" size={iconSize} color="#ffffff" />
             </View>
             <Text style={[styles.cardTitle, { fontSize: titleSize }]}>Family</Text>
             <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>Kids health</Text>
@@ -364,7 +364,7 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
             onPress={() => onContextChange('family')}
           >
             <View style={[styles.cardIconContainer, { width: iconContainerSize, height: iconContainerSize, borderRadius: iconContainerSize / 2 }]}>
-              <Ionicons name="people-circle" size={iconSize} color="#ffffff" />
+              <SvgIcon name="people-circle" size={iconSize} color="#ffffff" />
             </View>
             <Text style={[styles.cardTitle, { fontSize: titleSize }]}>Family Hub</Text>
             <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>Switch view</Text>
@@ -378,7 +378,7 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
             onPress={() => onContextChange('coach')}
           >
             <View style={[styles.cardIconContainer, { width: iconContainerSize, height: iconContainerSize, borderRadius: iconContainerSize / 2 }]}>
-              <Ionicons name="briefcase" size={iconSize} color="#ffffff" />
+              <SvgIcon name="briefcase" size={iconSize} color="#ffffff" />
             </View>
             <Text style={[styles.cardTitle, { fontSize: titleSize }]}>Coach Hub</Text>
             <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>Switch view</Text>
@@ -391,7 +391,7 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
           onPress={openQuickStartGuide}
         >
           <View style={[styles.cardIconContainer, { width: iconContainerSize, height: iconContainerSize, borderRadius: iconContainerSize / 2 }]}>
-            <Ionicons name="compass" size={iconSize} color="#ffffff" />
+            <SvgIcon name="compass" size={iconSize} color="#ffffff" />
           </View>
           <Text style={[styles.cardTitle, { fontSize: titleSize }]}>Quick Start</Text>
           <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>App guide</Text>
@@ -401,7 +401,7 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
       {/* Session Status */}
       {hasActiveSession && (
         <View style={[styles.sessionBanner, { maxWidth: layout.maxContentWidth, alignSelf: 'center' }]}>
-          <Ionicons name="checkmark-circle" size={20} color="#059669" />
+          <SvgIcon name="checkmark-circle" size={20} color="#059669" />
           <Text style={styles.sessionText}>Active session - Full access enabled</Text>
           <TouchableOpacity onPress={endSession}>
             <Text style={styles.endSessionText}>End</Text>

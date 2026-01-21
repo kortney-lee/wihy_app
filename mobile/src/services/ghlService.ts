@@ -1,11 +1,12 @@
 /**
  * GoHighLevel (GHL) Integration Service
  * 
- * Manages subscription status and user data sync with GoHighLevel CRM.
+ * Manages subscription status checks with GoHighLevel CRM.
  * GHL is used as the source of truth for premium subscription status.
  * 
- * NOTE: Uses user.wihy.ai (userUrl) for all user-related endpoints
- * since user data operations belong to the User Service.
+ * NOTE: Frontend only checks subscription status via GET endpoints.
+ * Contact sync, subscription updates, and tag management are handled
+ * server-to-server via payment webhooks and internal automation.
  */
 
 import { API_CONFIG } from './config';
@@ -17,14 +18,6 @@ export interface GHLSubscriptionStatus {
   expiresAt?: string;
   features: string[];
   contactId?: string;
-}
-
-export interface GHLContactData {
-  email: string;
-  name: string;
-  phone?: string;
-  tags?: string[];
-  customFields?: Record<string, any>;
 }
 
 class GHLService {
@@ -104,91 +97,6 @@ class GHLService {
         isPremium: false,
         features: [],
       };
-    }
-  }
-
-  /**
-   * Sync contact data to GHL when user signs up or updates profile
-   */
-  async syncContact(contactData: GHLContactData): Promise<boolean> {
-    try {
-      const response = await fetchWithLogging(`${this.userUrl}/api/users/sync-contact`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(contactData),
-      });
-
-      if (!response.ok) {
-        throw new Error(`GHL sync failed: ${response.status}`);
-      }
-
-      const result = await response.json();
-      console.log('[GHLService] Contact synced:', result.contactId);
-      return true;
-    } catch (error) {
-      console.error('[GHLService] Failed to sync contact:', error);
-      return false;
-    }
-  }
-
-  /**
-   * Update subscription status in GHL after successful purchase
-   */
-  async updateSubscription(
-    email: string,
-    subscriptionType: 'monthly' | 'yearly' | 'lifetime',
-    transactionId: string
-  ): Promise<boolean> {
-    try {
-      const response = await fetchWithLogging(`${this.userUrl}/api/users/update-ghl-subscription`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email,
-          subscriptionType,
-          transactionId,
-          purchasedAt: new Date().toISOString(),
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`GHL update failed: ${response.status}`);
-      }
-
-      console.log('[GHLService] Subscription updated in GHL');
-      return true;
-    } catch (error) {
-      console.error('[GHLService] Failed to update subscription:', error);
-      return false;
-    }
-  }
-
-  /**
-   * Add tags to contact in GHL (e.g., "premium", "active_user")
-   */
-  async addTags(email: string, tags: string[]): Promise<boolean> {
-    try {
-      const response = await fetchWithLogging(`${this.userUrl}/api/users/ghl-tags`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, tags }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`GHL add tags failed: ${response.status}`);
-      }
-
-      console.log('[GHLService] Tags added:', tags);
-      return true;
-    } catch (error) {
-      console.error('[GHLService] Failed to add tags:', error);
-      return false;
     }
   }
 

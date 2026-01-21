@@ -10,7 +10,7 @@ import {
   Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
+import SvgIcon from '../components/shared/SvgIcon';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
 import { AuthContext } from '../context/AuthContext';
@@ -435,13 +435,13 @@ export default function AboutScreen() {
         style={[styles.featureTitleContainer, { backgroundColor: LIGHT_GRAY }]}
       >
         <View style={styles.featureTitleContent}>
-          <Ionicons name={icon} size={24} color={WIHY_GREEN} />
+          <SvgIcon name={icon} size={24} color={WIHY_GREEN} />
           <View style={{ flex: 1, marginLeft: 12 }}>
             <Text style={styles.featureTitle}>{title}</Text>
             <Text style={styles.featureTagline}>{tagline}</Text>
           </View>
         </View>
-        <Ionicons
+        <SvgIcon
           name={expandedSections[id] ? 'chevron-up' : 'chevron-down'}
           size={24}
           color={WIHY_GREEN}
@@ -482,7 +482,7 @@ export default function AboutScreen() {
   const PlatformFeature = ({ title, description, icon }: any) => (
     <View style={styles.platformFeatureCard}>
       <View style={styles.platformFeatureIconContainer}>
-        <Ionicons name={icon} size={32} color={WIHY_GREEN} />
+        <SvgIcon name={icon} size={32} color={WIHY_GREEN} />
       </View>
       <Text style={styles.platformFeatureTitle}>{title}</Text>
       <Text style={styles.platformFeatureDescription}>{description}</Text>
@@ -493,7 +493,7 @@ export default function AboutScreen() {
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <Pressable onPress={() => navigation.goBack()} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color={DARK_GRAY} />
+          <SvgIcon name="arrow-back" size={24} color={DARK_GRAY} />
         </Pressable>
         <Text style={styles.headerTitle}>About WIHY</Text>
         <View style={{ width: 40 }} />

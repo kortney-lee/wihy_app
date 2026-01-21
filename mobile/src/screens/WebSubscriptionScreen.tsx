@@ -12,7 +12,7 @@ import {
   Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
+import SvgIcon from '../components/shared/SvgIcon';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList, TabParamList } from '../types/navigation';
 import { colors, borderRadius } from '../theme/design-tokens';
@@ -993,20 +993,20 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
           <section className="pricing-section">
             <div style={{ display: 'flex', justifyContent: 'center', gap: '32px', flexWrap: 'wrap', marginBottom: '16px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Ionicons name="shield-checkmark" size={20} color={colors.primary} />
+                <SvgIcon name="shield-checkmark" size={20} color={colors.primary} />
                 <span style={{ fontSize: '14px', color: '#6b7280' }}>Secure Payments</span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Ionicons name="refresh" size={20} color={colors.primary} />
+                <SvgIcon name="refresh" size={20} color={colors.primary} />
                 <span style={{ fontSize: '14px', color: '#6b7280' }}>Cancel Anytime</span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Ionicons name="card" size={20} color={colors.primary} />
+                <SvgIcon name="card" size={20} color={colors.primary} />
                 <span style={{ fontSize: '14px', color: '#6b7280' }}>30-Day Guarantee</span>
               </div>
             </div>
             <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '6px' }}>
-              <Ionicons name="lock-closed" size={14} color="#9ca3af" />
+              <SvgIcon name="lock-closed" size={14} color="#9ca3af" />
               <span style={{ fontSize: '12px', color: '#9ca3af' }}>Powered by Stripe</span>
             </div>
           </section>
@@ -1074,7 +1074,7 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
         </Pressable>
         <Text style={styles.headerTitle}>Choose Your Plan</Text>
         <Pressable onPress={() => navigation.goBack()} style={styles.closeButton}>
-          <Ionicons name="close" size={24} color={colors.text} />
+          <SvgIcon name="close" size={24} color={colors.text} />
         </Pressable>
       </View>
 
@@ -1086,7 +1086,7 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
         {/* Hero */}
         <View style={styles.heroSection}>
           <View style={styles.heroIcon}>
-            <Ionicons name="sparkles" size={40} color="#fff" />
+            <SvgIcon name="sparkles" size={40} color="#fff" />
           </View>
           <Text style={styles.heroTitle}>Unlock Your Full Potential</Text>
           <Text style={styles.heroSubtitle}>Choose the plan that fits how you live.</Text>
@@ -1121,7 +1121,7 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
             )}
             
             <View style={styles.planCardIcon}>
-              <Ionicons name={plan.icon as any} size={24} color={colors.primary} />
+              <SvgIcon name={plan.icon} size={24} color={colors.primary} />
             </View>
             <Text style={styles.planCardName}>{plan.name}</Text>
             <Text style={styles.planCardTagline}>{plan.tagline}</Text>
@@ -1152,7 +1152,7 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
             <View style={styles.featuresList}>
               {plan.features.map((feature, idx) => (
                 <View key={idx} style={styles.featureRow}>
-                  <Ionicons name="checkmark-circle" size={16} color="#22c55e" />
+                  <SvgIcon name="checkmark-circle" size={16} color="#22c55e" />
                   <Text style={styles.featureText}>{feature}</Text>
                 </View>
               ))}
@@ -1234,12 +1234,12 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
           style={styles.b2bLink}
           onPress={() => navigation.navigate('B2BPricing' as any)}
         >
-          <Ionicons name="business" size={24} color={colors.primary} />
+          <SvgIcon name="business" size={24} color={colors.primary} />
           <View style={styles.b2bLinkText}>
             <Text style={styles.b2bLinkTitle}>Enterprise Solutions</Text>
             <Text style={styles.b2bLinkSubtitle}>For businesses & organizations</Text>
           </View>
-          <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
+          <SvgIcon name="chevron-forward" size={20} color={colors.textMuted} />
         </Pressable>
 
         {/* Footer */}

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -9,11 +9,14 @@ import {
   Image,
   FlatList,
   Platform,
+  ActivityIndicator,
+  RefreshControl,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { dashboardColors, GradientDashboardHeader, WebPageWrapper } from '../components/shared';
 import { dashboardTheme } from '../theme/dashboardTheme';
+import { userService } from '../services/userService';
 
 const isWeb = Platform.OS === 'web';
 
@@ -35,6 +38,10 @@ interface Coach {
 export default function CoachSelection() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSpecialty, setSelectedSpecialty] = useState<string | null>('All');
+  const [coaches, setCoaches] = useState<Coach[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const specialties = [
     { key: 'All', label: 'All', icon: 'apps' },
@@ -45,6 +52,78 @@ export default function CoachSelection() {
     { key: 'Heart Health', label: 'Heart Health', icon: 'heart' },
     { key: 'Vegan/Plant-Based', label: 'Vegan/Plant-Based', icon: 'leaf' },
   ];
+
+  // Load coaches from API
+  const loadCoaches = useCallback(async (refresh = false) => {
+    try {
+      if (refresh) {
+        setRefreshing(true);
+      } else {
+        setIsLoading(true);
+      }
+      setError(null);
+
+      const filters: any = {
+        accepting_clients: true,
+        sort: 'rating' as const,
+      };
+      
+      // Add search query if present
+      if (searchQuery.trim()) {
+        filters.search = searchQuery.trim();
+      }
+      
+      // Add specialty filter if selected
+      if (selectedSpecialty && selectedSpecialty !== 'All') {
+        filters.specialty = selectedSpecialty;
+      }
+
+      const result = await userService.discoverCoaches(filters);
+      
+      // Map API response to Coach interface
+      const mappedCoaches: Coach[] = (result.coaches || []).map((c: any) => ({
+        id: c.id || c.coach_id,
+        name: c.name || c.full_name || 'Unknown Coach',
+        title: c.title || c.specialization || 'Health Coach',
+        avatar: c.avatar_url || c.avatar,
+        rating: c.rating || c.average_rating || 0,
+        reviews: c.review_count || c.reviews || 0,
+        specialties: c.specialties || c.specialty_areas || [],
+        experience: c.experience || c.years_experience ? `${c.years_experience} years` : 'Experienced',
+        certification: c.certification || c.certifications?.join(', ') || '',
+        rate: c.rate || c.hourly_rate ? `$${c.hourly_rate}/session` : 'Contact for pricing',
+        location: c.location || c.city || 'Remote',
+        bio: c.bio || c.about || '',
+      }));
+
+      setCoaches(mappedCoaches);
+    } catch (err) {
+      console.error('[CoachSelection] Failed to load coaches:', err);
+      setError('Failed to load coaches. Please try again.');
+    } finally {
+      setIsLoading(false);
+      setRefreshing(false);
+    }
+  }, [searchQuery, selectedSpecialty]);
+
+  // Load coaches on mount and when filters change
+  useEffect(() => {
+    loadCoaches();
+  }, [loadCoaches]);
+
+  // Debounce search
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (searchQuery !== undefined) {
+        loadCoaches();
+      }
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  const onRefresh = useCallback(() => {
+    loadCoaches(true);
+  }, [loadCoaches]);
 
   const getSpecialtyColor = (key: string): string => {
     switch (key) {
@@ -65,48 +144,6 @@ export default function CoachSelection() {
         return '#3b82f6'; // blue
     }
   };
-
-  const [coaches] = useState<Coach[]>([
-    {
-      id: '1',
-      name: 'Sarah Mitchell',
-      title: 'Registered Dietitian & Health Coach',
-      rating: 4.9,
-      reviews: 127,
-      specialties: ['Weight Loss', 'Meal Planning', 'Diabetes'],
-      experience: '8 years',
-      certification: 'RD, CDN, CPT',
-      rate: '$75/session',
-      location: 'New York, NY',
-      bio: 'Passionate about helping clients achieve sustainable weight loss through balanced nutrition and lifestyle changes.',
-    },
-    {
-      id: '2',
-      name: 'Marcus Johnson',
-      title: 'Sports Nutritionist',
-      rating: 5.0,
-      reviews: 89,
-      specialties: ['Sports Nutrition', 'Meal Planning', 'Performance'],
-      experience: '6 years',
-      certification: 'MS, CSCS, CISSN',
-      rate: '$90/session',
-      location: 'Los Angeles, CA',
-      bio: 'Former athlete turned nutritionist, specializing in performance optimization and body composition.',
-    },
-    {
-      id: '3',
-      name: 'Emily Chen',
-      title: 'Plant-Based Nutrition Expert',
-      rating: 4.8,
-      reviews: 156,
-      specialties: ['Vegan/Plant-Based', 'Heart Health', 'Meal Planning'],
-      experience: '10 years',
-      certification: 'RD, MS, Plant-Based Cert',
-      rate: '$65/session',
-      location: 'Austin, TX',
-      bio: 'Helping clients transition to plant-based diets while optimizing health and preventing disease.',
-    },
-  ]);
 
   const filteredCoaches = coaches.filter(coach => {
     const matchesSearch = 
@@ -281,10 +318,31 @@ export default function CoachSelection() {
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
           style={styles.scrollView}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              colors={[dashboardColors.primary]}
+              tintColor={dashboardColors.primary}
+            />
+          }
         >
           {renderHeader()}
         
-        {filteredCoaches.length === 0 ? (
+        {isLoading ? (
+          <View style={styles.loadingState}>
+            <ActivityIndicator size="large" color={dashboardColors.primary} />
+            <Text style={styles.loadingText}>Finding coaches...</Text>
+          </View>
+        ) : error ? (
+          <View style={styles.emptyState}>
+            <Ionicons name="alert-circle" size={64} color="#ef4444" />
+            <Text style={styles.emptyStateText}>{error}</Text>
+            <Pressable style={styles.retryButton} onPress={() => loadCoaches()}>
+              <Text style={styles.retryButtonText}>Retry</Text>
+            </Pressable>
+          </View>
+        ) : filteredCoaches.length === 0 ? (
           <View style={styles.emptyState}>
             <Ionicons name="people" size={64} color="#d1d5db" />
             <Text style={styles.emptyStateText}>No coaches found</Text>
@@ -626,5 +684,27 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#9ca3af',
     marginTop: 8,
+  },
+  loadingState: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 64,
+  },
+  loadingText: {
+    fontSize: 16,
+    color: '#6b7280',
+    marginTop: 16,
+  },
+  retryButton: {
+    marginTop: 16,
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    backgroundColor: dashboardColors.primary,
+    borderRadius: 8,
+  },
+  retryButtonText: {
+    color: '#fff',
+    fontWeight: '600',
+    fontSize: 14,
   },
 });

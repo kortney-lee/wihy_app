@@ -18,6 +18,7 @@ import { useNavigation } from '@react-navigation/native';
 import { AuthContext } from '../context/AuthContext';
 import { RootStackParamList } from '../types/navigation';
 import { ghlService } from '../services/ghlService';
+import { userService } from '../services/userService';
 import { notificationService } from '../services/notificationService';
 import { colors, sizes } from '../theme/design-tokens';
 import { dashboardColors, GradientDashboardHeader, WebPageWrapper } from '../components/shared';
@@ -64,6 +65,12 @@ export default function Profile() {
   const [showPlansModal, setShowPlansModal] = useState(false);
   const [showAddOnsModal, setShowAddOnsModal] = useState(false);
   
+  // User stats from API
+  const [healthScore, setHealthScore] = useState(0);
+  const [dayStreak, setDayStreak] = useState(0);
+  const [scansCount, setScansCount] = useState(0);
+  const [memberSince, setMemberSince] = useState('January 2026');
+  
   // Ref to track if subscription has been checked (prevents infinite calls)
   const subscriptionCheckedRef = useRef(false);
   
@@ -72,14 +79,15 @@ export default function Profile() {
   const [showAIUpgrade, setShowAIUpgrade] = useState(false);
 
   // Use user data from context or fallback
-  const userInfo = user || {
-    name: 'John Doe',
-    email: 'john.doe@example.com',
-    picture: undefined,
-    memberSince: 'January 2024',
-    healthScore: 82,
-    streakDays: 15,
-    preferences: defaultPreferences,
+  const userInfo = {
+    name: user?.name || 'Guest',
+    email: user?.email || '',
+    picture: user?.picture,
+    memberSince: memberSince,
+    healthScore: healthScore,
+    streakDays: dayStreak,
+    scansCount: scansCount,
+    preferences: user?.preferences || defaultPreferences,
   };
 
   const syncFromUser = useCallback(() => {
@@ -121,9 +129,42 @@ export default function Profile() {
     }
   }, [user?.email]);
 
+  // Fetch user stats from API
+  const fetchUserStats = useCallback(async () => {
+    if (!user?.email) return;
+    
+    try {
+      console.log('[Profile] Fetching user stats from API...');
+      const profile = await userService.getUserByEmail(user.email);
+      
+      if (profile) {
+        console.log('[Profile] User stats received:', {
+          healthScore: profile.healthScore,
+          dayStreak: profile.dayStreak,
+          scansCount: profile.scansCount,
+          createdAt: profile.createdAt,
+        });
+        
+        setHealthScore(profile.healthScore || 0);
+        setDayStreak(profile.dayStreak || 0);
+        setScansCount(profile.scansCount || 0);
+        
+        // Format member since date
+        if (profile.createdAt) {
+          const date = new Date(profile.createdAt);
+          const options: Intl.DateTimeFormatOptions = { month: 'long', year: 'numeric' };
+          setMemberSince(date.toLocaleDateString('en-US', options));
+        }
+      }
+    } catch (error) {
+      console.error('[Profile] Failed to fetch user stats:', error);
+    }
+  }, [user?.email]);
+
   // Run once on mount - empty dependency array to prevent re-runs
   useEffect(() => {
     syncFromUser();
+    fetchUserStats();
     checkSubscriptionStatus();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -607,15 +648,15 @@ export default function Profile() {
         {/* Stats Cards */}
         <View style={styles.statsContainer}>
           <View style={styles.statCard}>
-            <Text style={styles.statValue}>{userInfo.healthScore}</Text>
+            <Text style={styles.statValue}>{healthScore}</Text>
             <Text style={styles.statLabel}>Health Score</Text>
           </View>
           <View style={styles.statCard}>
-            <Text style={styles.statValue}>{userInfo.streakDays}</Text>
+            <Text style={styles.statValue}>{dayStreak}</Text>
             <Text style={styles.statLabel}>Day Streak</Text>
           </View>
           <View style={styles.statCard}>
-            <Text style={styles.statValue}>24</Text>
+            <Text style={styles.statValue}>{scansCount}</Text>
             <Text style={styles.statLabel}>Scans Done</Text>
           </View>
         </View>

@@ -83,48 +83,7 @@ const getStudyTypeDisplay = (studyType?: string) => {
   return studyType.replace(/_/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase());
 };
 
-// Mock data for development
-const mockResults: ResearchSearchResult[] = [
-  {
-    id: '1',
-    pmcid: 'PMC8123456',
-    title: 'Effects of Mediterranean Diet on Cardiovascular Health: A Meta-Analysis',
-    authors: 'Smith J, Johnson M, Brown K',
-    journal: 'Journal of Nutrition',
-    publicationYear: 2023,
-    abstract: 'This meta-analysis examines the effects of Mediterranean diet patterns on cardiovascular health outcomes across 25 randomized controlled trials...',
-    studyType: 'meta_analysis',
-    evidenceLevel: 'high',
-    relevanceScore: 0.94,
-    fullTextAvailable: true,
-  },
-  {
-    id: '2',
-    pmcid: 'PMC8234567',
-    title: 'Intermittent Fasting and Metabolic Health: Randomized Controlled Trial',
-    authors: 'Davis L, Wilson R',
-    journal: 'Clinical Nutrition',
-    publicationYear: 2024,
-    abstract: 'A 12-week randomized controlled trial investigating the effects of 16:8 intermittent fasting on metabolic markers in adults with prediabetes...',
-    studyType: 'randomized_controlled_trial',
-    evidenceLevel: 'high',
-    relevanceScore: 0.87,
-    fullTextAvailable: true,
-  },
-  {
-    id: '3',
-    pmcid: 'PMC8345678',
-    title: 'Plant-Based Protein Sources and Muscle Health in Aging Adults',
-    authors: 'Garcia M, Lee S, Thompson A',
-    journal: 'Nutrients',
-    publicationYear: 2023,
-    abstract: 'This cohort study examines the relationship between plant-based protein consumption and muscle mass maintenance in adults over 65 years...',
-    studyType: 'cohort_study',
-    evidenceLevel: 'moderate',
-    relevanceScore: 0.79,
-    fullTextAvailable: false,
-  },
-];
+// Note: Mock data removed - UI now shows proper empty/error states
 
 // Study Card Component
 const StudyCard: React.FC<{
@@ -272,9 +231,9 @@ export default function ResearchScreen({ isDashboardMode = false }: ResearchScre
       });
 
       if (results.length === 0) {
-        // Fallback to mock data for demo
-        setSearchResults(mockResults);
-        setError('Using demo data - API returned no results');
+        // Show empty state when no results found
+        setSearchResults([]);
+        setError('No research articles found for your query. Try different keywords.');
       } else {
         setSearchResults(results);
         await cacheSearchResults(searchQuery, results);
@@ -283,9 +242,9 @@ export default function ResearchScreen({ isDashboardMode = false }: ResearchScre
       await updateRecentSearches(searchQuery);
     } catch (apiError) {
       console.error('Search error:', apiError);
-      // Fallback to mock data
-      setSearchResults(mockResults);
-      setError('API unavailable - showing demo data');
+      // Show error state instead of mock data
+      setSearchResults([]);
+      setError('Unable to search research database. Please check your connection and try again.');
     } finally {
       setLoading(false);
     }
