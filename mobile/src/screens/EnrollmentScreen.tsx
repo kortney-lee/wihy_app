@@ -18,11 +18,14 @@ import SvgIcon from '../components/shared/SvgIcon';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { AuthContext } from '../context/AuthContext';
-import { userService, Coach, CoachClient } from '../services/userService';
+import { userService, Coach, CoachClient, CreateCoachInput } from '../services/userService';
 import { familyService, FamilyMember as FamilyServiceMember, FamilyRole } from '../services/familyService';
 import { coachService, Client, ClientDashboard } from '../services/coachService';
 import { RootStackParamList } from '../types/navigation';
 import { colors } from '../theme/design-tokens';
+import { WebNavHeader } from '../components/web/WebNavHeader';
+
+const isWeb = Platform.OS === 'web';
 
 // Family types from userService
 interface Family {
@@ -98,6 +101,7 @@ export default function EnrollmentScreen() {
   const [mode, setMode] = useState<EnrollmentMode>(initialTab);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
   
   // Parent/Family state
   const [familyName, setFamilyName] = useState('');
@@ -353,15 +357,29 @@ export default function EnrollmentScreen() {
   const handleBecomeCoach = async () => {
     setLoading(true);
     try {
-      const result = await userService.createCoach('coach_basic', 0.1); // 10% commission
+      // Create coach profile with required fields: name and specialty
+      const result = await userService.createCoach({
+        name: user?.name || user?.email?.split('@')[0] || 'WiHY Coach',
+        specialty: 'wellness', // Default specialty, can be updated later in profile
+        title: 'Health & Wellness Coach',
+        bio: 'Passionate about helping clients achieve their health goals through personalized coaching.',
+      });
+      
       if (result.success && result.data) {
         setCoachId(result.data.id);
-        Alert.alert('Success! 🎉', 'You are now a WiHY Coach! Start adding clients.');
+        // Refresh user context to update coach status
+        if (refreshUserContext) {
+          await refreshUserContext();
+        }
+        Alert.alert('Success! 🎉', 'You are now a WiHY Coach! Complete your profile to start accepting clients.');
       } else {
-        Alert.alert('Error', result.error || 'Failed to create coach profile');
+        const errorMessage = result.message || result.error || 'Failed to create coach profile';
+        Alert.alert('Error', errorMessage);
+        console.error('[Enrollment] Coach creation failed:', result);
       }
     } catch (error: any) {
       Alert.alert('Error', error.message || 'Failed to create coach profile');
+      console.error('[Enrollment] Coach creation error:', error);
     } finally {
       setLoading(false);
     }
@@ -776,6 +794,39 @@ export default function EnrollmentScreen() {
     </View>
   );
 
+  // Web-specific rendering
+  if (isWeb) {
+    return (
+      <View style={[styles.container, { minHeight: '100vh' } as any]}>
+        <WebNavHeader 
+          activePage="profile" 
+          showLoginModal={showLoginModal}
+          setShowLoginModal={setShowLoginModal}
+        />
+        <View style={[styles.webContent, { height: 'calc(100vh - 70px)', overflow: 'auto' } as any]}>
+          {/* Header */}
+          <View style={styles.header}>
+            <Pressable style={styles.backButton} onPress={() => navigation.goBack()}>
+              <SvgIcon name="arrow-back" size={24} color={theme.text} />
+            </Pressable>
+            <View style={styles.headerText}>
+              <Text style={styles.headerTitle}>
+                {mode === 'parent' ? 'Family Management' : 'Coach Dashboard'}
+              </Text>
+              <Text style={styles.headerSubtitle}>
+                {mode === 'parent' ? 'Manage your family members' : 'Manage your coaching clients'}
+              </Text>
+            </View>
+          </View>
+
+          <View style={styles.scrollContent}>
+            {mode === 'parent' ? renderParentSection() : renderCoachSection()}
+          </View>
+        </View>
+      </View>
+    );
+  }
+
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       {/* Header */}
@@ -821,6 +872,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: theme.background,
+  },
+  webContent: {
+    flex: 1,
+    paddingHorizontal: 24,
   },
   flex: {
     flex: 1,

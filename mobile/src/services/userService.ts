@@ -1450,30 +1450,43 @@ class UserService {
   /**
    * Create coach profile
    * POST /api/coaches
+   * 
+   * REQUIRED fields:
+   * - name: Coach's display name
+   * - specialty: Coach's expertise area (e.g., "nutrition", "fitness", "wellness")
+   * 
+   * NOTE: Plan and commission are handled separately:
+   * - Plan: via Payment Service /api/payment/coaches/subscription
+   * - Commission: via Admin API (admin-only)
    */
   async createCoach(
-    plan: string,
-    commissionRate: number
+    coachData: CreateCoachInput
   ): Promise<ApiResponse<Coach>> {
     const endpoint = `${this.baseUrl}${USER_SERVICE_CONFIG.endpoints.coaches}`;
     const headers = await this.getAuthHeaders();
     
     console.log('=== CREATE COACH PROFILE ===');
+    console.log('Coach data:', JSON.stringify(coachData, null, 2));
     
     try {
       const response = await fetchWithLogging(endpoint, {
         method: 'POST',
         headers,
-        body: JSON.stringify({ plan, commissionRate }),
+        body: JSON.stringify(coachData),
       });
 
       const data = await response.json();
       
       if (response.ok) {
-        console.log('Coach profile created:', data.coach?.id);
-        return { success: true, data: data.coach };
+        console.log('Coach profile created:', data.data?.id);
+        return { success: true, data: data.data };
       } else {
-        return { success: false, error: data.error, message: data.message };
+        console.error('Coach creation failed:', data);
+        return { 
+          success: false, 
+          error: data.error || 'Failed to create coach profile',
+          message: data.hint || data.message 
+        };
       }
     } catch (error: any) {
       console.error('Create coach error:', error);
@@ -1868,17 +1881,62 @@ class UserService {
 // Coach interface for management
 export interface Coach {
   id: string;
-  userId: string;
-  name?: string;
-  email?: string;
-  plan: string;
-  commissionRate: number;
-  totalRevenue: number;
-  clientCount: number;
+  userId?: string;
+  name: string;
+  title?: string;
+  specialty: string;
+  bio?: string;
+  credentials?: string;
+  experience_years?: number;
+  years_experience?: number;
+  session_rate?: number;
+  currency?: string;
+  phone?: string;
+  city?: string;
+  state?: string;
+  country?: string;
+  location?: {
+    city?: string;
+    state?: string;
+    country?: string;
+  };
+  rates?: {
+    session_rate?: number;
+    currency?: string;
+  };
+  avatar_url?: string;
+  profile_complete?: boolean;
+  accepting_clients?: boolean;
+  plan?: string;
+  commissionRate?: number;
+  totalRevenue?: number;
+  clientCount?: number;
   stripeConnectAccountId?: string;
-  isVerified: boolean;
-  createdAt: string;
+  isVerified?: boolean;
+  createdAt?: string;
+  created_at?: string;
   updatedAt?: string;
+}
+
+// Coach creation input
+export interface CreateCoachInput {
+  name: string;                    // REQUIRED - Coach's display name
+  specialty: string;                // REQUIRED - Coach's expertise area (e.g., "nutrition", "fitness")
+  title?: string;                   // Optional - Professional title
+  bio?: string;                     // Optional - Bio/description
+  location?: {                      // Optional - Location
+    city?: string;
+    state?: string;
+    country?: string;
+  };
+  phone?: string;                   // Optional - Contact phone
+  rates?: {                         // Optional - Session pricing
+    session_rate?: number;
+    currency?: string;
+  };
+  credentials?: string;             // Optional - Professional credentials
+  experience_years?: number;        // Optional - Years of experience
+  avatar_url?: string;              // Optional - Profile avatar URL
 }
 
 // Coach client interface
