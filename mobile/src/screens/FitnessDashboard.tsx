@@ -2732,13 +2732,14 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
                   
                   console.log('[FitnessDashboard] Routine workout response:', JSON.stringify(result, null, 2));
                   
-                  // Routine mode returns a 'routine' object with weekly_schedule
+                  // Routine mode returns a 'routine' object with 'schedule' array
                   if (result.success && (result as any).routine) {
                     const routine = (result as any).routine;
                     
                     // Convert routine response to program format
-                    const workouts = routine.weekly_schedule
-                      .filter((day: any) => day.type !== 'rest' && day.workout)
+                    // API returns routine.schedule array (not weekly_schedule)
+                    const workouts = (routine.schedule || [])
+                      .filter((day: any) => day.workout)
                       .map((day: any, idx: number) => {
                         const workout = day.workout;
                         // Build exercises array from sections.main_workout (API returns sections, not segments)
@@ -2746,7 +2747,7 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
                         const exercises = mainExercises.map((ex: any, exIdx: number) => ({
                           exercise_id: ex.id || `ex_${idx}_${exIdx}`,
                           name: ex.name,
-                          target_muscle: ex.muscle_group || day.type || 'full_body',
+                          target_muscle: ex.muscle_group || day.focus || 'full_body',
                           sets: ex.sets || 1,
                           reps: String(ex.reps || ex.duration_seconds ? `${ex.duration_seconds} sec` : '30 sec'),
                           rest_seconds: ex.rest || ex.rest_seconds || 60,
@@ -2759,11 +2760,11 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
                           day: day.day_number,
                           week: 1,
                           scheduled_date: new Date().toISOString().split('T')[0],
-                          name: workout.title || `${day.day} - ${day.type}`,
-                          focus: day.type,
+                          name: workout.title || `${day.day_name} - ${day.focus}`,
+                          focus: day.focus,
                           type: 'strength' as const,
                           estimated_duration: workout.duration_minutes || params.duration,
-                          difficulty: routine.difficulty || 'intermediate',
+                          difficulty: routine.fitness_level || 'intermediate',
                           is_rest_day: false,
                           exercises: exercises,
                           warm_up: {
@@ -2789,14 +2790,14 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
                       program_id: routine.routine_id,
                       program: {
                         program_id: routine.routine_id,
-                        name: routine.title,
-                        description: routine.subtitle,
+                        name: `${routine.workout_type || 'Full Body'} Routine`,
+                        description: `${routine.days_per_week} days/week - ${routine.duration_per_session || params.duration} min sessions`,
                         duration_weeks: 1,
                         days_per_week: routine.days_per_week,
-                        total_workouts: routine.total_workouts || workouts.length,
-                        difficulty: routine.difficulty || 'intermediate',
-                        goals: routine.goals,
-                        split_type: routine.split_type,
+                        total_workouts: workouts.length,
+                        difficulty: routine.fitness_level || 'intermediate',
+                        goals: routine.goals || [],
+                        split_type: routine.workout_type || 'full_body',
                         workouts: workouts,
                       },
                     };
