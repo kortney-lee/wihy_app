@@ -575,7 +575,7 @@ export default function Profile() {
   });
 
   const mainContent = (
-    <View style={[styles.container, isWeb && { flex: undefined, minHeight: undefined }]}>
+    <View style={styles.container}>
       {/* Status bar area - Always blue */}
       <View style={{ height: insets.top, backgroundColor: '#3B82F6' }} />
       
@@ -619,8 +619,6 @@ export default function Profile() {
       {/* Scrollable Content */}
       <Animated.ScrollView 
         showsVerticalScrollIndicator={false}
-        style={isWeb ? { flex: undefined } : undefined}
-        contentContainerStyle={isWeb ? { flexGrow: undefined } : undefined}
         scrollEventThrottle={16}
         onScroll={Animated.event(
           [{ nativeEvent: { contentOffset: { y: scrollY } } }],

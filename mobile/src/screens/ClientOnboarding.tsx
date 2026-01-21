@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { dashboardColors, WebPageWrapper } from '../components/shared';
+import { dashboardColors } from '../components/shared';
 import { dashboardTheme } from '../theme/dashboardTheme';
 
 const isWeb = Platform.OS === 'web';
@@ -680,10 +680,9 @@ export default function ClientOnboarding() {
   };
 
   return (
-    <WebPageWrapper activeTab="health">
-      <View style={[styles.container, isWeb && { flex: undefined, minHeight: undefined }]}>
-        {/* Status bar area - solid color */}
-        <View style={{ height: insets.top, backgroundColor: '#10b981' }} />
+    <View style={styles.container}>
+      {/* Status bar area - solid color */}
+      <View style={{ height: insets.top, backgroundColor: '#10b981' }} />
         
         {/* Collapsing Header */}
         <Animated.View style={[styles.collapsibleHeader, { height: headerHeight }]}>
@@ -734,8 +733,7 @@ export default function ClientOnboarding() {
           {/* Bottom spacing */}
           <View style={{ height: 100 }} />
         </Animated.ScrollView>
-      </View>
-    </WebPageWrapper>
+    </View>
   );
 }
 

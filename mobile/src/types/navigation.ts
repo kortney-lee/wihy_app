@@ -84,5 +84,6 @@ export type RootStackParamList = {
   
   // Profile screens
   EditProfile: undefined;
+  ProfileSetup: { isOnboarding?: boolean } | undefined;
   HealthData: undefined;
 };

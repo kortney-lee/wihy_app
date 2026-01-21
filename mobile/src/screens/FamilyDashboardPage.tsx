@@ -10,6 +10,7 @@ import {
   Share,
   Platform,
   Animated,
+  Image,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -18,8 +19,11 @@ import { GradientDashboardHeader, WebPageWrapper } from '../components/shared';
 import { HamburgerMenu } from '../components/shared/HamburgerMenu';
 import { AuthContext } from '../context/AuthContext';
 import { hasAIAccess, hasInstacartAccess } from '../utils/capabilities';
+import { useDashboardLayout } from '../hooks/useDashboardLayout';
+import SvgIcon from '../components/shared/SvgIcon';
 import type { DashboardContext } from './HealthHub';
 
+const spinnerGif = require('../../assets/whatishealthyspinner.gif');
 const isWeb = Platform.OS === 'web';
 
 const { width: screenWidth } = Dimensions.get('window');
@@ -48,6 +52,8 @@ export default function FamilyDashboardPage({
   const { user } = useContext(AuthContext);
   const [showAddMember, setShowAddMember] = useState(false);
   const [showHamburgerMenu, setShowHamburgerMenu] = useState(false);
+  const layout = useDashboardLayout();
+  const isMobileWeb = isWeb && layout.screenWidth < 768;
   
   // Handle Health tab clicks from parent HealthHub
   useEffect(() => {
@@ -165,8 +171,7 @@ export default function FamilyDashboardPage({
   );
 
   return (
-    <WebPageWrapper activeTab="health">
-      <View style={[styles.container, isWeb && { flex: undefined, minHeight: undefined }]}>
+      <View style={styles.container}>
         {/* Hamburger Menu for navigation */}
         {showHamburgerMenu && (
           <HamburgerMenu
@@ -188,6 +193,43 @@ export default function FamilyDashboardPage({
             }}
             context="family"
           />
+        )}
+        
+        {/* Back to Health Hub button for web */}
+        {isWeb && onContextChange && (
+          <TouchableOpacity
+            onPress={() => onContextChange('personal')}
+            style={{
+              position: 'absolute',
+              top: isMobileWeb ? 12 : 40,
+              right: isMobileWeb ? 12 : 24,
+              zIndex: 99,
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: isMobileWeb ? 6 : 10,
+              paddingVertical: isMobileWeb ? 4 : 6,
+              paddingLeft: isMobileWeb ? 8 : 12,
+              paddingRight: isMobileWeb ? 4 : 6,
+              backgroundColor: 'rgba(255,255,255,0.95)',
+              borderRadius: 24,
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.15,
+              shadowRadius: 6,
+            } as any}
+          >
+            <SvgIcon name="arrow-back" size={isMobileWeb ? 14 : 16} color="#16a34a" />
+            <Text style={{ fontSize: isMobileWeb ? 11 : 13, fontWeight: '600', color: '#16a34a' }}>Health Hub</Text>
+            <Image 
+              source={spinnerGif}
+              resizeMode="cover"
+              style={{
+                width: isMobileWeb ? 28 : 36,
+                height: isMobileWeb ? 28 : 36,
+                borderRadius: isMobileWeb ? 14 : 18,
+              }}
+            />
+          </TouchableOpacity>
         )}
         
         {/* Status bar area - solid color */}
@@ -349,7 +391,6 @@ export default function FamilyDashboardPage({
         <View style={{ height: 40 }} />
         </Animated.ScrollView>
       </View>
-    </WebPageWrapper>
   );
 }
 

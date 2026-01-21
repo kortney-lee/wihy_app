@@ -30,19 +30,23 @@ function generateFontStyles(ioniconsPath) {
   
   // IMPORTANT: expo/vector-icons uses 'ionicons' (lowercase) as the font-family name
   // The style element MUST have id 'expo-generated-fonts' for expo-font's Font.isLoaded() to find it
+  // Font-family must NOT have quotes so that rule.style.fontFamily === 'ionicons' matches
+  // No CSS comments inside the style tag to avoid parsing issues
   return `
     <!-- Ionicons Font Preload for reliable icon rendering -->
     <link rel="preload" href="${ioniconsPath}" as="font" type="font/ttf" crossorigin="anonymous" />
-    <style id="expo-generated-fonts">
-      /* Pre-register ionicons font before JS runs - must use expo-generated-fonts id for Font.isLoaded() */
-      @font-face {
-        font-family: "ionicons";
-        src: url('${ioniconsPath}') format('truetype');
-        font-weight: normal;
-        font-style: normal;
-        font-display: block;
-      }
-    </style>
+    <style id="expo-generated-fonts">@font-face{font-family:ionicons;src:url('${ioniconsPath}')format('truetype');font-weight:normal;font-style:normal;font-display:block;}</style>
+    <script>
+      // Ensure ionicons font is loaded via FontFace API as backup
+      (function() {
+        if (typeof FontFace !== 'undefined') {
+          var font = new FontFace('ionicons', "url('${ioniconsPath}')");
+          font.load().then(function(loadedFont) {
+            document.fonts.add(loadedFont);
+          }).catch(function(e) { console.warn('Ionicons preload failed:', e); });
+        }
+      })();
+    </script>
 `;
 }
 

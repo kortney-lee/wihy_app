@@ -19,7 +19,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
 import type { StackNavigationProp } from '@react-navigation/stack';
 import type { RootStackParamList } from '../types/navigation';
-import { dashboardColors, GradientDashboardHeader, WebPageWrapper } from '../components/shared';
+import { dashboardColors, GradientDashboardHeader } from '../components/shared';
 import { dashboardTheme } from '../theme/dashboardTheme';
 import { coachService, Client as APIClient, ClientDashboard } from '../services';
 import { useAuth } from '../context/AuthContext';
@@ -501,10 +501,9 @@ export default function CoachDashboard() {
   };
 
   return (
-    <WebPageWrapper activeTab="health">
-      <View style={[styles.container, isWeb && { flex: undefined, minHeight: undefined }]}>
-        {/* Status bar area - solid color */}
-        <View style={{ height: insets.top, backgroundColor: '#3b82f6' }} />
+    <View style={styles.container}>
+      {/* Status bar area - solid color */}
+      <View style={{ height: insets.top, backgroundColor: '#3b82f6' }} />
         
         {/* Collapsing Header */}
         <Animated.View style={[styles.collapsibleHeader, { height: headerHeight }]}>
@@ -668,8 +667,7 @@ export default function CoachDashboard() {
           </View>
         </View>
       )}
-      </View>
-    </WebPageWrapper>
+    </View>
   );
 }
 

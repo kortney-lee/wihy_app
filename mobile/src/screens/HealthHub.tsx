@@ -97,7 +97,7 @@ export default function HealthHub() {
 
   return (
     <WebPageWrapper activeTab="health">
-      <View style={[styles.container, isWeb && { flex: undefined, minHeight: undefined }]}>
+      <View style={styles.container}>
         {renderDashboard()}
       </View>
     </WebPageWrapper>

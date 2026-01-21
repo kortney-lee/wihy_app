@@ -15,7 +15,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { AuthContext } from '../context/AuthContext';
 import { hasAIAccess } from '../utils/capabilities';
-import { WebPageWrapper } from '../components/shared';
+import { dashboardTheme } from '../theme/dashboardTheme';
 import { coachService, CoachOverview as CoachOverviewData } from '../services';
 
 const isWeb = Platform.OS === 'web';
@@ -158,10 +158,9 @@ export default function CoachOverview() {
   }
 
   return (
-    <WebPageWrapper activeTab="health">
-      <View style={[styles.container, isWeb && { flex: undefined, minHeight: undefined }]}>
-        {/* Status bar area - solid color */}
-        <View style={{ height: insets.top, backgroundColor: '#3b82f6' }} />
+    <View style={styles.container}>
+      {/* Status bar area - solid color */}
+      <View style={{ height: insets.top, backgroundColor: '#3b82f6' }} />
         
         {/* Collapsing Header */}
         <Animated.View style={[styles.collapsibleHeader, { height: headerHeight }]}>
@@ -321,8 +320,7 @@ export default function CoachOverview() {
           {/* Bottom spacing */}
           <View style={{ height: 100 }} />
         </Animated.ScrollView>
-      </View>
-    </WebPageWrapper>
+    </View>
   );
 }
 

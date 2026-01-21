@@ -138,7 +138,7 @@ const OnboardingFlow: React.FC = () => {
     
     // Navigate to appropriate screen based on step
     const screenMap: { [key: string]: string } = {
-      'profile': 'Profile',
+      'profile': 'ProfileSetup',
       'firstScan': 'Scan',
       'logMeal': 'CreateMeals',
       'setGoals': 'Home', // Goals typically accessed from dashboard

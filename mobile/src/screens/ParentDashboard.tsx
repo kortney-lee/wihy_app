@@ -14,8 +14,9 @@ import {
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { dashboardColors, GradientDashboardHeader, WebPageWrapper } from '../components/shared';
+import { dashboardColors } from '../components/shared';
 import { dashboardTheme } from '../theme/dashboardTheme';
+import { useDashboardLayout } from '../hooks/useDashboardLayout';
 import { familyService, Family, FamilyMember, FamilyDashboard as FamilyDashboardData } from '../services/familyService';
 import { AuthContext } from '../context/AuthContext';
 import { useNavigation } from '@react-navigation/native';
@@ -50,6 +51,8 @@ export default function ParentDashboard() {
   const [recentActivity, setRecentActivity] = useState<FamilyDashboardData['recent_activity']>([]);
   const [error, setError] = useState<string | null>(null);
 
+  const { isTablet } = useDashboardLayout();
+  
   // Collapsing header animation
   const scrollY = useRef(new Animated.Value(0)).current;
   const insets = useSafeAreaInsets();
@@ -329,17 +332,17 @@ export default function ParentDashboard() {
   if (isLoading) {
     return (
       <View style={styles.container}>
-        <SafeAreaView style={styles.safeArea} edges={['left', 'right']}>
-          <GradientDashboardHeader
-            title="Family Dashboard"
-            subtitle="Track your family's health journey"
-            gradient="parent"
-          />
-          <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color="#ec4899" />
-            <Text style={styles.loadingText}>Loading family data...</Text>
+        <View style={{ height: insets.top, backgroundColor: '#f59e0b' }} />
+        <View style={[styles.collapsibleHeader, { height: HEADER_MAX_HEIGHT }]}>
+          <View style={styles.headerContent}>
+            <Text style={styles.headerTitle}>Family Dashboard</Text>
+            <Text style={styles.headerSubtitle}>Track your family's health journey</Text>
           </View>
-        </SafeAreaView>
+        </View>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#ec4899" />
+          <Text style={styles.loadingText}>Loading family data...</Text>
+        </View>
       </View>
     );
   }
@@ -348,12 +351,13 @@ export default function ParentDashboard() {
   if (error) {
     return (
       <View style={styles.container}>
-        <SafeAreaView style={styles.safeArea} edges={['left', 'right']}>
-          <GradientDashboardHeader
-            title="Family Dashboard"
-            subtitle="Track your family's health journey"
-            gradient="parent"
-          />
+        <View style={{ height: insets.top, backgroundColor: '#f59e0b' }} />
+        <View style={[styles.collapsibleHeader, { height: HEADER_MAX_HEIGHT }]}>
+          <View style={styles.headerContent}>
+            <Text style={styles.headerTitle}>Family Dashboard</Text>
+            <Text style={styles.headerSubtitle}>Track your family's health journey</Text>
+          </View>
+        </View>
           <View style={styles.emptyState}>
             <Ionicons name="people-outline" size={64} color="#ec4899" />
             <Text style={styles.emptyStateTitle}>No Family Set Up Yet</Text>
@@ -381,14 +385,12 @@ export default function ParentDashboard() {
               <Text style={styles.secondaryButtonText}>Go to Dashboard</Text>
             </TouchableOpacity>
           </View>
-        </SafeAreaView>
       </View>
     );
   }
 
   return (
-    <WebPageWrapper activeTab="health">
-      <View style={[styles.container, isWeb && { flex: undefined, minHeight: undefined }]}>
+      <View style={styles.container}>
         {/* Status bar area - solid color */}
         <View style={{ height: insets.top, backgroundColor: '#f59e0b' }} />
         
@@ -511,7 +513,6 @@ export default function ParentDashboard() {
             <View style={{ height: 40 }} />
           </Animated.ScrollView>
       </View>
-    </WebPageWrapper>
   );
 }
 

@@ -37,8 +37,8 @@ export function WebTopNav({ activeTab = 'none' }: WebTopNavProps) {
 
   // Determine if we're in a tab screen or stack screen
   // Tab screens: Home, Scan, Chat, Health, Profile
-  // Stack screens: About, Subscription, Terms, Privacy, B2BPricing
-  const isInTabNavigator = ['Home', 'Scan', 'Chat', 'Health', 'Profile', 'CoachSelection'].includes(route.name);
+  // Stack screens: CoachSelection, ClientManagement, About, Subscription, Terms, Privacy, B2BPricing
+  const isInTabNavigator = ['Home', 'Scan', 'Chat', 'Health', 'Profile'].includes(route.name);
   
   console.log('[WebTopNav] Current route:', route.name, 'isInTabNavigator:', isInTabNavigator);
 
