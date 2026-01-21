@@ -2736,12 +2736,21 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
                   if (result.success && (result as any).routine) {
                     const routine = (result as any).routine;
                     
+                    console.log('[FitnessDashboard] Processing routine with schedule:', routine.schedule);
+                    
                     // Convert routine response to program format
                     // API returns routine.schedule array (not weekly_schedule)
                     const workouts = (routine.schedule || [])
-                      .filter((day: any) => day.workout)
+                      .filter((day: any) => day && day.workout)
                       .map((day: any, idx: number) => {
                         const workout = day.workout;
+                        
+                        // Safety check - ensure workout and sections exist
+                        if (!workout || !workout.sections) {
+                          console.warn('[FitnessDashboard] Workout missing sections:', workout);
+                          return null;
+                        }
+                        
                         // Build exercises array from sections.main_workout (API returns sections, not segments)
                         const mainExercises = workout.sections?.main_workout?.exercises || [];
                         const exercises = mainExercises.map((ex: any, exIdx: number) => ({
@@ -2782,7 +2791,10 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
                             })),
                           },
                         };
-                      });
+                      })
+                      .filter((w: any) => w !== null); // Remove any null workouts
+                    
+                    console.log('[FitnessDashboard] Processed workouts:', workouts.length);
                     
                     // Create a program-like structure for the preview
                     const programFormat = {
