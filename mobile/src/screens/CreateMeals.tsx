@@ -452,21 +452,41 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
     try {
       setLoadingMeals(true);
       
-      // Try to load user's saved meals from API first
+      // Load user's saved meals from Meal Diary API
       let userMeals: SavedMeal[] = [];
       const token = await authService.getAccessToken();
       
       if (userId && token) {
         try {
-          console.log('[CreateMeals] Loading user meals from API...');
-          const apiResponse = await mealService.getUserMeals(userId, {
-            limit: 10,
-            sort: 'created_at',
-            order: 'desc',
+          console.log('[CreateMeals] Loading user meals from Meal Diary API...');
+          const mealDiaryService = getMealDiaryService(token);
+          const response = await mealDiaryService.getMealDiary(userId, {
+            limit: 50,
+            offset: 0,
           });
-          if (apiResponse?.meals && apiResponse.meals.length > 0) {
-            userMeals = apiResponse.meals;
-            console.log('[CreateMeals] Loaded', userMeals.length, 'meals from API');
+          
+          // Convert API response to SavedMeal format
+          if (response.recent_meals && response.recent_meals.length > 0) {
+            userMeals = response.recent_meals.map((meal: Meal) => ({
+              meal_id: meal.meal_id,
+              user_id: meal.user_id || userId,
+              name: meal.name,
+              nutrition: meal.nutrition,
+              ingredients: Array.isArray(meal.ingredients) 
+                ? meal.ingredients.filter((ing): ing is { name: string; amount: number; unit: string } => typeof ing === 'object' && 'amount' in ing)
+                : [],
+              tags: meal.tags || [],
+              notes: '',
+              is_favorite: meal.is_favorite || false,
+              times_logged: meal.times_logged || 0,
+              created_at: meal.created_at || new Date().toISOString(),
+              updated_at: meal.updated_at || new Date().toISOString(),
+              serving_size: meal.serving_size || 1,
+              preparation_time: meal.preparation_time,
+              cooking_time: meal.cooking_time,
+              instructions: meal.instructions || [],
+            })) as SavedMeal[];
+            console.log('[CreateMeals] Loaded', userMeals.length, 'meals from Meal Diary API');
           }
         } catch (apiError) {
           console.log('[CreateMeals] API failed to load user meals:', apiError);
@@ -1425,6 +1445,56 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
     return '🍴';
   };
 
+  // Delete meal handler
+  const handleDeleteMeal = async (mealId: string, mealName: string) => {
+    if (!userId) {
+      Alert.alert('Error', 'User not authenticated');
+      return;
+    }
+
+    Alert.alert(
+      'Delete Meal',
+      `Are you sure you want to delete "${mealName}"?`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              const token = await authService.getAccessToken();
+              if (!token) {
+                Alert.alert('Error', 'Authentication token not available');
+                return;
+              }
+
+              const mealDiaryService = getMealDiaryService(token);
+              await mealDiaryService.deleteMeal(userId, mealId);
+              
+              // Update local state - remove from savedMeals
+              setSavedMeals(prev => prev.filter(m => m.meal_id !== mealId));
+              
+              // Update allMeals if library is open
+              setAllMeals(prev => prev.filter(m => m.meal_id !== mealId));
+              
+              // Close meal details if it's open
+              if (selectedMeal?.meal_id === mealId) {
+                setShowMealDetails(false);
+                setSelectedMeal(null);
+              }
+              
+              console.log('[CreateMeals] Meal deleted:', mealId);
+              Alert.alert('Success', 'Meal deleted successfully');
+            } catch (error) {
+              console.error('[CreateMeals] Error deleting meal:', error);
+              Alert.alert('Error', 'Failed to delete meal. Please try again.');
+            }
+          },
+        },
+      ]
+    );
+  };
+
   // Helper function to extract and categorize ingredients from generated meal plan
   const extractShoppingListFromPlan = (plan: MealPlanResponse | null) => {
     if (!plan?.days) {
@@ -2079,16 +2149,32 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
           </View>
           
           {savedMeals.slice(0, 3).map((meal, index) => (
-            <TouchableOpacity key={meal.meal_id || index} style={styles.recentMealCard}>
+            <TouchableOpacity 
+              key={meal.meal_id || index} 
+              style={styles.recentMealCard}
+              onPress={() => {
+                setSelectedMeal(meal);
+                setMealServings(meal.serving_size || 1);
+                setShowMealDetails(true);
+              }}
+            >
               <View style={styles.recentMealInfo}>
                 <Text style={styles.recentMealName}>{meal.name}</Text>
                 <Text style={styles.recentMealMacros}>
                   {meal.nutrition.calories} cal • {meal.nutrition.protein}g protein
                 </Text>
               </View>
-              <TouchableOpacity style={styles.recentMealAction}>
-                <SvgIcon name="add-circle" size={28} color="#ef4444" />
-              </TouchableOpacity>
+              <View style={{ flexDirection: 'row', gap: 8 }}>
+                <TouchableOpacity 
+                  style={styles.recentMealAction}
+                  onPress={(e) => {
+                    e.stopPropagation();
+                    handleDeleteMeal(meal.meal_id, meal.name);
+                  }}
+                >
+                  <SvgIcon name="trash-outline" size={24} color="#ef4444" />
+                </TouchableOpacity>
+              </View>
             </TouchableOpacity>
           ))}
         </View>
@@ -2317,9 +2403,20 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
             )}
 
             <View style={styles.libraryMealFooter}>
-              <Text style={styles.libraryMealTimesLogged}>
-                Logged {meal.times_logged || 0} {meal.times_logged === 1 ? 'time' : 'times'}
-              </Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
+                <TouchableOpacity
+                  onPress={(e) => {
+                    e.stopPropagation();
+                    handleDeleteMeal(meal.meal_id, meal.name);
+                  }}
+                  style={{ padding: 4 }}
+                >
+                  <SvgIcon name="trash-outline" size={20} color="#ef4444" />
+                </TouchableOpacity>
+                <Text style={styles.libraryMealTimesLogged}>
+                  Logged {meal.times_logged || 0} {meal.times_logged === 1 ? 'time' : 'times'}
+                </Text>
+              </View>
               <SvgIcon name="chevron-forward" size={20} color="#9ca3af" />
             </View>
           </TouchableOpacity>
@@ -3837,6 +3934,17 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
                 )}
               </View>
             )}
+
+            {/* Bottom Actions */}
+            <View style={styles.mealDetailActionsContainer}>
+              <TouchableOpacity
+                style={styles.mealDetailDeleteButton}
+                onPress={() => handleDeleteMeal(selectedMeal.meal_id, selectedMeal.name)}
+              >
+                <SvgIcon name="trash-outline" size={20} color="#fff" />
+                <Text style={styles.mealDetailDeleteButtonText}>Delete Meal</Text>
+              </TouchableOpacity>
+            </View>
 
             {/* Bottom spacing */}
             </ScrollView>
@@ -6572,6 +6680,25 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#9ca3af',
     marginTop: 12,
+  },
+  mealDetailActionsContainer: {
+    paddingHorizontal: 16,
+    paddingVertical: 24,
+    gap: 12,
+  },
+  mealDetailDeleteButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: '#ef4444',
+    paddingVertical: 16,
+    borderRadius: 12,
+  },
+  mealDetailDeleteButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#fff',
   },
 
   // Library Modal Styles
