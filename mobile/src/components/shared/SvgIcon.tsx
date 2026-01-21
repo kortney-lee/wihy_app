@@ -415,6 +415,72 @@ const SvgIcon: React.FC<SvgIconProps> = ({ name, size = 24, color = '#000', styl
           </Svg>
         );
 
+      case 'share':
+      case 'share-outline':
+        return (
+          <Svg width={size} height={size} viewBox="0 0 512 512" fill="none" stroke={color} strokeWidth="32">
+            <Path d="M336 192h40a40 40 0 0140 40v192a40 40 0 01-40 40H136a40 40 0 01-40-40V232a40 40 0 0140-40h40M336 128l-80-80-80 80M256 321V48" strokeLinecap="round" strokeLinejoin="round" />
+          </Svg>
+        );
+
+      case 'refresh-outline':
+        return (
+          <Svg width={size} height={size} viewBox="0 0 512 512" fill="none" stroke={color} strokeWidth="32">
+            <Path d="M320 146s24.36-12-64-12a160 160 0 10160 160" strokeLinecap="round" strokeMiterlimit="10" />
+            <Path d="M256 58l80 80-80 80" strokeLinecap="round" strokeLinejoin="round" />
+          </Svg>
+        );
+
+      case 'close-circle':
+        return (
+          <Svg width={size} height={size} viewBox="0 0 512 512" fill={color}>
+            <Path d="M256 48C141.31 48 48 141.31 48 256s93.31 208 208 208 208-93.31 208-208S370.69 48 256 48zm75.31 260.69a16 16 0 11-22.62 22.62L256 278.63l-52.69 52.68a16 16 0 01-22.62-22.62L233.37 256l-52.68-52.69a16 16 0 0122.62-22.62L256 233.37l52.69-52.68a16 16 0 0122.62 22.62L278.63 256z" />
+          </Svg>
+        );
+
+      case 'people-outline':
+        return (
+          <Svg width={size} height={size} viewBox="0 0 512 512" fill="none" stroke={color} strokeWidth="32">
+            <Path d="M402 168c-2.93 40.67-33.1 72-66 72s-63.12-31.32-66-72c-3-42.31 26.37-72 66-72s69 30.46 66 72z" strokeLinecap="round" strokeLinejoin="round" />
+            <Path d="M336 304c-65.17 0-127.84 32.37-143.54 95.41-2.08 8.34 3.15 16.59 11.72 16.59h263.65c8.57 0 13.77-8.25 11.72-16.59C463.85 336.36 401.18 304 336 304z" strokeMiterlimit="10" />
+            <Path d="M200 185.94c-2.34 32.48-26.72 58.06-53 58.06s-50.7-25.57-53-58.06C91.61 152.15 115.34 128 147 128s55.39 24.77 53 57.94z" strokeLinecap="round" strokeLinejoin="round" />
+            <Path d="M206 306c-18.05-8.27-37.93-11.45-59-11.45-52 0-102.1 25.85-114.65 76.2-1.65 6.66 2.53 13.25 9.37 13.25H154" strokeLinecap="round" strokeMiterlimit="10" />
+          </Svg>
+        );
+
+      case 'add-circle':
+        return (
+          <Svg width={size} height={size} viewBox="0 0 512 512" fill={color}>
+            <Path d="M256 48C141.31 48 48 141.31 48 256s93.31 208 208 208 208-93.31 208-208S370.69 48 256 48zm80 224h-64v64a16 16 0 01-32 0v-64h-64a16 16 0 010-32h64v-64a16 16 0 0132 0v64h64a16 16 0 010 32z" />
+          </Svg>
+        );
+
+      case 'enter':
+      case 'enter-outline':
+        return (
+          <Svg width={size} height={size} viewBox="0 0 512 512" fill="none" stroke={color} strokeWidth="32">
+            <Path d="M176 176v-40a40 40 0 0140-40h208a40 40 0 0140 40v240a40 40 0 01-40 40H216a40 40 0 01-40-40v-40" strokeLinecap="round" strokeLinejoin="round" />
+            <Path d="M272 336l80-80-80-80M48 256h288" strokeLinecap="round" strokeLinejoin="round" />
+          </Svg>
+        );
+
+      case 'send':
+        return (
+          <Svg width={size} height={size} viewBox="0 0 512 512" fill={color}>
+            <Path d="M476.59 227.05l-.16-.07L49.35 49.84A23.56 23.56 0 0027.14 52 24.65 24.65 0 0016 72.59v113.29a24 24 0 0019.52 23.57l232.93 43.07a4 4 0 010 7.86L35.53 303.45A24 24 0 0016 327v113.28A23.57 23.57 0 0026.59 460a23.94 23.94 0 0013.22 4 24.55 24.55 0 009.52-1.93L476.4 285.94l.19-.09a32 32 0 000-58.8z" />
+          </Svg>
+        );
+
+      case 'ribbon':
+      case 'ribbon-outline':
+        return (
+          <Svg width={size} height={size} viewBox="0 0 512 512" fill="none" stroke={color} strokeWidth="32">
+            <Path d="M256 336c44.18 0 80-35.82 80-80s-35.82-80-80-80-80 35.82-80 80 35.82 80 80 80z" strokeLinecap="round" strokeLinejoin="round" />
+            <Path d="M256 176a80.1 80.1 0 0156.57 23.43L416 96H96l103.43 103.43A80.1 80.1 0 01256 176z" strokeLinecap="round" strokeLinejoin="round" />
+            <Path d="M432 208l-93.66 93.66a112 112 0 01-158.68 0L80 208M166 336l-58 202 88-88 60 60 60-60 88 88-58-202" strokeLinecap="round" strokeLinejoin="round" />
+          </Svg>
+        );
+
       default:
         // Fallback: simple circle
         return (

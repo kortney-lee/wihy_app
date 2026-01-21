@@ -81,4 +81,8 @@ export type RootStackParamList = {
   About: undefined;
   Terms: undefined;
   Privacy: undefined;
+  
+  // Profile screens
+  EditProfile: undefined;
+  HealthData: undefined;
 };
