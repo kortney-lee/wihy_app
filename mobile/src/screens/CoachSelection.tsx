@@ -15,8 +15,7 @@ import {
   Animated,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
-import { dashboardColors } from '../components/shared';
+import { dashboardColors, SvgIcon } from '../components/shared';
 import { dashboardTheme } from '../theme/dashboardTheme';
 import { userService } from '../services/userService';
 import { useDashboardLayout } from '../hooks/useDashboardLayout';
@@ -199,7 +198,7 @@ export default function CoachSelection() {
           <Text style={styles.coachName}>{item.name}</Text>
           <Text style={styles.coachTitle}>{item.title}</Text>
           <View style={styles.ratingContainer}>
-            <Ionicons name="star" size={16} color="#f59e0b" />
+            <SvgIcon name="star" size={16} color="#f59e0b" />
             <Text style={styles.ratingText}>{item.rating}</Text>
             <Text style={styles.reviewsText}>({item.reviews} reviews)</Text>
           </View>
@@ -223,15 +222,15 @@ export default function CoachSelection() {
       {/* Coach Details */}
       <View style={styles.detailsContainer}>
         <View style={styles.detailItem}>
-          <Ionicons name="briefcase" size={16} color="#6b7280" />
+          <SvgIcon name="briefcase" size={16} color="#6b7280" />
           <Text style={styles.detailText}>{item.experience}</Text>
         </View>
         <View style={styles.detailItem}>
-          <Ionicons name="medal" size={16} color="#6b7280" />
+          <SvgIcon name="medal" size={16} color="#6b7280" />
           <Text style={styles.detailText}>{item.certification}</Text>
         </View>
         <View style={styles.detailItem}>
-          <Ionicons name="location" size={16} color="#6b7280" />
+          <SvgIcon name="location" size={16} color="#6b7280" />
           <Text style={styles.detailText}>{item.location}</Text>
         </View>
       </View>
@@ -246,7 +245,7 @@ export default function CoachSelection() {
           <Text style={styles.viewProfileText}>View Profile</Text>
         </Pressable>
         <Pressable style={styles.bookButton}>
-          <Ionicons name="calendar" size={18} color="#fff" />
+          <SvgIcon name="calendar" size={18} color="#fff" />
           <Text style={styles.bookButtonText}>Book</Text>
         </Pressable>
       </View>
@@ -257,7 +256,7 @@ export default function CoachSelection() {
     <>
       {/* Search Bar */}
       <View style={styles.searchContainer}>
-        <Ionicons name="search" size={20} color="#9ca3af" />
+        <SvgIcon name="search" size={20} color="#9ca3af" />
         <TextInput
           style={styles.searchInput}
           placeholder="Search by name, specialty..."
@@ -267,7 +266,7 @@ export default function CoachSelection() {
         />
         {searchQuery.length > 0 && (
           <Pressable onPress={() => setSearchQuery('')}>
-            <Ionicons name="close-circle" size={20} color="#9ca3af" />
+            <SvgIcon name="close-circle" size={20} color="#9ca3af" />
           </Pressable>
         )}
       </View>
@@ -295,7 +294,7 @@ export default function CoachSelection() {
             ]}
             onPress={() => setSelectedSpecialty(specialty.key)}
           >
-            <Ionicons
+            <SvgIcon
               name={specialty.icon as any}
               size={20}
               color={selectedSpecialty === specialty.key ? getSpecialtyColor(specialty.key) : '#6b7280'}
@@ -322,7 +321,7 @@ export default function CoachSelection() {
         </Text>
         <Pressable style={styles.sortButton}>
           <Text style={styles.sortText}>Sort by Rating</Text>
-          <Ionicons name="chevron-down" size={16} color="#6b7280" />
+          <SvgIcon name="chevron-down" size={16} color="#6b7280" />
         </Pressable>
       </View>
     </>
@@ -373,7 +372,7 @@ export default function CoachSelection() {
           </View>
         ) : error ? (
           <View style={styles.emptyState}>
-            <Ionicons name="alert-circle" size={64} color="#ef4444" />
+            <SvgIcon name="alert-circle" size={64} color="#ef4444" />
             <Text style={styles.emptyStateText}>{error}</Text>
             <Pressable style={styles.retryButton} onPress={() => loadCoaches()}>
               <Text style={styles.retryButtonText}>Retry</Text>
@@ -381,7 +380,7 @@ export default function CoachSelection() {
           </View>
         ) : filteredCoaches.length === 0 ? (
           <View style={styles.emptyState}>
-            <Ionicons name="people" size={64} color="#d1d5db" />
+            <SvgIcon name="people" size={64} color="#d1d5db" />
             <Text style={styles.emptyStateText}>No coaches found</Text>
             <Text style={styles.emptyStateSubtext}>
               Try adjusting your search or filters

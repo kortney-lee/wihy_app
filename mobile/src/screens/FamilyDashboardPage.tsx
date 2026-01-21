@@ -13,7 +13,6 @@ import {
   Image,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { GradientDashboardHeader, WebPageWrapper } from '../components/shared';
 import { HamburgerMenu } from '../components/shared/HamburgerMenu';
@@ -151,7 +150,7 @@ export default function FamilyDashboardPage({
           <Text style={styles.memberName}>{member.name}</Text>
           {member.role === 'owner' && (
             <View style={styles.ownerBadge}>
-              <Ionicons name="star" size={12} color="#fbbf24" />
+              <SvgIcon name="star" size={12} color="#fbbf24" />
               <Text style={styles.ownerBadgeText}>Owner</Text>
             </View>
           )}
@@ -293,7 +292,7 @@ export default function FamilyDashboardPage({
               end={{ x: 1, y: 1 }}
             >
               <View style={styles.guardianCodeHeader}>
-                <Ionicons name="shield-checkmark" size={24} color="#fff" />
+                <SvgIcon name="shield-checkmark" size={24} color="#fff" />
                 <Text style={styles.guardianCodeTitle}>Guardian Code</Text>
               </View>
               <Text style={styles.guardianCode}>{guardianCode}</Text>
@@ -304,7 +303,7 @@ export default function FamilyDashboardPage({
                 style={styles.shareButton}
                 onPress={handleShareGuardianCode}
               >
-                <Ionicons name="share-outline" size={18} color="#8b5cf6" />
+                <SvgIcon name="share-outline" size={18} color="#8b5cf6" />
                 <Text style={styles.shareButtonText}>Share Code</Text>
               </TouchableOpacity>
             </LinearGradient>
@@ -317,7 +316,7 @@ export default function FamilyDashboardPage({
           <View style={styles.featuresGrid}>
             <TouchableOpacity style={styles.featureCard}>
               <View style={[styles.featureIcon, { backgroundColor: '#dbeafe' }]}>
-                <Ionicons name="restaurant" size={24} color="#3b82f6" />
+                <SvgIcon name="restaurant" size={24} color="#3b82f6" />
               </View>
               <Text style={styles.featureTitle}>Family Meals</Text>
               <Text style={styles.featureSubtitle}>Plan together</Text>
@@ -325,7 +324,7 @@ export default function FamilyDashboardPage({
 
             <TouchableOpacity style={styles.featureCard}>
               <View style={[styles.featureIcon, { backgroundColor: '#fef3c7' }]}>
-                <Ionicons name="cart" size={24} color="#f59e0b" />
+                <SvgIcon name="cart" size={24} color="#f59e0b" />
               </View>
               <Text style={styles.featureTitle}>Shopping List</Text>
               <Text style={styles.featureSubtitle}>Shared grocery</Text>
@@ -338,7 +337,7 @@ export default function FamilyDashboardPage({
 
             <TouchableOpacity style={styles.featureCard}>
               <View style={[styles.featureIcon, { backgroundColor: '#f3e8ff' }]}>
-                <Ionicons name="fitness" size={24} color="#8b5cf6" />
+                <SvgIcon name="fitness" size={24} color="#8b5cf6" />
               </View>
               <Text style={styles.featureTitle}>Family Goals</Text>
               <Text style={styles.featureSubtitle}>Track progress</Text>
@@ -354,14 +353,14 @@ export default function FamilyDashboardPage({
                   { backgroundColor: hasAIAccess(user) ? '#dcfce7' : '#f3f4f6' },
                 ]}
               >
-                <Ionicons
+                <SvgIcon
                   name="sparkles"
                   size={24}
                   color={hasAIAccess(user) ? '#10b981' : '#9ca3af'}
                 />
                 {!hasAIAccess(user) && (
                   <View style={styles.lockIcon}>
-                    <Ionicons name="lock-closed" size={12} color="#fff" />
+                    <SvgIcon name="lock-closed" size={12} color="#fff" />
                   </View>
                 )}
               </View>
@@ -378,7 +377,7 @@ export default function FamilyDashboardPage({
                 onPress={() => onContextChange('personal')}
               >
                 <View style={[styles.featureIcon, { backgroundColor: '#dcfce7' }]}>
-                  <Ionicons name="person" size={24} color="#10b981" />
+                  <SvgIcon name="person" size={24} color="#10b981" />
                 </View>
                 <Text style={styles.featureTitle}>Personal</Text>
                 <Text style={styles.featureSubtitle}>Back to my health</Text>

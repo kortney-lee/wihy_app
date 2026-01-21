@@ -19,7 +19,6 @@ import {
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
@@ -1675,11 +1674,11 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
         {/* Month Header */}
         <View style={styles.dayPickerHeader}>
           <TouchableOpacity onPress={() => changeMonth(-1)} style={styles.dayPickerNavButton}>
-            <Ionicons name="chevron-back" size={20} color="#374151" />
+            <SvgIcon name="chevron-back" size={20} color="#374151" />
           </TouchableOpacity>
           <Text style={styles.dayPickerMonthText}>{monthName}</Text>
           <TouchableOpacity onPress={() => changeMonth(1)} style={styles.dayPickerNavButton}>
-            <Ionicons name="chevron-forward" size={20} color="#374151" />
+            <SvgIcon name="chevron-forward" size={20} color="#374151" />
           </TouchableOpacity>
         </View>
 
@@ -1743,7 +1742,7 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
                   <View style={[styles.dayPickerMealDot, { backgroundColor: mealColor.border }]} />
                 )}
                 {isPast && hasMeal && (
-                  <Ionicons name="checkmark-circle" size={14} color="#10b981" />
+                  <SvgIcon name="checkmark-circle" size={14} color="#10b981" />
                 )}
               </TouchableOpacity>
             );
@@ -1822,12 +1821,12 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 0 }}
           >
-            <Ionicons name="add-circle" size={28} color="#ffffff" />
+            <SvgIcon name="add-circle" size={28} color="#ffffff" />
             <View style={styles.createPlanTextContainer}>
               <Text style={styles.createPlanTitle}>Create Wihy Meal Plan</Text>
               <Text style={styles.createPlanSubtitle}>Generate personalized meals & shopping list</Text>
             </View>
-            <Ionicons name="chevron-forward" size={24} color="#ffffff" />
+            <SvgIcon name="chevron-forward" size={24} color="#ffffff" />
           </LinearGradient>
         </TouchableOpacity>
       </View>
@@ -1858,7 +1857,7 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
             onPress={() => setViewMode('create')}
           >
             <View style={[styles.quickActionIcon, { backgroundColor: '#dbeafe' }]}>
-              <Ionicons name="add-circle" size={28} color="#3b82f6" />
+              <SvgIcon name="add-circle" size={28} color="#3b82f6" />
             </View>
             <Text style={styles.quickActionTitle}>Create Meal</Text>
             <Text style={styles.quickActionSubtitle}>Add manually</Text>
@@ -1873,7 +1872,7 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
               {scanning ? (
                 <ActivityIndicator color="#10b981" />
               ) : (
-                <Ionicons name="camera" size={28} color="#10b981" />
+                <SvgIcon name="camera" size={28} color="#10b981" />
               )}
             </View>
             <Text style={styles.quickActionTitle}>Scan Recipe</Text>
@@ -1888,7 +1887,7 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
             }}
           >
             <View style={[styles.quickActionIcon, { backgroundColor: '#ede9fe' }]}>
-              <Ionicons name="book" size={28} color="#8b5cf6" />
+              <SvgIcon name="book" size={28} color="#8b5cf6" />
             </View>
             <Text style={styles.quickActionTitle}>My Meals</Text>
             <Text style={styles.quickActionSubtitle}>Saved recipes</Text>
@@ -1899,7 +1898,7 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
             onPress={() => setViewMode('calendar')}
           >
             <View style={[styles.quickActionIcon, { backgroundColor: '#fef3c7' }]}>
-              <Ionicons name="calendar" size={28} color="#f59e0b" />
+              <SvgIcon name="calendar" size={28} color="#f59e0b" />
             </View>
             <Text style={styles.quickActionTitle}>Calendar</Text>
             <Text style={styles.quickActionSubtitle}>View meal plan</Text>
@@ -1945,7 +1944,7 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
               {shoppingListLoading ? (
                 <ActivityIndicator color="#22c55e" />
               ) : (
-                <Ionicons name="cart" size={28} color="#22c55e" />
+                <SvgIcon name="cart" size={28} color="#22c55e" />
               )}
             </View>
             <Text style={styles.quickActionTitle}>Shopping List</Text>
@@ -2007,7 +2006,7 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
                   }}
                 >
                   <View style={[styles.mealTypeIcon, { backgroundColor: config.bgColor }]}>
-                    <Ionicons name={config.icon as any} size={20} color={config.color} />
+                    <SvgIcon name={config.icon as any} size={20} color={config.color} />
                   </View>
                   <View style={styles.mealTypeInfo}>
                     <Text style={styles.mealTypeLabel}>{type.charAt(0).toUpperCase() + type.slice(1)}</Text>
@@ -2018,9 +2017,9 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
                     </Text>
                   </View>
                   {mealForType ? (
-                    <Ionicons name="checkmark-circle" size={24} color="#22c55e" />
+                    <SvgIcon name="checkmark-circle" size={24} color="#22c55e" />
                   ) : (
-                    <Ionicons name="add-circle-outline" size={24} color="#9ca3af" />
+                    <SvgIcon name="add-circle-outline" size={24} color="#9ca3af" />
                   )}
                 </TouchableOpacity>
               );
@@ -2088,7 +2087,7 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
                 </Text>
               </View>
               <TouchableOpacity style={styles.recentMealAction}>
-                <Ionicons name="add-circle" size={28} color="#ef4444" />
+                <SvgIcon name="add-circle" size={28} color="#ef4444" />
               </TouchableOpacity>
             </TouchableOpacity>
           ))}
@@ -2122,7 +2121,7 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
               initialMessage: 'Help me plan healthy meals for the week',
             })}
           >
-            <Ionicons name="chatbubble-ellipses" size={22} color="#4cbb17" />
+            <SvgIcon name="chatbubble-ellipses" size={22} color="#4cbb17" />
             <Text style={{ fontSize: 17, color: '#4cbb17', fontWeight: '600' }}>Ask WiHY</Text>
           </TouchableOpacity>
         </SweepBorder>
@@ -2170,7 +2169,7 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
                     style={styles.libraryModalCloseButton}
                     onPress={() => setShowLibrary(false)}
                   >
-                    <Ionicons name="close" size={28} color="#fff" />
+                    <SvgIcon name="close" size={28} color="#fff" />
                   </TouchableOpacity>
                 </View>
                 <Text style={styles.libraryModalTitle}>Meal Library</Text>
@@ -2179,7 +2178,7 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
 
           {/* Search Bar */}
           <View style={styles.librarySearchContainer}>
-            <Ionicons name="search" size={20} color="#9ca3af" style={styles.librarySearchIcon} />
+            <SvgIcon name="search" size={20} color="#9ca3af" style={styles.librarySearchIcon} />
             <TextInput
               style={styles.librarySearchInput}
               placeholder="Search meals..."
@@ -2189,7 +2188,7 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
             />
             {librarySearchQuery.length > 0 && (
               <TouchableOpacity onPress={() => handleLibrarySearch('')}>
-                <Ionicons name="close-circle" size={20} color="#9ca3af" />
+                <SvgIcon name="close-circle" size={20} color="#9ca3af" />
               </TouchableOpacity>
             )}
           </View>
@@ -2231,7 +2230,7 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
             style={styles.addMealButton}
             onPress={() => setViewMode('create')}
           >
-            <Ionicons name="add" size={18} color="#fff" />
+            <SvgIcon name="add" size={18} color="#fff" />
             <Text style={styles.addMealButtonText}>Add Meal</Text>
           </TouchableOpacity>
         </View>
@@ -2247,7 +2246,7 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
         {/* Empty State */}
         {!loadingLibrary && allMeals.length === 0 && (
           <View style={styles.libraryEmptyState}>
-            <Ionicons name="restaurant-outline" size={64} color="#d1d5db" />
+            <SvgIcon name="restaurant-outline" size={64} color="#d1d5db" />
             <Text style={styles.libraryEmptyTitle}>No meals yet</Text>
             <Text style={styles.libraryEmptySubtitle}>
               {librarySearchQuery || libraryFilterTag
@@ -2259,7 +2258,7 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
                 style={styles.libraryCreateButton}
                 onPress={() => setViewMode('create')}
               >
-                <Ionicons name="add-circle" size={20} color="#fff" />
+                <SvgIcon name="add-circle" size={20} color="#fff" />
                 <Text style={styles.libraryCreateButtonText}>Create Meal</Text>
               </TouchableOpacity>
             )}
@@ -2288,7 +2287,7 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
                 </Text>
               </View>
               {meal.is_favorite && (
-                <Ionicons name="heart" size={20} color="#ef4444" />
+                <SvgIcon name="heart" size={20} color="#ef4444" />
               )}
             </View>
 
@@ -2321,7 +2320,7 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
               <Text style={styles.libraryMealTimesLogged}>
                 Logged {meal.times_logged || 0} {meal.times_logged === 1 ? 'time' : 'times'}
               </Text>
-              <Ionicons name="chevron-forward" size={20} color="#9ca3af" />
+              <SvgIcon name="chevron-forward" size={20} color="#9ca3af" />
             </View>
           </TouchableOpacity>
         ))}
@@ -2347,7 +2346,7 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
             style={styles.headerBackButtonWhite}
             onPress={() => setViewMode('dashboard')}
           >
-            <Ionicons name="arrow-back" size={24} color="#ffffff" />
+            <SvgIcon name="arrow-back" size={24} color="#ffffff" />
           </TouchableOpacity>
           <Text style={styles.formHeaderTitleWhite}>Create Meal</Text>
           <Text style={styles.formHeaderSubtitle}>Add a new meal to your library</Text>
@@ -2462,7 +2461,7 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
 
             {calories && protein && carbs && fat && (
               <View style={styles.nutritionSummary}>
-                <Ionicons name="information-circle" size={20} color="#3b82f6" />
+                <SvgIcon name="information-circle" size={20} color="#3b82f6" />
                 <Text style={styles.summaryText}>
                   Total Macros: {protein}g protein • {carbs}g carbs • {fat}g fat
                 </Text>
@@ -2476,7 +2475,7 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Ingredients</Text>
             <Pressable onPress={addIngredient} style={styles.addButton}>
-              <Ionicons name="add-circle" size={20} color="#3b82f6" />
+              <SvgIcon name="add-circle" size={20} color="#3b82f6" />
               <Text style={styles.addButtonText}>Add</Text>
             </Pressable>
           </View>
@@ -2484,7 +2483,7 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
           <View style={styles.card}>
             {ingredients.length === 0 ? (
               <View style={styles.emptyState}>
-                <Ionicons name="list" size={32} color="#d1d5db" />
+                <SvgIcon name="list" size={32} color="#d1d5db" />
                 <Text style={styles.emptyText}>No ingredients added</Text>
               </View>
             ) : (
@@ -2513,7 +2512,7 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
                     placeholderTextColor="#9ca3af"
                   />
                   <Pressable onPress={() => removeIngredient(ingredient.id)}>
-                    <Ionicons name="close-circle" size={24} color="#ef4444" />
+                    <SvgIcon name="close-circle" size={24} color="#ef4444" />
                   </Pressable>
                 </View>
               ))
@@ -2578,7 +2577,7 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
             <ActivityIndicator color="#fff" />
           ) : (
             <>
-              <Ionicons name="checkmark-circle" size={20} color="#fff" />
+              <SvgIcon name="checkmark-circle" size={20} color="#fff" />
               <Text style={styles.saveButtonText}>Save Meal</Text>
             </>
           )}
@@ -2597,7 +2596,7 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
                 <ActivityIndicator color="#fff" />
               ) : (
                 <>
-                  <Ionicons 
+                  <SvgIcon 
                     name={mealPlanId ? "checkmark-circle" : "calendar"} 
                     size={20} 
                     color="#fff" 
@@ -2619,7 +2618,7 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
                   <ActivityIndicator color="#fff" />
                 ) : (
                   <>
-                    <Ionicons name="cart" size={20} color="#fff" />
+                    <SvgIcon name="cart" size={20} color="#fff" />
                     <Text style={styles.shoppingListButtonText}>
                       Generate Shopping List
                     </Text>
@@ -2644,7 +2643,7 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
               style={styles.templateCard}
               onPress={handleShowTemplates}
             >
-              <Ionicons name="fast-food" size={24} color="#3b82f6" />
+              <SvgIcon name="fast-food" size={24} color="#3b82f6" />
               <Text style={styles.templateTitle}>Use Template</Text>
               <Text style={styles.templateSubtitle}>Start from preset</Text>
             </Pressable>
@@ -2656,7 +2655,7 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
               {scanning ? (
                 <ActivityIndicator color="#10b981" />
               ) : (
-                <Ionicons name="camera" size={24} color="#10b981" />
+                <SvgIcon name="camera" size={24} color="#10b981" />
               )}
               <Text style={styles.templateTitle}>Scan Recipe</Text>
               <Text style={styles.templateSubtitle}>From image</Text>
@@ -2668,7 +2667,7 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
                 setShowLibrary(true);
               }}
             >
-              <Ionicons name="book" size={24} color="#8b5cf6" />
+              <SvgIcon name="book" size={24} color="#8b5cf6" />
               <Text style={styles.templateTitle}>My Meals</Text>
               <Text style={styles.templateSubtitle}>Saved recipes</Text>
             </Pressable>
@@ -2703,12 +2702,12 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
                 else if (planModalStep === 'meals') setPlanModalStep('preview');
               }}
             >
-              <Ionicons name="arrow-back" size={24} color="#374151" />
+              <SvgIcon name="arrow-back" size={24} color="#374151" />
             </TouchableOpacity>
           )}
           
           <View style={styles.modalTitleContainer}>
-            <Ionicons 
+<SvgIcon 
               name={
                 planModalStep === 'goals' ? 'sparkles' : 
                 planModalStep === 'preview' ? 'calendar-outline' :
@@ -2731,7 +2730,7 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
               resetPlanGenerator();
             }}
           >
-            <Ionicons name="close" size={28} color="#6b7280" />
+            <SvgIcon name="close" size={28} color="#6b7280" />
           </TouchableOpacity>
         </View>
 
@@ -2768,7 +2767,7 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
                           onPress={() => handleSelectQuickGoal(goal)}
                         >
                           <View style={styles.quickGoalIcon}>
-                            <Ionicons name={goal.icon as any} size={24} color="#ef4444" />
+                            <SvgIcon name={goal.icon as any} size={24} color="#ef4444" />
                           </View>
                           <Text style={styles.quickGoalLabel}>{goal.label}</Text>
                           <Text style={styles.quickGoalDesc}>{goal.description}</Text>
@@ -2806,7 +2805,7 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
                       disabled={!planDescription.trim()}
                     >
                       <Text style={styles.continueButtonText}>Generate Plan</Text>
-                      <Ionicons name="sparkles" size={20} color="#fff" />
+                      <SvgIcon name="sparkles" size={20} color="#fff" />
                     </TouchableOpacity>
                   </View>
                 </>
@@ -2818,19 +2817,19 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
                 {/* Plan Summary Stats */}
                 <View style={styles.planSummaryStats}>
                   <View style={styles.planSummaryStat}>
-                    <Ionicons name="calendar-outline" size={24} color="#3b82f6" />
+                    <SvgIcon name="calendar-outline" size={24} color="#3b82f6" />
                     <Text style={styles.planSummaryStatValue}>{generatedPlan.duration_days || 0}</Text>
                     <Text style={styles.planSummaryStatLabel}>Days</Text>
                   </View>
                   <View style={styles.planSummaryStat}>
-                    <Ionicons name="restaurant-outline" size={24} color="#ef4444" />
+                    <SvgIcon name="restaurant-outline" size={24} color="#ef4444" />
                     <Text style={styles.planSummaryStatValue}>
                       {generatedPlan.summary?.total_meals || generatedPlan.days?.reduce((sum, d) => sum + (d.meals?.length || 0), 0) || 0}
                     </Text>
                     <Text style={styles.planSummaryStatLabel}>Meals</Text>
                   </View>
                   <View style={styles.planSummaryStat}>
-                    <Ionicons name="flame-outline" size={24} color="#f59e0b" />
+                    <SvgIcon name="flame-outline" size={24} color="#f59e0b" />
                     <Text style={styles.planSummaryStatValue}>
                       {generatedPlan.summary?.avg_calories_per_day || Math.round((generatedPlan.days?.reduce((sum, d) => sum + (d.meals?.reduce((s, m) => s + (m.calories || 0), 0) || 0), 0) || 0) / (generatedPlan.duration_days || 1))}
                     </Text>
@@ -2855,7 +2854,7 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
                               styles.previewMealIcon,
                               { backgroundColor: mealTypeConfig[meal.meal_type]?.bgColor || '#f3f4f6' }
                             ]}>
-                              <Ionicons 
+<SvgIcon 
                                 name={mealTypeConfig[meal.meal_type]?.icon as any || 'restaurant-outline'} 
                                 size={16} 
                                 color={mealTypeConfig[meal.meal_type]?.color || '#6b7280'} 
@@ -2876,7 +2875,7 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
                   ))
                 ) : (
                   <View style={styles.previewEmptyState}>
-                    <Ionicons name="restaurant-outline" size={48} color="#d1d5db" />
+                    <SvgIcon name="restaurant-outline" size={48} color="#d1d5db" />
                     <Text style={styles.previewEmptyText}>
                       Meal plan is being generated...{'\n'}Please wait or try again.
                     </Text>
@@ -2889,9 +2888,9 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
                 onPress={() => setPlanModalStep('meals')}
                 disabled={!generatedPlan.days || generatedPlan.days.length === 0}
               >
-                <Ionicons name="cart-outline" size={24} color="#ef4444" />
+                <SvgIcon name="cart-outline" size={24} color="#ef4444" />
                 <Text style={styles.viewAllMealsButtonText}>View Shopping List</Text>
-                <Ionicons name="arrow-forward" size={20} color="#ef4444" />
+                <SvgIcon name="arrow-forward" size={20} color="#ef4444" />
               </TouchableOpacity>
             </>
           )}
@@ -2926,7 +2925,7 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
                         {shoppingItems.proteins.length > 0 && (
                           <View style={styles.shoppingCategoryCard}>
                             <View style={styles.shoppingCategoryHeader}>
-                              <Ionicons name="nutrition-outline" size={20} color="#f59e0b" />
+                              <SvgIcon name="nutrition-outline" size={20} color="#f59e0b" />
                               <Text style={styles.shoppingCategoryTitle}>Proteins</Text>
                               <Text style={styles.shoppingCategoryCount}>{shoppingItems.proteins.length} items</Text>
                             </View>
@@ -2945,7 +2944,7 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
                         {shoppingItems.produce.length > 0 && (
                           <View style={styles.shoppingCategoryCard}>
                             <View style={styles.shoppingCategoryHeader}>
-                              <Ionicons name="leaf-outline" size={20} color="#10b981" />
+                              <SvgIcon name="leaf-outline" size={20} color="#10b981" />
                               <Text style={styles.shoppingCategoryTitle}>Produce</Text>
                               <Text style={styles.shoppingCategoryCount}>{shoppingItems.produce.length} items</Text>
                             </View>
@@ -2964,7 +2963,7 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
                         {shoppingItems.dairy.length > 0 && (
                           <View style={styles.shoppingCategoryCard}>
                             <View style={styles.shoppingCategoryHeader}>
-                              <Ionicons name="water-outline" size={20} color="#3b82f6" />
+                              <SvgIcon name="water-outline" size={20} color="#3b82f6" />
                               <Text style={styles.shoppingCategoryTitle}>Dairy</Text>
                               <Text style={styles.shoppingCategoryCount}>{shoppingItems.dairy.length} items</Text>
                             </View>
@@ -2980,7 +2979,7 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
                         {shoppingItems.grains.length > 0 && (
                           <View style={styles.shoppingCategoryCard}>
                             <View style={styles.shoppingCategoryHeader}>
-                              <Ionicons name="grid-outline" size={20} color="#d97706" />
+                              <SvgIcon name="grid-outline" size={20} color="#d97706" />
                               <Text style={styles.shoppingCategoryTitle}>Grains</Text>
                               <Text style={styles.shoppingCategoryCount}>{shoppingItems.grains.length} items</Text>
                             </View>
@@ -2996,7 +2995,7 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
                         {shoppingItems.pantry.length > 0 && (
                           <View style={styles.shoppingCategoryCard}>
                             <View style={styles.shoppingCategoryHeader}>
-                              <Ionicons name="wine-outline" size={20} color="#ef4444" />
+                              <SvgIcon name="wine-outline" size={20} color="#ef4444" />
                               <Text style={styles.shoppingCategoryTitle}>Pantry</Text>
                               <Text style={styles.shoppingCategoryCount}>{shoppingItems.pantry.length} items</Text>
                             </View>
@@ -3015,7 +3014,7 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
                         {shoppingItems.other.length > 0 && (
                           <View style={styles.shoppingCategoryCard}>
                             <View style={styles.shoppingCategoryHeader}>
-                              <Ionicons name="basket-outline" size={20} color="#8b5cf6" />
+                              <SvgIcon name="basket-outline" size={20} color="#8b5cf6" />
                               <Text style={styles.shoppingCategoryTitle}>Other</Text>
                               <Text style={styles.shoppingCategoryCount}>{shoppingItems.other.length} items</Text>
                             </View>
@@ -3031,7 +3030,7 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
                   })()}
 
                   <View style={styles.shoppingListNote}>
-                    <Ionicons name="information-circle-outline" size={20} color="#6b7280" />
+                    <SvgIcon name="information-circle-outline" size={20} color="#6b7280" />
                     <Text style={styles.shoppingListNoteText}>
                       Shopping list generated based on your {generatedPlan.duration_days}-day meal plan
                     </Text>
@@ -3044,7 +3043,7 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
                 onPress={handleAcceptGeneratedPlan}
                 disabled={!generatedPlan.days || generatedPlan.days.length === 0}
               >
-                <Ionicons name="checkmark-circle" size={24} color="#fff" />
+                <SvgIcon name="checkmark-circle" size={24} color="#fff" />
                 <Text style={styles.acceptPlanButtonText}>Accept Plan</Text>
               </TouchableOpacity>
             </>
@@ -3073,7 +3072,7 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
             {/* Header with celebration */}
             <View style={styles.successModalHeader}>
               <View style={styles.successCelebrationIcon}>
-                <Ionicons name="checkmark-circle" size={64} color="#4cbb17" />
+                <SvgIcon name="checkmark-circle" size={64} color="#4cbb17" />
               </View>
               <Text style={styles.successModalTitle}>Meal Plan Created!</Text>
               <Text style={styles.successModalSubtitle}>Your personalized meal plan is ready</Text>
@@ -3082,19 +3081,19 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
             {/* Stats Grid */}
             <View style={styles.successStatsGrid}>
               <View style={styles.successStatCard}>
-                <Ionicons name="calendar-outline" size={28} color="#3b82f6" />
+                <SvgIcon name="calendar-outline" size={28} color="#3b82f6" />
                 <Text style={styles.successStatValue}>{acceptedPlan?.duration_days || planDuration}</Text>
                 <Text style={styles.successStatLabel}>Days</Text>
               </View>
               <View style={styles.successStatCard}>
-                <Ionicons name="restaurant-outline" size={28} color="#4cbb17" />
+                <SvgIcon name="restaurant-outline" size={28} color="#4cbb17" />
                 <Text style={styles.successStatValue}>
                   {acceptedPlan?.summary?.total_meals || acceptedPlan?.days?.reduce((sum, d) => sum + (d.meals?.length || 0), 0) || 0}
                 </Text>
                 <Text style={styles.successStatLabel}>Total Meals</Text>
               </View>
               <View style={styles.successStatCard}>
-                <Ionicons name="flame-outline" size={28} color="#f59e0b" />
+                <SvgIcon name="flame-outline" size={28} color="#f59e0b" />
                 <Text style={styles.successStatValue}>
                   {Math.round(acceptedPlan?.summary?.avg_calories_per_day || 0)}
                 </Text>
@@ -3147,7 +3146,7 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
                   {generatingList ? (
                     <ActivityIndicator color="#fff" size="small" />
                   ) : (
-                    <Ionicons name="list-outline" size={24} color="#fff" />
+                    <SvgIcon name="list-outline" size={24} color="#fff" />
                   )}
                   <Text style={styles.instacartButtonText}>
                     {generatingList ? 'Loading...' : 'View Shopping List'}
@@ -3182,15 +3181,15 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
                     end={{ x: 1, y: 0 }}
                     style={styles.instacartButtonGradient}
                   >
-                    <Ionicons name="cart-outline" size={24} color="#fff" />
+                    <SvgIcon name="cart-outline" size={24} color="#fff" />
                     <Text style={styles.instacartButtonText}>Submit to Instacart</Text>
                   </LinearGradient>
                 ) : (
                   <View style={styles.instacartButtonGradientDisabled}>
-                    <Ionicons name="cart-outline" size={24} color="#9ca3af" />
+                    <SvgIcon name="cart-outline" size={24} color="#9ca3af" />
                     <Text style={styles.instacartButtonTextDisabled}>Submit to Instacart</Text>
                     <View style={styles.premiumBadge}>
-                      <Ionicons name="star" size={12} color="#f59e0b" />
+                      <SvgIcon name="star" size={12} color="#f59e0b" />
                       <Text style={styles.premiumBadgeText}>PRO</Text>
                     </View>
                   </View>
@@ -3205,7 +3204,7 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
                   setViewMode('calendar');
                 }}
               >
-                <Ionicons name="calendar" size={20} color="#3b82f6" />
+                <SvgIcon name="calendar" size={20} color="#3b82f6" />
                 <Text style={styles.viewCalendarButtonText}>View in Calendar</Text>
               </TouchableOpacity>
 
@@ -3221,7 +3220,7 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
                 {savingMealPlan ? (
                   <ActivityIndicator color="#4cbb17" size="small" />
                 ) : (
-                  <Ionicons 
+<SvgIcon 
                     name={mealPlanSaved ? "checkmark-circle" : "bookmark-outline"} 
                     size={20} 
                     color={mealPlanSaved ? "#4cbb17" : "#4cbb17"} 
@@ -3264,7 +3263,7 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
         <View style={styles.modalHeader}>
           <Text style={styles.modalTitle}>Meal Templates</Text>
           <Pressable onPress={() => setShowTemplates(false)}>
-            <Ionicons name="close" size={28} color="#111827" />
+            <SvgIcon name="close" size={28} color="#111827" />
           </Pressable>
         </View>
         
@@ -3282,7 +3281,7 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
                 onPress={() => handleUseTemplate(template)}
               >
                 <View style={styles.templateIcon}>
-                  <Ionicons 
+<SvgIcon 
                     name={
                       template.category === 'breakfast' ? 'sunny' :
                       template.category === 'lunch' ? 'restaurant' :
@@ -3312,7 +3311,7 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
                     </View>
                   )}
                 </View>
-                <Ionicons name="chevron-forward" size={20} color="#9ca3af" />
+                <SvgIcon name="chevron-forward" size={20} color="#9ca3af" />
               </Pressable>
             ))
           )}
@@ -3402,12 +3401,12 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
         <Animated.View style={[styles.collapsibleHeader, { height: headerHeight, backgroundColor: '#f59e0b' }]}>
           <Animated.View style={[styles.dashboardHeaderContent, { opacity: headerOpacity, transform: [{ scale: titleScale }] }]}>
             <Pressable style={styles.calendarBackButton} onPress={() => setViewMode('dashboard')}>
-              <Ionicons name="arrow-back" size={24} color="#ffffff" />
+              <SvgIcon name="arrow-back" size={24} color="#ffffff" />
             </Pressable>
             <Text style={styles.dashboardHeaderTitle}>Meal Calendar</Text>
             <Text style={styles.dashboardHeaderSubtitle}>{activeMealPlan ? `${activeMealPlan.name}` : 'No active meal plan'}</Text>
             <Pressable style={styles.calendarAddButton} onPress={() => setShowPlanGenerator(true)}>
-              <Ionicons name="add" size={24} color="#ffffff" />
+              <SvgIcon name="add" size={24} color="#ffffff" />
             </Pressable>
           </Animated.View>
         </Animated.View>
@@ -3416,13 +3415,13 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
           {/* Month Navigation */}
           <View style={styles.calendarMonthNav}>
             <TouchableOpacity onPress={() => handleNavigateMonth(-1)} style={styles.calendarNavButton}>
-              <Ionicons name="chevron-back" size={24} color="#3b82f6" />
+              <SvgIcon name="chevron-back" size={24} color="#3b82f6" />
             </TouchableOpacity>
             <Text style={styles.calendarMonthTitle}>
               {monthNames[calendarMonth.getMonth()]} {calendarMonth.getFullYear()}
             </Text>
             <TouchableOpacity onPress={() => handleNavigateMonth(1)} style={styles.calendarNavButton}>
-              <Ionicons name="chevron-forward" size={24} color="#3b82f6" />
+              <SvgIcon name="chevron-forward" size={24} color="#3b82f6" />
             </TouchableOpacity>
           </View>
           
@@ -3516,7 +3515,7 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
                       styles.calendarMealIcon,
                       { backgroundColor: mealTypeConfig[meal.meal_type]?.bgColor || '#f3f4f6' }
                     ]}>
-                      <Ionicons 
+<SvgIcon 
                         name={mealTypeConfig[meal.meal_type]?.icon as any || 'restaurant-outline'} 
                         size={20} 
                         color={mealTypeConfig[meal.meal_type]?.color || '#6b7280'} 
@@ -3531,19 +3530,19 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
                         {meal.calories || 0} cal • {meal.protein || 0}g protein • {meal.carbs || 0}g carbs • {meal.fat || 0}g fat
                       </Text>
                     </View>
-                    <Ionicons name="chevron-forward" size={20} color="#9ca3af" />
+                    <SvgIcon name="chevron-forward" size={20} color="#9ca3af" />
                   </TouchableOpacity>
                 ))}
               </View>
             ) : (
               <View style={styles.calendarNoMeals}>
-                <Ionicons name="restaurant-outline" size={48} color="#d1d5db" />
+                <SvgIcon name="restaurant-outline" size={48} color="#d1d5db" />
                 <Text style={styles.calendarNoMealsText}>No meals planned for this day</Text>
                 <TouchableOpacity 
                   style={styles.calendarAddMealButton}
                   onPress={() => setShowPlanGenerator(true)}
                 >
-                  <Ionicons name="add-circle-outline" size={20} color="#3b82f6" />
+                  <SvgIcon name="add-circle-outline" size={20} color="#3b82f6" />
                   <Text style={styles.calendarAddMealText}>Create a Meal Plan</Text>
                 </TouchableOpacity>
               </View>
@@ -3641,7 +3640,7 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
                       setSelectedMeal(null);
                     }}
                   >
-                    <Ionicons name="close" size={28} color="#fff" />
+                    <SvgIcon name="close" size={28} color="#fff" />
                   </TouchableOpacity>
                 </View>
                 
@@ -3653,11 +3652,11 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
                 
                 <View style={styles.mealDetailStats}>
                   <View style={styles.mealDetailStat}>
-                    <Ionicons name="flame" size={16} color="#fff" />
+                    <SvgIcon name="flame" size={16} color="#fff" />
                     <Text style={styles.mealDetailStatText}>{adjustedCalories} cal</Text>
                   </View>
                   <View style={styles.mealDetailStat}>
-                    <Ionicons name="time" size={16} color="#fff" />
+                    <SvgIcon name="time" size={16} color="#fff" />
                     <Text style={styles.mealDetailStatText}>
                       {(selectedMeal.preparation_time || 0) + (selectedMeal.cooking_time || 0)} min
                     </Text>
@@ -3676,7 +3675,7 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
                   style={styles.mealDetailServingsButton}
                   onPress={() => setMealServings(Math.max(1, mealServings - 1))}
                 >
-                  <Ionicons name="remove" size={24} color="#374151" />
+                  <SvgIcon name="remove" size={24} color="#374151" />
                 </TouchableOpacity>
                 <View style={{ alignItems: 'center' }}>
                   <Text style={styles.mealDetailServingsValue}>{mealServings}</Text>
@@ -3686,7 +3685,7 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
                   style={styles.mealDetailServingsButton}
                   onPress={() => setMealServings(mealServings + 1)}
                 >
-                  <Ionicons name="add" size={24} color="#374151" />
+                  <SvgIcon name="add" size={24} color="#374151" />
                 </TouchableOpacity>
               </View>
             </View>
@@ -3766,14 +3765,14 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
             {/* Prep & Cook Time */}
             <View style={styles.mealDetailTimeRow}>
               <View style={styles.mealDetailTimeCard}>
-                <Ionicons name="cut-outline" size={24} color="#8b5cf6" />
+                <SvgIcon name="cut-outline" size={24} color="#8b5cf6" />
                 <View>
                   <Text style={styles.mealDetailTimeLabel}>Prep Time</Text>
                   <Text style={styles.mealDetailTimeValue}>{selectedMeal.preparation_time || 10} min</Text>
                 </View>
               </View>
               <View style={styles.mealDetailTimeCard}>
-                <Ionicons name="flame-outline" size={24} color="#f59e0b" />
+                <SvgIcon name="flame-outline" size={24} color="#f59e0b" />
                 <View>
                   <Text style={styles.mealDetailTimeLabel}>Cook Time</Text>
                   <Text style={styles.mealDetailTimeValue}>{selectedMeal.cooking_time || 15} min</Text>
@@ -3832,7 +3831,7 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
                   ))
                 ) : (
                   <View style={styles.mealDetailNoInstructions}>
-                    <Ionicons name="document-text-outline" size={48} color="#d1d5db" />
+                    <SvgIcon name="document-text-outline" size={48} color="#d1d5db" />
                     <Text style={styles.mealDetailNoInstructionsText}>No cooking instructions available</Text>
                   </View>
                 )}
@@ -3872,17 +3871,17 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
                   style={styles.shoppingModalCloseButton}
                   onPress={() => setShowShoppingListModal(false)}
                 >
-                  <Ionicons name="arrow-back" size={24} color="#111827" />
+                  <SvgIcon name="arrow-back" size={24} color="#111827" />
                 </TouchableOpacity>
                 <View style={styles.shoppingModalHeaderCenter}>
-                  <Ionicons name="cart-outline" size={24} color="#4cbb17" />
+                  <SvgIcon name="cart-outline" size={24} color="#4cbb17" />
                   <Text style={styles.shoppingModalTitle}>Shopping List</Text>
                 </View>
                 <TouchableOpacity 
                   style={styles.shoppingModalCloseButton}
                   onPress={() => setShowShoppingListModal(false)}
                 >
-                  <Ionicons name="close" size={24} color="#111827" />
+                  <SvgIcon name="close" size={24} color="#111827" />
                 </TouchableOpacity>
               </View>
 
@@ -3908,7 +3907,7 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
                 {items?.proteins && items.proteins.length > 0 && (
                   <View style={styles.shoppingCategorySection}>
                     <View style={styles.shoppingCategorySectionHeader}>
-                      <Ionicons name="nutrition-outline" size={20} color="#f59e0b" />
+                      <SvgIcon name="nutrition-outline" size={20} color="#f59e0b" />
                       <Text style={styles.shoppingCategorySectionTitle}>Proteins</Text>
                       <Text style={styles.shoppingCategorySectionCount}>{items.proteins.length}</Text>
                     </View>
@@ -3921,7 +3920,7 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
                           onPress={() => toggleShoppingItem('proteins', idx)}
                           activeOpacity={0.6}
                         >
-                          <Ionicons 
+<SvgIcon 
                             name={isChecked ? "checkbox" : "square-outline"} 
                             size={22} 
                             color={isChecked ? "#4cbb17" : "#d1d5db"} 
@@ -3942,7 +3941,7 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
                 {items?.produce && items.produce.length > 0 && (
                   <View style={styles.shoppingCategorySection}>
                     <View style={styles.shoppingCategorySectionHeader}>
-                      <Ionicons name="leaf-outline" size={20} color="#10b981" />
+                      <SvgIcon name="leaf-outline" size={20} color="#10b981" />
                       <Text style={styles.shoppingCategorySectionTitle}>Produce</Text>
                       <Text style={styles.shoppingCategorySectionCount}>{items.produce.length}</Text>
                     </View>
@@ -3955,7 +3954,7 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
                           onPress={() => toggleShoppingItem('produce', idx)}
                           activeOpacity={0.6}
                         >
-                          <Ionicons 
+<SvgIcon 
                             name={isChecked ? "checkbox" : "square-outline"} 
                             size={22} 
                             color={isChecked ? "#4cbb17" : "#d1d5db"} 
@@ -3976,7 +3975,7 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
                 {items?.dairy && items.dairy.length > 0 && (
                   <View style={styles.shoppingCategorySection}>
                     <View style={styles.shoppingCategorySectionHeader}>
-                      <Ionicons name="water-outline" size={20} color="#3b82f6" />
+                      <SvgIcon name="water-outline" size={20} color="#3b82f6" />
                       <Text style={styles.shoppingCategorySectionTitle}>Dairy</Text>
                       <Text style={styles.shoppingCategorySectionCount}>{items.dairy.length}</Text>
                     </View>
@@ -3989,7 +3988,7 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
                           onPress={() => toggleShoppingItem('dairy', idx)}
                           activeOpacity={0.6}
                         >
-                          <Ionicons 
+<SvgIcon 
                             name={isChecked ? "checkbox" : "square-outline"} 
                             size={22} 
                             color={isChecked ? "#4cbb17" : "#d1d5db"} 
@@ -4010,7 +4009,7 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
                 {items?.grains && items.grains.length > 0 && (
                   <View style={styles.shoppingCategorySection}>
                     <View style={styles.shoppingCategorySectionHeader}>
-                      <Ionicons name="grid-outline" size={20} color="#d97706" />
+                      <SvgIcon name="grid-outline" size={20} color="#d97706" />
                       <Text style={styles.shoppingCategorySectionTitle}>Grains</Text>
                       <Text style={styles.shoppingCategorySectionCount}>{items.grains.length}</Text>
                     </View>
@@ -4023,7 +4022,7 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
                           onPress={() => toggleShoppingItem('grains', idx)}
                           activeOpacity={0.6}
                         >
-                          <Ionicons 
+<SvgIcon 
                             name={isChecked ? "checkbox" : "square-outline"} 
                             size={22} 
                             color={isChecked ? "#4cbb17" : "#d1d5db"} 
@@ -4044,7 +4043,7 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
                 {items?.pantry && items.pantry.length > 0 && (
                   <View style={styles.shoppingCategorySection}>
                     <View style={styles.shoppingCategorySectionHeader}>
-                      <Ionicons name="wine-outline" size={20} color="#ef4444" />
+                      <SvgIcon name="wine-outline" size={20} color="#ef4444" />
                       <Text style={styles.shoppingCategorySectionTitle}>Pantry</Text>
                       <Text style={styles.shoppingCategorySectionCount}>{items.pantry.length}</Text>
                     </View>
@@ -4057,7 +4056,7 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
                           onPress={() => toggleShoppingItem('pantry', idx)}
                           activeOpacity={0.6}
                         >
-                          <Ionicons 
+<SvgIcon 
                             name={isChecked ? "checkbox" : "square-outline"} 
                             size={22} 
                             color={isChecked ? "#4cbb17" : "#d1d5db"} 
@@ -4078,7 +4077,7 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
                 {items?.other && items.other.length > 0 && (
                   <View style={styles.shoppingCategorySection}>
                     <View style={styles.shoppingCategorySectionHeader}>
-                      <Ionicons name="basket-outline" size={20} color="#8b5cf6" />
+                      <SvgIcon name="basket-outline" size={20} color="#8b5cf6" />
                       <Text style={styles.shoppingCategorySectionTitle}>Other</Text>
                       <Text style={styles.shoppingCategorySectionCount}>{items.other.length}</Text>
                     </View>
@@ -4091,7 +4090,7 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
                           onPress={() => toggleShoppingItem('other', idx)}
                           activeOpacity={0.6}
                         >
-                          <Ionicons 
+<SvgIcon 
                             name={isChecked ? "checkbox" : "square-outline"} 
                             size={22} 
                             color={isChecked ? "#4cbb17" : "#d1d5db"} 
@@ -4112,7 +4111,7 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
                 {totalItems === 0 && (
                   <View style={{ alignItems: 'center', paddingTop: 60, paddingHorizontal: 32 }}>
                     <View style={{ width: 100, height: 100, borderRadius: 50, backgroundColor: '#f3f4f6', alignItems: 'center', justifyContent: 'center', marginBottom: 20 }}>
-                      <Ionicons name="cart-outline" size={48} color="#9ca3af" />
+                      <SvgIcon name="cart-outline" size={48} color="#9ca3af" />
                     </View>
                     <Text style={{ fontSize: 20, fontWeight: '600', color: '#111827', marginBottom: 8 }}>No Shopping List</Text>
                     <Text style={{ fontSize: 14, color: '#6b7280', textAlign: 'center', lineHeight: 20 }}>
@@ -4134,7 +4133,7 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
                         setTimeout(() => setShowPlanGenerator(true), 300);
                       }}
                     >
-                      <Ionicons name="add-circle" size={20} color="#fff" />
+                      <SvgIcon name="add-circle" size={20} color="#fff" />
                       <Text style={{ color: '#fff', fontSize: 16, fontWeight: '600' }}>Create Meal Plan</Text>
                     </TouchableOpacity>
                   </View>
@@ -4178,7 +4177,7 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
                         }
                       }}
                     >
-                      <Ionicons name="cart" size={20} color="#fff" />
+                      <SvgIcon name="cart" size={20} color="#fff" />
                       <Text style={styles.shoppingDoneButtonText}>
                         {totalItems - checkedShoppingItems.size > 0 
                           ? `Order ${totalItems - checkedShoppingItems.size} items` 
@@ -6713,3 +6712,4 @@ const styles = StyleSheet.create({
     color: '#fff',
   },
 });
+
