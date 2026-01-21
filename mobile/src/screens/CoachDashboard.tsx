@@ -98,7 +98,11 @@ export default function CoachDashboard() {
     try {
       setLoading(true);
       setError(null);
-      const data = await coachService.listClients(coachId, {
+      
+      // Use mock coachId for development if not authenticated
+      const effectiveCoachId = coachId || 'mock-coach-1';
+      
+      const data = await coachService.listClients(effectiveCoachId, {
         status: 'ACTIVE',
         search: searchQuery || undefined,
       });
@@ -126,7 +130,10 @@ export default function CoachDashboard() {
 
   const loadClientDashboard = async (clientId: string) => {
     try {
-      const data = await coachService.getClientDashboard(coachId, clientId);
+      // Use mock coachId for development if not authenticated
+      const effectiveCoachId = coachId || 'mock-coach-1';
+      
+      const data = await coachService.getClientDashboard(effectiveCoachId, clientId);
       setClientDashboard(data);
       
       // Update selected client with dashboard data
@@ -361,8 +368,11 @@ export default function CoachDashboard() {
           if (!programId?.trim()) return;
           
           try {
+            // Use mock coachId for development if not authenticated
+            const effectiveCoachId = coachId || 'mock-coach-1';
+            
             await coachService.assignFitnessPlan({
-              coachId,
+              coachId: effectiveCoachId,
               clientId: selectedClient.id,
               programId: programId.trim(),
             });
@@ -603,7 +613,7 @@ export default function CoachDashboard() {
             setShowSendInvitation(false);
             handleInvitationSent();
           }}
-          coachId={coachId}
+          coachId={coachId || 'mock-coach-1'}
         />
       )}
     </View>
