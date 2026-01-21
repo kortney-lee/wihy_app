@@ -19,6 +19,9 @@ import { dashboardColors, SvgIcon } from '../components/shared';
 import { dashboardTheme } from '../theme/dashboardTheme';
 import { userService } from '../services/userService';
 import { useDashboardLayout } from '../hooks/useDashboardLayout';
+import { useNavigation } from '@react-navigation/native';
+import type { StackNavigationProp } from '@react-navigation/stack';
+import type { RootStackParamList } from '../types/navigation';
 
 const isWeb = Platform.OS === 'web';
 
@@ -38,6 +41,7 @@ interface Coach {
 }
 
 export default function CoachSelection() {
+  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   const insets = useSafeAreaInsets();
   useDashboardLayout(); // For responsive behavior
   const scrollY = useRef(new Animated.Value(0)).current;
@@ -186,7 +190,10 @@ export default function CoachSelection() {
   });
 
   const renderCoachCard = ({ item }: { item: Coach }) => (
-    <Pressable style={styles.coachCard}>
+    <Pressable 
+      style={styles.coachCard}
+      onPress={() => navigation.navigate('CoachDetailPage' as any, { coachId: item.id })}
+    >
       {/* Coach Header */}
       <View style={styles.coachHeader}>
         <View style={styles.coachAvatar}>
@@ -241,10 +248,16 @@ export default function CoachSelection() {
           <Text style={styles.rateLabel}>From</Text>
           <Text style={styles.rateValue}>{item.rate}</Text>
         </View>
-        <Pressable style={styles.viewProfileButton}>
+        <Pressable 
+          style={styles.viewProfileButton}
+          onPress={() => navigation.navigate('CoachDetailPage' as any, { coachId: item.id })}
+        >
           <Text style={styles.viewProfileText}>View Profile</Text>
         </Pressable>
-        <Pressable style={styles.bookButton}>
+        <Pressable 
+          style={styles.bookButton}
+          onPress={() => navigation.navigate('RequestCoaching' as any, { coachId: item.id, coachName: item.name })}
+        >
           <SvgIcon name="calendar" size={18} color="#fff" />
           <Text style={styles.bookButtonText}>Book</Text>
         </Pressable>
