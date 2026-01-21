@@ -409,7 +409,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#e0f2fe',
   },
   collapsibleHeader: {
-    backgroundColor: '#06b6d4',
+    backgroundColor: '#6366f1',
     overflow: 'hidden',
     justifyContent: 'flex-end',
   },

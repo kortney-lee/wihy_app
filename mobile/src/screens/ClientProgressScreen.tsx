@@ -1497,7 +1497,7 @@ function getRpeColor(rpe: number): object {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f9fafb',
+    backgroundColor: '#e0f2fe',
   },
   collapsibleHeader: {
     backgroundColor: '#3b82f6',
