@@ -1,5 +1,5 @@
 /**
- * Post-build script to inject SEO meta tags into Expo-generated index.html
+ * Post-build script to inject SEO meta tags and font preloads into Expo-generated index.html
  * Run after `expo export --platform web`
  */
 
@@ -9,7 +9,41 @@ const path = require('path');
 const distPath = path.join(__dirname, '../dist');
 const indexPath = path.join(distPath, 'index.html');
 
-// SEO content to inject
+// Find Ionicons font file in the dist folder
+function findIoniconsFont() {
+  const fontsDir = path.join(distPath, 'assets/node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts');
+  try {
+    const files = fs.readdirSync(fontsDir);
+    const ioniconsFile = files.find(f => f.startsWith('Ionicons.') && f.endsWith('.ttf'));
+    if (ioniconsFile) {
+      return `/assets/node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/${ioniconsFile}`;
+    }
+  } catch (e) {
+    console.warn('⚠️ Could not find Ionicons font directory');
+  }
+  return null;
+}
+
+// Generate font preload and @font-face CSS for Ionicons
+function generateFontStyles(ioniconsPath) {
+  if (!ioniconsPath) return '';
+  
+  return `
+    <!-- Ionicons Font Preload for reliable icon rendering -->
+    <link rel="preload" href="${ioniconsPath}" as="font" type="font/ttf" crossorigin="anonymous" />
+    <style>
+      @font-face {
+        font-family: 'Ionicons';
+        src: url('${ioniconsPath}') format('truetype');
+        font-weight: normal;
+        font-style: normal;
+        font-display: block;
+      }
+    </style>
+`;
+}
+
+// SEO content to inject (font preload added dynamically)
 const seoHead = `
     <!-- Google Analytics (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-X3TDLWKKWH"></script>
@@ -75,14 +109,22 @@ try {
     process.exit(1);
   }
 
+  // Find Ionicons font and generate font styles
+  const ioniconsPath = findIoniconsFont();
+  const fontStyles = generateFontStyles(ioniconsPath);
+  
+  if (ioniconsPath) {
+    console.log(`✅ Found Ionicons font: ${ioniconsPath}`);
+  }
+
   // Read the Expo-generated index.html
   let html = fs.readFileSync(indexPath, 'utf8');
 
   // Update the title
   html = html.replace(/<title>.*?<\/title>/i, '<title>WIHY AI | World\'s Smartest Health Search Engine</title>');
 
-  // Inject SEO tags right after <head>
-  html = html.replace(/<head>/i, `<head>${seoHead}`);
+  // Inject SEO tags and font styles right after <head>
+  html = html.replace(/<head>/i, `<head>${fontStyles}${seoHead}`);
 
   // Write the updated HTML
   fs.writeFileSync(indexPath, html);
