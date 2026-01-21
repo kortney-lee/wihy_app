@@ -1442,6 +1442,454 @@ class UserService {
       return { success: false, error: error.message };
     }
   }
+
+  // ==========================================
+  // COACH MANAGEMENT ENDPOINTS (FOR COACHES)
+  // ==========================================
+
+  /**
+   * Create coach profile
+   * POST /api/coaches
+   */
+  async createCoach(
+    plan: string,
+    commissionRate: number
+  ): Promise<ApiResponse<Coach>> {
+    const endpoint = `${this.baseUrl}${USER_SERVICE_CONFIG.endpoints.coaches}`;
+    const headers = await this.getAuthHeaders();
+    
+    console.log('=== CREATE COACH PROFILE ===');
+    
+    try {
+      const response = await fetchWithLogging(endpoint, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ plan, commissionRate }),
+      });
+
+      const data = await response.json();
+      
+      if (response.ok) {
+        console.log('Coach profile created:', data.coach?.id);
+        return { success: true, data: data.coach };
+      } else {
+        return { success: false, error: data.error, message: data.message };
+      }
+    } catch (error: any) {
+      console.error('Create coach error:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Get coach profile by ID
+   * GET /api/coaches/:coachId
+   */
+  async getCoach(coachId: string): Promise<Coach | null> {
+    const endpoint = `${this.baseUrl}${USER_SERVICE_CONFIG.endpoints.coaches}/${coachId}`;
+    const headers = await this.getAuthHeaders();
+    
+    console.log('=== GET COACH PROFILE ===');
+    
+    try {
+      const response = await fetchWithLogging(endpoint, { headers });
+      
+      if (response.ok) {
+        const coach = await response.json();
+        console.log('Coach profile retrieved:', coach.name);
+        return coach;
+      } else {
+        console.error('Failed to get coach profile');
+        return null;
+      }
+    } catch (error) {
+      console.error('Get coach error:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Update coach profile
+   * PUT /api/coaches/:coachId
+   */
+  async updateCoach(
+    coachId: string,
+    updates: { commissionRate?: number }
+  ): Promise<ApiResponse<Coach>> {
+    const endpoint = `${this.baseUrl}${USER_SERVICE_CONFIG.endpoints.coaches}/${coachId}`;
+    const headers = await this.getAuthHeaders();
+    
+    console.log('=== UPDATE COACH PROFILE ===');
+    
+    try {
+      const response = await fetchWithLogging(endpoint, {
+        method: 'PUT',
+        headers,
+        body: JSON.stringify(updates),
+      });
+
+      const data = await response.json();
+      
+      if (response.ok) {
+        console.log('Coach profile updated');
+        return { success: true, data: data.coach };
+      } else {
+        return { success: false, error: data.error, message: data.message };
+      }
+    } catch (error: any) {
+      console.error('Update coach error:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Add client to coach roster
+   * POST /api/coaches/:coachId/clients
+   */
+  async addCoachClient(
+    coachId: string,
+    clientId: string
+  ): Promise<ApiResponse<CoachClient>> {
+    const endpoint = `${this.baseUrl}${USER_SERVICE_CONFIG.endpoints.coaches}/${coachId}/clients`;
+    const headers = await this.getAuthHeaders();
+    
+    console.log('=== ADD COACH CLIENT ===');
+    
+    try {
+      const response = await fetchWithLogging(endpoint, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ clientId }),
+      });
+
+      const data = await response.json();
+      
+      if (response.ok) {
+        console.log('Client added to coach roster');
+        return { success: true, data: data.client };
+      } else {
+        return { success: false, error: data.error, message: data.message };
+      }
+    } catch (error: any) {
+      console.error('Add coach client error:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Remove client from coach roster
+   * DELETE /api/coaches/:coachId/clients/:clientId
+   */
+  async removeCoachClient(
+    coachId: string,
+    clientId: string
+  ): Promise<ApiResponse> {
+    const endpoint = `${this.baseUrl}${USER_SERVICE_CONFIG.endpoints.coaches}/${coachId}/clients/${clientId}`;
+    const headers = await this.getAuthHeaders();
+    
+    console.log('=== REMOVE COACH CLIENT ===');
+    
+    try {
+      const response = await fetchWithLogging(endpoint, {
+        method: 'DELETE',
+        headers,
+      });
+
+      const data = await response.json();
+      
+      if (response.ok) {
+        console.log('Client removed from coach roster');
+        return { success: true, message: data.message };
+      } else {
+        return { success: false, error: data.error, message: data.message };
+      }
+    } catch (error: any) {
+      console.error('Remove coach client error:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * List coach clients
+   * GET /api/coaches/:coachId/clients
+   */
+  async listCoachClients(coachId: string): Promise<{
+    coachId: string;
+    clients: CoachClient[];
+    totalClients: number;
+    activeClients: number;
+  } | null> {
+    const endpoint = `${this.baseUrl}${USER_SERVICE_CONFIG.endpoints.coaches}/${coachId}/clients`;
+    const headers = await this.getAuthHeaders();
+    
+    console.log('=== LIST COACH CLIENTS ===');
+    
+    try {
+      const response = await fetchWithLogging(endpoint, { headers });
+      
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Coach clients retrieved:', data.totalClients);
+        return data;
+      } else {
+        console.error('Failed to list coach clients');
+        return null;
+      }
+    } catch (error) {
+      console.error('List coach clients error:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Get coach revenue analytics
+   * GET /api/coaches/:coachId/revenue
+   */
+  async getCoachRevenue(coachId: string): Promise<any | null> {
+    const endpoint = `${this.baseUrl}${USER_SERVICE_CONFIG.endpoints.coaches}/${coachId}/revenue`;
+    const headers = await this.getAuthHeaders();
+    
+    console.log('=== GET COACH REVENUE ===');
+    
+    try {
+      const response = await fetchWithLogging(endpoint, { headers });
+      
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Coach revenue retrieved');
+        return data;
+      } else {
+        console.error('Failed to get coach revenue');
+        return null;
+      }
+    } catch (error) {
+      console.error('Get coach revenue error:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Connect Stripe account for payouts
+   * POST /api/coaches/:coachId/stripe
+   */
+  async connectCoachStripe(
+    coachId: string,
+    stripeAccountId: string
+  ): Promise<ApiResponse<Coach>> {
+    const endpoint = `${this.baseUrl}${USER_SERVICE_CONFIG.endpoints.coaches}/${coachId}/stripe`;
+    const headers = await this.getAuthHeaders();
+    
+    console.log('=== CONNECT COACH STRIPE ===');
+    
+    try {
+      const response = await fetchWithLogging(endpoint, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ stripeAccountId }),
+      });
+
+      const data = await response.json();
+      
+      if (response.ok) {
+        console.log('Stripe account connected');
+        return { success: true, data: data.coach };
+      } else {
+        return { success: false, error: data.error, message: data.message };
+      }
+    } catch (error: any) {
+      console.error('Connect coach Stripe error:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Get coach payout history
+   * GET /api/coaches/:coachId/payouts
+   */
+  async getCoachPayouts(coachId: string): Promise<any | null> {
+    const endpoint = `${this.baseUrl}${USER_SERVICE_CONFIG.endpoints.coaches}/${coachId}/payouts`;
+    const headers = await this.getAuthHeaders();
+    
+    console.log('=== GET COACH PAYOUTS ===');
+    
+    try {
+      const response = await fetchWithLogging(endpoint, { headers });
+      
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Coach payouts retrieved');
+        return data;
+      } else {
+        console.error('Failed to get coach payouts');
+        return null;
+      }
+    } catch (error) {
+      console.error('Get coach payouts error:', error);
+      return null;
+    }
+  }
+
+  // ==========================================
+  // FAMILY EXTENDED ENDPOINTS
+  // ==========================================
+
+  /**
+   * Get family by ID (for guardians viewing existing family)
+   * GET /api/family/:familyId
+   */
+  async getFamilyById(familyId: string): Promise<any> {
+    const endpoint = `${this.baseUrl}${USER_SERVICE_CONFIG.endpoints.family}/${familyId}`;
+    const headers = await this.getAuthHeaders();
+    
+    console.log('=== GET FAMILY BY ID ===');
+    console.log('Family ID:', familyId);
+    
+    try {
+      const response = await fetchWithLogging(endpoint, { headers });
+      
+      if (response.ok) {
+        const data = await response.json();
+        return data.data?.family || data.family || data;
+      } else {
+        return null;
+      }
+    } catch (error) {
+      console.error('Get family by ID error:', error);
+      return null;
+    }
+  }
+
+  /**
+   * List family members
+   * GET /api/family/:familyId/members
+   */
+  async listFamilyMembers(familyId: string): Promise<{ members: any[] } | null> {
+    const endpoint = `${this.baseUrl}${USER_SERVICE_CONFIG.endpoints.family}/${familyId}/members`;
+    const headers = await this.getAuthHeaders();
+    
+    console.log('=== LIST FAMILY MEMBERS ===');
+    
+    try {
+      const response = await fetchWithLogging(endpoint, { headers });
+      
+      if (response.ok) {
+        const data = await response.json();
+        return { members: data.data?.members || data.members || [] };
+      } else {
+        return null;
+      }
+    } catch (error) {
+      console.error('List family members error:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Remove family member by ID (guardian action)
+   * DELETE /api/family/:familyId/members/:memberId
+   */
+  async removeFamilyMemberById(familyId: string, memberId: string): Promise<ApiResponse> {
+    const endpoint = `${this.baseUrl}${USER_SERVICE_CONFIG.endpoints.family}/${familyId}/members/${memberId}`;
+    const headers = await this.getAuthHeaders();
+    
+    console.log('=== REMOVE FAMILY MEMBER ===');
+    
+    try {
+      const response = await fetchWithLogging(endpoint, {
+        method: 'DELETE',
+        headers,
+      });
+
+      const data = await response.json();
+      return response.ok ? { success: true, message: data.message } : { success: false, error: data.error };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Get guardian code for family
+   * GET /api/family/:familyId/guardian-code
+   */
+  async getGuardianCode(familyId: string): Promise<{ guardianCode: string } | null> {
+    const endpoint = `${this.baseUrl}${USER_SERVICE_CONFIG.endpoints.family}/${familyId}/guardian-code`;
+    const headers = await this.getAuthHeaders();
+    
+    console.log('=== GET GUARDIAN CODE ===');
+    
+    try {
+      const response = await fetchWithLogging(endpoint, { headers });
+      
+      if (response.ok) {
+        const data = await response.json();
+        return { guardianCode: data.guardianCode || data.guardian_code || data.data?.guardianCode };
+      } else {
+        return null;
+      }
+    } catch (error) {
+      console.error('Get guardian code error:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Regenerate guardian code for family
+   * POST /api/family/:familyId/regenerate-code
+   */
+  async regenerateGuardianCode(familyId: string): Promise<ApiResponse<{ guardianCode: string; guardian_code?: string }>> {
+    const endpoint = `${this.baseUrl}${USER_SERVICE_CONFIG.endpoints.family}/${familyId}/regenerate-code`;
+    const headers = await this.getAuthHeaders();
+    
+    console.log('=== REGENERATE GUARDIAN CODE ===');
+    
+    try {
+      const response = await fetchWithLogging(endpoint, {
+        method: 'POST',
+        headers,
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        return { 
+          success: true, 
+          data: { 
+            guardianCode: data.guardianCode || data.guardian_code || data.data?.guardianCode,
+            guardian_code: data.guardian_code || data.guardianCode || data.data?.guardian_code,
+          }
+        };
+      }
+      return { success: false, error: data.error };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+}
+
+// Coach interface for management
+export interface Coach {
+  id: string;
+  userId: string;
+  name?: string;
+  email?: string;
+  plan: string;
+  commissionRate: number;
+  totalRevenue: number;
+  clientCount: number;
+  stripeConnectAccountId?: string;
+  isVerified: boolean;
+  createdAt: string;
+  updatedAt?: string;
+}
+
+// Coach client interface
+export interface CoachClient {
+  clientId: string;
+  name?: string;
+  email?: string;
+  plan?: string;
+  healthScore?: number;
+  startedAt: string;
+  isActive: boolean;
 }
 
 // Export singleton instance

@@ -1809,13 +1809,16 @@ class AuthService {
 
   // ==========================================
   // FAMILY ENDPOINTS
+  // Note: Family endpoints go to users service (https://user.wihy.ai)
   // ==========================================
 
   /**
    * Create family
    */
   async createFamily(name: string, plan: string): Promise<ApiResponse<Family>> {
-    const endpoint = `${this.baseUrl}${AUTH_CONFIG.endpoints.families}`;
+    // Family endpoints are on the users service, not auth service
+    const usersBaseUrl = 'https://user.wihy.ai';
+    const endpoint = `${usersBaseUrl}/api/family`;
     const headers = await this.getAuthHeaders();
     
     console.log('=== CREATE FAMILY ===');
@@ -1846,7 +1849,9 @@ class AuthService {
    * Get family details
    */
   async getFamily(familyId: string): Promise<Family | null> {
-    const endpoint = `${this.baseUrl}${AUTH_CONFIG.endpoints.familyDetails}/${familyId}`;
+    // Family endpoints are on the users service, not auth service
+    const usersBaseUrl = 'https://user.wihy.ai';
+    const endpoint = `${usersBaseUrl}/api/family/${familyId}`;
     const headers = await this.getAuthHeaders();
     
     console.log('=== GET FAMILY ===');
@@ -1876,7 +1881,9 @@ class AuthService {
     familyId: string,
     updates: { name?: string }
   ): Promise<ApiResponse<Family>> {
-    const endpoint = `${this.baseUrl}${AUTH_CONFIG.endpoints.updateFamily}/${familyId}`;
+    // Family endpoints are on the users service, not auth service
+    const usersBaseUrl = 'https://user.wihy.ai';
+    const endpoint = `${usersBaseUrl}/api/family/${familyId}`;
     const headers = await this.getAuthHeaders();
     
     console.log('=== UPDATE FAMILY ===');
@@ -1906,7 +1913,9 @@ class AuthService {
    * Join family with guardian code
    */
   async joinFamily(guardianCode: string): Promise<ApiResponse<Family>> {
-    const endpoint = `${this.baseUrl}${AUTH_CONFIG.endpoints.joinFamily}`;
+    // Family endpoints are on the users service, not auth service
+    const usersBaseUrl = 'https://user.wihy.ai';
+    const endpoint = `${usersBaseUrl}/api/family/join`;
     const headers = await this.getAuthHeaders();
     
     console.log('=== JOIN FAMILY ===');
@@ -1940,7 +1949,9 @@ class AuthService {
     familyId: string,
     userId: string
   ): Promise<ApiResponse> {
-    const endpoint = `${this.baseUrl}${AUTH_CONFIG.endpoints.removeFamilyMember}/${familyId}/members/${userId}`;
+    // Family endpoints are on the users service, not auth service
+    const usersBaseUrl = 'https://user.wihy.ai';
+    const endpoint = `${usersBaseUrl}/api/family/members/${userId}`;
     const headers = await this.getAuthHeaders();
     
     console.log('=== REMOVE FAMILY MEMBER ===');
@@ -1974,7 +1985,9 @@ class AuthService {
     totalMembers: number;
     memberLimit: number;
   } | null> {
-    const endpoint = `${this.baseUrl}${AUTH_CONFIG.endpoints.listFamilyMembers}/${familyId}/members`;
+    // Family endpoints are on the users service, not auth service
+    const usersBaseUrl = 'https://user.wihy.ai';
+    const endpoint = `${usersBaseUrl}/api/family/members`;
     const headers = await this.getAuthHeaders();
     
     console.log('=== LIST FAMILY MEMBERS ===');
@@ -2004,7 +2017,9 @@ class AuthService {
     guardianCode: string;
     createdAt: string;
   } | null> {
-    const endpoint = `${this.baseUrl}${AUTH_CONFIG.endpoints.guardianCode}/${familyId}/code`;
+    // Family endpoints are on the users service, not auth service
+    const usersBaseUrl = 'https://user.wihy.ai';
+    const endpoint = `${usersBaseUrl}/api/family`;
     const headers = await this.getAuthHeaders();
     
     console.log('=== GET GUARDIAN CODE ===');
@@ -2030,7 +2045,9 @@ class AuthService {
    * Regenerate guardian code
    */
   async regenerateGuardianCode(familyId: string): Promise<ApiResponse> {
-    const endpoint = `${this.baseUrl}${AUTH_CONFIG.endpoints.regenerateCode}/${familyId}/code`;
+    // Family endpoints are on the users service, not auth service
+    const usersBaseUrl = 'https://user.wihy.ai';
+    const endpoint = `${usersBaseUrl}/api/family/regenerate-code`;
     const headers = await this.getAuthHeaders();
     
     console.log('=== REGENERATE GUARDIAN CODE ===');

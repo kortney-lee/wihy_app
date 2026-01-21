@@ -18,12 +18,34 @@ import SvgIcon from '../components/shared/SvgIcon';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { AuthContext } from '../context/AuthContext';
-import { authService, Family, FamilyMember, CoachClient, Coach } from '../services/authService';
-import { userService } from '../services/userService';
+import { userService, Coach, CoachClient } from '../services/userService';
 import { familyService, FamilyMember as FamilyServiceMember, FamilyRole } from '../services/familyService';
 import { coachService, Client, ClientDashboard } from '../services/coachService';
 import { RootStackParamList } from '../types/navigation';
 import { colors } from '../theme/design-tokens';
+
+// Family types from userService
+interface Family {
+  id: string;
+  ownerId: string;
+  name: string;
+  plan: string;
+  memberLimit: number;
+  memberCount: number;
+  guardianCode: string;
+  createdAt: string;
+  updatedAt?: string;
+}
+
+interface FamilyMember {
+  userId: string;
+  name?: string;
+  email?: string;
+  role: string;
+  healthScore?: number;
+  streakDays?: number;
+  joinedAt?: string;
+}
 
 // WiHY Light theme colors (matching Profile screen)
 const theme = {
@@ -110,7 +132,7 @@ export default function EnrollmentScreen() {
         // Check if user is part of a family
         if (profile.familyId) {
           try {
-            const familyData = await authService.getFamily(profile.familyId);
+            const familyData = await userService.getFamilyById(profile.familyId);
             if (familyData) {
               const normalized = normalizeFamily(familyData);
               if (normalized) {
@@ -125,8 +147,8 @@ export default function EnrollmentScreen() {
                   setFamilyMembers(membersData.map(normalizeFamilyMember));
                 }
               } catch {
-                // Fallback to authService
-                const membersData = await authService.listFamilyMembers(profile.familyId);
+                // Fallback to userService
+                const membersData = await userService.listFamilyMembers(profile.familyId);
                 if (membersData?.members) {
                   setFamilyMembers(membersData.members.map(normalizeFamilyMember));
                 }
@@ -153,10 +175,10 @@ export default function EnrollmentScreen() {
               setClients(overview.clients);
             }
           } catch {
-            // Fallback to authService
-            const clientsData = await authService.listCoachClients(profile.coachId);
+            // Fallback to userService
+            const clientsData = await userService.listCoachClients(profile.coachId);
             if (clientsData) {
-              // Map authService clients to coachService Client type
+              // Map userService clients to coachService Client type
               const mapped: Client[] = clientsData.clients.map(c => ({
                 id: c.clientId,
                 name: c.name || 'Unknown',
@@ -193,7 +215,7 @@ export default function EnrollmentScreen() {
     
     setLoading(true);
     try {
-      const result = await authService.createFamily(familyName.trim(), 'family');
+      const result = await userService.createFamily(familyName.trim());
       if (result.success && result.data) {
         const normalized = normalizeFamily(result.data);
         if (normalized) {
@@ -228,7 +250,7 @@ export default function EnrollmentScreen() {
     
     setLoading(true);
     try {
-      const result = await authService.joinFamily(joinCode.trim().toUpperCase());
+      const result = await userService.joinFamily(joinCode.trim().toUpperCase());
       if (result.success && result.data) {
         const normalized = normalizeFamily(result.data);
         if (normalized) {
@@ -276,7 +298,7 @@ export default function EnrollmentScreen() {
           onPress: async () => {
             setLoading(true);
             try {
-              const result = await authService.regenerateGuardianCode(family.id);
+              const result = await userService.regenerateGuardianCode(family.id);
               if (result.success && result.data) {
                 // Handle both camelCase and snake_case responses
                 const newCode = result.data.guardianCode || result.data.guardian_code;
@@ -310,7 +332,7 @@ export default function EnrollmentScreen() {
           onPress: async () => {
             setLoading(true);
             try {
-              const result = await authService.removeFamilyMember(family.id, memberId);
+              const result = await userService.removeFamilyMemberById(family.id, memberId);
               if (result.success) {
                 setFamilyMembers(prev => prev.filter(m => m.userId !== memberId));
                 Alert.alert('Success', 'Member removed');
@@ -331,7 +353,7 @@ export default function EnrollmentScreen() {
   const handleBecomeCoach = async () => {
     setLoading(true);
     try {
-      const result = await authService.createCoach('coach_basic', 0.1); // 10% commission
+      const result = await userService.createCoach('coach_basic', 0.1); // 10% commission
       if (result.success && result.data) {
         setCoachId(result.data.id);
         Alert.alert('Success! 🎉', 'You are now a WiHY Coach! Start adding clients.');
@@ -413,9 +435,9 @@ export default function EnrollmentScreen() {
                 setClients(prev => prev.filter(c => c.id !== clientId));
                 Alert.alert('Success', 'Client removed');
               } else {
-                // Fallback to authService
-                const authResult = await authService.removeCoachClient(coachId, clientId);
-                if (authResult.success) {
+                // Fallback to userService
+                const userResult = await userService.removeCoachClient(coachId, clientId);
+                if (userResult.success) {
                   setClients(prev => prev.filter(c => c.id !== clientId));
                   Alert.alert('Success', 'Client removed');
                 }
