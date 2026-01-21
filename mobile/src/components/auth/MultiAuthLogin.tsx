@@ -239,24 +239,22 @@ export default function MultiAuthLogin({
                 </Text>
               )}
 
-              {/* Social Providers at TOP */}
-              <View style={styles.socialProvidersSection}>
+              {/* Social Providers - Icon boxes in a row */}
+              <View style={styles.socialButtonsRow}>
                 {activeProviders.filter(p => p.id !== 'email').map((provider) => (
                   <Pressable
                     key={provider.id}
                     style={({ pressed }) => [
-                      styles.providerButton,
+                      styles.socialButton,
                       pressed && { opacity: 0.7 },
                     ]}
                     onPress={() => handleProviderPress(provider.id)}
                   >
                     <SvgIcon
                       name={provider.icon as any}
-                      size={getResponsiveIconSize(sizes.icons.md)}
+                      size={28}
                       color={provider.color}
-                      style={styles.providerIcon}
                     />
-                    <Text style={styles.providerText}>{provider.name}</Text>
                   </Pressable>
                 ))}
               </View>
@@ -793,18 +791,23 @@ const styles = StyleSheet.create({
   socialButtonsRow: {
     flexDirection: 'row',
     justifyContent: 'center',
-    gap: 16,
-    marginBottom: 16,
+    gap: 20,
+    marginBottom: 20,
   },
   socialButton: {
-    width: 52,
-    height: 52,
-    borderRadius: 12,
+    width: 64,
+    height: 64,
+    borderRadius: 14,
     borderWidth: 1,
     borderColor: '#e5e7eb',
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#ffffff',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
   },
   toggleButton: {
     paddingVertical: 8,
