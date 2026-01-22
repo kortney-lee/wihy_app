@@ -240,22 +240,22 @@ export default function SendInvitation({ visible, onClose, coachId }: SendInvita
 const styles = StyleSheet.create({
   modalOverlay: {
     flex: 1,
+    justifyContent: 'flex-end',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   backdrop: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    ...StyleSheet.absoluteFillObject,
   },
   modalContainer: {
     backgroundColor: '#fff',
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     maxHeight: '90%',
+    minHeight: 400,
   },
   safeArea: {
-    flex: 1,
   },
   scrollView: {
-    flex: 1,
   },
   scrollContent: {
     padding: 20,

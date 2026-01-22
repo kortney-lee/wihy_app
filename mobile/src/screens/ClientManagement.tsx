@@ -201,33 +201,9 @@ export default function ClientManagement() {
     });
   };
 
-  const handleAddClient = async () => {
-    // Show prompt for client email
-    Alert.prompt(
-      'Add New Client',
-      'Enter client email address:',
-      async (email) => {
-        if (!email?.trim()) return;
-        
-        try {
-          const result = await coachService.addClient({
-            coachId,
-            clientEmail: email.trim(),
-          });
-          
-          if (result.success) {
-            Alert.alert('Success', 'Client invitation sent successfully');
-            await loadClients();
-          } else {
-            Alert.alert('Error', result.message || 'Failed to add client');
-          }
-        } catch (err) {
-          const message = err instanceof Error ? err.message : 'Failed to add client';
-          Alert.alert('Error', message);
-        }
-      },
-      'plain-text'
-    );
+  const handleAddClient = () => {
+    // Navigate to client onboarding page
+    navigation.navigate('ClientOnboarding');
   };
 
   const handleUpdateClientStatus = async (client: Client, newStatus: 'active' | 'inactive') => {
