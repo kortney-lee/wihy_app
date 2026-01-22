@@ -12,6 +12,7 @@ import React, { useEffect, useState, useContext } from 'react';
 import { View, Text, ActivityIndicator, StyleSheet, Platform } from 'react-native';
 import { useNavigation, useRoute, CommonActions } from '@react-navigation/native';
 import { authService } from '../services/authService';
+import { checkoutService } from '../services/checkoutService';
 import { AuthContext } from '../context/AuthContext';
 import { colors } from '../theme/design-tokens';
 
@@ -37,66 +38,50 @@ export default function PaymentSuccessScreen() {
       console.log('Session ID:', sessionId);
 
       // Step 1: Get checkout session with login token from payment service
-      const checkoutRes = await fetch(
-        `https://payment.wihy.ai/api/stripe/checkout-session/${sessionId}`,
-        { method: 'GET' }
-      );
+      const checkoutResult = await checkoutService.getCheckoutSession(sessionId);
 
-      if (!checkoutRes.ok) {
-        throw new Error('Failed to retrieve checkout session');
+      if (!checkoutResult.success || !checkoutResult.session) {
+        throw new Error(checkoutResult.error || 'Failed to retrieve checkout session');
       }
 
-      const checkoutData = await checkoutRes.json();
       console.log('Checkout session retrieved:', {
-        hasLoginToken: !!checkoutData.session?.loginToken,
-        email: checkoutData.session?.email,
+        hasLoginToken: !!checkoutResult.session.loginToken,
+        email: checkoutResult.session.email,
       });
 
-      if (!checkoutData.session?.loginToken) {
+      if (!checkoutResult.session.loginToken) {
         throw new Error('No login token in checkout session');
       }
 
       // Step 2: Exchange login token for auth tokens
-      const authRes = await fetch(
-        'https://auth.wihy.ai/api/auth/verify-payment-token',
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ token: checkoutData.session.loginToken }),
-        }
-      );
+      const authResult = await checkoutService.verifyPaymentToken(checkoutResult.session.loginToken);
 
-      if (!authRes.ok) {
-        throw new Error('Failed to verify payment token');
+      if (!authResult.success || !authResult.accessToken) {
+        throw new Error(authResult.error || 'Failed to authenticate with payment token');
       }
 
-      const authData = await authRes.json();
       console.log('Auth tokens received:', {
-        success: authData.success,
-        hasAccessToken: !!authData.accessToken,
-        hasRefreshToken: !!authData.refreshToken,
+        success: authResult.success,
+        hasAccessToken: !!authResult.accessToken,
+        hasRefreshToken: !!authResult.refreshToken,
       });
-
-      if (!authData.success || !authData.accessToken) {
-        throw new Error('Failed to authenticate with payment token');
-      }
 
       // Step 3: Store tokens
       if (Platform.OS === 'web' && typeof localStorage !== 'undefined') {
-        localStorage.setItem('accessToken', authData.accessToken);
-        if (authData.refreshToken) {
-          localStorage.setItem('refreshToken', authData.refreshToken);
+        localStorage.setItem('accessToken', authResult.accessToken);
+        if (authResult.refreshToken) {
+          localStorage.setItem('refreshToken', authResult.refreshToken);
         }
       } else {
         // Native: use authService to store tokens
-        await authService.storeSessionToken(authData.accessToken);
+        await authService.storeSessionToken(authResult.accessToken);
       }
 
       // Step 4: Refresh user context
       await refreshUserContext();
 
       // Set plan name from checkout session
-      const planName = checkoutData.session?.planName || checkoutData.session?.plan || 'Premium';
+      const planName = checkoutResult.session.planName || checkoutResult.session.plan || 'Premium';
       setPlanName(planName);
 
       console.log('Payment login complete:', {

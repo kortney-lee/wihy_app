@@ -45,10 +45,10 @@ const providers = [
     color: '#000000',
   },
   {
-    id: 'microsoft',
-    name: 'Continue with Microsoft',
-    icon: 'logo-microsoft',
-    color: '#00BCF2',
+    id: 'facebook',
+    name: 'Continue with Facebook',
+    icon: 'logo-facebook',
+    color: '#1877F2',
   },
   {
     id: 'email',

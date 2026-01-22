@@ -831,6 +831,97 @@ class CheckoutService {
       };
     }
   }
+
+  /**
+   * Get checkout session details by session ID
+   * Used after Stripe redirect to get payment info
+   * Note: This is a public endpoint (no auth required) - used before login
+   */
+  async getCheckoutSession(sessionId: string): Promise<{
+    success: boolean;
+    session?: {
+      email?: string;
+      planName?: string;
+      plan?: string;
+      loginToken?: string;
+      status?: string;
+    };
+    error?: string;
+  }> {
+    try {
+      const response = await fetchWithLogging(
+        `${this.baseUrl}/api/stripe/checkout-session/${sessionId}`,
+        { 
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
+
+      const data = await response.json();
+
+      if (response.ok) {
+        return {
+          success: true,
+          session: data.session,
+        };
+      }
+
+      return {
+        success: false,
+        error: data.error || 'Failed to retrieve checkout session',
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        error: error.message || 'Network error',
+      };
+    }
+  }
+
+  /**
+   * Verify payment token and exchange for auth tokens
+   * Used after successful payment to log user in
+   * Note: This calls auth service, not payment service
+   */
+  async verifyPaymentToken(token: string): Promise<{
+    success: boolean;
+    accessToken?: string;
+    refreshToken?: string;
+    user?: any;
+    error?: string;
+  }> {
+    try {
+      const response = await fetchWithLogging(
+        `${API_CONFIG.authUrl}/api/auth/verify-payment-token`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        return {
+          success: true,
+          accessToken: data.accessToken,
+          refreshToken: data.refreshToken,
+          user: data.user,
+        };
+      }
+
+      return {
+        success: false,
+        error: data.error || 'Failed to verify payment token',
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        error: error.message || 'Network error',
+      };
+    }
+  }
 }
 
 // Export singleton instance
