@@ -8,7 +8,8 @@ export { HamburgerMenu } from './HamburgerMenu';
 export { useDashboardNavigation } from './useDashboardNavigation';
 export { QuickStartGuide } from './QuickStartGuide';
 export { WebTopNav, WebPageWrapper } from './WebTopNav';
-export { default as SvgIcon } from './SvgIcon';
+export { default as SvgIcon, Icon } from './SvgIcon';
+export { Ionicons } from './Ionicons';
 export * from './types';
 
 // Progressive Enhancement Components

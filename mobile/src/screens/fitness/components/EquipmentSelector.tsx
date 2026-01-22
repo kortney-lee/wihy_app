@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons } from '../../../components/shared';
 import type { WorkoutMode } from './ModeToggle';
 import { EQUIPMENT_OPTIONS } from '../constants';
 

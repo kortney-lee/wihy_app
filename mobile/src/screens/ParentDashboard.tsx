@@ -12,9 +12,8 @@ import {
   Animated,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { dashboardColors } from '../components/shared';
+import { dashboardColors, Ionicons } from '../components/shared';
 import { dashboardTheme } from '../theme/dashboardTheme';
 import { useDashboardLayout } from '../hooks/useDashboardLayout';
 import { familyService, Family, FamilyMember, FamilyDashboard as FamilyDashboardData } from '../services/familyService';

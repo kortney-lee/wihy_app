@@ -16,11 +16,10 @@ import {
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Picker } from '@react-native-picker/picker';
-import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { colors } from '../theme/design-tokens';
-import { dashboardColors, GradientDashboardHeader } from '../components/shared';
+import { dashboardColors, GradientDashboardHeader, Ionicons } from '../components/shared';
 import { 
   fitnessService, 
   DailyWorkout, 

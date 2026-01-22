@@ -16,7 +16,7 @@ import {
   Dimensions,
   ActivityIndicator,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons } from '../../components/shared';
 import { ExpandedSections, PerformanceGoal, BodyGoal, QuickGoal, EquipmentCategory } from './types';
 import { 
   FITNESS_LEVELS, 

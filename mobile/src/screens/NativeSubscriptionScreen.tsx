@@ -11,8 +11,8 @@ import {
   Linking,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
 import { StackNavigationProp } from '@react-navigation/stack';
+import { Ionicons } from '../components/shared';
 import { RootStackParamList } from '../types/navigation';
 
 // Subscription plans for native - matches backend plan keys

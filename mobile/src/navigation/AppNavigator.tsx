@@ -7,7 +7,7 @@ import * as Linking from 'expo-linking';
 import type { CompositeNavigationProp } from '@react-navigation/native';
 import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import type { StackNavigationProp } from '@react-navigation/stack';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons } from '../components/shared';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { TabParamList, RootStackParamList } from '../types/navigation';
 import { getResponsiveIconSize, getResponsiveButtonSize } from '../utils/responsive';

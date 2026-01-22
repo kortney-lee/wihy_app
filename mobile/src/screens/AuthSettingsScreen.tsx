@@ -15,8 +15,8 @@ import {
   Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
 import { useEnhancedAuth } from '../hooks/useEnhancedAuth';
+import { Ionicons } from '../components/shared';
 import { colors, sizes } from '../theme/design-tokens';
 
 export default function AuthSettingsScreen() {

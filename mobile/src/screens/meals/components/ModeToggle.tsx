@@ -14,7 +14,7 @@ import {
   TouchableOpacity,
   StyleSheet,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons } from '../../../components/shared';
 
 export type MealMode = 'quick' | 'plan' | 'diet';
 

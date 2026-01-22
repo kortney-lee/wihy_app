@@ -8,7 +8,7 @@ import {
   Platform,
   ScrollView,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons } from './shared';
 import { LinearGradient } from 'expo-linear-gradient';
 
 interface UpgradePromptProps {

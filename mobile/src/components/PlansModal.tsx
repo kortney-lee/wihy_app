@@ -12,7 +12,7 @@ import {
   Platform,
   Linking,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons } from './shared';
 import { checkoutService } from '../services/checkoutService';
 import { useAuth } from '../context/AuthContext';
 // import { purchaseService } from '../services/purchaseService'; // Requires production build

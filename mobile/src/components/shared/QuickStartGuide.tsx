@@ -9,14 +9,15 @@ import {
   Dimensions,
   Platform,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons as ExpoIonicons } from '@expo/vector-icons';
+import { Ionicons } from './Ionicons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 interface GuideStep {
   id: string;
-  icon: keyof typeof Ionicons.glyphMap;
+  icon: keyof typeof ExpoIonicons.glyphMap;
   iconColor: string;
   backgroundColor: string;
   title: string;
@@ -237,7 +238,7 @@ export const QuickStartGuide: React.FC<QuickStartGuideProps> = ({
   };
 
   // Tab bar icons for highlighting
-  const tabIcons: Array<{ name: keyof typeof Ionicons.glyphMap; label: string; target: string }> = [
+  const tabIcons: Array<{ name: keyof typeof ExpoIonicons.glyphMap; label: string; target: string }> = [
     { name: 'home-outline', label: 'Home', target: 'Home' },
     { name: 'scan-outline', label: 'Scan', target: 'Scan' },
     { name: 'chatbubble-outline', label: 'Chat', target: 'Chat' },
@@ -357,7 +358,7 @@ export const QuickStartGuide: React.FC<QuickStartGuideProps> = ({
                     ]}
                   >
                     <Ionicons
-                      name={isHighlighted ? tab.name.replace('-outline', '') as keyof typeof Ionicons.glyphMap : tab.name}
+                      name={isHighlighted ? tab.name.replace('-outline', '') as keyof typeof ExpoIonicons.glyphMap : tab.name}
                       size={24}
                       color={isHighlighted ? '#ffffff' : '#9ca3af'}
                     />

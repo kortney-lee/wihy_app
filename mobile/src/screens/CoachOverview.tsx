@@ -11,9 +11,9 @@ import {
   Animated,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { AuthContext } from '../context/AuthContext';
+import { Ionicons } from '../components/shared';
 import { hasAIAccess } from '../utils/capabilities';
 import { dashboardTheme } from '../theme/dashboardTheme';
 import { coachService, CoachOverview as CoachOverviewData } from '../services';
