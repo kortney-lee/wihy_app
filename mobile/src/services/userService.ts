@@ -298,7 +298,7 @@ class UserService {
 
   /**
    * Update user profile information
-   * PATCH /api/profile (userId from JWT token)
+   * PUT /api/profile/:userId
    */
   async updateUserProfile(
     userId: string,
@@ -323,8 +323,8 @@ class UserService {
       onboardingCompleted: boolean;
     }>
   ): Promise<ApiResponse<UserProfile>> {
-    // Use /api/profile without userId - backend identifies user from JWT
-    const endpoint = `${this.baseUrl}${USER_SERVICE_CONFIG.endpoints.updateProfile}`;
+    // Use /api/profile/:userId per API Reference
+    const endpoint = `${this.baseUrl}${USER_SERVICE_CONFIG.endpoints.updateProfile}/${userId}`;
     const headers = await this.getAuthHeaders();
     
     console.log('=== UPDATE USER PROFILE ===');
@@ -333,7 +333,7 @@ class UserService {
     
     try {
       const response = await fetchWithLogging(endpoint, {
-        method: 'PATCH',
+        method: 'PUT',
         headers,
         body: JSON.stringify(updates),
       });
@@ -366,7 +366,7 @@ class UserService {
     userId: string,
     avatarData: { avatarUrl?: string; avatarBase64?: string }
   ): Promise<ApiResponse<{ avatarUrl: string }>> {
-    const endpoint = `${this.baseUrl}${USER_SERVICE_CONFIG.endpoints.uploadAvatar}`.replace('/me/', `/${userId}/`);
+    const endpoint = `${this.baseUrl}/api/profile/${userId}/avatar`;
     const headers = await this.getAuthHeaders();
     
     console.log('=== UPLOAD AVATAR ===');
@@ -400,7 +400,7 @@ class UserService {
     currentPassword: string,
     newPassword: string
   ): Promise<ApiResponse> {
-    const endpoint = `${this.baseUrl}${USER_SERVICE_CONFIG.endpoints.changePassword}`.replace('/me/', `/${userId}/`);
+    const endpoint = `${this.baseUrl}/api/profile/${userId}/change-password`;
     const headers = await this.getAuthHeaders();
     
     console.log('=== CHANGE PASSWORD ===');

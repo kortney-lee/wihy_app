@@ -382,12 +382,12 @@ class ProfileService {
 
   /**
    * Get user profile from server
-   * GET /api/users/profile
+   * GET /api/profile/:userId
    */
   async getProfile(userId: string): Promise<UserProfile> {
     try {
       const response = await fetchWithLogging(
-        `${this.baseUrl}/api/users/${userId}/profile`
+        `${this.baseUrl}/api/profile/${userId}`
       );
       const data = await response.json();
       
@@ -404,7 +404,7 @@ class ProfileService {
 
   /**
    * Update user profile
-   * PUT /api/users/profile
+   * PUT /api/profile/:userId
    */
   async updateProfile(
     userId: string,
@@ -412,7 +412,7 @@ class ProfileService {
   ): Promise<UserProfile> {
     try {
       const response = await fetchWithLogging(
-        `${this.baseUrl}/api/users/${userId}/profile`,
+        `${this.baseUrl}/api/profile/${userId}`,
         {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
@@ -434,7 +434,7 @@ class ProfileService {
 
   /**
    * Upload avatar image
-   * POST /api/users/avatar
+   * POST /api/profile/:userId/avatar
    */
   async uploadAvatar(
     userId: string,
@@ -455,7 +455,7 @@ class ProfileService {
       formData.append('user_id', userId);
 
       const response = await fetchWithLogging(
-        `${this.baseUrl}/api/users/${userId}/avatar`,
+        `${this.baseUrl}/api/profile/${userId}/avatar`,
         {
           method: 'POST',
           body: formData,
