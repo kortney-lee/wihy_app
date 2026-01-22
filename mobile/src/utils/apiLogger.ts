@@ -270,21 +270,29 @@ export const apiLogger = new ApiLogger();
 
 /**
  * Import auth headers from config (lazy import to avoid circular dependency)
+ * 
+ * Authentication patterns:
+ * - auth.wihy.ai: Client credentials (x-client-id, x-client-secret) for login/register/verify
+ * - user.wihy.ai: JWT Bearer token (handled by individual services via getAuthHeaders())
+ * - services.wihy.ai: Client credentials for API access
+ * - ml.wihy.ai: Client credentials for ML API access
  */
 const getAuthHeadersForUrl = (url: string): Record<string, string> => {
   try {
     // Lazy import to avoid circular dependency
-    const { getMLAuthHeaders, getServicesAuthHeaders, getNativeAuthHeaders } = require('../services/config');
+    const { getMLAuthHeaders, getServicesAuthHeaders, getAppAuthHeaders } = require('../services/config');
     
     // Determine which auth headers to use based on URL
     if (url.includes('ml.wihy.ai')) {
       return getMLAuthHeaders();
     } else if (url.includes('services.wihy.ai')) {
       return getServicesAuthHeaders();
-    } else if (url.includes('auth.wihy.ai') || url.includes('user.wihy.ai') || url.includes('payment.wihy.ai')) {
-      // Native app credentials for auth, user, and payment services
-      return getNativeAuthHeaders();
+    } else if (url.includes('auth.wihy.ai')) {
+      // Only auth.wihy.ai uses client credentials (for login, register, verify, etc.)
+      return getAppAuthHeaders();
     }
+    // user.wihy.ai and payment.wihy.ai use Bearer tokens, not client credentials
+    // Bearer tokens are added by individual services via getAuthHeaders()
     return {};
   } catch {
     // Config not available yet
