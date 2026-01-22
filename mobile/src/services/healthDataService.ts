@@ -1,5 +1,13 @@
 import { Platform } from 'react-native';
 import Constants from 'expo-constants';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { API_CONFIG } from './config';
+
+// Storage keys for sync tracking
+const HEALTH_SYNC_STORAGE_KEYS = {
+  LAST_SYNC: '@wihy_health_last_sync',
+  SYNC_ENABLED: '@wihy_health_sync_enabled',
+};
 
 // Check if we're running in Expo Go (no native modules available)
 const isExpoGo = Constants.appOwnership === 'expo';
@@ -93,6 +101,134 @@ export interface WeeklyHealthData {
     calories: HealthTrend;
     activeMinutes: HealthTrend;
   };
+}
+
+// Backend sync types (user.wihy.ai/api/users/me/health-data)
+export interface HealthSyncMetrics {
+  steps?: number;
+  distanceMeters?: number;
+  floorsClimbed?: number;
+  activeMinutes?: number;
+  activeCalories?: number;
+  totalCalories?: number;
+  workoutsCompleted?: number;
+  exerciseMinutes?: number;
+  standHours?: number;
+  heartRateAvg?: number;
+  heartRateMin?: number;
+  heartRateMax?: number;
+  heartRateResting?: number;
+  heartRateVariability?: number;
+  bloodOxygenPercent?: number;
+  respiratoryRate?: number;
+  weightKg?: number;
+  bodyFatPercent?: number;
+  bmi?: number;
+  sleepHours?: number;
+  sleepDeepHours?: number;
+  sleepRemHours?: number;
+  sleepLightHours?: number;
+  sleepAwakeMinutes?: number;
+  sleepQualityScore?: number;
+  waterMl?: number;
+  caffeineMg?: number;
+  mindfulMinutes?: number;
+  healthScore?: number;
+  activityScore?: number;
+}
+
+export interface HealthSyncPayload {
+  source: 'apple_healthkit' | 'google_health_connect' | 'manual';
+  deviceType: string;
+  timezone: string;
+  recordedAt: string;
+  metrics: HealthSyncMetrics;
+  rawData?: Record<string, unknown>;
+}
+
+export interface HealthSyncBatchPayload {
+  source: 'apple_healthkit' | 'google_health_connect' | 'manual';
+  deviceType: string;
+  timezone: string;
+  records: Array<{
+    recordedAt: string;
+    metrics: HealthSyncMetrics;
+  }>;
+}
+
+export interface HealthSyncResponse {
+  success: boolean;
+  message?: string;
+  data?: {
+    id?: string;
+    recordedAt?: string;
+    syncedAt?: string;
+    synced?: number;
+    skipped?: number;
+    errors?: string[];
+  };
+  error?: string;
+}
+
+export interface HealthDataRecord {
+  date: string;
+  steps?: number;
+  activeMinutes?: number;
+  sleepHours?: number;
+  heartRateAvg?: number;
+  healthScore?: number;
+  distanceMeters?: number;
+  activeCalories?: number;
+  weightKg?: number;
+}
+
+export interface HealthDataResponse {
+  success: boolean;
+  data?: {
+    userId: string;
+    dateRange: { start: string; end: string };
+    latestSync?: string;
+    source?: string;
+    records: HealthDataRecord[];
+    summary: {
+      avgSteps?: number;
+      avgActiveMinutes?: number;
+      avgSleepHours?: number;
+      avgHealthScore?: number;
+      totalActiveCalories?: number;
+      trend?: {
+        steps?: 'up' | 'down' | 'stable';
+        activity?: 'up' | 'down' | 'stable';
+        sleep?: 'up' | 'down' | 'stable';
+      };
+    };
+  };
+  error?: string;
+}
+
+export interface HealthLatestResponse {
+  success: boolean;
+  data?: {
+    lastSync?: string;
+    source?: string;
+    today: {
+      steps?: number;
+      stepsGoal?: number;
+      stepsPercent?: number;
+      activeMinutes?: number;
+      activeMinutesGoal?: number;
+      activeMinutesPercent?: number;
+      calories?: number;
+      heartRate?: number;
+      healthScore?: number;
+    };
+    streaks?: {
+      stepsGoal?: number;
+      activityGoal?: number;
+      sleepGoal?: number;
+    };
+  };
+  error?: string;
 }
 
 export interface NutritionData {
@@ -1087,6 +1223,593 @@ class HealthDataService {
   formatNumber(num: number): string {
     return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
   }
-}
 
-export const healthDataService = new HealthDataService();
+  // ============================================================
+  // BACKEND SYNC METHODS (user.wihy.ai/api/users/me/health-data)
+  // ============================================================
+
+  /**
+   * Sync health data to backend
+   * Fetches data from device since last sync and sends to user.wihy.ai
+   * 
+   * @param accessToken - JWT token from auth
+   * @param daysBack - Number of days to sync (default 7, max 100 for batch)
+   */
+  async syncHealthDataToBackend(accessToken: string, daysBack: number = 7): Promise<HealthSyncResponse> {
+    try {
+      console.log(`[HealthDataService] Starting sync for last ${daysBack} days...`);
+
+      // 1. Get last sync timestamp
+      const lastSyncStr = await AsyncStorage.getItem(HEALTH_SYNC_STORAGE_KEYS.LAST_SYNC);
+      const lastSync = lastSyncStr ? new Date(lastSyncStr) : null;
+      
+      // If we synced recently (within 15 minutes), skip unless forced
+      if (lastSync && Date.now() - lastSync.getTime() < 15 * 60 * 1000) {
+        console.log('[HealthDataService] Recently synced, skipping...');
+        return { 
+          success: true, 
+          message: 'Already synced recently',
+          data: { synced: 0, skipped: 0, errors: [] }
+        };
+      }
+
+      // 2. Collect health data for each day
+      const records: Array<{ recordedAt: string; metrics: HealthSyncMetrics }> = [];
+      const today = new Date();
+      
+      for (let i = 0; i < Math.min(daysBack, 100); i++) {
+        const date = new Date(today);
+        date.setDate(date.getDate() - i);
+        date.setHours(0, 0, 0, 0);
+        
+        try {
+          const dayMetrics = await this.getMetricsForDate(date);
+          if (dayMetrics && Object.keys(dayMetrics).length > 0) {
+            records.push({
+              recordedAt: date.toISOString(),
+              metrics: dayMetrics,
+            });
+          }
+        } catch (err) {
+          console.log(`[HealthDataService] Could not get data for ${date.toISOString()}:`, err);
+        }
+      }
+
+      if (records.length === 0) {
+        console.log('[HealthDataService] No health data to sync');
+        return { 
+          success: true, 
+          message: 'No data to sync',
+          data: { synced: 0, skipped: 0, errors: [] }
+        };
+      }
+
+      // 3. Batch sync to backend
+      const payload: HealthSyncBatchPayload = {
+        source: Platform.OS === 'ios' ? 'apple_healthkit' : 'google_health_connect',
+        deviceType: Platform.OS === 'ios' ? 'iphone' : 'android',
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        records,
+      };
+
+      const response = await fetch(`${API_CONFIG.userUrl}/api/users/me/health-data/batch`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const result: HealthSyncResponse = await response.json();
+
+      if (result.success) {
+        // Update last sync timestamp
+        await AsyncStorage.setItem(HEALTH_SYNC_STORAGE_KEYS.LAST_SYNC, new Date().toISOString());
+        console.log(`[HealthDataService] ✅ Synced ${result.data?.synced || 0} health records`);
+      } else {
+        console.error('[HealthDataService] Sync failed:', result.error);
+      }
+
+      return result;
+
+    } catch (error) {
+      console.error('[HealthDataService] ❌ Health sync failed:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to sync health data',
+      };
+    }
+  }
+
+  /**
+   * Sync today's health data to backend (single day)
+   */
+  async syncTodayToBackend(accessToken: string): Promise<HealthSyncResponse> {
+    try {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      const metrics = await this.getTodayMetrics();
+      const healthScore = await this.getHealthScore();
+
+      const payload: HealthSyncPayload = {
+        source: Platform.OS === 'ios' ? 'apple_healthkit' : 'google_health_connect',
+        deviceType: Platform.OS === 'ios' ? 'iphone' : 'android',
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        recordedAt: today.toISOString(),
+        metrics: {
+          steps: metrics.steps,
+          distanceMeters: metrics.distance * 1000, // Convert km to meters
+          activeMinutes: metrics.activeMinutes,
+          activeCalories: metrics.calories,
+          heartRateAvg: metrics.heartRate,
+          sleepHours: metrics.sleepHours,
+          weightKg: metrics.weight,
+          waterMl: metrics.hydration ? metrics.hydration * 1000 : undefined, // Convert liters to ml
+          healthScore,
+        },
+      };
+
+      const response = await fetch(`${API_CONFIG.userUrl}/api/users/me/health-data`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const result: HealthSyncResponse = await response.json();
+
+      if (result.success) {
+        await AsyncStorage.setItem(HEALTH_SYNC_STORAGE_KEYS.LAST_SYNC, new Date().toISOString());
+        console.log('[HealthDataService] ✅ Synced today\'s health data');
+      }
+
+      return result;
+
+    } catch (error) {
+      console.error('[HealthDataService] ❌ Today sync failed:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to sync today\'s data',
+      };
+    }
+  }
+
+  /**
+   * Get health data from backend (for web dashboard or cross-device sync)
+   */
+  async getHealthDataFromBackend(
+    accessToken: string,
+    startDate?: string,
+    endDate?: string,
+    granularity: 'daily' | 'weekly' | 'monthly' = 'daily'
+  ): Promise<HealthDataResponse> {
+    try {
+      const params = new URLSearchParams();
+      if (startDate) params.append('startDate', startDate);
+      if (endDate) params.append('endDate', endDate);
+      params.append('granularity', granularity);
+
+      const url = `${API_CONFIG.userUrl}/api/users/me/health-data?${params.toString()}`;
+
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+        },
+      });
+
+      return await response.json();
+
+    } catch (error) {
+      console.error('[HealthDataService] ❌ Failed to get health data:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to get health data',
+      };
+    }
+  }
+
+  /**
+   * Get latest health summary from backend (for dashboard widgets)
+   */
+  async getLatestHealthSummary(accessToken: string): Promise<HealthLatestResponse> {
+    try {
+      const response = await fetch(`${API_CONFIG.userUrl}/api/users/me/health-data/latest`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+        },
+      });
+
+      return await response.json();
+
+    } catch (error) {
+      console.error('[HealthDataService] ❌ Failed to get health summary:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to get health summary',
+      };
+    }
+  }
+
+  /**
+   * Get health data for a client (coach access)
+   */
+  async getClientHealthData(
+    accessToken: string,
+    userId: string,
+    startDate?: string,
+    endDate?: string
+  ): Promise<HealthDataResponse> {
+    try {
+      const params = new URLSearchParams();
+      if (startDate) params.append('startDate', startDate);
+      if (endDate) params.append('endDate', endDate);
+
+      const url = `${API_CONFIG.userUrl}/api/users/${userId}/health-data?${params.toString()}`;
+
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+        },
+      });
+
+      return await response.json();
+
+    } catch (error) {
+      console.error('[HealthDataService] ❌ Failed to get client health data:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to get client health data',
+      };
+    }
+  }
+
+  /**
+   * Delete health data from backend (GDPR compliance)
+   */
+  async deleteHealthData(
+    accessToken: string,
+    options: { startDate?: string; endDate?: string; all?: boolean } = {}
+  ): Promise<{ success: boolean; deletedCount?: number; error?: string }> {
+    try {
+      const params = new URLSearchParams();
+      if (options.startDate) params.append('startDate', options.startDate);
+      if (options.endDate) params.append('endDate', options.endDate);
+      if (options.all) params.append('all', 'true');
+
+      const url = `${API_CONFIG.userUrl}/api/users/me/health-data?${params.toString()}`;
+
+      const response = await fetch(url, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+        },
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        // Clear local sync timestamp
+        await AsyncStorage.removeItem(HEALTH_SYNC_STORAGE_KEYS.LAST_SYNC);
+      }
+
+      return {
+        success: result.success,
+        deletedCount: result.data?.deletedCount,
+        error: result.error,
+      };
+
+    } catch (error) {
+      console.error('[HealthDataService] ❌ Failed to delete health data:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to delete health data',
+      };
+    }
+  }
+
+  /**
+   * Get last sync timestamp
+   */
+  async getLastSyncTime(): Promise<Date | null> {
+    const lastSyncStr = await AsyncStorage.getItem(HEALTH_SYNC_STORAGE_KEYS.LAST_SYNC);
+    return lastSyncStr ? new Date(lastSyncStr) : null;
+  }
+
+  /**
+   * Enable/disable automatic health sync
+   */
+  async setSyncEnabled(enabled: boolean): Promise<void> {
+    await AsyncStorage.setItem(HEALTH_SYNC_STORAGE_KEYS.SYNC_ENABLED, enabled ? 'true' : 'false');
+  }
+
+  /**
+   * Check if automatic health sync is enabled
+   */
+  async isSyncEnabled(): Promise<boolean> {
+    const enabled = await AsyncStorage.getItem(HEALTH_SYNC_STORAGE_KEYS.SYNC_ENABLED);
+    return enabled !== 'false'; // Default to enabled
+  }
+
+  /**
+   * Get health metrics for a specific date (for batch sync)
+   * Aggregates all metrics for a single day
+   */
+  private async getMetricsForDate(date: Date): Promise<HealthSyncMetrics> {
+    const startOfDay = new Date(date);
+    startOfDay.setHours(0, 0, 0, 0);
+    const endOfDay = new Date(date);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    // For Expo Go, return mock data
+    if (this.isExpoGo) {
+      const mockData = this.getMockMetrics();
+      return {
+        steps: mockData.steps,
+        distanceMeters: mockData.distance * 1000,
+        activeMinutes: mockData.activeMinutes,
+        activeCalories: mockData.calories,
+        heartRateAvg: mockData.heartRate,
+        sleepHours: mockData.sleepHours,
+        weightKg: mockData.weight,
+        waterMl: mockData.hydration ? mockData.hydration * 1000 : undefined,
+      };
+    }
+
+    // For real devices, fetch from HealthKit/Health Connect
+    if (Platform.OS === 'ios' && HealthKit) {
+      return await this.getHealthKitMetricsForDate(startOfDay, endOfDay);
+    } else if (Platform.OS === 'android') {
+      if (this.useHealthConnect && HealthConnectModule) {
+        return await this.getHealthConnectMetricsForDate(startOfDay, endOfDay);
+      } else if (GoogleFit) {
+        return await this.getGoogleFitMetricsForDate(startOfDay, endOfDay);
+      }
+    }
+
+    return {};
+  }
+
+  /**
+   * Get HealthKit metrics for a date range
+   */
+  private async getHealthKitMetricsForDate(startDate: Date, endDate: Date): Promise<HealthSyncMetrics> {
+    const metrics: HealthSyncMetrics = {};
+
+    try {
+      // Steps
+      const steps = await HealthKit.querySamples('HKQuantityTypeIdentifierStepCount', {
+        from: startDate,
+        to: endDate,
+      });
+      if (steps && steps.length > 0) {
+        metrics.steps = steps.reduce((sum: number, s: any) => sum + (s.value || 0), 0);
+      }
+
+      // Distance
+      const distance = await HealthKit.querySamples('HKQuantityTypeIdentifierDistanceWalkingRunning', {
+        from: startDate,
+        to: endDate,
+      });
+      if (distance && distance.length > 0) {
+        metrics.distanceMeters = distance.reduce((sum: number, d: any) => sum + (d.value || 0), 0);
+      }
+
+      // Active energy
+      const energy = await HealthKit.querySamples('HKQuantityTypeIdentifierActiveEnergyBurned', {
+        from: startDate,
+        to: endDate,
+      });
+      if (energy && energy.length > 0) {
+        metrics.activeCalories = energy.reduce((sum: number, e: any) => sum + (e.value || 0), 0);
+      }
+
+      // Exercise minutes
+      const exercise = await HealthKit.querySamples('HKQuantityTypeIdentifierAppleExerciseTime', {
+        from: startDate,
+        to: endDate,
+      });
+      if (exercise && exercise.length > 0) {
+        metrics.activeMinutes = exercise.reduce((sum: number, e: any) => sum + (e.value || 0), 0);
+      }
+
+      // Heart rate
+      const heartRate = await HealthKit.querySamples('HKQuantityTypeIdentifierHeartRate', {
+        from: startDate,
+        to: endDate,
+      });
+      if (heartRate && heartRate.length > 0) {
+        const hrValues = heartRate.map((h: any) => h.value).filter(Boolean);
+        if (hrValues.length > 0) {
+          metrics.heartRateAvg = Math.round(hrValues.reduce((a: number, b: number) => a + b, 0) / hrValues.length);
+          metrics.heartRateMin = Math.min(...hrValues);
+          metrics.heartRateMax = Math.max(...hrValues);
+        }
+      }
+
+      // Weight
+      const weight = await HealthKit.querySamples('HKQuantityTypeIdentifierBodyMass', {
+        from: startDate,
+        to: endDate,
+      });
+      if (weight && weight.length > 0) {
+        metrics.weightKg = weight[weight.length - 1].value; // Latest weight
+      }
+
+      // Sleep (simplified - just total hours)
+      const sleep = await HealthKit.querySamples('HKCategoryTypeIdentifierSleepAnalysis', {
+        from: startDate,
+        to: endDate,
+      });
+      if (sleep && sleep.length > 0) {
+        const totalSleepMs = sleep.reduce((sum: number, s: any) => {
+          const start = new Date(s.startDate).getTime();
+          const end = new Date(s.endDate).getTime();
+          return sum + (end - start);
+        }, 0);
+        metrics.sleepHours = Math.round((totalSleepMs / (1000 * 60 * 60)) * 10) / 10;
+      }
+
+    } catch (error) {
+      console.error('[HealthDataService] Error getting HealthKit metrics:', error);
+    }
+
+    return metrics;
+  }
+
+  /**
+   * Get Health Connect metrics for a date range
+   */
+  private async getHealthConnectMetricsForDate(startDate: Date, endDate: Date): Promise<HealthSyncMetrics> {
+    const metrics: HealthSyncMetrics = {};
+    const timeRange = {
+      timeRangeFilter: {
+        operator: 'between' as const,
+        startTime: startDate.toISOString(),
+        endTime: endDate.toISOString(),
+      },
+    };
+
+    try {
+      // Steps
+      const stepsResult = await HealthConnectModule.readRecords('Steps', timeRange);
+      if (stepsResult.records?.length > 0) {
+        metrics.steps = stepsResult.records.reduce((sum: number, r: any) => sum + (r.count || 0), 0);
+      }
+
+      // Distance
+      const distanceResult = await HealthConnectModule.readRecords('Distance', timeRange);
+      if (distanceResult.records?.length > 0) {
+        metrics.distanceMeters = distanceResult.records.reduce((sum: number, r: any) => sum + (r.distance?.inMeters || 0), 0);
+      }
+
+      // Active calories
+      const caloriesResult = await HealthConnectModule.readRecords('ActiveCaloriesBurned', timeRange);
+      if (caloriesResult.records?.length > 0) {
+        metrics.activeCalories = caloriesResult.records.reduce((sum: number, r: any) => sum + (r.energy?.inKilocalories || 0), 0);
+      }
+
+      // Exercise/Active minutes
+      const exerciseResult = await HealthConnectModule.readRecords('ExerciseSession', timeRange);
+      if (exerciseResult.records?.length > 0) {
+        metrics.activeMinutes = Math.round(exerciseResult.records.reduce((sum: number, r: any) => {
+          const start = new Date(r.startTime).getTime();
+          const end = new Date(r.endTime).getTime();
+          return sum + (end - start) / 60000;
+        }, 0));
+      }
+
+      // Heart rate
+      const hrResult = await HealthConnectModule.readRecords('HeartRate', timeRange);
+      if (hrResult.records?.length > 0) {
+        const hrSamples = hrResult.records.flatMap((r: any) => r.samples || []);
+        if (hrSamples.length > 0) {
+          const hrValues = hrSamples.map((s: any) => s.beatsPerMinute).filter(Boolean);
+          metrics.heartRateAvg = Math.round(hrValues.reduce((a: number, b: number) => a + b, 0) / hrValues.length);
+          metrics.heartRateMin = Math.min(...hrValues);
+          metrics.heartRateMax = Math.max(...hrValues);
+        }
+      }
+
+      // Weight
+      const weightResult = await HealthConnectModule.readRecords('Weight', timeRange);
+      if (weightResult.records?.length > 0) {
+        metrics.weightKg = weightResult.records[weightResult.records.length - 1].weight?.inKilograms;
+      }
+
+      // Sleep
+      const sleepResult = await HealthConnectModule.readRecords('SleepSession', timeRange);
+      if (sleepResult.records?.length > 0) {
+        const totalSleepMs = sleepResult.records.reduce((sum: number, r: any) => {
+          const start = new Date(r.startTime).getTime();
+          const end = new Date(r.endTime).getTime();
+          return sum + (end - start);
+        }, 0);
+        metrics.sleepHours = Math.round((totalSleepMs / (1000 * 60 * 60)) * 10) / 10;
+      }
+
+    } catch (error) {
+      console.error('[HealthDataService] Error getting Health Connect metrics:', error);
+    }
+
+    return metrics;
+  }
+
+  /**
+   * Get Google Fit metrics for a date range (fallback for older Android)
+   */
+  private async getGoogleFitMetricsForDate(startDate: Date, endDate: Date): Promise<HealthSyncMetrics> {
+    const metrics: HealthSyncMetrics = {};
+    const options = {
+      startDate: startDate.toISOString(),
+      endDate: endDate.toISOString(),
+    };
+
+    try {
+      // Steps
+      const steps = await GoogleFit.getDailyStepCountSamples(options);
+      if (steps && steps.length > 0) {
+        // Find the source with the most steps (usually "merged:com.google.step_count.cumulative")
+        const bestSource = steps.reduce((best: any, source: any) => {
+          const totalSteps = source.steps?.reduce((sum: number, day: any) => sum + (day.value || 0), 0) || 0;
+          const bestSteps = best?.steps?.reduce((sum: number, day: any) => sum + (day.value || 0), 0) || 0;
+          return totalSteps > bestSteps ? source : best;
+        }, steps[0]);
+        
+        if (bestSource?.steps?.length > 0) {
+          metrics.steps = bestSource.steps.reduce((sum: number, day: any) => sum + (day.value || 0), 0);
+        }
+      }
+
+      // Distance
+      const distance = await GoogleFit.getDailyDistanceSamples(options);
+      if (distance && distance.length > 0) {
+        metrics.distanceMeters = distance.reduce((sum: number, d: any) => sum + (d.distance || 0), 0);
+      }
+
+      // Calories
+      const calories = await GoogleFit.getDailyCalorieSamples(options);
+      if (calories && calories.length > 0) {
+        metrics.activeCalories = calories.reduce((sum: number, c: any) => sum + (c.calorie || 0), 0);
+      }
+
+      // Heart rate
+      const heartRate = await GoogleFit.getHeartRateSamples(options);
+      if (heartRate && heartRate.length > 0) {
+        const hrValues = heartRate.map((h: any) => h.value).filter(Boolean);
+        if (hrValues.length > 0) {
+          metrics.heartRateAvg = Math.round(hrValues.reduce((a: number, b: number) => a + b, 0) / hrValues.length);
+          metrics.heartRateMin = Math.min(...hrValues);
+          metrics.heartRateMax = Math.max(...hrValues);
+        }
+      }
+
+      // Weight
+      const weight = await GoogleFit.getWeightSamples(options);
+      if (weight && weight.length > 0) {
+        metrics.weightKg = weight[weight.length - 1].value;
+      }
+
+      // Sleep
+      const sleep = await GoogleFit.getSleepSamples(options);
+      if (sleep && sleep.length > 0) {
+        const totalSleepMs = sleep.reduce((sum: number, s: any) => {
+          const start = new Date(s.startDate).getTime();
+          const end = new Date(s.endDate).getTime();
+          return sum + (end - start);
+        }, 0);
+        metrics.sleepHours = Math.round((totalSleepMs / (1000 * 60 * 60)) * 10) / 10;
+      }
+
+    } catch (error) {
+      console.error('[HealthDataService] Error getting Google Fit metrics:', error);
+    }
+
+    return metrics;
+  }
