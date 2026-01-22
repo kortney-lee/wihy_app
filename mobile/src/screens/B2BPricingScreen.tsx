@@ -9,8 +9,8 @@ import {
   Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
 import { StackNavigationProp } from '@react-navigation/stack';
+import { Ionicons } from '../components/shared';
 import { RootStackParamList } from '../types/navigation';
 import { colors, borderRadius } from '../theme/design-tokens';
 import { useAuth } from '../context/AuthContext';

@@ -16,8 +16,8 @@ import { RouteProp } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../types/navigation';
 import { createInstacartLinkFromMealPlan } from '../services/instacartService';
-import { Ionicons } from '@expo/vector-icons';
 import { AuthContext } from '../context/AuthContext';
+import { Ionicons } from '../components/shared';
 // Note: Mock data removed to expose real API issues
 import { GradientDashboardHeader } from '../components/shared';
 

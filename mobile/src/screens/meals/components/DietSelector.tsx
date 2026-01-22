@@ -14,7 +14,7 @@ import {
   ActivityIndicator,
   TextInput,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons } from '../../../components/shared';
 import { mealService, DietOption } from '../../../services/mealService';
 
 interface DietSelectorProps {

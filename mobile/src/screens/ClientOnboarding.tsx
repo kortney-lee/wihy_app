@@ -12,8 +12,7 @@ import {
   Animated,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
-import { dashboardColors } from '../components/shared';
+import { dashboardColors, Ionicons } from '../components/shared';
 import { dashboardTheme } from '../theme/dashboardTheme';
 
 const isWeb = Platform.OS === 'web';

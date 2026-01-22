@@ -21,9 +21,8 @@ import type { RootStackParamList } from '../types/navigation';
 import { getMealDetails } from '../services/mealPlanService';
 import { mealService, ShoppingList } from '../services/mealService';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Ionicons } from '@expo/vector-icons';
 import { AuthContext } from '../context/AuthContext';
-import { GradientDashboardHeader } from '../components/shared';
+import { GradientDashboardHeader, Ionicons } from '../components/shared';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 

@@ -15,7 +15,7 @@ import {
   Dimensions,
   Alert,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons } from '../../components/shared';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { DailyWorkout, Exercise } from '../../services';
 import { ProgramProgress, CompletedSet } from './types';

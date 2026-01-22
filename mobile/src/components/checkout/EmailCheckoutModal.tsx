@@ -10,7 +10,7 @@ import {
   ActivityIndicator,
   Image,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons } from '../shared';
 import { colors, borderRadius } from '../../theme/design-tokens';
 
 // Import logo image for web compatibility

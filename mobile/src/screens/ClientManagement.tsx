@@ -13,9 +13,8 @@ import {
   ScrollView,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { dashboardColors } from '../components/shared';
+import { dashboardColors, Ionicons } from '../components/shared';
 
 const isWeb = Platform.OS === 'web';
 import { dashboardTheme } from '../theme/dashboardTheme';

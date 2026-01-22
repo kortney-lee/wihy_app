@@ -3,7 +3,8 @@ import {SafeAreaProvider} from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Alert, AppState, Platform, LogBox, ActivityIndicator, View } from 'react-native';
 import * as Font from 'expo-font';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons'; // Keep for font loading
+import { Ionicons as CrossPlatformIonicons } from './components/shared';
 import AppNavigator from './navigation/AppNavigator';
 import { SessionProvider } from './contexts/SessionContext';
 import { AuthProvider } from './context/AuthContext';

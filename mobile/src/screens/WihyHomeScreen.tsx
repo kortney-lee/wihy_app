@@ -22,8 +22,8 @@ import type { CompositeNavigationProp } from '@react-navigation/native';
 import { SweepBorder } from '../components/SweepBorder';
 import { getResponsiveFontSize, getResponsiveButtonSize, getResponsiveSpacing, isTablet, getDeviceType } from '../utils/responsive';
 import { colors, shadows, radii, spacing } from '../theme/design-tokens';
-import { Ionicons } from '@expo/vector-icons';
 import { AuthContext } from '../context/AuthContext';
+import { Ionicons } from '../components/shared';
 import MultiAuthLogin from '../components/auth/MultiAuthLogin';
 import { WebNavHeader } from '../components/web/WebNavHeader';
 
