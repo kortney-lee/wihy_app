@@ -37,7 +37,15 @@ interface Client {
   adherence: number;
 }
 
-export default function ClientManagement() {
+interface ClientManagementProps {
+  isDashboardMode?: boolean;
+  onBack?: () => void;
+}
+
+export default function ClientManagement({
+  isDashboardMode = false,
+  onBack,
+}: ClientManagementProps) {
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   const { coachId, user } = useAuth();
   

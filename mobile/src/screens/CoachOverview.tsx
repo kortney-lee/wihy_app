@@ -29,7 +29,15 @@ interface RevenueStats {
   commissionRate: number;
 }
 
-export default function CoachOverview() {
+interface CoachOverviewProps {
+  isDashboardMode?: boolean;
+  onBack?: () => void;
+}
+
+export default function CoachOverview({
+  isDashboardMode = false,
+  onBack,
+}: CoachOverviewProps) {
   const { user } = useContext(AuthContext);
   const coachId = user?.coachId;
   const [selectedPeriod, setSelectedPeriod] = useState<'week' | 'month' | 'year'>('month');
