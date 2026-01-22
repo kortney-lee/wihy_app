@@ -1,3 +1,5 @@
+import { fetchWithLogging } from '../utils/apiLogger';
+
 const API_BASE = 'https://services.wihy.ai/api';
 
 // Note: Mock data removed to expose real API issues
@@ -65,7 +67,7 @@ export async function createMealPlan(
   request: CreateMealPlanRequest
 ): Promise<MealPlan> {
   try {
-    const response = await fetch(`${API_BASE}/meal-plans`, {
+    const response = await fetchWithLogging(`${API_BASE}/meal-plans`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -95,7 +97,7 @@ export async function createMealPlan(
  * Get meal plan details
  */
 export async function getMealPlan(mealPlanId: number): Promise<MealPlan> {
-  const response = await fetch(`${API_BASE}/meal-plans/${mealPlanId}`);
+  const response = await fetchWithLogging(`${API_BASE}/meal-plans/${mealPlanId}`);
 
   if (!response.ok) {
     throw new Error(`Failed to get meal plan: ${response.statusText}`);
@@ -112,7 +114,7 @@ export async function generateShoppingList(
   mealPlanId: number
 ): Promise<ShoppingList> {
   try {
-    const response = await fetch(
+    const response = await fetchWithLogging(
       `${API_BASE}/meal-plans/${mealPlanId}/shopping-list`,
       {
         method: 'POST',
@@ -149,7 +151,7 @@ export async function addMealToPlan(
     servings: number;
   }
 ): Promise<void> {
-  const response = await fetch(
+  const response = await fetchWithLogging(
     `${API_BASE}/meal-plans/${mealPlanId}/days/${dayNumber}/meals`,
     {
       method: 'POST',
@@ -177,7 +179,7 @@ export async function createShoppingList(
     quantity: string;
   }>
 ): Promise<{ listId: string }> {
-  const response = await fetch(`${API_BASE}/shopping-lists`, {
+  const response = await fetchWithLogging(`${API_BASE}/shopping-lists`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -225,7 +227,7 @@ export async function getUserMeals(
     const queryString = params.toString();
     const url = `${API_BASE}/users/${userId}/meals/diary${queryString ? '?' + queryString : ''}`;
 
-    const response = await fetch(url);
+    const response = await fetchWithLogging(url);
 
     if (!response.ok) {
       const errorText = await response.text();
@@ -266,7 +268,7 @@ export async function getUserMeals(
 export async function getMealDetails(mealId: string): Promise<any> {
   try {
     // Fetch from API
-    const response = await fetch(`${API_BASE}/meals/${mealId}`);
+    const response = await fetchWithLogging(`${API_BASE}/meals/${mealId}`);
 
     if (!response.ok) {
       const errorText = await response.text();

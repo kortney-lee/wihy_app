@@ -14,6 +14,7 @@ import { storageService } from './storage/storageService';
 import { syncEngine } from './sync/syncEngine';
 import { connectivityService } from './connectivity/connectivityService';
 import { authService } from './authService';
+import { fetchWithLogging } from '../utils/apiLogger';
 
 // ============================================
 // TYPES - What the backend returns/expects
@@ -167,7 +168,7 @@ class WorkoutLogService {
     // Try to sync immediately
     try {
       const headers = await this.getAuthHeaders();
-      const response = await fetch(this.baseUrl, {
+      const response = await fetchWithLogging(this.baseUrl, {
         method: 'POST',
         headers,
         body: JSON.stringify(request),
@@ -214,7 +215,7 @@ class WorkoutLogService {
       const params = new URLSearchParams({ startDate });
       if (endDate) params.append('endDate', endDate);
 
-      const response = await fetch(`${this.baseUrl}?${params}`, {
+      const response = await fetchWithLogging(`${this.baseUrl}?${params}`, {
         method: 'GET',
         headers,
       });
@@ -268,7 +269,7 @@ class WorkoutLogService {
 
     try {
       const headers = await this.getAuthHeaders();
-      const response = await fetch(`${this.baseUrl}/summary?period=${period}`, {
+      const response = await fetchWithLogging(`${this.baseUrl}/summary?period=${period}`, {
         method: 'GET',
         headers,
       });
@@ -491,7 +492,7 @@ class WorkoutLogService {
     // Delete from server
     try {
       const headers = await this.getAuthHeaders();
-      await fetch(`${this.baseUrl}/${logId}`, {
+      await fetchWithLogging(`${this.baseUrl}/${logId}`, {
         method: 'DELETE',
         headers,
       });

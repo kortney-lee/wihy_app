@@ -10,6 +10,7 @@
 import { authService } from './authService';
 import { storageService } from './storage/storageService';
 import { connectivityService } from './connectivity/connectivityService';
+import { fetchWithLogging } from '../utils/apiLogger';
 
 // ============================================
 // CONFIGURATION
@@ -85,7 +86,7 @@ class ServicesApiClient {
     const timeoutId = setTimeout(() => controller.abort(), timeout);
 
     try {
-      const response = await fetch(url, {
+      const response = await fetchWithLogging(url, {
         ...options,
         signal: controller.signal,
       });

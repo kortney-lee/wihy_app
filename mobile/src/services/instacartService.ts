@@ -1,3 +1,5 @@
+import { fetchWithLogging } from '../utils/apiLogger';
+
 const API_BASE = 'https://services.wihy.ai/api';
 
 export interface Retailer {
@@ -49,7 +51,7 @@ export interface ApiResponse<T> {
 export async function getShoppingOptions(
   postalCode: string
 ): Promise<ShoppingOptions> {
-  const response = await fetch(
+  const response = await fetchWithLogging(
     `${API_BASE}/instacart/shopping-options?postalCode=${postalCode}`
   );
 
@@ -68,7 +70,7 @@ export async function createInstacartLinkFromMealPlan(
   mealPlanId: number
 ): Promise<InstacartRecipeResponse> {
   try {
-    const response = await fetch(`${API_BASE}/instacart/meal-plan/recipe`, {
+    const response = await fetchWithLogging(`${API_BASE}/instacart/meal-plan/recipe`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -100,7 +102,7 @@ export async function createInstacartLinkFromMealPlan(
 export async function createInstacartLinkFromMeal(
   mealId: number
 ): Promise<InstacartRecipeResponse> {
-  const response = await fetch(`${API_BASE}/instacart/meal/recipe`, {
+  const response = await fetchWithLogging(`${API_BASE}/instacart/meal/recipe`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

@@ -14,6 +14,7 @@ import { storageService } from './storage/storageService';
 import { syncEngine } from './sync/syncEngine';
 import { connectivityService } from './connectivity/connectivityService';
 import { authService } from './authService';
+import { fetchWithLogging } from '../utils/apiLogger';
 
 // ============================================
 // TYPES - What the backend returns/expects
@@ -196,7 +197,7 @@ class MealProgramService {
 
     try {
       const headers = await this.getAuthHeaders();
-      const response = await fetch(this.baseUrl, {
+      const response = await fetchWithLogging(this.baseUrl, {
         method: 'GET',
         headers,
       });
@@ -252,7 +253,7 @@ class MealProgramService {
 
     try {
       const headers = await this.getAuthHeaders();
-      const response = await fetch(this.baseUrl, {
+      const response = await fetchWithLogging(this.baseUrl, {
         method: 'POST',
         headers,
         body: JSON.stringify(request),
@@ -288,7 +289,7 @@ class MealProgramService {
 
     try {
       const headers = await this.getAuthHeaders();
-      const response = await fetch(`${this.baseUrl}/${programId}`, {
+      const response = await fetchWithLogging(`${this.baseUrl}/${programId}`, {
         method: 'GET',
         headers,
       });
@@ -363,7 +364,7 @@ class MealProgramService {
     // Try to sync immediately
     try {
       const headers = await this.getAuthHeaders();
-      const response = await fetch(`${this.baseUrl}/logs`, {
+      const response = await fetchWithLogging(`${this.baseUrl}/logs`, {
         method: 'POST',
         headers,
         body: JSON.stringify(request),
@@ -410,7 +411,7 @@ class MealProgramService {
       const params = new URLSearchParams({ startDate });
       if (endDate) params.append('endDate', endDate);
 
-      const response = await fetch(`${this.baseUrl}/logs?${params}`, {
+      const response = await fetchWithLogging(`${this.baseUrl}/logs?${params}`, {
         method: 'GET',
         headers,
       });
@@ -462,7 +463,7 @@ class MealProgramService {
 
     try {
       const headers = await this.getAuthHeaders();
-      const response = await fetch(`${this.baseUrl}/logs/today`, {
+      const response = await fetchWithLogging(`${this.baseUrl}/logs/today`, {
         method: 'GET',
         headers,
       });
