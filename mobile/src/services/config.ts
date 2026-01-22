@@ -22,8 +22,13 @@ export const API_CONFIG = {
   expoProjectId: process.env.EXPO_PUBLIC_PROJECT_ID || 'your-project-id', // For push notifications
   
   // Client credentials for service-to-service auth
+  // Native app credentials (for auth.wihy.ai and user.wihy.ai)
+  nativeClientId: process.env.EXPO_PUBLIC_WIHY_NATIVE_CLIENT_ID || '',
+  nativeClientSecret: process.env.EXPO_PUBLIC_WIHY_NATIVE_CLIENT_SECRET || '',
+  // Services API credentials (for services.wihy.ai)
   servicesClientId: process.env.EXPO_PUBLIC_WIHY_SERVICES_CLIENT_ID || '',
   servicesClientSecret: process.env.EXPO_PUBLIC_WIHY_SERVICES_CLIENT_SECRET || '',
+  // ML API credentials (for ml.wihy.ai)
   mlClientId: process.env.EXPO_PUBLIC_WIHY_ML_CLIENT_ID || '',
   mlClientSecret: process.env.EXPO_PUBLIC_WIHY_ML_CLIENT_SECRET || '',
   
@@ -48,6 +53,14 @@ export const API_CONFIG = {
   },
   timeout: 30000, // 30 seconds
 };
+
+/**
+ * Get auth headers for Native App API calls (auth.wihy.ai, user.wihy.ai)
+ */
+export const getNativeAuthHeaders = () => ({
+  'X-Client-ID': API_CONFIG.nativeClientId,
+  'X-Client-Secret': API_CONFIG.nativeClientSecret,
+});
 
 /**
  * Get auth headers for Services API calls
