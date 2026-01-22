@@ -14,6 +14,7 @@ import {
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useNavigation } from '@react-navigation/native';
 import { GradientDashboardHeader, WebPageWrapper } from '../components/shared';
 import { HamburgerMenu } from '../components/shared/HamburgerMenu';
 import { AuthContext } from '../context/AuthContext';
@@ -48,6 +49,7 @@ export default function FamilyDashboardPage({
   onMenuClose,
   onContextChange,
 }: FamilyDashboardPageProps) {
+  const navigation = useNavigation<any>();
   const { user } = useContext(AuthContext);
   const [showAddMember, setShowAddMember] = useState(false);
   const [showHamburgerMenu, setShowHamburgerMenu] = useState(false);
@@ -368,6 +370,18 @@ export default function FamilyDashboardPage({
               <Text style={styles.featureSubtitle}>
                 {hasAIAccess(user) ? 'Ask questions' : 'Premium only'}
               </Text>
+            </TouchableOpacity>
+
+            {/* Profile Setup - Always available */}
+            <TouchableOpacity
+              style={styles.featureCard}
+              onPress={() => navigation.navigate('ProfileSetup' as any, { isOnboarding: false })}
+            >
+              <View style={[styles.featureIcon, { backgroundColor: '#ccfbf1' }]}>
+                <SvgIcon name="person-add" size={24} color="#14b8a6" />
+              </View>
+              <Text style={styles.featureTitle}>Profile Setup</Text>
+              <Text style={styles.featureSubtitle}>Health profile</Text>
             </TouchableOpacity>
 
             {/* Switch back to Personal Dashboard */}

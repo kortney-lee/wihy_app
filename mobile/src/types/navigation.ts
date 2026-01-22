@@ -95,4 +95,8 @@ export type RootStackParamList = {
   EditProfile: undefined;
   ProfileSetup: { isOnboarding?: boolean } | undefined;
   HealthData: undefined;
+  
+  // User Profile Management Routes
+  ProfileSettings: undefined;
+  PrivacySettings: undefined;
 };

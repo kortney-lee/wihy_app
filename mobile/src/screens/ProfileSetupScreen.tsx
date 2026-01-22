@@ -13,18 +13,21 @@ import {
   Dimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { AuthContext } from '../context/AuthContext';
 import { userService } from '../services/userService';
 import { WebNavHeader } from '../components/web/WebNavHeader';
+import { GradientDashboardHeader } from '../components/shared';
+import { dashboardTheme } from '../theme/dashboardTheme';
 import SvgIcon from '../components/shared/SvgIcon';
 
 const isWeb = Platform.OS === 'web';
 const { width: screenWidth } = Dimensions.get('window');
 
-// WiHY Light theme
+// WiHY Light theme - aligned with design patterns
 const theme = {
-  background: '#f0f9ff',
+  background: '#e0f2fe', // Standard page background per DESIGN_PATTERNS.md
   card: '#ffffff',
   cardBorder: '#e5e7eb',
   text: '#1f2937',
@@ -838,23 +841,160 @@ export default function ProfileSetupScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
-      {mobileHeader}
-      <KeyboardAvoidingView 
-        style={{ flex: 1 }} 
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      >
-        {content}
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+    <View style={styles.container}>
+      {/* White top box for status bar - Pattern B */}
+      <SafeAreaView edges={['top']} style={styles.topBox}>
+        <View style={styles.topBoxContent} />
+      </SafeAreaView>
+      
+      {/* Main content area */}
+      <SafeAreaView style={styles.scrollContainer} edges={['left', 'right']}>
+        <KeyboardAvoidingView 
+          style={{ flex: 1 }} 
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        >
+          <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
+            {/* Gradient Header */}
+            <LinearGradient
+              colors={['#14b8a6', '#0d9488']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.gradientHeader}
+            >
+              <View style={styles.headerRow}>
+                <Pressable style={styles.backButtonWhite} onPress={handleBack}>
+                  <SvgIcon name="arrow-back" size={24} color="#ffffff" />
+                </Pressable>
+                <View style={styles.headerTextContainer}>
+                  <Text style={styles.headerTitle}>{stepTitles[currentStep]}</Text>
+                  <Text style={styles.headerSubtitle}>{stepDescriptions[currentStep]}</Text>
+                </View>
+              </View>
+              
+              {/* Progress bar in header */}
+              <View style={styles.headerProgressContainer}>
+                <View style={styles.headerProgressBar}>
+                  <View style={[styles.headerProgressFill, { width: `${progress}%` }]} />
+                </View>
+                <Text style={styles.headerProgressText}>Step {currentStepIndex + 1} of {steps.length}</Text>
+              </View>
+            </LinearGradient>
+
+            {/* Step content */}
+            {renderCurrentStep()}
+
+            {/* Navigation buttons */}
+            <View style={styles.buttonContainer}>
+              {currentStep !== 'complete' && currentStep !== 'basics' && (
+                <Pressable style={styles.skipButton} onPress={handleSkip}>
+                  <Text style={styles.skipButtonText}>Skip</Text>
+                </Pressable>
+              )}
+              
+              {currentStep === 'complete' ? (
+                <Pressable 
+                  style={[styles.primaryButton, saving && styles.buttonDisabled]} 
+                  onPress={handleComplete}
+                  disabled={saving}
+                >
+                  {saving ? (
+                    <ActivityIndicator size="small" color="#fff" />
+                  ) : (
+                    <>
+                      <Text style={styles.primaryButtonText}>Start My Journey</Text>
+                      <SvgIcon name="arrow-forward" size={20} color="#fff" />
+                    </>
+                  )}
+                </Pressable>
+              ) : (
+                <Pressable 
+                  style={[styles.primaryButton, !canProceed() && styles.buttonDisabled]} 
+                  onPress={handleNext}
+                  disabled={!canProceed()}
+                >
+                  <Text style={styles.primaryButtonText}>Continue</Text>
+                  <SvgIcon name="arrow-forward" size={20} color="#fff" />
+                </Pressable>
+              )}
+            </View>
+            
+            {/* Bottom spacing for tab bar */}
+            <View style={{ height: 100 }} />
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme.background,
   } as any,
+  // Pattern B - Dual SafeAreaView styles
+  topBox: {
+    backgroundColor: '#ffffff',
+  },
+  topBoxContent: {
+    height: 0,
+  },
+  scrollContainer: {
+    flex: 1,
+    backgroundColor: theme.background,
+  },
+  // Gradient header styles
+  gradientHeader: {
+    paddingHorizontal: dashboardTheme.spacing.lg,
+    paddingTop: dashboardTheme.spacing.xl,
+    paddingBottom: dashboardTheme.spacing.lg,
+  },
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 12,
+  },
+  backButtonWhite: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  headerTextContainer: {
+    flex: 1,
+  },
+  headerTitle: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#ffffff',
+    marginBottom: 4,
+  },
+  headerSubtitle: {
+    fontSize: 14,
+    color: 'rgba(255, 255, 255, 0.9)',
+    lineHeight: 20,
+  },
+  headerProgressContainer: {
+    marginTop: 16,
+  },
+  headerProgressBar: {
+    height: 6,
+    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+    borderRadius: 3,
+    overflow: 'hidden',
+  },
+  headerProgressFill: {
+    height: '100%',
+    backgroundColor: '#ffffff',
+    borderRadius: 3,
+  },
+  headerProgressText: {
+    fontSize: 12,
+    color: 'rgba(255, 255, 255, 0.8)',
+    textAlign: 'center',
+    marginTop: 8,
+  },
   webContent: {
     flex: 1,
     maxWidth: 800,

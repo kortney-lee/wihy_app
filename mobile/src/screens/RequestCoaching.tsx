@@ -14,6 +14,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import type { StackNavigationProp } from '@react-navigation/stack';
 import type { RootStackParamList } from '../types/navigation';
+import { useAuth } from '../context/AuthContext';
+import { userService } from '../services/userService';
 
 const isWeb = Platform.OS === 'web';
 
@@ -22,6 +24,7 @@ type Frequency = 'weekly' | 'bi-weekly' | 'monthly';
 export default function RequestCoaching() {
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   const route = useRoute();
+  const { userId } = useAuth();
   
   const { coachId, coachName } = (route.params as any) || {};
   
@@ -35,19 +38,27 @@ export default function RequestCoaching() {
       return;
     }
 
+    if (!coachId) {
+      alert('Coach not found. Please go back and retry.');
+      return;
+    }
+
+    if (!userId) {
+      alert('Please sign in before sending a coaching request.');
+      return;
+    }
+
     try {
       setSubmitting(true);
-      
-      // POST /api/coaches/:coachId/invite-client
-      // TODO: Call actual API
-      console.log('Sending coaching request:', {
-        coachId,
-        message,
-        frequency,
+      const result = await userService.requestCoaching(coachId, {
+        client_id: userId,
+        message: message.trim(),
+        preferred_frequency: frequency,
       });
 
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to send request');
+      }
 
       alert(`Coaching request sent to ${coachName}!\n\nThey will review your request and contact you via email within 24-48 hours.`);
       navigation.goBack();

@@ -1358,21 +1358,45 @@ class UserService {
   async discoverCoaches(filters?: {
     search?: string;
     specialty?: string;
-    location?: string;
+    city?: string;
+    location?: string; // backward compatible: maps to city
     min_rating?: number;
     max_price?: number;
     accepting_clients?: boolean;
     sort?: 'rating' | 'price' | 'experience';
-    page?: number;
     limit?: number;
+    offset?: number;
+    page?: number; // backward compatible: converted to offset when limit present
   }): Promise<{ coaches: any[]; pagination: any }> {
     const params = new URLSearchParams();
     if (filters) {
-      Object.entries(filters).forEach(([key, value]) => {
-        if (value !== undefined) params.append(key, String(value));
-      });
+      const {
+        search,
+        specialty,
+        city,
+        location,
+        min_rating,
+        max_price,
+        accepting_clients,
+        sort,
+        limit,
+        offset,
+        page,
+      } = filters;
+
+      if (search !== undefined) params.append('search', String(search));
+      if (specialty !== undefined) params.append('specialty', String(specialty));
+      const cityParam = city || location;
+      if (cityParam !== undefined) params.append('city', String(cityParam));
+      if (min_rating !== undefined) params.append('min_rating', String(min_rating));
+      if (max_price !== undefined) params.append('max_price', String(max_price));
+      if (accepting_clients !== undefined) params.append('accepting_clients', String(accepting_clients));
+      if (sort !== undefined) params.append('sort', String(sort));
+      if (limit !== undefined) params.append('limit', String(limit));
+      const derivedOffset = offset ?? (page !== undefined && limit ? (page - 1) * limit : undefined);
+      if (derivedOffset !== undefined) params.append('offset', String(derivedOffset));
     }
-    
+
     const endpoint = `${this.baseUrl}${USER_SERVICE_CONFIG.endpoints.coachesDiscover}?${params}`;
     const headers = await this.getAuthHeaders();
     
@@ -1382,8 +1406,8 @@ class UserService {
       if (response.ok) {
         const data = await response.json();
         return {
-          coaches: data.data?.coaches || [],
-          pagination: data.data?.pagination || {},
+          coaches: data.data?.coaches || data.data || data.coaches || [],
+          pagination: data.data?.pagination || data.pagination || { total: data.total, limit: data.limit, offset: data.offset },
         };
       }
       return { coaches: [], pagination: {} };
@@ -1417,27 +1441,119 @@ class UserService {
 
   /**
    * Book a session with coach
-   * POST /api/coaches/:coachId/book
+   * POST /api/coaches/:coachId/bookings
    */
-  async bookCoachSession(coachId: string, booking: {
-    date: string;
-    time: string;
-    duration_minutes?: number;
-    session_type?: string;
-    notes?: string;
-  }): Promise<ApiResponse<any>> {
-    const endpoint = `${this.baseUrl}${USER_SERVICE_CONFIG.endpoints.coaches}/${coachId}/book`;
+  async bookCoachSession(
+    coachId: string,
+    booking: {
+      scheduled_at?: string;
+      scheduledAt?: string; // backward compatible
+      duration_minutes: number;
+      session_type: string;
+      notes?: string;
+      price?: number;
+      client_id?: string;
+    }
+  ): Promise<ApiResponse<any>> {
+    const scheduledAt = booking.scheduled_at || booking.scheduledAt;
+    if (!scheduledAt) {
+      return { success: false, error: 'scheduled_at is required' };
+    }
+
+    const endpoint = `${this.baseUrl}${USER_SERVICE_CONFIG.endpoints.coaches}/${coachId}/bookings`;
     const headers = await this.getAuthHeaders();
     
     try {
       const response = await fetchWithLogging(endpoint, {
         method: 'POST',
         headers,
-        body: JSON.stringify(booking),
+        body: JSON.stringify({
+          scheduled_at: scheduledAt,
+          duration_minutes: booking.duration_minutes,
+          session_type: booking.session_type,
+          notes: booking.notes,
+          price: booking.price,
+          client_id: booking.client_id,
+        }),
       });
 
       const data = await response.json();
-      return response.ok ? { success: true, data: data.data } : { success: false, error: data.error };
+      return response.ok ? { success: true, data: data.data || data } : { success: false, error: data.error || data.message };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Client-led request to a coach
+   * POST /api/coaches/:coachId/invite-client
+   */
+  async requestCoaching(
+    coachId: string,
+    payload: { client_id: string; message?: string; preferred_frequency?: string }
+  ): Promise<ApiResponse<any>> {
+    const endpoint = `${this.baseUrl}${USER_SERVICE_CONFIG.endpoints.coaches}/${coachId}/invite-client`;
+    const headers = await this.getAuthHeaders();
+
+    try {
+      const response = await fetchWithLogging(endpoint, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(payload),
+      });
+
+      const data = await response.json();
+      return response.ok ? { success: true, data: data.data || data } : { success: false, error: data.error || data.message };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Coach-led invitation to a client
+   * POST /api/coaches/:coachId/send-invitation
+   */
+  async sendCoachInvitation(
+    coachId: string,
+    payload: { client_email: string; client_name?: string; message?: string }
+  ): Promise<ApiResponse<any>> {
+    const endpoint = `${this.baseUrl}${USER_SERVICE_CONFIG.endpoints.coaches}/${coachId}/send-invitation`;
+    const headers = await this.getAuthHeaders();
+
+    try {
+      const response = await fetchWithLogging(endpoint, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(payload),
+      });
+
+      const data = await response.json();
+      return response.ok ? { success: true, data: data.data || data } : { success: false, error: data.error || data.message };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Client accepts an invitation from a coach
+   * POST /api/coaches/:coachId/accept-invitation
+   */
+  async acceptCoachInvitation(
+    coachId: string,
+    payload: { invitation_id: string; client_id: string }
+  ): Promise<ApiResponse<any>> {
+    const endpoint = `${this.baseUrl}${USER_SERVICE_CONFIG.endpoints.coaches}/${coachId}/accept-invitation`;
+    const headers = await this.getAuthHeaders();
+
+    try {
+      const response = await fetchWithLogging(endpoint, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(payload),
+      });
+
+      const data = await response.json();
+      return response.ok ? { success: true, data: data.data || data } : { success: false, error: data.error || data.message };
     } catch (error: any) {
       return { success: false, error: error.message };
     }
