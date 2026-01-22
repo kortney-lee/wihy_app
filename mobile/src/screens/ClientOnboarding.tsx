@@ -219,7 +219,7 @@ export default function ClientOnboarding({
       console.log('User ID:', userId);
       console.log('Payload:', JSON.stringify(profilePayload, null, 2));
       
-      // Call userService to update profile via PATCH /api/profile
+      // Call userService to update profile via PUT /api/profile/:userId
       const response = await userService.updateUserProfile(userId, profilePayload);
       
       if (response.success) {
