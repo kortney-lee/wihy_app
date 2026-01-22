@@ -148,15 +148,15 @@ const CoachDashboardPage: React.FC<CoachDashboardPageProps> = ({ showMenuFromHea
   const renderSelectedView = () => {
     switch (selectedView) {
       case 'overview':
-        return <CoachOverview />;
+        return <CoachOverview isDashboardMode={true} onBack={handleBackToDashboardSelection} />;
       case 'dashboard':
-        return <CoachDashboard />;
+        return <CoachDashboard isDashboardMode={true} onBack={handleBackToDashboardSelection} />;
       case 'meals':
         return <CreateMeals isDashboardMode={true} />;
       case 'clients':
-        return <ClientManagement />;
+        return <ClientManagement isDashboardMode={true} onBack={handleBackToDashboardSelection} />;
       case 'onboard':
-        return <ClientOnboarding />;
+        return <ClientOnboarding isDashboardMode={true} onBack={handleBackToDashboardSelection} />;
       case 'profileSetup':
         return (
           <CoachProfileSetup

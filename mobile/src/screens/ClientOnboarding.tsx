@@ -18,6 +18,11 @@ import { dashboardTheme } from '../theme/dashboardTheme';
 
 const isWeb = Platform.OS === 'web';
 
+interface ClientOnboardingProps {
+  isDashboardMode?: boolean;
+  onBack?: () => void;
+}
+
 interface OnboardingData {
   // Personal Information
   firstName: string;
@@ -52,7 +57,10 @@ interface OnboardingData {
   communicationConsent: boolean;
 }
 
-export default function ClientOnboarding() {
+export default function ClientOnboarding({
+  isDashboardMode = false,
+  onBack,
+}: ClientOnboardingProps) {
   const [currentStep, setCurrentStep] = useState(1);
   const totalSteps = 5;
   
@@ -160,6 +168,8 @@ export default function ClientOnboarding() {
   const handleBack = () => {
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
+    } else if (onBack) {
+      onBack();
     } else {
       Alert.alert('Go Back', 'Use the hamburger menu to navigate to another screen.');
     }

@@ -39,7 +39,15 @@ interface Client {
 
 type TabType = 'goals' | 'actions' | 'meals' | 'shopping' | 'client-view';
 
-export default function CoachDashboard() {
+interface CoachDashboardProps {
+  isDashboardMode?: boolean;
+  onBack?: () => void;
+}
+
+export default function CoachDashboard({
+  isDashboardMode = false,
+  onBack,
+}: CoachDashboardProps) {
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   const { coachId } = useAuth();
   
