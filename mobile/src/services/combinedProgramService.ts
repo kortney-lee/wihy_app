@@ -13,6 +13,7 @@ import { authService } from './authService';
 import { storageService } from './storage/storageService';
 import { syncEngine } from './sync/syncEngine';
 import { connectivityService } from './connectivity/connectivityService';
+import { fetchWithLogging } from '../utils/apiLogger';
 import type {
   CookingSkillLevel,
   MealVariety,
@@ -620,7 +621,7 @@ class CombinedProgramService {
         headers['Authorization'] = `Bearer ${authToken}`;
       }
 
-      const response = await fetch(this.BASE_URL, {
+      const response = await fetchWithLogging(this.BASE_URL, {
         method: 'POST',
         headers,
         body: JSON.stringify(requestBody),
@@ -666,7 +667,7 @@ class CombinedProgramService {
       const headers = await this.getHeaders();
       const params = status ? `?status=${status}` : '';
       
-      const response = await fetch(`${this.BASE_URL}${params}`, {
+      const response = await fetchWithLogging(`${this.BASE_URL}${params}`, {
         method: 'GET',
         headers,
       });
@@ -707,7 +708,7 @@ class CombinedProgramService {
     try {
       const headers = await this.getHeaders();
       
-      const response = await fetch(`${this.BASE_URL}/${programId}`, {
+      const response = await fetchWithLogging(`${this.BASE_URL}/${programId}`, {
         method: 'GET',
         headers,
       });
@@ -759,7 +760,7 @@ class CombinedProgramService {
     try {
       const headers = await this.getHeaders();
       
-      const response = await fetch(`${this.BASE_URL}/${programId}`, {
+      const response = await fetchWithLogging(`${this.BASE_URL}/${programId}`, {
         method: 'PUT',
         headers,
         body: JSON.stringify(updates),
@@ -795,7 +796,7 @@ class CombinedProgramService {
     try {
       const headers = await this.getHeaders();
       
-      const response = await fetch(`${this.BASE_URL}/${programId}`, {
+      const response = await fetchWithLogging(`${this.BASE_URL}/${programId}`, {
         method: 'DELETE',
         headers,
       });
@@ -842,7 +843,7 @@ class CombinedProgramService {
     try {
       const headers = await this.getHeaders();
       
-      const response = await fetch(`${this.BASE_URL}/${programId}/workout`, {
+      const response = await fetchWithLogging(`${this.BASE_URL}/${programId}/workout`, {
         method: 'POST',
         headers,
         body: JSON.stringify(payload),
@@ -881,7 +882,7 @@ class CombinedProgramService {
     try {
       const headers = await this.getHeaders();
       
-      const response = await fetch(`${this.BASE_URL}/${programId}/post-workout-meal`, {
+      const response = await fetchWithLogging(`${this.BASE_URL}/${programId}/post-workout-meal`, {
         method: 'POST',
         headers,
         body: JSON.stringify({
@@ -1476,7 +1477,7 @@ class CombinedProgramService {
     try {
       const headers = await this.getHeaders();
       
-      const response = await fetch(`${this.BASE_URL}/goals`, {
+      const response = await fetchWithLogging(`${this.BASE_URL}/goals`, {
         method: 'GET',
         headers,
       });
@@ -1507,7 +1508,7 @@ class CombinedProgramService {
     try {
       const headers = await this.getHeaders();
       
-      const response = await fetch(`${this.BASE_URL}/preview`, {
+      const response = await fetchWithLogging(`${this.BASE_URL}/preview`, {
         method: 'POST',
         headers,
         body: JSON.stringify({
@@ -1545,7 +1546,7 @@ class CombinedProgramService {
     try {
       const headers = await this.getHeaders();
       
-      const response = await fetch(`${this.BASE_URL}/${programId}/dashboard`, {
+      const response = await fetchWithLogging(`${this.BASE_URL}/${programId}/dashboard`, {
         method: 'GET',
         headers,
       });

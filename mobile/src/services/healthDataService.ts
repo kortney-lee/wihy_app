@@ -2,6 +2,7 @@ import { Platform } from 'react-native';
 import Constants from 'expo-constants';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_CONFIG } from './config';
+import { fetchWithLogging } from '../utils/apiLogger';
 
 // Storage keys for sync tracking
 const HEALTH_SYNC_STORAGE_KEYS = {
@@ -1292,11 +1293,10 @@ class HealthDataService {
         records,
       };
 
-      const response = await fetch(`${API_CONFIG.userUrl}/api/users/me/health-data/batch`, {
+      const response = await fetchWithLogging(`${API_CONFIG.userUrl}/api/users/me/health-data/batch`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${accessToken}`,
         },
         body: JSON.stringify(payload),
       });
@@ -1351,11 +1351,10 @@ class HealthDataService {
         },
       };
 
-      const response = await fetch(`${API_CONFIG.userUrl}/api/users/me/health-data`, {
+      const response = await fetchWithLogging(`${API_CONFIG.userUrl}/api/users/me/health-data`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${accessToken}`,
         },
         body: JSON.stringify(payload),
       });
@@ -1395,11 +1394,8 @@ class HealthDataService {
 
       const url = `${API_CONFIG.userUrl}/api/users/me/health-data?${params.toString()}`;
 
-      const response = await fetch(url, {
+      const response = await fetchWithLogging(url, {
         method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${accessToken}`,
-        },
       });
 
       return await response.json();
@@ -1418,11 +1414,8 @@ class HealthDataService {
    */
   async getLatestHealthSummary(accessToken: string): Promise<HealthLatestResponse> {
     try {
-      const response = await fetch(`${API_CONFIG.userUrl}/api/users/me/health-data/latest`, {
+      const response = await fetchWithLogging(`${API_CONFIG.userUrl}/api/users/me/health-data/latest`, {
         method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${accessToken}`,
-        },
       });
 
       return await response.json();
@@ -1452,11 +1445,8 @@ class HealthDataService {
 
       const url = `${API_CONFIG.userUrl}/api/users/${userId}/health-data?${params.toString()}`;
 
-      const response = await fetch(url, {
+      const response = await fetchWithLogging(url, {
         method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${accessToken}`,
-        },
       });
 
       return await response.json();
@@ -1485,11 +1475,8 @@ class HealthDataService {
 
       const url = `${API_CONFIG.userUrl}/api/users/me/health-data?${params.toString()}`;
 
-      const response = await fetch(url, {
+      const response = await fetchWithLogging(url, {
         method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${accessToken}`,
-        },
       });
 
       const result = await response.json();
