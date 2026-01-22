@@ -199,7 +199,7 @@ export default function ClientOnboarding({
     
     try {
       // Build profile payload per API spec:
-      // PATCH https://user.wihy.ai/api/profile/:userId
+      // PATCH https://user.wihy.ai/api/profile (userId from JWT token)
       const profilePayload = {
         firstName: formData.firstName,
         lastName: formData.lastName,
@@ -208,11 +208,10 @@ export default function ClientOnboarding({
         height: formData.height ? parseFloat(formData.height) : undefined,
         weight: formData.weight ? parseFloat(formData.weight) : undefined,
         activityLevel: formData.activityLevel || undefined,
-        healthPreferences: {
-          goals: formData.primaryGoal ? [formData.primaryGoal] : [],
-          dietaryPref: formData.dietaryPreferences?.[0] || undefined,
-          allergies: formData.allergies || [],
-        },
+        // API expects goals as top-level array
+        goals: formData.primaryGoal ? [formData.primaryGoal] : [],
+        dietaryPreferences: formData.dietaryPreferences || [],
+        allergies: formData.allergies || [],
         onboardingCompleted: true,
       };
       
@@ -220,7 +219,7 @@ export default function ClientOnboarding({
       console.log('User ID:', userId);
       console.log('Payload:', JSON.stringify(profilePayload, null, 2));
       
-      // Call userService to update profile via PATCH /api/profile/:userId
+      // Call userService to update profile via PATCH /api/profile
       const response = await userService.updateUserProfile(userId, profilePayload);
       
       if (response.success) {
