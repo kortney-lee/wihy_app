@@ -298,7 +298,7 @@ class UserService {
 
   /**
    * Update user profile information
-   * PATCH /api/profile/:userId
+   * PATCH /api/profile (userId from JWT token)
    */
   async updateUserProfile(
     userId: string,
@@ -326,7 +326,8 @@ class UserService {
       onboardingCompleted: boolean;
     }>
   ): Promise<ApiResponse<UserProfile>> {
-    const endpoint = `${this.baseUrl}${USER_SERVICE_CONFIG.endpoints.updateProfile}/${userId}`;
+    // Use /api/profile without userId - backend identifies user from JWT
+    const endpoint = `${this.baseUrl}${USER_SERVICE_CONFIG.endpoints.updateProfile}`;
     const headers = await this.getAuthHeaders();
     
     console.log('=== UPDATE USER PROFILE ===');
