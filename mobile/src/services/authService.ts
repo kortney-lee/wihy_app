@@ -888,14 +888,15 @@ class AuthService {
   }
 
   /**
-   * Refresh access token using session token
-   * Uses /api/auth/refresh with Bearer token
+   * Refresh access token using refresh token
+   * Uses /api/auth/refresh with refresh token in body
+   * Client credentials (x-client-id, x-client-secret) are auto-injected by fetchWithLogging
    */
   async refreshAccessToken(): Promise<TokenResponse | null> {
-    const sessionToken = await this.getSessionToken();
+    const refreshToken = await this.getRefreshToken();
     
-    if (!sessionToken) {
-      console.log('No session token available for refresh');
+    if (!refreshToken) {
+      console.log('No refresh token available for token refresh');
       return null;
     }
     
@@ -909,38 +910,69 @@ class AuthService {
       const response = await fetchWithLogging(endpoint, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${sessionToken}`,
           'Content-Type': 'application/json',
         },
+        body: JSON.stringify({
+          refreshToken: refreshToken,
+        }),
       });
 
       const responseTime = Date.now() - startTime;
       console.log(`Response Status: ${response.status} (${responseTime}ms)`);
 
       if (response.ok) {
-        const data = await response.json();
+        const responseData = await response.json();
+        console.log('Refresh Response:', JSON.stringify(responseData, null, 2));
         
-        if (data.success && data.session_token) {
-          // Store new session token
-          await this.storeSessionToken(data.session_token);
+        // Handle nested data structure: response.data.token
+        // Also support legacy flat structure for backwards compatibility
+        const authData = responseData.data;
+        const newToken = authData?.token || responseData.token || responseData.session_token;
+        const newRefreshToken = authData?.refreshToken || responseData.refreshToken;
+        const expiresIn = authData?.expiresIn || responseData.expiresIn;
+        
+        if (responseData.success && newToken) {
+          // Store new access token
+          await this.storeSessionToken(newToken);
+          
+          // Store new refresh token if provided (token rotation)
+          if (newRefreshToken) {
+            await AsyncStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, newRefreshToken);
+          }
           
           // Store expiry if provided
-          if (data.expiresIn) {
-            const expiryTime = Date.now() + (data.expiresIn * 1000);
+          if (expiresIn) {
+            // Handle both string ("24h", "7d") and number (seconds) formats
+            let expiryMs: number;
+            if (typeof expiresIn === 'string') {
+              if (expiresIn.endsWith('h')) {
+                expiryMs = parseInt(expiresIn) * 60 * 60 * 1000;
+              } else if (expiresIn.endsWith('d')) {
+                expiryMs = parseInt(expiresIn) * 24 * 60 * 60 * 1000;
+              } else {
+                expiryMs = parseInt(expiresIn) * 1000;
+              }
+            } else {
+              expiryMs = expiresIn * 1000;
+            }
+            const expiryTime = Date.now() + expiryMs;
             await AsyncStorage.setItem(STORAGE_KEYS.TOKEN_EXPIRY, expiryTime.toString());
           }
           
           console.log('=== REFRESH TOKEN SUCCESS ===');
           return {
-            access_token: data.session_token,
+            access_token: newToken,
             token_type: 'Bearer',
-            expires_in: data.expiresIn || 3600,
+            expires_in: typeof expiresIn === 'number' ? expiresIn : 86400, // Default 24h
           };
         }
         
+        console.error('=== REFRESH TOKEN FAILED: No token in response ===');
         return null;
       } else {
+        const errorData = await response.json().catch(() => ({}));
         console.error('=== REFRESH TOKEN FAILED ===');
+        console.error('Error:', errorData.error || errorData.message || response.statusText);
         return null;
       }
     } catch (error: any) {
