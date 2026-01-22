@@ -36,6 +36,7 @@ import ParentDashboard from './ParentDashboard';
 import CreateMeals from './CreateMeals';
 import ShoppingListScreen from './ShoppingListScreen';
 import CoachSelection from './CoachSelection';
+import ProfileSetupScreen from './ProfileSetupScreen';
 
 // Note: screenWidth is now handled dynamically via useDashboardLayout
 
@@ -78,7 +79,7 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
   const [hasActiveSession, setHasActiveSession] = useState(false);
   const [showQuickStartGuide, setShowQuickStartGuide] = useState(false);
   const [showHamburgerMenu, setShowHamburgerMenu] = useState(false);
-  const [selectedDashboard, setSelectedDashboard] = useState<'overview' | 'progress' | 'nutrition' | 'research' | 'fitness' | 'parent' | 'meals' | 'shoppingList' | null>(null);
+  const [selectedDashboard, setSelectedDashboard] = useState<'overview' | 'progress' | 'nutrition' | 'research' | 'fitness' | 'parent' | 'meals' | 'shoppingList' | 'profileSetup' | null>(null);
 
   // Reset dashboard state when user plan changes (dev mode switcher)
   React.useEffect(() => {
@@ -149,7 +150,7 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
     }
     
     // Handle dashboard switches within DashboardPage
-    setSelectedDashboard(dashboardType as 'overview' | 'progress' | 'nutrition' | 'research' | 'fitness' | 'parent' | 'meals' | 'shoppingList' | null);
+    setSelectedDashboard(dashboardType as 'overview' | 'progress' | 'nutrition' | 'research' | 'fitness' | 'parent' | 'meals' | 'shoppingList' | 'profileSetup' | null);
   };
 
   const renderSelectedDashboard = () => {
@@ -207,6 +208,7 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
         {selectedDashboard === 'meals' && <CreateMeals isDashboardMode={true} />}
         {selectedDashboard === 'shoppingList' && <ShoppingListScreen isDashboardMode={true} />}
         {(selectedDashboard as any) === 'findCoach' && <CoachSelection />}
+        {selectedDashboard === 'profileSetup' && <ProfileSetupScreen isDashboardMode={true} onBack={() => setSelectedDashboard(null)} />}
       </View>
     );
   };
@@ -284,7 +286,7 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
         {/* Profile Setup - Available to ALL users to set up their health profile */}
         <TouchableOpacity
           style={[styles.dashboardCard, styles.profileSetupCard, { width: cardWidth as any }]}
-          onPress={() => navigation.navigate('ProfileSetup', { isOnboarding: false })}
+          onPress={() => setSelectedDashboard('profileSetup')}
         >
           <View style={[styles.cardIconContainer, { width: iconContainerSize, height: iconContainerSize, borderRadius: iconContainerSize / 2 }]}>
             <SvgIcon name="person-add" size={iconSize} color="#ffffff" />

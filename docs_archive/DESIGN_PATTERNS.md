@@ -262,6 +262,7 @@ These screens use the standardized dashboard pattern with white header box:
 | ResearchScreen | Purple (`#8b5cf6`, `#7c3aed`) | ✅ Complete |
 | CoachSelection | Indigo (`#6366f1`, `#4f46e5`) | ✅ Complete |
 | CreateMeals | Red/Orange (`#ef4444`, `#dc2626`) | ✅ Complete |
+| ProfileSetupScreen | Teal (`#14b8a6`) | ✅ Complete |
 | CoachDashboard | Purple (`#8b5cf6`, `#7c3aed`) | ⚠️ Needs Update |
 | ParentDashboard | Purple (`#9333ea`, `#7e22ce`) | ⚠️ Needs Update |
 
@@ -340,7 +341,8 @@ App
 │  │     │  ├─ FitnessDashboard
 │  │     │  ├─ ResearchScreen
 │  │     │  ├─ ParentDashboard
-│  │     │  └─ CreateMeals ← EMBEDDED = Bottom nav visible
+│  │     │  ├─ CreateMeals ← EMBEDDED = Bottom nav visible
+│  │     │  └─ ProfileSetupScreen ← EMBEDDED = Bottom nav visible
 │  │     ├─ FamilyDashboardPage (Family)
 │  │     └─ CoachDashboardPage (Coach)
 │  │        ├─ CoachDashboard
@@ -410,6 +412,93 @@ const renderSelectedDashboard = () => {
 | Modal | Stack | ❌ No | Overlay content requiring user action |
 | Settings | Stack | ❌ No | Configuration screens |
 | Coach Tools | CoachDashboardPage | ✅ Yes | Coach's main working screens |
+| Profile Setup | DashboardPage | ✅ Yes | User health profile configuration |
+
+---
+
+### 📝 Case Study: ProfileSetupScreen Migration (January 2026)
+
+**Problem:** ProfileSetupScreen was a Stack screen, which meant the bottom navigation (Home, Scan, Chat, Health, Profile) was hidden when users accessed it.
+
+**Solution:** Embedded ProfileSetupScreen in DashboardPage using the dashboard embedding pattern.
+
+**Changes Made:**
+
+#### 1. DashboardPage.tsx - Import and state type update:
+```tsx
+// Add import
+import ProfileSetupScreen from './ProfileSetupScreen';
+
+// Update selectedDashboard state type
+const [selectedDashboard, setSelectedDashboard] = useState<
+  'overview' | 'progress' | 'nutrition' | 'research' | 'fitness' | 
+  'parent' | 'meals' | 'shoppingList' | 'profileSetup' | null
+>(null);
+```
+
+#### 2. DashboardPage.tsx - Add to renderSelectedDashboard():
+```tsx
+const renderSelectedDashboard = () => {
+  // ... other dashboards
+  {selectedDashboard === 'profileSetup' && (
+    <ProfileSetupScreen 
+      isDashboardMode={true} 
+      onBack={() => setSelectedDashboard(null)} 
+    />
+  )}
+};
+```
+
+#### 3. DashboardPage.tsx - Update Profile Setup card onPress:
+```tsx
+// BEFORE (navigates away, hides bottom nav)
+onPress={() => navigation.navigate('ProfileSetup', { isOnboarding: false })}
+
+// AFTER (embeds in dashboard, keeps bottom nav)
+onPress={() => setSelectedDashboard('profileSetup')}
+```
+
+#### 4. ProfileSetupScreen.tsx - Add props interface:
+```tsx
+interface ProfileSetupScreenProps {
+  isDashboardMode?: boolean;
+  onBack?: () => void;
+}
+
+export default function ProfileSetupScreen({ 
+  isDashboardMode = false, 
+  onBack 
+}: ProfileSetupScreenProps) {
+  // ...
+  const isOnboarding = isDashboardMode ? false : (route.params?.isOnboarding ?? false);
+```
+
+#### 5. ProfileSetupScreen.tsx - Update navigation handlers:
+```tsx
+const handleBack = () => {
+  const prevIndex = currentStepIndex - 1;
+  if (prevIndex >= 0) {
+    setCurrentStep(steps[prevIndex]);
+  } else if (isDashboardMode && onBack) {
+    onBack();  // Return to Health Hub
+  } else {
+    navigation.goBack();
+  }
+};
+
+// In handleComplete():
+if (isOnboarding) {
+  navigation.reset({ index: 0, routes: [{ name: 'Main' }] });
+} else if (isDashboardMode && onBack) {
+  onBack();  // Return to Health Hub after completion
+} else {
+  navigation.goBack();
+}
+```
+
+**Result:** ProfileSetupScreen now shows the bottom navigation bar, allowing users to navigate to Home/Scan/Chat while configuring their profile.
+
+---
 
 ### Implementation Checklist
 

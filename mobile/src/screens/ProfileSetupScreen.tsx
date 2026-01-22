@@ -144,11 +144,16 @@ const activityTypes = [
   { id: 'hiit', label: 'HIIT', icon: 'flash' },
 ];
 
-export default function ProfileSetupScreen() {
+interface ProfileSetupScreenProps {
+  isDashboardMode?: boolean;
+  onBack?: () => void;
+}
+
+export default function ProfileSetupScreen({ isDashboardMode = false, onBack }: ProfileSetupScreenProps) {
   const navigation = useNavigation<any>();
   const route = useRoute<any>();
   const { user, updateUser } = useContext(AuthContext);
-  const isOnboarding = route.params?.isOnboarding ?? false;
+  const isOnboarding = isDashboardMode ? false : (route.params?.isOnboarding ?? false);
   
   const [currentStep, setCurrentStep] = useState<SetupStep>('basics');
   const [saving, setSaving] = useState(false);
@@ -260,6 +265,8 @@ export default function ProfileSetupScreen() {
     const prevIndex = currentStepIndex - 1;
     if (prevIndex >= 0) {
       setCurrentStep(steps[prevIndex]);
+    } else if (isDashboardMode && onBack) {
+      onBack();
     } else {
       navigation.goBack();
     }
@@ -336,6 +343,8 @@ export default function ProfileSetupScreen() {
           index: 0,
           routes: [{ name: 'Main' }],
         });
+      } else if (isDashboardMode && onBack) {
+        onBack();
       } else {
         navigation.goBack();
       }
