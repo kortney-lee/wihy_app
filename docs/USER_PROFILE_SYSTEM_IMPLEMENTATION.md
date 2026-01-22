@@ -1,6 +1,24 @@
 # User Profile Management System - Implementation Summary
 
-## Overview
+## ⚠️ OUTDATED DOCUMENT - SEE PROFILE_API_INTEGRATION_STATUS.md
+
+**This document describes the original implementation plan. Many screens listed here were removed during consolidation.**
+
+**Current Status (January 21, 2026):**
+- ✅ ProfileSetupScreen.tsx - Active (setup wizard)
+- ✅ EditProfileScreen.tsx - Active (edit profile)
+- ✅ Profile.tsx - Active (main profile tab)
+- ❌ ProfileSetupWizard.tsx - DELETED (duplicate)
+- ❌ UserProfile.tsx - DELETED (duplicate)
+- ❌ EditProfile.tsx - DELETED (duplicate)
+- ❌ ProfileSettings.tsx - DELETED (orphaned stub)
+- ❌ PrivacySettings.tsx - DELETED (orphaned stub)
+
+**See:** [PROFILE_API_INTEGRATION_STATUS.md](./PROFILE_API_INTEGRATION_STATUS.md) for current state.
+
+---
+
+## Overview (Original Plan)
 Complete implementation of the user profile management system for the WIHY mobile application. This system provides a comprehensive profile creation, viewing, editing, and settings management experience following the established design patterns.
 
 ## Completed Components
@@ -146,7 +164,8 @@ Complete implementation of the user profile management system for the WIHY mobil
 
 ---
 
-### 4. ProfileSettings.tsx (~460 lines)
+### 4. ProfileSettings.tsx (~460 lines) ❌ DELETED
+**Status**: Removed January 21, 2026 - Orphaned stub with no API integration
 **Purpose**: Account security and notification settings
 
 **Sections**:
@@ -187,7 +206,8 @@ Complete implementation of the user profile management system for the WIHY mobil
 
 ---
 
-### 5. PrivacySettings.tsx (~560 lines)
+### 5. PrivacySettings.tsx (~560 lines) ❌ DELETED
+**Status**: Removed January 21, 2026 - Orphaned stub with no API integration
 **Purpose**: Privacy controls and data management
 
 **Sections**:
@@ -234,42 +254,48 @@ Complete implementation of the user profile management system for the WIHY mobil
 
 ## Navigation Integration
 
-### Routes Added
+### Routes Added (OUTDATED - Many Removed)
 ```typescript
 // mobile/src/types/navigation.ts
-ProfileSetupWizard: undefined;
-UserProfile: undefined;
-ProfileSettings: undefined;
-PrivacySettings: undefined;
+// DELETED: ProfileSetupWizard: undefined;
+// DELETED: UserProfile: undefined;
+// DELETED: ProfileSettings: undefined;
+// DELETED: PrivacySettings: undefined;
+
+// CURRENT ROUTES:
+EditProfile: undefined;
+ProfileSetup: { isOnboarding?: boolean } | undefined;
+HealthData: undefined;
 ```
 
-### Screen Registrations
+### Screen Registrations (OUTDATED - Many Removed)
 ```typescript
 // mobile/src/navigation/AppNavigator.tsx
 
-// Imports
-import ProfileSetupWizard from '../screens/ProfileSetupWizard';
-import UserProfile from '../screens/UserProfile';
-import ProfileSettings from '../screens/ProfileSettings';
-import PrivacySettings from '../screens/PrivacySettings';
+// DELETED IMPORTS:
+// import ProfileSetupWizard from '../screens/ProfileSetupWizard';
+// import UserProfile from '../screens/UserProfile';
+// import ProfileSettings from '../screens/ProfileSettings';
+// import PrivacySettings from '../screens/PrivacySettings';
 
-// Stack.Screen registrations (all use card presentation with no header)
-<Stack.Screen name="ProfileSetupWizard" component={ProfileSetupWizard} />
-<Stack.Screen name="UserProfile" component={UserProfile} />
-<Stack.Screen name="ProfileSettings" component={ProfileSettings} />
-<Stack.Screen name="PrivacySettings" component={PrivacySettings} />
+// CURRENT: Only EditProfileScreen, ProfileSetupScreen registered
 ```
 
 ---
 
 ## Design System Compliance
 
-### Color Themes by Screen
-- **ProfileSetupWizard**: Green (#10b981) - "growth and progress"
-- **UserProfile**: Blue (#3b82f6) - "information and trust"
-- **EditProfile**: Blue (#3b82f6) with Yellow (#f59e0b) accents for changes
-- **ProfileSettings**: Purple (#8b5cf6) - "settings and customization"
-- **PrivacySettings**: Green (#10b981) - "security and privacy"
+### Color Themes by Screen (CURRENT)
+- **ProfileSetupScreen**: Teal (#14b8a6) - "setup and configuration"
+- **EditProfileScreen**: Blue (#3b82f6) - "information editing"
+- **Profile**: Blue/Various - "main profile with inline settings"
+
+### DELETED Screens
+- ~~**ProfileSetupWizard**: Green (#10b981)~~ - REMOVED
+- ~~**UserProfile**: Blue (#3b82f6)~~ - REMOVED
+- ~~**EditProfile**: Blue with Yellow accents~~ - REMOVED
+- ~~**ProfileSettings**: Purple (#8b5cf6)~~ - REMOVED
+- ~~**PrivacySettings**: Green (#10b981)~~ - REMOVED
 
 ### Common Design Elements
 ✅ Background: `#e0f2fe` (light blue)
@@ -620,10 +646,33 @@ Platform-specific optimizations:
 ✅ Privacy controls comprehensive
 ✅ Settings management complete
 
-**Status**: ✅ **COMPLETE** - Ready for testing and API integration
+**Status**: ⚠️ **OUTDATED** - See PROFILE_API_INTEGRATION_STATUS.md and PROFILE_CONSOLIDATION_SUMMARY.md
 
 ---
 
-*Generated: ${new Date().toISOString()}*
-*Version: 1.0.0*
-*Author: GitHub Copilot*
+## Final Status (January 21, 2026)
+
+**Screens Removed:**
+- ProfileSetupWizard.tsx (~950 lines) - Duplicate
+- UserProfile.tsx (~650 lines) - Duplicate
+- EditProfile.tsx (~880 lines) - Duplicate  
+- ProfileSettings.tsx (~460 lines) - Orphaned stub
+- PrivacySettings.tsx (~560 lines) - Orphaned stub
+
+**Total Removed:** ~3,500 lines of duplicate/stub code
+
+**Screens Kept (Active):**
+- ProfileSetupScreen.tsx - Setup wizard (API integrated) ✅
+- EditProfileScreen.tsx - Edit form (API integrated) ✅
+- Profile.tsx - Main profile tab (API integrated) ✅
+
+**Documentation:**
+- See [PROFILE_API_INTEGRATION_STATUS.md](./PROFILE_API_INTEGRATION_STATUS.md) for current API integration status
+- See [PROFILE_CONSOLIDATION_SUMMARY.md](./PROFILE_CONSOLIDATION_SUMMARY.md) for consolidation details
+- See [PROFILE_SCREENS_DUPLICATE_ANALYSIS.md](./PROFILE_SCREENS_DUPLICATE_ANALYSIS.md) for duplicate analysis
+
+---
+
+*Original Document Generated: January 2026*  
+*Marked Outdated: January 21, 2026*  
+*Version: 2.0.0 (Updated with deletion status)*
