@@ -1,4 +1,5 @@
 import { API_CONFIG, getDefaultUserContext } from './config';
+import { authService } from './authService';
 import { fetchWithLogging } from '../utils/apiLogger';
 import type { 
   BarcodeScanResult, 
@@ -23,6 +24,18 @@ class ScanService {
   }
 
   /**
+   * Get current authenticated user ID
+   * Throws error if user is not authenticated - no fallbacks.
+   */
+  private async getCurrentUserId(): Promise<string> {
+    const userData = await authService.getUserData();
+    if (userData?.id) {
+      return userData.id;
+    }
+    throw new Error('User not authenticated. Please log in to continue.');
+  }
+
+  /**
    * Universal Ask WiHY endpoint - auto-detects product type
    * API v6.1: POST /api/scan/ask_wihy
    * Searches ALL databases: Food, Beauty, Pet Food
@@ -38,12 +51,15 @@ class ScanService {
     console.log('Mode:', mode);
     
     try {
+      // Get the current authenticated user ID
+      const currentUserId = await this.getCurrentUserId();
+      
       const requestBody = {
         query,
         mode,
         user_context: {
           include_charts: true,
-          userId: getDefaultUserContext().userId,
+          userId: currentUserId,
           ...userContext,
         },
       };
@@ -109,12 +125,15 @@ class ScanService {
     console.log('User Context:', userContext);
     
     try {
+      // Get the current authenticated user ID
+      const currentUserId = await this.getCurrentUserId();
+      
       const requestBody = {
         barcode,
         user_context: {
           include_charts: true,
           include_ingredients: true,
-          userId: getDefaultUserContext().userId,
+          userId: currentUserId,
           ...userContext,
         },
       };
@@ -189,6 +208,9 @@ class ScanService {
     console.log('User Context:', userContext);
     
     try {
+      // Get the current authenticated user ID
+      const currentUserId = await this.getCurrentUserId();
+      
       // Convert image to base64 if needed
       let imageData = imageUri;
       if (!imageUri.startsWith('data:image')) {
@@ -202,7 +224,7 @@ class ScanService {
         context: userContext?.context || 'food analysis',
         user_context: {
           include_charts: true,
-          userId: getDefaultUserContext().userId,
+          userId: currentUserId,
           ...userContext,
         },
       };
@@ -279,6 +301,9 @@ class ScanService {
     console.log('User Context:', userContext);
     
     try {
+      // Get the current authenticated user ID
+      const currentUserId = await this.getCurrentUserId();
+      
       let imageData = imageUri;
       if (!imageUri.startsWith('data:image')) {
         console.log('Converting image to base64...');
@@ -289,7 +314,7 @@ class ScanService {
       const requestBody = {
         image: imageData.substring(0, 100) + '... [truncated]',
         user_context: {
-          userId: getDefaultUserContext().userId,
+          userId: currentUserId,
           include_charts: true,
           trackHistory: true,
           ...userContext,
@@ -310,7 +335,7 @@ class ScanService {
         body: JSON.stringify({
           image: imageData,
           user_context: {
-            userId: getDefaultUserContext().userId,
+            userId: currentUserId,
             include_charts: true,
             trackHistory: true,
             ...userContext,
@@ -383,6 +408,9 @@ class ScanService {
     console.log('User Context:', userContext);
     
     try {
+      // Get the current authenticated user ID
+      const currentUserId = await this.getCurrentUserId();
+      
       let imageData = imageUri;
       if (!imageUri.startsWith('data:image')) {
         console.log('Converting image to base64...');
@@ -390,12 +418,15 @@ class ScanService {
         console.log('Image converted, size:', imageData.length, 'chars');
       }
 
+      const userContextWithId = {
+        ...getDefaultUserContext(),
+        userId: currentUserId,
+        ...userContext,
+      };
+
       const requestBody = {
         image: imageData.substring(0, 100) + '... [truncated]',
-        user_context: {
-          ...getDefaultUserContext(),
-          ...userContext,
-        },
+        user_context: userContextWithId,
       };
       
       console.log('Request Body (truncated image):', JSON.stringify(requestBody, null, 2));
@@ -411,10 +442,7 @@ class ScanService {
         },
         body: JSON.stringify({
           image: imageData,
-          user_context: {
-            ...getDefaultUserContext(),
-            ...userContext,
-          },
+          user_context: userContextWithId,
         }),
       });
 
@@ -464,6 +492,9 @@ class ScanService {
     console.log('User Context:', userContext);
     
     try {
+      // Get the current authenticated user ID
+      const currentUserId = await this.getCurrentUserId();
+      
       let imageData = imageUri;
       if (!imageUri.startsWith('data:image')) {
         console.log('Converting image to base64...');
@@ -474,7 +505,7 @@ class ScanService {
       const requestBody = {
         image_url: imageData.substring(0, 100) + '... [truncated]',
         user_context: {
-          userId: getDefaultUserContext().userId,
+          userId: currentUserId,
           trackHistory: true,
           ...userContext,
         },
@@ -494,7 +525,7 @@ class ScanService {
         body: JSON.stringify({
           image_url: imageData,
           user_context: {
-            userId: getDefaultUserContext().userId,
+            userId: currentUserId,
             trackHistory: true,
             ...userContext,
           },
@@ -564,6 +595,9 @@ class ScanService {
     console.log('Context:', context);
     
     try {
+      // Get the current authenticated user ID
+      const currentUserId = await this.getCurrentUserId();
+      
       let imageData = imageUri;
       if (!imageUri.startsWith('data:image')) {
         console.log('Converting image to base64...');
@@ -574,7 +608,7 @@ class ScanService {
       const requestBody = {
         images: ['[base64 image data - truncated]'],
         context: {
-          userId: getDefaultUserContext().userId,
+          userId: currentUserId,
           ...context,
         },
       };
@@ -593,7 +627,7 @@ class ScanService {
         body: JSON.stringify({
           images: [imageData],
           context: {
-            userId: getDefaultUserContext().userId,
+            userId: currentUserId,
             ...context,
           },
         }),
@@ -631,6 +665,9 @@ class ScanService {
    */
   async confirmPill(scanId: string, selectedRxcui: string, userId?: string): Promise<any> {
     try {
+      // Get the current authenticated user ID if not provided
+      const currentUserId = userId || await this.getCurrentUserId();
+      
       const response = await fetchWithLogging(`${this.baseUrl}${API_CONFIG.endpoints.pillConfirm}`, {
         method: 'POST',
         headers: {
@@ -639,7 +676,7 @@ class ScanService {
         body: JSON.stringify({
           scanId,
           selectedRxcui,
-          userId: userId || getDefaultUserContext().userId,
+          userId: currentUserId,
         }),
       });
 
@@ -756,6 +793,9 @@ class ScanService {
     console.log('Options:', options);
     
     try {
+      // Get the current authenticated user ID if not provided
+      const currentUserId = options.userId || await this.getCurrentUserId();
+      
       // Convert image to base64
       let imageData = imageUri;
       if (!imageUri.startsWith('data:image')) {
@@ -771,7 +811,7 @@ class ScanService {
         barcode: options.barcode,
         upload_only: true, // Flag to indicate this is just for storage, not analysis
         user_context: {
-          userId: options.userId || getDefaultUserContext().userId,
+          userId: currentUserId,
           scan_type: options.scanType,
           timestamp: new Date().toISOString(),
         },

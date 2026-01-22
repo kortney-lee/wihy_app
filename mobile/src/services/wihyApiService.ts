@@ -8,6 +8,7 @@
  */
 
 import { API_CONFIG, getDefaultUserContext } from './config';
+import { authService } from './authService';
 import { fetchWithLogging } from '../utils/apiLogger';
 import { compressImageForUpload } from '../utils/imageCompression';
 import { WIHYError, WIHYErrorCode as ErrorCode, createErrorFromResponse, createNetworkError } from './errors';
@@ -108,7 +109,28 @@ export class WIHYApiService {
   }
 
   /**
-   * Get current user ID
+   * Get current authenticated user ID from auth service.
+   * Throws error if user is not authenticated - no fallbacks.
+   */
+  async getCurrentUserId(): Promise<string> {
+    // If we already have a real user ID (not the default), use it
+    if (this.userId && this.userId !== 'mobile-user') {
+      return this.userId;
+    }
+    
+    // Get the authenticated user's ID from auth service
+    const userData = await authService.getUserData();
+    if (userData?.id) {
+      this.userId = userData.id;
+      return userData.id;
+    }
+    
+    throw new Error('User not authenticated. Please log in to continue.');
+  }
+
+  /**
+   * Get current user ID (sync - may return stale default)
+   * @deprecated Use getCurrentUserId() instead for accurate user ID
    */
   getUserId(): string {
     return this.userId;
@@ -191,10 +213,13 @@ export class WIHYApiService {
     console.log('[WIHYApiService] Scanning barcode:', barcode);
 
     try {
+      // Get the current authenticated user ID
+      const currentUserId = await this.getCurrentUserId();
+      
       const requestBody = {
         barcode,
         user_context: {
-          userId: this.userId,
+          userId: currentUserId,
           trackHistory,
           include_charts: true,
           include_ingredients: true,
@@ -214,7 +239,7 @@ export class WIHYApiService {
 
       // Invalidate history cache after successful scan
       if (trackHistory) {
-        this.cache.invalidate(this.userId);
+        this.cache.invalidate(currentUserId);
       }
 
       return {
@@ -251,6 +276,9 @@ export class WIHYApiService {
     console.log('[WIHYApiService] Scanning food photo...');
 
     try {
+      // Get the current authenticated user ID
+      const currentUserId = await this.getCurrentUserId();
+      
       // Compress and encode image
       const base64Image = await compressImageForUpload(imageUri, {
         maxSizeKB: 500,
@@ -264,7 +292,7 @@ export class WIHYApiService {
       const requestBody = {
         image: base64Image,
         user_context: {
-          userId: this.userId,
+          userId: currentUserId,
           trackHistory,
           include_charts: true,
         },
@@ -283,7 +311,7 @@ export class WIHYApiService {
 
       // Invalidate history cache after successful scan
       if (trackHistory) {
-        this.cache.invalidate(this.userId);
+        this.cache.invalidate(currentUserId);
       }
 
       return {
@@ -324,6 +352,9 @@ export class WIHYApiService {
     console.log('[WIHYApiService] Scanning pill...');
 
     try {
+      // Get the current authenticated user ID
+      const currentUserId = await this.getCurrentUserId();
+      
       // Compress and encode image
       const base64Image = await compressImageForUpload(imageUri, {
         maxSizeKB: 500,
@@ -335,7 +366,7 @@ export class WIHYApiService {
       const requestBody = {
         images: [base64Image],
         context: {
-          userId: this.userId,
+          userId: currentUserId,
           ...context,
         },
       };
@@ -379,10 +410,13 @@ export class WIHYApiService {
     console.log('[WIHYApiService] Confirming pill:', scanId, selectedRxcui);
 
     try {
+      // Get the current authenticated user ID
+      const currentUserId = await this.getCurrentUserId();
+      
       const requestBody = {
         scanId,
         selectedRxcui,
-        userId: this.userId,
+        userId: currentUserId,
       };
 
       const result = await this.makeRequest<{
@@ -424,6 +458,9 @@ export class WIHYApiService {
     console.log('[WIHYApiService] Scanning product label...');
 
     try {
+      // Get the current authenticated user ID
+      const currentUserId = await this.getCurrentUserId();
+      
       // Compress and encode image
       const base64Image = await compressImageForUpload(imageUri, {
         maxSizeKB: 500,
@@ -435,7 +472,7 @@ export class WIHYApiService {
       const requestBody = {
         image: base64Image,
         user_context: {
-          userId: this.userId,
+          userId: currentUserId,
           trackHistory,
         },
       };
@@ -453,7 +490,7 @@ export class WIHYApiService {
 
       // Invalidate history cache after successful scan
       if (trackHistory) {
-        this.cache.invalidate(this.userId);
+        this.cache.invalidate(currentUserId);
       }
 
       return {
@@ -488,9 +525,12 @@ export class WIHYApiService {
     console.log('[WIHYApiService] Getting scan history...');
 
     try {
+      // Get the current authenticated user ID
+      const currentUserId = await this.getCurrentUserId();
+      
       // Check cache first
       if (useCache) {
-        const cached = this.cache.getCached(this.userId);
+        const cached = this.cache.getCached(currentUserId);
         if (cached) {
           console.log('[WIHYApiService] Returning cached history');
           return cached;
@@ -498,7 +538,7 @@ export class WIHYApiService {
       }
 
       const params = new URLSearchParams({
-        userId: this.userId,
+        userId: currentUserId,
         limit: limit.toString(),
         includeImages: 'true',
       });
@@ -515,9 +555,9 @@ export class WIHYApiService {
       );
 
       // Cache the result
-      this.cache.setCached(this.userId, result);
+      this.cache.setCached(currentUserId, result);
 
-      console.log(`[WIHYApiService] Retrieved ${result.count} scan history items`);
+      console.log(`[WIHYApiService] Retrieved ${result.count} scan history items for user: ${currentUserId}`);
 
       return result;
     } catch (error) {
@@ -540,8 +580,11 @@ export class WIHYApiService {
     console.log('[WIHYApiService] Deleting scan:', scanId);
 
     try {
+      // Get the current authenticated user ID
+      const currentUserId = await this.getCurrentUserId();
+      
       const requestBody = {
-        userId: this.userId,
+        userId: currentUserId,
       };
 
       await this.makeRequest<{ success: boolean }>(
@@ -553,7 +596,7 @@ export class WIHYApiService {
       );
 
       // Invalidate cache
-      this.cache.invalidate(this.userId);
+      this.cache.invalidate(currentUserId);
 
       return { success: true };
     } catch (error) {
@@ -568,8 +611,9 @@ export class WIHYApiService {
   /**
    * Clear the history cache
    */
-  clearCache(): void {
-    this.cache.invalidate(this.userId);
+  async clearCache(): Promise<void> {
+    const currentUserId = await this.getCurrentUserId();
+    this.cache.invalidate(currentUserId);
   }
 
   // ==========================================
