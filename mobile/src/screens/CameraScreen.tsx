@@ -598,9 +598,7 @@ export default function CameraScreen() {
           const imageData = await compressImageForUpload(photo.uri, { maxSizeKB: 500 });
           console.log('[CameraScreen] Photo compressed, sending to API...');
           setProcessingMessage('Analyzing food...');
-          const result = await scanService.scanFoodPhoto(imageData, {
-            userId: user?.email || 'mobile-user',
-          });
+          const result = await scanService.scanFoodPhoto(imageData);
 
           setIsScanning(false);
           setIsProcessing(false);
@@ -689,9 +687,7 @@ export default function CameraScreen() {
           const imageData = await compressImageForUpload(photo.uri, { maxSizeKB: 500 });
           console.log('[CameraScreen] Photo compressed, sending to API...');
           setProcessingMessage('Identifying pill...');
-          const result = await scanService.scanPill(imageData, {
-            userId: user?.email || 'mobile-user',
-          });
+          const result = await scanService.scanPill(imageData);
 
           setIsScanning(false);
           setIsProcessing(false);
@@ -770,9 +766,7 @@ export default function CameraScreen() {
           const imageData = await compressImageForUpload(photo.uri, { maxSizeKB: 500 });
           console.log('[CameraScreen] Photo compressed, sending to API...');
           setProcessingMessage('Analyzing label...');
-          const result = await scanService.scanLabel(imageData, {
-            userId: user?.email || 'mobile-user',
-          });
+          const result = await scanService.scanLabel(imageData);
 
           setIsScanning(false);
           setIsProcessing(false);
