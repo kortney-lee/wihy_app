@@ -51,6 +51,12 @@ const providers = [
     color: '#1877F2',
   },
   {
+    id: 'microsoft',
+    name: 'Continue with Microsoft',
+    icon: 'logo-microsoft',
+    color: '#00BCF2',
+  },
+  {
     id: 'email',
     name: 'Continue with Email',
     icon: 'mail',
