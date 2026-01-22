@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useContext } from 'react';
 import {
   View,
   Text,
@@ -10,10 +10,13 @@ import {
   Switch,
   Platform,
   Animated,
+  ActivityIndicator,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { dashboardColors, Ionicons } from '../components/shared';
 import { dashboardTheme } from '../theme/dashboardTheme';
+import { userService } from '../services/userService';
+import { AuthContext } from '../context/AuthContext';
 
 const isWeb = Platform.OS === 'web';
 
@@ -60,7 +63,9 @@ export default function ClientOnboarding({
   isDashboardMode = false,
   onBack,
 }: ClientOnboardingProps) {
+  const { user, updateUser } = useContext(AuthContext);
   const [currentStep, setCurrentStep] = useState(1);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const totalSteps = 5;
   
   // Collapsing header animation
@@ -174,16 +179,94 @@ export default function ClientOnboarding({
     }
   };
 
-  const handleSubmit = () => {
-    Alert.alert(
-      'Onboarding Complete!',
-      `Welcome ${formData.firstName}! Your profile has been created successfully. Use the hamburger menu to navigate.`,
-      [
-        {
-          text: 'OK',
+  const handleSubmit = async () => {
+    if (isSubmitting) return;
+    
+    // Validate required consents
+    if (!formData.termsAccepted || !formData.privacyAccepted) {
+      Alert.alert('Required', 'Please accept the Terms of Service and Privacy Policy to continue.');
+      return;
+    }
+    
+    // Get user ID from context
+    const userId = user?.id;
+    if (!userId) {
+      Alert.alert('Error', 'User session not found. Please log in again.');
+      return;
+    }
+    
+    setIsSubmitting(true);
+    
+    try {
+      // Build profile payload per API spec:
+      // PATCH https://user.wihy.ai/api/profile/:userId
+      const profilePayload = {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        dateOfBirth: formData.dateOfBirth || undefined,
+        gender: formData.gender || undefined,
+        height: formData.height ? parseFloat(formData.height) : undefined,
+        weight: formData.weight ? parseFloat(formData.weight) : undefined,
+        activityLevel: formData.activityLevel || undefined,
+        healthPreferences: {
+          goals: formData.primaryGoal ? [formData.primaryGoal] : [],
+          dietaryPref: formData.dietaryPreferences?.[0] || undefined,
+          allergies: formData.allergies || [],
         },
-      ]
-    );
+        onboardingCompleted: true,
+      };
+      
+      console.log('=== CLIENT ONBOARDING SUBMIT ===');
+      console.log('User ID:', userId);
+      console.log('Payload:', JSON.stringify(profilePayload, null, 2));
+      
+      // Call userService to update profile via PATCH /api/profile/:userId
+      const response = await userService.updateUserProfile(userId, profilePayload);
+      
+      if (response.success) {
+        console.log('=== ONBOARDING SUCCESS ===');
+        
+        // Update user context with new profile data
+        if (updateUser && response.data) {
+          updateUser({
+            ...user,
+            name: `${formData.firstName} ${formData.lastName}`,
+            onboardingCompleted: true,
+          });
+        }
+        
+        Alert.alert(
+          'Onboarding Complete!',
+          `Welcome ${formData.firstName}! Your profile has been created successfully.`,
+          [
+            {
+              text: 'OK',
+              onPress: () => {
+                if (onBack) {
+                  onBack();
+                }
+              },
+            },
+          ]
+        );
+      } else {
+        console.error('=== ONBOARDING FAILED ===', response.error);
+        Alert.alert(
+          'Error',
+          response.error || 'Failed to save profile. Please try again.',
+          [{ text: 'OK' }]
+        );
+      }
+    } catch (error: any) {
+      console.error('=== ONBOARDING ERROR ===', error);
+      Alert.alert(
+        'Error',
+        error.message || 'An unexpected error occurred. Please try again.',
+        [{ text: 'OK' }]
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const renderStepIndicator = () => (
@@ -725,17 +808,26 @@ export default function ClientOnboarding({
             <Pressable
               style={[styles.button, styles.buttonSecondary]}
               onPress={handleBack}
+              disabled={isSubmitting}
             >
               <Text style={styles.buttonSecondaryText}>Back</Text>
             </Pressable>
             <Pressable
-              style={[styles.button, styles.buttonPrimary, !validateStep() && styles.buttonDisabled]}
+              style={[
+                styles.button, 
+                styles.buttonPrimary, 
+                (!validateStep() || isSubmitting) && styles.buttonDisabled
+              ]}
               onPress={handleNext}
-              disabled={!validateStep()}
+              disabled={!validateStep() || isSubmitting}
             >
-              <Text style={styles.buttonPrimaryText}>
-                {currentStep === totalSteps ? 'Complete' : 'Next'}
-              </Text>
+              {isSubmitting ? (
+                <ActivityIndicator color="#fff" size="small" />
+              ) : (
+                <Text style={styles.buttonPrimaryText}>
+                  {currentStep === totalSteps ? 'Complete' : 'Next'}
+                </Text>
+              )}
             </Pressable>
           </View>
           

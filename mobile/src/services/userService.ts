@@ -298,7 +298,7 @@ class UserService {
 
   /**
    * Update user profile information
-   * PUT /api/profile/:userId
+   * PATCH /api/profile/:userId
    */
   async updateUserProfile(
     userId: string,
@@ -318,6 +318,12 @@ class UserService {
       healthScore: number;
       dayStreak: number;
       scansCount: number;
+      healthPreferences: {
+        goals?: string[];
+        dietaryPref?: string;
+        allergies?: string[];
+      };
+      onboardingCompleted: boolean;
     }>
   ): Promise<ApiResponse<UserProfile>> {
     const endpoint = `${this.baseUrl}${USER_SERVICE_CONFIG.endpoints.updateProfile}/${userId}`;
@@ -329,7 +335,7 @@ class UserService {
     
     try {
       const response = await fetchWithLogging(endpoint, {
-        method: 'PUT',
+        method: 'PATCH',
         headers,
         body: JSON.stringify(updates),
       });
