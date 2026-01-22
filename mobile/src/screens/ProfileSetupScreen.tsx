@@ -314,22 +314,24 @@ export default function ProfileSetupScreen({ isDashboardMode = false, onBack }: 
 
     setSaving(true);
     try {
-      const profileData = {
+      // Build profile data, omitting empty string values to prevent backend errors
+      const profileData: Record<string, any> = {
         firstName,
         lastName,
         name: `${firstName} ${lastName}`.trim(),
-        dateOfBirth,
-        gender,
-        height: height ? parseFloat(height) : undefined,
-        weight: weight ? parseFloat(weight) : undefined,
+        // Only include optional fields if they have values (not empty strings)
+        ...(dateOfBirth && { dateOfBirth }),
+        ...(gender && { gender }),
+        ...(height && { height: parseFloat(height) }),
+        ...(weight && { weight: parseFloat(weight) }),
         healthPreferences: {
           goals: selectedGoals,
-          targetWeight: targetWeight ? parseFloat(targetWeight) : undefined,
-          targetDate,
+          ...(targetWeight && { targetWeight: parseFloat(targetWeight) }),
+          ...(targetDate && { targetDate }),
           dietaryPrefs,
           allergies,
-          otherRestrictions,
-          fitnessLevel,
+          ...(otherRestrictions && { otherRestrictions }),
+          ...(fitnessLevel && { fitnessLevel }),
           preferredActivities,
           weeklyExerciseGoal: parseInt(weeklyExerciseGoal) || 3,
         },

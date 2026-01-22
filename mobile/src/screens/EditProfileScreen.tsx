@@ -93,15 +93,17 @@ export default function EditProfileScreen() {
 
     setSaving(true);
     try {
-      const updates = {
+      // Build updates, omitting empty string values to prevent backend errors
+      const updates: Record<string, any> = {
         firstName,
         lastName,
         name: `${firstName} ${lastName}`.trim(),
-        phone,
-        dateOfBirth,
-        gender,
-        height: height ? parseFloat(height) : undefined,
-        weight: weight ? parseFloat(weight) : undefined,
+        // Only include optional fields if they have values (not empty strings)
+        ...(phone && { phone }),
+        ...(dateOfBirth && { dateOfBirth }),
+        ...(gender && { gender }),
+        ...(height && { height: parseFloat(height) }),
+        ...(weight && { weight: parseFloat(weight) }),
       };
 
       const result = await userService.updateUserProfile(user.id, updates);
