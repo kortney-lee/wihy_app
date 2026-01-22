@@ -338,6 +338,22 @@ const CoachDashboardPage: React.FC<CoachDashboardPageProps> = ({ showMenuFromHea
             );
           })}
           
+          {/* Profile Setup - Always available */}
+          <TouchableOpacity
+            style={[
+              styles.dashboardCard,
+              styles.profileSetupCard,
+              isWeb && { width: 160, aspectRatio: undefined, height: 140, padding: 12 },
+            ]}
+            onPress={() => navigation.navigate('ProfileSetup', { isOnboarding: false })}
+          >
+            <View style={[styles.cardIconContainer, isWeb && { marginBottom: 8 }]}>
+              <SvgIcon name="person-add" size={isWeb ? 24 : 32} color="#ffffff" />
+            </View>
+            <Text style={[styles.cardTitle, { fontSize: isWeb ? 14 : 16 }]}>Profile Setup</Text>
+            <Text style={[styles.cardSubtitle, { fontSize: isWeb ? 11 : 12 }]}>Health profile</Text>
+          </TouchableOpacity>
+          
           {/* Switch back to Personal Dashboard */}
           {onContextChange && (
             <TouchableOpacity
@@ -459,6 +475,9 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: '#10b981',
     borderStyle: 'dashed',
+  },
+  profileSetupCard: {
+    backgroundColor: '#14b8a6',
   },
 });
 

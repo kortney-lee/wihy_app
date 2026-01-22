@@ -281,6 +281,18 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
           <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>Scan history</Text>
         </TouchableOpacity>
 
+        {/* Profile Setup - Available to ALL users to set up their health profile */}
+        <TouchableOpacity
+          style={[styles.dashboardCard, styles.profileSetupCard, { width: cardWidth as any }]}
+          onPress={() => navigation.navigate('ProfileSetup', { isOnboarding: false })}
+        >
+          <View style={[styles.cardIconContainer, { width: iconContainerSize, height: iconContainerSize, borderRadius: iconContainerSize / 2 }]}>
+            <SvgIcon name="person-add" size={iconSize} color="#ffffff" />
+          </View>
+          <Text style={[styles.cardTitle, { fontSize: titleSize }]}>Profile Setup</Text>
+          <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>Health profile</Text>
+        </TouchableOpacity>
+
         {/* Progress Dashboard - Premium only */}
         {!isFreeUser && (
         <TouchableOpacity
@@ -716,6 +728,10 @@ const styles = StyleSheet.create({
 
   onboardingCard: {
     backgroundColor: '#84cc16',
+  },
+
+  profileSetupCard: {
+    backgroundColor: '#14b8a6', // Teal - for profile/wellness setup
   },
 
   cardIconContainer: {

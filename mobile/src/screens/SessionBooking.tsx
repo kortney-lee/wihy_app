@@ -12,6 +12,8 @@ import {
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import type { StackNavigationProp } from '@react-navigation/stack';
+import { useAuth } from '../context/AuthContext';
+import { userService } from '../services/userService';
 
 interface RouteParams {
   coachId: string;
@@ -42,6 +44,7 @@ export default function SessionBooking() {
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   const route = useRoute();
   const { coachId, coachName } = (route.params as RouteParams) || {};
+  const { userId } = useAuth();
 
   // Collapsing header animation
   const scrollY = useRef(new Animated.Value(0)).current;
@@ -155,26 +158,60 @@ export default function SessionBooking() {
       return;
     }
 
+    if (!coachId) {
+      Alert.alert('Error', 'Coach not found. Please try again.');
+      return;
+    }
+
+    if (!userId) {
+      Alert.alert('Sign in required', 'Please sign in to book a session.');
+      return;
+    }
+
     setIsBooking(true);
 
     try {
-      // TODO: Replace with actual API call
-      // const response = await fetch(`/api/coaches/${coachId}/bookings`, {
-      //   method: 'POST',
-      //   headers: {
-      //     'Content-Type': 'application/json',
-      //     'Authorization': `Bearer ${accessToken}`,
-      //   },
-      //   body: JSON.stringify({
-      //     session_type: sessionType,
-      //     scheduled_date: selectedDate,
-      //     scheduled_time: selectedTime,
-      //     payment_method: paymentMethod,
-      //   }),
-      // });
-      // const data = await response.json();
+      const selectedDay = availableDays.find((d) => d.dateString === selectedDate);
+      if (!selectedDay) {
+        throw new Error('Selected date unavailable');
+      }
 
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      const timeMatch = selectedTime.match(/(\d+):(\d+)\s*(AM|PM)/i);
+      if (!timeMatch) {
+        throw new Error('Invalid time format');
+      }
+      const [, hourStr, minuteStr, meridiem] = timeMatch;
+      let hour = parseInt(hourStr, 10) % 12;
+      if (meridiem?.toUpperCase() === 'PM') {
+        hour += 12;
+      }
+      const minutes = parseInt(minuteStr, 10) || 0;
+
+      const scheduledAtDate = new Date(selectedDay.date);
+      scheduledAtDate.setHours(hour, minutes, 0, 0);
+      const scheduledAtIso = scheduledAtDate.toISOString();
+
+      const durationMinutes = sessionType === 'followup-30' ? 30 : 60;
+      const apiSessionType =
+        sessionType === 'initial-60'
+          ? 'initial_consultation'
+          : sessionType === 'followup-30'
+            ? 'followup_30'
+            : 'followup_60';
+      const priceNumber = Number((selectedSessionType?.price || '').replace(/[^0-9.]/g, '')) || undefined;
+
+      const result = await userService.bookCoachSession(coachId, {
+        scheduled_at: scheduledAtIso,
+        duration_minutes: durationMinutes,
+        session_type: apiSessionType,
+        price: priceNumber,
+        client_id: userId,
+        notes: paymentMethod === 'membership' ? 'membership' : undefined,
+      });
+
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to book session');
+      }
 
       Alert.alert(
         'Session Booked!',

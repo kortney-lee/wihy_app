@@ -398,10 +398,8 @@ export default function EnrollmentScreen() {
     
     setLoading(true);
     try {
-      // Try using coachService.sendInvitation first for proper invitation tracking
-      const invitation = await coachService.sendInvitation({
-        coachId,
-        clientEmail: clientEmail.trim(),
+      const invitation = await userService.sendCoachInvitation(coachId, {
+        client_email: clientEmail.trim(),
         message: `I'd like to help you reach your health goals with personalized nutrition and fitness guidance.`,
       });
       

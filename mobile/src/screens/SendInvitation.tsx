@@ -13,6 +13,8 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useAuth } from '../context/AuthContext';
+import { userService } from '../services/userService';
 
 interface SendInvitationProps {
   visible: boolean;
@@ -25,6 +27,7 @@ export default function SendInvitation({ visible, onClose, coachId }: SendInvita
   const [clientName, setClientName] = useState('');
   const [message, setMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { coachId: authCoachId } = useAuth();
 
   const handleSendInvitation = async () => {
     // Validate inputs
@@ -45,26 +48,24 @@ export default function SendInvitation({ visible, onClose, coachId }: SendInvita
       return;
     }
 
+    const effectiveCoachId = coachId || authCoachId;
+    if (!effectiveCoachId) {
+      Alert.alert('Error', 'Coach profile not found. Please sign in again.');
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
-      // TODO: Replace with actual API call
-      // const response = await fetch(`/api/coaches/${coachId}/send-invitation`, {
-      //   method: 'POST',
-      //   headers: {
-      //     'Content-Type': 'application/json',
-      //     'Authorization': `Bearer ${accessToken}`,
-      //   },
-      //   body: JSON.stringify({
-      //     client_email: clientEmail.trim(),
-      //     client_name: clientName.trim() || undefined,
-      //     message: message.trim(),
-      //   }),
-      // });
-      // const data = await response.json();
+      const result = await userService.sendCoachInvitation(effectiveCoachId, {
+        client_email: clientEmail.trim(),
+        client_name: clientName.trim() || undefined,
+        message: message.trim(),
+      });
 
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to send invitation');
+      }
 
       Alert.alert(
         'Invitation Sent!',
@@ -73,7 +74,6 @@ export default function SendInvitation({ visible, onClose, coachId }: SendInvita
           {
             text: 'OK',
             onPress: () => {
-              // Reset form
               setClientEmail('');
               setClientName('');
               setMessage('');

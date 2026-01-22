@@ -12,6 +12,8 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import type { StackNavigationProp } from '@react-navigation/stack';
+import { useAuth } from '../context/AuthContext';
+import { userService } from '../services/userService';
 
 interface RouteParams {
   invitationId: string;
@@ -40,6 +42,7 @@ export default function AcceptInvitation() {
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   const route = useRoute();
   const { invitationId, coachId } = (route.params as RouteParams) || {};
+  const { userId } = useAuth();
 
   const [invitation, setInvitation] = useState<CoachInvitation | null>(null);
   const [loading, setLoading] = useState(true);
@@ -91,24 +94,22 @@ export default function AcceptInvitation() {
   const handleAccept = async () => {
     if (!invitation) return;
 
+    if (!userId) {
+      Alert.alert('Sign in required', 'Please sign in to accept the invitation.');
+      return;
+    }
+
     setIsAccepting(true);
 
     try {
-      // TODO: Replace with actual API call
-      // const response = await fetch(`/api/coaches/${invitation.coach_id}/accept-invitation`, {
-      //   method: 'POST',
-      //   headers: {
-      //     'Content-Type': 'application/json',
-      //     'Authorization': `Bearer ${accessToken}`,
-      //   },
-      //   body: JSON.stringify({
-      //     invitation_id: invitationId,
-      //   }),
-      // });
-      // await response.json();
+      const result = await userService.acceptCoachInvitation(invitation.coach_id, {
+        invitation_id: invitationId,
+        client_id: userId,
+      });
 
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to accept invitation');
+      }
 
       if (scheduleNow) {
         // Navigate to booking screen
