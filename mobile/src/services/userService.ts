@@ -315,14 +315,11 @@ class UserService {
       activityLevel: string;
       timezone: string;
       goals: string[];
+      dietaryPreferences: string[];
+      allergies: string[];
       healthScore: number;
       dayStreak: number;
       scansCount: number;
-      healthPreferences: {
-        goals?: string[];
-        dietaryPref?: string;
-        allergies?: string[];
-      };
       onboardingCompleted: boolean;
     }>
   ): Promise<ApiResponse<UserProfile>> {
