@@ -713,6 +713,19 @@ class CoachService {
       { method: 'DELETE' }
     );
   }
+
+  /**
+   * Get coach public profile (for CoachDetailPage)
+   * GET /api/coaches/:coachId/profile
+   */
+  async getCoachProfile(coachId: string): Promise<any> {
+    const response = await fetchWithLogging(
+      `${this.baseUrl}/api/coaches/${coachId}/profile`,
+      { method: 'GET' }
+    );
+    const data = await response.json();
+    return data.data || data;
+  }
 }
 
 export const coachService = new CoachService();
