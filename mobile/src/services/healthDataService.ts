@@ -1813,3 +1813,7 @@ class HealthDataService {
 
     return metrics;
   }
+}
+
+// Export singleton instance
+export const healthDataService = new HealthDataService();
