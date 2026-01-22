@@ -1,5 +1,12 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_CONFIG } from './config';
 import { fetchWithLogging } from '../utils/apiLogger';
+
+// Storage keys (must match authService)
+const STORAGE_KEYS = {
+  SESSION_TOKEN: '@wihy_session_token',
+  ACCESS_TOKEN: '@wihy_access_token',
+};
 
 // ============= TYPES =============
 
@@ -125,6 +132,27 @@ class FamilyService {
     this.baseUrl = API_CONFIG.userUrl;
   }
 
+  /**
+   * Get authorization headers with JWT Bearer token
+   * Required for all user.wihy.ai protected endpoints
+   */
+  private async getAuthHeaders(): Promise<Record<string, string>> {
+    const sessionToken = await AsyncStorage.getItem(STORAGE_KEYS.SESSION_TOKEN);
+    const accessToken = await AsyncStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN);
+    
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+    
+    if (accessToken) {
+      headers['Authorization'] = `Bearer ${accessToken}`;
+    } else if (sessionToken) {
+      headers['Authorization'] = `Bearer ${sessionToken}`;
+    }
+    
+    return headers;
+  }
+
   // ============= FAMILY MANAGEMENT =============
 
   /**
@@ -140,12 +168,12 @@ class FamilyService {
     guardian_code?: string;
     message?: string;
   }> {
-    const response = await fetchWithLogging(`${this.baseUrl}/api/families`, {
+    const headers = await this.getAuthHeaders();
+    const response = await fetchWithLogging(`${this.baseUrl}/api/family`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       body: JSON.stringify({
         name: params.name,
-        created_by: params.creatorId,
       }),
     });
     return response.json();
@@ -153,21 +181,24 @@ class FamilyService {
 
   /**
    * Get family details
-   * GET /api/families/:familyId
+   * GET /api/family
    */
   async getFamily(familyId: string): Promise<Family> {
-    const response = await fetchWithLogging(`${this.baseUrl}/api/families/${familyId}`);
+    const headers = await this.getAuthHeaders();
+    const response = await fetchWithLogging(`${this.baseUrl}/api/family`, { headers });
     const data = await response.json();
     return data.data;
   }
 
   /**
-   * Get family by guardian code
-   * GET /api/families/by-code/:code
+   * Get family by guardian code (for preview before joining)
+   * Note: This might need to be a different endpoint or query param
    */
   async getFamilyByCode(guardianCode: string): Promise<Family | null> {
+    const headers = await this.getAuthHeaders();
     const response = await fetchWithLogging(
-      `${this.baseUrl}/api/families/by-code/${guardianCode}`
+      `${this.baseUrl}/api/family/by-code/${guardianCode}`,
+      { headers }
     );
     const data = await response.json();
     return data.data || null;
@@ -178,14 +209,15 @@ class FamilyService {
    * GET /api/users/:userId/family
    */
   async getUserFamily(userId: string): Promise<Family | null> {
-    const response = await fetchWithLogging(`${this.baseUrl}/api/users/${userId}/family`);
+    const headers = await this.getAuthHeaders();
+    const response = await fetchWithLogging(`${this.baseUrl}/api/users/${userId}/family`, { headers });
     const data = await response.json();
     return data.data || null;
   }
 
   /**
    * Update family settings
-   * PUT /api/families/:familyId
+   * PUT /api/family
    */
   async updateFamily(
     familyId: string,
@@ -193,9 +225,10 @@ class FamilyService {
       name?: string;
     }
   ): Promise<{ success: boolean }> {
-    const response = await fetchWithLogging(`${this.baseUrl}/api/families/${familyId}`, {
+    const headers = await this.getAuthHeaders();
+    const response = await fetchWithLogging(`${this.baseUrl}/api/family`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       body: JSON.stringify(updates),
     });
     return response.json();
@@ -203,44 +236,49 @@ class FamilyService {
 
   /**
    * Get guardian code for family
-   * GET /api/families/:familyId/guardian-code
+   * The guardian code is returned in the family response
    */
   async getGuardianCode(familyId: string): Promise<{ code: string; expires_at?: string }> {
+    const headers = await this.getAuthHeaders();
     const response = await fetchWithLogging(
-      `${this.baseUrl}/api/families/${familyId}/guardian-code`
+      `${this.baseUrl}/api/family`,
+      { headers }
     );
     const data = await response.json();
-    return data.data;
+    return { code: data.data?.guardianCode || data.guardianCode || '' };
   }
 
   /**
    * Regenerate guardian code
-   * POST /api/families/:familyId/regenerate-code
+   * POST /api/family/regenerate-code
    */
   async regenerateGuardianCode(familyId: string): Promise<{ code: string }> {
+    const headers = await this.getAuthHeaders();
     const response = await fetchWithLogging(
-      `${this.baseUrl}/api/families/${familyId}/regenerate-code`,
-      { method: 'POST' }
+      `${this.baseUrl}/api/family/regenerate-code`,
+      { method: 'POST', headers }
     );
     const data = await response.json();
-    return data.data;
+    return { code: data.data?.guardianCode || data.guardianCode || data.code || '' };
   }
 
   // ============= MEMBER MANAGEMENT =============
 
   /**
    * Get family members
-   * GET /api/families/:familyId/members
+   * GET /api/family/members (uses current user's family)
    */
   async getMembers(familyId: string): Promise<FamilyMember[]> {
-    const response = await fetchWithLogging(`${this.baseUrl}/api/families/${familyId}/members`);
+    const headers = await this.getAuthHeaders();
+    // Note: The family endpoint returns members in the family response
+    const response = await fetchWithLogging(`${this.baseUrl}/api/family`, { headers });
     const data = await response.json();
-    return data.data || [];
+    return data.data?.members || data.members || [];
   }
 
   /**
-   * Invite member to family
-   * POST /api/families/:familyId/invite
+   * Invite member to family (add directly)
+   * POST /api/family/members
    */
   async inviteMember(params: {
     familyId: string;
@@ -254,16 +292,15 @@ class FamilyService {
     invite_code?: string;
     message?: string;
   }> {
+    const headers = await this.getAuthHeaders();
     const response = await fetchWithLogging(
-      `${this.baseUrl}/api/families/${params.familyId}/invite`,
+      `${this.baseUrl}/api/family/members`,
       {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({
-          inviter_id: params.inviterId,
           email: params.email,
-          role: params.role,
-          message: params.message,
+          role: params.role?.toLowerCase() || 'member',
         }),
       }
     );
@@ -272,7 +309,8 @@ class FamilyService {
 
   /**
    * Join family using guardian code
-   * POST /api/families/join
+   * POST /api/family/join
+   * NOTE: Prefer using userService.joinFamily() as it's the canonical implementation
    */
   async joinFamily(params: {
     userId: string;
@@ -283,13 +321,13 @@ class FamilyService {
     family_id?: string;
     message?: string;
   }> {
-    const response = await fetchWithLogging(`${this.baseUrl}/api/families/join`, {
+    const headers = await this.getAuthHeaders();
+    const response = await fetchWithLogging(`${this.baseUrl}/api/family/join`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       body: JSON.stringify({
-        user_id: params.userId,
-        guardian_code: params.guardianCode,
-        role: params.role || 'MEMBER',
+        guardianCode: params.guardianCode,
+        role: params.role?.toLowerCase() || 'member',
       }),
     });
     return response.json();
@@ -652,7 +690,7 @@ class FamilyService {
 
   /**
    * Get family's shared recipes
-   * GET /api/families/:familyId/recipes
+   * GET /api/family - recipes are included in family response
    */
   async getFamilyRecipes(familyId: string): Promise<Array<{
     recipe_id: string;
@@ -662,22 +700,26 @@ class FamilyService {
     shared_at: string;
     is_favorite: boolean;
   }>> {
+    const headers = await this.getAuthHeaders();
     const response = await fetchWithLogging(
-      `${this.baseUrl}/api/families/${familyId}/recipes`
+      `${this.baseUrl}/api/family`,
+      { headers }
     );
     const data = await response.json();
-    return data.data || [];
+    return data.data?.recipes || data.recipes || [];
   }
 
   // ============= FAMILY DASHBOARD =============
 
   /**
    * Get family dashboard with all shared items and activity
-   * GET /api/families/:familyId/dashboard
+   * GET /api/family - returns dashboard data within family response
    */
   async getFamilyDashboard(familyId: string): Promise<FamilyDashboard> {
+    const headers = await this.getAuthHeaders();
     const response = await fetchWithLogging(
-      `${this.baseUrl}/api/families/${familyId}/dashboard`
+      `${this.baseUrl}/api/family`,
+      { headers }
     );
     const data = await response.json();
     return data.data;
