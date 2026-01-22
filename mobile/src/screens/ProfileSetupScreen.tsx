@@ -172,7 +172,7 @@ export default function ProfileSetupScreen({ isDashboardMode = false, onBack }: 
   const [targetDate, setTargetDate] = useState('');
 
   // Preferences
-  const [dietaryPref, setDietaryPref] = useState('none');
+  const [dietaryPrefs, setDietaryPrefs] = useState<string[]>([]);
   const [allergies, setAllergies] = useState<string[]>([]);
   const [otherRestrictions, setOtherRestrictions] = useState('');
 
@@ -222,7 +222,13 @@ export default function ProfileSetupScreen({ isDashboardMode = false, onBack }: 
         const prefs = (profile as any).healthPreferences;
         if (prefs) {
           if (prefs.goals) setSelectedGoals(prefs.goals);
-          if (prefs.dietaryPref) setDietaryPref(prefs.dietaryPref);
+          // Handle both old single value and new array format
+          if (prefs.dietaryPrefs) {
+            setDietaryPrefs(prefs.dietaryPrefs);
+          } else if (prefs.dietaryPref) {
+            // Migrate old single value to array
+            setDietaryPrefs(prefs.dietaryPref === 'none' ? [] : [prefs.dietaryPref]);
+          }
           if (prefs.allergies) setAllergies(prefs.allergies);
           if (prefs.fitnessLevel) setFitnessLevel(prefs.fitnessLevel);
           if (prefs.preferredActivities) setPreferredActivities(prefs.preferredActivities);
@@ -320,7 +326,7 @@ export default function ProfileSetupScreen({ isDashboardMode = false, onBack }: 
           goals: selectedGoals,
           targetWeight: targetWeight ? parseFloat(targetWeight) : undefined,
           targetDate,
-          dietaryPref,
+          dietaryPrefs,
           allergies,
           otherRestrictions,
           fitnessLevel,
@@ -522,6 +528,23 @@ export default function ProfileSetupScreen({ isDashboardMode = false, onBack }: 
     </View>
   );
 
+  const toggleDietaryPref = (prefId: string) => {
+    if (prefId === 'none') {
+      // "No Restrictions" clears all other selections
+      setDietaryPrefs([]);
+    } else {
+      setDietaryPrefs(prev => {
+        if (prev.includes(prefId)) {
+          // Remove if already selected
+          return prev.filter(p => p !== prefId);
+        } else {
+          // Add to selections
+          return [...prev, prefId];
+        }
+      });
+    }
+  };
+
   const renderPreferencesStep = () => (
     <View style={styles.stepContent}>
       <View style={styles.section}>
@@ -529,7 +552,10 @@ export default function ProfileSetupScreen({ isDashboardMode = false, onBack }: 
         
         <View style={styles.preferencesGrid}>
           {dietaryPreferences.map((pref) => {
-            const isSelected = dietaryPref === pref.id;
+            // "No Restrictions" is selected when array is empty
+            const isSelected = pref.id === 'none' 
+              ? dietaryPrefs.length === 0 
+              : dietaryPrefs.includes(pref.id);
             return (
               <Pressable
                 key={pref.id}
@@ -537,7 +563,7 @@ export default function ProfileSetupScreen({ isDashboardMode = false, onBack }: 
                   styles.preferenceChip,
                   isSelected && styles.preferenceChipSelected,
                 ]}
-                onPress={() => setDietaryPref(pref.id)}
+                onPress={() => toggleDietaryPref(pref.id)}
               >
                 <SvgIcon 
                   name={pref.icon} 
@@ -731,7 +757,9 @@ export default function ProfileSetupScreen({ isDashboardMode = false, onBack }: 
           <View style={styles.summaryRow}>
             <Text style={styles.summaryLabel}>Diet</Text>
             <Text style={styles.summaryValue}>
-              {dietaryPreferences.find(p => p.id === dietaryPref)?.label || 'No restrictions'}
+              {dietaryPrefs.length === 0 
+                ? 'No restrictions' 
+                : dietaryPrefs.map(id => dietaryPreferences.find(p => p.id === id)?.label).filter(Boolean).join(', ')}
             </Text>
           </View>
           
