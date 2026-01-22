@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect } from 'react';
+import React, { useState, useContext, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -11,18 +11,15 @@ import {
   Platform,
   KeyboardAvoidingView,
   Dimensions,
+  Animated,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { LinearGradient } from 'expo-linear-gradient';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { AuthContext } from '../context/AuthContext';
 import { userService } from '../services/userService';
-import { WebNavHeader } from '../components/web/WebNavHeader';
-import { GradientDashboardHeader } from '../components/shared';
 import { dashboardTheme } from '../theme/dashboardTheme';
 import SvgIcon from '../components/shared/SvgIcon';
 
-const isWeb = Platform.OS === 'web';
 const { width: screenWidth } = Dimensions.get('window');
 
 // WiHY Light theme - aligned with design patterns
@@ -155,7 +152,6 @@ export default function ProfileSetupScreen() {
   
   const [currentStep, setCurrentStep] = useState<SetupStep>('basics');
   const [saving, setSaving] = useState(false);
-  const [showLoginModal, setShowLoginModal] = useState(false);
 
   // Basic info
   const [firstName, setFirstName] = useState('');
@@ -179,6 +175,26 @@ export default function ProfileSetupScreen() {
   const [fitnessLevel, setFitnessLevel] = useState('');
   const [preferredActivities, setPreferredActivities] = useState<string[]>([]);
   const [weeklyExerciseGoal, setWeeklyExerciseGoal] = useState('3');
+
+  // Collapsible header animation
+  const scrollY = useRef(new Animated.Value(0)).current;
+  const insets = useSafeAreaInsets();
+  
+  const HEADER_MAX_HEIGHT = 140;
+  const HEADER_MIN_HEIGHT = 0;
+  const HEADER_SCROLL_DISTANCE = HEADER_MAX_HEIGHT - HEADER_MIN_HEIGHT;
+
+  const headerHeight = scrollY.interpolate({
+    inputRange: [0, HEADER_SCROLL_DISTANCE],
+    outputRange: [HEADER_MAX_HEIGHT, HEADER_MIN_HEIGHT],
+    extrapolate: 'clamp',
+  });
+
+  const headerOpacity = scrollY.interpolate({
+    inputRange: [0, HEADER_SCROLL_DISTANCE / 2],
+    outputRange: [1, 0],
+    extrapolate: 'clamp',
+  });
 
   // Load existing data
   useEffect(() => {
@@ -738,191 +754,74 @@ export default function ProfileSetupScreen() {
     }
   };
 
-  const content = (
-    <ScrollView 
-      style={styles.scrollView} 
-      contentContainerStyle={styles.scrollContent}
-      showsVerticalScrollIndicator={false}
-    >
-      {/* Header with back button for web */}
-      {isWeb && (
-        <View style={styles.webHeader}>
-          <Pressable style={styles.backButton} onPress={handleBack}>
-            <SvgIcon name="arrow-back" size={24} color={theme.text} />
-          </Pressable>
-          <Text style={styles.webPageTitle}>{stepTitles[currentStep]}</Text>
-        </View>
-      )}
-
-      {/* Progress indicator */}
-      <View style={styles.progressContainer}>
-        <View style={styles.progressBar}>
-          <View style={[styles.progressFill, { width: `${progress}%` }]} />
-        </View>
-        <Text style={styles.progressText}>Step {currentStepIndex + 1} of {steps.length}</Text>
-      </View>
-
-      {/* Step header */}
-      {!isWeb && (
-        <View style={styles.stepHeader}>
-          <Text style={styles.stepTitle}>{stepTitles[currentStep]}</Text>
-          <Text style={styles.stepDescription}>{stepDescriptions[currentStep]}</Text>
-        </View>
-      )}
-      
-      {isWeb && (
-        <Text style={styles.webStepDescription}>{stepDescriptions[currentStep]}</Text>
-      )}
-
-      {/* Step content */}
-      {renderCurrentStep()}
-
-      {/* Navigation buttons */}
-      <View style={styles.buttonContainer}>
-        {currentStep !== 'complete' && currentStep !== 'basics' && (
-          <Pressable style={styles.skipButton} onPress={handleSkip}>
-            <Text style={styles.skipButtonText}>Skip</Text>
-          </Pressable>
-        )}
-        
-        {currentStep === 'complete' ? (
-          <Pressable 
-            style={[styles.primaryButton, saving && styles.buttonDisabled]} 
-            onPress={handleComplete}
-            disabled={saving}
-          >
-            {saving ? (
-              <ActivityIndicator size="small" color="#fff" />
-            ) : (
-              <>
-                <Text style={styles.primaryButtonText}>Start My Journey</Text>
-                <SvgIcon name="arrow-forward" size={20} color="#fff" />
-              </>
-            )}
-          </Pressable>
-        ) : (
-          <Pressable 
-            style={[styles.primaryButton, !canProceed() && styles.buttonDisabled]} 
-            onPress={handleNext}
-            disabled={!canProceed()}
-          >
-            <Text style={styles.primaryButtonText}>Continue</Text>
-            <SvgIcon name="arrow-forward" size={20} color="#fff" />
-          </Pressable>
-        )}
-      </View>
-    </ScrollView>
-  );
-
-  // Mobile header
-  const mobileHeader = (
-    <View style={styles.mobileHeader}>
-      <Pressable style={styles.backButton} onPress={handleBack}>
-        <SvgIcon name="arrow-back" size={24} color={theme.text} />
-      </Pressable>
-      <Text style={styles.mobileHeaderTitle}>{stepTitles[currentStep]}</Text>
-      <View style={styles.headerSpacer} />
-    </View>
-  );
-
-  if (isWeb) {
-    return (
-      <View style={[styles.container, { minHeight: '100vh' } as any]}>
-        <WebNavHeader 
-          activePage="profile" 
-          showLoginModal={showLoginModal}
-          setShowLoginModal={setShowLoginModal}
-        />
-        <View style={[styles.webContent, { height: 'calc(100vh - 70px)', overflow: 'auto' } as any]}>
-          {content}
-        </View>
-      </View>
-    );
-  }
-
   return (
     <View style={styles.container}>
-      {/* White top box for status bar - Pattern B */}
-      <SafeAreaView edges={['top']} style={styles.topBox}>
-        <View style={styles.topBoxContent} />
-      </SafeAreaView>
+      {/* Status bar area - solid color */}
+      <View style={{ height: insets.top, backgroundColor: '#14b8a6' }} />
+        
+      {/* Collapsing Header */}
+      <Animated.View style={[styles.collapsibleHeader, { height: headerHeight }]}>
+        <Animated.View style={[styles.headerContent, { opacity: headerOpacity }]}>
+          <Text style={styles.headerTitle}>{stepTitles[currentStep]}</Text>
+          <Text style={styles.headerSubtitle}>{stepDescriptions[currentStep]}</Text>
+          <View style={styles.progressBadge}>
+            <Text style={styles.progressBadgeText}>Step {currentStepIndex + 1} of {steps.length}</Text>
+          </View>
+        </Animated.View>
+      </Animated.View>
       
-      {/* Main content area */}
-      <SafeAreaView style={styles.scrollContainer} edges={['left', 'right']}>
-        <KeyboardAvoidingView 
-          style={{ flex: 1 }} 
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        >
-          <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
-            {/* Gradient Header */}
-            <LinearGradient
-              colors={['#14b8a6', '#0d9488']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={styles.gradientHeader}
+      {/* Scrollable Content */}
+      <Animated.ScrollView 
+        style={styles.scrollView}
+        showsVerticalScrollIndicator={false}
+        scrollEventThrottle={16}
+        onScroll={Animated.event(
+          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+          { useNativeDriver: false }
+        )}
+        contentContainerStyle={styles.scrollContent}
+      >
+        {/* Step content */}
+        {renderCurrentStep()}
+
+        {/* Navigation buttons */}
+        <View style={styles.buttonContainer}>
+          {currentStep !== 'complete' && currentStep !== 'basics' && (
+            <Pressable style={styles.skipButton} onPress={handleSkip}>
+              <Text style={styles.skipButtonText}>Skip</Text>
+            </Pressable>
+          )}
+          
+          {currentStep === 'complete' ? (
+            <Pressable 
+              style={[styles.primaryButton, saving && styles.buttonDisabled]} 
+              onPress={handleComplete}
+              disabled={saving}
             >
-              <View style={styles.headerRow}>
-                <Pressable style={styles.backButtonWhite} onPress={handleBack}>
-                  <SvgIcon name="arrow-back" size={24} color="#ffffff" />
-                </Pressable>
-                <View style={styles.headerTextContainer}>
-                  <Text style={styles.headerTitle}>{stepTitles[currentStep]}</Text>
-                  <Text style={styles.headerSubtitle}>{stepDescriptions[currentStep]}</Text>
-                </View>
-              </View>
-              
-              {/* Progress bar in header */}
-              <View style={styles.headerProgressContainer}>
-                <View style={styles.headerProgressBar}>
-                  <View style={[styles.headerProgressFill, { width: `${progress}%` }]} />
-                </View>
-                <Text style={styles.headerProgressText}>Step {currentStepIndex + 1} of {steps.length}</Text>
-              </View>
-            </LinearGradient>
-
-            {/* Step content */}
-            {renderCurrentStep()}
-
-            {/* Navigation buttons */}
-            <View style={styles.buttonContainer}>
-              {currentStep !== 'complete' && currentStep !== 'basics' && (
-                <Pressable style={styles.skipButton} onPress={handleSkip}>
-                  <Text style={styles.skipButtonText}>Skip</Text>
-                </Pressable>
-              )}
-              
-              {currentStep === 'complete' ? (
-                <Pressable 
-                  style={[styles.primaryButton, saving && styles.buttonDisabled]} 
-                  onPress={handleComplete}
-                  disabled={saving}
-                >
-                  {saving ? (
-                    <ActivityIndicator size="small" color="#fff" />
-                  ) : (
-                    <>
-                      <Text style={styles.primaryButtonText}>Start My Journey</Text>
-                      <SvgIcon name="arrow-forward" size={20} color="#fff" />
-                    </>
-                  )}
-                </Pressable>
+              {saving ? (
+                <ActivityIndicator size="small" color="#fff" />
               ) : (
-                <Pressable 
-                  style={[styles.primaryButton, !canProceed() && styles.buttonDisabled]} 
-                  onPress={handleNext}
-                  disabled={!canProceed()}
-                >
-                  <Text style={styles.primaryButtonText}>Continue</Text>
+                <>
+                  <Text style={styles.primaryButtonText}>Start My Journey</Text>
                   <SvgIcon name="arrow-forward" size={20} color="#fff" />
-                </Pressable>
+                </>
               )}
-            </View>
-            
-            {/* Bottom spacing for tab bar */}
-            <View style={{ height: 100 }} />
-          </ScrollView>
-        </KeyboardAvoidingView>
-      </SafeAreaView>
+            </Pressable>
+          ) : (
+            <Pressable 
+              style={[styles.primaryButton, !canProceed() && styles.buttonDisabled]} 
+              onPress={handleNext}
+              disabled={!canProceed()}
+            >
+              <Text style={styles.primaryButtonText}>Continue</Text>
+              <SvgIcon name="arrow-forward" size={20} color="#fff" />
+            </Pressable>
+          )}
+        </View>
+        
+        {/* Bottom spacing */}
+        <View style={{ height: 100 }} />
+      </Animated.ScrollView>
     </View>
   );
 }
@@ -930,177 +829,57 @@ export default function ProfileSetupScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  } as any,
-  // Pattern B - Dual SafeAreaView styles
-  topBox: {
-    backgroundColor: '#ffffff',
+    backgroundColor: '#e0f2fe',
   },
-  topBoxContent: {
-    height: 0,
+  // Collapsible header styles - Teal theme
+  collapsibleHeader: {
+    backgroundColor: '#14b8a6',
+    overflow: 'hidden',
   },
-  scrollContainer: {
+  headerContent: {
     flex: 1,
-    backgroundColor: theme.background,
-  },
-  // Gradient header styles
-  gradientHeader: {
-    paddingHorizontal: dashboardTheme.spacing.lg,
-    paddingTop: dashboardTheme.spacing.xl,
-    paddingBottom: dashboardTheme.spacing.lg,
-  },
-  headerRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 12,
-  },
-  backButtonWhite: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    alignItems: 'center',
     justifyContent: 'center',
-  },
-  headerTextContainer: {
-    flex: 1,
+    alignItems: 'center',
+    paddingHorizontal: 20,
   },
   headerTitle: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: '700',
     color: '#ffffff',
     marginBottom: 4,
   },
   headerSubtitle: {
-    fontSize: 14,
+    fontSize: 16,
     color: 'rgba(255, 255, 255, 0.9)',
-    lineHeight: 20,
+    marginBottom: 12,
   },
-  headerProgressContainer: {
-    marginTop: 16,
+  progressBadge: {
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
   },
-  headerProgressBar: {
-    height: 6,
-    backgroundColor: 'rgba(255, 255, 255, 0.3)',
-    borderRadius: 3,
-    overflow: 'hidden',
+  progressBadgeText: {
+    color: '#ffffff',
+    fontSize: 14,
+    fontWeight: '600',
   },
-  headerProgressFill: {
-    height: '100%',
-    backgroundColor: '#ffffff',
-    borderRadius: 3,
-  },
-  headerProgressText: {
-    fontSize: 12,
-    color: 'rgba(255, 255, 255, 0.8)',
-    textAlign: 'center',
-    marginTop: 8,
-  },
-  webContent: {
-    flex: 1,
-    maxWidth: 800,
-    width: '100%',
-    alignSelf: 'center',
-    paddingHorizontal: 24,
-  } as any,
   scrollView: {
     flex: 1,
   },
   scrollContent: {
-    paddingBottom: 40,
-  },
-  mobileHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    backgroundColor: theme.background,
-  },
-  webHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 16,
-    marginTop: 24,
-    marginBottom: 8,
-  },
-  backButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: theme.card,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  mobileHeaderTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: theme.text,
-  },
-  webPageTitle: {
-    fontSize: 28,
-    fontWeight: '700',
-    color: theme.text,
-  },
-  headerSpacer: {
-    width: 40,
-  },
-  progressContainer: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    gap: 8,
-  },
-  progressBar: {
-    height: 6,
-    backgroundColor: '#e5e7eb',
-    borderRadius: 3,
-    overflow: 'hidden',
-  },
-  progressFill: {
-    height: '100%',
-    backgroundColor: theme.accent,
-    borderRadius: 3,
-  },
-  progressText: {
-    fontSize: 12,
-    color: theme.textSecondary,
-    textAlign: 'center',
-  },
-  stepHeader: {
-    paddingHorizontal: 16,
-    paddingBottom: 16,
-  },
-  stepTitle: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: theme.text,
-    marginBottom: 8,
-  },
-  stepDescription: {
-    fontSize: 15,
-    color: theme.textSecondary,
-    lineHeight: 22,
-  },
-  webStepDescription: {
-    fontSize: 16,
-    color: theme.textSecondary,
-    lineHeight: 24,
-    marginBottom: 24,
+    paddingHorizontal: dashboardTheme.spacing.lg,
+    paddingTop: dashboardTheme.spacing.lg,
   },
   stepContent: {
-    paddingHorizontal: 16,
+    // Content is now padded by scrollContent, so no padding here
   },
   section: {
-    backgroundColor: theme.card,
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 16,
-    borderWidth: 1,
-    borderColor: theme.cardBorder,
+    backgroundColor: dashboardTheme.colors.surface,
+    borderRadius: dashboardTheme.borderRadius.lg,
+    padding: dashboardTheme.spacing.lg,
+    marginBottom: dashboardTheme.spacing.md,
+    ...dashboardTheme.shadows.sm,
   },
   sectionTitle: {
     fontSize: 16,
@@ -1175,7 +954,7 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   goalCard: {
-    width: isWeb ? 'calc(25% - 12px)' : '47%',
+    width: '47%',
     padding: 16,
     borderRadius: 12,
     backgroundColor: theme.card,
