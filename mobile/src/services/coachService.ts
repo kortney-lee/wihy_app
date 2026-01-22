@@ -174,11 +174,18 @@ export interface CreateWorkoutPlanParams {
 
 // ============= SERVICE =============
 
+/**
+ * Coach Service
+ * 
+ * Handles all coach-related API calls.
+ * NOTE: Coaching endpoints are on user.wihy.ai (not services.wihy.ai)
+ */
 class CoachService {
   private baseUrl: string;
 
   constructor() {
-    this.baseUrl = API_CONFIG.baseUrl;
+    // Coaching endpoints are on user service, not services API
+    this.baseUrl = API_CONFIG.userUrl;
   }
 
   // ============= INVITATIONS =============
