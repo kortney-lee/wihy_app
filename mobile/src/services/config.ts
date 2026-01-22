@@ -11,6 +11,8 @@
 //
 // See complete API docs: docs/WIHY_API_REFERENCE.md
 
+import { Platform } from 'react-native';
+
 export const API_CONFIG = {
   baseUrl: 'https://services.wihy.ai',
   servicesUrl: 'https://services.wihy.ai', // Services API (scanning, meals, workouts)
@@ -22,9 +24,12 @@ export const API_CONFIG = {
   expoProjectId: process.env.EXPO_PUBLIC_PROJECT_ID || 'your-project-id', // For push notifications
   
   // Client credentials for service-to-service auth
-  // Native app credentials (for auth.wihy.ai and user.wihy.ai)
+  // Native app credentials (for iOS/Android)
   nativeClientId: process.env.EXPO_PUBLIC_WIHY_NATIVE_CLIENT_ID || '',
   nativeClientSecret: process.env.EXPO_PUBLIC_WIHY_NATIVE_CLIENT_SECRET || '',
+  // Frontend credentials (for Web)
+  frontendClientId: process.env.EXPO_PUBLIC_WIHY_FRONTEND_CLIENT_ID || '',
+  frontendClientSecret: process.env.EXPO_PUBLIC_WIHY_FRONTEND_CLIENT_SECRET || '',
   // Services API credentials (for services.wihy.ai)
   servicesClientId: process.env.EXPO_PUBLIC_WIHY_SERVICES_CLIENT_ID || '',
   servicesClientSecret: process.env.EXPO_PUBLIC_WIHY_SERVICES_CLIENT_SECRET || '',
@@ -55,12 +60,26 @@ export const API_CONFIG = {
 };
 
 /**
- * Get auth headers for Native App API calls (auth.wihy.ai, user.wihy.ai)
+ * Get auth headers for App API calls (auth.wihy.ai, user.wihy.ai, payment.wihy.ai)
+ * Uses frontend credentials for web, native credentials for iOS/Android
  */
-export const getNativeAuthHeaders = () => ({
-  'X-Client-ID': API_CONFIG.nativeClientId,
-  'X-Client-Secret': API_CONFIG.nativeClientSecret,
-});
+export const getAppAuthHeaders = () => {
+  if (Platform.OS === 'web') {
+    return {
+      'X-Client-ID': API_CONFIG.frontendClientId,
+      'X-Client-Secret': API_CONFIG.frontendClientSecret,
+    };
+  }
+  return {
+    'X-Client-ID': API_CONFIG.nativeClientId,
+    'X-Client-Secret': API_CONFIG.nativeClientSecret,
+  };
+};
+
+/**
+ * @deprecated Use getAppAuthHeaders() instead - it handles platform detection
+ */
+export const getNativeAuthHeaders = () => getAppAuthHeaders();
 
 /**
  * Get auth headers for Services API calls
