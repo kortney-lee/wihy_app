@@ -21,9 +21,14 @@ export const API_CONFIG = {
   coachingUrl: 'https://services.wihy.ai', // Coaching service
   expoProjectId: process.env.EXPO_PUBLIC_PROJECT_ID || 'your-project-id', // For push notifications
   
-  // Client credentials for service-to-service auth
+  // Client credentials for API auth
+  // App credentials (for auth.wihy.ai - login, register, verify)
+  appClientId: process.env.EXPO_PUBLIC_WIHY_APP_CLIENT_ID || '',
+  appClientSecret: process.env.EXPO_PUBLIC_WIHY_APP_CLIENT_SECRET || '',
+  // Services API credentials (for services.wihy.ai)
   servicesClientId: process.env.EXPO_PUBLIC_WIHY_SERVICES_CLIENT_ID || '',
   servicesClientSecret: process.env.EXPO_PUBLIC_WIHY_SERVICES_CLIENT_SECRET || '',
+  // ML API credentials (for ml.wihy.ai)
   mlClientId: process.env.EXPO_PUBLIC_WIHY_ML_CLIENT_ID || '',
   mlClientSecret: process.env.EXPO_PUBLIC_WIHY_ML_CLIENT_SECRET || '',
   
@@ -48,6 +53,14 @@ export const API_CONFIG = {
   },
   timeout: 30000, // 30 seconds
 };
+
+/**
+ * Get auth headers for App API calls (auth.wihy.ai - login, register, verify)
+ */
+export const getAppAuthHeaders = () => ({
+  'X-Client-ID': API_CONFIG.appClientId,
+  'X-Client-Secret': API_CONFIG.appClientSecret,
+});
 
 /**
  * Get auth headers for Services API calls
