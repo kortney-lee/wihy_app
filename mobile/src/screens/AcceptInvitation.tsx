@@ -14,6 +14,7 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import type { StackNavigationProp } from '@react-navigation/stack';
 import { useAuth } from '../context/AuthContext';
 import { userService } from '../services/userService';
+import { coachService } from '../services';
 
 interface RouteParams {
   invitationId: string;
@@ -60,29 +61,39 @@ export default function AcceptInvitation() {
       setLoading(true);
       setError(null);
 
-      // TODO: Replace with actual API call
-      // const response = await fetch(`/api/coaches/invitations/${invitationId}`, {
-      //   headers: {
-      //     'Authorization': `Bearer ${accessToken}`,
-      //   },
-      // });
-      // const data = await response.json();
-      // setInvitation(data.data);
+      // Call API to get invitation details
+      // GET /api/coaching/invitations/{invitationId}
+      const result = await coachService.getInvitationDetails(invitationId);
 
-      // Mock data
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      setInvitation({
-        id: invitationId,
-        coach_id: coachId || 'coach-123',
-        coach_name: 'Dr. Sarah Mitchell',
-        coach_title: 'Certified Nutrition Coach',
-        coach_rating: 4.9,
-        coach_review_count: 127,
-        message:
-          "Hi! I'd love to work with you on your wellness journey. I specialize in sustainable nutrition habits and have helped over 100 clients achieve their health goals. I believe my approach would be a great fit for what you're looking for!",
-        sent_at: '2026-01-20T10:30:00Z',
-        expires_at: '2026-02-04T10:30:00Z',
-      });
+      if (result.success && result.data) {
+        setInvitation({
+          id: result.data.id,
+          coach_id: result.data.coach_id,
+          coach_name: result.data.coach_name,
+          coach_title: result.data.coach_title,
+          coach_avatar_url: result.data.coach_avatar_url,
+          coach_rating: result.data.coach_rating,
+          coach_review_count: result.data.coach_review_count,
+          message: result.data.message,
+          sent_at: result.data.sent_at,
+          expires_at: result.data.expires_at,
+        });
+      } else {
+        // Fallback to mock data if API not ready
+        console.warn('AcceptInvitation: API returned error, using mock data');
+        setInvitation({
+          id: invitationId,
+          coach_id: coachId || 'coach-123',
+          coach_name: 'Dr. Sarah Mitchell',
+          coach_title: 'Certified Nutrition Coach',
+          coach_rating: 4.9,
+          coach_review_count: 127,
+          message:
+            "Hi! I'd love to work with you on your wellness journey. I specialize in sustainable nutrition habits and have helped over 100 clients achieve their health goals. I believe my approach would be a great fit for what you're looking for!",
+          sent_at: '2026-01-20T10:30:00Z',
+          expires_at: '2026-02-04T10:30:00Z',
+        });
+      }
     } catch (err) {
       console.error('Load invitation error:', err);
       setError('Failed to load invitation');

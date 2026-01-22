@@ -93,12 +93,12 @@ export default function CoachOverview() {
     setRefreshing(false);
   }, [loadOverviewData]);
 
-  // Calculate revenue stats from API data or fallback to mock
+  // Use real API revenue data
   const revenueStats: RevenueStats = {
-    totalRevenue: overviewData?.total_clients ? overviewData.total_clients * 50 : 0, // Estimate
-    monthlyRevenue: overviewData?.active_clients ? overviewData.active_clients * 25 : 0, // Estimate
-    activeClients: overviewData?.active_clients || 0,
-    commissionRate: user?.commissionRate || 30,
+    totalRevenue: overviewData?.total_revenue ?? 0,
+    monthlyRevenue: overviewData?.monthly_revenue ?? 0,
+    activeClients: overviewData?.active_clients ?? 0,
+    commissionRate: overviewData?.commission_rate ? overviewData.commission_rate * 100 : (user?.commissionRate || 30),
   };
 
   const quickActions = [
@@ -133,17 +133,48 @@ export default function CoachOverview() {
     },
   ];
 
-  // Get recent activity from API data or use fallback
+  // Get recent activity from API data
   const recentActivity = overviewData?.recent_activity?.length 
-    ? overviewData.recent_activity.map((activity: any, index: number) => ({
+    ? overviewData.recent_activity.map((activity, index) => ({
         id: String(index + 1),
         client: activity.client_name || 'Client',
-        action: activity.action || 'Activity',
-        time: activity.timestamp || 'Recently',
+        action: formatActivityType(activity.type),
+        time: formatRelativeTime(activity.timestamp),
       }))
     : [
         { id: '1', client: 'No recent activity', action: '', time: '' },
       ];
+
+  // Helper to format activity type for display
+  function formatActivityType(type: string): string {
+    const typeMap: Record<string, string> = {
+      'client_joined': 'Joined as client',
+      'session_booked': 'Booked a session',
+      'session_completed': 'Completed session',
+      'meal_logged': 'Logged a meal',
+      'goal_achieved': 'Achieved a goal',
+      'invitation_sent': 'Invitation sent',
+      'invitation_accepted': 'Accepted invitation',
+    };
+    return typeMap[type] || type.replace(/_/g, ' ');
+  }
+
+  // Helper to format timestamp as relative time
+  function formatRelativeTime(timestamp: string): string {
+    if (!timestamp) return 'Recently';
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+    
+    if (diffMins < 1) return 'Just now';
+    if (diffMins < 60) return `${diffMins}m ago`;
+    if (diffHours < 24) return `${diffHours}h ago`;
+    if (diffDays < 7) return `${diffDays}d ago`;
+    return date.toLocaleDateString();
+  }
 
   if (loading) {
     return (

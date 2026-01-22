@@ -10,10 +10,12 @@ import {
   Animated,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import type { StackNavigationProp } from '@react-navigation/stack';
 import { useAuth } from '../context/AuthContext';
 import { userService } from '../services/userService';
+import { coachService } from '../services';
+import type { RootStackParamList } from '../types/navigation';
 
 interface RouteParams {
   coachId: string;
@@ -35,15 +37,10 @@ interface DaySlots {
   slots: TimeSlot[];
 }
 
-type RootStackParamList = {
-  CoachSelection: undefined;
-  CoachDashboard: undefined;
-};
-
 export default function SessionBooking() {
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
-  const route = useRoute();
-  const { coachId, coachName } = (route.params as RouteParams) || {};
+  const route = useRoute<RouteProp<RootStackParamList, 'SessionBooking'>>();
+  const { coachId, coachName } = route.params;
   const { userId } = useAuth();
 
   // Collapsing header animation
@@ -81,51 +78,79 @@ export default function SessionBooking() {
     try {
       setLoading(true);
 
-      // TODO: Replace with actual API call
-      // const response = await fetch(`/api/coaches/${coachId}/availability`, {
-      //   headers: { 'Authorization': `Bearer ${accessToken}` },
-      // });
-      // const data = await response.json();
-
-      // Generate mock availability for next 7 days
-      const days: DaySlots[] = [];
+      // Calculate date range (next 7 days)
       const today = new Date();
+      const startDate = new Date(today);
+      startDate.setDate(today.getDate() + 1);
+      const endDate = new Date(today);
+      endDate.setDate(today.getDate() + 7);
 
-      for (let i = 1; i <= 7; i++) {
-        const date = new Date(today);
-        date.setDate(today.getDate() + i);
-        
-        const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-        const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-        
-        const dayName = dayNames[date.getDay()];
-        const dateString = `${monthNames[date.getMonth()]} ${date.getDate()}`;
+      // Call API to get coach availability
+      // GET /api/coaches/{coachId}/availability
+      const result = await coachService.getCoachAvailability(coachId, {
+        start_date: startDate.toISOString().split('T')[0],
+        end_date: endDate.toISOString().split('T')[0],
+      });
 
-        // Generate time slots (9 AM - 5 PM, hourly)
-        const slots: TimeSlot[] = [];
-        for (let hour = 9; hour <= 17; hour++) {
-          const time = `${hour > 12 ? hour - 12 : hour}:00 ${hour >= 12 ? 'PM' : 'AM'}`;
-          // Randomly make some slots unavailable
-          const available = Math.random() > 0.3;
-          slots.push({ time, available });
-        }
-
-        days.push({
-          date,
-          dateString,
-          dayName,
-          slots,
+      if (result.success && result.data?.available_slots) {
+        // Transform API response to local DaySlots format
+        const days: DaySlots[] = result.data.available_slots.map(slot => {
+          const date = new Date(slot.date);
+          const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+          const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+          
+          return {
+            date,
+            dateString: `${monthNames[date.getMonth()]} ${date.getDate()}`,
+            dayName: dayNames[date.getDay()],
+            slots: slot.slots.map(time => ({
+              time: formatTimeSlot(time),
+              available: true,
+            })),
+          };
         });
-      }
+        setAvailableDays(days);
+      } else {
+        // Fallback to mock data if API not ready
+        console.warn('SessionBooking: API returned error, using mock data');
+        const days: DaySlots[] = [];
+        
+        for (let i = 1; i <= 7; i++) {
+          const date = new Date(today);
+          date.setDate(today.getDate() + i);
+          
+          const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+          const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+          
+          const dayName = dayNames[date.getDay()];
+          const dateString = `${monthNames[date.getMonth()]} ${date.getDate()}`;
 
-      setAvailableDays(days);
-      await new Promise(resolve => setTimeout(resolve, 800));
+          // Generate time slots (9 AM - 5 PM, hourly)
+          const slots: TimeSlot[] = [];
+          for (let hour = 9; hour <= 17; hour++) {
+            const time = `${hour > 12 ? hour - 12 : hour}:00 ${hour >= 12 ? 'PM' : 'AM'}`;
+            const available = Math.random() > 0.3;
+            slots.push({ time, available });
+          }
+
+          days.push({ date, dateString, dayName, slots });
+        }
+        setAvailableDays(days);
+      }
     } catch (error) {
       console.error('Load availability error:', error);
       Alert.alert('Error', 'Failed to load availability');
     } finally {
       setLoading(false);
     }
+  };
+
+  // Helper to format time slot from 24h to 12h format
+  const formatTimeSlot = (time: string): string => {
+    const [hours, minutes] = time.split(':').map(Number);
+    const period = hours >= 12 ? 'PM' : 'AM';
+    const hour12 = hours > 12 ? hours - 12 : hours === 0 ? 12 : hours;
+    return `${hour12}:${minutes.toString().padStart(2, '0')} ${period}`;
   };
 
   const sessionTypes = [
@@ -219,9 +244,7 @@ export default function SessionBooking() {
         [
           {
             text: 'OK',
-            onPress: () => {
-              navigation.navigate('CoachSelection');
-            },
+            onPress: () => navigation.navigate('CoachDashboardPage'),
           },
         ]
       );

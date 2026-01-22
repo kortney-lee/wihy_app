@@ -125,11 +125,19 @@ export interface ClientNote {
 }
 
 export interface CoachOverview {
+  coach_id?: string;
   total_clients: number;
   active_clients: number;
   pending_invitations: number;
+  total_revenue: number;
+  monthly_revenue: number;
+  commission_rate: number;
   clients: Client[];
-  recent_activity: any[];
+  recent_activity: Array<{
+    type: string;
+    client_name: string;
+    timestamp: string;
+  }>;
 }
 
 export interface CreateMealPlanParams {
@@ -725,6 +733,235 @@ class CoachService {
     );
     const data = await response.json();
     return data.data || data;
+  }
+
+  // ============= COACH PROFILE CREATION =============
+
+  /**
+   * Create new coach profile (registration)
+   * POST /api/coaches/profile
+   * 
+   * Called during coach onboarding (CoachProfileSetup screen)
+   */
+  async createCoachProfile(profile: {
+    name: string;
+    email?: string;
+    phone?: string;
+    title: string;
+    bio: string;
+    specialties: string[];
+    certifications?: Array<{
+      name: string;
+      abbreviation: string;
+      issuing_org?: string;
+      year_obtained?: number;
+    }>;
+    years_experience: number;
+    location: {
+      city: string;
+      state: string;
+      country?: string;
+      timezone?: string;
+    };
+    pricing: {
+      session_rate: number;
+      currency?: string;
+      session_duration_minutes?: number;
+    };
+    availability?: {
+      accepting_clients?: boolean;
+      available_days?: string[];
+      available_hours?: {
+        start: string;
+        end: string;
+      };
+    };
+    social_links?: {
+      website?: string;
+      instagram?: string;
+      linkedin?: string;
+    };
+  }): Promise<{ success: boolean; data?: { id: string; profile_complete: boolean; created_at: string }; error?: any }> {
+    const response = await fetchWithLogging(
+      `${this.baseUrl}/api/coaches/profile`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(profile),
+      }
+    );
+    return response.json();
+  }
+
+  // ============= COACH BOOKINGS =============
+
+  /**
+   * Get all bookings for a coach
+   * GET /api/coaches/:coachId/bookings
+   * 
+   * Used in BookingsManagement screen
+   */
+  async getCoachBookings(
+    coachId: string,
+    params?: {
+      status?: 'pending' | 'confirmed' | 'completed' | 'cancelled' | 'all';
+      start_date?: string;
+      end_date?: string;
+      client_id?: string;
+      sort?: 'date_asc' | 'date_desc';
+      page?: number;
+      limit?: number;
+    }
+  ): Promise<{
+    success: boolean;
+    data?: {
+      bookings: Array<{
+        id: string;
+        client: {
+          id: string;
+          name: string;
+          email: string;
+          avatar_url?: string;
+        };
+        scheduled_at: string;
+        duration_minutes: number;
+        session_type: string;
+        status: 'pending' | 'confirmed' | 'completed' | 'cancelled';
+        notes?: string;
+        meeting_link?: string;
+        created_at: string;
+      }>;
+      summary: {
+        total: number;
+        pending: number;
+        confirmed: number;
+        completed: number;
+        cancelled: number;
+      };
+      pagination: {
+        page: number;
+        limit: number;
+        total_pages: number;
+        total_count: number;
+      };
+    };
+    error?: any;
+  }> {
+    const queryParams = new URLSearchParams();
+    if (params?.status) queryParams.append('status', params.status);
+    if (params?.start_date) queryParams.append('start_date', params.start_date);
+    if (params?.end_date) queryParams.append('end_date', params.end_date);
+    if (params?.client_id) queryParams.append('client_id', params.client_id);
+    if (params?.sort) queryParams.append('sort', params.sort);
+    if (params?.page) queryParams.append('page', params.page.toString());
+    if (params?.limit) queryParams.append('limit', params.limit.toString());
+
+    const queryString = queryParams.toString() ? `?${queryParams.toString()}` : '';
+    const response = await fetchWithLogging(
+      `${this.baseUrl}/api/coaches/${coachId}/bookings${queryString}`
+    );
+    return response.json();
+  }
+
+  /**
+   * Update booking status (confirm, cancel, complete, reschedule)
+   * PUT /api/coaches/:coachId/bookings/:bookingId
+   */
+  async updateBookingStatus(
+    coachId: string,
+    bookingId: string,
+    action: {
+      action: 'confirm' | 'cancel' | 'complete' | 'reschedule';
+      meeting_link?: string;
+      reason?: string;
+      notes?: string;
+      follow_up_date?: string;
+      new_date?: string;
+      new_time?: string;
+    }
+  ): Promise<{
+    success: boolean;
+    data?: {
+      id: string;
+      status: string;
+      meeting_link?: string;
+      updated_at: string;
+    };
+    error?: any;
+  }> {
+    const response = await fetchWithLogging(
+      `${this.baseUrl}/api/coaches/${coachId}/bookings/${bookingId}`,
+      {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(action),
+      }
+    );
+    return response.json();
+  }
+
+  // ============= AVAILABILITY =============
+
+  /**
+   * Get coach availability for booking
+   * GET /api/coaches/:coachId/availability
+   */
+  async getCoachAvailability(
+    coachId: string,
+    params?: {
+      start_date?: string;
+      end_date?: string;
+    }
+  ): Promise<{
+    success: boolean;
+    data?: {
+      coach_id: string;
+      timezone: string;
+      available_slots: Array<{
+        date: string;
+        slots: string[];
+      }>;
+    };
+    error?: any;
+  }> {
+    const queryParams = new URLSearchParams();
+    if (params?.start_date) queryParams.append('start_date', params.start_date);
+    if (params?.end_date) queryParams.append('end_date', params.end_date);
+
+    const queryString = queryParams.toString() ? `?${queryParams.toString()}` : '';
+    const response = await fetchWithLogging(
+      `${this.baseUrl}/api/coaches/${coachId}/availability${queryString}`
+    );
+    return response.json();
+  }
+
+  // ============= INVITATION DETAILS =============
+
+  /**
+   * Get invitation details by ID
+   * GET /api/coaching/invitations/:invitationId
+   */
+  async getInvitationDetails(invitationId: string): Promise<{
+    success: boolean;
+    data?: {
+      id: string;
+      coach_id: string;
+      coach_name: string;
+      coach_title: string;
+      coach_avatar_url?: string;
+      coach_rating: number;
+      coach_review_count: number;
+      message: string;
+      sent_at: string;
+      expires_at: string;
+      status: InvitationStatus;
+    };
+    error?: any;
+  }> {
+    const response = await fetchWithLogging(
+      `${this.baseUrl}/api/coaching/invitations/${invitationId}`
+    );
+    return response.json();
   }
 }
 
