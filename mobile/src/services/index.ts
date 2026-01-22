@@ -10,6 +10,10 @@ export { enhancedScanService } from './enhancedScanService';
 export { ghlService } from './ghlService';
 export { profileService } from './profileService';
 
+// NEW: Unified API Client with automatic authentication
+export { apiClient, authenticatedFetch, getAuthorizationHeaders, ApiError } from './apiClient';
+export type { WihyService, HttpMethod, ApiRequestOptions, ApiResponse } from './apiClient';
+
 // NEW: Export WIHY API Service
 export { wihyApiService, WIHYApiService } from './wihyApiService';
 

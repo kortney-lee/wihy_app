@@ -268,31 +268,53 @@ class ApiLogger {
 
 export const apiLogger = new ApiLogger();
 
+// Storage keys for JWT token (same as authService)
+const TOKEN_STORAGE_KEYS = {
+  ACCESS_TOKEN: '@wihy_access_token',
+  SESSION_TOKEN: '@wihy_session_token',
+};
+
+/**
+ * Get stored JWT token (async)
+ * Tries access token first, then session token
+ */
+const getStoredToken = async (): Promise<string | null> => {
+  try {
+    const AsyncStorage = require('@react-native-async-storage/async-storage').default;
+    const accessToken = await AsyncStorage.getItem(TOKEN_STORAGE_KEYS.ACCESS_TOKEN);
+    if (accessToken) return accessToken;
+    const sessionToken = await AsyncStorage.getItem(TOKEN_STORAGE_KEYS.SESSION_TOKEN);
+    return sessionToken;
+  } catch {
+    return null;
+  }
+};
+
 /**
  * Import auth headers from config (lazy import to avoid circular dependency)
  * 
  * Authentication patterns:
  * - auth.wihy.ai: Client credentials (x-client-id, x-client-secret) for login/register/verify
- * - user.wihy.ai: JWT Bearer token (handled by individual services via getAuthHeaders())
- * - services.wihy.ai: Client credentials for API access
- * - ml.wihy.ai: Client credentials for ML API access
+ * - user.wihy.ai: JWT Bearer token
+ * - services.wihy.ai: JWT Bearer token + Client credentials
+ * - ml.wihy.ai: JWT Bearer token + Client credentials
+ * - payment.wihy.ai: JWT Bearer token
  */
 const getAuthHeadersForUrl = (url: string): Record<string, string> => {
   try {
     // Lazy import to avoid circular dependency
     const { getMLAuthHeaders, getServicesAuthHeaders, getAppAuthHeaders } = require('../services/config');
     
-    // Determine which auth headers to use based on URL
+    // Determine which client credential headers to use based on URL
     if (url.includes('ml.wihy.ai')) {
       return getMLAuthHeaders();
     } else if (url.includes('services.wihy.ai')) {
       return getServicesAuthHeaders();
     } else if (url.includes('auth.wihy.ai')) {
-      // Only auth.wihy.ai uses client credentials (for login, register, verify, etc.)
+      // Auth service uses client credentials (for login, register, verify, etc.)
       return getAppAuthHeaders();
     }
-    // user.wihy.ai and payment.wihy.ai use Bearer tokens, not client credentials
-    // Bearer tokens are added by individual services via getAuthHeaders()
+    // user.wihy.ai and payment.wihy.ai only need Bearer tokens
     return {};
   } catch {
     // Config not available yet
@@ -301,7 +323,42 @@ const getAuthHeadersForUrl = (url: string): Record<string, string> => {
 };
 
 /**
- * Wrapper for fetch with automatic logging and auth headers
+ * Check if a URL requires Bearer token authentication
+ * Most endpoints require auth except public ones like login/register
+ */
+const requiresBearerToken = (url: string): boolean => {
+  // Public endpoints that don't need Bearer token
+  const publicEndpoints = [
+    '/api/auth/login',
+    '/api/auth/register',
+    '/api/auth/forgot-password',
+    '/api/auth/reset-password',
+    '/api/auth/providers',
+    '/api/health',
+    '/health',
+  ];
+
+  // Auth service login/register don't need Bearer token
+  if (url.includes('auth.wihy.ai')) {
+    for (const endpoint of publicEndpoints) {
+      if (url.includes(endpoint)) {
+        return false;
+      }
+    }
+  }
+
+  return true;
+};
+
+/**
+ * Wrapper for fetch with automatic logging, client credentials, AND Bearer token
+ * 
+ * IMPORTANT: This function now automatically injects the JWT Bearer token
+ * for all authenticated endpoints. No need to manually add Authorization header.
+ * 
+ * @param url - The URL to fetch
+ * @param options - Standard RequestInit options
+ * @returns Promise<Response>
  */
 export async function fetchWithLogging(
   url: string,
@@ -309,12 +366,25 @@ export async function fetchWithLogging(
 ): Promise<Response> {
   const method = options?.method || 'GET';
   
-  // Auto-inject client auth headers based on URL
-  const authHeaders = getAuthHeadersForUrl(url);
-  const mergedHeaders = {
-    ...authHeaders,
-    ...(options?.headers as Record<string, string> || {}),
+  // Get client credential headers (X-Client-Id, X-Client-Secret) based on URL
+  const clientHeaders = getAuthHeadersForUrl(url);
+  
+  // Start building merged headers
+  const existingHeaders = (options?.headers as Record<string, string>) || {};
+  const mergedHeaders: Record<string, string> = {
+    ...clientHeaders,
+    ...existingHeaders,
   };
+
+  // Auto-inject Bearer token if:
+  // 1. URL requires authentication
+  // 2. Authorization header not already provided
+  if (requiresBearerToken(url) && !mergedHeaders['Authorization']) {
+    const token = await getStoredToken();
+    if (token) {
+      mergedHeaders['Authorization'] = `Bearer ${token}`;
+    }
+  }
   
   const enhancedOptions: RequestInit = {
     ...options,
