@@ -274,13 +274,16 @@ export const apiLogger = new ApiLogger();
 const getAuthHeadersForUrl = (url: string): Record<string, string> => {
   try {
     // Lazy import to avoid circular dependency
-    const { getMLAuthHeaders, getServicesAuthHeaders } = require('../services/config');
+    const { getMLAuthHeaders, getServicesAuthHeaders, getNativeAuthHeaders } = require('../services/config');
     
     // Determine which auth headers to use based on URL
     if (url.includes('ml.wihy.ai')) {
       return getMLAuthHeaders();
     } else if (url.includes('services.wihy.ai')) {
       return getServicesAuthHeaders();
+    } else if (url.includes('auth.wihy.ai') || url.includes('user.wihy.ai') || url.includes('payment.wihy.ai')) {
+      // Native app credentials for auth, user, and payment services
+      return getNativeAuthHeaders();
     }
     return {};
   } catch {
