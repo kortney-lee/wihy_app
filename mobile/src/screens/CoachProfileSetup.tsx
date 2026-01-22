@@ -8,12 +8,16 @@ import {
   ScrollView,
   Platform,
   Animated,
+  Alert,
+  ActivityIndicator,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import type { StackNavigationProp } from '@react-navigation/stack';
 import type { RootStackParamList } from '../types/navigation';
+import { coachService } from '../services';
+import { useAuth } from '../context/AuthContext';
 
 const isWeb = Platform.OS === 'web';
 
@@ -59,10 +63,20 @@ const DAYS_OF_WEEK = [
   { key: 'sunday', label: 'Sun' },
 ];
 
-export default function CoachProfileSetup() {
+interface CoachProfileSetupProps {
+  isDashboardMode?: boolean;
+  onBack?: () => void;
+}
+
+export default function CoachProfileSetup({
+  isDashboardMode = false,
+  onBack,
+}: CoachProfileSetupProps) {
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   const insets = useSafeAreaInsets();
+  const { user } = useAuth();
   const [currentStep, setCurrentStep] = useState(1);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const totalSteps = 3;
   
   // Collapsing header animation
@@ -147,6 +161,8 @@ export default function CoachProfileSetup() {
   const handleBack = () => {
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
+    } else if (isDashboardMode && onBack) {
+      onBack();
     } else {
       navigation.goBack();
     }
@@ -154,17 +170,82 @@ export default function CoachProfileSetup() {
 
   const handleSubmit = async () => {
     if (!validateStep()) {
-      alert('Please fill in all required fields');
+      Alert.alert('Validation Error', 'Please fill in all required fields');
       return;
     }
 
-    // TODO: Call API to create coach profile
-    // POST /api/coaches
-    console.log('Creating coach profile:', formData);
-    
-    // Show success and navigate to dashboard
-    alert('Profile created! Pending verification.');
-    navigation.navigate('CoachDashboard' as any);
+    setIsSubmitting(true);
+
+    try {
+      // Parse certifications from credentials string
+      const certifications = formData.credentials
+        ? formData.credentials.split(',').map(cert => ({
+            name: cert.trim(),
+            abbreviation: cert.trim(),
+          }))
+        : [];
+
+      // Call API to create coach profile
+      // POST /api/coaches/profile
+      const result = await coachService.createCoachProfile({
+        name: formData.name,
+        email: user?.email,
+        title: formData.title,
+        bio: formData.bio,
+        specialties: [formData.specialty],
+        certifications,
+        years_experience: parseInt(formData.yearsExperience, 10) || 0,
+        location: {
+          city: formData.city,
+          state: formData.state,
+          country: formData.country,
+          timezone: 'America/New_York', // TODO: Detect from device
+        },
+        pricing: {
+          session_rate: parseFloat(formData.sessionRate) || 0,
+          currency: formData.currency,
+          session_duration_minutes: 60,
+        },
+        availability: {
+          accepting_clients: true,
+          available_days: formData.availableDays,
+          available_hours: {
+            start: formData.availableHoursStart,
+            end: formData.availableHoursEnd,
+          },
+        },
+      });
+
+      if (!result.success) {
+        throw new Error(result.error?.message || 'Failed to create profile');
+      }
+
+      // Show success and navigate back to Coach Hub
+      Alert.alert(
+        'Profile Created!',
+        'Your coach profile has been created and is pending verification.',
+        [
+          {
+            text: 'OK',
+            onPress: () => {
+              if (isDashboardMode && onBack) {
+                onBack();
+              } else {
+                navigation.navigate('CoachDashboardPage');
+              }
+            },
+          },
+        ]
+      );
+    } catch (error) {
+      console.error('CoachProfileSetup: Error creating profile:', error);
+      Alert.alert(
+        'Error',
+        error instanceof Error ? error.message : 'Failed to create coach profile. Please try again.'
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const renderStepIndicator = () => (

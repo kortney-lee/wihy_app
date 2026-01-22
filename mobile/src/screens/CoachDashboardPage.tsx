@@ -1,16 +1,14 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
-  Dimensions,
   Platform,
-  Animated,
-  Pressable,
+  ScrollView,
   Image,
 } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { CompositeNavigationProp } from '@react-navigation/native';
 import type { StackNavigationProp } from '@react-navigation/stack';
@@ -18,28 +16,29 @@ import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import type { TabParamList, RootStackParamList } from '../types/navigation';
 import { dashboardTheme } from '../theme/dashboardTheme';
 import { HamburgerMenu } from '../components/shared/HamburgerMenu';
-import { WebPageWrapper } from '../components/shared';
+import { GradientDashboardHeader } from '../components/shared/GradientDashboardHeader';
 import { AuthContext } from '../context/AuthContext';
 import { useDashboardLayout } from '../hooks/useDashboardLayout';
 import SvgIcon from '../components/shared/SvgIcon';
+import { BackToHubButton } from '../components/shared/BackToHubButton';
 import CoachDashboard from './CoachDashboard';
-import CoachOverview from './CoachOverview';
-import CreateMeals from './CreateMeals';
 
 const spinnerGif = require('../../assets/whatishealthyspinner.gif');
+import CoachOverview from './CoachOverview';
+import CreateMeals from './CreateMeals';
 import ClientManagement from './ClientManagement';
 import ClientOnboarding from './ClientOnboarding';
+import CoachProfileSetup from './CoachProfileSetup';
+import BookingsManagement from './BookingsManagement';
 
 const isWeb = Platform.OS === 'web';
-
-const { width: screenWidth } = Dimensions.get('window');
 
 type NavigationProp = CompositeNavigationProp<
   BottomTabNavigationProp<TabParamList>,
   StackNavigationProp<RootStackParamList>
 >;
 
-type CoachViewType = 'overview' | 'dashboard' | 'meals' | 'clients' | 'onboard';
+type CoachViewType = 'overview' | 'dashboard' | 'meals' | 'clients' | 'onboard' | 'profileSetup' | 'bookings' | 'coachProfile';
 
 interface CoachOption {
   id: CoachViewType;
@@ -63,31 +62,6 @@ const CoachDashboardPage: React.FC<CoachDashboardPageProps> = ({ showMenuFromHea
   const [selectedView, setSelectedView] = useState<CoachViewType | null>(null); // Start with hub view
   const layout = useDashboardLayout();
   const isMobileWeb = isWeb && layout.screenWidth < 768;
-
-  // Collapsing header animation
-  const scrollY = useRef(new Animated.Value(0)).current;
-  const insets = useSafeAreaInsets();
-  const HEADER_MAX_HEIGHT = 140;
-  const HEADER_MIN_HEIGHT = 0;
-  const HEADER_SCROLL_DISTANCE = HEADER_MAX_HEIGHT - HEADER_MIN_HEIGHT;
-
-  const headerHeight = scrollY.interpolate({
-    inputRange: [0, HEADER_SCROLL_DISTANCE],
-    outputRange: [HEADER_MAX_HEIGHT, HEADER_MIN_HEIGHT],
-    extrapolate: 'clamp',
-  });
-
-  const headerOpacity = scrollY.interpolate({
-    inputRange: [0, HEADER_SCROLL_DISTANCE / 2],
-    outputRange: [1, 0],
-    extrapolate: 'clamp',
-  });
-
-  const titleScale = scrollY.interpolate({
-    inputRange: [0, HEADER_SCROLL_DISTANCE],
-    outputRange: [1, 0.8],
-    extrapolate: 'clamp',
-  });
 
   // Reset view state when user plan changes (dev mode switcher)
   React.useEffect(() => {
@@ -136,6 +110,22 @@ const CoachDashboardPage: React.FC<CoachDashboardPageProps> = ({ showMenuFromHea
       color: '#10b981',
       available: true,
     },
+    {
+      id: 'bookings',
+      title: 'Bookings',
+      subtitle: 'Manage sessions & schedule',
+      icon: 'calendar',
+      color: '#6366f1',
+      available: true,
+    },
+    {
+      id: 'coachProfile',
+      title: 'Coach Profile',
+      subtitle: 'Your coach bio & settings',
+      icon: 'briefcase',
+      color: '#14b8a6',
+      available: true,
+    },
   ];
 
   const handleViewSelect = (viewId: CoachViewType) => {
@@ -167,12 +157,35 @@ const CoachDashboardPage: React.FC<CoachDashboardPageProps> = ({ showMenuFromHea
         return <ClientManagement />;
       case 'onboard':
         return <ClientOnboarding />;
+      case 'profileSetup':
+        return (
+          <CoachProfileSetup
+            isDashboardMode={true}
+            onBack={handleBackToDashboardSelection}
+          />
+        );
+      case 'bookings':
+        return (
+          <BookingsManagement
+            isDashboardMode={true}
+            onBack={handleBackToDashboardSelection}
+          />
+        );
+      case 'coachProfile':
+        return (
+          <CoachProfileSetup
+            isDashboardMode={true}
+            onBack={handleBackToDashboardSelection}
+          />
+        );
       default:
         return null;
     }
   };
 
   if (selectedView) {
+    const isMobileWebLocal = isWeb && layout.screenWidth < 768;
+    
     return (
       <View style={styles.container}>
         {showHamburgerMenu && (
@@ -207,51 +220,22 @@ const CoachDashboardPage: React.FC<CoachDashboardPageProps> = ({ showMenuFromHea
           />
         )}
         
-        {/* Back to Coach Hub button for web - in selected view */}
-        {isWeb && (
-          <TouchableOpacity
-            onPress={handleBackToDashboardSelection}
-            style={{
-              position: 'absolute',
-              top: isMobileWeb ? 12 : 40,
-              right: isMobileWeb ? 12 : 24,
-              zIndex: 99,
-              flexDirection: 'row',
-              alignItems: 'center',
-              gap: isMobileWeb ? 6 : 10,
-              paddingVertical: isMobileWeb ? 4 : 6,
-              paddingLeft: isMobileWeb ? 8 : 12,
-              paddingRight: isMobileWeb ? 4 : 6,
-              backgroundColor: 'rgba(255,255,255,0.95)',
-              borderRadius: 24,
-              shadowColor: '#000',
-              shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: 0.15,
-              shadowRadius: 6,
-            } as any}
-          >
-            <SvgIcon name="arrow-back" size={isMobileWeb ? 14 : 16} color="#3b82f6" />
-            <Text style={{ fontSize: isMobileWeb ? 11 : 13, fontWeight: '600', color: '#3b82f6' }}>Coach Hub</Text>
-            <Image 
-              source={spinnerGif}
-              resizeMode="cover"
-              style={{
-                width: isMobileWeb ? 28 : 36,
-                height: isMobileWeb ? 28 : 36,
-                borderRadius: isMobileWeb ? 14 : 18,
-              }}
-            />
-          </TouchableOpacity>
-        )}
-        
         {renderSelectedView()}
+        
+        <BackToHubButton
+          hubName="Coach Hub"
+          color="#3b82f6"
+          onPress={handleBackToDashboardSelection}
+          isMobileWeb={isMobileWebLocal}
+          spinnerGif={spinnerGif}
+        />
       </View>
     );
   }
 
   return (
-      <View style={styles.container}>
-        {showHamburgerMenu && (
+    <SafeAreaView style={styles.healthMainContent} edges={['left', 'right']}>
+      {showHamburgerMenu && (
         <HamburgerMenu
           visible={showHamburgerMenu}
           onClose={() => {
@@ -279,38 +263,40 @@ const CoachDashboardPage: React.FC<CoachDashboardPageProps> = ({ showMenuFromHea
         />
       )}
 
-      {/* Status bar area - solid color */}
-      <View style={{ height: insets.top, backgroundColor: '#3b82f6' }} />
-      
-      {/* Collapsing Header */}
-      <Animated.View style={[styles.collapsibleHeader, { height: headerHeight }]}>
-        <Animated.View style={[styles.headerContent, { opacity: headerOpacity, transform: [{ scale: titleScale }] }]}>
-          <Text style={styles.headerTitle}>Coach Hub</Text>
-          <Text style={styles.headerSubtitle}>Manage clients and grow your business</Text>
-          <View style={styles.statsRow}>
-            <SvgIcon name="briefcase" size={14} color="#ffffff" style={{ marginRight: 6 }} />
-            <Text style={styles.statsLabel}>Active Today</Text>
-          </View>
-        </Animated.View>
-      </Animated.View>
+      {/* Fixed Header - Outside ScrollView (matching Health Dashboard) */}
+      <GradientDashboardHeader
+        title="Coach Hub"
+        subtitle="Manage clients and grow your business"
+        gradient="coach"
+        badge={{ icon: "briefcase", text: "Active Today" }}
+      />
 
-      <Animated.ScrollView
-        style={{ flex: 1, backgroundColor: '#e0f2fe' }}
-        showsVerticalScrollIndicator={false}
-        scrollEventThrottle={16}
-        onScroll={Animated.event(
-          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-          { useNativeDriver: false }
-        )}
-      >
-        {/* Dashboard Grid */}
-        <View style={[styles.dashboardGrid, isWeb && { maxWidth: 800, alignSelf: 'center', width: '100%' }]}>
+      <ScrollView showsVerticalScrollIndicator={false}>
+        {/* Dashboard Grid - Centered with max-width on tablets */}
+        <View style={[
+          styles.dashboardGrid,
+          {
+            maxWidth: layout.maxContentWidth,
+            alignSelf: 'center',
+            width: '100%',
+            paddingHorizontal: layout.horizontalPadding,
+          }
+        ]}>
           {coachOptions.map((option) => {
-            // Web-specific sizing
-            const cardWidth = isWeb ? 160 : '47%';
-            const iconSize = isWeb ? 24 : 32;
-            const titleSize = isWeb ? 14 : 16;
-            const subtitleSize = isWeb ? 11 : 12;
+            // Calculate responsive card width - matching Health Dashboard exactly
+            const cardWidth = isWeb
+              ? isMobileWeb 
+                ? '47%'  // Mobile web: 2-column grid like native mobile
+                : 160    // Desktop web: Fixed smaller size
+              : layout.isTablet 
+                ? (layout.maxContentWidth - layout.horizontalPadding * 2 - layout.cardSpacing * 2) / 3 - 4
+                : '47%';
+            
+            // Responsive sizing based on device - matching Health Dashboard
+            const iconContainerSize = isWeb && !isMobileWeb ? 40 : 56;
+            const iconSize = isWeb && !isMobileWeb ? 24 : layout.rfs(32);
+            const titleSize = isWeb && !isMobileWeb ? 14 : layout.rfs(16);
+            const subtitleSize = isWeb && !isMobileWeb ? 11 : layout.rfs(12);
             
             return (
               <TouchableOpacity
@@ -318,13 +304,12 @@ const CoachDashboardPage: React.FC<CoachDashboardPageProps> = ({ showMenuFromHea
                 style={[
                   styles.dashboardCard,
                   { backgroundColor: option.color, width: cardWidth as any },
-                  isWeb && { aspectRatio: undefined, height: 140, padding: 12 },
                   !option.available && styles.optionCardDisabled,
                 ]}
                 onPress={() => option.available && handleViewSelect(option.id)}
                 disabled={!option.available}
               >
-                <View style={[styles.cardIconContainer, isWeb && { marginBottom: 8 }]}>
+                <View style={[styles.cardIconContainer, { width: iconContainerSize, height: iconContainerSize, borderRadius: iconContainerSize / 2 }]}>
                   <SvgIcon name={option.icon as any} size={iconSize} color="#ffffff" />
                 </View>
                 <Text style={[styles.cardTitle, { fontSize: titleSize }]}>{option.title}</Text>
@@ -338,45 +323,44 @@ const CoachDashboardPage: React.FC<CoachDashboardPageProps> = ({ showMenuFromHea
             );
           })}
           
-          {/* Profile Setup - Always available */}
-          <TouchableOpacity
-            style={[
-              styles.dashboardCard,
-              styles.profileSetupCard,
-              isWeb && { width: 160, aspectRatio: undefined, height: 140, padding: 12 },
-            ]}
-            onPress={() => navigation.navigate('ProfileSetup', { isOnboarding: false })}
-          >
-            <View style={[styles.cardIconContainer, isWeb && { marginBottom: 8 }]}>
-              <SvgIcon name="person-add" size={isWeb ? 24 : 32} color="#ffffff" />
-            </View>
-            <Text style={[styles.cardTitle, { fontSize: isWeb ? 14 : 16 }]}>Profile Setup</Text>
-            <Text style={[styles.cardSubtitle, { fontSize: isWeb ? 11 : 12 }]}>Health profile</Text>
-          </TouchableOpacity>
-          
           {/* Switch back to Personal Dashboard */}
-          {onContextChange && (
-            <TouchableOpacity
-              style={[
-                styles.dashboardCard, 
-                styles.switchPersonalCard,
-                isWeb && { width: 160, aspectRatio: undefined, height: 140, padding: 12 },
-              ]}
-              onPress={() => onContextChange('personal')}
-            >
-              <View style={[styles.cardIconContainer, isWeb && { marginBottom: 8 }]}>
-                <SvgIcon name="person" size={isWeb ? 24 : 32} color="#10b981" />
-              </View>
-              <Text style={[styles.cardTitle, { color: '#10b981', fontSize: isWeb ? 14 : 16 }]}>Personal</Text>
-              <Text style={[styles.cardSubtitle, { color: '#6b7280', fontSize: isWeb ? 11 : 12 }]}>Back to my health</Text>
-            </TouchableOpacity>
-          )}
+          {onContextChange && (() => {
+            // Same responsive sizing as other cards
+            const cardWidth = isWeb
+              ? isMobileWeb 
+                ? '47%'
+                : 160
+              : layout.isTablet 
+                ? (layout.maxContentWidth - layout.horizontalPadding * 2 - layout.cardSpacing * 2) / 3 - 4
+                : '47%';
+            const iconContainerSize = isWeb && !isMobileWeb ? 40 : 56;
+            const iconSize = isWeb && !isMobileWeb ? 24 : layout.rfs(32);
+            const titleSize = isWeb && !isMobileWeb ? 14 : layout.rfs(16);
+            const subtitleSize = isWeb && !isMobileWeb ? 11 : layout.rfs(12);
+            
+            return (
+              <TouchableOpacity
+                style={[
+                  styles.dashboardCard, 
+                  styles.switchPersonalCard,
+                  { width: cardWidth as any },
+                ]}
+                onPress={() => onContextChange('personal')}
+              >
+                <View style={[styles.cardIconContainer, styles.switchIconContainer, { width: iconContainerSize, height: iconContainerSize, borderRadius: iconContainerSize / 2 }]}>
+                  <SvgIcon name="person" size={iconSize} color="#10b981" />
+                </View>
+                <Text style={[styles.cardTitle, { color: '#10b981', fontSize: titleSize }]}>Personal</Text>
+                <Text style={[styles.cardSubtitle, { color: '#6b7280', fontSize: subtitleSize }]}>Back to my health</Text>
+              </TouchableOpacity>
+            );
+          })()}
         </View>
         
         {/* Bottom spacing for tab bar */}
         <View style={{ height: 100 }} />
-      </Animated.ScrollView>
-      </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 
@@ -385,52 +369,20 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: dashboardTheme.colors.background,
   },
-  collapsibleHeader: {
-    backgroundColor: '#3b82f6',
-    overflow: 'hidden',
-  },
-  headerContent: {
+  healthMainContent: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-  },
-  headerTitle: {
-    fontSize: 28,
-    fontWeight: '700',
-    color: '#ffffff',
-    marginBottom: 4,
-  },
-  headerSubtitle: {
-    fontSize: 16,
-    color: 'rgba(255, 255, 255, 0.9)',
-    marginBottom: 12,
-  },
-  statsRow: {
-    flexDirection: 'row',
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-    alignItems: 'center',
-  },
-  statsLabel: {
-    fontSize: 14,
-    color: '#ffffff',
-    fontWeight: '500',
-  },
-  scrollView: {
-    flex: 1,
+    backgroundColor: '#f0fdf4', // Light green background matching Health Hub
   },
   dashboardGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    justifyContent: 'space-between',
+    justifyContent: 'flex-start',
     gap: dashboardTheme.spacing.md,
     padding: dashboardTheme.spacing.md,
   },
   dashboardCard: {
-    width: '47%',
+    // Width is now set dynamically in the render
+    minWidth: 140,
     aspectRatio: 1,
     borderRadius: dashboardTheme.borderRadius.lg,
     padding: dashboardTheme.spacing.md,
@@ -439,7 +391,17 @@ const styles = StyleSheet.create({
     ...dashboardTheme.shadows.md,
   },
   cardIconContainer: {
-    marginBottom: dashboardTheme.spacing.sm,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: dashboardTheme.spacing.md,
+    flexShrink: 0,
+  },
+  switchIconContainer: {
+    backgroundColor: 'rgba(16, 185, 129, 0.1)',
   },
   cardTitle: {
     fontSize: 16,
@@ -475,9 +437,6 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: '#10b981',
     borderStyle: 'dashed',
-  },
-  profileSetupCard: {
-    backgroundColor: '#14b8a6',
   },
 });
 

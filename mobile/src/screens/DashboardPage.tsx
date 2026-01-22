@@ -24,6 +24,7 @@ import { AuthContext } from '../context/AuthContext';
 import { hasCoachAccess, hasFamilyAccess, hasMealsAccess } from '../utils/capabilities';
 import { useDashboardLayout } from '../hooks/useDashboardLayout';
 import SvgIcon from '../components/shared/SvgIcon';
+import { BackToHubButton } from '../components/shared/BackToHubButton';
 // import { useSession } from '../contexts/SessionContext';
 import OverviewDashboard from './OverviewDashboard';
 
@@ -163,42 +164,13 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
 
     return (
       <View style={styles.container}>
-        {/* Back to Health Hub button for web - positioned responsively */}
-        {isWeb && (
-          <TouchableOpacity
-            onPress={() => setSelectedDashboard(null)}
-            style={{
-              position: 'absolute',
-              top: isMobileWeb ? 12 : 40,
-              right: isMobileWeb ? 12 : 24,
-              zIndex: 99,
-              flexDirection: 'row',
-              alignItems: 'center',
-              gap: isMobileWeb ? 6 : 10,
-              paddingVertical: isMobileWeb ? 4 : 6,
-              paddingLeft: isMobileWeb ? 8 : 12,
-              paddingRight: isMobileWeb ? 4 : 6,
-              backgroundColor: 'rgba(255,255,255,0.95)',
-              borderRadius: 24,
-              shadowColor: '#000',
-              shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: 0.15,
-              shadowRadius: 6,
-            } as any}
-          >
-            <SvgIcon name="arrow-back" size={isMobileWeb ? 14 : 16} color="#16a34a" />
-            <Text style={{ fontSize: isMobileWeb ? 11 : 13, fontWeight: '600', color: '#16a34a' }}>Health Hub</Text>
-            <Image 
-              source={spinnerGif}
-              resizeMode="cover"
-              style={{
-                width: isMobileWeb ? 28 : 36,
-                height: isMobileWeb ? 28 : 36,
-                borderRadius: isMobileWeb ? 14 : 18,
-              }}
-            />
-          </TouchableOpacity>
-        )}
+        <BackToHubButton
+          hubName="Health Hub"
+          color="#16a34a"
+          onPress={() => setSelectedDashboard(null)}
+          isMobileWeb={isMobileWeb}
+          spinnerGif={spinnerGif}
+        />
         {selectedDashboard === 'overview' && <OverviewDashboard onAnalyze={handleAnalyze} />}
         {selectedDashboard === 'progress' && <MyProgressDashboard />}
         {selectedDashboard === 'nutrition' && <ConsumptionDashboard onAnalyze={handleAnalyze} />}

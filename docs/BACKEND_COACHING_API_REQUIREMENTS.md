@@ -381,6 +381,263 @@ GET /api/coaches/{coachId}/availability?start_date=2026-01-20&end_date=2026-01-2
 
 ---
 
+### 0h. Create Coach Profile (New Coach Registration)
+
+```
+POST /api/coaches/profile
+```
+
+**Purpose:** Create a new coach profile during coach onboarding (CoachProfileSetup screen)
+
+**Request Headers:**
+```
+Authorization: Bearer [token]
+Content-Type: application/json
+```
+
+**Request Body:**
+```json
+{
+  "name": "Sarah Mitchell",
+  "email": "sarah@example.com",
+  "phone": "+1-555-123-4567",
+  "title": "Registered Dietitian & Health Coach",
+  "bio": "Passionate about helping clients achieve sustainable weight loss...",
+  "specialties": ["Weight Loss", "Meal Planning", "Diabetes"],
+  "certifications": [
+    {
+      "name": "Registered Dietitian",
+      "abbreviation": "RD",
+      "issuing_org": "Academy of Nutrition and Dietetics",
+      "year_obtained": 2018
+    }
+  ],
+  "years_experience": 8,
+  "location": {
+    "city": "New York",
+    "state": "NY",
+    "country": "USA",
+    "timezone": "America/New_York"
+  },
+  "pricing": {
+    "session_rate": 75.00,
+    "currency": "USD",
+    "session_duration_minutes": 60
+  },
+  "availability": {
+    "accepting_clients": true,
+    "available_days": ["monday", "tuesday", "wednesday", "thursday", "friday"],
+    "available_hours": {
+      "start": "09:00",
+      "end": "17:00"
+    }
+  },
+  "social_links": {
+    "website": "https://sarahmitchell.com",
+    "instagram": "@sarahfitness",
+    "linkedin": "sarahmitchellrd"
+  }
+}
+```
+
+**Response (201 Created):**
+```json
+{
+  "success": true,
+  "data": {
+    "id": "coach_123",
+    "profile_complete": true,
+    "created_at": "2026-01-20T16:00:00Z"
+  }
+}
+```
+
+**Error Response (400 Bad Request):**
+```json
+{
+  "success": false,
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "Invalid profile data",
+    "details": {
+      "name": "Name is required",
+      "specialties": "At least one specialty is required"
+    }
+  }
+}
+```
+
+**Error Response (409 Conflict):**
+```json
+{
+  "success": false,
+  "error": {
+    "code": "PROFILE_EXISTS",
+    "message": "Coach profile already exists for this user"
+  }
+}
+```
+
+---
+
+### 0i. Get Coach Bookings (Coach View)
+
+```
+GET /api/coaches/{coachId}/bookings
+GET /api/coaches/{coachId}/bookings?status=pending
+GET /api/coaches/{coachId}/bookings?status=confirmed
+GET /api/coaches/{coachId}/bookings?start_date=2026-01-20&end_date=2026-01-27
+```
+
+**Purpose:** Get all bookings for a coach (used in BookingsManagement screen)
+
+**Query Parameters:**
+- `status` (optional): `pending` | `confirmed` | `completed` | `cancelled` | `all`
+- `start_date` (optional): Filter bookings from this date (ISO 8601)
+- `end_date` (optional): Filter bookings until this date (ISO 8601)
+- `client_id` (optional): Filter by specific client
+- `sort` (optional): `date_asc` | `date_desc` (default: `date_asc`)
+- `page` (optional): Page number (default: 1)
+- `limit` (optional): Results per page (default: 20)
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "bookings": [
+      {
+        "id": "booking_789",
+        "client": {
+          "id": "client_456",
+          "name": "John Doe",
+          "email": "john@example.com",
+          "avatar_url": "https://storage.wihy.ai/avatars/client_456.jpg"
+        },
+        "scheduled_at": "2026-01-22T10:00:00Z",
+        "duration_minutes": 60,
+        "session_type": "initial_consultation",
+        "status": "confirmed",
+        "notes": "Wants to discuss weight loss goals",
+        "meeting_link": "https://meet.wihy.ai/session/booking_789",
+        "created_at": "2026-01-18T14:30:00Z"
+      },
+      {
+        "id": "booking_790",
+        "client": {
+          "id": "client_457",
+          "name": "Jane Smith",
+          "email": "jane@example.com",
+          "avatar_url": null
+        },
+        "scheduled_at": "2026-01-22T14:00:00Z",
+        "duration_minutes": 30,
+        "session_type": "follow_up",
+        "status": "pending",
+        "notes": "Weekly check-in",
+        "meeting_link": null,
+        "created_at": "2026-01-19T09:15:00Z"
+      }
+    ],
+    "summary": {
+      "total": 15,
+      "pending": 3,
+      "confirmed": 8,
+      "completed": 2,
+      "cancelled": 2
+    },
+    "pagination": {
+      "page": 1,
+      "limit": 20,
+      "total_pages": 1,
+      "total_count": 15
+    }
+  }
+}
+```
+
+---
+
+### 0j. Update Booking Status (Coach Action)
+
+```
+PUT /api/coaches/{coachId}/bookings/{bookingId}
+```
+
+**Purpose:** Coach confirms, cancels, or updates a booking
+
+**Request Body (Confirm):**
+```json
+{
+  "action": "confirm",
+  "meeting_link": "https://meet.wihy.ai/session/booking_789"
+}
+```
+
+**Request Body (Cancel):**
+```json
+{
+  "action": "cancel",
+  "reason": "Schedule conflict - rescheduling required"
+}
+```
+
+**Request Body (Complete):**
+```json
+{
+  "action": "complete",
+  "notes": "Session completed successfully. Follow-up scheduled for next week.",
+  "follow_up_date": "2026-01-29"
+}
+```
+
+**Request Body (Reschedule):**
+```json
+{
+  "action": "reschedule",
+  "new_date": "2026-01-25",
+  "new_time": "14:00",
+  "reason": "Client requested different time"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "id": "booking_789",
+    "status": "confirmed",
+    "meeting_link": "https://meet.wihy.ai/session/booking_789",
+    "updated_at": "2026-01-20T10:30:00Z"
+  }
+}
+```
+
+**Error Response (404 Not Found):**
+```json
+{
+  "success": false,
+  "error": {
+    "code": "BOOKING_NOT_FOUND",
+    "message": "Booking not found"
+  }
+}
+```
+
+**Error Response (403 Forbidden):**
+```json
+{
+  "success": false,
+  "error": {
+    "code": "UNAUTHORIZED",
+    "message": "Coach is not authorized to manage this booking"
+  }
+}
+```
+
+---
+
 ## Required Endpoints
 
 ### 1. Coach Overview
@@ -1111,6 +1368,48 @@ curl -X POST "https://services.wihy.ai/api/coaches/coach_123/book" \
     "session_type": "initial_consultation"
   }'
 
+# Test create coach profile (new registration)
+curl -X POST "https://services.wihy.ai/api/coaches/profile" \
+  -H "Authorization: Bearer [token]" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Sarah Mitchell",
+    "email": "sarah@example.com",
+    "title": "Registered Dietitian",
+    "bio": "Passionate about helping clients...",
+    "specialties": ["Weight Loss", "Meal Planning"],
+    "certifications": [{"name": "RD", "abbreviation": "RD"}],
+    "years_experience": 8,
+    "location": {"city": "New York", "state": "NY", "timezone": "America/New_York"},
+    "pricing": {"session_rate": 75.00, "currency": "USD"}
+  }'
+
+# Test get coach bookings
+curl -X GET "https://services.wihy.ai/api/coaches/coach_123/bookings" \
+  -H "Authorization: Bearer [token]"
+
+# Test get coach bookings with filters
+curl -X GET "https://services.wihy.ai/api/coaches/coach_123/bookings?status=pending" \
+  -H "Authorization: Bearer [token]"
+
+# Test confirm booking
+curl -X PUT "https://services.wihy.ai/api/coaches/coach_123/bookings/booking_789" \
+  -H "Authorization: Bearer [token]" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "action": "confirm",
+    "meeting_link": "https://meet.wihy.ai/session/booking_789"
+  }'
+
+# Test cancel booking
+curl -X PUT "https://services.wihy.ai/api/coaches/coach_123/bookings/booking_789" \
+  -H "Authorization: Bearer [token]" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "action": "cancel",
+    "reason": "Client requested cancellation"
+  }'
+
 # Expected: 200 with data
 # Current: 404 "Route not found"
 ```
@@ -1122,6 +1421,7 @@ curl -X POST "https://services.wihy.ai/api/coaches/coach_123/book" \
 | Endpoint | Method | Purpose |
 |----------|--------|---------|
 | `/api/coaches/discover` | GET | Search coaches (Find Your Coach) |
+| `/api/coaches/profile` | POST | **NEW:** Create coach profile (registration) |
 | `/api/coaches/{id}/profile` | GET | Get coach public profile |
 | `/api/coaches/{id}/profile` | PUT | Update coach profile (coach only) |
 | `/api/coaches/{id}/overview` | GET | Coach dashboard data |
@@ -1133,9 +1433,12 @@ curl -X POST "https://services.wihy.ai/api/coaches/coach_123/book" \
 | `/api/coaches/{id}/reviews` | GET | Get coach reviews |
 | `/api/coaches/{id}/reviews` | POST | Submit review (client only) |
 | `/api/coaches/{id}/availability` | GET | Get booking slots |
-| `/api/coaches/{id}/book` | POST | Book a session |
+| `/api/coaches/{id}/bookings` | GET | **NEW:** List all coach bookings |
+| `/api/coaches/{id}/bookings/{bookingId}` | PUT | **NEW:** Update booking status |
+| `/api/coaches/{id}/book` | POST | Book a session (client action) |
 | `/api/coaching/invitations/send` | POST | Send invitation |
 | `/api/coaching/invitations/pending` | GET | List pending invites |
+| `/api/coaching/invitations/{id}` | GET | **NEW:** Get invitation details |
 | `/api/coaching/invitations/accept` | POST | Accept invitation |
 | `/api/coaching/invitations/decline` | POST | Decline invitation |
 | `/api/coaching/relationships/client/{id}/coach` | GET | Get client's coach |
