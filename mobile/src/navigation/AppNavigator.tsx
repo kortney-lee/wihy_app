@@ -69,8 +69,6 @@ import PrivacyScreen from '../screens/PrivacyScreen';
 import EditProfileScreen from '../screens/EditProfileScreen';
 import ProfileSetupScreen from '../screens/ProfileSetupScreen';
 import HealthDataScreen from '../screens/HealthDataScreen';
-import ProfileSettings from '../screens/ProfileSettings';
-import PrivacySettings from '../screens/PrivacySettings';
 
 import AuthCallbackScreen from '../screens/AuthCallbackScreen';
 import SubscribeCompleteScreen from '../screens/SubscribeCompleteScreen';
@@ -740,24 +738,6 @@ export default function AppNavigator() {
         <Stack.Screen
           name="HealthData"
           component={HealthDataScreen}
-          options={{
-            presentation: 'card',
-            headerShown: false,
-          }}
-        />
-        
-        {/* User Profile Management Screens */}
-        <Stack.Screen
-          name="ProfileSettings"
-          component={ProfileSettings}
-          options={{
-            presentation: 'card',
-            headerShown: false,
-          }}
-        />
-        <Stack.Screen
-          name="PrivacySettings"
-          component={PrivacySettings}
           options={{
             presentation: 'card',
             headerShown: false,
