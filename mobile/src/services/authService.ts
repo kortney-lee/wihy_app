@@ -14,9 +14,15 @@
  * - Auth service manages provider client IDs, secrets, endpoints
  * - Your app simply redirects to auth service endpoints
  * - Auth service returns session_token via deep link
+ * 
+ * AUTHENTICATION STRATEGY:
+ * ==========================================
+ * - WEB: Uses HttpOnly cookies (session_token cookie shared across *.wihy.ai)
+ * - MOBILE: Uses Bearer token in Authorization header (stored in AsyncStorage)
  */
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Platform } from 'react-native';
 import { EXPO_PUBLIC_WIHY_NATIVE_CLIENT_ID, EXPO_PUBLIC_AUTH_URL } from '@env';
 import { fetchWithLogging } from '../utils/apiLogger';
 import { affiliateService } from './affiliateService';
@@ -348,6 +354,7 @@ class AuthService {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(body),
+        // Web: credentials needed for Set-Cookie to work (fetchWithLogging handles this)
       });
 
       const responseTime = Date.now() - startTime;
@@ -365,6 +372,10 @@ class AuthService {
         const refreshToken = authData?.refreshToken || responseData.refreshToken;
         const expiresIn = authData?.expiresIn || responseData.expiresIn;
         
+        // AUTHENTICATION STRATEGY:
+        // - WEB: Server sets HttpOnly cookie via Set-Cookie header (auto-handled by browser)
+        //        We still store token in AsyncStorage for backwards compatibility
+        // - MOBILE: Store token in AsyncStorage, use in Authorization header
         if (authToken) {
           await this.storeSessionToken(authToken);
           
@@ -398,6 +409,8 @@ class AuthService {
         }
         
         console.log('=== LOGIN SUCCESS ===');
+        console.log(`Platform: ${Platform.OS}, Cookie auth: ${Platform.OS === 'web'}`);
+        
         // Return in expected format with nested data
         return {
           success: true,
@@ -1204,7 +1217,7 @@ class AuthService {
   // === Storage Methods ===
 
   async storeSessionToken(token: string): Promise<void> {
-    // Store to both keys for compatibility
+    // Store to both keys for compatibility across all services
     // Some services check ACCESS_TOKEN, others check SESSION_TOKEN
     await AsyncStorage.setItem(STORAGE_KEYS.SESSION_TOKEN, token);
     await AsyncStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, token);
@@ -1213,6 +1226,7 @@ class AuthService {
 
   private async storeTokens(tokens: TokenResponse): Promise<void> {
     await AsyncStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, tokens.access_token);
+    await AsyncStorage.setItem(STORAGE_KEYS.SESSION_TOKEN, tokens.access_token);
     
     if (tokens.refresh_token) {
       await AsyncStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, tokens.refresh_token);
@@ -1226,6 +1240,13 @@ class AuthService {
   private async storeUserData(user: UserData): Promise<void> {
     // Ensure name is always populated - construct from firstName/lastName if missing
     const userData = { ...user };
+    
+    // Normalize avatar URL field (backend may send avatar_url, avatarUrl, or avatar)
+    if (!userData.avatar) {
+      userData.avatar = (user as any).avatar_url || (user as any).avatarUrl || null;
+    }
+    
+    // Normalize name field
     if (!userData.name || userData.name === 'User' || userData.name === 'Guest') {
       const firstName = (user as any).firstName || (user as any).first_name || '';
       const lastName = (user as any).lastName || (user as any).last_name || '';
@@ -1236,6 +1257,17 @@ class AuthService {
         userData.name = user.email.split('@')[0];
       }
     }
+    
+    // Normalize role to lowercase for consistency
+    if (userData.role && typeof userData.role === 'string') {
+      userData.role = userData.role.toLowerCase() as any;
+    }
+    
+    // Normalize status to lowercase for consistency
+    if (userData.status && typeof userData.status === 'string') {
+      userData.status = userData.status.toLowerCase() as any;
+    }
+    
     await AsyncStorage.setItem(STORAGE_KEYS.USER_DATA, JSON.stringify(userData));
   }
 
@@ -1243,7 +1275,6 @@ class AuthService {
     // Try session token first, then fall back to access token for compatibility
     const sessionToken = await AsyncStorage.getItem(STORAGE_KEYS.SESSION_TOKEN);
     if (sessionToken) return sessionToken;
-    
     return await AsyncStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN);
   }
 
@@ -1251,7 +1282,6 @@ class AuthService {
     // Try access token first, then fall back to session token for compatibility
     const accessToken = await AsyncStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN);
     if (accessToken) return accessToken;
-    
     return await AsyncStorage.getItem(STORAGE_KEYS.SESSION_TOKEN);
   }
 
