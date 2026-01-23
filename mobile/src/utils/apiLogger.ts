@@ -398,6 +398,7 @@ export async function fetchWithLogging(
   // 2. Authorization header not already provided
   if (requiresBearerToken(url) && !mergedHeaders['Authorization']) {
     const token = await getStoredToken();
+    console.log(`[fetchWithLogging] Token for ${url}:`, token ? `${token.substring(0, 20)}...` : 'NO TOKEN FOUND');
     if (token) {
       // Check if token is expired before using it
       if (isJWTExpired(token)) {
