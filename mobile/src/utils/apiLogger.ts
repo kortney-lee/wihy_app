@@ -479,9 +479,27 @@ export async function fetchWithLogging(
               
               return retryResponse;
             }
+          } else {
+            // Refresh failed - token signature invalid, clear auth and force re-login
+            console.error('[fetchWithLogging] Token refresh failed - clearing auth data');
+            await authService.clearAllData();
+            // Reload page to trigger login flow (web) or return to login screen (mobile)
+            if (typeof window !== 'undefined') {
+              window.location.href = '/';
+            }
           }
         } catch (refreshError) {
           console.error('[fetchWithLogging] Token refresh failed:', refreshError);
+          // Clear invalid tokens and force re-login
+          try {
+            const { authService } = await import('../services/authService');
+            await authService.clearAllData();
+            if (typeof window !== 'undefined') {
+              window.location.href = '/';
+            }
+          } catch (e) {
+            console.error('[fetchWithLogging] Failed to clear auth data:', e);
+          }
         }
       }
       
