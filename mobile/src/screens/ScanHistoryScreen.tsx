@@ -34,6 +34,10 @@ export default function ScanHistoryScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [filter, setFilter] = useState<'all' | 'barcode' | 'image' | 'pill' | 'label'>('all');
 
+  // Refs to prevent duplicate API calls
+  const isLoadingRef = useRef(false);
+  const lastFilterRef = useRef(filter);
+
   // Collapsing header animation
   const scrollY = useRef(new Animated.Value(0)).current;
   const HEADER_MAX_HEIGHT = 100;
@@ -65,7 +69,17 @@ export default function ScanHistoryScreen() {
     }
   }, [user?.email]);
 
-  const loadHistory = useCallback(async () => {
+  const loadHistory = useCallback(async (forceRefresh = false) => {
+    // Prevent duplicate calls unless force refreshing or filter changed
+    const filterChanged = lastFilterRef.current !== filter;
+    if (isLoadingRef.current && !forceRefresh && !filterChanged) {
+      console.log('[ScanHistoryScreen] Skipping loadHistory - already loading');
+      return;
+    }
+    
+    isLoadingRef.current = true;
+    lastFilterRef.current = filter;
+    
     try {
       setLoading(true);
       const scanType = filter === 'all' ? undefined : filter;
@@ -76,9 +90,11 @@ export default function ScanHistoryScreen() {
       }
     } catch (error) {
       console.error('Error loading scan history:', error);
+      // Don't crash on CORS errors
     } finally {
       setLoading(false);
       setRefreshing(false);
+      isLoadingRef.current = false;
     }
   }, [filter]);
 
@@ -91,7 +107,7 @@ export default function ScanHistoryScreen() {
 
   const handleRefresh = () => {
     setRefreshing(true);
-    loadHistory();
+    loadHistory(true); // Force refresh
   };
 
   const handleDeleteScan = (scanId: number) => {

@@ -39,6 +39,11 @@ const OverviewDashboard: React.FC<BaseDashboardProps> = ({ onAnalyze }) => {
   const [recentScans, setRecentScans] = useState<ScanHistoryItem[]>([]);
   const [scansLoading, setScansLoading] = useState(false);
 
+  // Refs to prevent duplicate API calls
+  const isLoadingScansRef = useRef(false);
+  const isLoadingHealthRef = useRef(false);
+  const hasLoadedRef = useRef(false);
+
   // Collapsing header animation
   const scrollY = useRef(new Animated.Value(0)).current;
   const insets = useSafeAreaInsets();
@@ -65,30 +70,49 @@ const OverviewDashboard: React.FC<BaseDashboardProps> = ({ onAnalyze }) => {
     extrapolate: 'clamp',
   });
 
-  // Load recent scans
+  // Load recent scans with guard to prevent duplicate calls
   const loadRecentScans = useCallback(async () => {
+    // Prevent duplicate calls
+    if (isLoadingScansRef.current) {
+      console.log('[OverviewDashboard] Skipping loadRecentScans - already loading');
+      return;
+    }
+    
+    isLoadingScansRef.current = true;
+    setScansLoading(true);
+    
     try {
-      setScansLoading(true);
       const result = await wihyApiService.getScanHistory(5);
       if (result.success && result.scans) {
         setRecentScans(result.scans);
       }
     } catch (error) {
       console.error('Failed to load recent scans:', error);
+      // Don't crash on CORS errors - just show empty state
     } finally {
       setScansLoading(false);
+      isLoadingScansRef.current = false;
     }
   }, []);
 
-  // Load health data
+  // Load health data with guard to prevent duplicate calls
   const loadHealthData = useCallback(async () => {
+    // Prevent duplicate calls
+    if (isLoadingHealthRef.current) {
+      console.log('[OverviewDashboard] Skipping loadHealthData - already loading');
+      return;
+    }
+    
+    isLoadingHealthRef.current = true;
+    setIsLoading(true);
+    
     try {
-      setIsLoading(true);
       const userId = user?.id;
 
       if (!userId) {
         console.error('[OverviewDashboard] User ID not available');
         setIsLoading(false);
+        isLoadingHealthRef.current = false;
         return;
       }
 
@@ -423,15 +447,23 @@ const OverviewDashboard: React.FC<BaseDashboardProps> = ({ onAnalyze }) => {
       ]);
     } finally {
       setIsLoading(false);
+      isLoadingHealthRef.current = false;
     }
   }, [user?.id]);
 
-  // Load data on mount only
+  // Load data on mount only - with guard to prevent multiple loads
   useEffect(() => {
+    if (hasLoadedRef.current) {
+      console.log('[OverviewDashboard] Already loaded, skipping initial load');
+      return;
+    }
+    
+    hasLoadedRef.current = true;
+    console.log('[OverviewDashboard] Initial data load starting');
+    
     loadHealthData();
     loadRecentScans();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, []); // Empty deps - run once on mount only
 
   // Only memoize dynamic data that depends on navigation functions
   const quickActionCards: QuickActionCard[] = useMemo(() => [
