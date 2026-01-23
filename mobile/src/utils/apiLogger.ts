@@ -282,10 +282,13 @@ const getStoredToken = async (): Promise<string | null> => {
   try {
     const AsyncStorage = require('@react-native-async-storage/async-storage').default;
     const accessToken = await AsyncStorage.getItem(TOKEN_STORAGE_KEYS.ACCESS_TOKEN);
+    console.log('[getStoredToken] ACCESS_TOKEN:', accessToken ? `${accessToken.substring(0, 20)}...` : 'NULL');
     if (accessToken) return accessToken;
     const sessionToken = await AsyncStorage.getItem(TOKEN_STORAGE_KEYS.SESSION_TOKEN);
+    console.log('[getStoredToken] SESSION_TOKEN:', sessionToken ? `${sessionToken.substring(0, 20)}...` : 'NULL');
     return sessionToken;
-  } catch {
+  } catch (error) {
+    console.error('[getStoredToken] Error retrieving token:', error);
     return null;
   }
 };
