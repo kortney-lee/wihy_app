@@ -3,21 +3,7 @@
  * 
  * Logs all API requests and responses in development mode
  * Helps debug API issues on connected devices
- * 
- * COOKIE AUTHENTICATION (Web):
- * - Web uses HttpOnly cookies for auth (set by auth.wihy.ai)
- * - Cookies are shared across all *.wihy.ai subdomains
- * - All fetch calls include credentials: 'include'
- * 
- * BEARER TOKEN AUTHENTICATION (Mobile):
- * - Mobile uses Authorization: Bearer <token> header
- * - Token stored in AsyncStorage
  */
-
-import { Platform } from 'react-native';
-
-// Check if running on web
-const isWeb = Platform.OS === 'web';
 
 interface RequestLog {
   method: string;
@@ -407,13 +393,9 @@ export async function fetchWithLogging(
     ...existingHeaders,
   };
 
-  // Authentication strategy:
-  // - WEB: Use BOTH cookies (credentials: 'include') AND Bearer token for compatibility
-  //   - Cookies: HttpOnly session_token auto-attached by browser
-  //   - Bearer: Fallback for services that may not have cookie support yet
-  // - MOBILE: Use Bearer token in Authorization header only
-  
-  // Auto-inject Bearer token if needed (both web and mobile)
+  // Auto-inject Bearer token if:
+  // 1. URL requires authentication
+  // 2. Authorization header not already provided
   if (requiresBearerToken(url) && !mergedHeaders['Authorization']) {
     const token = await getStoredToken();
     if (token) {
@@ -446,13 +428,10 @@ export async function fetchWithLogging(
       }
     }
   }
-  
+
   const enhancedOptions: RequestInit = {
     ...options,
     headers: mergedHeaders,
-    // Web: Include credentials for cookie auth across *.wihy.ai subdomains
-    // This sends HttpOnly cookies with cross-origin requests
-    credentials: isWeb ? 'include' : options?.credentials,
   };
   
   const requestId = apiLogger.logRequest(method, url, enhancedOptions);
@@ -464,8 +443,8 @@ export async function fetchWithLogging(
     if (response.status === 401 && requiresBearerToken(url)) {
       console.error('[fetchWithLogging] 401 Unauthorized - token may be expired');
       
-      // For mobile: Try to refresh token and retry
-      if (!isWeb && !mergedHeaders['Authorization']) {
+      // Try to refresh token and retry
+      if (!mergedHeaders['Authorization']) {
         try {
           // Import authService dynamically to avoid circular dependency
           const { authService } = await import('../services/authService');
