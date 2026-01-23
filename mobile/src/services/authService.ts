@@ -1209,7 +1209,7 @@ class AuthService {
     // Some services check ACCESS_TOKEN, others check SESSION_TOKEN
     await AsyncStorage.setItem(STORAGE_KEYS.SESSION_TOKEN, token);
     await AsyncStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, token);
-    console.log('Session token stored (both session and access keys)');
+    console.log('Session token stored (both session and access keys):', token.substring(0, 20) + '...');
   }
 
   private async storeTokens(tokens: TokenResponse): Promise<void> {
