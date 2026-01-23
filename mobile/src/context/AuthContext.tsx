@@ -222,7 +222,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       id: authUser.id || `${authUser.provider}-${Date.now()}`,
       name: authUser.name,
       email: authUser.email,
-      picture: authUser.profile_data?.picture || authUser.avatar,
+      picture: authUser.avatar || authUser.profile_data?.picture,
       provider: authUser.provider || 'local',
       memberSince: authUser.memberSince || authUser.profile_data?.memberSince || new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
       healthScore: authUser.healthScore ?? authUser.profile_data?.healthScore ?? 85,
