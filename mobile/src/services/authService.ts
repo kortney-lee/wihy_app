@@ -1240,11 +1240,19 @@ class AuthService {
   }
 
   async getSessionToken(): Promise<string | null> {
-    return await AsyncStorage.getItem(STORAGE_KEYS.SESSION_TOKEN);
+    // Try session token first, then fall back to access token for compatibility
+    const sessionToken = await AsyncStorage.getItem(STORAGE_KEYS.SESSION_TOKEN);
+    if (sessionToken) return sessionToken;
+    
+    return await AsyncStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN);
   }
 
   async getAccessToken(): Promise<string | null> {
-    return await AsyncStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN);
+    // Try access token first, then fall back to session token for compatibility
+    const accessToken = await AsyncStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN);
+    if (accessToken) return accessToken;
+    
+    return await AsyncStorage.getItem(STORAGE_KEYS.SESSION_TOKEN);
   }
 
   async getRefreshToken(): Promise<string | null> {
