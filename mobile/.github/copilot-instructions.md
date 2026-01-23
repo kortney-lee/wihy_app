@@ -48,10 +48,62 @@ To run the app:
 ## Project Structure
 
 - `src/App.tsx` - Main app component with navigation
-- `src/screens/` - Screen components (Home, About)
+- `src/screens/` - Screen components (Home, About, Profile, etc.)
 - `src/components/` - Reusable UI components
 - `src/theme/` - Design system (colors, typography, spacing)
 - `src/types/` - TypeScript type definitions
-- `src/utils/` - Helper functions
+- `src/utils/` - Helper functions including apiLogger.ts
+- `src/services/` - API services (auth, user, payment, etc.)
+- `src/context/` - React contexts (AuthContext)
 - `android/` - Android-specific code and configuration
 - `ios/` - iOS-specific code and configuration
+
+## Authentication Architecture
+
+### Token Storage Strategy
+- **Web Platform:** Uses `localStorage` for JWT tokens (more reliable than AsyncStorage on web)
+- **Mobile Platform:** Uses `AsyncStorage` for JWT tokens
+- **Dual Storage:** Tokens are stored to both `@wihy_access_token` and `@wihy_session_token` keys for compatibility
+
+### Token Injection
+- All authenticated API requests automatically include `Authorization: Bearer {token}` header
+- Implemented in `src/utils/apiLogger.ts` via `fetchWithLogging()` function
+- Token retrieval checks localStorage first (web), then falls back to AsyncStorage
+
+### API Services
+- **auth.wihy.ai** - Authentication (login, register, OAuth, verify)
+- **user.wihy.ai** - User profiles and preferences  
+- **services.wihy.ai** - Nutrition, fitness, scans (requires Bearer token + Client credentials)
+- **ml.wihy.ai** - AI chat and health questions (requires Bearer token + Client credentials)
+- **payment.wihy.ai** - Stripe and subscriptions (requires Bearer token)
+
+### Client Credentials
+Services require both JWT Bearer token AND client credentials:
+- `X-Client-Id`: Client identifier
+- `X-Client-Secret`: Client secret
+- Automatically injected by `getAuthHeadersForUrl()` based on URL
+
+### Token Lifecycle
+1. **Login:** JWT stored to both localStorage (web) and AsyncStorage
+2. **API Calls:** Token auto-injected via `fetchWithLogging()`
+3. **Expiration:** Token expiry checked before each request
+4. **401 Errors:** Auto-logout and redirect to login on invalid token signature
+5. **Refresh:** Attempted before logout if refresh token available
+
+### JWT Secret
+- Current: `wihy-jwt-secret-2025-super-secure-key-for-token-generation`
+- Old tokens signed with previous secret will fail verification
+- Solution: Users must log out and log back in after secret changes
+
+## Deployment
+
+### Firebase Hosting
+- Build: `npx expo export --platform web`
+- Output: `mobile/dist/`
+- Deploy: `firebase deploy --only hosting`
+- URL: https://wihy.ai
+
+### GitHub Actions
+- Workflow: `.github/workflows/deploy-web.yml`
+- Triggers: Push to `main` branch
+- Auto-deploys to Firebase Hosting
