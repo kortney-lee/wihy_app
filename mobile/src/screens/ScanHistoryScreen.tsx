@@ -34,9 +34,18 @@ export default function ScanHistoryScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [filter, setFilter] = useState<'all' | 'barcode' | 'image' | 'pill' | 'label'>('all');
 
-  // Refs to prevent duplicate API calls
+  // Refs to prevent duplicate API calls and memory leaks
   const isLoadingRef = useRef(false);
   const lastFilterRef = useRef(filter);
+  const isMountedRef = useRef(true);  // Track if component is mounted
+
+  // Cleanup on unmount to prevent memory leaks
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
 
   // Collapsing header animation
   const scrollY = useRef(new Animated.Value(0)).current;
@@ -81,19 +90,22 @@ export default function ScanHistoryScreen() {
     lastFilterRef.current = filter;
     
     try {
-      setLoading(true);
+      if (isMountedRef.current) setLoading(true);
       const scanType = filter === 'all' ? undefined : filter;
       const result = await wihyApiService.getScanHistory(50, scanType, false);
 
-      if (result.success) {
+      // Only update state if still mounted
+      if (isMountedRef.current && result.success) {
         setScans(result.scans || []);
       }
     } catch (error) {
       console.error('Error loading scan history:', error);
       // Don't crash on CORS errors
     } finally {
-      setLoading(false);
-      setRefreshing(false);
+      if (isMountedRef.current) {
+        setLoading(false);
+        setRefreshing(false);
+      }
       isLoadingRef.current = false;
     }
   }, [filter]);

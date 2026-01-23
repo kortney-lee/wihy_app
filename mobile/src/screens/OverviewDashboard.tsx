@@ -39,10 +39,11 @@ const OverviewDashboard: React.FC<BaseDashboardProps> = ({ onAnalyze }) => {
   const [recentScans, setRecentScans] = useState<ScanHistoryItem[]>([]);
   const [scansLoading, setScansLoading] = useState(false);
 
-  // Refs to prevent duplicate API calls
+  // Refs to prevent duplicate API calls and memory leaks
   const isLoadingScansRef = useRef(false);
   const isLoadingHealthRef = useRef(false);
   const hasLoadedRef = useRef(false);
+  const isMountedRef = useRef(true);  // Track if component is mounted
 
   // Collapsing header animation
   const scrollY = useRef(new Animated.Value(0)).current;
@@ -70,6 +71,14 @@ const OverviewDashboard: React.FC<BaseDashboardProps> = ({ onAnalyze }) => {
     extrapolate: 'clamp',
   });
 
+  // Cleanup on unmount to prevent memory leaks
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
+
   // Load recent scans with guard to prevent duplicate calls
   const loadRecentScans = useCallback(async () => {
     // Prevent duplicate calls
@@ -79,18 +88,19 @@ const OverviewDashboard: React.FC<BaseDashboardProps> = ({ onAnalyze }) => {
     }
     
     isLoadingScansRef.current = true;
-    setScansLoading(true);
+    if (isMountedRef.current) setScansLoading(true);
     
     try {
       const result = await wihyApiService.getScanHistory(5);
-      if (result.success && result.scans) {
+      // Only update state if still mounted
+      if (isMountedRef.current && result.success && result.scans) {
         setRecentScans(result.scans);
       }
     } catch (error) {
       console.error('Failed to load recent scans:', error);
       // Don't crash on CORS errors - just show empty state
     } finally {
-      setScansLoading(false);
+      if (isMountedRef.current) setScansLoading(false);
       isLoadingScansRef.current = false;
     }
   }, []);
@@ -104,14 +114,14 @@ const OverviewDashboard: React.FC<BaseDashboardProps> = ({ onAnalyze }) => {
     }
     
     isLoadingHealthRef.current = true;
-    setIsLoading(true);
+    if (isMountedRef.current) setIsLoading(true);
     
     try {
       const userId = user?.id;
 
       if (!userId) {
         console.error('[OverviewDashboard] User ID not available');
-        setIsLoading(false);
+        if (isMountedRef.current) setIsLoading(false);
         isLoadingHealthRef.current = false;
         return;
       }
@@ -379,11 +389,12 @@ const OverviewDashboard: React.FC<BaseDashboardProps> = ({ onAnalyze }) => {
         });
       }
 
-      setHealthSummaryData(summary);
+      if (isMountedRef.current) setHealthSummaryData(summary);
     } catch (error) {
       console.error('[OverviewDashboard] Error loading health data:', error);
-      // Fall back to mock data on error
-      setHealthSummaryData([
+      // Fall back to mock data on error (only if still mounted)
+      if (isMountedRef.current) {
+        setHealthSummaryData([
         {
           id: '1',
           title: 'Health Score',
@@ -445,8 +456,9 @@ const OverviewDashboard: React.FC<BaseDashboardProps> = ({ onAnalyze }) => {
           color: '#6366f1',
         },
       ]);
+      }
     } finally {
-      setIsLoading(false);
+      if (isMountedRef.current) setIsLoading(false);
       isLoadingHealthRef.current = false;
     }
   }, [user?.id]);
