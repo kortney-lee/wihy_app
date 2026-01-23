@@ -3,7 +3,21 @@
  * 
  * Logs all API requests and responses in development mode
  * Helps debug API issues on connected devices
+ * 
+ * COOKIE AUTHENTICATION (Web):
+ * - Web uses HttpOnly cookies for auth (set by auth.wihy.ai)
+ * - Cookies are shared across all *.wihy.ai subdomains
+ * - All fetch calls include credentials: 'include'
+ * 
+ * BEARER TOKEN AUTHENTICATION (Mobile):
+ * - Mobile uses Authorization: Bearer <token> header
+ * - Token stored in AsyncStorage
  */
+
+import { Platform } from 'react-native';
+
+// Check if running on web
+const isWeb = Platform.OS === 'web';
 
 interface RequestLog {
   method: string;
@@ -376,19 +390,25 @@ export async function fetchWithLogging(
     ...existingHeaders,
   };
 
-  // Auto-inject Bearer token if:
-  // 1. URL requires authentication
-  // 2. Authorization header not already provided
-  if (requiresBearerToken(url) && !mergedHeaders['Authorization']) {
-    const token = await getStoredToken();
-    if (token) {
-      mergedHeaders['Authorization'] = `Bearer ${token}`;
+  // Authentication strategy:
+  // - WEB: Use cookies (credentials: 'include') - HttpOnly cookies auto-attached by browser
+  // - MOBILE: Use Bearer token in Authorization header
+  if (!isWeb) {
+    // Mobile: Auto-inject Bearer token if needed
+    if (requiresBearerToken(url) && !mergedHeaders['Authorization']) {
+      const token = await getStoredToken();
+      if (token) {
+        mergedHeaders['Authorization'] = `Bearer ${token}`;
+      }
     }
   }
   
   const enhancedOptions: RequestInit = {
     ...options,
     headers: mergedHeaders,
+    // Web: Include credentials for cookie auth across *.wihy.ai subdomains
+    // This sends HttpOnly cookies with cross-origin requests
+    credentials: isWeb ? 'include' : options?.credentials,
   };
   
   const requestId = apiLogger.logRequest(method, url, enhancedOptions);
