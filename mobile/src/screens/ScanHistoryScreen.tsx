@@ -65,14 +65,7 @@ export default function ScanHistoryScreen() {
     }
   }, [user?.email]);
 
-  // Load history when screen comes into focus or filter changes
-  useFocusEffect(
-    useCallback(() => {
-      loadHistory();
-    }, [filter])
-  );
-
-  const loadHistory = async () => {
+  const loadHistory = useCallback(async () => {
     try {
       setLoading(true);
       const scanType = filter === 'all' ? undefined : filter;
@@ -87,7 +80,14 @@ export default function ScanHistoryScreen() {
       setLoading(false);
       setRefreshing(false);
     }
-  };
+  }, [filter]);
+
+  // Load history when screen comes into focus or filter changes
+  useFocusEffect(
+    useCallback(() => {
+      loadHistory();
+    }, [loadHistory])
+  );
 
   const handleRefresh = () => {
     setRefreshing(true);

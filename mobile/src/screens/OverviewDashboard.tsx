@@ -80,13 +80,8 @@ const OverviewDashboard: React.FC<BaseDashboardProps> = ({ onAnalyze }) => {
     }
   }, []);
 
-  // Load real health data on mount
-  useEffect(() => {
-    loadHealthData();
-    loadRecentScans();
-  }, [loadRecentScans]);
-
-  const loadHealthData = async () => {
+  // Load health data
+  const loadHealthData = useCallback(async () => {
     try {
       setIsLoading(true);
       const userId = user?.id;
@@ -429,7 +424,14 @@ const OverviewDashboard: React.FC<BaseDashboardProps> = ({ onAnalyze }) => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [user?.id]);
+
+  // Load data on mount only
+  useEffect(() => {
+    loadHealthData();
+    loadRecentScans();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Only memoize dynamic data that depends on navigation functions
   const quickActionCards: QuickActionCard[] = useMemo(() => [
