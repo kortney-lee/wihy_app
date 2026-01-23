@@ -140,6 +140,27 @@ class ApiClient {
     // Consider expired if within 5 minutes of expiry
     return Date.now() >= (expiry - 5 * 60 * 1000);
   }
+  
+  /**
+   * Check if JWT token is expired by decoding it
+   * Falls back to checking stored expiry
+   */
+  async isJWTExpired(token: string): Promise<boolean> {
+    try {
+      // Decode JWT payload (second part)
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      if (payload.exp) {
+        // JWT exp is in seconds, convert to milliseconds
+        const expiry = payload.exp * 1000;
+        return Date.now() >= expiry;
+      }
+    } catch (error) {
+      console.warn('[ApiClient] Failed to decode JWT:', error);
+    }
+    
+    // Fall back to stored expiry
+    return this.isTokenExpired();
+  }
 
   /**
    * Get current user data
@@ -292,12 +313,21 @@ class ApiClient {
     const service = explicitService || this.detectService(endpoint);
     const url = this.buildUrl(endpoint, service);
 
-    // Check if token needs refresh (only for authenticated requests)
+    // Check if token is expired before making request (only for authenticated requests)
     if (!skipAuth && service !== 'auth') {
-      const expired = await this.isTokenExpired();
-      if (expired) {
-        console.log('[ApiClient] Token expired, attempting refresh...');
-        await this.refreshToken();
+      const token = await this.getToken();
+      if (token) {
+        const tokenExpired = await this.isJWTExpired(token);
+        if (tokenExpired) {
+          console.log('[ApiClient] Token expired, attempting refresh...');
+          const refreshed = await this.refreshToken();
+          if (!refreshed) {
+            console.error('[ApiClient] Token refresh failed - token expired and no valid refresh token');
+            // Clear auth data and throw error
+            await this.clearAuthData();
+            throw new ApiError('Authentication expired - please login again', 401, url);
+          }
+        }
       }
     }
 
@@ -388,6 +418,32 @@ class ApiClient {
       }
 
       apiLogger.logResponse(requestId, response, responseData);
+
+      // Handle 401 Unauthorized - token invalid or expired
+      if (response.status === 401) {
+        console.error('[ApiClient] 401 Unauthorized - token invalid or expired');
+        
+        // Try to refresh token once
+        if (!skipAuth && service !== 'auth') {
+          console.log('[ApiClient] Attempting token refresh after 401...');
+          const refreshed = await this.refreshToken();
+          
+          if (refreshed) {
+            // Retry request with new token
+            console.log('[ApiClient] Retrying request with refreshed token...');
+            return this.request<T>(method, endpoint, body, options);
+          }
+        }
+        
+        // Refresh failed or not applicable - clear auth and throw
+        await this.clearAuthData();
+        throw new ApiError(
+          'Authentication failed - please login again',
+          401,
+          url,
+          responseData
+        );
+      }
 
       // Handle errors
       if (!response.ok) {
@@ -519,6 +575,27 @@ class ApiClient {
     body?: any
   ): Promise<T> {
     return this.request<T>(method, endpoint, body, { service: 'payment' });
+  }
+  
+  // ============= HELPER METHODS =============
+  
+  /**
+   * Clear all auth data from storage
+   * Called on 401 errors when token refresh fails
+   */
+  private async clearAuthData(): Promise<void> {
+    try {
+      await AsyncStorage.multiRemove([
+        STORAGE_KEYS.ACCESS_TOKEN,
+        STORAGE_KEYS.SESSION_TOKEN,
+        STORAGE_KEYS.REFRESH_TOKEN,
+        STORAGE_KEYS.USER_DATA,
+        STORAGE_KEYS.TOKEN_EXPIRY,
+      ]);
+      console.log('[ApiClient] Auth data cleared');
+    } catch (error) {
+      console.error('[ApiClient] Failed to clear auth data:', error);
+    }
   }
 }
 
