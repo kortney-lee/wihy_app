@@ -22,6 +22,7 @@ import type {
   LabelScanResult,
   LabelScanResponse,
   ScanHistoryResult,
+  ScanHistoryItem,
   PillMatch,
 } from './types';
 
@@ -547,12 +548,26 @@ export class WIHYApiService {
         params.append('scanType', scanType);
       }
 
-      const result = await this.makeRequest<ScanHistoryResult>(
+      // API returns { success, data, pagination } but we expect { success, scans, count }
+      const apiResponse = await this.makeRequest<{
+        success: boolean;
+        data: ScanHistoryItem[];
+        pagination?: { total: number; limit: number; offset: number; page: number; pages: number };
+        error?: string;
+      }>(
         `${WIHY_CONFIG.endpoints.scanHistory}?${params}`,
         {
           method: 'GET',
         }
       );
+
+      // Transform API response to match ScanHistoryResult type
+      const result: ScanHistoryResult = {
+        success: apiResponse.success,
+        scans: apiResponse.data || [],
+        count: apiResponse.pagination?.total || apiResponse.data?.length || 0,
+        error: apiResponse.error,
+      };
 
       // Cache the result
       this.cache.setCached(currentUserId, result);
