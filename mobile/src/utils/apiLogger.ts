@@ -305,6 +305,23 @@ const getStoredToken = async (): Promise<string | null> => {
 };
 
 /**
+ * Check if JWT token is expired by decoding it
+ */
+const isJWTExpired = (token: string): boolean => {
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    if (payload.exp) {
+      // JWT exp is in seconds, convert to milliseconds
+      const expiry = payload.exp * 1000;
+      return Date.now() >= expiry;
+    }
+  } catch {
+    return true; // If can't decode, assume expired
+  }
+  return false;
+};
+
+/**
  * Import auth headers from config (lazy import to avoid circular dependency)
  * 
  * Authentication patterns:
@@ -398,7 +415,33 @@ export async function fetchWithLogging(
     if (requiresBearerToken(url) && !mergedHeaders['Authorization']) {
       const token = await getStoredToken();
       if (token) {
-        mergedHeaders['Authorization'] = `Bearer ${token}`;
+        // Check if token is expired before using it
+        if (isJWTExpired(token)) {
+          console.warn('[fetchWithLogging] Token expired, attempting refresh before request...');
+          try {
+            // Import authService dynamically to avoid circular dependency
+            const { authService } = await import('../services/authService');
+            const refreshed = await authService.refreshToken?.();
+            
+            if (refreshed) {
+              // Get the new token
+              const newToken = await getStoredToken();
+              if (newToken) {
+                mergedHeaders['Authorization'] = `Bearer ${newToken}`;
+              }
+            } else {
+              // Use expired token anyway - let backend return 401
+              mergedHeaders['Authorization'] = `Bearer ${token}`;
+            }
+          } catch (error) {
+            console.error('[fetchWithLogging] Token refresh failed:', error);
+            // Use expired token anyway - let backend return 401
+            mergedHeaders['Authorization'] = `Bearer ${token}`;
+          }
+        } else {
+          // Token is valid, use it
+          mergedHeaders['Authorization'] = `Bearer ${token}`;
+        }
       }
     }
   }
@@ -415,6 +458,53 @@ export async function fetchWithLogging(
 
   try {
     const response = await fetch(url, enhancedOptions);
+    
+    // Handle 401 Unauthorized - token expired or invalid
+    if (response.status === 401 && requiresBearerToken(url)) {
+      console.error('[fetchWithLogging] 401 Unauthorized - token may be expired');
+      
+      // For mobile: Try to refresh token and retry
+      if (!isWeb && !mergedHeaders['Authorization']) {
+        try {
+          // Import authService dynamically to avoid circular dependency
+          const { authService } = await import('../services/authService');
+          
+          console.log('[fetchWithLogging] Attempting token refresh...');
+          const refreshed = await authService.refreshToken?.();
+          
+          if (refreshed) {
+            // Retry request with new token
+            console.log('[fetchWithLogging] Retrying with refreshed token...');
+            const newToken = await getStoredToken();
+            if (newToken) {
+              mergedHeaders['Authorization'] = `Bearer ${newToken}`;
+              const retryOptions = {
+                ...options,
+                headers: mergedHeaders,
+              };
+              const retryResponse = await fetch(url, retryOptions);
+              
+              // Clone and log retry response
+              const clonedRetry = retryResponse.clone();
+              try {
+                const data = await clonedRetry.json();
+                apiLogger.logResponse(requestId, retryResponse, data);
+              } catch {
+                apiLogger.logResponse(requestId, retryResponse);
+              }
+              
+              return retryResponse;
+            }
+          }
+        } catch (refreshError) {
+          console.error('[fetchWithLogging] Token refresh failed:', refreshError);
+        }
+      }
+      
+      // Log the 401 response
+      apiLogger.logResponse(requestId, response);
+      return response;
+    }
     
     // Clone response to read body without consuming it
     const clonedResponse = response.clone();
