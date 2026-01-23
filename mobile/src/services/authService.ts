@@ -1204,8 +1204,11 @@ class AuthService {
   // === Storage Methods ===
 
   async storeSessionToken(token: string): Promise<void> {
+    // Store to both keys for compatibility
+    // Some services check ACCESS_TOKEN, others check SESSION_TOKEN
     await AsyncStorage.setItem(STORAGE_KEYS.SESSION_TOKEN, token);
-    console.log('Session token stored');
+    await AsyncStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, token);
+    console.log('Session token stored (both session and access keys)');
   }
 
   private async storeTokens(tokens: TokenResponse): Promise<void> {
