@@ -1209,13 +1209,29 @@ class AuthService {
     // Some services check ACCESS_TOKEN, others check SESSION_TOKEN
     await AsyncStorage.setItem(STORAGE_KEYS.SESSION_TOKEN, token);
     await AsyncStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, token);
+    
+    // Also store to localStorage on web for better compatibility
+    if (typeof window !== 'undefined' && window.localStorage) {
+      localStorage.setItem(STORAGE_KEYS.SESSION_TOKEN, token);
+      localStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, token);
+    }
+    
     console.log('Session token stored (both session and access keys):', token.substring(0, 20) + '...');
   }
 
   private async storeTokens(tokens: TokenResponse): Promise<void> {
     await AsyncStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, tokens.access_token);
+    
+    // Also store to localStorage on web
+    if (typeof window !== 'undefined' && window.localStorage) {
+      localStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, tokens.access_token);
+    }
+    
     if (tokens.refresh_token) {
       await AsyncStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, tokens.refresh_token);
+      if (typeof window !== 'undefined' && window.localStorage) {
+        localStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, tokens.refresh_token);
+      }
     }
     
     // Store expiry time

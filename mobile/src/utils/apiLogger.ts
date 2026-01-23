@@ -280,12 +280,23 @@ const TOKEN_STORAGE_KEYS = {
  */
 const getStoredToken = async (): Promise<string | null> => {
   try {
+    // On web, try localStorage first (more reliable than AsyncStorage on web)
+    if (typeof window !== 'undefined' && window.localStorage) {
+      const accessToken = localStorage.getItem(TOKEN_STORAGE_KEYS.ACCESS_TOKEN);
+      console.log('[getStoredToken] Web localStorage ACCESS_TOKEN:', accessToken ? `${accessToken.substring(0, 20)}...` : 'NULL');
+      if (accessToken) return accessToken;
+      const sessionToken = localStorage.getItem(TOKEN_STORAGE_KEYS.SESSION_TOKEN);
+      console.log('[getStoredToken] Web localStorage SESSION_TOKEN:', sessionToken ? `${sessionToken.substring(0, 20)}...` : 'NULL');
+      if (sessionToken) return sessionToken;
+    }
+    
+    // Fall back to AsyncStorage (mobile or if localStorage fails)
     const AsyncStorage = require('@react-native-async-storage/async-storage').default;
     const accessToken = await AsyncStorage.getItem(TOKEN_STORAGE_KEYS.ACCESS_TOKEN);
-    console.log('[getStoredToken] ACCESS_TOKEN:', accessToken ? `${accessToken.substring(0, 20)}...` : 'NULL');
+    console.log('[getStoredToken] AsyncStorage ACCESS_TOKEN:', accessToken ? `${accessToken.substring(0, 20)}...` : 'NULL');
     if (accessToken) return accessToken;
     const sessionToken = await AsyncStorage.getItem(TOKEN_STORAGE_KEYS.SESSION_TOKEN);
-    console.log('[getStoredToken] SESSION_TOKEN:', sessionToken ? `${sessionToken.substring(0, 20)}...` : 'NULL');
+    console.log('[getStoredToken] AsyncStorage SESSION_TOKEN:', sessionToken ? `${sessionToken.substring(0, 20)}...` : 'NULL');
     return sessionToken;
   } catch (error) {
     console.error('[getStoredToken] Error retrieving token:', error);
