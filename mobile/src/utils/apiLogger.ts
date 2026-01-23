@@ -408,40 +408,41 @@ export async function fetchWithLogging(
   };
 
   // Authentication strategy:
-  // - WEB: Use cookies (credentials: 'include') - HttpOnly cookies auto-attached by browser
-  // - MOBILE: Use Bearer token in Authorization header
-  if (!isWeb) {
-    // Mobile: Auto-inject Bearer token if needed
-    if (requiresBearerToken(url) && !mergedHeaders['Authorization']) {
-      const token = await getStoredToken();
-      if (token) {
-        // Check if token is expired before using it
-        if (isJWTExpired(token)) {
-          console.warn('[fetchWithLogging] Token expired, attempting refresh before request...');
-          try {
-            // Import authService dynamically to avoid circular dependency
-            const { authService } = await import('../services/authService');
-            const refreshed = await authService.refreshToken?.();
-            
-            if (refreshed) {
-              // Get the new token
-              const newToken = await getStoredToken();
-              if (newToken) {
-                mergedHeaders['Authorization'] = `Bearer ${newToken}`;
-              }
-            } else {
-              // Use expired token anyway - let backend return 401
-              mergedHeaders['Authorization'] = `Bearer ${token}`;
+  // - WEB: Use BOTH cookies (credentials: 'include') AND Bearer token for compatibility
+  //   - Cookies: HttpOnly session_token auto-attached by browser
+  //   - Bearer: Fallback for services that may not have cookie support yet
+  // - MOBILE: Use Bearer token in Authorization header only
+  
+  // Auto-inject Bearer token if needed (both web and mobile)
+  if (requiresBearerToken(url) && !mergedHeaders['Authorization']) {
+    const token = await getStoredToken();
+    if (token) {
+      // Check if token is expired before using it
+      if (isJWTExpired(token)) {
+        console.warn('[fetchWithLogging] Token expired, attempting refresh before request...');
+        try {
+          // Import authService dynamically to avoid circular dependency
+          const { authService } = await import('../services/authService');
+          const refreshed = await authService.refreshToken?.();
+          
+          if (refreshed) {
+            // Get the new token
+            const newToken = await getStoredToken();
+            if (newToken) {
+              mergedHeaders['Authorization'] = `Bearer ${newToken}`;
             }
-          } catch (error) {
-            console.error('[fetchWithLogging] Token refresh failed:', error);
+          } else {
             // Use expired token anyway - let backend return 401
             mergedHeaders['Authorization'] = `Bearer ${token}`;
           }
-        } else {
-          // Token is valid, use it
+        } catch (error) {
+          console.error('[fetchWithLogging] Token refresh failed:', error);
+          // Use expired token anyway - let backend return 401
           mergedHeaders['Authorization'] = `Bearer ${token}`;
         }
+      } else {
+        // Token is valid, use it
+        mergedHeaders['Authorization'] = `Bearer ${token}`;
       }
     }
   }
