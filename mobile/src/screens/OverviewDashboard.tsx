@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Dimensions, ActivityIndicator, Linking, Modal, Pressable, useWindowDimensions, Animated, Platform, StatusBar } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useIsFocused } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { GradientDashboardHeader, Ionicons } from '../components/shared';
 import { dashboardTheme } from '../theme/dashboardTheme';
@@ -32,6 +33,7 @@ const OverviewDashboard: React.FC<BaseDashboardProps> = ({ onAnalyze }) => {
   const { user } = React.useContext(AuthContext);
   const layout = useDashboardLayout();
   const { navigation, navigateToCamera, navigateToChat, handleAnalyze } = useDashboardNavigation();
+  const isFocused = useIsFocused(); // Check if Health tab is actually visible
   const [selectedTab, setSelectedTab] = useState('Summary');
   const [healthSummaryData, setHealthSummaryData] = useState<HealthSummaryItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -464,18 +466,25 @@ const OverviewDashboard: React.FC<BaseDashboardProps> = ({ onAnalyze }) => {
   }, [user?.id]);
 
   // Load data on mount only - with guard to prevent multiple loads
+  // ONLY load when Health tab is focused to prevent unnecessary API calls
   useEffect(() => {
+    // Don't load if not focused (user is on a different tab)
+    if (!isFocused) {
+      console.log('[OverviewDashboard] Not focused, skipping data load');
+      return;
+    }
+
     if (hasLoadedRef.current) {
       console.log('[OverviewDashboard] Already loaded, skipping initial load');
       return;
     }
     
     hasLoadedRef.current = true;
-    console.log('[OverviewDashboard] Initial data load starting');
+    console.log('[OverviewDashboard] Initial data load starting (tab is focused)');
     
     loadHealthData();
     loadRecentScans();
-  }, []); // Empty deps - run once on mount only
+  }, [isFocused, loadHealthData, loadRecentScans]); // Re-run if focus changes
 
   // Only memoize dynamic data that depends on navigation functions
   const quickActionCards: QuickActionCard[] = useMemo(() => [
