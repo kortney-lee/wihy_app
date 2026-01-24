@@ -55,129 +55,156 @@ class ResearchService {
   ];
 
   /**
-   * Search research articles
+   * Search research articles using WIHY Research API
+   * Endpoint: GET /api/research/search
    */
   async searchArticles(params: ResearchSearchParams): Promise<ResearchArticle[]> {
     try {
       const { query, category, limit = 20, offset = 0 } = params;
       
-      // Build PubMed search query
-      let searchTerm = query;
+      // Build query parameters for WIHY Research API
+      const queryParams = new URLSearchParams({
+        q: query,
+        limit: limit.toString(),
+      });
+
+      // Add optional filters if provided
       if (category && category !== 'all') {
-        searchTerm = `${query} AND ${category}[MeSH Terms]`;
+        queryParams.append('type', category);
       }
 
-      // Search PubMed Central using eutils API
-      const searchUrl = `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pmc&term=${encodeURIComponent(searchTerm)}&retmax=${limit}&retstart=${offset}&retmode=json&sort=relevance`;
+      // Call WIHY Research API
+      const searchUrl = `${API_CONFIG.servicesUrl}/api/research/search?${queryParams.toString()}`;
       
-      const searchResponse = await fetchWithLogging(searchUrl);
+      console.log('[ResearchService] Searching:', searchUrl);
+      
+      const searchResponse = await fetchWithLogging(searchUrl, {
+        headers: {
+          'X-Client-ID': API_CONFIG.servicesClientId,
+          'X-Client-Secret': API_CONFIG.servicesClientSecret,
+        },
+      });
+
       if (!searchResponse.ok) {
-        throw new Error('Failed to search PubMed');
+        throw new Error(`Research API error: ${searchResponse.status}`);
       }
 
-      const searchData = await searchResponse.json();
-      const pmcIds = searchData.esearchresult?.idlist || [];
-
-      if (pmcIds.length === 0) {
+      const data = await searchResponse.json();
+      
+      if (!data.success || !data.results) {
+        console.warn('[ResearchService] No results found');
         return [];
       }
 
-      // Fetch article details
-      const detailsUrl = `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=pmc&id=${pmcIds.join(',')}&retmode=json`;
-      
-      const detailsResponse = await fetchWithLogging(detailsUrl);
-      if (!detailsResponse.ok) {
-        throw new Error('Failed to fetch article details');
-      }
-
-      const detailsData = await detailsResponse.json();
       const bookmarks = await this.getBookmarks();
 
-      // Transform to our article format
-      const articles: ResearchArticle[] = pmcIds.map((id: string, index: number) => {
-        const article = detailsData.result[id];
-        if (!article) return null;
-
-        const pmcid = `PMC${id}`;
+      // Transform API results to our article format
+      const articles: ResearchArticle[] = data.results.map((article: any, index: number) => {
+        const pmcid = article.pmcid || `PMC${article.id}`;
         
         return {
-          id,
+          id: article.pmcid || article.id,
           pmcid,
           title: article.title || 'Untitled',
-          authors: article.authors?.slice(0, 3).map((a: any) => a.name).join(', '),
-          authorCount: article.authors?.length,
-          journal: article.fulljournalname || article.source,
-          publishedDate: article.pubdate,
-          publicationYear: article.pubdate ? new Date(article.pubdate).getFullYear() : undefined,
+          authors: Array.isArray(article.authors) 
+            ? article.authors.slice(0, 3).join(', ')
+            : article.authors,
+          authorCount: Array.isArray(article.authors) ? article.authors.length : undefined,
+          journal: article.journal || 'Unknown Journal',
+          publishedDate: article.publication_date || article.publishedDate,
+          publicationYear: article.publication_date 
+            ? new Date(article.publication_date).getFullYear() 
+            : article.publicationYear,
           abstract: article.abstract,
-          studyType: article.articletype,
+          studyType: article.study_type || article.studyType,
+          evidenceLevel: article.evidence_level || article.evidenceLevel,
           researchArea: category,
-          relevanceScore: 100 - (index * 5), // Simple relevance scoring
+          relevanceScore: article.relevance_score || (100 - (index * 5)) / 100,
           rank: index + 1 + offset,
-          fullTextAvailable: true,
+          fullTextAvailable: article.open_access || article.fullTextAvailable || true,
           links: {
             pmcWebsite: `https://www.ncbi.nlm.nih.gov/pmc/articles/${pmcid}/`,
             pubmedLink: article.pmid ? `https://pubmed.ncbi.nlm.nih.gov/${article.pmid}/` : undefined,
-            pdfDownload: `https://www.ncbi.nlm.nih.gov/pmc/articles/${pmcid}/pdf/`,
+            pdfDownload: article.open_access ? `https://www.ncbi.nlm.nih.gov/pmc/articles/${pmcid}/pdf/` : null,
             doi: article.doi,
           },
           category,
-          bookmarked: bookmarks.some(b => b.id === id),
+          bookmarked: bookmarks.some(b => b.pmcid === pmcid || b.id === article.id),
         };
-      }).filter(Boolean) as ResearchArticle[];
+      });
 
+      console.log(`[ResearchService] Found ${articles.length} articles`);
       return articles;
+      
     } catch (error) {
-      console.error('Failed to search articles:', error);
+      console.error('[ResearchService] Search failed:', error);
       // Return mock data on error
       return this.getMockArticles(params.category);
     }
   }
 
   /**
-   * Get article details by ID
+   * Get article details by PMCID using WIHY Research API
+   * Endpoint: GET /api/research/article/:pmcid
    */
-  async getArticle(id: string): Promise<ResearchArticle | null> {
+  async getArticle(pmcid: string): Promise<ResearchArticle | null> {
     try {
-      const detailsUrl = `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=pmc&id=${id}&retmode=json`;
+      // Ensure pmcid starts with "PMC"
+      const normalizedPmcid = pmcid.startsWith('PMC') ? pmcid : `PMC${pmcid}`;
       
-      const response = await fetchWithLogging(detailsUrl);
+      // Call WIHY Research API
+      const articleUrl = `${API_CONFIG.servicesUrl}/api/research/article/${normalizedPmcid}?include_metrics=true`;
+      
+      console.log('[ResearchService] Fetching article:', articleUrl);
+      
+      const response = await fetchWithLogging(articleUrl, {
+        headers: {
+          'X-Client-ID': API_CONFIG.servicesClientId,
+          'X-Client-Secret': API_CONFIG.servicesClientSecret,
+        },
+      });
+
       if (!response.ok) {
-        throw new Error('Failed to fetch article');
+        throw new Error(`Research API error: ${response.status}`);
       }
 
       const data = await response.json();
-      const article = data.result[id];
 
-      if (!article) {
+      if (!data.success || !data.article) {
+        console.warn('[ResearchService] Article not found');
         return null;
       }
 
-      const pmcid = `PMC${id}`;
+      const article = data.article;
       const bookmarks = await this.getBookmarks();
 
       return {
-        id,
-        pmcid,
+        id: article.pmcid || article.id,
+        pmcid: article.pmcid,
         title: article.title || 'Untitled',
-        authors: article.authors?.map((a: any) => a.name).join(', '),
-        authorCount: article.authors?.length,
-        journal: article.fulljournalname || article.source,
-        publishedDate: article.pubdate,
-        publicationYear: article.pubdate ? new Date(article.pubdate).getFullYear() : undefined,
-        abstract: article.abstract,
-        studyType: article.articletype,
-        fullTextAvailable: true,
+        authors: Array.isArray(article.authors)
+          ? article.authors.map((a: any) => a.name || a).join(', ')
+          : article.authors,
+        authorCount: Array.isArray(article.authors) ? article.authors.length : undefined,
+        journal: article.journal?.name || article.journal || 'Unknown Journal',
+        publishedDate: article.publication_info?.published_date || article.publishedDate,
+        publicationYear: article.publication_info?.published_date
+          ? new Date(article.publication_info.published_date).getFullYear()
+          : article.publicationYear,
+        abstract: article.abstract || article.full_text_sections?.introduction,
+        studyType: article.study_design?.type || article.studyType,
+        evidenceLevel: article.quality_assessment?.grade_evidence || article.evidenceLevel,
+        fullTextAvailable: article.open_access || true,
         links: {
-          pmcWebsite: `https://www.ncbi.nlm.nih.gov/pmc/articles/${pmcid}/`,
+          pmcWebsite: `https://www.ncbi.nlm.nih.gov/pmc/articles/${article.pmcid}/`,
           pubmedLink: article.pmid ? `https://pubmed.ncbi.nlm.nih.gov/${article.pmid}/` : undefined,
-          pdfDownload: `https://www.ncbi.nlm.nih.gov/pmc/articles/${pmcid}/pdf/`,
-          doi: article.doi,
+          pdfDownload: article.open_access ? `https://www.ncbi.nlm.nih.gov/pmc/articles/${article.pmcid}/pdf/` : null,
+          doi: article.publication_info?.doi || article.doi,
         },
-        bookmarked: bookmarks.some(b => b.id === id),
+        bookmarked: bookmarks.some(b => b.pmcid === article.pmcid || b.id === article.id),
       };
     } catch (error) {
-      console.error('Failed to get article:', error);
+      console.error('[ResearchService] Failed to get article:', error);
       return null;
     }
   }
@@ -193,8 +220,122 @@ class ResearchService {
       
       return await this.searchArticles({ query, limit });
     } catch (error) {
-      console.error('Failed to get recommendations:', error);
+      console.error('[ResearchService] Failed to get recommendations:', error);
       return this.getMockArticles();
+    }
+  }
+
+  /**
+   * Verify a health claim against scientific evidence
+   * Endpoint: POST /api/research/verify
+   */
+  async verifyClaim(claim: string, context?: {
+    source?: string;
+    population?: string;
+    specific_type?: string;
+  }): Promise<any> {
+    try {
+      const verifyUrl = `${API_CONFIG.servicesUrl}/api/research/verify`;
+      
+      console.log('[ResearchService] Verifying claim:', claim);
+      
+      const response = await fetchWithLogging(verifyUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Client-ID': API_CONFIG.servicesClientId,
+          'X-Client-Secret': API_CONFIG.servicesClientSecret,
+        },
+        body: JSON.stringify({
+          claim,
+          claim_context: context,
+          evidence_threshold: 'moderate',
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Verification API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      
+      if (!data.success) {
+        throw new Error('Claim verification failed');
+      }
+
+      return data;
+    } catch (error) {
+      console.error('[ResearchService] Failed to verify claim:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get research trends and emerging topics
+   * Endpoint: GET /api/research/trends
+   */
+  async getTrends(timeframe: '1month' | '3months' | '6months' | '1year' = '3months', category?: string): Promise<any> {
+    try {
+      const queryParams = new URLSearchParams({
+        timeframe,
+      });
+
+      if (category) {
+        queryParams.append('category', category);
+      }
+
+      const trendsUrl = `${API_CONFIG.servicesUrl}/api/research/trends?${queryParams.toString()}`;
+      
+      console.log('[ResearchService] Fetching trends:', trendsUrl);
+      
+      const response = await fetchWithLogging(trendsUrl, {
+        headers: {
+          'X-Client-ID': API_CONFIG.servicesClientId,
+          'X-Client-Secret': API_CONFIG.servicesClientSecret,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Trends API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      
+      if (!data.success) {
+        throw new Error('Failed to fetch trends');
+      }
+
+      return data;
+    } catch (error) {
+      console.error('[ResearchService] Failed to get trends:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get research service status
+   * Endpoint: GET /api/research/status
+   */
+  async getStatus(): Promise<any> {
+    try {
+      const statusUrl = `${API_CONFIG.servicesUrl}/api/research/status`;
+      
+      const response = await fetchWithLogging(statusUrl, {
+        headers: {
+          'X-Client-ID': API_CONFIG.servicesClientId,
+          'X-Client-Secret': API_CONFIG.servicesClientSecret,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Status API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('[ResearchService] Failed to get status:', error);
+      throw error;
     }
   }
 
