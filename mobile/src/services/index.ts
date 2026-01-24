@@ -256,6 +256,10 @@ export type {
   ResearchArticle,
   ResearchSearchParams,
   ResearchCategory,
+  ResearchDashboardStats,
+  ResearchBookmark,
+  SearchHistoryItem,
+  ReadingListItem,
 } from './researchService';
 
 export type {

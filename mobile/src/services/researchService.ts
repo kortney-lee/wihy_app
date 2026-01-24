@@ -43,6 +43,70 @@ export interface ResearchCategory {
   description?: string;
 }
 
+export interface ResearchDashboardStats {
+  studies_found: number;
+  high_evidence: number;
+  full_text: number;
+  new_papers: number;
+  saved: number;
+  recent_searches: number;
+  total_searches?: number;
+  total_bookmarks?: number;
+  total_articles_viewed?: number;
+}
+
+export interface ResearchBookmark {
+  id: string;
+  pmcid: string;
+  pmid?: string;
+  doi?: string;
+  title: string;
+  authors?: string;
+  journal?: string;
+  publication_year?: number;
+  abstract?: string;
+  study_type?: string;
+  evidence_level?: string;
+  pmc_url?: string;
+  pubmed_url?: string;
+  full_text_url?: string;
+  notes?: string;
+  tags?: string[];
+  folder?: string;
+  bookmarked_at: string;
+  last_accessed_at?: string;
+}
+
+export interface SearchHistoryItem {
+  id: string;
+  keyword: string;
+  search_filters?: {
+    study_type?: string;
+    year_from?: number;
+    year_to?: number;
+    evidence_level?: string;
+  };
+  results_count: number;
+  high_evidence_count?: number;
+  full_text_count?: number;
+  searched_at: string;
+}
+
+export interface ReadingListItem {
+  id: string;
+  pmcid: string;
+  pmid?: string;
+  doi?: string;
+  title: string;
+  authors?: string;
+  journal?: string;
+  status: 'unread' | 'in_progress' | 'completed';
+  priority: number;
+  added_at: string;
+  started_at?: string;
+  completed_at?: string;
+}
+
 class ResearchService {
   private readonly BOOKMARKS_KEY = '@research_bookmarks';
   private readonly CATEGORIES: ResearchCategory[] = [
@@ -336,6 +400,344 @@ class ResearchService {
     } catch (error) {
       console.error('[ResearchService] Failed to get status:', error);
       throw error;
+    }
+  }
+
+  // ==========================================
+  // USER RESEARCH API METHODS
+  // ==========================================
+
+  /**
+   * Get user's research dashboard statistics
+   * Endpoint: GET /api/research/user/stats
+   */
+  async getUserStats(userId: string): Promise<ResearchDashboardStats> {
+    try {
+      const statsUrl = `${API_CONFIG.servicesUrl}/api/research/user/stats?userId=${userId}`;
+      
+      console.log('[ResearchService] Fetching user stats:', userId);
+      
+      const response = await fetchWithLogging(statsUrl, {
+        headers: {
+          'X-Client-ID': API_CONFIG.servicesClientId,
+          'X-Client-Secret': API_CONFIG.servicesClientSecret,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`User stats API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      
+      if (!data.success || !data.stats) {
+        throw new Error('Failed to fetch user stats');
+      }
+
+      return data.stats;
+    } catch (error) {
+      console.error('[ResearchService] Failed to get user stats:', error);
+      // Return default stats on error
+      return {
+        studies_found: 0,
+        high_evidence: 0,
+        full_text: 0,
+        new_papers: 0,
+        saved: 0,
+        recent_searches: 0,
+      };
+    }
+  }
+
+  /**
+   * Get user's bookmarked articles
+   * Endpoint: GET /api/research/user/bookmarks
+   */
+  async getUserBookmarks(
+    userId: string,
+    options?: {
+      folder?: string;
+      limit?: number;
+      offset?: number;
+    }
+  ): Promise<{ count: number; bookmarks: ResearchBookmark[] }> {
+    try {
+      const queryParams = new URLSearchParams({
+        userId,
+      });
+
+      if (options?.folder) {
+        queryParams.append('folder', options.folder);
+      }
+      if (options?.limit) {
+        queryParams.append('limit', options.limit.toString());
+      }
+      if (options?.offset) {
+        queryParams.append('offset', options.offset.toString());
+      }
+
+      const bookmarksUrl = `${API_CONFIG.servicesUrl}/api/research/user/bookmarks?${queryParams.toString()}`;
+      
+      console.log('[ResearchService] Fetching user bookmarks:', userId);
+      
+      const response = await fetchWithLogging(bookmarksUrl, {
+        headers: {
+          'X-Client-ID': API_CONFIG.servicesClientId,
+          'X-Client-Secret': API_CONFIG.servicesClientSecret,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Bookmarks API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      
+      if (!data.success) {
+        throw new Error('Failed to fetch bookmarks');
+      }
+
+      return {
+        count: data.count || 0,
+        bookmarks: data.bookmarks || [],
+      };
+    } catch (error) {
+      console.error('[ResearchService] Failed to get bookmarks:', error);
+      return { count: 0, bookmarks: [] };
+    }
+  }
+
+  /**
+   * Save/bookmark a research article
+   * Endpoint: POST /api/research/user/bookmark
+   */
+  async saveBookmark(
+    userId: string,
+    article: Partial<ResearchArticle> & { title: string; pmcid?: string; pmid?: string; doi?: string },
+    options?: {
+      notes?: string;
+      tags?: string[];
+      folder?: string;
+    }
+  ): Promise<{ success: boolean; bookmark?: ResearchBookmark; message?: string }> {
+    try {
+      const bookmarkUrl = `${API_CONFIG.servicesUrl}/api/research/user/bookmark`;
+      
+      console.log('[ResearchService] Saving bookmark:', article.title);
+      
+      const response = await fetchWithLogging(bookmarkUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Client-ID': API_CONFIG.servicesClientId,
+          'X-Client-Secret': API_CONFIG.servicesClientSecret,
+        },
+        body: JSON.stringify({
+          userId,
+          pmcid: article.pmcid,
+          pmid: article.pmid,
+          doi: article.links?.doi,
+          title: article.title,
+          authors: article.authors,
+          journal: article.journal,
+          publication_year: article.publicationYear,
+          abstract: article.abstract,
+          study_type: article.studyType,
+          evidence_level: article.evidenceLevel,
+          pmc_url: article.links?.pmcWebsite,
+          pubmed_url: article.links?.pubmedLink,
+          full_text_url: article.links?.pdfDownload,
+          notes: options?.notes,
+          tags: options?.tags,
+          folder: options?.folder || 'default',
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Save bookmark API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('[ResearchService] Failed to save bookmark:', error);
+      return { success: false, message: 'Failed to save article' };
+    }
+  }
+
+  /**
+   * Remove a bookmarked article
+   * Endpoint: DELETE /api/research/user/bookmark/:pmcid
+   */
+  async removeBookmarkByPmcid(userId: string, pmcid: string): Promise<{ success: boolean; message?: string }> {
+    try {
+      const bookmarkUrl = `${API_CONFIG.servicesUrl}/api/research/user/bookmark/${pmcid}?userId=${userId}`;
+      
+      console.log('[ResearchService] Removing bookmark:', pmcid);
+      
+      const response = await fetchWithLogging(bookmarkUrl, {
+        method: 'DELETE',
+        headers: {
+          'X-Client-ID': API_CONFIG.servicesClientId,
+          'X-Client-Secret': API_CONFIG.servicesClientSecret,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Remove bookmark API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('[ResearchService] Failed to remove bookmark:', error);
+      return { success: false, message: 'Failed to remove bookmark' };
+    }
+  }
+
+  /**
+   * Get user's search history
+   * Endpoint: GET /api/research/user/searches
+   */
+  async getSearchHistory(
+    userId: string,
+    limit: number = 10
+  ): Promise<{ count: number; searches: SearchHistoryItem[] }> {
+    try {
+      const historyUrl = `${API_CONFIG.servicesUrl}/api/research/user/searches?userId=${userId}&limit=${limit}`;
+      
+      console.log('[ResearchService] Fetching search history:', userId);
+      
+      const response = await fetchWithLogging(historyUrl, {
+        headers: {
+          'X-Client-ID': API_CONFIG.servicesClientId,
+          'X-Client-Secret': API_CONFIG.servicesClientSecret,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Search history API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      
+      if (!data.success) {
+        throw new Error('Failed to fetch search history');
+      }
+
+      return {
+        count: data.count || 0,
+        searches: data.searches || [],
+      };
+    } catch (error) {
+      console.error('[ResearchService] Failed to get search history:', error);
+      return { count: 0, searches: [] };
+    }
+  }
+
+  /**
+   * Get user's reading list
+   * Endpoint: GET /api/research/user/reading-list
+   */
+  async getReadingList(
+    userId: string,
+    status?: 'unread' | 'in_progress' | 'completed'
+  ): Promise<{ count: number; reading_list: ReadingListItem[] }> {
+    try {
+      const queryParams = new URLSearchParams({
+        userId,
+      });
+
+      if (status) {
+        queryParams.append('status', status);
+      }
+
+      const readingUrl = `${API_CONFIG.servicesUrl}/api/research/user/reading-list?${queryParams.toString()}`;
+      
+      console.log('[ResearchService] Fetching reading list:', userId);
+      
+      const response = await fetchWithLogging(readingUrl, {
+        headers: {
+          'X-Client-ID': API_CONFIG.servicesClientId,
+          'X-Client-Secret': API_CONFIG.servicesClientSecret,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Reading list API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      
+      if (!data.success) {
+        throw new Error('Failed to fetch reading list');
+      }
+
+      return {
+        count: data.count || 0,
+        reading_list: data.reading_list || [],
+      };
+    } catch (error) {
+      console.error('[ResearchService] Failed to get reading list:', error);
+      return { count: 0, reading_list: [] };
+    }
+  }
+
+  /**
+   * Add article to reading list
+   * Endpoint: POST /api/research/user/reading-list
+   */
+  async addToReadingList(
+    userId: string,
+    article: Partial<ResearchArticle> & { title: string; pmcid?: string; pmid?: string; doi?: string },
+    priority: number = 0
+  ): Promise<{ success: boolean; item?: ReadingListItem; message?: string }> {
+    try {
+      const readingUrl = `${API_CONFIG.servicesUrl}/api/research/user/reading-list`;
+      
+      console.log('[ResearchService] Adding to reading list:', article.title);
+      
+      const response = await fetchWithLogging(readingUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Client-ID': API_CONFIG.servicesClientId,
+          'X-Client-Secret': API_CONFIG.servicesClientSecret,
+        },
+        body: JSON.stringify({
+          userId,
+          pmcid: article.pmcid,
+          pmid: article.pmid,
+          doi: article.links?.doi,
+          title: article.title,
+          authors: article.authors,
+          journal: article.journal,
+          priority,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Reading list API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('[ResearchService] Failed to add to reading list:', error);
+      return { success: false, message: 'Failed to add to reading list' };
+    }
+  }
+
+  /**
+   * Check if an article is bookmarked by the user
+   */
+  async isArticleBookmarked(userId: string, pmcid: string): Promise<boolean> {
+    try {
+      const bookmarks = await this.getUserBookmarks(userId, { limit: 100 });
+      return bookmarks.bookmarks.some(b => b.pmcid === pmcid);
+    } catch (error) {
+      console.error('[ResearchService] Failed to check bookmark status:', error);
+      return false;
     }
   }
 
