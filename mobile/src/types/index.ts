@@ -6,6 +6,11 @@ export interface NavigationProps {
   };
 }
 
+// Export all API types from centralized api.ts
+export * from './api';
+
+// Legacy types - kept for backward compatibility
+// Use types from api.ts for new code
 export interface User {
   id: string;
   name: string;

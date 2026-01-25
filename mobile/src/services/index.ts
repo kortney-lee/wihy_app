@@ -34,6 +34,9 @@ export { notificationService } from './notificationService';
 export { debugLogService } from './debugLogService';
 export { consumptionService } from './consumptionService';
 
+// NEW: Export Wellness Service (user.wihy.ai)
+export { wellnessService, WellnessService } from './wellnessService';
+
 // NEW: Export Checkout & Subscription Services
 export { checkoutService, WIHY_PLANS } from './checkoutService';
 export type { Plan, CheckoutResult, PaymentStatus } from './checkoutService';
@@ -49,11 +52,13 @@ export { combinedProgramService } from './combinedProgramService';
 
 // NEW: Export Health Tracking Client Services (services.wihy.ai)
 export { servicesApi } from './servicesApiClient';
+export { userApi } from './userApiClient';
 export { goalsService } from './goalsService';
 export { progressService } from './progressTrackingService';
 export { remindersService } from './remindersService';
 export { scanHistoryService } from './scanHistoryService';
 export { uploadService } from './uploadService';
+export { shoppingPreferencesService } from './shoppingPreferencesService';
 
 // NEW: Export Additional Feature Services (January 7, 2026)
 export { messagingService } from './messagingService';
@@ -404,6 +409,145 @@ export type {
   PostWorkoutMealSuggestion,
   Recommendation,
 } from './combinedProgramService';
+
+// Shopping Preferences (user.wihy.ai)
+export type {
+  BudgetPreference,
+  OrganicPreference,
+  DeliveryPreference,
+  PreferredStore,
+  BrandPreferences,
+  ShoppingPreferences,
+  SavePreferencesRequest,
+} from './shoppingPreferencesService';
+
+// Export all API types from centralized types/api.ts
+export type {
+  // Core types
+  ActivityLevel,
+  Gender,
+  GoalType,
+  UserRole,
+  UserStatus,
+  AuthProvider,
+  PlanType,
+  PlanStatus,
+  FamilyRoleType,
+  PrivacyLevel,
+  Theme,
+  Platform,
+  
+  // User types
+  UserCapabilities,
+  UserSettings,
+  User,
+  
+  // Auth types
+  RegisterRequest,
+  LoginRequest,
+  AuthResponse,
+  VerifyTokenResponse,
+  RefreshTokenRequest,
+  RefreshTokenResponse,
+  ForgotPasswordRequest,
+  ResetPasswordRequest,
+  SessionResponse,
+  ProvidersResponse,
+  
+  // Profile types
+  UpdateProfileRequest,
+  ChangePasswordRequest,
+  UploadAvatarRequest,
+  
+  // Settings types
+  UpdateSettingsRequest,
+  ToggleNotificationsRequest,
+  UpdatePrivacyRequest,
+  
+  // Preferences types
+  UserPreferences,
+  UpdatePreferencesRequest,
+  
+  // Permissions types
+  UserPermissions,
+  
+  // Shopping types
+  SaveShoppingPreferencesRequest as SaveShoppingPreferencesApiRequest,
+  
+  // Family types
+  Family,
+  FamilyMember,
+  CreateFamilyRequest,
+  JoinFamilyRequest,
+  AddFamilyMemberRequest,
+  UpdateFamilyRequest,
+  
+  // Coaching types
+  Location,
+  Rates,
+  CreateCoachRequest,
+  Coach,
+  CoachFilters,
+  CoachesDiscoverResponse,
+  UpdateCoachProfileRequest,
+  CoachOverview,
+  CoachClient,
+  AddClientRequest,
+  UpdateClientStatusRequest,
+  AssignProgramRequest,
+  BookingRequest,
+  BookingResponse,
+  ReviewRequest,
+  Review,
+  
+  // Goals types
+  GoalStatus,
+  GoalCategory,
+  CreateGoalRequest,
+  Goal,
+  UpdateGoalRequest,
+  LogGoalProgressRequest,
+  GoalProgressResponse,
+  CompleteGoalRequest,
+  GoalStats,
+  
+  // Progress types
+  PhotoType,
+  MeasurementType,
+  MeasurementUnit,
+  UploadProgressPhotoRequest,
+  ProgressPhoto,
+  PhotoComparison,
+  LogMeasurementRequest,
+  Measurement,
+  
+  // Wellness types
+  WellnessLog,
+  WellnessMetricScore,
+  WellnessSummary,
+  WellnessSummaryResponse,
+  
+  // Notifications types
+  RegisterPushTokenRequest,
+  DeactivatePushTokenRequest,
+  NotificationPreferences,
+  UpdateNotificationPreferencesRequest,
+  CreateReminderRequest,
+  Reminder,
+  UpdateReminderRequest,
+  
+  // Global Goals types
+  GlobalGoalStats,
+  UserRanking,
+  LeaderboardEntry,
+  Leaderboard,
+  Challenge,
+  
+  // API Response types
+  ApiResponse as ApiResponseType,
+  PaginatedResponse,
+  ListResponse,
+} from '../types/api';
 
 // Initialize all services
 export async function initializeServices(): Promise<void> {
