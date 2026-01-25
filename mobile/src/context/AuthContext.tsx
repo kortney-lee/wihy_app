@@ -27,7 +27,8 @@ export interface User {
 
   // Access control - role determines plan override
   // Roles match plan types: user→free, premium→premium, family-basic, family-pro, coach, employee→coach-family (no dev), admin→admin
-  role?: 'user' | 'premium' | 'family-basic' | 'family-pro' | 'coach' | 'employee' | 'admin';
+  // CLIENT role from backend maps to 'user' (free plan)
+  role?: 'user' | 'premium' | 'family-basic' | 'family-pro' | 'coach' | 'employee' | 'admin' | 'CLIENT';
   status?: 'active' | 'inactive' | 'suspended' | 'pending';
   isDeveloper?: boolean;
   
@@ -177,13 +178,28 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     // Check if this is a first-time user (no stored data = new signup)
     const isFirstTimeUser = !existingData;
     
-    // Role / developer flags from server or stored data (need this first to determine plan)
-    const roleFromServer = authUser.role || authUser.profile_data?.role;
-    const normalizedRole = roleFromServer ? roleFromServer.toLowerCase().replace('_', '-') as User['role'] : existingData?.role;
+    // ✅ USE VERIFY ENDPOINT AS SOURCE OF TRUTH
+    // The /api/auth/verify endpoint returns authoritative user data including role and plan
+    // Trust the backend response instead of client-side normalization
+    console.log('[AuthContext] Processing user data from verify endpoint:', {
+      email: authUser.email,
+      role: authUser.role,
+      plan: authUser.plan,
+      status: authUser.status
+    });
     
-    // ✅ Role-based plan overrides
-    // Each role maps to a specific plan for capabilities
-    const getPlanFromRole = (role: User['role'] | undefined, backendPlan: string): User['plan'] => {
+    // Get role directly from verify endpoint (already normalized by backend)
+    const roleFromServer = authUser.role || authUser.profile_data?.role;
+    let normalizedRole = roleFromServer ? roleFromServer.toLowerCase().replace('_', '-') as User['role'] : 'user';
+    
+    // ✅ Trust backend plan assignment (verify endpoint returns correct plan)
+    // Backend handles CLIENT → user mapping, role-based plans, etc.
+    const backendPlan = authUser.plan || 'free';
+    
+    // Map role to plan type for mobile app capabilities
+    // This ensures capabilities are computed correctly even if backend sends different plan name
+    const getPlanFromRole = (role: User['role'] | undefined, serverPlan: string): User['plan'] => {
+      // For specific roles, ensure plan matches what capabilities system expects
       switch (role) {
         case 'admin':       return 'admin';        // Full access to everything
         case 'employee':    return 'coach-family'; // Coach + Family, no dev tools
@@ -191,13 +207,27 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         case 'family-pro':  return 'family-pro';   // Family Pro features
         case 'family-basic': return 'family-basic'; // Family Basic features
         case 'premium':     return 'premium';      // Premium features
-        case 'user':        return 'free';         // Free tier
-        default:            return (backendPlan || 'free') as User['plan'];
+        case 'user':        
+          // User role can have different plans (free, premium, etc.)
+          // Trust backend plan assignment for 'user' role
+          return serverPlan as User['plan'];
+        default:            
+          return serverPlan as User['plan'];
       }
     };
     
-    const plan = getPlanFromRole(normalizedRole, authUser.plan || existingData?.plan || 'free');
+    const plan = getPlanFromRole(normalizedRole, backendPlan);
     const addOns = authUser.addOns || existingData?.addOns || [];
+    
+    // Debug logging for plan assignment
+    console.log('[AuthContext] User access assignment from verify endpoint:', {
+      email: authUser.email,
+      roleFromServer: authUser.role,
+      planFromServer: authUser.plan,
+      normalizedRole,
+      finalPlan: plan,
+      capabilities: getPlanCapabilities(plan, addOns)
+    });
     
     // ✅ Use capabilities from backend if available, otherwise compute client-side
     // For role-based users, always compute client-side to ensure correct access
