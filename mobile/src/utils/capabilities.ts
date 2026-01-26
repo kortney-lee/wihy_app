@@ -805,10 +805,10 @@ export const getUpgradeMessage = (
  * Maps role to plan - role determines capabilities
  */
 export const migrateUserRoleToPlan = (
-  userRole?: 'user' | 'premium' | 'family-basic' | 'family-pro' | 'coach' | 'employee' | 'admin' | 'parent'
+  userRole?: 'user' | 'premium' | 'family-basic' | 'family-pro' | 'coach' | 'employee' | 'admin' | 'parent' | 'CLIENT'
 ): User['plan'] => {
-  if (!userRole || userRole === 'user') return 'free';
-  if (userRole === 'premium') return 'premium';
+  if (!userRole || userRole === 'user' || userRole === 'CLIENT') return 'free';  // Handle CLIENT role from backend (maps to free plan)
+  if ((userRole as string).toLowerCase() === 'client') return 'free';  if (userRole === 'premium') return 'premium';
   if (userRole === 'parent' || userRole === 'family-basic') return 'family-basic';
   if (userRole === 'family-pro') return 'family-pro';
   if (userRole === 'coach') return 'coach';

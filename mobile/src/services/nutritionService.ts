@@ -85,31 +85,39 @@ export interface WeeklyTrends {
 }
 
 class NutritionService {
-  private baseUrl: string;
-
-  constructor() {
-    this.baseUrl = API_CONFIG.baseUrl;
-  }
+  // All methods now use API_CONFIG.userUrl directly
+  // Endpoints: https://user.wihy.ai/api/users/:userId/nutrition/...
 
   /**
    * Log a meal with nutrition information
+   * POST /api/users/:userId/nutrition/log-meal
    */
   async logMeal(meal: MealLog): Promise<any> {
-    const response = await fetchWithLogging(`${this.baseUrl}/api/nutrition/log-meal`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(meal),
-    });
+    if (!meal.userId) {
+      throw new Error('userId is required for logMeal');
+    }
+    const response = await fetchWithLogging(
+      `${API_CONFIG.userUrl}/api/users/${meal.userId}/nutrition/log-meal`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(meal),
+      }
+    );
     return response.json();
   }
 
   /**
    * Get daily nutrition summary with goals comparison
+   * GET /api/users/:userId/nutrition/daily-summary?date=YYYY-MM-DD
    */
   async getDailySummary(userId: string, date?: string): Promise<DailySummary> {
+    if (!userId) {
+      throw new Error('userId is required for getDailySummary');
+    }
     const dateParam = date || new Date().toISOString().split('T')[0];
     const response = await fetchWithLogging(
-      `${this.baseUrl}/api/nutrition/daily-summary?userId=${userId}&date=${dateParam}`
+      `${API_CONFIG.userUrl}/api/users/${userId}/nutrition/daily-summary?date=${dateParam}`
     );
     const data = await response.json();
     return data.data;
@@ -117,11 +125,15 @@ class NutritionService {
 
   /**
    * Get weekly nutrition trends
+   * GET /api/users/:userId/nutrition/weekly-trends?startDate=YYYY-MM-DD
    */
   async getWeeklyTrends(userId: string, startDate?: string): Promise<WeeklyTrends> {
-    const params = startDate ? `&startDate=${startDate}` : '';
+    if (!userId) {
+      throw new Error('userId is required for getWeeklyTrends');
+    }
+    const params = startDate ? `?startDate=${startDate}` : '';
     const response = await fetchWithLogging(
-      `${this.baseUrl}/api/nutrition/weekly-trends?userId=${userId}${params}`
+      `${API_CONFIG.userUrl}/api/users/${userId}/nutrition/weekly-trends${params}`
     );
     const data = await response.json();
     return data.data;
@@ -129,6 +141,7 @@ class NutritionService {
 
   /**
    * Get meal history with date range filtering
+   * GET /api/users/:userId/nutrition/history?startDate=X&endDate=Y&mealType=Z
    */
   async getHistory(
     userId: string,
@@ -138,46 +151,72 @@ class NutritionService {
       mealType?: string;
     }
   ): Promise<any> {
-    const params = new URLSearchParams({ userId });
+    if (!userId) {
+      throw new Error('userId is required for getHistory');
+    }
+    const params = new URLSearchParams();
     if (options?.startDate) params.append('startDate', options.startDate);
     if (options?.endDate) params.append('endDate', options.endDate);
     if (options?.mealType) params.append('mealType', options.mealType);
 
-    const response = await fetchWithLogging(
-      `${this.baseUrl}/api/nutrition/history?${params.toString()}`
-    );
+    const queryString = params.toString();
+    const url = queryString
+      ? `${API_CONFIG.userUrl}/api/users/${userId}/nutrition/history?${queryString}`
+      : `${API_CONFIG.userUrl}/api/users/${userId}/nutrition/history`;
+
+    const response = await fetchWithLogging(url);
     return response.json();
   }
 
   /**
    * Log water intake
+   * POST /api/users/:userId/nutrition/log-water
    */
   async logWater(water: WaterLog): Promise<any> {
-    const response = await fetchWithLogging(`${this.baseUrl}/api/nutrition/log-water`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(water),
-    });
+    if (!water.userId) {
+      throw new Error('userId is required for logWater');
+    }
+    const response = await fetchWithLogging(
+      `${API_CONFIG.userUrl}/api/users/${water.userId}/nutrition/log-water`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(water),
+      }
+    );
     return response.json();
   }
 
   /**
    * Update nutrition goals
+   * PUT /api/users/:userId/nutrition/goals
    */
   async updateGoals(goals: NutritionGoals): Promise<any> {
-    const response = await fetchWithLogging(`${this.baseUrl}/api/nutrition/goals`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(goals),
-    });
+    if (!goals.userId) {
+      throw new Error('userId is required for updateGoals');
+    }
+    const response = await fetchWithLogging(
+      `${API_CONFIG.userUrl}/api/users/${goals.userId}/nutrition/goals`,
+      {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(goals),
+      }
+    );
     return response.json();
   }
 
   /**
    * Get current nutrition goals
+   * GET /api/users/:userId/nutrition/goals
    */
   async getGoals(userId: string): Promise<NutritionGoals> {
-    const response = await fetchWithLogging(`${this.baseUrl}/api/nutrition/goals?userId=${userId}`);
+    if (!userId) {
+      throw new Error('userId is required for getGoals');
+    }
+    const response = await fetchWithLogging(
+      `${API_CONFIG.userUrl}/api/users/${userId}/nutrition/goals`
+    );
     const data = await response.json();
     return data.data;
   }

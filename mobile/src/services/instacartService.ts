@@ -39,6 +39,38 @@ export interface InstacartRecipeResponse {
   mealCount: number;
 }
 
+export interface ShoppingListItem {
+  name: string;
+  quantity: number;
+  unit: string;
+  notes?: string;
+  filters?: {
+    brand_filters?: string[];      // ["Prego", "Classico"]
+    health_filters?: string[];     // ["ORGANIC", "GLUTEN_FREE"]
+  };
+}
+
+export interface InstacartLinkResponse {
+  success: boolean;
+  data: {
+    productsLinkUrl: string;
+    listId: string;
+    createdAt: string;
+  };
+}
+
+export type HealthFilter =
+  | 'ORGANIC'
+  | 'GLUTEN_FREE'
+  | 'VEGAN'
+  | 'VEGETARIAN'
+  | 'KOSHER'
+  | 'HALAL'
+  | 'NON_GMO'
+  | 'GRASS_FED'
+  | 'NO_ADDED_SUGAR'
+  | 'LOW_SODIUM';
+
 export interface ApiResponse<T> {
   success: boolean;
   message: string;
@@ -116,4 +148,47 @@ export async function createInstacartLinkFromMeal(
 
   const result: ApiResponse<InstacartRecipeResponse> = await response.json();
   return result.data;
+}
+
+/**
+ * Create custom shopping list with brand preferences and filters
+ */
+export async function createShoppingList(
+  items: ShoppingListItem[],
+  userId: string,
+  zipCode?: string
+): Promise<InstacartLinkResponse> {
+  try {
+    const response = await fetchWithLogging(`${API_BASE}/instacart/shopping-list`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        userId,
+        list_data: {
+          line_items: items,
+        },
+        options: {
+          delivery_method: 'delivery',
+          ...(zipCode && { zip_code: zipCode }),
+        },
+      }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Shopping list creation failed:', {
+        status: response.status,
+        statusText: response.statusText,
+        error: errorText,
+      });
+      throw new Error(`Failed to create shopping list: ${response.status} ${response.statusText}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error in createShoppingList:', error);
+    throw error;
+  }
 }

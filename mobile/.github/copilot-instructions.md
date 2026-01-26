@@ -97,11 +97,31 @@ Services require both JWT Bearer token AND client credentials:
 
 ## Deployment
 
-### Firebase Hosting
-- Build: `npx expo export --platform web`
-- Output: `mobile/dist/`
-- Deploy: `firebase deploy --only hosting`
-- URL: https://wihy.ai
+### Firebase Hosting - Manual Deployment (Local)
+
+**Complete deployment process:**
+```bash
+# 1. Check Firebase login status
+firebase login:list
+
+# 2. Build the web app (from mobile directory)
+cd mobile
+npx expo export --platform web
+
+# 3. Deploy to Firebase Hosting
+firebase deploy --only hosting
+```
+
+**Important Notes:**
+- Always build BEFORE deploying (don't deploy without fresh build)
+- Build output goes to `mobile/dist/`
+- Deployment reads from `mobile/dist/` (configured in firebase.json)
+- Live URL: https://wihy-ai.web.app
+
+**Common Issues:**
+- If `cd mobile` fails with "path not found", use full path: `cd C:\repo\wihy_ui_clean\mobile`
+- Build must complete successfully before deploying
+- Verify 11 files are uploaded during deployment
 
 ### GitHub Actions
 - Workflow: `.github/workflows/deploy-web.yml`
