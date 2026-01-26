@@ -23,7 +23,6 @@ import {
   subscriptionService,
   type SubscriptionPlan,
   type AddOn,
-  type Integration,
   type ActiveSubscription,
   type UpgradeOption,
 } from '../services/subscriptionService';
