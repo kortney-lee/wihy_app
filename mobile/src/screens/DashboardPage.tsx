@@ -19,7 +19,7 @@ import type { TabParamList, RootStackParamList } from '../types/navigation';
 import type { DashboardContext } from './HealthHub';
 import { dashboardTheme } from '../theme/dashboardTheme';
 import { HamburgerMenu } from '../components/shared/HamburgerMenu';
-import { GradientDashboardHeader, QuickStartGuide, NotificationTile } from '../components/shared';
+import { GradientDashboardHeader, QuickStartGuide } from '../components/shared';
 import { AuthContext } from '../context/AuthContext';
 import { hasCoachAccess, hasFamilyAccess, hasMealsAccess } from '../utils/capabilities';
 import { useDashboardLayout } from '../hooks/useDashboardLayout';
@@ -256,16 +256,17 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
           <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>Health metrics</Text>
         </TouchableOpacity>
 
-        {/* Notifications Tile - Available to ALL users */}
-        <View style={{ width: cardWidth as any }}>
-          <NotificationTile
-            userId={user?.id}
-            onPress={() => navigation.navigate('Notifications' as never)}
-            onViewMessages={() => navigation.navigate('Messages' as never)}
-            onViewReminders={() => navigation.navigate('Reminders' as never)}
-            compact
-          />
-        </View>
+        {/* Notifications - Available to ALL users */}
+        <TouchableOpacity
+          style={[styles.dashboardCard, styles.notificationsCard, { width: cardWidth as any }]}
+          onPress={() => navigation.navigate('Notifications' as never)}
+        >
+          <View style={[styles.cardIconContainer, { width: iconContainerSize, height: iconContainerSize, borderRadius: iconContainerSize / 2 }]}>
+            <SvgIcon name="notifications" size={iconSize} color="#ffffff" />
+          </View>
+          <Text style={[styles.cardTitle, { fontSize: titleSize }]}>Notifications</Text>
+          <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>Messages & alerts</Text>
+        </TouchableOpacity>
 
         {/* Nutrition Dashboard - Available to ALL users (scan history, food analysis) */}
         <TouchableOpacity
@@ -680,6 +681,10 @@ const styles = StyleSheet.create({
 
   overviewCard: {
     backgroundColor: '#059669',
+  },
+
+  notificationsCard: {
+    backgroundColor: '#8b5cf6', // Purple for notifications
   },
 
   progressCard: {
