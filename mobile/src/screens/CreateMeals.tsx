@@ -940,7 +940,7 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
       // Normalize the response to handle different API formats
       const normalizedPlan: MealPlanResponse = {
         success: result.success ?? true,
-        program_id: result.program_id || result.plan_id || result.id || result.meal?.id || `plan_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        program_id: result.program_id || result.plan_id || result.id || result.meal?.id,
         name: result.name || result.meal?.name || `${planDuration}-Day Meal Plan`,
         description: result.description || planDescription || 'Custom meal plan',
         duration_days: result.duration_days || result.duration || planDuration,
@@ -1294,7 +1294,7 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
       
       const normalizedPlan: MealPlanResponse = {
         success: result.success ?? true,
-        program_id: result.program_id || result.plan_id || result.id || result.meal?.id || `plan_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        program_id: result.program_id || result.plan_id || result.id || result.meal?.id,
         name: result.name || result.meal?.name || `${request.duration}-Day Meal Plan`,
         description: result.description || request.description,
         duration_days: result.duration_days || result.duration || request.duration,
