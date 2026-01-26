@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useContext } from 'react';
 import {
   View,
   Text,
@@ -10,6 +10,7 @@ import {
   Alert,
   ActivityIndicator,
   Image,
+  Modal,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRoute, useNavigation } from '@react-navigation/native';
@@ -19,6 +20,9 @@ import type { StackNavigationProp } from '@react-navigation/stack';
 import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import type { TabParamList, RootStackParamList } from '../types/navigation';
 import { fdaService } from '../services/fdaService';
+import { consumptionService } from '../services/consumptionService';
+import { scanService } from '../services/scanService';
+import { AuthContext } from '../context/AuthContext';
 import type { IngredientAnalysis } from '../services/types';
 import { LinearGradient } from 'expo-linear-gradient';
 import { dashboardTheme } from '../theme/dashboardTheme';
@@ -102,6 +106,10 @@ const isUnknownProduct = (name: string | undefined): boolean => {
 export default function NutritionFacts() {
   const route = useRoute<RouteProps>();
   const navigation = useNavigation<NavigationProp>();
+  const { user } = useContext(AuthContext);
+
+  // Get user ID for food logging
+  const userId = user?.id || `guest_${Date.now()}`;
 
   const routeParams = route?.params;
   const { foodItem: initialFoodItem, context } = routeParams || { foodItem: null, context: null };
@@ -127,6 +135,11 @@ export default function NutritionFacts() {
   // FDA Ingredient Analysis State
   const [loadingIngredients, setLoadingIngredients] = useState<Set<string>>(new Set());
   const [analyzedIngredients, setAnalyzedIngredients] = useState<Map<string, IngredientAnalysis>>(new Map());
+
+  // Comparison Modal State
+  const [showCompareModal, setShowCompareModal] = useState(false);
+  const [comparisonData, setComparisonData] = useState<any>(null);
+  const [isLoadingComparison, setIsLoadingComparison] = useState(false);
 
   // Animation refs
   const analysisProgress = useRef(new Animated.Value(0)).current;
@@ -288,6 +301,86 @@ export default function NutritionFacts() {
         newSet.delete(trimmed);
         return newSet;
       });
+    }
+  };
+
+  /**
+   * Log food to consumption diary
+   */
+  const handleLogFood = async () => {
+    if (!foodItem) {
+      Alert.alert('Error', 'No food data available to log');
+      return;
+    }
+
+    try {
+      const productName = isBarcodeScanResponse(foodItem) ? foodItem.product_name : 'Unknown Food';
+      const calories = getCalories(foodItem);
+      const protein = isBarcodeScanResponse(foodItem) ? foodItem.protein : 0;
+      const carbs = isBarcodeScanResponse(foodItem) ? foodItem.carbohydrates : 0;
+      const fat = isBarcodeScanResponse(foodItem) ? foodItem.fat : 0;
+      const fiber = isBarcodeScanResponse(foodItem) ? foodItem.fiber : 0;
+      const sugar = isBarcodeScanResponse(foodItem) ? foodItem.sugars : 0;
+
+      const nutritionData = {
+        calories: calories * servingMultiplier,
+        protein_g: protein * servingMultiplier,
+        carbs_g: carbs * servingMultiplier,
+        fat_g: fat * servingMultiplier,
+        fiber_g: fiber * servingMultiplier,
+        sugar_g: sugar * servingMultiplier,
+      };
+
+      await consumptionService.logMeal(userId, {
+        name: productName,
+        meal_type: 'snack',
+        servings: servingMultiplier,
+        nutrition: nutritionData,
+        notes: 'Logged from Nutrition Facts',
+      });
+
+      Alert.alert('Success', `${productName} has been logged to your food diary!`);
+    } catch (error: any) {
+      console.error('Error logging food:', error);
+      Alert.alert('Error', error.message || 'Failed to log food');
+    }
+  };
+
+  /**
+   * Compare food with healthier alternatives
+   */
+  const handleCompareOptions = async () => {
+    if (!foodItem) {
+      Alert.alert('Info', 'No food data available to compare');
+      return;
+    }
+
+    setIsLoadingComparison(true);
+    setShowCompareModal(true);
+
+    try {
+      const productName = isBarcodeScanResponse(foodItem) ? foodItem.product_name : 'Unknown Food';
+      const category = isBarcodeScanResponse(foodItem) ? foodItem.categories?.[0] : undefined;
+      const dietaryGoals = context?.dietaryRestrictions || context?.userGoals;
+
+      const response = await scanService.compareFoodOptions(
+        productName,
+        category,
+        dietaryGoals
+      );
+
+      if (response.success) {
+        setComparisonData(response);
+      } else {
+        Alert.alert('Error', response.error || 'Failed to load comparison data');
+        setShowCompareModal(false);
+      }
+    } catch (error: any) {
+      console.error('Error comparing food:', error);
+      Alert.alert('Error', error.message || 'Failed to compare food options');
+      setShowCompareModal(false);
+    } finally {
+      setIsLoadingComparison(false);
     }
   };
 
@@ -788,20 +881,32 @@ export default function NutritionFacts() {
 
         {/* Action Buttons */}
         <View style={styles.actionSection}>
-          <Pressable
-            style={[styles.actionButton, styles.primaryAction]}
-            onPress={() => openChatWithContext({ type: 'general' })}
-          >
-            <Ionicons name="chatbubble-ellipses" size={20} color="#ffffff" />
-            <Text style={styles.primaryActionText}>Ask WiHY</Text>
-          </Pressable>
+          {/* Primary Actions - Log and Compare */}
+          <View style={styles.primaryActions}>
+            <Pressable
+              style={[styles.actionButton, styles.logAction]}
+              onPress={handleLogFood}
+            >
+              <Ionicons name="checkmark-circle" size={20} color="#ffffff" />
+              <Text style={styles.primaryActionText}>Log This Food</Text>
+            </Pressable>
+            <Pressable
+              style={[styles.actionButton, styles.compareAction]}
+              onPress={handleCompareOptions}
+            >
+              <Ionicons name="swap-horizontal" size={20} color="#ffffff" />
+              <Text style={styles.primaryActionText}>Compare</Text>
+            </Pressable>
+          </View>
+
+          {/* Secondary Actions */}
           <View style={styles.secondaryActions}>
             <Pressable
               style={[styles.actionButton, styles.secondaryAction]}
-              onPress={() => openChatWithContext({ type: 'alternatives' })}
+              onPress={() => openChatWithContext({ type: 'general' })}
             >
-              <Ionicons name="swap-horizontal" size={18} color="#6b7280" />
-              <Text style={styles.secondaryActionText}>Compare alternatives</Text>
+              <Ionicons name="chatbubble-ellipses" size={18} color="#6b7280" />
+              <Text style={styles.secondaryActionText}>Ask WiHY</Text>
             </Pressable>
 
             <Pressable
@@ -816,6 +921,119 @@ export default function NutritionFacts() {
 
         <View style={{ height: 40 }} />
       </ScrollView>
+
+      {/* Food Comparison Modal */}
+      <Modal
+        visible={showCompareModal}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setShowCompareModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            {/* Modal Header */}
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Healthier Alternatives</Text>
+              <Pressable
+                style={styles.modalCloseButton}
+                onPress={() => setShowCompareModal(false)}
+              >
+                <Ionicons name="close" size={24} color="#64748b" />
+              </Pressable>
+            </View>
+
+            {/* Loading State */}
+            {isLoadingComparison && (
+              <View style={styles.modalLoading}>
+                <ActivityIndicator size="large" color="#3b82f6" />
+                <Text style={styles.modalLoadingText}>Finding healthier options...</Text>
+              </View>
+            )}
+
+            {/* Comparison Results */}
+            {!isLoadingComparison && comparisonData && (
+              <ScrollView style={styles.modalScroll} showsVerticalScrollIndicator={false}>
+                {/* Original Food */}
+                <View style={styles.comparisonSection}>
+                  <Text style={styles.sectionLabel}>Your Selection</Text>
+                  <View style={styles.foodCard}>
+                    <Text style={styles.foodCardName}>{comparisonData.original.name}</Text>
+                    <View style={styles.nutritionRow}>
+                      <View style={styles.nutritionItem}>
+                        <Text style={styles.nutritionValue}>{comparisonData.original.calories}</Text>
+                        <Text style={styles.nutritionLabel}>calories</Text>
+                      </View>
+                      <View style={styles.nutritionItem}>
+                        <Text style={styles.nutritionValue}>{comparisonData.original.sugar}g</Text>
+                        <Text style={styles.nutritionLabel}>sugar</Text>
+                      </View>
+                      <View style={styles.nutritionItem}>
+                        <Text style={styles.nutritionValue}>{comparisonData.original.fiber}g</Text>
+                        <Text style={styles.nutritionLabel}>fiber</Text>
+                      </View>
+                    </View>
+                  </View>
+                </View>
+
+                {/* Alternatives */}
+                <View style={styles.comparisonSection}>
+                  <Text style={styles.sectionLabel}>Better Options</Text>
+                  {comparisonData.alternatives.map((alt: any, index: number) => (
+                    <View key={index} style={styles.alternativeCard}>
+                      <View style={styles.alternativeHeader}>
+                        <Text style={styles.alternativeName}>{alt.name}</Text>
+                        <Ionicons name="arrow-up-circle" size={20} color="#10b981" />
+                      </View>
+                      <Text style={styles.comparisonText}>{alt.comparison}</Text>
+                      <View style={styles.nutritionRow}>
+                        <View style={styles.nutritionItem}>
+                          <Text style={[styles.nutritionValue, styles.altValue]}>{alt.calories}</Text>
+                          <Text style={styles.nutritionLabel}>calories</Text>
+                        </View>
+                        <View style={styles.nutritionItem}>
+                          <Text style={[styles.nutritionValue, styles.altValue]}>{alt.sugar}g</Text>
+                          <Text style={styles.nutritionLabel}>sugar</Text>
+                        </View>
+                        <View style={styles.nutritionItem}>
+                          <Text style={[styles.nutritionValue, styles.altValue]}>{alt.fiber}g</Text>
+                          <Text style={styles.nutritionLabel}>fiber</Text>
+                        </View>
+                      </View>
+                      <Pressable
+                        style={styles.logAlternativeButton}
+                        onPress={async () => {
+                          try {
+                            await consumptionService.logMeal(userId, {
+                              name: alt.name,
+                              meal_type: 'snack',
+                              servings: 1,
+                              nutrition: {
+                                calories: alt.calories,
+                                protein_g: alt.protein || 0,
+                                carbs_g: (alt.sugar || 0) + (alt.fiber || 0),
+                                fat_g: alt.fat || 0,
+                                fiber_g: alt.fiber || 0,
+                                sugar_g: alt.sugar || 0,
+                              },
+                              notes: 'Logged from Nutrition Facts comparison',
+                            });
+                            Alert.alert('Success', `${alt.name} has been logged!`);
+                            setShowCompareModal(false);
+                          } catch (error: any) {
+                            Alert.alert('Error', error.message || 'Failed to log food');
+                          }
+                        }}
+                      >
+                        <Text style={styles.logAlternativeText}>Log This Instead</Text>
+                      </Pressable>
+                    </View>
+                  ))}
+                </View>
+              </ScrollView>
+            )}
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -1210,6 +1428,12 @@ const styles = StyleSheet.create({
     paddingBottom: 32,
   },
 
+  primaryActions: {
+    flexDirection: 'row',
+    gap: 12,
+    marginBottom: 12,
+  },
+
   actionButton: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -1218,6 +1442,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     borderRadius: 10,
     gap: 8,
+  },
+
+  logAction: {
+    flex: 1,
+    backgroundColor: '#3b82f6',
+    borderWidth: 1.5,
+    borderColor: '#3b82f6',
+  },
+
+  compareAction: {
+    flex: 1,
+    backgroundColor: '#10b981',
+    borderWidth: 1.5,
+    borderColor: '#10b981',
   },
 
   primaryAction: {
@@ -1864,5 +2102,137 @@ const styles = StyleSheet.create({
   capturedImageSection: {
     marginHorizontal: 16,
     marginBottom: 12,
+  },
+
+  // Comparison Modal Styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    backgroundColor: '#ffffff',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    maxHeight: '85%',
+    paddingBottom: 20,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f1f5f9',
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#1f2937',
+  },
+  modalCloseButton: {
+    padding: 8,
+  },
+  modalLoading: {
+    padding: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  modalLoadingText: {
+    marginTop: 16,
+    fontSize: 15,
+    color: '#64748b',
+  },
+  modalScroll: {
+    flex: 1,
+    paddingHorizontal: 20,
+  },
+  comparisonSection: {
+    marginVertical: 16,
+  },
+  sectionLabel: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#64748b',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginBottom: 12,
+  },
+  foodCard: {
+    backgroundColor: '#f8fafc',
+    borderRadius: 16,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+  },
+  foodCardName: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#1f2937',
+    marginBottom: 12,
+  },
+  nutritionRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+  },
+  nutritionItem: {
+    alignItems: 'center',
+  },
+  nutritionValue: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#3b82f6',
+    marginBottom: 4,
+  },
+  nutritionLabel: {
+    fontSize: 11,
+    color: '#64748b',
+    textTransform: 'uppercase',
+  },
+  alternativeCard: {
+    backgroundColor: '#ffffff',
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  alternativeHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+  },
+  alternativeName: {
+    fontSize: 17,
+    fontWeight: '700',
+    color: '#1f2937',
+  },
+  comparisonText: {
+    fontSize: 14,
+    color: '#10b981',
+    fontWeight: '600',
+    marginBottom: 12,
+  },
+  altValue: {
+    color: '#10b981',
+  },
+  logAlternativeButton: {
+    backgroundColor: '#3b82f6',
+    borderRadius: 12,
+    paddingVertical: 12,
+    alignItems: 'center',
+    marginTop: 12,
+  },
+  logAlternativeText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#ffffff',
   },
 });
