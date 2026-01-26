@@ -1315,49 +1315,6 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
     setSavingMealPlan(true);
     try {
       console.log('[SaveMealPlan] Saving plan:', acceptedPlan.program_id);
-          console.warn('[Instacart] Failed to open deep link:', linkError);
-          // Fallback: Open shopping list modal which has the Instacart button
-          if (acceptedPlan) {
-            const shoppingItems = extractShoppingListFromPlan(acceptedPlan);
-            setShoppingListItems(shoppingItems);
-            setShowMealPlanSuccess(false);
-            setTimeout(() => {
-              setShowShoppingListModal(true);
-            }, 300);
-          }
-        }
-      } else {
-        throw new Error('No Instacart link returned');
-      }
-    } catch (error: any) {
-      console.error('[Instacart] Error:', error);
-      // Fallback - save locally
-      if (acceptedPlan) {
-        const items = extractShoppingListFromPlan(acceptedPlan);
-        await saveShoppingListToStorage(items);
-      }
-      Alert.alert(
-        'Shopping List Saved',
-        'Your shopping list has been saved locally. Instacart integration is temporarily unavailable.',
-        [{ text: 'OK' }]
-      );
-    } finally {
-      setGeneratingList(false);
-    }
-  };
-
-  /**
-   * Save the meal plan to user's library for future use
-   */
-  const handleSaveMealPlan = async () => {
-    if (!acceptedPlan) {
-      Alert.alert('Error', 'No meal plan to save');
-      return;
-    }
-
-    setSavingMealPlan(true);
-    try {
-      console.log('[SaveMealPlan] Saving plan:', acceptedPlan.program_id);
       
       // Build the meal program data to save
       const programToSave = {
