@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useContext } from 'react';
 import {
   View,
   Text,
@@ -10,13 +10,15 @@ import {
   ActivityIndicator,
   RefreshControl,
   Animated,
+  Linking,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { GradientDashboardHeader, Ionicons } from '../components/shared';
 import { dashboardTheme } from '../theme/dashboardTheme';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { researchService, ResearchArticle } from '../services';
+import { researchService, ResearchArticle, ResearchDashboardStats, ResearchBookmark, SearchHistoryItem } from '../services';
+import { AuthContext } from '../context/AuthContext';
 
 // Types
 type ResearchSearchResult = ResearchArticle;
@@ -82,6 +84,27 @@ const getStudyTypeDisplay = (studyType?: string) => {
   return studyType.replace(/_/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase());
 };
 
+// Topic icon helper for API-returned topics (strings)
+const getTopicIcon = (topic: string): string => {
+  const topicLower = topic.toLowerCase();
+  if (topicLower.includes('diet') || topicLower.includes('mediterranean') || topicLower.includes('plant')) return 'leaf';
+  if (topicLower.includes('fast') || topicLower.includes('time')) return 'time';
+  if (topicLower.includes('gut') || topicLower.includes('microbiome') || topicLower.includes('fitness')) return 'fitness';
+  if (topicLower.includes('sleep') || topicLower.includes('moon')) return 'moon';
+  if (topicLower.includes('oil') || topicLower.includes('water')) return 'water';
+  if (topicLower.includes('processed') || topicLower.includes('food') || topicLower.includes('ultra')) return 'fast-food';
+  if (topicLower.includes('protein') || topicLower.includes('muscle')) return 'barbell';
+  if (topicLower.includes('sugar') || topicLower.includes('glucose')) return 'pulse';
+  if (topicLower.includes('vitamin') || topicLower.includes('supplement')) return 'medical';
+  return 'nutrition';
+};
+
+// Topic color helper for API-returned topics
+const getTopicColor = (index: number): string => {
+  const colors = ['#22c55e', '#f59e0b', '#8b5cf6', '#3b82f6', '#ef4444', '#f97316'];
+  return colors[index % colors.length];
+};
+
 // Note: Mock data removed - UI now shows proper empty/error states
 
 // Study Card Component
@@ -139,6 +162,10 @@ const StudyCard: React.FC<{
 
 // Main Research Screen
 export default function ResearchScreen({ isDashboardMode = false }: ResearchScreenProps) {
+  // Auth context for user ID
+  const { user } = useContext(AuthContext);
+  const userId = user?.id || user?.user_id || '';
+
   // State management
   const [activeWorkspace, setActiveWorkspace] = useState<string | null>(null);
   const [searchResults, setSearchResults] = useState<ResearchSearchResult[]>([]);
@@ -149,6 +176,11 @@ export default function ResearchScreen({ isDashboardMode = false }: ResearchScre
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const [query, setQuery] = useState('');
   const [error, setError] = useState<string | null>(null);
+
+  // User stats from backend
+  const [userStats, setUserStats] = useState<ResearchDashboardStats | null>(null);
+  const [popularTopics, setPopularTopics] = useState<string[]>([]);
+  const [loadingStats, setLoadingStats] = useState(false);
 
   // Collapsing header animation
   const scrollY = useRef(new Animated.Value(0)).current;
@@ -175,13 +207,69 @@ export default function ResearchScreen({ isDashboardMode = false }: ResearchScre
     extrapolate: 'clamp',
   });
 
-  // Load recent searches on mount
+  // Load data on mount
   useEffect(() => {
-    loadRecentSearches();
-  }, []);
+    loadDashboardData();
+  }, [userId]);
+
+  const loadDashboardData = async () => {
+    setLoadingStats(true);
+    try {
+      // Load recent searches from backend (with local fallback)
+      await loadRecentSearches();
+      
+      // Load user stats from backend
+      if (userId) {
+        try {
+          const stats = await researchService.getUserStats(userId);
+          setUserStats(stats);
+        } catch (statsError) {
+          console.warn('[Research] Failed to load user stats:', statsError);
+        }
+      }
+      
+      // Load popular topics from backend
+      try {
+        const topics = await researchService.getTopics();
+        if (topics.length > 0) {
+          setPopularTopics(topics.slice(0, 6));
+        }
+      } catch (topicsError) {
+        console.warn('[Research] Failed to load topics, using defaults:', topicsError);
+        // Fallback to default topics
+        setPopularTopics([
+          'Mediterranean Diet',
+          'Intermittent Fasting',
+          'Gut Microbiome',
+          'Sleep Quality',
+          'Seed Oils',
+          'Ultra-processed Foods',
+        ]);
+      }
+    } catch (error) {
+      console.error('[Research] Failed to load dashboard data:', error);
+    } finally {
+      setLoadingStats(false);
+    }
+  };
 
   const loadRecentSearches = async () => {
     try {
+      // Try backend first if user is logged in
+      if (userId) {
+        try {
+          const history = await researchService.getSearchHistory(userId, 5);
+          if (history.searches.length > 0) {
+            const searches = history.searches.map(s => s.keyword);
+            setRecentSearches(searches);
+            return;
+          }
+        } catch (backendError) {
+          console.warn('[Research] Backend search history not available:', backendError);
+        }
+      }
+      
+      // Fallback to local storage
       const stored = await AsyncStorage.getItem('wihy_recent_searches');
       if (stored) {
         setRecentSearches(JSON.parse(stored));
@@ -199,7 +287,11 @@ export default function ResearchScreen({ isDashboardMode = false }: ResearchScre
       ].slice(0, 5);
 
       setRecentSearches(updated);
+      
+      // Save to local storage as fallback
       await AsyncStorage.setItem('wihy_recent_searches', JSON.stringify(updated));
+      
+      // Note: Backend will track searches automatically via the search endpoint
     } catch (error) {
       console.error('Failed to update recent searches:', error);
     }
@@ -399,8 +491,15 @@ export default function ResearchScreen({ isDashboardMode = false }: ResearchScre
                   </View>
                 )}
 
-                {selectedStudy.fullTextAvailable && (
-                  <TouchableOpacity style={styles.fullTextButton}>
+                {selectedStudy.fullTextAvailable && selectedStudy.links?.pmcWebsite && (
+                  <TouchableOpacity 
+                    style={styles.fullTextButton}
+                    onPress={() => {
+                      if (selectedStudy.links?.pmcWebsite) {
+                        Linking.openURL(selectedStudy.links.pmcWebsite);
+                      }
+                    }}
+                  >
                     <Ionicons name="open-outline" size={20} color="#fff" />
                     <Text style={styles.fullTextButtonText}>View Full Text</Text>
                   </TouchableOpacity>
@@ -429,7 +528,9 @@ export default function ResearchScreen({ isDashboardMode = false }: ResearchScre
           <View style={styles.headerStats}>
             <View style={styles.headerStatBadge}>
               <Ionicons name="document-text" size={14} color="#fff" />
-              <Text style={styles.headerStatText}>12 new papers this month</Text>
+              <Text style={styles.headerStatText}>
+                {userStats?.new_papers || 0} new papers this month
+              </Text>
             </View>
           </View>
         </Animated.View>
@@ -442,6 +543,13 @@ export default function ResearchScreen({ isDashboardMode = false }: ResearchScre
           [{ nativeEvent: { contentOffset: { y: scrollY } } }],
           { useNativeDriver: false }
         )}
+        refreshControl={
+          <RefreshControl
+            refreshing={loadingStats}
+            onRefresh={loadDashboardData}
+            tintColor="#8b5cf6"
+          />
+        }
       >
         {/* Search Bar */}
         <View style={styles.searchSection}>
@@ -495,12 +603,12 @@ export default function ResearchScreen({ isDashboardMode = false }: ResearchScre
           <View style={styles.statsCards}>
             <View style={[styles.statsCard, { borderLeftColor: '#8b5cf6' }]}>
               <Ionicons name="document-text" size={24} color="#8b5cf6" />
-              <Text style={styles.statsCardValue}>12</Text>
+              <Text style={styles.statsCardValue}>{userStats?.new_papers || 0}</Text>
               <Text style={styles.statsCardLabel}>New Papers</Text>
             </View>
             <View style={[styles.statsCard, { borderLeftColor: '#22c55e' }]}>
               <Ionicons name="bookmark" size={24} color="#22c55e" />
-              <Text style={styles.statsCardValue}>5</Text>
+              <Text style={styles.statsCardValue}>{userStats?.saved || 0}</Text>
               <Text style={styles.statsCardLabel}>Saved</Text>
             </View>
           </View>
@@ -532,29 +640,36 @@ export default function ResearchScreen({ isDashboardMode = false }: ResearchScre
         <View style={styles.topicsSection}>
           <Text style={styles.sectionHeader}>Popular Topics</Text>
           <View style={styles.topicsList}>
-            {[
+            {(popularTopics.length > 0 ? popularTopics : [
               { topic: 'Mediterranean Diet', icon: 'leaf', color: '#22c55e' },
               { topic: 'Intermittent Fasting', icon: 'time', color: '#f59e0b' },
               { topic: 'Gut Microbiome', icon: 'fitness', color: '#8b5cf6' },
               { topic: 'Sleep Quality', icon: 'moon', color: '#3b82f6' },
               { topic: 'Seed Oils', icon: 'water', color: '#ef4444' },
               { topic: 'Ultra-processed Foods', icon: 'fast-food', color: '#f97316' },
-            ].map((item, index) => (
-              <TouchableOpacity
-                key={index}
-                style={styles.topicItem}
-                onPress={() => {
-                  setQuery(item.topic);
-                  handleSearch(item.topic);
-                }}
-              >
-                <View style={[styles.topicIcon, { backgroundColor: item.color + '20' }]}>
-                  <Ionicons name={item.icon as any} size={18} color={item.color} />
-                </View>
-                <Text style={styles.topicText}>{item.topic}</Text>
-                <Ionicons name="chevron-forward" size={16} color="#9ca3af" />
-              </TouchableOpacity>
-            ))}
+            ]).map((item, index) => {
+              // Handle both API response (string) and fallback (object) formats
+              const topicName = typeof item === 'string' ? item : item.topic;
+              const topicIcon = typeof item === 'string' ? getTopicIcon(item) : item.icon;
+              const topicColor = typeof item === 'string' ? getTopicColor(index) : item.color;
+              
+              return (
+                <TouchableOpacity
+                  key={index}
+                  style={styles.topicItem}
+                  onPress={() => {
+                    setQuery(topicName);
+                    handleSearch(topicName);
+                  }}
+                >
+                  <View style={[styles.topicIcon, { backgroundColor: topicColor + '20' }]}>
+                    <Ionicons name={topicIcon as any} size={18} color={topicColor} />
+                  </View>
+                  <Text style={styles.topicText}>{topicName}</Text>
+                  <Ionicons name="chevron-forward" size={16} color="#9ca3af" />
+                </TouchableOpacity>
+              );
+            })}
           </View>
         </View>
 

@@ -120,15 +120,16 @@ class ResearchService {
 
   /**
    * Search research articles using WIHY Research API
-   * Endpoint: GET /api/research/search
+   * Endpoint: GET /api/research/search?keyword=...&limit=...
    */
   async searchArticles(params: ResearchSearchParams): Promise<ResearchArticle[]> {
     try {
       const { query, category, limit = 20, offset = 0 } = params;
       
       // Build query parameters for WIHY Research API
+      // API uses 'keyword' not 'q'
       const queryParams = new URLSearchParams({
-        q: query,
+        keyword: query,
         limit: limit.toString(),
       });
 
@@ -155,45 +156,67 @@ class ResearchService {
 
       const data = await searchResponse.json();
       
-      if (!data.success || !data.results) {
+      // API returns { success, keyword, totalFound, articles }
+      if (!data.success) {
+        console.warn('[ResearchService] Search not successful:', data.error);
+        return [];
+      }
+
+      const articlesData = data.articles || data.results || [];
+      if (articlesData.length === 0) {
         console.warn('[ResearchService] No results found');
         return [];
       }
 
-      const bookmarks = await this.getBookmarks();
-
       // Transform API results to our article format
-      const articles: ResearchArticle[] = data.results.map((article: any, index: number) => {
+      const articles: ResearchArticle[] = articlesData.map((article: any, index: number) => {
         const pmcid = article.pmcid || `PMC${article.id}`;
         
+        // Relevance score mapping:
+        // API returns relevanceScore as decimal (0-1) like 0.87
+        // We store as decimal and display as percentage in UI
+        let relevanceScore = 0;
+        if (article.relevanceScore !== undefined) {
+          // Already a decimal (0-1)
+          relevanceScore = article.relevanceScore;
+        } else if (article.relevance_score !== undefined) {
+          // Snake case version
+          relevanceScore = article.relevance_score;
+        } else {
+          // Calculate based on rank (first result = 0.95, decreasing)
+          relevanceScore = Math.max(0.5, 0.95 - (index * 0.03));
+        }
+        
+        // Normalize evidence level to lowercase for consistent UI rendering
+        const evidenceLevel = (article.evidenceLevel || article.evidence_level || 'moderate').toLowerCase();
+        
         return {
-          id: article.pmcid || article.id,
+          id: article.id || pmcid,
           pmcid,
           title: article.title || 'Untitled',
           authors: Array.isArray(article.authors) 
             ? article.authors.slice(0, 3).join(', ')
             : article.authors,
-          authorCount: Array.isArray(article.authors) ? article.authors.length : undefined,
+          authorCount: article.authorCount || (Array.isArray(article.authors) ? article.authors.length : undefined),
           journal: article.journal || 'Unknown Journal',
-          publishedDate: article.publication_date || article.publishedDate,
-          publicationYear: article.publication_date 
-            ? new Date(article.publication_date).getFullYear() 
-            : article.publicationYear,
+          publishedDate: article.publishedDate || article.publication_date,
+          publicationYear: article.publicationYear || article.publication_year || 
+            (article.publishedDate ? new Date(article.publishedDate).getFullYear() : undefined),
           abstract: article.abstract,
-          studyType: article.study_type || article.studyType,
-          evidenceLevel: article.evidence_level || article.evidenceLevel,
-          researchArea: category,
-          relevanceScore: article.relevance_score || (100 - (index * 5)) / 100,
-          rank: index + 1 + offset,
-          fullTextAvailable: article.open_access || article.fullTextAvailable || true,
-          links: {
+          studyType: article.studyType || article.study_type,
+          evidenceLevel,
+          researchArea: article.researchArea || category,
+          relevanceScore,
+          rank: article.rank || (index + 1 + offset),
+          fullTextAvailable: article.fullTextAvailable ?? article.open_access ?? true,
+          links: article.links || {
             pmcWebsite: `https://www.ncbi.nlm.nih.gov/pmc/articles/${pmcid}/`,
             pubmedLink: article.pmid ? `https://pubmed.ncbi.nlm.nih.gov/${article.pmid}/` : undefined,
-            pdfDownload: article.open_access ? `https://www.ncbi.nlm.nih.gov/pmc/articles/${pmcid}/pdf/` : null,
+            pdfDownload: article.fullTextAvailable ? `https://www.ncbi.nlm.nih.gov/pmc/articles/${pmcid}/pdf/` : null,
             doi: article.doi,
           },
-          category,
-          bookmarked: bookmarks.some(b => b.pmcid === pmcid || b.id === article.id),
+          category: article.category || category,
+          bookmarked: article.bookmarked || false,
         };
       });
 
@@ -202,8 +225,8 @@ class ResearchService {
       
     } catch (error) {
       console.error('[ResearchService] Search failed:', error);
-      // Return mock data on error
-      return this.getMockArticles(params.category);
+      // Re-throw error - no mock fallback
+      throw error;
     }
   }
 
@@ -285,7 +308,203 @@ class ResearchService {
       return await this.searchArticles({ query, limit });
     } catch (error) {
       console.error('[ResearchService] Failed to get recommendations:', error);
-      return this.getMockArticles();
+      throw error;
+    }
+  }
+
+  /**
+   * Get full article content with body text
+   * Endpoint: GET /api/research/pmc/:pmcId/content
+   */
+  async getArticleContent(pmcid: string): Promise<{
+    pmcid: string;
+    title: string;
+    abstract: string;
+    body: {
+      introduction?: string;
+      methods?: string;
+      results?: string;
+      discussion?: string;
+      conclusion?: string;
+    };
+    references?: string[];
+  } | null> {
+    try {
+      const normalizedPmcid = pmcid.startsWith('PMC') ? pmcid : `PMC${pmcid}`;
+      const contentUrl = `${API_CONFIG.servicesUrl}/api/research/pmc/${normalizedPmcid}/content`;
+      
+      console.log('[ResearchService] Fetching article content:', contentUrl);
+      
+      const response = await fetchWithLogging(contentUrl, {
+        headers: {
+          'X-Client-ID': API_CONFIG.servicesClientId,
+          'X-Client-Secret': API_CONFIG.servicesClientSecret,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Article content API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      
+      if (!data.success || !data.content) {
+        console.warn('[ResearchService] Article content not found');
+        return null;
+      }
+
+      return data.content;
+    } catch (error) {
+      console.error('[ResearchService] Failed to get article content:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get research quality score for a topic
+   * Endpoint: GET /api/research/quality?keyword=...&maxResults=...
+   */
+  async getQualityScore(keyword: string, maxResults: number = 20): Promise<{
+    keyword: string;
+    qualityScore: number;
+    confidence: 'high' | 'moderate' | 'low';
+    totalStudies: number;
+    studyTypeBreakdown: Record<string, number>;
+    evidenceLevelBreakdown: Record<string, number>;
+    yearRange: { earliest: number; latest: number };
+    topJournals: string[];
+    recommendation: string;
+  } | null> {
+    try {
+      const queryParams = new URLSearchParams({
+        keyword,
+        maxResults: maxResults.toString(),
+      });
+      
+      const qualityUrl = `${API_CONFIG.servicesUrl}/api/research/quality?${queryParams.toString()}`;
+      
+      console.log('[ResearchService] Fetching quality score:', qualityUrl);
+      
+      const response = await fetchWithLogging(qualityUrl, {
+        headers: {
+          'X-Client-ID': API_CONFIG.servicesClientId,
+          'X-Client-Secret': API_CONFIG.servicesClientSecret,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Quality score API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      
+      if (!data.success) {
+        console.warn('[ResearchService] Quality score not available');
+        return null;
+      }
+
+      return {
+        keyword: data.keyword,
+        qualityScore: data.qualityScore,
+        confidence: data.confidence,
+        totalStudies: data.totalStudies,
+        studyTypeBreakdown: data.studyTypeBreakdown,
+        evidenceLevelBreakdown: data.evidenceLevelBreakdown,
+        yearRange: data.yearRange,
+        topJournals: data.topJournals,
+        recommendation: data.recommendation,
+      };
+    } catch (error) {
+      console.error('[ResearchService] Failed to get quality score:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get popular research topics from API
+   * Endpoint: GET /api/research/topics
+   */
+  async getTopics(): Promise<string[]> {
+    try {
+      const topicsUrl = `${API_CONFIG.servicesUrl}/api/research/topics`;
+      
+      console.log('[ResearchService] Fetching topics:', topicsUrl);
+      
+      const response = await fetchWithLogging(topicsUrl, {
+        headers: {
+          'X-Client-ID': API_CONFIG.servicesClientId,
+          'X-Client-Secret': API_CONFIG.servicesClientSecret,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Topics API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      
+      if (!data.success || !data.topics) {
+        console.warn('[ResearchService] Topics not available');
+        return [];
+      }
+
+      return data.topics;
+    } catch (error) {
+      console.error('[ResearchService] Failed to get topics:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get articles for a specific topic (simplified response)
+   * Endpoint: GET /api/research/articles?topic=...&limit=...
+   */
+  async getArticlesByTopic(topic: string = 'nutrition', limit: number = 10): Promise<{
+    topic: string;
+    articles: Array<{
+      pmcid: string;
+      title: string;
+      journal: string;
+      year: number;
+      abstract: string;
+      studyType: string;
+    }>;
+  }> {
+    try {
+      const queryParams = new URLSearchParams({
+        topic,
+        limit: limit.toString(),
+      });
+      
+      const articlesUrl = `${API_CONFIG.servicesUrl}/api/research/articles?${queryParams.toString()}`;
+      
+      console.log('[ResearchService] Fetching articles by topic:', articlesUrl);
+      
+      const response = await fetchWithLogging(articlesUrl, {
+        headers: {
+          'X-Client-ID': API_CONFIG.servicesClientId,
+          'X-Client-Secret': API_CONFIG.servicesClientSecret,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Articles by topic API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      
+      if (!data.success) {
+        console.warn('[ResearchService] Articles not available');
+        return { topic, articles: [] };
+      }
+
+      return {
+        topic: data.topic,
+        articles: data.articles || [],
+      };
+    } catch (error) {
+      console.error('[ResearchService] Failed to get articles by topic:', error);
+      throw error;
     }
   }
 
@@ -800,90 +1019,6 @@ class ResearchService {
    */
   getCategory(id: string): ResearchCategory | undefined {
     return this.CATEGORIES.find(c => c.id === id);
-  }
-
-  // Mock data for development/fallback
-  private getMockArticles(category?: string): ResearchArticle[] {
-    const mockArticles: ResearchArticle[] = [
-      {
-        id: '1',
-        pmcid: 'PMC8123456',
-        title: 'The Effects of Intermittent Fasting on Metabolic Health',
-        authors: 'Smith J, Johnson M, Williams R',
-        authorCount: 3,
-        journal: 'Journal of Nutrition',
-        publishedDate: '2023-05-15',
-        publicationYear: 2023,
-        abstract: 'This systematic review examines the metabolic effects of intermittent fasting across 50 clinical trials...',
-        studyType: 'Systematic Review',
-        researchArea: 'nutrition',
-        evidenceLevel: 'High',
-        relevanceScore: 95,
-        rank: 1,
-        fullTextAvailable: true,
-        links: {
-          pmcWebsite: 'https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8123456/',
-          pubmedLink: 'https://pubmed.ncbi.nlm.nih.gov/37123456/',
-          pdfDownload: 'https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8123456/pdf/',
-        },
-        category: 'nutrition',
-        bookmarked: false,
-      },
-      {
-        id: '2',
-        pmcid: 'PMC8234567',
-        title: 'High-Intensity Interval Training vs. Moderate Continuous Exercise',
-        authors: 'Davis K, Brown L, Taylor P',
-        authorCount: 3,
-        journal: 'Sports Medicine',
-        publishedDate: '2023-03-22',
-        publicationYear: 2023,
-        abstract: 'A meta-analysis comparing cardiovascular adaptations between HIIT and moderate-intensity training...',
-        studyType: 'Meta-analysis',
-        researchArea: 'fitness',
-        evidenceLevel: 'High',
-        relevanceScore: 92,
-        rank: 2,
-        fullTextAvailable: true,
-        links: {
-          pmcWebsite: 'https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8234567/',
-          pubmedLink: 'https://pubmed.ncbi.nlm.nih.gov/37234567/',
-          pdfDownload: 'https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8234567/pdf/',
-        },
-        category: 'fitness',
-        bookmarked: false,
-      },
-      {
-        id: '3',
-        pmcid: 'PMC8345678',
-        title: 'Sleep Quality and Cognitive Performance: A Longitudinal Study',
-        authors: 'Anderson M, Wilson T, Garcia A',
-        authorCount: 3,
-        journal: 'Sleep Research',
-        publishedDate: '2023-01-10',
-        publicationYear: 2023,
-        abstract: '10-year study tracking sleep patterns and cognitive function in 5,000 participants...',
-        studyType: 'Longitudinal Study',
-        researchArea: 'sleep',
-        evidenceLevel: 'Medium',
-        relevanceScore: 88,
-        rank: 3,
-        fullTextAvailable: true,
-        links: {
-          pmcWebsite: 'https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8345678/',
-          pubmedLink: 'https://pubmed.ncbi.nlm.nih.gov/37345678/',
-          pdfDownload: 'https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8345678/pdf/',
-        },
-        category: 'sleep',
-        bookmarked: false,
-      },
-    ];
-
-    if (category && category !== 'all') {
-      return mockArticles.filter(a => a.category === category);
-    }
-
-    return mockArticles;
   }
 }
 
