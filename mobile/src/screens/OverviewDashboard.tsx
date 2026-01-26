@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Dimensions, Activ
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useIsFocused } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { GradientDashboardHeader, Ionicons } from '../components/shared';
+import { GradientDashboardHeader, Ionicons, NotificationTile } from '../components/shared';
 import { dashboardTheme } from '../theme/dashboardTheme';
 import { useDashboardLayout } from '../hooks/useDashboardLayout';
 import {
@@ -680,6 +680,16 @@ const OverviewDashboard: React.FC<BaseDashboardProps> = ({ onAnalyze }) => {
                 {healthSummaryData.map((item) => renderHealthSummaryItem({ item }))}
               </View>
             )}
+
+            {/* Notifications Tile */}
+            <View style={styles.notificationSection}>
+              <NotificationTile
+                userId={user?.id}
+                onPress={() => navigation.navigate('Notifications' as never)}
+                onViewMessages={() => navigation.navigate('Messages' as never)}
+                onViewReminders={() => navigation.navigate('Reminders' as never)}
+              />
+            </View>
 
             {/* Recent Scans Section */}
             <View style={styles.recentScansSection}>
@@ -1455,6 +1465,12 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#6b7280',
     fontSize: 16,
+  },
+
+  // Notification Tile Section
+  notificationSection: {
+    marginTop: dashboardTheme.spacing.lg,
+    marginBottom: dashboardTheme.spacing.sm,
   },
 
   // Recent Scans Section Styles

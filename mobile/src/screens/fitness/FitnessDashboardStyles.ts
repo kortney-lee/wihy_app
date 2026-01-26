@@ -64,6 +64,11 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#e0f2fe',
   },
+  notificationSection: {
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    paddingBottom: 8,
+  },
   centerContent: {
     justifyContent: 'center',
     alignItems: 'center',

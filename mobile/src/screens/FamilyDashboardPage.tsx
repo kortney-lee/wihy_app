@@ -15,7 +15,7 @@ import {
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
-import { GradientDashboardHeader, WebPageWrapper } from '../components/shared';
+import { GradientDashboardHeader, WebPageWrapper, NotificationTile } from '../components/shared';
 import { HamburgerMenu } from '../components/shared/HamburgerMenu';
 import { AuthContext } from '../context/AuthContext';
 import { hasAIAccess, hasInstacartAccess } from '../utils/capabilities';
@@ -257,6 +257,16 @@ export default function FamilyDashboardPage({
           { useNativeDriver: false }
         )}
       >
+        {/* Notifications Tile */}
+        <View style={styles.notificationSection}>
+          <NotificationTile
+            userId={user?.id}
+            onPress={() => navigation.navigate('Notifications' as never)}
+            onViewMessages={() => navigation.navigate('Messages' as never)}
+            onViewReminders={() => navigation.navigate('Reminders' as never)}
+          />
+        </View>
+
         {/* Family Members - Metric Style */}
         <View style={styles.metricsSection}>
           <Text style={styles.sectionTitle}>Today's Metrics</Text>
@@ -550,6 +560,11 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#6b7280',
     marginTop: 4,
+  },
+  notificationSection: {
+    paddingHorizontal: 20,
+    paddingTop: 16,
+    paddingBottom: 8,
   },
   section: {
     paddingHorizontal: 20,

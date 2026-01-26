@@ -16,7 +16,7 @@ import {
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
-import { Ionicons } from '../components/shared';
+import { Ionicons, NotificationTile } from '../components/shared';
 import type { StackNavigationProp } from '@react-navigation/stack';
 import type { RootStackParamList } from '../types/navigation';
 import { dashboardColors, GradientDashboardHeader } from '../components/shared';
@@ -525,6 +525,16 @@ export default function CoachDashboard({
         {!selectedClient ? (
           /* Client List View */
           <View style={styles.clientListContainer}>
+            {/* Notifications Tile for Coaches */}
+            <View style={styles.notificationSection}>
+              <NotificationTile
+                userId={coachId || undefined}
+                onPress={() => navigation.navigate('Notifications' as never)}
+                onViewMessages={() => navigation.navigate('Messages' as never)}
+                onViewReminders={() => navigation.navigate('Reminders' as never)}
+              />
+            </View>
+
             {/* Search Bar */}
             <View style={styles.searchContainer}>
               <Ionicons name="search" size={20} color="#9ca3af" />
@@ -712,6 +722,11 @@ const styles = StyleSheet.create({
   },
   clientListContainer: {
     flex: 1,
+  },
+  notificationSection: {
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    paddingBottom: 8,
   },
   searchContainer: {
     flexDirection: 'row',

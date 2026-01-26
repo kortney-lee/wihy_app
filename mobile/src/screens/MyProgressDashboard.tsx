@@ -15,7 +15,7 @@ import {
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import { GradientDashboardHeader, Ionicons } from '../components/shared';
+import { GradientDashboardHeader, Ionicons, NotificationTile } from '../components/shared';
 import { useNavigation } from '@react-navigation/native';
 import type { CompositeNavigationProp } from '@react-navigation/native';
 import type { StackNavigationProp } from '@react-navigation/stack';
@@ -1130,6 +1130,16 @@ const MyProgressDashboard: React.FC<MyProgressDashboardProps> = ({
         )}
         scrollEventThrottle={16}
       >
+        {/* Notifications Tile */}
+        <View style={styles.notificationSection}>
+          <NotificationTile
+            userId={user?.id}
+            onPress={() => navigation.navigate('Notifications' as never)}
+            onViewMessages={() => navigation.navigate('Messages' as never)}
+            onViewReminders={() => navigation.navigate('Reminders' as never)}
+          />
+        </View>
+
         {/* Progress Cards */}
         <View style={[styles.progressSection, { paddingHorizontal: layout.horizontalPadding }]}>
           <View style={styles.sectionHeader}>
@@ -1566,6 +1576,12 @@ const styles = StyleSheet.create({
   periodTextActive: {
     color: '#ffffff',
     fontWeight: '600',
+  },
+
+  notificationSection: {
+    paddingHorizontal: dashboardTheme.spacing.lg,
+    paddingTop: dashboardTheme.spacing.md,
+    paddingBottom: dashboardTheme.spacing.sm,
   },
 
   progressSection: {

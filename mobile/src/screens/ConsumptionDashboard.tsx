@@ -16,7 +16,7 @@ import {
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import { GradientDashboardHeader, Ionicons } from '../components/shared';
+import { GradientDashboardHeader, Ionicons, NotificationTile } from '../components/shared';
 import { dashboardTheme } from '../theme/dashboardTheme';
 import { useDashboardLayout } from '../hooks/useDashboardLayout';
 import {
@@ -114,7 +114,7 @@ const ConsumptionDashboard: React.FC<ConsumptionDashboardProps> = ({
   onUploadReceipt,
 }) => {
   const layout = useDashboardLayout();
-  const { navigateToNutritionFacts } = useDashboardNavigation();
+  const { navigation, navigateToNutritionFacts } = useDashboardNavigation();
   const { userId } = useAuth();
   
   const [selectedTab, setSelectedTab] = useState<'nutrition' | 'meals' | 'recipes' | 'shopping'>('nutrition');
@@ -1341,6 +1341,16 @@ const ConsumptionDashboard: React.FC<ConsumptionDashboardProps> = ({
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       >
+        {/* Notifications Tile */}
+        <View style={styles.notificationSection}>
+          <NotificationTile
+            userId={userId || undefined}
+            onPress={() => navigation.navigate('Notifications' as never)}
+            onViewMessages={() => navigation.navigate('Messages' as never)}
+            onViewReminders={() => navigation.navigate('Reminders' as never)}
+          />
+        </View>
+
         {/* Search Bar */}
         <View style={styles.searchContainer}>
           <View style={styles.searchInputContainer}>
@@ -1427,7 +1437,11 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: dashboardTheme.colors.background,
   },
-
+  notificationSection: {
+    paddingHorizontal: dashboardTheme.spacing.lg,
+    paddingTop: dashboardTheme.spacing.md,
+    paddingBottom: dashboardTheme.spacing.xs,
+  },
   searchContainer: {
     paddingHorizontal: dashboardTheme.spacing.lg,
     paddingVertical: dashboardTheme.spacing.md,

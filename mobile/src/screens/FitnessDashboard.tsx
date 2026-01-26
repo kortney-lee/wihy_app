@@ -19,7 +19,7 @@ import { Picker } from '@react-native-picker/picker';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { colors } from '../theme/design-tokens';
-import { dashboardColors, GradientDashboardHeader, Ionicons } from '../components/shared';
+import { dashboardColors, GradientDashboardHeader, Ionicons, NotificationTile } from '../components/shared';
 import { 
   fitnessService, 
   DailyWorkout, 
@@ -3599,6 +3599,16 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
           }
         >
+
+          {/* Notifications Tile */}
+          <View style={styles.notificationSection}>
+            <NotificationTile
+              userId={userId || undefined}
+              onPress={() => navigation.navigate('Notifications' as never)}
+              onViewMessages={() => navigation.navigate('Messages' as never)}
+              onViewReminders={() => navigation.navigate('Reminders' as never)}
+            />
+          </View>
 
           {/* Weather Section */}
           <TouchableOpacity
