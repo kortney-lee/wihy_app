@@ -1,7 +1,7 @@
 /**
  * Subscription Service
  * 
- * Handles consumer subscriptions, add-ons, integrations, and upgrades
+ * Handles consumer subscriptions and add-ons
  * for both web (Stripe) and native (Apple/Google IAP)
  * 
  * Base URL: https://payment.wihy.ai/api/stripe
@@ -22,12 +22,8 @@ export type PlanId =
   | 'coach';
 
 export type AddOnId = 
-  | 'grocery_deals'
-  | 'restaurant_partnerships';
-
-export type IntegrationId =
-  | 'instacart_meals'
-  | 'workout_tracking';
+  | 'wihy_coach'
+  | 'instacart';
 
 export interface SubscriptionPlan {
   id: PlanId;
@@ -40,15 +36,6 @@ export interface SubscriptionPlan {
 
 export interface AddOn {
   id: AddOnId;
-  name: string;
-  description: string;
-  price: number;
-  interval: 'month' | 'year';
-  features: string[];
-}
-
-export interface Integration {
-  id: IntegrationId;
   name: string;
   description: string;
   price: number;
@@ -74,7 +61,7 @@ export interface ActiveSubscription {
 }
 
 export interface SubscriptionAddon {
-  id: AddOnId | IntegrationId;
+  id: AddOnId;
   name: string;
   price: number;
   subscriptionItemId: string;
@@ -175,18 +162,6 @@ class SubscriptionService {
   }
 
   /**
-   * Get all available integrations
-   * GET /api/stripe/integrations
-   */
-  async getIntegrations(): Promise<Integration[]> {
-    const response = await apiClient.payment<{ success: boolean; integrations: Integration[] }>(
-      'GET',
-      '/integrations'
-    );
-    return response.integrations;
-  }
-
-  /**
    * Get valid upgrade options from current plan
    * GET /api/stripe/upgrade-options/:currentPlan
    * 
@@ -207,7 +182,7 @@ class SubscriptionService {
    * @param subscriptionId - Stripe subscription ID
    * @param addonId - Add-on or integration ID
    */
-  async addAddon(subscriptionId: string, addonId: AddOnId | IntegrationId): Promise<SubscriptionAddon> {
+  async addAddon(subscriptionId: string, addonId: AddOnId): Promise<SubscriptionAddon> {
     const response = await apiClient.payment<{ success: boolean; addon: SubscriptionAddon }>(
       'POST',
       '/add-addon',

@@ -47,10 +47,8 @@ export { subscriptionService } from './subscriptionService';
 export type {
   PlanId,
   AddOnId,
-  IntegrationId,
   SubscriptionPlan,
   AddOn,
-  Integration,
   CheckoutSession,
   ActiveSubscription,
   SubscriptionAddon,
