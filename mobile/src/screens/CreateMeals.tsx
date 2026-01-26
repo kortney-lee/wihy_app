@@ -30,7 +30,7 @@ import SvgIcon from '../components/shared/SvgIcon';
 import { AuthContext } from '../context/AuthContext';
 import { mealService, MealTemplate, QUICK_TEMPLATE_PRESETS, MealType, CookingSkillLevel, MealVariety, TimePerMeal, CreateMealPlanRequest, MealPlanResponse, CalendarDay, SavedMeal, DietOption } from '../services/mealService';
 import { createMealPlan, generateShoppingList } from '../services/mealPlanService';
-import { createInstacartLinkFromMealPlan } from '../services/instacartService';
+import { createShoppingList, ShoppingListItem } from '../services/instacartService';
 import { getMealDiaryService, type Meal, type DietaryPreferences } from '../services/mealDiary';
 import { authService } from '../services/authService';
 import { RootStackParamList } from '../types/navigation';
@@ -1099,7 +1099,7 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
   };
 
   const handleSubmitToInstacart = async () => {
-    if (!acceptedPlan || !mealPlanId) {
+    if (!acceptedPlan) {
       Alert.alert('Error', 'No meal plan available. Please create a meal plan first.');
       return;
     }
@@ -1108,27 +1108,50 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
     setGeneratingList(true);
     
     try {
-      // Use the correct Instacart API to create shopping link from meal plan
-      console.log('[Instacart] Creating shopping link for plan:', mealPlanId);
+      // Extract shopping items from the accepted plan
+      const extractedItems = extractShoppingListFromPlan(acceptedPlan);
       
-      const instacartResponse = await createInstacartLinkFromMealPlan(mealPlanId);
+      // Flatten all categories into a single array for Instacart
+      const allItems: ShoppingListItem[] = [];
+      Object.values(extractedItems).forEach(categoryItems => {
+        categoryItems.forEach(item => {
+          if (item.name) {
+            allItems.push({
+              name: item.name,
+              quantity: item.amount || 1,
+              unit: item.unit || 'item',
+            });
+          }
+        });
+      });
       
-      if (instacartResponse && instacartResponse.productsLinkUrl) {
+      if (allItems.length === 0) {
+        Alert.alert('No Items', 'No ingredients found in this meal plan.');
+        setGeneratingList(false);
+        return;
+      }
+      
+      console.log('[Instacart] Creating shopping list with', allItems.length, 'items');
+      
+      // Use the /create-list endpoint - doesn't require saved mealPlanId
+      const instacartResponse = await createShoppingList(allItems, 'WIHY Meal Plan');
+      
+      if (instacartResponse?.success && instacartResponse?.data?.productsLinkUrl) {
         // Save the Instacart URL to state
-        setInstacartUrl(instacartResponse.productsLinkUrl);
+        setInstacartUrl(instacartResponse.data.productsLinkUrl);
         
-        console.log('[Instacart] Shopping link created:', instacartResponse.productsLinkUrl);
+        console.log('[Instacart] Shopping link created:', instacartResponse.data.productsLinkUrl);
         
         // Auto-open the Instacart link (deep link)
         try {
-          await Linking.openURL(instacartResponse.productsLinkUrl);
+          await Linking.openURL(instacartResponse.data.productsLinkUrl);
           console.log('[Instacart] Deep link opened successfully');
         } catch (linkError) {
           console.warn('[Instacart] Failed to open deep link:', linkError);
           // Fallback: Show alert with button to try again
           Alert.alert(
             'Shopping List Ready',
-            `Your shopping list with ${instacartResponse.ingredientCount} ingredients has been created. Tap the button to open in Instacart.`,
+            `Your shopping list with ${allItems.length} ingredients has been created. Tap the button to open in Instacart.`,
             [{ text: 'OK' }]
           );
         }

@@ -152,27 +152,33 @@ export async function createInstacartLinkFromMeal(
 
 /**
  * Create custom shopping list with brand preferences and filters
+ * Uses /create-list endpoint - doesn't require a saved meal plan
  */
 export async function createShoppingList(
   items: ShoppingListItem[],
-  userId: string,
-  zipCode?: string
+  title: string = 'My Shopping List'
 ): Promise<InstacartLinkResponse> {
   try {
-    const response = await fetchWithLogging(`${API_BASE}/instacart/shopping-list`, {
+    const response = await fetchWithLogging(`${API_BASE}/instacart/create-list`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        userId,
         list_data: {
-          line_items: items,
-        },
-        options: {
-          delivery_method: 'delivery',
-          ...(zipCode && { zip_code: zipCode }),
-        },
+          title,
+          line_items: items.map(item => ({
+            name: item.name,
+            quantity: item.quantity,
+            unit: item.unit,
+            ...(item.notes && { notes: item.notes }),
+            ...(item.filters?.brand_filters?.length && {
+              filters: {
+                brand_filters: item.filters.brand_filters
+              }
+            })
+          }))
+        }
       }),
     });
 
@@ -186,7 +192,8 @@ export async function createShoppingList(
       throw new Error(`Failed to create shopping list: ${response.status} ${response.statusText}`);
     }
 
-    return await response.json();
+    const result = await response.json();
+    return result;
   } catch (error) {
     console.error('Error in createShoppingList:', error);
     throw error;
