@@ -1524,18 +1524,21 @@ class MealService {
 
   /**
    * Create a custom meal (user-specific)
+   * IMPORTANT: Meals must be saved to DB before sending to Instacart for deep links to work
    */
   async createMeal(userId: string, mealData: {
     name: string;
     meal_type: 'breakfast' | 'lunch' | 'dinner' | 'snack';
     ingredients: Array<{ name: string; amount: number; unit: string }>;
+    instructions?: string[];
     nutrition?: { calories: number; protein: number; carbs: number; fat: number };
-    tags: string[];
+    tags?: string[];
     notes?: string;
     serving_size?: number;
-    preparation_time?: number;
-    cooking_time?: number;
-  }): Promise<string> {
+    prep_time?: number;
+    cook_time?: number;
+    servings?: number;
+  }): Promise<{ meal_id: string; id: string }> {
     try {
       const response = await fetchWithLogging(`${this.baseUrl}/api/meals/create`, {
         method: 'POST',
@@ -1543,6 +1546,11 @@ class MealService {
         body: JSON.stringify({
           user_id: userId,
           ...mealData,
+          // Map fields to API expected format
+          calories: mealData.nutrition?.calories,
+          protein_g: mealData.nutrition?.protein,
+          carbs_g: mealData.nutrition?.carbs,
+          fat_g: mealData.nutrition?.fat,
         }),
       });
 
@@ -1552,11 +1560,73 @@ class MealService {
         throw new Error(result.error || 'Failed to create meal');
       }
 
-      return result.meal_id;
+      // Return both meal_id and id for flexibility
+      return { 
+        meal_id: result.meal_id || result.meal?.id, 
+        id: result.meal?.id || result.meal_id 
+      };
     } catch (error) {
       console.error('Error creating meal:', error);
       throw error;
     }
+  }
+
+  /**
+   * Save all meals from a meal plan to the database
+   * This is REQUIRED before sending to Instacart so deep links work when user returns
+   * 
+   * @returns Array of saved meal IDs
+   */
+  async saveMealsFromPlan(
+    userId: string, 
+    plan: MealPlanResponse
+  ): Promise<string[]> {
+    const savedMealIds: string[] = [];
+    
+    if (!plan.days || plan.days.length === 0) {
+      console.warn('[MealService] No days in meal plan to save');
+      return savedMealIds;
+    }
+
+    console.log(`[MealService] Saving ${plan.days.length} days of meals to database...`);
+
+    for (const day of plan.days) {
+      if (!day.meals) continue;
+      
+      for (const meal of day.meals) {
+        try {
+          const result = await this.createMeal(userId, {
+            name: meal.meal_name,
+            meal_type: meal.meal_type as 'breakfast' | 'lunch' | 'dinner' | 'snack',
+            ingredients: (meal.ingredients || []).map(ing => ({
+              name: ing.name,
+              amount: ing.amount || 1,
+              unit: ing.unit || 'item',
+            })),
+            instructions: meal.instructions || [],
+            nutrition: {
+              calories: meal.calories || 0,
+              protein: meal.protein || 0,
+              carbs: meal.carbs || 0,
+              fat: meal.fat || 0,
+            },
+            tags: [],
+            prep_time: meal.prep_time_min,
+            cook_time: meal.cook_time_min,
+            servings: meal.servings,
+          });
+          
+          savedMealIds.push(result.meal_id || result.id);
+          console.log(`[MealService] Saved meal: ${meal.meal_name} -> ${result.meal_id || result.id}`);
+        } catch (error) {
+          console.error(`[MealService] Failed to save meal ${meal.meal_name}:`, error);
+          // Continue with other meals even if one fails
+        }
+      }
+    }
+
+    console.log(`[MealService] Saved ${savedMealIds.length} meals to database`);
+    return savedMealIds;
   }
 
   /**

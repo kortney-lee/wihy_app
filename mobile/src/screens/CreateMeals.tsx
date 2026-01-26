@@ -299,6 +299,8 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
   const [acceptedPlan, setAcceptedPlan] = useState<MealPlanResponse | null>(null);
   const [savingMealPlan, setSavingMealPlan] = useState(false);
   const [mealPlanSaved, setMealPlanSaved] = useState(false);
+  const [savedMealIds, setSavedMealIds] = useState<string[]>([]); // Track saved meal IDs for Instacart deep links
+  const [savingMealsToDb, setSavingMealsToDb] = useState(false); // Loading state for saving meals
 
   // Shopping List Modal state (bottom sheet style)
   const [showShoppingListModal, setShowShoppingListModal] = useState(false);
@@ -1386,6 +1388,7 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
     setInstacartUrl(null);
     setMealPlanId(null);
     setMealPlanSaved(false);
+    setSavedMealIds([]); // Reset saved meal IDs for new plan
   };
 
   const toggleDietaryOption = (id: string) => {
@@ -3354,15 +3357,33 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
             <View style={styles.successActionsContainer}>
               {/* View Shopping List - Primary Action */}
               <TouchableOpacity 
-                style={styles.instacartButton}
+                style={[styles.instacartButton, savingMealsToDb && styles.instacartButtonDisabled]}
                 activeOpacity={0.7}
-                onPress={(e) => {
+                onPress={async (e) => {
                   e.stopPropagation();
                   console.log('[ViewShoppingList] Button pressed');
                   const planId = acceptedPlan?.program_id;
                   if (!planId) {
                     Alert.alert('Error', 'No meal plan available');
                     return;
+                  }
+                  
+                  // ⭐ CRITICAL: Save meals to database first for Instacart deep links to work
+                  // When user returns from Instacart via "Go to recipe on Wihy.Ai", 
+                  // the meals must exist in the database
+                  if (savedMealIds.length === 0 && acceptedPlan) {
+                    try {
+                      setSavingMealsToDb(true);
+                      console.log('[ViewShoppingList] Saving meals to database for deep link support...');
+                      const mealIds = await mealService.saveMealsFromPlan(userId, acceptedPlan);
+                      setSavedMealIds(mealIds);
+                      console.log('[ViewShoppingList] Saved', mealIds.length, 'meals to database');
+                    } catch (saveError) {
+                      console.warn('[ViewShoppingList] Failed to save meals to DB (deep links may not work):', saveError);
+                      // Continue anyway - meals in local state can still be used
+                    } finally {
+                      setSavingMealsToDb(false);
+                    }
                   }
                   
                   // Extract shopping list from the accepted plan
@@ -3386,7 +3407,7 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
                     Alert.alert('No Items', 'No ingredients found in this meal plan.');
                   }
                 }}
-                disabled={!acceptedPlan || generatingList}
+                disabled={!acceptedPlan || generatingList || savingMealsToDb}
               >
                 <LinearGradient
                   colors={['#43B02A', '#2E8B1F']}
@@ -3394,7 +3415,11 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
                   end={{ x: 1, y: 0 }}
                   style={styles.instacartButtonGradient}
                 >
-                  <SvgIcon name="list-outline" size={24} color="#fff" />
+                  {savingMealsToDb ? (
+                    <ActivityIndicator size="small" color="#fff" />
+                  ) : (
+                    <SvgIcon name="list-outline" size={24} color="#fff" />
+                  )}
                   <Text style={styles.instacartButtonText}>
                     View Shopping List
                   </Text>
