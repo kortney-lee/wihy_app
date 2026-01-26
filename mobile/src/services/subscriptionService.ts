@@ -1,0 +1,419 @@
+/**
+ * Subscription Service
+ * 
+ * Handles consumer subscriptions, add-ons, integrations, and upgrades
+ * for both web (Stripe) and native (Apple/Google IAP)
+ * 
+ * Base URL: https://payment.wihy.ai/api/stripe
+ */
+
+import { Platform } from 'react-native';
+import { apiClient } from './apiClient';
+
+// ============= TYPES =============
+
+export type PlanId = 
+  | 'free'
+  | 'pro_monthly' 
+  | 'pro_yearly'
+  | 'family_basic'
+  | 'family_pro'
+  | 'family_yearly'
+  | 'coach';
+
+export type AddOnId = 
+  | 'grocery_deals'
+  | 'restaurant_partnerships';
+
+export type IntegrationId =
+  | 'instacart_meals'
+  | 'workout_tracking';
+
+export interface SubscriptionPlan {
+  id: PlanId;
+  name: string;
+  price: number;
+  interval: 'month' | 'year';
+  priceId: string;
+  features: string[];
+}
+
+export interface AddOn {
+  id: AddOnId;
+  name: string;
+  description: string;
+  price: number;
+  interval: 'month' | 'year';
+  features: string[];
+}
+
+export interface Integration {
+  id: IntegrationId;
+  name: string;
+  description: string;
+  price: number;
+  interval: 'month' | 'year';
+  features: string[];
+}
+
+export interface CheckoutSession {
+  checkoutUrl: string;
+  sessionId: string;
+  plan: PlanId;
+  email: string;
+}
+
+export interface ActiveSubscription {
+  id: string;
+  plan: PlanId;
+  status: 'active' | 'canceled' | 'past_due' | 'trialing' | 'incomplete';
+  currentPeriodEnd: number; // Unix timestamp
+  auto_renew: boolean;
+  provider: 'stripe' | 'apple' | 'google';
+  addons?: SubscriptionAddon[];
+}
+
+export interface SubscriptionAddon {
+  id: AddOnId | IntegrationId;
+  name: string;
+  price: number;
+  subscriptionItemId: string;
+}
+
+export interface UpgradeOption {
+  id: PlanId;
+  name: string;
+  price: number;
+  interval: 'month' | 'year';
+}
+
+// ============= SERVICE IMPLEMENTATION =============
+
+class SubscriptionService {
+  private baseUrl = 'https://payment.wihy.ai/api/stripe';
+
+  /**
+   * Get all available subscription plans
+   * GET /api/stripe/plans
+   */
+  async getPlans(): Promise<SubscriptionPlan[]> {
+    const response = await apiClient.payment<{ success: boolean; plans: SubscriptionPlan[] }>(
+      'GET',
+      '/plans'
+    );
+    return response.plans;
+  }
+
+  /**
+   * Create Stripe checkout session for web
+   * POST /api/stripe/create-checkout-session
+   * 
+   * @param plan - Plan ID (e.g., 'pro_monthly')
+   * @param email - User email
+   * @param successUrl - Redirect URL after successful payment
+   * @param cancelUrl - Redirect URL if user cancels
+   */
+  async createCheckoutSession(
+    plan: PlanId,
+    email: string,
+    successUrl?: string,
+    cancelUrl?: string
+  ): Promise<CheckoutSession> {
+    const response = await apiClient.payment<{ success: boolean } & CheckoutSession>(
+      'POST',
+      '/create-checkout-session',
+      {
+        plan,
+        email,
+        source: Platform.OS,
+        successUrl: successUrl || `${window?.location?.origin || ''}/payment/success`,
+        cancelUrl: cancelUrl || `${window?.location?.origin || ''}/payment/cancel`,
+      }
+    );
+
+    return {
+      checkoutUrl: response.checkoutUrl,
+      sessionId: response.sessionId,
+      plan: response.plan,
+      email: response.email,
+    };
+  }
+
+  /**
+   * Get Stripe customer portal URL for subscription management
+   * GET /api/stripe/customer-portal
+   */
+  async getCustomerPortal(): Promise<string> {
+    const response = await apiClient.payment<{ success: boolean; portalUrl: string }>(
+      'GET',
+      '/customer-portal'
+    );
+    return response.portalUrl;
+  }
+
+  /**
+   * Cancel subscription
+   * POST /api/stripe/cancel
+   */
+  async cancelSubscription(): Promise<void> {
+    await apiClient.payment<{ success: boolean; message: string }>(
+      'POST',
+      '/cancel'
+    );
+  }
+
+  /**
+   * Get all available add-ons
+   * GET /api/stripe/addons
+   */
+  async getAddons(): Promise<AddOn[]> {
+    const response = await apiClient.payment<{ success: boolean; addons: AddOn[] }>(
+      'GET',
+      '/addons'
+    );
+    return response.addons;
+  }
+
+  /**
+   * Get all available integrations
+   * GET /api/stripe/integrations
+   */
+  async getIntegrations(): Promise<Integration[]> {
+    const response = await apiClient.payment<{ success: boolean; integrations: Integration[] }>(
+      'GET',
+      '/integrations'
+    );
+    return response.integrations;
+  }
+
+  /**
+   * Get valid upgrade options from current plan
+   * GET /api/stripe/upgrade-options/:currentPlan
+   * 
+   * @param currentPlan - Current plan ID (e.g., 'pro_monthly')
+   */
+  async getUpgradeOptions(currentPlan: PlanId): Promise<UpgradeOption[]> {
+    const response = await apiClient.payment<{ success: boolean; upgrades: UpgradeOption[] }>(
+      'GET',
+      `/upgrade-options/${currentPlan}`
+    );
+    return response.upgrades;
+  }
+
+  /**
+   * Add an add-on or integration to existing subscription
+   * POST /api/stripe/add-addon
+   * 
+   * @param subscriptionId - Stripe subscription ID
+   * @param addonId - Add-on or integration ID
+   */
+  async addAddon(subscriptionId: string, addonId: AddOnId | IntegrationId): Promise<SubscriptionAddon> {
+    const response = await apiClient.payment<{ success: boolean; addon: SubscriptionAddon }>(
+      'POST',
+      '/add-addon',
+      {
+        subscriptionId,
+        addonId,
+      }
+    );
+    return response.addon;
+  }
+
+  /**
+   * Remove an add-on from subscription
+   * POST /api/stripe/remove-addon
+   * 
+   * @param subscriptionItemId - Stripe subscription item ID
+   */
+  async removeAddon(subscriptionItemId: string): Promise<void> {
+    await apiClient.payment<{ success: boolean; message: string }>(
+      'POST',
+      '/remove-addon',
+      {
+        subscriptionItemId,
+      }
+    );
+  }
+
+  /**
+   * Upgrade subscription to a higher-tier plan
+   * POST /api/stripe/upgrade
+   * 
+   * @param subscriptionId - Current Stripe subscription ID
+   * @param newPlan - New plan ID to upgrade to
+   */
+  async upgradeSubscription(subscriptionId: string, newPlan: PlanId): Promise<ActiveSubscription> {
+    const response = await apiClient.payment<{ success: boolean; subscription: ActiveSubscription }>(
+      'POST',
+      '/upgrade',
+      {
+        subscriptionId,
+        newPlan,
+      }
+    );
+    return response.subscription;
+  }
+
+  /**
+   * Get active subscription from any provider (Stripe, Apple, Google)
+   * GET /api/subscriptions/active
+   */
+  async getActiveSubscription(): Promise<ActiveSubscription | null> {
+    try {
+      const response = await apiClient.payment<{ success: boolean; data: ActiveSubscription }>(
+        'GET',
+        '/subscriptions/active'
+      );
+      return response.data;
+    } catch (error) {
+      console.log('[SubscriptionService] No active subscription found');
+      return null;
+    }
+  }
+
+  /**
+   * Verify all subscriptions (Stripe, Apple, Google) and sync status
+   * POST /api/subscriptions/verify
+   */
+  async verifyAllSubscriptions(): Promise<ActiveSubscription | null> {
+    try {
+      const response = await apiClient.payment<{ success: boolean; data: ActiveSubscription }>(
+        'POST',
+        '/subscriptions/verify'
+      );
+      return response.data;
+    } catch (error) {
+      console.error('[SubscriptionService] Failed to verify subscriptions:', error);
+      return null;
+    }
+  }
+
+  // ============= NATIVE IAP METHODS =============
+
+  /**
+   * Verify Apple IAP receipt
+   * POST /api/iap/verify-receipt
+   * 
+   * @param receipt - Base64 encoded receipt data
+   * @param productId - Product ID (e.g., 'com.wihy.premium.monthly')
+   */
+  async verifyAppleReceipt(receipt: string, productId: string): Promise<any> {
+    const response = await apiClient.payment<{ success: boolean; data: any }>(
+      'POST',
+      '/iap/verify-receipt',
+      {
+        receipt,
+        productId,
+      }
+    );
+    return response.data;
+  }
+
+  /**
+   * Get Apple IAP subscription status
+   * GET /api/iap/subscription
+   */
+  async getAppleSubscription(): Promise<ActiveSubscription | null> {
+    try {
+      const response = await apiClient.payment<{ success: boolean; data: ActiveSubscription }>(
+        'GET',
+        '/iap/subscription'
+      );
+      return response.data;
+    } catch (error) {
+      console.log('[SubscriptionService] No Apple subscription found');
+      return null;
+    }
+  }
+
+  /**
+   * Verify Google Play purchase
+   * POST /api/google-play/verify-purchase
+   * 
+   * @param productId - Product ID
+   * @param purchaseToken - Google Play purchase token
+   */
+  async verifyGooglePlayPurchase(productId: string, purchaseToken: string): Promise<any> {
+    const response = await apiClient.payment<{ success: boolean; data: any }>(
+      'POST',
+      '/google-play/verify-purchase',
+      {
+        productId,
+        purchaseToken,
+      }
+    );
+    return response.data;
+  }
+
+  /**
+   * Acknowledge Google Play purchase
+   * POST /api/google-play/acknowledge
+   * 
+   * @param productId - Product ID
+   * @param purchaseToken - Google Play purchase token
+   */
+  async acknowledgeGooglePlayPurchase(productId: string, purchaseToken: string): Promise<void> {
+    await apiClient.payment<{ success: boolean }>(
+      'POST',
+      '/google-play/acknowledge',
+      {
+        productId,
+        purchaseToken,
+      }
+    );
+  }
+
+  /**
+   * Get Google Play subscription status
+   * GET /api/google-play/subscription
+   */
+  async getGooglePlaySubscription(): Promise<ActiveSubscription | null> {
+    try {
+      const response = await apiClient.payment<{ success: boolean; data: ActiveSubscription }>(
+        'GET',
+        '/google-play/subscription'
+      );
+      return response.data;
+    } catch (error) {
+      console.log('[SubscriptionService] No Google Play subscription found');
+      return null;
+    }
+  }
+
+  // ============= HELPER METHODS =============
+
+  /**
+   * Check if user has active subscription
+   */
+  async hasActiveSubscription(): Promise<boolean> {
+    const subscription = await this.getActiveSubscription();
+    return subscription?.status === 'active';
+  }
+
+  /**
+   * Check if user has specific plan
+   */
+  async hasPlan(planId: PlanId): Promise<boolean> {
+    const subscription = await this.getActiveSubscription();
+    return subscription?.plan === planId;
+  }
+
+  /**
+   * Get user's current plan (or 'free' if no subscription)
+   */
+  async getCurrentPlan(): Promise<PlanId> {
+    const subscription = await this.getActiveSubscription();
+    return subscription?.plan || 'free';
+  }
+
+  /**
+   * Check if user can upgrade to a specific plan
+   */
+  async canUpgradeTo(newPlan: PlanId): Promise<boolean> {
+    const currentPlan = await this.getCurrentPlan();
+    const upgradeOptions = await this.getUpgradeOptions(currentPlan);
+    return upgradeOptions.some(option => option.id === newPlan);
+  }
+}
+
+export const subscriptionService = new SubscriptionService();

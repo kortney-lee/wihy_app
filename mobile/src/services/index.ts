@@ -42,6 +42,21 @@ export { wellnessService, WellnessService } from './wellnessService';
 export { checkoutService, WIHY_PLANS } from './checkoutService';
 export type { Plan, CheckoutResult, PaymentStatus } from './checkoutService';
 
+// NEW: Export Subscription Service (payment.wihy.ai)
+export { subscriptionService } from './subscriptionService';
+export type {
+  PlanId,
+  AddOnId,
+  IntegrationId,
+  SubscriptionPlan,
+  AddOn,
+  Integration,
+  CheckoutSession,
+  ActiveSubscription,
+  SubscriptionAddon,
+  UpgradeOption,
+} from './subscriptionService';
+
 // NEW: Export Apple Sign-In Service
 export { appleAuthService } from './appleAuthService';
 export type { AppleAuthResult } from './appleAuthService';
