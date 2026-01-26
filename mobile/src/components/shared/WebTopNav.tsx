@@ -26,9 +26,6 @@ export function WebTopNav({ activeTab = 'none' }: WebTopNavProps) {
   const route = useRoute();
   const { user } = useContext(AuthContext);
   const [showLoginModal, setShowLoginModal] = useState(false);
-  
-  // Check if user is on free plan
-  const isFreeUser = !user || user.plan === 'free';
 
   // Only render on web
   if (!isWeb) {
@@ -82,12 +79,14 @@ export function WebTopNav({ activeTab = 'none' }: WebTopNavProps) {
     }
   };
   
-  // Handle health button click - show subscription for free users
+  // Handle health button click - show subscription for non-logged-in users
   const handleHealthPress = () => {
-    console.log('[WebTopNav] handleHealthPress called, isFreeUser:', isFreeUser);
-    if (isFreeUser) {
+    console.log('[WebTopNav] handleHealthPress called, user:', user?.email);
+    if (!user) {
+      // Not logged in - redirect to subscription/plans
       navigateToStack('Subscription');
     } else {
+      // Logged in (free or premium) - allow access to Health
       navigateToTab('Health');
     }
   };
