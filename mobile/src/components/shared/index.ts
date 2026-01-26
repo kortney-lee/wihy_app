@@ -13,6 +13,8 @@ export { Ionicons } from './Ionicons';
 export * from './types';
 export { InstacartLinkButton } from './InstacartLinkButton';
 export { BrandInput } from './BrandInput';
+export { NotificationTile } from './NotificationTile';
+export type { NotificationSummary } from './NotificationTile';
 
 // Progressive Enhancement Components
 export { StoreSelector } from './StoreSelector';
