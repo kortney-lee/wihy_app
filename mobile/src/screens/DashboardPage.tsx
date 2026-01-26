@@ -19,7 +19,7 @@ import type { TabParamList, RootStackParamList } from '../types/navigation';
 import type { DashboardContext } from './HealthHub';
 import { dashboardTheme } from '../theme/dashboardTheme';
 import { HamburgerMenu } from '../components/shared/HamburgerMenu';
-import { GradientDashboardHeader, QuickStartGuide } from '../components/shared';
+import { GradientDashboardHeader, QuickStartGuide, NotificationTile } from '../components/shared';
 import { AuthContext } from '../context/AuthContext';
 import { hasCoachAccess, hasFamilyAccess, hasMealsAccess } from '../utils/capabilities';
 import { useDashboardLayout } from '../hooks/useDashboardLayout';
@@ -255,6 +255,17 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
           <Text style={[styles.cardTitle, { fontSize: titleSize }]}>Overview</Text>
           <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>Health metrics</Text>
         </TouchableOpacity>
+
+        {/* Notifications Tile - Available to ALL users */}
+        <View style={{ width: cardWidth as any }}>
+          <NotificationTile
+            userId={user?.id}
+            onPress={() => navigation.navigate('Notifications' as never)}
+            onViewMessages={() => navigation.navigate('Messages' as never)}
+            onViewReminders={() => navigation.navigate('Reminders' as never)}
+            compact
+          />
+        </View>
 
         {/* Nutrition Dashboard - Available to ALL users (scan history, food analysis) */}
         <TouchableOpacity
