@@ -6,7 +6,8 @@ export { authService } from './authService';
 export { userService } from './userService'; // NEW: User management (user.wihy.ai)
 export { enhancedAuthService } from './enhancedAuthService';
 export { enhancedScanService } from './enhancedScanService';
-// export { purchaseService } from './purchaseService'; // Requires native modules
+export { purchaseService } from './purchaseService'; // IAP service - handles platform detection internally
+export type { IAPItemDetails, InAppPurchase } from './purchaseService';
 export { ghlService } from './ghlService';
 export { profileService } from './profileService';
 
@@ -282,6 +283,10 @@ export type {
   NotificationPermissionStatus,
   ScheduledNotification,
   NotificationHandler,
+  BackendReminder,
+  BackendRemindersResponse,
+  NotificationPreferences,
+  QuietHours,
 } from './notificationService';
 
 export type {
