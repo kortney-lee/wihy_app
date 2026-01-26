@@ -2,23 +2,30 @@
 
 ## Overview
 
-Phase 2 of Instacart integration is now implemented with a **simple, lightweight approach**:
-- Text input for comma-separated brand names
-- 10 clickable example chips for quick selection
-- No complex modals, no search, no USDA integration (that's Phase 3 - backend only)
+Phases 2 and 3 of Instacart integration are now implemented:
+- **Phase 2**: Text input for comma-separated brand names with 10 clickable chips
+- **Phase 3**: Real-time API fetching of brand suggestions from OpenFoodFacts data
 
 ## What Was Added
 
-### 1. BrandInput Component
+### 1. BrandInput Component (Phase 2 + 3)
 **Location**: `mobile/src/components/shared/BrandInput.tsx`
 
-**Purpose**: Simple UI for users to specify preferred brands
+**Purpose**: Dynamic UI for users to specify preferred brands with real-time suggestions
 
-**Features**:
+**Features (Phase 2)**:
 - Text field accepts comma-separated brand names (e.g., "Prego, Classico")
-- 10 hardcoded example brands as clickable chips
+- 10 hardcoded fallback brands as clickable chips
 - Tap chip → adds to selection (or removes if already selected)
 - Auto-parses text input into array for API
+
+**Features (Phase 3 - NEW)**:
+- API integration: `GET /api/ingredients/:name/brands?country=US`
+- ⭐ Star indicator for popular brands (`isCommon: true`)
+- Source badges: ✓ (database), 🌐 (api), 📋 (fallback)
+- 5-minute caching to reduce API calls
+- Loading indicator while fetching
+- Graceful fallback to hardcoded brands on error
 
 **Example Usage**:
 ```typescript
@@ -26,10 +33,18 @@ import { BrandInput } from '../components/shared';
 
 const [brands, setBrands] = useState<string[]>([]);
 
+// Phase 2: Basic usage (shows hardcoded examples)
 <BrandInput
   value={brands}
   onChange={setBrands}
   placeholder="e.g., Prego, Classico"
+/>
+
+// Phase 3: With ingredient name (fetches real brands from API)
+<BrandInput
+  value={brands}
+  onChange={setBrands}
+  ingredientName="pasta sauce"  // NEW - triggers API call
 />
 ```
 
@@ -283,18 +298,56 @@ const exampleRequest = {
 - Country filtering (US, CA, UK)
 - Automatic brand recommendations
 
-**Why OpenFoodFacts instead of USDA?**
-- ✅ 700,000+ products worldwide (vs USDA's limited brand data)
+## Phase 3: Brand Suggestions API
+
+**Status**: ✅ COMPLETE
+
+The backend API is now available and the BrandInput component is integrated:
+
+### API Endpoint
+```
+GET /api/ingredients/:name/brands?country=US
+```
+
+### API Response Format
+```json
+{
+  "success": true,
+  "ingredient": "pasta sauce",
+  "brands": [
+    { "name": "Prego", "isCommon": true, "source": "database" },
+    { "name": "Ragu", "isCommon": true, "source": "database" },
+    { "name": "Classico", "isCommon": false, "source": "api" },
+    { "name": "Newman's Own", "isCommon": false, "source": "api" }
+  ]
+}
+```
+
+### Source Field Values
+- `database` - From our curated brand database (✓ icon)
+- `api` - From OpenFoodFacts real-time search (🌐 icon)
+- `fallback` - Hardcoded examples when API fails (📋 icon)
+
+### Caching
+- 5-minute in-memory cache per ingredient name
+- Reduces API calls for repeated lookups
+- Fallback brands used while loading or on error
+
+### Integration Example
+```typescript
+// Pass ingredientName to enable API suggestions
+<BrandInput
+  value={brands}
+  onChange={setBrands}
+  ingredientName={selectedIngredient.name}  // e.g., "pasta sauce"
+/>
+```
+
+**Why OpenFoodFacts?**
+- ✅ 700,000+ products worldwide
 - ✅ No API key required (public API)
-- ✅ < 100ms response time (very fast)
+- ✅ < 100ms response time
 - ✅ Real-time product updates
-- ✅ Backend already has OpenFoodFacts service in scan-server.js
-
-**When ready, they'll either**:
-1. Add a new endpoint: `GET /api/ingredients/:name/brands?country=US`
-2. Include `suggestedBrands` in existing API responses
-
-**No client work needed** - the BrandInput component will work as-is. You can optionally fetch suggestions from backend and replace the hardcoded EXAMPLE_BRANDS array.
 
 ## Troubleshooting
 
@@ -338,39 +391,33 @@ console.log('Parsed brands:', parsed);
 
 **Solution**: Make sure you're updating state correctly and passing the updated value back to the component.
 
-## Next Steps
+### Issue: API Suggestions Not Loading
 
-1. **Integrate into CreateMeals.tsx**:
-   - Find where ingredients are added/edited
-   - Add BrandInput component to the form
-   - Update state management to include `preferredBrands`
+**Check**:
+1. Verify `ingredientName` prop is passed and has > 2 characters
+2. Check console for `[BrandInput] Fetched brands for:` or error messages
+3. Test API directly: `curl https://services.wihy.ai/api/ingredients/pasta%20sauce/brands?country=US`
 
-2. **Update Shopping List Creation**:
-   - Transform ingredients to include `filters.brand_filters`
-   - Pass to `createShoppingList()` function
-   - Test with real Instacart orders
-
-3. **Add to Meal Diary** (optional):
-   - Allow brand preferences when logging meals
-   - Save preferences for future use
-
-4. **User Testing**:
-   - Test with common ingredients (pasta sauce, milk, cheese)
-   - Verify brands appear in Instacart
-   - Collect feedback on UX
+**Solution**: The component falls back to hardcoded brands on error. Check network logs for API issues.
 
 ## Summary
 
-✅ **Phase 2 Complete**:
-- Simple text input + clickable chips
-- No complex UI, no modals, no search
-- 10 hardcoded example brands
-- Full brand filtering support in API
-- Ready to integrate into your app
+✅ **Phase 1 Complete**: Display Instacart Links
+- InstacartLinkButton component with deep linking
+- CreateMeals integration for meal plan submission
 
-⏳ **Phase 3 Waiting**:
-- Backend team handles OpenFoodFacts integration (700k+ products, < 100ms)
-- No client work needed until backend is ready
+✅ **Phase 2 Complete**: Brand Preferences
+- Simple text input + clickable chips
+- Full brand filtering support in API
+
+✅ **Phase 3 Complete**: Brand Suggestions API
+- Real-time API integration with OpenFoodFacts data
+- ⭐ Popular brand indicators
+- Source badges (database ✓, api 🌐, fallback 📋)
+- 5-minute caching
+- Graceful error handling
+
+🎉 **All Phases Implemented!**
 - Current implementation will work with backend suggestions when available
 
 📋 **Implementation Time**: ~1-2 hours to integrate into existing forms
