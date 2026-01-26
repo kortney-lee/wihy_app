@@ -33,6 +33,7 @@ import { createMealPlan, generateShoppingList } from '../services/mealPlanServic
 import { createShoppingList, createInstacartLinkFromMealPlan, ShoppingListItem } from '../services/instacartService';
 import { getMealDiaryService, type Meal, type DietaryPreferences } from '../services/mealDiary';
 import { authService } from '../services/authService';
+import { clientDataService } from '../services/clientDataService';
 import { RootStackParamList } from '../types/navigation';
 import { useDashboardLayout } from '../hooks/useDashboardLayout';
 import { UpgradePrompt } from '../components/UpgradePrompt';
@@ -308,13 +309,13 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
   // ============================================================================
   // INSTACART INTEGRATION STATE
   // ============================================================================
-  // TODO: Session data storage coming soon - will be primary storage method
-  // Current: Using AsyncStorage (device local storage) as temporary solution
-  // Future: Backend session API will store Instacart URLs per user/plan
-  // Left off: Instacart URL persistence to AsyncStorage implemented (Jan 25, 2026)
+  // IMPLEMENTED: Session data storage via Client Data API (Jan 26, 2026)
+  // Primary: Backend session API stores Instacart URLs per user/plan
+  // Fallback: AsyncStorage for offline access
+  // See: docs/WIHY_CLIENT_DATA_API.md for API documentation
   // ============================================================================
   const [instacartUrl, setInstacartUrl] = useState<string | null>(null);
-  const INSTACART_URL_STORAGE_KEY = '@wihy_instacart_url'; // Temporary - will migrate to session API
+  const INSTACART_URL_STORAGE_KEY = '@wihy_instacart_url'; // AsyncStorage fallback key
 
   // Toggle shopping item checked state
   const toggleShoppingItem = (category: string, index: number) => {
@@ -333,39 +334,63 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
   // Storage key for shopping list persistence (fallback cache)
   const SHOPPING_LIST_STORAGE_KEY = '@wihy_shopping_list';
 
-  // Save Instacart URL to storage
+  // Save Instacart URL to session storage (backend + local fallback)
   const saveInstacartUrlToStorage = useCallback(async (url: string, planId?: string | number) => {
     try {
+      // Primary: Save to backend session via Client Data API
+      await clientDataService.saveInstacartUrl(url, planId?.toString());
+      console.log('[Instacart] URL saved to session (Client Data API)');
+      
+      // Fallback: Also save to AsyncStorage for offline access
       const key = planId ? `${INSTACART_URL_STORAGE_KEY}_${planId}` : INSTACART_URL_STORAGE_KEY;
       await AsyncStorage.setItem(key, url);
-      // Also save the most recent URL for quick access
       await AsyncStorage.setItem(INSTACART_URL_STORAGE_KEY, url);
-      console.log('[Instacart] URL saved to storage:', key);
     } catch (error) {
-      console.error('[Instacart] Error saving URL to storage:', error);
+      console.error('[Instacart] Error saving URL to session:', error);
+      // Fallback to AsyncStorage only
+      try {
+        const key = planId ? `${INSTACART_URL_STORAGE_KEY}_${planId}` : INSTACART_URL_STORAGE_KEY;
+        await AsyncStorage.setItem(key, url);
+        await AsyncStorage.setItem(INSTACART_URL_STORAGE_KEY, url);
+        console.log('[Instacart] URL saved to AsyncStorage (fallback)');
+      } catch (storageError) {
+        console.error('[Instacart] AsyncStorage fallback also failed:', storageError);
+      }
     }
   }, []);
 
-  // Load Instacart URL from storage
+  // Load Instacart URL from session storage (backend + local fallback)
   const loadInstacartUrlFromStorage = useCallback(async (planId?: string | number) => {
+    try {
+      // Primary: Try to get from backend session via Client Data API
+      const sessionUrl = await clientDataService.getInstacartUrl(planId?.toString());
+      if (sessionUrl) {
+        console.log('[Instacart] Loaded URL from session (Client Data API)');
+        return sessionUrl;
+      }
+    } catch (error) {
+      console.warn('[Instacart] Could not load from session, trying AsyncStorage:', error);
+    }
+    
+    // Fallback: Try AsyncStorage
     try {
       // Try plan-specific URL first
       if (planId) {
         const planUrl = await AsyncStorage.getItem(`${INSTACART_URL_STORAGE_KEY}_${planId}`);
         if (planUrl) {
-          console.log('[Instacart] Loaded plan-specific URL from storage');
+          console.log('[Instacart] Loaded plan-specific URL from AsyncStorage');
           return planUrl;
         }
       }
       // Fall back to most recent URL
       const recentUrl = await AsyncStorage.getItem(INSTACART_URL_STORAGE_KEY);
       if (recentUrl) {
-        console.log('[Instacart] Loaded recent URL from storage');
+        console.log('[Instacart] Loaded recent URL from AsyncStorage');
         return recentUrl;
       }
       console.log('[Instacart] No saved URL found');
     } catch (error) {
-      console.error('[Instacart] Error loading URL from storage:', error);
+      console.error('[Instacart] Error loading URL from AsyncStorage:', error);
     }
     return null;
   }, []);

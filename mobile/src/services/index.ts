@@ -60,6 +60,17 @@ export { scanHistoryService } from './scanHistoryService';
 export { uploadService } from './uploadService';
 export { shoppingPreferencesService } from './shoppingPreferencesService';
 
+// NEW: Export Client Data Service (user.wihy.ai/api/client-data)
+export { clientDataService } from './clientDataService';
+export type { 
+  ClientDataNamespace, 
+  UserLinks, 
+  FeatureFlags, 
+  SessionData, 
+  UserPreferences,
+  SetValueOptions,
+} from './clientDataService';
+
 // NEW: Export Additional Feature Services (January 7, 2026)
 export { messagingService } from './messagingService';
 export { achievementService } from './achievementService';
