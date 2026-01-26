@@ -3,8 +3,9 @@
  * React hook for integrating WIHY scanning services
  */
 
-import { useState, useCallback, useEffect, useRef } from 'react';
-import { wihyApiService, WIHYApiService, HealthTrends } from '../services/wihyApiService';
+import { useState, useCallback, useEffect, useRef, useContext } from 'react';
+import { scanService } from '../services/scanService';
+import { AuthContext } from '../contexts/AuthContext';
 import { WIHYError } from '../services/errors';
 import type {
   BarcodeScanResult,
@@ -393,7 +394,20 @@ export function useScanService(userId?: string) {
  * Hook for health trends data
  */
 export function useHealthTrends(timeRange: 'week' | 'month' | 'all' = 'week') {
-  const [trends, setTrends] = useState<HealthTrends>({
+  const { user } = useContext(AuthContext);
+  const [trends, setTrends] = useState<{
+    trends: Array<{ date: string; avgScore: number; scanCount: number }>;
+    averageHealthScore: number;
+    totalScans: number;
+    scansByType: {
+      barcode: number;
+      food_photo: number;
+      image: number;
+      pill: number;
+      product_label: number;
+      label: number;
+    };
+  }>({
     trends: [],
     averageHealthScore: 0,
     totalScans: 0,
@@ -414,14 +428,20 @@ export function useHealthTrends(timeRange: 'week' | 'month' | 'all' = 'week') {
     setError(null);
     
     try {
-      const data = await wihyApiService.getHealthTrends(timeRange);
+      const userId = user?.id;
+      if (!userId) {
+        setError('User not authenticated');
+        setLoading(false);
+        return;
+      }
+      const data = await scanService.getHealthTrends(userId, timeRange);
       setTrends(data);
     } catch (err) {
       setError(formatErrorForDisplay(err));
     } finally {
       setLoading(false);
     }
-  }, [timeRange]);
+  }, [timeRange, user?.id]);
 
   useEffect(() => {
     loadTrends();
@@ -442,6 +462,7 @@ export function useHealthTrends(timeRange: 'week' | 'month' | 'all' = 'week') {
  * Hook for recent scans (simplified)
  */
 export function useRecentScans(limit: number = 10) {
+  const { user } = useContext(AuthContext);
   const [scans, setScans] = useState<ScanHistoryItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -451,7 +472,13 @@ export function useRecentScans(limit: number = 10) {
     setError(null);
     
     try {
-      const result = await wihyApiService.getScanHistory(limit);
+      const userId = user?.id;
+      if (!userId) {
+        setError('User not authenticated');
+        setLoading(false);
+        return;
+      }
+      const result = await scanService.getScanHistory(userId, { limit });
       if (result.success) {
         setScans(result.scans || []);
       } else {
@@ -462,7 +489,7 @@ export function useRecentScans(limit: number = 10) {
     } finally {
       setLoading(false);
     }
-  }, [limit]);
+  }, [limit, user?.id]);
 
   useEffect(() => {
     loadScans();

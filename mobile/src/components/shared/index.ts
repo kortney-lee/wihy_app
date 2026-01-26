@@ -11,6 +11,8 @@ export { WebTopNav, WebPageWrapper } from './WebTopNav';
 export { default as SvgIcon, Icon } from './SvgIcon';
 export { Ionicons } from './Ionicons';
 export * from './types';
+export { InstacartLinkButton } from './InstacartLinkButton';
+export { BrandInput } from './BrandInput';
 
 // Progressive Enhancement Components
 export { StoreSelector } from './StoreSelector';

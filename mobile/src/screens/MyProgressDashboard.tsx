@@ -107,15 +107,17 @@ const MyProgressDashboard: React.FC<MyProgressDashboardProps> = ({
   const loadHealthTrends = useCallback(async () => {
     try {
       setTrendsLoading(true);
+      const userId = user?.id;
+      if (!userId) return;
       const timeRange = selectedPeriod === 'today' ? 'day' : selectedPeriod;
-      const trends = await wihyApiService.getHealthTrends(timeRange);
+      const trends = await scanService.getHealthTrends(userId, timeRange);
       setHealthTrends(trends);
     } catch (error) {
       console.error('Failed to load health trends:', error);
     } finally {
       setTrendsLoading(false);
     }
-  }, [selectedPeriod]);
+  }, [selectedPeriod, user?.id]);
 
   // Load trends when period changes
   useEffect(() => {

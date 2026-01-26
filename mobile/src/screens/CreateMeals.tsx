@@ -22,7 +22,7 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { dashboardColors } from '../components/shared';
+import { dashboardColors, InstacartLinkButton } from '../components/shared';
 import { dashboardTheme } from '../theme/dashboardTheme';
 import { SweepBorder } from '../components/SweepBorder';
 import SvgIcon from '../components/shared/SvgIcon';
@@ -303,6 +303,9 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
   const [shoppingListItems, setShoppingListItems] = useState<ReturnType<typeof extractShoppingListFromPlan> | null>(null);
   const [shoppingListLoading, setShoppingListLoading] = useState(false);
   const [checkedShoppingItems, setCheckedShoppingItems] = useState<Set<string>>(new Set());
+  
+  // Instacart integration state
+  const [instacartUrl, setInstacartUrl] = useState<string | null>(null);
 
   // Toggle shopping item checked state
   const toggleShoppingItem = (category: string, index: number) => {
@@ -678,7 +681,7 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
           
           const nutrition = recipe.nutritionInfo || recipe.nutrition || {};
           const mealData = {
-            meal_id: recipe.id || `meal_${dayNum}_${recipe.mealType}_${Date.now()}`,
+            meal_id: recipe.id,
             meal_type: recipe.mealType || 'dinner',
             meal_name: recipe.name || 'Meal',
             description: recipe.description || '',
@@ -726,7 +729,7 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
           date: new Date().toISOString().split('T')[0],
           day_number: 1,
           meals: [{
-            meal_id: meal.id || `meal_${Date.now()}`,
+            meal_id: meal.id,
             meal_type: meal.mealType || meal.meal_type || 'dinner',
             meal_name: meal.name || 'Meal',
             calories: meal.nutrition?.caloriesPerServing || meal.calories || 0,
@@ -746,7 +749,7 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
       // Normalize the response to handle different API formats
       const normalizedPlan: MealPlanResponse = {
         success: result.success ?? true,
-        program_id: result.program_id || result.id || result.meal?.id || `plan_${Date.now()}`,
+        program_id: result.program_id || result.id || result.meal?.id,
         name: result.name || result.meal?.name || `${planDuration}-Day Meal Plan`,
         description: result.description || planDescription || 'Custom meal plan',
         duration_days: result.duration_days || result.duration || planDuration,
@@ -757,7 +760,7 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
           day_number: day.day_number || day.dayNumber || idx + 1,
           day_name: day.day_name || ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][(new Date().getDay() + idx) % 7],
           meals: (day.meals || []).map((meal: any) => ({
-            meal_id: meal.meal_id || meal.id || `meal_${Date.now()}_${Math.random()}`,
+            meal_id: meal.meal_id || meal.id,
             meal_type: meal.meal_type || meal.type || 'dinner',
             meal_name: meal.meal_name || meal.name || 'Meal',
             description: meal.description || '',
@@ -930,7 +933,7 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
           
           const nutrition = recipe.nutritionInfo || recipe.nutrition || {};
           const mealData = {
-            meal_id: recipe.id || `meal_${dayNum}_${recipe.mealType}_${Date.now()}`,
+            meal_id: recipe.id,
             meal_type: recipe.mealType || 'dinner',
             meal_name: recipe.name || 'Meal',
             description: recipe.description || '',
@@ -979,7 +982,7 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
           day_number: 1,
           day_name: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][new Date().getDay()],
           meals: [{
-            meal_id: meal.id || `meal_${Date.now()}`,
+            meal_id: meal.id,
             meal_type: meal.mealType || meal.meal_type || 'dinner',
             meal_name: meal.name || 'Quick Meal',
             description: meal.description || '',
@@ -1007,7 +1010,7 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
       
       const normalizedPlan: MealPlanResponse = {
         success: result.success ?? true,
-        program_id: result.program_id || result.id || result.meal?.id || `plan_${Date.now()}`,
+        program_id: result.program_id || result.id || result.meal?.id,
         name: result.name || result.meal?.name || `${request.duration}-Day Meal Plan`,
         description: result.description || request.description,
         duration_days: result.duration_days || result.duration || request.duration,
@@ -1018,7 +1021,7 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
           day_number: day.day_number || day.dayNumber || idx + 1,
           day_name: day.day_name || ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][(new Date().getDay() + idx) % 7],
           meals: (day.meals || []).map((meal: any) => ({
-            meal_id: meal.meal_id || meal.id || `meal_${Date.now()}_${Math.random()}`,
+            meal_id: meal.meal_id || meal.id,
             meal_type: meal.meal_type || meal.type || 'dinner',
             meal_name: meal.meal_name || meal.name || 'Meal',
             description: meal.description || '',
@@ -1102,58 +1105,36 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
     setGeneratingList(true);
     
     try {
-      // First, create shopping list from the plan via API
-      console.log('[Instacart] Generating shopping list for plan:', acceptedPlan.program_id);
+      // Use the correct Instacart API to create shopping link from meal plan
+      console.log('[Instacart] Creating shopping link for plan:', acceptedPlan.program_id);
       
-      // Try to create shopping list via mealService
-      const shoppingList = await mealService.generateShoppingListFromPlan(
-        acceptedPlan.program_id,
-        {
-          startDay: 1,
-          endDay: acceptedPlan.duration_days || 7,
-          preferredStores: selectedStores,
-        }
-      );
+      const instacartResponse = await createInstacartLinkFromMealPlan(parseInt(acceptedPlan.program_id, 10));
       
-      console.log('[Instacart] Shopping list created:', shoppingList.list_id);
-      
-      // Then send to Instacart
-      const instacartResponse = await mealService.sendToInstacart(
-        shoppingList.list_id,
-        { storeType: selectedStores[0] || 'any' }
-      );
-      
-      if (instacartResponse.success && instacartResponse.cart_url) {
-        // Open Instacart URL
-        const { Linking } = require('react-native');
+      if (instacartResponse && instacartResponse.productsLinkUrl) {
+        // Save the Instacart URL to state
+        setInstacartUrl(instacartResponse.productsLinkUrl);
+        
+        console.log('[Instacart] Shopping link created:', instacartResponse.productsLinkUrl);
+        
+        // Show success message
         Alert.alert(
-          '🛒 Instacart Ready!',
-          'Your shopping cart has been created. Would you like to open Instacart to complete your order?',
-          [
-            { text: 'Later', style: 'cancel' },
-            { 
-              text: 'Open Instacart', 
-              onPress: () => Linking.openURL(instacartResponse.cart_url)
-            }
-          ]
-        );
-      } else {
-        Alert.alert(
-          'Instacart',
-          'Shopping list has been saved! Instacart integration will be available soon.',
+          '🛒 Shopping List Ready!',
+          `Your shopping list with ${instacartResponse.ingredientCount} ingredients from ${instacartResponse.mealCount} meals has been created. Tap the button below to open in Instacart.`,
           [{ text: 'OK' }]
         );
+      } else {
+        throw new Error('No Instacart link returned');
       }
     } catch (error: any) {
       console.error('[Instacart] Error:', error);
-      // Fallback - still save locally
+      // Fallback - save locally
       if (acceptedPlan) {
         const items = extractShoppingListFromPlan(acceptedPlan);
         await saveShoppingListToStorage(items);
       }
       Alert.alert(
         'Shopping List Saved',
-        'Your shopping list has been saved locally. Instacart integration coming soon!',
+        'Your shopping list has been saved locally. Instacart integration is temporarily unavailable.',
         [{ text: 'OK' }]
       );
     } finally {
@@ -3292,6 +3273,16 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
                   </View>
                 )}
               </TouchableOpacity>
+
+              {/* Instacart Link Button - Shows after successful submission */}
+              {instacartUrl && (
+                <View style={{ marginTop: 12 }}>
+                  <InstacartLinkButton 
+                    url={instacartUrl}
+                    title="🛒 Open Shopping List in Instacart"
+                  />
+                </View>
+              )}
 
               {/* View Calendar Button */}
               <TouchableOpacity 

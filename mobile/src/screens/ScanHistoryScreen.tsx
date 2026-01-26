@@ -16,7 +16,7 @@ import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '../components/shared';
 import type { StackNavigationProp } from '@react-navigation/stack';
 import type { RootStackParamList } from '../navigation/AppNavigator';
-import { wihyApiService } from '../services/wihyApiService';
+import { scanService } from '../services/scanService';
 import { AuthContext } from '../context/AuthContext';
 import type { ScanHistoryItem } from '../services/types';
 
@@ -71,12 +71,7 @@ export default function ScanHistoryScreen() {
     extrapolate: 'clamp',
   });
 
-  // Update user ID in service when user changes
-  useEffect(() => {
-    if (user?.email) {
-      wihyApiService.setUserId(user.email);
-    }
-  }, [user?.email]);
+  // User ID is now passed directly to service methods, no need to set it
 
   const loadHistory = useCallback(async (forceRefresh = false) => {
     // Prevent duplicate calls unless force refreshing or filter changed
@@ -91,11 +86,18 @@ export default function ScanHistoryScreen() {
     
     try {
       if (isMountedRef.current) setLoading(true);
+      const userId = user?.id;
+      if (!userId) return;
       const scanType = filter === 'all' ? undefined : filter;
-      const result = await wihyApiService.getScanHistory(50, scanType, false);
+      const result = await scanService.getScanHistory(userId, { 
+        limit: 50, 
+        scanType: scanType as any 
+      });
 
       // Only update state if still mounted
       if (isMountedRef.current && result.success) {
+        console.log('[ScanHistoryScreen] Loaded scans:', result.scans.length);
+        console.log('[ScanHistoryScreen] First scan image_url:', result.scans[0]?.image_url);
         setScans(result.scans || []);
       }
     } catch (error) {
@@ -132,7 +134,9 @@ export default function ScanHistoryScreen() {
           text: 'Delete',
           style: 'destructive',
           onPress: async () => {
-            const result = await wihyApiService.deleteScan(scanId);
+            const userId = user?.id;
+            if (!userId) return;
+            const result = await scanService.deleteScan(scanId, userId);
             if (result.success) {
               setScans(scans.filter(s => s.id !== scanId));
             } else {
@@ -226,7 +230,17 @@ export default function ScanHistoryScreen() {
         </View>
 
         {item.image_url && (
-          <Image source={{ uri: item.image_url }} style={styles.scanImage} />
+          <Image 
+            source={{ uri: item.image_url }} 
+            style={styles.scanImage} 
+            resizeMode="cover"
+            onError={(error) => {
+              console.log('[ScanHistoryScreen] Image load error:', error.nativeEvent);
+            }}
+            onLoad={() => {
+              console.log('[ScanHistoryScreen] Image loaded:', item.image_url);
+            }}
+          />
         )}
 
         {item.product?.detected_items && (

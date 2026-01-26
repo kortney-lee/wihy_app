@@ -1,12 +1,15 @@
 /**
  * Meal Diary API Service
  * Handles all meal tracking, dietary preferences, and meal history operations
- * Base URL: https://services.wihy.ai/api
+ * Base URL: https://user.wihy.ai/api
+ * 
+ * IMPORTANT: Meal diary endpoints moved from services.wihy.ai to user.wihy.ai
+ * Using services.wihy.ai returns 410 Gone (deprecated)
  */
 
 import { fetchWithLogging } from '../utils/apiLogger';
 
-const API_BASE = 'https://services.wihy.ai/api';
+const API_BASE = 'https://user.wihy.ai/api';
 
 // ============================================================================
 // Types

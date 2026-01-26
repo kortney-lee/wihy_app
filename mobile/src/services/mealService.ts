@@ -1562,6 +1562,9 @@ class MealService {
   /**
    * Get all meals for a user with filtering
    * Uses Meal Diary API: GET /api/users/:userId/meals/diary
+   * 
+   * CRITICAL: This endpoint is on user.wihy.ai, NOT services.wihy.ai
+   * Using services.wihy.ai returns 410 Gone (deprecated endpoint)
    */
   async getUserMeals(userId: string, filters?: {
     meal_type?: string;
@@ -1579,7 +1582,8 @@ class MealService {
       if (filters?.limit) params.append('limit', filters.limit.toString());
       if (filters?.offset) params.append('offset', filters.offset.toString());
 
-      const url = `${this.baseUrl}/api/users/${userId}/meals/diary${params.toString() ? '?' + params.toString() : ''}`;
+      // Use user.wihy.ai for meal diary endpoint (not services.wihy.ai)
+      const url = `${API_CONFIG.userUrl}/api/users/${userId}/meals/diary${params.toString() ? '?' + params.toString() : ''}`;
       
       const response = await fetchWithLogging(url);
       const result = await response.json();
@@ -2067,7 +2071,8 @@ class MealService {
 
   /**
    * Get user's saved meal plans
-   * GET /api/meal-programs?userId=
+   * GET /api/users/:userId/meal-plans
+   * Endpoint: user.wihy.ai (NOT services.wihy.ai)
    */
   async getUserMealPlans(
     userId?: string,
@@ -2081,14 +2086,18 @@ class MealService {
     is_active: boolean;
     completion_percentage: number;
   }>> {
+    if (!userId) {
+      throw new Error('userId is required for getUserMealPlans');
+    }
+
     const headers: Record<string, string> = {};
     if (authToken) {
       headers['Authorization'] = `Bearer ${authToken}`;
     }
 
-    const queryString = userId ? `?userId=${userId}` : '';
+    // Use user.wihy.ai endpoint (not services.wihy.ai)
     const response = await fetchWithLogging(
-      `${this.baseUrl}/api/meal-programs${queryString}`,
+      `${API_CONFIG.userUrl}/api/users/${userId}/meal-plans`,
       { headers }
     );
     const data = await response.json();

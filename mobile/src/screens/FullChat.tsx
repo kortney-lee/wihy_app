@@ -152,10 +152,16 @@ export default function FullChat() {
     // For guided flow (Home screen), don't show a fake initial message
     // The initialMessage will trigger an API call and show the real response
     if (!isGuidedFlow) {
+      // Extract first name from user.name (e.g., "John Doe" -> "John")
+      const firstName = user?.name?.split(' ')[0] || '';
+      const greeting = firstName 
+        ? `Hello ${firstName}! I am your Wihy Nutrition Expert. How can I help you today?`
+        : 'Hello! I am your Wihy Nutrition Expert. How can I help you today?';
+      
       const initialAIMessage: Message = {
         id: '1',
         type: 'ai',
-        content: 'Hello I am your Wihy Nutrition Expert. How can I help you today?',
+        content: greeting,
         timestamp: new Date(),
       };
       setMessages([initialAIMessage]);
@@ -164,7 +170,7 @@ export default function FullChat() {
       // Guided flow: Start with empty messages, API response will be first message
       setMessages([]);
     }
-  }, [context, isGuidedFlow]);
+  }, [context, isGuidedFlow, user?.name]);
 
   /**
    * Parse backend URL-style routes to React Navigation screen names

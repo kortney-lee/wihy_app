@@ -16,7 +16,7 @@ import {
 import { healthDataService } from '../services/healthDataService';
 import { nutritionService } from '../services/nutritionService';
 import { fitnessService } from '../services/fitnessService';
-import { wihyApiService } from '../services/wihyApiService';
+import { scanService } from '../services/scanService';
 import type { ScanHistoryItem } from '../services/types';
 import { AuthContext } from '../context/AuthContext';
 
@@ -93,7 +93,9 @@ const OverviewDashboard: React.FC<BaseDashboardProps> = ({ onAnalyze }) => {
     if (isMountedRef.current) setScansLoading(true);
     
     try {
-      const result = await wihyApiService.getScanHistory(5);
+      const userId = user?.id;
+      if (!userId) return;
+      const result = await scanService.getScanHistory(userId, { limit: 5 });
       // Only update state if still mounted
       if (isMountedRef.current && result.success && result.scans) {
         setRecentScans(result.scans);

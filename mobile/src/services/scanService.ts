@@ -858,6 +858,131 @@ class ScanService {
       };
     }
   }
+
+  /**
+   * Get health trends from scan history
+   * @param timeRange - Time range for trends
+   * @returns Calculated health trends
+   */
+  async getHealthTrends(
+    userId: string,
+    timeRange: 'day' | 'week' | 'month' | 'all' = 'week'
+  ): Promise<{
+    trends: Array<{ date: string; avgScore: number; scanCount: number }>;
+    averageHealthScore: number;
+    totalScans: number;
+    scansByType: {
+      barcode: number;
+      food_photo: number;
+      image: number;
+      pill: number;
+      product_label: number;
+      label: number;
+    };
+  }> {
+    const history = await this.getScanHistory(userId, { limit: 100 });
+
+    if (!history.success || !history.scans.length) {
+      return {
+        trends: [],
+        averageHealthScore: 0,
+        totalScans: 0,
+        scansByType: {
+          barcode: 0,
+          food_photo: 0,
+          image: 0,
+          pill: 0,
+          product_label: 0,
+          label: 0,
+        },
+      };
+    }
+
+    // Group by date and count by type
+    const grouped = new Map<string, Array<{ health_score: number }>>();
+    const scansByType = {
+      barcode: 0,
+      food_photo: 0,
+      image: 0,
+      pill: 0,
+      product_label: 0,
+      label: 0,
+    };
+    const cutoffDate = new Date();
+
+    switch (timeRange) {
+      case 'day':
+        cutoffDate.setDate(cutoffDate.getDate() - 1);
+        break;
+      case 'week':
+        cutoffDate.setDate(cutoffDate.getDate() - 7);
+        break;
+      case 'month':
+        cutoffDate.setMonth(cutoffDate.getMonth() - 1);
+        break;
+    }
+
+    let filteredScans = 0;
+    history.scans.forEach((scan) => {
+      const scanDate = new Date(scan.scan_timestamp);
+      
+      if (timeRange !== 'all' && scanDate < cutoffDate) {
+        return;
+      }
+      
+      filteredScans++;
+      
+      // Count by scan type
+      const scanType = scan.scan_type as keyof typeof scansByType;
+      if (scanType in scansByType) {
+        scansByType[scanType]++;
+      }
+
+      const dateStr = scanDate.toLocaleDateString();
+      
+      if (!grouped.has(dateStr)) {
+        grouped.set(dateStr, []);
+      }
+      
+      if (scan.health_score !== undefined) {
+        grouped.get(dateStr)!.push({ health_score: scan.health_score });
+      }
+    });
+
+    // Calculate trends
+    const trends = Array.from(grouped.entries())
+      .map(([date, scans]) => {
+        const validScans = scans.filter((s) => s.health_score !== undefined);
+        if (validScans.length === 0) return null;
+
+        const avgScore =
+          validScans.reduce((sum, s) => sum + s.health_score, 0) / validScans.length;
+
+        return {
+          date,
+          avgScore: Math.round(avgScore),
+          scanCount: validScans.length,
+        };
+      })
+      .filter((t): t is NonNullable<typeof t> => t !== null)
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+    // Calculate overall average
+    const allScores = trends.flatMap((t) =>
+      Array(t.scanCount).fill(t.avgScore)
+    );
+    const averageHealthScore =
+      allScores.length > 0
+        ? Math.round(allScores.reduce((a, b) => a + b, 0) / allScores.length)
+        : 0;
+
+    return {
+      trends,
+      averageHealthScore,
+      totalScans: filteredScans,
+      scansByType,
+    };
+  }
 }
 
 export const scanService = new ScanService();
