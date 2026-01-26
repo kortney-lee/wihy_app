@@ -335,6 +335,20 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
           <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>Expert guidance</Text>
         </TouchableOpacity>
 
+        {/* Upgrade to Premium - Free users only */}
+        {isFreeUser && (
+          <TouchableOpacity
+            style={[styles.dashboardCard, styles.upgradeCard, { width: cardWidth as any }]}
+            onPress={() => navigation.navigate('Profile')}
+          >
+            <View style={[styles.cardIconContainer, { width: iconContainerSize, height: iconContainerSize, borderRadius: iconContainerSize / 2 }]}>
+              <SvgIcon name="rocket" size={iconSize} color="#ffffff" />
+            </View>
+            <Text style={[styles.cardTitle, { fontSize: titleSize }]}>Upgrade</Text>
+            <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>Go Premium</Text>
+          </TouchableOpacity>
+        )}
+
         {/* Family Dashboard (family plan users only) */}
         {hasFamilyAccess(user) && (
           <TouchableOpacity
@@ -670,6 +684,10 @@ const styles = StyleSheet.create({
 
   coachCard: {
     backgroundColor: '#3b82f6',
+  },
+
+  upgradeCard: {
+    backgroundColor: '#f59e0b', // Amber/gold for premium upgrade
   },
 
   parentCard: {
