@@ -30,7 +30,7 @@ import { hasFamilyAccess, hasCoachAccess } from '../utils/capabilities';
 import SvgIcon from '../components/shared/SvgIcon';
 import { UpgradePrompt } from '../components/UpgradePrompt';
 import { useFeatureAccess } from '../hooks/usePaywall';
-import { ADD_ONS, INTEGRATIONS } from '../config/subscriptionConfig';
+import { ADD_ONS } from '../config/subscriptionConfig';
 
 const isWeb = Platform.OS === 'web';
 
@@ -270,7 +270,7 @@ export default function Profile() {
         {
           id: 'addons',
           title: 'Power-Up Add-ons',
-          subtitle: 'Add-ons $4.99/mo | Integrations $7.99/mo',
+          subtitle: 'WIHY Coach $9.99/mo | Instacart $7.99/mo',
           type: 'navigation' as const,
           icon: 'sparkles',
           onPress: () => {
