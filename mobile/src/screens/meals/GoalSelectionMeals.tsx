@@ -20,7 +20,7 @@ import {
   ActivityIndicator,
   TextInput,
 } from 'react-native';
-import { Ionicons } from '../../components/shared';
+import { Ionicons, BrandInput } from '../../components/shared';
 import {
   ModeToggle,
   DietSelector,
@@ -182,6 +182,9 @@ export interface GenerateMealParams {
   program?: string;
   activityLevel?: string;
   calorieTarget?: number;
+  
+  // Brand preferences (all modes)
+  preferredBrands?: string[];
 }
 
 // ============================================
@@ -222,6 +225,9 @@ export const GoalSelectionMeals: React.FC<GoalSelectionMealsProps> = ({
   const [activityLevel, setActivityLevel] = useState<string>('moderate');
   const [calorieTarget, setCalorieTarget] = useState<string>('');
   const [programDiets, setProgramDiets] = useState<string[]>([]);
+  
+  // Brand preferences (shared across all modes)
+  const [preferredBrands, setPreferredBrands] = useState<string[]>([]);
 
   // Initialize from template when it changes
   useEffect(() => {
@@ -298,6 +304,11 @@ export const GoalSelectionMeals: React.FC<GoalSelectionMealsProps> = ({
       params.servings = servings; // Include servings for diet programs
       params.duration = DIET_PROGRAMS.find(p => p.id === selectedProgram)?.weeks ? 
         (DIET_PROGRAMS.find(p => p.id === selectedProgram)!.weeks * 7) : 28;
+    }
+
+    // Include brand preferences for all modes
+    if (preferredBrands.length > 0) {
+      params.preferredBrands = preferredBrands;
     }
 
     onGenerateMeal(params);
@@ -408,6 +419,15 @@ export const GoalSelectionMeals: React.FC<GoalSelectionMealsProps> = ({
         showSearch={false}
         title="Dietary needs (optional)"
       />
+
+      {/* Brand Preferences */}
+      <View style={styles.section}>
+        <BrandInput
+          value={preferredBrands}
+          onChange={setPreferredBrands}
+          placeholder="e.g., Prego, Classico"
+        />
+      </View>
     </>
   );
 
@@ -519,6 +539,15 @@ export const GoalSelectionMeals: React.FC<GoalSelectionMealsProps> = ({
           })}
         </View>
       </View>
+
+      {/* Brand Preferences */}
+      <View style={styles.section}>
+        <BrandInput
+          value={preferredBrands}
+          onChange={setPreferredBrands}
+          placeholder="e.g., Prego, Classico"
+        />
+      </View>
     </>
   );
 
@@ -599,6 +628,15 @@ export const GoalSelectionMeals: React.FC<GoalSelectionMealsProps> = ({
             showSearch={false}
             title="Additional dietary needs"
           />
+
+          {/* Brand Preferences */}
+          <View style={styles.section}>
+            <BrandInput
+              value={preferredBrands}
+              onChange={setPreferredBrands}
+              placeholder="e.g., Prego, Classico"
+            />
+          </View>
         </>
       )}
     </>

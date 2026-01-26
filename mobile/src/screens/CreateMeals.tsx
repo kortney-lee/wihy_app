@@ -16,6 +16,7 @@ import {
   useWindowDimensions,
   Animated,
   Image,
+  Linking,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -1100,8 +1101,7 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
   const handleSubmitToInstacart = async () => {
     if (!acceptedPlan) return;
     
-    // Close success modal and generate shopping list
-    setShowMealPlanSuccess(false);
+    // Keep success modal open while generating
     setGeneratingList(true);
     
     try {
@@ -1116,12 +1116,19 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
         
         console.log('[Instacart] Shopping link created:', instacartResponse.productsLinkUrl);
         
-        // Show success message
-        Alert.alert(
-          '🛒 Shopping List Ready!',
-          `Your shopping list with ${instacartResponse.ingredientCount} ingredients from ${instacartResponse.mealCount} meals has been created. Tap the button below to open in Instacart.`,
-          [{ text: 'OK' }]
-        );
+        // Auto-open the Instacart link (deep link)
+        try {
+          await Linking.openURL(instacartResponse.productsLinkUrl);
+          console.log('[Instacart] Deep link opened successfully');
+        } catch (linkError) {
+          console.warn('[Instacart] Failed to open deep link:', linkError);
+          // Fallback: Show alert with button to try again
+          Alert.alert(
+            '🛒 Shopping List Ready!',
+            `Your shopping list with ${instacartResponse.ingredientCount} ingredients has been created. Tap the button to open in Instacart.`,
+            [{ text: 'OK' }]
+          );
+        }
       } else {
         throw new Error('No Instacart link returned');
       }
@@ -3232,11 +3239,11 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
                 </LinearGradient>
               </TouchableOpacity>
 
-              {/* Submit to Instacart - Grayed out if not enabled */}
+              {/* Open Instacart Shopping List - Creates link and deep links */}
               <TouchableOpacity 
                 style={[
                   styles.instacartButton,
-                  !user?.capabilities?.instacart && styles.instacartButtonDisabled
+                  (!user?.capabilities?.instacart || generatingList) && styles.instacartButtonDisabled
                 ]}
                 onPress={() => {
                   if (user?.capabilities?.instacart) {
@@ -3251,6 +3258,7 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
                     });
                   }
                 }}
+                disabled={generatingList}
               >
                 {user?.capabilities?.instacart ? (
                   <LinearGradient
@@ -3259,13 +3267,19 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
                     end={{ x: 1, y: 0 }}
                     style={styles.instacartButtonGradient}
                   >
-                    <SvgIcon name="cart-outline" size={24} color="#fff" />
-                    <Text style={styles.instacartButtonText}>Submit to Instacart</Text>
+                    {generatingList ? (
+                      <ActivityIndicator color="#fff" size="small" />
+                    ) : (
+                      <SvgIcon name="cart-outline" size={24} color="#fff" />
+                    )}
+                    <Text style={styles.instacartButtonText}>
+                      {generatingList ? 'Creating Shopping List...' : 'Open Instacart Shopping List'}
+                    </Text>
                   </LinearGradient>
                 ) : (
                   <View style={styles.instacartButtonGradientDisabled}>
                     <SvgIcon name="cart-outline" size={24} color="#9ca3af" />
-                    <Text style={styles.instacartButtonTextDisabled}>Submit to Instacart</Text>
+                    <Text style={styles.instacartButtonTextDisabled}>Open Instacart Shopping List</Text>
                     <View style={styles.premiumBadge}>
                       <SvgIcon name="star" size={12} color="#f59e0b" />
                       <Text style={styles.premiumBadgeText}>PRO</Text>
@@ -3274,12 +3288,12 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
                 )}
               </TouchableOpacity>
 
-              {/* Instacart Link Button - Shows after successful submission */}
+              {/* Instacart Link Button - Shows after successful submission for quick re-open */}
               {instacartUrl && (
                 <View style={{ marginTop: 12 }}>
                   <InstacartLinkButton 
                     url={instacartUrl}
-                    title="🛒 Open Shopping List in Instacart"
+                    title="🛒 Open Again in Instacart"
                   />
                 </View>
               )}
