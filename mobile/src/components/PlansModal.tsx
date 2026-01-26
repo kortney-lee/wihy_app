@@ -15,6 +15,15 @@ import {
 import { Ionicons } from './shared';
 import { checkoutService } from '../services/checkoutService';
 import { useAuth } from '../context/AuthContext';
+import { 
+  SUBSCRIPTION_PLANS, 
+  ADD_ONS, 
+  INTEGRATIONS, 
+  formatPrice,
+  type PlanConfig,
+  type AddOnConfig,
+  type IntegrationConfig,
+} from '../config/subscriptionConfig';
 // import { purchaseService } from '../services/purchaseService'; // Requires production build
 
 // Map plan IDs to in-app purchase product IDs
@@ -41,109 +50,37 @@ interface PlansModalProps {
   showAddOns?: boolean;
 }
 
-interface AddOn {
-  id: string;
-  displayName: string;
-  price: string;
-  description: string;
-  icon: string;
-  color: string;
-}
+// Add color coding for UI
+const PLAN_COLORS: Record<string, string> = {
+  free: '#6b7280',
+  pro_monthly: '#3b82f6',
+  pro_yearly: '#3b82f6',
+  family_basic: '#8b5cf6',
+  family_pro: '#a855f7',
+  family_yearly: '#a855f7',
+  coach: '#f97316',
+};
 
-const ADD_ONS: AddOn[] = [
-  {
-    id: 'ai-coach',
-    displayName: 'AI Coach',
-    price: '$4.99/mo',
-    description: 'Personalized AI health coaching & recommendations',
-    icon: 'sparkles',
-    color: '#8b5cf6',
-  },
-  {
-    id: 'instacart',
-    displayName: 'Instacart Integration',
-    price: '$4.99/mo',
-    description: 'Auto-order groceries from your meal plans',
-    icon: 'cart',
-    color: '#10b981',
-  },
-];
+const ADDON_COLORS: Record<string, string> = {
+  grocery_deals: '#f59e0b',
+  restaurant_partnerships: '#ef4444',
+};
 
-const PLANS: Plan[] = [
-  {
-    id: 'free',
-    displayName: 'Free',
-    price: '$0/mo',
-    description: 'Essential features to get started',
-    features: [
-      'Barcode scanning',
-      'Photo food analysis',
-      'Medication tracking',
-      'Basic health dashboard',
-      'Browse coaches',
-    ],
-    color: '#6b7280',
-  },
-  {
-    id: 'pro_monthly',
-    displayName: 'Premium',
-    price: '$12.99/mo',
-    description: 'Meals + Workouts',
-    features: [
-      'Unlimited barcode scanning',
-      'Full health dashboard',
-      'Meal planning',
-      'Workout programs',
-      'Priority support',
-    ],
-    color: '#3b82f6',
-  },
-  {
-    id: 'family_basic',
-    displayName: 'Family Basic',
-    price: '$24.99/mo',
-    description: 'Up to 4 members, add-ons available',
-    features: [
-      'All Premium features',
-      'Up to 4 family members',
-      'Family dashboard',
-      'AI Coach add-on ($4.99/mo)',
-      'Instacart add-on ($9.99/mo)',
-    ],
-    color: '#8b5cf6',
-  },
-  {
-    id: 'family_pro',
-    displayName: 'Family Pro',
-    price: '$49.99/mo',
-    description: 'Unlimited members, AI + Instacart included',
-    features: [
-      'All Premium features',
-      'Unlimited family members',
-      'Family dashboard',
-      '🤖 AI Coach included',
-      '🛒 Instacart included',
-      'Priority support',
-    ],
-    color: '#a855f7',
-    recommended: true,
-  },
-  {
-    id: 'coach',
-    displayName: 'Coach',
-    price: '$99.99 setup + $29.99/mo',
-    description: 'For health & fitness professionals',
-    features: [
-      'Unlimited clients',
-      'Meal plan & workout creation',
-      'Progress tracking & reporting',
-      'Full app access for yourself',
-      'Up to 1% affiliate commission',
-      'A team member will reach out for training',
-    ],
-    color: '#f97316',
-  },
-];
+const INTEGRATION_COLORS: Record<string, string> = {
+  instacart_meals: '#10b981',
+  workout_tracking: '#8b5cf6',
+};
+
+// Convert config to UI-friendly format
+const PLANS: Plan[] = Object.values(SUBSCRIPTION_PLANS).map(plan => ({
+  id: plan.id,
+  displayName: plan.displayName,
+  price: formatPrice(plan.yearlyPrice || plan.monthlyPrice, plan.interval),
+  description: plan.tagline,
+  features: plan.features,
+  color: PLAN_COLORS[plan.id] || '#6b7280',
+  recommended: plan.popular,
+}));
 
 export default function PlansModal({
   visible,
@@ -157,7 +94,7 @@ export default function PlansModal({
   const { user } = useAuth();
   const [purchasing, setPurchasing] = useState(false);
   const [initializingPurchases, setInitializingPurchases] = useState(true);
-  const [activeTab, setActiveTab] = useState<'plans' | 'addons'>(showAddOns ? 'addons' : 'plans');
+  const [activeTab, setActiveTab] = useState<'plans' | 'addons' | 'integrations'>(showAddOns ? 'addons' : 'plans');
 
   useEffect(() => {
     if (visible) {
@@ -173,6 +110,7 @@ export default function PlansModal({
 
   const handleSelectPlan = async (planId: string) => {
     const selectedPlan = PLANS.find(p => p.id === planId);
+    const configPlan = SUBSCRIPTION_PLANS[planId as keyof typeof SUBSCRIPTION_PLANS];
     
     // Free plan - no payment needed, just close modal
     if (planId === 'free') {
@@ -296,8 +234,15 @@ export default function PlansModal({
               style={[styles.tab, activeTab === 'addons' && styles.tabActive]}
               onPress={() => setActiveTab('addons')}
             >
-              <Ionicons name="add-circle" size={18} color={activeTab === 'addons' ? '#3b82f6' : '#6b7280'} />
+              <Ionicons name="pricetag" size={18} color={activeTab === 'addons' ? '#3b82f6' : '#6b7280'} />
               <Text style={[styles.tabText, activeTab === 'addons' && styles.tabTextActive]}>Add-ons</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.tab, activeTab === 'integrations' && styles.tabActive]}
+              onPress={() => setActiveTab('integrations')}
+            >
+              <Ionicons name="link" size={18} color={activeTab === 'integrations' ? '#3b82f6' : '#6b7280'} />
+              <Text style={[styles.tabText, activeTab === 'integrations' && styles.tabTextActive]}>Integrations</Text>
             </TouchableOpacity>
           </View>
 
@@ -363,33 +308,33 @@ export default function PlansModal({
               </Pressable>
             ))}
 
-            {/* Add-ons Tab Content */}
+            {/* Add-ons Tab Content ($4.99/mo) */}
             {activeTab === 'addons' && (
               <>
                 <View style={styles.addOnsHeader}>
-                  <Text style={styles.addOnsTitle}>Power Up Your Experience</Text>
+                  <Text style={styles.addOnsTitle}>Add-ons • $4.99/mo</Text>
                   <Text style={styles.addOnsSubtitle}>
-                    Add these features to any paid plan
+                    Enhance your experience with these features
                   </Text>
                 </View>
                 
-                {ADD_ONS.map((addon) => (
+                {Object.values(ADD_ONS).map((addon) => (
                   <Pressable
                     key={addon.id}
                     style={styles.addOnCard}
                     onPress={() => handleSelectPlan(addon.id)}
                   >
-                    <View style={[styles.addOnIconContainer, { backgroundColor: addon.color + '20' }]}>
-                      <Ionicons name={addon.icon as any} size={28} color={addon.color} />
+                    <View style={[styles.addOnIconContainer, { backgroundColor: ADDON_COLORS[addon.id] + '20' }]}>
+                      <Ionicons name={addon.icon as any} size={28} color={ADDON_COLORS[addon.id]} />
                     </View>
                     <View style={styles.addOnInfo}>
                       <Text style={styles.addOnName}>{addon.displayName}</Text>
                       <Text style={styles.addOnDescription}>{addon.description}</Text>
                     </View>
                     <View style={styles.addOnPriceContainer}>
-                      <Text style={styles.addOnPrice}>{addon.price}</Text>
+                      <Text style={styles.addOnPrice}>${addon.price.toFixed(2)}/mo</Text>
                       <TouchableOpacity
-                        style={[styles.addOnButton, { backgroundColor: addon.color }]}
+                        style={[styles.addOnButton, { backgroundColor: ADDON_COLORS[addon.id] }]}
                         onPress={() => handleSelectPlan(addon.id)}
                       >
                         <Ionicons name="add" size={20} color="#fff" />
@@ -401,7 +346,51 @@ export default function PlansModal({
                 <View style={styles.addOnsNote}>
                   <Ionicons name="information-circle-outline" size={18} color="#6b7280" />
                   <Text style={styles.addOnsNoteText}>
-                    Add-ons require an active subscription. Family Premium includes both add-ons.
+                    Add-ons require an active subscription. All add-ons are $4.99/mo.
+                  </Text>
+                </View>
+              </>
+            )}
+
+            {/* Integrations Tab Content ($7.99/mo) */}
+            {activeTab === 'integrations' && (
+              <>
+                <View style={styles.addOnsHeader}>
+                  <Text style={styles.addOnsTitle}>Integrations • $7.99/mo</Text>
+                  <Text style={styles.addOnsSubtitle}>
+                    Connect with your favorite apps and services
+                  </Text>
+                </View>
+                
+                {Object.values(INTEGRATIONS).map((integration) => (
+                  <Pressable
+                    key={integration.id}
+                    style={styles.addOnCard}
+                    onPress={() => handleSelectPlan(integration.id)}
+                  >
+                    <View style={[styles.addOnIconContainer, { backgroundColor: INTEGRATION_COLORS[integration.id] + '20' }]}>
+                      <Ionicons name={integration.icon as any} size={28} color={INTEGRATION_COLORS[integration.id]} />
+                    </View>
+                    <View style={styles.addOnInfo}>
+                      <Text style={styles.addOnName}>{integration.displayName}</Text>
+                      <Text style={styles.addOnDescription}>{integration.description}</Text>
+                    </View>
+                    <View style={styles.addOnPriceContainer}>
+                      <Text style={styles.addOnPrice}>${integration.price.toFixed(2)}/mo</Text>
+                      <TouchableOpacity
+                        style={[styles.addOnButton, { backgroundColor: INTEGRATION_COLORS[integration.id] }]}
+                        onPress={() => handleSelectPlan(integration.id)}
+                      >
+                        <Ionicons name="add" size={20} color="#fff" />
+                      </TouchableOpacity>
+                    </View>
+                  </Pressable>
+                ))}
+                
+                <View style={styles.addOnsNote}>
+                  <Ionicons name="information-circle-outline" size={18} color="#6b7280" />
+                  <Text style={styles.addOnsNoteText}>
+                    Integrations require an active subscription. All integrations are $7.99/mo. Family Pro includes Instacart Meals.
                   </Text>
                 </View>
               </>

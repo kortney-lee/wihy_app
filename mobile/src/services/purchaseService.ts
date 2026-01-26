@@ -3,6 +3,9 @@ import { API_CONFIG } from './config';
 import { fetchWithLogging } from '../utils/apiLogger';
 import { authService } from './authService';
 
+// Payment service base URL for IAP verification
+const PAYMENT_BASE_URL = API_CONFIG.paymentUrl || 'https://payment.wihy.ai';
+
 // In-App Purchases only work on native platforms (iOS/Android)
 // Web uses Stripe checkout instead - this service is a no-op on web
 const isNative = Platform.OS === 'ios' || Platform.OS === 'android';
@@ -181,7 +184,7 @@ class PurchaseService {
     try {
       const headers = await this.getAuthHeaders();
       const response = await fetchWithLogging(
-        `${API_CONFIG.authUrl}/api/iap/verify-receipt`,
+        `${PAYMENT_BASE_URL}/api/iap/verify-receipt`,
         {
           method: 'POST',
           headers,
@@ -233,7 +236,7 @@ class PurchaseService {
     try {
       const headers = await this.getAuthHeaders();
       const response = await fetchWithLogging(
-        `${API_CONFIG.authUrl}/api/google-play/verify-purchase`,
+        `${PAYMENT_BASE_URL}/api/google-play/verify-purchase`,
         {
           method: 'POST',
           headers,
@@ -277,7 +280,7 @@ class PurchaseService {
     try {
       const headers = await this.getAuthHeaders();
       const response = await fetchWithLogging(
-        `${API_CONFIG.authUrl}/api/google-play/acknowledge`,
+        `${PAYMENT_BASE_URL}/api/google-play/acknowledge`,
         {
           method: 'POST',
           headers,
@@ -320,7 +323,7 @@ class PurchaseService {
     try {
       const headers = await this.getAuthHeaders();
       const response = await fetchWithLogging(
-        `${API_CONFIG.authUrl}/api/iap/subscription`,
+        `${PAYMENT_BASE_URL}/api/iap/subscription`,
         {
           method: 'GET',
           headers,
@@ -351,7 +354,7 @@ class PurchaseService {
     try {
       const headers = await this.getAuthHeaders();
       const response = await fetchWithLogging(
-        `${API_CONFIG.authUrl}/api/google-play/subscription`,
+        `${PAYMENT_BASE_URL}/api/google-play/subscription`,
         {
           method: 'GET',
           headers,
@@ -389,7 +392,7 @@ class PurchaseService {
     try {
       const headers = await this.getAuthHeaders();
       const response = await fetchWithLogging(
-        `${API_CONFIG.authUrl}/api/subscriptions/active`,
+        `${PAYMENT_BASE_URL}/api/subscriptions/active`,
         {
           method: 'GET',
           headers,
