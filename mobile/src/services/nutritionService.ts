@@ -188,6 +188,61 @@ class NutritionService {
   }
 
   /**
+   * Set nutrition targets (calorie and macro targets)
+   * POST /api/users/:userId/nutrition/targets
+   */
+  async setNutritionTargets(
+    userId: string,
+    targets: {
+      daily_calories: number;
+      protein_g: number;
+      carbs_g: number;
+      fat_g: number;
+      fiber_g?: number;
+      sugar_limit_g?: number;
+      sodium_limit_mg?: number;
+      water_oz?: number;
+    }
+  ): Promise<any> {
+    if (!userId) {
+      throw new Error('userId is required for setNutritionTargets');
+    }
+    const response = await fetchWithLogging(
+      `${API_CONFIG.userUrl}/api/users/${userId}/nutrition/targets`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(targets),
+      }
+    );
+    return response.json();
+  }
+
+  /**
+   * Get current nutrition targets
+   * GET /api/users/:userId/nutrition/targets
+   */
+  async getNutritionTargets(userId: string): Promise<{
+    daily_calories: number;
+    protein_g: number;
+    carbs_g: number;
+    fat_g: number;
+    fiber_g?: number;
+    sugar_limit_g?: number;
+    sodium_limit_mg?: number;
+    water_oz?: number;
+  }> {
+    if (!userId) {
+      throw new Error('userId is required for getNutritionTargets');
+    }
+    const response = await fetchWithLogging(
+      `${API_CONFIG.userUrl}/api/users/${userId}/nutrition/targets`
+    );
+    const data = await response.json();
+    return data.data;
+  }
+
+  /**
    * Update nutrition goals
    * PUT /api/users/:userId/nutrition/goals
    */

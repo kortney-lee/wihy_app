@@ -59,6 +59,26 @@ export interface NotificationPreferences {
   quiet_hours?: QuietHours;
 }
 
+// Backend reminder types for server-managed reminders
+export interface BackendReminder {
+  id?: string;
+  userId: string;
+  type: 'meal' | 'workout' | 'water' | 'medication' | 'weigh_in' | 'custom';
+  title: string;
+  body: string;
+  time: string; // HH:MM format
+  days: ('mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun')[];
+  enabled: boolean;
+  metadata?: Record<string, any>;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface BackendRemindersResponse {
+  reminders: BackendReminder[];
+  total: number;
+}
+
 // Configure notification behavior
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -335,6 +355,102 @@ class NotificationService {
    */
   async setQuietHours(userId: string, quietHours: QuietHours): Promise<void> {
     await this.updateNotificationPreferences(userId, { quiet_hours: quietHours });
+  }
+
+  // ============= BACKEND REMINDERS CRUD =============
+
+  /**
+   * Create a reminder on the backend
+   * POST /api/notifications/reminders
+   */
+  async createReminder(reminder: Omit<BackendReminder, 'id' | 'createdAt' | 'updatedAt'>): Promise<BackendReminder> {
+    try {
+      const response = await fetchWithLogging(
+        `${API_CONFIG.baseUrl}/api/notifications/reminders`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(reminder),
+        }
+      );
+      const data = await response.json();
+      return data.reminder;
+    } catch (error) {
+      console.error('[NotificationService] Failed to create reminder:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get all reminders for a user
+   * GET /api/notifications/reminders?userId=:userId
+   */
+  async getReminders(userId: string): Promise<BackendRemindersResponse> {
+    try {
+      const response = await fetchWithLogging(
+        `${API_CONFIG.baseUrl}/api/notifications/reminders?userId=${userId}`
+      );
+      const data = await response.json();
+      return {
+        reminders: data.reminders || [],
+        total: data.total || 0,
+      };
+    } catch (error) {
+      console.error('[NotificationService] Failed to get reminders:', error);
+      return { reminders: [], total: 0 };
+    }
+  }
+
+  /**
+   * Update a reminder
+   * PUT /api/notifications/reminders/:reminderId
+   */
+  async updateReminder(
+    reminderId: string,
+    updates: Partial<Omit<BackendReminder, 'id' | 'createdAt' | 'updatedAt'>>
+  ): Promise<BackendReminder> {
+    try {
+      const response = await fetchWithLogging(
+        `${API_CONFIG.baseUrl}/api/notifications/reminders/${reminderId}`,
+        {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(updates),
+        }
+      );
+      const data = await response.json();
+      return data.reminder;
+    } catch (error) {
+      console.error('[NotificationService] Failed to update reminder:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Delete a reminder
+   * DELETE /api/notifications/reminders/:reminderId
+   */
+  async deleteReminder(reminderId: string): Promise<void> {
+    try {
+      await fetchWithLogging(
+        `${API_CONFIG.baseUrl}/api/notifications/reminders/${reminderId}`,
+        {
+          method: 'DELETE',
+        }
+      );
+      console.log('[NotificationService] Reminder deleted:', reminderId);
+    } catch (error) {
+      console.error('[NotificationService] Failed to delete reminder:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Toggle a reminder on/off
+   * PATCH /api/notifications/reminders/:reminderId/toggle
+   */
+  async toggleReminder(reminderId: string, enabled: boolean): Promise<BackendReminder> {
+    return this.updateReminder(reminderId, { enabled });
   }
 
   /**
