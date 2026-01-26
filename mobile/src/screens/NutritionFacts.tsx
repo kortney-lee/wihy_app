@@ -316,11 +316,11 @@ export default function NutritionFacts() {
     try {
       const productName = isBarcodeScanResponse(foodItem) ? foodItem.product_name : 'Unknown Food';
       const calories = getCalories(foodItem);
-      const protein = isBarcodeScanResponse(foodItem) ? foodItem.protein : 0;
-      const carbs = isBarcodeScanResponse(foodItem) ? foodItem.carbohydrates : 0;
-      const fat = isBarcodeScanResponse(foodItem) ? foodItem.fat : 0;
-      const fiber = isBarcodeScanResponse(foodItem) ? foodItem.fiber : 0;
-      const sugar = isBarcodeScanResponse(foodItem) ? foodItem.sugars : 0;
+      const protein = isBarcodeScanResponse(foodItem) ? foodItem.protein_g : 0;
+      const carbs = isBarcodeScanResponse(foodItem) ? foodItem.carbs_g : 0;
+      const fat = isBarcodeScanResponse(foodItem) ? foodItem.fat_g : 0;
+      const fiber = isBarcodeScanResponse(foodItem) ? foodItem.fiber_g : 0;
+      const sugar = isBarcodeScanResponse(foodItem) ? foodItem.sugar_g : 0;
 
       const nutritionData = {
         calories: calories * servingMultiplier,
