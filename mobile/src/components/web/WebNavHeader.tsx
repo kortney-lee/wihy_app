@@ -23,15 +23,12 @@ interface WebNavHeaderProps {
   showLoginModal?: boolean;
   /** Optional: Set login modal state (controlled externally) */
   setShowLoginModal?: (show: boolean) => void;
-  /** Optional: Whether user is on free plan (affects Health nav behavior) */
-  isFreeUser?: boolean;
 }
 
 export const WebNavHeader: React.FC<WebNavHeaderProps> = ({
   activePage = 'none',
   showLoginModal: externalShowLogin,
   setShowLoginModal: externalSetShowLogin,
-  isFreeUser = true,
 }) => {
   const navigation = useNavigation<any>();
   const route = useRoute();
@@ -71,11 +68,14 @@ export const WebNavHeader: React.FC<WebNavHeaderProps> = ({
     }
   };
 
-  // Handle Health navigation - free users go to subscription
+  // Handle Health navigation - logged-in users can access Health
+  // Non-logged-in users go to subscription/plans page
   const handleHealthClick = () => {
-    if (isFreeUser) {
+    if (!user) {
+      // Not logged in - show subscription/plans
       navigateToStack('Subscription');
     } else {
+      // Logged in (even free users) can access Health with limited dashboards
       navigateToTab('Health');
     }
   };
