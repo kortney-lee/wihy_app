@@ -1239,12 +1239,31 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
         try {
           await Linking.openURL(productsLinkUrl);
           console.log('[Instacart] Deep link opened successfully');
+          
+          // Also open shopping list modal so user can see their items when they return
+          if (acceptedPlan) {
+            const shoppingItems = extractShoppingListFromPlan(acceptedPlan);
+            setShoppingListItems(shoppingItems);
+            // Close success modal and open shopping list
+            setShowMealPlanSuccess(false);
+            setTimeout(() => {
+              setShowShoppingListModal(true);
+            }, 300);
+          }
         } catch (linkError) {
           console.warn('[Instacart] Failed to open deep link:', linkError);
-          // Fallback: Show alert with button to try again
+          // Fallback: Open shopping list modal which has the Instacart button
+          if (acceptedPlan) {
+            const shoppingItems = extractShoppingListFromPlan(acceptedPlan);
+            setShoppingListItems(shoppingItems);
+            setShowMealPlanSuccess(false);
+            setTimeout(() => {
+              setShowShoppingListModal(true);
+            }, 300);
+          }
           Alert.alert(
             'Shopping List Ready',
-            `Your shopping list with ${itemCount} ingredients has been created. Tap the button to open in Instacart.`,
+            `Your shopping list with ${itemCount} ingredients is ready. You can open Instacart from the shopping list.`,
             [{ text: 'OK' }]
           );
         }
@@ -3411,16 +3430,6 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
                   </View>
                 )}
               </TouchableOpacity>
-
-              {/* Instacart Link Button - Shows after successful submission for quick re-open */}
-              {instacartUrl && (
-                <View style={{ marginTop: 12 }}>
-                  <InstacartLinkButton 
-                    url={instacartUrl}
-                    title="Open Again in Instacart"
-                  />
-                </View>
-              )}
 
               {/* View Calendar Button */}
               <TouchableOpacity 
