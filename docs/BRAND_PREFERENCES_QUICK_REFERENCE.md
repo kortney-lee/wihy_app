@@ -278,12 +278,20 @@ const exampleRequest = {
 ## Phase 3 (Future - No Work Needed)
 
 **Backend team will handle**:
-- USDA FoodData Central API integration
+- OpenFoodFacts API integration (700k+ products, < 100ms response time)
 - Real brand suggestions based on ingredient names
+- Country filtering (US, CA, UK)
 - Automatic brand recommendations
 
+**Why OpenFoodFacts instead of USDA?**
+- ✅ 700,000+ products worldwide (vs USDA's limited brand data)
+- ✅ No API key required (public API)
+- ✅ < 100ms response time (very fast)
+- ✅ Real-time product updates
+- ✅ Backend already has OpenFoodFacts service in scan-server.js
+
 **When ready, they'll either**:
-1. Add a new endpoint: `GET /api/ingredients/:name/brands`
+1. Add a new endpoint: `GET /api/ingredients/:name/brands?country=US`
 2. Include `suggestedBrands` in existing API responses
 
 **No client work needed** - the BrandInput component will work as-is. You can optionally fetch suggestions from backend and replace the hardcoded EXAMPLE_BRANDS array.
@@ -361,11 +369,16 @@ console.log('Parsed brands:', parsed);
 - Ready to integrate into your app
 
 ⏳ **Phase 3 Waiting**:
-- Backend team handles USDA integration
+- Backend team handles OpenFoodFacts integration (700k+ products, < 100ms)
 - No client work needed until backend is ready
 - Current implementation will work with backend suggestions when available
 
 📋 **Implementation Time**: ~1-2 hours to integrate into existing forms
+
+**Backend Status**:
+- ✅ OpenFoodFacts service already exists in scan-server.js
+- ⏳ Needs brand suggestions endpoint: `/api/ingredients/:name/brands?country=US`
+- ⏳ Estimated: 1-2 hours backend work
 
 ---
 
