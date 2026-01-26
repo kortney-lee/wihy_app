@@ -305,9 +305,16 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
   const [shoppingListLoading, setShoppingListLoading] = useState(false);
   const [checkedShoppingItems, setCheckedShoppingItems] = useState<Set<string>>(new Set());
   
-  // Instacart integration state
+  // ============================================================================
+  // INSTACART INTEGRATION STATE
+  // ============================================================================
+  // TODO: Session data storage coming soon - will be primary storage method
+  // Current: Using AsyncStorage (device local storage) as temporary solution
+  // Future: Backend session API will store Instacart URLs per user/plan
+  // Left off: Instacart URL persistence to AsyncStorage implemented (Jan 25, 2026)
+  // ============================================================================
   const [instacartUrl, setInstacartUrl] = useState<string | null>(null);
-  const INSTACART_URL_STORAGE_KEY = '@wihy_instacart_url';
+  const INSTACART_URL_STORAGE_KEY = '@wihy_instacart_url'; // Temporary - will migrate to session API
 
   // Toggle shopping item checked state
   const toggleShoppingItem = (category: string, index: number) => {
