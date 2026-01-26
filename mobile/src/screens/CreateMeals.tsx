@@ -307,6 +307,7 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
   
   // Instacart integration state
   const [instacartUrl, setInstacartUrl] = useState<string | null>(null);
+  const INSTACART_URL_STORAGE_KEY = '@wihy_instacart_url';
 
   // Toggle shopping item checked state
   const toggleShoppingItem = (category: string, index: number) => {
@@ -324,6 +325,43 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
 
   // Storage key for shopping list persistence (fallback cache)
   const SHOPPING_LIST_STORAGE_KEY = '@wihy_shopping_list';
+
+  // Save Instacart URL to storage
+  const saveInstacartUrlToStorage = useCallback(async (url: string, planId?: string | number) => {
+    try {
+      const key = planId ? `${INSTACART_URL_STORAGE_KEY}_${planId}` : INSTACART_URL_STORAGE_KEY;
+      await AsyncStorage.setItem(key, url);
+      // Also save the most recent URL for quick access
+      await AsyncStorage.setItem(INSTACART_URL_STORAGE_KEY, url);
+      console.log('[Instacart] URL saved to storage:', key);
+    } catch (error) {
+      console.error('[Instacart] Error saving URL to storage:', error);
+    }
+  }, []);
+
+  // Load Instacart URL from storage
+  const loadInstacartUrlFromStorage = useCallback(async (planId?: string | number) => {
+    try {
+      // Try plan-specific URL first
+      if (planId) {
+        const planUrl = await AsyncStorage.getItem(`${INSTACART_URL_STORAGE_KEY}_${planId}`);
+        if (planUrl) {
+          console.log('[Instacart] Loaded plan-specific URL from storage');
+          return planUrl;
+        }
+      }
+      // Fall back to most recent URL
+      const recentUrl = await AsyncStorage.getItem(INSTACART_URL_STORAGE_KEY);
+      if (recentUrl) {
+        console.log('[Instacart] Loaded recent URL from storage');
+        return recentUrl;
+      }
+      console.log('[Instacart] No saved URL found');
+    } catch (error) {
+      console.error('[Instacart] Error loading URL from storage:', error);
+    }
+    return null;
+  }, []);
 
   // Convert API ShoppingList to our local format
   const convertApiShoppingListToLocal = useCallback((apiList: any): ReturnType<typeof extractShoppingListFromPlan> => {
@@ -437,6 +475,21 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
     loadAvailableDiets();
     loadShoppingList(); // Load shopping list from API or storage
   }, [loadShoppingList]);
+
+  // Load saved Instacart URL when success modal opens or plan changes
+  useEffect(() => {
+    const loadSavedInstacartUrl = async () => {
+      if (showMealPlanSuccess && acceptedPlan && !instacartUrl) {
+        const planIdentifier = mealPlanId || acceptedPlan?.program_id;
+        const savedUrl = await loadInstacartUrlFromStorage(planIdentifier);
+        if (savedUrl) {
+          setInstacartUrl(savedUrl);
+          console.log('[Instacart] Restored saved URL for plan');
+        }
+      }
+    };
+    loadSavedInstacartUrl();
+  }, [showMealPlanSuccess, acceptedPlan, mealPlanId, instacartUrl, loadInstacartUrlFromStorage]);
 
   // Load available diets from API
   const loadAvailableDiets = async () => {
@@ -1166,8 +1219,12 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
       
       // Handle successful response
       if (productsLinkUrl) {
-        // Save the Instacart URL to state
+        // Save the Instacart URL to state and storage
         setInstacartUrl(productsLinkUrl);
+        
+        // Persist to AsyncStorage for later access
+        const planIdentifier = mealPlanId || acceptedPlan?.program_id;
+        await saveInstacartUrlToStorage(productsLinkUrl, planIdentifier);
         
         console.log('[Instacart] Shopping link created:', productsLinkUrl);
         
@@ -1239,7 +1296,7 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
       setMealPlanSaved(true);
       
       Alert.alert(
-        'Saved! 🎉',
+        'Saved!',
         'Your meal plan has been saved to your library. Access it anytime from the Consumption Dashboard.',
         [{ text: 'Great!' }]
       );
@@ -1252,13 +1309,14 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
         const plans = savedPlans ? JSON.parse(savedPlans) : [];
         plans.unshift({
           ...acceptedPlan,
+          instacart_url: instacartUrl, // Include Instacart URL with saved plan
           saved_at: new Date().toISOString(),
         });
         await AsyncStorage.setItem('saved_meal_plans', JSON.stringify(plans.slice(0, 20))); // Keep last 20
         
         setMealPlanSaved(true);
         Alert.alert(
-          'Saved Locally! 📱',
+          'Saved Locally',
           'Your meal plan has been saved to this device.',
           [{ text: 'OK' }]
         );
@@ -1282,6 +1340,10 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
     setTimePerMeal('moderate');
     setGeneratedPlan(null);
     setPlanModalStep('goals');
+    // Reset Instacart state for new plan
+    setInstacartUrl(null);
+    setMealPlanId(null);
+    setMealPlanSaved(false);
   };
 
   const toggleDietaryOption = (id: string) => {
