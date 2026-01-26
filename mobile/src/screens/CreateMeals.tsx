@@ -316,6 +316,8 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
   // ============================================================================
   const [instacartUrl, setInstacartUrl] = useState<string | null>(null);
   const INSTACART_URL_STORAGE_KEY = '@wihy_instacart_url'; // AsyncStorage fallback key
+  const [showInstacartSuccessModal, setShowInstacartSuccessModal] = useState(false);
+  const [instacartItemCount, setInstacartItemCount] = useState(0);
 
   // Toggle shopping item checked state
   const toggleShoppingItem = (category: string, index: number) => {
@@ -1260,22 +1262,59 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
         
         console.log('[Instacart] Shopping link created:', productsLinkUrl);
         
-        // Auto-open the Instacart link (deep link)
+        // Auto-open the Instacart link (deep link) and show shopping list
         try {
           await Linking.openURL(productsLinkUrl);
           console.log('[Instacart] Deep link opened successfully');
-          
-          // Also open shopping list modal so user can see their items when they return
-          if (acceptedPlan) {
-            const shoppingItems = extractShoppingListFromPlan(acceptedPlan);
-            setShoppingListItems(shoppingItems);
-            // Close success modal and open shopping list
-            setShowMealPlanSuccess(false);
-            setTimeout(() => {
-              setShowShoppingListModal(true);
-            }, 300);
-          }
         } catch (linkError) {
+          console.warn('[Instacart] Failed to open deep link:', linkError);
+        }
+        
+        // Show shopping list modal so user can review/edit when they return
+        if (acceptedPlan) {
+          const shoppingItems = extractShoppingListFromPlan(acceptedPlan);
+          setShoppingListItems(shoppingItems);
+          setShowMealPlanSuccess(false);
+          setTimeout(() => {
+            setShowShoppingListModal(true);
+          }, 300);
+        }
+      } else {
+        throw new Error('No Instacart link returned');
+      }
+    } catch (error: any) {
+      console.error('[Instacart] Error:', error);
+      // Fallback - save locally
+      if (acceptedPlan) {
+        const items = extractShoppingListFromPlan(acceptedPlan);
+        await saveShoppingListToStorage(items);
+      }
+      // Show error fallback - open shopping list modal
+      if (acceptedPlan) {
+        const shoppingItems = extractShoppingListFromPlan(acceptedPlan);
+        setShoppingListItems(shoppingItems);
+        setShowMealPlanSuccess(false);
+        setTimeout(() => {
+          setShowShoppingListModal(true);
+        }, 300);
+      }
+    } finally {
+      setGeneratingList(false);
+    }
+  };
+
+  /**
+   * Save the meal plan to user's library for future use
+   */
+  const handleSaveMealPlan = async () => {
+    if (!acceptedPlan) {
+      Alert.alert('Error', 'No meal plan to save');
+      return;
+    }
+
+    setSavingMealPlan(true);
+    try {
+      console.log('[SaveMealPlan] Saving plan:', acceptedPlan.program_id);
           console.warn('[Instacart] Failed to open deep link:', linkError);
           // Fallback: Open shopping list modal which has the Instacart button
           if (acceptedPlan) {
@@ -1286,11 +1325,6 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
               setShowShoppingListModal(true);
             }, 300);
           }
-          Alert.alert(
-            'Shopping List Ready',
-            `Your shopping list with ${itemCount} ingredients is ready. You can open Instacart from the shopping list.`,
-            [{ text: 'OK' }]
-          );
         }
       } else {
         throw new Error('No Instacart link returned');
@@ -3321,7 +3355,12 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
     >
       <View style={styles.successModalOverlay}>
         <View style={styles.successModalContainer}>
-          <SafeAreaView style={styles.successModalSafeArea}>
+          <ScrollView 
+            style={styles.successModalScrollView}
+            contentContainerStyle={styles.successModalScrollContent}
+            showsVerticalScrollIndicator={false}
+            bounces={true}
+          >
             {/* Header with celebration */}
             <View style={styles.successModalHeader}>
               <View style={styles.successCelebrationIcon}>
@@ -3359,7 +3398,9 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
               {/* View Shopping List - Primary Action */}
               <TouchableOpacity 
                 style={styles.instacartButton}
-                onPress={() => {
+                activeOpacity={0.7}
+                onPress={(e) => {
+                  e.stopPropagation();
                   console.log('[ViewShoppingList] Button pressed');
                   const planId = acceptedPlan?.program_id;
                   if (!planId) {
@@ -3388,7 +3429,7 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
                     Alert.alert('No Items', 'No ingredients found in this meal plan.');
                   }
                 }}
-                disabled={!acceptedPlan}
+                disabled={!acceptedPlan || generatingList}
               >
                 <LinearGradient
                   colors={['#43B02A', '#2E8B1F']}
@@ -3396,13 +3437,9 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
                   end={{ x: 1, y: 0 }}
                   style={styles.instacartButtonGradient}
                 >
-                  {generatingList ? (
-                    <ActivityIndicator color="#fff" size="small" />
-                  ) : (
-                    <SvgIcon name="list-outline" size={24} color="#fff" />
-                  )}
+                  <SvgIcon name="list-outline" size={24} color="#fff" />
                   <Text style={styles.instacartButtonText}>
-                    {generatingList ? 'Loading...' : 'View Shopping List'}
+                    View Shopping List
                   </Text>
                 </LinearGradient>
               </TouchableOpacity>
@@ -3413,7 +3450,9 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
                   styles.instacartButton,
                   (!user?.capabilities?.instacart || generatingList) && styles.instacartButtonDisabled
                 ]}
-                onPress={() => {
+                activeOpacity={0.7}
+                onPress={(e) => {
+                  e.stopPropagation();
                   if (user?.capabilities?.instacart) {
                     // User has Instacart enabled - proceed with submission
                     handleSubmitToInstacart();
@@ -3459,7 +3498,9 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
               {/* View Calendar Button */}
               <TouchableOpacity 
                 style={styles.viewCalendarButton}
-                onPress={() => {
+                activeOpacity={0.7}
+                onPress={(e) => {
+                  e.stopPropagation();
                   setShowMealPlanSuccess(false);
                   setViewMode('calendar');
                 }}
@@ -3474,13 +3515,14 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
                   styles.saveMealPlanButton,
                   mealPlanSaved && styles.saveMealPlanButtonSaved
                 ]}
+                activeOpacity={0.7}
                 onPress={handleSaveMealPlan}
                 disabled={savingMealPlan || mealPlanSaved}
               >
                 {savingMealPlan ? (
                   <ActivityIndicator color="#4cbb17" size="small" />
                 ) : (
-<SvgIcon 
+                  <SvgIcon 
                     name={mealPlanSaved ? "checkmark-circle" : "bookmark-outline"} 
                     size={20} 
                     color={mealPlanSaved ? "#4cbb17" : "#4cbb17"} 
@@ -3497,7 +3539,9 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
               {/* Done Button */}
               <TouchableOpacity 
                 style={styles.successDoneButton}
-                onPress={() => {
+                activeOpacity={0.7}
+                onPress={(e) => {
+                  e.stopPropagation();
                   setShowMealPlanSuccess(false);
                   setMealPlanSaved(false); // Reset for next plan
                 }}
@@ -3505,7 +3549,7 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
                 <Text style={styles.successDoneText}>Done</Text>
               </TouchableOpacity>
             </View>
-          </SafeAreaView>
+          </ScrollView>
         </View>
       </View>
     </Modal>
@@ -4118,6 +4162,69 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
   };
 
   // Shopping List Modal - Slides up from bottom
+  // Instacart Success Modal (similar to workout complete modal)
+  const renderInstacartSuccessModal = () => (
+    <Modal
+      visible={showInstacartSuccessModal}
+      animationType="slide"
+      presentationStyle="overFullScreen"
+      transparent={true}
+      onRequestClose={() => setShowInstacartSuccessModal(false)}
+    >
+      <View style={styles.workoutCompleteOverlay}>
+        <View style={styles.workoutCompleteContainer}>
+          <SafeAreaView style={styles.workoutCompleteSafeArea}>
+            {/* Header with celebration */}
+            <View style={styles.workoutCompleteHeader}>
+              <View style={styles.celebrationIcon}>
+                <Text style={styles.celebrationEmoji}>🎉</Text>
+              </View>
+              <Text style={styles.workoutCompleteTitle}>Shopping List Created!</Text>
+              <Text style={styles.workoutCompleteSubtitle}>Your ingredients are ready in Instacart</Text>
+            </View>
+
+            {/* Stats Grid */}
+            <View style={styles.workoutStatsGrid}>
+              <View style={styles.workoutStatCard}>
+                <SvgIcon name="cart-outline" size={28} color="#4cbb17" />
+                <Text style={styles.workoutCompleteStatValue}>{instacartItemCount}</Text>
+                <Text style={styles.workoutCompleteStatLabel}>Items</Text>
+              </View>
+              <View style={styles.workoutStatCard}>
+                <SvgIcon name="checkmark-circle-outline" size={28} color="#3b82f6" />
+                <Text style={styles.workoutCompleteStatValue}>Ready</Text>
+                <Text style={styles.workoutCompleteStatLabel}>To Order</Text>
+              </View>
+              <View style={styles.workoutStatCard}>
+                <SvgIcon name="time-outline" size={28} color="#f59e0b" />
+                <Text style={styles.workoutCompleteStatValue}>Fast</Text>
+                <Text style={styles.workoutCompleteStatLabel}>Delivery</Text>
+              </View>
+            </View>
+
+            {/* Done Button */}
+            <TouchableOpacity 
+              style={styles.workoutCompleteDoneButton}
+              onPress={async () => {
+                setShowInstacartSuccessModal(false);
+                // Open Instacart if URL is available
+                if (instacartUrl) {
+                  try {
+                    await Linking.openURL(instacartUrl);
+                  } catch (err) {
+                    console.warn('Failed to open Instacart:', err);
+                  }
+                }
+              }}
+            >
+              <Text style={styles.workoutCompleteDoneText}>Open Instacart</Text>
+            </TouchableOpacity>
+          </SafeAreaView>
+        </View>
+      </View>
+    </Modal>
+  );
+
   const renderShoppingListModal = () => {
     const items = shoppingListItems;
     const totalItems = items ? Object.values(items).flat().length : 0;
@@ -4802,15 +4909,18 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
-    maxHeight: '85%',
+    maxHeight: '90%',
   },
-  successModalSafeArea: {
+  successModalScrollView: {
+    flexGrow: 1,
+  },
+  successModalScrollContent: {
     paddingHorizontal: 20,
-    paddingBottom: 20,
+    paddingTop: 24,
+    paddingBottom: 40,
   },
   successModalHeader: {
     alignItems: 'center',
-    paddingTop: 24,
     paddingBottom: 16,
   },
   successCelebrationIcon: {
@@ -7000,6 +7110,85 @@ const styles = StyleSheet.create({
     fontSize: 17,
     fontWeight: '600',
     color: '#fff',
+  },
+  
+  // Workout Complete Modal Styles (used for Instacart success)
+  workoutCompleteOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+  },
+  workoutCompleteContainer: {
+    backgroundColor: '#ffffff',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    maxHeight: '85%',
+    minHeight: '50%',
+  },
+  workoutCompleteSafeArea: {
+    padding: 24,
+  },
+  workoutCompleteHeader: {
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  celebrationIcon: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: '#fef3c7',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+  },
+  celebrationEmoji: {
+    fontSize: 40,
+  },
+  workoutCompleteTitle: {
+    fontSize: 28,
+    fontWeight: '700',
+    color: '#111827',
+    marginBottom: 8,
+  },
+  workoutCompleteSubtitle: {
+    fontSize: 16,
+    color: '#6b7280',
+  },
+  workoutStatsGrid: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 24,
+  },
+  workoutStatCard: {
+    flex: 1,
+    alignItems: 'center',
+    backgroundColor: '#f9fafb',
+    borderRadius: 16,
+    paddingVertical: 16,
+    paddingHorizontal: 8,
+    marginHorizontal: 4,
+  },
+  workoutCompleteStatValue: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#111827',
+    marginTop: 8,
+  },
+  workoutCompleteStatLabel: {
+    fontSize: 12,
+    color: '#6b7280',
+    marginTop: 4,
+  },
+  workoutCompleteDoneButton: {
+    backgroundColor: '#4cbb17',
+    paddingVertical: 16,
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  workoutCompleteDoneText: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#ffffff',
   },
 });
 

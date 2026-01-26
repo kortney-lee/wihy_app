@@ -767,3 +767,27 @@ export interface IngredientAnalysis {
   fda_status: string;
   analysis_summary: string;
 }
+
+export interface FoodAlternative {
+  name: string;
+  calories: number;
+  sugar: number;
+  fiber: number;
+  protein?: number;
+  fat?: number;
+  comparison: string;
+}
+
+export interface CompareResponse {
+  success: boolean;
+  original: {
+    name: string;
+    calories: number;
+    sugar: number;
+    fiber: number;
+    protein?: number;
+    fat?: number;
+  };
+  alternatives: FoodAlternative[];
+  error?: string;
+}

@@ -981,6 +981,71 @@ class ScanService {
       scansByType,
     };
   }
+
+  /**
+   * Compare food item with healthier alternatives
+   * API v6.1: POST /api/scan/compare
+   */
+  async compareFoodOptions(
+    foodName: string,
+    category?: string,
+    dietaryGoals?: string[]
+  ): Promise<any> {
+    const endpoint = `${this.baseUrl}/api/scan/compare`;
+    
+    console.log('=== COMPARE FOOD API CALL ===');
+    console.log('Food Name:', foodName);
+    console.log('Category:', category);
+    console.log('Dietary Goals:', dietaryGoals);
+    
+    try {
+      const requestBody: any = {
+        food_name: foodName,
+      };
+      
+      if (category) {
+        requestBody.category = category;
+      }
+      
+      if (dietaryGoals && dietaryGoals.length > 0) {
+        requestBody.user_context = {
+          dietary_goals: dietaryGoals,
+        };
+      }
+      
+      console.log('Request Body:', JSON.stringify(requestBody, null, 2));
+      
+      const response = await fetchWithLogging(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      console.log(`Response Status: ${response.status}`);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error(`Compare Food HTTP error ${response.status}:`, errorText);
+        throw new Error(`Failed to compare food options (${response.status})`);
+      }
+
+      const data = await response.json();
+      console.log('=== COMPARE FOOD SUCCESS ===');
+      
+      return data;
+    } catch (error: any) {
+      console.error('=== COMPARE FOOD ERROR ===');
+      console.error('Error:', error);
+      return {
+        success: false,
+        error: error.message || 'Failed to compare food options',
+        original: null,
+        alternatives: [],
+      };
+    }
+  }
 }
 
 export const scanService = new ScanService();
