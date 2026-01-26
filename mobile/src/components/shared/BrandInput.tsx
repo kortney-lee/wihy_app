@@ -131,9 +131,9 @@ export const BrandInput: React.FC<Props> = ({
 
   const getSourceIcon = (source: string) => {
     switch (source) {
-      case 'database': return '✓';
-      case 'api': return '🌐';
-      case 'fallback': return '📋';
+      case 'database': return 'DB';
+      case 'api': return 'API';
+      case 'fallback': return '';
       default: return '';
     }
   };
@@ -175,7 +175,7 @@ export const BrandInput: React.FC<Props> = ({
               styles.brandText,
               value.includes(brand.name) && styles.brandTextSelected
             ]}>
-              {brand.isCommon && '⭐ '}{brand.name}
+              {brand.isCommon && '* '}{brand.name}
             </Text>
             {brand.source !== 'fallback' && (
               <Text style={[

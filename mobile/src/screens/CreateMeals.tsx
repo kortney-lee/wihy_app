@@ -1099,16 +1099,19 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
   };
 
   const handleSubmitToInstacart = async () => {
-    if (!acceptedPlan) return;
+    if (!acceptedPlan || !mealPlanId) {
+      Alert.alert('Error', 'No meal plan available. Please create a meal plan first.');
+      return;
+    }
     
     // Keep success modal open while generating
     setGeneratingList(true);
     
     try {
       // Use the correct Instacart API to create shopping link from meal plan
-      console.log('[Instacart] Creating shopping link for plan:', acceptedPlan.program_id);
+      console.log('[Instacart] Creating shopping link for plan:', mealPlanId);
       
-      const instacartResponse = await createInstacartLinkFromMealPlan(parseInt(acceptedPlan.program_id, 10));
+      const instacartResponse = await createInstacartLinkFromMealPlan(mealPlanId);
       
       if (instacartResponse && instacartResponse.productsLinkUrl) {
         // Save the Instacart URL to state
@@ -1124,7 +1127,7 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
           console.warn('[Instacart] Failed to open deep link:', linkError);
           // Fallback: Show alert with button to try again
           Alert.alert(
-            '🛒 Shopping List Ready!',
+            'Shopping List Ready',
             `Your shopping list with ${instacartResponse.ingredientCount} ingredients has been created. Tap the button to open in Instacart.`,
             [{ text: 'OK' }]
           );
@@ -1664,7 +1667,7 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
 
       setMealPlanId(mealPlan.id);
       Alert.alert(
-        'Meal Plan Created! 📋',
+        'Meal Plan Created',
         `7-day plan created. Generate a shopping list to get started.`,
         [{ text: 'OK' }]
       );
@@ -1694,7 +1697,7 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
       console.log('Shopping list generated:', shoppingList);
       
       Alert.alert(
-        'Shopping List Ready! 🛒',
+        'Shopping List Ready',
         `${shoppingList.totalItems} items organized by category`,
         [
           {
@@ -2687,7 +2690,7 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
                     color="#fff" 
                   />
                   <Text style={styles.planButtonText}>
-                    {mealPlanId ? '✓ Meal Plan Created' : 'Create Meal Plan'}
+                    {mealPlanId ? 'Meal Plan Created' : 'Create Meal Plan'}
                   </Text>
                 </>
               )}
@@ -3293,7 +3296,7 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
                 <View style={{ marginTop: 12 }}>
                   <InstacartLinkButton 
                     url={instacartUrl}
-                    title="🛒 Open Again in Instacart"
+                    title="Open Again in Instacart"
                   />
                 </View>
               )}
@@ -4283,7 +4286,7 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
                         } else {
                           // Manual list - show coming soon
                           Alert.alert(
-                            '🛒 Instacart',
+                            'Instacart',
                             `Order ${uncheckedCount} unchecked items with Instacart. This feature is coming soon!`,
                             [{ text: 'OK' }]
                           );
