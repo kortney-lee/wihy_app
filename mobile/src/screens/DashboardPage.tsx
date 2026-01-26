@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   View,
   Text,
@@ -9,8 +9,10 @@ import {
   Platform,
   Image,
   useWindowDimensions,
+  Animated,
+  StatusBar,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import type { CompositeNavigationProp } from '@react-navigation/native';
 import type { StackNavigationProp } from '@react-navigation/stack';
@@ -76,6 +78,32 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
   const route = useRoute();
   const { user } = React.useContext(AuthContext);
   const layout = useDashboardLayout();
+  const insets = useSafeAreaInsets();
+
+  // Collapsing header animation
+  const scrollY = useRef(new Animated.Value(0)).current;
+  
+  const HEADER_MAX_HEIGHT = 140;
+  const HEADER_MIN_HEIGHT = 0;
+  const HEADER_SCROLL_DISTANCE = HEADER_MAX_HEIGHT - HEADER_MIN_HEIGHT;
+
+  const headerHeight = scrollY.interpolate({
+    inputRange: [0, HEADER_SCROLL_DISTANCE],
+    outputRange: [HEADER_MAX_HEIGHT, HEADER_MIN_HEIGHT],
+    extrapolate: 'clamp',
+  });
+
+  const headerOpacity = scrollY.interpolate({
+    inputRange: [0, HEADER_SCROLL_DISTANCE / 2],
+    outputRange: [1, 0],
+    extrapolate: 'clamp',
+  });
+
+  const titleScale = scrollY.interpolate({
+    inputRange: [0, HEADER_SCROLL_DISTANCE],
+    outputRange: [1, 0.8],
+    extrapolate: 'clamp',
+  });
   // const { hasActiveSession, createMockSession, endSession } = useSession();
   const [hasActiveSession, setHasActiveSession] = useState(false);
   const [showQuickStartGuide, setShowQuickStartGuide] = useState(false);
@@ -224,16 +252,41 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
     const isFreeUser = !user || user.plan === 'free';
     
     return (
-    <SafeAreaView style={styles.healthMainContent} edges={['left', 'right']}>
-      {/* Fixed Header - Outside ScrollView */}
-      <GradientDashboardHeader
-        title="Health Dashboard"
-        subtitle={isFreeUser ? "Basic health overview" : "Your comprehensive health overview"}
-        gradient="healthHub"
-        badge={{ icon: "fitness", text: "Active Today" }}
-      />
+    <View style={styles.healthMainContent}>
+      <StatusBar barStyle="light-content" backgroundColor="#16a34a" />
+      {/* Status bar area - Always green */}
+      <View style={{ height: Platform.OS === 'android' ? StatusBar.currentHeight || 0 : insets.top, backgroundColor: '#16a34a' }} />
+      
+      {/* Collapsing Header */}
+      <Animated.View style={[styles.collapsibleHeader, { height: headerHeight, backgroundColor: '#16a34a' }]}>
+        <Animated.View 
+          style={[
+            styles.headerContent,
+            { 
+              opacity: headerOpacity,
+              transform: [{ scale: titleScale }]
+            }
+          ]}
+        >
+          <Text style={styles.collapsibleHeaderTitle}>Health Dashboard</Text>
+          <Text style={styles.collapsibleHeaderSubtitle}>
+            {isFreeUser ? "Basic health overview" : "Your comprehensive health overview"}
+          </Text>
+          <View style={styles.progressBadge}>
+            <SvgIcon name="fitness" size={14} color="#16a34a" />
+            <Text style={styles.progressBadgeText}>Active Today</Text>
+          </View>
+        </Animated.View>
+      </Animated.View>
 
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <Animated.ScrollView 
+        showsVerticalScrollIndicator={false}
+        scrollEventThrottle={16}
+        onScroll={Animated.event(
+          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+          { useNativeDriver: false }
+        )}
+      >
       {/* Dashboard Grid - Centered with max-width on tablets */}
       <View style={[
         styles.dashboardGrid,
@@ -442,8 +495,8 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
       
       {/* Bottom spacing for tab bar */}
       <View style={{ height: 100 }} />
-    </ScrollView>
-    </SafeAreaView>
+    </Animated.ScrollView>
+    </View>
   );
   };
 
@@ -871,6 +924,50 @@ const styles = StyleSheet.create({
   fitnessDashboardWrapper: {
     flex: 1,
     backgroundColor: '#e0f2fe',
+  },
+
+  // Collapsible Header Styles
+  collapsibleHeader: {
+    overflow: 'hidden',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
+  headerContent: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 24,
+  },
+
+  collapsibleHeaderTitle: {
+    fontSize: 28,
+    fontWeight: '700',
+    color: '#ffffff',
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+
+  collapsibleHeaderSubtitle: {
+    fontSize: 16,
+    color: 'rgba(255, 255, 255, 0.9)',
+    textAlign: 'center',
+    marginBottom: 12,
+  },
+
+  progressBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    gap: 6,
+  },
+
+  progressBadgeText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#16a34a',
   },
 });
 
