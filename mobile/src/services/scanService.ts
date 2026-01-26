@@ -25,14 +25,12 @@ class ScanService {
 
   /**
    * Get current authenticated user ID
-   * Throws error if user is not authenticated - no fallbacks.
+   * Returns null for unauthenticated/guest users (free features don't require auth)
+   * Backend will handle guest sessions and feature access based on authentication status
    */
-  private async getCurrentUserId(): Promise<string> {
+  private async getCurrentUserId(): Promise<string | null> {
     const userData = await authService.getUserData();
-    if (userData?.id) {
-      return userData.id;
-    }
-    throw new Error('User not authenticated. Please log in to continue.');
+    return userData?.id || null;
   }
 
   /**
@@ -51,7 +49,7 @@ class ScanService {
     console.log('Mode:', mode);
     
     try {
-      // Get the current authenticated user ID
+      // Get the current user ID (null for guest users - free features work without auth)
       const currentUserId = await this.getCurrentUserId();
       
       const requestBody = {
@@ -59,7 +57,7 @@ class ScanService {
         mode,
         user_context: {
           include_charts: true,
-          userId: currentUserId,
+          userId: currentUserId, // null for guest users
           ...userContext,
         },
       };
@@ -125,7 +123,7 @@ class ScanService {
     console.log('User Context:', userContext);
     
     try {
-      // Get the current authenticated user ID
+      // Get the current user ID (null for guest users - barcode scanning is FREE)
       const currentUserId = await this.getCurrentUserId();
       
       const requestBody = {
@@ -133,7 +131,7 @@ class ScanService {
         user_context: {
           include_charts: true,
           include_ingredients: true,
-          userId: currentUserId,
+          userId: currentUserId, // null for guest users
           ...userContext,
         },
       };
@@ -208,7 +206,7 @@ class ScanService {
     console.log('User Context:', userContext);
     
     try {
-      // Get the current authenticated user ID
+      // Get the current user ID (null for guest users - photo analysis is FREE)
       const currentUserId = await this.getCurrentUserId();
       
       // Convert image to base64 if needed
@@ -224,7 +222,7 @@ class ScanService {
         context: userContext?.context || 'food analysis',
         user_context: {
           include_charts: true,
-          userId: currentUserId,
+          userId: currentUserId, // null for guest users
           ...userContext,
         },
       };
@@ -301,7 +299,7 @@ class ScanService {
     console.log('User Context:', userContext);
     
     try {
-      // Get the current authenticated user ID
+      // Get the current user ID (null for guest users - photo food analysis is FREE)
       const currentUserId = await this.getCurrentUserId();
       
       let imageData = imageUri;
@@ -314,7 +312,7 @@ class ScanService {
       const requestBody = {
         image: imageData.substring(0, 100) + '... [truncated]',
         user_context: {
-          userId: currentUserId,
+          userId: currentUserId, // null for guest users
           include_charts: true,
           trackHistory: true,
           ...userContext,
@@ -408,7 +406,7 @@ class ScanService {
     console.log('User Context:', userContext);
     
     try {
-      // Get the current authenticated user ID
+      // Get the current user ID (null for guest users)
       const currentUserId = await this.getCurrentUserId();
       
       let imageData = imageUri;
@@ -420,7 +418,7 @@ class ScanService {
 
       const userContextWithId = {
         ...getDefaultUserContext(),
-        userId: currentUserId,
+        userId: currentUserId, // null for guest users
         ...userContext,
       };
 
@@ -492,7 +490,7 @@ class ScanService {
     console.log('User Context:', userContext);
     
     try {
-      // Get the current authenticated user ID
+      // Get the current user ID (null for guest users)
       const currentUserId = await this.getCurrentUserId();
       
       let imageData = imageUri;
@@ -505,7 +503,7 @@ class ScanService {
       const requestBody = {
         image_url: imageData.substring(0, 100) + '... [truncated]',
         user_context: {
-          userId: currentUserId,
+          userId: currentUserId, // null for guest users
           trackHistory: true,
           ...userContext,
         },
@@ -595,7 +593,7 @@ class ScanService {
     console.log('Context:', context);
     
     try {
-      // Get the current authenticated user ID
+      // Get the current user ID (null for guest users - medication tracking is FREE)
       const currentUserId = await this.getCurrentUserId();
       
       let imageData = imageUri;
@@ -608,7 +606,7 @@ class ScanService {
       const requestBody = {
         images: ['[base64 image data - truncated]'],
         context: {
-          userId: currentUserId,
+          userId: currentUserId, // null for guest users
           ...context,
         },
       };
