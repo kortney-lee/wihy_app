@@ -55,15 +55,14 @@ export default function WihyHomeScreen({}: Props = {}) {
   
   // Don't auto-show login modal - let user interact first
   // Modal will be triggered by clicking profile icon or protected features
-  
-  // Check if user is on free plan
-  const isFreeUser = !user || user.plan === 'free';
-  
-  // Handle health button click - show subscription for free users
+
+  // Handle health button click - show subscription for non-logged-in users
   const handleHealthPress = () => {
-    if (isFreeUser) {
+    if (!user) {
+      // Not logged in - redirect to subscription
       navigation.navigate('Subscription');
     } else {
+      // Logged in (free or premium) - allow access to Health
       navigation.navigate('Health');
     }
   };
@@ -546,7 +545,6 @@ export default function WihyHomeScreen({}: Props = {}) {
         {/* @ts-ignore */}
         <WebNavHeader 
           activePage="home" 
-          isFreeUser={isFreeUser}
           showLoginModal={showLoginModal}
           setShowLoginModal={setShowLoginModal}
         />
