@@ -747,6 +747,99 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
       // Handle different API response structures
       let daysArrayFirst = result.days || result.meal_days || [];
       
+      // Handle API format where meals are separate properties (breakfast, lunch, dinner) instead of meals array
+      if (daysArrayFirst.length > 0 && !daysArrayFirst[0].meals && (daysArrayFirst[0].breakfast || daysArrayFirst[0].lunch || daysArrayFirst[0].dinner)) {
+        console.log('[CreateMeals] Converting breakfast/lunch/dinner format to meals array');
+        daysArrayFirst = daysArrayFirst.map((day: any, idx: number) => {
+          const meals: any[] = [];
+          
+          // Add breakfast if present
+          if (day.breakfast) {
+            const breakfast = day.breakfast;
+            meals.push({
+              meal_id: breakfast.meal_id || breakfast.id,
+              meal_type: 'breakfast',
+              meal_name: breakfast.name || breakfast.meal_name || 'Breakfast',
+              description: breakfast.description || '',
+              calories: breakfast.nutrition?.calories || breakfast.calories || 0,
+              protein: breakfast.nutrition?.protein_g || breakfast.protein || breakfast.protein_g || 0,
+              carbs: breakfast.nutrition?.carbs_g || breakfast.carbs || breakfast.carbs_g || 0,
+              fat: breakfast.nutrition?.fat_g || breakfast.fat || breakfast.fat_g || 0,
+              servings: breakfast.servings || planServings,
+              prep_time_min: breakfast.prep_time_min || breakfast.prep_time || breakfast.prepTime || 0,
+              cook_time_min: breakfast.cook_time_min || breakfast.cook_time || breakfast.cookTime || 0,
+              ingredients: breakfast.ingredients || [],
+              instructions: breakfast.instructions || [],
+              image_url: breakfast.image_url || breakfast.imageUrl,
+            });
+          }
+          
+          // Add lunch if present
+          if (day.lunch) {
+            const lunch = day.lunch;
+            meals.push({
+              meal_id: lunch.meal_id || lunch.id,
+              meal_type: 'lunch',
+              meal_name: lunch.name || lunch.meal_name || 'Lunch',
+              description: lunch.description || '',
+              calories: lunch.nutrition?.calories || lunch.calories || 0,
+              protein: lunch.nutrition?.protein_g || lunch.protein || lunch.protein_g || 0,
+              carbs: lunch.nutrition?.carbs_g || lunch.carbs || lunch.carbs_g || 0,
+              fat: lunch.nutrition?.fat_g || lunch.fat || lunch.fat_g || 0,
+              servings: lunch.servings || planServings,
+              prep_time_min: lunch.prep_time_min || lunch.prep_time || lunch.prepTime || 0,
+              cook_time_min: lunch.cook_time_min || lunch.cook_time || lunch.cookTime || 0,
+              ingredients: lunch.ingredients || [],
+              instructions: lunch.instructions || [],
+              image_url: lunch.image_url || lunch.imageUrl,
+            });
+          }
+          
+          // Add dinner if present
+          if (day.dinner) {
+            const dinner = day.dinner;
+            meals.push({
+              meal_id: dinner.meal_id || dinner.id,
+              meal_type: 'dinner',
+              meal_name: dinner.name || dinner.meal_name || 'Dinner',
+              description: dinner.description || '',
+              calories: dinner.nutrition?.calories || dinner.calories || 0,
+              protein: dinner.nutrition?.protein_g || dinner.protein || dinner.protein_g || 0,
+              carbs: dinner.nutrition?.carbs_g || dinner.carbs || dinner.carbs_g || 0,
+              fat: dinner.nutrition?.fat_g || dinner.fat || dinner.fat_g || 0,
+              servings: dinner.servings || planServings,
+              prep_time_min: dinner.prep_time_min || dinner.prep_time || dinner.prepTime || 0,
+              cook_time_min: dinner.cook_time_min || dinner.cook_time || dinner.cookTime || 0,
+              ingredients: dinner.ingredients || [],
+              instructions: dinner.instructions || [],
+              image_url: dinner.image_url || dinner.imageUrl,
+            });
+          }
+          
+          // Calculate totals
+          const total_calories = meals.reduce((sum, m) => sum + (m.calories || 0), 0);
+          const total_protein = meals.reduce((sum, m) => sum + (m.protein || 0), 0);
+          const total_carbs = meals.reduce((sum, m) => sum + (m.carbs || 0), 0);
+          const total_fat = meals.reduce((sum, m) => sum + (m.fat || 0), 0);
+          
+          return {
+            date: day.date || new Date(Date.now() + idx * 86400000).toISOString().split('T')[0],
+            day_number: day.day_number || day.dayNumber || idx + 1,
+            day_name: day.day_name || ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][(new Date().getDay() + idx) % 7],
+            meals,
+            total_calories,
+            total_protein,
+            total_carbs,
+            total_fat,
+            has_breakfast: !!day.breakfast,
+            has_lunch: !!day.lunch,
+            has_dinner: !!day.dinner,
+            has_snacks: false,
+          };
+        });
+        console.log(`[CreateMeals] Converted ${daysArrayFirst.length} days with ${daysArrayFirst.reduce((sum: number, d: any) => sum + d.meals.length, 0)} total meals`);
+      }
+      
       // Handle plan.plan.recipes structure (from /api/meals/create-from-text)
       if (daysArrayFirst.length === 0 && result.plan?.plan?.recipes) {
         console.log('[CreateMeals] Converting plan.plan.recipes to days structure');
@@ -998,6 +1091,99 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
       
       // Handle different API response structures
       let daysArray = result.days || result.meal_days || [];
+      
+      // Handle API format where meals are separate properties (breakfast, lunch, dinner) instead of meals array
+      if (daysArray.length > 0 && !daysArray[0].meals && (daysArray[0].breakfast || daysArray[0].lunch || daysArray[0].dinner)) {
+        console.log('[CreateMeals] Converting breakfast/lunch/dinner format to meals array');
+        daysArray = daysArray.map((day: any, idx: number) => {
+          const meals: any[] = [];
+          
+          // Add breakfast if present
+          if (day.breakfast) {
+            const breakfast = day.breakfast;
+            meals.push({
+              meal_id: breakfast.meal_id || breakfast.id,
+              meal_type: 'breakfast',
+              meal_name: breakfast.name || breakfast.meal_name || 'Breakfast',
+              description: breakfast.description || '',
+              calories: breakfast.nutrition?.calories || breakfast.calories || 0,
+              protein: breakfast.nutrition?.protein_g || breakfast.protein || breakfast.protein_g || 0,
+              carbs: breakfast.nutrition?.carbs_g || breakfast.carbs || breakfast.carbs_g || 0,
+              fat: breakfast.nutrition?.fat_g || breakfast.fat || breakfast.fat_g || 0,
+              servings: breakfast.servings || request.servings,
+              prep_time_min: breakfast.prep_time_min || breakfast.prep_time || breakfast.prepTime || 0,
+              cook_time_min: breakfast.cook_time_min || breakfast.cook_time || breakfast.cookTime || 0,
+              ingredients: breakfast.ingredients || [],
+              instructions: breakfast.instructions || [],
+              image_url: breakfast.image_url || breakfast.imageUrl,
+            });
+          }
+          
+          // Add lunch if present
+          if (day.lunch) {
+            const lunch = day.lunch;
+            meals.push({
+              meal_id: lunch.meal_id || lunch.id,
+              meal_type: 'lunch',
+              meal_name: lunch.name || lunch.meal_name || 'Lunch',
+              description: lunch.description || '',
+              calories: lunch.nutrition?.calories || lunch.calories || 0,
+              protein: lunch.nutrition?.protein_g || lunch.protein || lunch.protein_g || 0,
+              carbs: lunch.nutrition?.carbs_g || lunch.carbs || lunch.carbs_g || 0,
+              fat: lunch.nutrition?.fat_g || lunch.fat || lunch.fat_g || 0,
+              servings: lunch.servings || request.servings,
+              prep_time_min: lunch.prep_time_min || lunch.prep_time || lunch.prepTime || 0,
+              cook_time_min: lunch.cook_time_min || lunch.cook_time || lunch.cookTime || 0,
+              ingredients: lunch.ingredients || [],
+              instructions: lunch.instructions || [],
+              image_url: lunch.image_url || lunch.imageUrl,
+            });
+          }
+          
+          // Add dinner if present
+          if (day.dinner) {
+            const dinner = day.dinner;
+            meals.push({
+              meal_id: dinner.meal_id || dinner.id,
+              meal_type: 'dinner',
+              meal_name: dinner.name || dinner.meal_name || 'Dinner',
+              description: dinner.description || '',
+              calories: dinner.nutrition?.calories || dinner.calories || 0,
+              protein: dinner.nutrition?.protein_g || dinner.protein || dinner.protein_g || 0,
+              carbs: dinner.nutrition?.carbs_g || dinner.carbs || dinner.carbs_g || 0,
+              fat: dinner.nutrition?.fat_g || dinner.fat || dinner.fat_g || 0,
+              servings: dinner.servings || request.servings,
+              prep_time_min: dinner.prep_time_min || dinner.prep_time || dinner.prepTime || 0,
+              cook_time_min: dinner.cook_time_min || dinner.cook_time || dinner.cookTime || 0,
+              ingredients: dinner.ingredients || [],
+              instructions: dinner.instructions || [],
+              image_url: dinner.image_url || dinner.imageUrl,
+            });
+          }
+          
+          // Calculate totals
+          const total_calories = meals.reduce((sum, m) => sum + (m.calories || 0), 0);
+          const total_protein = meals.reduce((sum, m) => sum + (m.protein || 0), 0);
+          const total_carbs = meals.reduce((sum, m) => sum + (m.carbs || 0), 0);
+          const total_fat = meals.reduce((sum, m) => sum + (m.fat || 0), 0);
+          
+          return {
+            date: day.date || new Date(Date.now() + idx * 86400000).toISOString().split('T')[0],
+            day_number: day.day_number || day.dayNumber || idx + 1,
+            day_name: day.day_name || ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][(new Date().getDay() + idx) % 7],
+            meals,
+            total_calories,
+            total_protein,
+            total_carbs,
+            total_fat,
+            has_breakfast: !!day.breakfast,
+            has_lunch: !!day.lunch,
+            has_dinner: !!day.dinner,
+            has_snacks: false,
+          };
+        });
+        console.log(`[CreateMeals] Converted ${daysArray.length} days with ${daysArray.reduce((sum: number, d: any) => sum + d.meals.length, 0)} total meals`);
+      }
       
       // Handle plan.plan.recipes structure (from /api/meals/create-from-text)
       if (daysArray.length === 0 && result.plan?.plan?.recipes) {
