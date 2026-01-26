@@ -744,6 +744,14 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
       // Cast to any for flexible field access during normalization
       const result = apiResult as any;
       
+      // Debug: Log available ID fields
+      console.log('[CreateMeals] ID fields:', {
+        program_id: result.program_id,
+        plan_id: result.plan_id,
+        id: result.id,
+        meal_id: result.meal?.id,
+      });
+      
       // Handle different API response structures
       let daysArrayFirst = result.days || result.meal_days || [];
       
@@ -932,7 +940,7 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
       // Normalize the response to handle different API formats
       const normalizedPlan: MealPlanResponse = {
         success: result.success ?? true,
-        program_id: result.program_id || result.id || result.meal?.id,
+        program_id: result.program_id || result.plan_id || result.id || result.meal?.id || `plan_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         name: result.name || result.meal?.name || `${planDuration}-Day Meal Plan`,
         description: result.description || planDescription || 'Custom meal plan',
         duration_days: result.duration_days || result.duration || planDuration,
@@ -1286,7 +1294,7 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
       
       const normalizedPlan: MealPlanResponse = {
         success: result.success ?? true,
-        program_id: result.program_id || result.id || result.meal?.id,
+        program_id: result.program_id || result.plan_id || result.id || result.meal?.id || `plan_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         name: result.name || result.meal?.name || `${request.duration}-Day Meal Plan`,
         description: result.description || request.description,
         duration_days: result.duration_days || result.duration || request.duration,
@@ -1354,6 +1362,15 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
 
   const handleAcceptGeneratedPlan = async () => {
     if (!generatedPlan) return;
+    
+    console.log('[CreateMeals] Accepting plan:', {
+      program_id: generatedPlan.program_id,
+      duration_days: generatedPlan.duration_days,
+      days_count: generatedPlan.days?.length,
+      total_meals: generatedPlan.days?.reduce((sum, d) => sum + (d.meals?.length || 0), 0),
+      first_day_meals: generatedPlan.days?.[0]?.meals?.length,
+      summary: generatedPlan.summary,
+    });
     
     setActiveMealPlan(generatedPlan);
     setAcceptedPlan(generatedPlan);
@@ -3548,11 +3565,14 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
                 onPress={async (e) => {
                   e.stopPropagation();
                   console.log('[ViewShoppingList] Button pressed');
-                  const planId = acceptedPlan?.program_id;
-                  if (!planId) {
+                  
+                  // Check if we have a plan with days/meals (program_id not required for shopping list)
+                  if (!acceptedPlan || !acceptedPlan.days || acceptedPlan.days.length === 0) {
                     Alert.alert('Error', 'No meal plan available');
                     return;
                   }
+                  
+                  console.log('[ViewShoppingList] Plan has', acceptedPlan.days.length, 'days');
                   
                   // ⭐ CRITICAL: Save meals to database first for Instacart deep links to work
                   // When user returns from Instacart via "Go to recipe on Wihy.Ai", 
