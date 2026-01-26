@@ -19,12 +19,8 @@ export type PlanId =
   | 'coach';
 
 export type AddOnId = 
-  | 'grocery_deals'
-  | 'restaurant_partnerships';
-
-export type IntegrationId =
-  | 'instacart_meals'
-  | 'workout_tracking';
+  | 'wihy_coach'
+  | 'instacart';
 
 // ============= SUBSCRIPTION PLANS =============
 
@@ -217,7 +213,7 @@ export const SUBSCRIPTION_PLANS: Record<PlanId, PlanConfig> = {
   },
 };
 
-// ============= ADD-ONS ($4.99/mo) =============
+// ============= ADD-ONS =============
 
 export interface AddOnConfig {
   id: AddOnId;
@@ -232,85 +228,37 @@ export interface AddOnConfig {
 }
 
 export const ADD_ONS: Record<AddOnId, AddOnConfig> = {
-  grocery_deals: {
-    id: 'grocery_deals',
-    name: 'Grocery Deals',
-    displayName: 'Grocery Store Deals',
-    price: 4.99,
+  wihy_coach: {
+    id: 'wihy_coach',
+    name: 'WIHY Coach (AI)',
+    displayName: 'WIHY Coach (AI)',
+    price: 9.99,
     interval: 'month',
-    description: 'Exclusive grocery store deals and discounts',
-    icon: 'pricetag',
+    description: 'AI-powered personal health and nutrition coach',
+    icon: 'sparkles',
     stripePriceId: 'price_1SqhOSCb0XQPUqHrQwmDghSO',
     features: [
-      'Weekly grocery coupons',
-      'Store-specific deals',
-      'Price match notifications',
+      '24/7 AI health coaching',
+      'Personalized meal recommendations',
+      'Workout guidance',
+      'Progress insights and motivation',
     ],
   },
   
-  restaurant_partnerships: {
-    id: 'restaurant_partnerships',
-    name: 'Restaurant Partnerships',
-    displayName: 'Restaurant Discounts',
-    price: 4.99,
-    interval: 'month',
-    description: 'Discounts at partner restaurants',
-    icon: 'restaurant',
-    stripePriceId: 'price_1SqhOTCb0XQPUqHrohVBqrPV',
-    features: [
-      '10-20% off at partner restaurants',
-      'Exclusive menu items',
-      'Priority reservations',
-    ],
-  },
-};
-
-// ============= INTEGRATIONS ($7.99/mo) =============
-
-export interface IntegrationConfig {
-  id: IntegrationId;
-  name: string;
-  displayName: string;
-  price: number;
-  interval: 'month';
-  description: string;
-  features: string[];
-  icon: string;
-  stripePriceId: string;
-}
-
-export const INTEGRATIONS: Record<IntegrationId, IntegrationConfig> = {
-  instacart_meals: {
-    id: 'instacart_meals',
-    name: 'Instacart Meals Integration',
-    displayName: 'Instacart Meals',
+  instacart: {
+    id: 'instacart',
+    name: 'Instacart Integration',
+    displayName: 'Instacart Integration',
     price: 7.99,
     interval: 'month',
-    description: 'Meal planning with Instacart delivery',
+    description: 'Meal planning with Instacart grocery delivery',
     icon: 'cart',
-    stripePriceId: 'price_1SqhOTCb0XQPUqHrDk84eaVq',
+    stripePriceId: 'price_1SqhOTCb0XQPUqHrohVBqrPV',
     features: [
       'AI-powered meal suggestions',
       'Auto-generate shopping lists',
-      'Direct Instacart ordering',
+      'One-click Instacart ordering',
       'Recipe library access',
-    ],
-  },
-  
-  workout_tracking: {
-    id: 'workout_tracking',
-    name: 'Workout Tracking Integration',
-    displayName: 'Fitness App Sync',
-    price: 7.99,
-    interval: 'month',
-    description: 'Sync with fitness apps and wearables',
-    icon: 'fitness',
-    stripePriceId: 'price_1SqhOUCb0XQPUqHrncrXDc0c',
-    features: [
-      'Apple Watch sync',
-      'Fitbit integration',
-      'Garmin sync',
-      'Workout history import',
     ],
   },
 };
@@ -352,13 +300,6 @@ export function getAddOn(addonId: AddOnId): AddOnConfig | undefined {
 }
 
 /**
- * Get integration by ID
- */
-export function getIntegration(integrationId: IntegrationId): IntegrationConfig | undefined {
-  return INTEGRATIONS[integrationId];
-}
-
-/**
  * Get all plans as array
  */
 export function getAllPlans(): PlanConfig[] {
@@ -370,13 +311,6 @@ export function getAllPlans(): PlanConfig[] {
  */
 export function getAllAddOns(): AddOnConfig[] {
   return Object.values(ADD_ONS);
-}
-
-/**
- * Get all integrations as array
- */
-export function getAllIntegrations(): IntegrationConfig[] {
-  return Object.values(INTEGRATIONS);
 }
 
 /**
@@ -392,16 +326,14 @@ export function getUpgradeOptions(currentPlan: PlanId): PlanConfig[] {
  */
 export function calculateTotalCost(
   planId: PlanId,
-  addonIds: (AddOnId | IntegrationId)[] = []
+  addonIds: AddOnId[] = []
 ): number {
   const plan = SUBSCRIPTION_PLANS[planId];
   let total = plan.monthlyPrice;
   
   addonIds.forEach(id => {
-    const addon = ADD_ONS[id as AddOnId];
-    const integration = INTEGRATIONS[id as IntegrationId];
+    const addon = ADD_ONS[id];
     if (addon) total += addon.price;
-    if (integration) total += integration.price;
   });
   
   return total;
@@ -431,15 +363,12 @@ export function getPriceSummary(planId: PlanId): string {
 export default {
   SUBSCRIPTION_PLANS,
   ADD_ONS,
-  INTEGRATIONS,
   UPGRADE_PATHS,
   formatPrice,
   getPlan,
   getAddOn,
-  getIntegration,
   getAllPlans,
   getAllAddOns,
-  getAllIntegrations,
   getUpgradeOptions,
   calculateTotalCost,
   getPriceSummary,

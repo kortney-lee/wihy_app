@@ -18,11 +18,9 @@ import { useAuth } from '../context/AuthContext';
 import { 
   SUBSCRIPTION_PLANS, 
   ADD_ONS, 
-  INTEGRATIONS, 
   formatPrice,
   type PlanConfig,
   type AddOnConfig,
-  type IntegrationConfig,
 } from '../config/subscriptionConfig';
 // import { purchaseService } from '../services/purchaseService'; // Requires production build
 
@@ -62,13 +60,8 @@ const PLAN_COLORS: Record<string, string> = {
 };
 
 const ADDON_COLORS: Record<string, string> = {
-  grocery_deals: '#f59e0b',
-  restaurant_partnerships: '#ef4444',
-};
-
-const INTEGRATION_COLORS: Record<string, string> = {
-  instacart_meals: '#10b981',
-  workout_tracking: '#8b5cf6',
+  wihy_coach: '#8b5cf6',
+  instacart: '#10b981',
 };
 
 // Convert config to UI-friendly format
@@ -94,7 +87,7 @@ export default function PlansModal({
   const { user } = useAuth();
   const [purchasing, setPurchasing] = useState(false);
   const [initializingPurchases, setInitializingPurchases] = useState(true);
-  const [activeTab, setActiveTab] = useState<'plans' | 'addons' | 'integrations'>(showAddOns ? 'addons' : 'plans');
+  const [activeTab, setActiveTab] = useState<'plans' | 'addons'>(showAddOns ? 'addons' : 'plans');
 
   useEffect(() => {
     if (visible) {
@@ -234,15 +227,8 @@ export default function PlansModal({
               style={[styles.tab, activeTab === 'addons' && styles.tabActive]}
               onPress={() => setActiveTab('addons')}
             >
-              <Ionicons name="pricetag" size={18} color={activeTab === 'addons' ? '#3b82f6' : '#6b7280'} />
+              <Ionicons name="add-circle" size={18} color={activeTab === 'addons' ? '#3b82f6' : '#6b7280'} />
               <Text style={[styles.tabText, activeTab === 'addons' && styles.tabTextActive]}>Add-ons</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.tab, activeTab === 'integrations' && styles.tabActive]}
-              onPress={() => setActiveTab('integrations')}
-            >
-              <Ionicons name="link" size={18} color={activeTab === 'integrations' ? '#3b82f6' : '#6b7280'} />
-              <Text style={[styles.tabText, activeTab === 'integrations' && styles.tabTextActive]}>Integrations</Text>
             </TouchableOpacity>
           </View>
 
@@ -308,13 +294,13 @@ export default function PlansModal({
               </Pressable>
             ))}
 
-            {/* Add-ons Tab Content ($4.99/mo) */}
+            {/* Add-ons Tab Content */}
             {activeTab === 'addons' && (
               <>
                 <View style={styles.addOnsHeader}>
-                  <Text style={styles.addOnsTitle}>Add-ons • $4.99/mo</Text>
+                  <Text style={styles.addOnsTitle}>Power-Up Add-ons</Text>
                   <Text style={styles.addOnsSubtitle}>
-                    Enhance your experience with these features
+                    Add these features to any paid plan
                   </Text>
                 </View>
                 
@@ -346,51 +332,7 @@ export default function PlansModal({
                 <View style={styles.addOnsNote}>
                   <Ionicons name="information-circle-outline" size={18} color="#6b7280" />
                   <Text style={styles.addOnsNoteText}>
-                    Add-ons require an active subscription. All add-ons are $4.99/mo.
-                  </Text>
-                </View>
-              </>
-            )}
-
-            {/* Integrations Tab Content ($7.99/mo) */}
-            {activeTab === 'integrations' && (
-              <>
-                <View style={styles.addOnsHeader}>
-                  <Text style={styles.addOnsTitle}>Integrations • $7.99/mo</Text>
-                  <Text style={styles.addOnsSubtitle}>
-                    Connect with your favorite apps and services
-                  </Text>
-                </View>
-                
-                {Object.values(INTEGRATIONS).map((integration) => (
-                  <Pressable
-                    key={integration.id}
-                    style={styles.addOnCard}
-                    onPress={() => handleSelectPlan(integration.id)}
-                  >
-                    <View style={[styles.addOnIconContainer, { backgroundColor: INTEGRATION_COLORS[integration.id] + '20' }]}>
-                      <Ionicons name={integration.icon as any} size={28} color={INTEGRATION_COLORS[integration.id]} />
-                    </View>
-                    <View style={styles.addOnInfo}>
-                      <Text style={styles.addOnName}>{integration.displayName}</Text>
-                      <Text style={styles.addOnDescription}>{integration.description}</Text>
-                    </View>
-                    <View style={styles.addOnPriceContainer}>
-                      <Text style={styles.addOnPrice}>${integration.price.toFixed(2)}/mo</Text>
-                      <TouchableOpacity
-                        style={[styles.addOnButton, { backgroundColor: INTEGRATION_COLORS[integration.id] }]}
-                        onPress={() => handleSelectPlan(integration.id)}
-                      >
-                        <Ionicons name="add" size={20} color="#fff" />
-                      </TouchableOpacity>
-                    </View>
-                  </Pressable>
-                ))}
-                
-                <View style={styles.addOnsNote}>
-                  <Ionicons name="information-circle-outline" size={18} color="#6b7280" />
-                  <Text style={styles.addOnsNoteText}>
-                    Integrations require an active subscription. All integrations are $7.99/mo. Family Pro includes Instacart Meals.
+                    Add-ons require an active subscription. WIHY Coach: $9.99/mo, Instacart: $7.99/mo
                   </Text>
                 </View>
               </>

@@ -2,7 +2,7 @@
  * Subscription Management Screen
  * 
  * Unified subscription management for both web (Stripe) and native (IAP)
- * Handles plans, add-ons, integrations, and upgrades
+ * Handles plans, add-ons, and upgrades
  */
 
 import React, { useEffect, useState } from 'react';
@@ -43,11 +43,10 @@ export const SubscriptionManagementScreen: React.FC<Props> = ({ navigation }) =>
   const [activeSubscription, setActiveSubscription] = useState<ActiveSubscription | null>(null);
   const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
   const [addons, setAddons] = useState<AddOn[]>([]);
-  const [integrations, setIntegrations] = useState<Integration[]>([]);
   const [upgradeOptions, setUpgradeOptions] = useState<UpgradeOption[]>([]);
   
   // UI state
-  const [selectedTab, setSelectedTab] = useState<'plans' | 'addons' | 'integrations'>('plans');
+  const [selectedTab, setSelectedTab] = useState<'plans' | 'addons'>('plans');
 
   useEffect(() => {
     loadSubscriptionData();
@@ -60,16 +59,14 @@ export const SubscriptionManagementScreen: React.FC<Props> = ({ navigation }) =>
       const subscription = await subscriptionService.getActiveSubscription();
       setActiveSubscription(subscription);
 
-      // Load available plans, add-ons, and integrations
-      const [plansData, addonsData, integrationsData] = await Promise.all([
+      // Load available plans and add-ons
+      const [plansData, addonsData] = await Promise.all([
         subscriptionService.getPlans(),
         subscriptionService.getAddons(),
-        subscriptionService.getIntegrations(),
       ]);
 
       setPlans(plansData);
       setAddons(addonsData);
-      setIntegrations(integrationsData);
 
       // If user has active subscription, load upgrade options
       if (subscription?.plan) {
@@ -304,14 +301,6 @@ export const SubscriptionManagementScreen: React.FC<Props> = ({ navigation }) =>
               Add-ons
             </Text>
           </Pressable>
-          <Pressable
-            style={[styles.tab, selectedTab === 'integrations' && styles.tabActive]}
-            onPress={() => setSelectedTab('integrations')}
-          >
-            <Text style={[styles.tabText, selectedTab === 'integrations' && styles.tabTextActive]}>
-              Integrations
-            </Text>
-          </Pressable>
         </View>
 
         {/* Plans / Upgrades */}
@@ -398,43 +387,6 @@ export const SubscriptionManagementScreen: React.FC<Props> = ({ navigation }) =>
                       disabled={processing || !hasActiveSubscription}
                     >
                       <Text style={styles.addButtonText}>Add</Text>
-                    </Pressable>
-                  )}
-                </View>
-              );
-            })}
-          </View>
-        )}
-
-        {/* Integrations */}
-        {selectedTab === 'integrations' && (
-          <View style={styles.section}>
-            <Text style={styles.sectionDescription}>
-              Connect third-party services and apps
-            </Text>
-            {integrations.map((integration) => {
-              const isActive = currentAddons.some((a) => a.id === integration.id);
-              return (
-                <View key={integration.id} style={styles.addonCard}>
-                  <View style={styles.addonContent}>
-                    <Text style={styles.addonName}>{integration.name}</Text>
-                    <Text style={styles.addonDescription}>{integration.description}</Text>
-                    <Text style={styles.addonPrice}>
-                      ${integration.price.toFixed(2)}/month
-                    </Text>
-                  </View>
-                  {isActive ? (
-                    <View style={styles.addedBadge}>
-                      <Ionicons name="checkmark-circle" size={20} color="#4CAF50" />
-                      <Text style={styles.addedBadgeText}>Connected</Text>
-                    </View>
-                  ) : (
-                    <Pressable
-                      style={styles.addButton}
-                      onPress={() => handleAddAddon(integration.id)}
-                      disabled={processing || !hasActiveSubscription}
-                    >
-                      <Text style={styles.addButtonText}>Connect</Text>
                     </Pressable>
                   )}
                 </View>
