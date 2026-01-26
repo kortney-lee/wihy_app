@@ -108,8 +108,21 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
   };
 
   const handleGuideNavigate = (tab: 'Home' | 'Scan' | 'Chat' | 'Health' | 'Profile') => {
-    // Navigate to the appropriate tab
-    navigation.navigate(tab as any);
+    // On web, check if we're in TabNavigator or need to navigate to Main first
+    if (Platform.OS === 'web') {
+      const isInTabNavigator = ['Home', 'Scan', 'Chat', 'Health', 'Profile'].includes(route.name);
+      
+      if (isInTabNavigator) {
+        // Already in TabNavigator, navigate directly
+        navigation.navigate(tab as any);
+      } else {
+        // In stack screen, navigate to Main then to tab
+        navigation.navigate('Main', { screen: tab });
+      }
+    } else {
+      // Native (iOS/Android) - direct navigation works
+      navigation.navigate(tab as any);
+    }
   };
 
   const endSession = () => {
