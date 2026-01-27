@@ -301,6 +301,7 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
   const [mealPlanSaved, setMealPlanSaved] = useState(false);
   const [savedMealIds, setSavedMealIds] = useState<string[]>([]); // Track saved meal IDs for Instacart deep links
   const [savingMealsToDb, setSavingMealsToDb] = useState(false); // Loading state for saving meals
+  const [mealsAutoSaved, setMealsAutoSaved] = useState(false); // Track if meals were auto-saved by API (plan/diet mode)
 
   // Shopping List Modal state (bottom sheet style)
   const [showShoppingListModal, setShowShoppingListModal] = useState(false);
@@ -1097,6 +1098,44 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
       // Normalize response (same logic as handleGenerateAIMealPlan)
       const result = apiResult as any;
       
+      // ⭐ NEW: Check if meals were auto-saved by the API (plan/diet mode)
+      // Plan and Diet mode meals are now automatically saved to the database by the backend
+      // Quick mode meals still need manual saving before Instacart
+      const isAutoSaved = result._meta?.meals_auto_saved === true || 
+                          result.mode === 'plan' || 
+                          result.mode === 'diet';
+      
+      if (isAutoSaved) {
+        console.log('[CreateMeals] ✅ Meals were auto-saved by the API (plan/diet mode)');
+        setMealsAutoSaved(true);
+        
+        // Extract meal IDs from the response - they're already saved with 'saved_' prefix
+        const autoSavedMealIds: string[] = [];
+        const extractMealIds = (obj: any) => {
+          if (obj?.meal_id && typeof obj.meal_id === 'string' && obj.meal_id.startsWith('saved_')) {
+            autoSavedMealIds.push(obj.meal_id);
+          } else if (obj?.id && typeof obj.id === 'string' && obj.id.startsWith('saved_')) {
+            autoSavedMealIds.push(obj.id);
+          }
+        };
+        
+        // Extract from all day/meal structures
+        (result.days || []).forEach((day: any) => {
+          ['breakfast', 'lunch', 'dinner', 'snack'].forEach(mealType => {
+            if (day[mealType]) extractMealIds(day[mealType]);
+          });
+          (day.meals || []).forEach(extractMealIds);
+        });
+        
+        if (autoSavedMealIds.length > 0) {
+          console.log('[CreateMeals] Found', autoSavedMealIds.length, 'auto-saved meal IDs:', autoSavedMealIds);
+          setSavedMealIds(autoSavedMealIds);
+        }
+      } else {
+        console.log('[CreateMeals] Quick mode - meals need manual save before Instacart');
+        setMealsAutoSaved(false);
+      }
+      
       // Handle different API response structures
       let daysArray = result.days || result.meal_days || [];
       
@@ -1592,6 +1631,7 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
     setMealPlanId(null);
     setMealPlanSaved(false);
     setSavedMealIds([]); // Reset saved meal IDs for new plan
+    setMealsAutoSaved(false); // Reset auto-saved flag for new plan
   };
 
   const toggleDietaryOption = (id: string) => {
@@ -3574,13 +3614,13 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
                   
                   console.log('[ViewShoppingList] Plan has', acceptedPlan.days.length, 'days');
                   
-                  // ⭐ CRITICAL: Save meals to database first for Instacart deep links to work
-                  // When user returns from Instacart via "Go to recipe on Wihy.Ai", 
-                  // the meals must exist in the database
-                  if (savedMealIds.length === 0 && acceptedPlan) {
+                  // ⭐ UPDATED: Check if meals are already auto-saved (plan/diet mode)
+                  // Plan and Diet mode meals are now automatically saved by the backend
+                  // Only save manually for Quick mode or if no saved IDs exist
+                  if (savedMealIds.length === 0 && !mealsAutoSaved && acceptedPlan) {
                     try {
                       setSavingMealsToDb(true);
-                      console.log('[ViewShoppingList] Saving meals to database for deep link support...');
+                      console.log('[ViewShoppingList] Quick mode - saving meals to database for deep link support...');
                       const mealIds = await mealService.saveMealsFromPlan(userId, acceptedPlan);
                       setSavedMealIds(mealIds);
                       console.log('[ViewShoppingList] Saved', mealIds.length, 'meals to database');
@@ -3590,6 +3630,8 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
                     } finally {
                       setSavingMealsToDb(false);
                     }
+                  } else if (mealsAutoSaved) {
+                    console.log('[ViewShoppingList] ✅ Meals already auto-saved by API, skipping manual save');
                   }
                   
                   // Extract shopping list from the accepted plan
