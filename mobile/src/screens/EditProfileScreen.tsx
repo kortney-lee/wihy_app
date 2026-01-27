@@ -17,6 +17,7 @@ import { AuthContext } from '../context/AuthContext';
 import { userService } from '../services/userService';
 import { WebNavHeader } from '../components/web/WebNavHeader';
 import SvgIcon from '../components/shared/SvgIcon';
+import { formatDateInput } from '../utils/dateFormatter';
 
 const isWeb = Platform.OS === 'web';
 
@@ -217,9 +218,11 @@ export default function EditProfileScreen() {
               <TextInput
                 style={styles.input}
                 value={dateOfBirth}
-                onChangeText={setDateOfBirth}
+                onChangeText={(text) => setDateOfBirth(formatDateInput(text))}
                 placeholder="MM/DD/YYYY"
                 placeholderTextColor={theme.textSecondary}
+                keyboardType="numeric"
+                maxLength={10}
               />
             </View>
 

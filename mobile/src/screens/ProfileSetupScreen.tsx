@@ -18,6 +18,7 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import { AuthContext } from '../context/AuthContext';
 import { userService } from '../services/userService';
 import { dashboardTheme } from '../theme/dashboardTheme';
+import { formatDateInput } from '../utils/dateFormatter';
 import SvgIcon from '../components/shared/SvgIcon';
 
 const { width: screenWidth } = Dimensions.get('window');
@@ -397,9 +398,11 @@ export default function ProfileSetupScreen({ isDashboardMode = false, onBack }: 
           <TextInput
             style={styles.input}
             value={dateOfBirth}
-            onChangeText={setDateOfBirth}
+            onChangeText={(text) => setDateOfBirth(formatDateInput(text))}
             placeholder="MM/DD/YYYY"
             placeholderTextColor={theme.textSecondary}
+            keyboardType="numeric"
+            maxLength={10}
           />
         </View>
 
