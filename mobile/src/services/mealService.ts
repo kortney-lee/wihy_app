@@ -207,6 +207,12 @@ export interface CreateMealPlanRequest {
   /** Time constraint for quick mode */
   timeConstraint?: 'quick' | 'moderate' | 'standard' | 'slow';
   
+  // ⭐ Multi-select support (new in v2)
+  /** Array of meal types for multi-meal generation (Quick mode) */
+  mealTypes?: ('breakfast' | 'lunch' | 'dinner' | 'snack' | 'dessert')[];
+  /** Array of cuisine types for multi-cuisine generation (Quick mode) */
+  cuisineTypes?: string[];
+  
   // ⭐ Food Preferences (for personalized meal plans)
   /** Foods user NEVER wants (picky eaters) */
   food_exclusions?: string[];
