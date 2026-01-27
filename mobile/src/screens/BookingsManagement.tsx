@@ -54,7 +54,7 @@ export default function BookingsManagement({
   // Collapsing header animation
   const scrollY = useRef(new Animated.Value(0)).current;
   const insets = useSafeAreaInsets();
-  const HEADER_MAX_HEIGHT = 140;
+  const HEADER_MAX_HEIGHT = 180;
   const HEADER_MIN_HEIGHT = 0;
   const HEADER_SCROLL_DISTANCE = HEADER_MAX_HEIGHT - HEADER_MIN_HEIGHT;
 
@@ -499,12 +499,14 @@ const styles = StyleSheet.create({
   collapsibleHeader: {
     backgroundColor: '#6366f1',
     overflow: 'hidden',
+    paddingBottom: 20,
   },
   headerContent: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 20,
+    paddingTop: 10,
   },
   headerTitle: {
     fontSize: 28,
