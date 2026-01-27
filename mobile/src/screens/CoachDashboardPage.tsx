@@ -221,14 +221,6 @@ const CoachDashboardPage: React.FC<CoachDashboardPageProps> = ({ showMenuFromHea
         )}
         
         {renderSelectedView()}
-        
-        <BackToHubButton
-          hubName="Coach Hub"
-          color="#3b82f6"
-          onPress={handleBackToDashboardSelection}
-          isMobileWeb={isMobileWebLocal}
-          spinnerGif={spinnerGif}
-        />
       </View>
     );
   }
