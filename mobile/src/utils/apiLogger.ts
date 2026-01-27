@@ -381,6 +381,38 @@ const requiresBearerToken = (url: string): boolean => {
   return true;
 };
 
+// Token refresh synchronization
+let refreshPromise: Promise<boolean> | null = null;
+
+/**
+ * Synchronized token refresh - ensures only one refresh happens at a time
+ */
+async function refreshTokenSynchronized(): Promise<boolean> {
+  if (refreshPromise) {
+    // Already refreshing, wait for existing refresh to complete
+    console.log('[refreshTokenSynchronized] Waiting for existing refresh...');
+    return await refreshPromise;
+  }
+
+  // Start new refresh
+  console.log('[refreshTokenSynchronized] Starting new token refresh...');
+  refreshPromise = (async () => {
+    try {
+      const { authService } = await import('../services/authService');
+      const result = await authService.refreshToken?.();
+      return result || false;
+    } catch (error) {
+      console.error('[refreshTokenSynchronized] Refresh failed:', error);
+      return false;
+    } finally {
+      // Clear the promise after completion
+      refreshPromise = null;
+    }
+  })();
+
+  return await refreshPromise;
+}
+
 /**
  * Wrapper for fetch with automatic logging, client credentials, AND Bearer token
  * 
@@ -417,24 +449,16 @@ export async function fetchWithLogging(
       // Check if token is expired before using it
       if (isJWTExpired(token)) {
         console.warn('[fetchWithLogging] Token expired, attempting refresh before request...');
-        try {
-          // Import authService dynamically to avoid circular dependency
-          const { authService } = await import('../services/authService');
-          const refreshed = await authService.refreshToken?.();
-          
-          if (refreshed) {
-            // Get the new token
-            const newToken = await getStoredToken();
-            if (newToken) {
-              mergedHeaders['Authorization'] = `Bearer ${newToken}`;
-            }
-          } else {
-            // Use expired token anyway - let backend return 401
-            mergedHeaders['Authorization'] = `Bearer ${token}`;
+        const refreshed = await refreshTokenSynchronized();
+        
+        if (refreshed) {
+          // Get the new token after refresh
+          const newToken = await getStoredToken();
+          if (newToken) {
+            mergedHeaders['Authorization'] = `Bearer ${newToken}`;
           }
-        } catch (error) {
-          console.error('[fetchWithLogging] Token refresh failed:', error);
-          // Use expired token anyway - let backend return 401
+        } else {
+          // Refresh failed - use expired token anyway, let backend handle it
           mergedHeaders['Authorization'] = `Bearer ${token}`;
         }
       } else {
@@ -458,58 +482,42 @@ export async function fetchWithLogging(
     if (response.status === 401 && requiresBearerToken(url)) {
       console.error('[fetchWithLogging] 401 Unauthorized - token may be expired');
       
-      // Try to refresh token and retry
-      if (!mergedHeaders['Authorization']) {
-        try {
-          // Import authService dynamically to avoid circular dependency
-          const { authService } = await import('../services/authService');
-          
-          console.log('[fetchWithLogging] Attempting token refresh...');
-          const refreshed = await authService.refreshToken?.();
-          
-          if (refreshed) {
-            // Retry request with new token
-            console.log('[fetchWithLogging] Retrying with refreshed token...');
-            const newToken = await getStoredToken();
-            if (newToken) {
-              mergedHeaders['Authorization'] = `Bearer ${newToken}`;
-              const retryOptions = {
-                ...options,
-                headers: mergedHeaders,
-              };
-              const retryResponse = await fetch(url, retryOptions);
-              
-              // Clone and log retry response
-              const clonedRetry = retryResponse.clone();
-              try {
-                const data = await clonedRetry.json();
-                apiLogger.logResponse(requestId, retryResponse, data);
-              } catch {
-                apiLogger.logResponse(requestId, retryResponse);
-              }
-              
-              return retryResponse;
+      // Try to refresh token and retry (only if we haven't already tried)
+      if (mergedHeaders['Authorization']) {
+        console.log('[fetchWithLogging] Attempting token refresh after 401...');
+        const refreshed = await refreshTokenSynchronized();
+        
+        if (refreshed) {
+          // Retry request with new token
+          console.log('[fetchWithLogging] Retrying with refreshed token...');
+          const newToken = await getStoredToken();
+          if (newToken) {
+            mergedHeaders['Authorization'] = `Bearer ${newToken}`;
+            const retryOptions = {
+              ...options,
+              headers: mergedHeaders,
+            };
+            const retryResponse = await fetch(url, retryOptions);
+            
+            // Clone and log retry response
+            const clonedRetry = retryResponse.clone();
+            try {
+              const data = await clonedRetry.json();
+              apiLogger.logResponse(requestId, retryResponse, data);
+            } catch {
+              apiLogger.logResponse(requestId, retryResponse);
             }
-          } else {
-            // Refresh failed - token signature invalid, clear auth and force re-login
-            console.error('[fetchWithLogging] Token refresh failed - clearing auth data');
-            await authService.clearAllData();
-            // Reload page to trigger login flow (web) or return to login screen (mobile)
-            if (typeof window !== 'undefined') {
-              window.location.href = '/';
-            }
+            
+            return retryResponse;
           }
-        } catch (refreshError) {
-          console.error('[fetchWithLogging] Token refresh failed:', refreshError);
-          // Clear invalid tokens and force re-login
-          try {
-            const { authService } = await import('../services/authService');
-            await authService.clearAllData();
-            if (typeof window !== 'undefined') {
-              window.location.href = '/';
-            }
-          } catch (e) {
-            console.error('[fetchWithLogging] Failed to clear auth data:', e);
+        } else {
+          // Refresh failed - token signature invalid, clear auth and force re-login
+          console.error('[fetchWithLogging] Token refresh failed - clearing auth data');
+          const { authService } = await import('../services/authService');
+          await authService.clearAllData();
+          // Reload page to trigger login flow (web) or return to login screen (mobile)
+          if (typeof window !== 'undefined') {
+            window.location.href = '/';
           }
         }
       }
