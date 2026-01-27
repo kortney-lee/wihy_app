@@ -1165,15 +1165,40 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
 
       // Add mode-specific parameters per MEAL_COMBINATIONS_GUIDE
       if (params.mode === 'quick') {
-        request.mealType = params.mealType as any;
-        request.cuisineType = params.cuisineType;
+        // ⭐ Multi-select support: Send arrays for meal types and cuisines
+        if (params.mealTypes && params.mealTypes.length > 0) {
+          request.mealTypes = params.mealTypes;
+          // Backward compatibility: also set single value
+          request.mealType = params.mealTypes[0] as any;
+        } else if (params.mealType) {
+          request.mealType = params.mealType as any;
+        }
+        
+        if (params.cuisineTypes && params.cuisineTypes.length > 0) {
+          request.cuisineTypes = params.cuisineTypes;
+          // Backward compatibility: also set single value
+          request.cuisineType = params.cuisineTypes[0];
+        } else if (params.cuisineType) {
+          request.cuisineType = params.cuisineType;
+        }
+        
         request.timeConstraint = params.timeConstraint as any;
+        
         // Build comprehensive description including all user selections
         const dietaryPart = (params.quickDiets && params.quickDiets.length > 0) 
           ? ` that is ${params.quickDiets.join(', ')}` 
           : '';
-        request.description = `Generate a single ${params.mealType || 'dinner'}${
-          params.cuisineType ? ` (${params.cuisineType} cuisine)` : ''
+        
+        // Build description for multi-select
+        const mealTypesStr = params.mealTypes && params.mealTypes.length > 0
+          ? params.mealTypes.join(', ')
+          : (params.mealType || 'dinner');
+        const cuisinesStr = params.cuisineTypes && params.cuisineTypes.length > 0
+          ? params.cuisineTypes.join(', ')
+          : (params.cuisineType || '');
+        
+        request.description = `Generate ${params.mealTypes && params.mealTypes.length > 1 ? 'meals' : 'a single meal'}: ${mealTypesStr}${
+          cuisinesStr ? ` (${cuisinesStr} cuisine)` : ''
         }${dietaryPart}${params.timeConstraint ? `, ${params.timeConstraint} prep time` : ''}`;
         request.duration = 1;
       } else if (params.mode === 'plan') {
