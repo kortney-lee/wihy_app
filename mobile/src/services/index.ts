@@ -56,6 +56,24 @@ export type {
   DashboardData,
 } from './progressService';
 
+// NEW: Export Meal Calendar Service (services.wihy.ai/api/meals)
+export { mealCalendarService } from './mealCalendarService';
+export type {
+  MealType,
+  MealSlot,
+  GeneratedMeal,
+  CreateMealRequest,
+  ScheduleMealRequest,
+  BulkScheduleRequest,
+  CalendarDay as MealCalendarDay,
+  CalendarStats,
+  ScheduleEntry,
+  MealTemplate,
+  MealProgram,
+  DayPlan,
+  ActiveMealPlan,
+} from './mealCalendarService';
+
 // NEW: Export Checkout & Subscription Services
 export { checkoutService, WIHY_PLANS } from './checkoutService';
 export type { Plan, CheckoutResult, PaymentStatus } from './checkoutService';
