@@ -1,6 +1,12 @@
 ﻿import React from 'react';
-import { Platform } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { Platform, View, Text } from 'react-native';
+
+// Only import Ionicons on native platforms to prevent font preloading on web
+let NativeIonicons: any = null;
+if (Platform.OS !== 'web') {
+  // Dynamic import for native only - prevents web bundler from including icon fonts
+  NativeIonicons = require('@expo/vector-icons').Ionicons;
+}
 
 interface SvgIconProps {
   name: string;
@@ -354,8 +360,17 @@ const SvgIcon: React.FC<SvgIconProps> = ({ name, size = 24, color = '#000', styl
     );
   }
 
-  // On mobile, use Ionicons
-  return <Ionicons name={name as any} size={size} color={color} style={style} />;
+  // On mobile, use Ionicons (only loaded on native platforms)
+  if (NativeIonicons) {
+    return <NativeIonicons name={name as any} size={size} color={color} style={style} />;
+  }
+  
+  // Fallback for any edge case
+  return (
+    <View style={[{ width: size, height: size }, style]}>
+      <Text style={{ fontSize: size * 0.5, color }}>{name.charAt(0)}</Text>
+    </View>
+  );
 };
 
 // Export as Icon for easy drop-in replacement of Ionicons

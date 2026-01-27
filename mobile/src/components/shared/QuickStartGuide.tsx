@@ -9,7 +9,6 @@ import {
   Dimensions,
   Platform,
 } from 'react-native';
-import { Ionicons as ExpoIonicons } from '@expo/vector-icons';
 import { Ionicons } from './Ionicons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -17,7 +16,7 @@ const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 interface GuideStep {
   id: string;
-  icon: keyof typeof ExpoIonicons.glyphMap;
+  icon: string; // Changed from keyof typeof ExpoIonicons.glyphMap to string
   iconColor: string;
   backgroundColor: string;
   title: string;
