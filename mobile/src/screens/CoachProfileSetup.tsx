@@ -10,16 +10,19 @@ import {
   Animated,
   Alert,
   ActivityIndicator,
+  Dimensions,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
-import { Ionicons } from '../components/shared';
+import { Ionicons, BackToHubButton } from '../components/shared';
 import type { StackNavigationProp } from '@react-navigation/stack';
 import type { RootStackParamList } from '../types/navigation';
 import { coachService } from '../services';
 import { useAuth } from '../context/AuthContext';
 
+const spinnerGif = require('../../assets/whatishealthyspinner.gif');
 const isWeb = Platform.OS === 'web';
+const { width: screenWidth } = Dimensions.get('window');
 
 interface CoachProfileData {
   // Step 1: Basic Information
@@ -81,7 +84,7 @@ export default function CoachProfileSetup({
   
   // Collapsing header animation
   const scrollY = useRef(new Animated.Value(0)).current;
-  const HEADER_MAX_HEIGHT = 140;
+  const HEADER_MAX_HEIGHT = 180;
   const HEADER_MIN_HEIGHT = 0;
   const HEADER_SCROLL_DISTANCE = HEADER_MAX_HEIGHT - HEADER_MIN_HEIGHT;
 
@@ -487,6 +490,17 @@ export default function CoachProfileSetup({
 
   return (
     <View style={styles.container}>
+      {/* Back to Coach Hub button - only on web */}
+      {isDashboardMode && onBack && (
+        <BackToHubButton
+          hubName="Coach Hub"
+          color="#10b981"
+          onPress={onBack}
+          isMobileWeb={isWeb && screenWidth < 768}
+          spinnerGif={spinnerGif}
+        />
+      )}
+
       {/* Status bar area */}
       <View style={{ height: insets.top, backgroundColor: '#10b981' }} />
       
@@ -563,12 +577,14 @@ const styles = StyleSheet.create({
   collapsibleHeader: {
     backgroundColor: '#10b981',
     overflow: 'hidden',
+    paddingBottom: 20,
   },
   headerContent: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 20,
+    paddingTop: 10,
   },
   headerTitle: {
     fontSize: 28,
