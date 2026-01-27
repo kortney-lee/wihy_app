@@ -1575,6 +1575,10 @@ class MealService {
    * Save all meals from a meal plan to the database
    * This is REQUIRED before sending to Instacart so deep links work when user returns
    * 
+   * NOTE: Plan and Diet mode meals are now AUTO-SAVED by the backend!
+   * This function checks for 'saved_' prefix on meal IDs and skips already-saved meals.
+   * Only Quick mode meals need manual saving.
+   * 
    * @returns Array of saved meal IDs
    */
   async saveMealsFromPlan(
@@ -1588,12 +1592,20 @@ class MealService {
       return savedMealIds;
     }
 
-    console.log(`[MealService] Saving ${plan.days.length} days of meals to database...`);
+    console.log(`[MealService] Processing ${plan.days.length} days of meals...`);
 
     for (const day of plan.days) {
       if (!day.meals) continue;
       
       for (const meal of day.meals) {
+        // ⭐ NEW: Check if meal is already saved (has 'saved_' prefix from auto-save)
+        const existingMealId = meal.meal_id || (meal as any).id;
+        if (existingMealId && typeof existingMealId === 'string' && existingMealId.startsWith('saved_')) {
+          console.log(`[MealService] ✅ Meal already saved: ${meal.meal_name} -> ${existingMealId}`);
+          savedMealIds.push(existingMealId);
+          continue; // Skip saving, it's already in the database
+        }
+        
         try {
           const result = await this.createMeal(userId, {
             name: meal.meal_name,
@@ -1625,7 +1637,7 @@ class MealService {
       }
     }
 
-    console.log(`[MealService] Saved ${savedMealIds.length} meals to database`);
+    console.log(`[MealService] Processed ${savedMealIds.length} meals (auto-saved + newly saved)`);
     return savedMealIds;
   }
 
