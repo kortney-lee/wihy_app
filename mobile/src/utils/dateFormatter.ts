@@ -48,3 +48,24 @@ export const convertToAPIFormat = (date: string): string => {
   const [month, day, year] = date.split('/');
   return `${year}-${month}-${day}`;
 };
+
+/**
+ * Converts ISO date string to MM/DD/YYYY format for display
+ * @param isoDate - ISO date string (e.g., "1985-10-09T00:00:00.000Z")
+ * @returns Date in MM/DD/YYYY format
+ */
+export const formatISODateForDisplay = (isoDate: string): string => {
+  if (!isoDate) return '';
+  
+  try {
+    const date = new Date(isoDate);
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const year = date.getFullYear();
+    
+    return `${month}/${day}/${year}`;
+  } catch (error) {
+    console.error('Error formatting ISO date:', error);
+    return '';
+  }
+};
