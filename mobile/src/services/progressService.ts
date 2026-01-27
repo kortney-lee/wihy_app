@@ -10,7 +10,7 @@
  */
 
 import { API_CONFIG } from './config';
-import { fetchWithLogging } from './apiLogger';
+import { fetchWithLogging } from '../utils/apiLogger';
 
 // =============================================================================
 // TYPES & INTERFACES
