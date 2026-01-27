@@ -315,9 +315,10 @@ export default function ResearchScreen({ isDashboardMode = false }: ResearchScre
         return;
       }
 
-      // Make API call using researchService
+      // Call WIHY Research API: GET /api/research/search?keyword={query}&limit={limit}
+      // Using researchService which already implements the correct endpoint
       const results = await researchService.searchArticles({ 
-        query: searchQuery, 
+        query: searchQuery,  // researchService converts 'query' to 'keyword' parameter
         limit: 20 
       });
 
@@ -333,7 +334,7 @@ export default function ResearchScreen({ isDashboardMode = false }: ResearchScre
       await updateRecentSearches(searchQuery);
     } catch (apiError) {
       console.error('Search error:', apiError);
-      // Show error state instead of mock data
+      // Show error state - no mock data fallback
       setSearchResults([]);
       setError('Unable to search research database. Please check your connection and try again.');
     } finally {
@@ -351,17 +352,22 @@ export default function ResearchScreen({ isDashboardMode = false }: ResearchScre
     setSelectedStudy(study);
     setShowModal(true);
     
-    // Fetch full article details from services API to get abstract
+    // Fetch full article content including abstract and body text
+    // API: GET /api/research/pmc/{pmcId}/content
+    // This returns the complete article content, not just metadata
     if (!study.abstract || study.abstract === 'Abstract not available - full text may contain detailed methodology') {
       try {
-        console.log('[ResearchScreen] Fetching full article details for', study.pmcid);
-        const article = await researchService.getArticle(study.pmcid);
-        if (article && article.abstract) {
-          // Update the selected study with the full abstract
-          setSelectedStudy({ ...study, abstract: article.abstract });
+        console.log('[ResearchScreen] Fetching full article content for', study.pmcid);
+        const content = await researchService.getArticleContent(study.pmcid);
+        if (content && content.abstract) {
+          // Update the selected study with the full abstract from content
+          setSelectedStudy({ 
+            ...study, 
+            abstract: content.abstract 
+          });
         }
       } catch (error) {
-        console.warn('[ResearchScreen] Failed to fetch article details:', error);
+        console.warn('[ResearchScreen] Failed to fetch article content:', error);
         // Keep showing the modal even if fetch fails
       }
     }
