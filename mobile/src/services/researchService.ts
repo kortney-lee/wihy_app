@@ -232,15 +232,15 @@ class ResearchService {
 
   /**
    * Get article details by PMCID using WIHY Research API
-   * Endpoint: GET /api/research/article/:pmcid
+   * Endpoint: GET /api/research/pmc/:pmc_id
    */
   async getArticle(pmcid: string): Promise<ResearchArticle | null> {
     try {
       // Ensure pmcid starts with "PMC"
       const normalizedPmcid = pmcid.startsWith('PMC') ? pmcid : `PMC${pmcid}`;
       
-      // Call WIHY Research API
-      const articleUrl = `${API_CONFIG.servicesUrl}/api/research/article/${normalizedPmcid}?include_metrics=true`;
+      // Call WIHY Research API - correct endpoint is /api/research/pmc/{pmc_id}
+      const articleUrl = `${API_CONFIG.servicesUrl}/api/research/pmc/${normalizedPmcid}`;
       
       console.log('[ResearchService] Fetching article:', articleUrl);
       
