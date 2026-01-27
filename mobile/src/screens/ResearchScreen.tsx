@@ -164,7 +164,7 @@ const StudyCard: React.FC<{
 export default function ResearchScreen({ isDashboardMode = false }: ResearchScreenProps) {
   // Auth context for user ID
   const { user } = useContext(AuthContext);
-  const userId = user?.id || user?.user_id || '';
+  const userId = user?.id || '';
 
   // State management
   const [activeWorkspace, setActiveWorkspace] = useState<string | null>(null);
@@ -347,9 +347,24 @@ export default function ResearchScreen({ isDashboardMode = false }: ResearchScre
     }
   };
 
-  const handleStudyPress = (study: ResearchSearchResult) => {
+  const handleStudyPress = async (study: ResearchSearchResult) => {
     setSelectedStudy(study);
     setShowModal(true);
+    
+    // Fetch full article details from services API to get abstract
+    if (!study.abstract || study.abstract === 'Abstract not available - full text may contain detailed methodology') {
+      try {
+        console.log('[ResearchScreen] Fetching full article details for', study.pmcid);
+        const article = await researchService.getArticle(study.pmcid);
+        if (article && article.abstract) {
+          // Update the selected study with the full abstract
+          setSelectedStudy({ ...study, abstract: article.abstract });
+        }
+      } catch (error) {
+        console.warn('[ResearchScreen] Failed to fetch article details:', error);
+        // Keep showing the modal even if fetch fails
+      }
+    }
   };
 
   const handleBackToDashboard = () => {
