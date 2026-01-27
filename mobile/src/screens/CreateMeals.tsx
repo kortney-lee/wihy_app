@@ -29,6 +29,7 @@ import { SweepBorder } from '../components/SweepBorder';
 import SvgIcon from '../components/shared/SvgIcon';
 import { AuthContext } from '../context/AuthContext';
 import { mealService, MealTemplate, QUICK_TEMPLATE_PRESETS, MealType, CookingSkillLevel, MealVariety, TimePerMeal, CreateMealPlanRequest, MealPlanResponse, CalendarDay, SavedMeal, DietOption } from '../services/mealService';
+import { mealCalendarService } from '../services/mealCalendarService';
 import { createMealPlan, generateShoppingList } from '../services/mealPlanService';
 import { createShoppingList, createInstacartLinkFromMealPlan, ShoppingListItem } from '../services/instacartService';
 import { getMealDiaryService, type Meal, type DietaryPreferences } from '../services/mealDiary';
@@ -514,6 +515,13 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
     loadShoppingList(); // Load shopping list from API or storage
   }, [loadShoppingList]);
 
+  // Load calendar data when viewing calendar or month changes
+  useEffect(() => {
+    if (viewMode === 'calendar' && userId) {
+      loadCalendarData();
+    }
+  }, [viewMode, calendarMonth, userId]);
+
   // Load saved Instacart URL when success modal opens or plan changes
   useEffect(() => {
     const loadSavedInstacartUrl = async () => {
@@ -665,9 +673,92 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
     }
   };
 
+  // Load calendar data from mealCalendarService
+  const loadCalendarData = async () => {
+    if (!userId) {
+      console.log('[CreateMeals] No userId for calendar data');
+      return;
+    }
+
+    try {
+      setCalendarLoading(true);
+      setCalendarError(null);
+
+      // Get the month range to load
+      const firstDay = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth(), 1);
+      const lastDay = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() + 1, 0);
+      
+      const startDate = firstDay.toISOString().split('T')[0];
+      const endDate = lastDay.toISOString().split('T')[0];
+
+      console.log('[CreateMeals] Loading calendar data from', startDate, 'to', endDate);
+
+      // Load calendar days from services.wihy.ai
+      const days = await mealCalendarService.getCalendar(userId, startDate, endDate);
+      
+      if (days && days.length > 0) {
+        console.log('[CreateMeals] Loaded', days.length, 'calendar days');
+        
+        // Convert to local CalendarDay format
+        const convertedDays = days.map(day => ({
+          date: day.date,
+          day_number: new Date(day.date).getDate(),
+          day_name: day.dayName || new Date(day.date).toLocaleDateString('en-US', { weekday: 'long' }),
+          meals: day.meals.map(m => ({
+            meal_id: m.meal_id,
+            meal_type: m.meal_slot as MealType,
+            meal_name: m.meal.name,
+            calories: m.meal.nutrition.calories,
+            protein: m.meal.nutrition.protein,
+            carbs: m.meal.nutrition.carbs,
+            fat: m.meal.nutrition.fat,
+            servings: m.servings,
+          })),
+          total_calories: day.totals.calories,
+          total_protein: day.totals.protein,
+          total_carbs: day.totals.carbs,
+          total_fat: day.totals.fat,
+          has_breakfast: day.meals.some(m => m.meal_slot === 'breakfast'),
+          has_lunch: day.meals.some(m => m.meal_slot === 'lunch'),
+          has_dinner: day.meals.some(m => m.meal_slot === 'dinner'),
+          has_snacks: day.meals.some(m => m.meal_slot === 'snack'),
+        })) as CalendarDay[];
+
+        setCalendarDays(convertedDays);
+
+        // Set today's meals if viewing current month
+        const today = new Date().toISOString().split('T')[0];
+        const todayData = days.find(d => d.date === today);
+        if (todayData) {
+          setTodaysMeals(todayData.meals.map(m => ({
+            meal_id: m.meal_id,
+            meal_type: m.meal_slot,
+            meal_name: m.meal.name,
+            calories: m.meal.nutrition.calories,
+            protein: m.meal.nutrition.protein,
+            carbs: m.meal.nutrition.carbs,
+            fat: m.meal.nutrition.fat,
+            servings: m.servings,
+          })));
+        }
+      } else {
+        console.log('[CreateMeals] No calendar data found for month');
+        setCalendarDays([]);
+      }
+    } catch (error) {
+      console.error('[CreateMeals] Error loading calendar data:', error);
+      setCalendarError('Failed to load calendar');
+    } finally {
+      setCalendarLoading(false);
+    }
+  };
+
   const onRefresh = async () => {
     setRefreshing(true);
     await loadDashboardData();
+    if (viewMode === 'calendar') {
+      await loadCalendarData();
+    }
     setRefreshing(false);
   };
 
@@ -3890,11 +3981,11 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
       // Add days of the month
       for (let day = 1; day <= daysInMonth; day++) {
         const currentDate = new Date(year, month, day);
-        // Find meals for this day from activeMealPlan
-        const dayMeals = activeMealPlan?.days?.find(d => {
-          const planDate = new Date(d.date);
-          return planDate.getDate() === day && planDate.getMonth() === month && planDate.getFullYear() === year;
-        })?.meals || [];
+        const dateStr = currentDate.toISOString().split('T')[0];
+        
+        // Find meals for this day from calendarDays (loaded via mealCalendarService)
+        const dayData = calendarDays.find(d => d.date === dateStr);
+        const dayMeals = dayData?.meals || [];
         
         days.push({ date: currentDate, day, isCurrentMonth: true, meals: dayMeals });
       }
@@ -3933,13 +4024,10 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
       setCalendarMonth(newMonth);
     };
     
-    // Get meals for selected date
-    const selectedDayMeals = activeMealPlan?.days?.find(d => {
-      const planDate = new Date(d.date);
-      return planDate.getDate() === selectedDate.getDate() && 
-             planDate.getMonth() === selectedDate.getMonth() && 
-             planDate.getFullYear() === selectedDate.getFullYear();
-    })?.meals || [];
+    // Get meals for selected date from calendarDays (loaded via mealCalendarService)
+    const dateStr = selectedDate.toISOString().split('T')[0];
+    const selectedDayData = calendarDays.find(d => d.date === dateStr);
+    const selectedDayMeals = selectedDayData?.meals || [];
     
     return (
       <View style={styles.calendarContainer}>
@@ -3953,7 +4041,9 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
               <SvgIcon name="arrow-back" size={24} color="#ffffff" />
             </Pressable>
             <Text style={styles.dashboardHeaderTitle}>Meal Calendar</Text>
-            <Text style={styles.dashboardHeaderSubtitle}>{activeMealPlan ? `${activeMealPlan.name}` : 'No active meal plan'}</Text>
+            <Text style={styles.dashboardHeaderSubtitle}>
+              {calendarLoading ? 'Loading...' : calendarDays.length > 0 ? `${calendarDays.length} days scheduled` : 'No meals scheduled'}
+            </Text>
             <Pressable style={styles.calendarAddButton} onPress={() => setShowPlanGenerator(true)}>
               <SvgIcon name="add" size={24} color="#ffffff" />
             </Pressable>
@@ -3961,8 +4051,26 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
         </Animated.View>
         
         <ScrollView style={styles.calendarContent} showsVerticalScrollIndicator={false}>
-          {/* Month Navigation */}
-          <View style={styles.calendarMonthNav}>
+          {calendarLoading ? (
+            <View style={{ padding: 40, alignItems: 'center' }}>
+              <ActivityIndicator size="large" color="#3b82f6" />
+              <Text style={{ marginTop: 16, color: '#6b7280', fontSize: 14 }}>Loading calendar...</Text>
+            </View>
+          ) : calendarError ? (
+            <View style={{ padding: 40, alignItems: 'center' }}>
+              <SvgIcon name="alert-circle-outline" size={48} color="#ef4444" />
+              <Text style={{ marginTop: 16, color: '#ef4444', fontSize: 14 }}>{calendarError}</Text>
+              <TouchableOpacity 
+                style={{ marginTop: 16, padding: 12, backgroundColor: '#3b82f6', borderRadius: 8 }}
+                onPress={() => loadCalendarData()}
+              >
+                <Text style={{ color: '#ffffff', fontSize: 14, fontWeight: '600' }}>Retry</Text>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <>
+              {/* Month Navigation */}
+              <View style={styles.calendarMonthNav}>
             <TouchableOpacity onPress={() => handleNavigateMonth(-1)} style={styles.calendarNavButton}>
               <SvgIcon name="chevron-back" size={24} color="#3b82f6" />
             </TouchableOpacity>
@@ -4097,6 +4205,8 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
               </View>
             )}
           </View>
+          </>
+          )}
           
           {/* Plan Summary */}
           {activeMealPlan && (
