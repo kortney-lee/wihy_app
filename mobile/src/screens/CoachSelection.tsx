@@ -113,20 +113,33 @@ export default function CoachSelection() {
       const result = await userService.discoverCoaches(filters);
       
       // Map API response to Coach interface
-      const mappedCoaches: Coach[] = (result.coaches || []).map((c: any) => ({
-        id: c.id || c.coach_id,
-        name: c.name || c.full_name || 'Unknown Coach',
-        title: c.title || c.specialization || 'Health Coach',
-        avatar: c.avatar_url || c.avatar,
-        rating: typeof c.rating === 'object' ? (c.rating?.average || 0) : (c.rating || c.average_rating || 0),
-        reviews: typeof c.rating === 'object' ? (c.rating?.total_reviews || 0) : (c.review_count || c.reviews || 0),
-        specialties: c.specialties || c.specialty_areas || [],
-        experience: c.experience || c.years_experience ? `${c.years_experience} years` : 'Experienced',
-        certification: c.certification || c.certifications?.join(', ') || '',
-        rate: c.rate || c.hourly_rate ? `$${c.hourly_rate}/session` : 'Contact for pricing',
-        location: c.location || c.city || 'Remote',
-        bio: c.bio || c.about || '',
-      }));
+      const mappedCoaches: Coach[] = (result.coaches || []).map((c: any) => {
+        // Handle location - can be string or {city, state} object
+        let locationStr = 'Remote';
+        if (typeof c.location === 'string') {
+          locationStr = c.location;
+        } else if (c.location && typeof c.location === 'object') {
+          const parts = [c.location.city, c.location.state].filter(Boolean);
+          locationStr = parts.length > 0 ? parts.join(', ') : 'Remote';
+        } else if (c.city) {
+          locationStr = c.state ? `${c.city}, ${c.state}` : c.city;
+        }
+        
+        return {
+          id: c.id || c.coach_id,
+          name: c.name || c.full_name || 'Unknown Coach',
+          title: c.title || c.specialization || 'Health Coach',
+          avatar: c.avatar_url || c.avatar,
+          rating: typeof c.rating === 'object' ? (c.rating?.average || 0) : (c.rating || c.average_rating || 0),
+          reviews: typeof c.rating === 'object' ? (c.rating?.total_reviews || 0) : (c.review_count || c.reviews || 0),
+          specialties: c.specialties || c.specialty_areas || [],
+          experience: c.experience || c.years_experience ? `${c.years_experience} years` : 'Experienced',
+          certification: c.certification || c.certifications?.join(', ') || '',
+          rate: c.rate || c.hourly_rate ? `$${c.hourly_rate}/session` : 'Contact for pricing',
+          location: locationStr,
+          bio: c.bio || c.about || '',
+        };
+      });
 
       setCoaches(mappedCoaches);
     } catch (err) {
