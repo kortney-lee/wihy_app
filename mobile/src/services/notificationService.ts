@@ -56,6 +56,9 @@ export interface NotificationPreferences {
   medication_reminders: boolean;
   goal_updates: boolean;
   weekly_summary: boolean;
+  coach_messages: boolean;
+  community_messages: boolean;
+  marketing: boolean;
   quiet_hours?: QuietHours;
 }
 
@@ -79,6 +82,22 @@ export interface BackendRemindersResponse {
   total: number;
 }
 
+// Notification inbox types
+export interface InboxNotification {
+  id: string;
+  type: 'goal_progress' | 'meal_reminder' | 'workout_reminder' | 'coach_message' | 'community' | 'system';
+  title: string;
+  body: string;
+  read: boolean;
+  created_at: string;
+  data?: Record<string, any>;
+}
+
+export interface NotificationsInboxResponse {
+  notifications: InboxNotification[];
+  unread_count: number;
+}
+
 // Configure notification behavior
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -93,6 +112,30 @@ Notifications.setNotificationHandler({
 class NotificationService {
   private pushToken: string | null = null;
   private listeners: Notifications.Subscription[] = [];
+  private authToken: string | null = null;
+  
+  // User service base URL for notifications API
+  private readonly userApiUrl = API_CONFIG.userUrl || 'https://user.wihy.ai';
+
+  /**
+   * Set auth token for API calls
+   */
+  setAuthToken(token: string | null): void {
+    this.authToken = token;
+  }
+
+  /**
+   * Get authorization headers
+   */
+  private getAuthHeaders(): Record<string, string> {
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+    if (this.authToken) {
+      headers['Authorization'] = `Bearer ${this.authToken}`;
+    }
+    return headers;
+  }
 
   /**
    * Initialize notification service
@@ -237,18 +280,18 @@ class NotificationService {
 
   /**
    * Register push token with backend
+   * POST /api/notifications/token
    * Backend should store this for sending push notifications
    */
   private async registerTokenWithBackend(userId: string, token: string): Promise<void> {
     try {
-      const response = await fetchWithLogging(`${API_CONFIG.baseUrl}/api/notifications/register-token`, {
+      const response = await fetchWithLogging(`${this.userApiUrl}/api/notifications/token`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: this.getAuthHeaders(),
         body: JSON.stringify({
-          userId,
           token,
           platform: Platform.OS,
-          deviceId: Device.modelName,
+          device_id: Device.modelName || 'unknown',
         }),
       });
 
@@ -265,16 +308,16 @@ class NotificationService {
 
   /**
    * Unregister push token (when user logs out or disables notifications)
+   * DELETE /api/notifications/token
    */
   async unregisterPushToken(userId: string): Promise<void> {
     try {
       if (!this.pushToken) return;
 
-      await fetchWithLogging(`${API_CONFIG.baseUrl}/api/notifications/unregister-token`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      await fetchWithLogging(`${this.userApiUrl}/api/notifications/token`, {
+        method: 'DELETE',
+        headers: this.getAuthHeaders(),
         body: JSON.stringify({
-          userId,
           token: this.pushToken,
         }),
       });
@@ -295,10 +338,18 @@ class NotificationService {
   async getNotificationPreferences(userId: string): Promise<NotificationPreferences> {
     try {
       const response = await fetchWithLogging(
-        `${API_CONFIG.baseUrl}/api/notifications/preferences?userId=${userId}`
+        `${this.userApiUrl}/api/notifications/preferences`,
+        {
+          headers: this.getAuthHeaders(),
+        }
       );
       const data = await response.json();
-      return data.preferences;
+      
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || 'Failed to get preferences');
+      }
+      
+      return data.data;
     } catch (error) {
       console.error('[NotificationService] Failed to get preferences:', error);
       // Return defaults
@@ -311,6 +362,9 @@ class NotificationService {
         medication_reminders: false,
         goal_updates: true,
         weekly_summary: true,
+        coach_messages: true,
+        community_messages: true,
+        marketing: false,
       };
     }
   }
@@ -325,18 +379,20 @@ class NotificationService {
   ): Promise<NotificationPreferences> {
     try {
       const response = await fetchWithLogging(
-        `${API_CONFIG.baseUrl}/api/notifications/preferences`,
+        `${this.userApiUrl}/api/notifications/preferences`,
         {
           method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            userId,
-            ...preferences,
-          }),
+          headers: this.getAuthHeaders(),
+          body: JSON.stringify(preferences),
         }
       );
       const data = await response.json();
-      return data.preferences;
+      
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || 'Failed to update preferences');
+      }
+      
+      return data.data;
     } catch (error) {
       console.error('[NotificationService] Failed to update preferences:', error);
       throw error;
@@ -366,15 +422,26 @@ class NotificationService {
   async createReminder(reminder: Omit<BackendReminder, 'id' | 'createdAt' | 'updatedAt'>): Promise<BackendReminder> {
     try {
       const response = await fetchWithLogging(
-        `${API_CONFIG.baseUrl}/api/notifications/reminders`,
+        `${this.userApiUrl}/api/notifications/reminders`,
         {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(reminder),
+          headers: this.getAuthHeaders(),
+          body: JSON.stringify({
+            type: reminder.type,
+            title: reminder.title,
+            time: reminder.time,
+            days: reminder.days,
+            enabled: reminder.enabled,
+          }),
         }
       );
       const data = await response.json();
-      return data.reminder;
+      
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || 'Failed to create reminder');
+      }
+      
+      return data.data;
     } catch (error) {
       console.error('[NotificationService] Failed to create reminder:', error);
       throw error;
@@ -383,17 +450,25 @@ class NotificationService {
 
   /**
    * Get all reminders for a user
-   * GET /api/notifications/reminders?userId=:userId
+   * GET /api/notifications/reminders
    */
   async getReminders(userId: string): Promise<BackendRemindersResponse> {
     try {
       const response = await fetchWithLogging(
-        `${API_CONFIG.baseUrl}/api/notifications/reminders?userId=${userId}`
+        `${this.userApiUrl}/api/notifications/reminders`,
+        {
+          headers: this.getAuthHeaders(),
+        }
       );
       const data = await response.json();
+      
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || 'Failed to get reminders');
+      }
+      
       return {
-        reminders: data.reminders || [],
-        total: data.total || 0,
+        reminders: data.data || [],
+        total: data.data?.length || 0,
       };
     } catch (error) {
       console.error('[NotificationService] Failed to get reminders:', error);
@@ -403,7 +478,7 @@ class NotificationService {
 
   /**
    * Update a reminder
-   * PUT /api/notifications/reminders/:reminderId
+   * PUT /api/notifications/reminders/:id
    */
   async updateReminder(
     reminderId: string,
@@ -411,15 +486,20 @@ class NotificationService {
   ): Promise<BackendReminder> {
     try {
       const response = await fetchWithLogging(
-        `${API_CONFIG.baseUrl}/api/notifications/reminders/${reminderId}`,
+        `${this.userApiUrl}/api/notifications/reminders/${reminderId}`,
         {
           method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
+          headers: this.getAuthHeaders(),
           body: JSON.stringify(updates),
         }
       );
       const data = await response.json();
-      return data.reminder;
+      
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || 'Failed to update reminder');
+      }
+      
+      return data.data;
     } catch (error) {
       console.error('[NotificationService] Failed to update reminder:', error);
       throw error;
@@ -428,16 +508,22 @@ class NotificationService {
 
   /**
    * Delete a reminder
-   * DELETE /api/notifications/reminders/:reminderId
+   * DELETE /api/notifications/reminders/:id
    */
   async deleteReminder(reminderId: string): Promise<void> {
     try {
-      await fetchWithLogging(
-        `${API_CONFIG.baseUrl}/api/notifications/reminders/${reminderId}`,
+      const response = await fetchWithLogging(
+        `${this.userApiUrl}/api/notifications/reminders/${reminderId}`,
         {
           method: 'DELETE',
+          headers: this.getAuthHeaders(),
         }
       );
+      
+      if (!response.ok) {
+        throw new Error('Failed to delete reminder');
+      }
+      
       console.log('[NotificationService] Reminder deleted:', reminderId);
     } catch (error) {
       console.error('[NotificationService] Failed to delete reminder:', error);
@@ -452,6 +538,128 @@ class NotificationService {
   async toggleReminder(reminderId: string, enabled: boolean): Promise<BackendReminder> {
     return this.updateReminder(reminderId, { enabled });
   }
+
+  // ============= NOTIFICATION INBOX =============
+
+  /**
+   * Get notifications inbox
+   * GET /api/notifications
+   */
+  async getNotifications(options?: {
+    unread?: boolean;
+    limit?: number;
+    offset?: number;
+  }): Promise<NotificationsInboxResponse> {
+    try {
+      const params = new URLSearchParams();
+      if (options?.unread !== undefined) {
+        params.append('unread', String(options.unread));
+      }
+      if (options?.limit) {
+        params.append('limit', String(options.limit));
+      }
+      if (options?.offset) {
+        params.append('offset', String(options.offset));
+      }
+
+      const queryString = params.toString();
+      const url = `${this.userApiUrl}/api/notifications${queryString ? `?${queryString}` : ''}`;
+
+      const response = await fetchWithLogging(url, {
+        headers: this.getAuthHeaders(),
+      });
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || 'Failed to get notifications');
+      }
+
+      return {
+        notifications: data.data?.notifications || [],
+        unread_count: data.data?.unread_count || 0,
+      };
+    } catch (error) {
+      console.error('[NotificationService] Failed to get notifications:', error);
+      return { notifications: [], unread_count: 0 };
+    }
+  }
+
+  /**
+   * Mark a notification as read
+   * PUT /api/notifications/:id/read
+   */
+  async markNotificationAsRead(notificationId: string): Promise<void> {
+    try {
+      const response = await fetchWithLogging(
+        `${this.userApiUrl}/api/notifications/${notificationId}/read`,
+        {
+          method: 'PUT',
+          headers: this.getAuthHeaders(),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error('Failed to mark notification as read');
+      }
+
+      console.log('[NotificationService] Notification marked as read:', notificationId);
+    } catch (error) {
+      console.error('[NotificationService] Failed to mark notification as read:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Mark all notifications as read
+   * PUT /api/notifications/read-all
+   */
+  async markAllNotificationsAsRead(): Promise<void> {
+    try {
+      const response = await fetchWithLogging(
+        `${this.userApiUrl}/api/notifications/read-all`,
+        {
+          method: 'PUT',
+          headers: this.getAuthHeaders(),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error('Failed to mark all notifications as read');
+      }
+
+      console.log('[NotificationService] All notifications marked as read');
+    } catch (error) {
+      console.error('[NotificationService] Failed to mark all notifications as read:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get unread notification count
+   * GET /api/notifications/unread-count
+   */
+  async getUnreadCount(): Promise<number> {
+    try {
+      const response = await fetchWithLogging(
+        `${this.userApiUrl}/api/notifications/unread-count`,
+        {
+          headers: this.getAuthHeaders(),
+        }
+      );
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || 'Failed to get unread count');
+      }
+
+      return data.unread_count || 0;
+    } catch (error) {
+      console.error('[NotificationService] Failed to get unread count:', error);
+      return 0;
+    }
+  }
+
+  // ============= LOCAL NOTIFICATIONS =============
 
   /**
    * Schedule a local notification
