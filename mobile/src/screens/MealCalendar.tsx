@@ -283,9 +283,15 @@ const MealCalendar: React.FC<MealCalendarProps> = ({ isDashboardMode = false }) 
             
             {/* Selected Day Meals */}
             <View style={styles.calendarSelectedDay}>
-              <Text style={styles.calendarSelectedDayTitle}>
-                {selectedDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
-              </Text>
+              <View style={styles.calendarSelectedDayHeader}>
+                <Text style={styles.calendarSelectedDayTitle}>
+                  {selectedDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
+                </Text>
+                <TouchableOpacity style={styles.addMealButton}>
+                  <SvgIcon name="add" size={20} color="#ffffff" />
+                  <Text style={styles.addMealButtonText}>Add Meal</Text>
+                </TouchableOpacity>
+              </View>
               
               {selectedDayMeals.length > 0 ? (
                 <View style={styles.calendarMealsList}>
@@ -444,11 +450,31 @@ const styles = StyleSheet.create({
     marginTop: 16,
     padding: 16,
   },
+  calendarSelectedDayHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
   calendarSelectedDayTitle: {
     fontSize: 18,
     fontWeight: '600',
     color: '#111827',
-    marginBottom: 16,
+    flex: 1,
+  },
+  addMealButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#3b82f6',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
+    gap: 4,
+  },
+  addMealButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#ffffff',
   },
   calendarMealsList: {
     gap: 12,
