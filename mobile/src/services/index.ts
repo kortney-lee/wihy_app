@@ -38,6 +38,24 @@ export { consumptionService } from './consumptionService';
 // NEW: Export Wellness Service (user.wihy.ai)
 export { wellnessService, WellnessService } from './wellnessService';
 
+// NEW: Export Progress Service (user.wihy.ai/api/progress)
+export { progressService } from './progressService';
+export type {
+  ProgressCard,
+  ProgressSummary,
+  WeightData,
+  WeightEntry,
+  ActionItem,
+  ActionsSummary,
+  Recommendation,
+  HydrationData,
+  MacrosData,
+  StreaksData,
+  MeasurementsData,
+  GoalsData,
+  DashboardData,
+} from './progressService';
+
 // NEW: Export Checkout & Subscription Services
 export { checkoutService, WIHY_PLANS } from './checkoutService';
 export type { Plan, CheckoutResult, PaymentStatus } from './checkoutService';
