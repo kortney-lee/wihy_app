@@ -2,10 +2,15 @@ import 'react-native-gesture-handler';
 import React, { useEffect, useState } from 'react';
 import { StatusBar, View, ActivityIndicator, Platform } from 'react-native';
 import * as Font from 'expo-font';
-import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import AppNavigator from './src/navigation/AppNavigator';
 import { AuthProvider } from './src/context/AuthContext';
+
+// Only import Ionicons on native platforms - web uses inline SVGs
+let Ionicons = null;
+if (Platform.OS !== 'web') {
+  Ionicons = require('@expo/vector-icons').Ionicons;
+}
 
 export default function App() {
   const [fontsLoaded, setFontsLoaded] = useState(false);
@@ -14,8 +19,8 @@ export default function App() {
     let mounted = true;
     (async () => {
       try {
-        // Only load fonts on native platforms - web handles fonts via CSS
-        if (Platform.OS !== 'web') {
+        // Only load fonts on native platforms - web handles icons via inline SVG
+        if (Platform.OS !== 'web' && Ionicons?.font) {
           await Font.loadAsync({ ...Ionicons.font });
         }
       } catch (error) {

@@ -3,13 +3,18 @@ import {SafeAreaProvider} from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Alert, AppState, Platform, LogBox, ActivityIndicator, View } from 'react-native';
 import * as Font from 'expo-font';
-import { Ionicons } from '@expo/vector-icons'; // Keep for font loading
 import { Ionicons as CrossPlatformIonicons } from './components/shared';
 import AppNavigator from './navigation/AppNavigator';
 import { SessionProvider } from './contexts/SessionContext';
 import { AuthProvider } from './context/AuthContext';
 import { useDeepLinkHandler } from './utils/deepLinkHandler';
 import { debugLogService } from './services';
+
+// Only import Ionicons on native platforms to prevent font preloading on web
+let NativeIonicons: any = null;
+if (Platform.OS !== 'web') {
+  NativeIonicons = require('@expo/vector-icons').Ionicons;
+}
 
 // Suppress expo-notifications warnings in Expo Go - log them instead
 // These are expected in Expo Go and should not be shown to users
@@ -88,10 +93,12 @@ const App: React.FC = () => {
   useEffect(() => {
     async function loadFonts() {
       try {
-        // Load Expo Vector Icons fonts for web
-        await Font.loadAsync({
-          ...Ionicons.font,
-        });
+        // Only load Ionicons fonts on native platforms - web uses inline SVGs
+        if (Platform.OS !== 'web' && NativeIonicons?.font) {
+          await Font.loadAsync({
+            ...NativeIonicons.font,
+          });
+        }
         setFontsLoaded(true);
       } catch (error) {
         console.error('Error loading fonts:', error);
@@ -103,8 +110,8 @@ const App: React.FC = () => {
     loadFonts();
   }, []);
 
-  // Show loading indicator while fonts load (web only)
-  if (!fontsLoaded && Platform.OS === 'web') {
+  // Show loading indicator while fonts load (native only)
+  if (!fontsLoaded && Platform.OS !== 'web') {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#fff' }}>
         <ActivityIndicator size="large" color="#4cbb17" />
