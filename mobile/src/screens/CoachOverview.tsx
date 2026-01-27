@@ -13,11 +13,12 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { AuthContext } from '../context/AuthContext';
-import { Ionicons } from '../components/shared';
+import { Ionicons, BackToHubButton } from '../components/shared';
 import { hasAIAccess } from '../utils/capabilities';
 import { dashboardTheme } from '../theme/dashboardTheme';
 import { coachService, CoachOverview as CoachOverviewData } from '../services';
 
+const spinnerGif = require('../../assets/whatishealthyspinner.gif');
 const isWeb = Platform.OS === 'web';
 
 const { width: screenWidth } = Dimensions.get('window');
@@ -198,6 +199,17 @@ export default function CoachOverview({
 
   return (
     <View style={styles.container}>
+      {/* Back to Coach Hub button - only on web */}
+      {isDashboardMode && onBack && (
+        <BackToHubButton
+          hubName="Coach Hub"
+          color="#3b82f6"
+          onPress={onBack}
+          isMobileWeb={isWeb && screenWidth < 768}
+          spinnerGif={spinnerGif}
+        />
+      )}
+
       {/* Status bar area - solid color */}
       <View style={{ height: insets.top, backgroundColor: '#3b82f6' }} />
         
