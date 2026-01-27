@@ -745,16 +745,21 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
       // Cast to any for flexible field access during normalization
       const result = apiResult as any;
       
+      // ⭐ IMPORTANT: Extract plan data from nested structure
+      // API returns: { success, mode, plan: { days, recipes, summary }, _meta }
+      const planDataFirst = result.plan || result;
+      console.log('[CreateMeals] Plan data keys:', Object.keys(planDataFirst));
+      
       // Debug: Log available ID fields
       console.log('[CreateMeals] ID fields:', {
-        program_id: result.program_id,
+        program_id: planDataFirst.program_id || planDataFirst.mealPlanId,
         plan_id: result.plan_id,
         id: result.id,
         meal_id: result.meal?.id,
       });
       
-      // Handle different API response structures
-      let daysArrayFirst = result.days || result.meal_days || [];
+      // Handle different API response structures - now using planDataFirst
+      let daysArrayFirst = planDataFirst.days || planDataFirst.meal_days || result.days || result.meal_days || [];
       
       // Handle API format where meals are separate properties (breakfast, lunch, dinner) instead of meals array
       if (daysArrayFirst.length > 0 && !daysArrayFirst[0].meals && (daysArrayFirst[0].breakfast || daysArrayFirst[0].lunch || daysArrayFirst[0].dinner)) {
@@ -849,10 +854,10 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
         console.log(`[CreateMeals] Converted ${daysArrayFirst.length} days with ${daysArrayFirst.reduce((sum: number, d: any) => sum + d.meals.length, 0)} total meals`);
       }
       
-      // Handle plan.plan.recipes structure (from /api/meals/create-from-text)
-      if (daysArrayFirst.length === 0 && result.plan?.plan?.recipes) {
-        console.log('[CreateMeals] Converting plan.plan.recipes to days structure');
-        const recipes = result.plan.plan.recipes;
+      // Handle recipes array structure (planDataFirst.recipes from /api/meals/create-from-text)
+      if (daysArrayFirst.length === 0 && planDataFirst.recipes && planDataFirst.recipes.length > 0) {
+        console.log('[CreateMeals] Converting planDataFirst.recipes to days structure');
+        const recipes = planDataFirst.recipes;
         
         // Group recipes by day
         const daysMap: { [key: number]: any } = {};
@@ -941,12 +946,12 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
       // Normalize the response to handle different API formats
       const normalizedPlan: MealPlanResponse = {
         success: result.success ?? true,
-        program_id: result.program_id || result.plan_id || result.id || result.meal?.id,
-        name: result.name || result.meal?.name || `${planDuration}-Day Meal Plan`,
-        description: result.description || planDescription || 'Custom meal plan',
-        duration_days: result.duration_days || result.duration || planDuration,
-        servings: result.servings || result.meal?.servings || planServings,
-        created_at: result.created_at || result.timestamp || new Date().toISOString(),
+        program_id: planDataFirst.program_id || planDataFirst.mealPlanId || result.plan_id || result.id || result.meal?.id,
+        name: planDataFirst.name || result.name || result.meal?.name || `${planDuration}-Day Meal Plan`,
+        description: planDataFirst.description || result.description || planDescription || 'Custom meal plan',
+        duration_days: planDataFirst.duration || result.duration_days || result.duration || planDuration,
+        servings: planDataFirst.parsedRequest?.servings || result.servings || result.meal?.servings || planServings,
+        created_at: planDataFirst.generated_at || result.created_at || result.timestamp || new Date().toISOString(),
         days: daysArrayFirst.map((day: any, idx: number) => ({
           date: day.date || new Date(Date.now() + idx * 86400000).toISOString().split('T')[0],
           day_number: day.day_number || day.dayNumber || idx + 1,
@@ -977,13 +982,13 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
           has_snacks: day.has_snacks ?? (day.meals?.some((m: any) => (m.meal_type || m.type) === 'snack') || false),
         })),
         summary: {
-          total_meals: result.summary?.total_meals || result.total_meals || 
+          total_meals: planDataFirst.summary?.total_meals || result.summary?.total_meals || result.total_meals || 
             daysArrayFirst.reduce((sum: number, day: any) => sum + (day.meals?.length || 0), 0),
-          avg_calories_per_day: result.summary?.avg_calories_per_day || result.avg_calories_per_day || 
+          avg_calories_per_day: planDataFirst.summary?.avg_calories_per_day || result.summary?.avg_calories_per_day || result.avg_calories_per_day || 
             (result.meal?.nutrition?.caloriesPerServing || 0),
-          avg_protein_per_day: result.summary?.avg_protein_per_day || result.avg_protein_per_day || 
+          avg_protein_per_day: planDataFirst.summary?.avg_protein_per_day || result.summary?.avg_protein_per_day || result.avg_protein_per_day || 
             (result.meal?.nutrition?.protein?.amount || 0),
-          shopping_list_available: result.summary?.shopping_list_available ?? true,
+          shopping_list_available: planDataFirst.summary?.shopping_list_available ?? result.summary?.shopping_list_available ?? true,
         },
         preferences_used: result.preferences_used || {
           stores: selectedStores,
@@ -1098,6 +1103,12 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
       // Normalize response (same logic as handleGenerateAIMealPlan)
       const result = apiResult as any;
       
+      // ⭐ IMPORTANT: Extract plan data from nested structure
+      // API returns: { success, mode, plan: { days, recipes, summary }, _meta }
+      // We need to extract the plan data first
+      const planData = result.plan || result;
+      console.log('[CreateMeals] Plan data extracted, keys:', Object.keys(planData));
+      
       // ⭐ NEW: Check if meals were auto-saved by the API (plan/diet mode)
       // Plan and Diet mode meals are now automatically saved to the database by the backend
       // Quick mode meals still need manual saving before Instacart
@@ -1109,26 +1120,29 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
         console.log('[CreateMeals] ✅ Meals were auto-saved by the API (plan/diet mode)');
         setMealsAutoSaved(true);
         
-        // Extract meal IDs from the response - they're already saved with 'saved_' prefix
+        // Extract meal IDs from the response
         const autoSavedMealIds: string[] = [];
         const extractMealIds = (obj: any) => {
-          if (obj?.meal_id && typeof obj.meal_id === 'string' && obj.meal_id.startsWith('saved_')) {
+          if (obj?.meal_id && typeof obj.meal_id === 'string') {
             autoSavedMealIds.push(obj.meal_id);
-          } else if (obj?.id && typeof obj.id === 'string' && obj.id.startsWith('saved_')) {
+          } else if (obj?.id && typeof obj.id === 'string') {
             autoSavedMealIds.push(obj.id);
           }
         };
         
-        // Extract from all day/meal structures
-        (result.days || []).forEach((day: any) => {
+        // Extract from planData.days (correct path)
+        (planData.days || []).forEach((day: any) => {
           ['breakfast', 'lunch', 'dinner', 'snack'].forEach(mealType => {
             if (day[mealType]) extractMealIds(day[mealType]);
           });
           (day.meals || []).forEach(extractMealIds);
         });
         
+        // Also extract from planData.recipes if available
+        (planData.recipes || []).forEach(extractMealIds);
+        
         if (autoSavedMealIds.length > 0) {
-          console.log('[CreateMeals] Found', autoSavedMealIds.length, 'auto-saved meal IDs:', autoSavedMealIds);
+          console.log('[CreateMeals] Found', autoSavedMealIds.length, 'meal IDs:', autoSavedMealIds.slice(0, 5), '...');
           setSavedMealIds(autoSavedMealIds);
         }
       } else {
@@ -1136,8 +1150,8 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
         setMealsAutoSaved(false);
       }
       
-      // Handle different API response structures
-      let daysArray = result.days || result.meal_days || [];
+      // Handle different API response structures - now using planData
+      let daysArray = planData.days || planData.meal_days || result.days || result.meal_days || [];
       
       // Handle API format where meals are separate properties (breakfast, lunch, dinner) instead of meals array
       if (daysArray.length > 0 && !daysArray[0].meals && (daysArray[0].breakfast || daysArray[0].lunch || daysArray[0].dinner)) {
@@ -1232,10 +1246,10 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
         console.log(`[CreateMeals] Converted ${daysArray.length} days with ${daysArray.reduce((sum: number, d: any) => sum + d.meals.length, 0)} total meals`);
       }
       
-      // Handle plan.plan.recipes structure (from /api/meals/create-from-text)
-      if (daysArray.length === 0 && result.plan?.plan?.recipes) {
-        console.log('[CreateMeals] Converting plan.plan.recipes to days structure');
-        const recipes = result.plan.plan.recipes;
+      // Handle recipes array structure (planData.recipes from /api/meals/create-from-text)
+      if (daysArray.length === 0 && planData.recipes && planData.recipes.length > 0) {
+        console.log('[CreateMeals] Converting planData.recipes to days structure');
+        const recipes = planData.recipes;
         
         // Group recipes by day
         const daysMap: { [key: number]: any } = {};
@@ -1333,12 +1347,12 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
       
       const normalizedPlan: MealPlanResponse = {
         success: result.success ?? true,
-        program_id: result.program_id || result.plan_id || result.id || result.meal?.id,
-        name: result.name || result.meal?.name || `${request.duration}-Day Meal Plan`,
-        description: result.description || request.description,
-        duration_days: result.duration_days || result.duration || request.duration,
-        servings: result.servings || result.meal?.servings || request.servings,
-        created_at: result.created_at || result.timestamp || new Date().toISOString(),
+        program_id: planData.program_id || planData.mealPlanId || result.plan_id || result.id || result.meal?.id,
+        name: planData.name || result.name || result.meal?.name || `${request.duration}-Day Meal Plan`,
+        description: planData.description || result.description || request.description,
+        duration_days: planData.duration || result.duration_days || result.duration || request.duration,
+        servings: planData.parsedRequest?.servings || result.servings || result.meal?.servings || request.servings,
+        created_at: planData.generated_at || result.created_at || result.timestamp || new Date().toISOString(),
         days: daysArray.map((day: any, idx: number) => ({
           date: day.date || new Date(Date.now() + idx * 86400000).toISOString().split('T')[0],
           day_number: day.day_number || day.dayNumber || idx + 1,
@@ -1369,13 +1383,13 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
           has_snacks: day.has_snacks ?? (day.meals?.some((m: any) => (m.meal_type || m.type) === 'snack') || false),
         })),
         summary: {
-          total_meals: result.summary?.total_meals || result.total_meals || 
+          total_meals: planData.summary?.total_meals || result.summary?.total_meals || result.total_meals || 
             daysArray.reduce((sum: number, day: any) => sum + (day.meals?.length || 0), 0),
-          avg_calories_per_day: result.summary?.avg_calories_per_day || result.avg_calories_per_day || 
+          avg_calories_per_day: planData.summary?.avg_calories_per_day || result.summary?.avg_calories_per_day || result.avg_calories_per_day || 
             (result.meal?.nutrition?.caloriesPerServing || 0),
-          avg_protein_per_day: result.summary?.avg_protein_per_day || result.avg_protein_per_day || 
+          avg_protein_per_day: planData.summary?.avg_protein_per_day || result.summary?.avg_protein_per_day || result.avg_protein_per_day || 
             (result.meal?.nutrition?.protein?.amount || 0),
-          shopping_list_available: result.summary?.shopping_list_available ?? true,
+          shopping_list_available: planData.summary?.shopping_list_available ?? result.summary?.shopping_list_available ?? true,
         },
         preferences_used: result.preferences_used || {
           stores: params.preferredStores || [],
