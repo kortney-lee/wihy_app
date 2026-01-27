@@ -27,6 +27,8 @@ import { dashboardColors } from '../components/shared';
 import { healthDataService } from '../services/healthDataService';
 import { nutritionService } from '../services/nutritionService';
 import { fitnessService } from '../services/fitnessService';
+import { progressService } from '../services/progressService';
+import { scanService } from '../services/scanService';
 import { AuthContext } from '../context/AuthContext';
 import { wihyApiService } from '../services/wihyApiService';
 import { useGoalsDashboard } from '../hooks/useGoalsDashboard';
@@ -125,10 +127,88 @@ const MyProgressDashboard: React.FC<MyProgressDashboardProps> = ({
   }, [loadHealthTrends]);
 
   const loadProgressData = async () => {
+    const userId = user?.id;
+    
+    if (!userId) {
+      console.log('[MyProgressDashboard] No user ID, showing mock data');
+      setProgressCards(getMockDataForPeriod(selectedPeriod));
+      setIsLoading(false);
+      return;
+    }
+
     try {
       setIsLoading(true);
+      console.log('[MyProgressDashboard] Loading progress data from API for user:', userId);
       
-      // Initialize health service
+      // Try to load from progress API first
+      try {
+        const dashboardResponse = await progressService.getDashboard(userId);
+        
+        if (dashboardResponse.success && dashboardResponse.summary) {
+          console.log('[MyProgressDashboard] Dashboard data from API:', dashboardResponse.summary);
+          
+          const { cards } = dashboardResponse.summary;
+          const progressCardsFromApi: ProgressCard[] = [
+            {
+              id: 'calories',
+              title: 'Calories',
+              completed: cards.calories?.current || 0,
+              target: cards.calories?.target || 2200,
+              icon: 'flame',
+              color: dashboardTheme.colors.error,
+              unit: 'kcal',
+            },
+            {
+              id: 'protein',
+              title: 'Protein',
+              completed: cards.protein?.current || 0,
+              target: cards.protein?.target || 120,
+              icon: 'nutrition',
+              color: dashboardTheme.colors.orange,
+              unit: 'g',
+            },
+            {
+              id: 'workouts',
+              title: 'Workouts',
+              completed: cards.workouts?.current || 0,
+              target: cards.workouts?.target || 1,
+              icon: 'fitness',
+              color: dashboardTheme.colors.primary,
+              unit: 'sessions',
+            },
+            {
+              id: 'hydration',
+              title: 'Hydration',
+              completed: cards.hydration?.current || 0,
+              target: cards.hydration?.target || 8,
+              icon: 'water',
+              color: '#3b82f6',
+              unit: 'glasses',
+            },
+          ];
+          
+          // Add sleep if available
+          if (cards.sleep) {
+            progressCardsFromApi.push({
+              id: 'sleep',
+              title: 'Sleep',
+              completed: cards.sleep.current || 0,
+              target: cards.sleep.target || 8,
+              icon: 'moon',
+              color: '#6366f1',
+              unit: 'hours',
+            });
+          }
+          
+          setProgressCards(progressCardsFromApi);
+          setIsLoading(false);
+          return;
+        }
+      } catch (apiError) {
+        console.warn('[MyProgressDashboard] Progress API not available, falling back to local data:', apiError);
+      }
+      
+      // Fallback: Try health service
       const initialized = await healthDataService.initialize();
       console.log('[MyProgressDashboard] Health service initialized:', initialized);
       
@@ -442,11 +522,11 @@ const MyProgressDashboard: React.FC<MyProgressDashboardProps> = ({
    */
   const loadMealAndWorkoutData = async () => {
     try {
-      const { user } = useContext(AuthContext);
       const userId = user?.id;
 
       if (!userId) {
         console.error('[MyProgressDashboard] User ID not available');
+        setProgressCards(getMockDataForPeriod(selectedPeriod));
         return;
       }
 
@@ -789,8 +869,31 @@ const MyProgressDashboard: React.FC<MyProgressDashboardProps> = ({
 
   const loadActionItems = async () => {
     try {
-      // Try to load from service if available
-      // For now, using mock data with dynamic initialization
+      const userId = user?.id;
+      
+      if (userId) {
+        // Try to load from progress API
+        try {
+          const response = await progressService.getActions(userId);
+          if (response.success && response.actions) {
+            console.log('[MyProgressDashboard] Actions from API:', response.actions);
+            setActionItems(response.actions.map((action: any) => ({
+              id: action.id,
+              title: action.title,
+              description: action.description,
+              completed: action.completed,
+              type: action.type,
+              icon: action.icon,
+              time: action.scheduledTime,
+            })));
+            return;
+          }
+        } catch (apiError) {
+          console.warn('[MyProgressDashboard] Actions API not available:', apiError);
+        }
+      }
+      
+      // Fallback to mock data
       const mockActionItems: ActionItem[] = [
         {
           id: '1',
@@ -847,8 +950,30 @@ const MyProgressDashboard: React.FC<MyProgressDashboardProps> = ({
 
   const loadCoachRecommendations = async () => {
     try {
-      // Try to load from service if available
-      // For now, using mock data with dynamic initialization
+      const userId = user?.id;
+      
+      if (userId) {
+        // Try to load from progress API
+        try {
+          const response = await progressService.getRecommendations(userId);
+          if (response.success && response.recommendations) {
+            console.log('[MyProgressDashboard] Recommendations from API:', response.recommendations);
+            setCoachRecommendations(response.recommendations.map((rec: any) => ({
+              id: rec.id,
+              title: rec.title,
+              message: rec.message,
+              type: rec.type,
+              priority: rec.priority,
+              icon: rec.icon,
+            })));
+            return;
+          }
+        } catch (apiError) {
+          console.warn('[MyProgressDashboard] Recommendations API not available:', apiError);
+        }
+      }
+      
+      // Fallback to mock data
       const mockRecommendations: CoachRecommendation[] = [
         {
           id: '1',
