@@ -208,62 +208,6 @@ class ChatService {
   }
 
   /**
-   * @deprecated v3.0 - Sessions are now client-generated
-   * Start a new chat session - now just generates a client-side session ID
-   * The session is auto-created in the database on first /ask call
-   */
-  async startSession(userId: string): Promise<{ session_id: string; user_id: string; created_at: string } | null> {
-    console.log('=== START CHAT SESSION (v3.0 - client-generated) ===');
-    console.log('User ID:', userId);
-    
-    // v3.0: Client is responsible for generating session IDs
-    // Sessions are auto-created in DB on first message
-    const sessionId = this.startNewConversation();
-    
-    console.log('Session ID generated:', sessionId);
-    return {
-      session_id: sessionId,
-      user_id: userId,
-      created_at: new Date().toISOString(),
-    };
-  }
-
-  /**
-   * @deprecated v3.0 - Use ask() instead
-   * Send a message in a chat session - now routes to /ask
-   * Maintained for backward compatibility
-   */
-  async sendMessage(
-    message: string,
-    sessionId: string,
-    userId: string,
-    context?: {
-      user_goals?: string[];
-      fitness_level?: string;
-      dietary_restrictions?: string[];
-      authToken?: string;
-      [key: string]: any;
-    }
-  ): Promise<ChatResponse> {
-    console.log('=== SEND MESSAGE (v3.0 - routing to /ask) ===');
-    console.log('Session ID:', sessionId);
-    console.log('User ID:', userId);
-    console.log('Message:', message);
-    
-    // v3.0: All messages go through /ask
-    return this.ask(message, {
-      sessionId,
-      userId,
-      authToken: context?.authToken,
-      user: context ? {
-        goals: context.user_goals,
-        fitness_level: context.fitness_level,
-        dietary_restrictions: context.dietary_restrictions,
-      } : undefined,
-    });
-  }
-
-  /**
    * Get chat history for a session via /chat/session/{session_id}/history
    * @param sessionId - The session ID to retrieve history for
    * @param authToken - Optional JWT token for authenticated access
@@ -335,57 +279,13 @@ class ChatService {
   /**
    * Resume a previous session by loading its history
    */
-  async resumeSession(sessionId: string): Promise<ChatMessage[]> {
-    return this.getHistory(sessionId);
+  async resumeSession(sessionId: string, authToken?: string): Promise<ChatMessage[]> {
+    return this.getHistory(sessionId, authToken);
   }
 
   /**
-   * @deprecated Use startSession() instead - createSession is legacy
-   */
-  async createSession(title?: string): Promise<{ session_id: string; title: string } | null> {
-    // For backwards compatibility, generate a local session ID
-    const localSessionId = `local_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    console.log('createSession is deprecated, use startSession(userId) instead');
-    return {
-      session_id: localSessionId,
-      title: title || 'New Chat',
-    };
-  }
-
-  /**
-   * @deprecated Use getUserSessions(userId) instead
-   */
-  async getSessions(): Promise<ChatSession[]> {
-    console.warn('getSessions is deprecated, use getUserSessions(userId) instead');
-    return [];
-  }
-
-  /**
-   * @deprecated Use getHistory(sessionId) instead
-   */
-  async getSessionMessages(sessionId: string): Promise<ChatMessage[]> {
-    console.warn('getSessionMessages is deprecated, use getHistory(sessionId) instead');
-    return this.getHistory(sessionId);
-  }
-
-  /**
-   * @deprecated Use sendMessage() for session-based chat instead
-   */
-  async askFollowUp(
-    query: string,
-    sessionId: string,
-    additionalContext?: any
-  ): Promise<ChatResponse> {
-    console.warn('askFollowUp is deprecated, use sendMessage() instead');
-    return this.ask(query, {
-      session_id: sessionId,
-      ...additionalContext,
-    });
-  }
-
-  /**
-   * Parse /ask endpoint response (API v2.0)
-   * Response includes: type, response, confidence, cached, session_id, recommendations, citations, quick_insights
+   * Parse /ask endpoint response (API v3.0)
+   * Response includes: message, type, confidence, processing_time_ms, trace_id, sessionId, recommendations, citations, quick_insights
    */
   private parseAskResponse(data: any): ChatResponse {
     // Parse actions to suggested_actions format
@@ -429,49 +329,6 @@ class ChatService {
       follow_up_suggestions: data.follow_up_suggestions,
       clarifying_questions: data.clarifying_questions,
       suggested_searches: data.suggested_searches,
-    };
-  }
-
-  /**
-   * Parse /chat/send-message response (ModalResponse format - API v2.0)
-   * Response includes: assistantMessage, citations, actions, entities, traceId, conversationId, mode, detectedIntent
-   */
-  private parseSendMessageResponse(data: any, sessionId: string): ChatResponse {
-    // Parse actions from ModalResponse format
-    let suggested_actions: SuggestedAction[] | undefined;
-    if (data.actions && Array.isArray(data.actions)) {
-      suggested_actions = data.actions.map((action: any) => ({
-        action: action.type?.toLowerCase() || action.action,
-        label: action.label,
-        route: action.payload?.route,
-      }));
-    }
-    // Also check modal.actions for backwards compatibility
-    if (!suggested_actions && data.modal?.actions && Array.isArray(data.modal.actions)) {
-      suggested_actions = data.modal.actions.map((action: any) => ({
-        action: action.type?.toLowerCase() || action.action,
-        label: action.label,
-        route: action.route,
-      }));
-    }
-
-    return {
-      success: data.success !== false,
-      message: data.assistantMessage || data.response || '',
-      response: data.assistantMessage || data.response || '',
-      session_id: data.conversationId || sessionId,
-      timestamp: data.timestamp || new Date().toISOString(),
-      type: data.mode || data.detectedIntent || 'general',
-      detected_type: data.detectedIntent,
-      confidence: data.confidence || 0,
-      processing_time_ms: data.processingTimeMs || 0,
-      trace_id: data.traceId || '',
-      source: data.service || 'wihy_ai',
-      suggested_actions,
-      citations: data.citations,
-      entities: data.entities,
-      // Modal info for UI display (backwards compat)
-      modal: data.modal,
     };
   }
 }
