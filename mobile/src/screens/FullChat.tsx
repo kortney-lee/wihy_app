@@ -101,7 +101,7 @@ export default function FullChat() {
   }, [initialMessage]);
   
   // Determine if this is a guided flow (from Home screen) or conversation flow (from Chat tab)
-  // Guided flow uses /api/chat/public/ask endpoint, conversation flow uses /api/chat/send-message
+  // v3.0: Both flows now use the same /ask endpoint with client-generated sessionId
   const isGuidedFlow = context?.type === 'search' || context?.type === 'verify';
 
   // Check if nutrition facts are available in context
@@ -134,24 +134,25 @@ export default function FullChat() {
   const dot2Anim = useRef(new Animated.Value(0.3)).current;
   const dot3Anim = useRef(new Animated.Value(0.3)).current;
 
-  // Initialize chat session - only for conversation flow (Chat tab)
-  // Guided flow (Home screen) uses public/ask which is stateless
-  const initializeSession = useCallback(async () => {
-    if (sessionId || isInitializingSession || isGuidedFlow) return;
+  // Initialize chat session - v3.0: client generates session ID
+  // All flows now use the same /ask endpoint with client-generated sessionId
+  const initializeSession = useCallback(() => {
+    if (sessionId) return;
     
-    setIsInitializingSession(true);
-    try {
-      const session = await chatService.startSession(userId);
-      if (session) {
-        setSessionId(session.session_id);
-        console.log('Chat session initialized:', session.session_id);
-      }
-    } catch (error) {
-      console.error('Failed to create chat session:', error);
-    } finally {
-      setIsInitializingSession(false);
-    }
-  }, [sessionId, isInitializingSession, isGuidedFlow]);
+    // v3.0: Client is responsible for generating session IDs
+    const newSessionId = chatService.getSessionId();
+    setSessionId(newSessionId);
+    console.log('Chat session initialized (client-generated):', newSessionId);
+  }, [sessionId]);
+
+  // Start a new conversation with fresh session ID
+  const startNewConversation = useCallback(() => {
+    const newSessionId = chatService.startNewConversation();
+    setSessionId(newSessionId);
+    setMessages([]);
+    console.log('New conversation started:', newSessionId);
+    return newSessionId;
+  }, []);
 
   // Initialize messages and session on mount
   useEffect(() => {
@@ -412,38 +413,29 @@ export default function FullChat() {
     try {
       let response;
       
-      // Route based on flow type:
-      // - Guided flow (Home screen): Use /api/chat/public/ask (stateless)
-      // - Conversation flow (Chat tab): Use /api/chat/send-message with session
+      // v3.0: All chat now goes through /ask with client-generated sessionId
+      // No distinction between guided flow and conversation flow
+      const currentSessionId = sessionId || chatService.getSessionId();
       
-      if (isGuidedFlow) {
-        // Guided flow: Use public ask endpoint (stateless, no session needed)
-        console.log('=== GUIDED FLOW (/api/chat/public/ask) ===');
-        
-        response = await chatService.ask(text);
-      } else if (sessionId) {
-        // Conversation flow with session: Use /api/chat/send-message
-        console.log('=== CONVERSATION FLOW (/api/chat/send-message) ===');
-        console.log('Session ID:', sessionId);
-        console.log('User ID:', userId);
-        
-        response = await chatService.sendMessage(text, sessionId, userId, {
-          ...(context?.userGoals && { user_goals: context.userGoals }),
-          ...(context?.fitnessLevel && { fitness_level: context.fitnessLevel }),
-          ...(context?.dietaryRestrictions && { dietary_restrictions: context.dietaryRestrictions }),
-        });
-      } else {
-        // Conversation flow without session yet: Start session first
-        console.log('=== CONVERSATION FLOW - STARTING SESSION ===');
-        
-        const session = await chatService.startSession(userId);
-        if (session) {
-          setSessionId(session.session_id);
-          response = await chatService.sendMessage(text, session.session_id, userId);
-        } else {
-          // Fallback to public ask if session creation fails
-          response = await chatService.ask(text);
-        }
+      console.log('=== CHAT API CALL (/ask) - v3.0 ===');
+      console.log('Session ID:', currentSessionId);
+      console.log('User ID:', userId);
+      
+      response = await chatService.ask(text, {
+        sessionId: currentSessionId,
+        userId,
+        user: user ? {
+          id: user.id,
+          name: user.name,
+          goals: context?.userGoals,
+          dietary_restrictions: context?.dietaryRestrictions,
+          fitness_level: context?.fitnessLevel,
+        } : undefined,
+      });
+      
+      // Ensure session ID is set if not already
+      if (!sessionId) {
+        setSessionId(currentSessionId);
       }
 
       if (response.success) {
