@@ -18,6 +18,7 @@ import { dashboardColors, Ionicons, BackToHubButton } from '../components/shared
 import { dashboardTheme } from '../theme/dashboardTheme';
 import { userService } from '../services/userService';
 import { AuthContext } from '../context/AuthContext';
+import { formatDateInput } from '../utils/dateFormatter';
 
 const spinnerGif = require('../../assets/whatishealthyspinner.gif');
 const isWeb = Platform.OS === 'web';
@@ -350,8 +351,10 @@ export default function ClientOnboarding({
           style={styles.input}
           placeholder="MM/DD/YYYY"
           value={formData.dateOfBirth}
-          onChangeText={(value) => updateField('dateOfBirth', value)}
+          onChangeText={(value) => updateField('dateOfBirth', formatDateInput(value))}
           placeholderTextColor="#9ca3af"
+          keyboardType="numeric"
+          maxLength={10}
         />
       </View>
 
