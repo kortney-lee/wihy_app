@@ -104,7 +104,7 @@ export { combinedProgramService } from './combinedProgramService';
 export { servicesApi } from './servicesApiClient';
 export { userApi } from './userApiClient';
 export { goalsService } from './goalsService';
-export { progressService } from './progressTrackingService';
+export { progressService as progressTrackingService } from './progressTrackingService';
 export { remindersService } from './remindersService';
 export { scanHistoryService } from './scanHistoryService';
 export { uploadService } from './uploadService';
