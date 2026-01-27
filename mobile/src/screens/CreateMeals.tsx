@@ -1778,16 +1778,20 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
         return;
       }
 
-      // Fetch from Meal Diary API
+      // Use new getAllMeals endpoint (not getMealDiary)
+      // API: GET /api/users/:userId/meals
       const mealDiaryService = getMealDiaryService(token);
-      const response = await mealDiaryService.getMealDiary(userId, {
+      const response = await mealDiaryService.getAllMeals(userId, {
         limit: 100,
         offset: 0,
         meal_type: filterTag as any,
+        search: searchQuery,
+        sort: 'created_at',
+        order: 'desc',
       });
 
-      // Convert API response to SavedMeal format
-      let apiMeals = (response.recent_meals || []).map((meal: Meal) => ({
+      // Response format: { success: true, meals: Meal[], pagination: {...} }
+      let apiMeals = (response.meals || []).map((meal: Meal) => ({
         meal_id: meal.meal_id,
         user_id: meal.user_id || userId,
         name: meal.name,
@@ -1807,27 +1811,11 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
         instructions: meal.instructions || [],
       })) as SavedMeal[];
 
-      // Apply search filter if provided
-      if (searchQuery?.trim()) {
-        const query = searchQuery.toLowerCase();
-        apiMeals = apiMeals.filter(meal => 
-          meal.name.toLowerCase().includes(query) ||
-          meal.tags?.some(tag => tag.toLowerCase().includes(query))
-        );
-      }
-
-      // Filter by tag if filterTag wasn't used in API call
-      if (filterTag && !filterTag.includes('_')) {
-        apiMeals = apiMeals.filter(meal => 
-          meal.tags?.some(tag => tag.toLowerCase().includes(filterTag.toLowerCase()))
-        );
-      }
-
       setAllMeals(apiMeals);
-      console.log('[CreateMeals] Loaded', apiMeals.length, 'meals from Meal Diary API');
+      console.log('[CreateMeals] Loaded', apiMeals.length, 'meals from Meals API');
     } catch (error) {
       console.log('[CreateMeals] Error loading library meals:', error);
-      // Set empty array instead of mock data - let UI show empty state
+      // Set empty array - let UI show empty state
       setAllMeals([]);
     } finally {
       setLoadingLibrary(false);

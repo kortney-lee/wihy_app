@@ -1,6 +1,9 @@
 import { fetchWithLogging } from '../utils/apiLogger';
+import { API_CONFIG } from './config';
 
-const API_BASE = 'https://services.wihy.ai/api';
+// CRITICAL: Meals API is on user.wihy.ai, NOT services.wihy.ai
+// See docs/BACKEND_MEALS_API_REQUIREMENTS.md for correct endpoint usage
+const API_BASE = `${API_CONFIG.userUrl}/api`;
 
 // Note: Mock data removed to expose real API issues
 
