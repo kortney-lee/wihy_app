@@ -172,16 +172,18 @@ class ResearchService {
       const articles: ResearchArticle[] = articlesData.map((article: any, index: number) => {
         const pmcid = article.pmcid || `PMC${article.id}`;
         
-        // Relevance score mapping:
-        // API returns relevanceScore as decimal (0-1) like 0.87
-        // We store as decimal and display as percentage in UI
+        // Relevance score normalization:
+        // API may return as decimal (0-1) or percentage (0-100)
+        // We normalize to decimal (0-1) and display as percentage in UI
         let relevanceScore = 0;
         if (article.relevanceScore !== undefined) {
-          // Already a decimal (0-1)
-          relevanceScore = article.relevanceScore;
+          const score = article.relevanceScore;
+          // If value is > 1, it's already a percentage, convert to decimal
+          relevanceScore = score > 1 ? score / 100 : score;
         } else if (article.relevance_score !== undefined) {
-          // Snake case version
-          relevanceScore = article.relevance_score;
+          const score = article.relevance_score;
+          // If value is > 1, it's already a percentage, convert to decimal
+          relevanceScore = score > 1 ? score / 100 : score;
         } else {
           // Calculate based on rank (first result = 0.95, decreasing)
           relevanceScore = Math.max(0.5, 0.95 - (index * 0.03));
@@ -231,90 +233,9 @@ class ResearchService {
   }
 
   /**
-   * Get article details by PMCID using WIHY Research API
-   * Endpoint: GET /api/research/pmc/:pmc_id
-   */
-  async getArticle(pmcid: string): Promise<ResearchArticle | null> {
-    try {
-      // Ensure pmcid starts with "PMC"
-      const normalizedPmcid = pmcid.startsWith('PMC') ? pmcid : `PMC${pmcid}`;
-      
-      // Call WIHY Research API - correct endpoint is /api/research/pmc/{pmc_id}
-      const articleUrl = `${API_CONFIG.servicesUrl}/api/research/pmc/${normalizedPmcid}`;
-      
-      console.log('[ResearchService] Fetching article:', articleUrl);
-      
-      const response = await fetchWithLogging(articleUrl, {
-        headers: {
-          'X-Client-ID': API_CONFIG.servicesClientId,
-          'X-Client-Secret': API_CONFIG.servicesClientSecret,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(`Research API error: ${response.status}`);
-      }
-
-      const data = await response.json();
-
-      if (!data.success || !data.article) {
-        console.warn('[ResearchService] Article not found');
-        return null;
-      }
-
-      const article = data.article;
-      const bookmarks = await this.getBookmarks();
-
-      return {
-        id: article.pmcid || article.id,
-        pmcid: article.pmcid,
-        title: article.title || 'Untitled',
-        authors: Array.isArray(article.authors)
-          ? article.authors.map((a: any) => a.name || a).join(', ')
-          : article.authors,
-        authorCount: Array.isArray(article.authors) ? article.authors.length : undefined,
-        journal: article.journal?.name || article.journal || 'Unknown Journal',
-        publishedDate: article.publication_info?.published_date || article.publishedDate,
-        publicationYear: article.publication_info?.published_date
-          ? new Date(article.publication_info.published_date).getFullYear()
-          : article.publicationYear,
-        abstract: article.abstract || article.full_text_sections?.introduction,
-        studyType: article.study_design?.type || article.studyType,
-        evidenceLevel: article.quality_assessment?.grade_evidence || article.evidenceLevel,
-        fullTextAvailable: article.open_access || true,
-        links: {
-          pmcWebsite: `https://www.ncbi.nlm.nih.gov/pmc/articles/${article.pmcid}/`,
-          pubmedLink: article.pmid ? `https://pubmed.ncbi.nlm.nih.gov/${article.pmid}/` : undefined,
-          pdfDownload: article.open_access ? `https://www.ncbi.nlm.nih.gov/pmc/articles/${article.pmcid}/pdf/` : null,
-          doi: article.publication_info?.doi || article.doi,
-        },
-        bookmarked: bookmarks.some(b => b.pmcid === article.pmcid || b.id === article.id),
-      };
-    } catch (error) {
-      console.error('[ResearchService] Failed to get article:', error);
-      return null;
-    }
-  }
-
-  /**
-   * Get personalized article recommendations
-   */
-  async getRecommendations(userProfile?: any, limit: number = 10): Promise<ResearchArticle[]> {
-    try {
-      // Build query based on user interests
-      const interests = userProfile?.interests || ['nutrition', 'fitness', 'health'];
-      const query = interests.join(' OR ');
-      
-      return await this.searchArticles({ query, limit });
-    } catch (error) {
-      console.error('[ResearchService] Failed to get recommendations:', error);
-      throw error;
-    }
-  }
-
-  /**
-   * Get full article content with body text
+   * Get full article content with abstract and body text
    * Endpoint: GET /api/research/pmc/:pmcId/content
+   * This is the primary method for fetching article details with full abstract
    */
   async getArticleContent(pmcid: string): Promise<{
     pmcid: string;
