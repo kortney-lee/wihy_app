@@ -2288,9 +2288,243 @@ searchInput: {
 - Apply SafeAreaView with both top and bottom edges
 - Test on multiple screen sizes and orientations
 
+## Hub-Based Screen Pattern (Health Hub / Coach Hub / Family Hub)
+
+### BackToHubButton Component
+
+**When to Use:**
+- Screens that are accessed from a hub (Health Hub, Coach Hub, Family Hub)
+- Web platform only (component auto-hides on native)
+- Screens with `isDashboardMode={true}` prop
+
+**Implementation:**
+
+```tsx
+// 1. Import the component
+import { BackToHubButton } from '../components/shared';
+import Dimensions from 'react-native';
+
+const spinnerGif = require('../../assets/whatishealthyspinner.gif');
+const { width: screenWidth } = Dimensions.get('window');
+
+// 2. Add props interface
+interface YourScreenProps {
+  isDashboardMode?: boolean;
+  onBack?: () => void;
+}
+
+export default function YourScreen({ 
+  isDashboardMode = false, 
+  onBack 
+}: YourScreenProps) {
+  // ... component code
+
+  return (
+    <View style={styles.container}>
+      {/* Add BackToHubButton at the top */}
+      {isDashboardMode && onBack && (
+        <BackToHubButton
+          hubName="Coach Hub"  // or "Health Hub" or "Family Hub"
+          color="#3b82f6"      // Match your header color
+          onPress={onBack}
+          isMobileWeb={Platform.OS === 'web' && screenWidth < 768}
+          spinnerGif={spinnerGif}
+        />
+      )}
+      
+      {/* Rest of your screen */}
+      <View style={{ height: insets.top, backgroundColor: '#3b82f6' }} />
+      {/* ... */}
+    </View>
+  );
+}
+```
+
+**Hub Colors:**
+- Health Hub: `#16a34a` (green)
+- Coach Hub: `#3b82f6` (blue) or screen-specific color
+- Family Hub: `#f59e0b` (orange)
+
+### Collapsible Header Pattern
+
+**Standard Configuration:**
+
+```tsx
+// 1. Import Animated
+import { Animated, Dimensions } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
+const { width: screenWidth } = Dimensions.get('window');
+
+// 2. Setup animation values
+const scrollY = useRef(new Animated.Value(0)).current;
+const insets = useSafeAreaInsets();
+
+// CRITICAL: Use 180px max height (not 140px)
+const HEADER_MAX_HEIGHT = 180;
+const HEADER_MIN_HEIGHT = 0;
+const HEADER_SCROLL_DISTANCE = HEADER_MAX_HEIGHT - HEADER_MIN_HEIGHT;
+
+const headerHeight = scrollY.interpolate({
+  inputRange: [0, HEADER_SCROLL_DISTANCE],
+  outputRange: [HEADER_MAX_HEIGHT, HEADER_MIN_HEIGHT],
+  extrapolate: 'clamp',
+});
+
+const headerOpacity = scrollY.interpolate({
+  inputRange: [0, HEADER_SCROLL_DISTANCE / 2],
+  outputRange: [1, 0],
+  extrapolate: 'clamp',
+});
+
+const titleScale = scrollY.interpolate({
+  inputRange: [0, HEADER_SCROLL_DISTANCE],
+  outputRange: [1, 0.9],
+  extrapolate: 'clamp',
+});
+
+// 3. Render collapsible header
+<Animated.View style={[styles.collapsibleHeader, { height: headerHeight }]}>
+  <Animated.View style={[
+    styles.headerContent, 
+    { opacity: headerOpacity, transform: [{ scale: titleScale }] }
+  ]}>
+    <Text style={styles.headerTitle}>Your Title</Text>
+    <Text style={styles.headerSubtitle}>Your subtitle</Text>
+    {/* Optional badge/stats */}
+    <View style={styles.statsRow}>
+      <Text style={styles.statsLabel}>Active Clients</Text>
+      <Text style={styles.statsValue}>0</Text>
+    </View>
+  </Animated.View>
+</Animated.View>
+
+// 4. Attach scroll listener to ScrollView
+<Animated.ScrollView
+  showsVerticalScrollIndicator={false}
+  scrollEventThrottle={16}
+  onScroll={Animated.event(
+    [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+    { useNativeDriver: false }
+  )}
+>
+  {/* Content */}
+</Animated.ScrollView>
+```
+
+**Required Styles:**
+
+```tsx
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#e0f2fe',
+  },
+  collapsibleHeader: {
+    backgroundColor: '#3b82f6',  // Your theme color
+    overflow: 'hidden',
+    paddingBottom: 20,  // CRITICAL: Prevents color bleeding below
+  },
+  headerContent: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingTop: 10,  // CRITICAL: Proper spacing from top
+  },
+  headerTitle: {
+    fontSize: 28,
+    fontWeight: '700',
+    color: '#ffffff',
+    marginBottom: 4,
+  },
+  headerSubtitle: {
+    fontSize: 16,
+    color: 'rgba(255, 255, 255, 0.9)',
+    marginBottom: 12,
+  },
+  statsRow: {
+    flexDirection: 'row',
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    alignItems: 'center',
+    gap: 8,
+  },
+  statsLabel: {
+    fontSize: 14,
+    color: 'rgba(255, 255, 255, 0.9)',
+    fontWeight: '500',
+  },
+  statsValue: {
+    fontSize: 14,
+    color: '#ffffff',
+    fontWeight: '700',
+  },
+});
+```
+
+**Critical Requirements:**
+1. ✅ **HEADER_MAX_HEIGHT = 180** (not 140) - prevents text cutoff
+2. ✅ **paddingBottom: 20** on collapsibleHeader - prevents background color bleeding
+3. ✅ **paddingTop: 10** on headerContent - proper spacing
+4. ✅ **useNativeDriver: false** for scroll animations (required for height changes)
+5. ✅ Status bar area before header: `<View style={{ height: insets.top, backgroundColor: '#yourColor' }} />`
+
+### Dashboard Mode Integration
+
+**Parent Component (e.g., CoachDashboardPage):**
+
+```tsx
+// Pass isDashboardMode and onBack to child screens
+const renderSelectedView = () => {
+  switch (selectedView) {
+    case 'overview':
+      return <CoachOverview isDashboardMode={true} onBack={handleBackToDashboard} />;
+    case 'clients':
+      return <ClientManagement isDashboardMode={true} onBack={handleBackToDashboard} />;
+    // ...
+  }
+};
+```
+
+**Child Screen:**
+
+```tsx
+interface YourScreenProps {
+  isDashboardMode?: boolean;
+  onBack?: () => void;
+}
+
+export default function YourScreen({ 
+  isDashboardMode = false, 
+  onBack 
+}: YourScreenProps) {
+  // Use isDashboardMode to show/hide BackToHubButton
+  // Use onBack callback to navigate back to hub
+}
+```
+
 ## Example Implementation Checklist
 
-When creating a new screen:
+When creating a new hub-based screen:
+
+- [ ] Import BackToHubButton component
+- [ ] Add `isDashboardMode` and `onBack` props to interface
+- [ ] Import Dimensions and get screenWidth
+- [ ] Import spinner GIF: `const spinnerGif = require('../../assets/whatishealthyspinner.gif')`
+- [ ] Render BackToHubButton conditionally with correct hub name and color
+- [ ] Set HEADER_MAX_HEIGHT to 180 (not 140)
+- [ ] Add paddingBottom: 20 to collapsibleHeader style
+- [ ] Add paddingTop: 10 to headerContent style
+- [ ] Use SafeAreaView or insets for status bar area
+- [ ] Set useNativeDriver: false in scroll animation
+- [ ] Test on web platform (mobile and desktop widths)
+- [ ] Verify no duplicate buttons appear
+- [ ] Ensure BackToHubButton only shows on web platform
+
+When creating a new general screen:
 
 - [ ] Import LinearGradient for header
 - [ ] Use SafeAreaView with top and bottom edges

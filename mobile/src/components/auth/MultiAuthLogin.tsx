@@ -300,7 +300,7 @@ export default function MultiAuthLogin({
             <View style={styles.inputContainer}>
               <Text style={styles.inputLabel}>Email</Text>
               <View style={styles.inputWrapper}>
-                <SvgIcon name="mail-outline" size={20} color="#9ca3af" style={styles.inputIcon} />
+                <SvgIcon name="mail" size={20} color={colors.primary} style={styles.inputIcon} />
                 <TextInput
                   style={styles.input}
                   placeholder="you@example.com"
@@ -511,7 +511,7 @@ export default function MultiAuthLogin({
                 <View style={styles.inputContainer}>
                   <Text style={styles.inputLabel}>Email Address</Text>
                   <View style={styles.inputWrapper}>
-                    <SvgIcon name="mail-outline" size={20} color="#9ca3af" style={styles.inputIcon} />
+                    <SvgIcon name="mail" size={20} color={colors.primary} style={styles.inputIcon} />
                     <TextInput
                       style={styles.input}
                       placeholder="you@example.com"

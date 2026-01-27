@@ -78,6 +78,17 @@ export interface MealDiaryResponse {
   has_more: boolean;
 }
 
+export interface GetAllMealsResponse {
+  success: boolean;
+  meals: Meal[];
+  pagination: {
+    total: number;
+    limit: number;
+    offset: number;
+    hasMore: boolean;
+  };
+}
+
 export interface CreateMealRequest {
   name: string;
   meal_type: string;
@@ -172,6 +183,48 @@ export class MealDiaryAPI {
   // ========================================================================
   // Meal Diary Endpoints
   // ========================================================================
+
+  /**
+   * Get all user meals (Meal Library)
+   * GET /api/users/:userId/meals
+   * Returns paginated list of meals with full details
+   */
+  async getAllMeals(
+    userId: string,
+    options?: {
+      limit?: number;
+      offset?: number;
+      meal_type?: string;
+      search?: string;
+      sort?: string;
+      order?: 'asc' | 'desc';
+    }
+  ): Promise<GetAllMealsResponse> {
+    try {
+      const params = new URLSearchParams();
+      if (options?.limit) params.append('limit', options.limit.toString());
+      if (options?.offset) params.append('offset', options.offset.toString());
+      if (options?.meal_type) params.append('meal_type', options.meal_type);
+      if (options?.search) params.append('search', options.search);
+      if (options?.sort) params.append('sort', options.sort);
+      if (options?.order) params.append('order', options.order);
+
+      const url = `${API_BASE}/users/${userId}/meals${params.toString() ? `?${params.toString()}` : ''}`;
+      
+      const response = await fetchWithLogging(url, {
+        method: 'GET',
+        headers: this.headers,
+      });
+
+      if (!response.ok) {
+        throw new Error(`API Error: ${response.status}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      throw this.handleError(error);
+    }
+  }
 
   /**
    * Get user's meal diary with dietary preferences
