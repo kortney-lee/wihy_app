@@ -40,6 +40,7 @@ import CreateMeals from './CreateMeals';
 import ShoppingListScreen from './ShoppingListScreen';
 import CoachSelection from './CoachSelection';
 import ProfileSetupScreen from './ProfileSetupScreen';
+import MealCalendar from './MealCalendar';
 
 // Note: screenWidth is now handled dynamically via useDashboardLayout
 
@@ -48,7 +49,7 @@ type NavigationProp = CompositeNavigationProp<
   StackNavigationProp<RootStackParamList>
 >;
 
-type DashboardType = 'overview' | 'progress' | 'consumption' | 'fitness' | 'research' | 'coach' | 'parent' | 'meals';
+type DashboardType = 'overview' | 'progress' | 'consumption' | 'fitness' | 'research' | 'coach' | 'parent' | 'meals' | 'calendar';
 
 interface DashboardOption {
   id: DashboardType;
@@ -108,7 +109,7 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
   const [hasActiveSession, setHasActiveSession] = useState(false);
   const [showQuickStartGuide, setShowQuickStartGuide] = useState(false);
   const [showHamburgerMenu, setShowHamburgerMenu] = useState(false);
-  const [selectedDashboard, setSelectedDashboard] = useState<'overview' | 'progress' | 'nutrition' | 'research' | 'fitness' | 'parent' | 'meals' | 'shoppingList' | 'profileSetup' | null>(null);
+  const [selectedDashboard, setSelectedDashboard] = useState<'overview' | 'progress' | 'nutrition' | 'research' | 'fitness' | 'parent' | 'meals' | 'shoppingList' | 'profileSetup' | 'calendar' | null>(null);
 
   // Reset dashboard state when user plan changes (dev mode switcher)
   React.useEffect(() => {
@@ -220,6 +221,7 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
         {selectedDashboard === 'parent' && <ParentDashboard />}
         {selectedDashboard === 'meals' && <CreateMeals isDashboardMode={true} />}
         {selectedDashboard === 'shoppingList' && <ShoppingListScreen isDashboardMode={true} />}
+        {selectedDashboard === 'calendar' && <MealCalendar isDashboardMode={true} />}
         {(selectedDashboard as any) === 'findCoach' && <CoachSelection />}
         {selectedDashboard === 'profileSetup' && <ProfileSetupScreen isDashboardMode={true} onBack={() => setSelectedDashboard(null)} />}
       </View>
@@ -370,6 +372,20 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
             </View>
             <Text style={[styles.cardTitle, { fontSize: titleSize }]}>Create Meals</Text>
             <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>Custom recipes</Text>
+          </TouchableOpacity>
+        )}
+
+        {/* Meal Calendar Card (premium+ users) */}
+        {hasMealsAccess(user) && (
+          <TouchableOpacity
+            style={[styles.dashboardCard, styles.calendarCard, { width: cardWidth as any }]}
+            onPress={() => setSelectedDashboard('calendar')}
+          >
+            <View style={[styles.cardIconContainer, { width: iconContainerSize, height: iconContainerSize, borderRadius: iconContainerSize / 2 }]}>
+              <SvgIcon name="calendar" size={iconSize} color="#ffffff" />
+            </View>
+            <Text style={[styles.cardTitle, { fontSize: titleSize }]}>Meal Calendar</Text>
+            <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>View schedule</Text>
           </TouchableOpacity>
         )}
 
@@ -790,6 +806,10 @@ const styles = StyleSheet.create({
 
   mealsCard: {
     backgroundColor: '#f97316',
+  },
+
+  calendarCard: {
+    backgroundColor: '#f59e0b', // Amber/Orange for calendar
   },
 
   shoppingListCard: {
