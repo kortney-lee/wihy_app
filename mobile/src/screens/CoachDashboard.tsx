@@ -12,11 +12,12 @@ import {
   RefreshControl,
   Platform,
   Animated,
+  Dimensions,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
-import { Ionicons, NotificationTile } from '../components/shared';
+import { Ionicons, NotificationTile, BackToHubButton } from '../components/shared';
 import type { StackNavigationProp } from '@react-navigation/stack';
 import type { RootStackParamList } from '../types/navigation';
 import { dashboardColors, GradientDashboardHeader } from '../components/shared';
@@ -25,7 +26,9 @@ import { coachService, Client as APIClient, ClientDashboard } from '../services'
 import { useAuth } from '../context/AuthContext';
 import SendInvitation from './SendInvitation';
 
+const spinnerGif = require('../../assets/whatishealthyspinner.gif');
 const isWeb = Platform.OS === 'web';
+const { width: screenWidth } = Dimensions.get('window');
 
 interface Client {
   id: string;
@@ -494,6 +497,17 @@ export default function CoachDashboard({
 
   return (
     <View style={styles.container}>
+      {/* Back to Coach Hub button - only on web */}
+      {isDashboardMode && onBack && (
+        <BackToHubButton
+          hubName="Coach Hub"
+          color="#3b82f6"
+          onPress={onBack}
+          isMobileWeb={isWeb && screenWidth < 768}
+          spinnerGif={spinnerGif}
+        />
+      )}
+
       {/* Status bar area - solid color */}
       <View style={{ height: insets.top, backgroundColor: '#3b82f6' }} />
         

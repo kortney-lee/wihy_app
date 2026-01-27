@@ -11,14 +11,17 @@ import {
   Platform,
   Animated,
   ActivityIndicator,
+  Dimensions,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { dashboardColors, Ionicons } from '../components/shared';
+import { dashboardColors, Ionicons, BackToHubButton } from '../components/shared';
 import { dashboardTheme } from '../theme/dashboardTheme';
 import { userService } from '../services/userService';
 import { AuthContext } from '../context/AuthContext';
 
+const spinnerGif = require('../../assets/whatishealthyspinner.gif');
 const isWeb = Platform.OS === 'web';
+const { width: screenWidth } = Dimensions.get('window');
 
 interface ClientOnboardingProps {
   isDashboardMode?: boolean;
@@ -772,6 +775,17 @@ export default function ClientOnboarding({
 
   return (
     <View style={styles.container}>
+      {/* Back to Coach Hub button - only on web */}
+      {isDashboardMode && onBack && (
+        <BackToHubButton
+          hubName="Coach Hub"
+          color="#10b981"
+          onPress={onBack}
+          isMobileWeb={isWeb && screenWidth < 768}
+          spinnerGif={spinnerGif}
+        />
+      )}
+
       {/* Status bar area - solid color */}
       <View style={{ height: insets.top, backgroundColor: '#10b981' }} />
         

@@ -11,12 +11,15 @@ import {
   Platform,
   Animated,
   ScrollView,
+  Dimensions,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import { dashboardColors, Ionicons } from '../components/shared';
+import { dashboardColors, Ionicons, BackToHubButton } from '../components/shared';
 
+const spinnerGif = require('../../assets/whatishealthyspinner.gif');
 const isWeb = Platform.OS === 'web';
+const { width: screenWidth } = Dimensions.get('window');
 import { dashboardTheme } from '../theme/dashboardTheme';
 import { coachService, Client as APIClient, ClientDashboard } from '../services';
 import { useAuth } from '../context/AuthContext';
@@ -351,6 +354,17 @@ export default function ClientManagement({
 
   return (
     <View style={styles.container}>
+      {/* Back to Coach Hub button - only on web */}
+      {isDashboardMode && onBack && (
+        <BackToHubButton
+          hubName="Coach Hub"
+          color="#8b5cf6"
+          onPress={onBack}
+          isMobileWeb={isWeb && screenWidth < 768}
+          spinnerGif={spinnerGif}
+        />
+      )}
+
       {/* Status bar area - solid color */}
       <View style={{ height: insets.top, backgroundColor: '#8b5cf6' }} />
         

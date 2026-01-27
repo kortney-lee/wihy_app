@@ -10,15 +10,18 @@ import {
   Platform,
   Animated,
   ScrollView,
+  Dimensions,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import { dashboardColors, Ionicons } from '../components/shared';
+import { dashboardColors, Ionicons, BackToHubButton } from '../components/shared';
 import { dashboardTheme } from '../theme/dashboardTheme';
 import { coachService } from '../services';
 import { useAuth } from '../context/AuthContext';
 
+const spinnerGif = require('../../assets/whatishealthyspinner.gif');
 const isWeb = Platform.OS === 'web';
+const { width: screenWidth } = Dimensions.get('window');
 
 interface Booking {
   id: string;
@@ -380,6 +383,17 @@ export default function BookingsManagement({
 
   return (
     <View style={styles.container}>
+      {/* Back to Coach Hub button - only on web */}
+      {isDashboardMode && onBack && (
+        <BackToHubButton
+          hubName="Coach Hub"
+          color="#6366f1"
+          onPress={onBack}
+          isMobileWeb={isWeb && screenWidth < 768}
+          spinnerGif={spinnerGif}
+        />
+      )}
+
       {/* Status bar area */}
       <View style={{ height: insets.top, backgroundColor: '#6366f1' }} />
       
