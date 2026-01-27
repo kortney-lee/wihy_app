@@ -152,7 +152,7 @@ const CoachDashboardPage: React.FC<CoachDashboardPageProps> = ({ showMenuFromHea
       case 'dashboard':
         return <CoachDashboard isDashboardMode={true} onBack={handleBackToDashboardSelection} />;
       case 'meals':
-        return <CreateMeals isDashboardMode={true} />;
+        return <CreateMeals isDashboardMode={true} onBack={handleBackToDashboardSelection} />;
       case 'clients':
         return <ClientManagement isDashboardMode={true} onBack={handleBackToDashboardSelection} />;
       case 'onboard':

@@ -23,7 +23,7 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { dashboardColors, InstacartLinkButton } from '../components/shared';
+import { dashboardColors, InstacartLinkButton, BackToHubButton } from '../components/shared';
 import { dashboardTheme } from '../theme/dashboardTheme';
 import { SweepBorder } from '../components/SweepBorder';
 import SvgIcon from '../components/shared/SvgIcon';
@@ -179,9 +179,10 @@ interface Ingredient {
 
 interface CreateMealsProps {
   isDashboardMode?: boolean;
+  onBack?: () => void;
 }
 
-export default function CreateMeals({ isDashboardMode = false }: CreateMealsProps) {
+export default function CreateMeals({ isDashboardMode = false, onBack }: CreateMealsProps) {
   const { user } = useContext(AuthContext);
   const userId = user?.id;
   const navigation = useNavigation<NavigationProp>();
@@ -195,7 +196,7 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
   // Collapsing header animation
   const scrollY = useRef(new Animated.Value(0)).current;
   const insets = useSafeAreaInsets();
-  const HEADER_MAX_HEIGHT = 140;
+  const HEADER_MAX_HEIGHT = 180;
   const HEADER_MIN_HEIGHT = 0;
   const HEADER_SCROLL_DISTANCE = HEADER_MAX_HEIGHT - HEADER_MIN_HEIGHT;
 
@@ -2235,41 +2236,53 @@ export default function CreateMeals({ isDashboardMode = false }: CreateMealsProp
       {/* Status bar area - solid color */}
       <View style={{ height: insets.top, backgroundColor: '#ef4444' }} />
       
-      {/* Back to Health Hub button for web - only show when NOT in dashboard mode */}
-      {Platform.OS === 'web' && !isDashboardMode && (
-        <TouchableOpacity
-          onPress={() => navigation.goBack()}
-          style={{
-            position: 'absolute',
-            top: layout.screenWidth < 768 ? 12 : 40,
-            right: layout.screenWidth < 768 ? 12 : 24,
-            zIndex: 99,
-            flexDirection: 'row',
-            alignItems: 'center',
-            gap: layout.screenWidth < 768 ? 6 : 10,
-            paddingVertical: layout.screenWidth < 768 ? 4 : 6,
-            paddingLeft: layout.screenWidth < 768 ? 8 : 12,
-            paddingRight: layout.screenWidth < 768 ? 4 : 6,
-            backgroundColor: 'rgba(255,255,255,0.95)',
-            borderRadius: 24,
-            shadowColor: '#000',
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.15,
-            shadowRadius: 6,
-          } as any}
-        >
-          <SvgIcon name="arrow-back" size={layout.screenWidth < 768 ? 14 : 16} color="#16a34a" />
-          <Text style={{ fontSize: layout.screenWidth < 768 ? 11 : 13, fontWeight: '600', color: '#16a34a' }}>Health Hub</Text>
-          <Image 
-            source={spinnerGif}
-            resizeMode="cover"
-            style={{
-              width: layout.screenWidth < 768 ? 28 : 36,
-              height: layout.screenWidth < 768 ? 28 : 36,
-              borderRadius: layout.screenWidth < 768 ? 14 : 18,
-            }}
+      {/* Back button for web */}
+      {Platform.OS === 'web' && (
+        isDashboardMode && onBack ? (
+          // Coach Hub mode - use BackToHubButton
+          <BackToHubButton
+            hubName="Coach Hub"
+            color="#ef4444"
+            onPress={onBack}
+            isMobileWeb={layout.screenWidth < 768}
+            spinnerGif={spinnerGif}
           />
-        </TouchableOpacity>
+        ) : !isDashboardMode ? (
+          // Health Hub mode - use Health Hub button
+          <TouchableOpacity
+            onPress={() => navigation.goBack()}
+            style={{
+              position: 'absolute',
+              top: layout.screenWidth < 768 ? 12 : 40,
+              right: layout.screenWidth < 768 ? 12 : 24,
+              zIndex: 99,
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: layout.screenWidth < 768 ? 6 : 10,
+              paddingVertical: layout.screenWidth < 768 ? 4 : 6,
+              paddingLeft: layout.screenWidth < 768 ? 8 : 12,
+              paddingRight: layout.screenWidth < 768 ? 4 : 6,
+              backgroundColor: 'rgba(255,255,255,0.95)',
+              borderRadius: 24,
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.15,
+              shadowRadius: 6,
+            } as any}
+          >
+            <SvgIcon name="arrow-back" size={layout.screenWidth < 768 ? 14 : 16} color="#16a34a" />
+            <Text style={{ fontSize: layout.screenWidth < 768 ? 11 : 13, fontWeight: '600', color: '#16a34a' }}>Health Hub</Text>
+            <Image 
+              source={spinnerGif}
+              resizeMode="cover"
+              style={{
+                width: layout.screenWidth < 768 ? 28 : 36,
+                height: layout.screenWidth < 768 ? 28 : 36,
+                borderRadius: layout.screenWidth < 768 ? 14 : 18,
+              }}
+            />
+          </TouchableOpacity>
+        ) : null
       )}
       
       {/* Collapsing Header */}
@@ -4869,12 +4882,14 @@ const styles = StyleSheet.create({
   collapsibleHeader: {
     backgroundColor: '#ef4444',
     overflow: 'hidden',
+    paddingBottom: 20,
   },
   dashboardHeaderContent: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 20,
+    paddingTop: 10,
   },
   dashboardHeaderTitle: {
     fontSize: 28,
