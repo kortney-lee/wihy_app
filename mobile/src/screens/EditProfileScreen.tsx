@@ -17,7 +17,7 @@ import { AuthContext } from '../context/AuthContext';
 import { userService } from '../services/userService';
 import { WebNavHeader } from '../components/web/WebNavHeader';
 import SvgIcon from '../components/shared/SvgIcon';
-import { formatDateInput } from '../utils/dateFormatter';
+import { formatDateInput, formatISODateForDisplay } from '../utils/dateFormatter';
 
 const isWeb = Platform.OS === 'web';
 
@@ -74,7 +74,9 @@ export default function EditProfileScreen() {
         if (profile.firstName) setFirstName(profile.firstName);
         if (profile.lastName) setLastName(profile.lastName);
         if ((profile as any).phone) setPhone((profile as any).phone);
-        if ((profile as any).dateOfBirth) setDateOfBirth((profile as any).dateOfBirth);
+        if ((profile as any).dateOfBirth) {
+          setDateOfBirth(formatISODateForDisplay((profile as any).dateOfBirth));
+        }
         if ((profile as any).gender) setGender((profile as any).gender);
         if ((profile as any).height) setHeight(String((profile as any).height));
         if ((profile as any).weight) setWeight(String((profile as any).weight));

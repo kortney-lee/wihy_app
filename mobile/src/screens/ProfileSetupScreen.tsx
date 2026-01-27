@@ -18,7 +18,7 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import { AuthContext } from '../context/AuthContext';
 import { userService } from '../services/userService';
 import { dashboardTheme } from '../theme/dashboardTheme';
-import { formatDateInput } from '../utils/dateFormatter';
+import { formatDateInput, formatISODateForDisplay } from '../utils/dateFormatter';
 import SvgIcon from '../components/shared/SvgIcon';
 
 const { width: screenWidth } = Dimensions.get('window');
@@ -217,21 +217,40 @@ export default function ProfileSetupScreen({ isDashboardMode = false, onBack }: 
     try {
       const profile = await userService.getUserByEmail(user.email);
       if (profile) {
+        // Load basic info
         if (profile.firstName) setFirstName(profile.firstName);
         if (profile.lastName) setLastName(profile.lastName);
-        // Load other saved preferences if available
+        if ((profile as any).dateOfBirth) {
+          setDateOfBirth(formatISODateForDisplay((profile as any).dateOfBirth));
+        }
+        if ((profile as any).gender) setGender((profile as any).gender);
+        if ((profile as any).height) setHeight(String((profile as any).height));
+        if ((profile as any).weight) setWeight(String((profile as any).weight));
+        if ((profile as any).activityLevel) setFitnessLevel((profile as any).activityLevel);
+        
+        // Load health goals (top-level healthGoals array)
+        if ((profile as any).healthGoals && Array.isArray((profile as any).healthGoals)) {
+          setSelectedGoals((profile as any).healthGoals);
+        }
+        
+        // Load dietary preferences (top-level dietaryPreferences array)
+        if ((profile as any).dietaryPreferences && Array.isArray((profile as any).dietaryPreferences)) {
+          setDietaryPrefs((profile as any).dietaryPreferences);
+        }
+        
+        // Load other saved preferences if available (legacy nested format)
         const prefs = (profile as any).healthPreferences;
         if (prefs) {
-          if (prefs.goals) setSelectedGoals(prefs.goals);
+          if (prefs.goals && !selectedGoals.length) setSelectedGoals(prefs.goals);
           // Handle both old single value and new array format
-          if (prefs.dietaryPrefs) {
+          if (prefs.dietaryPrefs && !dietaryPrefs.length) {
             setDietaryPrefs(prefs.dietaryPrefs);
-          } else if (prefs.dietaryPref) {
+          } else if (prefs.dietaryPref && !dietaryPrefs.length) {
             // Migrate old single value to array
             setDietaryPrefs(prefs.dietaryPref === 'none' ? [] : [prefs.dietaryPref]);
           }
           if (prefs.allergies) setAllergies(prefs.allergies);
-          if (prefs.fitnessLevel) setFitnessLevel(prefs.fitnessLevel);
+          if (prefs.fitnessLevel && !fitnessLevel) setFitnessLevel(prefs.fitnessLevel);
           if (prefs.preferredActivities) setPreferredActivities(prefs.preferredActivities);
         }
       }
