@@ -25,7 +25,7 @@ export interface ChatMessage {
 
 class ChatService {
   private mlBaseUrl: string;
-  private sessionTimeout = 30 * 60 * 1000; // 30 minutes
+  private currentSessionId: string | null = null;
 
   constructor() {
     this.mlBaseUrl = API_CONFIG.mlApiUrl; // https://ml.wihy.ai
@@ -33,30 +33,25 @@ class ChatService {
 
   /**
    * Get headers for ML API requests
-   * Includes optional client identification for analytics/rate limiting
+   * Includes optional Bearer token for authenticated users
    */
-  private getHeaders(): Record<string, string> {
-    return {
+  private getHeaders(authToken?: string): Record<string, string> {
+    const headers: Record<string, string> = {
       'Content-Type': 'application/json',
       ...getMLAuthHeaders(), // Optional X-Client-ID and X-Client-Secret
     };
-  }
-
-  /**
-   * Get headers for public/session endpoints (no auth needed)
-   */
-  private getPublicHeaders(): Record<string, string> {
-    return {
-      'Content-Type': 'application/json',
-      // Don't include auth headers - public endpoints don't accept them
-    };
+    if (authToken) {
+      headers['Authorization'] = `Bearer ${authToken}`;
+    }
+    return headers;
   }
 
   /**
    * Get or create session ID for chat continuity
+   * Client is responsible for generating and managing session IDs (v3.0)
    * Persists session ID across app lifecycle
    */
-  private getSessionId(): string {
+  getSessionId(): string {
     if (typeof window !== 'undefined' && window.localStorage) {
       let sessionId = localStorage.getItem('wihy_session_id');
       if (!sessionId) {
@@ -66,7 +61,23 @@ class ChatService {
       return sessionId;
     }
     // Fallback for environments without localStorage
-    return this.generateUUID();
+    if (!this.currentSessionId) {
+      this.currentSessionId = this.generateUUID();
+    }
+    return this.currentSessionId;
+  }
+
+  /**
+   * Start a new conversation by generating a new session ID
+   * Clears the current session and creates a fresh one
+   */
+  startNewConversation(): string {
+    const newSessionId = this.generateUUID();
+    if (typeof window !== 'undefined' && window.localStorage) {
+      localStorage.setItem('wihy_session_id', newSessionId);
+    }
+    this.currentSessionId = newSessionId;
+    return newSessionId;
   }
 
   /**
@@ -85,14 +96,33 @@ class ChatService {
   }
 
   /**
-   * Ask a health question via /ask endpoint (Universal Health Question)
-   * Supports authenticated (Bearer token) and anonymous access (rate-limited)
-   * Uses "message" field per API v3.0 spec
-   * session_id is REQUIRED for all calls
+   * Ask a health question via /ask endpoint - SINGLE ENTRY POINT (v3.0)
+   * All conversations now go through /ask
+   * 
+   * @param message - Health question (1-10000 chars)
+   * @param options - Optional configuration
+   * @param options.sessionId - Session UUID (client-generated, defaults to persisted session)
+   * @param options.userId - User UUID from auth service (optional)
+   * @param options.authToken - JWT token for personalized responses (optional)
+   * @param options.user - Full user profile for personalization (optional)
    */
   async ask(
-    query: string,
-    context?: {
+    message: string,
+    options?: {
+      sessionId?: string;
+      userId?: string;
+      authToken?: string;
+      user?: {
+        id?: string;
+        name?: string;
+        goals?: string[];
+        height?: number;
+        weight?: number;
+        dietary_restrictions?: string[];
+        fitness_level?: string;
+      };
+      chartTypes?: string[];
+      // Legacy context fields for backward compatibility
       product_name?: string;
       nutrition_data?: any;
       session_id?: string;
@@ -107,24 +137,39 @@ class ChatService {
     const startTime = Date.now();
     const endpoint = `${this.mlBaseUrl}${API_CONFIG.endpoints.ask}`;
     
+    // Resolve session ID: prefer explicit, then legacy, then generate
+    const sessionId = options?.sessionId || options?.session_id || this.getSessionId();
+    const userId = options?.userId || options?.user_id;
+    
     console.log('=== ASK API CALL (/ask) - v3.0 ===');
     console.log('Endpoint:', endpoint);
-    console.log('Query:', query);
+    console.log('Message:', message);
+    console.log('Session ID:', sessionId);
     
     try {
       // Build request body matching ML API v3.0 format
-      // Required: message, session_id
+      // Required: message, sessionId
       const requestBody: any = {
-        message: query, // v3.0: renamed from 'query'
-        session_id: context?.session_id || this.getSessionId(), // v3.0: required field
-        ...(context?.user_id && { user_id: context.user_id }),
+        message,
+        sessionId, // v3.0: client-generated, required
       };
+      
+      // Add optional fields
+      if (userId) {
+        requestBody.userId = userId;
+      }
+      if (options?.user) {
+        requestBody.user = options.user;
+      }
+      if (options?.chartTypes) {
+        requestBody.chartTypes = options.chartTypes;
+      }
       
       console.log('Request Body:', JSON.stringify(requestBody, null, 2));
       
       const response = await fetchWithLogging(endpoint, {
         method: 'POST',
-        headers: this.getHeaders(),
+        headers: this.getHeaders(options?.authToken),
         body: JSON.stringify(requestBody),
       });
 
@@ -150,7 +195,12 @@ class ChatService {
       console.error('Error message:', error.message);
       return {
         success: false,
+        message: '',
         response: '',
+        type: 'general' as const,
+        confidence: 0,
+        processing_time_ms: responseTime,
+        trace_id: '',
         timestamp: new Date().toISOString(),
         error: error.message || 'Failed to get response',
       };
@@ -158,61 +208,30 @@ class ChatService {
   }
 
   /**
-   * Start a new chat session via /chat/start-session
-   * Returns session_id for use in send-message calls
+   * @deprecated v3.0 - Sessions are now client-generated
+   * Start a new chat session - now just generates a client-side session ID
+   * The session is auto-created in the database on first /ask call
    */
   async startSession(userId: string): Promise<{ session_id: string; user_id: string; created_at: string } | null> {
-    const endpoint = `${this.mlBaseUrl}${API_CONFIG.endpoints.chatStartSession}`;
-    
-    console.log('=== START CHAT SESSION (/chat/start-session) ===');
-    console.log('Endpoint:', endpoint);
+    console.log('=== START CHAT SESSION (v3.0 - client-generated) ===');
     console.log('User ID:', userId);
     
-    try {
-      const response = await fetchWithLogging(endpoint, {
-        method: 'POST',
-        headers: this.getPublicHeaders(),
-        body: JSON.stringify({ user_id: userId }),
-      });
-
-      if (!response.ok) {
-        if (response.status === 404) {
-          console.log('Session API not available, using local session ID');
-          const localSessionId = `local_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-          return {
-            session_id: localSessionId,
-            user_id: userId,
-            created_at: new Date().toISOString(),
-          };
-        }
-        const errorText = await response.text();
-        console.error(`Start Session API HTTP error ${response.status}:`, errorText);
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      console.log('Session Started:', data);
-      return {
-        session_id: data.session_id,
-        user_id: data.user_id || userId,
-        created_at: data.created_at || new Date().toISOString(),
-      };
-    } catch (error: any) {
-      console.error('=== START SESSION ERROR ===', error);
-      const localSessionId = `local_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      console.log('Fallback: using local session ID:', localSessionId);
-      return {
-        session_id: localSessionId,
-        user_id: userId,
-        created_at: new Date().toISOString(),
-      };
-    }
+    // v3.0: Client is responsible for generating session IDs
+    // Sessions are auto-created in DB on first message
+    const sessionId = this.startNewConversation();
+    
+    console.log('Session ID generated:', sessionId);
+    return {
+      session_id: sessionId,
+      user_id: userId,
+      created_at: new Date().toISOString(),
+    };
   }
 
   /**
-   * Send a message in a chat session via /chat/send-message
-   * Maintains conversation history on the server
-   * Response format: ModalResponse with assistantMessage, actions, entities, etc.
+   * @deprecated v3.0 - Use ask() instead
+   * Send a message in a chat session - now routes to /ask
+   * Maintained for backward compatibility
    */
   async sendMessage(
     message: string,
@@ -222,68 +241,34 @@ class ChatService {
       user_goals?: string[];
       fitness_level?: string;
       dietary_restrictions?: string[];
+      authToken?: string;
       [key: string]: any;
     }
   ): Promise<ChatResponse> {
-    const startTime = Date.now();
-    const endpoint = `${this.mlBaseUrl}${API_CONFIG.endpoints.chatSendMessage}`;
-    
-    console.log('=== CHAT SEND MESSAGE (/chat/send-message) ===');
-    console.log('Endpoint:', endpoint);
+    console.log('=== SEND MESSAGE (v3.0 - routing to /ask) ===');
     console.log('Session ID:', sessionId);
     console.log('User ID:', userId);
     console.log('Message:', message);
     
-    try {
-      const requestBody: any = {
-        session_id: sessionId,
-        user_id: userId,
-        message,
-      };
-      
-      console.log('Request Body:', JSON.stringify(requestBody, null, 2));
-      
-      const response = await fetchWithLogging(endpoint, {
-        method: 'POST',
-        headers: this.getPublicHeaders(),
-        body: JSON.stringify(requestBody),
-      });
-
-      const responseTime = Date.now() - startTime;
-      console.log(`Response Status: ${response.status} (${responseTime}ms)`);
-
-      if (!response.ok) {
-        // If endpoint doesn't exist (404), fall back to public ask
-        if (response.status === 404) {
-          console.log('Chat send-message API not available, falling back to public/ask');
-          return this.ask(message, context);
-        }
-        const errorText = await response.text();
-        console.error(`Chat Send Message API HTTP error ${response.status}:`, errorText);
-        console.log('=== CHAT MESSAGE FAILED ===');
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      console.log('Response Data:', JSON.stringify(data, null, 2));
-      console.log('=== CHAT MESSAGE SUCCESS ===');
-      
-      return this.parseSendMessageResponse(data, sessionId);
-    } catch (error: any) {
-      const responseTime = Date.now() - startTime;
-      console.error('=== CHAT MESSAGE ERROR ===');
-      console.error('Error after', responseTime, 'ms:', error);
-      
-      // Fallback to public ask endpoint on any error
-      console.log('Falling back to public/ask endpoint');
-      return this.ask(message, context);
-    }
+    // v3.0: All messages go through /ask
+    return this.ask(message, {
+      sessionId,
+      userId,
+      authToken: context?.authToken,
+      user: context ? {
+        goals: context.user_goals,
+        fitness_level: context.fitness_level,
+        dietary_restrictions: context.dietary_restrictions,
+      } : undefined,
+    });
   }
 
   /**
    * Get chat history for a session via /chat/session/{session_id}/history
+   * @param sessionId - The session ID to retrieve history for
+   * @param authToken - Optional JWT token for authenticated access
    */
-  async getHistory(sessionId: string): Promise<ChatMessage[]> {
+  async getHistory(sessionId: string, authToken?: string): Promise<ChatMessage[]> {
     const endpoint = `${this.mlBaseUrl}${API_CONFIG.endpoints.chatHistory}/${sessionId}/history`;
     
     console.log('=== GET CHAT HISTORY ===');
@@ -293,7 +278,7 @@ class ChatService {
     try {
       const response = await fetchWithLogging(endpoint, {
         method: 'GET',
-        headers: this.getPublicHeaders(),
+        headers: this.getHeaders(authToken),
       });
 
       if (!response.ok) {
@@ -311,19 +296,19 @@ class ChatService {
   }
 
   /**
-   * Get list of chat sessions for a user via /chat/user/{user_id}/sessions
+   * Get list of chat sessions for authenticated user via /chat/me/sessions
+   * @param authToken - JWT token for authenticated access (required)
    */
-  async getUserSessions(userId: string): Promise<ChatSession[]> {
-    const endpoint = `${this.mlBaseUrl}${API_CONFIG.endpoints.chatUserSessions}/${userId}/sessions`;
+  async getUserSessions(authToken: string): Promise<ChatSession[]> {
+    const endpoint = `${this.mlBaseUrl}${API_CONFIG.endpoints.chatMySessions}`;
     
-    console.log('=== GET USER SESSIONS ===');
+    console.log('=== GET USER SESSIONS (/chat/me/sessions) ===');
     console.log('Endpoint:', endpoint);
-    console.log('User ID:', userId);
     
     try {
       const response = await fetchWithLogging(endpoint, {
         method: 'GET',
-        headers: this.getPublicHeaders(),
+        headers: this.getHeaders(authToken),
       });
 
       if (!response.ok) {
@@ -472,14 +457,16 @@ class ChatService {
 
     return {
       success: data.success !== false,
+      message: data.assistantMessage || data.response || '',
       response: data.assistantMessage || data.response || '',
       session_id: data.conversationId || sessionId,
       timestamp: data.timestamp || new Date().toISOString(),
-      type: data.mode || data.detectedIntent,
+      type: data.mode || data.detectedIntent || 'general',
       detected_type: data.detectedIntent,
+      confidence: data.confidence || 0,
+      processing_time_ms: data.processingTimeMs || 0,
+      trace_id: data.traceId || '',
       source: data.service || 'wihy_ai',
-      traceId: data.traceId,
-      processingTimeMs: data.processingTimeMs,
       suggested_actions,
       citations: data.citations,
       entities: data.entities,

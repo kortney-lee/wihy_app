@@ -41,14 +41,13 @@ export const API_CONFIG = {
     pillScan: '/api/v1/medications/pills/scan', // Pill identification
     pillConfirm: '/api/v1/medications/pills/confirm', // Pill confirmation
     labelByNdc: '/api/scan/product', // NDC lookup
-    // ML Chat API endpoints (v2.0 - Jan 2026)
+    // ML Chat API endpoints (v3.0 - Jan 2026)
     // See docs: WIHY_ML_CLIENT_API.md
-    ask: '/ask', // Universal health question endpoint (supports anonymous)
-    chatPublic: '/chat/public', // Public chat (one-shot, no session)
-    chatStartSession: '/chat/start-session', // Start a chat session
-    chatSendMessage: '/chat/send-message', // Send message in session  
+    // All chat now goes through /ask with client-generated sessionId
+    ask: '/ask', // Universal entry point - all chat goes here
+    // Session retrieval endpoints (still valid)
     chatHistory: '/chat/session', // Get session history: /{session_id}/history
-    chatUserSessions: '/chat/user', // Get user sessions: /{user_id}/sessions
+    chatMySessions: '/chat/me/sessions', // Get authenticated user's sessions
     fdaIngredient: '/api/openfda/ingredient',
   },
   timeout: 30000, // 30 seconds
