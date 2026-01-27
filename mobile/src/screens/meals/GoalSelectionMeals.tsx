@@ -163,8 +163,10 @@ export interface GenerateMealParams {
   mode: MealMode;
   
   // Quick mode
-  mealType?: string;
-  cuisineType?: string;
+  mealType?: string; // Deprecated - use mealTypes
+  mealTypes?: string[]; // New: support multiple meal types
+  cuisineType?: string; // Deprecated - use cuisineTypes
+  cuisineTypes?: string[]; // New: support multiple cuisines
   timeConstraint?: string;
   quickDiets?: string[];
   
@@ -200,8 +202,8 @@ export const GoalSelectionMeals: React.FC<GoalSelectionMealsProps> = ({
   const [mode, setMode] = useState<MealMode>(initialTemplate ? 'plan' : 'quick');
   
   // Quick mode state
-  const [quickMealType, setQuickMealType] = useState<string>('dinner');
-  const [quickCuisine, setQuickCuisine] = useState<string | null>(null);
+  const [quickMealTypes, setQuickMealTypes] = useState<string[]>(['dinner']);
+  const [quickCuisines, setQuickCuisines] = useState<string[]>([]);
   const [quickTime, setQuickTime] = useState<string>('moderate');
   const [quickDiets, setQuickDiets] = useState<string[]>([]);
   
@@ -282,8 +284,8 @@ export const GoalSelectionMeals: React.FC<GoalSelectionMealsProps> = ({
     const params: GenerateMealParams = { mode };
 
     if (mode === 'quick') {
-      params.mealType = quickMealType;
-      params.cuisineType = quickCuisine || undefined;
+      params.mealTypes = quickMealTypes;
+      params.cuisineTypes = quickCuisines.length > 0 ? quickCuisines : undefined;
       params.timeConstraint = quickTime;
       params.quickDiets = quickDiets;
       params.servings = servings; // Include servings for single meal
@@ -316,7 +318,7 @@ export const GoalSelectionMeals: React.FC<GoalSelectionMealsProps> = ({
 
   // Check if can generate
   const canGenerate = () => {
-    if (mode === 'quick') return !!quickMealType;
+    if (mode === 'quick') return quickMealTypes.length > 0;
     if (mode === 'plan') return Object.values(mealsPerDay).some(Boolean);
     if (mode === 'diet') return !!selectedProgram;
     return false;
@@ -332,12 +334,18 @@ export const GoalSelectionMeals: React.FC<GoalSelectionMealsProps> = ({
         <Text style={styles.sectionTitle}>What meal?</Text>
         <View style={styles.chipGrid}>
           {QUICK_MEAL_TYPES.map((type) => {
-            const isSelected = quickMealType === type.id;
+            const isSelected = quickMealTypes.includes(type.id);
             return (
               <TouchableOpacity
                 key={type.id}
                 style={[styles.chip, isSelected && styles.chipSelected]}
-                onPress={() => setQuickMealType(type.id)}
+                onPress={() => {
+                  setQuickMealTypes(prev => 
+                    prev.includes(type.id) 
+                      ? prev.filter(id => id !== type.id)
+                      : [...prev, type.id]
+                  );
+                }}
               >
                 <Ionicons
                   name={type.icon as any}
@@ -358,12 +366,18 @@ export const GoalSelectionMeals: React.FC<GoalSelectionMealsProps> = ({
         <Text style={styles.sectionTitle}>Cuisine (optional)</Text>
         <View style={styles.chipGrid}>
           {QUICK_CUISINE_TYPES.map((cuisine) => {
-            const isSelected = quickCuisine === cuisine.id;
+            const isSelected = quickCuisines.includes(cuisine.id);
             return (
               <TouchableOpacity
                 key={cuisine.id}
                 style={[styles.chip, isSelected && styles.chipSelected]}
-                onPress={() => setQuickCuisine(isSelected ? null : cuisine.id)}
+                onPress={() => {
+                  setQuickCuisines(prev => 
+                    prev.includes(cuisine.id)
+                      ? prev.filter(id => id !== cuisine.id)
+                      : [...prev, cuisine.id]
+                  );
+                }}
               >
                 <Ionicons
                   name={cuisine.icon as any}
@@ -415,7 +429,6 @@ export const GoalSelectionMeals: React.FC<GoalSelectionMealsProps> = ({
       <DietSelector
         selectedDiets={quickDiets}
         onDietsChange={setQuickDiets}
-        maxSelection={3}
         showSearch={false}
         title="Dietary needs (optional)"
       />
