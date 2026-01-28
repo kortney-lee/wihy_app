@@ -20,7 +20,9 @@ import {
   ActivityIndicator,
   TextInput,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons, BrandInput } from '../../components/shared';
+import { API_CONFIG } from '../../config/api';
 import {
   ModeToggle,
   DietSelector,
@@ -234,6 +236,9 @@ export const GoalSelectionMeals: React.FC<GoalSelectionMealsProps> = ({
   
   // Saved mode state
   const [selectedSavedMealIds, setSelectedSavedMealIds] = useState<string[]>([]);
+  const [savedMeals, setSavedMeals] = useState<any[]>([]);
+  const [loadingSavedMeals, setLoadingSavedMeals] = useState(false);
+  const [savedMealsError, setSavedMealsError] = useState<string | null>(null);
   
   // Brand preferences (shared across all modes)
   const [preferredBrands, setPreferredBrands] = useState<string[]>([]);
@@ -638,22 +643,99 @@ export const GoalSelectionMeals: React.FC<GoalSelectionMealsProps> = ({
         </Text>
       </View>
 
-      {/* TODO: Add saved meals list component */}
-      <View style={styles.section}>
-        <View style={styles.placeholderBox}>
-          <Ionicons name="bookmark-outline" size={48} color="#9ca3af" />
-          <Text style={styles.placeholderText}>Your saved meals will appear here</Text>
-          <Text style={styles.placeholderSubtext}>
-            Generate meals in Quick or Plan mode first
-          </Text>
+      {/* Loading state */}
+      {loadingSavedMeals && (
+        <View style={styles.section}>
+          <ActivityIndicator size="large" color="#4cbb17" />
+          <Text style={styles.loadingText}>Loading saved meals...</Text>
         </View>
-      </View>
+      )}
+
+      {/* Error state */}
+      {savedMealsError && (
+        <View style={styles.section}>
+          <View style={styles.errorBox}>
+            <Ionicons name="alert-circle-outline" size={48} color="#ef4444" />
+            <Text style={styles.errorText}>{savedMealsError}</Text>
+          </View>
+        </View>
+      )}
+
+      {/* Empty state */}
+      {!loadingSavedMeals && !savedMealsError && savedMeals.length === 0 && (
+        <View style={styles.section}>
+          <View style={styles.placeholderBox}>
+            <Ionicons name="bookmark-outline" size={48} color="#9ca3af" />
+            <Text style={styles.placeholderText}>No saved meals yet</Text>
+            <Text style={styles.placeholderSubtext}>
+              Generate meals in Quick or Plan mode first
+            </Text>
+          </View>
+        </View>
+      )}
+
+      {/* Saved meals list */}
+      {!loadingSavedMeals && !savedMealsError && savedMeals.length > 0 && (
+        <View style={styles.section}>
+          {savedMeals.map((mealPlan) => {
+            const isSelected = selectedSavedMealIds.includes(mealPlan.id);
+            return (
+              <TouchableOpacity
+                key={mealPlan.id}
+                style={[styles.savedMealCard, isSelected && styles.savedMealCardSelected]}
+                onPress={() => {
+                  setSelectedSavedMealIds(prev => 
+                    prev.includes(mealPlan.id)
+                      ? prev.filter(id => id !== mealPlan.id)
+                      : [...prev, mealPlan.id]
+                  );
+                }}
+              >
+                <View style={styles.savedMealHeader}>
+                  <View style={styles.savedMealInfo}>
+                    <Text style={styles.savedMealTitle}>{mealPlan.name}</Text>
+                    <Text style={styles.savedMealSubtitle}>{mealPlan.displayTitle}</Text>
+                  </View>
+                  <View style={[styles.checkbox, isSelected && styles.checkboxSelected]}>
+                    {isSelected && <Ionicons name="checkmark" size={16} color="#fff" />}
+                  </View>
+                </View>
+                
+                <View style={styles.savedMealMeta}>
+                  <View style={styles.metaItem}>
+                    <Ionicons name="restaurant-outline" size={14} color="#6b7280" />
+                    <Text style={styles.metaText}>{mealPlan.totalMeals} meals</Text>
+                  </View>
+                  <View style={styles.metaItem}>
+                    <Ionicons name="calendar-outline" size={14} color="#6b7280" />
+                    <Text style={styles.metaText}>{mealPlan.duration} days</Text>
+                  </View>
+                  {mealPlan.orderCount > 0 && (
+                    <View style={styles.metaItem}>
+                      <Ionicons name="repeat-outline" size={14} color="#6b7280" />
+                      <Text style={styles.metaText}>Ordered {mealPlan.orderCount}x</Text>
+                    </View>
+                  )}
+                </View>
+                
+                {mealPlan.description && (
+                  <Text style={styles.savedMealDescription} numberOfLines={2}>
+                    {mealPlan.description}
+                  </Text>
+                )}
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+      )}
 
       {/* Servings adjustment */}
-      <ServingsSelector
-        selectedServings={servings}
-        onServingsChange={setServings}
-      />
+      {savedMeals.length > 0 && (
+        <ServingsSelector
+          selectedServings={servings}
+          onServingsChange={setServings}
+        />
+      )}
     </>
   );
 
@@ -1023,6 +1105,93 @@ const styles = StyleSheet.create({
     color: '#9ca3af',
     marginTop: 4,
     textAlign: 'center',
+  },
+  loadingText: {
+    fontSize: 14,
+    color: '#6b7280',
+    marginTop: 12,
+    textAlign: 'center',
+  },
+  errorBox: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 32,
+    paddingHorizontal: 24,
+    backgroundColor: '#fef2f2',
+    borderRadius: 12,
+    borderWidth: 1.5,
+    borderColor: '#fecaca',
+  },
+  errorText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#ef4444',
+    marginTop: 12,
+    textAlign: 'center',
+  },
+  savedMealCard: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 12,
+    borderWidth: 2,
+    borderColor: '#e5e7eb',
+  },
+  savedMealCardSelected: {
+    borderColor: '#4cbb17',
+    backgroundColor: '#f0fdf4',
+  },
+  savedMealHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 8,
+  },
+  savedMealInfo: {
+    flex: 1,
+    marginRight: 12,
+  },
+  savedMealTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#111827',
+    marginBottom: 4,
+  },
+  savedMealSubtitle: {
+    fontSize: 13,
+    color: '#6b7280',
+  },
+  checkbox: {
+    width: 24,
+    height: 24,
+    borderRadius: 6,
+    borderWidth: 2,
+    borderColor: '#d1d5db',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  checkboxSelected: {
+    backgroundColor: '#4cbb17',
+    borderColor: '#4cbb17',
+  },
+  savedMealMeta: {
+    flexDirection: 'row',
+    gap: 16,
+    marginBottom: 8,
+  },
+  metaItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  metaText: {
+    fontSize: 12,
+    color: '#6b7280',
+  },
+  savedMealDescription: {
+    fontSize: 13,
+    color: '#4b5563',
+    lineHeight: 18,
   },
 });
 
