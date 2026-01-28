@@ -130,8 +130,8 @@ const MyProgressDashboard: React.FC<MyProgressDashboardProps> = ({
     const userId = user?.id;
     
     if (!userId) {
-      console.log('[MyProgressDashboard] No user ID, showing mock data');
-      setProgressCards(getMockDataForPeriod(selectedPeriod));
+      console.error('[MyProgressDashboard] No user ID available');
+      setProgressCards([]);
       setIsLoading(false);
       return;
     }
@@ -144,7 +144,7 @@ const MyProgressDashboard: React.FC<MyProgressDashboardProps> = ({
       try {
         const dashboardResponse = await progressService.getDashboard(userId);
         
-        if (dashboardResponse.success && dashboardResponse.summary) {
+        if (dashboardResponse && dashboardResponse.summary) {
           console.log('[MyProgressDashboard] Dashboard data from API:', dashboardResponse.summary);
           
           const { cards } = dashboardResponse.summary;
@@ -511,7 +511,7 @@ const MyProgressDashboard: React.FC<MyProgressDashboardProps> = ({
       }
     } catch (error) {
       console.error('[MyProgressDashboard] Error loading progress data:', error);
-      setProgressCards(getMockDataForPeriod(selectedPeriod));
+      setProgressCards([]);
     } finally {
       setIsLoading(false);
     }
@@ -526,7 +526,7 @@ const MyProgressDashboard: React.FC<MyProgressDashboardProps> = ({
 
       if (!userId) {
         console.error('[MyProgressDashboard] User ID not available');
-        setProgressCards(getMockDataForPeriod(selectedPeriod));
+        setProgressCards([]);
         return;
       }
 
@@ -560,9 +560,9 @@ const MyProgressDashboard: React.FC<MyProgressDashboardProps> = ({
         console.log('[MyProgressDashboard] Has actual meal/workout data:', hasActualData, { mealsLogged, mealCalories, mealProtein, workoutsCompleted });
 
         if (!hasActualData) {
-          // No actual data - use mock data instead
-          console.log('[MyProgressDashboard] No actual meal/workout data, falling back to mock data');
-          setProgressCards(getMockDataForPeriod(selectedPeriod));
+          // No actual data - show empty state
+          console.log('[MyProgressDashboard] No actual meal/workout data available');
+          setProgressCards([]);
           return;
         }
 
@@ -625,8 +625,8 @@ const MyProgressDashboard: React.FC<MyProgressDashboardProps> = ({
         const hasActualData = avgDailyCalories > 0 || avgDailyProtein > 0 || workoutsCompleted > 0;
         
         if (!hasActualData) {
-          console.log('[MyProgressDashboard] No actual weekly data, falling back to mock data');
-          setProgressCards(getMockDataForPeriod(selectedPeriod));
+          console.log('[MyProgressDashboard] No actual weekly data available');
+          setProgressCards([]);
           return;
         }
         
@@ -688,8 +688,8 @@ const MyProgressDashboard: React.FC<MyProgressDashboardProps> = ({
         const hasActualData = avgCalories > 0 || avgProtein > 0 || workoutsCompleted > 0;
         
         if (!hasActualData) {
-          console.log('[MyProgressDashboard] No actual monthly data, falling back to mock data');
-          setProgressCards(getMockDataForPeriod(selectedPeriod));
+          console.log('[MyProgressDashboard] No actual monthly data available');
+          setProgressCards([]);
           return;
         }
 
@@ -743,129 +743,11 @@ const MyProgressDashboard: React.FC<MyProgressDashboardProps> = ({
       }
     } catch (error) {
       console.error('[MyProgressDashboard] Error loading meal/workout data:', error);
-      setProgressCards(getMockDataForPeriod(selectedPeriod));
+      setProgressCards([]);
     }
   };
 
-  const getMockDataForPeriod = (period: 'today' | 'week' | 'month'): ProgressCard[] => {
-    const mockData = {
-      today: [
-        {
-          id: '1',
-          title: 'Workouts',
-          completed: 2,
-          target: 3,
-          icon: 'fitness',
-          color: dashboardTheme.colors.orange,
-          unit: 'sessions',
-        },
-        {
-          id: '2',
-          title: 'Meals',
-          completed: 3,
-          target: 4,
-          icon: 'restaurant',
-          color: dashboardTheme.colors.secondary,
-          unit: 'meals',
-        },
-        {
-          id: '3',
-          title: 'Hydration',
-          completed: 6,
-          target: 8,
-          icon: 'water',
-          color: dashboardTheme.colors.primary,
-          unit: 'glasses',
-        },
-        {
-          id: '4',
-          title: 'Sleep',
-          completed: 7.2,
-          target: 8,
-          icon: 'moon',
-          color: dashboardTheme.colors.accent,
-          unit: 'hours',
-        },
-      ],
-      week: [
-        {
-          id: '1',
-          title: 'Workouts',
-          completed: 12,
-          target: 21,
-          icon: 'fitness',
-          color: dashboardTheme.colors.orange,
-          unit: 'sessions',
-        },
-        {
-          id: '2',
-          title: 'Meals',
-          completed: 19,
-          target: 28,
-          icon: 'restaurant',
-          color: dashboardTheme.colors.secondary,
-          unit: 'meals',
-        },
-        {
-          id: '3',
-          title: 'Hydration',
-          completed: 45,
-          target: 56,
-          icon: 'water',
-          color: dashboardTheme.colors.primary,
-          unit: 'glasses',
-        },
-        {
-          id: '4',
-          title: 'Sleep',
-          completed: 7.5,
-          target: 8,
-          icon: 'moon',
-          color: dashboardTheme.colors.accent,
-          unit: 'hours avg',
-        },
-      ],
-      month: [
-        {
-          id: '1',
-          title: 'Workouts',
-          completed: 48,
-          target: 90,
-          icon: 'fitness',
-          color: dashboardTheme.colors.orange,
-          unit: 'sessions',
-        },
-        {
-          id: '2',
-          title: 'Meals',
-          completed: 82,
-          target: 120,
-          icon: 'restaurant',
-          color: dashboardTheme.colors.secondary,
-          unit: 'meals',
-        },
-        {
-          id: '3',
-          title: 'Hydration',
-          completed: 185,
-          target: 240,
-          icon: 'water',
-          color: dashboardTheme.colors.primary,
-          unit: 'glasses',
-        },
-        {
-          id: '4',
-          title: 'Sleep',
-          completed: 7.3,
-          target: 8,
-          icon: 'moon',
-          color: dashboardTheme.colors.accent,
-          unit: 'hours avg',
-        },
-      ],
-    };
-    return mockData[period];
-  };
+
 
   const loadActionItems = async () => {
     try {
@@ -893,55 +775,9 @@ const MyProgressDashboard: React.FC<MyProgressDashboardProps> = ({
         }
       }
       
-      // Fallback to mock data
-      const mockActionItems: ActionItem[] = [
-        {
-          id: '1',
-          title: 'Morning Workout',
-          description: 'Complete your 30-minute HIIT routine',
-          completed: true,
-          type: 'workout',
-          icon: 'fitness',
-          time: '7:00 AM',
-        },
-        {
-          id: '2',
-          title: 'Healthy Breakfast',
-          description: 'Log your morning meal with protein focus',
-          completed: true,
-          type: 'meal',
-          icon: 'restaurant',
-          time: '8:30 AM',
-        },
-        {
-          id: '3',
-          title: 'Hydration Check',
-          description: 'Drink 2 more glasses of water',
-          completed: false,
-          type: 'habit',
-          icon: 'water',
-          time: '2:00 PM',
-        },
-        {
-          id: '4',
-          title: 'Evening Stretch',
-          description: 'Complete 15-minute flexibility routine',
-          completed: false,
-          type: 'workout',
-          icon: 'body',
-          time: '7:00 PM',
-        },
-        {
-          id: '5',
-          title: 'Dinner Planning',
-          description: 'Plan and log your evening meal',
-          completed: false,
-          type: 'meal',
-          icon: 'restaurant',
-          time: '6:00 PM',
-        },
-      ];
-      setActionItems(mockActionItems);
+      // Show empty state when API not available
+      console.log('[MyProgressDashboard] No action items data available');
+      setActionItems([]);
     } catch (error) {
       console.error('[MyProgressDashboard] Error loading action items:', error);
       setActionItems([]);
@@ -973,34 +809,9 @@ const MyProgressDashboard: React.FC<MyProgressDashboardProps> = ({
         }
       }
       
-      // Fallback to mock data
-      const mockRecommendations: CoachRecommendation[] = [
-        {
-          id: '1',
-          title: 'Adjust Workout Intensity',
-          message: 'Based on yesterday\'s performance, consider reducing intensity by 10% today.',
-          type: 'workout',
-          priority: 'medium',
-          icon: 'fitness',
-        },
-        {
-          id: '2',
-          title: 'Increase Protein Intake',
-          message: 'Your protein intake is below target. Add a protein shake or nuts to your snack.',
-          type: 'nutrition',
-          priority: 'high',
-          icon: 'nutrition',
-        },
-        {
-          id: '3',
-          title: 'Sleep Optimization',
-          message: 'Try winding down 30 minutes earlier tonight for better sleep quality.',
-          type: 'wellness',
-          priority: 'medium',
-          icon: 'moon',
-        },
-      ];
-      setCoachRecommendations(mockRecommendations);
+      // Show empty state when API not available
+      console.log('[MyProgressDashboard] No recommendations data available');
+      setCoachRecommendations([]);
     } catch (error) {
       console.error('[MyProgressDashboard] Error loading coach recommendations:', error);
       setCoachRecommendations([]);
@@ -1300,6 +1111,20 @@ const MyProgressDashboard: React.FC<MyProgressDashboardProps> = ({
             <View style={styles.loadingContainer}>
               <ActivityIndicator size="large" color={dashboardColors.primary} />
               <Text style={styles.loadingText}>Loading health data...</Text>
+            </View>
+          ) : progressCards.length === 0 ? (
+            <View style={styles.emptyStateContainer}>
+              <Ionicons name="bar-chart-outline" size={64} color="#cbd5e1" />
+              <Text style={styles.emptyStateTitle}>No Progress Data</Text>
+              <Text style={styles.emptyStateText}>
+                Start logging meals and workouts to see your progress here.
+              </Text>
+              <TouchableOpacity
+                style={styles.emptyStateButton}
+                onPress={() => navigation.navigate('CreateMeals' as never)}
+              >
+                <Text style={styles.emptyStateButtonText}>Log Your First Meal</Text>
+              </TouchableOpacity>
             </View>
           ) : (
             <View style={styles.progressGrid}>
@@ -2332,6 +2157,43 @@ const styles = StyleSheet.create({
     color: dashboardTheme.colors.textSecondary,
     fontSize: 11,
     marginTop: 4,
+  },
+
+  // Empty State Styles
+  emptyStateContainer: {
+    padding: dashboardTheme.spacing.xl,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 300,
+  },
+
+  emptyStateTitle: {
+    ...dashboardTheme.typography.title,
+    fontWeight: '700',
+    color: dashboardTheme.colors.text,
+    marginTop: dashboardTheme.spacing.md,
+    marginBottom: dashboardTheme.spacing.sm,
+  },
+
+  emptyStateText: {
+    ...dashboardTheme.typography.body,
+    color: dashboardTheme.colors.textSecondary,
+    textAlign: 'center',
+    marginBottom: dashboardTheme.spacing.lg,
+    paddingHorizontal: dashboardTheme.spacing.md,
+  },
+
+  emptyStateButton: {
+    backgroundColor: dashboardTheme.colors.primary,
+    paddingHorizontal: dashboardTheme.spacing.xl,
+    paddingVertical: dashboardTheme.spacing.md,
+    borderRadius: 12,
+  },
+
+  emptyStateButtonText: {
+    ...dashboardTheme.typography.body,
+    color: '#ffffff',
+    fontWeight: '600',
   },
 });
 

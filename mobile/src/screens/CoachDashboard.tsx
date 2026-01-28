@@ -110,10 +110,12 @@ export default function CoachDashboard({
       setLoading(true);
       setError(null);
       
-      // Use mock coachId for development if not authenticated
-      const effectiveCoachId = coachId || 'mock-coach-1';
+      // Require authenticated coachId
+      if (!coachId) {
+        throw new Error('Coach authentication required');
+      }
       
-      const data = await coachService.listClients(effectiveCoachId, {
+      const data = await coachService.listClients(coachId, {
         status: 'ACTIVE',
         search: searchQuery || undefined,
       });
@@ -141,10 +143,12 @@ export default function CoachDashboard({
 
   const loadClientDashboard = async (clientId: string) => {
     try {
-      // Use mock coachId for development if not authenticated
-      const effectiveCoachId = coachId || 'mock-coach-1';
+      // Require authenticated coachId
+      if (!coachId) {
+        throw new Error('Coach authentication required');
+      }
       
-      const data = await coachService.getClientDashboard(effectiveCoachId, clientId);
+      const data = await coachService.getClientDashboard(coachId, clientId);
       setClientDashboard(data);
       
       // Update selected client with dashboard data
@@ -379,11 +383,13 @@ export default function CoachDashboard({
           if (!programId?.trim()) return;
           
           try {
-            // Use mock coachId for development if not authenticated
-            const effectiveCoachId = coachId || 'mock-coach-1';
+            // Require authenticated coachId
+            if (!coachId) {
+              throw new Error('Coach authentication required');
+            }
             
             await coachService.assignFitnessPlan({
-              coachId: effectiveCoachId,
+              coachId: coachId,
               clientId: selectedClient.id,
               programId: programId.trim(),
             });
@@ -645,7 +651,7 @@ export default function CoachDashboard({
             setShowSendInvitation(false);
             handleInvitationSent();
           }}
-          coachId={coachId || 'mock-coach-1'}
+          coachId={coachId || ''}
         />
       )}
     </View>

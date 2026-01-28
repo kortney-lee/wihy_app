@@ -396,70 +396,9 @@ const OverviewDashboard: React.FC<BaseDashboardProps> = ({ onAnalyze }) => {
       if (isMountedRef.current) setHealthSummaryData(summary);
     } catch (error) {
       console.error('[OverviewDashboard] Error loading health data:', error);
-      // Fall back to mock data on error (only if still mounted)
+      // Show empty state on error - no mock data fallback
       if (isMountedRef.current) {
-        setHealthSummaryData([
-        {
-          id: '1',
-          title: 'Health Score',
-          value: '82',
-          unit: '/100',
-          status: 'good',
-          trend: 'up',
-          icon: 'fitness',
-          color: '#10b981',
-        },
-        {
-          id: '2',
-          title: 'Daily Steps',
-          value: '8,247',
-          unit: 'steps',
-          status: 'good',
-          trend: 'up',
-          icon: 'footsteps',
-          color: '#3b82f6',
-        },
-        {
-          id: '3',
-          title: 'Meals Logged',
-          value: '3',
-          unit: 'meals',
-          status: 'good',
-          trend: 'up',
-          icon: 'restaurant',
-          color: '#ec4899',
-        },
-        {
-          id: '4',
-          title: 'Calories Consumed',
-          value: '1,847',
-          unit: '/ 2,200 kcal',
-          status: 'warning',
-          trend: 'stable',
-          icon: 'nutrition',
-          color: '#f97316',
-        },
-        {
-          id: '5',
-          title: 'Protein',
-          value: '98',
-          unit: '/ 120g',
-          status: 'warning',
-          trend: 'up',
-          icon: 'nutrition',
-          color: '#8b5cf6',
-        },
-        {
-          id: '6',
-          title: 'Sleep',
-          value: '7.2',
-          unit: 'hours',
-          status: 'warning',
-          trend: 'down',
-          icon: 'moon',
-          color: '#6366f1',
-        },
-      ]);
+        setHealthSummaryData([]);
       }
     } finally {
       if (isMountedRef.current) setIsLoading(false);

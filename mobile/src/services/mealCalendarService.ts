@@ -344,7 +344,7 @@ class MealCalendarService {
   /**
    * Get calendar entries for a date range
    * 
-   * GET /api/meals/calendar/:userId?startDate=YYYY-MM-DD&endDate=YYYY-MM-DD
+   * GET /api/meals/calendar/:userId?start=YYYY-MM-DD&end=YYYY-MM-DD
    * 
    * @param userId - User ID
    * @param startDate - Start date (YYYY-MM-DD)
@@ -354,7 +354,7 @@ class MealCalendarService {
   async getCalendar(userId: string, startDate: string, endDate: string): Promise<CalendarDay[]> {
     try {
       const response = await fetchWithLogging(
-        `${this.baseUrl}/api/meals/calendar/${userId}?startDate=${startDate}&endDate=${endDate}`,
+        `${this.baseUrl}/api/meals/calendar/${userId}?start=${startDate}&end=${endDate}`,
         {
           method: 'GET',
         }
@@ -405,7 +405,7 @@ class MealCalendarService {
   async getWeekView(userId: string, startDate?: string): Promise<CalendarDay[]> {
     try {
       const url = startDate
-        ? `${this.baseUrl}/api/meals/calendar/${userId}/week?startDate=${startDate}`
+        ? `${this.baseUrl}/api/meals/calendar/${userId}/week?start=${startDate}`
         : `${this.baseUrl}/api/meals/calendar/${userId}/week`;
 
       const response = await fetchWithLogging(url, {

@@ -338,54 +338,14 @@ const ConsumptionDashboard: React.FC<ConsumptionDashboardProps> = ({
       }
       
       // 2. Get shopping list items with nutrition (as available food)
-      // Note: We'd need user's shopping list ID - using mock for now
-      // In real implementation: const lists = await shoppingService.getUserLists(userId);
+      // TODO: Implement shopping list integration when user has shopping list ID
+      // const lists = await shoppingService.getUserLists(userId);
       
       setPendingMeals(pending);
     } catch (err) {
       console.error('Error loading pending meals:', err);
-      // Set mock data as fallback
-      setPendingMeals([
-        {
-          id: 'mock-1',
-          name: 'Greek Yogurt with Berries',
-          calories: 245,
-          protein: 18,
-          carbs: 28,
-          fat: 6,
-          mealType: 'breakfast',
-          scheduledTime: '8:00 AM',
-          source: 'meal_plan',
-          isConfirmed: false,
-          isSkipped: false,
-        },
-        {
-          id: 'mock-2',
-          name: 'Grilled Chicken Salad',
-          calories: 387,
-          protein: 35,
-          carbs: 15,
-          fat: 18,
-          mealType: 'lunch',
-          scheduledTime: '12:30 PM',
-          source: 'meal_plan',
-          isConfirmed: false,
-          isSkipped: false,
-        },
-        {
-          id: 'mock-3',
-          name: 'Salmon with Quinoa',
-          calories: 456,
-          protein: 32,
-          carbs: 48,
-          fat: 18,
-          mealType: 'dinner',
-          scheduledTime: '7:00 PM',
-          source: 'meal_plan',
-          isConfirmed: false,
-          isSkipped: false,
-        },
-      ]);
+      // Show empty state - no mock data
+      setPendingMeals([]);
     } finally {
       setMealsLoading(false);
     }
@@ -437,45 +397,8 @@ const ConsumptionDashboard: React.FC<ConsumptionDashboardProps> = ({
       setRecipes(browsable);
     } catch (err) {
       console.error('Error loading recipes:', err);
-      // Set mock data as fallback
-      setRecipes([
-        {
-          id: 'recipe-1',
-          name: 'Chicken Stir Fry',
-          calories: 380,
-          protein: 32,
-          carbs: 24,
-          fat: 16,
-          source: 'user_created',
-          prepTime: 25,
-          isFavorite: true,
-          timesLogged: 12,
-        },
-        {
-          id: 'recipe-2',
-          name: 'Protein Smoothie Bowl',
-          calories: 295,
-          protein: 28,
-          carbs: 35,
-          fat: 6,
-          source: 'template',
-          prepTime: 10,
-          isFavorite: false,
-          timesLogged: 5,
-        },
-        {
-          id: 'recipe-3',
-          name: 'Overnight Oats',
-          calories: 350,
-          protein: 15,
-          carbs: 52,
-          fat: 10,
-          source: 'scanned',
-          prepTime: 5,
-          isFavorite: true,
-          timesLogged: 8,
-        },
-      ]);
+      // Show empty state - no mock data
+      setRecipes([]);
     } finally {
       setRecipesLoading(false);
     }
