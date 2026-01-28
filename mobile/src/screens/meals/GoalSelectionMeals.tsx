@@ -217,6 +217,7 @@ export const GoalSelectionMeals: React.FC<GoalSelectionMealsProps> = ({
     dinner: true,
     snack: false,
   });
+  const [planCuisines, setPlanCuisines] = useState<string[]>([]); // Multi-select cuisines
   const [dietaryRestrictions, setDietaryRestrictions] = useState<string[]>([]);
   const [cookingLevel, setCookingLevel] = useState<CookingSkillLevel>('intermediate');
   const [selectedStores, setSelectedStores] = useState<string[]>([]);
@@ -294,6 +295,7 @@ export const GoalSelectionMeals: React.FC<GoalSelectionMealsProps> = ({
       params.duration = duration;
       params.servings = servings;
       params.mealsPerDay = mealsPerDay;
+      params.cuisineTypes = planCuisines.length > 0 ? planCuisines : undefined; // Multi-select cuisines
       params.dietaryRestrictions = dietaryRestrictions;
       params.cookingLevel = cookingLevel;
       params.preferredStores = selectedStores.length > 0 ? selectedStores : undefined;
@@ -512,6 +514,38 @@ export const GoalSelectionMeals: React.FC<GoalSelectionMealsProps> = ({
         selectedMealTypes={mealsPerDay}
         onMealTypesChange={setMealsPerDay}
       />
+
+      {/* Cuisines */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitleLight}>Cuisines (optional)</Text>
+        <View style={styles.chipGrid}>
+          {QUICK_CUISINE_TYPES.map((cuisine) => {
+            const isSelected = planCuisines.includes(cuisine.id);
+            return (
+              <TouchableOpacity
+                key={cuisine.id}
+                style={[styles.chip, isSelected && styles.chipSelected]}
+                onPress={() => {
+                  setPlanCuisines(prev => 
+                    prev.includes(cuisine.id)
+                      ? prev.filter(id => id !== cuisine.id)
+                      : [...prev, cuisine.id]
+                  );
+                }}
+              >
+                <Ionicons
+                  name={cuisine.icon as any}
+                  size={16}
+                  color={isSelected ? '#4cbb17' : '#6b7280'}
+                />
+                <Text style={[styles.chipText, isSelected && styles.chipTextSelected]}>
+                  {cuisine.label}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+      </View>
 
       {/* Cooking Level */}
       <CookingLevelSelector

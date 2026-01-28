@@ -1202,7 +1202,24 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
         }${dietaryPart}${params.timeConstraint ? `, ${params.timeConstraint} prep time` : ''}`;
         request.duration = 1;
       } else if (params.mode === 'plan') {
-        request.description = params.description || `Create a ${params.duration || 7}-day meal plan`;
+        // ⭐ Multi-select support for Plan mode cuisines
+        if (params.cuisineTypes && params.cuisineTypes.length > 0) {
+          request.cuisineTypes = params.cuisineTypes;
+          // Backward compatibility: also set single value
+          request.cuisineType = params.cuisineTypes[0];
+        } else if (params.cuisineType) {
+          request.cuisineType = params.cuisineType;
+        }
+        
+        // Build description with cuisine preferences
+        const cuisinesStr = params.cuisineTypes && params.cuisineTypes.length > 0
+          ? params.cuisineTypes.join(', ')
+          : (params.cuisineType || '');
+        
+        const baseDescription = params.description || `Create a ${params.duration || 7}-day meal plan`;
+        request.description = cuisinesStr 
+          ? `${baseDescription} featuring ${cuisinesStr} cuisine${params.cuisineTypes && params.cuisineTypes.length > 1 ? 's' : ''}`
+          : baseDescription;
       } else if (params.mode === 'diet') {
         request.description = `Create a ${params.program || 'weight_loss'} program`;
         request.fitnessGoal = params.program === 'muscle_gain' ? 'muscle_gain' : 
