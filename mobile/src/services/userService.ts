@@ -2177,6 +2177,27 @@ class UserService {
   }
 
   /**
+   * Get user reminders
+   * GET /api/notifications/reminders?userId=xxx
+   */
+  async getReminders(userId: string): Promise<any> {
+    const endpoint = `${this.baseUrl}/api/notifications/reminders?userId=${userId}`;
+    const headers = await this.getAuthHeaders();
+
+    try {
+      const response = await fetchWithLogging(endpoint, { headers });
+      if (response.ok) {
+        const data = await response.json();
+        return data.reminders || data;
+      }
+      return null;
+    } catch (error) {
+      console.error('Get reminders error:', error);
+      return null;
+    }
+  }
+
+  /**
    * Create reminder
    * POST /api/notifications/reminders
    */
