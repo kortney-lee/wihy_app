@@ -149,8 +149,44 @@ class ServicesApiClient {
 
       const data = await response.json();
 
-      // Handle 401 - clear tokens and throw
+      // Handle 401 - attempt token refresh and retry
       if (response.status === 401) {
+        console.log('[ServicesAPI] Got 401, attempting token refresh...');
+        
+        // Try to refresh the token
+        const refreshResult = await authService.refreshAccessToken();
+        
+        if (refreshResult && refreshResult.access_token) {
+          console.log('[ServicesAPI] Token refreshed successfully, retrying request...');
+          
+          // Update Authorization header with new token
+          options.headers = {
+            ...options.headers,
+            'Authorization': `Bearer ${refreshResult.access_token}`,
+          };
+          
+          // Retry the request with new token
+          const retryResponse = await this.fetchWithTimeout(
+            url,
+            options,
+            config.timeout || this.timeout
+          );
+          
+          const retryData = await retryResponse.json();
+          
+          if (retryResponse.ok) {
+            console.log('[ServicesAPI] Retry successful after token refresh');
+            return retryData as T;
+          }
+          
+          // Retry also failed
+          console.error('[ServicesAPI] Retry failed after token refresh:', retryResponse.status);
+          await authService.clearTokens();
+          throw new Error('Session expired. Please log in again.');
+        }
+        
+        // No refresh token or refresh failed
+        console.error('[ServicesAPI] Token refresh failed');
         await authService.clearTokens();
         throw new Error('Session expired. Please log in again.');
       }
