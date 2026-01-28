@@ -2543,8 +2543,8 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
       {/* Status bar area - solid color */}
       <View style={{ height: insets.top, backgroundColor: '#ef4444' }} />
       
-      {/* Back button for web */}
-      {Platform.OS === 'web' && (
+      {/* Back button for web - only in dashboard view */}
+      {Platform.OS === 'web' && viewMode === 'dashboard' && (
         isDashboardMode && onBack ? (
           // Coach Hub mode - use BackToHubButton
           <BackToHubButton
