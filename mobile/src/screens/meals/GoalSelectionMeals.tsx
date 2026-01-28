@@ -47,14 +47,34 @@ const QUICK_MEAL_TYPES = [
   { id: 'dessert', label: 'Dessert', icon: 'ice-cream-outline' },
 ];
 
-const QUICK_CUISINE_TYPES = [
-  { id: 'american', label: 'American', icon: 'flag-outline' },
-  { id: 'italian', label: 'Italian', icon: 'pizza-outline' },
-  { id: 'mexican', label: 'Mexican', icon: 'flame-outline' },
-  { id: 'asian', label: 'Asian', icon: 'restaurant-outline' },
-  { id: 'mediterranean', label: 'Mediterranean', icon: 'boat-outline' },
-  { id: 'indian', label: 'Indian', icon: 'bonfire-outline' },
+// World Cuisines - organized by category
+const WORLD_CUISINES = [
+  { id: 'american', label: 'American', icon: 'flag-outline', description: 'Traditional American comfort food' },
+  { id: 'mexican', label: 'Mexican', icon: 'flame-outline', description: 'Bold spices and flavors' },
+  { id: 'italian', label: 'Italian', icon: 'pizza-outline', description: 'Pasta, pizza, Mediterranean' },
+  { id: 'chinese', label: 'Chinese', icon: 'restaurant-outline', description: 'Stir-fry, rice, noodles' },
+  { id: 'japanese', label: 'Japanese', icon: 'fish-outline', description: 'Sushi, teriyaki, miso' },
+  { id: 'korean', label: 'Korean', icon: 'bonfire-outline', description: 'BBQ, kimchi, spicy dishes' },
+  { id: 'greek', label: 'Greek', icon: 'boat-outline', description: 'Mediterranean, seafood' },
+  { id: 'caribbean', label: 'Caribbean', icon: 'sunny-outline', description: 'Jerk, tropical flavors' },
+  { id: 'brazilian', label: 'Brazilian', icon: 'leaf-outline', description: 'Churrasco, feijoada' },
+  { id: 'spanish', label: 'Spanish', icon: 'wine-outline', description: 'Tapas, paella' },
+  { id: 'french', label: 'French', icon: 'rose-outline', description: 'Classic French cuisine' },
+  { id: 'asian', label: 'Asian Fusion', icon: 'globe-outline', description: 'General Asian fusion' },
 ];
+
+// Vegetarian-friendly cuisines
+const VEGETARIAN_CUISINES = [
+  { id: 'thai', label: 'Thai', icon: 'leaf-outline', description: 'Curries, coconut, fresh herbs' },
+  { id: 'indian', label: 'Indian', icon: 'bonfire-outline', description: 'Curries, lentils, spices' },
+  { id: 'vietnamese', label: 'Vietnamese', icon: 'nutrition-outline', description: 'Pho, spring rolls, fresh veggies' },
+  { id: 'mediterranean', label: 'Mediterranean', icon: 'boat-outline', description: 'Plant-based focus' },
+  { id: 'middle_eastern', label: 'Middle Eastern', icon: 'earth-outline', description: 'Falafel, hummus, tabbouleh' },
+  { id: 'moroccan', label: 'Moroccan', icon: 'compass-outline', description: 'Tagines, couscous, chickpeas' },
+];
+
+// Combined for backward compatibility
+const QUICK_CUISINE_TYPES = [...WORLD_CUISINES.slice(0, 6)]; // Keep first 6 for quick display
 
 const TIME_CONSTRAINTS = [
   { id: 'quick', label: '< 15 min', icon: 'flash-outline' },
@@ -211,6 +231,7 @@ export const GoalSelectionMeals: React.FC<GoalSelectionMealsProps> = ({
   const [quickCuisines, setQuickCuisines] = useState<string[]>([]);
   const [quickTime, setQuickTime] = useState<string>('moderate');
   const [quickDiets, setQuickDiets] = useState<string[]>([]);
+  const [cuisineTab, setCuisineTab] = useState<'world' | 'vegetarian'>('world'); // Cuisine category tab
   
   // Plan mode state
   const [planGoal, setPlanGoal] = useState<string | null>(null);
@@ -390,13 +411,33 @@ export const GoalSelectionMeals: React.FC<GoalSelectionMealsProps> = ({
       {/* Cuisine Type */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Cuisine (optional)</Text>
+        
+        {/* Cuisine Category Tabs */}
+        <View style={styles.cuisineTabsContainer}>
+          <TouchableOpacity
+            style={[styles.cuisineTab, cuisineTab === 'world' && styles.cuisineTabActive]}
+            onPress={() => setCuisineTab('world')}
+          >
+            <Ionicons name="globe-outline" size={16} color={cuisineTab === 'world' ? '#4cbb17' : '#6b7280'} />
+            <Text style={[styles.cuisineTabText, cuisineTab === 'world' && styles.cuisineTabTextActive]}>World</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.cuisineTab, cuisineTab === 'vegetarian' && styles.cuisineTabActive]}
+            onPress={() => setCuisineTab('vegetarian')}
+          >
+            <Ionicons name="leaf-outline" size={16} color={cuisineTab === 'vegetarian' ? '#4cbb17' : '#6b7280'} />
+            <Text style={[styles.cuisineTabText, cuisineTab === 'vegetarian' && styles.cuisineTabTextActive]}>Veg-Friendly</Text>
+          </TouchableOpacity>
+        </View>
+        
+        {/* Cuisine Options based on selected tab */}
         <View style={styles.chipGrid}>
-          {QUICK_CUISINE_TYPES.map((cuisine) => {
+          {(cuisineTab === 'world' ? WORLD_CUISINES : VEGETARIAN_CUISINES).map((cuisine) => {
             const isSelected = quickCuisines.includes(cuisine.id);
             return (
               <TouchableOpacity
                 key={cuisine.id}
-                style={[styles.chip, isSelected && styles.chipSelected]}
+                style={[styles.cuisineChip, isSelected && styles.cuisineChipSelected]}
                 onPress={() => {
                   setQuickCuisines(prev => 
                     prev.includes(cuisine.id)
@@ -405,18 +446,39 @@ export const GoalSelectionMeals: React.FC<GoalSelectionMealsProps> = ({
                   );
                 }}
               >
-                <Ionicons
-                  name={cuisine.icon as any}
-                  size={18}
-                  color={isSelected ? '#4cbb17' : '#6b7280'}
-                />
-                <Text style={[styles.chipText, isSelected && styles.chipTextSelected]}>
-                  {cuisine.label}
+                <View style={styles.cuisineChipHeader}>
+                  <Ionicons
+                    name={cuisine.icon as any}
+                    size={18}
+                    color={isSelected ? '#4cbb17' : '#6b7280'}
+                  />
+                  <Text style={[styles.cuisineChipLabel, isSelected && styles.cuisineChipLabelSelected]}>
+                    {cuisine.label}
+                  </Text>
+                </View>
+                <Text style={[styles.cuisineChipDescription, isSelected && styles.cuisineChipDescriptionSelected]} numberOfLines={1}>
+                  {cuisine.description}
                 </Text>
               </TouchableOpacity>
             );
           })}
         </View>
+        
+        {/* Selected cuisines summary */}
+        {quickCuisines.length > 0 && (
+          <View style={styles.selectedCuisinesSummary}>
+            <Text style={styles.selectedCuisinesLabel}>Selected: </Text>
+            <Text style={styles.selectedCuisinesText}>
+              {quickCuisines.map(id => {
+                const cuisine = [...WORLD_CUISINES, ...VEGETARIAN_CUISINES].find(c => c.id === id);
+                return cuisine?.label || id;
+              }).join(', ')}
+            </Text>
+            <TouchableOpacity onPress={() => setQuickCuisines([])} style={styles.clearCuisinesButton}>
+              <Ionicons name="close-circle" size={18} color="#ef4444" />
+            </TouchableOpacity>
+          </View>
+        )}
       </View>
 
       {/* Time Constraint */}
@@ -1192,6 +1254,93 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: '#4b5563',
     lineHeight: 18,
+  },
+  // Cuisine Tab Styles
+  cuisineTabsContainer: {
+    flexDirection: 'row',
+    gap: 8,
+    marginBottom: 12,
+  },
+  cuisineTab: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    paddingVertical: 10,
+    borderRadius: 8,
+    borderWidth: 1.5,
+    borderColor: '#e5e7eb',
+    backgroundColor: '#f9fafb',
+  },
+  cuisineTabActive: {
+    borderColor: '#4cbb17',
+    backgroundColor: '#f0fdf4',
+  },
+  cuisineTabText: {
+    fontSize: 13,
+    fontWeight: '500',
+    color: '#6b7280',
+  },
+  cuisineTabTextActive: {
+    color: '#166534',
+    fontWeight: '600',
+  },
+  cuisineChip: {
+    width: '48%',
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    backgroundColor: '#f9fafb',
+    borderRadius: 10,
+    borderWidth: 1.5,
+    borderColor: '#e5e7eb',
+  },
+  cuisineChipSelected: {
+    backgroundColor: '#f0fdf4',
+    borderColor: '#4cbb17',
+  },
+  cuisineChipHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: 2,
+  },
+  cuisineChipLabel: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#374151',
+  },
+  cuisineChipLabelSelected: {
+    color: '#166534',
+  },
+  cuisineChipDescription: {
+    fontSize: 11,
+    color: '#9ca3af',
+    lineHeight: 14,
+  },
+  cuisineChipDescriptionSelected: {
+    color: '#4ade80',
+  },
+  selectedCuisinesSummary: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 8,
+    gap: 8,
+  },
+  selectedCuisinesLabel: {
+    fontSize: 12,
+    fontWeight: '500',
+    color: '#6b7280',
+  },
+  selectedCuisinesText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#166534',
+    flex: 1,
+  },
+  clearCuisinesButton: {
+    paddingVertical: 4,
+    paddingHorizontal: 8,
   },
 });
 
