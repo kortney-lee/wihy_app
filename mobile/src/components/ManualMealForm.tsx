@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -10,17 +10,24 @@ import {
   Alert,
   Linking,
   StyleSheet,
+  FlatList,
+  Keyboard,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import SvgIcon from './shared/SvgIcon';
 import { useCreateMealWithShopping } from '../hooks/useCreateMealWithShopping';
-import { FoodProduct } from '../services/productSearchService';
+import { FoodProduct, productSearchService } from '../services/productSearchService';
 
 interface Ingredient {
   id: string;
   name: string;
   amount: string;
   unit: string;
+  calories?: number;
+  protein?: number;
+  carbs?: number;
+  fat?: number;
+  productData?: FoodProduct;
 }
 
 interface ManualMealFormProps {
@@ -59,20 +66,91 @@ export const ManualMealForm: React.FC<ManualMealFormProps> = ({
   const [notes, setNotes] = useState('');
   const [ingredients, setIngredients] = useState<Ingredient[]>([]);
   const [saving, setSaving] = useState(false);
+  
+  // Inline search state
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<FoodProduct[]>([]);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [showSearch, setShowSearch] = useState(true); // Always show search by default
 
   // Shopping hook
   const mealShoppingHook = useCreateMealWithShopping(userId);
 
+  // Quick search categories
+  const quickCategories = [
+    { name: 'Chicken', icon: 'restaurant' },
+    { name: 'Beef', icon: 'restaurant' },
+    { name: 'Fish', icon: 'restaurant' },
+    { name: 'Rice', icon: 'nutrition' },
+    { name: 'Pasta', icon: 'nutrition' },
+    { name: 'Vegetables', icon: 'leaf' },
+  ];
+
+  // Inline product search
+  const handleSearch = useCallback(async (query?: string) => {
+    const searchTerm = query || searchQuery;
+    if (!searchTerm.trim()) return;
+
+    setSearchLoading(true);
+    Keyboard.dismiss();
+    try {
+      const data = await productSearchService.search(searchTerm, {
+        type: 'food',
+        limit: 20,
+      });
+      setSearchResults(data.food || []);
+    } catch (error) {
+      console.error('Product search error:', error);
+      setSearchResults([]);
+    } finally {
+      setSearchLoading(false);
+    }
+  }, [searchQuery]);
+
+  // Add product from search results
+  const handleAddProduct = (product: FoodProduct) => {
+    const newIngredient: Ingredient = {
+      id: `product-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      name: product.name || 'Unknown Product',
+      amount: '1',
+      unit: product.servingSize || 'serving',
+      calories: product.calories || 0,
+      protein: product.protein || 0,
+      carbs: product.carbs || 0,
+      fat: product.fat || 0,
+      productData: product,
+    };
+    
+    setIngredients([...ingredients, newIngredient]);
+    
+    // Also add to shopping hook for cart functionality
+    mealShoppingHook.addIngredientFromProduct({
+      id: product.id || newIngredient.id,
+      name: product.name,
+      brands: product.brand,
+      nutriments: {
+        energy_kcal: product.calories || 0,
+        proteins: product.protein || 0,
+        carbohydrates: product.carbs || 0,
+        fat: product.fat || 0,
+      },
+      image_url: product.imageUrl,
+    } as any);
+    
+    // Clear search after adding
+    setSearchQuery('');
+    setSearchResults([]);
+  };
+
   // Ingredient management
   const addIngredient = () => {
     const newIngredient: Ingredient = {
-      id: Date.now().toString(),
+      id: `manual-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       name: '',
-      amount: '',
+      amount: '1',
       unit: 'cups',
     };
     setIngredients([...ingredients, newIngredient]);
-    mealShoppingHook.addIngredientManually('', '', 'cups');
   };
 
   const updateIngredient = (id: string, field: keyof Ingredient, value: string) => {
@@ -173,120 +251,243 @@ export const ManualMealForm: React.FC<ManualMealFormProps> = ({
           </View>
         </View>
 
-        {/* Ingredients */}
+        {/* Ingredients with Inline Search */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Ingredients</Text>
-            <View style={{ flexDirection: 'row', gap: 8 }}>
-              <Pressable 
-                onPress={onShowProductSearch} 
-                style={[styles.addButton, { backgroundColor: '#eff6ff', borderWidth: 1, borderColor: '#bfdbfe' }]}
-              >
-                <SvgIcon name="search" size={18} color="#3b82f6" />
-                <Text style={[styles.addButtonText, { color: '#3b82f6' }]}>Search</Text>
-              </Pressable>
-              <Pressable onPress={addIngredient} style={styles.addButton}>
-                <SvgIcon name="add-circle" size={20} color="#3b82f6" />
-                <Text style={styles.addButtonText}>Manual</Text>
-              </Pressable>
-            </View>
+            <Text style={styles.sectionTitle}>Add Ingredients</Text>
           </View>
 
-          <View style={styles.card}>
-            {ingredients.length === 0 ? (
-              <View style={styles.emptyState}>
-                <SvgIcon name="search" size={32} color="#d1d5db" />
-                <Text style={styles.emptyText}>Search for products or add manually</Text>
+          {/* Inline Search Bar - Always visible like WiHY home */}
+          <View style={styles.inlineSearchContainer}>
+            <View style={styles.inlineSearchBar}>
+              <SvgIcon name="search" size={20} color="#9ca3af" />
+              <TextInput
+                style={styles.inlineSearchInput}
+                placeholder="Search 4M+ products (e.g., chicken breast, rice)"
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+                onSubmitEditing={() => handleSearch()}
+                returnKeyType="search"
+                placeholderTextColor="#9ca3af"
+              />
+              {searchLoading ? (
+                <ActivityIndicator size="small" color="#3b82f6" />
+              ) : searchQuery ? (
+                <TouchableOpacity onPress={() => { setSearchQuery(''); setSearchResults([]); }}>
+                  <SvgIcon name="close-circle" size={20} color="#9ca3af" />
+                </TouchableOpacity>
+              ) : null}
+            </View>
+            
+            {/* Quick Category Pills */}
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.quickCategoriesScroll}>
+              <View style={styles.quickCategories}>
+                {quickCategories.map((category) => (
+                  <TouchableOpacity
+                    key={category.name}
+                    style={styles.categoryPill}
+                    onPress={() => {
+                      setSearchQuery(category.name);
+                      handleSearch(category.name);
+                    }}
+                  >
+                    <SvgIcon name={category.icon as any} size={14} color="#3b82f6" />
+                    <Text style={styles.categoryPillText}>{category.name}</Text>
+                  </TouchableOpacity>
+                ))}
+                <TouchableOpacity
+                  style={[styles.categoryPill, { backgroundColor: '#f3f4f6' }]}
+                  onPress={addIngredient}
+                >
+                  <SvgIcon name="add-circle" size={14} color="#6b7280" />
+                  <Text style={[styles.categoryPillText, { color: '#6b7280' }]}>Manual Entry</Text>
+                </TouchableOpacity>
               </View>
-            ) : (
-              ingredients.map((ingredient) => (
-                <View key={ingredient.id} style={styles.ingredientRow}>
-                  <View style={{ flex: 1 }}>
+            </ScrollView>
+          </View>
+
+          {/* Search Results - Inline display */}
+          {searchResults.length > 0 && (
+            <View style={styles.searchResultsContainer}>
+              <View style={styles.searchResultsHeader}>
+                <Text style={styles.searchResultsTitle}>
+                  {searchResults.length} products found
+                </Text>
+                <TouchableOpacity onPress={() => setSearchResults([])}>
+                  <Text style={styles.clearResultsText}>Clear</Text>
+                </TouchableOpacity>
+              </View>
+              <FlatList
+                data={searchResults}
+                keyExtractor={(item) => item.id || Math.random().toString()}
+                horizontal={false}
+                numColumns={1}
+                scrollEnabled={false}
+                style={{ maxHeight: 300 }}
+                nestedScrollEnabled
+                renderItem={({ item }) => (
+                  <TouchableOpacity
+                    style={styles.searchResultCard}
+                    onPress={() => handleAddProduct(item)}
+                  >
+                    <View style={styles.searchResultInfo}>
+                      <Text style={styles.searchResultName} numberOfLines={2}>
+                        {item.name}
+                      </Text>
+                      {item.brand && (
+                        <Text style={styles.searchResultBrand}>{item.brand}</Text>
+                      )}
+                      {/* Nutrition badges */}
+                      <View style={styles.searchResultNutrition}>
+                        {item.calories && (
+                          <View style={styles.nutrientBadge}>
+                            <Text style={styles.nutrientValue}>
+                              {Math.round(item.calories)}
+                            </Text>
+                            <Text style={styles.nutrientLabel}>cal</Text>
+                          </View>
+                        )}
+                        {item.protein && (
+                          <View style={styles.nutrientBadge}>
+                            <Text style={styles.nutrientValue}>
+                              {Math.round(item.protein)}g
+                            </Text>
+                            <Text style={styles.nutrientLabel}>protein</Text>
+                          </View>
+                        )}
+                      </View>
+                    </View>
+                    <View style={styles.addProductButton}>
+                      <SvgIcon name="add-circle" size={28} color="#3b82f6" />
+                    </View>
+                  </TouchableOpacity>
+                )}
+              />
+            </View>
+          )}
+
+          {/* My Ingredients List */}
+          {ingredients.length > 0 && (
+            <View style={styles.myIngredientsSection}>
+              <Text style={styles.myIngredientsTitle}>
+                My Ingredients ({ingredients.length})
+              </Text>
+              <View style={styles.card}>
+                {ingredients.map((ingredient) => (
+                  <View key={ingredient.id} style={styles.ingredientRow}>
+                    <View style={{ flex: 1 }}>
+                      {ingredient.productData ? (
+                        // Product from search - show name and nutrition
+                        <View>
+                          <Text style={styles.ingredientNameText}>{ingredient.name}</Text>
+                          <View style={{ flexDirection: 'row', gap: 8, marginTop: 4 }}>
+                            {ingredient.calories && (
+                              <View style={styles.miniNutritionBadge}>
+                                <SvgIcon name="flame" size={10} color="#f59e0b" />
+                                <Text style={styles.miniNutritionText}>
+                                  {Math.round(ingredient.calories * parseFloat(ingredient.amount || '1'))} cal
+                                </Text>
+                              </View>
+                            )}
+                            {ingredient.protein && (
+                              <View style={styles.miniNutritionBadge}>
+                                <SvgIcon name="fitness" size={10} color="#10b981" />
+                                <Text style={styles.miniNutritionText}>
+                                  {Math.round(ingredient.protein * parseFloat(ingredient.amount || '1'))}g protein
+                                </Text>
+                              </View>
+                            )}
+                          </View>
+                        </View>
+                      ) : (
+                        // Manual entry - show input
+                        <TextInput
+                          style={[styles.input, styles.ingredientName]}
+                          placeholder="Ingredient name"
+                          value={ingredient.name}
+                          onChangeText={(value) => updateIngredient(ingredient.id, 'name', value)}
+                          placeholderTextColor="#9ca3af"
+                        />
+                      )}
+                    </View>
                     <TextInput
-                      style={[styles.input, styles.ingredientName]}
-                      placeholder="Ingredient name"
-                      value={ingredient.name}
-                      onChangeText={(value) => updateIngredient(ingredient.id, 'name', value)}
+                      style={[styles.input, styles.ingredientAmount]}
+                      placeholder="1"
+                      value={ingredient.amount}
+                      onChangeText={(value) => updateIngredient(ingredient.id, 'amount', value)}
+                      keyboardType="numeric"
                       placeholderTextColor="#9ca3af"
                     />
-                    {/* Show nutrition info if available from product search */}
-                    {mealShoppingHook.ingredients.find(i => i.id === ingredient.id)?.calories && (
-                      <View style={{ flexDirection: 'row', gap: 8, marginTop: 4 }}>
-                        <View style={styles.miniNutritionBadge}>
-                          <SvgIcon name="flame" size={10} color="#f59e0b" />
-                          <Text style={styles.miniNutritionText}>
-                            {Math.round((mealShoppingHook.ingredients.find(i => i.id === ingredient.id)?.calories || 0) * parseFloat(ingredient.amount || '1'))} cal
-                          </Text>
-                        </View>
-                        <View style={styles.miniNutritionBadge}>
-                          <SvgIcon name="fitness" size={10} color="#10b981" />
-                          <Text style={styles.miniNutritionText}>
-                            {Math.round((mealShoppingHook.ingredients.find(i => i.id === ingredient.id)?.protein || 0) * parseFloat(ingredient.amount || '1'))}g protein
-                          </Text>
-                        </View>
-                      </View>
-                    )}
+                    <TextInput
+                      style={[styles.input, styles.ingredientUnit]}
+                      placeholder="cups"
+                      value={ingredient.unit}
+                      onChangeText={(value) => updateIngredient(ingredient.id, 'unit', value)}
+                      placeholderTextColor="#9ca3af"
+                    />
+                    <Pressable onPress={() => removeIngredient(ingredient.id)}>
+                      <SvgIcon name="close-circle" size={24} color="#ef4444" />
+                    </Pressable>
                   </View>
-                  <TextInput
-                    style={[styles.input, styles.ingredientAmount]}
-                    placeholder="0"
-                    value={ingredient.amount}
-                    onChangeText={(value) => updateIngredient(ingredient.id, 'amount', value)}
-                    keyboardType="numeric"
-                    placeholderTextColor="#9ca3af"
-                  />
-                  <TextInput
-                    style={[styles.input, styles.ingredientUnit]}
-                    placeholder="cups"
-                    value={ingredient.unit}
-                    onChangeText={(value) => updateIngredient(ingredient.id, 'unit', value)}
-                    placeholderTextColor="#9ca3af"
-                  />
-                  <Pressable onPress={() => removeIngredient(ingredient.id)}>
-                    <SvgIcon name="close-circle" size={24} color="#ef4444" />
-                  </Pressable>
-                </View>
-              ))
-            )}
-          </View>
+                ))}
+              </View>
 
-          {/* Nutrition Summary */}
-          {mealShoppingHook.hasCalculatedNutrition && (
-            <View style={styles.nutritionSummaryCard}>
-              <View style={styles.nutritionSummaryHeader}>
-                <SvgIcon name="checkmark-circle" size={18} color="#10b981" />
-                <Text style={styles.nutritionSummaryTitle}>Total Nutrition</Text>
+              {/* Nutrition Summary - Always visible when ingredients exist */}
+              <View style={styles.nutritionSummaryCard}>
+                <View style={styles.nutritionSummaryHeader}>
+                  <SvgIcon name="checkmark-circle" size={18} color="#10b981" />
+                  <Text style={styles.nutritionSummaryTitle}>Total Meal Nutrition</Text>
+                </View>
+                <View style={styles.nutritionSummaryRow}>
+                  <View style={styles.nutritionSummaryItem}>
+                    <SvgIcon name="flame" size={16} color="#f59e0b" />
+                    <Text style={styles.nutritionSummaryValue}>
+                      {Math.round(ingredients.reduce((sum, ing) => 
+                        sum + ((ing.calories || 0) * parseFloat(ing.amount || '1')), 0
+                      ))}
+                    </Text>
+                    <Text style={styles.nutritionSummaryLabel}>calories</Text>
+                  </View>
+                  <View style={styles.nutritionSummaryItem}>
+                    <SvgIcon name="fitness" size={16} color="#10b981" />
+                    <Text style={styles.nutritionSummaryValue}>
+                      {Math.round(ingredients.reduce((sum, ing) => 
+                        sum + ((ing.protein || 0) * parseFloat(ing.amount || '1')), 0
+                      ))}
+                    </Text>
+                    <Text style={styles.nutritionSummaryLabel}>g protein</Text>
+                  </View>
+                  <View style={styles.nutritionSummaryItem}>
+                    <Text style={styles.nutritionSummaryValue}>
+                      {Math.round(ingredients.reduce((sum, ing) => 
+                        sum + ((ing.carbs || 0) * parseFloat(ing.amount || '1')), 0
+                      ))}
+                    </Text>
+                    <Text style={styles.nutritionSummaryLabel}>g carbs</Text>
+                  </View>
+                  <View style={styles.nutritionSummaryItem}>
+                    <Text style={styles.nutritionSummaryValue}>
+                      {Math.round(ingredients.reduce((sum, ing) => 
+                        sum + ((ing.fat || 0) * parseFloat(ing.amount || '1')), 0
+                      ))}
+                    </Text>
+                    <Text style={styles.nutritionSummaryLabel}>g fat</Text>
+                  </View>
+                </View>
+                <Text style={styles.nutritionSummaryFooter}>
+                  Calculated from {ingredients.filter(i => i.calories).length} products with nutrition data
+                </Text>
               </View>
-              <View style={styles.nutritionSummaryRow}>
-                <View style={styles.nutritionSummaryItem}>
-                  <SvgIcon name="flame" size={16} color="#f59e0b" />
-                  <Text style={styles.nutritionSummaryValue}>
-                    {Math.round(mealShoppingHook.calculatedNutrition.calories)}
-                  </Text>
-                  <Text style={styles.nutritionSummaryLabel}>cal</Text>
-                </View>
-                <View style={styles.nutritionSummaryItem}>
-                  <SvgIcon name="fitness" size={16} color="#10b981" />
-                  <Text style={styles.nutritionSummaryValue}>
-                    {mealShoppingHook.calculatedNutrition.protein.toFixed(0)}
-                  </Text>
-                  <Text style={styles.nutritionSummaryLabel}>g protein</Text>
-                </View>
-                <View style={styles.nutritionSummaryItem}>
-                  <Text style={styles.nutritionSummaryValue}>
-                    {mealShoppingHook.calculatedNutrition.carbs.toFixed(0)}
-                  </Text>
-                  <Text style={styles.nutritionSummaryLabel}>g carbs</Text>
-                </View>
-                <View style={styles.nutritionSummaryItem}>
-                  <Text style={styles.nutritionSummaryValue}>
-                    {mealShoppingHook.calculatedNutrition.fat.toFixed(0)}
-                  </Text>
-                  <Text style={styles.nutritionSummaryLabel}>g fat</Text>
-                </View>
-              </View>
-              <Text style={styles.nutritionSummaryFooter}>
-                Auto-calculated from {mealShoppingHook.ingredients.filter(i => i.calories).length} products
+            </View>
+          )}
+
+          {/* Empty state when no ingredients */}
+          {ingredients.length === 0 && searchResults.length === 0 && !searchLoading && (
+            <View style={styles.emptyStateCard}>
+              <SvgIcon name="search" size={40} color="#3b82f6" />
+              <Text style={styles.emptyStateTitle}>Search for ingredients</Text>
+              <Text style={styles.emptyStateText}>
+                Type a product name above or tap a category to get started
               </Text>
             </View>
           )}
@@ -692,6 +893,171 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#9ca3af',
     marginTop: 8,
+  },
+  // Inline Search Styles
+  inlineSearchContainer: {
+    marginBottom: 16,
+  },
+  inlineSearchBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#ffffff',
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    gap: 12,
+    borderWidth: 2,
+    borderColor: '#e5e7eb',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  inlineSearchInput: {
+    flex: 1,
+    fontSize: 16,
+    color: '#111827',
+  },
+  quickCategoriesScroll: {
+    marginTop: 12,
+  },
+  quickCategories: {
+    flexDirection: 'row',
+    gap: 8,
+    paddingHorizontal: 4,
+  },
+  categoryPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    backgroundColor: '#eff6ff',
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#bfdbfe',
+  },
+  categoryPillText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#3b82f6',
+  },
+  searchResultsContainer: {
+    backgroundColor: '#ffffff',
+    borderRadius: 12,
+    marginBottom: 16,
+    padding: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  searchResultsHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+    paddingHorizontal: 4,
+  },
+  searchResultsTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#374151',
+  },
+  clearResultsText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#3b82f6',
+  },
+  searchResultCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f9fafb',
+    borderRadius: 10,
+    padding: 12,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
+  },
+  searchResultInfo: {
+    flex: 1,
+  },
+  searchResultName: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#111827',
+    marginBottom: 2,
+  },
+  searchResultBrand: {
+    fontSize: 13,
+    color: '#6b7280',
+    marginBottom: 6,
+  },
+  searchResultNutrition: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  nutrientBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: '#ffffff',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
+  },
+  nutrientValue: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#047857',
+  },
+  nutrientLabel: {
+    fontSize: 11,
+    color: '#6b7280',
+  },
+  addProductButton: {
+    padding: 4,
+  },
+  myIngredientsSection: {
+    marginTop: 8,
+  },
+  myIngredientsTitle: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#374151',
+    marginBottom: 12,
+  },
+  ingredientNameText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#111827',
+  },
+  emptyStateCard: {
+    backgroundColor: '#ffffff',
+    borderRadius: 12,
+    padding: 32,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  emptyStateTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#111827',
+    marginTop: 12,
+    marginBottom: 4,
+  },
+  emptyStateText: {
+    fontSize: 14,
+    color: '#6b7280',
+    textAlign: 'center',
   },
   ingredientRow: {
     flexDirection: 'row',

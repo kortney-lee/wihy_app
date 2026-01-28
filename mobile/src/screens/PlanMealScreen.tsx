@@ -4,7 +4,6 @@ import { useSafeAreaInsets, SafeAreaView } from 'react-native-safe-area-context'
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { ManualMealForm } from '../components/ManualMealForm';
-import { ProductSearchModal } from '../components/ProductSearchModal';
 import SvgIcon from '../components/shared/SvgIcon';
 import { AuthContext } from '../context/AuthContext';
 import { useCreateMealWithShopping } from '../hooks/useCreateMealWithShopping';
@@ -42,8 +41,7 @@ export default function PlanMealScreen({
   const navigation = useNavigation<NavigationProp>();
   const insets = useSafeAreaInsets();
   
-  // Product search modal state
-  const [showProductSearch, setShowProductSearch] = useState(false);
+  // Product search is now inline in ManualMealForm
   
   // Meal templates modal state
   const [showTemplates, setShowTemplates] = useState(false);
@@ -76,7 +74,8 @@ export default function PlanMealScreen({
   };
 
   const handleShowProductSearch = () => {
-    setShowProductSearch(true);
+    // Product search is now inline in ManualMealForm
+    // This callback is kept for interface compatibility but does nothing
   };
 
   const handleShowLibrary = () => {
@@ -126,24 +125,6 @@ export default function PlanMealScreen({
     }
   }, [userId]);
 
-  const handleProductSelect = (product: any) => {
-    // Add product to meal shopping hook
-    mealShoppingHook.addIngredientFromProduct({
-      id: product.id || `product-${Date.now()}`,
-      name: product.name || product.product_name,
-      brands: product.brands,
-      barcode: product.barcode || product.code,
-      nutriments: product.nutriments || {
-        energy_kcal: product.calories || 0,
-        proteins: product.protein || 0,
-        carbohydrates: product.carbs || 0,
-        fat: product.fat || 0,
-      },
-      image_url: product.image_url || product.imageUrl,
-    } as any);
-    setShowProductSearch(false);
-  };
-
   const handleTemplateSelect = (template: any) => {
     // Apply template to form
     // This would need to be implemented with a callback to ManualMealForm
@@ -155,7 +136,7 @@ export default function PlanMealScreen({
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#3b82f6" />
       
-      {/* Main Form */}
+      {/* Main Form - Now includes inline product search */}
       <ManualMealForm
         userId={userId}
         onBack={handleBack}
@@ -166,13 +147,6 @@ export default function PlanMealScreen({
         onSavedMealId={handleSavedMealId}
         scanning={scanning}
         onLoadLibraryMeals={loadLibraryMeals}
-      />
-
-      {/* Product Search Modal */}
-      <ProductSearchModal
-        visible={showProductSearch}
-        onClose={() => setShowProductSearch(false)}
-        onSelectProduct={handleProductSelect}
       />
 
       {/* Meal Templates Modal */}
