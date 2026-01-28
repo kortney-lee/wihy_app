@@ -7,8 +7,13 @@ The frontend has been updated to support **multi-select for meal types and cuisi
 ## Affected Modes
 
 - **Quick Mode:** Multi-select for meal types (breakfast, lunch, dinner, snack, dessert) AND cuisines
+  - **Duration:** 1-5 days max (fast meal generation)
+  - **Purpose:** Quick meal ideas and options
 - **Plan Mode:** Multi-select for cuisines (american, italian, mexican, asian, mediterranean, indian)
+  - **Duration:** 7-30 days (full meal planning)
+  - **Purpose:** Comprehensive meal plans with variety
 - **Diet Mode:** No changes (uses existing dietary restrictions)
+  - **Duration:** 14-30 days (program-based)
 
 ## Changes Required
 
@@ -400,6 +405,23 @@ const request = {
 
 ```javascript
 function validateRequest(request) {
+  // Mode-based duration validation
+  if (request.mode === 'quick') {
+    if (request.duration > 5) {
+      throw new Error('Quick mode limited to 5 days maximum');
+    }
+    if (request.duration < 1) {
+      throw new Error('Duration must be at least 1 day');
+    }
+  } else if (request.mode === 'plan') {
+    if (request.duration < 7) {
+      throw new Error('Plan mode requires minimum 7 days');
+    }
+    if (request.duration > 30) {
+      throw new Error('Maximum 30 days allowed');
+    }
+  }
+  
   // Check array sizes
   if (request.mealTypes && request.mealTypes.length > 5) {
     throw new Error('Maximum 5 meal types allowed');
@@ -468,10 +490,12 @@ async function generateMealsParallel(combinations) {
 - [ ] **Quick Mode:** Multiple meal types + multiple cuisines
 - [ ] **Quick Mode:** Empty mealTypes array (should default to 'dinner')
 - [ ] **Quick Mode:** Invalid meal type in array (should reject)
+- [ ] **Quick Mode:** Duration validation (1-5 days, reject > 5)
 - [ ] **Plan Mode:** Single cuisine (backward compatibility)
 - [ ] **Plan Mode:** Multiple cuisines (should distribute across days)
 - [ ] **Plan Mode:** No cuisine (should work as before)
 - [ ] **Plan Mode:** 3 cuisines × 7 days (should rotate cuisines)
+- [ ] **Plan Mode:** Duration validation (7-30 days, reject < 7)
 - [ ] Maximum limits (5 meal types, 10 cuisines)
 
 ### Integration Tests
