@@ -29,7 +29,6 @@ import { SweepBorder } from '../components/SweepBorder';
 import SvgIcon from '../components/shared/SvgIcon';
 import { AuthContext } from '../context/AuthContext';
 import { mealService, MealTemplate, QUICK_TEMPLATE_PRESETS, MealType, CookingSkillLevel, MealVariety, TimePerMeal, CreateMealPlanRequest, MealPlanResponse, CalendarDay, SavedMeal, DietOption } from '../services/mealService';
-import { mealCalendarService } from '../services/mealCalendarService';
 import { createMealPlan, generateShoppingList } from '../services/mealPlanService';
 import { createShoppingList, createInstacartLinkFromMealPlan, ShoppingListItem } from '../services/instacartService';
 import { getMealDiaryService, type Meal, type DietaryPreferences } from '../services/mealDiary';
@@ -41,6 +40,9 @@ import { RootStackParamList } from '../types/navigation';
 import { useDashboardLayout } from '../hooks/useDashboardLayout';
 import { UpgradePrompt } from '../components/UpgradePrompt';
 import { useFeatureAccess } from '../hooks/usePaywall';
+import { useCreateMealWithShopping } from '../hooks/useCreateMealWithShopping';
+import { ManualMealForm } from '../components/ManualMealForm';
+import { ProductSearchModal } from '../components/ProductSearchModal';
 
 // New GoalSelection component for 3-mode meal planning
 import { GoalSelectionMeals, GenerateMealParams } from './meals/GoalSelectionMeals';
@@ -55,7 +57,7 @@ type NavigationProp = StackNavigationProp<RootStackParamList>;
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
 // View modes for the screen
-type ViewMode = 'dashboard' | 'create' | 'calendar' | 'library';
+type ViewMode = 'dashboard' | 'create' | 'library';
 
 // Meal type icons and colors
 const mealTypeConfig: Record<string, { icon: string; color: string; bgColor: string }> = {
@@ -191,6 +193,11 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
   const navigation = useNavigation<NavigationProp>();
   const scrollViewRef = useRef<ScrollView>(null);
   const layout = useDashboardLayout();
+  
+  // ============================================================================
+  // PRODUCT SEARCH & MEAL CREATION WITH SHOPPING HOOK
+  // ============================================================================
+  const mealShoppingHook = useCreateMealWithShopping(userId || '');
   
   // Paywall check
   const hasMealAccess = useFeatureAccess('meals');
@@ -347,6 +354,12 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
   // Storage key for shopping list persistence (fallback cache)
   const SHOPPING_LIST_STORAGE_KEY = '@wihy_shopping_list';
 
+  // ============================================================================
+  // PRODUCT SEARCH MODAL STATE
+  // ============================================================================
+  const [showProductSearch, setShowProductSearch] = useState(false);
+  const [savedMealId, setSavedMealId] = useState<string | null>(null);
+
   // Save Instacart URL to session storage (backend + local fallback)
   const saveInstacartUrlToStorage = useCallback(async (url: string, planId?: string | number) => {
     try {
@@ -497,10 +510,6 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
     }
   }, []);
 
-  // Calendar loading state
-  const [calendarLoading, setCalendarLoading] = useState(false);
-  const [calendarError, setCalendarError] = useState<string | null>(null);
-
   const tags = [
     'Breakfast',
     'Lunch',
@@ -520,13 +529,6 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
     loadAvailableDiets();
     loadShoppingList(); // Load shopping list from API or storage
   }, [loadShoppingList]);
-
-  // Load calendar data when viewing calendar or month changes
-  useEffect(() => {
-    if (viewMode === 'calendar' && userId) {
-      loadCalendarData();
-    }
-  }, [viewMode, calendarMonth, userId]);
 
   // Load saved Instacart URL when success modal opens or plan changes
   useEffect(() => {
@@ -679,92 +681,9 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
     }
   };
 
-  // Load calendar data from mealCalendarService
-  const loadCalendarData = async () => {
-    if (!userId) {
-      console.log('[CreateMeals] No userId for calendar data');
-      return;
-    }
-
-    try {
-      setCalendarLoading(true);
-      setCalendarError(null);
-
-      // Get the month range to load
-      const firstDay = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth(), 1);
-      const lastDay = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() + 1, 0);
-      
-      const startDate = firstDay.toISOString().split('T')[0];
-      const endDate = lastDay.toISOString().split('T')[0];
-
-      console.log('[CreateMeals] Loading calendar data from', startDate, 'to', endDate);
-
-      // Load calendar days from services.wihy.ai
-      const days = await mealCalendarService.getCalendar(userId, startDate, endDate);
-      
-      if (days && days.length > 0) {
-        console.log('[CreateMeals] Loaded', days.length, 'calendar days');
-        
-        // Convert to local CalendarDay format
-        const convertedDays = days.map(day => ({
-          date: day.date,
-          day_number: new Date(day.date).getDate(),
-          day_name: day.dayName || new Date(day.date).toLocaleDateString('en-US', { weekday: 'long' }),
-          meals: day.meals.map(m => ({
-            meal_id: m.meal_id,
-            meal_type: m.meal_slot as MealType,
-            meal_name: m.meal.name,
-            calories: m.meal.nutrition.calories,
-            protein: m.meal.nutrition.protein,
-            carbs: m.meal.nutrition.carbs,
-            fat: m.meal.nutrition.fat,
-            servings: m.servings,
-          })),
-          total_calories: day.totals.calories,
-          total_protein: day.totals.protein,
-          total_carbs: day.totals.carbs,
-          total_fat: day.totals.fat,
-          has_breakfast: day.meals.some(m => m.meal_slot === 'breakfast'),
-          has_lunch: day.meals.some(m => m.meal_slot === 'lunch'),
-          has_dinner: day.meals.some(m => m.meal_slot === 'dinner'),
-          has_snacks: day.meals.some(m => m.meal_slot === 'snack'),
-        })) as CalendarDay[];
-
-        setCalendarDays(convertedDays);
-
-        // Set today's meals if viewing current month
-        const today = new Date().toISOString().split('T')[0];
-        const todayData = days.find(d => d.date === today);
-        if (todayData) {
-          setTodaysMeals(todayData.meals.map(m => ({
-            meal_id: m.meal_id,
-            meal_type: m.meal_slot,
-            meal_name: m.meal.name,
-            calories: m.meal.nutrition.calories,
-            protein: m.meal.nutrition.protein,
-            carbs: m.meal.nutrition.carbs,
-            fat: m.meal.nutrition.fat,
-            servings: m.servings,
-          })));
-        }
-      } else {
-        console.log('[CreateMeals] No calendar data found for month');
-        setCalendarDays([]);
-      }
-    } catch (error) {
-      console.error('[CreateMeals] Error loading calendar data:', error);
-      setCalendarError('Failed to load calendar');
-    } finally {
-      setCalendarLoading(false);
-    }
-  };
-
   const onRefresh = async () => {
     setRefreshing(true);
     await loadDashboardData();
-    if (viewMode === 'calendar') {
-      await loadCalendarData();
-    }
     setRefreshing(false);
   };
 
@@ -2543,53 +2462,15 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
       {/* Status bar area - solid color */}
       <View style={{ height: insets.top, backgroundColor: '#ef4444' }} />
       
-      {/* Back button for web - only in dashboard view */}
-      {Platform.OS === 'web' && viewMode === 'dashboard' && (
-        isDashboardMode && onBack ? (
-          // Coach Hub mode - use BackToHubButton
-          <BackToHubButton
-            hubName="Coach Hub"
-            color="#ef4444"
-            onPress={onBack}
-            isMobileWeb={layout.screenWidth < 768}
-            spinnerGif={spinnerGif}
-          />
-        ) : !isDashboardMode ? (
-          // Health Hub mode - use Health Hub button
-          <TouchableOpacity
-            onPress={() => navigation.goBack()}
-            style={{
-              position: 'absolute',
-              top: layout.screenWidth < 768 ? 12 : 40,
-              right: layout.screenWidth < 768 ? 12 : 24,
-              zIndex: 99,
-              flexDirection: 'row',
-              alignItems: 'center',
-              gap: layout.screenWidth < 768 ? 6 : 10,
-              paddingVertical: layout.screenWidth < 768 ? 4 : 6,
-              paddingLeft: layout.screenWidth < 768 ? 8 : 12,
-              paddingRight: layout.screenWidth < 768 ? 4 : 6,
-              backgroundColor: 'rgba(255,255,255,0.95)',
-              borderRadius: 24,
-              shadowColor: '#000',
-              shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: 0.15,
-              shadowRadius: 6,
-            } as any}
-          >
-            <SvgIcon name="arrow-back" size={layout.screenWidth < 768 ? 14 : 16} color="#16a34a" />
-            <Text style={{ fontSize: layout.screenWidth < 768 ? 11 : 13, fontWeight: '600', color: '#16a34a' }}>Health Hub</Text>
-            <Image 
-              source={spinnerGif}
-              resizeMode="cover"
-              style={{
-                width: layout.screenWidth < 768 ? 28 : 36,
-                height: layout.screenWidth < 768 ? 28 : 36,
-                borderRadius: layout.screenWidth < 768 ? 14 : 18,
-              }}
-            />
-          </TouchableOpacity>
-        ) : null
+      {/* Back button for web - only in dashboard view, not in calendar or create modes */}
+      {Platform.OS === 'web' && viewMode === 'dashboard' && isDashboardMode && onBack && (
+        <BackToHubButton
+          hubName="Coach Hub"
+          color="#ef4444"
+          onPress={onBack}
+          isMobileWeb={layout.screenWidth < 768}
+          spinnerGif={spinnerGif}
+        />
       )}
       
       {/* Collapsing Header */}
@@ -2692,7 +2573,7 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
 
           <TouchableOpacity 
             style={styles.quickActionCard}
-            onPress={() => setViewMode('calendar')}
+            onPress={() => navigation.navigate('MealCalendar' as never)}
           >
             <View style={[styles.quickActionIcon, { backgroundColor: '#fef3c7' }]}>
               <SvgIcon name="calendar" size={28} color="#f59e0b" />
@@ -2755,7 +2636,7 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Today's Meals</Text>
-            <TouchableOpacity onPress={() => setViewMode('calendar')}>
+            <TouchableOpacity onPress={() => navigation.navigate('MealCalendar' as never)}>
               <Text style={styles.sectionLink}>View All</Text>
             </TouchableOpacity>
           </View>
@@ -3157,350 +3038,17 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
 
   // Render Create Meal Form
   const renderCreateMealForm = () => (
-    <View style={styles.formContainer}>
-      <ScrollView showsVerticalScrollIndicator={false}>
-        {/* Header - Inside ScrollView like FitnessDashboard */}
-        <LinearGradient
-          colors={['#3b82f6', '#2563eb']}
-          style={styles.formHeaderGradient}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-        >
-          <TouchableOpacity 
-            style={styles.headerBackButtonWhite}
-            onPress={() => setViewMode('dashboard')}
-          >
-            <SvgIcon name="arrow-back" size={24} color="#ffffff" />
-          </TouchableOpacity>
-          <Text style={styles.formHeaderTitleWhite}>Create Meal</Text>
-          <Text style={styles.formHeaderSubtitle}>Add a new meal to your library</Text>
-        </LinearGradient>
-
-        {/* Basic Information */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Basic Information</Text>
-          
-          <View style={styles.card}>
-            <Text style={styles.label}>Meal Name *</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="e.g., Grilled Chicken Salad"
-              value={mealName}
-              onChangeText={setMealName}
-              placeholderTextColor="#9ca3af"
-            />
-
-            <Text style={styles.label}>Serving Size</Text>
-            <View style={styles.servingContainer}>
-              <TextInput
-                style={[styles.input, styles.servingInput]}
-                placeholder="1"
-                value={servingSize}
-                onChangeText={setServingSize}
-                keyboardType="numeric"
-                placeholderTextColor="#9ca3af"
-              />
-              <Text style={styles.servingUnit}>serving(s)</Text>
-            </View>
-
-            <Text style={styles.label}>Meal Type *</Text>
-            <View style={styles.mealTypeContainer}>
-              {(['breakfast', 'lunch', 'dinner', 'snack'] as const).map((type) => (
-                <Pressable
-                  key={type}
-                  style={[
-                    styles.mealTypeButton,
-                    mealType === type && styles.mealTypeButtonSelected,
-                  ]}
-                  onPress={() => setMealType(type)}
-                >
-                  <Text
-                    style={[
-                      styles.mealTypeText,
-                      mealType === type && styles.mealTypeTextSelected,
-                    ]}
-                  >
-                    {type.charAt(0).toUpperCase() + type.slice(1)}
-                  </Text>
-                </Pressable>
-              ))}
-            </View>
-          </View>
-        </View>
-
-        {/* Nutrition Facts */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Nutrition Facts (per serving) - Optional</Text>
-          
-          <View style={styles.card}>
-            <View style={styles.nutritionGrid}>
-              <View style={styles.nutritionItem}>
-                <Text style={styles.label}>Calories</Text>
-                <TextInput
-                  style={styles.input}
-                  placeholder="0"
-                  value={calories}
-                  onChangeText={setCalories}
-                  keyboardType="numeric"
-                  placeholderTextColor="#9ca3af"
-                />
-              </View>
-
-              <View style={styles.nutritionItem}>
-                <Text style={styles.label}>Protein (g)</Text>
-                <TextInput
-                  style={styles.input}
-                  placeholder="0"
-                  value={protein}
-                  onChangeText={setProtein}
-                  keyboardType="numeric"
-                  placeholderTextColor="#9ca3af"
-                />
-              </View>
-
-              <View style={styles.nutritionItem}>
-                <Text style={styles.label}>Carbs (g)</Text>
-                <TextInput
-                  style={styles.input}
-                  placeholder="0"
-                  value={carbs}
-                  onChangeText={setCarbs}
-                  keyboardType="numeric"
-                  placeholderTextColor="#9ca3af"
-                />
-              </View>
-
-              <View style={styles.nutritionItem}>
-                <Text style={styles.label}>Fat (g)</Text>
-                <TextInput
-                  style={styles.input}
-                  placeholder="0"
-                  value={fat}
-                  onChangeText={setFat}
-                  keyboardType="numeric"
-                  placeholderTextColor="#9ca3af"
-                />
-              </View>
-            </View>
-
-            {calories && protein && carbs && fat && (
-              <View style={styles.nutritionSummary}>
-                <SvgIcon name="information-circle" size={20} color="#3b82f6" />
-                <Text style={styles.summaryText}>
-                  Total Macros: {protein}g protein • {carbs}g carbs • {fat}g fat
-                </Text>
-              </View>
-            )}
-          </View>
-        </View>
-
-        {/* Ingredients */}
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Ingredients</Text>
-            <Pressable onPress={addIngredient} style={styles.addButton}>
-              <SvgIcon name="add-circle" size={20} color="#3b82f6" />
-              <Text style={styles.addButtonText}>Add</Text>
-            </Pressable>
-          </View>
-
-          <View style={styles.card}>
-            {ingredients.length === 0 ? (
-              <View style={styles.emptyState}>
-                <SvgIcon name="list" size={32} color="#d1d5db" />
-                <Text style={styles.emptyText}>No ingredients added</Text>
-              </View>
-            ) : (
-              ingredients.map((ingredient) => (
-                <View key={ingredient.id} style={styles.ingredientRow}>
-                  <TextInput
-                    style={[styles.input, styles.ingredientName]}
-                    placeholder="Ingredient name"
-                    value={ingredient.name}
-                    onChangeText={(value) => updateIngredient(ingredient.id, 'name', value)}
-                    placeholderTextColor="#9ca3af"
-                  />
-                  <TextInput
-                    style={[styles.input, styles.ingredientAmount]}
-                    placeholder="0"
-                    value={ingredient.amount}
-                    onChangeText={(value) => updateIngredient(ingredient.id, 'amount', value)}
-                    keyboardType="numeric"
-                    placeholderTextColor="#9ca3af"
-                  />
-                  <TextInput
-                    style={[styles.input, styles.ingredientUnit]}
-                    placeholder="cups"
-                    value={ingredient.unit}
-                    onChangeText={(value) => updateIngredient(ingredient.id, 'unit', value)}
-                    placeholderTextColor="#9ca3af"
-                  />
-                  <Pressable onPress={() => removeIngredient(ingredient.id)}>
-                    <SvgIcon name="close-circle" size={24} color="#ef4444" />
-                  </Pressable>
-                </View>
-              ))
-            )}
-          </View>
-        </View>
-
-        {/* Tags */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Tags</Text>
-          
-          <View style={styles.card}>
-            <View style={styles.tagsContainer}>
-              {tags.map((tag) => (
-                <Pressable
-                  key={tag}
-                  style={[
-                    styles.tag,
-                    selectedTags.includes(tag) && styles.tagSelected,
-                  ]}
-                  onPress={() => toggleTag(tag)}
-                >
-                  <Text
-                    style={[
-                      styles.tagText,
-                      selectedTags.includes(tag) && styles.tagTextSelected,
-                    ]}
-                  >
-                    {tag}
-                  </Text>
-                </Pressable>
-              ))}
-            </View>
-          </View>
-        </View>
-
-        {/* Notes */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Notes & Instructions</Text>
-          
-          <View style={styles.card}>
-            <TextInput
-              style={[styles.input, styles.notesInput]}
-              placeholder="Add preparation instructions, tips, or special notes..."
-              value={notes}
-              onChangeText={setNotes}
-              multiline
-              numberOfLines={4}
-              textAlignVertical="top"
-              placeholderTextColor="#9ca3af"
-            />
-          </View>
-        </View>
-
-        {/* Save Button */}
-        <Pressable 
-          style={[styles.saveButton, saving && styles.saveButtonDisabled]} 
-          onPress={handleSaveMeal}
-          disabled={saving}
-        >
-          {saving ? (
-            <ActivityIndicator color="#fff" />
-          ) : (
-            <>
-              <SvgIcon name="checkmark-circle" size={20} color="#fff" />
-              <Text style={styles.saveButtonText}>Save Meal</Text>
-            </>
-          )}
-        </Pressable>
-
-        {/* Meal Plan & Shopping List */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Meal Planning & Shopping</Text>
-          <View style={styles.card}>
-            <Pressable
-              style={[styles.planButton, mealPlanId && styles.planButtonSuccess]}
-              onPress={handleCreateMealPlan}
-              disabled={saving || !mealName.trim()}
-            >
-              {saving ? (
-                <ActivityIndicator color="#fff" />
-              ) : (
-                <>
-                  <SvgIcon 
-                    name={mealPlanId ? "checkmark-circle" : "calendar"} 
-                    size={20} 
-                    color="#fff" 
-                  />
-                  <Text style={styles.planButtonText}>
-                    {mealPlanId ? 'Meal Plan Created' : 'Create Meal Plan'}
-                  </Text>
-                </>
-              )}
-            </Pressable>
-
-            {mealPlanId && (
-              <Pressable
-                style={styles.shoppingListButton}
-                onPress={handleGenerateShoppingList}
-                disabled={generatingList}
-              >
-                {generatingList ? (
-                  <ActivityIndicator color="#fff" />
-                ) : (
-                  <>
-                    <SvgIcon name="cart" size={20} color="#fff" />
-                    <Text style={styles.shoppingListButtonText}>
-                      Generate Shopping List
-                    </Text>
-                  </>
-                )}
-              </Pressable>
-            )}
-
-            <Text style={styles.planHintText}>
-              {!mealPlanId 
-                ? 'Create a meal plan, then generate your Instacart shopping list'
-                : 'Tap above to generate your shopping list and shop via Instacart'}
-            </Text>
-          </View>
-        </View>
-
-        {/* Templates Quick Actions */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Quick Start</Text>
-          <View style={styles.templatesContainer}>
-            <Pressable 
-              style={styles.templateCard}
-              onPress={handleShowTemplates}
-            >
-              <SvgIcon name="fast-food" size={24} color="#3b82f6" />
-              <Text style={styles.templateTitle}>Use Template</Text>
-              <Text style={styles.templateSubtitle}>Start from preset</Text>
-            </Pressable>
-            <Pressable 
-              style={styles.templateCard}
-              onPress={handleScanRecipe}
-              disabled={scanning}
-            >
-              {scanning ? (
-                <ActivityIndicator color="#10b981" />
-              ) : (
-                <SvgIcon name="camera" size={24} color="#10b981" />
-              )}
-              <Text style={styles.templateTitle}>Scan Recipe</Text>
-              <Text style={styles.templateSubtitle}>From image</Text>
-            </Pressable>
-            <Pressable 
-              style={styles.templateCard}
-              onPress={() => {
-                loadLibraryMeals();
-                setShowLibrary(true);
-              }}
-            >
-              <SvgIcon name="book" size={24} color="#8b5cf6" />
-              <Text style={styles.templateTitle}>My Meals</Text>
-              <Text style={styles.templateSubtitle}>Saved recipes</Text>
-            </Pressable>
-          </View>
-        </View>
-        
-        <View style={{ height: 100 }} />
-      </ScrollView>
-    </View>
+    <ManualMealForm
+      userId={userId || ''}
+      onBack={() => setViewMode('dashboard')}
+      onShowProductSearch={() => setShowProductSearch(true)}
+      onShowLibrary={() => setShowLibrary(true)}
+      onShowTemplates={handleShowTemplates}
+      onScanRecipe={handleScanRecipe}
+      onSavedMealId={(id) => setSavedMealId(id)}
+      scanning={scanning}
+      onLoadLibraryMeals={loadLibraryMeals}
+    />
   );
 
   // Render AI Plan Generator Modal
@@ -4059,20 +3607,6 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
                 )}
               </TouchableOpacity>
 
-              {/* View Calendar Button */}
-              <TouchableOpacity 
-                style={styles.viewCalendarButton}
-                activeOpacity={0.7}
-                onPress={(e) => {
-                  e.stopPropagation();
-                  setShowMealPlanSuccess(false);
-                  setViewMode('calendar');
-                }}
-              >
-                <SvgIcon name="calendar" size={20} color="#3b82f6" />
-                <Text style={styles.viewCalendarButtonText}>View in Calendar</Text>
-              </TouchableOpacity>
-
               {/* Save Meal Plan Button */}
               <TouchableOpacity 
                 style={[
@@ -4097,60 +3631,6 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
                   mealPlanSaved && styles.saveMealPlanButtonTextSaved
                 ]}>
                   {mealPlanSaved ? 'Saved to Library!' : 'Save Meal Plan'}
-                </Text>
-              </TouchableOpacity>
-
-              {/* Log to Diary Button */}
-              <TouchableOpacity 
-                style={[
-                  styles.saveMealPlanButton,
-                  savedToDiary && styles.saveMealPlanButtonSaved
-                ]}
-                activeOpacity={0.7}
-                onPress={handleLogToDiary}
-                disabled={loggingToDiary || savedToDiary}
-              >
-                {loggingToDiary ? (
-                  <ActivityIndicator color="#3b82f6" size="small" />
-                ) : (
-                  <SvgIcon 
-                    name={savedToDiary ? "checkmark-circle" : "calendar-outline"} 
-                    size={20} 
-                    color={savedToDiary ? "#4cbb17" : "#3b82f6"} 
-                  />
-                )}
-                <Text style={[
-                  styles.saveMealPlanButtonText,
-                  savedToDiary && styles.saveMealPlanButtonTextSaved
-                ]}>
-                  {savedToDiary ? 'Logged to Diary!' : 'Log to Meal Diary'}
-                </Text>
-              </TouchableOpacity>
-
-              {/* Save to Recipe Library Button */}
-              <TouchableOpacity 
-                style={[
-                  styles.saveMealPlanButton,
-                  savedToLibrary && styles.saveMealPlanButtonSaved
-                ]}
-                activeOpacity={0.7}
-                onPress={handleSaveToLibrary}
-                disabled={savingToLibrary || savedToLibrary}
-              >
-                {savingToLibrary ? (
-                  <ActivityIndicator color="#8b5cf6" size="small" />
-                ) : (
-                  <SvgIcon 
-                    name={savedToLibrary ? "checkmark-circle" : "book-outline"} 
-                    size={20} 
-                    color={savedToLibrary ? "#4cbb17" : "#8b5cf6"} 
-                  />
-                )}
-                <Text style={[
-                  styles.saveMealPlanButtonText,
-                  savedToLibrary && styles.saveMealPlanButtonTextSaved
-                ]}>
-                  {savedToLibrary ? 'Saved to Recipe Library!' : 'Save Recipes to Library'}
                 </Text>
               </TouchableOpacity>
 
@@ -4241,292 +3721,6 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
       </SafeAreaView>
     </Modal>
   );
-
-  // Calendar View - Shows meal plan calendar with actual data
-  const renderCalendarView = () => {
-    // Generate calendar days for the current month
-    const getDaysInMonth = (date: Date) => {
-      const year = date.getFullYear();
-      const month = date.getMonth();
-      const firstDay = new Date(year, month, 1);
-      const lastDay = new Date(year, month + 1, 0);
-      const daysInMonth = lastDay.getDate();
-      const startingDayOfWeek = firstDay.getDay();
-      
-      const days: Array<{ date: Date | null; day: number; isCurrentMonth: boolean; meals: any[] }> = [];
-      
-      // Add empty days for padding
-      for (let i = 0; i < startingDayOfWeek; i++) {
-        days.push({ date: null, day: 0, isCurrentMonth: false, meals: [] });
-      }
-      
-      // Add days of the month
-      for (let day = 1; day <= daysInMonth; day++) {
-        const currentDate = new Date(year, month, day);
-        const dateStr = currentDate.toISOString().split('T')[0];
-        
-        // Find meals for this day from calendarDays (loaded via mealCalendarService)
-        const dayData = calendarDays.find(d => d.date === dateStr);
-        const dayMeals = dayData?.meals || [];
-        
-        days.push({ date: currentDate, day, isCurrentMonth: true, meals: dayMeals });
-      }
-      
-      return days;
-    };
-    
-    const calendarGridDays = getDaysInMonth(calendarMonth);
-    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-    const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-    
-    const isToday = (date: Date | null) => {
-      if (!date) return false;
-      const today = new Date();
-      return date.getDate() === today.getDate() && 
-             date.getMonth() === today.getMonth() && 
-             date.getFullYear() === today.getFullYear();
-    };
-    
-    const isSelected = (date: Date | null) => {
-      if (!date) return false;
-      return date.getDate() === selectedDate.getDate() && 
-             date.getMonth() === selectedDate.getMonth() && 
-             date.getFullYear() === selectedDate.getFullYear();
-    };
-    
-    const handleDayPress = (date: Date | null) => {
-      if (date) {
-        setSelectedDate(date);
-      }
-    };
-    
-    const handleNavigateMonth = (delta: number) => {
-      const newMonth = new Date(calendarMonth);
-      newMonth.setMonth(newMonth.getMonth() + delta);
-      setCalendarMonth(newMonth);
-    };
-    
-    // Get meals for selected date from calendarDays (loaded via mealCalendarService)
-    const dateStr = selectedDate.toISOString().split('T')[0];
-    const selectedDayData = calendarDays.find(d => d.date === dateStr);
-    const selectedDayMeals = selectedDayData?.meals || [];
-    
-    return (
-      <View style={styles.calendarContainer}>
-        {/* Status bar area - solid color */}
-        <View style={{ height: insets.top, backgroundColor: '#f59e0b' }} />
-        
-        {/* Collapsing Header */}
-        <Animated.View style={[styles.collapsibleHeader, { height: headerHeight, backgroundColor: '#f59e0b' }]}>
-          <Animated.View style={[styles.dashboardHeaderContent, { opacity: headerOpacity, transform: [{ scale: titleScale }] }]}>
-            <Pressable style={styles.calendarBackButton} onPress={() => setViewMode('dashboard')}>
-              <SvgIcon name="arrow-back" size={24} color="#ffffff" />
-            </Pressable>
-            <Text style={styles.dashboardHeaderTitle}>Meal Calendar</Text>
-            <Text style={styles.dashboardHeaderSubtitle}>
-              {calendarLoading ? 'Loading...' : calendarDays.length > 0 ? `${calendarDays.length} days scheduled` : 'No meals scheduled'}
-            </Text>
-            <Pressable style={styles.calendarAddButton} onPress={() => setShowPlanGenerator(true)}>
-              <SvgIcon name="add" size={24} color="#ffffff" />
-            </Pressable>
-          </Animated.View>
-        </Animated.View>
-        
-        <ScrollView style={styles.calendarContent} showsVerticalScrollIndicator={false}>
-          {calendarLoading ? (
-            <View style={{ padding: 40, alignItems: 'center' }}>
-              <ActivityIndicator size="large" color="#3b82f6" />
-              <Text style={{ marginTop: 16, color: '#6b7280', fontSize: 14 }}>Loading calendar...</Text>
-            </View>
-          ) : calendarError ? (
-            <View style={{ padding: 40, alignItems: 'center' }}>
-              <SvgIcon name="alert-circle-outline" size={48} color="#ef4444" />
-              <Text style={{ marginTop: 16, color: '#ef4444', fontSize: 14 }}>{calendarError}</Text>
-              <TouchableOpacity 
-                style={{ marginTop: 16, padding: 12, backgroundColor: '#3b82f6', borderRadius: 8 }}
-                onPress={() => loadCalendarData()}
-              >
-                <Text style={{ color: '#ffffff', fontSize: 14, fontWeight: '600' }}>Retry</Text>
-              </TouchableOpacity>
-            </View>
-          ) : (
-            <>
-              {/* Month Navigation */}
-              <View style={styles.calendarMonthNav}>
-            <TouchableOpacity onPress={() => handleNavigateMonth(-1)} style={styles.calendarNavButton}>
-              <SvgIcon name="chevron-back" size={24} color="#3b82f6" />
-            </TouchableOpacity>
-            <Text style={styles.calendarMonthTitle}>
-              {monthNames[calendarMonth.getMonth()]} {calendarMonth.getFullYear()}
-            </Text>
-            <TouchableOpacity onPress={() => handleNavigateMonth(1)} style={styles.calendarNavButton}>
-              <SvgIcon name="chevron-forward" size={24} color="#3b82f6" />
-            </TouchableOpacity>
-          </View>
-          
-          {/* Day Names Header */}
-          <View style={styles.calendarDayNames}>
-            {dayNames.map((name) => (
-              <Text key={name} style={styles.calendarDayName}>{name}</Text>
-            ))}
-          </View>
-          
-          {/* Calendar Grid */}
-          <View style={styles.calendarGrid}>
-            {calendarGridDays.map((item, index) => (
-              <TouchableOpacity
-                key={index}
-                style={[
-                  styles.calendarDayCell,
-                  !item.isCurrentMonth && styles.calendarDayCellEmpty,
-                  isToday(item.date) && styles.calendarDayCellToday,
-                  isSelected(item.date) && styles.calendarDayCellSelected,
-                ]}
-                onPress={() => handleDayPress(item.date)}
-                disabled={!item.isCurrentMonth}
-              >
-                {item.isCurrentMonth && (
-                  <>
-                    <Text style={[
-                      styles.calendarDayText,
-                      isToday(item.date) && styles.calendarDayTextToday,
-                      isSelected(item.date) && styles.calendarDayTextSelected,
-                    ]}>
-                      {item.day}
-                    </Text>
-                    {item.meals.length > 0 && (
-                      <View style={styles.calendarMealDots}>
-                        {item.meals.slice(0, 3).map((meal, mealIdx) => (
-                          <View 
-                            key={mealIdx} 
-                            style={[
-                              styles.calendarMealDot,
-                              { backgroundColor: mealTypeConfig[meal.meal_type]?.color || '#9ca3af' }
-                            ]} 
-                          />
-                        ))}
-                      </View>
-                    )}
-                  </>
-                )}
-              </TouchableOpacity>
-            ))}
-          </View>
-          
-          {/* Selected Day Meals */}
-          <View style={styles.calendarSelectedDay}>
-            <Text style={styles.calendarSelectedDayTitle}>
-              {selectedDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
-            </Text>
-            
-            {selectedDayMeals.length > 0 ? (
-              <View style={styles.calendarMealsList}>
-                {selectedDayMeals.map((meal, index) => (
-                  <TouchableOpacity
-                    key={index}
-                    style={styles.calendarMealCard}
-                    onPress={() => {
-                      // Create a minimal SavedMeal-compatible object for display
-                      const mealForDetails = {
-                        meal_id: meal.meal_id,
-                        name: meal.meal_name,
-                        description: '',
-                        nutrition: {
-                          calories: meal.calories,
-                          protein: meal.protein,
-                          carbs: meal.carbs,
-                          fat: meal.fat,
-                        },
-                        ingredients: [],
-                        tags: [],
-                        servings: meal.servings,
-                        serving_size: meal.servings,
-                        is_favorite: false,
-                        times_logged: 0,
-                        created_at: new Date().toISOString(),
-                        updated_at: new Date().toISOString(),
-                      } as MealWithInstructions;
-                      setSelectedMeal(mealForDetails);
-                      setShowMealDetails(true);
-                    }}
-                  >
-                    <View style={[
-                      styles.calendarMealIcon,
-                      { backgroundColor: mealTypeConfig[meal.meal_type]?.bgColor || '#f3f4f6' }
-                    ]}>
-<SvgIcon 
-                        name={mealTypeConfig[meal.meal_type]?.icon as any || 'restaurant-outline'} 
-                        size={20} 
-                        color={mealTypeConfig[meal.meal_type]?.color || '#6b7280'} 
-                      />
-                    </View>
-                    <View style={styles.calendarMealInfo}>
-                      <Text style={styles.calendarMealType}>
-                        {meal.meal_type.charAt(0).toUpperCase() + meal.meal_type.slice(1)}
-                      </Text>
-                      <Text style={styles.calendarMealName}>{meal.meal_name}</Text>
-                      <Text style={styles.calendarMealMacros}>
-                        {meal.calories || 0} cal • {meal.protein || 0}g protein • {meal.carbs || 0}g carbs • {meal.fat || 0}g fat
-                      </Text>
-                    </View>
-                    <SvgIcon name="chevron-forward" size={20} color="#9ca3af" />
-                  </TouchableOpacity>
-                ))}
-              </View>
-            ) : (
-              <View style={styles.calendarNoMeals}>
-                <SvgIcon name="restaurant-outline" size={48} color="#d1d5db" />
-                <Text style={styles.calendarNoMealsText}>No meals planned for this day</Text>
-                <TouchableOpacity 
-                  style={styles.calendarAddMealButton}
-                  onPress={() => setShowPlanGenerator(true)}
-                >
-                  <SvgIcon name="add-circle-outline" size={20} color="#3b82f6" />
-                  <Text style={styles.calendarAddMealText}>Create a Meal Plan</Text>
-                </TouchableOpacity>
-              </View>
-            )}
-          </View>
-          </>
-          )}
-          
-          {/* Plan Summary */}
-          {activeMealPlan && (
-            <View style={styles.calendarSummary}>
-              <Text style={styles.calendarSummaryTitle}>Plan Summary</Text>
-              <View style={styles.calendarSummaryStats}>
-                <View style={styles.calendarSummaryStat}>
-                  <Text style={styles.calendarSummaryValue}>{activeMealPlan.duration_days || activeMealPlan.days?.length || 0}</Text>
-                  <Text style={styles.calendarSummaryLabel}>Days</Text>
-                </View>
-                <View style={styles.calendarSummaryStat}>
-                  <Text style={styles.calendarSummaryValue}>
-                    {activeMealPlan.summary?.total_meals || 
-                      activeMealPlan.days?.reduce((sum, day) => sum + (day.meals?.length || 0), 0) || 0}
-                  </Text>
-                  <Text style={styles.calendarSummaryLabel}>Meals</Text>
-                </View>
-                <View style={styles.calendarSummaryStat}>
-                  <Text style={styles.calendarSummaryValue}>
-                    {activeMealPlan.summary?.avg_calories_per_day || 
-                      Math.round((activeMealPlan.days?.reduce((sum, day) => {
-                        const dayCalories = day.meals?.reduce((mealSum, meal: any) => {
-                          return mealSum + (meal.nutrition?.calories || meal.calories || 0);
-                        }, 0) || 0;
-                        return sum + dayCalories;
-                      }, 0) || 0) / (activeMealPlan.days?.length || 1)) || 0}
-                  </Text>
-                  <Text style={styles.calendarSummaryLabel}>Avg Cal/Day</Text>
-                </View>
-              </View>
-            </View>
-          )}
-          
-          <View style={{ height: 100 }} />
-        </ScrollView>
-      </View>
-    );
-  };
 
   // Meal Details Modal - matches the screenshot design
   const renderMealDetailsModal = () => {
@@ -5245,7 +4439,6 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
       {/* Content based on view mode */}
       {viewMode === 'dashboard' && renderDashboard()}
       {viewMode === 'create' && renderCreateMealForm()}
-      {viewMode === 'calendar' && renderCalendarView()}
 
       {/* Modals */}
       {renderPlanGeneratorModal()}
@@ -5254,6 +4447,30 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
       {renderTemplatesModal()}
       {renderMealDetailsModal()}
       {renderLibraryModal()}
+      
+      {/* Product Search Modal */}
+      <ProductSearchModal
+        visible={showProductSearch}
+        onClose={() => setShowProductSearch(false)}
+        onSelectProduct={(product) => {
+          // Add product to hook's ingredients
+          mealShoppingHook.addIngredientFromProduct(
+            product,
+            '1',
+            product.servingSize || 'serving'
+          );
+          
+          // Also sync to component's ingredients for display
+          const newIngredient = {
+            id: `ing_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
+            name: product.name,
+            amount: '1',
+            unit: product.servingSize || 'serving',
+          };
+          setIngredients([...ingredients, newIngredient]);
+          setShowProductSearch(false);
+        }}
+      />
     </>
   );
 }
@@ -5511,6 +4728,23 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: '#fff',
+  },
+  secondaryButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    backgroundColor: '#ffffff',
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
+    paddingVertical: 12,
+    borderRadius: 10,
+  },
+  secondaryButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#3b82f6',
   },
   templatesContainer: {
     flexDirection: 'row',
