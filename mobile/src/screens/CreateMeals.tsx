@@ -1166,25 +1166,66 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
       // Add mode-specific parameters per MEAL_COMBINATIONS_GUIDE
       if (params.mode === 'saved') {
         // ⭐ Saved mode: Reorder previously created meals
-        // Skip meal generation entirely - just use existing meal IDs
         if (!params.savedMealIds || params.savedMealIds.length === 0) {
-          throw new Error('No saved meals selected');
+          throw new Error('Please select at least one meal plan to reorder');
         }
         
-        // TODO: Implement saved meals reorder flow
-        // This should:
-        // 1. Fetch full meal details from saved meal IDs
-        // 2. Update servings if needed
-        // 3. Navigate directly to shopping list/Instacart
-        console.log('Reordering saved meals:', params.savedMealIds);
+        console.log('[CreateMeals] Reordering saved meals:', params.savedMealIds);
         
-        // For now, show a message that this feature is being implemented
-        Alert.alert(
-          'Coming Soon',
-          'Saved meals reordering will be available in the next update. For now, please use Quick or Plan mode to generate meals.',
-          [{ text: 'OK' }]
-        );
-        setIsCreatingMeal(false);
+        try {
+          // Call reorder API endpoint
+          const reorderResponse = await fetch(
+            `${API_CONFIG.services.baseUrl}/api/meals/reorder`,
+            {
+              method: 'POST',
+              headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                userId: userId,
+                savedMealIds: params.savedMealIds,
+                servings: params.servings,
+              }),
+            }
+          );
+          
+          if (!reorderResponse.ok) {
+            const errorData = await reorderResponse.json();
+            throw new Error(errorData.error || 'Failed to reorder meals');
+          }
+          
+          const reorderData = await reorderResponse.json();
+          console.log('[CreateMeals] Reorder successful:', reorderData);
+          
+          // Show success message
+          Alert.alert(
+            'Shopping List Created!',
+            `${reorderData.totalIngredients} ingredients added to your shopping list.`,
+            [
+              { text: 'OK', style: 'default' },
+              ...(reorderData.instacartUrl ? [
+                {
+                  text: 'Open Instacart',
+                  onPress: () => {
+                    // Open Instacart URL
+                    if (reorderData.instacartUrl) {
+                      Linking.openURL(reorderData.instacartUrl);
+                    }
+                  },
+                },
+              ] : []),
+            ]
+          );
+          
+          // Navigate to shopping list or home
+          navigation.navigate('Meals');
+        } catch (error: any) {
+          console.error('[CreateMeals] Reorder error:', error);
+          throw error; // Will be caught by outer catch
+        } finally {
+          setIsCreatingMeal(false);
+        }
         return;
       } else if (params.mode === 'quick') {
         // ⭐ Multi-select support: Send arrays for meal types and cuisines

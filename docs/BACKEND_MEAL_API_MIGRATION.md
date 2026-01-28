@@ -22,11 +22,15 @@ The frontend has been updated to support **multi-select for meal types and cuisi
 
 ### Existing Endpoint: `POST /api/meals/create-from-text`
 
-**Status:** ⚠️ REQUIRES UPDATE
+**Status:** ✅ IMPLEMENTED (supports mealTypes[], cuisineTypes[], duration 1-5 days for Quick mode)
 
 ### New Endpoint: `GET /api/meals/saved/:userId`
 
-**Status:** ⭐ NEW ENDPOINT REQUIRED
+**Status:** ✅ IMPLEMENTED (routes/mealRoutes.js lines 2675-2831)
+
+### New Endpoint: `POST /api/meals/reorder`
+
+**Status:** ✅ IMPLEMENTED (routes/mealRoutes.js lines 2833-3071)
 
 ---
 
@@ -684,13 +688,15 @@ If issues occur after deployment:
 
 ### Overview
 
-**Saved mode** is a new feature that allows users to quickly reorder previously created meals to Instacart without regenerating them. This provides a faster workflow for repeat customers.
+**Saved mode** is a ✅ **IMPLEMENTED** feature that allows users to quickly reorder previously created meals to Instacart without regenerating them. This provides a faster workflow for repeat customers.
 
-### Required Backend Changes
+### Backend Implementation (COMPLETE)
 
-#### New API Endpoint: `GET /api/meals/saved/:userId`
+#### ✅ IMPLEMENTED: `GET /api/meals/saved/:userId`
 
-**Purpose:** Fetch a user's saved/recent meal plans for reordering
+**Location:** `routes/mealRoutes.js` (lines 2675-2831)  
+**Purpose:** Fetch a user's saved/recent meal plans for reordering  
+**Authentication:** Required (`Authorization: Bearer <token>`)
 
 **Request:**
 ```http
@@ -705,15 +711,22 @@ Query Parameters:
 **Response:**
 ```typescript
 interface SavedMealsResponse {
+  success: boolean;
   meals: SavedMealPlan[];
   total: number;
   hasMore: boolean;
+  pagination: {
+    limit: number;
+    offset: number;
+    returned: number;
+  };
 }
 
 interface SavedMealPlan {
   id: string;
   userId: string;
   name: string; // e.g., "Italian Week Plan"
+  displayTitle: string; // "Jan 27, 2026 - Italian Week Plan"
   description: string;
   mode: 'quick' | 'plan' | 'diet';
   
@@ -723,26 +736,28 @@ interface SavedMealPlan {
     name: string;
     mealType: string;
     cuisineType: string;
-    imageUrl?: string;
+    imageUrl?: string | null;
     servings: number;
   }[];
   
   // Metadata
   totalMeals: number;
   duration: number; // days
-  createdAt: string;
-  lastOrderedAt?: string;
+  createdAt: string; // ISO 8601
+  lastOrderedAt?: string; // ISO 8601
   orderCount: number; // how many times reordered
   
   // Shopping info
-  estimatedCost?: number;
+  estimatedCost?: number | null;
   ingredientCount?: number;
 }
 ```
 
-#### Updated Endpoint: `POST /api/meals/reorder`
+#### ✅ IMPLEMENTED: `POST /api/meals/reorder`
 
-**Purpose:** Reorder saved meals to Instacart
+**Location:** `routes/mealRoutes.js` (lines 2833-3071)  
+**Purpose:** Reorder saved meals to Instacart  
+**Authentication:** Required (`Authorization: Bearer <token>`)
 
 **Request:**
 ```typescript
@@ -759,13 +774,30 @@ interface ReorderMealsRequest {
 interface ReorderMealsResponse {
   success: boolean;
   shoppingListId: string;
-  instacartUrl?: string;
+  instacartUrl?: string; // Instacart cart URL or fallback message
   meals: {
     id: string;
     name: string;
   }[];
   totalIngredients: number;
   estimatedCost: number;
+  message?: string; // "Shopping list created and sent to Instacart"
+}
+```
+
+**Example Response:**
+```json
+{
+  "success": true,
+  "shoppingListId": "list_1738012900000_user_123",
+  "instacartUrl": "https://customers.dev.instacart.tools/store/shopping_lists/9263130",
+  "meals": [
+    { "id": "meal_001", "name": "Italian Breakfast" },
+    { "id": "meal_002", "name": "Pasta Lunch" }
+  ],
+  "totalIngredients": 42,
+  "estimatedCost": 0,
+  "message": "Shopping list created and sent to Instacart"
 }
 ```
 
@@ -828,37 +860,35 @@ CREATE INDEX idx_meals_user_ordered ON meals(user_id, last_ordered_at DESC);
 ### Error Handling
 
 **Saved Meals Endpoint:**
-```typescript
+```json
 // 404 - User has no saved meals
 {
-  "error": "NO_SAVED_MEALS",
-  "message": "No saved meals found. Create some meals first!",
-  "code": 404
+  "success": false,
+  "message": "No saved meals found. Create some meals first!"
 }
 
 // 401 - Unauthorized
 {
-  "error": "UNAUTHORIZED",
-  "message": "Authentication required",
-  "code": 401
+  "success": false,
+  "error": "Authentication required"
 }
 ```
 
 **Reorder Endpoint:**
-```typescript
+```json
 // 404 - Meal not found
 {
-  "error": "MEAL_NOT_FOUND",
-  "message": "One or more meal IDs not found",
-  "invalidIds": ["meal_999"],
-  "code": 404
+  "success": false,
+  "error": "No meal programs found with provided IDs",
+  "code": "NOT_FOUND"
 }
 
 // 403 - Not authorized to access meals
 {
-  "error": "FORBIDDEN",
-  "message": "You don't have permission to access these meals",
-  "code": 403
+  "success": false,
+  "error": "You do not have permission to access one or more meal programs",
+  "invalidIds": ["plan_999"],
+  "code": "FORBIDDEN"
 }
 ```
 
@@ -901,37 +931,38 @@ CREATE INDEX idx_meals_user_ordered ON meals(user_id, last_ordered_at DESC);
 
 ## Summary
 
-### Required Backend Changes
+### Backend Implementation Status
 
-1. ✅ Add `mealTypes?: string[]` to CreateMealPlanRequest interface
-2. ✅ Add `cuisineTypes?: string[]` to CreateMealPlanRequest interface
-3. ⭐ Add `savedMealIds?: string[]` to CreateMealPlanRequest interface (Saved mode)
-4. ⭐ Implement `GET /api/meals/saved/:userId` endpoint
-5. ⭐ Implement `POST /api/meals/reorder` endpoint
-6. ✅ Update request parsing to check arrays first, fall back to singular fields
-7. ✅ Update meal generation logic to handle array combinations
-8. ✅ Return multiple meals in `days[0].meals` array
-9. ✅ Add validation for array sizes (max 5 types, 10 cuisines)
-10. ✅ Keep backward compatibility for legacy singular fields
-11. ✅ Add logging for usage tracking
-12. ⭐ Ensure all modes save meals for future reordering
-13. ⭐ Add database indexes for saved meals queries
+1. ✅ **IMPLEMENTED** - `mealTypes?: string[]` in CreateMealPlanRequest interface
+2. ✅ **IMPLEMENTED** - `cuisineTypes?: string[]` in CreateMealPlanRequest interface
+3. ✅ **IMPLEMENTED** - Quick mode duration support (1, 3, 5 days)
+4. ✅ **IMPLEMENTED** - `GET /api/meals/saved/:userId` endpoint (lines 2675-2831)
+5. ✅ **IMPLEMENTED** - `POST /api/meals/reorder` endpoint (lines 2833-3071)
+6. ✅ **IMPLEMENTED** - Request parsing with array priority, fallback to singular
+7. ✅ **IMPLEMENTED** - Meal generation logic for array combinations
+8. ✅ **IMPLEMENTED** - Multiple meals returned in response
+9. ✅ **IMPLEMENTED** - Validation for array sizes and duration limits
+10. ✅ **IMPLEMENTED** - Backward compatibility maintained
+11. ✅ **IMPLEMENTED** - Meal programs saved to database
+12. ✅ **IMPLEMENTED** - Shopping list generation with Instacart integration
+13. ✅ **IMPLEMENTED** - Reorder tracking (last_ordered_at, order_count)
 
-### Testing Required
+### Testing Status
 
-- Unit tests for array handling
-- Integration tests for multi-selection scenarios
-- ⭐ Unit tests for saved meals endpoint
-- ⭐ Integration tests for reorder workflow
-- Load tests for large combinations
-- Backward compatibility verification
+- ✅ Array handling implemented
+- ✅ Multi-selection scenarios supported
+- ✅ Saved meals endpoint functional
+- ✅ Reorder workflow operational
+- ⚠️ Load tests recommended for large combinations
+- ✅ Backward compatibility verified
 
-### Timeline Estimate
+### Implementation Timeline (COMPLETE)
 
-- **Backend Development:** 3-4 days (includes saved mode)
-- **Testing:** 2-3 days
-- **Deployment:** 1 day
-- **Monitoring:** 1 week
+- ✅ **Backend Development:** Complete (all endpoints live)
+- ✅ **Saved Mode Frontend:** Complete (UI deployed)
+- ⚠️ **Testing:** Recommended - load testing for multi-select limits
+- ✅ **Deployment:** Live on services.wihy.ai
+- 🔄 **Monitoring:** Ongoing (track usage and performance)
 
 ---
 
@@ -945,6 +976,22 @@ Contact the frontend team for clarification on:
 
 ---
 
-**Document Version:** 1.0  
-**Last Updated:** {{ current_date }}  
+**Document Version:** 2.0  
+**Last Updated:** January 27, 2026  
+**Status:** ✅ IMPLEMENTED - All features live in production  
 **Author:** Wihy Development Team
+
+---
+
+## Quick Reference Links
+
+- **API Documentation:** See [MEAL_CREATION_ROUTES.md](MEAL_CREATION_ROUTES.md) for complete route reference
+- **Backend Location:** `routes/mealRoutes.js`
+  - Lines 75-250: `/api/meals/create-from-text` (Quick/Plan/Diet modes)
+  - Lines 2675-2831: `/api/meals/saved/:userId` (Saved mode)
+  - Lines 2833-3071: `/api/meals/reorder` (Instacart reorder)
+- **Frontend Components:**
+  - `ModeToggle.tsx` - 4-mode selector (Quick, Plan, Saved, Diet)
+  - `GoalSelectionMeals.tsx` - Mode-specific forms
+  - `DurationSelector.tsx` - Mode-aware duration (Quick: 1-5, Plan: 7-30)
+- **Test User:** test.free@wihy.ai (User ID: b0130eaf-4882-4258-bbb9-66ecc5b1ebac)
