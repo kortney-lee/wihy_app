@@ -960,6 +960,18 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
         }];
       }
       
+      // Create a lookup map from result.meals for full meal details (includes ingredients)
+      const mealsLookup: { [key: string]: any } = {};
+      if (result.meals && Array.isArray(result.meals)) {
+        for (const meal of result.meals) {
+          const mealId = meal.meal_id || meal.recipe_id || meal.id;
+          if (mealId) {
+            mealsLookup[mealId] = meal;
+          }
+        }
+        console.log('[CreateMeals] Created meals lookup with', Object.keys(mealsLookup).length, 'meals');
+      }
+      
       // Normalize the response to handle different API formats
       const normalizedPlan: MealPlanResponse = {
         success: result.success ?? true,
@@ -973,22 +985,26 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
           date: day.date || new Date(Date.now() + idx * 86400000).toISOString().split('T')[0],
           day_number: day.day_number || day.dayNumber || idx + 1,
           day_name: day.day_name || ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][(new Date().getDay() + idx) % 7],
-          meals: (day.meals || []).map((meal: any) => ({
-            meal_id: meal.meal_id || meal.id,
+          meals: (day.meals || []).map((meal: any) => {
+            const mealId = meal.meal_id || meal.id;
+            const fullMealDetails = mealsLookup[mealId] || {};
+            return {
+            meal_id: mealId,
             meal_type: meal.meal_type || meal.type || 'dinner',
-            meal_name: meal.meal_name || meal.name || 'Meal',
-            description: meal.description || '',
-            calories: meal.calories || 0,
-            protein: meal.protein || meal.protein_g || 0,
-            carbs: meal.carbs || meal.carbs_g || 0,
-            fat: meal.fat || meal.fat_g || 0,
-            servings: meal.servings || planServings,
-            prep_time_min: meal.prep_time_min || meal.prep_time || 0,
-            cook_time_min: meal.cook_time_min || meal.cook_time || 0,
-            ingredients: meal.ingredients || [],
-            instructions: meal.instructions || [],
-            image_url: meal.image_url || meal.imageUrl,
-          })),
+            meal_name: meal.meal_name || meal.name || fullMealDetails.name || 'Meal',
+            description: meal.description || fullMealDetails.description || '',
+            calories: meal.calories || fullMealDetails.nutrition?.calories || 0,
+            protein: meal.protein || meal.protein_g || fullMealDetails.nutrition?.protein || 0,
+            carbs: meal.carbs || meal.carbs_g || fullMealDetails.nutrition?.carbs || 0,
+            fat: meal.fat || meal.fat_g || fullMealDetails.nutrition?.fat || 0,
+            servings: meal.servings || fullMealDetails.servings || planServings,
+            prep_time_min: meal.prep_time_min || meal.prep_time || fullMealDetails.preparation_time || 0,
+            cook_time_min: meal.cook_time_min || meal.cook_time || fullMealDetails.cooking_time || 0,
+            ingredients: meal.ingredients?.length > 0 ? meal.ingredients : (fullMealDetails.ingredients || []),
+            instructions: meal.instructions?.length > 0 ? meal.instructions : (fullMealDetails.instructions || []),
+            image_url: meal.image_url || meal.imageUrl || fullMealDetails.image_url,
+          };
+          }),
           total_calories: day.total_calories || day.totalCalories || 0,
           total_protein: day.total_protein || day.totalProtein || 0,
           total_carbs: day.total_carbs || day.totalCarbs || 0,
@@ -1472,6 +1488,18 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
         }];
       }
       
+      // Create a lookup map from result.meals for full meal details (includes ingredients)
+      const mealsLookupGoal: { [key: string]: any } = {};
+      if (result.meals && Array.isArray(result.meals)) {
+        for (const meal of result.meals) {
+          const mealId = meal.meal_id || meal.recipe_id || meal.id;
+          if (mealId) {
+            mealsLookupGoal[mealId] = meal;
+          }
+        }
+        console.log('[CreateMeals] Created meals lookup with', Object.keys(mealsLookupGoal).length, 'meals');
+      }
+      
       const normalizedPlan: MealPlanResponse = {
         success: result.success ?? true,
         program_id: planData.program_id || planData.mealPlanId || result.plan_id || result.id || result.meal?.id,
@@ -1484,22 +1512,26 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
           date: day.date || new Date(Date.now() + idx * 86400000).toISOString().split('T')[0],
           day_number: day.day_number || day.dayNumber || idx + 1,
           day_name: day.day_name || ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][(new Date().getDay() + idx) % 7],
-          meals: (day.meals || []).map((meal: any) => ({
-            meal_id: meal.meal_id || meal.id,
+          meals: (day.meals || []).map((meal: any) => {
+            const mealId = meal.meal_id || meal.id;
+            const fullMealDetails = mealsLookupGoal[mealId] || {};
+            return {
+            meal_id: mealId,
             meal_type: meal.meal_type || meal.type || 'dinner',
-            meal_name: meal.meal_name || meal.name || 'Meal',
-            description: meal.description || '',
-            calories: meal.calories || 0,
-            protein: meal.protein || meal.protein_g || 0,
-            carbs: meal.carbs || meal.carbs_g || 0,
-            fat: meal.fat || meal.fat_g || 0,
-            servings: meal.servings || request.servings,
-            prep_time_min: meal.prep_time_min || meal.prep_time || 0,
-            cook_time_min: meal.cook_time_min || meal.cook_time || 0,
-            ingredients: meal.ingredients || [],
-            instructions: meal.instructions || [],
-            image_url: meal.image_url || meal.imageUrl,
-          })),
+            meal_name: meal.meal_name || meal.name || fullMealDetails.name || 'Meal',
+            description: meal.description || fullMealDetails.description || '',
+            calories: meal.calories || fullMealDetails.nutrition?.calories || 0,
+            protein: meal.protein || meal.protein_g || fullMealDetails.nutrition?.protein || 0,
+            carbs: meal.carbs || meal.carbs_g || fullMealDetails.nutrition?.carbs || 0,
+            fat: meal.fat || meal.fat_g || fullMealDetails.nutrition?.fat || 0,
+            servings: meal.servings || fullMealDetails.servings || request.servings,
+            prep_time_min: meal.prep_time_min || meal.prep_time || fullMealDetails.preparation_time || 0,
+            cook_time_min: meal.cook_time_min || meal.cook_time || fullMealDetails.cooking_time || 0,
+            ingredients: meal.ingredients?.length > 0 ? meal.ingredients : (fullMealDetails.ingredients || []),
+            instructions: meal.instructions?.length > 0 ? meal.instructions : (fullMealDetails.instructions || []),
+            image_url: meal.image_url || meal.imageUrl || fullMealDetails.image_url,
+          };
+          }),
           total_calories: day.total_calories || day.totalCalories || 0,
           total_protein: day.total_protein || day.totalProtein || 0,
           total_carbs: day.total_carbs || day.totalCarbs || 0,
