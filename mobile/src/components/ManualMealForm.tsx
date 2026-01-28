@@ -54,16 +54,11 @@ export const ManualMealForm: React.FC<ManualMealFormProps> = ({
   // Form state
   const [mealName, setMealName] = useState('');
   const [servingSize, setServingSize] = useState('1');
-  const [calories, setCalories] = useState('');
-  const [protein, setProtein] = useState('');
-  const [carbs, setCarbs] = useState('');
-  const [fat, setFat] = useState('');
   const [mealType, setMealType] = useState<'breakfast' | 'lunch' | 'dinner' | 'snack'>('lunch');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [notes, setNotes] = useState('');
   const [ingredients, setIngredients] = useState<Ingredient[]>([]);
   const [saving, setSaving] = useState(false);
-  const [showQuickStartTooltip, setShowQuickStartTooltip] = useState(false);
 
   // Shopping hook
   const mealShoppingHook = useCreateMealWithShopping(userId);
@@ -99,10 +94,6 @@ export const ManualMealForm: React.FC<ManualMealFormProps> = ({
   const resetForm = () => {
     setMealName('');
     setServingSize('1');
-    setCalories('');
-    setProtein('');
-    setCarbs('');
-    setFat('');
     setMealType('lunch');
     setSelectedTags([]);
     setNotes('');
@@ -126,60 +117,13 @@ export const ManualMealForm: React.FC<ManualMealFormProps> = ({
           >
             <SvgIcon name="arrow-back" size={24} color="#ffffff" />
           </TouchableOpacity>
-          <Text style={styles.formHeaderTitleWhite}>Create Meal</Text>
-          <Text style={styles.formHeaderSubtitle}>Search 4M+ products or add ingredients manually</Text>
+          <Text style={styles.formHeaderTitleWhite}>Plan Your Meal</Text>
+          <Text style={styles.formHeaderSubtitle}>Build your ingredient list and create shopping cart</Text>
         </LinearGradient>
 
-        {/* Quick Start Tooltip Button */}
+        {/* Meal Details */}
         <View style={styles.section}>
-          <TouchableOpacity
-            onPress={() => setShowQuickStartTooltip(!showQuickStartTooltip)}
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 8,
-              backgroundColor: '#eff6ff',
-              paddingVertical: 10,
-              paddingHorizontal: 16,
-              borderRadius: 8,
-              borderWidth: 1,
-              borderColor: '#bfdbfe',
-            }}
-          >
-            <SvgIcon name="help-circle" size={18} color="#3b82f6" />
-            <Text style={{ fontSize: 14, fontWeight: '600', color: '#3b82f6' }}>
-              Quick Start Guide
-            </Text>
-            <SvgIcon 
-              name={showQuickStartTooltip ? "chevron-up" : "chevron-down"} 
-              size={16} 
-              color="#3b82f6" 
-            />
-          </TouchableOpacity>
-
-          {/* Expandable Quick Start Content */}
-          {showQuickStartTooltip && (
-            <View style={{ 
-              backgroundColor: '#eff6ff', 
-              borderRadius: 12, 
-              padding: 16, 
-              marginTop: 8,
-              borderLeftWidth: 4, 
-              borderLeftColor: '#3b82f6',
-            }}>
-              <Text style={{ fontSize: 13, color: '#1e40af', lineHeight: 20 }}>
-                1. Add ingredients using <Text style={{ fontWeight: '600' }}>Search</Text> for nutrition data or <Text style={{ fontWeight: '600' }}>Manual</Text> entry{'\n'}
-                2. Nutrition auto-calculates from products{'\n'}
-                3. Choose <Text style={{ fontWeight: '600' }}>Save & Shop</Text> to create Instacart list or <Text style={{ fontWeight: '600' }}>Save Only</Text>
-              </Text>
-            </View>
-          )}
-        </View>
-
-        {/* Basic Information */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Basic Information</Text>
+          <Text style={styles.sectionTitle}>Meal Details</Text>
           
           <View style={styles.card}>
             <Text style={styles.label}>Meal Name *</Text>
@@ -190,19 +134,6 @@ export const ManualMealForm: React.FC<ManualMealFormProps> = ({
               onChangeText={setMealName}
               placeholderTextColor="#9ca3af"
             />
-
-            <Text style={styles.label}>Serving Size</Text>
-            <View style={styles.servingContainer}>
-              <TextInput
-                style={[styles.input, styles.servingInput]}
-                placeholder="1"
-                value={servingSize}
-                onChangeText={setServingSize}
-                keyboardType="numeric"
-                placeholderTextColor="#9ca3af"
-              />
-              <Text style={styles.servingUnit}>serving(s)</Text>
-            </View>
 
             <Text style={styles.label}>Meal Type *</Text>
             <View style={styles.mealTypeContainer}>
@@ -226,85 +157,19 @@ export const ManualMealForm: React.FC<ManualMealFormProps> = ({
                 </Pressable>
               ))}
             </View>
-          </View>
-        </View>
 
-        {/* Nutrition Facts */}
-        <View style={styles.section}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-            <Text style={styles.sectionTitle}>Nutrition Facts (per serving)</Text>
-            {mealShoppingHook.hasCalculatedNutrition && (
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-                <SvgIcon name="checkmark-circle" size={16} color="#10b981" />
-                <Text style={{ fontSize: 12, color: '#10b981', fontWeight: '600' }}>Auto-calculated</Text>
-              </View>
-            )}
-          </View>
-          <Text style={{ fontSize: 13, color: '#6b7280', marginBottom: 12 }}>Values auto-calculate from products or enter manually</Text>
-          
-          <View style={styles.card}>
-            <View style={styles.nutritionGrid}>
-              <View style={styles.nutritionItem}>
-                <Text style={styles.label}>Calories</Text>
-                <TextInput
-                  style={styles.input}
-                  placeholder={mealShoppingHook.hasCalculatedNutrition ? Math.round(mealShoppingHook.calculatedNutrition.calories).toString() : "0"}
-                  value={calories}
-                  onChangeText={setCalories}
-                  keyboardType="numeric"
-                  placeholderTextColor={mealShoppingHook.hasCalculatedNutrition ? "#10b981" : "#9ca3af"}
-                />
-              </View>
-
-              <View style={styles.nutritionItem}>
-                <Text style={styles.label}>Protein (g)</Text>
-                <TextInput
-                  style={styles.input}
-                  placeholder={mealShoppingHook.hasCalculatedNutrition ? mealShoppingHook.calculatedNutrition.protein.toFixed(1) : "0"}
-                  value={protein}
-                  onChangeText={setProtein}
-                  keyboardType="numeric"
-                  placeholderTextColor={mealShoppingHook.hasCalculatedNutrition ? "#10b981" : "#9ca3af"}
-                />
-              </View>
-
-              <View style={styles.nutritionItem}>
-                <Text style={styles.label}>Carbs (g)</Text>
-                <TextInput
-                  style={styles.input}
-                  placeholder={mealShoppingHook.hasCalculatedNutrition ? mealShoppingHook.calculatedNutrition.carbs.toFixed(1) : "0"}
-                  value={carbs}
-                  onChangeText={setCarbs}
-                  keyboardType="numeric"
-                  placeholderTextColor={mealShoppingHook.hasCalculatedNutrition ? "#10b981" : "#9ca3af"}
-                />
-              </View>
-
-              <View style={styles.nutritionItem}>
-                <Text style={styles.label}>Fat (g)</Text>
-                <TextInput
-                  style={styles.input}
-                  placeholder={mealShoppingHook.hasCalculatedNutrition ? mealShoppingHook.calculatedNutrition.fat.toFixed(1) : "0"}
-                  value={fat}
-                  onChangeText={setFat}
-                  keyboardType="numeric"
-                  placeholderTextColor={mealShoppingHook.hasCalculatedNutrition ? "#10b981" : "#9ca3af"}
-                />
-              </View>
+            <Text style={styles.label}>Servings</Text>
+            <View style={styles.servingContainer}>
+              <TextInput
+                style={[styles.input, styles.servingInput]}
+                placeholder="1"
+                value={servingSize}
+                onChangeText={setServingSize}
+                keyboardType="numeric"
+                placeholderTextColor="#9ca3af"
+              />
+              <Text style={styles.servingUnit}>serving(s)</Text>
             </View>
-
-            {(calories || protein || carbs || fat || mealShoppingHook.hasCalculatedNutrition) && (
-              <View style={styles.nutritionSummary}>
-                <SvgIcon name="information-circle" size={20} color="#3b82f6" />
-                <Text style={styles.summaryText}>
-                  {mealShoppingHook.hasCalculatedNutrition && !calories && !protein && !carbs && !fat ? (
-                    `Auto-calculated: ${Math.round(mealShoppingHook.calculatedNutrition.calories)} cal • ${mealShoppingHook.calculatedNutrition.protein.toFixed(1)}g protein`
-                  ) : (
-                    `Total Macros: ${protein || mealShoppingHook.calculatedNutrition.protein.toFixed(1)}g protein • ${carbs || mealShoppingHook.calculatedNutrition.carbs.toFixed(1)}g carbs • ${fat || mealShoppingHook.calculatedNutrition.fat.toFixed(1)}g fat`
-                  )}
-                </Text>
-              </View>
-            )}
           </View>
         </View>
 
@@ -346,10 +211,20 @@ export const ManualMealForm: React.FC<ManualMealFormProps> = ({
                     />
                     {/* Show nutrition info if available from product search */}
                     {mealShoppingHook.ingredients.find(i => i.id === ingredient.id)?.calories && (
-                      <Text style={{ fontSize: 12, color: '#10b981', marginTop: 4 }}>
-                        {Math.round((mealShoppingHook.ingredients.find(i => i.id === ingredient.id)?.calories || 0) * parseFloat(ingredient.amount || '1'))} cal • 
-                        {Math.round((mealShoppingHook.ingredients.find(i => i.id === ingredient.id)?.protein || 0) * parseFloat(ingredient.amount || '1'))}g protein
-                      </Text>
+                      <View style={{ flexDirection: 'row', gap: 8, marginTop: 4 }}>
+                        <View style={styles.miniNutritionBadge}>
+                          <SvgIcon name="flame" size={10} color="#f59e0b" />
+                          <Text style={styles.miniNutritionText}>
+                            {Math.round((mealShoppingHook.ingredients.find(i => i.id === ingredient.id)?.calories || 0) * parseFloat(ingredient.amount || '1'))} cal
+                          </Text>
+                        </View>
+                        <View style={styles.miniNutritionBadge}>
+                          <SvgIcon name="fitness" size={10} color="#10b981" />
+                          <Text style={styles.miniNutritionText}>
+                            {Math.round((mealShoppingHook.ingredients.find(i => i.id === ingredient.id)?.protein || 0) * parseFloat(ingredient.amount || '1'))}g protein
+                          </Text>
+                        </View>
+                      </View>
                     )}
                   </View>
                   <TextInput
@@ -375,20 +250,43 @@ export const ManualMealForm: React.FC<ManualMealFormProps> = ({
             )}
           </View>
 
-          {/* Auto-calculated nutrition badge */}
+          {/* Nutrition Summary */}
           {mealShoppingHook.hasCalculatedNutrition && (
-            <View style={{ 
-              flexDirection: 'row', 
-              alignItems: 'center', 
-              gap: 8, 
-              marginTop: 12, 
-              padding: 12, 
-              backgroundColor: '#ecfdf5', 
-              borderRadius: 8 
-            }}>
-              <SvgIcon name="checkmark-circle" size={16} color="#10b981" />
-              <Text style={{ fontSize: 13, color: '#10b981', flex: 1 }}>
-                Nutrition auto-calculated from {mealShoppingHook.ingredients.filter(i => i.calories).length} products
+            <View style={styles.nutritionSummaryCard}>
+              <View style={styles.nutritionSummaryHeader}>
+                <SvgIcon name="checkmark-circle" size={18} color="#10b981" />
+                <Text style={styles.nutritionSummaryTitle}>Total Nutrition</Text>
+              </View>
+              <View style={styles.nutritionSummaryRow}>
+                <View style={styles.nutritionSummaryItem}>
+                  <SvgIcon name="flame" size={16} color="#f59e0b" />
+                  <Text style={styles.nutritionSummaryValue}>
+                    {Math.round(mealShoppingHook.calculatedNutrition.calories)}
+                  </Text>
+                  <Text style={styles.nutritionSummaryLabel}>cal</Text>
+                </View>
+                <View style={styles.nutritionSummaryItem}>
+                  <SvgIcon name="fitness" size={16} color="#10b981" />
+                  <Text style={styles.nutritionSummaryValue}>
+                    {mealShoppingHook.calculatedNutrition.protein.toFixed(0)}
+                  </Text>
+                  <Text style={styles.nutritionSummaryLabel}>g protein</Text>
+                </View>
+                <View style={styles.nutritionSummaryItem}>
+                  <Text style={styles.nutritionSummaryValue}>
+                    {mealShoppingHook.calculatedNutrition.carbs.toFixed(0)}
+                  </Text>
+                  <Text style={styles.nutritionSummaryLabel}>g carbs</Text>
+                </View>
+                <View style={styles.nutritionSummaryItem}>
+                  <Text style={styles.nutritionSummaryValue}>
+                    {mealShoppingHook.calculatedNutrition.fat.toFixed(0)}
+                  </Text>
+                  <Text style={styles.nutritionSummaryLabel}>g fat</Text>
+                </View>
+              </View>
+              <Text style={styles.nutritionSummaryFooter}>
+                Auto-calculated from {mealShoppingHook.ingredients.filter(i => i.calories).length} products
               </Text>
             </View>
           )}
@@ -454,7 +352,7 @@ export const ManualMealForm: React.FC<ManualMealFormProps> = ({
               
               setSaving(true);
               const result = await mealShoppingHook.saveAndShopOnInstacart(
-                mealName, mealType, servingSize, calories, protein, carbs, fat, selectedTags, notes
+                mealName, mealType, servingSize, '', '', '', '', selectedTags, notes
               );
               setSaving(false);
               
@@ -494,7 +392,7 @@ export const ManualMealForm: React.FC<ManualMealFormProps> = ({
                 
                 setSaving(true);
                 const mealId = await mealShoppingHook.saveMeal(
-                  mealName, mealType, servingSize, calories, protein, carbs, fat, selectedTags, notes
+                  mealName, mealType, servingSize, '', '', '', '', selectedTags, notes
                 );
                 setSaving(false);
                 
@@ -529,7 +427,7 @@ export const ManualMealForm: React.FC<ManualMealFormProps> = ({
                 
                 setSaving(true);
                 const mealId = await mealShoppingHook.saveMeal(
-                  mealName, mealType, servingSize, calories, protein, carbs, fat, selectedTags, notes
+                  mealName, mealType, servingSize, '', '', '', '', selectedTags, notes
                 );
                 setSaving(false);
                 
@@ -712,28 +610,65 @@ const styles = StyleSheet.create({
   mealTypeTextSelected: {
     color: '#ffffff',
   },
-  nutritionGrid: {
+  miniNutritionBadge: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    backgroundColor: '#f9fafb',
+    borderRadius: 6,
   },
-  nutritionItem: {
-    flex: 1,
-    minWidth: '45%',
+  miniNutritionText: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#374151',
   },
-  nutritionSummary: {
+  nutritionSummaryCard: {
+    marginTop: 12,
+    padding: 16,
+    backgroundColor: '#ecfdf5',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#d1fae5',
+  },
+  nutritionSummaryHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    marginTop: 12,
-    padding: 12,
-    backgroundColor: '#eff6ff',
-    borderRadius: 8,
+    marginBottom: 12,
   },
-  summaryText: {
+  nutritionSummaryTitle: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#047857',
+  },
+  nutritionSummaryRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 12,
+    marginBottom: 8,
+  },
+  nutritionSummaryItem: {
     flex: 1,
-    fontSize: 13,
-    color: '#1e40af',
+    alignItems: 'center',
+    gap: 4,
+  },
+  nutritionSummaryValue: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#047857',
+  },
+  nutritionSummaryLabel: {
+    fontSize: 11,
+    color: '#059669',
+    fontWeight: '500',
+  },
+  nutritionSummaryFooter: {
+    fontSize: 12,
+    color: '#059669',
+    textAlign: 'center',
+    marginTop: 4,
   },
   addButton: {
     flexDirection: 'row',
