@@ -209,7 +209,7 @@ export const GoalSelectionMeals: React.FC<GoalSelectionMealsProps> = ({
   
   // Plan mode state
   const [planGoal, setPlanGoal] = useState<string | null>(null);
-  const [duration, setDuration] = useState(7);
+  const [duration, setDuration] = useState(mode === 'quick' ? 1 : 7); // Quick: 1 day, Plan: 7 days
   const [servings, setServings] = useState(2);
   const [mealsPerDay, setMealsPerDay] = useState<Record<string, boolean>>({
     breakfast: true,
@@ -231,6 +231,15 @@ export const GoalSelectionMeals: React.FC<GoalSelectionMealsProps> = ({
   
   // Brand preferences (shared across all modes)
   const [preferredBrands, setPreferredBrands] = useState<string[]>([]);
+
+  // Update duration when mode changes
+  useEffect(() => {
+    if (mode === 'quick' && duration > 5) {
+      setDuration(1); // Reset to 1 day for Quick mode
+    } else if (mode === 'plan' && duration < 7) {
+      setDuration(7); // Reset to 7 days for Plan mode
+    }
+  }, [mode, duration]);
 
   // Initialize from template when it changes
   useEffect(() => {
@@ -421,6 +430,14 @@ export const GoalSelectionMeals: React.FC<GoalSelectionMealsProps> = ({
         </View>
       </View>
 
+      {/* Duration (Quick mode) */}
+      <DurationSelector
+        selectedDuration={duration}
+        onDurationChange={setDuration}
+        title="Meals for"
+        mode="quick"
+      />
+
       {/* Servings */}
       <ServingsSelector
         selectedServings={servings}
@@ -501,6 +518,7 @@ export const GoalSelectionMeals: React.FC<GoalSelectionMealsProps> = ({
       <DurationSelector
         selectedDuration={duration}
         onDurationChange={setDuration}
+        mode="plan"
       />
 
       {/* Servings */}

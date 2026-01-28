@@ -10,14 +10,24 @@ import {
   StyleSheet,
 } from 'react-native';
 
+type MealMode = 'quick' | 'plan' | 'diet';
+
 interface DurationSelectorProps {
   selectedDuration: number;
   onDurationChange: (duration: number) => void;
   title?: string;
+  mode?: MealMode; // Mode determines which day options to show
 }
 
-const DURATION_OPTIONS = [
-  { value: 3, label: '3 Days', description: 'Try it out' },
+// Quick mode: 1-5 days (fast meal generation)
+const QUICK_DURATION_OPTIONS = [
+  { value: 1, label: '1 Day', description: 'Tonight only' },
+  { value: 3, label: '3 Days', description: 'Weekend' },
+  { value: 5, label: '5 Days', description: 'Work week' },
+];
+
+// Plan mode: 7-30 days (full meal planning)
+const PLAN_DURATION_OPTIONS = [
   { value: 7, label: '1 Week', description: 'Most popular' },
   { value: 14, label: '2 Weeks', description: 'Build habits' },
   { value: 30, label: '30 Days', description: 'Full program' },
@@ -27,14 +37,18 @@ export const DurationSelector: React.FC<DurationSelectorProps> = ({
   selectedDuration,
   onDurationChange,
   title = 'Plan Duration',
+  mode = 'plan', // Default to plan mode
 }) => {
+  // Choose options based on mode
+  const durationOptions = mode === 'quick' ? QUICK_DURATION_OPTIONS : PLAN_DURATION_OPTIONS;
+  
   return (
     <View style={styles.container}>
       <Text style={styles.title}>{title}</Text>
       <View style={styles.optionsGrid}>
-        {DURATION_OPTIONS.map((option) => {
+        {durationOptions.map((option) => {
           const isSelected = selectedDuration === option.value;
-          const isPopular = option.value === 7;
+          const isPopular = option.value === 7 && mode === 'plan';
           return (
             <TouchableOpacity
               key={option.value}
