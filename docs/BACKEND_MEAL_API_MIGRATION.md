@@ -2,7 +2,13 @@
 
 ## Overview
 
-The frontend has been updated to support **multi-select for meal types and cuisines**, allowing users to select multiple options simultaneously instead of being limited to a single choice. This document outlines the required backend API changes to support this new functionality.
+The frontend has been updated to support **multi-select for meal types and cuisines** in both **Quick mode** and **Plan mode**, allowing users to select multiple options simultaneously instead of being limited to a single choice. This document outlines the required backend API changes to support this new functionality.
+
+## Affected Modes
+
+- **Quick Mode:** Multi-select for meal types (breakfast, lunch, dinner, snack, dessert) AND cuisines
+- **Plan Mode:** Multi-select for cuisines (american, italian, mexican, asian, mediterranean, indian)
+- **Diet Mode:** No changes (uses existing dietary restrictions)
 
 ## Changes Required
 
@@ -84,28 +90,36 @@ function getCuisineTypes(request) {
 ## 3. Meal Generation Logic
 
 ### Current Behavior (Single Selection)
+
+**Quick Mode:**
 ```
 User selects: mealType = 'lunch', cuisineType = 'italian'
 Result: Generate 1 meal (Italian lunch)
 ```
 
+**Plan Mode:**
+```
+User selects: 7-day plan, cuisineType = 'italian'
+Result: Generate 7-day plan with Italian cuisine
+```
+
 ### New Behavior (Multi-Selection)
 
-#### Example 1: Multiple Meal Types
+#### Quick Mode - Multiple Meal Types
 ```
 User selects: mealTypes = ['breakfast', 'lunch', 'dinner']
              cuisineType = 'italian'
 Result: Generate 3 meals (Italian breakfast, Italian lunch, Italian dinner)
 ```
 
-#### Example 2: Multiple Cuisines
+#### Quick Mode - Multiple Cuisines
 ```
 User selects: mealType = 'lunch'
              cuisineTypes = ['italian', 'mexican', 'asian']
 Result: Generate 3 meals (Italian lunch, Mexican lunch, Asian lunch)
 ```
 
-#### Example 3: Multiple Types AND Multiple Cuisines
+#### Quick Mode - Multiple Types AND Multiple Cuisines
 ```
 User selects: mealTypes = ['breakfast', 'lunch']
              cuisineTypes = ['italian', 'mexican']
@@ -116,11 +130,21 @@ Result: Generate 4 meals:
   - Mexican lunch
 ```
 
+#### Plan Mode - Multiple Cuisines (NEW)
+```
+User selects: 7-day plan
+             cuisineTypes = ['italian', 'mexican', 'american']
+Result: Generate 7-day meal plan with variety across selected cuisines
+  - Days rotate through Italian, Mexican, and American meals
+  - Backend decides distribution (e.g., 3 Italian days, 2 Mexican days, 2 American days)
+  - OR each day includes variety from selected cuisines
+```
+
 ### Implementation Strategy
 
-**Option A: Cartesian Product (Recommended)**
+**Option A: Quick Mode - Cartesian Product (Recommended)**
 ```javascript
-function generateMeals(request) {
+function generateQuickMeals(request) {
   const mealTypes = getMealTypes(request);
   const cuisineTypes = getCuisineTypes(request) || [null];
   
@@ -141,32 +165,39 @@ function generateMeals(request) {
   
   return meals;
 }
-
-function buildDescription(mealType, cuisineType, request) {
-  const dietaryPart = (request.dietaryRestrictions && request.dietaryRestrictions.length > 0)
-    ? ` that is ${request.dietaryRestrictions.join(', ')}`
-    : '';
-  
-  const cuisinePart = cuisineType ? ` (${cuisineType} cuisine)` : '';
-  const timePart = request.timeConstraint ? `, ${request.timeConstraint} prep time` : '';
-  
-  return `Generate a single ${mealType}${cuisinePart}${dietaryPart}${timePart}`;
-}
 ```
 
-**Option B: Sequential Generation**
+**Option B: Plan Mode - Distributed Variety (Recommended)**
 ```javascript
-function generateMeals(request) {
-  const mealTypes = getMealTypes(request);
+function generatePlanMeals(request) {
   const cuisineTypes = getCuisineTypes(request);
+  const duration = request.duration || 7;
   
-  if (cuisineTypes && cuisineTypes.length > 0) {
-    // Multiple cuisines specified
-    return generateMultiCuisineMeals(request, mealTypes, cuisineTypes);
+  if (cuisineTypes && cuisineTypes.length > 1) {
+    // Distribute cuisines across days for variety
+    const days = [];
+    for (let day = 0; day < duration; day++) {
+      const cuisineIndex = day % cuisineTypes.length;
+      const cuisine = cuisineTypes[cuisineIndex];
+      
+      days.push(generateDayMeals({
+        ...request,
+        cuisineType: cuisine,
+        description: buildPlanDescription(cuisine, request)
+      }));
+    }
+    return days;
   } else {
-    // Single or no cuisine
-    return generateMultiTypeMeals(request, mealTypes);
+    // Single or no cuisine - standard flow
+    return generateStandardPlan(request);
   }
+}
+
+function buildPlanDescription(cuisine, request) {
+  const baseDescription = request.description || `Create a ${request.duration || 7}-day meal plan`;
+  return cuisine 
+    ? `${baseDescription} featuring ${cuisine} cuisine`
+    : baseDescription;
 }
 ```
 
@@ -309,7 +340,9 @@ ALTER TABLE meal_plans ADD COLUMN generation_params JSONB;
 
 ## 7. Frontend Request Example
 
-### Before (Single Selection)
+### Quick Mode
+
+**Before (Single Selection):**
 ```javascript
 const request = {
   mode: 'quick',
@@ -321,15 +354,41 @@ const request = {
 };
 ```
 
-### After (Multi-Selection)
+**After (Multi-Selection):**
 ```javascript
 const request = {
   mode: 'quick',
   mealTypes: ['breakfast', 'lunch', 'dinner'],    // Array
   cuisineTypes: ['italian', 'mexican'],           // Array
   duration: 1,
-  description: 'Generate meals for selected types and cuisines',
+  description: 'Generate meals: breakfast, lunch, dinner (italian, mexican cuisine)',
   dietaryRestrictions: ['gluten_free', 'dairy_free', 'vegan'] // No limit
+};
+```
+
+### Plan Mode (NEW)
+
+**Before (Single Cuisine):**
+```javascript
+const request = {
+  mode: 'plan',
+  duration: 7,
+  cuisineType: 'italian',      // Single value
+  description: 'Create a 7-day meal plan',
+  servings: 4,
+  mealsPerDay: { breakfast: true, lunch: true, dinner: true }
+};
+```
+
+**After (Multi-Cuisine):**
+```javascript
+const request = {
+  mode: 'plan',
+  duration: 7,
+  cuisineTypes: ['italian', 'mexican', 'american'],  // Array
+  description: 'Create a 7-day meal plan featuring italian, mexican, american cuisines',
+  servings: 4,
+  mealsPerDay: { breakfast: true, lunch: true, dinner: true }
 };
 ```
 
@@ -403,22 +462,30 @@ async function generateMealsParallel(combinations) {
 
 ### Unit Tests
 
-- [ ] Single meal type + single cuisine (backward compatibility)
-- [ ] Multiple meal types, no cuisine
-- [ ] Single meal type, multiple cuisines
-- [ ] Multiple meal types + multiple cuisines
-- [ ] Empty mealTypes array (should default to 'dinner')
-- [ ] Invalid meal type in array (should reject)
+- [ ] **Quick Mode:** Single meal type + single cuisine (backward compatibility)
+- [ ] **Quick Mode:** Multiple meal types, no cuisine
+- [ ] **Quick Mode:** Single meal type, multiple cuisines
+- [ ] **Quick Mode:** Multiple meal types + multiple cuisines
+- [ ] **Quick Mode:** Empty mealTypes array (should default to 'dinner')
+- [ ] **Quick Mode:** Invalid meal type in array (should reject)
+- [ ] **Plan Mode:** Single cuisine (backward compatibility)
+- [ ] **Plan Mode:** Multiple cuisines (should distribute across days)
+- [ ] **Plan Mode:** No cuisine (should work as before)
+- [ ] **Plan Mode:** 3 cuisines × 7 days (should rotate cuisines)
 - [ ] Maximum limits (5 meal types, 10 cuisines)
 
 ### Integration Tests
 
-- [ ] Quick mode with `mealTypes` array
-- [ ] Quick mode with `cuisineTypes` array
-- [ ] Quick mode with both arrays
-- [ ] Verify all meals returned in single day
+- [ ] **Quick mode:** with `mealTypes` array
+- [ ] **Quick mode:** with `cuisineTypes` array
+- [ ] **Quick mode:** with both arrays
+- [ ] **Quick mode:** Verify all meals returned in single day
+- [ ] **Plan mode:** with `cuisineTypes` array
+- [ ] **Plan mode:** Verify cuisines distributed across multiple days
+- [ ] **Plan mode:** Verify each day has proper meal structure
 - [ ] Verify recipes array includes all generated recipes
 - [ ] Legacy request still works (single mealType/cuisineType)
+- [ ] Backward compatibility for Plan mode with single cuisineType
 
 ### Load Tests
 
