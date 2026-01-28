@@ -200,26 +200,6 @@ class MessagingService {
   }
 
   /**
-   * Get unread message count across all threads
-   * 
-   * @returns Total unread count
-   */
-  async getUnreadCount(): Promise<number> {
-    const headers = await this.getAuthHeaders();
-    
-    const response = await fetchWithLogging(
-      `${this.baseUrl}/api/messaging/unread`,
-      {
-        method: 'GET',
-        headers,
-      }
-    );
-
-    const data = await this.handleResponse<{ count: number }>(response);
-    return data.count;
-  }
-
-  /**
    * Get threads with unread messages
    * 
    * @returns Threads with unread messages

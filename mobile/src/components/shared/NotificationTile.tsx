@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Animated } from 'react-native';
 import { Ionicons } from './Ionicons';
 import { dashboardTheme } from '../../theme/dashboardTheme';
-import { notificationService, messagingService } from '../../services';
+import { notificationService } from '../../services';
 
 export interface NotificationSummary {
   unreadMessages: number;
@@ -74,15 +74,7 @@ export const NotificationTile: React.FC<NotificationTileProps> = ({
     }
 
     try {
-      // Load unread messages
-      let unreadMessages = 0;
-      try {
-        unreadMessages = await messagingService.getUnreadCount();
-      } catch (e) {
-        console.log('[NotificationTile] Messages not available');
-      }
-
-      // Load reminders
+      // Load reminders (messaging unread count endpoint removed - not available)
       let pendingReminders = 0;
       let upcomingReminders = 0;
       try {
@@ -117,10 +109,10 @@ export const NotificationTile: React.FC<NotificationTileProps> = ({
       }
 
       setSummary({
-        unreadMessages,
+        unreadMessages: 0,
         pendingReminders,
         upcomingReminders: upcomingReminders + scheduledNotifications,
-        totalUnread: unreadMessages + pendingReminders,
+        totalUnread: pendingReminders,
       });
     } catch (error) {
       console.error('[NotificationTile] Failed to load summary:', error);
