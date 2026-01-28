@@ -2647,17 +2647,6 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
         <View style={styles.quickActionsGrid}>
           <TouchableOpacity 
             style={styles.quickActionCard}
-            onPress={() => setViewMode('create')}
-          >
-            <View style={[styles.quickActionIcon, { backgroundColor: '#dbeafe' }]}>
-              <SvgIcon name="add-circle" size={28} color="#3b82f6" />
-            </View>
-            <Text style={styles.quickActionTitle}>Create Meal</Text>
-            <Text style={styles.quickActionSubtitle}>Add manually</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity 
-            style={styles.quickActionCard}
             onPress={handleScanRecipe}
             disabled={scanning}
           >

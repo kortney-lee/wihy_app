@@ -41,6 +41,7 @@ import ShoppingListScreen from './ShoppingListScreen';
 import CoachSelection from './CoachSelection';
 import ProfileSetupScreen from './ProfileSetupScreen';
 import MealCalendar from './MealCalendar';
+import PlanMealScreen from './PlanMealScreen';
 
 // Note: screenWidth is now handled dynamically via useDashboardLayout
 
@@ -109,7 +110,7 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
   const [hasActiveSession, setHasActiveSession] = useState(false);
   const [showQuickStartGuide, setShowQuickStartGuide] = useState(false);
   const [showHamburgerMenu, setShowHamburgerMenu] = useState(false);
-  const [selectedDashboard, setSelectedDashboard] = useState<'overview' | 'progress' | 'nutrition' | 'research' | 'fitness' | 'parent' | 'meals' | 'shoppingList' | 'profileSetup' | 'calendar' | null>(null);
+  const [selectedDashboard, setSelectedDashboard] = useState<'overview' | 'progress' | 'nutrition' | 'research' | 'fitness' | 'parent' | 'meals' | 'shoppingList' | 'profileSetup' | 'calendar' | 'planMeal' | null>(null);
 
   // Reset dashboard state when user plan changes (dev mode switcher)
   React.useEffect(() => {
@@ -222,6 +223,7 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
         {selectedDashboard === 'meals' && <CreateMeals isDashboardMode={true} />}
         {selectedDashboard === 'shoppingList' && <ShoppingListScreen isDashboardMode={true} />}
         {selectedDashboard === 'calendar' && <MealCalendar isDashboardMode={true} />}
+        {selectedDashboard === 'planMeal' && <PlanMealScreen isDashboardMode={true} onBack={() => setSelectedDashboard(null)} />}
         {(selectedDashboard as any) === 'findCoach' && <CoachSelection />}
         {selectedDashboard === 'profileSetup' && <ProfileSetupScreen isDashboardMode={true} onBack={() => setSelectedDashboard(null)} />}
       </View>
@@ -361,17 +363,17 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
         </TouchableOpacity>
         )}
 
-        {/* Create Meals Card (premium+ users) */}
+        {/* AI Meal Plans Card (premium+ users) */}
         {hasMealsAccess(user) && (
           <TouchableOpacity
             style={[styles.dashboardCard, styles.mealsCard, { width: cardWidth as any }]}
             onPress={() => handleNavigateToDashboard('meals')}
           >
             <View style={[styles.cardIconContainer, { width: iconContainerSize, height: iconContainerSize, borderRadius: iconContainerSize / 2 }]}>
-              <SvgIcon name="restaurant" size={iconSize} color="#ffffff" />
+              <SvgIcon name="sparkles" size={iconSize} color="#ffffff" />
             </View>
-            <Text style={[styles.cardTitle, { fontSize: titleSize }]}>Create Meals</Text>
-            <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>Custom recipes</Text>
+            <Text style={[styles.cardTitle, { fontSize: titleSize }]}>AI Meal Plans</Text>
+            <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>Auto-generate</Text>
           </TouchableOpacity>
         )}
 
@@ -386,6 +388,20 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
             </View>
             <Text style={[styles.cardTitle, { fontSize: titleSize }]}>Meal Calendar</Text>
             <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>View schedule</Text>
+          </TouchableOpacity>
+        )}
+
+        {/* Plan Meal Card (premium+ users) - Manual meal planning with product search */}
+        {hasMealsAccess(user) && (
+          <TouchableOpacity
+            style={[styles.dashboardCard, styles.planMealCard, { width: cardWidth as any }]}
+            onPress={() => setSelectedDashboard('planMeal')}
+          >
+            <View style={[styles.cardIconContainer, { width: iconContainerSize, height: iconContainerSize, borderRadius: iconContainerSize / 2 }]}>
+              <SvgIcon name="create" size={iconSize} color="#ffffff" />
+            </View>
+            <Text style={[styles.cardTitle, { fontSize: titleSize }]}>Plan Meal</Text>
+            <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>Build shopping list</Text>
           </TouchableOpacity>
         )}
 
@@ -810,6 +826,10 @@ const styles = StyleSheet.create({
 
   calendarCard: {
     backgroundColor: '#f59e0b', // Amber/Orange for calendar
+  },
+
+  planMealCard: {
+    backgroundColor: '#3b82f6', // Blue for Plan Meal (manual meal planning)
   },
 
   shoppingListCard: {
