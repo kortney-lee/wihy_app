@@ -10,7 +10,7 @@ import {
   StyleSheet,
 } from 'react-native';
 
-type MealMode = 'quick' | 'plan' | 'diet';
+type MealMode = 'quick' | 'plan' | 'diet' | 'saved';
 
 interface DurationSelectorProps {
   selectedDuration: number;
@@ -39,6 +39,11 @@ export const DurationSelector: React.FC<DurationSelectorProps> = ({
   title = 'Plan Duration',
   mode = 'plan', // Default to plan mode
 }) => {
+  // Saved mode doesn't need duration selector
+  if (mode === 'saved') {
+    return null;
+  }
+  
   // Choose options based on mode
   const durationOptions = mode === 'quick' ? QUICK_DURATION_OPTIONS : PLAN_DURATION_OPTIONS;
   
