@@ -1053,12 +1053,13 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
     setIsGeneratingPlan(true);
 
     try {
-      // Build mealsPerDay with proper typing
+      // Build mealsPerDay with proper typing - support both mealType (singular) and mealTypes (array)
+      const selectedMealTypes = params.mealTypes || (params.mealType ? [params.mealType] : []);
       const defaultMealsPerDay = {
-        breakfast: params.mealType === 'breakfast',
-        lunch: params.mealType === 'lunch',
-        dinner: params.mealType === 'dinner' || params.mode !== 'quick',
-        snack: false,
+        breakfast: selectedMealTypes.includes('breakfast'),
+        lunch: selectedMealTypes.includes('lunch'),
+        dinner: selectedMealTypes.includes('dinner') || (params.mode !== 'quick' && selectedMealTypes.length === 0),
+        snack: selectedMealTypes.includes('snack'),
       };
       
       // Build request based on mode - using /api/meals/create-from-text
