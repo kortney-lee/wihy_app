@@ -579,6 +579,7 @@ export default function AppNavigator() {
             headerShown: false,
           }}
         />
+
         <Stack.Screen
 
           name="IntegrationTest"
