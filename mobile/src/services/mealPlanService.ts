@@ -203,8 +203,8 @@ export async function createShoppingList(
 }
 
 /**
- * Get user's saved meals from Meal Diary
- * Uses correct API endpoint: GET /api/users/:userId/meals/diary
+ * Get user's saved meals (recipe library)
+ * Uses correct API endpoint: GET /api/users/:userId/meals
  */
 export async function getUserMeals(
   userId: string,
@@ -214,7 +214,7 @@ export async function getUserMeals(
   try {
     const params = new URLSearchParams();
     
-    // Map filter parameters to Meal Diary API format
+    // Map filter parameters to API format
     if (filterTag && filterTag !== 'Favorites') {
       // Map tag to meal_type if it's a meal type
       const mealTypes = ['breakfast', 'lunch', 'dinner', 'snack'];
@@ -228,7 +228,7 @@ export async function getUserMeals(
     params.append('limit', '50');
     
     const queryString = params.toString();
-    const url = `${API_BASE}/users/${userId}/meals/diary${queryString ? '?' + queryString : ''}`;
+    const url = `${API_BASE}/users/${userId}/meals${queryString ? '?' + queryString : ''}`;
 
     const response = await fetchWithLogging(url);
 

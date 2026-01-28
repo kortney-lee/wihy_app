@@ -1670,8 +1670,9 @@ class MealService {
       if (filters?.limit) params.append('limit', filters.limit.toString());
       if (filters?.offset) params.append('offset', filters.offset.toString());
 
-      // Use user.wihy.ai for meal diary endpoint (not services.wihy.ai)
-      const url = `${API_CONFIG.userUrl}/api/users/${userId}/meals/diary${params.toString() ? '?' + params.toString() : ''}`;
+      // Use user.wihy.ai for saved recipes library (user_meal_diary table)
+      // NOT /meals/diary which returns consumption logs (meal_logs table)
+      const url = `${API_CONFIG.userUrl}/api/users/${userId}/meals${params.toString() ? '?' + params.toString() : ''}`;
       
       const response = await fetchWithLogging(url);
       const result = await response.json();

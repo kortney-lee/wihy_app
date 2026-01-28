@@ -227,8 +227,8 @@ export class MealDiaryAPI {
   }
 
   /**
-   * Get user's meal diary with dietary preferences
-   * GET /api/users/:userId/meals/diary
+   * Get user's saved meals (recipe library)
+   * GET /api/users/:userId/meals
    */
   async getMealDiary(
     userId: string,
@@ -244,7 +244,7 @@ export class MealDiaryAPI {
       if (options?.offset) params.append('offset', options.offset.toString());
       if (options?.meal_type) params.append('meal_type', options.meal_type);
 
-      const url = `${API_BASE}/users/${userId}/meals/diary${params.toString() ? `?${params.toString()}` : ''}`;
+      const url = `${API_BASE}/users/${userId}/meals${params.toString() ? `?${params.toString()}` : ''}`;
       
       const response = await fetchWithLogging(url, {
         method: 'GET',
