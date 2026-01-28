@@ -51,6 +51,7 @@ export type RootStackParamList = {
   SessionBooking: { coachId: string; coachName: string };
   
   CreateMeals: { showShoppingList?: boolean; shoppingListId?: string } | undefined;
+  MealCalendar: undefined;
   MealPreferences: { returnTo?: keyof RootStackParamList };
   ShoppingList: { 
     mealPlanId: number; 

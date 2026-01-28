@@ -43,6 +43,7 @@ import ClientManagement from '../screens/ClientManagement';
 import ClientOnboarding from '../screens/ClientOnboarding';
 import CoachSelection from '../screens/CoachSelection';
 import CreateMeals from '../screens/CreateMeals';
+import MealCalendar from '../screens/MealCalendar';
 import ShoppingListScreen from '../screens/ShoppingListScreen';
 import MealDetailsScreen from '../screens/MealDetailsScreen';
 import MealPreferencesScreen from '../screens/MealPreferencesScreen';
@@ -139,6 +140,7 @@ const linking: LinkingOptions<RootStackParamList> = {
       MealPlanDetails: 'meal-plan',
       Enrollment: 'enrollment',
       CreateMeals: 'create-meals',
+      MealCalendar: 'meal-calendar',
       PostPaymentRegistration: 'register',
       OnboardingFlow: 'onboarding',
       // OAuth callback route for web
@@ -667,6 +669,14 @@ export default function AppNavigator() {
         <Stack.Screen
           name="CreateMeals"
           component={CreateMeals}
+          options={{
+            presentation: 'card',
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="MealCalendar"
+          component={MealCalendar}
           options={{
             presentation: 'card',
             headerShown: false,

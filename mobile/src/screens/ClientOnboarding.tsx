@@ -12,9 +12,12 @@ import {
   Animated,
   ActivityIndicator,
   Dimensions,
+  TouchableOpacity,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useNavigation } from '@react-navigation/native';
 import { dashboardColors, Ionicons, BackToHubButton } from '../components/shared';
+import SvgIcon from '../components/shared/SvgIcon';
 import { dashboardTheme } from '../theme/dashboardTheme';
 import { userService } from '../services/userService';
 import { AuthContext } from '../context/AuthContext';
@@ -67,6 +70,7 @@ export default function ClientOnboarding({
   isDashboardMode = false,
   onBack,
 }: ClientOnboardingProps) {
+  const navigation = useNavigation<any>();
   const { user, updateUser } = useContext(AuthContext);
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -778,7 +782,20 @@ export default function ClientOnboarding({
 
   return (
     <View style={styles.container}>
-      {/* Back to Coach Hub button - only on web */}
+      {/* Back button for web navigation */}
+      {isWeb && !isDashboardMode && (
+        <View style={styles.webBackHeader}>
+          <TouchableOpacity
+            style={styles.webBackButton}
+            onPress={() => navigation.goBack()}
+          >
+            <SvgIcon name="arrow-back" size={20} color="#10b981" />
+            <Text style={styles.webBackText}>Back</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+      
+      {/* Back to Coach Hub button - only on web in dashboard mode */}
       {isDashboardMode && onBack && (
         <BackToHubButton
           hubName="Coach Hub"
@@ -858,6 +875,23 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#e0f2fe',
+  },
+  webBackHeader: {
+    backgroundColor: '#ffffff',
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e5e7eb',
+  },
+  webBackButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  webBackText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#10b981',
   },
   collapsibleHeader: {
     backgroundColor: '#10b981',
