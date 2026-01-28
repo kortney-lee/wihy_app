@@ -115,15 +115,6 @@ export default function SessionBooking() {
         console.error('SessionBooking: API returned error');
         setAvailableDays([]);
       }
-            const time = `${hour > 12 ? hour - 12 : hour}:00 ${hour >= 12 ? 'PM' : 'AM'}`;
-            const available = Math.random() > 0.3;
-            slots.push({ time, available });
-          }
-
-          days.push({ date, dateString, dayName, slots });
-        }
-        setAvailableDays(days);
-      }
     } catch (error) {
       console.error('Load availability error:', error);
       Alert.alert('Error', 'Failed to load availability');
