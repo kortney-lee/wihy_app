@@ -1681,8 +1681,11 @@ class MealService {
         throw new Error(result.error || 'Failed to fetch meals');
       }
 
-      // Convert Meal Diary API response to expected format
-      const meals = (result.recent_meals || []).map((meal: any) => ({
+      // Convert API response to expected format
+      // /api/users/:userId/meals returns { meals: [...] } (GetAllMealsResponse)
+      // /api/users/:userId/meals/diary returns { recent_meals: [...] } (MealDiaryResponse)
+      const rawMeals = result.meals || result.recent_meals || [];
+      const meals = rawMeals.map((meal: any) => ({
         meal_id: meal.meal_id,
         user_id: meal.user_id || userId,
         name: meal.name,
@@ -1703,8 +1706,8 @@ class MealService {
 
       return {
         meals,
-        total: result.total_meals || meals.length,
-        has_more: result.has_more || false,
+        total: result.pagination?.total || result.total_meals || meals.length,
+        has_more: result.pagination?.hasMore || result.has_more || false,
       };
     } catch (error) {
       console.error('Error fetching meals:', error);
