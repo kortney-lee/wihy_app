@@ -1996,6 +1996,316 @@ class UserService {
       return { success: false, error: error.message };
     }
   }
+
+  // ==========================================
+  // NUTRITION & MEAL LOGGING (user.wihy.ai)
+  // ==========================================
+
+  /**
+   * Log water intake
+   * POST /api/users/:userId/nutrition/log-water
+   */
+  async logWater(userId: string, amount: number, unit: 'ml' | 'oz' = 'ml', timestamp?: string): Promise<ApiResponse> {
+    const endpoint = `${this.baseUrl}/api/users/${userId}/nutrition/log-water`;
+    const headers = await this.getAuthHeaders();
+
+    try {
+      const response = await fetchWithLogging(endpoint, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          amount,
+          unit,
+          timestamp: timestamp || new Date().toISOString(),
+        }),
+      });
+
+      const data = await response.json();
+      return response.ok
+        ? { success: true, data }
+        : { success: false, error: data.error };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  // ==========================================
+  // PROGRESS TRACKING
+  // ==========================================
+
+  /**
+   * Log weight measurement
+   * POST /api/user-progress/weight
+   */
+  async logWeight(
+    weight: number,
+    unit: 'kg' | 'lbs' = 'kg',
+    timestamp?: string,
+    note?: string
+  ): Promise<ApiResponse> {
+    const endpoint = `${this.baseUrl}/api/user-progress/weight`;
+    const headers = await this.getAuthHeaders();
+
+    try {
+      const response = await fetchWithLogging(endpoint, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          weight,
+          unit,
+          timestamp: timestamp || new Date().toISOString(),
+          note,
+        }),
+      });
+
+      const data = await response.json();
+      return response.ok
+        ? { success: true, data }
+        : { success: false, error: data.error };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Get user progress summary
+   * GET /api/user-progress/summary
+   */
+  async getProgressSummary(): Promise<any> {
+    const endpoint = `${this.baseUrl}/api/user-progress/summary`;
+    const headers = await this.getAuthHeaders();
+
+    try {
+      const response = await fetchWithLogging(endpoint, { headers });
+      if (response.ok) {
+        const data = await response.json();
+        return data.summary || data;
+      }
+      return null;
+    } catch (error) {
+      console.error('Get progress summary error:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Upload progress photo
+   * POST /api/progress/photos
+   */
+  async uploadProgressPhoto(
+    photo: any,
+    date: string,
+    notes?: string
+  ): Promise<ApiResponse> {
+    const endpoint = `${this.baseUrl}/api/progress/photos`;
+    const headers = await this.getAuthHeaders();
+    delete headers['Content-Type']; // Let FormData set it
+
+    try {
+      const formData = new FormData();
+      formData.append('photo', photo);
+      formData.append('date', date);
+      if (notes) formData.append('notes', notes);
+
+      const response = await fetchWithLogging(endpoint, {
+        method: 'POST',
+        headers,
+        body: formData,
+      });
+
+      const data = await response.json();
+      return response.ok
+        ? { success: true, data }
+        : { success: false, error: data.error };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  // ==========================================
+  // NOTIFICATIONS & REMINDERS
+  // ==========================================
+
+  /**
+   * Register FCM push notification token
+   * POST /api/notifications/token
+   */
+  async registerPushToken(
+    userId: string,
+    token: string,
+    platform: 'ios' | 'android' | 'web',
+    deviceId: string
+  ): Promise<ApiResponse> {
+    const endpoint = `${this.baseUrl}/api/notifications/token`;
+    const headers = await this.getAuthHeaders();
+
+    try {
+      const response = await fetchWithLogging(endpoint, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ userId, token, platform, deviceId }),
+      });
+
+      const data = await response.json();
+      return response.ok
+        ? { success: true, data }
+        : { success: false, error: data.error };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Get notification preferences
+   * GET /api/notifications/preferences
+   */
+  async getNotificationPreferences(): Promise<any> {
+    const endpoint = `${this.baseUrl}/api/notifications/preferences`;
+    const headers = await this.getAuthHeaders();
+
+    try {
+      const response = await fetchWithLogging(endpoint, { headers });
+      if (response.ok) {
+        const data = await response.json();
+        return data.preferences || data;
+      }
+      return null;
+    } catch (error) {
+      console.error('Get notification preferences error:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Create reminder
+   * POST /api/notifications/reminders
+   */
+  async createReminder(
+    userId: string,
+    title: string,
+    message: string,
+    scheduledFor: string,
+    repeatType: 'once' | 'daily' | 'weekly' | 'monthly' = 'once'
+  ): Promise<ApiResponse> {
+    const endpoint = `${this.baseUrl}/api/notifications/reminders`;
+    const headers = await this.getAuthHeaders();
+
+    try {
+      const response = await fetchWithLogging(endpoint, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          userId,
+          title,
+          message,
+          scheduledFor,
+          repeatType,
+        }),
+      });
+
+      const data = await response.json();
+      return response.ok
+        ? { success: true, data }
+        : { success: false, error: data.error };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  // ==========================================
+  // STATS & METRICS
+  // ==========================================
+
+  /**
+   * Get user streak information
+   * GET /api/stats/:userId/streak
+   */
+  async getUserStreak(userId: string): Promise<any> {
+    const endpoint = `${this.baseUrl}/api/stats/${userId}/streak`;
+    const headers = await this.getAuthHeaders();
+
+    try {
+      const response = await fetchWithLogging(endpoint, { headers });
+      if (response.ok) {
+        const data = await response.json();
+        return data.streak || data;
+      }
+      return null;
+    } catch (error) {
+      console.error('Get user streak error:', error);
+      return null;
+    }
+  }
+
+  // ==========================================
+  // CLIENT DATA (KEY-VALUE STORE)
+  // ==========================================
+
+  /**
+   * Get all data in namespace
+   * GET /api/client-data/:namespace
+   */
+  async getClientData(namespace: string): Promise<any> {
+    const endpoint = `${this.baseUrl}/api/client-data/${namespace}`;
+    const headers = await this.getAuthHeaders();
+
+    try {
+      const response = await fetchWithLogging(endpoint, { headers });
+      if (response.ok) {
+        const data = await response.json();
+        return data.data || data;
+      }
+      return null;
+    } catch (error) {
+      console.error('Get client data error:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Set key-value pair in namespace
+   * PUT /api/client-data/:namespace/:key
+   */
+  async setClientData(namespace: string, key: string, value: any): Promise<ApiResponse> {
+    const endpoint = `${this.baseUrl}/api/client-data/${namespace}/${key}`;
+    const headers = await this.getAuthHeaders();
+
+    try {
+      const response = await fetchWithLogging(endpoint, {
+        method: 'PUT',
+        headers,
+        body: JSON.stringify({ value }),
+      });
+
+      const data = await response.json();
+      return response.ok
+        ? { success: true, data }
+        : { success: false, error: data.error };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Get feature flags for user
+   * GET /api/client-data/features
+   */
+  async getFeatureFlags(): Promise<any> {
+    const endpoint = `${this.baseUrl}/api/client-data/features`;
+    const headers = await this.getAuthHeaders();
+
+    try {
+      const response = await fetchWithLogging(endpoint, { headers });
+      if (response.ok) {
+        const data = await response.json();
+        return data.features || data;
+      }
+      return null;
+    } catch (error) {
+      console.error('Get feature flags error:', error);
+      return null;
+    }
+  }
 }
 
 // Coach interface for management
