@@ -2130,6 +2130,88 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
     );
   };
 
+  // Toggle favorite handler
+  const handleToggleFavorite = async (mealId: string, currentFavorite: boolean) => {
+    if (!userId) {
+      Alert.alert('Error', 'User not authenticated');
+      return;
+    }
+
+    try {
+      const token = await authService.getAccessToken();
+      if (!token) {
+        Alert.alert('Error', 'Authentication token not available');
+        return;
+      }
+
+      const mealDiaryService = getMealDiaryService(token);
+      const result = await mealDiaryService.toggleFavorite(userId, mealId);
+      
+      // Update local state - update in allMeals
+      setAllMeals(prev => prev.map(m => 
+        m.meal_id === mealId ? { ...m, is_favorite: result.is_favorite } : m
+      ));
+      
+      // Update in savedMeals
+      setSavedMeals(prev => prev.map(m => 
+        m.meal_id === mealId ? { ...m, is_favorite: result.is_favorite } : m
+      ));
+      
+      // Update selected meal if open
+      if (selectedMeal?.meal_id === mealId) {
+        setSelectedMeal({ ...selectedMeal, is_favorite: result.is_favorite });
+      }
+      
+      console.log('[CreateMeals] Favorite toggled:', mealId, result.is_favorite);
+    } catch (error) {
+      console.error('[CreateMeals] Error toggling favorite:', error);
+      Alert.alert('Error', 'Failed to update favorite status');
+    }
+  };
+
+  // Log meal to diary handler
+  const handleLogMealToDiary = async (meal: SavedMeal, servings: number = 1, mealType: string = 'lunch') => {
+    if (!userId) {
+      Alert.alert('Error', 'User not authenticated');
+      return;
+    }
+
+    try {
+      const token = await authService.getAccessToken();
+      if (!token) {
+        Alert.alert('Error', 'Authentication token not available');
+        return;
+      }
+
+      const baseServings = meal.serving_size || 1;
+      const ratio = servings / baseServings;
+      
+      await nutritionService.logMeal({
+        userId,
+        mealType: mealType as 'breakfast' | 'lunch' | 'dinner' | 'snack',
+        foodName: meal.name,
+        calories: Math.round((meal.nutrition?.calories || 0) * ratio),
+        protein_g: Math.round((meal.nutrition?.protein || 0) * ratio),
+        carbs_g: Math.round((meal.nutrition?.carbs || 0) * ratio),
+        fat_g: Math.round((meal.nutrition?.fat || 0) * ratio),
+        servings,
+      });
+      
+      console.log('[CreateMeals] Meal logged to diary:', meal.name);
+      Alert.alert(
+        'Logged!',
+        `${meal.name} has been logged to your ${mealType} diary.`
+      );
+      
+      // Close modal if open
+      setShowMealDetails(false);
+      setSelectedMeal(null);
+    } catch (error) {
+      console.error('[CreateMeals] Error logging meal:', error);
+      Alert.alert('Error', 'Failed to log meal. Please try again.');
+    }
+  };
+
   // Helper function to extract and categorize ingredients from generated meal plan
   const extractShoppingListFromPlan = (plan: MealPlanResponse | null) => {
     if (!plan?.days) {
@@ -3012,18 +3094,31 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
             )}
 
             <View style={styles.libraryMealFooter}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                <TouchableOpacity
+                  onPress={(e) => {
+                    e.stopPropagation();
+                    handleToggleFavorite(meal.meal_id, meal.is_favorite || false);
+                  }}
+                  style={styles.libraryMealFooterAction}
+                >
+                  <SvgIcon 
+                    name={meal.is_favorite ? "heart" : "heart-outline"} 
+                    size={20} 
+                    color={meal.is_favorite ? "#ef4444" : "#9ca3af"} 
+                  />
+                </TouchableOpacity>
                 <TouchableOpacity
                   onPress={(e) => {
                     e.stopPropagation();
                     handleDeleteMeal(meal.meal_id, meal.name);
                   }}
-                  style={{ padding: 4 }}
+                  style={styles.libraryMealFooterAction}
                 >
                   <SvgIcon name="trash-outline" size={20} color="#ef4444" />
                 </TouchableOpacity>
                 <Text style={styles.libraryMealTimesLogged}>
-                  Logged {meal.times_logged || 0} {meal.times_logged === 1 ? 'time' : 'times'}
+                  Logged {meal.times_logged || 0}×
                 </Text>
               </View>
               <SvgIcon name="chevron-forward" size={20} color="#9ca3af" />
@@ -3976,6 +4071,52 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
 
             {/* Bottom Actions */}
             <View style={styles.mealDetailActionsContainer}>
+              {/* Row 1: Favorite and Log */}
+              <View style={styles.mealDetailActionsRow}>
+                <TouchableOpacity
+                  style={[
+                    styles.mealDetailActionButton,
+                    selectedMeal.is_favorite && styles.mealDetailActionButtonActive
+                  ]}
+                  onPress={() => handleToggleFavorite(selectedMeal.meal_id, selectedMeal.is_favorite || false)}
+                >
+                  <SvgIcon 
+                    name={selectedMeal.is_favorite ? "heart" : "heart-outline"} 
+                    size={20} 
+                    color={selectedMeal.is_favorite ? "#ef4444" : "#6b7280"} 
+                  />
+                  <Text style={[
+                    styles.mealDetailActionButtonText,
+                    selectedMeal.is_favorite && styles.mealDetailActionButtonTextActive
+                  ]}>
+                    {selectedMeal.is_favorite ? 'Favorited' : 'Favorite'}
+                  </Text>
+                </TouchableOpacity>
+                
+                <TouchableOpacity
+                  style={[styles.mealDetailActionButton, styles.mealDetailLogButton]}
+                  onPress={() => {
+                    Alert.alert(
+                      'Log Meal',
+                      `Log ${mealServings} serving(s) of ${selectedMeal.name}?`,
+                      [
+                        { text: 'Cancel', style: 'cancel' },
+                        { text: 'Breakfast', onPress: () => handleLogMealToDiary(selectedMeal, mealServings, 'breakfast') },
+                        { text: 'Lunch', onPress: () => handleLogMealToDiary(selectedMeal, mealServings, 'lunch') },
+                        { text: 'Dinner', onPress: () => handleLogMealToDiary(selectedMeal, mealServings, 'dinner') },
+                        { text: 'Snack', onPress: () => handleLogMealToDiary(selectedMeal, mealServings, 'snack') },
+                      ]
+                    );
+                  }}
+                >
+                  <SvgIcon name="add-circle" size={20} color="#4cbb17" />
+                  <Text style={[styles.mealDetailActionButtonText, { color: '#4cbb17' }]}>
+                    Log to Diary
+                  </Text>
+                </TouchableOpacity>
+              </View>
+              
+              {/* Row 2: Delete */}
               <TouchableOpacity
                 style={styles.mealDetailDeleteButton}
                 onPress={() => handleDeleteMeal(selectedMeal.meal_id, selectedMeal.name)}
@@ -6439,6 +6580,11 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
   },
+  libraryMealFooterAction: {
+    padding: 6,
+    borderRadius: 8,
+    backgroundColor: '#f3f4f6',
+  },
   libraryMealTimesLogged: {
     fontSize: 14,
     color: '#9ca3af',
@@ -6846,6 +6992,38 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: '#fff',
+  },
+  mealDetailActionsRow: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  mealDetailActionButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: '#f3f4f6',
+    paddingVertical: 14,
+    borderRadius: 12,
+    borderWidth: 1.5,
+    borderColor: '#e5e7eb',
+  },
+  mealDetailActionButtonActive: {
+    backgroundColor: '#fef2f2',
+    borderColor: '#fecaca',
+  },
+  mealDetailActionButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#6b7280',
+  },
+  mealDetailActionButtonTextActive: {
+    color: '#ef4444',
+  },
+  mealDetailLogButton: {
+    borderColor: '#bbf7d0',
+    backgroundColor: '#f0fdf4',
   },
 
   // Library Modal Styles
