@@ -419,7 +419,10 @@ class NotificationService {
    * Create a reminder on the backend
    * POST /api/notifications/reminders
    */
-  async createReminder(reminder: Omit<BackendReminder, 'id' | 'createdAt' | 'updatedAt'>): Promise<BackendReminder> {
+  async createReminder(
+    userId: string,
+    reminder: Omit<BackendReminder, 'id' | 'userId' | 'createdAt' | 'updatedAt'>
+  ): Promise<BackendReminder> {
     try {
       const response = await fetchWithLogging(
         `${this.userApiUrl}/api/notifications/reminders`,
@@ -427,6 +430,7 @@ class NotificationService {
           method: 'POST',
           headers: this.getAuthHeaders(),
           body: JSON.stringify({
+            userId,
             type: reminder.type,
             title: reminder.title,
             time: reminder.time,
@@ -450,12 +454,12 @@ class NotificationService {
 
   /**
    * Get all reminders for a user
-   * GET /api/notifications/reminders
+   * GET /api/notifications/reminders?userId=xxx
    */
   async getReminders(userId: string): Promise<BackendRemindersResponse> {
     try {
       const response = await fetchWithLogging(
-        `${this.userApiUrl}/api/notifications/reminders`,
+        `${this.userApiUrl}/api/notifications/reminders?userId=${userId}`,
         {
           headers: this.getAuthHeaders(),
         }
