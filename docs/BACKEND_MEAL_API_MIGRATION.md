@@ -2,7 +2,7 @@
 
 ## Overview
 
-The frontend has been updated to support **multi-select for meal types and cuisines** in both **Quick mode** and **Plan mode**, allowing users to select multiple options simultaneously instead of being limited to a single choice. This document outlines the required backend API changes to support this new functionality.
+The frontend has been updated to support **multi-select for meal types and cuisines** in both **Quick mode** and **Plan mode**, and a new **Saved mode** for reordering previously created meals. This document outlines the required backend API changes to support these functionalities.
 
 ## Affected Modes
 
@@ -12,22 +12,29 @@ The frontend has been updated to support **multi-select for meal types and cuisi
 - **Plan Mode:** Multi-select for cuisines (american, italian, mexican, asian, mediterranean, indian)
   - **Duration:** 7-30 days (full meal planning)
   - **Purpose:** Comprehensive meal plans with variety
+- **Saved Mode:** ⭐ NEW - Reorder previously created meals
+  - **Duration:** N/A (uses existing meals)
+  - **Purpose:** Quick reordering to Instacart without regeneration
 - **Diet Mode:** No changes (uses existing dietary restrictions)
   - **Duration:** 14-30 days (program-based)
 
 ## Changes Required
 
-### API Endpoint: `POST /api/meals/create-from-text`
+### Existing Endpoint: `POST /api/meals/create-from-text`
 
 **Status:** ⚠️ REQUIRES UPDATE
+
+### New Endpoint: `GET /api/meals/saved/:userId`
+
+**Status:** ⭐ NEW ENDPOINT REQUIRED
 
 ---
 
 ## 1. Request Interface Changes
 
-### New Fields (Multi-Select Support)
+### New Fields (Multi-Select Support + Saved Mode)
 
-Add support for **array versions** of existing singular fields:
+Add support for **array versions** of existing singular fields and new saved mode fields:
 
 ```typescript
 interface CreateMealPlanRequest {
@@ -39,6 +46,10 @@ interface CreateMealPlanRequest {
   
   /** Array of cuisine types for multi-cuisine generation */
   cuisineTypes?: string[]; // e.g., ['italian', 'mexican', 'asian']
+  
+  // ⭐ NEW: Saved mode fields
+  /** Array of saved meal IDs to reorder (Saved mode only) */
+  savedMealIds?: string[];
   
   // 🔄 EXISTING: Keep for backward compatibility
   /** Single meal type (deprecated - use mealTypes) */
@@ -669,30 +680,256 @@ If issues occur after deployment:
 
 ---
 
+## 10. Saved Mode - Reorder Previously Created Meals
+
+### Overview
+
+**Saved mode** is a new feature that allows users to quickly reorder previously created meals to Instacart without regenerating them. This provides a faster workflow for repeat customers.
+
+### Required Backend Changes
+
+#### New API Endpoint: `GET /api/meals/saved/:userId`
+
+**Purpose:** Fetch a user's saved/recent meal plans for reordering
+
+**Request:**
+```http
+GET /api/meals/saved/:userId
+Query Parameters:
+  - limit?: number (default: 20, max: 50)
+  - offset?: number (default: 0)
+  - sortBy?: 'created_at' | 'last_ordered' (default: 'created_at')
+  - order?: 'desc' | 'asc' (default: 'desc')
+```
+
+**Response:**
+```typescript
+interface SavedMealsResponse {
+  meals: SavedMealPlan[];
+  total: number;
+  hasMore: boolean;
+}
+
+interface SavedMealPlan {
+  id: string;
+  userId: string;
+  name: string; // e.g., "Italian Week Plan"
+  description: string;
+  mode: 'quick' | 'plan' | 'diet';
+  
+  // Meal details
+  meals: {
+    id: string;
+    name: string;
+    mealType: string;
+    cuisineType: string;
+    imageUrl?: string;
+    servings: number;
+  }[];
+  
+  // Metadata
+  totalMeals: number;
+  duration: number; // days
+  createdAt: string;
+  lastOrderedAt?: string;
+  orderCount: number; // how many times reordered
+  
+  // Shopping info
+  estimatedCost?: number;
+  ingredientCount?: number;
+}
+```
+
+#### Updated Endpoint: `POST /api/meals/reorder`
+
+**Purpose:** Reorder saved meals to Instacart
+
+**Request:**
+```typescript
+interface ReorderMealsRequest {
+  userId: string;
+  savedMealIds: string[]; // IDs from saved meals list
+  servings?: number; // Optional: adjust servings
+  preferredStores?: string[];
+}
+```
+
+**Response:**
+```typescript
+interface ReorderMealsResponse {
+  success: boolean;
+  shoppingListId: string;
+  instacartUrl?: string;
+  meals: {
+    id: string;
+    name: string;
+  }[];
+  totalIngredients: number;
+  estimatedCost: number;
+}
+```
+
+### Frontend Integration
+
+**User Flow:**
+1. User selects "Saved" mode in ModeToggle
+2. Frontend calls `GET /api/meals/saved/:userId` to fetch recent meals
+3. User browses saved meal plans
+4. User selects one or more saved plans to reorder
+5. User clicks "Reorder to Instacart"
+6. Frontend calls `POST /api/meals/reorder` with `savedMealIds`
+7. Backend returns shopping list/Instacart link
+8. User is redirected to shopping list or Instacart
+
+**Example Frontend Request:**
+```typescript
+// Fetch saved meals
+const response = await fetch(`/api/meals/saved/${userId}?limit=20&sortBy=last_ordered`);
+const { meals } = await response.json();
+
+// Reorder selected meals
+const reorderResponse = await fetch('/api/meals/reorder', {
+  method: 'POST',
+  body: JSON.stringify({
+    userId,
+    savedMealIds: ['meal_123', 'meal_456'],
+    servings: 4,
+    preferredStores: ['whole_foods'],
+  }),
+});
+```
+
+### Database Considerations
+
+**Existing Tables:**
+- Meals are already being saved with `_meta.meals_auto_saved: true` in Plan/Diet modes
+- Need to ensure Quick mode meals are also saved for future reordering
+
+**Required Indexes:**
+```sql
+CREATE INDEX idx_meals_user_created ON meals(user_id, created_at DESC);
+CREATE INDEX idx_meals_user_ordered ON meals(user_id, last_ordered_at DESC);
+```
+
+### Validation Rules
+
+**Saved Meals Endpoint:**
+- ✅ User must be authenticated
+- ✅ `limit` must be between 1-50
+- ✅ `offset` must be non-negative
+- ✅ Only return meals owned by the requesting user
+
+**Reorder Endpoint:**
+- ✅ `savedMealIds` array must not be empty
+- ✅ All meal IDs must belong to the requesting user
+- ✅ `servings` must be between 1-12 if provided
+- ✅ Meals must still exist (not deleted)
+
+### Error Handling
+
+**Saved Meals Endpoint:**
+```typescript
+// 404 - User has no saved meals
+{
+  "error": "NO_SAVED_MEALS",
+  "message": "No saved meals found. Create some meals first!",
+  "code": 404
+}
+
+// 401 - Unauthorized
+{
+  "error": "UNAUTHORIZED",
+  "message": "Authentication required",
+  "code": 401
+}
+```
+
+**Reorder Endpoint:**
+```typescript
+// 404 - Meal not found
+{
+  "error": "MEAL_NOT_FOUND",
+  "message": "One or more meal IDs not found",
+  "invalidIds": ["meal_999"],
+  "code": 404
+}
+
+// 403 - Not authorized to access meals
+{
+  "error": "FORBIDDEN",
+  "message": "You don't have permission to access these meals",
+  "code": 403
+}
+```
+
+### Testing Checklist
+
+**Saved Meals Endpoint:**
+- [ ] Returns user's saved meals in correct order
+- [ ] Pagination works correctly
+- [ ] Sorting by created_at and last_ordered_at works
+- [ ] Respects user authentication
+- [ ] Handles users with no saved meals gracefully
+- [ ] Limits work correctly (max 50)
+
+**Reorder Endpoint:**
+- [ ] Successfully generates shopping list from saved meals
+- [ ] Validates meal ownership
+- [ ] Handles non-existent meal IDs
+- [ ] Updates last_ordered_at timestamp
+- [ ] Increments order_count
+- [ ] Respects servings adjustment
+- [ ] Generates correct Instacart URL
+
+### Performance Considerations
+
+**Caching:**
+- Cache saved meals list for 5 minutes (frequently accessed)
+- Invalidate cache when new meals are created
+
+**Database Optimization:**
+- Use pagination to avoid large result sets
+- Index on (user_id, created_at) for fast sorting
+- Consider denormalizing total_meals count
+
+**Response Size:**
+- Include meal thumbnails (not full images)
+- Limit description length to 200 characters
+- Use lazy loading for additional meal details
+
+---
+
 ## Summary
 
 ### Required Backend Changes
 
 1. ✅ Add `mealTypes?: string[]` to CreateMealPlanRequest interface
 2. ✅ Add `cuisineTypes?: string[]` to CreateMealPlanRequest interface
-3. ✅ Update request parsing to check arrays first, fall back to singular fields
-4. ✅ Update meal generation logic to handle array combinations
-5. ✅ Return multiple meals in `days[0].meals` array
-6. ✅ Add validation for array sizes (max 5 types, 10 cuisines)
-7. ✅ Keep backward compatibility for legacy singular fields
-8. ✅ Add logging for usage tracking
+3. ⭐ Add `savedMealIds?: string[]` to CreateMealPlanRequest interface (Saved mode)
+4. ⭐ Implement `GET /api/meals/saved/:userId` endpoint
+5. ⭐ Implement `POST /api/meals/reorder` endpoint
+6. ✅ Update request parsing to check arrays first, fall back to singular fields
+7. ✅ Update meal generation logic to handle array combinations
+8. ✅ Return multiple meals in `days[0].meals` array
+9. ✅ Add validation for array sizes (max 5 types, 10 cuisines)
+10. ✅ Keep backward compatibility for legacy singular fields
+11. ✅ Add logging for usage tracking
+12. ⭐ Ensure all modes save meals for future reordering
+13. ⭐ Add database indexes for saved meals queries
 
 ### Testing Required
 
 - Unit tests for array handling
 - Integration tests for multi-selection scenarios
+- ⭐ Unit tests for saved meals endpoint
+- ⭐ Integration tests for reorder workflow
 - Load tests for large combinations
 - Backward compatibility verification
 
 ### Timeline Estimate
 
-- **Backend Development:** 2-3 days
-- **Testing:** 1-2 days
+- **Backend Development:** 3-4 days (includes saved mode)
+- **Testing:** 2-3 days
 - **Deployment:** 1 day
 - **Monitoring:** 1 week
 

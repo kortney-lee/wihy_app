@@ -1,10 +1,11 @@
 /**
  * ModeToggle - Meal Planning Mode Selector
  * 
- * 3-Mode Architecture:
+ * 4-Mode Architecture:
  * - Quick: Single meal generation
  * - Plan: Multi-day meal planning
  * - Diet: Goal-specific programs (weight loss, muscle gain, etc.)
+ * - Saved: Recent meals for quick reordering
  */
 
 import React from 'react';
@@ -16,7 +17,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '../../../components/shared';
 
-export type MealMode = 'quick' | 'plan' | 'diet';
+export type MealMode = 'quick' | 'plan' | 'diet' | 'saved';
 
 interface ModeToggleProps {
   selectedMode: MealMode;
@@ -26,6 +27,7 @@ interface ModeToggleProps {
 const MODES = [
   { id: 'quick' as MealMode, label: 'Quick', icon: 'flash-outline', description: 'Single meal' },
   { id: 'plan' as MealMode, label: 'Plan', icon: 'calendar-outline', description: 'Weekly plan' },
+  { id: 'saved' as MealMode, label: 'Saved', icon: 'bookmark-outline', description: 'Reorder' },
   { id: 'diet' as MealMode, label: 'Diet', icon: 'trophy-outline', description: 'Goal program' },
 ];
 

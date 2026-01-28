@@ -185,6 +185,9 @@ export interface GenerateMealParams {
   activityLevel?: string;
   calorieTarget?: number;
   
+  // Saved mode
+  savedMealIds?: string[]; // Selected saved meal IDs to reorder
+  
   // Brand preferences (all modes)
   preferredBrands?: string[];
 }
@@ -228,6 +231,9 @@ export const GoalSelectionMeals: React.FC<GoalSelectionMealsProps> = ({
   const [activityLevel, setActivityLevel] = useState<string>('moderate');
   const [calorieTarget, setCalorieTarget] = useState<string>('');
   const [programDiets, setProgramDiets] = useState<string[]>([]);
+  
+  // Saved mode state
+  const [selectedSavedMealIds, setSelectedSavedMealIds] = useState<string[]>([]);
   
   // Brand preferences (shared across all modes)
   const [preferredBrands, setPreferredBrands] = useState<string[]>([]);
@@ -309,6 +315,9 @@ export const GoalSelectionMeals: React.FC<GoalSelectionMealsProps> = ({
       params.cookingLevel = cookingLevel;
       params.preferredStores = selectedStores.length > 0 ? selectedStores : undefined;
       params.description = planDescription || undefined;
+    } else if (mode === 'saved') {
+      params.savedMealIds = selectedSavedMealIds;
+      params.servings = servings; // Allow adjusting servings for reorder
     } else if (mode === 'diet') {
       params.program = selectedProgram || undefined;
       params.activityLevel = activityLevel;
@@ -331,6 +340,7 @@ export const GoalSelectionMeals: React.FC<GoalSelectionMealsProps> = ({
   const canGenerate = () => {
     if (mode === 'quick') return quickMealTypes.length > 0;
     if (mode === 'plan') return Object.values(mealsPerDay).some(Boolean);
+    if (mode === 'saved') return selectedSavedMealIds.length > 0;
     if (mode === 'diet') return !!selectedProgram;
     return false;
   };
@@ -617,6 +627,37 @@ export const GoalSelectionMeals: React.FC<GoalSelectionMealsProps> = ({
   );
 
   // ============================================
+  // SAVED MODE RENDER
+  // ============================================
+  const renderSavedMode = () => (
+    <>
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Recent Meals</Text>
+        <Text style={styles.sectionTitleLight}>
+          Select previously created meals to reorder to Instacart
+        </Text>
+      </View>
+
+      {/* TODO: Add saved meals list component */}
+      <View style={styles.section}>
+        <View style={styles.placeholderBox}>
+          <Ionicons name="bookmark-outline" size={48} color="#9ca3af" />
+          <Text style={styles.placeholderText}>Your saved meals will appear here</Text>
+          <Text style={styles.placeholderSubtext}>
+            Generate meals in Quick or Plan mode first
+          </Text>
+        </View>
+      </View>
+
+      {/* Servings adjustment */}
+      <ServingsSelector
+        selectedServings={servings}
+        onServingsChange={setServings}
+      />
+    </>
+  );
+
+  // ============================================
   // DIET PROGRAM MODE RENDER
   // ============================================
   const renderDietMode = () => (
@@ -719,6 +760,7 @@ export const GoalSelectionMeals: React.FC<GoalSelectionMealsProps> = ({
       {/* Mode-specific content */}
       {mode === 'quick' && renderQuickMode()}
       {mode === 'plan' && renderPlanMode()}
+      {mode === 'saved' && renderSavedMode()}
       {mode === 'diet' && renderDietMode()}
 
       {/* Primary CTA */}
@@ -737,7 +779,8 @@ export const GoalSelectionMeals: React.FC<GoalSelectionMealsProps> = ({
             <Ionicons name="flash" size={22} color="#ffffff" />
             <Text style={styles.generateButtonText}>
               {mode === 'quick' ? 'Generate Meal' : 
-               mode === 'plan' ? 'Create Meal Plan' : 
+               mode === 'plan' ? 'Create Meal Plan' :
+               mode === 'saved' ? 'Reorder to Instacart' :
                'Start Program'}
             </Text>
           </>
@@ -955,6 +998,31 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '700',
     color: '#ffffff',
+  },
+  // Placeholder styles
+  placeholderBox: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 48,
+    paddingHorizontal: 24,
+    backgroundColor: '#f9fafb',
+    borderRadius: 12,
+    borderWidth: 1.5,
+    borderColor: '#e5e7eb',
+    borderStyle: 'dashed',
+  },
+  placeholderText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#6b7280',
+    marginTop: 12,
+    textAlign: 'center',
+  },
+  placeholderSubtext: {
+    fontSize: 13,
+    color: '#9ca3af',
+    marginTop: 4,
+    textAlign: 'center',
   },
 });
 

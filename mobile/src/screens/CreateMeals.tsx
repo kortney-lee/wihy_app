@@ -1164,7 +1164,29 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
       };
 
       // Add mode-specific parameters per MEAL_COMBINATIONS_GUIDE
-      if (params.mode === 'quick') {
+      if (params.mode === 'saved') {
+        // ⭐ Saved mode: Reorder previously created meals
+        // Skip meal generation entirely - just use existing meal IDs
+        if (!params.savedMealIds || params.savedMealIds.length === 0) {
+          throw new Error('No saved meals selected');
+        }
+        
+        // TODO: Implement saved meals reorder flow
+        // This should:
+        // 1. Fetch full meal details from saved meal IDs
+        // 2. Update servings if needed
+        // 3. Navigate directly to shopping list/Instacart
+        console.log('Reordering saved meals:', params.savedMealIds);
+        
+        // For now, show a message that this feature is being implemented
+        Alert.alert(
+          'Coming Soon',
+          'Saved meals reordering will be available in the next update. For now, please use Quick or Plan mode to generate meals.',
+          [{ text: 'OK' }]
+        );
+        setIsCreatingMeal(false);
+        return;
+      } else if (params.mode === 'quick') {
         // ⭐ Multi-select support: Send arrays for meal types and cuisines
         if (params.mealTypes && params.mealTypes.length > 0) {
           request.mealTypes = params.mealTypes;
