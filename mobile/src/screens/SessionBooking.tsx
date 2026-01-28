@@ -111,23 +111,10 @@ export default function SessionBooking() {
         });
         setAvailableDays(days);
       } else {
-        // Fallback to mock data if API not ready
-        console.warn('SessionBooking: API returned error, using mock data');
-        const days: DaySlots[] = [];
-        
-        for (let i = 1; i <= 7; i++) {
-          const date = new Date(today);
-          date.setDate(today.getDate() + i);
-          
-          const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-          const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-          
-          const dayName = dayNames[date.getDay()];
-          const dateString = `${monthNames[date.getMonth()]} ${date.getDate()}`;
-
-          // Generate time slots (9 AM - 5 PM, hourly)
-          const slots: TimeSlot[] = [];
-          for (let hour = 9; hour <= 17; hour++) {
+        // Show error state - no mock data fallback
+        console.error('SessionBooking: API returned error');
+        setAvailableDays([]);
+      }
             const time = `${hour > 12 ? hour - 12 : hour}:00 ${hour >= 12 ? 'PM' : 'AM'}`;
             const available = Math.random() > 0.3;
             slots.push({ time, available });

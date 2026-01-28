@@ -144,75 +144,6 @@ export default function NutritionFacts() {
   // Animation refs
   const analysisProgress = useRef(new Animated.Value(0)).current;
 
-  // Mock nutrition data generator (for backwards compatibility with old code paths)
-  const generateMockNutritionData = (foodName: string): BarcodeScanResponse => {
-    const mockData: BarcodeScanResponse = {
-      success: true,
-      timestamp: new Date().toISOString(),
-      processing_time_ms: 250,
-      scan_type: 'barcode',
-      product_name: foodName,
-      brand: '',
-      barcode: '',
-      image_url: null,
-      categories: [],
-      image_front_url: null,
-      image_front_small_url: null,
-      image_nutrition_url: null,
-      image_nutrition_small_url: null,
-      image_ingredients_url: null,
-      image_ingredients_small_url: null,
-      health_score: Math.floor(Math.random() * 40) + 50,
-      nutrition_score: Math.floor(Math.random() * 40) + 50,
-      nutrition_grade: 'B',
-      confidence_score: 0.85,
-      nova_group: 2,
-      processing_level: 'processed_ingredient',
-      calories: Math.floor(Math.random() * 300) + 100,
-      calories_per_serving: Math.floor(Math.random() * 200) + 150,
-      protein_g: Math.floor(Math.random() * 25) + 5,
-      carbs_g: Math.floor(Math.random() * 40) + 10,
-      fat_g: Math.floor(Math.random() * 15) + 2,
-      saturated_fat_g: Math.floor(Math.random() * 5) + 1,
-      fiber_g: Math.floor(Math.random() * 8) + 1,
-      sugar_g: Math.floor(Math.random() * 20) + 2,
-      sodium_mg: Math.floor(Math.random() * 400) + 100,
-      cholesterol_mg: 0,
-      trans_fat_g: 0,
-      polyunsaturated_fat_g: 0,
-      monounsaturated_fat_g: 0,
-      potassium_mg: 200,
-      calcium_mg: 120,
-      iron_mg: 2,
-      vitamin_a_mcg: 0,
-      vitamin_c_mg: 45,
-      vitamin_d_mcg: 0,
-      serving_size: '1 cup',
-      servings_per_container: 1,
-      chart_protein: Math.floor(Math.random() * 25) + 5,
-      chart_carbs: Math.floor(Math.random() * 40) + 10,
-      chart_fat: Math.floor(Math.random() * 15) + 2,
-      chart_health_score: Math.floor(Math.random() * 40) + 50,
-      chart_nova_group: 2,
-      summary: 'Nutrition information generated from product analysis.',
-      health_alerts: [],
-      positive_aspects: ['Good source of protein', 'Contains fiber'],
-      areas_of_concern: [],
-      ingredients_text: '',
-      total_ingredients: 0,
-      allergens: [],
-      additives: [],
-      total_additives: 0,
-      ask_wihy: `Tell me more about ${foodName}`,
-      is_healthy: true,
-      is_processed: false,
-      has_allergens: false,
-      has_additives: false,
-    };
-
-    return mockData;
-  };
-
   useEffect(() => {
     // Reset state when new scan arrives (different sessionId means new scan)
     if (context?.sessionId) {
@@ -222,16 +153,13 @@ export default function NutritionFacts() {
     }
 
     if (initialFoodItem) {
-      // For v2.0 API responses, just use them directly
+      // For v2.0 API responses, use them directly
       if (initialFoodItem.success !== undefined) {
         setFoodItem(initialFoodItem as ScanResponse);
       } else {
-        // Legacy handling for old data structures
-        // This will be deprecated once all scan flows use v2.0 API
-        const mockData = generateMockNutritionData(
-          (initialFoodItem as any).name || (initialFoodItem as any).product_name || 'Unknown Food'
-        );
-        setFoodItem(mockData);
+        // Handle legacy data structures without mock fallback
+        console.error('[NutritionFacts] Invalid food item data - missing success field:', initialFoodItem);
+        setFoodItem(null);
       }
     }
   }, [initialFoodItem, context?.sessionId]);

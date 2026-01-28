@@ -1582,12 +1582,16 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
   };
 
   // Check if a past workout was completed (vs skipped)
-  // Mock implementation - in real app, this would check workout history
+  // TODO: Implement real workout history check from API
   const isWorkoutCompleted = (date: Date | null) => {
     if (!date) return false;
-    // Mock: odd-numbered days were completed, even-numbered were skipped
-    // In production, check against actual workout completion records
-    return date.getDate() % 3 !== 0; // Skip every 3rd workout day
+    
+    // Check against actual workout history
+    const dateStr = date.toDateString();
+    return workoutHistory.some(workout => {
+      const workoutDate = new Date(workout.completed_at || workout.date);
+      return workoutDate.toDateString() === dateStr;
+    });
   };
 
   const changeMonth = (delta: number) => {

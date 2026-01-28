@@ -79,20 +79,9 @@ export default function AcceptInvitation() {
           expires_at: result.data.expires_at,
         });
       } else {
-        // Fallback to mock data if API not ready
-        console.warn('AcceptInvitation: API returned error, using mock data');
-        setInvitation({
-          id: invitationId,
-          coach_id: coachId || 'coach-123',
-          coach_name: 'Dr. Sarah Mitchell',
-          coach_title: 'Certified Nutrition Coach',
-          coach_rating: 4.9,
-          coach_review_count: 127,
-          message:
-            "Hi! I'd love to work with you on your wellness journey. I specialize in sustainable nutrition habits and have helped over 100 clients achieve their health goals. I believe my approach would be a great fit for what you're looking for!",
-          sent_at: '2026-01-20T10:30:00Z',
-          expires_at: '2026-02-04T10:30:00Z',
-        });
+        // Show error state - no mock data fallback
+        console.error('AcceptInvitation: API returned error');
+        setError('Failed to load invitation details');
       }
     } catch (err) {
       console.error('Load invitation error:', err);

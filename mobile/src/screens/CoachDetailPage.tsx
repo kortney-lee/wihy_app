@@ -70,30 +70,10 @@ export default function CoachDetailPage() {
       const profile = await coachService.getCoachProfile(coachId);
       setCoach(profile);
       
-      // Load reviews (mock for now)
-      setReviews([
-        {
-          id: '1',
-          client_name: 'Alex M.',
-          rating: 5,
-          comment: 'Changed my life! Sarah helped me lose 30 lbs in 6 months!',
-          created_at: '2d ago',
-        },
-        {
-          id: '2',
-          client_name: 'Jamie T.',
-          rating: 4,
-          comment: 'Very professional. Great guidance and support throughout my journey.',
-          created_at: '1w ago',
-        },
-        {
-          id: '3',
-          client_name: 'Morgan K.',
-          rating: 5,
-          comment: 'Best decision I made! Highly recommend Sarah for nutrition coaching.',
-          created_at: '2w ago',
-        },
-      ]);
+      // TODO: Load reviews from API
+      // const reviewsData = await coachService.getCoachReviews(coachId);
+      // setReviews(reviewsData);
+      setReviews([]);
     } catch (error) {
       console.error('Error loading coach profile:', error);
     } finally {

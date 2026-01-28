@@ -88,41 +88,8 @@ export default function FamilyDashboardPage({
     extrapolate: 'clamp',
   });
   
-  // Mock family data - replace with real data from backend
-  const [familyMembers, setFamilyMembers] = useState<FamilyMember[]>([
-    {
-      id: '1',
-      name: 'John (You)',
-      age: 35,
-      role: 'owner',
-      healthScore: 82,
-      lastActive: 'Now',
-    },
-    {
-      id: '2',
-      name: 'Sarah',
-      age: 33,
-      role: 'member',
-      healthScore: 88,
-      lastActive: '2h ago',
-    },
-    {
-      id: '3',
-      name: 'Emma',
-      age: 10,
-      role: 'member',
-      healthScore: 95,
-      lastActive: '5h ago',
-    },
-    {
-      id: '4',
-      name: 'Jake',
-      age: 8,
-      role: 'member',
-      healthScore: 91,
-      lastActive: '1d ago',
-    },
-  ]);
+  // Family data loaded from API (see loadFamilyData below)
+  const [familyMembers, setFamilyMembers] = useState<FamilyMember[]>([]);
 
   const guardianCode = user?.guardianCode || 'WIHY-ABC123';
   const isPremium = user?.plan === 'family-premium';

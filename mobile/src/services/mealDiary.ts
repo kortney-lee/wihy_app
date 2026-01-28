@@ -420,6 +420,250 @@ export class MealDiaryAPI {
     }
   }
 
+  /**
+   * Get favorites
+   * GET /api/users/:userId/meals/favorites
+   */
+  async getFavorites(userId: string): Promise<GetAllMealsResponse> {
+    try {
+      const url = `${API_BASE}/users/${userId}/meals/favorites`;
+      
+      const response = await fetchWithLogging(url, {
+        method: 'GET',
+        headers: this.headers,
+      });
+
+      if (!response.ok) {
+        throw new Error(`API Error: ${response.status}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      throw this.handleError(error);
+    }
+  }
+
+  /**
+   * Get meals by type
+   * GET /api/users/:userId/meals/by-type/:mealType
+   */
+  async getMealsByType(userId: string, mealType: string): Promise<GetAllMealsResponse> {
+    try {
+      const url = `${API_BASE}/users/${userId}/meals/by-type/${mealType}`;
+      
+      const response = await fetchWithLogging(url, {
+        method: 'GET',
+        headers: this.headers,
+      });
+
+      if (!response.ok) {
+        throw new Error(`API Error: ${response.status}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      throw this.handleError(error);
+    }
+  }
+
+  // ========================================================================
+  // Meal Management & Cleanup
+  // ========================================================================
+
+  /**
+   * Get meal groups (for cleanup UI)
+   * GET /api/users/:userId/meals/groups
+   */
+  async getMealGroups(userId: string): Promise<{
+    success: boolean;
+    total: number;
+    by_source: Array<{ source: string; count: number }>;
+    by_type: Array<{ type: string; count: number }>;
+    by_month: Array<{ month: string; count: number }>;
+  }> {
+    try {
+      const url = `${API_BASE}/users/${userId}/meals/groups`;
+      
+      const response = await fetchWithLogging(url, {
+        method: 'GET',
+        headers: this.headers,
+      });
+
+      if (!response.ok) {
+        throw new Error(`API Error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log('[MealDiaryAPI] Meal groups retrieved:', data.total, 'total meals');
+      return data;
+    } catch (error) {
+      throw this.handleError(error);
+    }
+  }
+
+  /**
+   * Delete meals by type
+   * DELETE /api/users/:userId/meals/by-type/:mealType
+   */
+  async deleteMealsByType(userId: string, mealType: string): Promise<{
+    success: boolean;
+    deleted: number;
+    message: string;
+  }> {
+    try {
+      const url = `${API_BASE}/users/${userId}/meals/by-type/${mealType}`;
+      
+      const response = await fetchWithLogging(url, {
+        method: 'DELETE',
+        headers: this.headers,
+      });
+
+      if (!response.ok) {
+        throw new Error(`API Error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log('[MealDiaryAPI] Deleted meals by type:', mealType, '-', data.deleted, 'meals');
+      return data;
+    } catch (error) {
+      throw this.handleError(error);
+    }
+  }
+
+  /**
+   * Delete meals by source
+   * DELETE /api/users/:userId/meals/by-source/:source
+   */
+  async deleteMealsBySource(userId: string, source: string): Promise<{
+    success: boolean;
+    deleted: number;
+    message: string;
+  }> {
+    try {
+      const url = `${API_BASE}/users/${userId}/meals/by-source/${source}`;
+      
+      const response = await fetchWithLogging(url, {
+        method: 'DELETE',
+        headers: this.headers,
+      });
+
+      if (!response.ok) {
+        throw new Error(`API Error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log('[MealDiaryAPI] Deleted meals by source:', source, '-', data.deleted, 'meals');
+      return data;
+    } catch (error) {
+      throw this.handleError(error);
+    }
+  }
+
+  /**
+   * Delete all meals (requires confirmation)
+   * DELETE /api/users/:userId/meals/all?confirm=true
+   * 
+   * ⚠️ DESTRUCTIVE - Deletes ALL meals
+   */
+  async deleteAllMeals(userId: string): Promise<{
+    success: boolean;
+    deleted: number;
+    message: string;
+  }> {
+    try {
+      const url = `${API_BASE}/users/${userId}/meals/all?confirm=true`;
+      
+      const response = await fetchWithLogging(url, {
+        method: 'DELETE',
+        headers: this.headers,
+      });
+
+      if (!response.ok) {
+        throw new Error(`API Error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log('[MealDiaryAPI] Deleted ALL meals:', data.deleted, 'meals');
+      return data;
+    } catch (error) {
+      throw this.handleError(error);
+    }
+  }
+
+  /**
+   * Bulk delete meals by IDs
+   * POST /api/users/:userId/meals/bulk-delete
+   * 
+   * @param mealIds - Array of meal IDs to delete (max 100)
+   */
+  async bulkDeleteMeals(userId: string, mealIds: string[]): Promise<{
+    success: boolean;
+    deleted: number;
+    requested: number;
+    message: string;
+  }> {
+    try {
+      if (mealIds.length > 100) {
+        throw new Error('Cannot delete more than 100 meals at once');
+      }
+
+      const url = `${API_BASE}/users/${userId}/meals/bulk-delete`;
+      
+      const response = await fetchWithLogging(url, {
+        method: 'POST',
+        headers: this.headers,
+        body: JSON.stringify({ mealIds }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`API Error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log('[MealDiaryAPI] Bulk deleted:', data.deleted, 'of', data.requested, 'meals');
+      return data;
+    } catch (error) {
+      throw this.handleError(error);
+    }
+  }
+
+  /**
+   * Delete meals by filter
+   * POST /api/users/:userId/meals/delete-by-filter
+   * 
+   * @param filters - Complex filter criteria
+   */
+  async deleteMealsByFilter(userId: string, filters: {
+    source?: 'ai_generated' | 'user_created' | 'recipe_import';
+    meal_type?: 'breakfast' | 'lunch' | 'dinner' | 'snack' | 'pre-workout' | 'post-workout';
+    created_before?: string; // YYYY-MM-DD
+    created_after?: string;  // YYYY-MM-DD
+  }): Promise<{
+    success: boolean;
+    deleted: number;
+    message: string;
+  }> {
+    try {
+      const url = `${API_BASE}/users/${userId}/meals/delete-by-filter`;
+      
+      const response = await fetchWithLogging(url, {
+        method: 'POST',
+        headers: this.headers,
+        body: JSON.stringify(filters),
+      });
+
+      if (!response.ok) {
+        throw new Error(`API Error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log('[MealDiaryAPI] Deleted by filter:', data.deleted, 'meals');
+      return data;
+    } catch (error) {
+      throw this.handleError(error);
+    }
+  }
+
   // ========================================================================
   // Dietary Preferences Endpoints
   // ========================================================================

@@ -109,38 +109,9 @@ export default function BookingsManagement({
         }));
         setBookings(transformedBookings);
       } else {
-        // Fallback to mock data if API not ready
-        console.warn('BookingsManagement: API returned error, using mock data');
-        const mockBookings: Booking[] = [
-          {
-            id: '1',
-            clientName: 'Sarah Johnson',
-            clientEmail: 'sarah@example.com',
-            sessionType: 'initial-60',
-            scheduledAt: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(),
-            status: 'confirmed',
-            price: 150,
-          },
-          {
-            id: '2',
-            clientName: 'Mike Chen',
-            clientEmail: 'mike@example.com',
-            sessionType: 'followup-30',
-            scheduledAt: new Date(Date.now() + 4 * 24 * 60 * 60 * 1000).toISOString(),
-            status: 'pending',
-            price: 75,
-          },
-          {
-            id: '3',
-            clientName: 'Emma Wilson',
-            clientEmail: 'emma@example.com',
-            sessionType: 'followup-60',
-            scheduledAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-            status: 'completed',
-            price: 120,
-          },
-        ];
-        setBookings(mockBookings);
+        // Show error state - no mock data fallback
+        console.error('BookingsManagement: API returned error');
+        setBookings([]);
       }
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to load bookings';
