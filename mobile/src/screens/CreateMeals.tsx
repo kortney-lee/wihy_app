@@ -33,7 +33,9 @@ import { mealCalendarService } from '../services/mealCalendarService';
 import { createMealPlan, generateShoppingList } from '../services/mealPlanService';
 import { createShoppingList, createInstacartLinkFromMealPlan, ShoppingListItem } from '../services/instacartService';
 import { getMealDiaryService, type Meal, type DietaryPreferences } from '../services/mealDiary';
+import { nutritionService } from '../services';
 import { authService } from '../services/authService';
+import { API_CONFIG } from '../services/config';
 import { clientDataService } from '../services/clientDataService';
 import { RootStackParamList } from '../types/navigation';
 import { useDashboardLayout } from '../hooks/useDashboardLayout';
@@ -298,6 +300,10 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
 
   // Meal Plan Success Modal state
   const [showMealPlanSuccess, setShowMealPlanSuccess] = useState(false);
+  const [loggingToDiary, setLoggingToDiary] = useState(false);
+  const [savedToDiary, setSavedToDiary] = useState(false);
+  const [savingToLibrary, setSavingToLibrary] = useState(false);
+  const [savedToLibrary, setSavedToLibrary] = useState(false);
   const [acceptedPlan, setAcceptedPlan] = useState<MealPlanResponse | null>(null);
   const [savingMealPlan, setSavingMealPlan] = useState(false);
   const [mealPlanSaved, setMealPlanSaved] = useState(false);
@@ -1138,7 +1144,7 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
       
       // Build request based on mode - using /api/meals/create-from-text
       const request: CreateMealPlanRequest = {
-        mode: params.mode, // CRITICAL: Pass mode for proper endpoint routing
+        mode: (params.mode === 'saved' ? 'plan' : params.mode) as 'quick' | 'plan' | 'diet', // CRITICAL: Pass mode for proper endpoint routing
         userId: userId,
         description: params.description || `Generate ${params.mode} meal`,
         duration: params.duration || (params.mode === 'quick' ? 1 : 7),
@@ -1163,6 +1169,9 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
         },
       };
 
+      // Get auth token for saved mode
+      const token = await authService.getAccessToken();
+      
       // Add mode-specific parameters per MEAL_COMBINATIONS_GUIDE
       if (params.mode === 'saved') {
         // ⭐ Saved mode: Reorder previously created meals
@@ -1175,7 +1184,7 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
         try {
           // Call reorder API endpoint
           const reorderResponse = await fetch(
-            `${API_CONFIG.services.baseUrl}/api/meals/reorder`,
+            `${API_CONFIG.servicesUrl}/api/meals/reorder`,
             {
               method: 'POST',
               headers: {
@@ -1218,19 +1227,17 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
             ]
           );
           
-          // Navigate to shopping list or home
-          navigation.navigate('Meals');
+          // Navigate back to dashboard
+          setShowPlanGenerator(false);
         } catch (error: any) {
           console.error('[CreateMeals] Reorder error:', error);
           throw error; // Will be caught by outer catch
-        } finally {
-          setIsCreatingMeal(false);
         }
         return;
       } else if (params.mode === 'quick') {
         // ⭐ Multi-select support: Send arrays for meal types and cuisines
         if (params.mealTypes && params.mealTypes.length > 0) {
-          request.mealTypes = params.mealTypes;
+          request.mealTypes = params.mealTypes as ('breakfast' | 'lunch' | 'dinner' | 'snack' | 'dessert')[];
           // Backward compatibility: also set single value
           request.mealType = params.mealTypes[0] as any;
         } else if (params.mealType) {
@@ -1643,6 +1650,111 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
     setShowMealPlanSuccess(true);
   };
 
+  const handleLogToDiary = async () => {
+    if (!acceptedPlan || !userId) {
+      Alert.alert('Error', 'No meal plan available or user not logged in');
+      return;
+    }
+
+    try {
+      setLoggingToDiary(true);
+      
+      // Log meals using nutritionService (used by ConsumptionDashboard)
+      const token = await authService.getAccessToken();
+      if (!token) {
+        Alert.alert('Error', 'Authentication required');
+        setLoggingToDiary(false);
+        return;
+      }
+      
+      let loggedCount = 0;
+      for (const [dayIndex, day] of (acceptedPlan.days || []).entries()) {
+        const dayDate = new Date();
+        dayDate.setDate(dayDate.getDate() + dayIndex);
+        
+        for (const meal of day.meals || []) {
+          await nutritionService.logMeal({
+            userId,
+            foodName: meal.meal_name || 'Meal',
+            calories: meal.calories || 0,
+            protein_g: meal.protein || 0,
+            carbs_g: meal.carbs || 0,
+            fat_g: meal.fat || 0,
+            mealType: (meal.meal_type === 'dessert' ? 'snack' : meal.meal_type || 'lunch') as 'breakfast' | 'lunch' | 'dinner' | 'snack',
+            servings: meal.servings || 1,
+          });
+          loggedCount++;
+        }
+      }
+      
+      setSavedToDiary(true);
+      Alert.alert(
+        'Logged to Diary! 📅',
+        `${loggedCount} meals have been added to your meal diary. View them in Consumption Dashboard.`,
+        [{ text: 'OK' }]
+      );
+    } catch (err: any) {
+      console.error('[CreateMeals] Error logging to diary:', err);
+      Alert.alert('Error', err.message || 'Failed to log meals to diary');
+    } finally {
+      setLoggingToDiary(false);
+    }
+  };
+
+  const handleSaveToLibrary = async () => {
+    if (!acceptedPlan || !userId) {
+      Alert.alert('Error', 'No meal plan available or user not logged in');
+      return;
+    }
+
+    try {
+      setSavingToLibrary(true);
+      
+      // Convert all unique meals to library recipes
+      const seenMealNames = new Set<string>();
+      let savedCount = 0;
+
+      for (const day of acceptedPlan.days || []) {
+        for (const meal of day.meals || []) {
+          const mealName = meal.meal_name || 'Meal';
+          if (seenMealNames.has(mealName)) continue;
+          seenMealNames.add(mealName);
+
+          await mealService.createMeal(userId, {
+            name: mealName,
+            meal_type: (meal.meal_type === 'dessert' ? 'snack' : meal.meal_type || 'dinner') as 'breakfast' | 'lunch' | 'dinner' | 'snack',
+            ingredients: (meal.ingredients || []).map((ing: any) => ({
+              name: ing.name || ing.ingredient || '',
+              amount: parseFloat(ing.amount || ing.quantity) || 0,
+              unit: ing.unit || '',
+            })),
+            nutrition: {
+              calories: meal.calories || 0,
+              protein: meal.protein || 0,
+              carbs: meal.carbs || 0,
+              fat: meal.fat || 0,
+            },
+            serving_size: meal.servings || 1,
+            tags: [meal.meal_type || 'dinner'],
+          });
+          savedCount++;
+        }
+      }
+      
+      setSavedToLibrary(true);
+      Alert.alert(
+        'Saved to Library! 📚',
+        `${savedCount} unique recipes have been added to your meal library. Access them from \"My Meals\".`,
+        [{ text: 'OK' }]
+      );
+    } catch (err: any) {
+      console.error('[CreateMeals] Error saving to library:', err);
+      Alert.alert('Error', err.message || 'Failed to save recipes to library');
+    } finally {
+      setSavingToLibrary(false);
+    }
+  };
+
   const handleSubmitToInstacart = async () => {
     if (!acceptedPlan) {
       Alert.alert('Error', 'No meal plan available. Please create a meal plan first.');
@@ -1970,48 +2082,56 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
   const loadLibraryMeals = async (searchQuery?: string, filterTag?: string | null) => {
     setLoadingLibrary(true);
     try {
-      const token = await authService.getAccessToken();
-      if (!userId || !token) {
-        console.log('[CreateMeals] User or token not available for library load');
+      if (!userId) {
+        console.log('[CreateMeals] User not available for library load');
         setAllMeals([]);
         return;
       }
 
-      // Use new getAllMeals endpoint (not getMealDiary)
-      // API: GET /api/users/:userId/meals
-      const mealDiaryService = getMealDiaryService(token);
-      const response = await mealDiaryService.getAllMeals(userId, {
+      // Use mealService to fetch user meals
+      const response = await mealService.getUserMeals(userId, {
         limit: 100,
-        offset: 0,
-        meal_type: filterTag as any,
-        search: searchQuery,
-        sort: 'created_at',
-        order: 'desc',
       });
 
-      // Response format: { success: true, meals: Meal[], pagination: {...} }
-      let apiMeals = (response.meals || []).map((meal: Meal) => ({
-        meal_id: meal.meal_id,
-        user_id: meal.user_id || userId,
-        name: meal.name,
-        nutrition: meal.nutrition,
-        ingredients: Array.isArray(meal.ingredients) 
-          ? meal.ingredients.filter((ing): ing is { name: string; amount: number; unit: string } => typeof ing === 'object' && 'amount' in ing)
+      // Filter by search and meal type locally
+      let apiMeals = ((response as any)?.meals || response || []).map((recipe: any) => ({
+        meal_id: recipe.recipe_id,
+        user_id: recipe.user_id || userId,
+        name: recipe.name,
+        nutrition: recipe.nutrition,
+        ingredients: Array.isArray(recipe.ingredients) 
+          ? recipe.ingredients.filter((ing: any) => typeof ing === 'object' && 'amount' in ing)
           : [],
-        tags: meal.tags || [],
-        notes: '',
-        is_favorite: meal.is_favorite || false,
-        times_logged: meal.times_logged || 0,
-        created_at: meal.created_at || new Date().toISOString(),
-        updated_at: meal.updated_at || new Date().toISOString(),
-        serving_size: meal.serving_size || 1,
-        preparation_time: meal.preparation_time,
-        cooking_time: meal.cooking_time,
-        instructions: meal.instructions || [],
+        tags: recipe.tags || [],
+        notes: recipe.notes || '',
+        is_favorite: recipe.is_favorite || false,
+        times_logged: recipe.times_used || 0,
+        created_at: recipe.created_at || new Date().toISOString(),
+        updated_at: recipe.updated_at || new Date().toISOString(),
+        serving_size: recipe.serving_size || 1,
+        preparation_time: recipe.preparation_time,
+        cooking_time: recipe.cooking_time,
+        instructions: recipe.instructions || [],
       })) as SavedMeal[];
 
+      // Apply client-side filtering
+      if (searchQuery) {
+        const query = searchQuery.toLowerCase();
+        apiMeals = apiMeals.filter(meal => 
+          meal.name.toLowerCase().includes(query) ||
+          meal.tags.some(tag => tag.toLowerCase().includes(query))
+        );
+      }
+
+      if (filterTag) {
+        const tag = filterTag.toLowerCase();
+        apiMeals = apiMeals.filter(meal =>
+          meal.tags.some(t => t.toLowerCase() === tag)
+        );
+      }
+
       setAllMeals(apiMeals);
-      console.log('[CreateMeals] Loaded', apiMeals.length, 'meals from Meals API');
+      console.log('[CreateMeals] Loaded', apiMeals.length, 'recipes from Meal Library');
     } catch (error) {
       console.log('[CreateMeals] Error loading library meals:', error);
       // Set empty array - let UI show empty state
@@ -3977,6 +4097,60 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
                   mealPlanSaved && styles.saveMealPlanButtonTextSaved
                 ]}>
                   {mealPlanSaved ? 'Saved to Library!' : 'Save Meal Plan'}
+                </Text>
+              </TouchableOpacity>
+
+              {/* Log to Diary Button */}
+              <TouchableOpacity 
+                style={[
+                  styles.saveMealPlanButton,
+                  savedToDiary && styles.saveMealPlanButtonSaved
+                ]}
+                activeOpacity={0.7}
+                onPress={handleLogToDiary}
+                disabled={loggingToDiary || savedToDiary}
+              >
+                {loggingToDiary ? (
+                  <ActivityIndicator color="#3b82f6" size="small" />
+                ) : (
+                  <SvgIcon 
+                    name={savedToDiary ? "checkmark-circle" : "calendar-outline"} 
+                    size={20} 
+                    color={savedToDiary ? "#4cbb17" : "#3b82f6"} 
+                  />
+                )}
+                <Text style={[
+                  styles.saveMealPlanButtonText,
+                  savedToDiary && styles.saveMealPlanButtonTextSaved
+                ]}>
+                  {savedToDiary ? 'Logged to Diary!' : 'Log to Meal Diary'}
+                </Text>
+              </TouchableOpacity>
+
+              {/* Save to Recipe Library Button */}
+              <TouchableOpacity 
+                style={[
+                  styles.saveMealPlanButton,
+                  savedToLibrary && styles.saveMealPlanButtonSaved
+                ]}
+                activeOpacity={0.7}
+                onPress={handleSaveToLibrary}
+                disabled={savingToLibrary || savedToLibrary}
+              >
+                {savingToLibrary ? (
+                  <ActivityIndicator color="#8b5cf6" size="small" />
+                ) : (
+                  <SvgIcon 
+                    name={savedToLibrary ? "checkmark-circle" : "book-outline"} 
+                    size={20} 
+                    color={savedToLibrary ? "#4cbb17" : "#8b5cf6"} 
+                  />
+                )}
+                <Text style={[
+                  styles.saveMealPlanButtonText,
+                  savedToLibrary && styles.saveMealPlanButtonTextSaved
+                ]}>
+                  {savedToLibrary ? 'Saved to Recipe Library!' : 'Save Recipes to Library'}
                 </Text>
               </TouchableOpacity>
 

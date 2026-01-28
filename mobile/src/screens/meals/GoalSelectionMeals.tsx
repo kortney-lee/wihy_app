@@ -22,7 +22,7 @@ import {
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons, BrandInput } from '../../components/shared';
-import { API_CONFIG } from '../../config/api';
+import { API_CONFIG } from '../../services/config';
 import {
   ModeToggle,
   DietSelector,
