@@ -12,8 +12,11 @@ export interface MealLog {
   fiber_g?: number;
   sugar_g?: number;
   servings?: number;
+  servingSize?: number;
+  servingUnit?: string;
   photo_url?: string;
   notes?: string;
+  brand?: string;
 }
 
 export interface WaterLog {
@@ -86,22 +89,33 @@ export interface WeeklyTrends {
 
 class NutritionService {
   // All methods now use API_CONFIG.userUrl directly
-  // Endpoints: https://user.wihy.ai/api/users/:userId/nutrition/...
+  // Endpoints: https://user.wihy.ai/api/users/:userId/meals/...
 
   /**
    * Log a meal with nutrition information
-   * POST /api/users/:userId/nutrition/log-meal
+   * POST /api/users/:userId/meals/log
    */
   async logMeal(meal: MealLog): Promise<any> {
     if (!meal.userId) {
       throw new Error('userId is required for logMeal');
     }
     const response = await fetchWithLogging(
-      `${API_CONFIG.userUrl}/api/users/${meal.userId}/nutrition/log-meal`,
+      `${API_CONFIG.userUrl}/api/users/${meal.userId}/meals/log`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(meal),
+        body: JSON.stringify({
+          mealType: meal.mealType,
+          foodName: meal.foodName,
+          calories: meal.calories,
+          protein: meal.protein_g,
+          carbs: meal.carbs_g,
+          fat: meal.fat_g,
+          fiber: meal.fiber_g,
+          servingSize: meal.servingSize || meal.servings || 1,
+          servingUnit: meal.servingUnit || 'serving',
+          brand: meal.brand,
+        }),
       }
     );
     return response.json();
@@ -109,7 +123,7 @@ class NutritionService {
 
   /**
    * Get daily nutrition summary with goals comparison
-   * GET /api/users/:userId/nutrition/daily-summary?date=YYYY-MM-DD
+   * GET /api/users/:userId/meals/summary/daily?date=YYYY-MM-DD
    */
   async getDailySummary(userId: string, date?: string): Promise<DailySummary> {
     if (!userId) {
@@ -117,10 +131,78 @@ class NutritionService {
     }
     const dateParam = date || new Date().toISOString().split('T')[0];
     const response = await fetchWithLogging(
-      `${API_CONFIG.userUrl}/api/users/${userId}/nutrition/daily-summary?date=${dateParam}`
+      `${API_CONFIG.userUrl}/api/users/${userId}/meals/summary/daily?date=${dateParam}`
     );
     const data = await response.json();
+    
+    // Map response to DailySummary interface
+    if (data.success && data.totals) {
+      return {
+        date: dateParam,
+        totals: {
+          calories: data.totals.calories || 0,
+          protein_g: data.totals.protein || 0,
+          carbs_g: data.totals.carbs || 0,
+          fat_g: data.totals.fat || 0,
+          fiber_g: data.totals.fiber || 0,
+          sugar_g: 0,
+        },
+        goals: {
+          calories: data.totals.targets?.calories || 2000,
+          protein_g: data.totals.targets?.protein || 150,
+          carbs_g: data.totals.targets?.carbs || 250,
+          fat_g: data.totals.targets?.fat || 65,
+          fiber_g: 25,
+          sugar_g: 50,
+        },
+        progress: {
+          calories: data.totals.targets?.calories ? (data.totals.calories / data.totals.targets.calories) * 100 : 0,
+          protein_g: data.totals.targets?.protein ? (data.totals.protein / data.totals.targets.protein) * 100 : 0,
+          carbs_g: data.totals.targets?.carbs ? (data.totals.carbs / data.totals.targets.carbs) * 100 : 0,
+          fat_g: data.totals.targets?.fat ? (data.totals.fat / data.totals.targets.fat) * 100 : 0,
+        },
+        water_ml: 0,
+        water_goal_ml: 2500,
+        water_progress: 0,
+        meals: [],
+      };
+    }
     return data.data;
+  }
+
+  /**
+   * Get meals grouped by date (recommended for daily consumption view)
+   * GET /api/users/:userId/meals/diary/by-date?days=7
+   */
+  async getMealsByDate(userId: string, options?: { days?: number; startDate?: string; endDate?: string }): Promise<any> {
+    if (!userId) {
+      throw new Error('userId is required for getMealsByDate');
+    }
+    const params = new URLSearchParams();
+    if (options?.days) params.append('days', options.days.toString());
+    if (options?.startDate) params.append('startDate', options.startDate);
+    if (options?.endDate) params.append('endDate', options.endDate);
+    
+    const queryString = params.toString();
+    const response = await fetchWithLogging(
+      `${API_CONFIG.userUrl}/api/users/${userId}/meals/diary/by-date${queryString ? '?' + queryString : ''}`
+    );
+    return response.json();
+  }
+
+  /**
+   * Delete a meal log entry
+   * DELETE /api/users/:userId/meals/log/:logId
+   */
+  async deleteMealLog(userId: string, logId: string): Promise<any> {
+    if (!userId || !logId) {
+      throw new Error('userId and logId are required for deleteMealLog');
+    }
+    const response = await fetchWithLogging(
+      `${API_CONFIG.userUrl}/api/users/${userId}/meals/log/${logId}`,
+      { method: 'DELETE' }
+    );
+    return response.json();
   }
 
   /**
