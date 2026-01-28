@@ -1219,10 +1219,13 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
           ? params.cuisineTypes.join(', ')
           : (params.cuisineType || '');
         
+        const duration = params.duration || 1;
+        const durationText = duration === 1 ? '' : ` for ${duration} days`;
+        
         request.description = `Generate ${params.mealTypes && params.mealTypes.length > 1 ? 'meals' : 'a single meal'}: ${mealTypesStr}${
           cuisinesStr ? ` (${cuisinesStr} cuisine)` : ''
-        }${dietaryPart}${params.timeConstraint ? `, ${params.timeConstraint} prep time` : ''}`;
-        request.duration = 1;
+        }${durationText}${dietaryPart}${params.timeConstraint ? `, ${params.timeConstraint} prep time` : ''}`;
+        request.duration = duration; // Use selected duration (1, 3, or 5 days)
       } else if (params.mode === 'plan') {
         // ⭐ Multi-select support for Plan mode cuisines
         if (params.cuisineTypes && params.cuisineTypes.length > 0) {
