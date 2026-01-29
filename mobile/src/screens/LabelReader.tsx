@@ -636,7 +636,7 @@ const styles = StyleSheet.create({
 
   // Flags Section
   flagsSection: {
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // Now using theme.colors.surface dynamically
     borderRadius: 16,
     padding: 16,
     marginTop: 16,
@@ -705,7 +705,7 @@ const styles = StyleSheet.create({
 
   // Claims Section
   claimsSection: {
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // Now using theme.colors.surface dynamically
     borderRadius: 16,
     padding: 16,
     marginTop: 16,
@@ -770,7 +770,7 @@ const styles = StyleSheet.create({
 
   // Certifications
   certificationsSection: {
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // Now using theme.colors.surface dynamically
     borderRadius: 16,
     padding: 16,
     marginTop: 16,
@@ -805,7 +805,7 @@ const styles = StyleSheet.create({
 
   // Detected Text
   detectedTextSection: {
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // Now using theme.colors.surface dynamically
     borderRadius: 16,
     padding: 16,
     marginTop: 16,
@@ -829,7 +829,7 @@ const styles = StyleSheet.create({
 
   // Analysis Section
   analysisSection: {
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // Now using theme.colors.surface dynamically
     borderRadius: 16,
     padding: 16,
     marginTop: 16,
@@ -883,7 +883,7 @@ const styles = StyleSheet.create({
 
   // Recommendations
   recommendationsSection: {
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // Now using theme.colors.surface dynamically
     borderRadius: 16,
     padding: 16,
     marginTop: 16,

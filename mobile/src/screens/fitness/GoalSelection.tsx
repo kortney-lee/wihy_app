@@ -709,7 +709,7 @@ const styles = StyleSheet.create({
     color: '#ef4444',
   },
   collapsibleSection: {
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // Now using theme.colors.surface dynamically
     borderRadius: 16,
     marginBottom: 12,
     overflow: 'hidden',
@@ -973,7 +973,7 @@ const styles = StyleSheet.create({
   },
   // Duration Section Styles (Program & Workout)
   durationSection: {
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // Now using theme.colors.surface dynamically
     borderRadius: 16,
     marginBottom: 12,
     padding: 16,

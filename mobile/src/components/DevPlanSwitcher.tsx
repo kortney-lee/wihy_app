@@ -409,7 +409,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   modalContent: {
-    backgroundColor: '#fff',
+    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     maxHeight: '90%',
@@ -569,7 +569,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   categoryTabActive: {
-    backgroundColor: '#fff',
+    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
   },
   categoryTabText: {
     fontSize: 14,

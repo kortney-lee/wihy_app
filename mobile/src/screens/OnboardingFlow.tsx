@@ -238,7 +238,7 @@ const OnboardingFlow: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
   },
   header: {
     flexDirection: 'row',

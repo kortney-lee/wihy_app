@@ -427,7 +427,7 @@ const styles = StyleSheet.create({
     color: '#92400e',
   },
   switchPersonalCard: {
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // Now using theme.colors.surface dynamically
     borderWidth: 2,
     borderColor: '#10b981',
     borderStyle: 'dashed',

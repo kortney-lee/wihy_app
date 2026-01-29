@@ -1189,7 +1189,7 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
             <View
               key={item.id}
               style={{
-                backgroundColor: '#fff',
+                // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
                 borderWidth: 2,
                 borderColor: '#e5e7eb',
                 borderRadius: 16,
@@ -1214,7 +1214,7 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
 
                 <View
                   style={{
-                    backgroundColor: '#ffffff',
+                    // backgroundColor: '#ffffff', // Now using theme.colors.surface dynamically
                     borderWidth: 2,
                     borderColor: '#fa5f06',
                     borderRadius: 14,
@@ -1273,7 +1273,7 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
   },
   header: {
     flexDirection: 'row',
@@ -1354,7 +1354,7 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   toggleBtnActive: {
-    backgroundColor: '#fff',
+    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
   },
   toggleText: {
     fontSize: 14,
@@ -1376,7 +1376,7 @@ const styles = StyleSheet.create({
     color: '#16a34a',
   },
   planCard: {
-    backgroundColor: '#fff',
+    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
     borderWidth: 1,
     borderColor: '#e5e7eb',
     borderRadius: 16,

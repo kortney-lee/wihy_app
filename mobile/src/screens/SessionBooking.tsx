@@ -273,7 +273,7 @@ export default function SessionBooking() {
       >
         {/* Session Type Selection */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Session Type</Text>
+          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Session Type</Text>
           {sessionTypes.map((type) => (
             <TouchableOpacity
               key={type.id}
@@ -307,7 +307,7 @@ export default function SessionBooking() {
 
         {/* Calendar / Date Selection */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Select Date</Text>
+          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Select Date</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.dateScroller}>
             {availableDays.map((day, index) => (
               <TouchableOpacity
@@ -345,7 +345,7 @@ export default function SessionBooking() {
         {/* Time Slot Selection */}
         {selectedDate && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Select Time</Text>
+            <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Select Time</Text>
             <View style={styles.timeGrid}>
               {availableDays
                 .find((d) => d.dateString === selectedDate)
@@ -378,7 +378,7 @@ export default function SessionBooking() {
         {/* Payment Method */}
         {selectedTime && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Payment Method</Text>
+            <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Payment Method</Text>
             
             <TouchableOpacity
               style={[
@@ -434,7 +434,7 @@ export default function SessionBooking() {
 
         {/* Booking Summary */}
         {selectedDate && selectedTime && (
-          <View style={styles.summaryCard}>
+          <View style={[styles.summaryCard, { backgroundColor: theme.colors.surface }]}>
             <Text style={styles.summaryTitle}>Booking Summary</Text>
             <View style={styles.summaryRow}>
               <Text style={styles.summaryLabel}>Coach:</Text>
@@ -539,7 +539,7 @@ const styles = StyleSheet.create({
   sessionTypeCard: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    backgroundColor: '#fff',
+    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
     padding: 16,
     borderRadius: 12,
     marginBottom: 12,
@@ -603,7 +603,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   dateCard: {
-    backgroundColor: '#fff',
+    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
     padding: 16,
     borderRadius: 12,
     marginRight: 12,
@@ -639,7 +639,7 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   timeSlot: {
-    backgroundColor: '#fff',
+    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
     paddingVertical: 12,
     paddingHorizontal: 16,
     borderRadius: 8,
@@ -671,7 +671,7 @@ const styles = StyleSheet.create({
   paymentCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#fff',
+    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
     padding: 16,
     borderRadius: 12,
     marginBottom: 12,
@@ -699,7 +699,7 @@ const styles = StyleSheet.create({
     color: '#6b7280',
   },
   summaryCard: {
-    backgroundColor: '#fff',
+    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
     padding: 20,
     borderRadius: 16,
     shadowColor: '#000',
@@ -746,7 +746,7 @@ const styles = StyleSheet.create({
   },
   bottomActions: {
     padding: 20,
-    backgroundColor: '#fff',
+    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
     borderTopWidth: 1,
     borderTopColor: '#e5e7eb',
   },

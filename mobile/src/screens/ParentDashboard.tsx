@@ -425,7 +425,7 @@ export default function ParentDashboard() {
           {/* Family Stats Summary */}
           {familyStats && (
             <View style={styles.statsSection}>
-              <Text style={styles.sectionTitle}>Family Overview</Text>
+              <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Family Overview</Text>
               <View style={styles.statsGrid}>
                 <View style={styles.statCard}>
                   <Ionicons name="restaurant" size={24} color={dashboardColors.orange} />
@@ -448,7 +448,7 @@ export default function ParentDashboard() {
 
           {/* Children Selector */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>My Children</Text>
+            <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>My Children</Text>
             {familyMembers.length > 0 ? (
               <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.childrenScroll}>
                 {familyMembers.map(renderChildCard)}
@@ -465,7 +465,7 @@ export default function ParentDashboard() {
           {/* Selected Child Progress */}
           {selectedChild ? (
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>{selectedChild.name}'s Progress</Text>
+              <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>{selectedChild.name}'s Progress</Text>
               <View style={styles.progressGrid}>
                 {getChildProgressCards(selectedChild).map(renderProgressCard)}
               </View>
@@ -480,7 +480,7 @@ export default function ParentDashboard() {
           {/* Recent Activity */}
           {recentActivity.length > 0 && (
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Recent Activity</Text>
+              <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Recent Activity</Text>
               <View style={styles.activityList}>
                 {recentActivity.slice(0, 5).map(renderActivityItem)}
               </View>

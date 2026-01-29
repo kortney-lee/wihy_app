@@ -420,7 +420,7 @@ const styles = StyleSheet.create({
     color: '#6b7280',
   },
   coachCard: {
-    backgroundColor: '#fff',
+    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
     borderRadius: 16,
     padding: 24,
     alignItems: 'center',
@@ -480,7 +480,7 @@ const styles = StyleSheet.create({
     color: '#6b7280',
   },
   messageCard: {
-    backgroundColor: '#fff',
+    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
     borderRadius: 16,
     padding: 20,
     marginBottom: 16,
@@ -502,7 +502,7 @@ const styles = StyleSheet.create({
     lineHeight: 24,
   },
   optionsCard: {
-    backgroundColor: '#fff',
+    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
     borderRadius: 16,
     padding: 20,
     marginBottom: 16,
@@ -586,7 +586,7 @@ const styles = StyleSheet.create({
     right: 0,
     flexDirection: 'row',
     padding: 20,
-    backgroundColor: '#fff',
+    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
     borderTopWidth: 1,
     borderTopColor: '#e5e7eb',
     gap: 12,
@@ -600,7 +600,7 @@ const styles = StyleSheet.create({
     minHeight: 52,
   },
   declineButton: {
-    backgroundColor: '#fff',
+    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
     borderWidth: 2,
     borderColor: '#dc2626',
   },

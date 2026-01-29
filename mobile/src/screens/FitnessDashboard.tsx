@@ -1768,7 +1768,7 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
 
         {/* When to Start Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>When do you want to start?</Text>
+          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>When do you want to start?</Text>
           <Text style={styles.sectionSubtitle}>Select a day to see the workout details</Text>
           
           <ScrollView 
@@ -1916,7 +1916,7 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
 
         {/* Workouts List */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Your Workouts</Text>
+          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Your Workouts</Text>
           <Text style={styles.sectionSubtitle}>Tap a workout to see details and start</Text>
           
           {workouts.map((workout: any, index: number) => {

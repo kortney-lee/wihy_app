@@ -192,7 +192,7 @@ export default function PetFoodFacts() {
 
         {/* Nutrition Grade */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>
+          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
             <Ionicons name="nutrition" size={18} color="#8b5cf6" /> Nutrition Grade
           </Text>
           
@@ -226,7 +226,7 @@ export default function PetFoodFacts() {
 
         {/* Protein Sources */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>
+          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
             <Ionicons name="fitness" size={18} color="#8b5cf6" /> Protein Sources
           </Text>
           
@@ -253,7 +253,7 @@ export default function PetFoodFacts() {
 
         {/* Ingredient Flags */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>
+          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
             <Ionicons name="flag" size={18} color="#8b5cf6" /> Ingredient Flags
           </Text>
           
@@ -285,7 +285,7 @@ export default function PetFoodFacts() {
         {/* Ingredient Concerns */}
         {ingredients.concerns.length > 0 && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>
+            <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
               <Ionicons name="alert-circle" size={18} color="#f97316" /> Ingredient Concerns
             </Text>
             {ingredients.concerns.map((concern, index) => (
@@ -321,7 +321,7 @@ export default function PetFoodFacts() {
             style={styles.ingredientsHeader}
             onPress={() => setExpandedIngredients(!expandedIngredients)}
           >
-            <Text style={styles.sectionTitle}>
+            <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
               <Ionicons name="list" size={18} color="#8b5cf6" /> Full Ingredients
             </Text>
             <Ionicons 
@@ -351,7 +351,7 @@ export default function PetFoodFacts() {
         {/* Product Details */}
         {(productInfo.origin_countries || productInfo.certifications || productInfo.quantity) && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>
+            <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
               <Ionicons name="information-circle" size={18} color="#8b5cf6" /> Product Details
             </Text>
             <View style={styles.detailsGrid}>
@@ -538,13 +538,13 @@ const styles = StyleSheet.create({
     width: 100,
     height: 100,
     borderRadius: 12,
-    backgroundColor: '#fff',
+    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
   },
   productImagePlaceholder: {
     width: 100,
     height: 100,
     borderRadius: 12,
-    backgroundColor: '#fff',
+    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -587,7 +587,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   section: {
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // Now using theme.colors.surface dynamically
     borderRadius: 16,
     padding: 16,
     marginBottom: 16,

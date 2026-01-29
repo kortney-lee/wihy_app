@@ -588,7 +588,7 @@ export default function NutritionFacts() {
         {/* Health Score & Grade - Only show for known products with valid data */}
         {!isUnknownProduct(foodItem.product_name) && (foodItem.health_score > 0 || foodItem.nutrition_grade) && (
           <View style={styles.healthScoreSection}>
-            <Text style={styles.sectionTitle}>Health Rating</Text>
+            <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Health Rating</Text>
             <View style={styles.healthScoreCard}>
               {foodItem.health_score > 0 && (
                 <View style={styles.scoreContainer}>
@@ -615,7 +615,7 @@ export default function NutritionFacts() {
           <>
         {/* Macronutrients */}
         <View style={styles.macrosSection}>
-          <Text style={styles.sectionTitle}>Macronutrients</Text>
+          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Macronutrients</Text>
           <View style={styles.macrosGrid}>
             {renderMacroCard('Protein', foodItem.protein_g)}
             {renderMacroCard('Carbs', foodItem.carbs_g)}
@@ -626,7 +626,7 @@ export default function NutritionFacts() {
 
         {/* Detailed Nutrients */}
         <View style={styles.nutrientsSection}>
-          <Text style={styles.sectionTitle}>Vitamins & Minerals</Text>
+          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Vitamins & Minerals</Text>
           <Text style={styles.nutrientsTip}>
             Tap any nutrient to learn more
           </Text>
@@ -636,7 +636,7 @@ export default function NutritionFacts() {
         {/* Ingredients with FDA Analysis */}
         {foodItem.ingredients_text && (
           <View style={styles.ingredientsSection}>
-            <Text style={styles.sectionTitle}>Ingredients</Text>
+            <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Ingredients</Text>
             <View style={styles.ingredientsList}>
               {(foodItem.ingredients_text?.split(',') || []).map((ingredient, idx) => {
                 const trimmed = ingredient.trim();
@@ -746,7 +746,7 @@ export default function NutritionFacts() {
         {/* Allergens */}
         {(foodItem.allergens && foodItem.allergens.length > 0) || foodItem.product_name?.toLowerCase().includes('apple') ? (
           <View style={styles.allergensSection}>
-            <Text style={styles.sectionTitle}>Allergen Information</Text>
+            <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Allergen Information</Text>
             <View style={styles.allergensList}>
               {(foodItem.allergens && foodItem.allergens.length > 0
                 ? foodItem.allergens
@@ -776,7 +776,7 @@ export default function NutritionFacts() {
         {/* Additional Info */}
         {(foodItem.brand || foodItem.categories?.[0] || foodItem.barcode) || foodItem.product_name?.toLowerCase().includes('apple') ? (
           <View style={styles.additionalInfoSection}>
-            <Text style={styles.sectionTitle}>Product Information</Text>
+            <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Product Information</Text>
             <View style={styles.infoList}>
               <View style={[styles.infoBar, { backgroundColor: '#6366f1' }]}>
                 <View style={styles.infoBarLeft}>
@@ -1056,7 +1056,7 @@ const styles = StyleSheet.create({
   productImageContainer: {
     width: '100%',
     height: 200,
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // Now using theme.colors.surface dynamically
     borderRadius: 12,
     marginVertical: 16,
     overflow: 'hidden',
@@ -1243,7 +1243,7 @@ const styles = StyleSheet.create({
 
   progressFillWhite: {
     height: '100%',
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // Now using theme.colors.surface dynamically
     borderRadius: 2,
   },
 
@@ -1335,7 +1335,7 @@ const styles = StyleSheet.create({
   askWihyButton: {
     flexDirection: 'row',
     gap: 10,
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // Now using theme.colors.surface dynamically
     paddingVertical: 14,
     paddingHorizontal: 32,
     borderRadius: 26,
@@ -1416,7 +1416,7 @@ const styles = StyleSheet.create({
 
   loadingContainer: {
     flex: 1,
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // Now using theme.colors.surface dynamically
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -1463,7 +1463,7 @@ const styles = StyleSheet.create({
 
   errorContainer: {
     flex: 1,
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // Now using theme.colors.surface dynamically
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 32,
@@ -2037,7 +2037,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   modalContent: {
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // Now using theme.colors.surface dynamically
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     maxHeight: '85%',
@@ -2117,7 +2117,7 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
   },
   alternativeCard: {
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // Now using theme.colors.surface dynamically
     borderRadius: 16,
     padding: 16,
     marginBottom: 12,

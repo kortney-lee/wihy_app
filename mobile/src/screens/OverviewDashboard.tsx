@@ -594,15 +594,15 @@ const OverviewDashboard: React.FC<BaseDashboardProps> = ({ onAnalyze }) => {
       case 'Summary':
         return (
           <View>
-            <Text style={styles.sectionTitle}>Health Summary</Text>
+            <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Health Summary</Text>
             {isLoading ? (
               <View style={styles.loadingContainer}>
                 <ActivityIndicator size="large" color={dashboardColors.primary} />
-                <Text style={styles.loadingText}>Loading health data...</Text>
+                <Text style={[styles.loadingText, { color: theme.colors.textSecondary }]}>Loading health data...</Text>
               </View>
             ) : healthSummaryData.length === 0 ? (
               <View style={styles.permissionDeniedContainer}>
-                <Ionicons name="fitness-outline" size={64} color="#9ca3af" />
+                <Ionicons name="fitness-outline" size={64} color={theme.colors.textSecondary} />
                 <Text style={styles.permissionDeniedTitle}>Health Access Required</Text>
                 <Text style={styles.permissionDeniedText}>
                   WiHY needs access to your health and fitness data to provide personalized insights.
@@ -635,7 +635,7 @@ const OverviewDashboard: React.FC<BaseDashboardProps> = ({ onAnalyze }) => {
             {/* Recent Scans Section */}
             <View style={styles.recentScansSection}>
               <View style={styles.sectionHeader}>
-                <Text style={styles.sectionTitle}>Recent Scans</Text>
+                <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Recent Scans</Text>
                 <TouchableOpacity 
                   onPress={() => navigation.navigate('ScanHistory' as never)}
                   style={styles.viewAllButton}
@@ -699,7 +699,7 @@ const OverviewDashboard: React.FC<BaseDashboardProps> = ({ onAnalyze }) => {
       case 'Insights':
         return (
           <View style={styles.insightsContainer}>
-            <Text style={styles.sectionTitle}>AI Health Insights</Text>
+            <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>AI Health Insights</Text>
             <View style={styles.insightCard}>
               <Ionicons name="bulb" size={24} color={dashboardTheme.colors.warning} />
               <View style={styles.insightContent}>
@@ -816,7 +816,7 @@ const OverviewDashboard: React.FC<BaseDashboardProps> = ({ onAnalyze }) => {
         onRequestClose={() => setShowPermissionModal(false)}
       >
         <View style={styles.permissionOverlay}>
-          <View style={styles.permissionModalContainer}>
+          <View style={[styles.permissionModalContainer, { backgroundColor: theme.colors.surface }]}>
             <SafeAreaView style={styles.permissionModalSafeArea} edges={['bottom']}>
               {/* Header with Icon and Close Button */}
               <View style={styles.permissionModalHeader}>
@@ -1270,7 +1270,7 @@ const styles = StyleSheet.create({
   },
 
   permissionModalContainer: {
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // Now using theme.colors.surface dynamically
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     maxHeight: '85%',
@@ -1342,7 +1342,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // Now using theme.colors.surface dynamically
     alignItems: 'center',
     justifyContent: 'center',
   },

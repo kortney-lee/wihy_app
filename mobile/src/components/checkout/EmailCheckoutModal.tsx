@@ -89,7 +89,7 @@ export default function EmailCheckoutModal({
         <div 
           onClick={(e) => e.stopPropagation()}
           style={{
-            backgroundColor: '#fff',
+            // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
             borderRadius: 16,
             padding: 32,
             maxWidth: 420,
@@ -355,7 +355,7 @@ const styles = StyleSheet.create({
     padding: 24,
   },
   modal: {
-    backgroundColor: '#fff',
+    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
     borderRadius: 16,
     padding: 32,
     width: '100%',

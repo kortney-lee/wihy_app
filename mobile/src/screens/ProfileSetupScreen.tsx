@@ -389,7 +389,7 @@ export default function ProfileSetupScreen({ isDashboardMode = false, onBack }: 
   const renderBasicsStep = () => (
     <View style={styles.stepContent}>
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>About You</Text>
+        <Text style={[styles.sectionTitle, { color: themeContext.colors.text }]}>About You</Text>
         
         <View style={styles.row}>
           <View style={[styles.inputGroup, styles.halfWidth]}>
@@ -454,7 +454,7 @@ export default function ProfileSetupScreen({ isDashboardMode = false, onBack }: 
       </View>
 
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Physical Stats (Optional)</Text>
+        <Text style={[styles.sectionTitle, { color: themeContext.colors.text }]}>Physical Stats (Optional)</Text>
         <Text style={styles.sectionHint}>
           This helps us provide accurate nutrition recommendations
         </Text>
@@ -490,7 +490,7 @@ export default function ProfileSetupScreen({ isDashboardMode = false, onBack }: 
   const renderGoalsStep = () => (
     <View style={styles.stepContent}>
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Select Your Goals</Text>
+        <Text style={[styles.sectionTitle, { color: themeContext.colors.text }]}>Select Your Goals</Text>
         <Text style={styles.sectionHint}>Choose all that apply</Text>
         
         <View style={styles.goalsGrid}>
@@ -524,7 +524,7 @@ export default function ProfileSetupScreen({ isDashboardMode = false, onBack }: 
 
       {selectedGoals.includes('weight_loss') || selectedGoals.includes('weight_gain') ? (
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Target Details</Text>
+          <Text style={[styles.sectionTitle, { color: themeContext.colors.text }]}>Target Details</Text>
           
           <View style={styles.row}>
             <View style={[styles.inputGroup, styles.halfWidth]}>
@@ -574,7 +574,7 @@ export default function ProfileSetupScreen({ isDashboardMode = false, onBack }: 
   const renderPreferencesStep = () => (
     <View style={styles.stepContent}>
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Dietary Preference</Text>
+        <Text style={[styles.sectionTitle, { color: themeContext.colors.text }]}>Dietary Preference</Text>
         
         <View style={styles.preferencesGrid}>
           {dietaryPreferences.map((pref) => {
@@ -609,7 +609,7 @@ export default function ProfileSetupScreen({ isDashboardMode = false, onBack }: 
       </View>
 
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Food Allergies</Text>
+        <Text style={[styles.sectionTitle, { color: themeContext.colors.text }]}>Food Allergies</Text>
         <Text style={styles.sectionHint}>Select any that apply</Text>
         
         <View style={styles.allergiesGrid}>
@@ -640,7 +640,7 @@ export default function ProfileSetupScreen({ isDashboardMode = false, onBack }: 
       </View>
 
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Other Restrictions</Text>
+        <Text style={[styles.sectionTitle, { color: themeContext.colors.text }]}>Other Restrictions</Text>
         <TextInput
           style={[styles.input, styles.textArea]}
           value={otherRestrictions}
@@ -658,7 +658,7 @@ export default function ProfileSetupScreen({ isDashboardMode = false, onBack }: 
   const renderFitnessStep = () => (
     <View style={styles.stepContent}>
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Current Fitness Level</Text>
+        <Text style={[styles.sectionTitle, { color: themeContext.colors.text }]}>Current Fitness Level</Text>
         
         <View style={styles.fitnessOptions}>
           {fitnessLevels.map((level) => {
@@ -694,7 +694,7 @@ export default function ProfileSetupScreen({ isDashboardMode = false, onBack }: 
       </View>
 
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Preferred Activities</Text>
+        <Text style={[styles.sectionTitle, { color: themeContext.colors.text }]}>Preferred Activities</Text>
         <Text style={styles.sectionHint}>Select activities you enjoy</Text>
         
         <View style={styles.activitiesGrid}>
@@ -727,7 +727,7 @@ export default function ProfileSetupScreen({ isDashboardMode = false, onBack }: 
       </View>
 
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Weekly Exercise Goal</Text>
+        <Text style={[styles.sectionTitle, { color: themeContext.colors.text }]}>Weekly Exercise Goal</Text>
         <View style={styles.exerciseGoalRow}>
           {['1', '2', '3', '4', '5', '6', '7'].map((num) => (
             <Pressable

@@ -434,7 +434,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 6,
     paddingHorizontal: 10,
-    backgroundColor: '#fff',
+    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
     borderRadius: 8,
     borderWidth: 1,
     borderColor: '#e5e7eb',

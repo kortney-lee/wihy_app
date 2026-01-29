@@ -125,7 +125,7 @@ const WeatherScreen: React.FC = () => {
                 {/* Air Quality */}
                 {weather.airQuality && (
                   <View style={styles.airQualityContainer}>
-                    <Text style={styles.sectionTitle}>Air Quality</Text>
+                    <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Air Quality</Text>
                     <View style={styles.airQualityContent}>
                       <Text style={styles.airQualityLevel}>{weather.airQuality.level}</Text>
                       <Text style={styles.airQualityImpact}>{weather.airQuality.healthImpact}</Text>
@@ -137,7 +137,7 @@ const WeatherScreen: React.FC = () => {
               {/* Health Recommendations */}
               {weather.healthRecommendations && weather.healthRecommendations.length > 0 && (
                 <View style={styles.recommendationsCard}>
-                  <Text style={styles.sectionTitle}>💡 Health Recommendations</Text>
+                  <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>💡 Health Recommendations</Text>
                   {weather.healthRecommendations.map((rec, index) => (
                     <View key={index} style={styles.recommendationItem}>
                       <Text style={styles.recommendationText}>{rec}</Text>
@@ -149,7 +149,7 @@ const WeatherScreen: React.FC = () => {
               {/* 7-Day Forecast */}
               {weather.forecast && weather.forecast.length > 0 && (
                 <View style={styles.forecastCard}>
-                  <Text style={styles.sectionTitle}>📅 7-Day Forecast</Text>
+                  <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>📅 7-Day Forecast</Text>
                   <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                     {weather.forecast.map((day, index) => (
                       <View key={index} style={styles.forecastDay}>

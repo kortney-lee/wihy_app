@@ -408,7 +408,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     paddingHorizontal: 16,
     paddingVertical: 12,
-    backgroundColor: '#fff',
+    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
     borderBottomWidth: 1,
     borderBottomColor: '#e5e7eb',
     gap: 8,
@@ -437,7 +437,7 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   scanCard: {
-    backgroundColor: '#fff',
+    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,

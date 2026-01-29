@@ -134,7 +134,7 @@ export const ResponsiveCard: React.FC<ResponsiveCardProps> = ({
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // Now using theme.colors.surface dynamically
     borderRadius: 12,
     padding: 16,
     shadowColor: '#000',
