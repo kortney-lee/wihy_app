@@ -2,6 +2,7 @@ export { DashboardHeader } from './DashboardHeader';
 export { GradientDashboardHeader, DASHBOARD_GRADIENTS } from './GradientDashboardHeader';
 export type { DashboardGradientType } from './GradientDashboardHeader';
 export { BackToHubButton } from './BackToHubButton';
+export { CloseButton, BackButton, ModalHeader } from './NavigationButtons';
 export { ActionCard, MetricCard } from './DashboardCards';
 export { DashboardLayout, DashboardSection, DashboardGrid } from './DashboardLayout';
 export { HamburgerMenu } from './HamburgerMenu';

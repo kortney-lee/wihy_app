@@ -15,7 +15,9 @@ import {
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import { GradientDashboardHeader, Ionicons } from '../components/shared';
+import { GradientDashboardHeader, Ionicons, CloseButton } from '../components/shared';
+import { SweepBorder } from '../components/SweepBorder';
+import { colors } from '../theme/design-tokens';
 import { dashboardTheme } from '../theme/dashboardTheme';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { researchService, ResearchArticle, ResearchDashboardStats, ResearchBookmark, SearchHistoryItem } from '../services';
@@ -26,6 +28,8 @@ type ResearchSearchResult = ResearchArticle;
 
 interface ResearchScreenProps {
   isDashboardMode?: boolean;
+  /** Callback when results view is entered/exited (for hiding/showing hub button) */
+  onResultsViewChange?: (isInResultsView: boolean) => void;
 }
 
 // Cache utilities
@@ -162,7 +166,7 @@ const StudyCard: React.FC<{
 };
 
 // Main Research Screen
-export default function ResearchScreen({ isDashboardMode = false }: ResearchScreenProps) {
+export default function ResearchScreen({ isDashboardMode = false, onResultsViewChange }: ResearchScreenProps) {
   // Auth context for user ID
   const { user } = useContext(AuthContext);
   const userId = user?.id || '';
@@ -305,6 +309,7 @@ export default function ResearchScreen({ isDashboardMode = false }: ResearchScre
     setLoading(true);
     setError(null);
     setActiveWorkspace(searchQuery);
+    onResultsViewChange?.(true); // Notify parent we're entering results view
 
     try {
       // Check cache first
@@ -379,6 +384,7 @@ export default function ResearchScreen({ isDashboardMode = false }: ResearchScre
     setSearchResults([]);
     setQuery('');
     setError(null);
+    onResultsViewChange?.(false); // Notify parent we're exiting results view
   };
 
   const onRefresh = async () => {
@@ -391,6 +397,8 @@ export default function ResearchScreen({ isDashboardMode = false }: ResearchScre
 
   // Results view when searching
   if (activeWorkspace) {
+    const isWeb = Platform.OS === 'web';
+    
     return (
       <View style={styles.container}>
         <ScrollView
@@ -404,8 +412,9 @@ export default function ResearchScreen({ isDashboardMode = false }: ResearchScre
             title="Research Results"
             subtitle={`"${activeWorkspace}"`}
             gradient="research"
-            showBackButton={true}
+            showBackButton={!isWeb}
             onBackPress={handleBackToDashboard}
+            rightAction={isWeb ? { icon: 'arrow-back', onPress: handleBackToDashboard } : undefined}
             badge={error ? { icon: "information-circle", text: error } : undefined}
           />
 
@@ -459,11 +468,9 @@ export default function ResearchScreen({ isDashboardMode = false }: ResearchScre
         <Modal visible={showModal} animationType="slide" presentationStyle="pageSheet">
           <SafeAreaView style={styles.modalContainer} edges={['top']}>
             <View style={styles.modalHeader}>
-              <TouchableOpacity onPress={() => setShowModal(false)} style={styles.modalCloseButton}>
-                <Ionicons name="close" size={24} color="#374151" />
-              </TouchableOpacity>
-              <Text style={styles.modalHeaderTitle}>Study Details</Text>
               <View style={{ width: 40 }} />
+              <Text style={styles.modalHeaderTitle}>Study Details</Text>
+              <CloseButton onPress={() => setShowModal(false)} />
             </View>
 
             {selectedStudy && (
@@ -575,23 +582,30 @@ export default function ResearchScreen({ isDashboardMode = false }: ResearchScre
       >
         {/* Search Bar */}
         <View style={styles.searchSection}>
-          <View style={styles.searchBar}>
-            <Ionicons name="search" size={20} color="#9ca3af" />
-            <TextInput
-              value={query}
-              onChangeText={setQuery}
-              placeholder="Search health topics..."
-              placeholderTextColor="#9ca3af"
-              style={styles.searchInput}
-              returnKeyType="search"
-              onSubmitEditing={handleAnalyze}
-            />
-            {query.length > 0 && (
-              <TouchableOpacity onPress={() => setQuery('')}>
-                <Ionicons name="close-circle" size={20} color="#9ca3af" />
-              </TouchableOpacity>
-            )}
-          </View>
+          <SweepBorder
+            borderWidth={2}
+            radius={28}
+            durationMs={2500}
+            colors={colors.borderSweep}
+          >
+            <View style={styles.searchBar}>
+              <Ionicons name="search" size={20} color="#9ca3af" />
+              <TextInput
+                value={query}
+                onChangeText={setQuery}
+                placeholder="Search health topics..."
+                placeholderTextColor="#9ca3af"
+                style={styles.searchInput}
+                returnKeyType="search"
+                onSubmitEditing={handleAnalyze}
+              />
+              {query.length > 0 && (
+                <TouchableOpacity onPress={() => setQuery('')}>
+                  <Ionicons name="close-circle" size={20} color="#9ca3af" />
+                </TouchableOpacity>
+              )}
+            </View>
+          </SweepBorder>
           <TouchableOpacity style={styles.searchButton} onPress={handleAnalyze}>
             <Text style={styles.searchButtonText}>Search</Text>
           </TouchableOpacity>

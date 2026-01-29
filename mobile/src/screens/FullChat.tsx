@@ -16,7 +16,7 @@ import {
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRoute, useNavigation } from '@react-navigation/native';
-import { Ionicons } from '../components/shared';
+import { Ionicons, CloseButton } from '../components/shared';
 import type { CompositeNavigationProp, RouteProp } from '@react-navigation/native';
 import type { StackNavigationProp } from '@react-navigation/stack';
 import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
@@ -687,8 +687,7 @@ export default function FullChat() {
 
               {/* Hide close button on web - nav bar handles navigation */}
               {!isWeb && (
-                <Pressable
-                  style={styles.closeButton}
+                <CloseButton
                   onPress={() => {
                     if (navigation.canGoBack()) {
                       navigation.goBack();
@@ -696,9 +695,9 @@ export default function FullChat() {
                       navigation.navigate('Home');
                     }
                   }}
-                >
-                  <Ionicons name="close" size={24} color="#3b82f6" />
-                </Pressable>
+                  iconColor="#3b82f6"
+                  style={{ backgroundColor: '#ffffff' }}
+                />
               )}
             </View>
           </GradientDashboardHeader>

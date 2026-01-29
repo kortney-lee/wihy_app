@@ -16,6 +16,8 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { dashboardColors, Ionicons, BackToHubButton } from '../components/shared';
+import { SweepBorder } from '../components/SweepBorder';
+import { colors } from '../theme/design-tokens';
 
 const spinnerGif = require('../../assets/whatishealthyspinner.gif');
 const isWeb = Platform.OS === 'web';
@@ -394,21 +396,28 @@ export default function ClientManagement({
         >
           {/* Search Bar */}
           <View style={styles.searchContainer}>
-            <View style={styles.searchBar}>
-              <Ionicons name="search" size={20} color="#9ca3af" />
-              <TextInput
-                style={styles.searchInput}
-                placeholder="Search clients..."
-                value={searchQuery}
-                onChangeText={setSearchQuery}
-                placeholderTextColor="#9ca3af"
-              />
-              {searchQuery.length > 0 && (
-                <Pressable onPress={() => setSearchQuery('')}>
-                  <Ionicons name="close-circle" size={20} color="#9ca3af" />
-                </Pressable>
-              )}
-            </View>
+            <SweepBorder
+              borderWidth={2}
+              radius={28}
+              durationMs={2500}
+              colors={colors.borderSweep}
+            >
+              <View style={styles.searchBar}>
+                <Ionicons name="search" size={20} color="#9ca3af" />
+                <TextInput
+                  style={styles.searchInput}
+                  placeholder="Search clients..."
+                  value={searchQuery}
+                  onChangeText={setSearchQuery}
+                  placeholderTextColor="#9ca3af"
+                />
+                {searchQuery.length > 0 && (
+                  <Pressable onPress={() => setSearchQuery('')}>
+                    <Ionicons name="close-circle" size={20} color="#9ca3af" />
+                  </Pressable>
+                )}
+              </View>
+            </SweepBorder>
           </View>
 
           {/* Filters & View Toggle */}
