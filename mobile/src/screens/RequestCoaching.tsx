@@ -268,7 +268,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   textArea: {
-    backgroundColor: '#f9fafb',
+    // // backgroundColor: '#f9fafb', // theme.colors.surface // Use theme.colors.surface
     borderWidth: 1,
     borderColor: '#e5e7eb',
     borderRadius: 8,
@@ -292,7 +292,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 12,
     padding: 12,
-    backgroundColor: '#f9fafb',
+    // // backgroundColor: '#f9fafb', // theme.colors.surface // Use theme.colors.surface
     borderWidth: 1,
     borderColor: '#e5e7eb',
     borderRadius: 8,
@@ -353,7 +353,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 8,
-    backgroundColor: '#f3f4f6',
+    // // backgroundColor: '#f3f4f6', // theme.colors.surface // Use theme.colors.background
   },
   cancelButtonText: {
     fontSize: 16,

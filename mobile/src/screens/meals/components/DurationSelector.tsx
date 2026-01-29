@@ -99,7 +99,7 @@ const styles = StyleSheet.create({
     width: '48%',
     paddingVertical: 14,
     paddingHorizontal: 12,
-    backgroundColor: '#f9fafb',
+    // backgroundColor: '#f9fafb', // theme.colors.surface
     borderRadius: 12,
     borderWidth: 1.5,
     borderColor: '#e5e7eb',

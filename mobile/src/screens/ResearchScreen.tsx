@@ -767,7 +767,7 @@ export default function ResearchScreen({ isDashboardMode = false, onResultsViewC
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#e0f2fe',
+    // backgroundColor: '#e0f2fe', // theme.colors.background
   },
   
   // Collapsing Header
@@ -828,7 +828,7 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface // Use theme.colors.surface
     borderRadius: 28,
     paddingHorizontal: 18,
     paddingVertical: 14,
@@ -880,7 +880,7 @@ const styles = StyleSheet.create({
   quickAction: {
     flex: 1,
     alignItems: 'center',
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface // Use theme.colors.surface
     paddingVertical: 16,
     borderRadius: 12,
     borderWidth: 1,
@@ -917,7 +917,7 @@ const styles = StyleSheet.create({
   },
   statsCard: {
     flex: 1,
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface // Use theme.colors.surface
     borderRadius: 12,
     padding: 16,
     borderLeftWidth: 4,
@@ -948,7 +948,7 @@ const styles = StyleSheet.create({
   recentTag: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface // Use theme.colors.surface
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 20,
@@ -967,7 +967,7 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   topicsList: {
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface // Use theme.colors.surface
     borderRadius: 12,
     overflow: 'hidden',
   },
@@ -1033,7 +1033,7 @@ const styles = StyleSheet.create({
   // Results Stats
   resultsStats: {
     flexDirection: 'row',
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface // Use theme.colors.surface
     marginHorizontal: 16,
     marginTop: -12,
     borderRadius: 12,
@@ -1082,7 +1082,7 @@ const styles = StyleSheet.create({
 
   // Study Card
   studyCard: {
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface // Use theme.colors.surface
     borderRadius: 12,
     padding: 16,
     borderWidth: 1,
@@ -1174,7 +1174,7 @@ const styles = StyleSheet.create({
   // Modal
   modalContainer: {
     flex: 1,
-    backgroundColor: '#e0f2fe',
+    // backgroundColor: '#e0f2fe', // theme.colors.background
   },
   modalHeader: {
     flexDirection: 'row',
@@ -1182,7 +1182,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingVertical: 12,
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface // Use theme.colors.surface
     borderBottomWidth: 1,
     borderBottomColor: '#e5e7eb',
   },
@@ -1209,7 +1209,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   modalMeta: {
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface // Use theme.colors.surface
     borderRadius: 12,
     padding: 16,
     marginBottom: 16,
@@ -1246,7 +1246,7 @@ const styles = StyleSheet.create({
   evidenceLevelCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface // Use theme.colors.surface
     borderRadius: 12,
     padding: 16,
     gap: 12,
@@ -1273,7 +1273,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: '#374151',
     lineHeight: 24,
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface // Use theme.colors.surface
     borderRadius: 12,
     padding: 16,
   },

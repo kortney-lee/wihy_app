@@ -99,7 +99,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     paddingVertical: 14,
-    backgroundColor: '#f9fafb',
+    // backgroundColor: '#f9fafb', // theme.colors.surface
     borderRadius: 10,
     borderWidth: 1.5,
     borderColor: '#e5e7eb',

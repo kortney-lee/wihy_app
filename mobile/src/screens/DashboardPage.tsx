@@ -700,7 +700,7 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: 32,
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface // Use theme.colors.surface
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 16,
@@ -958,7 +958,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 24,
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface // Use theme.colors.surface
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.25,
@@ -974,12 +974,12 @@ const styles = StyleSheet.create({
 
   researchDashboardWrapper: {
     flex: 1,
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface // Use theme.colors.surface
   },
 
   fitnessDashboardWrapper: {
     flex: 1,
-    backgroundColor: '#e0f2fe',
+    // backgroundColor: '#e0f2fe', // theme.colors.background
   },
 
   // Collapsible Header Styles

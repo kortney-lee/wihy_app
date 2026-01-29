@@ -68,7 +68,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 14,
     paddingHorizontal: 8,
-    backgroundColor: '#f9fafb',
+    // backgroundColor: '#f9fafb', // theme.colors.surface // theme.colors.surface // Use theme.colors.surface
     borderRadius: 12,
     borderWidth: 1.5,
     borderColor: '#e5e7eb',

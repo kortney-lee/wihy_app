@@ -663,7 +663,7 @@ export default function CoachDashboard({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#e0f2fe',
+    // backgroundColor: '#e0f2fe', // theme.colors.background
   },
   
   // Collapsing Header
@@ -753,7 +753,7 @@ const styles = StyleSheet.create({
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface // Use theme.colors.surface
     margin: 16,
     paddingHorizontal: 18,
     paddingVertical: 14,
@@ -972,7 +972,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
-    backgroundColor: '#f3f4f6',
+    // backgroundColor: '#f3f4f6', // theme.colors.surface // Use theme.colors.background
     borderWidth: 1,
     borderColor: '#e5e7eb',
   },
@@ -1078,7 +1078,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   previewMeal: {
-    backgroundColor: '#f9fafb',
+    // backgroundColor: '#f9fafb', // theme.colors.surface // Use theme.colors.surface
     padding: 12,
     borderRadius: 8,
   },
@@ -1150,7 +1150,7 @@ const styles = StyleSheet.create({
   },
   statItem: {
     flex: 1,
-    backgroundColor: '#f9fafb',
+    // backgroundColor: '#f9fafb', // theme.colors.surface // Use theme.colors.surface
     padding: 12,
     borderRadius: 8,
   },
@@ -1204,7 +1204,7 @@ const styles = StyleSheet.create({
     color: '#111827',
   },
   modalInput: {
-    backgroundColor: '#f9fafb',
+    // backgroundColor: '#f9fafb', // theme.colors.surface // Use theme.colors.surface
     borderWidth: 1,
     borderColor: '#e5e7eb',
     borderRadius: 8,

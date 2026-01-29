@@ -466,7 +466,7 @@ const styles = StyleSheet.create({
   planCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#f9fafb',
+    // // backgroundColor: '#f9fafb', // theme.colors.surface // Use theme.colors.surface
     padding: 16,
     borderRadius: 12,
     marginBottom: 8,
@@ -505,7 +505,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#f9fafb',
+    // // backgroundColor: '#f9fafb', // theme.colors.surface // Use theme.colors.surface
     padding: 16,
     borderRadius: 12,
     marginBottom: 8,
@@ -556,7 +556,7 @@ const styles = StyleSheet.create({
   },
   categoryTabs: {
     flexDirection: 'row',
-    backgroundColor: '#f3f4f6',
+    // // backgroundColor: '#f3f4f6', // theme.colors.surface // Use theme.colors.background
     borderRadius: 12,
     padding: 4,
     marginTop: 16,

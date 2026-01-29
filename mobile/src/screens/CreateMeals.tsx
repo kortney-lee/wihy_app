@@ -2906,7 +2906,7 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
             style={{
               flexDirection: 'row',
               gap: 10,
-              backgroundColor: '#ffffff',
+              // backgroundColor: '#ffffff', // theme.colors.surface // Use theme.colors.surface
               paddingVertical: 14,
               paddingHorizontal: 32,
               borderRadius: 26,
@@ -4469,7 +4469,7 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
                 {/* Empty state if no items */}
                 {totalItems === 0 && (
                   <View style={{ alignItems: 'center', paddingTop: 60, paddingHorizontal: 32 }}>
-                    <View style={{ width: 100, height: 100, borderRadius: 50, backgroundColor: '#f3f4f6', alignItems: 'center', justifyContent: 'center', marginBottom: 20 }}>
+                    <View style={{ width: 100, height: 100, borderRadius: 50, // backgroundColor: '#f3f4f6', // theme.colors.surface // Use theme.colors.background alignItems: 'center', justifyContent: 'center', marginBottom: 20 }}>
                       <SvgIcon name="cart-outline" size={48} color="#9ca3af" />
                     </View>
                     <Text style={{ fontSize: 20, fontWeight: '600', color: '#111827', marginBottom: 8 }}>No Shopping List</Text>
@@ -4548,7 +4548,7 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
                     <TouchableOpacity 
                       style={[styles.shoppingDoneButton, { 
                         paddingHorizontal: 24,
-                        backgroundColor: '#f3f4f6',
+                        // backgroundColor: '#f3f4f6', // theme.colors.surface // Use theme.colors.background
                       }]}
                       onPress={() => setShowShoppingListModal(false)}
                     >
@@ -4728,7 +4728,7 @@ const styles = StyleSheet.create({
     marginTop: 12,
   },
   input: {
-    backgroundColor: '#f9fafb',
+    // backgroundColor: '#f9fafb', // theme.colors.surface // Use theme.colors.surface
     borderWidth: 1,
     borderColor: '#e5e7eb',
     borderRadius: 8,
@@ -4760,7 +4760,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderRadius: 20,
-    backgroundColor: '#f3f4f6',
+    // backgroundColor: '#f3f4f6', // theme.colors.surface // Use theme.colors.background
     borderWidth: 1,
     borderColor: '#e5e7eb',
   },
@@ -4842,7 +4842,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 16,
-    backgroundColor: '#f3f4f6',
+    // backgroundColor: '#f3f4f6', // theme.colors.surface // Use theme.colors.background
     borderWidth: 1,
     borderColor: '#e5e7eb',
   },
@@ -4887,7 +4887,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 6,
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface // Use theme.colors.surface
     borderWidth: 1,
     borderColor: '#e5e7eb',
     paddingVertical: 12,
@@ -5099,7 +5099,7 @@ const styles = StyleSheet.create({
   
   modalContainer: {
     flex: 1,
-    backgroundColor: '#e0f2fe',
+    // backgroundColor: '#e0f2fe', // theme.colors.background
   },
   modalHeader: {
     flexDirection: 'row',
@@ -5179,7 +5179,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 10,
-    backgroundColor: '#f3f4f6',
+    // backgroundColor: '#f3f4f6', // theme.colors.surface // Use theme.colors.background
   },
   miniTagText: {
     fontSize: 11,
@@ -5242,7 +5242,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   viewModeTabActive: {
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface // Use theme.colors.surface
   },
   viewModeTabText: {
     fontSize: 13,
@@ -5255,7 +5255,7 @@ const styles = StyleSheet.create({
 
   // Day Picker Styles (Horizontal Scroll) - Matching FitnessDashboard
   dayPickerContainer: {
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface // Use theme.colors.surface
     marginHorizontal: 16,
     borderRadius: 16,
     paddingVertical: 12,
@@ -5272,7 +5272,7 @@ const styles = StyleSheet.create({
   dayPickerNavButton: {
     padding: 6,
     borderRadius: 8,
-    backgroundColor: '#f3f4f6',
+    // backgroundColor: '#f3f4f6', // theme.colors.surface // Use theme.colors.background
   },
   dayPickerMonthText: {
     fontSize: 16,
@@ -5289,7 +5289,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 14,
-    backgroundColor: '#f3f4f6',
+    // backgroundColor: '#f3f4f6', // theme.colors.surface // Use theme.colors.background
     paddingVertical: 8,
   },
   dayPickerItemToday: {
@@ -5307,7 +5307,7 @@ const styles = StyleSheet.create({
     borderColor: '#f59e0b',
   },
   dayPickerItemPast: {
-    backgroundColor: '#f3f4f6',
+    // backgroundColor: '#f3f4f6', // theme.colors.surface // Use theme.colors.background
     borderWidth: 2,
     borderColor: '#d1d5db',
   },
@@ -5518,7 +5518,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: dashboardTheme.header.paddingHorizontal,
     paddingTop: dashboardTheme.header.paddingTop,
     paddingBottom: 16,
-    backgroundColor: '#f9fafb',
+    // backgroundColor: '#f9fafb', // theme.colors.surface // Use theme.colors.surface
     borderBottomWidth: 1,
     borderBottomColor: '#e5e7eb',
   },
@@ -5526,7 +5526,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface // Use theme.colors.surface
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: '#000',
@@ -5544,7 +5544,7 @@ const styles = StyleSheet.create({
   // Form Container (for create/library views)
   formContainer: {
     flex: 1,
-    backgroundColor: '#f9fafb',
+    // backgroundColor: '#f9fafb', // theme.colors.surface // Use theme.colors.surface
   },
   formHeaderGradient: {
     paddingHorizontal: dashboardTheme.header.paddingHorizontal,
@@ -5588,7 +5588,7 @@ const styles = StyleSheet.create({
   // Calendar View Styles
   calendarContainer: {
     flex: 1,
-    backgroundColor: '#f9fafb',
+    // backgroundColor: '#f9fafb', // theme.colors.surface // Use theme.colors.surface
   },
   calendarHeader: {
     paddingTop: dashboardTheme.header.paddingTop,
@@ -5616,7 +5616,7 @@ const styles = StyleSheet.create({
   // Removed duplicate - see calendarModalBackButton and calendarModalAddButton above
   calendarContent: {
     flex: 1,
-    backgroundColor: '#f9fafb',
+    // backgroundColor: '#f9fafb', // theme.colors.surface // Use theme.colors.surface
   },
   calendarMonthNav: {
     flexDirection: 'row',
@@ -5718,7 +5718,7 @@ const styles = StyleSheet.create({
   calendarMealCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#f9fafb',
+    // backgroundColor: '#f9fafb', // theme.colors.surface // Use theme.colors.surface
     padding: 12,
     borderRadius: 12,
   },
@@ -5839,7 +5839,7 @@ const styles = StyleSheet.create({
   // Modal Styles
   modalScrollContent: {
     flex: 1,
-    backgroundColor: '#e0f2fe',
+    // backgroundColor: '#e0f2fe', // theme.colors.background
   },
   modalBackButton: {
     padding: 8,
@@ -5974,7 +5974,7 @@ const styles = StyleSheet.create({
   durationOption: {
     flex: 1,
     paddingVertical: 12,
-    backgroundColor: '#f9fafb',
+    // backgroundColor: '#f9fafb', // theme.colors.surface // Use theme.colors.surface
     borderRadius: 10,
     alignItems: 'center',
     borderWidth: 1,
@@ -6006,7 +6006,7 @@ const styles = StyleSheet.create({
     gap: 8,
     paddingVertical: 10,
     paddingHorizontal: 14,
-    backgroundColor: '#f9fafb',
+    // backgroundColor: '#f9fafb', // theme.colors.surface // Use theme.colors.surface
     borderRadius: 10,
     borderWidth: 1,
     borderColor: '#e5e7eb',
@@ -6032,7 +6032,7 @@ const styles = StyleSheet.create({
   dietarySearchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#f3f4f6',
+    // backgroundColor: '#f3f4f6', // theme.colors.surface // Use theme.colors.background
     borderRadius: 10,
     paddingHorizontal: 12,
     paddingVertical: 10,
@@ -6101,7 +6101,7 @@ const styles = StyleSheet.create({
     gap: 6,
     paddingVertical: 8,
     paddingHorizontal: 12,
-    backgroundColor: '#f9fafb',
+    // backgroundColor: '#f9fafb', // theme.colors.surface // Use theme.colors.surface
     borderRadius: 8,
     borderWidth: 1,
     borderColor: '#e5e7eb',
@@ -6131,7 +6131,7 @@ const styles = StyleSheet.create({
     gap: 6,
     paddingVertical: 8,
     paddingHorizontal: 12,
-    backgroundColor: '#f9fafb',
+    // backgroundColor: '#f9fafb', // theme.colors.surface // Use theme.colors.surface
     borderRadius: 8,
     borderWidth: 1,
     borderColor: '#e5e7eb',
@@ -6356,7 +6356,7 @@ const styles = StyleSheet.create({
   shoppingCategoryCount: {
     fontSize: 14,
     color: '#6b7280',
-    backgroundColor: '#f3f4f6',
+    // backgroundColor: '#f3f4f6', // theme.colors.surface // Use theme.colors.background
     paddingHorizontal: 12,
     paddingVertical: 4,
     borderRadius: 12,
@@ -6373,7 +6373,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    backgroundColor: '#f9fafb',
+    // backgroundColor: '#f9fafb', // theme.colors.surface // Use theme.colors.surface
     padding: 12,
     borderRadius: 8,
     marginTop: 8,
@@ -6389,7 +6389,7 @@ const styles = StyleSheet.create({
   librarySearchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface // Use theme.colors.surface
     marginHorizontal: 16,
     marginTop: 8,
     paddingHorizontal: 18,
@@ -6538,7 +6538,7 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: '#f3f4f6',
+    // backgroundColor: '#f3f4f6', // theme.colors.surface // Use theme.colors.background
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 12,
@@ -6591,7 +6591,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 12,
-    backgroundColor: '#f3f4f6',
+    // backgroundColor: '#f3f4f6', // theme.colors.surface // Use theme.colors.background
   },
   libraryMealTagText: {
     fontSize: 12,
@@ -6605,7 +6605,7 @@ const styles = StyleSheet.create({
   libraryMealFooterAction: {
     padding: 6,
     borderRadius: 8,
-    backgroundColor: '#f3f4f6',
+    // backgroundColor: '#f3f4f6', // theme.colors.surface // Use theme.colors.background
   },
   libraryMealTimesLogged: {
     fontSize: 14,
@@ -6737,10 +6737,10 @@ const styles = StyleSheet.create({
   },
   mealDetailContent: {
     flex: 1,
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface // Use theme.colors.surface
   },
   mealDetailServingsCard: {
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface // Use theme.colors.surface
     marginHorizontal: 16,
     marginTop: -20,
     borderRadius: 16,
@@ -6767,7 +6767,7 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: '#f3f4f6',
+    // backgroundColor: '#f3f4f6', // theme.colors.surface // Use theme.colors.background
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -6801,7 +6801,7 @@ const styles = StyleSheet.create({
     color: '#9ca3af',
   },
   mealDetailNutritionCard: {
-    backgroundColor: '#f9fafb',
+    // backgroundColor: '#f9fafb', // theme.colors.surface // Use theme.colors.surface
     borderRadius: 16,
     padding: 20,
   },
@@ -6857,7 +6857,7 @@ const styles = StyleSheet.create({
     marginTop: 16,
   },
   mealDetailTag: {
-    backgroundColor: '#f3f4f6',
+    // backgroundColor: '#f3f4f6', // theme.colors.surface // Use theme.colors.background
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 16,
@@ -6877,7 +6877,7 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#f9fafb',
+    // backgroundColor: '#f9fafb', // theme.colors.surface // Use theme.colors.surface
     padding: 16,
     borderRadius: 12,
     gap: 12,
@@ -6897,7 +6897,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     marginHorizontal: 16,
     marginTop: 24,
-    backgroundColor: '#f3f4f6',
+    // backgroundColor: '#f3f4f6', // theme.colors.surface // Use theme.colors.background
     borderRadius: 12,
     padding: 4,
   },
@@ -6908,7 +6908,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   mealDetailTabActive: {
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface // Use theme.colors.surface
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
@@ -6929,7 +6929,7 @@ const styles = StyleSheet.create({
   mealDetailContentCard: {
     marginHorizontal: 16,
     marginTop: 16,
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface // Use theme.colors.surface
     borderRadius: 16,
     padding: 16,
     borderWidth: 1,
@@ -7025,7 +7025,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    backgroundColor: '#f3f4f6',
+    // backgroundColor: '#f3f4f6', // theme.colors.surface // Use theme.colors.background
     paddingVertical: 14,
     borderRadius: 12,
     borderWidth: 1.5,
@@ -7108,7 +7108,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-around',
     paddingVertical: 16,
-    backgroundColor: '#f9fafb',
+    // backgroundColor: '#f9fafb', // theme.colors.surface // Use theme.colors.surface
     borderBottomWidth: 1,
     borderBottomColor: '#e5e7eb',
   },
@@ -7150,7 +7150,7 @@ const styles = StyleSheet.create({
   shoppingCategorySectionCount: {
     fontSize: 14,
     color: '#6b7280',
-    backgroundColor: '#f3f4f6',
+    // backgroundColor: '#f3f4f6', // theme.colors.surface // Use theme.colors.background
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 12,
@@ -7193,7 +7193,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   workoutCompleteContainer: {
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface // Use theme.colors.surface
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     maxHeight: '85%',
@@ -7236,7 +7236,7 @@ const styles = StyleSheet.create({
   workoutStatCard: {
     flex: 1,
     alignItems: 'center',
-    backgroundColor: '#f9fafb',
+    // backgroundColor: '#f9fafb', // theme.colors.surface // Use theme.colors.surface
     borderRadius: 16,
     paddingVertical: 16,
     paddingHorizontal: 8,

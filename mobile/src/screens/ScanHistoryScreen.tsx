@@ -362,7 +362,7 @@ export default function ScanHistoryScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f9fafb',
+    // // backgroundColor: '#f9fafb', // theme.colors.surface // Use theme.colors.surface
   },
   
   // Collapsing Header
@@ -419,7 +419,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 20,
-    backgroundColor: '#f3f4f6',
+    // // backgroundColor: '#f3f4f6', // theme.colors.surface // Use theme.colors.background
     gap: 4,
   },
   filterButtonActive: {
@@ -488,7 +488,7 @@ const styles = StyleSheet.create({
     height: 180,
     borderRadius: 8,
     marginBottom: 12,
-    backgroundColor: '#f3f4f6',
+    // // backgroundColor: '#f3f4f6', // theme.colors.surface // Use theme.colors.background
   },
   detectedItems: {
     padding: 12,

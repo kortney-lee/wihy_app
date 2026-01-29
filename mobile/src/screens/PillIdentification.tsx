@@ -376,7 +376,7 @@ export default function PillIdentification() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f9fafb',
+    // // backgroundColor: '#f9fafb', // theme.colors.surface // Use theme.colors.surface
   },
   loadingContainer: {
     flex: 1,
@@ -495,7 +495,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    backgroundColor: '#f3f4f6',
+    // // backgroundColor: '#f3f4f6', // theme.colors.surface // Use theme.colors.background
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 16,
@@ -528,7 +528,7 @@ const styles = StyleSheet.create({
 
   // Analysis Section
   analysisSection: {
-    backgroundColor: '#ffffff',
+    // // backgroundColor: '#ffffff', // theme.colors.surface // Use theme.colors.surface
     borderRadius: 16,
     padding: 16,
     marginTop: 16,
@@ -586,7 +586,7 @@ const styles = StyleSheet.create({
 
   // Other Matches
   otherMatchesSection: {
-    backgroundColor: '#ffffff',
+    // // backgroundColor: '#ffffff', // theme.colors.surface // Use theme.colors.surface
     borderRadius: 16,
     padding: 16,
     marginTop: 16,
@@ -688,7 +688,7 @@ const styles = StyleSheet.create({
   },
   secondaryAction: {
     flex: 1,
-    backgroundColor: '#f9fafb',
+    // // backgroundColor: '#f9fafb', // theme.colors.surface // Use theme.colors.surface
     borderWidth: 1,
     borderColor: '#e5e7eb',
   },

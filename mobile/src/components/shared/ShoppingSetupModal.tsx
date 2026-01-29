@@ -310,7 +310,7 @@ const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    // backgroundColor: '#ffffff', // theme.colors.surface
   },
   header: {
     flexDirection: 'row',

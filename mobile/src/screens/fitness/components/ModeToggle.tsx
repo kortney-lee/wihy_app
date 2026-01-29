@@ -45,7 +45,7 @@ export const ModeToggle: React.FC<ModeToggleProps> = ({ selectedMode, onModeChan
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
-    backgroundColor: '#f3f4f6',
+    // backgroundColor: '#f3f4f6', // theme.colors.surface // theme.colors.surface // Use theme.colors.background
     borderRadius: 12,
     padding: 4,
     marginBottom: 16,

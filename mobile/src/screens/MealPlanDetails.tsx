@@ -107,7 +107,7 @@ export default function MealPlanDetails() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#e0f2fe',
+    // backgroundColor: '#e0f2fe', // theme.colors.background
   },
   backButton: {
     width: 40,
@@ -160,7 +160,7 @@ const styles = StyleSheet.create({
     color: '#6b7280',
   },
   placeholderCard: {
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface // Use theme.colors.surface
     borderRadius: 16,
     padding: 24,
     alignItems: 'center',

@@ -907,7 +907,7 @@ const OverviewDashboard: React.FC<BaseDashboardProps> = ({ onAnalyze }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#e0f2fe',
+    // backgroundColor: '#e0f2fe', // theme.colors.background
   },
   collapsibleHeader: {
     overflow: 'hidden',
@@ -953,7 +953,7 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     flex: 1,
-    backgroundColor: '#e0f2fe',
+    // backgroundColor: '#e0f2fe', // theme.colors.background
   },
 
   header: {
@@ -1270,7 +1270,7 @@ const styles = StyleSheet.create({
   },
 
   permissionModalContainer: {
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface // Use theme.colors.surface
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     maxHeight: '85%',
@@ -1294,7 +1294,7 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: '#e0f2fe',
+    // backgroundColor: '#e0f2fe', // theme.colors.background
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -1332,7 +1332,7 @@ const styles = StyleSheet.create({
   permissionFeatureItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#f9fafb',
+    // backgroundColor: '#f9fafb', // theme.colors.surface // Use theme.colors.surface
     padding: 16,
     borderRadius: 12,
     gap: 12,
@@ -1342,7 +1342,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface // Use theme.colors.surface
     alignItems: 'center',
     justifyContent: 'center',
   },

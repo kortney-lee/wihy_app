@@ -1356,7 +1356,7 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   topBox: {
-    backgroundColor: '#ffffff',
+    // // backgroundColor: '#ffffff', // theme.colors.surface // Use theme.colors.surface
   },
   topBoxContent: {
     height: 0,
@@ -1378,7 +1378,7 @@ const styles = StyleSheet.create({
   searchInputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#ffffff',
+    // // backgroundColor: '#ffffff', // theme.colors.surface // Use theme.colors.surface
     borderRadius: 28,
     paddingHorizontal: 18,
     paddingVertical: 14,

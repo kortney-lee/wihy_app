@@ -665,7 +665,7 @@ export default function IntegrationTestScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f9fafb',
+    // // backgroundColor: '#f9fafb', // theme.colors.surface // Use theme.colors.surface
   },
   header: {
     backgroundColor: '#fff',

@@ -149,7 +149,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface
   },
   buttonDisabled: {
     opacity: 0.6,

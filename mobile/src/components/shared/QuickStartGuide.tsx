@@ -385,7 +385,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 20,
     right: 20,
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface
     borderRadius: 20,
     padding: 24,
     alignItems: 'center',
@@ -516,7 +516,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'flex-end',
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface
     paddingTop: 12,
     borderTopWidth: 1,
     borderTopColor: '#e5e7eb',

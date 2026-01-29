@@ -72,7 +72,7 @@ const styles = StyleSheet.create({
   },
   toggleRow: {
     flexDirection: 'row',
-    backgroundColor: '#f3f4f6',
+    // backgroundColor: '#f3f4f6', // theme.colors.surface
     borderRadius: 12,
     padding: 4,
     gap: 4,

@@ -892,7 +892,7 @@ export default function ProfileSetupScreen({ isDashboardMode = false, onBack }: 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#e0f2fe',
+    // backgroundColor: '#e0f2fe', // theme.colors.background
   },
   // Collapsible header styles - Teal theme
   collapsibleHeader: {

@@ -72,7 +72,7 @@ const styles = StyleSheet.create({
     borderColor: '#93c5fd',
   },
   containerSecondary: {
-    backgroundColor: '#f9fafb',
+    // // backgroundColor: '#f9fafb', // theme.colors.surface // Use theme.colors.surface
     borderColor: '#e5e7eb',
   },
   content: {
@@ -91,7 +91,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#dbeafe',
   },
   iconContainerSecondary: {
-    backgroundColor: '#f3f4f6',
+    // // backgroundColor: '#f3f4f6', // theme.colors.surface // Use theme.colors.background
   },
   message: {
     flex: 1,

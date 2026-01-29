@@ -451,7 +451,7 @@ const styles = StyleSheet.create({
   },
   scrollContainer: {
     flex: 1,
-    backgroundColor: '#e0f2fe',
+    // backgroundColor: '#e0f2fe', // theme.colors.background
   },
   scrollView: {
     flex: 1,
@@ -576,7 +576,7 @@ const styles = StyleSheet.create({
   },
   categoryCardComplete: {
     opacity: 0.7,
-    backgroundColor: '#f9fafb',
+    // backgroundColor: '#f9fafb', // theme.colors.surface // Use theme.colors.surface
   },
   categoryHeader: {
     flexDirection: 'row',
@@ -605,7 +605,7 @@ const styles = StyleSheet.create({
     color: '#9ca3af',
   },
   categoryBadge: {
-    backgroundColor: '#f3f4f6',
+    // backgroundColor: '#f3f4f6', // theme.colors.surface // Use theme.colors.background
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 12,
@@ -677,7 +677,7 @@ const styles = StyleSheet.create({
   itemBrand: {
     fontSize: 12,
     color: '#9ca3af',
-    backgroundColor: '#f3f4f6',
+    // backgroundColor: '#f3f4f6', // theme.colors.surface // Use theme.colors.background
     paddingHorizontal: 8,
     paddingVertical: 2,
     borderRadius: 4,

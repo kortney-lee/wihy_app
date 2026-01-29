@@ -332,7 +332,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 20,
     paddingHorizontal: 12,
-    backgroundColor: '#f9fafb',
+    // backgroundColor: '#f9fafb', // theme.colors.surface // theme.colors.surface // Use theme.colors.surface
     borderRadius: 16,
     borderWidth: 2,
     borderColor: '#e5e7eb',
@@ -369,7 +369,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingVertical: 16,
     paddingHorizontal: 12,
-    backgroundColor: '#f9fafb',
+    // backgroundColor: '#f9fafb', // theme.colors.surface // theme.colors.surface // Use theme.colors.surface
     borderRadius: 12,
     borderWidth: 2,
     borderColor: '#e5e7eb',
@@ -473,7 +473,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingVertical: 12,
     paddingHorizontal: 8,
-    backgroundColor: '#f9fafb',
+    // backgroundColor: '#f9fafb', // theme.colors.surface // theme.colors.surface // Use theme.colors.surface
     borderRadius: 10,
     borderWidth: 2,
     borderColor: '#e5e7eb',

@@ -48,7 +48,7 @@ export const DurationSelector: React.FC<DurationSelectorProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface // theme.colors.surface // Use theme.colors.surface
     borderRadius: 16,
     padding: 16,
     marginBottom: 12,
@@ -81,7 +81,7 @@ const styles = StyleSheet.create({
   option: {
     flex: 1,
     paddingVertical: 12,
-    backgroundColor: '#f9fafb',
+    // backgroundColor: '#f9fafb', // theme.colors.surface // theme.colors.surface // Use theme.colors.surface
     borderRadius: 10,
     borderWidth: 1,
     borderColor: '#e5e7eb',

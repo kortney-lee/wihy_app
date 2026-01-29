@@ -709,7 +709,7 @@ const styles = StyleSheet.create({
     color: '#ef4444',
   },
   collapsibleSection: {
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface // theme.colors.surface // Use theme.colors.surface
     borderRadius: 16,
     marginBottom: 12,
     overflow: 'hidden',
@@ -721,7 +721,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     padding: 16,
-    backgroundColor: '#f9fafb',
+    // backgroundColor: '#f9fafb', // theme.colors.surface // theme.colors.surface // Use theme.colors.surface
   },
   collapsibleHeaderLeft: {
     flexDirection: 'row',
@@ -733,7 +733,7 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: '#f3f4f6',
+    // backgroundColor: '#f3f4f6', // theme.colors.surface // theme.colors.surface // Use theme.colors.background
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -791,7 +791,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: 20,
-    backgroundColor: '#f3f4f6',
+    // backgroundColor: '#f3f4f6', // theme.colors.surface // theme.colors.surface // Use theme.colors.background
     borderWidth: 1,
     borderColor: '#e5e7eb',
   },
@@ -813,7 +813,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   quickGoalButton: {
-    backgroundColor: '#f9fafb',
+    // backgroundColor: '#f9fafb', // theme.colors.surface // theme.colors.surface // Use theme.colors.surface
     borderRadius: 12,
     padding: 12,
     borderWidth: 1,
@@ -904,7 +904,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   bodyPartButton: {
-    backgroundColor: '#f9fafb',
+    // backgroundColor: '#f9fafb', // theme.colors.surface // theme.colors.surface // Use theme.colors.surface
     borderRadius: 12,
     padding: 12,
     borderWidth: 1,
@@ -945,7 +945,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   equipmentButton: {
-    backgroundColor: '#f9fafb',
+    // backgroundColor: '#f9fafb', // theme.colors.surface // theme.colors.surface // Use theme.colors.surface
     borderRadius: 12,
     padding: 12,
     borderWidth: 1,
@@ -973,7 +973,7 @@ const styles = StyleSheet.create({
   },
   // Duration Section Styles (Program & Workout)
   durationSection: {
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface // theme.colors.surface // Use theme.colors.surface
     borderRadius: 16,
     marginBottom: 12,
     padding: 16,
@@ -1012,7 +1012,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 12,
     paddingHorizontal: 16,
-    backgroundColor: '#f9fafb',
+    // backgroundColor: '#f9fafb', // theme.colors.surface // theme.colors.surface // Use theme.colors.surface
     borderRadius: 12,
     borderWidth: 1,
     borderColor: '#e5e7eb',
@@ -1040,7 +1040,7 @@ const styles = StyleSheet.create({
     minWidth: 44,
     paddingVertical: 10,
     paddingHorizontal: 14,
-    backgroundColor: '#f9fafb',
+    // backgroundColor: '#f9fafb', // theme.colors.surface // theme.colors.surface // Use theme.colors.surface
     borderRadius: 12,
     borderWidth: 1,
     borderColor: '#e5e7eb',
@@ -1066,7 +1066,7 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
   },
   goalTextInput: {
-    backgroundColor: '#f9fafb',
+    // backgroundColor: '#f9fafb', // theme.colors.surface // theme.colors.surface // Use theme.colors.surface
     borderRadius: 12,
     borderWidth: 1,
     borderColor: '#e5e7eb',

@@ -380,7 +380,7 @@ export default function CoachOverview({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#e0f2fe',
+    // backgroundColor: '#e0f2fe', // theme.colors.background
   },
   collapsibleHeader: {
     backgroundColor: '#3b82f6',
@@ -425,7 +425,7 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     flex: 1,
-    backgroundColor: '#e0f2fe',
+    // backgroundColor: '#e0f2fe', // theme.colors.background
   },
   section: {
     paddingHorizontal: 20,

@@ -476,7 +476,7 @@ export default function LabelReader() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f9fafb',
+    // // backgroundColor: '#f9fafb', // theme.colors.surface // Use theme.colors.surface
   },
   loadingContainer: {
     flex: 1,
@@ -636,7 +636,7 @@ const styles = StyleSheet.create({
 
   // Flags Section
   flagsSection: {
-    backgroundColor: '#ffffff',
+    // // backgroundColor: '#ffffff', // theme.colors.surface // Use theme.colors.surface
     borderRadius: 16,
     padding: 16,
     marginTop: 16,
@@ -705,7 +705,7 @@ const styles = StyleSheet.create({
 
   // Claims Section
   claimsSection: {
-    backgroundColor: '#ffffff',
+    // // backgroundColor: '#ffffff', // theme.colors.surface // Use theme.colors.surface
     borderRadius: 16,
     padding: 16,
     marginTop: 16,
@@ -716,7 +716,7 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   claimCard: {
-    backgroundColor: '#f9fafb',
+    // // backgroundColor: '#f9fafb', // theme.colors.surface // Use theme.colors.surface
     borderRadius: 10,
     padding: 12,
     marginBottom: 10,
@@ -770,7 +770,7 @@ const styles = StyleSheet.create({
 
   // Certifications
   certificationsSection: {
-    backgroundColor: '#ffffff',
+    // // backgroundColor: '#ffffff', // theme.colors.surface // Use theme.colors.surface
     borderRadius: 16,
     padding: 16,
     marginTop: 16,
@@ -805,7 +805,7 @@ const styles = StyleSheet.create({
 
   // Detected Text
   detectedTextSection: {
-    backgroundColor: '#ffffff',
+    // // backgroundColor: '#ffffff', // theme.colors.surface // Use theme.colors.surface
     borderRadius: 16,
     padding: 16,
     marginTop: 16,
@@ -816,7 +816,7 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   detectedTextContainer: {
-    backgroundColor: '#f9fafb',
+    // // backgroundColor: '#f9fafb', // theme.colors.surface // Use theme.colors.surface
     borderRadius: 8,
     padding: 12,
     maxHeight: 200,
@@ -829,7 +829,7 @@ const styles = StyleSheet.create({
 
   // Analysis Section
   analysisSection: {
-    backgroundColor: '#ffffff',
+    // // backgroundColor: '#ffffff', // theme.colors.surface // Use theme.colors.surface
     borderRadius: 16,
     padding: 16,
     marginTop: 16,
@@ -883,7 +883,7 @@ const styles = StyleSheet.create({
 
   // Recommendations
   recommendationsSection: {
-    backgroundColor: '#ffffff',
+    // // backgroundColor: '#ffffff', // theme.colors.surface // Use theme.colors.surface
     borderRadius: 16,
     padding: 16,
     marginTop: 16,
@@ -936,7 +936,7 @@ const styles = StyleSheet.create({
   },
   secondaryAction: {
     flex: 1,
-    backgroundColor: '#f9fafb',
+    // // backgroundColor: '#f9fafb', // theme.colors.surface // Use theme.colors.surface
     borderWidth: 1,
     borderColor: '#e5e7eb',
   },

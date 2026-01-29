@@ -389,7 +389,7 @@ export default function FamilyDashboardPage({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#e0f2fe',
+    // backgroundColor: '#e0f2fe', // theme.colors.background
   },
   scrollView: {
     flex: 1,
@@ -464,7 +464,7 @@ const styles = StyleSheet.create({
   metricCard: {
     width: '48%',
     minWidth: 140,
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface // Use theme.colors.surface
     padding: 16,
     borderRadius: 16,
     alignItems: 'center',

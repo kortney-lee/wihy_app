@@ -875,7 +875,7 @@ export default function ClientOnboarding({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#e0f2fe',
+    // backgroundColor: '#e0f2fe', // theme.colors.background
   },
   webCloseButton: {
     position: 'absolute',
@@ -885,7 +885,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface // Use theme.colors.surface
     justifyContent: 'center',
     alignItems: 'center',
     shadowColor: '#000',
@@ -1143,7 +1143,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#3b82f6',
   },
   buttonSecondary: {
-    backgroundColor: '#f3f4f6',
+    // backgroundColor: '#f3f4f6', // theme.colors.surface // Use theme.colors.background
   },
   buttonDisabled: {
     opacity: 0.5,

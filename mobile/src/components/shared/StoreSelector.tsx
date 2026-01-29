@@ -168,7 +168,7 @@ const styles = StyleSheet.create({
   storeCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
+    // backgroundColor: '#ffffff', // theme.colors.surface
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
@@ -182,7 +182,7 @@ const styles = StyleSheet.create({
   },
   storeCardSelected: {
     borderColor: '#007AFF',
-    backgroundColor: '#e0f2fe',
+    // backgroundColor: '#e0f2fe', // theme.colors.background
   },
   storeLogoContainer: {
     width: 48,

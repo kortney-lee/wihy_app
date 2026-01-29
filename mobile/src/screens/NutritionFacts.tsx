@@ -967,7 +967,7 @@ export default function NutritionFacts() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#e0f2fe',
+    // backgroundColor: '#e0f2fe', // theme.colors.background
   },
   header: {
     paddingHorizontal: dashboardTheme.header.paddingHorizontal,
@@ -1042,7 +1042,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 14,
-    backgroundColor: '#f3f4f6',
+    // backgroundColor: '#f3f4f6', // theme.colors.surface // Use theme.colors.background
   },
 
   servingText: {
@@ -1056,7 +1056,7 @@ const styles = StyleSheet.create({
   productImageContainer: {
     width: '100%',
     height: 200,
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface // Use theme.colors.surface
     borderRadius: 12,
     marginVertical: 16,
     overflow: 'hidden',
@@ -1243,7 +1243,7 @@ const styles = StyleSheet.create({
 
   progressFillWhite: {
     height: '100%',
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface // Use theme.colors.surface
     borderRadius: 2,
   },
 
@@ -1335,7 +1335,7 @@ const styles = StyleSheet.create({
   askWihyButton: {
     flexDirection: 'row',
     gap: 10,
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface // Use theme.colors.surface
     paddingVertical: 14,
     paddingHorizontal: 32,
     borderRadius: 26,
@@ -1403,7 +1403,7 @@ const styles = StyleSheet.create({
 
   secondaryAction: {
     flex: 1,
-    backgroundColor: '#f9fafb',
+    // backgroundColor: '#f9fafb', // theme.colors.surface // Use theme.colors.surface
     borderWidth: 1,
     borderColor: '#e5e7eb',
   },
@@ -1416,7 +1416,7 @@ const styles = StyleSheet.create({
 
   loadingContainer: {
     flex: 1,
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface // Use theme.colors.surface
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -1463,7 +1463,7 @@ const styles = StyleSheet.create({
 
   errorContainer: {
     flex: 1,
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface // Use theme.colors.surface
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 32,
@@ -1689,7 +1689,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     padding: 12,
-    backgroundColor: '#f9fafb',
+    // backgroundColor: '#f9fafb', // theme.colors.surface // Use theme.colors.surface
     borderRadius: 8,
   },
 
@@ -2037,7 +2037,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   modalContent: {
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface // Use theme.colors.surface
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     maxHeight: '85%',
@@ -2117,7 +2117,7 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
   },
   alternativeCard: {
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface // Use theme.colors.surface
     borderRadius: 16,
     padding: 16,
     marginBottom: 12,

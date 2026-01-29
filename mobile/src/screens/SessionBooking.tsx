@@ -489,7 +489,7 @@ export default function SessionBooking() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#e0f2fe',
+    // backgroundColor: '#e0f2fe', // theme.colors.background
   },
   centerContent: {
     flex: 1,
@@ -653,7 +653,7 @@ const styles = StyleSheet.create({
     borderColor: '#3b82f6',
   },
   timeSlotUnavailable: {
-    backgroundColor: '#f3f4f6',
+    // backgroundColor: '#f3f4f6', // theme.colors.surface // Use theme.colors.background
     borderColor: '#e5e7eb',
     opacity: 0.5,
   },

@@ -718,7 +718,7 @@ const styles = StyleSheet.create({
   },
   modalContainer: {
     flex: 1,
-    backgroundColor: '#ffffff',
+    // // backgroundColor: '#ffffff', // theme.colors.surface // Use theme.colors.surface
   },
   modalHeader: {
     flexDirection: 'row',
@@ -767,7 +767,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     padding: 16,
-    backgroundColor: '#f9fafb',
+    // // backgroundColor: '#f9fafb', // theme.colors.surface // Use theme.colors.surface
     borderRadius: 12,
     marginBottom: 12,
     borderWidth: 1,
@@ -822,7 +822,7 @@ const styles = StyleSheet.create({
   librarySearchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#ffffff',
+    // // backgroundColor: '#ffffff', // theme.colors.surface // Use theme.colors.surface
     margin: 16,
     marginTop: 0,
     paddingHorizontal: 18,
@@ -863,7 +863,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
-    backgroundColor: '#ffffff',
+    // // backgroundColor: '#ffffff', // theme.colors.surface // Use theme.colors.surface
     borderWidth: 1,
     borderColor: '#e5e7eb',
   },
@@ -937,7 +937,7 @@ const styles = StyleSheet.create({
     paddingTop: 0,
   },
   mealCard: {
-    backgroundColor: '#ffffff',
+    // // backgroundColor: '#ffffff', // theme.colors.surface // Use theme.colors.surface
     borderRadius: 16,
     padding: 16,
     marginBottom: 12,
@@ -979,7 +979,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
     paddingVertical: 12,
     marginVertical: 8,
-    backgroundColor: '#f9fafb',
+    // // backgroundColor: '#f9fafb', // theme.colors.surface // Use theme.colors.surface
     borderRadius: 8,
   },
   nutritionItem: {
@@ -1004,7 +1004,7 @@ const styles = StyleSheet.create({
   mealTag: {
     paddingHorizontal: 10,
     paddingVertical: 4,
-    backgroundColor: '#f3f4f6',
+    // // backgroundColor: '#f3f4f6', // theme.colors.surface // Use theme.colors.background
     borderRadius: 12,
   },
   mealTagText: {
@@ -1022,13 +1022,13 @@ const styles = StyleSheet.create({
   actionButton: {
     padding: 8,
     borderRadius: 8,
-    backgroundColor: '#f9fafb',
+    // // backgroundColor: '#f9fafb', // theme.colors.surface // Use theme.colors.surface
   },
   logButton: {
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 8,
-    backgroundColor: '#f9fafb',
+    // // backgroundColor: '#f9fafb', // theme.colors.surface // Use theme.colors.surface
   },
   logButtonText: {
     fontSize: 13,

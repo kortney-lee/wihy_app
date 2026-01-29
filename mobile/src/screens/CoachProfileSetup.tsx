@@ -574,7 +574,7 @@ export default function CoachProfileSetup({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#e0f2fe',
+    // backgroundColor: '#e0f2fe', // theme.colors.background
   },
   collapsibleHeader: {
     backgroundColor: '#10b981',
@@ -608,7 +608,7 @@ const styles = StyleSheet.create({
   },
   progressFill: {
     height: '100%',
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface // Use theme.colors.surface
     borderRadius: 2,
   },
   stepIndicator: {
@@ -835,7 +835,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#3b82f6',
   },
   buttonSecondary: {
-    backgroundColor: '#f3f4f6',
+    // backgroundColor: '#f3f4f6', // theme.colors.surface // Use theme.colors.background
   },
   buttonDisabled: {
     opacity: 0.5,
