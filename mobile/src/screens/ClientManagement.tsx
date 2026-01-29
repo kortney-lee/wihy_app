@@ -21,6 +21,11 @@ import { colors } from '../theme/design-tokens';
 
 const spinnerGif = require('../../assets/whatishealthyspinner.gif');
 const isWeb = Platform.OS === 'web';
+
+// Import CSS for web only
+if (isWeb) {
+  require('../styles/web-landing.css');
+}
 const { width: screenWidth } = Dimensions.get('window');
 import { dashboardTheme } from '../theme/dashboardTheme';
 import { coachService, Client as APIClient, ClientDashboard } from '../services';
@@ -396,28 +401,48 @@ export default function ClientManagement({
         >
           {/* Search Bar */}
           <View style={styles.searchContainer}>
-            <SweepBorder
-              borderWidth={2}
-              radius={28}
-              durationMs={2500}
-              colors={colors.borderSweep}
-            >
-              <View style={styles.searchBar}>
-                <Ionicons name="search" size={20} color="#9ca3af" />
-                <TextInput
-                  style={styles.searchInput}
-                  placeholder="Search clients..."
-                  value={searchQuery}
-                  onChangeText={setSearchQuery}
-                  placeholderTextColor="#9ca3af"
-                />
-                {searchQuery.length > 0 && (
-                  <Pressable onPress={() => setSearchQuery('')}>
-                    <Ionicons name="close-circle" size={20} color="#9ca3af" />
-                  </Pressable>
-                )}
-              </View>
-            </SweepBorder>
+            {isWeb ? (
+              <div className="web-search-input-container" style={{ width: '100%' }}>
+                <View style={styles.searchBar}>
+                  <Ionicons name="search" size={20} color="#9ca3af" />
+                  <TextInput
+                    style={styles.searchInput}
+                    placeholder="Search clients..."
+                    value={searchQuery}
+                    onChangeText={setSearchQuery}
+                    placeholderTextColor="#9ca3af"
+                  />
+                  {searchQuery.length > 0 && (
+                    <Pressable onPress={() => setSearchQuery('')}>
+                      <Ionicons name="close-circle" size={20} color="#9ca3af" />
+                    </Pressable>
+                  )}
+                </View>
+              </div>
+            ) : (
+              <SweepBorder
+                borderWidth={2}
+                radius={28}
+                durationMs={2500}
+                colors={colors.borderSweep}
+              >
+                <View style={styles.searchBar}>
+                  <Ionicons name="search" size={20} color="#9ca3af" />
+                  <TextInput
+                    style={styles.searchInput}
+                    placeholder="Search clients..."
+                    value={searchQuery}
+                    onChangeText={setSearchQuery}
+                    placeholderTextColor="#9ca3af"
+                  />
+                  {searchQuery.length > 0 && (
+                    <Pressable onPress={() => setSearchQuery('')}>
+                      <Ionicons name="close-circle" size={20} color="#9ca3af" />
+                    </Pressable>
+                  )}
+                </View>
+              </SweepBorder>
+            )}
           </View>
 
           {/* Filters & View Toggle */}

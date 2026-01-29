@@ -709,11 +709,10 @@ export default function FullChat() {
           style={styles.messagesContainer}
           contentContainerStyle={[
             styles.messagesContent, 
-            { paddingBottom: isWeb ? 20 : 12 + bottomInset / 2 }
+            { paddingBottom: isWeb ? 20 : 100 + bottomInset }
           ]}
           showsVerticalScrollIndicator={false}
-          {...(isWeb ? { nativeID: 'chat-scroll-view' } : {})}
-        >
+          {...(isWeb ? { nativeID: 'chat-scroll-view' } : {})}        >
           {messages.map((message, messageIndex) => (
             <View
               key={message.id}
@@ -877,11 +876,7 @@ export default function FullChat() {
         <View
           style={[
             styles.inputContainer,
-            {
-              paddingBottom: bottomInset + 4,
-              paddingTop: 12,
-              marginBottom: bottomInset ? -bottomInset / 2 : -6,
-            },
+            { paddingBottom: bottomInset || 8 },
           ]}
         >
           <View style={styles.textInputContainer}>
@@ -908,7 +903,7 @@ export default function FullChat() {
           >
             <Ionicons
               name="send"
-              size={20}
+              size={22}
               color={inputText.trim() ? '#ffffff' : '#9ca3af'}
             />
           </Pressable>
@@ -1344,25 +1339,37 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   inputContainer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 12,
+    paddingHorizontal: 16,
     paddingTop: 8,
-    paddingBottom: 8,
-    backgroundColor: '#ffffff',
-    borderTopWidth: 1,
-    borderTopColor: '#f1f5f9',
-    gap: 8,
+    backgroundColor: '#e0f2fe',
+    gap: 12,
   },
   textInputContainer: {
     flex: 1,
-    backgroundColor: '#f1f5f9',
-    borderRadius: 22,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
+    backgroundColor: '#ffffff',
+    borderRadius: 28,
+    paddingHorizontal: 18,
+    paddingVertical: 12,
     maxHeight: 100,
-    minHeight: 40,
+    minHeight: 48,
     justifyContent: 'center',
+    ...Platform.select({
+      ios: {
+        shadowColor: 'rgba(64,60,67,0.35)',
+        shadowOpacity: 0.35,
+        shadowRadius: 6,
+        shadowOffset: { width: 0, height: 3 },
+      },
+      android: {
+        elevation: 5,
+      },
+    }),
   },
   textInput: {
     fontSize: 15,
@@ -1374,17 +1381,17 @@ const styles = StyleSheet.create({
     outlineStyle: 'none' as any,
   },
   sendButton: {
-    width: 40,
-    height: 40,
+    width: 48,
+    height: 48,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 20,
+    borderRadius: 24,
   },
   sendButtonActive: {
-    backgroundColor: '#3b82f6',
+    backgroundColor: '#8b5cf6',
   },
   sendButtonInactive: {
-    backgroundColor: '#e2e8f0',
+    backgroundColor: '#d1d5db',
   },
   
   // Created Resources Styles
