@@ -508,7 +508,7 @@ export default function ResearchScreen({ isDashboardMode = false, onResultsViewC
                 </View>
 
                 <View style={styles.evidenceSection}>
-                  <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Evidence Level</Text>
+                  <Text style={styles.sectionTitle}>Evidence Level</Text>
                   <View style={styles.evidenceLevelCard}>
                     <View style={[styles.evidenceLevelDot, { backgroundColor: getEvidenceLevelColor(selectedStudy.evidenceLevel) }]} />
                     <View>
@@ -524,7 +524,7 @@ export default function ResearchScreen({ isDashboardMode = false, onResultsViewC
 
                 {selectedStudy.abstract && (
                   <View style={styles.abstractSection}>
-                    <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Abstract</Text>
+                    <Text style={styles.sectionTitle}>Abstract</Text>
                     <Text style={styles.abstractText}>{selectedStudy.abstract}</Text>
                   </View>
                 )}
@@ -635,7 +635,7 @@ export default function ResearchScreen({ isDashboardMode = false, onResultsViewC
                 durationMs={2500}
                 colors={colors.borderSweep}
               >
-                <View style={[styles.searchBar, { backgroundColor: theme.colors.surface }]}>
+                <View style={styles.searchBar}>
                   <Ionicons name="search" size={20} color="#9ca3af" />
                   <TextInput
                     value={query}
@@ -828,7 +828,7 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    // backgroundColor: '#ffffff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#ffffff',
     borderRadius: 28,
     paddingHorizontal: 18,
     paddingVertical: 14,
@@ -880,7 +880,7 @@ const styles = StyleSheet.create({
   quickAction: {
     flex: 1,
     alignItems: 'center',
-    // backgroundColor: '#ffffff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#ffffff',
     paddingVertical: 16,
     borderRadius: 12,
     borderWidth: 1,
@@ -917,7 +917,7 @@ const styles = StyleSheet.create({
   },
   statsCard: {
     flex: 1,
-    // backgroundColor: '#ffffff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#ffffff',
     borderRadius: 12,
     padding: 16,
     borderLeftWidth: 4,
@@ -948,7 +948,7 @@ const styles = StyleSheet.create({
   recentTag: {
     flexDirection: 'row',
     alignItems: 'center',
-    // backgroundColor: '#ffffff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#ffffff',
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 20,
@@ -967,7 +967,7 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   topicsList: {
-    // backgroundColor: '#ffffff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#ffffff',
     borderRadius: 12,
     overflow: 'hidden',
   },
@@ -1033,7 +1033,7 @@ const styles = StyleSheet.create({
   // Results Stats
   resultsStats: {
     flexDirection: 'row',
-    // backgroundColor: '#ffffff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#ffffff',
     marginHorizontal: 16,
     marginTop: -12,
     borderRadius: 12,
@@ -1082,7 +1082,7 @@ const styles = StyleSheet.create({
 
   // Study Card
   studyCard: {
-    // backgroundColor: '#ffffff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#ffffff',
     borderRadius: 12,
     padding: 16,
     borderWidth: 1,
@@ -1182,7 +1182,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingVertical: 12,
-    // backgroundColor: '#ffffff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#ffffff',
     borderBottomWidth: 1,
     borderBottomColor: '#e5e7eb',
   },
@@ -1209,7 +1209,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   modalMeta: {
-    // backgroundColor: '#ffffff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#ffffff',
     borderRadius: 12,
     padding: 16,
     marginBottom: 16,
@@ -1246,7 +1246,7 @@ const styles = StyleSheet.create({
   evidenceLevelCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    // backgroundColor: '#ffffff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#ffffff',
     borderRadius: 12,
     padding: 16,
     gap: 12,
@@ -1273,7 +1273,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: '#374151',
     lineHeight: 24,
-    // backgroundColor: '#ffffff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#ffffff',
     borderRadius: 12,
     padding: 16,
   },

@@ -1290,7 +1290,7 @@ const styles = StyleSheet.create({
     color: '#ffffff',
   },
   bottomPanel: {
-    // backgroundColor: '#ffffff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#ffffff',
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     paddingTop: 24,
@@ -1359,7 +1359,7 @@ const styles = StyleSheet.create({
     borderColor: '#3b82f6',
     alignItems: 'center',
     justifyContent: 'center',
-    // backgroundColor: '#ffffff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#ffffff',
   },
   captureButtonScanning: {
     borderColor: '#ef4444',
@@ -1443,7 +1443,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   processingContainer: {
-    // backgroundColor: '#ffffff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#ffffff',
     borderRadius: 16,
     padding: 32,
     alignItems: 'center',

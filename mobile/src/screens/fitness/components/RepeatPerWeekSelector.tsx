@@ -82,7 +82,7 @@ const styles = StyleSheet.create({
   option: {
     flex: 1,
     paddingVertical: 8,
-    // backgroundColor: '#ffffff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#ffffff',
     borderRadius: 8,
     borderWidth: 1,
     borderColor: '#e5e7eb',

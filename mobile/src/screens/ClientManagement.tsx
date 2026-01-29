@@ -628,12 +628,12 @@ const styles = StyleSheet.create({
   },
   searchContainer: {
     padding: 16,
-    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#fff',
   },
   searchBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    // backgroundColor: '#ffffff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#ffffff',
     borderRadius: 28,
     paddingHorizontal: 18,
     paddingVertical: 14,
@@ -665,7 +665,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingVertical: 16,
-    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#fff',
     borderBottomWidth: 1,
     borderBottomColor: '#e5e7eb',
     gap: 16,
@@ -719,7 +719,7 @@ const styles = StyleSheet.create({
     gap: 12,
     paddingHorizontal: 16,
     paddingVertical: 12,
-    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#fff',
   },
   statCard: {
     flex: 1,
@@ -744,7 +744,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   clientCard: {
-    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#fff',
     marginHorizontal: 16,
     marginTop: 12,
     padding: 16,
@@ -866,7 +866,7 @@ const styles = StyleSheet.create({
     gap: 8,
     paddingVertical: 14,
     borderRadius: 10,
-    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#fff',
     borderWidth: 1.5,
     borderColor: '#e5e7eb',
   },
@@ -887,7 +887,7 @@ const styles = StyleSheet.create({
   },
   gridCard: {
     width: '48%',
-    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#fff',
     padding: 16,
     borderRadius: 12,
     alignItems: 'center',

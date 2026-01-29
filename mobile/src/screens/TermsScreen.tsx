@@ -455,7 +455,7 @@ export default function TermsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#fff',
   },
   header: {
     flexDirection: 'row',
@@ -547,7 +547,7 @@ const styles = StyleSheet.create({
   termsSectionContent: {
     paddingVertical: 12,
     paddingHorizontal: 14,
-    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#fff',
     borderTopWidth: 1,
     borderTopColor: BORDER_GRAY,
   },

@@ -117,8 +117,8 @@ export const NativeSubscriptionScreen: React.FC<Props> = ({ navigation }) => {
       </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        <View style={[styles.benefitsSection, { backgroundColor: theme.colors.surface }]}>
-          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Premium Benefits</Text>
+        <View style={styles.benefitsSection}>
+          <Text style={styles.sectionTitle}>Premium Benefits</Text>
           {['Unlimited barcode scans', 'Advanced nutrition analysis', 'Personalized health insights', 'Priority support', 'Ad-free experience'].map((benefit, i) => (
             <View key={i} style={styles.benefitItem}>
               <Ionicons name="checkmark-circle" size={24} color="#4CAF50" />
@@ -128,7 +128,7 @@ export const NativeSubscriptionScreen: React.FC<Props> = ({ navigation }) => {
         </View>
 
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Subscription Plans</Text>
+          <Text style={styles.sectionTitle}>Subscription Plans</Text>
           {NATIVE_PLANS.map((plan) => (
             <Pressable
               key={plan.id}

@@ -235,7 +235,7 @@ export const SubscriptionManagementScreen: React.FC<Props> = ({ navigation }) =>
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {/* Current Subscription Status */}
         {hasActiveSubscription && (
-          <View style={[styles.currentPlanCard, { backgroundColor: theme.colors.surface }]}>
+          <View style={styles.currentPlanCard}>
             <View style={styles.currentPlanHeader}>
               <View>
                 <Text style={styles.currentPlanLabel}>Current Plan</Text>
@@ -266,9 +266,9 @@ export const SubscriptionManagementScreen: React.FC<Props> = ({ navigation }) =>
         {/* Current Add-ons */}
         {currentAddons.length > 0 && (
           <View style={styles.section}>
-            <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Your Add-ons</Text>
+            <Text style={styles.sectionTitle}>Your Add-ons</Text>
             {currentAddons.map((addon) => (
-              <View key={addon.id} style={[styles.activeAddonCard, { backgroundColor: theme.colors.surface }]}>
+              <View key={addon.id} style={styles.activeAddonCard}>
                 <View style={styles.addonInfo}>
                   <Text style={styles.addonName}>{addon.name}</Text>
                   <Text style={styles.addonPrice}>${addon.price.toFixed(2)}/mo</Text>
@@ -417,7 +417,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingVertical: 12,
-    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#fff',
     borderBottomWidth: 1,
     borderBottomColor: '#e0e0e0',
   },
@@ -425,7 +425,7 @@ const styles = StyleSheet.create({
   headerTitle: { fontSize: 18, fontWeight: '600', color: '#333' },
   content: { flex: 1 },
   currentPlanCard: {
-    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#fff',
     padding: 20,
     marginBottom: 16,
     borderBottomWidth: 1,
@@ -456,7 +456,7 @@ const styles = StyleSheet.create({
   sectionDescription: { fontSize: 14, color: '#666', marginBottom: 16, lineHeight: 20 },
   tabs: {
     flexDirection: 'row',
-    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#fff',
     marginBottom: 16,
     borderBottomWidth: 1,
     borderBottomColor: '#e0e0e0',

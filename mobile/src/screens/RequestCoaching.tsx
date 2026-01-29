@@ -224,7 +224,7 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   modal: {
-    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#fff',
     borderRadius: 16,
     width: '100%',
     maxWidth: 500,

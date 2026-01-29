@@ -726,6 +726,7 @@ export default function FullChat() {
                 style={[
                   styles.messageText,
                   message.type === 'user' ? styles.userMessageText : styles.aiMessageText,
+                  message.type === 'ai' && { color: theme.colors.text },
                 ]}
               >
                 {message.type === 'ai' ? cleanResponseText(message.content) : message.content}
@@ -737,7 +738,7 @@ export default function FullChat() {
                 {message.createdResources.map((resource, index) => (
                   <Pressable
                     key={`resource-${index}`}
-                    style={[styles.resourceCard, { backgroundColor: theme.colors.surface }]}
+                    style={styles.resourceCard}
                     onPress={() => handleNavigateToResource(resource)}
                   >
                     <View style={styles.resourceCardIcon}>
@@ -885,7 +886,7 @@ export default function FullChat() {
             { paddingBottom: bottomInset || 8, backgroundColor: theme.colors.surface },
           ]}
         >
-          <View style={[styles.textInputContainer, { backgroundColor: theme.colors.surface }]}>
+          <View style={styles.textInputContainer}>
             <TextInput
               style={[styles.textInput, { color: theme.colors.text }]}
               value={inputText}
@@ -1254,7 +1255,7 @@ const styles = StyleSheet.create({
   },
   messagesContainer: {
     flex: 1,
-    // backgroundColor: '#ffffff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#ffffff',
   },
   messagesContent: {
     paddingVertical: 20,
@@ -1283,7 +1284,7 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 6,
   },
   aiMessageText: {
-    // backgroundColor: '#ffffff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#ffffff',
     color: '#1f2937',
     borderBottomLeftRadius: 6,
     shadowColor: '#000',
@@ -1310,7 +1311,7 @@ const styles = StyleSheet.create({
     gap: 5,
     padding: 14,
     paddingHorizontal: 18,
-    // backgroundColor: '#ffffff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#ffffff',
     borderRadius: 20,
     borderBottomLeftRadius: 6,
     shadowColor: '#000',
@@ -1334,7 +1335,7 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   quickReplyButton: {
-    // backgroundColor: '#ffffff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#ffffff',
     borderRadius: 18,
     paddingHorizontal: 16,
     paddingVertical: 10,
@@ -1351,12 +1352,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 16,
     paddingTop: 8,
-    // backgroundColor: '#ffffff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#ffffff',
     gap: 12,
   },
   textInputContainer: {
     flex: 1,
-    // backgroundColor: '#ffffff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#ffffff',
     borderRadius: 28,
     paddingHorizontal: 18,
     paddingVertical: 12,
@@ -1406,7 +1407,7 @@ const styles = StyleSheet.create({
   resourceCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    // backgroundColor: '#ffffff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#ffffff',
     borderRadius: 14,
     padding: 14,
     borderWidth: 1,
@@ -1537,7 +1538,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   modalContent: {
-    // backgroundColor: '#ffffff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#ffffff',
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     maxHeight: '85%',
@@ -1617,7 +1618,7 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
   },
   alternativeCard: {
-    // backgroundColor: '#ffffff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#ffffff',
     borderRadius: 16,
     padding: 16,
     marginBottom: 12,

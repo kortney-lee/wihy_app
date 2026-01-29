@@ -105,7 +105,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   levelCard: {
-    // backgroundColor: '#ffffff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#ffffff',
     borderRadius: 16,
     padding: 20,
     marginBottom: 16,

@@ -103,7 +103,7 @@ const AuthenticationScreen = ({ navigation }: { navigation: any }) => {
 
         {!showLocalAuth ? (
           <View style={styles.oauthContainer}>
-            <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Sign In With</Text>
+            <Text style={styles.sectionTitle}>Sign In With</Text>
 
             <TouchableOpacity
               style={[styles.button, styles.googleButton]}
@@ -166,7 +166,7 @@ const AuthenticationScreen = ({ navigation }: { navigation: any }) => {
               <Text style={styles.backButtonText}>← Back</Text>
             </TouchableOpacity>
 
-            <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
+            <Text style={styles.sectionTitle}>
               {isRegistering ? 'Create Account' : 'Sign In'}
             </Text>
 
@@ -235,7 +235,7 @@ const AuthenticationScreen = ({ navigation }: { navigation: any }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#fff',
   },
   scrollContent: {
     flexGrow: 1,

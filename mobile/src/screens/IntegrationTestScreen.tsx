@@ -668,7 +668,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#f9fafb',
   },
   header: {
-    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#fff',
     padding: 16,
     borderBottomWidth: 1,
     borderBottomColor: '#e5e7eb',
@@ -684,7 +684,7 @@ const styles = StyleSheet.create({
     color: '#6b7280',
   },
   userInfo: {
-    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#fff',
     margin: 12,
     padding: 12,
     borderRadius: 10,
@@ -711,7 +711,7 @@ const styles = StyleSheet.create({
   summary: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#fff',
     marginHorizontal: 12,
     marginBottom: 12,
     padding: 12,
@@ -757,7 +757,7 @@ const styles = StyleSheet.create({
   },
   categorySection: {
     marginBottom: 12,
-    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#fff',
     borderRadius: 10,
     borderWidth: 1,
     borderColor: '#e5e7eb',

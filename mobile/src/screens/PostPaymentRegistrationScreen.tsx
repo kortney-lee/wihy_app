@@ -190,7 +190,7 @@ export const PostPaymentRegistrationScreen: React.FC<Props> = ({ navigation, rou
       return (
         <div className="pricing-page" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <div style={{
-            // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
+            backgroundColor: '#fff',
             borderRadius: 16,
             padding: 48,
             maxWidth: 420,
@@ -265,7 +265,7 @@ export const PostPaymentRegistrationScreen: React.FC<Props> = ({ navigation, rou
     return (
       <div className="pricing-page" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
         <div style={{
-          // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
+          backgroundColor: '#fff',
           borderRadius: 16,
           padding: 40,
           maxWidth: 460,
@@ -619,7 +619,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   form: {
-    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#fff',
     borderRadius: 16,
     padding: 24,
     shadowColor: '#000',

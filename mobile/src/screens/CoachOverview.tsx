@@ -241,7 +241,7 @@ export default function CoachOverview({
         >
           {/* Revenue Overview */}
           <View style={styles.section}>
-            <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Revenue Overview</Text>
+            <Text style={styles.sectionTitle}>Revenue Overview</Text>
           
           {/* Period Selector */}
           <View style={styles.periodSelector}>
@@ -320,7 +320,7 @@ export default function CoachOverview({
 
         {/* Quick Actions */}
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Quick Actions</Text>
+          <Text style={styles.sectionTitle}>Quick Actions</Text>
           <View style={styles.actionsGrid}>
             {quickActions.map((action) => (
               <TouchableOpacity
@@ -353,7 +353,7 @@ export default function CoachOverview({
 
         {/* Recent Activity */}
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Recent Activity</Text>
+          <Text style={styles.sectionTitle}>Recent Activity</Text>
           <View style={styles.activityList}>
             {recentActivity.map((activity) => (
               <View key={activity.id} style={styles.activityItem}>
@@ -440,7 +440,7 @@ const styles = StyleSheet.create({
   },
   periodSelector: {
     flexDirection: 'row',
-    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#fff',
     borderRadius: 12,
     padding: 4,
     marginBottom: 16,
@@ -496,7 +496,7 @@ const styles = StyleSheet.create({
   actionCard: {
     width: '48%',
     minWidth: 140,
-    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#fff',
     padding: 16,
     borderRadius: 16,
     alignItems: 'center',
@@ -533,7 +533,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   activityList: {
-    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#fff',
     borderRadius: 16,
     overflow: 'hidden',
   },
