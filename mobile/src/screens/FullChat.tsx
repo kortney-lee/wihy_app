@@ -17,6 +17,8 @@ import {
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { Ionicons, CloseButton } from '../components/shared';
+import { SweepBorder } from '../components/SweepBorder';
+import { colors } from '../theme/design-tokens';
 import type { CompositeNavigationProp, RouteProp } from '@react-navigation/native';
 import type { StackNavigationProp } from '@react-navigation/stack';
 import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
@@ -886,7 +888,7 @@ export default function FullChat() {
             { paddingBottom: bottomInset || 8, backgroundColor: theme.colors.surface },
           ]}
         >
-          <View style={styles.textInputContainer}>
+          <View style={[styles.textInputContainer, { backgroundColor: theme.colors.surface }]}>
             <TextInput
               style={[styles.textInput, { color: theme.colors.text }]}
               value={inputText}
@@ -1136,7 +1138,7 @@ const styles = StyleSheet.create({
     width: 38,
     height: 38,
     borderRadius: 19,
-    // backgroundColor: '#ffffff', // theme.colors.surface // Use theme.colors.surface
+    backgroundColor: '#ffffff',
     alignItems: 'center',
     justifyContent: 'center',
     overflow: 'hidden',
@@ -1357,7 +1359,6 @@ const styles = StyleSheet.create({
   },
   textInputContainer: {
     flex: 1,
-    // backgroundColor: '#ffffff', // theme.colors.surface // Use theme.colors.surface
     borderRadius: 28,
     paddingHorizontal: 18,
     paddingVertical: 12,

@@ -725,7 +725,7 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 40,
-    // // backgroundColor: '#ffffff', // theme.colors.surface // Use theme.colors.surface
+    backgroundColor: '#ffffff',
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: '#000000',

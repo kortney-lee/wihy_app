@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Animated } from 'react-native';
 import { Ionicons } from './Ionicons';
 import { useTheme } from '../../context/ThemeContext';
+import { dashboardTheme } from '../../theme/dashboardTheme';
 import { notificationService } from '../../services';
 
 export interface NotificationSummary {

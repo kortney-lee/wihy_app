@@ -125,9 +125,10 @@ const StudyCard: React.FC<{
   study: ResearchSearchResult;
   onPress: (study: ResearchSearchResult) => void;
 }> = ({ study, onPress }) => {
+  const { theme } = useTheme();
   return (
     <TouchableOpacity
-      style={styles.studyCard}
+      style={[styles.studyCard, { backgroundColor: theme.colors.surface, borderColor: theme.colors.text + '10' }]}
       onPress={() => onPress(study)}
       activeOpacity={0.7}
     >
@@ -139,29 +140,29 @@ const StudyCard: React.FC<{
         </View>
         <View style={styles.evidenceBadge}>
           <View style={[styles.evidenceDot, { backgroundColor: getEvidenceLevelColor(study.evidenceLevel) }]} />
-          <Text style={styles.evidenceText}>{study.evidenceLevel}</Text>
+          <Text style={[styles.evidenceText, { color: theme.colors.textSecondary }]}>{study.evidenceLevel}</Text>
         </View>
       </View>
 
-      <Text style={styles.studyTitle} numberOfLines={2}>
+      <Text style={[styles.studyTitle, { color: theme.colors.text }]} numberOfLines={2}>
         {study.title}
       </Text>
 
       {study.abstract && (
-        <Text style={styles.studyAbstract} numberOfLines={2}>
+        <Text style={[styles.studyAbstract, { color: theme.colors.textSecondary }]} numberOfLines={2}>
           {study.abstract}
         </Text>
       )}
 
       <View style={styles.studyMeta}>
-        <Text style={styles.studyJournal} numberOfLines={1}>
+        <Text style={[styles.studyJournal, { color: theme.colors.textSecondary }]} numberOfLines={1}>
           {study.journal}
         </Text>
-        <Text style={styles.studyYear}>{study.publicationYear}</Text>
+        <Text style={[styles.studyYear, { color: theme.colors.textSecondary }]}>{study.publicationYear}</Text>
       </View>
 
-      <View style={styles.studyFooter}>
-        <Text style={styles.relevanceScore}>
+      <View style={[styles.studyFooter, { borderTopColor: theme.colors.text + '10' }]}>
+        <Text style={[styles.relevanceScore, { color: theme.colors.textSecondary }]}>
           {Math.round((study.relevanceScore || 0) * 100)}% relevant
         </Text>
         <View style={styles.readButtonSmall}>
@@ -428,24 +429,24 @@ export default function ResearchScreen({ isDashboardMode = false, onResultsViewC
           />
 
           {/* Results Stats */}
-          <View style={styles.resultsStats}>
+          <View style={[styles.resultsStats, { backgroundColor: theme.colors.surface }]}>
             <View style={styles.statItem}>
-              <Text style={styles.statValue}>{searchResults.length}</Text>
-              <Text style={styles.statLabel}>Studies Found</Text>
+              <Text style={[styles.statValue, { color: theme.colors.text }]}>{searchResults.length}</Text>
+              <Text style={[styles.statLabel, { color: theme.colors.textSecondary }]}>Studies Found</Text>
             </View>
             <View style={styles.statDivider} />
             <View style={styles.statItem}>
-              <Text style={styles.statValue}>
+              <Text style={[styles.statValue, { color: theme.colors.text }]}>
                 {searchResults.filter(s => s.evidenceLevel === 'high').length}
               </Text>
-              <Text style={styles.statLabel}>High Evidence</Text>
+              <Text style={[styles.statLabel, { color: theme.colors.textSecondary }]}>High Evidence</Text>
             </View>
             <View style={styles.statDivider} />
             <View style={styles.statItem}>
-              <Text style={styles.statValue}>
+              <Text style={[styles.statValue, { color: theme.colors.text }]}>
                 {searchResults.filter(s => s.fullTextAvailable).length}
               </Text>
-              <Text style={styles.statLabel}>Full Text</Text>
+              <Text style={[styles.statLabel, { color: theme.colors.textSecondary }]}>Full Text</Text>
             </View>
           </View>
 
@@ -453,7 +454,7 @@ export default function ResearchScreen({ isDashboardMode = false, onResultsViewC
           {loading && (
             <View style={styles.loadingContainer}>
               <ActivityIndicator size="large" color="#8b5cf6" />
-              <Text style={styles.loadingText}>Searching research...</Text>
+              <Text style={[styles.loadingText, { color: theme.colors.textSecondary }]}>Searching research...</Text>
             </View>
           )}
 
@@ -476,9 +477,9 @@ export default function ResearchScreen({ isDashboardMode = false, onResultsViewC
         {/* Study Detail Modal */}
         <Modal visible={showModal} animationType="slide" presentationStyle="pageSheet">
           <SafeAreaView style={[styles.modalContainer, { backgroundColor: theme.colors.background }]} edges={['top']}>
-            <View style={styles.modalHeader}>
+            <View style={[styles.modalHeader, { backgroundColor: theme.colors.surface, borderBottomColor: theme.colors.text + '10' }]}>
               <View style={{ width: 40 }} />
-              <Text style={styles.modalHeaderTitle}>Study Details</Text>
+              <Text style={[styles.modalHeaderTitle, { color: theme.colors.text }]}>Study Details</Text>
               <CloseButton onPress={() => setShowModal(false)} />
             </View>
 
@@ -490,32 +491,32 @@ export default function ResearchScreen({ isDashboardMode = false, onResultsViewC
                   </Text>
                 </View>
 
-                <Text style={styles.modalTitle}>{selectedStudy.title}</Text>
+                <Text style={[styles.modalTitle, { color: theme.colors.text }]}>{selectedStudy.title}</Text>
 
-                <View style={styles.modalMeta}>
+                <View style={[styles.modalMeta, { backgroundColor: theme.colors.surface }]}>
                   <View style={styles.modalMetaRow}>
-                    <Ionicons name="people-outline" size={16} color="#6b7280" />
-                    <Text style={styles.modalAuthors}>{selectedStudy.authors}</Text>
+                    <Ionicons name="people-outline" size={16} color={theme.colors.textSecondary} />
+                    <Text style={[styles.modalAuthors, { color: theme.colors.text }]}>{selectedStudy.authors}</Text>
                   </View>
                   <View style={styles.modalMetaRow}>
-                    <Ionicons name="book-outline" size={16} color="#6b7280" />
-                    <Text style={styles.modalJournal}>{selectedStudy.journal} • {selectedStudy.publicationYear}</Text>
+                    <Ionicons name="book-outline" size={16} color={theme.colors.textSecondary} />
+                    <Text style={[styles.modalJournal, { color: theme.colors.textSecondary }]}>{selectedStudy.journal} • {selectedStudy.publicationYear}</Text>
                   </View>
                   <View style={styles.modalMetaRow}>
-                    <Ionicons name="document-text-outline" size={16} color="#6b7280" />
-                    <Text style={styles.modalPmcId}>PMC ID: {selectedStudy.pmcid}</Text>
+                    <Ionicons name="document-text-outline" size={16} color={theme.colors.textSecondary} />
+                    <Text style={[styles.modalPmcId, { color: theme.colors.textSecondary }]}>PMC ID: {selectedStudy.pmcid}</Text>
                   </View>
                 </View>
 
                 <View style={styles.evidenceSection}>
-                  <Text style={styles.sectionTitle}>Evidence Level</Text>
-                  <View style={styles.evidenceLevelCard}>
+                  <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Evidence Level</Text>
+                  <View style={[styles.evidenceLevelCard, { backgroundColor: theme.colors.surface }]}>
                     <View style={[styles.evidenceLevelDot, { backgroundColor: getEvidenceLevelColor(selectedStudy.evidenceLevel) }]} />
                     <View>
-                      <Text style={styles.evidenceLevelText}>
+                      <Text style={[styles.evidenceLevelText, { color: theme.colors.text }]}>
                         {selectedStudy.evidenceLevel?.replace(/_/g, ' ').toUpperCase()} EVIDENCE
                       </Text>
-                      <Text style={styles.evidenceLevelDesc}>
+                      <Text style={[styles.evidenceLevelDesc, { color: theme.colors.textSecondary }]}>
                         {Math.round((selectedStudy.relevanceScore || 0) * 100)}% relevance score
                       </Text>
                     </View>
@@ -524,8 +525,8 @@ export default function ResearchScreen({ isDashboardMode = false, onResultsViewC
 
                 {selectedStudy.abstract && (
                   <View style={styles.abstractSection}>
-                    <Text style={styles.sectionTitle}>Abstract</Text>
-                    <Text style={styles.abstractText}>{selectedStudy.abstract}</Text>
+                    <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Abstract</Text>
+                    <Text style={[styles.abstractText, { color: theme.colors.text, backgroundColor: theme.colors.surface }]}>{selectedStudy.abstract}</Text>
                   </View>
                 )}
 
@@ -592,109 +593,103 @@ export default function ResearchScreen({ isDashboardMode = false, onResultsViewC
         {/* Search Bar */}
         <View style={styles.searchSection}>
           {isWeb ? (
-            // Web: Use CSS border sweep animation with searchBar styling
-            <View style={[styles.searchBar, { backgroundColor: theme.colors.surface }]}>
-              {/* @ts-ignore - className for web */}
-              <div className="web-search-input-container" style={{ display: 'flex', alignItems: 'center', paddingLeft: 18, paddingRight: 8, gap: 12, flex: 1 }}>
-                <Ionicons name="search" size={20} color="#9ca3af" />
-                {/* @ts-ignore - web input */}
-                <input
-                  type="text"
-                  value={query}
-                  onChange={(e: any) => setQuery(e.target.value)}
-                  placeholder="Search health topics..."
-                  style={{
-                    flex: 1,
-                    fontSize: 16,
-                    color: '#1f2937',
-                    border: 'none',
-                    outline: 'none',
-                    background: 'transparent',
-                    height: 56,
-                    lineHeight: '56px',
-                  }}
-                  onKeyDown={(e: any) => {
-                    if (e.key === 'Enter') handleAnalyze();
-                  }}
-                />
+            // Web: Use CSS border sweep animation
+            // @ts-ignore - className for web
+            <div className="web-search-input-container">
+              {/* @ts-ignore - web input */}
+              <input
+                type="text"
+                value={query}
+                onChange={(e: any) => setQuery(e.target.value)}
+                placeholder="Search health topics..."
+                className="web-search-input"
+                onKeyDown={(e: any) => {
+                  if (e.key === 'Enter') handleAnalyze();
+                }}
+                autoComplete="off"
+                autoCorrect="off"
+                spellCheck={false}
+              />
+              
+              {/* Icons Container */}
+              <div className="web-search-icons">
+                {/* Clear Button - only show when query exists */}
                 {query.length > 0 && (
-                  <TouchableOpacity onPress={() => setQuery('')}>
-                    <Ionicons name="close-circle" size={20} color="#9ca3af" />
-                  </TouchableOpacity>
+                  <button
+                    onClick={() => setQuery('')}
+                    className="web-icon-button clear-btn"
+                    type="button"
+                  >
+                    <svg viewBox="0 0 24 24" width="24" height="24" fill="#5f6368">
+                      <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                    </svg>
+                  </button>
                 )}
-                {/* Search button inside the sweep border */}
-                <TouchableOpacity style={styles.searchButtonInline} onPress={handleAnalyze}>
-                  <Ionicons name="arrow-forward" size={20} color="#9ca3af" />
-                </TouchableOpacity>
               </div>
-            </View>
+            </div>
           ) : (
             // Native: Use SweepBorder component
-            <SweepBorder
-              borderWidth={2}
-              radius={28}
-              durationMs={2500}
-              colors={colors.borderSweep}
-            >
-              <View style={{ backgroundColor: theme.colors.surface, borderRadius: 28, paddingHorizontal: 18, paddingVertical: 14, flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-                <Ionicons name="search" size={20} color="#9ca3af" />
+            <View style={{ flex: 1 }}>
+              <SweepBorder
+                borderWidth={2}
+                radius={28}
+                durationMs={2500}
+                colors={colors.borderSweep}
+              >
+                <View style={{ backgroundColor: theme.colors.surface, borderRadius: 28, paddingHorizontal: 18, height: 52, justifyContent: 'center' }}>
                   <TextInput
                     value={query}
                     onChangeText={setQuery}
                     placeholder="Search health topics..."
-                    placeholderTextColor="#9ca3af"
-                    style={styles.searchInput}
+                    placeholderTextColor={theme.colors.textSecondary}
+                    style={[styles.searchInput, { color: theme.colors.text }]}
                     returnKeyType="search"
                     onSubmitEditing={handleAnalyze}
+                    autoComplete="off"
+                    autoCorrect={false}
+                    spellCheck={false}
                   />
-                  {query.length > 0 && (
-                    <TouchableOpacity onPress={() => setQuery('')}>
-                      <Ionicons name="close-circle" size={20} color="#9ca3af" />
-                    </TouchableOpacity>
-                  )}
-                  <TouchableOpacity style={styles.searchButtonInline} onPress={handleAnalyze}>
-                    <Ionicons name="arrow-forward" size={20} color="#9ca3af" />
-                  </TouchableOpacity>
                 </View>
               </SweepBorder>
-            )}
+            </View>
+          )}
         </View>
 
         {/* Quick Actions */}
         <View style={styles.quickActions}>
-          <TouchableOpacity style={styles.quickAction}>
+          <TouchableOpacity style={[styles.quickAction, { backgroundColor: theme.colors.surface }]}>
             <View style={[styles.quickActionIcon, { backgroundColor: '#ede9fe' }]}>
               <Ionicons name="time" size={20} color="#8b5cf6" />
             </View>
-            <Text style={styles.quickActionText}>History</Text>
+            <Text style={[styles.quickActionText, { color: theme.colors.text }]}>History</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.quickAction}>
+          <TouchableOpacity style={[styles.quickAction, { backgroundColor: theme.colors.surface }]}>
             <View style={[styles.quickActionIcon, { backgroundColor: '#dcfce7' }]}>
               <Ionicons name="bookmark" size={20} color="#22c55e" />
             </View>
-            <Text style={styles.quickActionText}>Saved</Text>
+            <Text style={[styles.quickActionText, { color: theme.colors.text }]}>Saved</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.quickAction}>
+          <TouchableOpacity style={[styles.quickAction, { backgroundColor: theme.colors.surface }]}>
             <View style={[styles.quickActionIcon, { backgroundColor: '#dbeafe' }]}>
               <Ionicons name="trending-up" size={20} color="#3b82f6" />
             </View>
-            <Text style={styles.quickActionText}>Trending</Text>
+            <Text style={[styles.quickActionText, { color: theme.colors.text }]}>Trending</Text>
           </TouchableOpacity>
         </View>
 
         {/* Stats Cards */}
         <View style={styles.statsSection}>
-          <Text style={styles.sectionHeader}>Your Research</Text>
+          <Text style={[styles.sectionHeader, { color: theme.colors.text }]}>Your Research</Text>
           <View style={styles.statsCards}>
-            <View style={[styles.statsCard, { borderLeftColor: '#8b5cf6' }]}>
+            <View style={[styles.statsCard, { backgroundColor: theme.colors.surface, borderColor: '#8b5cf6' }]}>
               <Ionicons name="document-text" size={24} color="#8b5cf6" />
-              <Text style={styles.statsCardValue}>{userStats?.new_papers || 0}</Text>
-              <Text style={styles.statsCardLabel}>New Papers</Text>
+              <Text style={[styles.statsCardValue, { color: theme.colors.text }]}>{userStats?.new_papers || 0}</Text>
+              <Text style={[styles.statsCardLabel, { color: theme.colors.textSecondary }]}>New Papers</Text>
             </View>
-            <View style={[styles.statsCard, { borderLeftColor: '#22c55e' }]}>
+            <View style={[styles.statsCard, { backgroundColor: theme.colors.surface, borderColor: '#22c55e' }]}>
               <Ionicons name="bookmark" size={24} color="#22c55e" />
-              <Text style={styles.statsCardValue}>{userStats?.saved || 0}</Text>
-              <Text style={styles.statsCardLabel}>Saved</Text>
+              <Text style={[styles.statsCardValue, { color: theme.colors.text }]}>{userStats?.saved || 0}</Text>
+              <Text style={[styles.statsCardLabel, { color: theme.colors.textSecondary }]}>Saved</Text>
             </View>
           </View>
         </View>
@@ -702,19 +697,19 @@ export default function ResearchScreen({ isDashboardMode = false, onResultsViewC
         {/* Recent Searches */}
         {recentSearches.length > 0 && (
           <View style={styles.recentSection}>
-            <Text style={styles.sectionHeader}>Recent Searches</Text>
+            <Text style={[styles.sectionHeader, { color: theme.colors.text }]}>Recent Searches</Text>
             <View style={styles.recentTags}>
               {recentSearches.map((search, index) => (
                 <TouchableOpacity
                   key={index}
-                  style={styles.recentTag}
+                  style={[styles.recentTag, { backgroundColor: theme.colors.surface }]}
                   onPress={() => {
                     setQuery(search);
                     handleSearch(search);
                   }}
                 >
-                  <Ionicons name="time-outline" size={14} color="#6b7280" />
-                  <Text style={styles.recentTagText}>{search}</Text>
+                  <Ionicons name="time-outline" size={14} color={theme.colors.textSecondary} />
+                  <Text style={[styles.recentTagText, { color: theme.colors.text }]}>{search}</Text>
                 </TouchableOpacity>
               ))}
             </View>
@@ -723,8 +718,8 @@ export default function ResearchScreen({ isDashboardMode = false, onResultsViewC
 
         {/* Popular Topics */}
         <View style={styles.topicsSection}>
-          <Text style={styles.sectionHeader}>Popular Topics</Text>
-          <View style={styles.topicsList}>
+          <Text style={[styles.sectionHeader, { color: theme.colors.text }]}>Popular Topics</Text>
+          <View style={[styles.topicsList, { backgroundColor: theme.colors.surface }]}>
             {(popularTopics.length > 0 ? popularTopics : [
               { topic: 'Mediterranean Diet', icon: 'leaf', color: '#22c55e' },
               { topic: 'Intermittent Fasting', icon: 'time', color: '#f59e0b' },
@@ -750,8 +745,8 @@ export default function ResearchScreen({ isDashboardMode = false, onResultsViewC
                   <View style={[styles.topicIcon, { backgroundColor: topicColor + '20' }]}>
                     <Ionicons name={topicIcon as any} size={18} color={topicColor} />
                   </View>
-                  <Text style={styles.topicText}>{topicName}</Text>
-                  <Ionicons name="chevron-forward" size={16} color="#9ca3af" />
+                  <Text style={[styles.topicText, { color: theme.colors.text }]}>{topicName}</Text>
+                  <Ionicons name="chevron-forward" size={16} color={theme.colors.textSecondary} />
                 </TouchableOpacity>
               );
             })}
@@ -831,7 +826,7 @@ const styles = StyleSheet.create({
     // backgroundColor: '#ffffff', // theme.colors.surface // Use theme.colors.surface
     borderRadius: 28,
     paddingHorizontal: 18,
-    paddingVertical: 14,
+    height: 56,
     gap: 12,
     ...Platform.select({
       ios: {
@@ -920,7 +915,7 @@ const styles = StyleSheet.create({
     // backgroundColor: '#ffffff', // theme.colors.surface // Use theme.colors.surface
     borderRadius: 12,
     padding: 16,
-    borderLeftWidth: 4,
+    borderWidth: 2,
     alignItems: 'center',
   },
   statsCardValue: {
@@ -1051,11 +1046,11 @@ const styles = StyleSheet.create({
   statValue: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#1f2937',
+    // color: '#1f2937', // Applied via theme
   },
   statLabel: {
     fontSize: 12,
-    color: '#6b7280',
+    // color: '#6b7280', // Applied via theme
     marginTop: 2,
   },
   statDivider: {
@@ -1070,7 +1065,7 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     fontSize: 15,
-    color: '#6b7280',
+    // color: '#6b7280', // Applied via theme
     marginTop: 12,
   },
 
@@ -1082,11 +1077,11 @@ const styles = StyleSheet.create({
 
   // Study Card
   studyCard: {
-    // backgroundColor: '#ffffff', // theme.colors.surface // Use theme.colors.surface
+    // backgroundColor: '#ffffff', // theme.colors.surface // Applied via theme
     borderRadius: 12,
     padding: 16,
     borderWidth: 1,
-    borderColor: '#e5e7eb',
+    // borderColor: '#e5e7eb', // Applied via theme
     marginBottom: 12,
   },
   studyCardHeader: {
@@ -1117,19 +1112,19 @@ const styles = StyleSheet.create({
   },
   evidenceText: {
     fontSize: 12,
-    color: '#6b7280',
+    // color: '#6b7280', // Applied via theme
     textTransform: 'capitalize',
   },
   studyTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#1f2937',
+    // color: '#1f2937', // Applied via theme
     lineHeight: 22,
     marginBottom: 8,
   },
   studyAbstract: {
     fontSize: 14,
-    color: '#6b7280',
+    // color: '#6b7280', // Applied via theme
     lineHeight: 20,
     marginBottom: 12,
   },
@@ -1140,12 +1135,12 @@ const styles = StyleSheet.create({
   },
   studyJournal: {
     fontSize: 12,
-    color: '#9ca3af',
+    // color: '#9ca3af', // Applied via theme
     flex: 1,
   },
   studyYear: {
     fontSize: 12,
-    color: '#9ca3af',
+    // color: '#9ca3af', // Applied via theme
     fontWeight: '500',
   },
   studyFooter: {
@@ -1154,11 +1149,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingTop: 12,
     borderTopWidth: 1,
-    borderTopColor: '#f3f4f6',
+    // borderTopColor: '#f3f4f6', // Applied via theme
   },
   relevanceScore: {
     fontSize: 12,
-    color: '#6b7280',
+    // color: '#6b7280', // Applied via theme
   },
   readButtonSmall: {
     flexDirection: 'row',
@@ -1182,9 +1177,9 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingVertical: 12,
-    // backgroundColor: '#ffffff', // theme.colors.surface // Use theme.colors.surface
+    // backgroundColor: '#ffffff', // theme.colors.surface // Applied via theme
     borderBottomWidth: 1,
-    borderBottomColor: '#e5e7eb',
+    // borderBottomColor: '#e5e7eb', // Applied via theme
   },
   modalCloseButton: {
     width: 40,
@@ -1195,7 +1190,7 @@ const styles = StyleSheet.create({
   modalHeaderTitle: {
     fontSize: 17,
     fontWeight: '600',
-    color: '#1f2937',
+    // color: '#1f2937', // Applied via theme
   },
   modalContent: {
     flex: 1,
@@ -1204,7 +1199,7 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#1f2937',
+    // color: '#1f2937', // Applied via theme
     lineHeight: 28,
     marginBottom: 16,
   },
@@ -1222,16 +1217,16 @@ const styles = StyleSheet.create({
   },
   modalAuthors: {
     fontSize: 14,
-    color: '#374151',
+    // color: '#374151', // Applied via theme
     flex: 1,
   },
   modalJournal: {
     fontSize: 14,
-    color: '#6b7280',
+    // color: '#6b7280', // Applied via theme
   },
   modalPmcId: {
     fontSize: 13,
-    color: '#6b7280',
+    // color: '#6b7280', // Applied via theme
     fontFamily: 'monospace',
   },
   evidenceSection: {
@@ -1240,13 +1235,13 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#1f2937',
+    // color: '#1f2937', // Applied via theme
     marginBottom: 8,
   },
   evidenceLevelCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    // backgroundColor: '#ffffff', // theme.colors.surface // Use theme.colors.surface
+    // backgroundColor: '#ffffff', // theme.colors.surface // Applied via theme
     borderRadius: 12,
     padding: 16,
     gap: 12,
@@ -1259,11 +1254,11 @@ const styles = StyleSheet.create({
   evidenceLevelText: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#1f2937',
+    // color: '#1f2937', // Applied via theme
   },
   evidenceLevelDesc: {
     fontSize: 13,
-    color: '#6b7280',
+    // color: '#6b7280', // Applied via theme
     marginTop: 2,
   },
   abstractSection: {
@@ -1271,9 +1266,9 @@ const styles = StyleSheet.create({
   },
   abstractText: {
     fontSize: 15,
-    color: '#374151',
+    // color: '#374151', // Applied via theme
     lineHeight: 24,
-    // backgroundColor: '#ffffff', // theme.colors.surface // Use theme.colors.surface
+    // backgroundColor: '#ffffff', // theme.colors.surface // Applied via theme
     borderRadius: 12,
     padding: 16,
   },

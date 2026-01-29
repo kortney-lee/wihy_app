@@ -816,13 +816,13 @@ export default function WihyHomeScreen({}: Props = {}) {
                     durationMs={2500}
                     colors={colors.borderSweep}
                   >
-                    <View style={[styles.searchInner, { height: searchHeight - 4 }]}>
+                    <View style={[styles.searchInner, { height: searchHeight - 4, backgroundColor: theme.colors.surface }]}>
                       <TextInput
                         value={query}
                         onChangeText={setQuery}
                         placeholder="Analyze my meals"
-                        placeholderTextColor="#9ca3af"
-                        style={[styles.input, { fontSize: isTabletDevice ? 18 : 16 }]}
+                        placeholderTextColor={theme.colors.textSecondary}
+                        style={[styles.input, { fontSize: isTabletDevice ? 18 : 16, color: theme.colors.text }]}
                         returnKeyType="search"
                         onSubmitEditing={handleAnalyze}
                         autoComplete="off"
