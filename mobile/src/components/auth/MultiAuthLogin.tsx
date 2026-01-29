@@ -14,6 +14,7 @@ import {
   ScrollView,
 } from 'react-native';
 import { AuthContext } from '../../context/AuthContext';
+import { useTheme } from '../../context/ThemeContext';
 import { colors, sizes } from '../../theme/design-tokens';
 import { getResponsiveIconSize } from '../../utils/responsive';
 import SvgIcon from '../shared/SvgIcon';
@@ -76,6 +77,7 @@ export default function MultiAuthLogin({
   onSkip,
   skipLabel = 'Continue without account',
 }: MultiAuthLoginProps) {
+  const { theme } = useTheme();
   const { user, loading, signIn, signOut } = useContext(AuthContext);
   const [showEmailForm, setShowEmailForm] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
