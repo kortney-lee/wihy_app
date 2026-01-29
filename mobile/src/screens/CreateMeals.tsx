@@ -2491,15 +2491,15 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
     const monthName = calendarMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
 
     return (
-      <View style={styles.dayPickerContainer}>
+      <View style={[styles.dayPickerContainer, { backgroundColor: theme.colors.surface }]}>
         {/* Month Header */}
         <View style={styles.dayPickerHeader}>
-          <TouchableOpacity onPress={() => changeMonth(-1)} style={styles.dayPickerNavButton}>
-            <SvgIcon name="chevron-back" size={20} color="#374151" />
+          <TouchableOpacity onPress={() => changeMonth(-1)} style={[styles.dayPickerNavButton, { backgroundColor: theme.colors.background }]}>
+            <SvgIcon name="chevron-back" size={20} color={theme.colors.text} />
           </TouchableOpacity>
-          <Text style={styles.dayPickerMonthText}>{monthName}</Text>
-          <TouchableOpacity onPress={() => changeMonth(1)} style={styles.dayPickerNavButton}>
-            <SvgIcon name="chevron-forward" size={20} color="#374151" />
+          <Text style={[styles.dayPickerMonthText, { color: theme.colors.text }]}>{monthName}</Text>
+          <TouchableOpacity onPress={() => changeMonth(1)} style={[styles.dayPickerNavButton, { backgroundColor: theme.colors.background }]}>
+            <SvgIcon name="chevron-forward" size={20} color={theme.colors.text} />
           </TouchableOpacity>
         </View>
 
@@ -2531,6 +2531,7 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
                 key={index}
                 style={[
                   styles.dayPickerItem,
+                  { backgroundColor: theme.colors.background },
                   hasMeal && !isPast && !isTodayDate && {
                     backgroundColor: mealColor.bg,
                     borderWidth: 2,
@@ -2545,6 +2546,7 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
               >
                 <Text style={[
                   styles.dayPickerDayName,
+                  { color: theme.colors.textSecondary },
                   hasMeal && !isPast && !isTodayDate && { color: mealColor.text },
                   isPast && styles.dayPickerTextPast,
                   isTodayDate && styles.dayPickerTextToday,
@@ -2553,6 +2555,7 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
                 </Text>
                 <Text style={[
                   styles.dayPickerDayNumber,
+                  { color: theme.colors.text },
                   hasMeal && !isPast && !isTodayDate && { color: mealColor.text, fontWeight: '700' },
                   isPast && styles.dayPickerTextPast,
                   isTodayDate && styles.dayPickerTextToday,
@@ -2906,7 +2909,7 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
             style={{
               flexDirection: 'row',
               gap: 10,
-              // backgroundColor: '#ffffff', // theme.colors.surface // Use theme.colors.surface
+              backgroundColor: theme.colors.surface,
               paddingVertical: 14,
               paddingHorizontal: 32,
               borderRadius: 26,
@@ -4712,30 +4715,25 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#111827',
     marginBottom: 12,
   },
   card: {
-    backgroundColor: '#fff',
     borderRadius: 12,
     padding: 16,
   },
   label: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#6b7280',
     marginBottom: 8,
     marginTop: 12,
   },
   input: {
-    // backgroundColor: '#f9fafb', // theme.colors.surface // Use theme.colors.surface
     borderWidth: 1,
     borderColor: '#e5e7eb',
     borderRadius: 8,
     paddingHorizontal: 12,
     paddingVertical: 10,
     fontSize: 16,
-    color: '#111827',
     outlineStyle: 'none' as any,
   },
   servingContainer: {
@@ -4748,7 +4746,6 @@ const styles = StyleSheet.create({
   },
   servingUnit: {
     fontSize: 16,
-    color: '#6b7280',
   },
   mealTypeContainer: {
     flexDirection: 'row',
@@ -4771,7 +4768,6 @@ const styles = StyleSheet.create({
   mealTypeText: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#374151',
   },
   mealTypeTextSelected: {
     color: '#ffffff',

@@ -271,25 +271,26 @@ export const ManualMealForm: React.FC<ManualMealFormProps> = ({
 
         {/* Meal Details */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Meal Details</Text>
+          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Meal Details</Text>
           
-          <View style={styles.card}>
-            <Text style={styles.label}>Meal Name *</Text>
+          <View style={[styles.card, { backgroundColor: theme.colors.surface }]}>
+            <Text style={[styles.label, { color: theme.colors.text }]}>Meal Name *</Text>
             <TextInput
-              style={styles.input}
+              style={[styles.input, { backgroundColor: theme.colors.background, color: theme.colors.text, borderColor: theme.colors.text + '20' }]}
               placeholder="e.g., Grilled Chicken Salad"
               value={mealName}
               onChangeText={setMealName}
-              placeholderTextColor="#9ca3af"
+              placeholderTextColor={theme.colors.textSecondary}
             />
 
-            <Text style={styles.label}>Meal Type *</Text>
+            <Text style={[styles.label, { color: theme.colors.text }]}>Meal Type *</Text>
             <View style={styles.mealTypeContainer}>
               {(['breakfast', 'lunch', 'dinner', 'snack'] as const).map((type) => (
                 <Pressable
                   key={type}
                   style={[
                     styles.mealTypeButton,
+                    { backgroundColor: theme.colors.background, borderColor: theme.colors.text + '20' },
                     mealType === type && styles.mealTypeButtonSelected,
                   ]}
                   onPress={() => setMealType(type)}
@@ -297,26 +298,26 @@ export const ManualMealForm: React.FC<ManualMealFormProps> = ({
                   <Text
                     style={[
                       styles.mealTypeText,
+                      { color: theme.colors.textSecondary },
                       mealType === type && styles.mealTypeTextSelected,
-                    ]}
-                  >
+                    ]}>
                     {type.charAt(0).toUpperCase() + type.slice(1)}
                   </Text>
                 </Pressable>
               ))}
             </View>
 
-            <Text style={styles.label}>Servings</Text>
+            <Text style={[styles.label, { color: theme.colors.text }]}>Servings</Text>
             <View style={styles.servingContainer}>
               <TextInput
-                style={[styles.input, styles.servingInput]}
+                style={[styles.input, styles.servingInput, { backgroundColor: theme.colors.background, color: theme.colors.text, borderColor: theme.colors.text + '20' }]}
                 placeholder="1"
                 value={servingSize}
                 onChangeText={setServingSize}
                 keyboardType="numeric"
-                placeholderTextColor="#9ca3af"
+                placeholderTextColor={theme.colors.textSecondary}
               />
-              <Text style={styles.servingUnit}>serving(s)</Text>
+              <Text style={[styles.servingUnit, { color: theme.colors.textSecondary }]}>serving(s)</Text>
             </View>
           </View>
         </View>
@@ -324,7 +325,7 @@ export const ManualMealForm: React.FC<ManualMealFormProps> = ({
         {/* Ingredients with Inline Search */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Add Ingredients</Text>
+            <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Add Ingredients</Text>
           </View>
 
           {/* Inline Search Bar - Always visible like WiHY home */}
@@ -358,16 +359,19 @@ export const ManualMealForm: React.FC<ManualMealFormProps> = ({
                 durationMs={2500}
                 colors={colors.borderSweep}
               >
-                <View style={styles.inlineSearchBar}>
-                  <SvgIcon name="search" size={20} color="#9ca3af" />
+                <View style={[styles.inlineSearchBar, { backgroundColor: theme.colors.surface }]}>
+                  <SvgIcon name="search" size={20} color={theme.colors.textSecondary} />
                   <TextInput
-                    style={styles.inlineSearchInput}
+                    style={[styles.inlineSearchInput, { color: theme.colors.text }]}
                     placeholder="Search 4M+ products (e.g., chicken breast, rice)"
                     value={searchQuery}
                     onChangeText={setSearchQuery}
                     onSubmitEditing={() => handleSearch()}
                     returnKeyType="search"
-                    placeholderTextColor="#9ca3af"
+                    placeholderTextColor={theme.colors.textSecondary}
+                    autoComplete="off"
+                    autoCorrect={false}
+                    spellCheck={false}
                   />
                   {searchLoading ? (
                     <ActivityIndicator size="small" color="#3b82f6" />
@@ -409,9 +413,9 @@ export const ManualMealForm: React.FC<ManualMealFormProps> = ({
 
           {/* Search Results - Inline display */}
           {searchResults.length > 0 && (
-            <View style={styles.searchResultsContainer}>
+            <View style={[styles.searchResultsContainer, { backgroundColor: theme.colors.surface }]}>
               <View style={styles.searchResultsHeader}>
-                <Text style={styles.searchResultsTitle}>
+                <Text style={[styles.searchResultsTitle, { color: theme.colors.text }]}>
                   {searchResults.length} products found
                 </Text>
                 <TouchableOpacity onPress={() => setSearchResults([])}>
@@ -428,15 +432,15 @@ export const ManualMealForm: React.FC<ManualMealFormProps> = ({
                 nestedScrollEnabled
                 renderItem={({ item }) => (
                   <TouchableOpacity
-                    style={styles.searchResultCard}
+                    style={[styles.searchResultCard, { backgroundColor: theme.colors.background, borderColor: theme.colors.text + '20' }]}
                     onPress={() => handleAddProduct(item)}
                   >
                     <View style={styles.searchResultInfo}>
-                      <Text style={styles.searchResultName} numberOfLines={2}>
+                      <Text style={[styles.searchResultName, { color: theme.colors.text }]} numberOfLines={2}>
                         {item.name}
                       </Text>
                       {item.brand && (
-                        <Text style={styles.searchResultBrand}>{item.brand}</Text>
+                        <Text style={[styles.searchResultBrand, { color: theme.colors.textSecondary }]}>{item.brand}</Text>
                       )}
                       {/* Nutrition badges */}
                       <View style={styles.searchResultNutrition}>
@@ -470,17 +474,17 @@ export const ManualMealForm: React.FC<ManualMealFormProps> = ({
           {/* My Ingredients List */}
           {ingredients.length > 0 && (
             <View style={styles.myIngredientsSection}>
-              <Text style={styles.myIngredientsTitle}>
+              <Text style={[styles.myIngredientsTitle, { color: theme.colors.text }]}>
                 My Ingredients ({ingredients.length})
               </Text>
-              <View style={styles.card}>
+              <View style={[styles.card, { backgroundColor: theme.colors.surface }]}>
                 {ingredients.map((ingredient) => (
                   <View key={ingredient.id} style={styles.ingredientRow}>
                     <View style={{ flex: 1 }}>
                       {ingredient.productData ? (
                         // Product from search - show name and nutrition
                         <View>
-                          <Text style={styles.ingredientNameText}>{ingredient.name}</Text>
+                          <Text style={[styles.ingredientNameText, { color: theme.colors.text }]}>{ingredient.name}</Text>
                           <View style={{ flexDirection: 'row', gap: 8, marginTop: 4 }}>
                             {ingredient.calories && (
                               <View style={styles.miniNutritionBadge}>
@@ -503,28 +507,28 @@ export const ManualMealForm: React.FC<ManualMealFormProps> = ({
                       ) : (
                         // Manual entry - show input
                         <TextInput
-                          style={[styles.input, styles.ingredientName]}
+                          style={[styles.input, styles.ingredientName, { backgroundColor: theme.colors.background, color: theme.colors.text, borderColor: theme.colors.text + '20' }]}
                           placeholder="Ingredient name"
                           value={ingredient.name}
                           onChangeText={(value) => updateIngredient(ingredient.id, 'name', value)}
-                          placeholderTextColor="#9ca3af"
+                          placeholderTextColor={theme.colors.textSecondary}
                         />
                       )}
                     </View>
                     <TextInput
-                      style={[styles.input, styles.ingredientAmount]}
+                      style={[styles.input, styles.ingredientAmount, { backgroundColor: theme.colors.background, color: theme.colors.text, borderColor: theme.colors.text + '20' }]}
                       placeholder="1"
                       value={ingredient.amount}
                       onChangeText={(value) => updateIngredient(ingredient.id, 'amount', value)}
                       keyboardType="numeric"
-                      placeholderTextColor="#9ca3af"
+                      placeholderTextColor={theme.colors.textSecondary}
                     />
                     <TextInput
-                      style={[styles.input, styles.ingredientUnit]}
+                      style={[styles.input, styles.ingredientUnit, { backgroundColor: theme.colors.background, color: theme.colors.text, borderColor: theme.colors.text + '20' }]}
                       placeholder="cups"
                       value={ingredient.unit}
                       onChangeText={(value) => updateIngredient(ingredient.id, 'unit', value)}
-                      placeholderTextColor="#9ca3af"
+                      placeholderTextColor={theme.colors.textSecondary}
                     />
                     <Pressable onPress={() => removeIngredient(ingredient.id)}>
                       <SvgIcon name="close-circle" size={24} color="#ef4444" />
@@ -534,10 +538,10 @@ export const ManualMealForm: React.FC<ManualMealFormProps> = ({
               </View>
 
               {/* Nutrition Summary - Always visible when ingredients exist */}
-              <View style={styles.nutritionSummaryCard}>
+              <View style={[styles.nutritionSummaryCard, { backgroundColor: theme.colors.surface }]}>
                 <View style={styles.nutritionSummaryHeader}>
                   <SvgIcon name="checkmark-circle" size={18} color="#10b981" />
-                  <Text style={styles.nutritionSummaryTitle}>Total Meal Nutrition</Text>
+                  <Text style={[styles.nutritionSummaryTitle, { color: theme.colors.text }]}>Total Meal Nutrition</Text>
                 </View>
                 <View style={styles.nutritionSummaryRow}>
                   <View style={styles.nutritionSummaryItem}>
@@ -584,10 +588,10 @@ export const ManualMealForm: React.FC<ManualMealFormProps> = ({
 
           {/* Empty state when no ingredients */}
           {ingredients.length === 0 && searchResults.length === 0 && !searchLoading && (
-            <View style={styles.emptyStateCard}>
+            <View style={[styles.emptyStateCard, { backgroundColor: theme.colors.surface }]}>
               <SvgIcon name="search" size={40} color="#3b82f6" />
-              <Text style={styles.emptyStateTitle}>Search for ingredients</Text>
-              <Text style={styles.emptyStateText}>
+              <Text style={[styles.emptyStateTitle, { color: theme.colors.text }]}>Search for ingredients</Text>
+              <Text style={[styles.emptyStateText, { color: theme.colors.textSecondary }]}>
                 Type a product name above or tap a category to get started
               </Text>
             </View>
@@ -596,15 +600,15 @@ export const ManualMealForm: React.FC<ManualMealFormProps> = ({
 
         {/* Tags */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Tags</Text>
+          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Tags</Text>
           
-          <View style={styles.card}>
-            <View style={styles.tagsContainer}>
-              {TAGS.map((tag) => (
+          <View style={styles.tagsContainer}>
+            {TAGS.map((tag) => (
                 <Pressable
                   key={tag}
                   style={[
                     styles.tag,
+                    { backgroundColor: theme.colors.surface, borderColor: theme.colors.text + '20' },
                     selectedTags.includes(tag) && styles.tagSelected,
                   ]}
                   onPress={() => toggleTag(tag)}
@@ -612,33 +616,30 @@ export const ManualMealForm: React.FC<ManualMealFormProps> = ({
                   <Text
                     style={[
                       styles.tagText,
+                      { color: theme.colors.textSecondary },
                       selectedTags.includes(tag) && styles.tagTextSelected,
-                    ]}
-                  >
+                    ]}>
                     {tag}
                   </Text>
                 </Pressable>
               ))}
             </View>
-          </View>
         </View>
 
         {/* Notes */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Notes & Instructions</Text>
+          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Notes & Instructions</Text>
           
-          <View style={styles.card}>
-            <TextInput
-              style={[styles.input, styles.notesInput]}
+          <TextInput
+            style={[styles.input, styles.notesInput, { backgroundColor: theme.colors.surface, color: theme.colors.text, borderColor: theme.colors.text + '20' }]}
               placeholder="Add preparation instructions, tips, or special notes..."
               value={notes}
               onChangeText={setNotes}
               multiline
               numberOfLines={4}
               textAlignVertical="top"
-              placeholderTextColor="#9ca3af"
-            />
-          </View>
+              placeholderTextColor={theme.colors.textSecondary}
+          />
         </View>
 
         {/* Multiple Save Options */}
@@ -755,18 +756,18 @@ export const ManualMealForm: React.FC<ManualMealFormProps> = ({
 
         {/* Templates Quick Actions */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Quick Start</Text>
+          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Quick Start</Text>
           <View style={styles.templatesContainer}>
             <Pressable 
-              style={styles.templateCard}
+              style={[styles.templateCard, { backgroundColor: theme.colors.surface }]}
               onPress={onShowTemplates}
             >
               <SvgIcon name="fast-food" size={24} color="#3b82f6" />
-              <Text style={styles.templateTitle}>Use Template</Text>
-              <Text style={styles.templateSubtitle}>Start from preset</Text>
+              <Text style={[styles.templateTitle, { color: theme.colors.text }]}>Use Template</Text>
+              <Text style={[styles.templateSubtitle, { color: theme.colors.textSecondary }]}>Start from preset</Text>
             </Pressable>
             <Pressable 
-              style={styles.templateCard}
+              style={[styles.templateCard, { backgroundColor: theme.colors.surface }]}
               onPress={onScanRecipe}
               disabled={scanning}
             >
@@ -775,19 +776,19 @@ export const ManualMealForm: React.FC<ManualMealFormProps> = ({
               ) : (
                 <SvgIcon name="camera" size={24} color="#10b981" />
               )}
-              <Text style={styles.templateTitle}>Scan Recipe</Text>
-              <Text style={styles.templateSubtitle}>From image</Text>
+              <Text style={[styles.templateTitle, { color: theme.colors.text }]}>Scan Recipe</Text>
+              <Text style={[styles.templateSubtitle, { color: theme.colors.textSecondary }]}>From image</Text>
             </Pressable>
             <Pressable 
-              style={styles.templateCard}
+              style={[styles.templateCard, { backgroundColor: theme.colors.surface }]}
               onPress={() => {
                 onLoadLibraryMeals?.();
                 onShowLibrary();
               }}
             >
               <SvgIcon name="book" size={24} color="#8b5cf6" />
-              <Text style={styles.templateTitle}>My Meals</Text>
-              <Text style={styles.templateSubtitle}>Saved recipes</Text>
+              <Text style={[styles.templateTitle, { color: theme.colors.text }]}>My Meals</Text>
+              <Text style={[styles.templateSubtitle, { color: theme.colors.textSecondary }]}>Saved recipes</Text>
             </Pressable>
           </View>
         </View>
@@ -1003,25 +1004,10 @@ const styles = StyleSheet.create({
   inlineSearchBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    // backgroundColor: '#ffffff', // theme.colors.surface
     borderRadius: 28,
     paddingHorizontal: 18,
-    paddingVertical: 14,
+    height: 52,
     gap: 12,
-    ...Platform.select({
-      ios: {
-        shadowColor: 'rgba(64,60,67,0.35)',
-        shadowOpacity: 0.35,
-        shadowRadius: 6,
-        shadowOffset: { width: 0, height: 3 },
-      },
-      android: {
-        elevation: 5,
-      },
-      web: {
-        boxShadow: '0 3px 6px rgba(64,60,67,0.35)',
-      },
-    }),
   },
   inlineSearchInput: {
     flex: 1,
