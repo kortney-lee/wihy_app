@@ -835,6 +835,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: '#111827',
     marginBottom: 16,
+    outlineStyle: 'none' as any,
   },
   servingContainer: {
     flexDirection: 'row',
@@ -982,6 +983,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 16,
     color: '#111827',
+    outlineStyle: 'none' as any,
   },
   quickCategoriesScroll: {
     marginTop: 12,
@@ -1170,6 +1172,7 @@ const styles = StyleSheet.create({
   notesInput: {
     minHeight: 100,
     textAlignVertical: 'top',
+    outlineStyle: 'none' as any,
   },
   saveButton: {
     flexDirection: 'row',

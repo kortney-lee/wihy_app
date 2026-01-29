@@ -977,6 +977,7 @@ const styles = StyleSheet.create({
     color: theme.text,
     borderWidth: 1,
     borderColor: theme.cardBorder,
+    outlineStyle: 'none' as any,
   },
   textArea: {
     minHeight: 80,

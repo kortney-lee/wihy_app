@@ -219,6 +219,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#374151',
     paddingVertical: 0,
+    outlineStyle: 'none' as any,
   },
   selectionHint: {
     fontSize: 12,

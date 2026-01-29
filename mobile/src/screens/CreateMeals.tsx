@@ -4749,6 +4749,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     fontSize: 16,
     color: '#111827',
+    outlineStyle: 'none' as any,
   },
   servingContainer: {
     flexDirection: 'row',
@@ -4872,6 +4873,7 @@ const styles = StyleSheet.create({
   },
   notesInput: {
     minHeight: 100,
+    outlineStyle: 'none' as any,
   },
   saveButton: {
     flexDirection: 'row',
@@ -5956,6 +5958,7 @@ const styles = StyleSheet.create({
     color: '#111827',
     minHeight: 80,
     textAlignVertical: 'top',
+    outlineStyle: 'none' as any,
   },
   continueButton: {
     flexDirection: 'row',
@@ -6054,6 +6057,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#1f2937',
     padding: 0,
+    outlineStyle: 'none' as any,
   },
   selectedDietaryCount: {
     flexDirection: 'row',
@@ -6417,6 +6421,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 16,
     color: '#1f2937',
+    outlineStyle: 'none' as any,
   },
   libraryTagsScroll: {
     marginTop: 16,

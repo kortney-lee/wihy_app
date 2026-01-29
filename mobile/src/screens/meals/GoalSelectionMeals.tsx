@@ -1113,6 +1113,7 @@ const styles = StyleSheet.create({
     color: '#374151',
     minHeight: 60,
     textAlignVertical: 'top',
+    outlineStyle: 'none' as any,
   },
   calorieInput: {
     backgroundColor: '#f9fafb',
@@ -1123,6 +1124,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     fontSize: 14,
     color: '#374151',
+    outlineStyle: 'none' as any,
   },
   // Generate button
   generateButton: {

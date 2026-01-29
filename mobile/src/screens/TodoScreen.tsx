@@ -193,6 +193,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     color: colors.text,
     fontSize: 16,
+    outlineStyle: 'none' as any,
   },
   addButton: {
     backgroundColor: colors.primary,

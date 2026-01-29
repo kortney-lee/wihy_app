@@ -1385,6 +1385,7 @@ const styles = StyleSheet.create({
     flex: 1,
     ...dashboardTheme.typography.body,
     color: dashboardTheme.colors.text,
+    outlineStyle: 'none' as any,
   },
 
   quickActions: {

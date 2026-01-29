@@ -776,6 +776,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 16,
     color: '#1f2937',
+    outlineStyle: 'none' as any,
   },
   searchButton: {
     backgroundColor: '#8b5cf6',

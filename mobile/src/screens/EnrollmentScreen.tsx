@@ -1216,6 +1216,7 @@ const styles = StyleSheet.create({
     marginTop: 16,
     borderWidth: 1,
     borderColor: theme.cardBorder,
+    outlineStyle: 'none' as any,
   },
 
   // Buttons

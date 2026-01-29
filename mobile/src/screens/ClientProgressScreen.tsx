@@ -2347,6 +2347,7 @@ const styles = StyleSheet.create({
     color: '#1f2937',
     minHeight: 100,
     lineHeight: 22,
+    outlineStyle: 'none' as any,
   },
   saveNoteButton: {
     backgroundColor: '#3b82f6',
