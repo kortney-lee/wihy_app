@@ -209,6 +209,7 @@ const styles = StyleSheet.create({
     padding: 12,
     fontSize: 16,
     backgroundColor: '#fff',
+    outlineStyle: 'none' as any,
   },
   hintRow: {
     flexDirection: 'row',

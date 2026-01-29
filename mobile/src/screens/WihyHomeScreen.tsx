@@ -914,6 +914,7 @@ const styles = StyleSheet.create({
     color: '#111827',
     paddingVertical: 0,
     textAlign: 'center',
+    outlineStyle: 'none' as any,
   },
 
   iconCluster: {

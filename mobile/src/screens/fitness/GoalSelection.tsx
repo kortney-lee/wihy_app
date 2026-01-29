@@ -1075,6 +1075,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#1f2937',
     textAlignVertical: 'top',
+    outlineStyle: 'none' as any,
   },
   generateButton: {
     backgroundColor: '#4cbb17',

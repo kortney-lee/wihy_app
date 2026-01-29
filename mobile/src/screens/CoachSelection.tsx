@@ -533,6 +533,7 @@ const styles = StyleSheet.create({
     marginLeft: 8,
     fontSize: 16,
     color: '#111827',
+    outlineStyle: 'none' as any,
   },
   filtersContainer: {
     maxHeight: 80,

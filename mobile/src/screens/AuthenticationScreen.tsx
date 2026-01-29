@@ -313,6 +313,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     fontSize: 14,
     color: '#333',
+    outlineStyle: 'none' as any,
   },
   backButton: {
     padding: 8,

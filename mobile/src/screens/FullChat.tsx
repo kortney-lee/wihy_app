@@ -1372,6 +1372,7 @@ const styles = StyleSheet.create({
     textAlignVertical: 'center',
     paddingTop: 0,
     paddingBottom: 0,
+    outlineStyle: 'none' as any,
   },
   sendButton: {
     width: 40,

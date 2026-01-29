@@ -542,6 +542,7 @@ const styles = StyleSheet.create({
     borderColor: '#e5e7eb',
     minHeight: 80,
     textAlignVertical: 'top',
+    outlineStyle: 'none' as any,
   },
   skillOption: {
     flexDirection: 'row',

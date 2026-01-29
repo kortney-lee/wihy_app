@@ -439,6 +439,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#1f2937',
     textAlign: 'center',
+    outlineStyle: 'none' as any,
   },
   logSetButton: {
     backgroundColor: '#4cbb17',

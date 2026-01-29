@@ -646,6 +646,7 @@ const styles = StyleSheet.create({
     paddingRight: 48,
     fontSize: 16,
     color: '#1f2937',
+    outlineStyle: 'none' as any,
   },
   eyeButton: {
     position: 'absolute',

@@ -322,6 +322,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#1f2937',
     backgroundColor: '#fff',
+    outlineStyle: 'none' as any,
   },
   textArea: {
     minHeight: 120,

@@ -1009,6 +1009,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     fontSize: 16,
     color: '#111827',
+    outlineStyle: 'none' as any,
   },
   textArea: {
     minHeight: 100,

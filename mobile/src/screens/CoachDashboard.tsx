@@ -764,6 +764,7 @@ const styles = StyleSheet.create({
     marginLeft: 8,
     fontSize: 16,
     color: '#111827',
+    outlineStyle: 'none' as any,
   },
   listHeader: {
     flexDirection: 'row',
@@ -1198,6 +1199,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#111827',
     marginBottom: 12,
+    outlineStyle: 'none' as any,
   },
   modalButton: {
     flexDirection: 'row',

@@ -841,6 +841,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 16,
     color: '#111827',
+    outlineStyle: 'none' as any,
   },
   libraryTagsScroll: {
     maxHeight: 48,

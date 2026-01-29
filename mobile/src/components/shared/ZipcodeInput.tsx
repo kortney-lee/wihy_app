@@ -224,6 +224,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: '#1A1A1A',
     fontWeight: '500',
+    outlineStyle: 'none' as any,
   },
   clearButton: {
     padding: 8,

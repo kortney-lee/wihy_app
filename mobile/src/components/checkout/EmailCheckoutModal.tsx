@@ -409,6 +409,7 @@ const styles = StyleSheet.create({
     padding: 14,
     fontSize: 16,
     color: '#1f2937',
+    outlineStyle: 'none' as any,
   },
   inputError: {
     borderColor: '#ef4444',
