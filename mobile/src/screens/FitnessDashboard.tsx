@@ -3193,7 +3193,7 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
     const monthName = calendarMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
 
     return (
-      <View style={styles.dayPickerContainer}>
+      <View style={[styles.dayPickerContainer, { backgroundColor: theme.colors.surface }]}>
         {/* Month Header */}
         <View style={styles.dayPickerHeader}>
           <TouchableOpacity onPress={() => changeMonth(-1)} style={styles.dayPickerNavButton}>
@@ -3620,7 +3620,7 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
 
           {/* Weather Section */}
           <TouchableOpacity
-            style={[styles.weatherCard, showWeather && weather && styles.weatherCardExpanded]}
+            style={[styles.weatherCard, { backgroundColor: theme.colors.surface }, showWeather && weather && styles.weatherCardExpanded]}
             onPress={() => {
               if (!showWeather && !weather) {
                 loadWeatherData();
