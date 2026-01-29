@@ -4557,10 +4557,10 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
                   </View>
                 ) : (
                   <TouchableOpacity 
-                    style={[styles.shoppingDoneButton, { backgroundColor: '#f3f4f6' }]}
+                    style={[styles.shoppingDoneButton, { backgroundColor: theme.colors.surface }]}
                     onPress={() => setShowShoppingListModal(false)}
                   >
-                    <Text style={[styles.shoppingDoneButtonText, { color: '#6b7280' }]}>Close</Text>
+                    <Text style={[styles.shoppingDoneButtonText, { color: theme.colors.textSecondary }]}>Close</Text>
                   </TouchableOpacity>
                 )}
               </View>

@@ -1749,17 +1749,17 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
 
         {/* Program Stats */}
         <View style={styles.programStatsRow}>
-          <View style={styles.programStatCard}>
+          <View style={[styles.programStatCard, { backgroundColor: theme.colors.surface }]}>
             <Ionicons name="calendar-number-outline" size={24} color="#6366f1" />
             <Text style={styles.programStatValue}>{workouts.length}</Text>
             <Text style={styles.programStatLabel}>Workouts</Text>
           </View>
-          <View style={styles.programStatCard}>
+          <View style={[styles.programStatCard, { backgroundColor: theme.colors.surface }]}>
             <Ionicons name="barbell-outline" size={24} color="#8b5cf6" />
             <Text style={styles.programStatValue}>{totalExercises}</Text>
             <Text style={styles.programStatLabel}>Exercises</Text>
           </View>
-          <View style={styles.programStatCard}>
+          <View style={[styles.programStatCard, { backgroundColor: theme.colors.surface }]}>
             <Ionicons name="time-outline" size={24} color="#f59e0b" />
             <Text style={styles.programStatValue}>{totalDuration}</Text>
             <Text style={styles.programStatLabel}>Total Mins</Text>
@@ -3064,17 +3064,17 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
 
             {/* Stats Grid */}
             <View style={styles.workoutStatsGrid}>
-              <View style={styles.workoutStatCard}>
+              <View style={[styles.workoutStatCard, { backgroundColor: theme.colors.surface }]}>
                 <Ionicons name="time-outline" size={28} color="#3b82f6" />
                 <Text style={styles.workoutCompleteStatValue}>{workoutSummary?.duration || '00:00'}</Text>
                 <Text style={styles.workoutCompleteStatLabel}>Duration</Text>
               </View>
-              <View style={styles.workoutStatCard}>
+              <View style={[styles.workoutStatCard, { backgroundColor: theme.colors.surface }]}>
                 <Ionicons name="checkmark-done-outline" size={28} color="#4cbb17" />
                 <Text style={styles.workoutCompleteStatValue}>{workoutSummary?.setsCompleted || 0}</Text>
                 <Text style={styles.workoutCompleteStatLabel}>Sets Completed</Text>
               </View>
-              <View style={styles.workoutStatCard}>
+              <View style={[styles.workoutStatCard, { backgroundColor: theme.colors.surface }]}>
                 <Ionicons name="flame-outline" size={28} color="#f59e0b" />
                 <Text style={styles.workoutCompleteStatValue}>{workoutSummary?.calories || 0}</Text>
                 <Text style={styles.workoutCompleteStatLabel}>Est. Calories</Text>
