@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { productSearchService, FoodProduct } from '../services/productSearchService';
 import SvgIcon from './shared/SvgIcon';
+import { useTheme } from '../context/ThemeContext';
 
 interface ProductSearchModalProps {
   visible: boolean;
@@ -24,6 +25,7 @@ export function ProductSearchModal({
   onClose,
   onSelectProduct,
 }: ProductSearchModalProps) {
+  const { theme } = useTheme();
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<FoodProduct[]>([]);
   const [loading, setLoading] = useState(false);

@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '../../../components/shared';
+import { useTheme } from '../../../context/ThemeContext';
 
 export type WorkoutMode = 'quick' | 'routine' | 'train';
 
@@ -16,8 +17,9 @@ const modes: { id: WorkoutMode; label: string; icon: string }[] = [
 ];
 
 export const ModeToggle: React.FC<ModeToggleProps> = ({ selectedMode, onModeChange }) => {
+  const { theme } = useTheme();
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.colors.surface }]}>
       {modes.map((mode) => {
         const isSelected = selectedMode === mode.id;
         return (

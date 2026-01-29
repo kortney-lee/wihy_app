@@ -10,6 +10,7 @@ import {
   StyleSheet,
 } from 'react-native';
 import { Ionicons } from '../../../components/shared';
+import { useTheme } from '../../../context/ThemeContext';
 
 interface ServingsSelectorProps {
   selectedServings: number;
@@ -29,6 +30,7 @@ export const ServingsSelector: React.FC<ServingsSelectorProps> = ({
   onServingsChange,
   title = 'Servings',
 }) => {
+  const { theme } = useTheme();
   return (
     <View style={styles.container}>
       <Text style={styles.title}>{title}</Text>

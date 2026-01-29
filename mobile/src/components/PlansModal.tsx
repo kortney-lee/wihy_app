@@ -13,6 +13,7 @@ import {
   Linking,
 } from 'react-native';
 import { Ionicons } from './shared';
+import { useTheme } from '../context/ThemeContext';
 import { checkoutService } from '../services/checkoutService';
 import { useAuth } from '../context/AuthContext';
 import { 
@@ -84,6 +85,7 @@ export default function PlansModal({
   subtitle = 'Choose a plan that works for you',
   showAddOns = false,
 }: PlansModalProps) {
+  const { theme } = useTheme();
   const { user } = useAuth();
   const [purchasing, setPurchasing] = useState(false);
   const [initializingPurchases, setInitializingPurchases] = useState(true);

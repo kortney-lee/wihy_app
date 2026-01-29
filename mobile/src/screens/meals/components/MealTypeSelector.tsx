@@ -10,6 +10,7 @@ import {
   StyleSheet,
 } from 'react-native';
 import { Ionicons } from '../../../components/shared';
+import { useTheme } from '../../../context/ThemeContext';
 
 interface MealTypeSelectorProps {
   selectedMealTypes: Record<string, boolean>;
@@ -29,6 +30,7 @@ export const MealTypeSelector: React.FC<MealTypeSelectorProps> = ({
   onMealTypesChange,
   title = 'Meals Per Day',
 }) => {
+  const { theme } = useTheme();
   const toggleMealType = (mealType: string) => {
     onMealTypesChange({
       ...selectedMealTypes,
