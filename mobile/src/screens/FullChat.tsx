@@ -644,7 +644,7 @@ export default function FullChat() {
         {/* Chat Header - Using GradientDashboardHeader with custom children - Hidden on web */}
         {!isWeb && (
           <GradientDashboardHeader
-            title={getHeaderTitle()}
+            title="" 
             gradient="chat"
             style={styles.header}
           >
@@ -685,20 +685,18 @@ export default function FullChat() {
                 </Text>
               </Pressable>
 
-              {/* Hide close button on web - nav bar handles navigation */}
-              {!isWeb && (
-                <CloseButton
-                  onPress={() => {
-                    if (navigation.canGoBack()) {
-                      navigation.goBack();
-                    } else {
-                      navigation.navigate('Home');
-                    }
-                  }}
-                  iconColor="#3b82f6"
-                  style={{ backgroundColor: '#ffffff' }}
-                />
-              )}
+              {/* Close button */}
+              <CloseButton
+                onPress={() => {
+                  if (navigation.canGoBack()) {
+                    navigation.goBack();
+                  } else {
+                    navigation.navigate('Home');
+                  }
+                }}
+                iconColor="#3b82f6"
+                style={{ backgroundColor: '#ffffff' }}
+              />
             </View>
           </GradientDashboardHeader>
         )}
@@ -712,7 +710,8 @@ export default function FullChat() {
             { paddingBottom: isWeb ? 20 : 12 }
           ]}
           showsVerticalScrollIndicator={false}
-          {...(isWeb ? { nativeID: 'chat-scroll-view' } : {})}        >
+          nativeID={isWeb ? 'chat-scroll-view' : undefined}
+        >
           {messages.map((message, messageIndex) => (
             <View
               key={message.id}
@@ -1102,12 +1101,15 @@ const styles = StyleSheet.create({
   },
   header: {
     borderBottomWidth: 0,
+    paddingTop: 8,
+    paddingBottom: 8,
   },
   chatHeaderContent: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 0,
+    width: '100%',
+    paddingHorizontal: 8,
   },
   headerLeft: {
     flexDirection: 'row',
