@@ -23,6 +23,7 @@ import { fdaService } from '../services/fdaService';
 import { consumptionService } from '../services/consumptionService';
 import { scanService } from '../services/scanService';
 import { AuthContext } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import type { IngredientAnalysis } from '../services/types';
 import { LinearGradient } from 'expo-linear-gradient';
 import { dashboardTheme } from '../theme/dashboardTheme';
@@ -107,6 +108,7 @@ export default function NutritionFacts() {
   const route = useRoute<RouteProps>();
   const navigation = useNavigation<NavigationProp>();
   const { user } = useContext(AuthContext);
+  const { theme } = useTheme();
 
   // Get user ID for food logging
   const userId = user?.id || `guest_${Date.now()}`;
@@ -511,7 +513,7 @@ export default function NutritionFacts() {
   const insets = useSafeAreaInsets();
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       {/* Header */}
       <LinearGradient
         colors={['#3b82f6', '#3b82f6']}

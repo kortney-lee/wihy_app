@@ -13,6 +13,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { Ionicons } from '../components/shared';
+import { useTheme } from '../context/ThemeContext';
 import { RootStackParamList } from '../types/navigation';
 
 // Subscription plans for native - matches backend plan keys
@@ -68,6 +69,7 @@ interface Props {
 
 // Native Subscription Screen (Android/iOS)
 export const NativeSubscriptionScreen: React.FC<Props> = ({ navigation }) => {
+  const { theme } = useTheme();
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
   const [purchasing, setPurchasing] = useState(false);
 
@@ -105,7 +107,7 @@ export const NativeSubscriptionScreen: React.FC<Props> = ({ navigation }) => {
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]} edges={['top']}>
       <View style={styles.header}>
         <Pressable onPress={() => navigation.goBack()} style={styles.backButton}>
           <Ionicons name="arrow-back" size={24} color="#333" />

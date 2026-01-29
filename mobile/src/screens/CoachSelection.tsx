@@ -16,6 +16,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { dashboardColors, SvgIcon } from '../components/shared';
+import { useTheme } from '../context/ThemeContext';
 import { dashboardTheme } from '../theme/dashboardTheme';
 import { userService } from '../services/userService';
 import { useDashboardLayout } from '../hooks/useDashboardLayout';
@@ -42,6 +43,7 @@ interface Coach {
 
 export default function CoachSelection() {
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
+  const { theme } = useTheme();
   const insets = useSafeAreaInsets();
   useDashboardLayout(); // For responsive behavior
   const scrollY = useRef(new Animated.Value(0)).current;
@@ -354,7 +356,7 @@ export default function CoachSelection() {
   );
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       {/* Collapsing Header */}
       <Animated.View style={[styles.collapsibleHeader, { height: headerHeight }]}>
         <Animated.View style={[styles.headerContent, { opacity: headerOpacity, transform: [{ scale: titleScale }] }]}>
@@ -373,7 +375,7 @@ export default function CoachSelection() {
       <Animated.ScrollView
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
-        style={styles.scrollView}
+        style={[styles.scrollView, { backgroundColor: theme.colors.background }]}
         contentContainerStyle={styles.scrollContent}
         scrollEventThrottle={16}
         onScroll={Animated.event(

@@ -18,6 +18,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { dashboardColors, Ionicons, BackToHubButton } from '../components/shared';
 import { SweepBorder } from '../components/SweepBorder';
 import { colors } from '../theme/design-tokens';
+import { useTheme } from '../context/ThemeContext';
 
 const spinnerGif = require('../../assets/whatishealthyspinner.gif');
 const isWeb = Platform.OS === 'web';
@@ -57,6 +58,7 @@ export default function ClientManagement({
 }: ClientManagementProps) {
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   const { coachId, user } = useAuth();
+  const { theme } = useTheme();
   
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFilter, setSelectedFilter] = useState<'all' | 'active' | 'inactive' | 'pending'>('all');
@@ -360,7 +362,7 @@ export default function ClientManagement({
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       {/* Back to Coach Hub button - only on web */}
       {isDashboardMode && onBack && (
         <BackToHubButton

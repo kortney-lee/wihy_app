@@ -16,6 +16,7 @@ import React, { useEffect, useState, useContext } from 'react';
 import { View, Text, ActivityIndicator, StyleSheet, Platform } from 'react-native';
 import { useNavigation, CommonActions } from '@react-navigation/native';
 import { AuthContext } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import { checkoutService } from '../services/checkoutService';
 import { colors } from '../theme/design-tokens';
 
@@ -29,6 +30,7 @@ interface PendingSubscription {
 export default function SubscribeCompleteScreen() {
   const navigation = useNavigation<any>();
   const { user } = useContext(AuthContext);
+  const { theme } = useTheme();
   const [status, setStatus] = useState<'processing' | 'redirecting' | 'error'>('processing');
   const [errorMessage, setErrorMessage] = useState<string>('');
 
@@ -136,7 +138,7 @@ export default function SubscribeCompleteScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       {status === 'processing' && (
         <>
           <ActivityIndicator size="large" color={colors.primary} />

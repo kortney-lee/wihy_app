@@ -18,6 +18,7 @@ import { useNavigation } from '@react-navigation/native';
 import { GradientDashboardHeader, WebPageWrapper, NotificationTile } from '../components/shared';
 import { HamburgerMenu } from '../components/shared/HamburgerMenu';
 import { AuthContext } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import { hasAIAccess, hasInstacartAccess } from '../utils/capabilities';
 import { useDashboardLayout } from '../hooks/useDashboardLayout';
 import SvgIcon from '../components/shared/SvgIcon';
@@ -51,6 +52,7 @@ export default function FamilyDashboardPage({
 }: FamilyDashboardPageProps) {
   const navigation = useNavigation<any>();
   const { user } = useContext(AuthContext);
+  const { theme } = useTheme();
   const [showAddMember, setShowAddMember] = useState(false);
   const [showHamburgerMenu, setShowHamburgerMenu] = useState(false);
   const layout = useDashboardLayout();
@@ -139,7 +141,7 @@ export default function FamilyDashboardPage({
   );
 
   return (
-      <View style={styles.container}>
+      <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
         {/* Hamburger Menu for navigation */}
         {showHamburgerMenu && (
           <HamburgerMenu

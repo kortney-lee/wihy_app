@@ -26,6 +26,7 @@ import { chatService } from '../services/chatService';
 import { consumptionService } from '../services/consumptionService';
 import { scanService } from '../services/scanService';
 import { AuthContext } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import type { CreatedResource, SuggestedAction } from '../services/types';
 
 const isWeb = Platform.OS === 'web';
@@ -70,6 +71,7 @@ export default function FullChat() {
   const messagesEndRef = useRef<View>(null);
   const insets = useSafeAreaInsets();
   const { user } = useContext(AuthContext);
+  const { theme } = useTheme();
 
   // Get user ID for session management
   const userId = user?.id || `guest_${Date.now()}`;
@@ -635,9 +637,9 @@ export default function FullChat() {
   };
 
   const mainContent = (
-    <SafeAreaView style={styles.container} edges={['left', 'right']}>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]} edges={[]}>
       <KeyboardAvoidingView
-        style={styles.flex}
+        style={[styles.flex, { backgroundColor: theme.colors.background }]}
         behavior="padding"
         keyboardVerticalOffset={0}
       >
@@ -704,7 +706,7 @@ export default function FullChat() {
         {/* Messages Container */}
         <ScrollView
           ref={scrollViewRef}
-          style={styles.messagesContainer}
+          style={[styles.messagesContainer, { backgroundColor: theme.colors.surface }]}
           contentContainerStyle={[
             styles.messagesContent, 
             { paddingBottom: isWeb ? 20 : 12 }
@@ -724,6 +726,7 @@ export default function FullChat() {
                 style={[
                   styles.messageText,
                   message.type === 'user' ? styles.userMessageText : styles.aiMessageText,
+                  message.type === 'ai' && { color: theme.colors.text },
                 ]}
               >
                 {message.type === 'ai' ? cleanResponseText(message.content) : message.content}
@@ -750,14 +753,14 @@ export default function FullChat() {
                       />
                     </View>
                     <View style={styles.resourceCardContent}>
-                      <Text style={styles.resourceCardTitle}>{resource.name}</Text>
+                      <Text style={[styles.resourceCardTitle, { color: theme.colors.text }]}>{resource.name}</Text>
                       <Text style={styles.resourceCardType}>
                         {resource.type === 'fitness_program' ? 'Fitness Program' :
                          resource.type === 'meal_program' ? 'Meal Plan' :
                          resource.type === 'shopping_list' ? 'Shopping List' : 'Resource'}
                       </Text>
                       {resource.metadata && (
-                        <Text style={styles.resourceCardMeta}>
+                        <Text style={[styles.resourceCardMeta, { color: theme.colors.textSecondary }]}>
                           {resource.metadata.duration_weeks && `${resource.metadata.duration_weeks} weeks`}
                           {resource.metadata.days_per_week && ` • ${resource.metadata.days_per_week} days/week`}
                           {resource.metadata.calories && ` • ${resource.metadata.calories} cal`}
@@ -806,14 +809,14 @@ export default function FullChat() {
             {/* Follow-up Suggestions - Only show on the last AI message */}
             {message.followUpSuggestions && message.followUpSuggestions.length > 0 && messageIndex === messages.length - 1 && message.type === 'ai' && (
               <View style={styles.followUpContainer}>
-                <Text style={styles.followUpLabel}>Try asking:</Text>
+                <Text style={[styles.followUpLabel, { color: theme.colors.textSecondary }]}>Try asking:</Text>
                 {message.followUpSuggestions.map((suggestion, index) => (
                   <Pressable
                     key={`followup-${index}`}
                     style={styles.followUpButton}
                     onPress={() => handleSendMessage(suggestion)}
                   >
-                    <Text style={styles.followUpText}>{suggestion}</Text>
+                    <Text style={[styles.followUpText, { color: theme.colors.textSecondary }]}>{suggestion}</Text>
                   </Pressable>
                 ))}
               </View>
@@ -823,6 +826,7 @@ export default function FullChat() {
               style={[
                 styles.timestamp,
                 message.type === 'user' ? styles.userTimestamp : styles.aiTimestamp,
+                { color: theme.colors.textSecondary },
               ]}
             >
               {message.timestamp.toLocaleTimeString([], {
@@ -846,7 +850,11 @@ export default function FullChat() {
         {/* Quick Replies - Dynamic from API or fallback */}
         {!isTyping && messages.length >= 1 && (
           <View style={styles.quickRepliesContainer}>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            <ScrollView 
+              horizontal 
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={{ paddingHorizontal: 16 }}
+            >
               <View style={styles.quickReplies}>
                 {getQuickReplies().map((reply, index) => (
                   <Pressable
@@ -854,7 +862,7 @@ export default function FullChat() {
                     style={styles.quickReplyButton}
                     onPress={() => handleQuickReply(reply)}
                   >
-                    <Text style={styles.quickReplyText}>{reply}</Text>
+                    <Text style={[styles.quickReplyText, { color: theme.colors.primary }]}>{reply}</Text>
                   </Pressable>
                 ))}
               </View>
@@ -875,16 +883,16 @@ export default function FullChat() {
         <View
           style={[
             styles.inputContainer,
-            { paddingBottom: bottomInset || 8 },
+            { paddingBottom: bottomInset || 8, backgroundColor: theme.colors.surface },
           ]}
         >
           <View style={styles.textInputContainer}>
             <TextInput
-              style={styles.textInput}
+              style={[styles.textInput, { color: theme.colors.text }]}
               value={inputText}
               onChangeText={setInputText}
               placeholder="Type your health question..."
-              placeholderTextColor="#9ca3af"
+              placeholderTextColor={theme.colors.textSecondary}
               multiline
               maxLength={500}
               autoCorrect={false}
@@ -986,7 +994,7 @@ export default function FullChat() {
           <View style={styles.modalContent}>
             {/* Modal Header */}
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Healthier Alternatives</Text>
+              <Text style={[styles.modalTitle, { color: theme.colors.text }]}>Healthier Alternatives</Text>
               <Pressable
                 style={styles.modalCloseButton}
                 onPress={() => setShowCompareModal(false)}
@@ -999,7 +1007,7 @@ export default function FullChat() {
             {isLoadingComparison && (
               <View style={styles.modalLoading}>
                 <ActivityIndicator size="large" color="#3b82f6" />
-                <Text style={styles.modalLoadingText}>Finding healthier options...</Text>
+                <Text style={[styles.modalLoadingText, { color: theme.colors.textSecondary }]}>Finding healthier options...</Text>
               </View>
             )}
 
@@ -1008,21 +1016,21 @@ export default function FullChat() {
               <ScrollView style={styles.modalScroll} showsVerticalScrollIndicator={false}>
                 {/* Original Food */}
                 <View style={styles.comparisonSection}>
-                  <Text style={styles.sectionLabel}>Your Selection</Text>
+                  <Text style={[styles.sectionLabel, { color: theme.colors.textSecondary }]}>Your Selection</Text>
                   <View style={styles.foodCard}>
-                    <Text style={styles.foodName}>{comparisonData.original.name}</Text>
+                    <Text style={[styles.foodName, { color: theme.colors.text }]}>{comparisonData.original.name}</Text>
                     <View style={styles.nutritionRow}>
                       <View style={styles.nutritionItem}>
                         <Text style={styles.nutritionValue}>{comparisonData.original.calories}</Text>
-                        <Text style={styles.nutritionLabel}>calories</Text>
+                        <Text style={[styles.nutritionLabel, { color: theme.colors.textSecondary }]}>calories</Text>
                       </View>
                       <View style={styles.nutritionItem}>
                         <Text style={styles.nutritionValue}>{comparisonData.original.sugar}g</Text>
-                        <Text style={styles.nutritionLabel}>sugar</Text>
+                        <Text style={[styles.nutritionLabel, { color: theme.colors.textSecondary }]}>sugar</Text>
                       </View>
                       <View style={styles.nutritionItem}>
                         <Text style={styles.nutritionValue}>{comparisonData.original.fiber}g</Text>
-                        <Text style={styles.nutritionLabel}>fiber</Text>
+                        <Text style={[styles.nutritionLabel, { color: theme.colors.textSecondary }]}>fiber</Text>
                       </View>
                     </View>
                   </View>
@@ -1030,26 +1038,26 @@ export default function FullChat() {
 
                 {/* Alternatives */}
                 <View style={styles.comparisonSection}>
-                  <Text style={styles.sectionLabel}>Better Options</Text>
+                  <Text style={[styles.sectionLabel, { color: theme.colors.textSecondary }]}>Better Options</Text>
                   {comparisonData.alternatives.map((alt: any, index: number) => (
                     <View key={index} style={styles.alternativeCard}>
                       <View style={styles.alternativeHeader}>
-                        <Text style={styles.alternativeName}>{alt.name}</Text>
+                        <Text style={[styles.alternativeName, { color: theme.colors.text }]}>{alt.name}</Text>
                         <Ionicons name="arrow-up-circle" size={20} color="#10b981" />
                       </View>
                       <Text style={styles.comparisonText}>{alt.comparison}</Text>
                       <View style={styles.nutritionRow}>
                         <View style={styles.nutritionItem}>
                           <Text style={[styles.nutritionValue, styles.altValue]}>{alt.calories}</Text>
-                          <Text style={styles.nutritionLabel}>calories</Text>
+                          <Text style={[styles.nutritionLabel, { color: theme.colors.textSecondary }]}>calories</Text>
                         </View>
                         <View style={styles.nutritionItem}>
                           <Text style={[styles.nutritionValue, styles.altValue]}>{alt.sugar}g</Text>
-                          <Text style={styles.nutritionLabel}>sugar</Text>
+                          <Text style={[styles.nutritionLabel, { color: theme.colors.textSecondary }]}>sugar</Text>
                         </View>
                         <View style={styles.nutritionItem}>
                           <Text style={[styles.nutritionValue, styles.altValue]}>{alt.fiber}g</Text>
-                          <Text style={styles.nutritionLabel}>fiber</Text>
+                          <Text style={[styles.nutritionLabel, { color: theme.colors.textSecondary }]}>fiber</Text>
                         </View>
                       </View>
                       <Pressable
@@ -1103,13 +1111,14 @@ const styles = StyleSheet.create({
     borderBottomWidth: 0,
     paddingTop: 8,
     paddingBottom: 8,
+    paddingHorizontal: 0, // Remove horizontal padding to reach device edges
   },
   chatHeaderContent: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     width: '100%',
-    paddingHorizontal: 8,
+    paddingHorizontal: 16, // Add padding here instead
   },
   headerLeft: {
     flexDirection: 'row',
@@ -1249,13 +1258,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffffff',
   },
   messagesContent: {
-    padding: 16,
-    paddingTop: 20,
-    paddingBottom: 20,
+    paddingVertical: 20,
   },
   messageContainer: {
     marginBottom: 12,
     maxWidth: '85%',
+    marginHorizontal: 16,
   },
   userMessage: {
     alignSelf: 'flex-end',
@@ -1325,7 +1333,6 @@ const styles = StyleSheet.create({
   quickReplies: {
     flexDirection: 'row',
     gap: 10,
-    paddingHorizontal: 16,
   },
   quickReplyButton: {
     backgroundColor: '#ffffff',

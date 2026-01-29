@@ -12,6 +12,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { Ionicons } from '../components/shared';
+import { useTheme } from '../context/ThemeContext';
 import type { StackNavigationProp } from '@react-navigation/stack';
 import type { RootStackParamList } from '../types/navigation';
 import { coachService } from '../services';
@@ -48,6 +49,7 @@ interface Review {
 
 export default function CoachDetailPage() {
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
+  const { theme } = useTheme();
   const route = useRoute();
   const insets = useSafeAreaInsets();
   const scrollY = useRef(new Animated.Value(0)).current;
@@ -109,7 +111,7 @@ export default function CoachDetailPage() {
 
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
+      <View style={[styles.loadingContainer, { backgroundColor: theme.colors.background }]}>
         <ActivityIndicator size="large" color="#3b82f6" />
         <Text style={styles.loadingText}>Loading profile...</Text>
       </View>
@@ -118,7 +120,7 @@ export default function CoachDetailPage() {
 
   if (!coach) {
     return (
-      <View style={styles.errorContainer}>
+      <View style={[styles.errorContainer, { backgroundColor: theme.colors.background }]}>
         <Ionicons name="alert-circle" size={48} color="#ef4444" />
         <Text style={styles.errorText}>Coach not found</Text>
         <Pressable style={styles.backButton} onPress={() => navigation.goBack()}>
@@ -129,7 +131,7 @@ export default function CoachDetailPage() {
   }
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       {/* Status bar area */}
       <View style={{ height: insets.top, backgroundColor: '#6366f1' }} />
       

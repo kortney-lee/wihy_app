@@ -16,6 +16,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { AuthContext } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import { userService } from '../services/userService';
 import { dashboardTheme } from '../theme/dashboardTheme';
 import { formatDateInput, formatISODateForDisplay } from '../utils/dateFormatter';
@@ -154,6 +155,7 @@ export default function ProfileSetupScreen({ isDashboardMode = false, onBack }: 
   const navigation = useNavigation<any>();
   const route = useRoute<any>();
   const { user, updateUser } = useContext(AuthContext);
+  const { theme: themeContext } = useTheme();
   const isOnboarding = isDashboardMode ? false : (route.params?.isOnboarding ?? false);
   
   const [currentStep, setCurrentStep] = useState<SetupStep>('basics');
@@ -816,7 +818,7 @@ export default function ProfileSetupScreen({ isDashboardMode = false, onBack }: 
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: themeContext.colors.background }]}>
       {/* Status bar area - solid color */}
       <View style={{ height: insets.top, backgroundColor: '#14b8a6' }} />
         

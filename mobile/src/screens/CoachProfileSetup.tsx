@@ -19,6 +19,7 @@ import type { StackNavigationProp } from '@react-navigation/stack';
 import type { RootStackParamList } from '../types/navigation';
 import { coachService } from '../services';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 
 const spinnerGif = require('../../assets/whatishealthyspinner.gif');
 const isWeb = Platform.OS === 'web';
@@ -76,6 +77,7 @@ export default function CoachProfileSetup({
   onBack,
 }: CoachProfileSetupProps) {
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
+  const { theme } = useTheme();
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
   const [currentStep, setCurrentStep] = useState(1);
@@ -489,7 +491,7 @@ export default function CoachProfileSetup({
   );
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       {/* Back to Coach Hub button - only on web */}
       {isDashboardMode && onBack && (
         <BackToHubButton

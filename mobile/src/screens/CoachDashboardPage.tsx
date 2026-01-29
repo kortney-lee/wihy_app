@@ -18,6 +18,7 @@ import { dashboardTheme } from '../theme/dashboardTheme';
 import { HamburgerMenu } from '../components/shared/HamburgerMenu';
 import { GradientDashboardHeader } from '../components/shared/GradientDashboardHeader';
 import { AuthContext } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import { useDashboardLayout } from '../hooks/useDashboardLayout';
 import SvgIcon from '../components/shared/SvgIcon';
 import { BackToHubButton } from '../components/shared/BackToHubButton';
@@ -58,6 +59,7 @@ interface CoachDashboardPageProps {
 const CoachDashboardPage: React.FC<CoachDashboardPageProps> = ({ showMenuFromHealthTab = false, onMenuClose, onContextChange }) => {
   const navigation = useNavigation<NavigationProp>();
   const { user } = React.useContext(AuthContext);
+  const { theme } = useTheme();
   const [showHamburgerMenu, setShowHamburgerMenu] = useState(false);
   const [selectedView, setSelectedView] = useState<CoachViewType | null>(null); // Start with hub view
   const layout = useDashboardLayout();
@@ -187,7 +189,7 @@ const CoachDashboardPage: React.FC<CoachDashboardPageProps> = ({ showMenuFromHea
     const isMobileWebLocal = isWeb && layout.screenWidth < 768;
     
     return (
-      <View style={styles.container}>
+      <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
         {showHamburgerMenu && (
           <HamburgerMenu
             visible={showHamburgerMenu}

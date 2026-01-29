@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import { Ionicons } from '../components/shared';
 import {
   fitnessService,
@@ -102,6 +103,7 @@ const INITIAL_TESTS: TestResult[] = [
 
 export default function IntegrationTestScreen() {
   const { userId, coachId, isCoach } = useAuth();
+  const { theme } = useTheme();
   const [tests, setTests] = useState<TestResult[]>(INITIAL_TESTS);
   const [running, setRunning] = useState(false);
   const [categories, setCategories] = useState(TEST_CATEGORIES);
@@ -511,7 +513,7 @@ export default function IntegrationTestScreen() {
   }, {} as Record<string, (TestResult & { index: number })[]>);
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]} edges={['top', 'left', 'right']}>
       <View style={styles.header}>
         <Text style={styles.headerTitle}>API Integration Tests</Text>
         <Text style={styles.headerSubtitle}>Test all backend endpoints</Text>

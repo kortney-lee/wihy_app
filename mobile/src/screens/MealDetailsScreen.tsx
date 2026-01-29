@@ -22,6 +22,7 @@ import { getMealDetails } from '../services/mealPlanService';
 import { mealService, ShoppingList } from '../services/mealService';
 import { LinearGradient } from 'expo-linear-gradient';
 import { AuthContext } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import { GradientDashboardHeader, Ionicons } from '../components/shared';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -80,6 +81,7 @@ export default function MealDetailsScreen() {
   const route = useRoute<RouteProps>();
   const navigation = useNavigation<NavigationProp>();
   const { user } = useContext(AuthContext);
+  const { theme } = useTheme();
 
   const routeParams = route?.params;
   const { mealId } = routeParams || { mealId: null };
@@ -350,11 +352,11 @@ export default function MealDetailsScreen() {
       <SafeAreaView style={styles.statusBarBox} edges={['top']} />
       
       {/* Main Content */}
-      <View style={styles.container}>
+      <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
         
         {/* Scrollable Content */}
         <ScrollView
-          style={styles.scrollView}
+          style={[styles.scrollView, { backgroundColor: theme.colors.background }]}
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
         >

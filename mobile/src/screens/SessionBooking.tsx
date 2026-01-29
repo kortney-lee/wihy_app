@@ -13,6 +13,7 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import type { StackNavigationProp } from '@react-navigation/stack';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import { userService } from '../services/userService';
 import { coachService } from '../services';
 import type { RootStackParamList } from '../types/navigation';
@@ -39,6 +40,7 @@ interface DaySlots {
 
 export default function SessionBooking() {
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
+  const { theme } = useTheme();
   const route = useRoute<RouteProp<RootStackParamList, 'SessionBooking'>>();
   const { coachId, coachName } = route.params;
   const { userId } = useAuth();
@@ -238,7 +240,7 @@ export default function SessionBooking() {
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+      <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]} edges={['top', 'bottom']}>
         <View style={styles.centerContent}>
           <ActivityIndicator size="large" color="#3b82f6" />
           <Text style={styles.loadingText}>Loading availability...</Text>
@@ -248,7 +250,7 @@ export default function SessionBooking() {
   }
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       {/* Status bar area */}
       <View style={{ height: insets.top, backgroundColor: '#6366f1' }} />
 

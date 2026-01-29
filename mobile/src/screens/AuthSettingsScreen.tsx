@@ -16,10 +16,12 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useEnhancedAuth } from '../hooks/useEnhancedAuth';
+import { useTheme } from '../context/ThemeContext';
 import { Ionicons } from '../components/shared';
 import { colors, sizes } from '../theme/design-tokens';
 
 export default function AuthSettingsScreen() {
+  const { theme } = useTheme();
   const {
     biometricCapability,
     biometricEnabled,
@@ -72,9 +74,9 @@ export default function AuthSettingsScreen() {
   const biometricTypeName = getBiometricTypeName();
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <ScrollView contentContainerStyle={styles.content}>
-        <Text style={styles.title}>Authentication Settings</Text>
+        <Text style={[styles.title, { color: theme.colors.text }]}>Authentication Settings</Text>
 
         {/* Biometric Section */}
         <View style={styles.section}>
@@ -88,15 +90,15 @@ export default function AuthSettingsScreen() {
               size={24}
               color={colors.primary}
             />
-            <Text style={styles.sectionTitle}>Biometric Login</Text>
+            <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Biometric Login</Text>
           </View>
 
-          <View style={styles.settingRow}>
+          <View style={[styles.settingRow, { backgroundColor: theme.colors.card }]}>
             <View style={styles.settingInfo}>
-              <Text style={styles.settingLabel}>
+              <Text style={[styles.settingLabel, { color: theme.colors.text }]}>
                 Enable {biometricTypeName}
               </Text>
-              <Text style={styles.settingDescription}>
+              <Text style={[styles.settingDescription, { color: theme.colors.textSecondary }]}>
                 {biometricAvailable
                   ? `Use ${biometricTypeName} for quick and secure login`
                   : `${biometricTypeName} is not available on this device`}
@@ -112,15 +114,15 @@ export default function AuthSettingsScreen() {
           </View>
 
           {biometricCapability && (
-            <View style={styles.infoBox}>
-              <Text style={styles.infoText}>
+            <View style={[styles.infoBox, { backgroundColor: theme.colors.surface }]}>
+              <Text style={[styles.infoText, { color: theme.colors.text }]}>
                 <Text style={styles.infoLabel}>Status: </Text>
                 {biometricCapability.enrolled
                   ? `${biometricTypeName} is set up`
                   : `${biometricTypeName} is not set up on this device`}
               </Text>
               {biometricCapability.types.length > 0 && (
-                <Text style={styles.infoText}>
+                <Text style={[styles.infoText, { color: theme.colors.text }]}>
                   <Text style={styles.infoLabel}>Available: </Text>
                   {biometricCapability.types.join(', ')}
                 </Text>
@@ -146,13 +148,13 @@ export default function AuthSettingsScreen() {
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Ionicons name="refresh-circle" size={24} color={colors.primary} />
-            <Text style={styles.sectionTitle}>Token Management</Text>
+            <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Token Management</Text>
           </View>
 
-          <View style={styles.settingRow}>
+          <View style={[styles.settingRow, { backgroundColor: theme.colors.card }]}>
             <View style={styles.settingInfo}>
-              <Text style={styles.settingLabel}>Auto Token Refresh</Text>
-              <Text style={styles.settingDescription}>
+              <Text style={[styles.settingLabel, { color: theme.colors.text }]}>Auto Token Refresh</Text>
+              <Text style={[styles.settingDescription, { color: theme.colors.textSecondary }]}>
                 Automatically refresh your session in the background
               </Text>
             </View>
@@ -165,12 +167,12 @@ export default function AuthSettingsScreen() {
             />
           </View>
 
-          <View style={styles.infoBox}>
-            <Text style={styles.infoText}>
+          <View style={[styles.infoBox, { backgroundColor: theme.colors.surface }]}>
+            <Text style={[styles.infoText, { color: theme.colors.text }]}>
               When enabled, your authentication tokens will be automatically
               refreshed every 5 minutes to keep your session alive.
             </Text>
-            <Text style={[styles.infoText, { marginTop: 8 }]}>
+            <Text style={[styles.infoText, { marginTop: 8, color: theme.colors.text }]}>
               This prevents unexpected logouts and ensures a seamless
               experience.
             </Text>
@@ -185,20 +187,20 @@ export default function AuthSettingsScreen() {
               size={24}
               color={colors.primary}
             />
-            <Text style={styles.sectionTitle}>Security Information</Text>
+            <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Security Information</Text>
           </View>
 
-          <View style={styles.infoBox}>
-            <Text style={styles.infoText}>
+          <View style={[styles.infoBox, { backgroundColor: theme.colors.surface }]}>
+            <Text style={[styles.infoText, { color: theme.colors.text }]}>
               • All authentication tokens are stored securely on your device
             </Text>
-            <Text style={styles.infoText}>
+            <Text style={[styles.infoText, { color: theme.colors.text }]}>
               • Biometric data never leaves your device
             </Text>
-            <Text style={styles.infoText}>
+            <Text style={[styles.infoText, { color: theme.colors.text }]}>
               • Sessions expire after 24 hours of inactivity
             </Text>
-            <Text style={styles.infoText}>
+            <Text style={[styles.infoText, { color: theme.colors.text }]}>
               • Auto refresh checks for token expiration every 5 minutes
             </Text>
           </View>
@@ -206,21 +208,21 @@ export default function AuthSettingsScreen() {
 
         {/* Platform Info */}
         {__DEV__ && (
-          <View style={styles.debugSection}>
-            <Text style={styles.debugTitle}>Debug Info</Text>
-            <Text style={styles.debugText}>
+          <View style={[styles.debugSection, { backgroundColor: theme.colors.surface }]}>
+            <Text style={[styles.debugTitle, { color: theme.colors.textSecondary }]}>Debug Info</Text>
+            <Text style={[styles.debugText, { color: theme.colors.textSecondary }]}>
               Platform: {Platform.OS} {Platform.Version}
             </Text>
-            <Text style={styles.debugText}>
+            <Text style={[styles.debugText, { color: theme.colors.textSecondary }]}>
               Biometric Available: {biometricAvailable ? 'Yes' : 'No'}
             </Text>
-            <Text style={styles.debugText}>
+            <Text style={[styles.debugText, { color: theme.colors.textSecondary }]}>
               Biometric Enrolled: {biometricCapability?.enrolled ? 'Yes' : 'No'}
             </Text>
-            <Text style={styles.debugText}>
+            <Text style={[styles.debugText, { color: theme.colors.textSecondary }]}>
               Biometric Enabled: {biometricEnabled ? 'Yes' : 'No'}
             </Text>
-            <Text style={styles.debugText}>
+            <Text style={[styles.debugText, { color: theme.colors.textSecondary }]}>
               Auto Refresh: {autoRefreshEnabled ? 'On' : 'Off'}
             </Text>
           </View>
@@ -262,7 +264,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#fff',
     padding: 16,
     borderRadius: 12,
     marginBottom: 12,

@@ -17,6 +17,7 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../types/navigation';
 import { createInstacartLinkFromMealPlan } from '../services/instacartService';
 import { AuthContext } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import { Ionicons } from '../components/shared';
 // Note: Mock data removed to expose real API issues
 import { GradientDashboardHeader } from '../components/shared';
@@ -45,6 +46,7 @@ interface ShoppingItem {
 }
 
 export default function ShoppingListScreen({ route, navigation, isDashboardMode = false }: Props) {
+  const { theme } = useTheme();
   // Support both navigation mode (with route params) and dashboard mode (empty data if no params)
   const mealPlanId: number = route?.params?.mealPlanId || 1;
   const shoppingListData = route?.params?.shoppingListData || {
@@ -222,7 +224,7 @@ export default function ShoppingListScreen({ route, navigation, isDashboardMode 
   return (
     <>
       {/* Pattern B: Dual SafeAreaView - Stack Screen */}
-      <SafeAreaView style={styles.topBox}>
+      <SafeAreaView style={[styles.topBox, { backgroundColor: theme.colors.primary }]}>
         <GradientDashboardHeader
           title="Shopping List"
           gradient="shoppingList"
@@ -267,7 +269,7 @@ export default function ShoppingListScreen({ route, navigation, isDashboardMode 
         </GradientDashboardHeader>
       </SafeAreaView>
 
-      <SafeAreaView style={styles.scrollContainer}>
+      <SafeAreaView style={[styles.scrollContainer, { backgroundColor: theme.colors.background }]}>
         <ScrollView
           style={styles.scrollView}
           contentContainerStyle={styles.scrollContent}

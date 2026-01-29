@@ -14,6 +14,7 @@ import SvgIcon from '../components/shared/SvgIcon';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
 import { AuthContext } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import MultiAuthLogin from '../components/auth/MultiAuthLogin';
 import { WebNavHeader } from '../components/web/WebNavHeader';
 
@@ -37,6 +38,7 @@ interface ExpandedSections {
 export default function AboutScreen() {
   const navigation = useNavigation<any>();
   const { user } = useContext(AuthContext);
+  const { theme: appTheme } = useTheme();
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [expandedSections, setExpandedSections] = useState<ExpandedSections>({});
 
@@ -490,7 +492,7 @@ export default function AboutScreen() {
   );
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: appTheme.colors.background }]}>
       <View style={styles.header}>
         <Pressable onPress={() => navigation.goBack()} style={styles.backButton}>
           <SvgIcon name="arrow-back" size={24} color={DARK_GRAY} />

@@ -22,6 +22,7 @@ import { dashboardTheme } from '../theme/dashboardTheme';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { researchService, ResearchArticle, ResearchDashboardStats, ResearchBookmark, SearchHistoryItem } from '../services';
 import { AuthContext } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 
 const isWeb = Platform.OS === 'web';
 
@@ -176,6 +177,7 @@ const StudyCard: React.FC<{
 export default function ResearchScreen({ isDashboardMode = false, onResultsViewChange }: ResearchScreenProps) {
   // Auth context for user ID
   const { user } = useContext(AuthContext);
+  const { theme } = useTheme();
   const userId = user?.id || '';
 
   // State management
@@ -407,7 +409,7 @@ export default function ResearchScreen({ isDashboardMode = false, onResultsViewC
     const isWeb = Platform.OS === 'web';
     
     return (
-      <View style={styles.container}>
+      <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
         <ScrollView
           showsVerticalScrollIndicator={false}
           refreshControl={
@@ -473,7 +475,7 @@ export default function ResearchScreen({ isDashboardMode = false, onResultsViewC
 
         {/* Study Detail Modal */}
         <Modal visible={showModal} animationType="slide" presentationStyle="pageSheet">
-          <SafeAreaView style={styles.modalContainer} edges={['top']}>
+          <SafeAreaView style={[styles.modalContainer, { backgroundColor: theme.colors.background }]} edges={['top']}>
             <View style={styles.modalHeader}>
               <View style={{ width: 40 }} />
               <Text style={styles.modalHeaderTitle}>Study Details</Text>
@@ -552,7 +554,7 @@ export default function ResearchScreen({ isDashboardMode = false, onResultsViewC
 
   // Dashboard view (default state)
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       {/* Status bar area - solid color */}
       <View style={{ height: insets.top, backgroundColor: '#8b5cf6' }} />
       

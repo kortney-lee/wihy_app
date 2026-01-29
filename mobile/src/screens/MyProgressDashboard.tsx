@@ -30,6 +30,7 @@ import { fitnessService } from '../services/fitnessService';
 import { progressService } from '../services/progressService';
 import { scanService } from '../services/scanService';
 import { AuthContext } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import { wihyApiService } from '../services/wihyApiService';
 import { useGoalsDashboard } from '../hooks/useGoalsDashboard';
 import type { HealthTrends } from '../services/wihyApiService';
@@ -87,6 +88,7 @@ const MyProgressDashboard: React.FC<MyProgressDashboardProps> = ({
 }) => {
   const layout = useDashboardLayout();
   const navigation = useNavigation<NavigationProp>();
+  const { theme } = useTheme();
   const { user } = useContext(AuthContext);
   const [selectedPeriod, setSelectedPeriod] = useState<'today' | 'week' | 'month'>('today');
   const [isLoading, setIsLoading] = useState(true);
@@ -1006,7 +1008,7 @@ const MyProgressDashboard: React.FC<MyProgressDashboardProps> = ({
   });
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       {/* Status bar area - Always red */}
       <View style={{ height: insets.top, backgroundColor: '#dc2626' }} />
       

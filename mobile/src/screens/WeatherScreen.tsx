@@ -11,11 +11,13 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {useNavigation} from '@react-navigation/native';
+import { useTheme } from '../context/ThemeContext';
 import {colors, spacing, typography} from '../theme';
 import { weatherService, WeatherData, ForecastDay } from '../services';
 
 const WeatherScreen: React.FC = () => {
   const navigation = useNavigation();
+  const { theme } = useTheme();
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -53,7 +55,7 @@ const WeatherScreen: React.FC = () => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <ScrollView 
         contentInsetAdjustmentBehavior="automatic"
         refreshControl={

@@ -15,6 +15,7 @@ import { Ionicons } from '../components/shared';
 import { RootStackParamList } from '../types/navigation';
 import { colors, borderRadius } from '../theme/design-tokens';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 
 // Success green color
 const SUCCESS_COLOR = '#22c55e';
@@ -43,6 +44,7 @@ interface Props {
 
 export const PostPaymentRegistrationScreen: React.FC<Props> = ({ navigation, route }) => {
   const { createAccountAfterPayment } = useAuth();
+  const { theme } = useTheme();
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -223,7 +225,7 @@ export const PostPaymentRegistrationScreen: React.FC<Props> = ({ navigation, rou
     }
 
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
         <View style={styles.successContainer}>
           <View style={styles.successIcon}>
             <Ionicons name="checkmark-circle" size={48} color={SUCCESS_COLOR} />
@@ -249,7 +251,7 @@ export const PostPaymentRegistrationScreen: React.FC<Props> = ({ navigation, rou
     }
 
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={colors.primary} />
           <Text style={styles.loadingText}>Loading...</Text>
@@ -487,7 +489,7 @@ export const PostPaymentRegistrationScreen: React.FC<Props> = ({ navigation, rou
 
   // Native render
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <View style={styles.content}>
         {/* Header */}
         <View style={styles.header}>

@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
+import { useTheme } from '../context/ThemeContext';
 import { Ionicons } from '../components/shared';
 import type { StackNavigationProp } from '@react-navigation/stack';
 import type { RootStackParamList } from '../navigation/AppNavigator';
@@ -37,6 +38,7 @@ type PermissionItem = {
 
 export default function PermissionsScreen() {
   const navigation = useNavigation<NavigationProp>();
+  const { theme } = useTheme();
   const [permissions, setPermissions] = useState<PermissionItem[]>([
     {
       id: 'camera',
@@ -136,7 +138,7 @@ export default function PermissionsScreen() {
   const anyPending = permissions.some((p) => p.status === 'pending');
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'left', 'right', 'bottom']}>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]} edges={['top', 'left', 'right', 'bottom']}>
       <View style={styles.header}>
         <Pressable
           style={styles.backButton}

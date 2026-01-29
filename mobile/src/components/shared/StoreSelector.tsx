@@ -15,6 +15,7 @@ import {
   ActivityIndicator,
   Image,
 } from 'react-native';
+import { useTheme } from '../../context/ThemeContext';
 import type { AvailableStore } from '../../services/mealService';
 
 interface StoreSelectorProps {
@@ -49,6 +50,7 @@ export const StoreSelector: React.FC<StoreSelectorProps> = ({
   showEstimatedCost = true,
   showDistance = true,
 }) => {
+  const { theme } = useTheme();
   const renderStore = ({ item: store }: { item: AvailableStore }) => {
     const isSelected = store.id === selectedStoreId;
     const logoEmoji = DEFAULT_STORE_LOGOS[store.id] || DEFAULT_STORE_LOGOS.default;
@@ -57,7 +59,7 @@ export const StoreSelector: React.FC<StoreSelectorProps> = ({
       <TouchableOpacity
         style={[
           styles.storeCard,
-          isSelected && styles.storeCardSelected,
+          isSelected && [styles.storeCardSelected, { backgroundColor: theme.colors.background }],
         ]}
         onPress={() => onSelectStore(store)}
         activeOpacity={0.7}

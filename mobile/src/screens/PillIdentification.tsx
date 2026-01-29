@@ -18,6 +18,7 @@ import type { StackNavigationProp } from '@react-navigation/stack';
 import type { RootStackParamList } from '../types/navigation';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SweepBorder } from '../components/SweepBorder';
+import { useTheme } from '../context/ThemeContext';
 import type { PillMatch, PillScanResult } from '../services/types';
 import { chatService } from '../services/chatService';
 
@@ -76,6 +77,7 @@ function getShapeIcon(shape?: string): string {
 export default function PillIdentification() {
   const route = useRoute<RouteProps>();
   const navigation = useNavigation<NavigationProp>();
+  const { theme } = useTheme();
 
   const { pillData: initialData, context, capturedImage } = (route?.params || {}) as PillIdentificationParams;
   
@@ -125,7 +127,7 @@ export default function PillIdentification() {
 
   if (!pillData) {
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#f59e0b" />
           <Text style={styles.loadingText}>Loading pill identification...</Text>
@@ -143,7 +145,7 @@ export default function PillIdentification() {
   const insets = useSafeAreaInsets();
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       {/* Header */}
       <LinearGradient
         colors={['#f59e0b', '#d97706']}

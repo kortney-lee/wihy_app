@@ -19,6 +19,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '../components/shared';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import {
   subscriptionService,
   type SubscriptionPlan,
@@ -35,6 +36,7 @@ interface Props {
 
 export const SubscriptionManagementScreen: React.FC<Props> = ({ navigation }) => {
   const { user } = useAuth();
+  const { theme } = useTheme();
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState(false);
   
@@ -207,7 +209,7 @@ export const SubscriptionManagementScreen: React.FC<Props> = ({ navigation }) =>
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#4CAF50" />
           <Text style={styles.loadingText}>Loading subscription data...</Text>
@@ -220,7 +222,7 @@ export const SubscriptionManagementScreen: React.FC<Props> = ({ navigation }) =>
   const currentAddons = activeSubscription?.addons || [];
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]} edges={['top']}>
       {/* Header */}
       <View style={styles.header}>
         <Pressable onPress={() => navigation.goBack()} style={styles.backButton}>

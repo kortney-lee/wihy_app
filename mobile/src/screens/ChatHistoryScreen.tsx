@@ -17,6 +17,7 @@ import type { RootStackParamList } from '../types/navigation';
 import { GradientDashboardHeader, WebPageWrapper } from '../components/shared';
 import { chatService, ChatSession } from '../services/chatService';
 import { AuthContext } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import { colors, spacing, borderRadius } from '../theme/design-tokens';
 
 const isWeb = Platform.OS === 'web';
@@ -31,6 +32,7 @@ type NavigationProp = StackNavigationProp<RootStackParamList>;
 export default function ChatHistoryScreen() {
   const navigation = useNavigation<NavigationProp>();
   const { user } = useContext(AuthContext);
+  const { theme } = useTheme();
   const userId = user?.id || 'guest';
 
   const [sessions, setSessions] = useState<ChatSession[]>([]);
@@ -173,7 +175,7 @@ export default function ChatHistoryScreen() {
   );
 
   const mainContent = (
-    <SafeAreaView style={styles.container} edges={['left', 'right']}>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]} edges={['left', 'right']}>
       <GradientDashboardHeader
         title="Chat History"
         gradient="chat"

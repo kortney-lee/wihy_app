@@ -14,6 +14,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import { userService } from '../services/userService';
 
 interface SendInvitationProps {
@@ -23,6 +24,7 @@ interface SendInvitationProps {
 }
 
 export default function SendInvitation({ visible, onClose, coachId }: SendInvitationProps) {
+  const { theme } = useTheme();
   const [clientEmail, setClientEmail] = useState('');
   const [clientName, setClientName] = useState('');
   const [message, setMessage] = useState('');
@@ -115,7 +117,7 @@ export default function SendInvitation({ visible, onClose, coachId }: SendInvita
           onPress={handleCancel}
         />
 
-        <View style={styles.modalContainer}>
+        <View style={[styles.modalContainer, { backgroundColor: theme.colors.background }]}>
           <SafeAreaView edges={['bottom']} style={styles.safeArea}>
             <ScrollView
               style={styles.scrollView}
@@ -124,9 +126,9 @@ export default function SendInvitation({ visible, onClose, coachId }: SendInvita
             >
               {/* Header */}
               <View style={styles.header}>
-                <Text style={styles.headerTitle}>Invite Client</Text>
+                <Text style={[styles.headerTitle, { color: theme.colors.text }]}>Invite Client</Text>
                 <TouchableOpacity onPress={handleCancel} style={styles.closeButton}>
-                  <Text style={styles.closeButtonText}>✕</Text>
+                  <Text style={[styles.closeButtonText, { color: theme.colors.textSecondary }]}>✕</Text>
                 </TouchableOpacity>
               </View>
 
@@ -141,12 +143,13 @@ export default function SendInvitation({ visible, onClose, coachId }: SendInvita
 
               {/* Client Email */}
               <View style={styles.inputGroup}>
-                <Text style={styles.label}>
+                <Text style={[styles.label, { color: theme.colors.text }]}>
                   Client Email <Text style={styles.required}>*</Text>
                 </Text>
                 <TextInput
-                  style={styles.input}
+                  style={[styles.input, { color: theme.colors.text, backgroundColor: theme.colors.surface }]}
                   placeholder="client@example.com"
+                  placeholderTextColor={theme.colors.textSecondary}
                   value={clientEmail}
                   onChangeText={setClientEmail}
                   keyboardType="email-address"
@@ -158,10 +161,11 @@ export default function SendInvitation({ visible, onClose, coachId }: SendInvita
 
               {/* Client Name (Optional) */}
               <View style={styles.inputGroup}>
-                <Text style={styles.label}>Client Name (Optional)</Text>
+                <Text style={[styles.label, { color: theme.colors.text }]}>Client Name (Optional)</Text>
                 <TextInput
-                  style={styles.input}
+                  style={[styles.input, { color: theme.colors.text, backgroundColor: theme.colors.surface }]}
                   placeholder="John Doe"
+                  placeholderTextColor={theme.colors.textSecondary}
                   value={clientName}
                   onChangeText={setClientName}
                   autoCapitalize="words"
@@ -171,12 +175,13 @@ export default function SendInvitation({ visible, onClose, coachId }: SendInvita
 
               {/* Personal Message */}
               <View style={styles.inputGroup}>
-                <Text style={styles.label}>
+                <Text style={[styles.label, { color: theme.colors.text }]}>
                   Personal Message <Text style={styles.required}>*</Text>
                 </Text>
                 <TextInput
-                  style={[styles.input, styles.textArea]}
+                  style={[styles.input, styles.textArea, { color: theme.colors.text, backgroundColor: theme.colors.surface }]}
                   placeholder="Introduce yourself and explain how you can help them achieve their goals..."
+                  placeholderTextColor={theme.colors.textSecondary}
                   value={message}
                   onChangeText={(text) => {
                     if (text.length <= 500) {
@@ -188,7 +193,7 @@ export default function SendInvitation({ visible, onClose, coachId }: SendInvita
                   textAlignVertical="top"
                   editable={!isSubmitting}
                 />
-                <Text style={styles.charCount}>{message.length}/500</Text>
+                <Text style={[styles.charCount, { color: theme.colors.textSecondary }]}>{message.length}/500</Text>
               </View>
 
               {/* Tips */}

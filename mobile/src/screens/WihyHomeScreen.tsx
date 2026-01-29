@@ -12,6 +12,7 @@ import {
   KeyboardAvoidingView,
   TouchableWithoutFeedback,
   Keyboard,
+  StatusBar,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
@@ -23,6 +24,7 @@ import { SweepBorder } from '../components/SweepBorder';
 import { getResponsiveFontSize, getResponsiveButtonSize, getResponsiveSpacing, isTablet, getDeviceType } from '../utils/responsive';
 import { colors, shadows, radii, spacing } from '../theme/design-tokens';
 import { AuthContext } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import { Ionicons } from '../components/shared';
 import MultiAuthLogin from '../components/auth/MultiAuthLogin';
 import { WebNavHeader } from '../components/web/WebNavHeader';
@@ -51,6 +53,7 @@ export default function WihyHomeScreen({}: Props = {}) {
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [uploadTextInput, setUploadTextInput] = useState('');
   const { user } = useContext(AuthContext);
+  const { theme, isDark } = useTheme();
   const [showLoginModal, setShowLoginModal] = useState(false);
   
   // Don't auto-show login modal - let user interact first
@@ -779,14 +782,15 @@ export default function WihyHomeScreen({}: Props = {}) {
   // NATIVE RENDER - React Native with SweepBorder component
   return (
     <>
-      <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
+      <SafeAreaView style={[styles.screen, { backgroundColor: theme.colors.surface }]} edges={['top', 'left', 'right']}>
+        <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} backgroundColor={theme.colors.surface} />
         <KeyboardAvoidingView
           style={styles.keyboardAvoidingView}
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           keyboardVerticalOffset={Platform.OS === 'ios' ? 60 : 80}
         >
           <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-            <View style={styles.container}>
+            <View style={[styles.container, { backgroundColor: theme.colors.surface }]}>
               {/* top bar */}
               <View style={styles.topBar}>
                 {/* Empty top bar */}
@@ -852,7 +856,7 @@ export default function WihyHomeScreen({}: Props = {}) {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: '#ffffff',
+    backgroundColor: '#e0f2fe',
   },
   keyboardAvoidingView: {
     flex: 1,

@@ -40,6 +40,8 @@ import {
 } from '../services';
 import { authService } from '../services/authService';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
+import { useNavigation } from '@react-navigation/native';
 import { UpgradePrompt } from '../components/UpgradePrompt';
 import { useFeatureAccess } from '../hooks/usePaywall';
 import {
@@ -296,6 +298,8 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
   onStartSession,
 }) => {
   const { userId } = useAuth();
+  const { theme } = useTheme();
+  const navigation = useNavigation();
   const insets = useSafeAreaInsets();
   
   // Paywall check
@@ -1970,7 +1974,7 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
                 >
                   <View style={styles.workoutDayHeader}>
                     <View style={[styles.workoutDayNumber, { backgroundColor: '#e5e7eb' }]}>
-                      <Text style={[styles.workoutDayNumberText, { color: '#6B7280' }]}>{index + 1}</Text>
+                      <Text style={[styles.workoutDayNumberText, { color: theme.colors.textSecondary }]}>{index + 1}</Text>
                     </View>
                     <View style={styles.workoutDayInfo}>
                       <Text style={styles.workoutDayTitle}>{workout.name || 'Rest Day'}</Text>
@@ -3513,7 +3517,7 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
   // Show loading state
   if (loading && !workout) {
     return (
-      <View style={[styles.container, styles.centerContent]}>
+      <View style={[styles.container, styles.centerContent, { backgroundColor: theme.colors.background }]}>
         <ActivityIndicator size="large" color={colors.primary} />
         <Text style={styles.loadingText}>Loading your workout...</Text>
       </View>
@@ -3523,7 +3527,7 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
   // Show exercise execution view when workout is active
   if (isWorkoutActive && workout) {
     return (
-      <View style={styles.container}>
+      <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
         {renderGoalSelector()}
         {renderWorkoutCompleteModal()}
         {renderDeleteConfirmationModal()}
@@ -3547,7 +3551,7 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
         />
       )}
 
-      <View style={styles.container}>
+      <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
         {renderGoalSelector()}
         {renderWorkoutCompleteModal()}
         {renderDeleteConfirmationModal()}
@@ -4071,7 +4075,7 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
             /* No workout for this date - show rest message */
             <View style={[styles.workoutInfoCard, { alignItems: 'center', paddingVertical: 32 }]}>
               <Ionicons name="calendar-outline" size={48} color="#9ca3af" />
-              <Text style={[styles.workoutInfoTitle, { marginTop: 12, color: '#6b7280' }]}>
+              <Text style={[styles.workoutInfoTitle, { marginTop: 12, color: theme.colors.textSecondary }]}>
                 No Workout Scheduled
               </Text>
               <Text style={[styles.workoutInfoSubtitle, { textAlign: 'center', marginTop: 4 }]}>

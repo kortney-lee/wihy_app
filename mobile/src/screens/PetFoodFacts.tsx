@@ -13,6 +13,7 @@ import {
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { Ionicons } from '../components/shared';
+import { useTheme } from '../context/ThemeContext';
 import type { RouteProp } from '@react-navigation/native';
 import type { StackNavigationProp } from '@react-navigation/stack';
 import type { RootStackParamList } from '../types/navigation';
@@ -60,6 +61,7 @@ function getIngredientFlagColor(hasIssue: boolean) {
 export default function PetFoodFacts() {
   const route = useRoute<RouteProps>();
   const navigation = useNavigation<NavigationProp>();
+  const { theme } = useTheme();
 
   const { product: initialProduct, context } = route?.params || { product: null, context: null };
   
@@ -129,7 +131,7 @@ export default function PetFoodFacts() {
 
   if (!product) {
     return (
-      <View style={styles.container}>
+      <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
         <View style={[styles.loadingContainer, { paddingTop: insets.top }]}>
           <ActivityIndicator size="large" color="#8b5cf6" />
           <Text style={styles.loadingText}>Loading product details...</Text>
@@ -144,7 +146,7 @@ export default function PetFoodFacts() {
   const gradeColors = getNutritionGradeColor(nutrition.grade);
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       {/* Header */}
       <LinearGradient
         colors={['#8b5cf6', '#7c3aed']}

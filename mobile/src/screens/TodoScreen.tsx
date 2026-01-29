@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {useNavigation} from '@react-navigation/native';
+import { useTheme } from '../context/ThemeContext';
 import {colors, spacing, typography} from '../theme';
 
 interface Task {
@@ -21,6 +22,7 @@ interface Task {
 
 const TodoScreen: React.FC = () => {
   const navigation = useNavigation();
+  const { theme } = useTheme();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [inputText, setInputText] = useState('');
 
@@ -66,7 +68,7 @@ const TodoScreen: React.FC = () => {
   const totalCount = tasks.length;
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <ScrollView style={styles.scrollView}>
         <View style={styles.header}>
           <Text style={styles.title}>📝 My Tasks</Text>

@@ -12,9 +12,11 @@ import {
   ScrollView
 } from 'react-native';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 
 const AuthenticationScreen = ({ navigation }: { navigation: any }) => {
   const { signIn, loading } = useAuth();
+  const { theme } = useTheme();
   const [showLocalAuth, setShowLocalAuth] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -70,7 +72,7 @@ const AuthenticationScreen = ({ navigation }: { navigation: any }) => {
 
   if (loading) {
     return (
-      <View style={styles.container}>
+      <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
         <ActivityIndicator size="large" color="#0066cc" />
         <Text style={styles.loadingText}>Loading...</Text>
       </View>
@@ -79,7 +81,7 @@ const AuthenticationScreen = ({ navigation }: { navigation: any }) => {
 
   if (error) {
     return (
-      <View style={styles.container}>
+      <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
         <Text style={styles.errorText}>Error: {error}</Text>
         <TouchableOpacity style={styles.button}>
           <Text style={styles.buttonText}>Retry</Text>
@@ -91,7 +93,7 @@ const AuthenticationScreen = ({ navigation }: { navigation: any }) => {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={styles.container}
+      style={[styles.container, { backgroundColor: theme.colors.background }]}
     >
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.header}>

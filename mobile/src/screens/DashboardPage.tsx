@@ -23,6 +23,7 @@ import { dashboardTheme } from '../theme/dashboardTheme';
 import { HamburgerMenu } from '../components/shared/HamburgerMenu';
 import { GradientDashboardHeader, QuickStartGuide } from '../components/shared';
 import { AuthContext } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import { hasCoachAccess, hasFamilyAccess, hasMealsAccess } from '../utils/capabilities';
 import { useDashboardLayout } from '../hooks/useDashboardLayout';
 import SvgIcon from '../components/shared/SvgIcon';
@@ -79,6 +80,7 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
   const navigation = useNavigation<NavigationProp>();
   const route = useRoute();
   const { user } = React.useContext(AuthContext);
+  const { theme } = useTheme();
   const layout = useDashboardLayout();
   const insets = useSafeAreaInsets();
 
@@ -213,7 +215,7 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
     const isMobileWeb = isWeb && layout.screenWidth < 768;
 
     return (
-      <View style={styles.container}>
+      <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
         {!hideHubButtonForSubView && (
           <BackToHubButton
             hubName="Health Hub"
@@ -270,7 +272,7 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
     const isFreeUser = !user || user.plan === 'free';
     
     return (
-    <View style={styles.healthMainContent}>
+    <View style={[styles.healthMainContent, { backgroundColor: theme.colors.background }]}>
       <StatusBar barStyle="light-content" backgroundColor="#16a34a" />
       {/* Status bar area - Always green */}
       <View style={{ height: Platform.OS === 'android' ? StatusBar.currentHeight || 0 : insets.top, backgroundColor: '#16a34a' }} />
@@ -530,11 +532,11 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
 
       {/* Session Status */}
       {hasActiveSession && (
-        <View style={[styles.sessionBanner, { maxWidth: layout.maxContentWidth, alignSelf: 'center' }]}>
+        <View style={[styles.sessionBanner, { maxWidth: layout.maxContentWidth, alignSelf: 'center', backgroundColor: theme.mode === 'dark' ? '#064e3b' : '#ecfdf5' }]}>
           <SvgIcon name="checkmark-circle" size={20} color="#059669" />
-          <Text style={styles.sessionText}>Active session - Full access enabled</Text>
+          <Text style={[styles.sessionText, { color: theme.mode === 'dark' ? '#34d399' : '#059669' }]}>Active session - Full access enabled</Text>
           <TouchableOpacity onPress={endSession}>
-            <Text style={styles.endSessionText}>End</Text>
+            <Text style={[styles.endSessionText, { color: theme.mode === 'dark' ? '#f87171' : '#dc2626' }]}>End</Text>
           </TouchableOpacity>
         </View>
       )}
@@ -547,7 +549,7 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       {showHamburgerMenu && (
         <HamburgerMenu
           visible={showHamburgerMenu}
@@ -722,7 +724,7 @@ const styles = StyleSheet.create({
   floatingTitle: {
     fontSize: 28,
     fontWeight: '800',
-    color: '#0f172a',
+    color: '#0f172a', // Note: Override with theme.colors.text inline where used
     letterSpacing: -0.5,
     marginBottom: 8,
     textAlign: 'center',
@@ -730,7 +732,7 @@ const styles = StyleSheet.create({
 
   floatingSubtitle: {
     fontSize: 16,
-    color: '#64748b',
+    color: '#64748b', // Note: Override with theme.colors.textSecondary inline where used
     fontWeight: '500',
     letterSpacing: 0.2,
     textAlign: 'center',
@@ -947,7 +949,7 @@ const styles = StyleSheet.create({
   dashboardTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: dashboardTheme.colors.text,
+    color: dashboardTheme.colors.text, // Note: Override with theme.colors.text inline where used
   },
 
   menuButton: {

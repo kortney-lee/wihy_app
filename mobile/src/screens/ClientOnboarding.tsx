@@ -21,6 +21,7 @@ import SvgIcon from '../components/shared/SvgIcon';
 import { dashboardTheme } from '../theme/dashboardTheme';
 import { userService } from '../services/userService';
 import { AuthContext } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import { formatDateInput } from '../utils/dateFormatter';
 
 const spinnerGif = require('../../assets/whatishealthyspinner.gif');
@@ -72,6 +73,7 @@ export default function ClientOnboarding({
 }: ClientOnboardingProps) {
   const navigation = useNavigation<any>();
   const { user, updateUser } = useContext(AuthContext);
+  const { theme } = useTheme();
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const totalSteps = 5;
@@ -781,7 +783,7 @@ export default function ClientOnboarding({
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       {/* Back to Coach Hub button - positioned in top right */}
       {isDashboardMode && onBack && (
         <BackToHubButton

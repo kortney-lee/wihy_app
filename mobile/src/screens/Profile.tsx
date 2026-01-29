@@ -16,6 +16,7 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { Ionicons } from '../components/shared';
 import { useNavigation } from '@react-navigation/native';
 import { AuthContext } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import { RootStackParamList } from '../types/navigation';
 import { ghlService } from '../services/ghlService';
 import { userService } from '../services/userService';
@@ -48,6 +49,7 @@ interface SettingsItem {
 
 export default function Profile() {
   const { user, signOut, updateUser } = useContext(AuthContext);
+  const { theme, isDark, toggleTheme } = useTheme();
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   const defaultPreferences = {
     notifications: true,
@@ -437,14 +439,11 @@ export default function Profile() {
         {
           id: 'dark-mode',
           title: 'Dark Mode',
-          subtitle: 'Use dark theme',
+          subtitle: isDark ? 'Dark theme enabled' : 'Use dark theme',
           type: 'toggle' as const,
           icon: 'moon',
-          value: darkModeEnabled,
-          onToggle: async (value) => {
-            setDarkModeEnabled(value);
-            await persistPreferences({ darkMode: value });
-          },
+          value: isDark,
+          onToggle: toggleTheme,
         },
         {
           id: 'analytics',
@@ -524,12 +523,13 @@ export default function Profile() {
         <View style={styles.settingsText}>
           <Text style={[
             styles.settingsTitle,
+            { color: theme.colors.text },
             item.destructive && { color: '#ef4444' },
           ]}>
             {item.title}
           </Text>
           {item.subtitle && (
-            <Text style={styles.settingsSubtitle}>{item.subtitle}</Text>
+            <Text style={[styles.settingsSubtitle, { color: theme.colors.textSecondary }]}>{item.subtitle}</Text>
           )}
         </View>
       </View>
@@ -576,7 +576,7 @@ export default function Profile() {
   });
 
   const mainContent = (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       {/* Status bar area - Always blue */}
       <View style={{ height: insets.top, backgroundColor: '#3B82F6' }} />
       
@@ -628,17 +628,17 @@ export default function Profile() {
       >
         {/* Stats Cards */}
         <View style={styles.statsContainer}>
-          <View style={styles.statCard}>
-            <Text style={styles.statValue}>{healthScore}</Text>
-            <Text style={styles.statLabel}>Health Score</Text>
+          <View style={[styles.statCard, { backgroundColor: theme.colors.surface }]}>
+            <Text style={[styles.statValue, { color: theme.colors.text }]}>{healthScore}</Text>
+            <Text style={[styles.statLabel, { color: theme.colors.textSecondary }]}>Health Score</Text>
           </View>
-          <View style={styles.statCard}>
-            <Text style={styles.statValue}>{dayStreak}</Text>
-            <Text style={styles.statLabel}>Day Streak</Text>
+          <View style={[styles.statCard, { backgroundColor: theme.colors.surface }]}>
+            <Text style={[styles.statValue, { color: theme.colors.text }]}>{dayStreak}</Text>
+            <Text style={[styles.statLabel, { color: theme.colors.textSecondary }]}>Day Streak</Text>
           </View>
-          <View style={styles.statCard}>
-            <Text style={styles.statValue}>{scansCount}</Text>
-            <Text style={styles.statLabel}>Scans Done</Text>
+          <View style={[styles.statCard, { backgroundColor: theme.colors.surface }]}>
+            <Text style={[styles.statValue, { color: theme.colors.text }]}>{scansCount}</Text>
+            <Text style={[styles.statLabel, { color: theme.colors.textSecondary }]}>Scans Done</Text>
           </View>
         </View>
 
@@ -646,8 +646,8 @@ export default function Profile() {
         <View style={styles.settingsContainer}>
           {settingsSections.map((section) => (
             <View key={section.title} style={styles.settingsSection}>
-              <Text style={styles.sectionTitle}>{section.title}</Text>
-              <View style={styles.sectionContent}>
+              <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>{section.title}</Text>
+              <View style={[styles.sectionContent, { backgroundColor: theme.colors.surface }]}>
                 {section.items.map((item) => renderSettingsItem(item))}
               </View>
             </View>
@@ -656,8 +656,8 @@ export default function Profile() {
 
         {/* App Version */}
         <View style={styles.versionContainer}>
-          <Text style={styles.versionText}>Wihy Health v1.0.0</Text>
-          <Text style={styles.buildText}>Build 100</Text>
+          <Text style={[styles.versionText, { color: theme.colors.textSecondary }]}>Wihy Health v1.0.0</Text>
+          <Text style={[styles.buildText, { color: theme.colors.textSecondary }]}>Build 100</Text>
         </View>
 
         {/* Bottom spacing for tab navigation */}
