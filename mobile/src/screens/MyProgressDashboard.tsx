@@ -1092,7 +1092,7 @@ const MyProgressDashboard: React.FC<MyProgressDashboardProps> = ({
                 color={selectedPeriod === 'today' ? '#cbd5e1' : dashboardTheme.colors.primary} 
               />
             </TouchableOpacity>
-            <Text style={styles.sectionTitle}>
+            <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
               {selectedPeriod === 'today' ? "Today's Metrics" : 
                selectedPeriod === 'week' ? "This Week's Metrics" : 
                "This Month's Metrics"}
@@ -1138,7 +1138,7 @@ const MyProgressDashboard: React.FC<MyProgressDashboardProps> = ({
         {/* Health Trends from Scans Section */}
         <View style={[styles.trendsSection, { paddingHorizontal: layout.horizontalPadding }]}>
           <View style={styles.trendsSectionHeader}>
-            <Text style={styles.sectionTitle}>Scan-Based Health Trends</Text>
+            <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Scan-Based Health Trends</Text>
             <TouchableOpacity 
               onPress={() => navigation.navigate('ScanHistory' as never)}
               style={styles.viewHistoryButton}
@@ -1238,7 +1238,7 @@ const MyProgressDashboard: React.FC<MyProgressDashboardProps> = ({
 
         {/* Action Items */}
         <View style={[styles.actionSection, { paddingHorizontal: layout.horizontalPadding }]}>
-          <Text style={styles.sectionTitle}>Today's Actions ({completedActions}/{totalActions})</Text>
+          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Today's Actions ({completedActions}/{totalActions})</Text>
           <View style={styles.actionList}>
             {actionItems.map((item, index) => (
               <View key={item.id}>
@@ -1251,7 +1251,7 @@ const MyProgressDashboard: React.FC<MyProgressDashboardProps> = ({
         {/* Goals Dashboard Section - Backend-Driven */}
         <View style={[styles.combinedProgramSection, { paddingHorizontal: layout.horizontalPadding }]}>
           <View style={styles.combinedSectionHeader}>
-            <Text style={styles.sectionTitle}>Meal & Fitness Goals</Text>
+            <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Meal & Fitness Goals</Text>
           </View>
           
           <Text style={styles.goalSectionSubtitle}>
@@ -1386,7 +1386,7 @@ const MyProgressDashboard: React.FC<MyProgressDashboardProps> = ({
 
         {/* Coach Recommendations */}
         <View style={[styles.coachSection, { paddingHorizontal: layout.horizontalPadding }]}>
-          <Text style={styles.sectionTitle}>AI Coach Recommendations</Text>
+          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>AI Coach Recommendations</Text>
           <View style={styles.coachList}>
             {coachRecommendations.map((item, index) => (
               <View key={item.id}>
@@ -1904,7 +1904,7 @@ const styles = StyleSheet.create({
     width: 16,
     height: 16,
     borderRadius: 8,
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // Now using theme.colors.surface dynamically
     borderWidth: 2,
     borderColor: dashboardColors.primary,
     marginLeft: -8,

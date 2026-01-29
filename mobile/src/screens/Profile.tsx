@@ -807,7 +807,7 @@ const styles = StyleSheet.create({
   },
   statCard: {
     flex: 1,
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // Now using theme.colors.surface dynamically
     alignItems: 'center',
     paddingVertical: 20,
     borderRadius: 16,
@@ -841,7 +841,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   sectionContent: {
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // Now using theme.colors.surface dynamically
     borderRadius: 16,
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 2 },

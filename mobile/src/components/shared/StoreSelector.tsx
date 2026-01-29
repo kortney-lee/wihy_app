@@ -168,7 +168,7 @@ const styles = StyleSheet.create({
   storeCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
+    // backgroundColor: '#FFFFFF', // Now using theme.colors.surface dynamically
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,

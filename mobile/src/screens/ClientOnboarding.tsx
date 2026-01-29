@@ -885,7 +885,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // Now using theme.colors.surface dynamically
     justifyContent: 'center',
     alignItems: 'center',
     shadowColor: '#000',
@@ -959,7 +959,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 12,
     paddingVertical: 16,
-    backgroundColor: '#fff',
+    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
   },
   stepDot: {
     width: 32,
@@ -1003,7 +1003,7 @@ const styles = StyleSheet.create({
     color: '#374151',
   },
   input: {
-    backgroundColor: '#fff',
+    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
     borderWidth: 1,
     borderColor: '#e5e7eb',
     borderRadius: 8,
@@ -1033,7 +1033,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
-    backgroundColor: '#fff',
+    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
     borderWidth: 1,
     borderColor: '#e5e7eb',
   },
@@ -1054,7 +1054,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 12,
     padding: 12,
-    backgroundColor: '#fff',
+    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
     borderRadius: 8,
     borderWidth: 1,
     borderColor: '#e5e7eb',
@@ -1084,7 +1084,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   consentCard: {
-    backgroundColor: '#fff',
+    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
     borderRadius: 12,
     padding: 16,
     gap: 16,
@@ -1104,7 +1104,7 @@ const styles = StyleSheet.create({
     textDecorationLine: 'underline',
   },
   summaryCard: {
-    backgroundColor: '#fff',
+    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
     borderRadius: 12,
     padding: 16,
     gap: 12,
@@ -1128,7 +1128,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 12,
     padding: 16,
-    backgroundColor: '#fff',
+    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
     borderTopWidth: 1,
     borderTopColor: '#e5e7eb',
   },

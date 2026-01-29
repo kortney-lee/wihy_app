@@ -464,7 +464,7 @@ const styles = StyleSheet.create({
   metricCard: {
     width: '48%',
     minWidth: 140,
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // Now using theme.colors.surface dynamically
     padding: 16,
     borderRadius: 16,
     alignItems: 'center',
@@ -594,7 +594,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    backgroundColor: '#fff',
+    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderRadius: 20,
@@ -609,7 +609,7 @@ const styles = StyleSheet.create({
   },
   memberCard: {
     flexDirection: 'row',
-    backgroundColor: '#fff',
+    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
     padding: 16,
     borderRadius: 16,
   },
@@ -699,7 +699,7 @@ const styles = StyleSheet.create({
   featureCard: {
     width: '48%',
     minWidth: 140,
-    backgroundColor: '#fff',
+    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
     padding: 16,
     borderRadius: 16,
     alignItems: 'center',

@@ -271,7 +271,7 @@ export const ManualMealForm: React.FC<ManualMealFormProps> = ({
 
         {/* Meal Details */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Meal Details</Text>
+          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Meal Details</Text>
           
           <View style={styles.card}>
             <Text style={styles.label}>Meal Name *</Text>
@@ -324,7 +324,7 @@ export const ManualMealForm: React.FC<ManualMealFormProps> = ({
         {/* Ingredients with Inline Search */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Add Ingredients</Text>
+            <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Add Ingredients</Text>
           </View>
 
           {/* Inline Search Bar - Always visible like WiHY home */}
@@ -596,7 +596,7 @@ export const ManualMealForm: React.FC<ManualMealFormProps> = ({
 
         {/* Tags */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Tags</Text>
+          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Tags</Text>
           
           <View style={styles.card}>
             <View style={styles.tagsContainer}>
@@ -625,7 +625,7 @@ export const ManualMealForm: React.FC<ManualMealFormProps> = ({
 
         {/* Notes */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Notes & Instructions</Text>
+          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Notes & Instructions</Text>
           
           <View style={styles.card}>
             <TextInput
@@ -755,7 +755,7 @@ export const ManualMealForm: React.FC<ManualMealFormProps> = ({
 
         {/* Templates Quick Actions */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Quick Start</Text>
+          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Quick Start</Text>
           <View style={styles.templatesContainer}>
             <Pressable 
               style={styles.templateCard}
@@ -847,7 +847,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   card: {
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // Now using theme.colors.surface dynamically
     borderRadius: 12,
     padding: 16,
     shadowColor: '#000',
@@ -1003,7 +1003,7 @@ const styles = StyleSheet.create({
   inlineSearchBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // Now using theme.colors.surface dynamically
     borderRadius: 28,
     paddingHorizontal: 18,
     paddingVertical: 14,
@@ -1054,7 +1054,7 @@ const styles = StyleSheet.create({
     color: '#3b82f6',
   },
   searchResultsContainer: {
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // Now using theme.colors.surface dynamically
     borderRadius: 12,
     marginBottom: 16,
     padding: 12,
@@ -1113,7 +1113,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // Now using theme.colors.surface dynamically
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 6,
@@ -1147,7 +1147,7 @@ const styles = StyleSheet.create({
     color: '#111827',
   },
   emptyStateCard: {
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // Now using theme.colors.surface dynamically
     borderRadius: 12,
     padding: 32,
     alignItems: 'center',
@@ -1263,7 +1263,7 @@ const styles = StyleSheet.create({
   },
   templateCard: {
     flex: 1,
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // Now using theme.colors.surface dynamically
     borderRadius: 12,
     padding: 16,
     alignItems: 'center',

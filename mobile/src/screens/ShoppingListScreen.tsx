@@ -276,17 +276,17 @@ export default function ShoppingListScreen({ route, navigation, isDashboardMode 
         >
           {/* Quick Stats */}
           <View style={styles.statsRow}>
-            <View style={styles.statCard}>
+            <View style={[styles.statCard, { backgroundColor: theme.colors.surface }]}>
               <Ionicons name="grid-outline" size={20} color="#4cbb17" />
               <Text style={styles.statValue}>{categories.length}</Text>
               <Text style={styles.statLabel}>Categories</Text>
             </View>
-            <View style={styles.statCard}>
+            <View style={[styles.statCard, { backgroundColor: theme.colors.surface }]}>
               <Ionicons name="cart-outline" size={20} color="#4cbb17" />
               <Text style={styles.statValue}>{totalItems - checkedCount}</Text>
               <Text style={styles.statLabel}>Remaining</Text>
             </View>
-            <View style={styles.statCard}>
+            <View style={[styles.statCard, { backgroundColor: theme.colors.surface }]}>
               <Ionicons name="checkbox-outline" size={20} color="#4cbb17" />
               <Text style={styles.statValue}>{checkedCount}</Text>
               <Text style={styles.statLabel}>Checked</Text>
@@ -514,7 +514,7 @@ const styles = StyleSheet.create({
   },
   progressBarFill: {
     height: '100%',
-    backgroundColor: '#fff',
+    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
     borderRadius: 4,
   },
   completeBadge: {
@@ -539,7 +539,7 @@ const styles = StyleSheet.create({
   },
   statCard: {
     flex: 1,
-    backgroundColor: '#fff',
+    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
     borderRadius: 12,
     padding: 12,
     alignItems: 'center',
@@ -565,7 +565,7 @@ const styles = StyleSheet.create({
   categoryCard: {
     marginHorizontal: 16,
     marginTop: 12,
-    backgroundColor: '#fff',
+    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
     borderRadius: 12,
     overflow: 'hidden',
     shadowColor: '#000',
@@ -583,7 +583,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: 14,
-    backgroundColor: '#fff',
+    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
   },
   categoryTitleRow: {
     flexDirection: 'row',
@@ -687,7 +687,7 @@ const styles = StyleSheet.create({
   instacartSection: {
     marginHorizontal: 16,
     marginTop: 24,
-    backgroundColor: '#fff',
+    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
     borderRadius: 16,
     padding: 20,
     shadowColor: '#000',
@@ -781,7 +781,7 @@ const styles = StyleSheet.create({
     paddingRight: 16,
   },
   storeLogo: {
-    backgroundColor: '#fff',
+    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
     paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: 20,

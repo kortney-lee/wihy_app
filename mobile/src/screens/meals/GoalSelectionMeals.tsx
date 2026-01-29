@@ -22,6 +22,7 @@ import {
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons, BrandInput } from '../../components/shared';
+import { useTheme } from '../../context/ThemeContext';
 import { API_CONFIG } from '../../services/config';
 import {
   ModeToggle,
@@ -223,6 +224,7 @@ export const GoalSelectionMeals: React.FC<GoalSelectionMealsProps> = ({
   initialTemplate,
   onTemplateCleared,
 }) => {
+  const { theme } = useTheme();
   // Mode state - default to 'plan' if template provided
   const [mode, setMode] = useState<MealMode>(initialTemplate ? 'plan' : 'quick');
   
@@ -378,7 +380,7 @@ export const GoalSelectionMeals: React.FC<GoalSelectionMealsProps> = ({
     <>
       {/* Meal Type */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>What meal?</Text>
+        <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>What meal?</Text>
         <View style={styles.chipGrid}>
           {QUICK_MEAL_TYPES.map((type) => {
             const isSelected = quickMealTypes.includes(type.id);
@@ -410,7 +412,7 @@ export const GoalSelectionMeals: React.FC<GoalSelectionMealsProps> = ({
 
       {/* Cuisine Type */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Cuisine (optional)</Text>
+        <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Cuisine (optional)</Text>
         
         {/* Cuisine Category Tabs */}
         <View style={styles.cuisineTabsContainer}>
@@ -483,7 +485,7 @@ export const GoalSelectionMeals: React.FC<GoalSelectionMealsProps> = ({
 
       {/* Time Constraint */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Time available</Text>
+        <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Time available</Text>
         <View style={styles.chipGrid}>
           {TIME_CONSTRAINTS.map((time) => {
             const isSelected = quickTime === time.id;
@@ -547,7 +549,7 @@ export const GoalSelectionMeals: React.FC<GoalSelectionMealsProps> = ({
     <>
       {/* Quick Goals */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Quick start (optional)</Text>
+        <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Quick start (optional)</Text>
         <View style={styles.quickGoalGrid}>
           {QUICK_GOALS.map((goal) => {
             const isSelected = planGoal === goal.id;
@@ -699,7 +701,7 @@ export const GoalSelectionMeals: React.FC<GoalSelectionMealsProps> = ({
   const renderSavedMode = () => (
     <>
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Recent Meals</Text>
+        <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Recent Meals</Text>
         <Text style={styles.sectionTitleLight}>
           Select previously created meals to reorder to Instacart
         </Text>
@@ -808,7 +810,7 @@ export const GoalSelectionMeals: React.FC<GoalSelectionMealsProps> = ({
     <>
       {/* Program Selection */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Select Program</Text>
+        <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Select Program</Text>
         <View style={styles.programGrid}>
           {DIET_PROGRAMS.map((program) => {
             const isSelected = selectedProgram === program.id;
@@ -838,7 +840,7 @@ export const GoalSelectionMeals: React.FC<GoalSelectionMealsProps> = ({
         <>
           {/* Activity Level */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Activity Level</Text>
+            <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Activity Level</Text>
             <View style={styles.levelRow}>
               {ACTIVITY_LEVELS.map((level) => {
                 const isSelected = activityLevel === level.id;
@@ -1194,7 +1196,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   savedMealCard: {
-    backgroundColor: '#fff',
+    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,

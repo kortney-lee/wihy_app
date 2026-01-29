@@ -187,13 +187,13 @@ export default function CoachDetailPage() {
 
         {/* About Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>About {coach.name.split(' ')[0]}</Text>
+          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>About {coach.name.split(' ')[0]}</Text>
           <Text style={styles.bioText}>{coach.bio}</Text>
         </View>
 
         {/* Specialties */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Specialties</Text>
+          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Specialties</Text>
           <View style={styles.specialtiesRow}>
             {coach.specialties.map((specialty, index) => (
               <View key={index} style={styles.specialtyBadge}>
@@ -206,20 +206,20 @@ export default function CoachDetailPage() {
         {/* Credentials */}
         {coach.certifications.length > 0 && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Credentials</Text>
+            <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Credentials</Text>
             <Text style={styles.credentialsText}>{coach.certifications.join(', ')}</Text>
           </View>
         )}
 
         {/* Experience */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Experience</Text>
+          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Experience</Text>
           <Text style={styles.experienceText}>{coach.years_experience}+ years of experience</Text>
         </View>
 
         {/* Availability */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Availability</Text>
+          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Availability</Text>
           <Text style={styles.availabilityText}>
             {coach.available_days.map(d => d.charAt(0).toUpperCase() + d.slice(1)).join(', ')}
           </Text>
@@ -230,7 +230,7 @@ export default function CoachDetailPage() {
 
         {/* Reviews */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Recent Reviews ({reviews.length} of {coach.rating_count})</Text>
+          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Recent Reviews ({reviews.length} of {coach.rating_count})</Text>
           {reviews.map((review) => (
             <View key={review.id} style={styles.reviewCard}>
               <View style={styles.reviewHeader}>
@@ -277,7 +277,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingVertical: 12,
-    backgroundColor: '#fff',
+    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
     borderBottomWidth: 1,
     borderBottomColor: '#e5e7eb',
   },
@@ -299,7 +299,7 @@ const styles = StyleSheet.create({
     paddingBottom: 100,
   },
   profileCard: {
-    backgroundColor: '#fff',
+    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
     padding: 24,
     alignItems: 'center',
     borderBottomWidth: 1,
@@ -366,7 +366,7 @@ const styles = StyleSheet.create({
     color: '#6b7280',
   },
   section: {
-    backgroundColor: '#fff',
+    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
     padding: 20,
     marginTop: 12,
   },
@@ -443,7 +443,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 12,
     padding: 16,
-    backgroundColor: '#fff',
+    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
     borderTopWidth: 1,
     borderTopColor: '#e5e7eb',
   },
@@ -457,7 +457,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: 1,
     borderColor: '#3b82f6',
-    backgroundColor: '#fff',
+    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
   },
   secondaryActionText: {
     fontSize: 16,

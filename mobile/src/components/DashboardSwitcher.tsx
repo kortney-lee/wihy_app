@@ -125,10 +125,10 @@ export const DashboardSwitcher: React.FC<DashboardSwitcherProps> = ({
 
 const styles = StyleSheet.create({
   safeArea: {
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // Now using theme.colors.surface dynamically
   },
   container: {
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // Now using theme.colors.surface dynamically
     borderBottomWidth: 1,
     borderBottomColor: '#e5e7eb',
     paddingHorizontal: 16,

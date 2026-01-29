@@ -686,7 +686,7 @@ export default function AboutScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
   },
   header: {
     flexDirection: 'row',
@@ -804,7 +804,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   featureDetailsContainer: {
-    backgroundColor: '#fff',
+    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
     paddingVertical: 16,
     paddingHorizontal: 16,
     borderTopWidth: 1,

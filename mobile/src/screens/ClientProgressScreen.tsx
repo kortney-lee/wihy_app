@@ -520,28 +520,28 @@ export default function ClientProgressScreen() {
       <View style={styles.tabContent}>
         {/* Quick Stats */}
         <View style={styles.statsGrid}>
-          <View style={styles.statCard}>
+          <View style={[styles.statCard, { backgroundColor: theme.colors.surface }]}>
             <LinearGradient colors={['#10b981', '#059669']} style={styles.statGradient}>
               <Ionicons name="fitness" size={24} color="#fff" />
               <Text style={styles.statValue}>{progressData.fitness.adherence_rate}%</Text>
               <Text style={styles.statLabel}>Workout Adherence</Text>
             </LinearGradient>
           </View>
-          <View style={styles.statCard}>
+          <View style={[styles.statCard, { backgroundColor: theme.colors.surface }]}>
             <LinearGradient colors={['#3b82f6', '#2563eb']} style={styles.statGradient}>
               <Ionicons name="flame" size={24} color="#fff" />
               <Text style={styles.statValue}>{progressData.fitness.streak_days}</Text>
               <Text style={styles.statLabel}>Day Streak</Text>
             </LinearGradient>
           </View>
-          <View style={styles.statCard}>
+          <View style={[styles.statCard, { backgroundColor: theme.colors.surface }]}>
             <LinearGradient colors={['#f59e0b', '#d97706']} style={styles.statGradient}>
               <Ionicons name="restaurant" size={24} color="#fff" />
               <Text style={styles.statValue}>{progressData.nutrition.goal_compliance_rate}%</Text>
               <Text style={styles.statLabel}>Diet Compliance</Text>
             </LinearGradient>
           </View>
-          <View style={styles.statCard}>
+          <View style={[styles.statCard, { backgroundColor: theme.colors.surface }]}>
             <LinearGradient colors={['#8b5cf6', '#7c3aed']} style={styles.statGradient}>
               <Ionicons name="trophy" size={24} color="#fff" />
               <Text style={styles.statValue}>{progressData.fitness.workouts_completed}</Text>
@@ -551,7 +551,7 @@ export default function ClientProgressScreen() {
         </View>
 
         {/* Current Programs */}
-        <Text style={styles.sectionTitle}>Active Programs</Text>
+        <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Active Programs</Text>
         <View style={styles.card}>
           {progressData.fitness.current_program ? (
             <View style={styles.programItem}>
@@ -605,7 +605,7 @@ export default function ClientProgressScreen() {
         </View>
 
         {/* Recent Activity */}
-        <Text style={styles.sectionTitle}>Recent Activity</Text>
+        <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Recent Activity</Text>
         <View style={styles.card}>
           {progressData.fitness.recent_sessions.length > 0 ? (
             progressData.fitness.recent_sessions.slice(0, 3).map((session, index) => (
@@ -632,7 +632,7 @@ export default function ClientProgressScreen() {
         {/* Client Goals */}
         {progressData.client.goals && progressData.client.goals.length > 0 && (
           <>
-            <Text style={styles.sectionTitle}>Goals</Text>
+            <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Goals</Text>
             <View style={styles.card}>
               {progressData.client.goals.map((goal, index) => (
                 <View key={index} style={styles.goalItem}>
@@ -671,7 +671,7 @@ export default function ClientProgressScreen() {
         {/* Current Program */}
         {progressData.fitness.current_program && (
           <>
-            <Text style={styles.sectionTitle}>Current Program</Text>
+            <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Current Program</Text>
             <View style={styles.card}>
               <View style={styles.programHeader}>
                 <Text style={styles.programTitle}>{progressData.fitness.current_program.name}</Text>
@@ -695,7 +695,7 @@ export default function ClientProgressScreen() {
         )}
 
         {/* Weekly Progress Chart Placeholder */}
-        <Text style={styles.sectionTitle}>Weekly Progress</Text>
+        <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Weekly Progress</Text>
         <View style={styles.card}>
           <View style={styles.chartPlaceholder}>
             {progressData.fitness.weekly_progress.map((week, index) => (
@@ -713,7 +713,7 @@ export default function ClientProgressScreen() {
         </View>
 
         {/* Recent Sessions */}
-        <Text style={styles.sectionTitle}>Recent Sessions</Text>
+        <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Recent Sessions</Text>
         <View style={styles.card}>
           {progressData.fitness.recent_sessions.map((session, index) => (
             <View key={session.id} style={[styles.sessionItem, index > 0 && styles.sessionBorder]}>
@@ -769,7 +769,7 @@ export default function ClientProgressScreen() {
         </View>
 
         {/* Macros Breakdown */}
-        <Text style={styles.sectionTitle}>Macros (Daily Average)</Text>
+        <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Macros (Daily Average)</Text>
         <View style={styles.card}>
           <View style={styles.macroRow}>
             <View style={styles.macroItem}>
@@ -824,7 +824,7 @@ export default function ClientProgressScreen() {
         </View>
 
         {/* Water Intake */}
-        <Text style={styles.sectionTitle}>Hydration</Text>
+        <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Hydration</Text>
         <View style={styles.card}>
           <View style={styles.waterRow}>
             <Ionicons name="water" size={32} color="#3b82f6" />
@@ -846,7 +846,7 @@ export default function ClientProgressScreen() {
         </View>
 
         {/* Recent Meals */}
-        <Text style={styles.sectionTitle}>Recent Meals</Text>
+        <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Recent Meals</Text>
         <View style={styles.card}>
           {progressData.nutrition.recent_meals.map((meal, index) => (
             <View key={meal.id} style={[styles.mealItem, index > 0 && styles.mealBorder]}>
@@ -926,7 +926,7 @@ export default function ClientProgressScreen() {
           
           {/* Platform Info */}
           <View style={styles.card}>
-            <Text style={styles.sectionTitle}>
+            <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
               Device Health Integration
             </Text>
             <Text style={styles.healthInfoText}>
@@ -969,7 +969,7 @@ export default function ClientProgressScreen() {
         </View>
 
         {/* Today's Metrics */}
-        <Text style={styles.sectionTitle}>Today's Activity</Text>
+        <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Today's Activity</Text>
         <View style={styles.healthMetricsGrid}>
           {/* Steps */}
           <View style={styles.healthMetricCard}>
@@ -1009,7 +1009,7 @@ export default function ClientProgressScreen() {
         </View>
 
         {/* Vitals */}
-        <Text style={styles.sectionTitle}>Vitals</Text>
+        <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Vitals</Text>
         <View style={styles.healthVitalsCard}>
           <View style={styles.healthVitalItem}>
             <View style={[styles.healthVitalIcon, { backgroundColor: '#fee2e2' }]}>
@@ -1063,7 +1063,7 @@ export default function ClientProgressScreen() {
         {/* Weekly Summary */}
         {weekly && (
           <>
-            <Text style={styles.sectionTitle}>Weekly Summary</Text>
+            <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Weekly Summary</Text>
             <View style={styles.card}>
               <View style={styles.weeklyStatsRow}>
                 <View style={styles.weeklyStat}>
@@ -1567,7 +1567,7 @@ const styles = StyleSheet.create({
   tabBar: {
     paddingHorizontal: 16,
     paddingVertical: 12,
-    backgroundColor: '#fff',
+    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
     borderBottomWidth: 1,
     borderBottomColor: '#e5e7eb',
   },
@@ -1603,7 +1603,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   card: {
-    backgroundColor: '#fff',
+    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
     borderRadius: 12,
     padding: 16,
     shadowColor: '#000',
@@ -1646,7 +1646,7 @@ const styles = StyleSheet.create({
   },
   statBox: {
     flex: 1,
-    backgroundColor: '#fff',
+    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
     borderRadius: 12,
     padding: 16,
     marginHorizontal: 4,
@@ -2039,7 +2039,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   healthPermissionButton: {
-    backgroundColor: '#fff',
+    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 24,
@@ -2110,7 +2110,7 @@ const styles = StyleSheet.create({
     flex: 1,
     minWidth: 140,
     maxWidth: '48%',
-    backgroundColor: '#fff',
+    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
     padding: 16,
     borderRadius: 12,
     alignItems: 'center',
@@ -2132,7 +2132,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   healthVitalsCard: {
-    backgroundColor: '#fff',
+    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
     borderRadius: 12,
     padding: 16,
     marginBottom: 16,
@@ -2247,7 +2247,7 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   noteCard: {
-    backgroundColor: '#fff',
+    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
     borderRadius: 12,
     padding: 16,
     shadowColor: '#000',
@@ -2304,7 +2304,7 @@ const styles = StyleSheet.create({
     zIndex: 100,
   },
   modalContent: {
-    backgroundColor: '#fff',
+    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     padding: 24,
