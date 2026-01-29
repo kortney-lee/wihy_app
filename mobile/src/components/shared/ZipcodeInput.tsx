@@ -15,6 +15,7 @@ import {
   ActivityIndicator,
   Keyboard,
 } from 'react-native';
+import { useTheme } from '../../context/ThemeContext';
 
 interface ZipcodeInputProps {
   value?: string;
@@ -40,6 +41,7 @@ export const ZipcodeInput: React.FC<ZipcodeInputProps> = ({
   buttonText = 'Find Stores',
   onCancel,
 }) => {
+  const { theme } = useTheme();
   const [zipcode, setZipcode] = useState(value);
   const [validationError, setValidationError] = useState<string | null>(null);
   const [isFocused, setIsFocused] = useState(false);

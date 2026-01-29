@@ -1,6 +1,7 @@
 import React from 'react';
 import { TouchableOpacity, Text, StyleSheet, View } from 'react-native';
 import { Ionicons } from './shared';
+import { useTheme } from '../context/ThemeContext';
 
 interface LockedFeatureButtonProps {
   message: string;
@@ -19,6 +20,7 @@ export const LockedFeatureButton: React.FC<LockedFeatureButtonProps> = ({
   icon = 'lock-closed',
   variant = 'primary',
 }) => {
+  const { theme } = useTheme();
   const isPrimary = variant === 'primary';
 
   return (

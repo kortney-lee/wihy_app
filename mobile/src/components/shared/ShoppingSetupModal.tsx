@@ -20,6 +20,7 @@ import {
 import { ZipcodeInput } from './ZipcodeInput';
 import { StoreSelector } from './StoreSelector';
 import { EnhancementStatus } from './EnhancementStatus';
+import { useTheme } from '../../context/ThemeContext';
 import type { AvailableStore, EnhancementLevel } from '../../services/mealService';
 
 // ============================================
@@ -68,6 +69,7 @@ export const ShoppingSetupModal: React.FC<ShoppingSetupModalProps> = ({
   loading = false,
   error,
 }) => {
+  const { theme } = useTheme();
   // State
   const [step, setStep] = useState<SetupStep>('zipcode');
   const [zipcode, setZipcode] = useState<string>(initialZipcode || '');

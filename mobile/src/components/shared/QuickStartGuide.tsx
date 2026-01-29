@@ -10,6 +10,7 @@ import {
   Platform,
 } from 'react-native';
 import { Ionicons } from './Ionicons';
+import { useTheme } from '../../context/ThemeContext';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
@@ -125,6 +126,7 @@ export const QuickStartGuide: React.FC<QuickStartGuideProps> = ({
   onClose,
   onNavigate,
 }) => {
+  const { theme } = useTheme();
   const insets = useSafeAreaInsets();
   const [currentStep, setCurrentStep] = useState(0);
   const fadeAnim = useRef(new Animated.Value(0)).current;
