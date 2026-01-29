@@ -718,7 +718,7 @@ const styles = StyleSheet.create({
   },
   modalContainer: {
     flex: 1,
-    // backgroundColor: '#ffffff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#ffffff',
   },
   modalHeader: {
     flexDirection: 'row',
@@ -822,7 +822,7 @@ const styles = StyleSheet.create({
   librarySearchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    // backgroundColor: '#ffffff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#ffffff',
     margin: 16,
     marginTop: 0,
     paddingHorizontal: 18,
@@ -863,7 +863,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
-    // backgroundColor: '#ffffff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#ffffff',
     borderWidth: 1,
     borderColor: '#e5e7eb',
   },
@@ -937,7 +937,7 @@ const styles = StyleSheet.create({
     paddingTop: 0,
   },
   mealCard: {
-    // backgroundColor: '#ffffff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#ffffff',
     borderRadius: 16,
     padding: 16,
     marginBottom: 12,

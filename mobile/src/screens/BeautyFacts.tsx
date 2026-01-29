@@ -176,7 +176,7 @@ export default function BeautyFacts() {
 
         {/* Safety Overview */}
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
+          <Text style={styles.sectionTitle}>
             <Ionicons name="shield-checkmark" size={18} color="#ec4899" /> Safety Overview
           </Text>
           
@@ -205,7 +205,7 @@ export default function BeautyFacts() {
         {/* Warnings */}
         {ingredients.warnings.length > 0 && (
           <View style={styles.section}>
-            <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
+            <Text style={styles.sectionTitle}>
               <Ionicons name="warning" size={18} color="#ef4444" /> Warnings
             </Text>
             {ingredients.warnings.map((warning, index) => (
@@ -220,7 +220,7 @@ export default function BeautyFacts() {
         {/* Ingredient Concerns */}
         {ingredients.concerns.length > 0 && (
           <View style={styles.section}>
-            <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
+            <Text style={styles.sectionTitle}>
               <Ionicons name="alert-circle" size={18} color="#f97316" /> Ingredient Concerns
             </Text>
             {ingredients.concerns.map((concern, index) => (
@@ -256,7 +256,7 @@ export default function BeautyFacts() {
             style={styles.ingredientsHeader}
             onPress={() => setExpandedIngredients(!expandedIngredients)}
           >
-            <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
+            <Text style={styles.sectionTitle}>
               <Ionicons name="list" size={18} color="#ec4899" /> Full Ingredients
             </Text>
             <Ionicons 
@@ -286,7 +286,7 @@ export default function BeautyFacts() {
         {/* Product Details */}
         {(productInfo.origin_countries || productInfo.certifications || productInfo.packaging) && (
           <View style={styles.section}>
-            <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
+            <Text style={styles.sectionTitle}>
               <Ionicons name="information-circle" size={18} color="#ec4899" /> Product Details
             </Text>
             <View style={styles.detailsGrid}>
@@ -472,13 +472,13 @@ const styles = StyleSheet.create({
     width: 100,
     height: 100,
     borderRadius: 12,
-    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#fff',
   },
   productImagePlaceholder: {
     width: 100,
     height: 100,
     borderRadius: 12,
-    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#fff',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -509,7 +509,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   section: {
-    // backgroundColor: '#ffffff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#ffffff',
     borderRadius: 16,
     padding: 16,
     marginBottom: 16,

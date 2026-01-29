@@ -533,7 +533,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   filterTabActive: {
-    // backgroundColor: '#ffffff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#ffffff',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
@@ -553,7 +553,7 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   bookingCard: {
-    // backgroundColor: '#ffffff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#ffffff',
     borderRadius: 12,
     padding: 16,
     shadowColor: '#000',

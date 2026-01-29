@@ -208,7 +208,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 12,
     fontSize: 16,
-    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#fff',
     outlineStyle: 'none' as any,
   },
   hintRow: {

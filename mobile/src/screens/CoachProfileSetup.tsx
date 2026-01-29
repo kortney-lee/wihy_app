@@ -608,7 +608,7 @@ const styles = StyleSheet.create({
   },
   progressFill: {
     height: '100%',
-    // backgroundColor: '#ffffff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#ffffff',
     borderRadius: 2,
   },
   stepIndicator: {
@@ -617,7 +617,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 12,
     paddingVertical: 16,
-    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#fff',
   },
   stepDot: {
     width: 32,
@@ -667,7 +667,7 @@ const styles = StyleSheet.create({
     color: '#374151',
   },
   input: {
-    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#fff',
     borderWidth: 1,
     borderColor: '#e5e7eb',
     borderRadius: 8,
@@ -695,7 +695,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
-    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#fff',
     borderWidth: 1,
     borderColor: '#e5e7eb',
   },
@@ -712,7 +712,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   avatarPlaceholder: {
-    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#fff',
     borderWidth: 2,
     borderColor: '#e5e7eb',
     borderStyle: 'dashed',
@@ -756,7 +756,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderRadius: 8,
-    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#fff',
     borderWidth: 1,
     borderColor: '#e5e7eb',
     minWidth: 50,
@@ -788,7 +788,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   hourInput: {
-    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#fff',
     borderWidth: 1,
     borderColor: '#e5e7eb',
     borderRadius: 8,
@@ -819,7 +819,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 12,
     padding: 16,
-    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#fff',
     borderTopWidth: 1,
     borderTopColor: '#e5e7eb',
   },

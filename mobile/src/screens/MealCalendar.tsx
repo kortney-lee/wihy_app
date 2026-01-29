@@ -374,7 +374,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 20,
     paddingVertical: 16,
-    // backgroundColor: '#ffffff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#ffffff',
     borderBottomWidth: 1,
     borderBottomColor: '#e5e7eb',
   },
@@ -390,7 +390,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     paddingHorizontal: 12,
     paddingVertical: 12,
-    // backgroundColor: '#ffffff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#ffffff',
   },
   calendarDayName: {
     flex: 1,
@@ -403,7 +403,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     paddingHorizontal: 12,
-    // backgroundColor: '#ffffff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#ffffff',
   },
   calendarDayCell: {
     width: `${100 / 7}%`,
@@ -449,7 +449,7 @@ const styles = StyleSheet.create({
     borderRadius: 2,
   },
   calendarSelectedDay: {
-    // backgroundColor: '#ffffff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#ffffff',
     marginTop: 16,
     padding: 16,
   },

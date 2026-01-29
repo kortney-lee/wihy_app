@@ -522,7 +522,7 @@ export default function EnrollmentScreen() {
           </View>
 
           {/* Family Members */}
-          <Text style={[styles.sectionTitle, { color: themeContext.colors.text }]}>Family Members</Text>
+          <Text style={styles.sectionTitle}>Family Members</Text>
           {familyMembers.length > 0 ? (
             familyMembers.map((member) => (
               <View key={member.userId} style={styles.memberCard}>
@@ -681,7 +681,7 @@ export default function EnrollmentScreen() {
 
           {/* Invite Client */}
           <View style={styles.inviteSection}>
-            <Text style={[styles.sectionTitle, { color: themeContext.colors.text }]}>Invite New Client</Text>
+            <Text style={styles.sectionTitle}>Invite New Client</Text>
             <View style={styles.inviteRow}>
               <TextInput
                 style={[styles.input, styles.inviteInput]}
@@ -699,7 +699,7 @@ export default function EnrollmentScreen() {
           </View>
 
           {/* Clients List */}
-          <Text style={[styles.sectionTitle, { color: themeContext.colors.text }]}>Your Clients</Text>
+          <Text style={styles.sectionTitle}>Your Clients</Text>
           {clients.length > 0 ? (
             clients.map((client) => (
               <Pressable

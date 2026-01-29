@@ -859,7 +859,7 @@ const ConsumptionDashboard: React.FC<ConsumptionDashboardProps> = ({
         return (
           <View>
             {/* Calorie Summary */}
-            <View style={[styles.nutritionSummary, { backgroundColor: theme.colors.surface }]}>
+            <View style={styles.nutritionSummary}>
               {renderCircularProgress(nutritionGoals.calories.current, nutritionGoals.calories.target)}
               <View style={styles.macroBreakdown}>
                 {renderMacroBar('protein', 'Protein')}
@@ -1281,7 +1281,7 @@ const ConsumptionDashboard: React.FC<ConsumptionDashboardProps> = ({
 
         {/* Search Bar */}
         <View style={styles.searchContainer}>
-          <View style={[styles.searchInputContainer, { backgroundColor: theme.colors.surface }]}>
+          <View style={styles.searchInputContainer}>
             <Ionicons name="search" size={20} color={dashboardTheme.colors.textSecondary} />
             <TextInput
               style={styles.searchInput}
@@ -1356,7 +1356,7 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   topBox: {
-    // backgroundColor: '#ffffff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#ffffff',
   },
   topBoxContent: {
     height: 0,
@@ -1378,7 +1378,7 @@ const styles = StyleSheet.create({
   searchInputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    // backgroundColor: '#ffffff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#ffffff',
     borderRadius: 28,
     paddingHorizontal: 18,
     paddingVertical: 14,

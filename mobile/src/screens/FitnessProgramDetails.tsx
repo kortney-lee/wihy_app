@@ -152,7 +152,7 @@ const styles = StyleSheet.create({
     color: '#6b7280',
   },
   placeholderCard: {
-    // backgroundColor: '#ffffff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#ffffff',
     borderRadius: 16,
     padding: 24,
     alignItems: 'center',

@@ -291,7 +291,7 @@ export const PlanSelector: React.FC<PlanSelectorProps> = ({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    // backgroundColor: '#FFFFFF', // Now using theme.colors.surface dynamically
+    backgroundColor: '#FFFFFF',
   },
   containerWeb: {
     maxWidth: 1200,
@@ -349,7 +349,7 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   planCard: {
-    // backgroundColor: '#FFFFFF', // Now using theme.colors.surface dynamically
+    backgroundColor: '#FFFFFF',
     borderRadius: 16,
     padding: 20,
     marginRight: 16,
@@ -482,12 +482,12 @@ const styles = StyleSheet.create({
   },
   selectIndicatorSelected: {
     borderColor: '#0AAE5E',
-    // backgroundColor: '#FFFFFF', // Now using theme.colors.surface dynamically
+    backgroundColor: '#FFFFFF',
   },
   footer: {
     padding: 24,
     paddingBottom: 40,
-    // backgroundColor: '#FFFFFF', // Now using theme.colors.surface dynamically
+    backgroundColor: '#FFFFFF',
     borderTopWidth: 1,
     borderTopColor: '#E5E7EB',
   },

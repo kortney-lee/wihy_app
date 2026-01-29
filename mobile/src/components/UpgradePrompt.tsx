@@ -144,7 +144,7 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   card: {
-    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#fff',
     borderRadius: 24,
     padding: 24,
     alignItems: 'center',

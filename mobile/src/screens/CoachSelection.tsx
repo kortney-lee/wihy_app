@@ -521,7 +521,7 @@ const styles = StyleSheet.create({
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    // backgroundColor: '#ffffff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#ffffff',
     margin: 16,
     marginBottom: 12,
     paddingHorizontal: 18,
@@ -567,7 +567,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 14,
     borderRadius: 24,
-    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#fff',
     borderWidth: 1,
     borderColor: '#e5e7eb',
     minHeight: 48,
@@ -613,7 +613,7 @@ const styles = StyleSheet.create({
     paddingBottom: 100,
   },
   coachCard: {
-    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#fff',
     borderRadius: 16,
     padding: 16,
     marginBottom: 16,

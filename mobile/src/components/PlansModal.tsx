@@ -374,7 +374,7 @@ const styles = StyleSheet.create({
     ...(isWeb && { alignItems: 'center', justifyContent: 'center' }),
   },
   modalContent: {
-    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#fff',
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     maxHeight: '90%',
@@ -433,7 +433,7 @@ const styles = StyleSheet.create({
     ...(isWeb && { maxHeight: '60vh', overflowY: 'auto' }),
   },
   planCard: {
-    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#fff',
     borderRadius: 16,
     padding: 20,
     marginBottom: 16,
@@ -554,7 +554,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   tabActive: {
-    // backgroundColor: '#ffffff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#ffffff',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
@@ -586,7 +586,7 @@ const styles = StyleSheet.create({
   addOnCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#fff',
     padding: 16,
     borderRadius: 16,
     marginBottom: 12,
@@ -672,7 +672,7 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 24,
   },
   loadingContainer: {
-    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#fff',
     padding: 24,
     borderRadius: 16,
     alignItems: 'center',

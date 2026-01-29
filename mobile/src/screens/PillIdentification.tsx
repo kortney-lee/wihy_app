@@ -528,7 +528,7 @@ const styles = StyleSheet.create({
 
   // Analysis Section
   analysisSection: {
-    // backgroundColor: '#ffffff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#ffffff',
     borderRadius: 16,
     padding: 16,
     marginTop: 16,
@@ -586,7 +586,7 @@ const styles = StyleSheet.create({
 
   // Other Matches
   otherMatchesSection: {
-    // backgroundColor: '#ffffff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#ffffff',
     borderRadius: 16,
     padding: 16,
     marginTop: 16,

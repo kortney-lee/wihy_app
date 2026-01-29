@@ -558,7 +558,7 @@ export default function CoachDashboard({
             </View>
 
             {/* Search Bar */}
-            <View style={[styles.searchContainer, { backgroundColor: theme.colors.surface }]}>
+            <View style={styles.searchContainer}>
               <Ionicons name="search" size={20} color="#9ca3af" />
               <TextInput
                 style={styles.searchInput}
@@ -753,7 +753,7 @@ const styles = StyleSheet.create({
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    // backgroundColor: '#ffffff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#ffffff',
     margin: 16,
     paddingHorizontal: 18,
     paddingVertical: 14,
@@ -808,7 +808,7 @@ const styles = StyleSheet.create({
   clientCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#fff',
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
@@ -877,7 +877,7 @@ const styles = StyleSheet.create({
   clientHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#fff',
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderBottomWidth: 1,
@@ -896,7 +896,7 @@ const styles = StyleSheet.create({
     color: '#6b7280',
   },
   tabBar: {
-    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#fff',
     borderBottomWidth: 1,
     borderBottomColor: '#e5e7eb',
   },
@@ -931,7 +931,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   card: {
-    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#fff',
     borderRadius: 12,
     padding: 16,
     marginBottom: 16,
@@ -1119,7 +1119,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#fff',
     borderWidth: 2,
     borderColor: '#3b82f6',
     paddingVertical: 14,
@@ -1181,7 +1181,7 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   modalContent: {
-    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#fff',
     borderRadius: 16,
     padding: 20,
     width: '100%',

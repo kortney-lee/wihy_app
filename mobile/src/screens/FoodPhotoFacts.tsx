@@ -501,7 +501,7 @@ const styles = StyleSheet.create({
 
   // Detected Foods
   detectedSection: {
-    // backgroundColor: '#ffffff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#ffffff',
     borderRadius: 16,
     padding: 16,
     marginBottom: 16,
@@ -594,7 +594,7 @@ const styles = StyleSheet.create({
 
   // Nutrition Section
   nutritionSection: {
-    // backgroundColor: '#ffffff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#ffffff',
     borderRadius: 16,
     padding: 16,
     marginBottom: 16,
@@ -704,7 +704,7 @@ const styles = StyleSheet.create({
 
   // Health Analysis
   healthAnalysisSection: {
-    // backgroundColor: '#ffffff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#ffffff',
     borderRadius: 16,
     padding: 16,
     marginBottom: 16,

@@ -397,7 +397,7 @@ export default function MealDetailsScreen() {
           </GradientDashboardHeader>
 
         {/* Servings Adjuster */}
-        <View style={[styles.servingsCard, { backgroundColor: theme.colors.surface }]}>
+        <View style={styles.servingsCard}>
             <Text style={styles.servingsLabel}>Adjust Servings</Text>
             <View style={styles.servingsControls}>
               <TouchableOpacity
@@ -428,8 +428,8 @@ export default function MealDetailsScreen() {
           </View>
 
           {/* Nutrition Card */}
-          <View style={[styles.nutritionCard, { backgroundColor: theme.colors.surface }]}>
-            <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Nutrition Facts</Text>
+          <View style={styles.nutritionCard}>
+            <Text style={styles.sectionTitle}>Nutrition Facts</Text>
             <Text style={styles.nutritionSubtitle}>Per {servings} serving{servings > 1 ? 's' : ''}</Text>
             <View style={styles.nutritionGrid}>
               <View style={styles.nutritionItem}>
@@ -498,7 +498,7 @@ export default function MealDetailsScreen() {
 
           {/* Tags */}
           {meal.tags.length > 0 && (
-            <View style={[styles.tagsCard, { backgroundColor: theme.colors.surface }]}>
+            <View style={styles.tagsCard}>
               <View style={styles.tags}>
                 {meal.tags.map((tag) => (
                   <View key={tag} style={styles.tag}>
@@ -511,7 +511,7 @@ export default function MealDetailsScreen() {
 
           {/* Time Info */}
           {(meal.preparation_time || meal.cooking_time) && (
-            <View style={[styles.timeCard, { backgroundColor: theme.colors.surface }]}>
+            <View style={styles.timeCard}>
               {meal.preparation_time && (
                 <View style={styles.timeItem}>
                   <Ionicons name="restaurant" size={20} color="#8b5cf6" />
@@ -555,7 +555,7 @@ export default function MealDetailsScreen() {
 
           {/* Ingredients Tab */}
           {activeTab === 'ingredients' && (
-            <View style={[styles.contentCard, { backgroundColor: theme.colors.surface }]}>
+            <View style={styles.contentCard}>
               <View style={styles.contentHeader}>
                 <Text style={styles.contentTitle}>Ingredients</Text>
                 {servings !== originalServings && (
@@ -583,7 +583,7 @@ export default function MealDetailsScreen() {
 
           {/* Instructions Tab */}
           {activeTab === 'instructions' && (
-            <View style={[styles.contentCard, { backgroundColor: theme.colors.surface }]}>
+            <View style={styles.contentCard}>
               <View style={styles.contentHeader}>
                 <Text style={styles.contentTitle}>Cooking Instructions</Text>
                 {meal.instructions && meal.instructions.length > 0 && (
@@ -715,7 +715,7 @@ export default function MealDetailsScreen() {
 const styles = StyleSheet.create({
   // White box for status bar area
   statusBarBox: {
-    // backgroundColor: '#ffffff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#ffffff',
   },
   // Main container
   container: {
@@ -808,7 +808,7 @@ const styles = StyleSheet.create({
     margin: 16,
     marginBottom: 8,
     padding: 16,
-    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#fff',
     borderRadius: 16,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -864,7 +864,7 @@ const styles = StyleSheet.create({
     margin: 16,
     marginTop: 8,
     padding: 20,
-    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#fff',
     borderRadius: 16,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -953,7 +953,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 16,
-    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#fff',
     borderWidth: 1,
     borderColor: '#e5e7eb',
   },
@@ -976,7 +976,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
     padding: 12,
-    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#fff',
     borderRadius: 12,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
@@ -1006,7 +1006,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 12,
     alignItems: 'center',
-    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#fff',
     borderRadius: 10,
     borderWidth: 2,
     borderColor: '#e5e7eb',
@@ -1028,7 +1028,7 @@ const styles = StyleSheet.create({
   contentCard: {
     marginHorizontal: 16,
     padding: 20,
-    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#fff',
     borderRadius: 16,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -1261,7 +1261,7 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   actionButtonSecondary: {
-    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#fff',
     borderWidth: 2,
     borderColor: '#8b5cf6',
   },

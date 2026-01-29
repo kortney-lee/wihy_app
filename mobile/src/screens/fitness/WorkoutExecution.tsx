@@ -365,7 +365,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: isTablet ? 24 : 16,
   },
   exerciseCard: {
-    // backgroundColor: '#ffffff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#ffffff',
     borderRadius: 20,
     padding: 24,
     alignItems: 'center',
@@ -385,7 +385,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   infoCard: {
-    // backgroundColor: '#ffffff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#ffffff',
     borderRadius: 16,
     padding: 16,
     marginBottom: 16,
@@ -402,7 +402,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   logSetSection: {
-    // backgroundColor: '#ffffff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#ffffff',
     borderRadius: 16,
     padding: 20,
     marginBottom: 16,

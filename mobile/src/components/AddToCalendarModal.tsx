@@ -8,7 +8,6 @@ import {
   ScrollView,
 } from 'react-native';
 import SvgIcon from './shared/SvgIcon';
-import { useTheme } from '../context/ThemeContext';
 
 interface AddToCalendarModalProps {
   visible: boolean;
@@ -30,7 +29,6 @@ export function AddToCalendarModal({
   onSchedule,
   mealName,
 }: AddToCalendarModalProps) {
-  const { theme } = useTheme();
   const [selectedDate, setSelectedDate] = useState<string>(
     new Date().toISOString().split('T')[0]
   );
@@ -57,7 +55,7 @@ export function AddToCalendarModal({
 
           {/* Simple Date Picker */}
           <View style={styles.datePickerContainer}>
-            <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Select Date</Text>
+            <Text style={styles.sectionTitle}>Select Date</Text>
             <View style={styles.dateOptionsContainer}>
               {[0, 1, 2, 3, 4, 5, 6].map((daysAhead) => {
                 const date = new Date();
@@ -86,7 +84,7 @@ export function AddToCalendarModal({
           </View>
 
           {/* Meal Type Selection */}
-          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Meal Type</Text>
+          <Text style={styles.sectionTitle}>Meal Type</Text>
           <View style={styles.mealTypes}>
             {MEAL_TYPES.map((type) => (
               <TouchableOpacity

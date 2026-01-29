@@ -235,7 +235,7 @@ export default function MealPreferencesScreen() {
         >
             {/* Planning Focus Selection */}
             <View style={styles.section}>
-              <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>I'm Planning Meals For...</Text>
+              <Text style={styles.sectionTitle}>I'm Planning Meals For...</Text>
               <Text style={styles.sectionSubtitle}>Select your primary focus</Text>
 
               {PLANNING_FOCUS_OPTIONS.map((option) => (
@@ -270,7 +270,7 @@ export default function MealPreferencesScreen() {
 
             {/* Dietary Needs */}
             <View style={styles.section}>
-              <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Dietary Needs</Text>
+              <Text style={styles.sectionTitle}>Dietary Needs</Text>
               <Text style={styles.sectionSubtitle}>Select all that apply</Text>
 
               <View style={styles.optionsGrid}>
@@ -296,7 +296,7 @@ export default function MealPreferencesScreen() {
 
             {/* Preferred Stores */}
             <View style={styles.section}>
-              <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Preferred Stores</Text>
+              <Text style={styles.sectionTitle}>Preferred Stores</Text>
               <Text style={styles.sectionSubtitle}>Where do you usually shop?</Text>
 
               <View style={styles.optionsGrid}>
@@ -322,7 +322,7 @@ export default function MealPreferencesScreen() {
 
             {/* Custom Brands */}
             <View style={styles.section}>
-              <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Preferred Brands (Optional)</Text>
+              <Text style={styles.sectionTitle}>Preferred Brands (Optional)</Text>
               <Text style={styles.sectionSubtitle}>
                 e.g., Organic brands, Store brands, Kirkland Signature
               </Text>
@@ -339,7 +339,7 @@ export default function MealPreferencesScreen() {
 
             {/* Cooking Skill Level */}
             <View style={styles.section}>
-              <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Cooking Skill Level</Text>
+              <Text style={styles.sectionTitle}>Cooking Skill Level</Text>
 
               {COOKING_SKILL_OPTIONS.map((option) => (
                 <TouchableOpacity
@@ -468,7 +468,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   focusCard: {
-    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#fff',
     borderRadius: 16,
     padding: 16,
     marginBottom: 12,
@@ -518,7 +518,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderRadius: 20,
-    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#fff',
     borderWidth: 1.5,
     borderColor: '#e5e7eb',
   },
@@ -535,7 +535,7 @@ const styles = StyleSheet.create({
     color: '#dc2626',
   },
   textInput: {
-    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#fff',
     borderRadius: 12,
     padding: 16,
     fontSize: 15,
@@ -549,7 +549,7 @@ const styles = StyleSheet.create({
   skillOption: {
     flexDirection: 'row',
     alignItems: 'center',
-    // backgroundColor: '#fff', // Now using theme.colors.surface dynamically
+    backgroundColor: '#fff',
     borderRadius: 12,
     padding: 16,
     marginBottom: 10,

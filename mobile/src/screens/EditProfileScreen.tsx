@@ -169,7 +169,7 @@ export default function EditProfileScreen() {
         <View style={styles.formContainer}>
           {/* Personal Information */}
           <View style={styles.section}>
-            <Text style={[styles.sectionTitle, { color: appTheme.colors.text }]}>Personal Information</Text>
+            <Text style={styles.sectionTitle}>Personal Information</Text>
             
             <View style={styles.inputGroup}>
               <Text style={styles.label}>First Name</Text>
@@ -258,7 +258,7 @@ export default function EditProfileScreen() {
 
           {/* Physical Information */}
           <View style={styles.section}>
-            <Text style={[styles.sectionTitle, { color: appTheme.colors.text }]}>Physical Information</Text>
+            <Text style={styles.sectionTitle}>Physical Information</Text>
             
             <View style={styles.row}>
               <View style={[styles.inputGroup, styles.halfWidth]}>

@@ -278,7 +278,7 @@ function TabNavigator() {
           height: 100 + insets.bottom,
           paddingBottom: Math.max(insets.bottom + 8, 20),
           paddingTop: 12,
-          // backgroundColor: '#ffffff', // Now using theme.colors.surface dynamically
+          backgroundColor: '#ffffff',
           borderTopWidth: 1,
           borderTopColor: '#e2e8f0',
           shadowColor: '#000000',

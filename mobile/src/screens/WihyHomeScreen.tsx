@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useContext, useEffect, useCallback } from 'react';
+import React, { useMemo, useState, useContext, useEffect } from 'react';
 import {
   View,
   Text,
@@ -15,7 +15,7 @@ import {
   StatusBar,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import type { StackNavigationProp } from '@react-navigation/stack';
 import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import type { RootStackParamList, TabParamList } from '../types/navigation';
@@ -55,16 +55,6 @@ export default function WihyHomeScreen({}: Props = {}) {
   const { user } = useContext(AuthContext);
   const { theme, isDark } = useTheme();
   const [showLoginModal, setShowLoginModal] = useState(false);
-
-  // Set StatusBar when screen comes into focus
-  useFocusEffect(
-    useCallback(() => {
-      StatusBar.setBarStyle(isDark ? 'light-content' : 'dark-content');
-      if (Platform.OS === 'android') {
-        StatusBar.setBackgroundColor(theme.colors.surface);
-      }
-    }, [isDark, theme.colors.surface])
-  );
   
   // Don't auto-show login modal - let user interact first
   // Modal will be triggered by clicking profile icon or protected features
