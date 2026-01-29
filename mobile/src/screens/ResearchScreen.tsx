@@ -591,10 +591,10 @@ export default function ResearchScreen({ isDashboardMode = false, onResultsViewC
       >
         {/* Search Bar */}
         <View style={styles.searchSection}>
-          <View style={{ flex: 1 }}>
-            {isWeb ? (
-              // Web: Use CSS border sweep animation
-              // @ts-ignore - className for web
+          {isWeb ? (
+            // Web: Use CSS border sweep animation with searchBar styling
+            <View style={[styles.searchBar, { backgroundColor: theme.colors.surface }]}>
+              {/* @ts-ignore - className for web */}
               <div className="web-search-input-container" style={{ display: 'flex', alignItems: 'center', paddingLeft: 18, paddingRight: 8, gap: 12, flex: 1 }}>
                 <Ionicons name="search" size={20} color="#9ca3af" />
                 {/* @ts-ignore - web input */}
@@ -627,16 +627,17 @@ export default function ResearchScreen({ isDashboardMode = false, onResultsViewC
                   <Ionicons name="arrow-forward" size={20} color="#9ca3af" />
                 </TouchableOpacity>
               </div>
-            ) : (
-              // Native: Use SweepBorder component
-              <SweepBorder
-                borderWidth={2}
-                radius={28}
-                durationMs={2500}
-                colors={colors.borderSweep}
-              >
-                <View style={styles.searchBar}>
-                  <Ionicons name="search" size={20} color="#9ca3af" />
+            </View>
+          ) : (
+            // Native: Use SweepBorder component
+            <SweepBorder
+              borderWidth={2}
+              radius={28}
+              durationMs={2500}
+              colors={colors.borderSweep}
+            >
+              <View style={{ backgroundColor: theme.colors.surface, borderRadius: 28, paddingHorizontal: 18, paddingVertical: 14, flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                <Ionicons name="search" size={20} color="#9ca3af" />
                   <TextInput
                     value={query}
                     onChangeText={setQuery}
@@ -657,7 +658,6 @@ export default function ResearchScreen({ isDashboardMode = false, onResultsViewC
                 </View>
               </SweepBorder>
             )}
-          </View>
         </View>
 
         {/* Quick Actions */}
