@@ -14,7 +14,7 @@ import {
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRoute, useNavigation } from '@react-navigation/native';
-import { Ionicons } from '../components/shared';
+import { Ionicons, CloseButton } from '../components/shared';
 import type { CompositeNavigationProp, RouteProp } from '@react-navigation/native';
 import type { StackNavigationProp } from '@react-navigation/stack';
 import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
@@ -861,13 +861,9 @@ export default function NutritionFacts() {
           <View style={styles.modalContent}>
             {/* Modal Header */}
             <View style={styles.modalHeader}>
+              <View style={{ width: 40 }} />
               <Text style={styles.modalTitle}>Healthier Alternatives</Text>
-              <Pressable
-                style={styles.modalCloseButton}
-                onPress={() => setShowCompareModal(false)}
-              >
-                <Ionicons name="close" size={24} color="#64748b" />
-              </Pressable>
+              <CloseButton onPress={() => setShowCompareModal(false)} />
             </View>
 
             {/* Loading State */}

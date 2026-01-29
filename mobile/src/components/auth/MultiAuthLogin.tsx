@@ -17,6 +17,7 @@ import { AuthContext } from '../../context/AuthContext';
 import { colors, sizes } from '../../theme/design-tokens';
 import { getResponsiveIconSize } from '../../utils/responsive';
 import SvgIcon from '../shared/SvgIcon';
+import { CloseButton } from '../shared';
 import { authService } from '../../services/authService';
 
 interface MultiAuthLoginProps {
@@ -210,13 +211,9 @@ export default function MultiAuthLogin({
           <View style={[styles.emailFormContainer, Platform.OS === 'web' && styles.emailFormContainerWeb]}>
             {/* Close button for web */}
             {Platform.OS === 'web' && onClose && (
-              <TouchableOpacity 
-                style={styles.closeButton} 
-                onPress={onClose}
-                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-              >
-                <Text style={styles.closeButtonText}>✕</Text>
-              </TouchableOpacity>
+              <View style={styles.closeButtonContainer}>
+                <CloseButton onPress={onClose} />
+              </View>
             )}
 
             <ScrollView 
@@ -455,16 +452,15 @@ export default function MultiAuthLogin({
           <View style={[styles.emailFormContainer, Platform.OS === 'web' && styles.emailFormContainerWeb]}>
             {/* Close button for web */}
             {Platform.OS === 'web' && (
-              <TouchableOpacity 
-                style={styles.closeButton} 
-                onPress={() => {
-                  setShowForgotPassword(false);
-                  setResetSent(false);
-                  setResetEmail('');
-                }}
-              >
-                <Text style={styles.closeButtonText}>✕</Text>
-              </TouchableOpacity>
+              <View style={styles.closeButtonContainer}>
+                <CloseButton
+                  onPress={() => {
+                    setShowForgotPassword(false);
+                    setResetSent(false);
+                    setResetEmail('');
+                  }}
+                />
+              </View>
             )}
 
             {resetSent ? (
@@ -870,6 +866,12 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     fontSize: 14,
     fontWeight: '600',
+  },
+  closeButtonContainer: {
+    position: 'absolute',
+    top: 16,
+    right: 16,
+    zIndex: 10,
   },
   closeButton: {
     position: 'absolute',

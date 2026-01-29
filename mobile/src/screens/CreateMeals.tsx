@@ -23,7 +23,7 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { dashboardColors, InstacartLinkButton, BackToHubButton } from '../components/shared';
+import { dashboardColors, InstacartLinkButton, BackToHubButton, CloseButton, BackButton } from '../components/shared';
 import { dashboardTheme } from '../theme/dashboardTheme';
 import { SweepBorder } from '../components/SweepBorder';
 import SvgIcon from '../components/shared/SvgIcon';
@@ -2963,12 +2963,11 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
               >
                 <View style={styles.libraryModalHeaderRow}>
                   <View style={{ width: 40 }} />
-                  <TouchableOpacity
-                    style={styles.libraryModalCloseButton}
+                  <CloseButton
                     onPress={() => setShowLibrary(false)}
-                  >
-                    <SvgIcon name="close" size={28} color="#fff" />
-                  </TouchableOpacity>
+                    iconColor="#fff"
+                    style={{ backgroundColor: 'rgba(255,255,255,0.2)' }}
+                  />
                 </View>
                 <Text style={styles.libraryModalTitle}>Meal Library</Text>
                 <Text style={styles.libraryModalSubtitle}>{allMeals.length} meals saved</Text>
@@ -3212,15 +3211,12 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
             </Text>
           </View>
           
-          <TouchableOpacity
-            style={styles.closeButton}
+          <CloseButton
             onPress={() => {
               setShowPlanGenerator(false);
               resetPlanGenerator();
             }}
-          >
-            <SvgIcon name="close" size={28} color="#6b7280" />
-          </TouchableOpacity>
+          />
         </View>
 
         {/* Show new GoalSelectionMeals UI when in goals step and useGoalSelectionUI is true */}
@@ -3885,15 +3881,14 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
               >
                 <View style={styles.mealDetailHeroRow}>
                   <View style={{ width: 40 }} />
-                  <TouchableOpacity
-                    style={styles.mealDetailCloseButton}
+                  <CloseButton
                     onPress={() => {
                       setShowMealDetails(false);
                       setSelectedMeal(null);
                     }}
-                  >
-                    <SvgIcon name="close" size={28} color="#fff" />
-                  </TouchableOpacity>
+                    iconColor="#fff"
+                    style={{ backgroundColor: 'rgba(255,255,255,0.2)' }}
+                  />
                 </View>
                 
                 <Text style={styles.mealDetailHeroTitle}>{selectedMeal.name}</Text>
@@ -4239,22 +4234,12 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
             <SafeAreaView style={{ flex: 1, width: '100%' }}>
               {/* Header */}
               <View style={styles.shoppingModalHeader}>
-                <TouchableOpacity 
-                  style={styles.shoppingModalCloseButton}
-                  onPress={() => setShowShoppingListModal(false)}
-                >
-                  <SvgIcon name="arrow-back" size={24} color="#111827" />
-                </TouchableOpacity>
+                <BackButton onPress={() => setShowShoppingListModal(false)} />
                 <View style={styles.shoppingModalHeaderCenter}>
                   <SvgIcon name="cart-outline" size={24} color="#4cbb17" />
                   <Text style={styles.shoppingModalTitle}>Shopping List</Text>
                 </View>
-                <TouchableOpacity 
-                  style={styles.shoppingModalCloseButton}
-                  onPress={() => setShowShoppingListModal(false)}
-                >
-                  <SvgIcon name="close" size={24} color="#111827" />
-                </TouchableOpacity>
+                <CloseButton onPress={() => setShowShoppingListModal(false)} />
               </View>
 
               {/* Stats Bar */}

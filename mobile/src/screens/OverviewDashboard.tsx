@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Dimensions, Activ
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useIsFocused } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { GradientDashboardHeader, Ionicons, NotificationTile } from '../components/shared';
+import { GradientDashboardHeader, Ionicons, NotificationTile, CloseButton } from '../components/shared';
 import { dashboardTheme } from '../theme/dashboardTheme';
 import { useDashboardLayout } from '../hooks/useDashboardLayout';
 import {
@@ -822,9 +822,7 @@ const OverviewDashboard: React.FC<BaseDashboardProps> = ({ onAnalyze }) => {
                 <View style={styles.permissionModalIconContainer}>
                   <Ionicons name="fitness" size={48} color={dashboardColors.primary} />
                 </View>
-                <Pressable onPress={() => setShowPermissionModal(false)} style={styles.permissionModalCloseButton}>
-                  <Ionicons name="close" size={28} color="#6b7280" />
-                </Pressable>
+                <CloseButton onPress={() => setShowPermissionModal(false)} />
               </View>
 
               {/* Scrollable Content */}

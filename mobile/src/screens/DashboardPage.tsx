@@ -111,12 +111,19 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
   const [showQuickStartGuide, setShowQuickStartGuide] = useState(false);
   const [showHamburgerMenu, setShowHamburgerMenu] = useState(false);
   const [selectedDashboard, setSelectedDashboard] = useState<'overview' | 'progress' | 'nutrition' | 'research' | 'fitness' | 'parent' | 'meals' | 'shoppingList' | 'profileSetup' | 'calendar' | 'planMeal' | null>(null);
+  const [hideHubButtonForSubView, setHideHubButtonForSubView] = useState(false);
 
   // Reset dashboard state when user plan changes (dev mode switcher)
   React.useEffect(() => {
     setSelectedDashboard(null);
     setShowHamburgerMenu(false);
+    setHideHubButtonForSubView(false);
   }, [user?.plan]);
+
+  // Reset sub-view state when dashboard selection changes
+  React.useEffect(() => {
+    setHideHubButtonForSubView(false);
+  }, [selectedDashboard]);
 
   // Handle route parameters to auto-open research dashboard
   React.useEffect(() => {
@@ -207,17 +214,24 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
 
     return (
       <View style={styles.container}>
-        <BackToHubButton
-          hubName="Health Hub"
-          color="#16a34a"
-          onPress={() => setSelectedDashboard(null)}
-          isMobileWeb={isMobileWeb}
-          spinnerGif={spinnerGif}
-        />
+        {!hideHubButtonForSubView && (
+          <BackToHubButton
+            hubName="Health Hub"
+            color="#16a34a"
+            onPress={() => setSelectedDashboard(null)}
+            isMobileWeb={isMobileWeb}
+            spinnerGif={spinnerGif}
+          />
+        )}
         {selectedDashboard === 'overview' && <OverviewDashboard onAnalyze={handleAnalyze} />}
         {selectedDashboard === 'progress' && <MyProgressDashboard />}
         {selectedDashboard === 'nutrition' && <ConsumptionDashboard onAnalyze={handleAnalyze} />}
-        {selectedDashboard === 'research' && <ResearchScreen isDashboardMode={true} />}
+        {selectedDashboard === 'research' && (
+          <ResearchScreen 
+            isDashboardMode={true} 
+            onResultsViewChange={(isInResults) => setHideHubButtonForSubView(isInResults)}
+          />
+        )}
         {selectedDashboard === 'fitness' && <FitnessDashboard />}
         {selectedDashboard === 'parent' && <ParentDashboard />}
         {selectedDashboard === 'meals' && <CreateMeals isDashboardMode={true} />}

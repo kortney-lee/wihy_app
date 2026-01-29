@@ -6,6 +6,7 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ManualMealForm } from '../components/ManualMealForm';
 import SvgIcon from '../components/shared/SvgIcon';
+import { CloseButton } from '../components/shared';
 import { AuthContext } from '../context/AuthContext';
 import { useCreateMealWithShopping } from '../hooks/useCreateMealWithShopping';
 import { SavedMeal, MealTemplate, MealIngredient } from '../services/mealService';
@@ -530,13 +531,9 @@ export default function PlanMealScreen({
       >
         <SafeAreaView style={styles.modalContainer} edges={['top', 'left', 'right']}>
           <View style={styles.modalHeader}>
+            <View style={{ width: 40 }} />
             <Text style={styles.modalTitle}>Meal Templates</Text>
-            <TouchableOpacity 
-              onPress={() => setShowTemplates(false)}
-              style={styles.modalCloseButton}
-            >
-              <SvgIcon name="close" size={24} color="#374151" />
-            </TouchableOpacity>
+            <CloseButton onPress={() => setShowTemplates(false)} />
           </View>
           <ScrollView style={styles.modalContent}>
             {loadingTemplates ? (
@@ -593,12 +590,11 @@ export default function PlanMealScreen({
             >
               <View style={styles.libraryHeaderRow}>
                 <View style={{ width: 40 }} />
-                <TouchableOpacity
-                  style={styles.libraryCloseButton}
+                <CloseButton
                   onPress={() => setShowLibrary(false)}
-                >
-                  <SvgIcon name="close" size={28} color="#fff" />
-                </TouchableOpacity>
+                  iconColor="#fff"
+                  style={{ backgroundColor: 'rgba(255,255,255,0.2)' }}
+                />
               </View>
               <Text style={styles.libraryTitle}>Meal Library</Text>
               <Text style={styles.librarySubtitle}>{libraryTotal} meals saved</Text>
