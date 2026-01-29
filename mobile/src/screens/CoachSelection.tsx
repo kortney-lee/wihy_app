@@ -519,14 +519,26 @@ const styles = StyleSheet.create({
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: '#ffffff',
     margin: 16,
     marginBottom: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#e5e7eb',
+    paddingHorizontal: 18,
+    paddingVertical: 14,
+    borderRadius: 28,
+    ...Platform.select({
+      ios: {
+        shadowColor: 'rgba(64,60,67,0.35)',
+        shadowOpacity: 0.35,
+        shadowRadius: 6,
+        shadowOffset: { width: 0, height: 3 },
+      },
+      android: {
+        elevation: 5,
+      },
+      web: {
+        boxShadow: '0 3px 6px rgba(64,60,67,0.35)',
+      },
+    }),
   },
   searchInput: {
     flex: 1,

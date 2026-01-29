@@ -827,15 +827,24 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffffff',
     margin: 16,
     marginTop: 0,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderRadius: 12,
+    paddingHorizontal: 18,
+    paddingVertical: 14,
+    borderRadius: 28,
     gap: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
+    ...Platform.select({
+      ios: {
+        shadowColor: 'rgba(64,60,67,0.35)',
+        shadowOpacity: 0.35,
+        shadowRadius: 6,
+        shadowOffset: { width: 0, height: 3 },
+      },
+      android: {
+        elevation: 5,
+      },
+      web: {
+        boxShadow: '0 3px 6px rgba(64,60,67,0.35)',
+      },
+    }),
   },
   librarySearchInput: {
     flex: 1,

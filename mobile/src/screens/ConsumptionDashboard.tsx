@@ -1373,12 +1373,25 @@ const styles = StyleSheet.create({
   searchInputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: dashboardTheme.colors.surface,
-    borderRadius: dashboardTheme.borderRadius.lg,
-    paddingHorizontal: dashboardTheme.spacing.md,
-    paddingVertical: dashboardTheme.spacing.sm,
+    backgroundColor: '#ffffff',
+    borderRadius: 28,
+    paddingHorizontal: 18,
+    paddingVertical: 14,
     gap: dashboardTheme.spacing.sm,
-    ...dashboardTheme.shadows.sm,
+    ...Platform.select({
+      ios: {
+        shadowColor: 'rgba(64,60,67,0.35)',
+        shadowOpacity: 0.35,
+        shadowRadius: 6,
+        shadowOffset: { width: 0, height: 3 },
+      },
+      android: {
+        elevation: 5,
+      },
+      web: {
+        boxShadow: '0 3px 6px rgba(64,60,67,0.35)',
+      },
+    }),
   },
 
   searchInput: {

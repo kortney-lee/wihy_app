@@ -12,6 +12,7 @@ import {
   StyleSheet,
   FlatList,
   Keyboard,
+  Platform,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import SvgIcon from './shared/SvgIcon';
@@ -967,17 +968,24 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#ffffff',
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    borderRadius: 28,
+    paddingHorizontal: 18,
+    paddingVertical: 14,
     gap: 12,
-    borderWidth: 2,
-    borderColor: '#e5e7eb',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
+    ...Platform.select({
+      ios: {
+        shadowColor: 'rgba(64,60,67,0.35)',
+        shadowOpacity: 0.35,
+        shadowRadius: 6,
+        shadowOffset: { width: 0, height: 3 },
+      },
+      android: {
+        elevation: 5,
+      },
+      web: {
+        boxShadow: '0 3px 6px rgba(64,60,67,0.35)',
+      },
+    }),
   },
   inlineSearchInput: {
     flex: 1,
