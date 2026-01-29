@@ -485,7 +485,7 @@ function IngredientFlag({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8fafc',
+    backgroundColor: '#e0f2fe',
   },
   loadingContainer: {
     flex: 1,

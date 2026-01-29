@@ -969,7 +969,7 @@ export default function NutritionFacts() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8fafc',
+    backgroundColor: '#e0f2fe',
   },
   header: {
     paddingHorizontal: dashboardTheme.header.paddingHorizontal,

@@ -764,7 +764,7 @@ export const ManualMealForm: React.FC<ManualMealFormProps> = ({
 const styles = StyleSheet.create({
   formContainer: {
     flex: 1,
-    backgroundColor: '#f3f4f6',
+    backgroundColor: '#e0f2fe',
   },
   formHeaderGradient: {
     paddingTop: 60,

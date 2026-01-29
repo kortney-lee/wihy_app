@@ -583,7 +583,7 @@ export default function PlanMealScreen({
         onRequestClose={() => setShowLibrary(false)}
       >
         <SafeAreaView style={{ flex: 1, backgroundColor: '#8b5cf6' }} edges={['top']}>
-          <View style={{ flex: 1, backgroundColor: '#f3f4f6' }}>
+          <View style={{ flex: 1, backgroundColor: '#e0f2fe' }}>
             {/* Header */}
             <LinearGradient
               colors={['#8b5cf6', '#7c3aed']}

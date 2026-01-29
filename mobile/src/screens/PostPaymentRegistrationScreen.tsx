@@ -580,7 +580,7 @@ export const PostPaymentRegistrationScreen: React.FC<Props> = ({ navigation, rou
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8fafc',
+    backgroundColor: '#e0f2fe',
   },
   content: {
     flex: 1,
