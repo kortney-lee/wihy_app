@@ -23,6 +23,13 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { researchService, ResearchArticle, ResearchDashboardStats, ResearchBookmark, SearchHistoryItem } from '../services';
 import { AuthContext } from '../context/AuthContext';
 
+const isWeb = Platform.OS === 'web';
+
+// Import CSS for web only
+if (isWeb) {
+  require('../styles/web-landing.css');
+}
+
 // Types
 type ResearchSearchResult = ResearchArticle;
 
@@ -582,33 +589,73 @@ export default function ResearchScreen({ isDashboardMode = false, onResultsViewC
       >
         {/* Search Bar */}
         <View style={styles.searchSection}>
-          <SweepBorder
-            borderWidth={2}
-            radius={28}
-            durationMs={2500}
-            colors={colors.borderSweep}
-          >
-            <View style={styles.searchBar}>
-              <Ionicons name="search" size={20} color="#9ca3af" />
-              <TextInput
-                value={query}
-                onChangeText={setQuery}
-                placeholder="Search health topics..."
-                placeholderTextColor="#9ca3af"
-                style={styles.searchInput}
-                returnKeyType="search"
-                onSubmitEditing={handleAnalyze}
-              />
-              {query.length > 0 && (
-                <TouchableOpacity onPress={() => setQuery('')}>
-                  <Ionicons name="close-circle" size={20} color="#9ca3af" />
+          <View style={{ flex: 1 }}>
+            {isWeb ? (
+              // Web: Use CSS border sweep animation
+              // @ts-ignore - className for web
+              <div className="web-search-input-container" style={{ display: 'flex', alignItems: 'center', paddingLeft: 18, paddingRight: 8, gap: 12, flex: 1 }}>
+                <Ionicons name="search" size={20} color="#9ca3af" />
+                {/* @ts-ignore - web input */}
+                <input
+                  type="text"
+                  value={query}
+                  onChange={(e: any) => setQuery(e.target.value)}
+                  placeholder="Search health topics..."
+                  style={{
+                    flex: 1,
+                    fontSize: 16,
+                    color: '#1f2937',
+                    border: 'none',
+                    outline: 'none',
+                    background: 'transparent',
+                    height: 56,
+                    lineHeight: '56px',
+                  }}
+                  onKeyDown={(e: any) => {
+                    if (e.key === 'Enter') handleAnalyze();
+                  }}
+                />
+                {query.length > 0 && (
+                  <TouchableOpacity onPress={() => setQuery('')}>
+                    <Ionicons name="close-circle" size={20} color="#9ca3af" />
+                  </TouchableOpacity>
+                )}
+                {/* Search button inside the sweep border */}
+                <TouchableOpacity style={styles.searchButtonInline} onPress={handleAnalyze}>
+                  <Ionicons name="arrow-forward" size={20} color="#9ca3af" />
                 </TouchableOpacity>
-              )}
-            </View>
-          </SweepBorder>
-          <TouchableOpacity style={styles.searchButton} onPress={handleAnalyze}>
-            <Text style={styles.searchButtonText}>Search</Text>
-          </TouchableOpacity>
+              </div>
+            ) : (
+              // Native: Use SweepBorder component
+              <SweepBorder
+                borderWidth={2}
+                radius={28}
+                durationMs={2500}
+                colors={colors.borderSweep}
+              >
+                <View style={styles.searchBar}>
+                  <Ionicons name="search" size={20} color="#9ca3af" />
+                  <TextInput
+                    value={query}
+                    onChangeText={setQuery}
+                    placeholder="Search health topics..."
+                    placeholderTextColor="#9ca3af"
+                    style={styles.searchInput}
+                    returnKeyType="search"
+                    onSubmitEditing={handleAnalyze}
+                  />
+                  {query.length > 0 && (
+                    <TouchableOpacity onPress={() => setQuery('')}>
+                      <Ionicons name="close-circle" size={20} color="#9ca3af" />
+                    </TouchableOpacity>
+                  )}
+                  <TouchableOpacity style={styles.searchButtonInline} onPress={handleAnalyze}>
+                    <Ionicons name="arrow-forward" size={20} color="#9ca3af" />
+                  </TouchableOpacity>
+                </View>
+              </SweepBorder>
+            )}
+          </View>
         </View>
 
         {/* Quick Actions */}
@@ -806,16 +853,19 @@ const styles = StyleSheet.create({
     outlineStyle: 'none' as any,
   },
   searchButton: {
-    backgroundColor: '#8b5cf6',
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    borderRadius: 12,
+    width: 44,
+    height: 44,
+    alignItems: 'center',
     justifyContent: 'center',
+    borderRadius: 22,
+    backgroundColor: '#8b5cf6',
   },
-  searchButtonText: {
-    color: '#ffffff',
-    fontSize: 15,
-    fontWeight: '600',
+  searchButtonInline: {
+    width: 40,
+    height: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 20,
   },
 
   // Quick Actions

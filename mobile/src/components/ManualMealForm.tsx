@@ -18,6 +18,13 @@ import { LinearGradient } from 'expo-linear-gradient';
 import SvgIcon from './shared/SvgIcon';
 import { SweepBorder } from './SweepBorder';
 import { colors } from '../theme/design-tokens';
+
+const isWeb = Platform.OS === 'web';
+
+// Import CSS for web only
+if (isWeb) {
+  require('../styles/web-landing.css');
+}
 import { useCreateMealWithShopping } from '../hooks/useCreateMealWithShopping';
 import { FoodProduct, productSearchService } from '../services/productSearchService';
 
@@ -320,32 +327,56 @@ export const ManualMealForm: React.FC<ManualMealFormProps> = ({
 
           {/* Inline Search Bar - Always visible like WiHY home */}
           <View style={styles.inlineSearchContainer}>
-            <SweepBorder
-              borderWidth={2}
-              radius={28}
-              durationMs={2500}
-              colors={colors.borderSweep}
-            >
-              <View style={styles.inlineSearchBar}>
-                <SvgIcon name="search" size={20} color="#9ca3af" />
-                <TextInput
-                  style={styles.inlineSearchInput}
-                  placeholder="Search 4M+ products (e.g., chicken breast, rice)"
-                  value={searchQuery}
-                  onChangeText={setSearchQuery}
-                  onSubmitEditing={() => handleSearch()}
-                  returnKeyType="search"
-                  placeholderTextColor="#9ca3af"
-                />
-                {searchLoading ? (
-                  <ActivityIndicator size="small" color="#3b82f6" />
-                ) : searchQuery ? (
-                  <TouchableOpacity onPress={() => { setSearchQuery(''); setSearchResults([]); }}>
-                    <SvgIcon name="close-circle" size={20} color="#9ca3af" />
-                  </TouchableOpacity>
-                ) : null}
-              </View>
-            </SweepBorder>
+            {isWeb ? (
+              <div className="web-search-input-container" style={{ width: '100%' }}>
+                <View style={styles.inlineSearchBar}>
+                  <SvgIcon name="search" size={20} color="#9ca3af" />
+                  <TextInput
+                    style={styles.inlineSearchInput}
+                    placeholder="Search 4M+ products (e.g., chicken breast, rice)"
+                    value={searchQuery}
+                    onChangeText={setSearchQuery}
+                    onSubmitEditing={() => handleSearch()}
+                    returnKeyType="search"
+                    placeholderTextColor="#9ca3af"
+                  />
+                  {searchLoading ? (
+                    <ActivityIndicator size="small" color="#3b82f6" />
+                  ) : searchQuery ? (
+                    <TouchableOpacity onPress={() => { setSearchQuery(''); setSearchResults([]); }}>
+                      <SvgIcon name="close-circle" size={20} color="#9ca3af" />
+                    </TouchableOpacity>
+                  ) : null}
+                </View>
+              </div>
+            ) : (
+              <SweepBorder
+                borderWidth={2}
+                radius={28}
+                durationMs={2500}
+                colors={colors.borderSweep}
+              >
+                <View style={styles.inlineSearchBar}>
+                  <SvgIcon name="search" size={20} color="#9ca3af" />
+                  <TextInput
+                    style={styles.inlineSearchInput}
+                    placeholder="Search 4M+ products (e.g., chicken breast, rice)"
+                    value={searchQuery}
+                    onChangeText={setSearchQuery}
+                    onSubmitEditing={() => handleSearch()}
+                    returnKeyType="search"
+                    placeholderTextColor="#9ca3af"
+                  />
+                  {searchLoading ? (
+                    <ActivityIndicator size="small" color="#3b82f6" />
+                  ) : searchQuery ? (
+                    <TouchableOpacity onPress={() => { setSearchQuery(''); setSearchResults([]); }}>
+                      <SvgIcon name="close-circle" size={20} color="#9ca3af" />
+                    </TouchableOpacity>
+                  ) : null}
+                </View>
+              </SweepBorder>
+            )}
             
             {/* Quick Category Pills */}
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.quickCategoriesScroll}>
