@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Animated } from 'react-native';
 import { Ionicons } from './Ionicons';
-import { dashboardTheme } from '../../theme/dashboardTheme';
+import { useTheme } from '../../context/ThemeContext';
 import { notificationService } from '../../services';
 
 export interface NotificationSummary {
@@ -36,6 +36,7 @@ export const NotificationTile: React.FC<NotificationTileProps> = ({
   compact = false,
   style,
 }) => {
+  const { theme } = useTheme();
   const [summary, setSummary] = useState<NotificationSummary>({
     unreadMessages: 0,
     pendingReminders: 0,
@@ -145,7 +146,7 @@ export const NotificationTile: React.FC<NotificationTileProps> = ({
           <Ionicons 
             name="notifications" 
             size={24} 
-            color={hasNotifications ? dashboardTheme.colors.primary : dashboardTheme.colors.textSecondary} 
+            color={hasNotifications ? theme.colors.primary : theme.colors.textSecondary} 
           />
           {hasNotifications && (
             <View style={styles.compactBadge}>
@@ -161,7 +162,7 @@ export const NotificationTile: React.FC<NotificationTileProps> = ({
 
   return (
     <TouchableOpacity
-      style={[styles.container, style]}
+      style={[styles.container, { backgroundColor: theme.colors.surface }, style]}
       onPress={onPress}
       activeOpacity={0.7}
     >
@@ -174,7 +175,7 @@ export const NotificationTile: React.FC<NotificationTileProps> = ({
             <Ionicons 
               name="notifications" 
               size={28} 
-              color={dashboardTheme.colors.primary} 
+              color={theme.colors.primary} 
             />
           </Animated.View>
           {hasNotifications && (
@@ -186,13 +187,13 @@ export const NotificationTile: React.FC<NotificationTileProps> = ({
           )}
         </View>
         <View style={styles.titleContainer}>
-          <Text style={styles.title}>Notifications</Text>
-          <Text style={styles.subtitle}>
+          <Text style={[styles.title, { color: theme.colors.text }]}>Notifications</Text>
+          <Text style={[styles.subtitle, { color: theme.colors.textSecondary }]}>
             {isLoading ? 'Loading...' : 
              hasNotifications ? `${summary.totalUnread} new` : 'All caught up!'}
           </Text>
         </View>
-        <Ionicons name="chevron-forward" size={20} color={dashboardTheme.colors.textSecondary} />
+        <Ionicons name="chevron-forward" size={20} color={theme.colors.textSecondary} />
       </View>
 
       {!isLoading && (
@@ -207,8 +208,8 @@ export const NotificationTile: React.FC<NotificationTileProps> = ({
               <Ionicons name="chatbubble" size={16} color="#3b82f6" />
             </View>
             <View style={styles.statContent}>
-              <Text style={styles.statValue}>{summary.unreadMessages}</Text>
-              <Text style={styles.statLabel}>Messages</Text>
+              <Text style={[styles.statValue, { color: theme.colors.text }]}>{summary.unreadMessages}</Text>
+              <Text style={[styles.statLabel, { color: theme.colors.textSecondary }]}>Messages</Text>
             </View>
           </TouchableOpacity>
 
@@ -222,8 +223,8 @@ export const NotificationTile: React.FC<NotificationTileProps> = ({
               <Ionicons name="alarm" size={16} color="#f59706" />
             </View>
             <View style={styles.statContent}>
-              <Text style={styles.statValue}>{summary.pendingReminders}</Text>
-              <Text style={styles.statLabel}>Today</Text>
+              <Text style={[styles.statValue, { color: theme.colors.text }]}>{summary.pendingReminders}</Text>
+              <Text style={[styles.statLabel, { color: theme.colors.textSecondary }]}>Today</Text>
             </View>
           </TouchableOpacity>
 
@@ -237,8 +238,8 @@ export const NotificationTile: React.FC<NotificationTileProps> = ({
               <Ionicons name="calendar" size={16} color="#10b981" />
             </View>
             <View style={styles.statContent}>
-              <Text style={styles.statValue}>{summary.upcomingReminders}</Text>
-              <Text style={styles.statLabel}>Scheduled</Text>
+              <Text style={[styles.statValue, { color: theme.colors.text }]}>{summary.upcomingReminders}</Text>
+              <Text style={[styles.statLabel, { color: theme.colors.textSecondary }]}>Scheduled</Text>
             </View>
           </TouchableOpacity>
         </View>

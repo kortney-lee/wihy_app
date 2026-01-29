@@ -397,11 +397,11 @@ export const ManualMealForm: React.FC<ManualMealFormProps> = ({
                   </TouchableOpacity>
                 ))}
                 <TouchableOpacity
-                  style={[styles.categoryPill, { backgroundColor: '#f3f4f6' }]}
+                  style={[styles.categoryPill, { backgroundColor: theme.colors.surface }]}
                   onPress={addIngredient}
                 >
-                  <SvgIcon name="add-circle" size={14} color="#6b7280" />
-                  <Text style={[styles.categoryPillText, { color: '#6b7280' }]}>Manual Entry</Text>
+                  <SvgIcon name="add-circle" size={14} color={theme.colors.textSecondary} />
+                  <Text style={[styles.categoryPillText, { color: theme.colors.textSecondary }]}>Manual Entry</Text>
                 </TouchableOpacity>
               </View>
             </ScrollView>
