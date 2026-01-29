@@ -14,6 +14,7 @@ import {
   Dimensions,
 } from 'react-native';
 import { Ionicons } from '../../components/shared';
+import { useTheme } from '../../context/ThemeContext';
 import { FitnessLevel } from './types';
 import { FITNESS_LEVELS } from './constants';
 
@@ -29,12 +30,13 @@ export const FitnessLevelSelection: React.FC<FitnessLevelSelectionProps> = ({
   selectedLevel,
   onSelectLevel,
 }) => {
+  const { theme } = useTheme();
   return (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+    <ScrollView style={[styles.container, { backgroundColor: theme.colors.background }]} showsVerticalScrollIndicator={false}>
       <View style={styles.header}>
         <Ionicons name="fitness-outline" size={48} color="#4cbb17" />
-        <Text style={styles.title}>What's Your Fitness Level?</Text>
-        <Text style={styles.subtitle}>
+        <Text style={[styles.title, { color: theme.colors.text }]}>What's Your Fitness Level?</Text>
+        <Text style={[styles.subtitle, { color: theme.colors.textSecondary }]}>
           Select your current fitness level to get appropriate exercises and reps
         </Text>
       </View>
@@ -44,6 +46,7 @@ export const FitnessLevelSelection: React.FC<FitnessLevelSelectionProps> = ({
           key={level.id}
           style={[
             styles.levelCard,
+            { backgroundColor: theme.colors.surface },
             selectedLevel === level.id && styles.levelCardSelected,
             selectedLevel === level.id && { borderColor: level.color },
             { borderLeftColor: level.color, borderLeftWidth: 4 }

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
 import { Ionicons } from '../../../components/shared';
+import { useTheme } from '../../../context/ThemeContext';
 import type { WorkoutMode } from './ModeToggle';
 import { EQUIPMENT_OPTIONS } from '../constants';
 
@@ -47,6 +48,7 @@ export const EquipmentSelector: React.FC<EquipmentSelectorProps> = ({
   selectedGymEquipment = [],
   onGymEquipmentChange,
 }) => {
+  const { theme } = useTheme();
   const [showLibrary, setShowLibrary] = useState(false);
   const [gymPreset, setGymPreset] = useState<'full_gym' | 'basic' | 'custom'>('full_gym');
 

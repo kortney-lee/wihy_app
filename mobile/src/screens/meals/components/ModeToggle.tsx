@@ -16,6 +16,7 @@ import {
   StyleSheet,
 } from 'react-native';
 import { Ionicons } from '../../../components/shared';
+import { useTheme } from '../../../context/ThemeContext';
 
 export type MealMode = 'quick' | 'plan' | 'diet' | 'saved';
 
@@ -35,8 +36,9 @@ export const ModeToggle: React.FC<ModeToggleProps> = ({
   selectedMode,
   onModeChange,
 }) => {
+  const { theme } = useTheme();
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.colors.surface }]}>
       <View style={styles.toggleRow}>
         {MODES.map((mode) => {
           const isSelected = selectedMode === mode.id;

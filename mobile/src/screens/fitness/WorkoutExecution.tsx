@@ -17,6 +17,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '../../components/shared';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTheme } from '../../context/ThemeContext';
 import { DailyWorkout, Exercise } from '../../services';
 import { ProgramProgress, CompletedSet } from './types';
 import { GradientDashboardHeader } from '../../components/shared';
@@ -63,6 +64,7 @@ export const WorkoutExecution: React.FC<WorkoutExecutionProps> = ({
   onRepsChange,
   onWeightChange,
 }) => {
+  const { theme } = useTheme();
   const currentExercise = workout.exercises[currentExerciseIndex];
   if (!currentExercise) return null;
   
@@ -123,7 +125,7 @@ export const WorkoutExecution: React.FC<WorkoutExecutionProps> = ({
   }
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       {/* Gradient Header - Using GradientDashboardHeader */}
       <GradientDashboardHeader
         title="Workout"

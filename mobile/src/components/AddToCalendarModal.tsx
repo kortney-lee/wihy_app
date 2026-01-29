@@ -8,6 +8,7 @@ import {
   ScrollView,
 } from 'react-native';
 import SvgIcon from './shared/SvgIcon';
+import { useTheme } from '../context/ThemeContext';
 
 interface AddToCalendarModalProps {
   visible: boolean;
@@ -29,6 +30,7 @@ export function AddToCalendarModal({
   onSchedule,
   mealName,
 }: AddToCalendarModalProps) {
+  const { theme } = useTheme();
   const [selectedDate, setSelectedDate] = useState<string>(
     new Date().toISOString().split('T')[0]
   );
@@ -42,7 +44,7 @@ export function AddToCalendarModal({
   return (
     <Modal visible={visible} animationType="slide" transparent>
       <View style={styles.overlay}>
-        <View style={styles.modal}>
+        <View style={[styles.modal, { backgroundColor: theme.colors.surface }]}>
           {/* Header */}
           <View style={styles.header}>
             <Text style={styles.title}>Add to Calendar</Text>

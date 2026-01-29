@@ -18,6 +18,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '../../components/shared';
+import { useTheme } from '../../context/ThemeContext';
 import {
   ModeToggle,
   DurationSelector,
@@ -147,6 +148,7 @@ export const GoalSelection: React.FC<GoalSelectionProps> = ({
   onLevelPress,
   onGenerateWorkout,
 }) => {
+  const { theme } = useTheme();
   // Mode state
   const [mode, setMode] = useState<WorkoutMode>('quick');
   
@@ -692,7 +694,7 @@ export const GoalSelection: React.FC<GoalSelectionProps> = ({
 
   return (
     <ScrollView 
-      style={styles.container} 
+      style={[styles.container, { backgroundColor: theme.colors.background }]} 
       showsVerticalScrollIndicator={false}
       contentContainerStyle={styles.contentContainer}
     >

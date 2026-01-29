@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '../../../components/shared';
+import { useTheme } from '../../../context/ThemeContext';
 import type { WorkoutMode } from './ModeToggle';
 
 interface IntensitySelectorProps {
@@ -20,6 +21,7 @@ export const IntensitySelector: React.FC<IntensitySelectorProps> = ({
   selectedIntensity,
   onIntensityChange,
 }) => {
+  const { theme } = useTheme();
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Intensity</Text>

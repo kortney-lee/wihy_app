@@ -17,6 +17,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '../../components/shared';
+import { useTheme } from '../../context/ThemeContext';
 import { ExpandedSections, PerformanceGoal, BodyGoal, QuickGoal, EquipmentCategory } from './types';
 import { 
   FITNESS_LEVELS, 
@@ -138,6 +139,7 @@ export const GoalSelection: React.FC<GoalSelectionProps> = ({
   onClearBodyGoals,
   onGenerateWorkout,
 }) => {
+  const { theme } = useTheme();
   // Get level color for dynamic styling
   const currentLevel = FITNESS_LEVELS.find(l => l.id === levelId);
   const levelColor = currentLevel?.color || '#2563EB';
@@ -152,7 +154,7 @@ export const GoalSelection: React.FC<GoalSelectionProps> = ({
   const selectedPerformanceGoal = selectedPerformanceGoals[0] || null;
 
   return (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+    <ScrollView style={[styles.container, { backgroundColor: theme.colors.background }]} showsVerticalScrollIndicator={false}>
       {/* Top spacing for better touch targets */}
       <View style={{ height: 16 }} />
       

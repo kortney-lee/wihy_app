@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   StyleSheet,
 } from 'react-native';
+import { useTheme } from '../../../context/ThemeContext';
 
 type MealMode = 'quick' | 'plan' | 'diet' | 'saved';
 
@@ -39,6 +40,7 @@ export const DurationSelector: React.FC<DurationSelectorProps> = ({
   title = 'Plan Duration',
   mode = 'plan', // Default to plan mode
 }) => {
+  const { theme } = useTheme();
   // Saved mode doesn't need duration selector
   if (mode === 'saved') {
     return null;

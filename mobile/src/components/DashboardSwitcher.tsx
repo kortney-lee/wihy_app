@@ -5,6 +5,7 @@ import { Ionicons } from './shared';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { AuthContext } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import { hasFamilyAccess, hasCoachAccess } from '../utils/capabilities';
 import PlansModal from './PlansModal';
 import { RootStackParamList } from '../types/navigation';
@@ -20,6 +21,7 @@ export const DashboardSwitcher: React.FC<DashboardSwitcherProps> = ({
   currentContext,
   onContextChange,
 }) => {
+  const { theme } = useTheme();
   const { user } = useContext(AuthContext);
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   const [showPlansModal, setShowPlansModal] = useState(false);

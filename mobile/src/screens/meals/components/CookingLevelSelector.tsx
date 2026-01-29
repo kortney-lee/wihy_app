@@ -10,6 +10,7 @@ import {
   StyleSheet,
 } from 'react-native';
 import { Ionicons } from '../../../components/shared';
+import { useTheme } from '../../../context/ThemeContext';
 import type { CookingSkillLevel } from '../../../services/mealService';
 
 interface CookingLevelSelectorProps {
@@ -34,6 +35,7 @@ export const CookingLevelSelector: React.FC<CookingLevelSelectorProps> = ({
   onLevelChange,
   title = 'Cooking Level',
 }) => {
+  const { theme } = useTheme();
   return (
     <View style={styles.container}>
       <Text style={styles.title}>{title}</Text>

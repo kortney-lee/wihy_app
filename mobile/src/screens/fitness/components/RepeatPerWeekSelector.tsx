@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '../../../components/shared';
+import { useTheme } from '../../../context/ThemeContext';
 import type { WorkoutMode } from './ModeToggle';
 
 interface RepeatPerWeekSelectorProps {
@@ -16,8 +17,9 @@ export const RepeatPerWeekSelector: React.FC<RepeatPerWeekSelectorProps> = ({
   selectedDays,
   onDaysChange,
 }) => {
+  const { theme } = useTheme();
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.colors.surface }]}>
       <View style={styles.header}>
         <Ionicons name="calendar-outline" size={20} color="#6b7280" />
         <View style={styles.headerText}>

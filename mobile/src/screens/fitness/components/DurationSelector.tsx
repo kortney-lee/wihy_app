@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '../../../components/shared';
+import { useTheme } from '../../../context/ThemeContext';
 import type { WorkoutMode } from './ModeToggle';
 
 interface DurationSelectorProps {
@@ -16,8 +17,9 @@ export const DurationSelector: React.FC<DurationSelectorProps> = ({
   selectedDuration,
   onDurationChange,
 }) => {
+  const { theme } = useTheme();
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.colors.surface }]}>
       <View style={styles.header}>
         <Ionicons name="time-outline" size={20} color="#4cbb17" />
         <View style={styles.headerText}>

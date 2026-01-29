@@ -10,6 +10,7 @@ import { useNavigation } from '@react-navigation/native';
 import type { StackNavigationProp } from '@react-navigation/stack';
 import type { RootStackParamList } from '../types/navigation';
 import { SweepBorder } from './SweepBorder';
+import { useTheme } from '../context/ThemeContext';
 import { chatService } from '../services';
 import { debugLogService } from '../services';
 
@@ -45,6 +46,7 @@ const AnalyzeWithWihyButton: React.FC<AnalyzeWithWihyButtonProps> = ({
   borderRadius = 24,
   disabled = false,
 }) => {
+  const { theme } = useTheme();
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 

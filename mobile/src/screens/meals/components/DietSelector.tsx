@@ -16,6 +16,7 @@ import {
   Platform,
 } from 'react-native';
 import { Ionicons } from '../../../components/shared';
+import { useTheme } from '../../../context/ThemeContext';
 import { mealService, DietOption } from '../../../services/mealService';
 
 interface DietSelectorProps {
@@ -33,6 +34,7 @@ export const DietSelector: React.FC<DietSelectorProps> = ({
   showSearch = true,
   title = 'Dietary Preferences',
 }) => {
+  const { theme } = useTheme();
   const [diets, setDiets] = useState<DietOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
