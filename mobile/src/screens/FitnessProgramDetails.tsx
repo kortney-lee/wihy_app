@@ -97,7 +97,7 @@ export default function FitnessProgramDetails() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8fafc',
+    backgroundColor: '#e0f2fe',
   },
   backButton: {
     width: 40,
