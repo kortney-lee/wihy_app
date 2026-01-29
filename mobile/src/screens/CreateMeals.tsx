@@ -4469,7 +4469,7 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
                 {/* Empty state if no items */}
                 {totalItems === 0 && (
                   <View style={{ alignItems: 'center', paddingTop: 60, paddingHorizontal: 32 }}>
-                    <View style={{ width: 100, height: 100, borderRadius: 50, // backgroundColor: '#f3f4f6', // theme.colors.surface // Use theme.colors.background alignItems: 'center', justifyContent: 'center', marginBottom: 20 }}>
+                    <View style={{ width: 100, height: 100, borderRadius: 50, backgroundColor: theme.colors.surface, alignItems: 'center', justifyContent: 'center', marginBottom: 20 }}>
                       <SvgIcon name="cart-outline" size={48} color="#9ca3af" />
                     </View>
                     <Text style={{ fontSize: 20, fontWeight: '600', color: '#111827', marginBottom: 8 }}>No Shopping List</Text>
