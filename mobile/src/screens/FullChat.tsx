@@ -638,8 +638,8 @@ export default function FullChat() {
     <SafeAreaView style={styles.container} edges={['left', 'right']}>
       <KeyboardAvoidingView
         style={styles.flex}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 60 : 80}
+        behavior="padding"
+        keyboardVerticalOffset={0}
       >
         {/* Chat Header - Using GradientDashboardHeader with custom children - Hidden on web */}
         {!isWeb && (
@@ -709,7 +709,7 @@ export default function FullChat() {
           style={styles.messagesContainer}
           contentContainerStyle={[
             styles.messagesContent, 
-            { paddingBottom: isWeb ? 20 : 100 + bottomInset }
+            { paddingBottom: isWeb ? 20 : 12 }
           ]}
           showsVerticalScrollIndicator={false}
           {...(isWeb ? { nativeID: 'chat-scroll-view' } : {})}        >
@@ -1339,15 +1339,11 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   inputContainer: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 16,
     paddingTop: 8,
-    backgroundColor: '#e0f2fe',
+    backgroundColor: '#ffffff',
     gap: 12,
   },
   textInputContainer: {
@@ -1388,7 +1384,7 @@ const styles = StyleSheet.create({
     borderRadius: 24,
   },
   sendButtonActive: {
-    backgroundColor: '#8b5cf6',
+    backgroundColor: '#4cbb17',
   },
   sendButtonInactive: {
     backgroundColor: '#d1d5db',
