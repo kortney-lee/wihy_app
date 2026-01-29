@@ -13,6 +13,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { AuthContext } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import { Ionicons, BackToHubButton } from '../components/shared';
 import { hasAIAccess } from '../utils/capabilities';
 import { dashboardTheme } from '../theme/dashboardTheme';
@@ -40,6 +41,7 @@ export default function CoachOverview({
   onBack,
 }: CoachOverviewProps) {
   const { user } = useContext(AuthContext);
+  const { theme } = useTheme();
   const coachId = user?.coachId;
   const [selectedPeriod, setSelectedPeriod] = useState<'week' | 'month' | 'year'>('month');
   const [loading, setLoading] = useState(true);
@@ -187,7 +189,7 @@ export default function CoachOverview({
 
   if (loading) {
     return (
-      <View style={styles.container}>
+      <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
         <View style={{ height: insets.top, backgroundColor: '#3b82f6' }} />
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#3b82f6" />
@@ -198,7 +200,7 @@ export default function CoachOverview({
   }
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       {/* Back to Coach Hub button - only on web */}
       {isDashboardMode && onBack && (
         <BackToHubButton
@@ -225,8 +227,8 @@ export default function CoachOverview({
           </Animated.View>
         </Animated.View>
 
-        <Animated.ScrollView 
-          style={styles.scrollView} 
+        <Animated.ScrollView
+          style={[styles.scrollView, { backgroundColor: theme.colors.background }]}
           showsVerticalScrollIndicator={false}
           scrollEventThrottle={16}
           onScroll={Animated.event(

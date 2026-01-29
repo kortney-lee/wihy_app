@@ -6,6 +6,7 @@ import * as Updates from 'expo-updates';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import AppNavigator from './src/navigation/AppNavigator';
 import { AuthProvider } from './src/context/AuthContext';
+import { ThemeProvider } from './src/context/ThemeContext';
 
 // Only import Ionicons on native platforms - web uses inline SVGs
 let Ionicons = null;
@@ -72,10 +73,12 @@ export default function App() {
 
   return (
     <SafeAreaProvider>
-      <AuthProvider>
-        <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
-        <AppNavigator />
-      </AuthProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
+          <AppNavigator />
+        </AuthProvider>
+      </ThemeProvider>
     </SafeAreaProvider>
   );
 }

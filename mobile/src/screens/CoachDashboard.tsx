@@ -24,6 +24,7 @@ import { dashboardColors, GradientDashboardHeader } from '../components/shared';
 import { dashboardTheme } from '../theme/dashboardTheme';
 import { coachService, Client as APIClient, ClientDashboard } from '../services';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import SendInvitation from './SendInvitation';
 
 const spinnerGif = require('../../assets/whatishealthyspinner.gif');
@@ -53,6 +54,7 @@ export default function CoachDashboard({
 }: CoachDashboardProps) {
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   const { coachId } = useAuth();
+  const { theme } = useTheme();
   
   // Collapsing header animation
   const scrollY = useRef(new Animated.Value(0)).current;
@@ -218,13 +220,13 @@ export default function CoachDashboard({
       onPress={() => handleClientPress(item)}
     >
       <View style={styles.clientAvatar}>
-        <Text style={styles.clientAvatarText}>
+        <Text style={[styles.clientAvatarText, { color: theme.colors.primary }]}>
           {item.name.split(' ').map(n => n[0]).join('')}
         </Text>
       </View>
       <View style={styles.clientInfo}>
-        <Text style={styles.clientName}>{item.name}</Text>
-        <Text style={styles.clientEmail}>{item.email}</Text>
+        <Text style={[styles.clientName, { color: theme.colors.text }]}>{item.name}</Text>
+        <Text style={[styles.clientEmail, { color: theme.colors.textSecondary }]}>{item.email}</Text>
         {item.goals.length > 0 && (
           <View style={styles.goalsContainer}>
             {item.goals.slice(0, 2).map((goal, idx) => (
@@ -236,27 +238,27 @@ export default function CoachDashboard({
         )}
       </View>
       <View style={styles.clientMeta}>
-        <Text style={styles.lastActive}>{item.lastActive}</Text>
-        <Ionicons name="chevron-forward" size={20} color="#9ca3af" />
+        <Text style={[styles.lastActive, { color: theme.colors.textSecondary }]}>{item.lastActive}</Text>
+        <Ionicons name="chevron-forward" size={20} color={theme.colors.textSecondary} />
       </View>
     </Pressable>
   );
 
   const renderGoalsTab = () => (
     <View style={styles.tabContent}>
-      <Text style={styles.sectionTitle}>Client Goals</Text>
+      <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Client Goals</Text>
       
       <View style={styles.card}>
-        <Text style={styles.cardLabel}>Primary Goals</Text>
+        <Text style={[styles.cardLabel, { color: theme.colors.textSecondary }]}>Primary Goals</Text>
         {selectedClient?.goals && selectedClient.goals.length > 0 ? (
           selectedClient.goals.map((goal, idx) => (
             <View key={idx} style={styles.goalItem}>
               <Ionicons name="flag" size={20} color="#10b981" />
-              <Text style={styles.goalItemText}>{goal}</Text>
+              <Text style={[styles.goalItemText, { color: theme.colors.text }]}>{goal}</Text>
             </View>
           ))
         ) : (
-          <Text style={styles.emptyGoalText}>No goals set yet</Text>
+          <Text style={[styles.emptyGoalText, { color: theme.colors.textSecondary }]}>No goals set yet</Text>
         )}
         <Pressable style={styles.addButton}>
           <Ionicons name="add-circle" size={20} color="#3b82f6" />
@@ -264,10 +266,10 @@ export default function CoachDashboard({
         </Pressable>
       </View>
 
-      <Text style={styles.sectionTitle}>Diet Preferences</Text>
+      <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Diet Preferences</Text>
       <View style={styles.card}>
-        <Text style={styles.cardLabel}>Current Diet Plan</Text>
-        <Text style={styles.dietCurrentText}>
+        <Text style={[styles.cardLabel, { color: theme.colors.textSecondary }]}>Current Diet Plan</Text>
+        <Text style={[styles.dietCurrentText, { color: theme.colors.text }]}>
           {selectedClient?.diet || 'No diet plan assigned'}
         </Text>
         <View style={styles.dietSelector}>
@@ -295,20 +297,20 @@ export default function CoachDashboard({
       {/* Workout Stats */}
       {clientDashboard?.fitness_progress && (
         <View>
-          <Text style={styles.sectionTitle}>Fitness Progress</Text>
+          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Fitness Progress</Text>
           <View style={styles.card}>
-            <Text style={styles.cardLabel}>Current Program</Text>
-            <Text style={styles.statValue}>
+            <Text style={[styles.cardLabel, { color: theme.colors.textSecondary }]}>Current Program</Text>
+            <Text style={[styles.statValue, { color: theme.colors.text }]}>
               {clientDashboard.fitness_progress.current_program || 'No active program'}
             </Text>
             
             <View style={styles.statsRow}>
               <View style={styles.statItem}>
-                <Text style={styles.statLabel}>Workouts Completed</Text>
+                <Text style={[styles.statLabel, { color: theme.colors.textSecondary }]}>Workouts Completed</Text>
                 <Text style={styles.statNumber}>{clientDashboard.fitness_progress.workouts_completed}</Text>
               </View>
               <View style={styles.statItem}>
-                <Text style={styles.statLabel}>Adherence Rate</Text>
+                <Text style={[styles.statLabel, { color: theme.colors.textSecondary }]}>Adherence Rate</Text>
                 <Text style={styles.statNumber}>{clientDashboard.fitness_progress.adherence_rate}%</Text>
               </View>
             </View>
@@ -319,15 +321,15 @@ export default function CoachDashboard({
       {/* Nutrition Stats */}
       {clientDashboard?.nutrition_summary && (
         <View>
-          <Text style={styles.sectionTitle}>Nutrition Summary</Text>
+          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Nutrition Summary</Text>
           <View style={styles.card}>
             <View style={styles.statsRow}>
               <View style={styles.statItem}>
-                <Text style={styles.statLabel}>Avg Daily Calories</Text>
+                <Text style={[styles.statLabel, { color: theme.colors.textSecondary }]}>Avg Daily Calories</Text>
                 <Text style={styles.statNumber}>{clientDashboard.nutrition_summary.daily_average_calories}</Text>
               </View>
               <View style={styles.statItem}>
-                <Text style={styles.statLabel}>Goal Compliance</Text>
+                <Text style={[styles.statLabel, { color: theme.colors.textSecondary }]}>Goal Compliance</Text>
                 <Text style={styles.statNumber}>{clientDashboard.nutrition_summary.goal_compliance_rate}%</Text>
               </View>
             </View>
@@ -339,14 +341,14 @@ export default function CoachDashboard({
 
   const renderActionsTab = () => (
     <View style={styles.tabContent}>
-      <Text style={styles.sectionTitle}>Action Items</Text>
+      <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Action Items</Text>
       
       <View style={styles.card}>
         <View style={styles.actionItem}>
           <Ionicons name="checkbox" size={24} color="#10b981" />
           <View style={styles.actionContent}>
-            <Text style={styles.actionTitle}>Log daily meals</Text>
-            <Text style={styles.actionStatus}>Due: Today</Text>
+            <Text style={[styles.actionTitle, { color: theme.colors.text }]}>Log daily meals</Text>
+            <Text style={[styles.actionStatus, { color: theme.colors.textSecondary }]}>Due: Today</Text>
           </View>
           <View style={[styles.priorityBadge, { backgroundColor: '#fef3c7' }]}>
             <Text style={styles.priorityText}>High</Text>
@@ -354,10 +356,10 @@ export default function CoachDashboard({
         </View>
 
         <View style={styles.actionItem}>
-          <Ionicons name="square-outline" size={24} color="#6b7280" />
+          <Ionicons name="square-outline" size={24} color={theme.colors.textSecondary} />
           <View style={styles.actionContent}>
-            <Text style={styles.actionTitle}>Track water intake</Text>
-            <Text style={styles.actionStatus}>Due: Tomorrow</Text>
+            <Text style={[styles.actionTitle, { color: theme.colors.text }]}>Track water intake</Text>
+            <Text style={[styles.actionStatus, { color: theme.colors.textSecondary }]}>Due: Tomorrow</Text>
           </View>
           <View style={[styles.priorityBadge, { backgroundColor: '#dbeafe' }]}>
             <Text style={styles.priorityText}>Medium</Text>
@@ -406,26 +408,26 @@ export default function CoachDashboard({
     
     return (
       <View style={styles.tabContent}>
-        <Text style={styles.sectionTitle}>Meal Programs</Text>
+        <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Meal Programs</Text>
         
         <View style={styles.card}>
-          <Text style={styles.cardLabel}>7-Day Meal Plan</Text>
+          <Text style={[styles.cardLabel, { color: theme.colors.textSecondary }]}>7-Day Meal Plan</Text>
           <View style={styles.mealDay}>
-            <Text style={styles.mealDayTitle}>Monday</Text>
+            <Text style={[styles.mealDayTitle, { color: theme.colors.text }]}>Monday</Text>
             <View style={styles.mealItem}>
               <Ionicons name="sunny" size={16} color="#f59e0b" />
-              <Text style={styles.mealType}>Breakfast:</Text>
-              <Text style={styles.mealName}>Protein Smoothie Bowl</Text>
+              <Text style={[styles.mealType, { color: theme.colors.textSecondary }]}>Breakfast:</Text>
+              <Text style={[styles.mealName, { color: theme.colors.text }]}>Protein Smoothie Bowl</Text>
             </View>
             <View style={styles.mealItem}>
               <Ionicons name="partly-sunny" size={16} color="#10b981" />
-              <Text style={styles.mealType}>Lunch:</Text>
-              <Text style={styles.mealName}>Grilled Chicken Salad</Text>
+              <Text style={[styles.mealType, { color: theme.colors.textSecondary }]}>Lunch:</Text>
+              <Text style={[styles.mealName, { color: theme.colors.text }]}>Grilled Chicken Salad</Text>
             </View>
             <View style={styles.mealItem}>
               <Ionicons name="moon" size={16} color="#6366f1" />
-              <Text style={styles.mealType}>Dinner:</Text>
-              <Text style={styles.mealName}>Salmon with Vegetables</Text>
+              <Text style={[styles.mealType, { color: theme.colors.textSecondary }]}>Dinner:</Text>
+              <Text style={[styles.mealName, { color: theme.colors.text }]}>Salmon with Vegetables</Text>
             </View>
           </View>
         </View>
@@ -445,15 +447,15 @@ export default function CoachDashboard({
 
   const renderShoppingTab = () => (
     <View style={styles.tabContent}>
-      <Text style={styles.sectionTitle}>Shopping List</Text>
+      <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Shopping List</Text>
       
       {['Produce', 'Protein', 'Dairy', 'Grains'].map((category) => (
         <View key={category} style={styles.card}>
-          <Text style={styles.cardLabel}>{category}</Text>
+          <Text style={[styles.cardLabel, { color: theme.colors.textSecondary }]}>{category}</Text>
           <View style={styles.shoppingItems}>
-            <Text style={styles.shoppingItem}>• Spinach (2 bunches)</Text>
-            <Text style={styles.shoppingItem}>• Chicken breast (1 lb)</Text>
-            <Text style={styles.shoppingItem}>• Greek yogurt (32 oz)</Text>
+            <Text style={[styles.shoppingItem, { color: theme.colors.text }]}>• Spinach (2 bunches)</Text>
+            <Text style={[styles.shoppingItem, { color: theme.colors.text }]}>• Chicken breast (1 lb)</Text>
+            <Text style={[styles.shoppingItem, { color: theme.colors.text }]}>• Greek yogurt (32 oz)</Text>
           </View>
         </View>
       ))}
@@ -473,12 +475,12 @@ export default function CoachDashboard({
       </View>
 
       <View style={styles.card}>
-        <Text style={styles.previewTitle}>What {selectedClient?.name} Sees</Text>
-        <Text style={styles.previewSubtitle}>Today's Plan</Text>
+        <Text style={[styles.previewTitle, { color: theme.colors.text }]}>What {selectedClient?.name} Sees</Text>
+        <Text style={[styles.previewSubtitle, { color: theme.colors.textSecondary }]}>Today's Plan</Text>
         <View style={styles.previewMeal}>
-          <Text style={styles.previewMealTime}>Breakfast</Text>
-          <Text style={styles.previewMealName}>Protein Smoothie Bowl</Text>
-          <Text style={styles.previewMacros}>380 cal • 25g protein • 15g carbs</Text>
+          <Text style={[styles.previewMealTime, { color: theme.colors.textSecondary }]}>Breakfast</Text>
+          <Text style={[styles.previewMealName, { color: theme.colors.text }]}>Protein Smoothie Bowl</Text>
+          <Text style={[styles.previewMacros, { color: theme.colors.textSecondary }]}>380 cal • 25g protein • 15g carbs</Text>
         </View>
       </View>
     </View>
@@ -502,7 +504,7 @@ export default function CoachDashboard({
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       {/* Back to Coach Hub button - only on web */}
       {isDashboardMode && onBack && (
         <BackToHubButton
@@ -570,7 +572,7 @@ export default function CoachDashboard({
             </View>
 
             <View style={styles.listHeader}>
-              <Text style={styles.listHeaderText}>
+              <Text style={[styles.listHeaderText, { color: theme.colors.textSecondary }]}>
                 {filteredClients.length} Client{filteredClients.length !== 1 ? 's' : ''}
               </Text>
               <Pressable 
@@ -585,13 +587,13 @@ export default function CoachDashboard({
             {loading && clients.length === 0 ? (
               <View style={styles.loadingContainer}>
                 <ActivityIndicator size="large" color="#3b82f6" />
-                <Text style={styles.loadingText}>Loading clients...</Text>
+                <Text style={[styles.loadingText, { color: theme.colors.textSecondary }]}>Loading clients...</Text>
               </View>
             ) : filteredClients.length === 0 ? (
               <View style={styles.emptyContainer}>
-                <Ionicons name="people" size={48} color="#9ca3af" />
-                <Text style={styles.emptyText}>No clients found</Text>
-                <Text style={styles.emptySubtext}>Add your first client to get started</Text>
+                <Ionicons name="people" size={48} color={theme.colors.textSecondary} />
+                <Text style={[styles.emptyText, { color: theme.colors.textSecondary }]}>No clients found</Text>
+                <Text style={[styles.emptySubtext, { color: theme.colors.textSecondary }]}>Add your first client to get started</Text>
               </View>
             ) : (
               filteredClients.map((client) => (
@@ -610,8 +612,8 @@ export default function CoachDashboard({
                 <Ionicons name="arrow-back" size={20} color="#3b82f6" />
               </Pressable>
               <View style={styles.clientHeaderInfo}>
-                <Text style={styles.clientHeaderName}>{selectedClient.name}</Text>
-                <Text style={styles.clientHeaderEmail}>{selectedClient.email}</Text>
+                <Text style={[styles.clientHeaderName, { color: theme.colors.text }]}>{selectedClient.name}</Text>
+                <Text style={[styles.clientHeaderEmail, { color: theme.colors.textSecondary }]}>{selectedClient.email}</Text>
               </View>
             </View>
 
@@ -626,10 +628,10 @@ export default function CoachDashboard({
                   <Ionicons
                     name={tab.icon as any}
                     size={18}
-                    color={activeTab === tab.id ? '#3b82f6' : '#6b7280'}
+                    color={activeTab === tab.id ? '#3b82f6' : theme.colors.textSecondary}
                   />
                   <Text
-                    style={[styles.tabText, activeTab === tab.id && styles.tabTextActive]}
+                    style={[styles.tabText, { color: theme.colors.textSecondary }, activeTab === tab.id && styles.tabTextActive]}
                   >
                     {tab.label}
                   </Text>

@@ -19,6 +19,7 @@ import { fitnessService } from '../services/fitnessService';
 import { scanService } from '../services/scanService';
 import type { ScanHistoryItem } from '../services/types';
 import { AuthContext } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 
 // Remove static screenWidth - use dynamic values instead
 const BASE_SCREEN_WIDTH = 390; // Reference for scaling
@@ -31,6 +32,7 @@ const TABS = ['Summary', 'Insights', 'Wellness', 'Trends', 'Predictive'];
 
 const OverviewDashboard: React.FC<BaseDashboardProps> = ({ onAnalyze }) => {
   const { user } = React.useContext(AuthContext);
+  const { theme } = useTheme();
   const layout = useDashboardLayout();
   const { navigation, navigateToCamera, navigateToChat, handleAnalyze } = useDashboardNavigation();
   const isFocused = useIsFocused(); // Check if Health tab is actually visible
@@ -732,7 +734,7 @@ const OverviewDashboard: React.FC<BaseDashboardProps> = ({ onAnalyze }) => {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <StatusBar barStyle="light-content" backgroundColor="#059669" />
       {/* Status bar area - Always emerald */}
       <View style={{ height: Platform.OS === 'android' ? StatusBar.currentHeight || 0 : insets.top, backgroundColor: '#059669' }} />
@@ -789,7 +791,7 @@ const OverviewDashboard: React.FC<BaseDashboardProps> = ({ onAnalyze }) => {
 
       <Animated.ScrollView 
         showsVerticalScrollIndicator={false} 
-        style={styles.scrollView}
+        style={[styles.scrollView, { backgroundColor: theme.colors.background }]}
         scrollEventThrottle={16}
         onScroll={Animated.event(
           [{ nativeEvent: { contentOffset: { y: scrollY } } }],
@@ -819,7 +821,7 @@ const OverviewDashboard: React.FC<BaseDashboardProps> = ({ onAnalyze }) => {
               {/* Header with Icon and Close Button */}
               <View style={styles.permissionModalHeader}>
                 <View style={{ width: 40 }} />
-                <View style={styles.permissionModalIconContainer}>
+                <View style={[styles.permissionModalIconContainer, { backgroundColor: theme.colors.background }]}>
                   <Ionicons name="fitness" size={48} color={dashboardColors.primary} />
                 </View>
                 <CloseButton onPress={() => setShowPermissionModal(false)} />
@@ -831,8 +833,8 @@ const OverviewDashboard: React.FC<BaseDashboardProps> = ({ onAnalyze }) => {
                 contentContainerStyle={styles.permissionModalScrollContent}
                 showsVerticalScrollIndicator={false}
               >
-                <Text style={styles.permissionModalTitle}>Enable Health Tracking</Text>
-                <Text style={styles.permissionModalDescription}>
+                <Text style={[styles.permissionModalTitle, { color: theme.colors.text }]}>Enable Health Tracking</Text>
+                <Text style={[styles.permissionModalDescription, { color: theme.colors.textSecondary }]}>
                   WiHY uses Health Connect to access your health data from Samsung Health, Google Fit, and other fitness apps for personalized insights.
                 </Text>
 
@@ -843,8 +845,8 @@ const OverviewDashboard: React.FC<BaseDashboardProps> = ({ onAnalyze }) => {
                       <Ionicons name="footsteps" size={24} color={dashboardColors.primary} />
                     </View>
                     <View style={styles.permissionFeatureTextContainer}>
-                      <Text style={styles.permissionFeatureItemTitle}>Activity Tracking</Text>
-                      <Text style={styles.permissionFeatureItemDesc}>Steps, distance, and active minutes from any fitness app</Text>
+                      <Text style={[styles.permissionFeatureItemTitle, { color: theme.colors.text }]}>Activity Tracking</Text>
+                      <Text style={[styles.permissionFeatureItemDesc, { color: theme.colors.textSecondary }]}>Steps, distance, and active minutes from any fitness app</Text>
                     </View>
                   </View>
 
@@ -853,8 +855,8 @@ const OverviewDashboard: React.FC<BaseDashboardProps> = ({ onAnalyze }) => {
                       <Ionicons name="heart" size={24} color="#ef4444" />
                     </View>
                     <View style={styles.permissionFeatureTextContainer}>
-                      <Text style={styles.permissionFeatureItemTitle}>Health Metrics</Text>
-                      <Text style={styles.permissionFeatureItemDesc}>Heart rate, weight, sleep, and body measurements</Text>
+                      <Text style={[styles.permissionFeatureItemTitle, { color: theme.colors.text }]}>Health Metrics</Text>
+                      <Text style={[styles.permissionFeatureItemDesc, { color: theme.colors.textSecondary }]}>Heart rate, weight, sleep, and body measurements</Text>
                     </View>
                   </View>
 
@@ -863,13 +865,13 @@ const OverviewDashboard: React.FC<BaseDashboardProps> = ({ onAnalyze }) => {
                       <Ionicons name="barbell" size={24} color="#4cbb17" />
                     </View>
                     <View style={styles.permissionFeatureTextContainer}>
-                      <Text style={styles.permissionFeatureItemTitle}>Workout History</Text>
-                      <Text style={styles.permissionFeatureItemDesc}>Exercise sessions and calories burned</Text>
+                      <Text style={[styles.permissionFeatureItemTitle, { color: theme.colors.text }]}>Workout History</Text>
+                      <Text style={[styles.permissionFeatureItemDesc, { color: theme.colors.textSecondary }]}>Exercise sessions and calories burned</Text>
                     </View>
                   </View>
                 </View>
 
-                <Text style={styles.permissionModalNote}>
+                <Text style={[styles.permissionModalNote, { color: theme.colors.textSecondary }]}>
                   <Ionicons name="shield-checkmark" size={16} color="#10b981" /> 
                   Works with your device's health app. Your data stays private and secure.
                 </Text>
@@ -891,7 +893,7 @@ const OverviewDashboard: React.FC<BaseDashboardProps> = ({ onAnalyze }) => {
                   style={styles.permissionSecondaryButton}
                   onPress={() => setShowPermissionModal(false)}
                 >
-                  <Text style={styles.permissionSecondaryButtonText}>Maybe Later</Text>
+                  <Text style={[styles.permissionSecondaryButtonText, { color: theme.colors.textSecondary }]}>Maybe Later</Text>
                 </TouchableOpacity>
               </ScrollView>
             </SafeAreaView>

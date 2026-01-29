@@ -20,6 +20,7 @@ import { checkoutService } from '../services/checkoutService';
 import { purchaseService } from '../services/purchaseService';
 import { authService } from '../services/authService';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import EmailCheckoutModal from '../components/checkout/EmailCheckoutModal';
 import MultiAuthLogin from '../components/auth/MultiAuthLogin';
 import { WebNavHeader } from '../components/web/WebNavHeader';
@@ -263,6 +264,7 @@ interface Props {
 export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
   const { width } = useWindowDimensions();
   const { user } = useAuth();
+  const { theme } = useTheme();
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
   const [isLoading, setIsLoading] = useState(false);
   const [showEmailModal, setShowEmailModal] = useState(false);
@@ -1060,7 +1062,7 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
 
   // Native app render
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]} edges={['top']}>
       <View style={styles.header}>
         <Pressable 
           onPress={() => navigation.navigate('Main')} 

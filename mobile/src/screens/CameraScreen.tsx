@@ -21,6 +21,7 @@ import { ensureCameraPermission, ensureMediaLibraryPermission } from '../utils/p
 import { compressImageForUpload } from '../utils/imageCompression';
 import { scanService } from '../services';
 import { AuthContext } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import PlansModal from '../components/PlansModal';
 
 type NavigationProp = StackNavigationProp<RootStackParamList>;
@@ -38,6 +39,7 @@ export default function CameraScreen() {
   const navigation = useNavigation<NavigationProp>();
   const route = useRoute<CameraRouteProp>();
   const { user } = useContext(AuthContext);
+  const { theme } = useTheme();
   const autoScanEnabled = user?.preferences?.autoScan ?? false;
   const insets = useSafeAreaInsets();
   const topOffset = Math.max(insets.top, 16);
@@ -882,7 +884,7 @@ export default function CameraScreen() {
 
   if (hasPermission === null) {
     return (
-      <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
+      <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]} edges={['top', 'left', 'right']}>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#3b82f6" />
           <Text style={styles.loadingText}>Checking permissions...</Text>
@@ -893,7 +895,7 @@ export default function CameraScreen() {
 
   if (hasPermission === false) {
     return (
-      <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
+      <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]} edges={['top', 'left', 'right']}>
         <View style={styles.permissionDeniedContainer}>
           <Ionicons name="videocam-off" size={64} color="#6b7280" />
           <Text style={styles.permissionDeniedTitle}>Camera Access Required</Text>
@@ -912,7 +914,7 @@ export default function CameraScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]} edges={['top', 'left', 'right']}>
       {/* Camera View Area */}
       <View style={styles.cameraContainer}>
         {/* Real Camera View */}

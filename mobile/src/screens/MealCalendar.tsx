@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import SvgIcon from '../components/shared/SvgIcon';
+import { useTheme } from '../context/ThemeContext';
 import { AuthContext } from '../context/AuthContext';
 import { mealCalendarService } from '../services/mealCalendarService';
 import { CalendarDay as MealCalendarDay } from '../services/mealCalendarService';
@@ -33,6 +34,7 @@ const MealCalendar: React.FC<MealCalendarProps> = ({ isDashboardMode = false }) 
   const { user } = useContext(AuthContext);
   const userId = user?.id;
   const insets = useSafeAreaInsets();
+  const { theme } = useTheme();
   
   // Collapsing header animation
   const scrollY = useRef(new Animated.Value(0)).current;
@@ -178,7 +180,7 @@ const MealCalendar: React.FC<MealCalendarProps> = ({ isDashboardMode = false }) 
   const selectedDayMeals = selectedDayData?.meals || [];
 
   return (
-    <View style={styles.calendarContainer}>
+    <View style={[styles.calendarContainer, { backgroundColor: theme.colors.background }]}>
       {/* Status bar area - solid color */}
       <View style={{ height: insets.top, backgroundColor: '#f59e0b' }} />
       
@@ -204,7 +206,7 @@ const MealCalendar: React.FC<MealCalendarProps> = ({ isDashboardMode = false }) 
         {calendarLoading ? (
           <View style={{ padding: 40, alignItems: 'center' }}>
             <ActivityIndicator size="large" color="#3b82f6" />
-            <Text style={{ marginTop: 16, color: '#6b7280', fontSize: 14 }}>Loading calendar...</Text>
+            <Text style={{ marginTop: 16, color: theme.colors.textSecondary, fontSize: 14 }}>Loading calendar...</Text>
           </View>
         ) : calendarError ? (
           <View style={{ padding: 40, alignItems: 'center' }}>
@@ -220,11 +222,11 @@ const MealCalendar: React.FC<MealCalendarProps> = ({ isDashboardMode = false }) 
         ) : (
           <>
             {/* Month Navigation */}
-            <View style={styles.calendarMonthNav}>
+            <View style={[styles.calendarMonthNav, { backgroundColor: theme.colors.surface }]}>
               <TouchableOpacity onPress={() => handleNavigateMonth(-1)} style={styles.calendarNavButton}>
                 <SvgIcon name="chevron-back" size={24} color="#3b82f6" />
               </TouchableOpacity>
-              <Text style={styles.calendarMonthTitle}>
+              <Text style={[styles.calendarMonthTitle, { color: theme.colors.text }]}>
                 {monthNames[calendarMonth.getMonth()]} {calendarMonth.getFullYear()}
               </Text>
               <TouchableOpacity onPress={() => handleNavigateMonth(1)} style={styles.calendarNavButton}>
@@ -233,14 +235,14 @@ const MealCalendar: React.FC<MealCalendarProps> = ({ isDashboardMode = false }) 
             </View>
             
             {/* Day Names Header */}
-            <View style={styles.calendarDayNames}>
+            <View style={[styles.calendarDayNames, { backgroundColor: theme.colors.surface }]}>
               {dayNames.map((name) => (
-                <Text key={name} style={styles.calendarDayName}>{name}</Text>
+                <Text key={name} style={[styles.calendarDayName, { color: theme.colors.textSecondary }]}>{name}</Text>
               ))}
             </View>
             
             {/* Calendar Grid */}
-            <View style={styles.calendarGrid}>
+            <View style={[styles.calendarGrid, { backgroundColor: theme.colors.surface }]}>
               {calendarGridDays.map((item, index) => (
                 <TouchableOpacity
                   key={index}
@@ -257,6 +259,7 @@ const MealCalendar: React.FC<MealCalendarProps> = ({ isDashboardMode = false }) 
                     <>
                       <Text style={[
                         styles.calendarDayText,
+                        { color: theme.colors.text },
                         isToday(item.date) && styles.calendarDayTextToday,
                         isSelected(item.date) && styles.calendarDayTextSelected,
                       ]}>
@@ -282,9 +285,9 @@ const MealCalendar: React.FC<MealCalendarProps> = ({ isDashboardMode = false }) 
             </View>
             
             {/* Selected Day Meals */}
-            <View style={styles.calendarSelectedDay}>
+            <View style={[styles.calendarSelectedDay, { backgroundColor: theme.colors.surface }]}>
               <View style={styles.calendarSelectedDayHeader}>
-                <Text style={styles.calendarSelectedDayTitle}>
+                <Text style={[styles.calendarSelectedDayTitle, { color: theme.colors.text }]}>
                   {selectedDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
                 </Text>
                 <TouchableOpacity style={styles.addMealButton}>
@@ -308,11 +311,11 @@ const MealCalendar: React.FC<MealCalendarProps> = ({ isDashboardMode = false }) 
                         />
                       </View>
                       <View style={styles.calendarMealInfo}>
-                        <Text style={styles.calendarMealType}>
+                        <Text style={[styles.calendarMealType, { color: theme.colors.textSecondary }]}>
                           {scheduledMeal.meal_slot.charAt(0).toUpperCase() + scheduledMeal.meal_slot.slice(1)}
                         </Text>
-                        <Text style={styles.calendarMealName}>{scheduledMeal.meal.name}</Text>
-                        <Text style={styles.calendarMealMacros}>
+                        <Text style={[styles.calendarMealName, { color: theme.colors.text }]}>{scheduledMeal.meal.name}</Text>
+                        <Text style={[styles.calendarMealMacros, { color: theme.colors.textSecondary }]}>
                           {scheduledMeal.meal.nutrition.calories || 0} cal • {scheduledMeal.meal.nutrition.protein || 0}g protein
                         </Text>
                       </View>
@@ -323,7 +326,7 @@ const MealCalendar: React.FC<MealCalendarProps> = ({ isDashboardMode = false }) 
               ) : (
                 <View style={styles.calendarNoMeals}>
                   <SvgIcon name="restaurant-outline" size={48} color="#d1d5db" />
-                  <Text style={styles.calendarNoMealsText}>No meals planned for this day</Text>
+                  <Text style={[styles.calendarNoMealsText, { color: theme.colors.textSecondary }]}>No meals planned for this day</Text>
                 </View>
               )}
             </View>

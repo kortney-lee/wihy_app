@@ -12,6 +12,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { Ionicons } from '../components/shared';
+import { useTheme } from '../context/ThemeContext';
 import type { RouteProp } from '@react-navigation/native';
 import type { StackNavigationProp } from '@react-navigation/stack';
 import type { RootStackParamList } from '../types/navigation';
@@ -23,13 +24,14 @@ type NavigationProp = StackNavigationProp<RootStackParamList>;
 export default function MealPlanDetails() {
   const route = useRoute<RouteProps>();
   const navigation = useNavigation<NavigationProp>();
+  const { theme } = useTheme();
   const { planId, planName } = route.params || {};
 
   // In a real implementation, this would fetch meal plan details from API
   const [isLoading, setIsLoading] = React.useState(false);
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]} edges={['top']}>
       <GradientDashboardHeader
         title={planName || 'Meal Plan'}
         gradient="createMeals"

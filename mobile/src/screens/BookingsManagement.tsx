@@ -18,6 +18,7 @@ import { dashboardColors, Ionicons, BackToHubButton } from '../components/shared
 import { dashboardTheme } from '../theme/dashboardTheme';
 import { coachService } from '../services';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 
 const spinnerGif = require('../../assets/whatishealthyspinner.gif');
 const isWeb = Platform.OS === 'web';
@@ -44,6 +45,7 @@ export default function BookingsManagement({
   onBack,
 }: BookingsManagementProps) {
   const { coachId } = useAuth();
+  const { theme } = useTheme();
   
   const [selectedFilter, setSelectedFilter] = useState<'all' | 'upcoming' | 'pending' | 'completed'>('upcoming');
   const [bookings, setBookings] = useState<Booking[]>([]);
@@ -343,7 +345,7 @@ export default function BookingsManagement({
 
   if (loading) {
     return (
-      <View style={styles.container}>
+      <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#6366f1" />
           <Text style={styles.loadingText}>Loading bookings...</Text>
@@ -353,7 +355,7 @@ export default function BookingsManagement({
   }
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       {/* Back to Coach Hub button - only on web */}
       {isDashboardMode && onBack && (
         <BackToHubButton

@@ -12,6 +12,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '../components/shared';
 import { AuthContext } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import MultiAuthLogin from '../components/auth/MultiAuthLogin';
 import { WebNavHeader } from '../components/web/WebNavHeader';
 
@@ -226,6 +227,7 @@ const termsData = [
 export default function TermsScreen() {
   const navigation = useNavigation<any>();
   const { user } = useContext(AuthContext);
+  const { theme } = useTheme();
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [expandedSections, setExpandedSections] = useState<ExpandedSections>({});
 
@@ -395,7 +397,7 @@ export default function TermsScreen() {
   );
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <View style={styles.header}>
         <Pressable onPress={() => navigation.goBack()} style={styles.backButton}>
           <Ionicons name="arrow-back" size={24} color={DARK_GRAY} />

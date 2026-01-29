@@ -8,6 +8,7 @@ import { ManualMealForm } from '../components/ManualMealForm';
 import SvgIcon from '../components/shared/SvgIcon';
 import { CloseButton } from '../components/shared';
 import { AuthContext } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import { useCreateMealWithShopping } from '../hooks/useCreateMealWithShopping';
 import { SavedMeal, MealTemplate, MealIngredient } from '../services/mealService';
 import { mealService } from '../services/mealService';
@@ -41,6 +42,7 @@ export default function PlanMealScreen({
   onBack 
 }: PlanMealScreenProps) {
   const { user } = useContext(AuthContext);
+  const { theme } = useTheme();
   const userId = user?.id || '';
   const navigation = useNavigation<NavigationProp>();
   const insets = useSafeAreaInsets();
@@ -504,7 +506,7 @@ export default function PlanMealScreen({
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <StatusBar barStyle="light-content" backgroundColor="#3b82f6" />
       
       {/* Main Form - Now includes inline product search */}
@@ -580,7 +582,7 @@ export default function PlanMealScreen({
         onRequestClose={() => setShowLibrary(false)}
       >
         <SafeAreaView style={{ flex: 1, backgroundColor: '#8b5cf6' }} edges={['top']}>
-          <View style={{ flex: 1, backgroundColor: '#e0f2fe' }}>
+          <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
             {/* Header */}
             <LinearGradient
               colors={['#8b5cf6', '#7c3aed']}

@@ -18,6 +18,7 @@ import type { StackNavigationProp } from '@react-navigation/stack';
 import type { RootStackParamList } from '../types/navigation';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SweepBorder } from '../components/SweepBorder';
+import { useTheme } from '../context/ThemeContext';
 import type { LabelScanResponse, GreenwashingFlag, MarketingClaim } from '../services/types';
 import { chatService } from '../services/chatService';
 
@@ -83,6 +84,7 @@ function getClaimCategoryIcon(category: string): string {
 export default function LabelReader() {
   const route = useRoute<RouteProps>();
   const navigation = useNavigation<NavigationProp>();
+  const { theme } = useTheme();
 
   const { labelData: initialData, context, capturedImage } = (route?.params || {}) as LabelReaderParams;
   
@@ -134,7 +136,7 @@ export default function LabelReader() {
 
   if (!labelData) {
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#ef4444" />
           <Text style={styles.loadingText}>Loading label analysis...</Text>
@@ -153,7 +155,7 @@ export default function LabelReader() {
   const insets = useSafeAreaInsets();
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       {/* Header */}
       <LinearGradient
         colors={['#ef4444', '#dc2626']}

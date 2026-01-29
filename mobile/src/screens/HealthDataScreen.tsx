@@ -12,6 +12,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { AuthContext } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import { userService } from '../services/userService';
 import { WebNavHeader } from '../components/web/WebNavHeader';
 import SvgIcon from '../components/shared/SvgIcon';
@@ -43,6 +44,7 @@ interface HealthMetric {
 export default function HealthDataScreen() {
   const navigation = useNavigation();
   const { user } = useContext(AuthContext);
+  const { theme: appTheme } = useTheme();
   const [loading, setLoading] = useState(true);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [healthData, setHealthData] = useState<HealthMetric[]>([]);
@@ -203,28 +205,28 @@ export default function HealthDataScreen() {
       {!isWeb && (
         <View style={styles.header}>
           <Pressable style={styles.backButton} onPress={() => navigation.goBack()}>
-            <SvgIcon name="arrow-back" size={24} color={theme.text} />
+            <SvgIcon name="arrow-back" size={24} color={appTheme.colors.text} />
           </Pressable>
-          <Text style={styles.headerTitle}>Health Data</Text>
+          <Text style={[styles.headerTitle, { color: appTheme.colors.text }]}>Health Data</Text>
           <View style={styles.headerSpacer} />
         </View>
       )}
       
       {/* Web page title */}
       {isWeb && (
-        <Text style={styles.webPageTitle}>Health Data</Text>
+        <Text style={[styles.webPageTitle, { color: appTheme.colors.text }]}>Health Data</Text>
       )}
 
       {loading ? (
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={theme.accent} />
-          <Text style={styles.loadingText}>Loading health data...</Text>
+          <ActivityIndicator size="large" color={appTheme.colors.primary} />
+          <Text style={[styles.loadingText, { color: appTheme.colors.textSecondary }]}>Loading health data...</Text>
         </View>
       ) : (
         <>
           {/* Health Metrics */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Your Health Metrics</Text>
+            <Text style={[styles.sectionTitle, { color: appTheme.colors.text }]}>Your Health Metrics</Text>
             
             {healthData.length > 0 ? (
               <View style={styles.metricsGrid}>
@@ -233,18 +235,18 @@ export default function HealthDataScreen() {
                     <View style={[styles.metricIcon, { backgroundColor: `${metric.color}20` }]}>
                       <SvgIcon name={metric.icon as any} size={24} color={metric.color} />
                     </View>
-                    <Text style={styles.metricValue}>
+                    <Text style={[styles.metricValue, { color: appTheme.colors.text }]}>
                       {metric.value} {metric.unit}
                     </Text>
-                    <Text style={styles.metricLabel}>{metric.label}</Text>
+                    <Text style={[styles.metricLabel, { color: appTheme.colors.textSecondary }]}>{metric.label}</Text>
                   </View>
                 ))}
               </View>
             ) : (
               <View style={styles.emptyState}>
-                <SvgIcon name="analytics" size={48} color={theme.textSecondary} />
-                <Text style={styles.emptyText}>No health data yet</Text>
-                <Text style={styles.emptyHint}>
+                <SvgIcon name="analytics" size={48} color={appTheme.colors.textSecondary} />
+                <Text style={[styles.emptyText, { color: appTheme.colors.text }]}>No health data yet</Text>
+                <Text style={[styles.emptyHint, { color: appTheme.colors.textSecondary }]}>
                   Complete your profile to see your health metrics here
                 </Text>
               </View>
@@ -253,61 +255,61 @@ export default function HealthDataScreen() {
 
           {/* Activity Stats */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Activity Summary</Text>
+            <Text style={[styles.sectionTitle, { color: appTheme.colors.text }]}>Activity Summary</Text>
             
             <View style={styles.statsGrid}>
               <View style={styles.statItem}>
                 <SvgIcon name="barcode" size={24} color={theme.accent} />
-                <Text style={styles.statValue}>{stats.scansCount}</Text>
-                <Text style={styles.statLabel}>Scans</Text>
+                <Text style={[styles.statValue, { color: appTheme.colors.text }]}>{stats.scansCount}</Text>
+                <Text style={[styles.statLabel, { color: appTheme.colors.textSecondary }]}>Scans</Text>
               </View>
               <View style={styles.statItem}>
                 <SvgIcon name="restaurant" size={24} color={theme.success} />
-                <Text style={styles.statValue}>{stats.mealsLogged}</Text>
-                <Text style={styles.statLabel}>Meals Logged</Text>
+                <Text style={[styles.statValue, { color: appTheme.colors.text }]}>{stats.mealsLogged}</Text>
+                <Text style={[styles.statLabel, { color: appTheme.colors.textSecondary }]}>Meals Logged</Text>
               </View>
               <View style={styles.statItem}>
                 <SvgIcon name="chatbubble" size={24} color="#8b5cf6" />
-                <Text style={styles.statValue}>{stats.chatSessions}</Text>
-                <Text style={styles.statLabel}>Chat Sessions</Text>
+                <Text style={[styles.statValue, { color: appTheme.colors.text }]}>{stats.chatSessions}</Text>
+                <Text style={[styles.statLabel, { color: appTheme.colors.textSecondary }]}>Chat Sessions</Text>
               </View>
               <View style={styles.statItem}>
                 <SvgIcon name="calendar" size={24} color={theme.warning} />
-                <Text style={styles.statValue}>{stats.daysActive}</Text>
-                <Text style={styles.statLabel}>Days Active</Text>
+                <Text style={[styles.statValue, { color: appTheme.colors.text }]}>{stats.daysActive}</Text>
+                <Text style={[styles.statLabel, { color: appTheme.colors.textSecondary }]}>Days Active</Text>
               </View>
             </View>
           </View>
 
           {/* Data Management */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Data Management</Text>
+            <Text style={[styles.sectionTitle, { color: appTheme.colors.text }]}>Data Management</Text>
             
             <Pressable style={styles.actionButton} onPress={handleExportData}>
-              <SvgIcon name="download" size={20} color={theme.accent} />
+              <SvgIcon name="download" size={20} color={appTheme.colors.primary} />
               <View style={styles.actionContent}>
-                <Text style={styles.actionTitle}>Export Your Data</Text>
-                <Text style={styles.actionSubtitle}>Download all your health data as CSV</Text>
+                <Text style={[styles.actionTitle, { color: appTheme.colors.text }]}>Export Your Data</Text>
+                <Text style={[styles.actionSubtitle, { color: appTheme.colors.textSecondary }]}>Download all your health data as CSV</Text>
               </View>
-              <SvgIcon name="chevron-forward" size={20} color={theme.textSecondary} />
+              <SvgIcon name="chevron-forward" size={20} color={appTheme.colors.textSecondary} />
             </Pressable>
 
             <Pressable style={styles.actionButton} onPress={() => navigation.navigate('Privacy' as never)}>
-              <SvgIcon name="shield-checkmark" size={20} color={theme.accent} />
+              <SvgIcon name="shield-checkmark" size={20} color={appTheme.colors.primary} />
               <View style={styles.actionContent}>
-                <Text style={styles.actionTitle}>Privacy Policy</Text>
-                <Text style={styles.actionSubtitle}>Learn how we protect your data</Text>
+                <Text style={[styles.actionTitle, { color: appTheme.colors.text }]}>Privacy Policy</Text>
+                <Text style={[styles.actionSubtitle, { color: appTheme.colors.textSecondary }]}>Learn how we protect your data</Text>
               </View>
-              <SvgIcon name="chevron-forward" size={20} color={theme.textSecondary} />
+              <SvgIcon name="chevron-forward" size={20} color={appTheme.colors.textSecondary} />
             </Pressable>
 
             <Pressable style={[styles.actionButton, styles.dangerButton]} onPress={handleDeleteData}>
               <SvgIcon name="trash" size={20} color={theme.error} />
               <View style={styles.actionContent}>
                 <Text style={[styles.actionTitle, { color: theme.error }]}>Delete All Data</Text>
-                <Text style={styles.actionSubtitle}>Permanently remove your health data</Text>
+                <Text style={[styles.actionSubtitle, { color: appTheme.colors.textSecondary }]}>Permanently remove your health data</Text>
               </View>
-              <SvgIcon name="chevron-forward" size={20} color={theme.textSecondary} />
+              <SvgIcon name="chevron-forward" size={20} color={appTheme.colors.textSecondary} />
             </Pressable>
           </View>
 
@@ -333,7 +335,7 @@ export default function HealthDataScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <SafeAreaView style={[styles.container, { backgroundColor: appTheme.colors.background }]} edges={['top']}>
       {content}
     </SafeAreaView>
   );

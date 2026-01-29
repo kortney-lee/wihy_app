@@ -23,6 +23,7 @@ import { WebPageWrapper } from '../components/shared';
 import { coachService, fitnessService, nutritionService, mealService, ClientNote, NoteCategory } from '../services';
 import { healthDataService, HealthMetrics, WeeklyHealthData } from '../services/healthDataService';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 
 const isWeb = Platform.OS === 'web';
 
@@ -159,6 +160,7 @@ type TabType = 'overview' | 'fitness' | 'nutrition' | 'health' | 'body' | 'notes
 
 export default function ClientProgressScreen() {
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
+  const { theme } = useTheme();
   const route = useRoute<RouteProp<RootStackParamList, 'ClientProgress'>>();
   const { coachId } = useAuth();
   
@@ -1046,7 +1048,7 @@ export default function ClientProgressScreen() {
           </View>
           
           <View style={styles.healthVitalItem}>
-            <View style={[styles.healthVitalIcon, { backgroundColor: '#e0f2fe' }]}>
+            <View style={[styles.healthVitalIcon, { backgroundColor: theme.colors.background }]}>
               <Ionicons name="water" size={20} color="#0ea5e9" />
             </View>
             <View style={styles.healthVitalInfo}>
@@ -1307,7 +1309,7 @@ export default function ClientProgressScreen() {
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#3b82f6" />
           <Text style={styles.loadingText}>Loading client progress...</Text>
@@ -1318,7 +1320,7 @@ export default function ClientProgressScreen() {
 
   if (error) {
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
         <View style={styles.errorContainer}>
           <Ionicons name="alert-circle" size={48} color="#ef4444" />
           <Text style={styles.errorText}>{error}</Text>
@@ -1332,7 +1334,7 @@ export default function ClientProgressScreen() {
 
   return (
     <WebPageWrapper activeTab="health">
-      <View style={styles.container}>
+      <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
         {/* Status bar area - solid color */}
         <View style={{ height: insets.top, backgroundColor: '#3b82f6' }} />
         

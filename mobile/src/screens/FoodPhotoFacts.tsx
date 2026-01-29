@@ -19,6 +19,7 @@ import type { RootStackParamList } from '../types/navigation';
 import { LinearGradient } from 'expo-linear-gradient';
 import { dashboardTheme } from '../theme/dashboardTheme';
 import { SweepBorder } from '../components/SweepBorder';
+import { useTheme } from '../context/ThemeContext';
 import type { PhotoScanResponse } from '../services/types';
 import { chatService } from '../services/chatService';
 
@@ -59,6 +60,7 @@ function getNovaColor(nova: number) {
 export default function FoodPhotoFacts() {
   const route = useRoute<RouteProps>();
   const navigation = useNavigation<NavigationProp>();
+  const { theme } = useTheme();
 
   const { photoData: initialData, context, capturedImage } = route?.params || { 
     photoData: null, 
@@ -92,7 +94,7 @@ export default function FoodPhotoFacts() {
 
   if (!photoData) {
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#f97316" />
           <Text style={styles.loadingText}>Loading food analysis...</Text>
@@ -117,7 +119,7 @@ export default function FoodPhotoFacts() {
   const insets = useSafeAreaInsets();
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       {/* Header */}
       <LinearGradient
         colors={['#f97316', '#ea580c']}

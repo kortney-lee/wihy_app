@@ -28,6 +28,7 @@ import { dashboardTheme } from '../theme/dashboardTheme';
 import { SweepBorder } from '../components/SweepBorder';
 import SvgIcon from '../components/shared/SvgIcon';
 import { AuthContext } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import { mealService, MealTemplate, QUICK_TEMPLATE_PRESETS, MealType, CookingSkillLevel, MealVariety, TimePerMeal, CreateMealPlanRequest, MealPlanResponse, CalendarDay, SavedMeal, DietOption } from '../services/mealService';
 import { createMealPlan, generateShoppingList } from '../services/mealPlanService';
 import { createShoppingList, createInstacartLinkFromMealPlan, ShoppingListItem } from '../services/instacartService';
@@ -189,6 +190,7 @@ interface CreateMealsProps {
 
 export default function CreateMeals({ isDashboardMode = false, onBack }: CreateMealsProps) {
   const { user } = useContext(AuthContext);
+  const { theme } = useTheme();
   const userId = user?.id;
   const navigation = useNavigation<NavigationProp>();
   const scrollViewRef = useRef<ScrollView>(null);
@@ -2573,7 +2575,7 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
 
   // Render Dashboard View
   const renderDashboard = () => (
-    <View style={{ flex: 1, backgroundColor: '#e0f2fe' }}>
+    <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
       {/* Status bar area - solid color */}
       <View style={{ height: insets.top, backgroundColor: '#ef4444' }} />
       
@@ -2942,7 +2944,7 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
         onRequestClose={() => setShowLibrary(false)}
       >
         <SafeAreaView style={{ flex: 1, backgroundColor: '#8b5cf6' }} edges={['top']}>
-          <View style={{ flex: 1, backgroundColor: '#e0f2fe' }}>
+          <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
             <ScrollView 
               showsVerticalScrollIndicator={false}
               contentContainerStyle={{ paddingBottom: 32 }}
@@ -3869,7 +3871,7 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
         }}
       >
         <SafeAreaView style={{ flex: 1, backgroundColor: '#f59e0b' }} edges={['top']}>
-          <View style={{ flex: 1, backgroundColor: '#e0f2fe' }}>
+          <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
             <ScrollView 
               showsVerticalScrollIndicator={false}
               bounces={true}

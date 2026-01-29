@@ -12,6 +12,7 @@ import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '../components/shared';
 import type { StackNavigationProp } from '@react-navigation/stack';
 import { AuthContext } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import { colors, sizes } from '../theme/design-tokens';
 
 type NavigationProp = StackNavigationProp<any, 'OnboardingFlow'>;
@@ -91,6 +92,7 @@ const onboardingSteps: OnboardingStep[] = [
 const OnboardingFlow: React.FC = () => {
   const navigation = useNavigation<NavigationProp>();
   const { user, updateUser } = useContext(AuthContext);
+  const { theme } = useTheme();
   const [currentStep, setCurrentStep] = useState(0);
   const [completedSteps, setCompletedSteps] = useState<string[]>([]);
 
@@ -155,7 +157,7 @@ const OnboardingFlow: React.FC = () => {
   const progress = ((currentStep + 1) / onboardingSteps.length) * 100;
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <View style={styles.header}>
         <TouchableOpacity onPress={handleSkipToApp}>
           <Text style={styles.skipButton}>Skip</Text>

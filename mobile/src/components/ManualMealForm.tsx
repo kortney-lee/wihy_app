@@ -18,6 +18,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import SvgIcon from './shared/SvgIcon';
 import { SweepBorder } from './SweepBorder';
 import { colors } from '../theme/design-tokens';
+import { useTheme } from '../context/ThemeContext';
 
 const isWeb = Platform.OS === 'web';
 
@@ -95,6 +96,7 @@ export const ManualMealForm: React.FC<ManualMealFormProps> = ({
   mealToEdit,
   onClearMealToEdit,
 }) => {
+  const { theme } = useTheme();
   // Form state
   const [mealName, setMealName] = useState('');
   const [servingSize, setServingSize] = useState('1');
@@ -254,7 +256,7 @@ export const ManualMealForm: React.FC<ManualMealFormProps> = ({
   };
 
   return (
-    <View style={styles.formContainer}>
+    <View style={[styles.formContainer, { backgroundColor: theme.colors.background }]}>
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Header */}
         <LinearGradient

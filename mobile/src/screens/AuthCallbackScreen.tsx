@@ -14,6 +14,7 @@ import { useNavigation, useRoute, CommonActions } from '@react-navigation/native
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { authService } from '../services/authService';
 import { AuthContext } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import { colors } from '../theme/design-tokens';
 
 // State storage key for CSRF verification
@@ -31,6 +32,7 @@ export default function AuthCallbackScreen() {
   const navigation = useNavigation<any>();
   const route = useRoute();
   const { signIn } = useContext(AuthContext);
+  const { theme } = useTheme();
   const [status, setStatus] = useState<'processing' | 'success' | 'error'>('processing');
   const [errorMessage, setErrorMessage] = useState<string>('');
 
@@ -229,7 +231,7 @@ export default function AuthCallbackScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       {status === 'processing' && (
         <>
           <ActivityIndicator size="large" color={colors.primary} />

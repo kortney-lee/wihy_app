@@ -13,6 +13,7 @@ import {
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { Ionicons } from '../components/shared';
+import { useTheme } from '../context/ThemeContext';
 import type { RouteProp } from '@react-navigation/native';
 import type { StackNavigationProp } from '@react-navigation/stack';
 import type { RootStackParamList } from '../types/navigation';
@@ -51,6 +52,7 @@ function getSafetyBadgeColor(hasIssue: boolean) {
 export default function BeautyFacts() {
   const route = useRoute<RouteProps>();
   const navigation = useNavigation<NavigationProp>();
+  const { theme } = useTheme();
 
   const { product: initialProduct, context } = route?.params || { product: null, context: null };
   
@@ -117,7 +119,7 @@ export default function BeautyFacts() {
 
   if (!product) {
     return (
-      <View style={styles.container}>
+      <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
         <View style={[styles.loadingContainer, { paddingTop: insets.top }]}>
           <ActivityIndicator size="large" color="#ec4899" />
           <Text style={styles.loadingText}>Loading product details...</Text>
@@ -130,7 +132,7 @@ export default function BeautyFacts() {
   const hasAnyConcerns = ingredients.concerns.length > 0 || ingredients.warnings.length > 0;
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       {/* Header */}
       <LinearGradient
         colors={['#ec4899', '#db2777']}

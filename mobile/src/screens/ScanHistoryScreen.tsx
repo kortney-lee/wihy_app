@@ -18,6 +18,7 @@ import type { StackNavigationProp } from '@react-navigation/stack';
 import type { RootStackParamList } from '../navigation/AppNavigator';
 import { scanService } from '../services/scanService';
 import { AuthContext } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import type { ScanHistoryItem } from '../services/types';
 
 type NavigationProp = StackNavigationProp<RootStackParamList>;
@@ -28,6 +29,7 @@ const AnimatedFlatList = Animated.createAnimatedComponent(FlatList<ScanHistoryIt
 export default function ScanHistoryScreen() {
   const navigation = useNavigation<NavigationProp>();
   const { user } = useContext(AuthContext);
+  const { theme } = useTheme();
   const insets = useSafeAreaInsets();
   const [scans, setScans] = useState<ScanHistoryItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -210,10 +212,10 @@ export default function ScanHistoryScreen() {
             <Ionicons name={getScanIcon(item.scan_type) as any} size={24} color={scanColor} />
           </View>
           <View style={styles.scanInfo}>
-            <Text style={styles.scanTitle}>
+            <Text style={[styles.scanTitle, { color: theme.colors.text }]}>
               {item.product?.name || item.medication?.name || 'Scan'}
             </Text>
-            <Text style={styles.scanDate}>
+            <Text style={[styles.scanDate, { color: theme.colors.textSecondary }]}>
               {new Date(item.scan_timestamp).toLocaleDateString('en-US', {
                 month: 'short',
                 day: 'numeric',
@@ -279,10 +281,11 @@ export default function ScanHistoryScreen() {
       <Ionicons 
         name={icon as any} 
         size={18} 
-        color={filter === value ? '#fff' : '#6b7280'} 
+        color={filter === value ? '#fff' : theme.colors.textSecondary} 
       />
       <Text style={[
         styles.filterButtonText,
+        { color: theme.colors.textSecondary },
         filter === value && styles.filterButtonTextActive,
       ]}>
         {label}
@@ -292,17 +295,17 @@ export default function ScanHistoryScreen() {
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#3b82f6" />
-          <Text style={styles.loadingText}>Loading history...</Text>
+          <Text style={[styles.loadingText, { color: theme.colors.textSecondary }]}>Loading history...</Text>
         </View>
       </SafeAreaView>
     );
   }
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       {/* Status bar area - solid color */}
       <View style={{ height: insets.top, backgroundColor: '#3b82f6' }} />
       
@@ -345,8 +348,8 @@ export default function ScanHistoryScreen() {
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
             <Ionicons name="scan" size={64} color="#d1d5db" />
-            <Text style={styles.emptyText}>No scans yet</Text>
-            <Text style={styles.emptySubtext}>
+            <Text style={[styles.emptyText, { color: theme.colors.textSecondary }]}>No scans yet</Text>
+            <Text style={[styles.emptySubtext, { color: theme.colors.textSecondary }]}>
               Your scan history will appear here
             </Text>
           </View>

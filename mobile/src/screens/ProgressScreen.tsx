@@ -4,6 +4,7 @@ import type { CompositeNavigationProp } from '@react-navigation/native';
 import type { StackNavigationProp } from '@react-navigation/stack';
 import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import type { TabParamList, RootStackParamList } from '../types/navigation';
+import { useTheme } from '../context/ThemeContext';
 import MyProgressDashboard from './MyProgressDashboard';
 
 type NavigationProp = CompositeNavigationProp<
@@ -13,6 +14,7 @@ type NavigationProp = CompositeNavigationProp<
 
 const ProgressScreen: React.FC = () => {
   const navigation = useNavigation<NavigationProp>();
+  const { theme } = useTheme();
 
   const handleToggleAction = (actionId: string) => {
     console.log('Action toggled:', actionId);

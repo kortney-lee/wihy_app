@@ -18,6 +18,7 @@ import SvgIcon from '../components/shared/SvgIcon';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { AuthContext } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import { userService, Coach, CoachClient, CreateCoachInput } from '../services/userService';
 import { familyService, FamilyMember as FamilyServiceMember, FamilyRole } from '../services/familyService';
 import { coachService, Client, ClientDashboard } from '../services/coachService';
@@ -95,6 +96,7 @@ export default function EnrollmentScreen() {
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   const route = useRoute<RouteProp<RootStackParamList, 'Enrollment'>>();
   const { user } = useContext(AuthContext);
+  const { theme: themeContext } = useTheme();
   
   // Get initial tab from navigation params, default to 'parent'
   const initialTab = route.params?.tab || 'parent';
@@ -826,7 +828,7 @@ export default function EnrollmentScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <SafeAreaView style={[styles.container, { backgroundColor: themeContext.colors.background }]} edges={['top']}>
       {/* Header */}
       <View style={styles.header}>
         <Pressable style={styles.backButton} onPress={() => navigation.goBack()}>

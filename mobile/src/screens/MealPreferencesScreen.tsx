@@ -17,6 +17,7 @@ import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { Ionicons } from '../components/shared';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { AuthContext } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import { mealService, MealPlanningPreferences, PlanningFocus, CookingSkillLevel } from '../services/mealService';
 import { RootStackParamList } from '../types/navigation';
 import { GradientDashboardHeader } from '../components/shared';
@@ -89,6 +90,7 @@ const STORE_OPTIONS = [
 
 export default function MealPreferencesScreen() {
   const { user } = useContext(AuthContext);
+  const { theme } = useTheme();
   const navigation = useNavigation<NavigationProp>();
   const route = useRoute<RouteProps>();
 
@@ -210,7 +212,7 @@ export default function MealPreferencesScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]} edges={['top']}>
       <StatusBar barStyle="light-content" backgroundColor="#ef4444" translucent={false} />
       {/* Fixed Header - Using GradientDashboardHeader */}
       <GradientDashboardHeader
@@ -227,7 +229,7 @@ export default function MealPreferencesScreen() {
         style={styles.keyboardView}
       >
         <ScrollView
-          style={styles.scrollView}
+          style={[styles.scrollView, { backgroundColor: theme.colors.background }]}
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
         >

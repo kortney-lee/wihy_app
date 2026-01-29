@@ -18,6 +18,7 @@ import { dashboardTheme } from '../theme/dashboardTheme';
 import { useDashboardLayout } from '../hooks/useDashboardLayout';
 import { familyService, Family, FamilyMember, FamilyDashboard as FamilyDashboardData } from '../services/familyService';
 import { AuthContext } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import { useNavigation } from '@react-navigation/native';
 import type { StackNavigationProp } from '@react-navigation/stack';
 import type { RootStackParamList } from '../types/navigation';
@@ -40,6 +41,7 @@ interface ChildHealthData {
 
 export default function ParentDashboard() {
   const { user } = useContext(AuthContext);
+  const { theme } = useTheme();
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   const [selectedChild, setSelectedChild] = useState<ChildHealthData | null>(null);
   const [refreshing, setRefreshing] = useState(false);
@@ -330,7 +332,7 @@ export default function ParentDashboard() {
   // Loading state
   if (isLoading) {
     return (
-      <View style={styles.container}>
+      <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
         <View style={{ height: insets.top, backgroundColor: '#f59e0b' }} />
         <View style={[styles.collapsibleHeader, { height: HEADER_MAX_HEIGHT }]}>
           <View style={styles.headerContent}>
@@ -349,7 +351,7 @@ export default function ParentDashboard() {
   // Error state - Navigate to Enrollment to set up family
   if (error) {
     return (
-      <View style={styles.container}>
+      <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
         <View style={{ height: insets.top, backgroundColor: '#f59e0b' }} />
         <View style={[styles.collapsibleHeader, { height: HEADER_MAX_HEIGHT }]}>
           <View style={styles.headerContent}>
@@ -389,7 +391,7 @@ export default function ParentDashboard() {
   }
 
   return (
-      <View style={styles.container}>
+      <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
         {/* Status bar area - solid color */}
         <View style={{ height: insets.top, backgroundColor: '#f59e0b' }} />
         

@@ -3,6 +3,7 @@ import { View, StyleSheet, Platform } from 'react-native';
 import { useNavigation, useIsFocused } from '@react-navigation/native';
 import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import { AuthContext } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import { hasFamilyAccess, hasCoachAccess } from '../utils/capabilities';
 import { WebPageWrapper } from '../components/shared';
 import DashboardPage from './DashboardPage';
@@ -22,6 +23,7 @@ export default function HealthHub() {
   const navigation = useNavigation<BottomTabNavigationProp<any>>();
   const isFocused = useIsFocused();
   const { user } = useContext(AuthContext);
+  const { theme } = useTheme();
   const [currentContext, setCurrentContext] = useState<DashboardContext>('personal');
   const [showMenu, setShowMenu] = useState(false);
 
@@ -97,7 +99,7 @@ export default function HealthHub() {
 
   return (
     <WebPageWrapper activeTab="health">
-      <View style={styles.container}>
+      <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
         {renderDashboard()}
       </View>
     </WebPageWrapper>

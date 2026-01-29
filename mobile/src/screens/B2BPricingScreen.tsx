@@ -14,6 +14,7 @@ import { Ionicons } from '../components/shared';
 import { RootStackParamList } from '../types/navigation';
 import { colors, borderRadius } from '../theme/design-tokens';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import { WebNavHeader } from '../components/web/WebNavHeader';
 
 // Import CSS for web only
@@ -142,6 +143,7 @@ interface Props {
 export const B2BPricingScreen: React.FC<Props> = ({ navigation }) => {
   const { width } = useWindowDimensions();
   const { user } = useAuth();
+  const { theme } = useTheme();
   
   const isDesktop = width >= 1024;
   const isTablet = width >= 768;
@@ -312,7 +314,7 @@ export const B2BPricingScreen: React.FC<Props> = ({ navigation }) => {
 
   // Native render (simplified for now)
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]} edges={['top']}>
       <View style={styles.header}>
         <Pressable 
           onPress={() => navigation.goBack()} 

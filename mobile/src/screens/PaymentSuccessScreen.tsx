@@ -14,6 +14,7 @@ import { useNavigation, useRoute, CommonActions } from '@react-navigation/native
 import { authService } from '../services/authService';
 import { checkoutService } from '../services/checkoutService';
 import { AuthContext } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import { colors } from '../theme/design-tokens';
 
 interface PaymentSuccessParams {
@@ -24,6 +25,7 @@ export default function PaymentSuccessScreen() {
   const navigation = useNavigation<any>();
   const route = useRoute();
   const { user, refreshUserContext } = useContext(AuthContext);
+  const { theme } = useTheme();
   const [status, setStatus] = useState<'processing' | 'success' | 'error'>('processing');
   const [errorMessage, setErrorMessage] = useState<string>('');
   const [planName, setPlanName] = useState<string>('');
@@ -85,7 +87,7 @@ export default function PaymentSuccessScreen() {
       setPlanName(planName);
 
       console.log('Payment login complete:', {
-        email: checkoutData.session?.email,
+        email: checkoutResult.session?.email,
         plan: planName,
       });
 
@@ -301,7 +303,7 @@ export default function PaymentSuccessScreen() {
 
   // Native view - React Native components
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       {status === 'processing' && (
         <>
           <ActivityIndicator size="large" color={colors.primary} />

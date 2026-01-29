@@ -2,15 +2,17 @@ import React, { useState, useContext } from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AuthContext } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import MultiAuthLogin from '../components/auth/MultiAuthLogin';
 import { colors } from '../theme/design-tokens';
 
 export default function Login() {
   const { user } = useContext(AuthContext);
+  const { theme } = useTheme();
   const [showAuth, setShowAuth] = useState(false);
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <View style={styles.content}>
         <Text style={styles.title}>Welcome to WIHY</Text>
         <Text style={styles.subtitle}>

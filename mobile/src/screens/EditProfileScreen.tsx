@@ -14,6 +14,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { AuthContext } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import { userService } from '../services/userService';
 import { WebNavHeader } from '../components/web/WebNavHeader';
 import SvgIcon from '../components/shared/SvgIcon';
@@ -37,6 +38,7 @@ const theme = {
 export default function EditProfileScreen() {
   const navigation = useNavigation();
   const { user, updateUser } = useContext(AuthContext);
+  const { theme: appTheme } = useTheme();
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
@@ -323,7 +325,7 @@ export default function EditProfileScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <SafeAreaView style={[styles.container, { backgroundColor: appTheme.colors.background }]} edges={['top']}>
       <KeyboardAvoidingView 
         style={{ flex: 1 }} 
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}

@@ -15,6 +15,7 @@ import { Ionicons } from '../components/shared';
 import type { StackNavigationProp } from '@react-navigation/stack';
 import type { RootStackParamList } from '../types/navigation';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import { userService } from '../services/userService';
 
 const isWeb = Platform.OS === 'web';
@@ -25,6 +26,7 @@ export default function RequestCoaching() {
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   const route = useRoute();
   const { userId } = useAuth();
+  const { theme } = useTheme();
   
   const { coachId, coachName } = (route.params as any) || {};
   
@@ -72,7 +74,7 @@ export default function RequestCoaching() {
 
   return (
     <KeyboardAvoidingView
-      style={styles.container}
+      style={[styles.container, { backgroundColor: theme.colors.background }]}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <View style={styles.overlay}>

@@ -7,6 +7,7 @@ import { Ionicons as CrossPlatformIonicons } from './components/shared';
 import AppNavigator from './navigation/AppNavigator';
 import { SessionProvider } from './contexts/SessionContext';
 import { AuthProvider } from './context/AuthContext';
+import { ThemeProvider } from './context/ThemeContext';
 import { useDeepLinkHandler } from './utils/deepLinkHandler';
 import { debugLogService } from './services';
 
@@ -121,13 +122,15 @@ const App: React.FC = () => {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <AuthProvider>
-        <SessionProvider>
-          <SafeAreaProvider>
-            <AppContent />
-          </SafeAreaProvider>
-        </SessionProvider>
-      </AuthProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <SessionProvider>
+            <SafeAreaProvider>
+              <AppContent />
+            </SafeAreaProvider>
+          </SessionProvider>
+        </AuthProvider>
+      </ThemeProvider>
     </GestureHandlerRootView>
   );
 };

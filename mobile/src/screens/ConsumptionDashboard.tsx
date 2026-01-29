@@ -29,6 +29,7 @@ import { mealService, SavedMeal, MealTemplate, PlanMeal, CalendarDay } from '../
 import { shoppingService, ShoppingList, ShoppingListItem } from '../services/shoppingService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 
 interface ConsumptionDashboardProps extends BaseDashboardProps {
   period?: 'today' | 'week' | 'month';
@@ -116,6 +117,7 @@ const ConsumptionDashboard: React.FC<ConsumptionDashboardProps> = ({
   const layout = useDashboardLayout();
   const { navigation, navigateToNutritionFacts } = useDashboardNavigation();
   const { userId } = useAuth();
+  const { theme } = useTheme();
   
   const [selectedTab, setSelectedTab] = useState<'nutrition' | 'meals' | 'recipes' | 'shopping'>('nutrition');
   const [searchQuery, setSearchQuery] = useState('');
@@ -625,9 +627,9 @@ const ConsumptionDashboard: React.FC<ConsumptionDashboardProps> = ({
           }]} />
         </View>
         <View style={styles.circularProgressText}>
-          <Text style={styles.caloriesValue}>{current}</Text>
-          <Text style={styles.caloriesTarget}>/ {target}</Text>
-          <Text style={styles.caloriesLabel}>calories</Text>
+          <Text style={[styles.caloriesValue, { color: theme.colors.text }]}>{current}</Text>
+          <Text style={[styles.caloriesTarget, { color: theme.colors.textSecondary }]}>/ {target}</Text>
+          <Text style={[styles.caloriesLabel, { color: theme.colors.textSecondary }]}>calories</Text>
         </View>
       </View>
     );
@@ -640,8 +642,8 @@ const ConsumptionDashboard: React.FC<ConsumptionDashboardProps> = ({
     return (
       <View style={styles.macroBar} key={macro}>
         <View style={styles.macroHeader}>
-          <Text style={styles.macroLabel}>{label}</Text>
-          <Text style={styles.macroValue}>{data.current}g / {data.target}g</Text>
+          <Text style={[styles.macroLabel, { color: theme.colors.text }]}>{label}</Text>
+          <Text style={[styles.macroValue, { color: theme.colors.textSecondary }]}>{data.current}g / {data.target}g</Text>
         </View>
         <View style={styles.macroProgressBackground}>
           <View
@@ -654,7 +656,7 @@ const ConsumptionDashboard: React.FC<ConsumptionDashboardProps> = ({
             ]}
           />
         </View>
-        <Text style={styles.macroPercentage}>{Math.round(percentage)}%</Text>
+        <Text style={[styles.macroPercentage, { color: theme.colors.textSecondary }]}>{Math.round(percentage)}%</Text>
       </View>
     );
   };
@@ -687,8 +689,8 @@ const ConsumptionDashboard: React.FC<ConsumptionDashboardProps> = ({
           />
         </View>
         <View style={styles.mealContent}>
-          <Text style={styles.mealName}>{item.name}</Text>
-          <Text style={styles.mealTime}>{item.time}</Text>
+          <Text style={[styles.mealName, { color: theme.colors.text }]}>{item.name}</Text>
+          <Text style={[styles.mealTime, { color: theme.colors.textSecondary }]}>{item.time}</Text>
           <View style={styles.macroTags}>
             <Text style={styles.macroTag}>P: {item.macros.protein}g</Text>
             <Text style={styles.macroTag}>C: {item.macros.carbs}g</Text>
@@ -697,8 +699,8 @@ const ConsumptionDashboard: React.FC<ConsumptionDashboardProps> = ({
         </View>
       </View>
       <View style={styles.mealRight}>
-        <Text style={styles.mealCalories}>{item.calories}</Text>
-        <Text style={styles.mealCaloriesLabel}>cal</Text>
+        <Text style={[styles.mealCalories, { color: theme.colors.text }]}>{item.calories}</Text>
+        <Text style={[styles.mealCaloriesLabel, { color: theme.colors.textSecondary }]}>cal</Text>
       </View>
     </TouchableOpacity>
   );
@@ -726,18 +728,18 @@ const ConsumptionDashboard: React.FC<ConsumptionDashboardProps> = ({
             </Text>
           </View>
           {meal.scheduledTime && (
-            <Text style={styles.scheduledTime}>{meal.scheduledTime}</Text>
+            <Text style={[styles.scheduledTime, { color: theme.colors.textSecondary }]}>{meal.scheduledTime}</Text>
           )}
         </View>
         
-        <Text style={styles.pendingMealName}>{meal.name}</Text>
+        <Text style={[styles.pendingMealName, { color: theme.colors.text }]}>{meal.name}</Text>
         
         <View style={styles.pendingMealNutrition}>
           <Text style={styles.pendingMealCalories}>{meal.calories} cal</Text>
           <View style={styles.pendingMealMacros}>
-            <Text style={styles.macroText}>P: {meal.protein}g</Text>
-            <Text style={styles.macroText}>C: {meal.carbs}g</Text>
-            <Text style={styles.macroText}>F: {meal.fat}g</Text>
+            <Text style={[styles.macroText, { color: theme.colors.textSecondary }]}>P: {meal.protein}g</Text>
+            <Text style={[styles.macroText, { color: theme.colors.textSecondary }]}>C: {meal.carbs}g</Text>
+            <Text style={[styles.macroText, { color: theme.colors.textSecondary }]}>F: {meal.fat}g</Text>
           </View>
         </View>
         
@@ -745,9 +747,9 @@ const ConsumptionDashboard: React.FC<ConsumptionDashboardProps> = ({
           <Ionicons 
             name={meal.source === 'meal_plan' ? 'calendar' : 'cart'} 
             size={12} 
-            color={dashboardTheme.colors.textSecondary} 
+            color={theme.colors.textSecondary} 
           />
-          <Text style={styles.sourceText}>
+          <Text style={[styles.sourceText, { color: theme.colors.textSecondary }]}>
             From: {meal.source === 'meal_plan' ? "Today's Meal Plan" : 'Shopping List'}
           </Text>
         </View>
@@ -801,21 +803,21 @@ const ConsumptionDashboard: React.FC<ConsumptionDashboardProps> = ({
         </View>
       </View>
       
-      <Text style={styles.recipeName} numberOfLines={2}>{recipe.name}</Text>
+      <Text style={[styles.recipeName, { color: theme.colors.text }]} numberOfLines={2}>{recipe.name}</Text>
       
       <View style={styles.recipeNutrition}>
         <Text style={styles.recipeCalories}>{recipe.calories} cal</Text>
         <View style={styles.recipeMacros}>
-          <Text style={styles.macroSmall}>P: {recipe.protein}g</Text>
-          <Text style={styles.macroSmall}>C: {recipe.carbs}g</Text>
-          <Text style={styles.macroSmall}>F: {recipe.fat}g</Text>
+          <Text style={[styles.macroSmall, { color: theme.colors.textSecondary }]}>P: {recipe.protein}g</Text>
+          <Text style={[styles.macroSmall, { color: theme.colors.textSecondary }]}>C: {recipe.carbs}g</Text>
+          <Text style={[styles.macroSmall, { color: theme.colors.textSecondary }]}>F: {recipe.fat}g</Text>
         </View>
       </View>
       
       {recipe.prepTime && (
         <View style={styles.recipeTime}>
-          <Ionicons name="time-outline" size={12} color={dashboardTheme.colors.textSecondary} />
-          <Text style={styles.recipeTimeText}>{recipe.prepTime} min</Text>
+          <Ionicons name="time-outline" size={12} color={theme.colors.textSecondary} />
+          <Text style={[styles.recipeTimeText, { color: theme.colors.textSecondary }]}>{recipe.prepTime} min</Text>
         </View>
       )}
       
@@ -869,7 +871,7 @@ const ConsumptionDashboard: React.FC<ConsumptionDashboardProps> = ({
             {/* Hydration */}
             <View style={styles.hydrationSection}>
               <View style={styles.hydrationHeader}>
-                <Text style={styles.hydrationTitle}>Hydration</Text>
+                <Text style={[styles.hydrationTitle, { color: theme.colors.text }]}>Hydration</Text>
                 <TouchableOpacity
                   style={styles.addWaterButton}
                   onPress={handleLogWater}
@@ -896,7 +898,7 @@ const ConsumptionDashboard: React.FC<ConsumptionDashboardProps> = ({
                     </View>
                   ))}
                 </View>
-                <Text style={styles.hydrationText}>
+                <Text style={[styles.hydrationText, { color: theme.colors.textSecondary }]}>
                   {nutritionGoals.water.current} / {nutritionGoals.water.target} glasses
                 </Text>
               </View>
@@ -911,7 +913,7 @@ const ConsumptionDashboard: React.FC<ConsumptionDashboardProps> = ({
         return (
           <View>
             <View style={styles.mealsHeader}>
-              <Text style={styles.mealsTitle}>Today's Meals</Text>
+              <Text style={[styles.mealsTitle, { color: theme.colors.text }]}>Today's Meals</Text>
               <Text style={styles.mealsPending}>
                 {activePendingMeals.length} pending
               </Text>
@@ -922,8 +924,8 @@ const ConsumptionDashboard: React.FC<ConsumptionDashboardProps> = ({
             ) : activePendingMeals.length === 0 ? (
               <View style={styles.emptyMeals}>
                 <Ionicons name="checkmark-done-circle" size={48} color={dashboardTheme.colors.primary} />
-                <Text style={styles.emptyMealsTitle}>All caught up!</Text>
-                <Text style={styles.emptyMealsText}>
+                <Text style={[styles.emptyMealsTitle, { color: theme.colors.text }]}>All caught up!</Text>
+                <Text style={[styles.emptyMealsText, { color: theme.colors.textSecondary }]}>
                   No pending meals to confirm. Check Recipes tab to log something new.
                 </Text>
               </View>
@@ -936,7 +938,7 @@ const ConsumptionDashboard: React.FC<ConsumptionDashboardProps> = ({
             {/* Already logged section */}
             {todaysMeals.length > 0 && (
               <View style={styles.loggedSection}>
-                <Text style={styles.loggedTitle}>Already Logged Today</Text>
+                <Text style={[styles.loggedTitle, { color: theme.colors.textSecondary }]}>Already Logged Today</Text>
                 <View style={styles.mealsList}>
                   {todaysMeals.map((item) => (
                     <View key={item.id}>
@@ -976,6 +978,7 @@ const ConsumptionDashboard: React.FC<ConsumptionDashboardProps> = ({
                 >
                   <Text style={[
                     styles.filterChipText,
+                    { color: theme.colors.textSecondary },
                     recipeFilter === filter.key && styles.filterChipTextActive,
                   ]}>
                     {filter.label}
@@ -988,9 +991,9 @@ const ConsumptionDashboard: React.FC<ConsumptionDashboardProps> = ({
               <ActivityIndicator size="small" color={dashboardTheme.colors.primary} />
             ) : searchFilteredRecipes.length === 0 ? (
               <View style={styles.emptyRecipes}>
-                <Ionicons name="restaurant-outline" size={48} color={dashboardTheme.colors.textSecondary} />
-                <Text style={styles.emptyRecipesTitle}>No recipes found</Text>
-                <Text style={styles.emptyRecipesText}>
+                <Ionicons name="restaurant-outline" size={48} color={theme.colors.textSecondary} />
+                <Text style={[styles.emptyRecipesTitle, { color: theme.colors.textSecondary }]}>No recipes found</Text>
+                <Text style={[styles.emptyRecipesText, { color: theme.colors.textSecondary }]}>
                   Try a different search or filter, or create a new meal.
                 </Text>
               </View>
@@ -1006,7 +1009,7 @@ const ConsumptionDashboard: React.FC<ConsumptionDashboardProps> = ({
         return (
           <View>
             <View style={styles.mealsHeader}>
-              <Text style={styles.mealsTitle}>Shopping Lists</Text>
+              <Text style={[styles.mealsTitle, { color: theme.colors.text }]}>Shopping Lists</Text>
               <Text style={styles.mealsPending}>
                 {shoppingLists.length} lists
               </Text>
@@ -1016,9 +1019,9 @@ const ConsumptionDashboard: React.FC<ConsumptionDashboardProps> = ({
               <ActivityIndicator size="small" color={dashboardTheme.colors.primary} />
             ) : shoppingLists.length === 0 ? (
               <View style={styles.emptyMeals}>
-                <Ionicons name="cart-outline" size={48} color={dashboardTheme.colors.textSecondary} />
-                <Text style={styles.emptyMealsTitle}>No shopping lists</Text>
-                <Text style={styles.emptyMealsText}>
+                <Ionicons name="cart-outline" size={48} color={theme.colors.textSecondary} />
+                <Text style={[styles.emptyMealsTitle, { color: theme.colors.text }]}>No shopping lists</Text>
+                <Text style={[styles.emptyMealsText, { color: theme.colors.textSecondary }]}>
                   Create a meal plan to generate a shopping list.
                 </Text>
               </View>
@@ -1037,8 +1040,8 @@ const ConsumptionDashboard: React.FC<ConsumptionDashboardProps> = ({
                       <Ionicons name="cart" size={24} color={dashboardTheme.colors.primary} />
                     </View>
                     <View style={styles.shoppingListContent}>
-                      <Text style={styles.shoppingListName}>{list.name}</Text>
-                      <Text style={styles.shoppingListMeta}>
+                      <Text style={[styles.shoppingListName, { color: theme.colors.text }]}>{list.name}</Text>
+                      <Text style={[styles.shoppingListMeta, { color: theme.colors.textSecondary }]}>
                         {list.checked_items || 0} / {list.total_items || list.items?.length || 0} items checked
                       </Text>
                       <View style={styles.shoppingListProgress}>
@@ -1063,9 +1066,9 @@ const ConsumptionDashboard: React.FC<ConsumptionDashboardProps> = ({
       default:
         return (
           <View style={styles.comingSoonContainer}>
-            <Ionicons name="construct" size={48} color={dashboardTheme.colors.textSecondary} />
-            <Text style={styles.comingSoonTitle}>Coming Soon</Text>
-            <Text style={styles.comingSoonText}>
+            <Ionicons name="construct" size={48} color={theme.colors.textSecondary} />
+            <Text style={[styles.comingSoonTitle, { color: theme.colors.textSecondary }]}>Coming Soon</Text>
+            <Text style={[styles.comingSoonText, { color: theme.colors.textSecondary }]}>
               {selectedTab} features are being developed.
             </Text>
           </View>
@@ -1084,20 +1087,20 @@ const ConsumptionDashboard: React.FC<ConsumptionDashboardProps> = ({
       <View style={styles.modalOverlay}>
         <View style={styles.modalContent}>
           <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>Log This Meal</Text>
+            <Text style={[styles.modalTitle, { color: theme.colors.text }]}>Log This Meal</Text>
             <TouchableOpacity
               onPress={() => setConfirmModal({ ...confirmModal, visible: false })}
             >
-              <Ionicons name="close" size={24} color={dashboardTheme.colors.textSecondary} />
+              <Ionicons name="close" size={24} color={theme.colors.textSecondary} />
             </TouchableOpacity>
           </View>
           
           {confirmModal.item && (
             <>
-              <Text style={styles.modalMealName}>{confirmModal.item.name}</Text>
+              <Text style={[styles.modalMealName, { color: theme.colors.text }]}>{confirmModal.item.name}</Text>
               
               {/* Meal Type Selector */}
-              <Text style={styles.modalLabel}>Meal Type</Text>
+              <Text style={[styles.modalLabel, { color: theme.colors.textSecondary }]}>Meal Type</Text>
               <View style={styles.mealTypeSelector}>
                 {(['breakfast', 'lunch', 'dinner', 'snack'] as const).map(type => (
                   <TouchableOpacity
@@ -1111,10 +1114,11 @@ const ConsumptionDashboard: React.FC<ConsumptionDashboardProps> = ({
                     <Ionicons
                       name={getMealTypeIcon(type) as any}
                       size={16}
-                      color={confirmModal.mealType === type ? '#fff' : dashboardTheme.colors.textSecondary}
+                      color={confirmModal.mealType === type ? '#fff' : theme.colors.textSecondary}
                     />
                     <Text style={[
                       styles.mealTypeOptionText,
+                      { color: theme.colors.textSecondary },
                       confirmModal.mealType === type && styles.mealTypeOptionTextActive,
                     ]}>
                       {type.charAt(0).toUpperCase() + type.slice(1)}
@@ -1124,7 +1128,7 @@ const ConsumptionDashboard: React.FC<ConsumptionDashboardProps> = ({
               </View>
               
               {/* Servings Selector */}
-              <Text style={styles.modalLabel}>Servings</Text>
+              <Text style={[styles.modalLabel, { color: theme.colors.textSecondary }]}>Servings</Text>
               <View style={styles.servingsSelector}>
                 <TouchableOpacity
                   style={styles.servingsButton}
@@ -1135,7 +1139,7 @@ const ConsumptionDashboard: React.FC<ConsumptionDashboardProps> = ({
                 >
                   <Ionicons name="remove" size={20} color={dashboardTheme.colors.primary} />
                 </TouchableOpacity>
-                <Text style={styles.servingsValue}>{confirmModal.servings}</Text>
+                <Text style={[styles.servingsValue, { color: theme.colors.text }]}>{confirmModal.servings}</Text>
                 <TouchableOpacity
                   style={styles.servingsButton}
                   onPress={() => setConfirmModal({
@@ -1150,26 +1154,26 @@ const ConsumptionDashboard: React.FC<ConsumptionDashboardProps> = ({
               {/* Calculated Nutrition */}
               <View style={styles.modalNutrition}>
                 <View style={styles.modalNutritionRow}>
-                  <Text style={styles.modalNutritionLabel}>Calories</Text>
-                  <Text style={styles.modalNutritionValue}>
+                  <Text style={[styles.modalNutritionLabel, { color: theme.colors.textSecondary }]}>Calories</Text>
+                  <Text style={[styles.modalNutritionValue, { color: theme.colors.text }]}>
                     {Math.round(confirmModal.item.calories * confirmModal.servings)}
                   </Text>
                 </View>
                 <View style={styles.modalNutritionRow}>
-                  <Text style={styles.modalNutritionLabel}>Protein</Text>
-                  <Text style={styles.modalNutritionValue}>
+                  <Text style={[styles.modalNutritionLabel, { color: theme.colors.textSecondary }]}>Protein</Text>
+                  <Text style={[styles.modalNutritionValue, { color: theme.colors.text }]}>
                     {Math.round(confirmModal.item.protein * confirmModal.servings)}g
                   </Text>
                 </View>
                 <View style={styles.modalNutritionRow}>
-                  <Text style={styles.modalNutritionLabel}>Carbs</Text>
-                  <Text style={styles.modalNutritionValue}>
+                  <Text style={[styles.modalNutritionLabel, { color: theme.colors.textSecondary }]}>Carbs</Text>
+                  <Text style={[styles.modalNutritionValue, { color: theme.colors.text }]}>
                     {Math.round(confirmModal.item.carbs * confirmModal.servings)}g
                   </Text>
                 </View>
                 <View style={styles.modalNutritionRow}>
-                  <Text style={styles.modalNutritionLabel}>Fat</Text>
-                  <Text style={styles.modalNutritionValue}>
+                  <Text style={[styles.modalNutritionLabel, { color: theme.colors.textSecondary }]}>Fat</Text>
+                  <Text style={[styles.modalNutritionValue, { color: theme.colors.text }]}>
                     {Math.round(confirmModal.item.fat * confirmModal.servings)}g
                   </Text>
                 </View>
@@ -1193,15 +1197,15 @@ const ConsumptionDashboard: React.FC<ConsumptionDashboardProps> = ({
   // Show loading state
   if (loading && !dailySummary) {
     return (
-      <View style={[styles.container, styles.centerContent]}>
+      <View style={[styles.container, styles.centerContent, { backgroundColor: theme.colors.background }]}>
         <ActivityIndicator size="large" color={dashboardTheme.colors.primary} />
-        <Text style={styles.loadingText}>Loading nutrition data...</Text>
+        <Text style={[styles.loadingText, { color: theme.colors.textSecondary }]}>Loading nutrition data...</Text>
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       {/* Status bar area - Always deep orange */}
       <View style={{ height: insets.top, backgroundColor: '#ea580c' }} />
       
@@ -1243,6 +1247,7 @@ const ConsumptionDashboard: React.FC<ConsumptionDashboardProps> = ({
             >
               <Text style={[
                 styles.tabText,
+                { color: theme.colors.textSecondary },
                 selectedTab === tab && styles.tabTextActive,
               ]}>
                 {tab.charAt(0).toUpperCase() + tab.slice(1)}
