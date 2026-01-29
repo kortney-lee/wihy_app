@@ -782,20 +782,7 @@ export default function ClientOnboarding({
 
   return (
     <View style={styles.container}>
-      {/* Back button for web navigation */}
-      {isWeb && !isDashboardMode && (
-        <View style={styles.webBackHeader}>
-          <TouchableOpacity
-            style={styles.webBackButton}
-            onPress={() => navigation.goBack()}
-          >
-            <SvgIcon name="arrow-back" size={20} color="#10b981" />
-            <Text style={styles.webBackText}>Back</Text>
-          </TouchableOpacity>
-        </View>
-      )}
-      
-      {/* Back to Coach Hub button - only on web in dashboard mode */}
+      {/* Back to Coach Hub button - positioned in top right */}
       {isDashboardMode && onBack && (
         <BackToHubButton
           hubName="Coach Hub"
@@ -804,6 +791,16 @@ export default function ClientOnboarding({
           isMobileWeb={isWeb && screenWidth < 768}
           spinnerGif={spinnerGif}
         />
+      )}
+      
+      {/* Web-only close button when not in dashboard mode */}
+      {isWeb && !isDashboardMode && (
+        <TouchableOpacity
+          style={styles.webCloseButton}
+          onPress={() => navigation.goBack()}
+        >
+          <SvgIcon name="close" size={24} color="#10b981" />
+        </TouchableOpacity>
       )}
 
       {/* Status bar area - solid color */}
@@ -825,6 +822,8 @@ export default function ClientOnboarding({
           style={styles.scrollView} 
           showsVerticalScrollIndicator={false}
           scrollEventThrottle={16}
+          keyboardShouldPersistTaps="handled"
+          contentContainerStyle={styles.scrollViewContent}
           onScroll={Animated.event(
             [{ nativeEvent: { contentOffset: { y: scrollY } } }],
             { useNativeDriver: false }
@@ -832,9 +831,9 @@ export default function ClientOnboarding({
         >
           {renderStepIndicator()}
 
-          <ScrollView style={styles.content} contentContainerStyle={styles.contentContainer} keyboardShouldPersistTaps="handled">
+          <View style={styles.content}>
             {renderCurrentStep()}
-          </ScrollView>
+          </View>
 
           {/* Navigation Buttons */}
           <View style={styles.footer}>
@@ -876,22 +875,22 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#e0f2fe',
   },
-  webBackHeader: {
+  webCloseButton: {
+    position: 'absolute',
+    top: 12,
+    right: 20,
+    zIndex: 100,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     backgroundColor: '#ffffff',
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e5e7eb',
-  },
-  webBackButton: {
-    flexDirection: 'row',
+    justifyContent: 'center',
     alignItems: 'center',
-    gap: 8,
-  },
-  webBackText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#10b981',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   collapsibleHeader: {
     backgroundColor: '#10b981',
@@ -938,6 +937,9 @@ const styles = StyleSheet.create({
   scrollView: {
     flex: 1,
   },
+  scrollViewContent: {
+    flexGrow: 1,
+  },
   contentWrapper: {
     flex: 1,
   },
@@ -972,7 +974,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#10b981',
   },
   content: {
-    flex: 1,
+    padding: 16,
   },
   contentContainer: {
     padding: 16,
