@@ -365,7 +365,7 @@ export default function AcceptInvitation() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#e0f2fe',
+    // backgroundColor: '#e0f2fe', // theme.colors.background
   },
   centerContent: {
     flex: 1,

@@ -582,7 +582,7 @@ export default function ClientManagement({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#e0f2fe',
+    // backgroundColor: '#e0f2fe', // theme.colors.background
   },
   collapsibleHeader: {
     backgroundColor: '#8b5cf6',
@@ -633,7 +633,7 @@ const styles = StyleSheet.create({
   searchBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface // Use theme.colors.surface
     borderRadius: 28,
     paddingHorizontal: 18,
     paddingVertical: 14,
@@ -683,7 +683,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 14,
     borderRadius: 24,
-    backgroundColor: '#f3f4f6',
+    // backgroundColor: '#f3f4f6', // theme.colors.surface // Use theme.colors.background
     borderWidth: 1,
     borderColor: '#e5e7eb',
     minHeight: 48,
@@ -709,7 +709,7 @@ const styles = StyleSheet.create({
   viewButton: {
     padding: 12,
     borderRadius: 8,
-    backgroundColor: '#f9fafb',
+    // backgroundColor: '#f9fafb', // theme.colors.surface // Use theme.colors.surface
   },
   viewButtonActive: {
     backgroundColor: '#eff6ff',
@@ -723,7 +723,7 @@ const styles = StyleSheet.create({
   },
   statCard: {
     flex: 1,
-    backgroundColor: '#f9fafb',
+    // backgroundColor: '#f9fafb', // theme.colors.surface // Use theme.colors.surface
     padding: 12,
     borderRadius: 8,
     alignItems: 'center',
@@ -809,7 +809,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 12,
-    backgroundColor: '#f9fafb',
+    // backgroundColor: '#f9fafb', // theme.colors.surface // Use theme.colors.surface
   },
   statusText: {
     fontSize: 12,
@@ -846,7 +846,7 @@ const styles = StyleSheet.create({
   },
   progressBar: {
     height: 8,
-    backgroundColor: '#f3f4f6',
+    // backgroundColor: '#f3f4f6', // theme.colors.surface // Use theme.colors.background
     borderRadius: 4,
     overflow: 'hidden',
   },
@@ -924,7 +924,7 @@ const styles = StyleSheet.create({
   gridAdherence: {
     width: '100%',
     height: 6,
-    backgroundColor: '#f3f4f6',
+    // backgroundColor: '#f3f4f6', // theme.colors.surface // Use theme.colors.background
     borderRadius: 3,
     marginTop: 8,
     overflow: 'hidden',

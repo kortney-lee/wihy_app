@@ -206,7 +206,7 @@ const styles = StyleSheet.create({
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface
     borderRadius: 28,
     paddingHorizontal: 18,
     paddingVertical: 12,
@@ -260,7 +260,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 8,
     paddingHorizontal: 12,
-    backgroundColor: '#f9fafb',
+    // backgroundColor: '#f9fafb', // theme.colors.surface
     borderRadius: 8,
     borderWidth: 1.5,
     borderColor: '#e5e7eb',
@@ -271,7 +271,7 @@ const styles = StyleSheet.create({
     borderColor: '#4cbb17',
   },
   chipDisabled: {
-    backgroundColor: '#f9fafb',
+    // backgroundColor: '#f9fafb', // theme.colors.surface
     borderColor: '#e5e7eb',
     opacity: 0.5,
   },

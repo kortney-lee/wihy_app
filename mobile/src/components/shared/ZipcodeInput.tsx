@@ -210,7 +210,7 @@ const styles = StyleSheet.create({
   },
   inputWrapperFocused: {
     borderColor: '#007AFF',
-    backgroundColor: '#FFFFFF',
+    // backgroundColor: '#ffffff', // theme.colors.surface
   },
   inputWrapperError: {
     borderColor: '#FF3B30',

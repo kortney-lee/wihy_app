@@ -342,7 +342,7 @@ const MealCalendar: React.FC<MealCalendarProps> = ({ isDashboardMode = false }) 
 const styles = StyleSheet.create({
   calendarContainer: {
     flex: 1,
-    backgroundColor: '#f9fafb',
+    // // backgroundColor: '#f9fafb', // theme.colors.surface // Use theme.colors.surface
   },
   collapsibleHeader: {
     backgroundColor: '#f59e0b',
@@ -374,7 +374,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 20,
     paddingVertical: 16,
-    backgroundColor: '#ffffff',
+    // // backgroundColor: '#ffffff', // theme.colors.surface // Use theme.colors.surface
     borderBottomWidth: 1,
     borderBottomColor: '#e5e7eb',
   },
@@ -390,7 +390,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     paddingHorizontal: 12,
     paddingVertical: 12,
-    backgroundColor: '#ffffff',
+    // // backgroundColor: '#ffffff', // theme.colors.surface // Use theme.colors.surface
   },
   calendarDayName: {
     flex: 1,
@@ -403,7 +403,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     paddingHorizontal: 12,
-    backgroundColor: '#ffffff',
+    // // backgroundColor: '#ffffff', // theme.colors.surface // Use theme.colors.surface
   },
   calendarDayCell: {
     width: `${100 / 7}%`,
@@ -415,7 +415,7 @@ const styles = StyleSheet.create({
     borderColor: '#f3f4f6',
   },
   calendarDayCellEmpty: {
-    backgroundColor: '#f9fafb',
+    // // backgroundColor: '#f9fafb', // theme.colors.surface // Use theme.colors.surface
   },
   calendarDayCellToday: {
     backgroundColor: '#dbeafe',
@@ -449,7 +449,7 @@ const styles = StyleSheet.create({
     borderRadius: 2,
   },
   calendarSelectedDay: {
-    backgroundColor: '#ffffff',
+    // // backgroundColor: '#ffffff', // theme.colors.surface // Use theme.colors.surface
     marginTop: 16,
     padding: 16,
   },
@@ -486,7 +486,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     padding: 12,
-    backgroundColor: '#f9fafb',
+    // // backgroundColor: '#f9fafb', // theme.colors.surface // Use theme.colors.surface
     borderRadius: 12,
     gap: 12,
   },

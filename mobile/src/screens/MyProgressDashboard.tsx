@@ -1904,7 +1904,7 @@ const styles = StyleSheet.create({
     width: 16,
     height: 16,
     borderRadius: 8,
-    backgroundColor: '#ffffff',
+    // // backgroundColor: '#ffffff', // theme.colors.surface // Use theme.colors.surface
     borderWidth: 2,
     borderColor: dashboardColors.primary,
     marginLeft: -8,

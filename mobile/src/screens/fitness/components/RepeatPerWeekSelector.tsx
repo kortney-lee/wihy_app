@@ -82,7 +82,7 @@ const styles = StyleSheet.create({
   option: {
     flex: 1,
     paddingVertical: 8,
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface // theme.colors.surface // Use theme.colors.surface
     borderRadius: 8,
     borderWidth: 1,
     borderColor: '#e5e7eb',

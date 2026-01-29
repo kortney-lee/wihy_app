@@ -578,7 +578,7 @@ const styles = StyleSheet.create({
     alignItems: Platform.OS === 'web' ? 'center' : 'stretch',
   },
   providerContainer: {
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface
     borderRadius: Platform.OS === 'web' ? 20 : 0,
     borderTopLeftRadius: Platform.OS === 'web' ? 20 : 28,
     borderTopRightRadius: Platform.OS === 'web' ? 20 : 28,
@@ -611,7 +611,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#e2e8f0',
     marginBottom: 12,
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
@@ -628,7 +628,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   emailFormContainer: {
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface
     borderTopLeftRadius: 28,
     borderTopRightRadius: 28,
     padding: 24,
@@ -704,7 +704,7 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: '#e5e7eb',
     borderRadius: 12,
-    backgroundColor: '#f9fafb',
+    // backgroundColor: '#f9fafb', // theme.colors.surface // Use theme.colors.surface
     paddingHorizontal: 12,
     ...(Platform.OS === 'web' && {
       outlineStyle: 'none' as any,
@@ -804,7 +804,7 @@ const styles = StyleSheet.create({
     borderColor: '#e5e7eb',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
@@ -880,7 +880,7 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: '#f3f4f6',
+    // backgroundColor: '#f3f4f6', // theme.colors.surface // Use theme.colors.background
     alignItems: 'center',
     justifyContent: 'center',
     zIndex: 10,

@@ -113,7 +113,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: BORDER_RADIUS,
-    backgroundColor: '#f3f4f6', // Light gray silhouette background
+    // backgroundColor: '#f3f4f6', // theme.colors.surface // Use theme.colors.background // Light gray silhouette background
     ...Platform.select({
       ios: {
         shadowColor: 'rgba(0,0,0,0.1)',
@@ -135,7 +135,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: BORDER_RADIUS,
-    backgroundColor: '#f3f4f6', // Light gray silhouette background
+    // backgroundColor: '#f3f4f6', // theme.colors.surface // Use theme.colors.background // Light gray silhouette background
     ...Platform.select({
       ios: {
         shadowColor: 'rgba(0,0,0,0.1)',
@@ -157,7 +157,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingVertical: 12,
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface
     borderBottomWidth: 1,
     borderBottomColor: '#e5e7eb',
   },

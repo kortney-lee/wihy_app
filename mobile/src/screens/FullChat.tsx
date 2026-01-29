@@ -1102,7 +1102,7 @@ export default function FullChat() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#e0f2fe',
+    // backgroundColor: '#e0f2fe', // theme.colors.background
   },
   flex: {
     flex: 1,
@@ -1136,7 +1136,7 @@ const styles = StyleSheet.create({
     width: 38,
     height: 38,
     borderRadius: 19,
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface // Use theme.colors.surface
     alignItems: 'center',
     justifyContent: 'center',
     overflow: 'hidden',
@@ -1165,7 +1165,7 @@ const styles = StyleSheet.create({
     width: 16,
     height: 16,
     borderRadius: 8,
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface // Use theme.colors.surface
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 2,
@@ -1246,7 +1246,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 19,
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface // Use theme.colors.surface
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
@@ -1255,7 +1255,7 @@ const styles = StyleSheet.create({
   },
   messagesContainer: {
     flex: 1,
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface // Use theme.colors.surface
   },
   messagesContent: {
     paddingVertical: 20,
@@ -1284,7 +1284,7 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 6,
   },
   aiMessageText: {
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface // Use theme.colors.surface
     color: '#1f2937',
     borderBottomLeftRadius: 6,
     shadowColor: '#000',
@@ -1311,7 +1311,7 @@ const styles = StyleSheet.create({
     gap: 5,
     padding: 14,
     paddingHorizontal: 18,
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface // Use theme.colors.surface
     borderRadius: 20,
     borderBottomLeftRadius: 6,
     shadowColor: '#000',
@@ -1335,7 +1335,7 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   quickReplyButton: {
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface // Use theme.colors.surface
     borderRadius: 18,
     paddingHorizontal: 16,
     paddingVertical: 10,
@@ -1352,12 +1352,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 16,
     paddingTop: 8,
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface // Use theme.colors.surface
     gap: 12,
   },
   textInputContainer: {
     flex: 1,
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface // Use theme.colors.surface
     borderRadius: 28,
     paddingHorizontal: 18,
     paddingVertical: 12,
@@ -1407,7 +1407,7 @@ const styles = StyleSheet.create({
   resourceCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface // Use theme.colors.surface
     borderRadius: 14,
     padding: 14,
     borderWidth: 1,
@@ -1538,7 +1538,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   modalContent: {
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface // Use theme.colors.surface
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     maxHeight: '85%',
@@ -1618,7 +1618,7 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
   },
   alternativeCard: {
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface // Use theme.colors.surface
     borderRadius: 16,
     padding: 16,
     marginBottom: 12,

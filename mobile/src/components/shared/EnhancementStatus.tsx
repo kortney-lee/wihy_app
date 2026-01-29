@@ -233,7 +233,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#FFFFFF',
+    // backgroundColor: '#ffffff', // theme.colors.surface
     borderRadius: 10,
     borderWidth: 2,
     paddingVertical: 12,

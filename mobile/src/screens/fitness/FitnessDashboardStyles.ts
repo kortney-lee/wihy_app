@@ -13,7 +13,7 @@ const isTablet = screenWidth > 768;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#e0f2fe',
+    // backgroundColor: '#e0f2fe', // theme.colors.background
   },
   animatedHeader: {
     backgroundColor: '#fa5f06',
@@ -62,7 +62,7 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     flex: 1,
-    backgroundColor: '#e0f2fe',
+    // backgroundColor: '#e0f2fe', // theme.colors.background
   },
   notificationSection: {
     paddingHorizontal: 16,
@@ -72,7 +72,7 @@ const styles = StyleSheet.create({
   centerContent: {
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#e0f2fe',
+    // backgroundColor: '#e0f2fe', // theme.colors.background
   },
   loadingText: {
     marginTop: 16,
@@ -81,14 +81,14 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   topBox: {
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface
   },
   topBoxContent: {
     height: 0,
   },
   scrollContainer: {
     flex: 1,
-    backgroundColor: '#e0f2fe',
+    // backgroundColor: '#e0f2fe', // theme.colors.background
     paddingBottom: 24,
   },
   header: {
@@ -330,7 +330,7 @@ const styles = StyleSheet.create({
   workoutContent: {
     paddingHorizontal: isTablet ? 24 : 16,
     paddingBottom: 24,
-    backgroundColor: '#e0f2fe',
+    // backgroundColor: '#e0f2fe', // theme.colors.background
     marginHorizontal: isTablet ? 16 : 8,
     marginTop: 16,
     borderRadius: 20,
@@ -352,7 +352,7 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   exerciseCard: {
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface
     borderRadius: 16,
     padding: isTablet ? 20 : 16,
     borderWidth: 1,
@@ -480,7 +480,7 @@ const styles = StyleSheet.create({
   // Modal styles
   modalContainer: {
     flex: 1,
-    backgroundColor: '#e0f2fe',
+    // backgroundColor: '#e0f2fe', // theme.colors.background
   },
   modalHeader: {
     flexDirection: 'row',
@@ -488,7 +488,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 20,
     paddingVertical: 16,
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface
     borderBottomWidth: 1,
     borderBottomColor: '#e5e7eb',
   },
@@ -531,7 +531,7 @@ const styles = StyleSheet.create({
   // Collapsible Section Styles
   collapsibleSection: {
     marginTop: 12,
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface
     borderRadius: 16,
     borderWidth: 1,
     borderColor: '#e5e7eb',
@@ -542,7 +542,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     padding: 16,
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface
   },
   collapsibleHeaderLeft: {
     flexDirection: 'row',
@@ -553,7 +553,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 12,
-    backgroundColor: '#f3f4f6',
+    // backgroundColor: '#f3f4f6', // theme.colors.surface
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 12,
@@ -658,7 +658,7 @@ const styles = StyleSheet.create({
     gap: 6,
     paddingVertical: 8,
     paddingHorizontal: 14,
-    backgroundColor: '#f3f4f6',
+    // backgroundColor: '#f3f4f6', // theme.colors.surface
     borderRadius: 20,
     borderWidth: 1,
     borderColor: '#e5e7eb',
@@ -689,7 +689,7 @@ const styles = StyleSheet.create({
     gap: 4,
     paddingVertical: 12,
     paddingHorizontal: 12,
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface
     borderRadius: 12,
     borderWidth: 2,
     borderColor: '#e5e7eb',
@@ -732,7 +732,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 12,
     paddingHorizontal: 16,
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface
     borderRadius: 12,
     borderWidth: 2,
     borderColor: '#e5e7eb',
@@ -769,7 +769,7 @@ const styles = StyleSheet.create({
 
   // Natural language input
   goalTextInput: {
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface
     borderRadius: 12,
     borderWidth: 2,
     borderColor: '#e5e7eb',
@@ -791,7 +791,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 12,
     paddingHorizontal: 16,
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface
     borderRadius: 12,
     borderWidth: 2,
     borderColor: '#e5e7eb',
@@ -822,7 +822,7 @@ const styles = StyleSheet.create({
   difficultyButton: {
     flex: 1,
     paddingVertical: 14,
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface
     borderRadius: 12,
     borderWidth: 2,
     borderColor: '#e5e7eb',
@@ -850,7 +850,7 @@ const styles = StyleSheet.create({
   durationButton: {
     flex: 1,
     paddingVertical: 14,
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface
     borderRadius: 12,
     borderWidth: 2,
     borderColor: '#e5e7eb',
@@ -952,7 +952,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   levelCard: {
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface
     borderRadius: 16,
     padding: 20,
     marginBottom: 16,
@@ -976,7 +976,7 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 12,
-    backgroundColor: '#f3f4f6',
+    // backgroundColor: '#f3f4f6', // theme.colors.surface
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 12,
@@ -1148,7 +1148,7 @@ const styles = StyleSheet.create({
   },
   programStatCard: {
     flex: 1,
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface
     borderRadius: 12,
     padding: 16,
     alignItems: 'center',
@@ -1181,7 +1181,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 20,
     borderRadius: 12,
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface
     borderWidth: 2,
     borderColor: '#e5e7eb',
     alignItems: 'center',
@@ -1208,7 +1208,7 @@ const styles = StyleSheet.create({
     color: '#4cbb17',
   },
   workoutDayCard: {
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface
     borderRadius: 16,
     padding: 16,
     marginBottom: 12,
@@ -1220,7 +1220,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#f0fdf4',
   },
   restDayCard: {
-    backgroundColor: '#f9fafb',
+    // backgroundColor: '#f9fafb', // theme.colors.surface
     borderColor: '#e5e7eb',
     borderStyle: 'dashed',
   },
@@ -1402,7 +1402,7 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   previewSummaryCard: {
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface
     borderRadius: 16,
     padding: 20,
     marginBottom: 20,
@@ -1488,7 +1488,7 @@ const styles = StyleSheet.create({
     color: '#111827',
   },
   previewExerciseCard: {
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
@@ -1504,7 +1504,7 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: '#f3f4f6',
+    // backgroundColor: '#f3f4f6', // theme.colors.surface
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 12,
@@ -1566,7 +1566,7 @@ const styles = StyleSheet.create({
     color: '#6b7280',
   },
   runningInstructionsCard: {
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface
     borderRadius: 12,
     padding: 16,
     marginBottom: 16,
@@ -1621,7 +1621,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#f3f4f6',
+    // backgroundColor: '#f3f4f6', // theme.colors.surface
     paddingVertical: 14,
     borderRadius: 12,
     gap: 6,
@@ -1682,7 +1682,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface
     paddingVertical: 16,
     borderRadius: 12,
     borderWidth: 2,
@@ -1698,7 +1698,7 @@ const styles = StyleSheet.create({
   // Exercise Execution styles
   executionContainer: {
     flex: 1,
-    backgroundColor: '#e0f2fe',
+    // backgroundColor: '#e0f2fe', // theme.colors.background
   },
   executionHeader: {
     // Gradient fills the entire header area including status bar
@@ -1739,7 +1739,7 @@ const styles = StyleSheet.create({
   executionProgressContainer: {
     paddingHorizontal: 16,
     paddingVertical: 12,
-    backgroundColor: '#e0f2fe',
+    // backgroundColor: '#e0f2fe', // theme.colors.background
   },
   executionTitle: {
     fontSize: 18,
@@ -1774,7 +1774,7 @@ const styles = StyleSheet.create({
   executionContent: {
     flex: 1,
     padding: 20,
-    backgroundColor: '#e0f2fe',
+    // backgroundColor: '#e0f2fe', // theme.colors.background
   },
   executionExerciseHeader: {
     alignItems: 'center',
@@ -1788,7 +1788,7 @@ const styles = StyleSheet.create({
     marginTop: 12,
   },
   executionInfoCard: {
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface
     borderRadius: 12,
     padding: 16,
     marginBottom: 20,
@@ -1809,7 +1809,7 @@ const styles = StyleSheet.create({
     paddingVertical: 20,
   },
   currentExerciseCard: {
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface
     borderRadius: 16,
     padding: 24,
     marginBottom: 20,
@@ -1882,7 +1882,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   logInput: {
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface
     borderWidth: 2,
     borderColor: '#e5e7eb',
     borderRadius: 12,
@@ -1991,7 +1991,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 12,
     padding: 20,
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface
     borderTopWidth: 1,
     borderTopColor: '#e5e7eb',
   },
@@ -2000,7 +2000,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#f3f4f6',
+    // backgroundColor: '#f3f4f6', // theme.colors.surface
     paddingVertical: 14,
     borderRadius: 12,
     gap: 6,
@@ -2029,7 +2029,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#f3f4f6',
+    // backgroundColor: '#f3f4f6', // theme.colors.surface
     paddingVertical: 16,
     borderRadius: 12,
     marginHorizontal: 16,
@@ -2047,7 +2047,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     padding: 32,
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface
   },
   lockedWorkoutTitle: {
     fontSize: 20,
@@ -2125,7 +2125,7 @@ const styles = StyleSheet.create({
 
   // Current Workout Section styles (kept for compatibility)
   currentWorkoutSection: {
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface
     marginHorizontal: 16,
     marginTop: 16,
     borderRadius: 16,
@@ -2139,7 +2139,7 @@ const styles = StyleSheet.create({
   
   // Program Progress Card (separate card style)
   programProgressCard: {
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface
     marginHorizontal: 16,
     borderRadius: 16,
     padding: 16,
@@ -2271,7 +2271,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface
     padding: 14,
     borderRadius: 12,
     borderWidth: 1,
@@ -2281,7 +2281,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#e0f2fe',
+    // backgroundColor: '#e0f2fe', // theme.colors.background
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -2348,7 +2348,7 @@ const styles = StyleSheet.create({
 
   // Workout Info Card (standalone like NutritionFacts)
   workoutInfoCard: {
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface
     marginHorizontal: 16,
     marginBottom: 16,
     borderRadius: 16,
@@ -2386,7 +2386,7 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   exerciseCardItem: {
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface
     borderRadius: 14,
     flexDirection: 'row',
     overflow: 'hidden',
@@ -2437,7 +2437,7 @@ const styles = StyleSheet.create({
 
   // Stretches Card
   stretchesCard: {
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface
     marginHorizontal: 16,
     borderRadius: 14,
     padding: 16,
@@ -2523,7 +2523,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
-    backgroundColor: '#f9fafb',
+    // backgroundColor: '#f9fafb', // theme.colors.surface
     paddingVertical: 10,
     paddingHorizontal: 12,
     borderRadius: 10,
@@ -2629,7 +2629,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     alignSelf: 'flex-start',
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface
     paddingVertical: 8,
     paddingHorizontal: 14,
     borderRadius: 20,
@@ -2652,7 +2652,7 @@ const styles = StyleSheet.create({
 
   // New Weather Card styles
   weatherCard: {
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface
     marginHorizontal: 16,
     marginTop: 16,
     borderRadius: 16,
@@ -2695,7 +2695,7 @@ const styles = StyleSheet.create({
     marginRight: 12,
   },
   weatherExpandedCard: {
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface
     marginHorizontal: 16,
     marginTop: 0,
     borderBottomLeftRadius: 16,
@@ -2782,7 +2782,7 @@ const styles = StyleSheet.create({
 
   // Day Picker Styles (Horizontal Scroll)
   dayPickerContainer: {
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface
     marginHorizontal: 16,
     borderRadius: 16,
     paddingVertical: 12,
@@ -2804,7 +2804,7 @@ const styles = StyleSheet.create({
   dayPickerNavButton: {
     padding: 6,
     borderRadius: 8,
-    backgroundColor: '#f3f4f6',
+    // backgroundColor: '#f3f4f6', // theme.colors.surface
   },
   dayPickerMonthText: {
     fontSize: 16,
@@ -2821,7 +2821,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 14,
-    backgroundColor: '#f3f4f6',
+    // backgroundColor: '#f3f4f6', // theme.colors.surface
     paddingVertical: 8,
   },
   dayPickerItemWorkout: {
@@ -2844,7 +2844,7 @@ const styles = StyleSheet.create({
     borderColor: '#f59e0b',
   },
   dayPickerItemSkipped: {
-    backgroundColor: '#f3f4f6',
+    // backgroundColor: '#f3f4f6', // theme.colors.surface
     borderWidth: 2,
     borderColor: '#d1d5db',
   },
@@ -2897,7 +2897,7 @@ const styles = StyleSheet.create({
 
   // Enhanced Execution Styles
   executionExerciseCard: {
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface
     borderRadius: 20,
     padding: 32,
     alignItems: 'center',
@@ -2920,7 +2920,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   workoutCompleteContainer: {
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     maxHeight: '85%',
@@ -2963,7 +2963,7 @@ const styles = StyleSheet.create({
   workoutStatCard: {
     flex: 1,
     alignItems: 'center',
-    backgroundColor: '#f9fafb',
+    // backgroundColor: '#f9fafb', // theme.colors.surface
     borderRadius: 16,
     paddingVertical: 16,
     paddingHorizontal: 8,
@@ -3036,7 +3036,7 @@ const styles = StyleSheet.create({
   savedProgramsSection: {
     paddingHorizontal: 16,
     paddingVertical: 16,
-    backgroundColor: '#e0f2fe',
+    // backgroundColor: '#e0f2fe', // theme.colors.background
   },
   programCount: {
     fontSize: 14,
@@ -3053,7 +3053,7 @@ const styles = StyleSheet.create({
   },
   savedProgramCard: {
     width: 220,
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface
     borderRadius: 16,
     padding: 16,
     marginRight: 12,
@@ -3166,7 +3166,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   deleteModalContainer: {
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     minHeight: 320,
@@ -3233,7 +3233,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 14,
     borderRadius: 12,
-    backgroundColor: '#f3f4f6',
+    // backgroundColor: '#f3f4f6', // theme.colors.surface
     alignItems: 'center',
     justifyContent: 'center',
   },

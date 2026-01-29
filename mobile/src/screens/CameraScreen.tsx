@@ -1290,7 +1290,7 @@ const styles = StyleSheet.create({
     color: '#ffffff',
   },
   bottomPanel: {
-    backgroundColor: '#ffffff',
+    // // backgroundColor: '#ffffff', // theme.colors.surface // Use theme.colors.surface
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     paddingTop: 24,
@@ -1347,7 +1347,7 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     borderRadius: 25,
-    backgroundColor: '#f3f4f6',
+    // // backgroundColor: '#f3f4f6', // theme.colors.surface // Use theme.colors.background
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -1359,7 +1359,7 @@ const styles = StyleSheet.create({
     borderColor: '#3b82f6',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#ffffff',
+    // // backgroundColor: '#ffffff', // theme.colors.surface // Use theme.colors.surface
   },
   captureButtonScanning: {
     borderColor: '#ef4444',
@@ -1390,7 +1390,7 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     borderRadius: 25,
-    backgroundColor: '#f3f4f6',
+    // // backgroundColor: '#f3f4f6', // theme.colors.surface // Use theme.colors.background
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -1443,7 +1443,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   processingContainer: {
-    backgroundColor: '#ffffff',
+    // // backgroundColor: '#ffffff', // theme.colors.surface // Use theme.colors.surface
     borderRadius: 16,
     padding: 32,
     alignItems: 'center',

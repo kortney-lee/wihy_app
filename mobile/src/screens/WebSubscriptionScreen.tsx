@@ -1214,7 +1214,7 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
 
                 <View
                   style={{
-                    backgroundColor: '#ffffff',
+                    // // backgroundColor: '#ffffff', // theme.colors.surface // Use theme.colors.surface
                     borderWidth: 2,
                     borderColor: '#fa5f06',
                     borderRadius: 14,
@@ -1337,7 +1337,7 @@ const styles = StyleSheet.create({
   },
   toggleContainer: {
     flexDirection: 'row',
-    backgroundColor: '#f3f4f6',
+    // // backgroundColor: '#f3f4f6', // theme.colors.surface // Use theme.colors.background
     borderRadius: 28,
     padding: 4,
     marginHorizontal: 24,
@@ -1471,7 +1471,7 @@ const styles = StyleSheet.create({
   b2bLink: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#f9fafb',
+    // // backgroundColor: '#f9fafb', // theme.colors.surface // Use theme.colors.surface
     marginHorizontal: 16,
     marginVertical: 24,
     padding: 16,

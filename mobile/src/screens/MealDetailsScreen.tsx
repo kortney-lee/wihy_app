@@ -715,16 +715,16 @@ export default function MealDetailsScreen() {
 const styles = StyleSheet.create({
   // White box for status bar area
   statusBarBox: {
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface // Use theme.colors.surface
   },
   // Main container
   container: {
     flex: 1,
-    backgroundColor: '#e0f2fe', // Light blue background per design patterns
+    // backgroundColor: '#e0f2fe', // theme.colors.background // Light blue background per design patterns
   },
   scrollView: {
     flex: 1,
-    backgroundColor: '#e0f2fe',
+    // backgroundColor: '#e0f2fe', // theme.colors.background
   },
   scrollContent: {
     paddingBottom: 100,
@@ -795,7 +795,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#f9fafb',
+    // backgroundColor: '#f9fafb', // theme.colors.surface // Use theme.colors.surface
   },
   loadingText: {
     fontSize: 16,
@@ -833,7 +833,7 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: '#f3f4f6',
+    // backgroundColor: '#f3f4f6', // theme.colors.surface // Use theme.colors.background
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -921,7 +921,7 @@ const styles = StyleSheet.create({
   },
   macroProgressBar: {
     height: 8,
-    backgroundColor: '#f3f4f6',
+    // backgroundColor: '#f3f4f6', // theme.colors.surface // Use theme.colors.background
     borderRadius: 4,
     overflow: 'hidden',
   },
@@ -1218,7 +1218,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
     marginTop: 16,
     padding: 16,
-    backgroundColor: '#f3f4f6',
+    // backgroundColor: '#f3f4f6', // theme.colors.surface // Use theme.colors.background
     borderRadius: 12,
   },
   storageTitle: {

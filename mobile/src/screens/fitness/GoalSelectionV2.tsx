@@ -770,7 +770,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 10,
     paddingHorizontal: 14,
-    backgroundColor: '#f9fafb',
+    // backgroundColor: '#f9fafb', // theme.colors.surface // theme.colors.surface // Use theme.colors.surface
     borderRadius: 10,
     borderWidth: 1.5,
     borderColor: '#e5e7eb',
@@ -798,7 +798,7 @@ const styles = StyleSheet.create({
   tag: {
     paddingVertical: 6,
     paddingHorizontal: 12,
-    backgroundColor: '#f3f4f6',
+    // backgroundColor: '#f3f4f6', // theme.colors.surface // theme.colors.surface // Use theme.colors.background
     borderRadius: 16,
   },
   tagSelected: {
@@ -815,7 +815,7 @@ const styles = StyleSheet.create({
   // Category toggle (Train mode)
   categoryToggle: {
     flexDirection: 'row',
-    backgroundColor: '#f3f4f6',
+    // backgroundColor: '#f3f4f6', // theme.colors.surface // theme.colors.surface // Use theme.colors.background
     borderRadius: 10,
     padding: 4,
   },
@@ -846,7 +846,7 @@ const styles = StyleSheet.create({
   programCard: {
     paddingVertical: 14,
     paddingHorizontal: 16,
-    backgroundColor: '#f9fafb',
+    // backgroundColor: '#f9fafb', // theme.colors.surface // theme.colors.surface // Use theme.colors.surface
     borderRadius: 12,
     borderWidth: 1.5,
     borderColor: '#e5e7eb',
@@ -877,7 +877,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 12,
     paddingHorizontal: 10,
-    backgroundColor: '#f9fafb',
+    // backgroundColor: '#f9fafb', // theme.colors.surface // theme.colors.surface // Use theme.colors.surface
     borderRadius: 10,
     borderWidth: 1.5,
     borderColor: '#e5e7eb',

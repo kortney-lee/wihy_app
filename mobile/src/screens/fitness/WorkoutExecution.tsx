@@ -267,7 +267,7 @@ export const WorkoutExecution: React.FC<WorkoutExecutionProps> = ({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f9fafb',
+    // backgroundColor: '#f9fafb', // theme.colors.surface // theme.colors.surface // Use theme.colors.surface
   },
   header: {
     paddingBottom: 8,
@@ -304,7 +304,7 @@ const styles = StyleSheet.create({
   progressContainer: {
     paddingHorizontal: 16,
     paddingVertical: 8,
-    backgroundColor: '#f9fafb',
+    // backgroundColor: '#f9fafb', // theme.colors.surface // theme.colors.surface // Use theme.colors.surface
   },
   progress: {
     height: 6,
@@ -365,7 +365,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: isTablet ? 24 : 16,
   },
   exerciseCard: {
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface // theme.colors.surface // Use theme.colors.surface
     borderRadius: 20,
     padding: 24,
     alignItems: 'center',
@@ -385,7 +385,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   infoCard: {
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface // theme.colors.surface // Use theme.colors.surface
     borderRadius: 16,
     padding: 16,
     marginBottom: 16,
@@ -402,7 +402,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   logSetSection: {
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface // theme.colors.surface // Use theme.colors.surface
     borderRadius: 16,
     padding: 20,
     marginBottom: 16,
@@ -429,7 +429,7 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   logInput: {
-    backgroundColor: '#f9fafb',
+    // backgroundColor: '#f9fafb', // theme.colors.surface // theme.colors.surface // Use theme.colors.surface
     borderRadius: 12,
     borderWidth: 1,
     borderColor: '#e5e7eb',
@@ -491,7 +491,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 6,
     paddingVertical: 14,
-    backgroundColor: '#f3f4f6',
+    // backgroundColor: '#f3f4f6', // theme.colors.surface // theme.colors.surface // Use theme.colors.background
     borderRadius: 12,
     borderWidth: 1,
     borderColor: '#e5e7eb',

@@ -801,7 +801,7 @@ export const ManualMealForm: React.FC<ManualMealFormProps> = ({
 const styles = StyleSheet.create({
   formContainer: {
     flex: 1,
-    backgroundColor: '#e0f2fe',
+    // backgroundColor: '#e0f2fe', // theme.colors.background
   },
   formHeaderGradient: {
     paddingTop: 60,
@@ -847,7 +847,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   card: {
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface
     borderRadius: 12,
     padding: 16,
     shadowColor: '#000',
@@ -863,7 +863,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   input: {
-    backgroundColor: '#f9fafb',
+    // backgroundColor: '#f9fafb', // theme.colors.surface // Use theme.colors.surface
     borderWidth: 1,
     borderColor: '#e5e7eb',
     borderRadius: 8,
@@ -896,7 +896,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 12,
     borderRadius: 8,
-    backgroundColor: '#f3f4f6',
+    // backgroundColor: '#f3f4f6', // theme.colors.surface // Use theme.colors.background
     borderWidth: 1,
     borderColor: '#e5e7eb',
     alignItems: 'center',
@@ -919,7 +919,7 @@ const styles = StyleSheet.create({
     gap: 4,
     paddingHorizontal: 8,
     paddingVertical: 2,
-    backgroundColor: '#f9fafb',
+    // backgroundColor: '#f9fafb', // theme.colors.surface // Use theme.colors.surface
     borderRadius: 6,
   },
   miniNutritionText: {
@@ -1003,7 +1003,7 @@ const styles = StyleSheet.create({
   inlineSearchBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface
     borderRadius: 28,
     paddingHorizontal: 18,
     paddingVertical: 14,
@@ -1054,7 +1054,7 @@ const styles = StyleSheet.create({
     color: '#3b82f6',
   },
   searchResultsContainer: {
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface
     borderRadius: 12,
     marginBottom: 16,
     padding: 12,
@@ -1084,7 +1084,7 @@ const styles = StyleSheet.create({
   searchResultCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#f9fafb',
+    // backgroundColor: '#f9fafb', // theme.colors.surface // Use theme.colors.surface
     borderRadius: 10,
     padding: 12,
     marginBottom: 8,
@@ -1113,7 +1113,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 6,
@@ -1147,7 +1147,7 @@ const styles = StyleSheet.create({
     color: '#111827',
   },
   emptyStateCard: {
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface
     borderRadius: 12,
     padding: 32,
     alignItems: 'center',
@@ -1196,7 +1196,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 16,
-    backgroundColor: '#f3f4f6',
+    // backgroundColor: '#f3f4f6', // theme.colors.surface // Use theme.colors.background
     borderWidth: 1,
     borderColor: '#e5e7eb',
   },
@@ -1263,7 +1263,7 @@ const styles = StyleSheet.create({
   },
   templateCard: {
     flex: 1,
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface
     borderRadius: 12,
     padding: 16,
     alignItems: 'center',

@@ -974,7 +974,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 10,
     paddingHorizontal: 14,
-    backgroundColor: '#f9fafb',
+    // backgroundColor: '#f9fafb', // theme.colors.surface
     borderRadius: 10,
     borderWidth: 1.5,
     borderColor: '#e5e7eb',
@@ -1002,7 +1002,7 @@ const styles = StyleSheet.create({
   quickGoalCard: {
     width: '48%',
     padding: 12,
-    backgroundColor: '#f9fafb',
+    // backgroundColor: '#f9fafb', // theme.colors.surface
     borderRadius: 12,
     borderWidth: 1.5,
     borderColor: '#e5e7eb',
@@ -1036,7 +1036,7 @@ const styles = StyleSheet.create({
   programCard: {
     width: '48%',
     padding: 12,
-    backgroundColor: '#f9fafb',
+    // backgroundColor: '#f9fafb', // theme.colors.surface
     borderRadius: 12,
     borderWidth: 1.5,
     borderColor: '#e5e7eb',
@@ -1077,7 +1077,7 @@ const styles = StyleSheet.create({
     width: '48%',
     paddingVertical: 12,
     paddingHorizontal: 10,
-    backgroundColor: '#f9fafb',
+    // backgroundColor: '#f9fafb', // theme.colors.surface
     borderRadius: 10,
     borderWidth: 1.5,
     borderColor: '#e5e7eb',
@@ -1103,7 +1103,7 @@ const styles = StyleSheet.create({
   },
   // Input styles
   textInput: {
-    backgroundColor: '#f9fafb',
+    // backgroundColor: '#f9fafb', // theme.colors.surface
     borderRadius: 10,
     borderWidth: 1,
     borderColor: '#e5e7eb',
@@ -1116,7 +1116,7 @@ const styles = StyleSheet.create({
     outlineStyle: 'none' as any,
   },
   calorieInput: {
-    backgroundColor: '#f9fafb',
+    // backgroundColor: '#f9fafb', // theme.colors.surface
     borderRadius: 10,
     borderWidth: 1,
     borderColor: '#e5e7eb',
@@ -1151,7 +1151,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingVertical: 48,
     paddingHorizontal: 24,
-    backgroundColor: '#f9fafb',
+    // backgroundColor: '#f9fafb', // theme.colors.surface
     borderRadius: 12,
     borderWidth: 1.5,
     borderColor: '#e5e7eb',
@@ -1273,7 +1273,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: 1.5,
     borderColor: '#e5e7eb',
-    backgroundColor: '#f9fafb',
+    // backgroundColor: '#f9fafb', // theme.colors.surface
   },
   cuisineTabActive: {
     borderColor: '#4cbb17',
@@ -1292,7 +1292,7 @@ const styles = StyleSheet.create({
     width: '48%',
     paddingVertical: 10,
     paddingHorizontal: 12,
-    backgroundColor: '#f9fafb',
+    // backgroundColor: '#f9fafb', // theme.colors.surface
     borderRadius: 10,
     borderWidth: 1.5,
     borderColor: '#e5e7eb',

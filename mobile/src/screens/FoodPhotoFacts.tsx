@@ -421,7 +421,7 @@ export default function FoodPhotoFacts() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f9fafb',
+    // // backgroundColor: '#f9fafb', // theme.colors.surface // Use theme.colors.surface
   },
   loadingContainer: {
     flex: 1,
@@ -501,7 +501,7 @@ const styles = StyleSheet.create({
 
   // Detected Foods
   detectedSection: {
-    backgroundColor: '#ffffff',
+    // // backgroundColor: '#ffffff', // theme.colors.surface // Use theme.colors.surface
     borderRadius: 16,
     padding: 16,
     marginBottom: 16,
@@ -594,7 +594,7 @@ const styles = StyleSheet.create({
 
   // Nutrition Section
   nutritionSection: {
-    backgroundColor: '#ffffff',
+    // // backgroundColor: '#ffffff', // theme.colors.surface // Use theme.colors.surface
     borderRadius: 16,
     padding: 16,
     marginBottom: 16,
@@ -619,7 +619,7 @@ const styles = StyleSheet.create({
     width: 28,
     height: 28,
     borderRadius: 14,
-    backgroundColor: '#f3f4f6',
+    // // backgroundColor: '#f3f4f6', // theme.colors.surface // Use theme.colors.background
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -704,7 +704,7 @@ const styles = StyleSheet.create({
 
   // Health Analysis
   healthAnalysisSection: {
-    backgroundColor: '#ffffff',
+    // // backgroundColor: '#ffffff', // theme.colors.surface // Use theme.colors.surface
     borderRadius: 16,
     padding: 16,
     marginBottom: 16,
@@ -814,7 +814,7 @@ const styles = StyleSheet.create({
   },
   secondaryAction: {
     flex: 1,
-    backgroundColor: '#f9fafb',
+    // // backgroundColor: '#f9fafb', // theme.colors.surface // Use theme.colors.surface
     borderWidth: 1,
     borderColor: '#e5e7eb',
   },

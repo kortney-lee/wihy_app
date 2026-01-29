@@ -403,7 +403,7 @@ export const PostPaymentRegistrationScreen: React.FC<Props> = ({ navigation, rou
 
           {/* Password requirements */}
           <div style={{
-            backgroundColor: '#f9fafb',
+            // backgroundColor: '#f9fafb', // theme.colors.surface // Use theme.colors.surface
             borderRadius: 8,
             padding: 12,
             marginBottom: 24,
@@ -582,7 +582,7 @@ export const PostPaymentRegistrationScreen: React.FC<Props> = ({ navigation, rou
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#e0f2fe',
+    // backgroundColor: '#e0f2fe', // theme.colors.background
   },
   content: {
     flex: 1,

@@ -856,7 +856,7 @@ export default function WihyHomeScreen({}: Props = {}) {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: '#e0f2fe',
+    // backgroundColor: '#e0f2fe', // theme.colors.background
   },
   keyboardAvoidingView: {
     flex: 1,
@@ -892,7 +892,7 @@ const styles = StyleSheet.create({
   },
 
   searchInner: {
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface // Use theme.colors.surface
     flexDirection: 'row',
     alignItems: 'center',
     paddingLeft: 18,
@@ -939,7 +939,7 @@ const styles = StyleSheet.create({
   },
 
   iconPressed: {
-    backgroundColor: '#f3f4f6',
+    // backgroundColor: '#f3f4f6', // theme.colors.surface // Use theme.colors.background
   },
 
   // Web-specific styles (used alongside CSS classes)

@@ -281,7 +281,7 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: '#f3f4f6',
+    // // backgroundColor: '#f3f4f6', // theme.colors.surface // Use theme.colors.background
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -369,7 +369,7 @@ const styles = StyleSheet.create({
     minHeight: 52,
   },
   cancelButton: {
-    backgroundColor: '#f3f4f6',
+    // // backgroundColor: '#f3f4f6', // theme.colors.surface // Use theme.colors.background
   },
   cancelButtonText: {
     fontSize: 16,

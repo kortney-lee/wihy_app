@@ -1499,7 +1499,7 @@ function getRpeColor(rpe: number): object {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#e0f2fe',
+    // backgroundColor: '#e0f2fe', // theme.colors.background
   },
   collapsibleHeader: {
     backgroundColor: '#3b82f6',
@@ -1578,7 +1578,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     marginRight: 8,
     borderRadius: 20,
-    backgroundColor: '#f3f4f6',
+    // backgroundColor: '#f3f4f6', // theme.colors.surface // Use theme.colors.background
   },
   tabActive: {
     backgroundColor: '#eff6ff',
@@ -1744,7 +1744,7 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   rpeBadge: {
-    backgroundColor: '#f3f4f6',
+    // backgroundColor: '#f3f4f6', // theme.colors.surface // Use theme.colors.background
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 8,
@@ -1961,7 +1961,7 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: '#f3f4f6',
+    // backgroundColor: '#f3f4f6', // theme.colors.surface // Use theme.colors.background
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -2227,7 +2227,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 12,
     paddingVertical: 8,
-    backgroundColor: '#f3f4f6',
+    // backgroundColor: '#f3f4f6', // theme.colors.surface // Use theme.colors.background
     borderRadius: 20,
     marginRight: 8,
     gap: 6,
@@ -2334,7 +2334,7 @@ const styles = StyleSheet.create({
   noteInputContainer: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    backgroundColor: '#f9fafb',
+    // backgroundColor: '#f9fafb', // theme.colors.surface // Use theme.colors.surface
     borderRadius: 12,
     padding: 16,
     marginBottom: 20,

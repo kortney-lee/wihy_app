@@ -105,7 +105,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   levelCard: {
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // theme.colors.surface // theme.colors.surface // Use theme.colors.surface
     borderRadius: 16,
     padding: 20,
     marginBottom: 16,
