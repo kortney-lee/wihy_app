@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
   View,
   Text,
@@ -30,6 +30,27 @@ interface Ingredient {
   productData?: FoodProduct;
 }
 
+// Meal to edit interface (from mealDiary)
+interface MealToEdit {
+  meal_id: string;
+  name: string;
+  meal_type: 'breakfast' | 'lunch' | 'dinner' | 'snack' | 'pre-workout' | 'post-workout';
+  nutrition?: {
+    calories: number;
+    protein: number;
+    carbs: number;
+    fat: number;
+  };
+  ingredients?: Array<{
+    name: string;
+    amount: number;
+    unit: string;
+  } | string>;
+  tags?: string[];
+  serving_size?: number;
+  instructions?: string[];
+}
+
 interface ManualMealFormProps {
   userId: string;
   onBack: () => void;
@@ -40,6 +61,10 @@ interface ManualMealFormProps {
   onSavedMealId: (id: string) => void;
   scanning?: boolean;
   onLoadLibraryMeals?: () => void;
+  /** Optional meal to load into the form for editing */
+  mealToEdit?: MealToEdit | null;
+  /** Callback when meal edit is cleared */
+  onClearMealToEdit?: () => void;
 }
 
 const TAGS = [
@@ -57,6 +82,8 @@ export const ManualMealForm: React.FC<ManualMealFormProps> = ({
   onSavedMealId,
   scanning = false,
   onLoadLibraryMeals,
+  mealToEdit,
+  onClearMealToEdit,
 }) => {
   // Form state
   const [mealName, setMealName] = useState('');
@@ -75,6 +102,43 @@ export const ManualMealForm: React.FC<ManualMealFormProps> = ({
 
   // Shopping hook
   const mealShoppingHook = useCreateMealWithShopping(userId);
+
+  // Load meal to edit when provided
+  useEffect(() => {
+    if (mealToEdit) {
+      setMealName(mealToEdit.name || '');
+      setServingSize(String(mealToEdit.serving_size || 1));
+      
+      // Map meal type
+      const validMealTypes = ['breakfast', 'lunch', 'dinner', 'snack'] as const;
+      const mealTypeValue = mealToEdit.meal_type?.toLowerCase() || 'lunch';
+      setMealType(validMealTypes.includes(mealTypeValue as any) ? mealTypeValue as any : 'lunch');
+      
+      // Map tags
+      setSelectedTags(mealToEdit.tags || []);
+      
+      // Map ingredients
+      if (mealToEdit.ingredients && mealToEdit.ingredients.length > 0) {
+        const mappedIngredients: Ingredient[] = mealToEdit.ingredients.map((ing, index) => {
+          if (typeof ing === 'string') {
+            return {
+              id: `edit-${index}-${Date.now()}`,
+              name: ing,
+              amount: '1',
+              unit: 'item',
+            };
+          }
+          return {
+            id: `edit-${index}-${Date.now()}`,
+            name: ing.name,
+            amount: String(ing.amount || 1),
+            unit: ing.unit || 'item',
+          };
+        });
+        setIngredients(mappedIngredients);
+      }
+    }
+  }, [mealToEdit]);
 
   // Quick search categories
   const quickCategories = [
