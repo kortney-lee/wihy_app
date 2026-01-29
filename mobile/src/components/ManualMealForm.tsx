@@ -254,12 +254,6 @@ export const ManualMealForm: React.FC<ManualMealFormProps> = ({
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
         >
-          <TouchableOpacity 
-            style={styles.headerBackButtonWhite}
-            onPress={onBack}
-          >
-            <SvgIcon name="arrow-back" size={24} color="#ffffff" />
-          </TouchableOpacity>
           <Text style={styles.formHeaderTitleWhite}>Plan Your Meal</Text>
           <Text style={styles.formHeaderSubtitle}>Build your ingredient list and create shopping cart</Text>
         </LinearGradient>
