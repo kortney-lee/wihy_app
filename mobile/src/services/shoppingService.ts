@@ -198,6 +198,128 @@ class ShoppingService {
     // Handle different API response formats
     return data.lists || data.data || data || [];
   }
+
+  /**
+   * Create a manual shopping list (not from meal plan)
+   * POST /api/shopping-lists/manual
+   */
+  async createManualList(
+    userId: string,
+    data?: {
+      name?: string;
+      description?: string;
+      budget?: number;
+      dueDate?: string;
+    }
+  ): Promise<ShoppingList> {
+    const response = await fetchWithLogging(
+      `${this.baseUrl}/api/shopping-lists/manual`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user_id: userId,
+          name: data?.name || `Shopping List - ${new Date().toLocaleDateString()}`,
+          description: data?.description,
+          budget: data?.budget,
+          due_date: data?.dueDate,
+        }),
+      }
+    );
+    const result = await response.json();
+    return result.list || result.data;
+  }
+
+  /**
+   * Add items to an existing shopping list
+   * POST /api/shopping-lists/:listId/items
+   */
+  async addItemsToList(
+    listId: string,
+    items: ShoppingListItem[]
+  ): Promise<{ listId: string; itemsAdded: number; list: ShoppingList }> {
+    const response = await fetchWithLogging(
+      `${this.baseUrl}/api/shopping-lists/${listId}/items`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ items }),
+      }
+    );
+    const result = await response.json();
+    return {
+      listId: result.list_id,
+      itemsAdded: result.items_added,
+      list: result.list,
+    };
+  }
+
+  /**
+   * Update an item in a shopping list
+   * PUT /api/shopping-lists/:listId/items/:itemId
+   */
+  async updateItem(
+    listId: string,
+    itemId: string,
+    updates: Partial<ShoppingListItem>
+  ): Promise<{ item: ShoppingListItem; listSummary: any }> {
+    const response = await fetchWithLogging(
+      `${this.baseUrl}/api/shopping-lists/${listId}/items/${itemId}`,
+      {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updates),
+      }
+    );
+    const result = await response.json();
+    return {
+      item: result.item,
+      listSummary: result.list_summary,
+    };
+  }
+
+  /**
+   * Delete an item from a shopping list
+   * DELETE /api/shopping-lists/:listId/items/:itemId
+   */
+  async deleteItem(
+    listId: string,
+    itemId: string
+  ): Promise<{ success: boolean; listSummary: any }> {
+    const response = await fetchWithLogging(
+      `${this.baseUrl}/api/shopping-lists/${listId}/items/${itemId}`,
+      { method: 'DELETE' }
+    );
+    const result = await response.json();
+    return {
+      success: result.success,
+      listSummary: result.list_summary,
+    };
+  }
+
+  /**
+   * Bulk update items (check, uncheck, delete multiple items)
+   * PATCH /api/shopping-lists/:listId/items/bulk
+   */
+  async bulkUpdateItems(
+    listId: string,
+    operation: 'check' | 'uncheck' | 'delete',
+    itemIds: string[]
+  ): Promise<{ itemsAffected: number; listSummary: any }> {
+    const response = await fetchWithLogging(
+      `${this.baseUrl}/api/shopping-lists/${listId}/items/bulk`,
+      {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ operation, item_ids: itemIds }),
+      }
+    );
+    const result = await response.json();
+    return {
+      itemsAffected: result.items_affected,
+      listSummary: result.list_summary,
+    };
+  }
 }
 
 export const shoppingService = new ShoppingService();

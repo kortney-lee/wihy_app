@@ -237,7 +237,7 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
         {selectedDashboard === 'fitness' && <FitnessDashboard />}
         {selectedDashboard === 'parent' && <ParentDashboard />}
         {selectedDashboard === 'meals' && <CreateMeals isDashboardMode={true} />}
-        {selectedDashboard === 'shoppingList' && <ShoppingListScreen isDashboardMode={true} />}
+        {selectedDashboard === 'shoppingList' && <ShoppingListScreen isDashboardMode={true} onBack={() => setSelectedDashboard(null)} />}
         {selectedDashboard === 'calendar' && <MealCalendar isDashboardMode={true} />}
         {selectedDashboard === 'planMeal' && <PlanMealScreen isDashboardMode={true} onBack={() => setSelectedDashboard(null)} />}
         {(selectedDashboard as any) === 'findCoach' && <CoachSelection />}
