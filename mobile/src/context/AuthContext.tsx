@@ -52,6 +52,10 @@ export interface User {
   coachId?: string;
   commissionRate?: number;
   
+  // Auth session (from auth.wihy.ai)
+  sessionId?: string;  // Session ID from auth service - pass to ML API
+  authToken?: string;  // JWT token for ML API authentication
+  
   // B2B/Enterprise info (if applicable)
   organizationId?: string;
   organizationRole?: 'admin' | 'user' | 'student' | 'employee';
@@ -175,6 +179,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const existingData = storedData ? JSON.parse(storedData) : null;
     const existingPrefs = existingData?.preferences || defaultPreferences;
     
+    // Retrieve auth token from AsyncStorage (for ML API calls)
+    let authToken: string | null = null;
+    try {
+      authToken = await AsyncStorage.getItem('@wihy_access_token');
+    } catch (error) {
+      console.error('[AuthContext] Failed to retrieve auth token:', error);
+    }
+    
     // Check if this is a first-time user (no stored data = new signup)
     const isFirstTimeUser = !existingData;
     
@@ -229,6 +241,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       capabilities: getPlanCapabilities(plan, addOns)
     });
     
+    // Debug logging for auth session data
+    console.log('[AuthContext] Auth session data for ML API:', {
+      email: authUser.email,
+      sessionId: authUser.sessionId ?? existingData?.sessionId,
+      hasAuthToken: !!authToken,
+      tokenLength: authToken?.length
+    });
+    
     // ✅ Use capabilities from backend if available, otherwise compute client-side
     // For role-based users, always compute client-side to ensure correct access
     const rolesWithOverride: User['role'][] = ['admin', 'employee', 'coach', 'family-pro', 'family-basic', 'premium'];
@@ -266,6 +286,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       capabilities,
       isFirstTimeUser,
       onboardingCompleted: existingData?.onboardingCompleted || false,
+      // ✅ Auth session data (for ML API)
+      sessionId: authUser.sessionId ?? existingData?.sessionId,
+      authToken: authToken || existingData?.authToken, // JWT token from AsyncStorage
       // ✅ NEW: Use backend data for relationships (source of truth)
       familyId: authUser.familyId ?? existingData?.familyId,
       familyRole: authUser.familyRole ?? existingData?.familyRole,
