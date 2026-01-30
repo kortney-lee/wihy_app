@@ -183,6 +183,9 @@ export interface UserData {
   
   // Coach info (from backend)
   coachId?: string | null;
+  isCoach?: boolean;
+  coachCode?: string | null;
+  coachProfileId?: string | null;
   commissionRate?: number | null;
   
   // Organization info (from backend)

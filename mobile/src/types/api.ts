@@ -121,6 +121,8 @@ export interface User {
   coachId?: string | null;
   coachName?: string | null;
   isCoach?: boolean;
+  coachCode?: string | null;
+  coachProfileId?: string | null;
   clientCount?: number;
   clients?: CoachInfo[];
   

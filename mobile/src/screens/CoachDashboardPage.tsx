@@ -74,18 +74,6 @@ const CoachDashboardPage: React.FC<CoachDashboardPageProps> = ({ showMenuFromHea
     }
   }, [user?.isCoach, navigation]);
 
-  // Don't render anything if user is not a coach (security)
-  if (!user?.isCoach) {
-    return (
-      <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
-        <View style={styles.centerContent}>
-          <Text style={[styles.cardTitle, { color: theme.colors.text }]}>Access Denied</Text>
-          <Text style={[styles.cardSubtitle, { color: theme.colors.textSecondary }]}>Coach access required</Text>
-        </View>
-      </SafeAreaView>
-    );
-  }
-
   // Reset view state when user plan changes (dev mode switcher)
   React.useEffect(() => {
     setSelectedView(null);
@@ -248,6 +236,18 @@ const CoachDashboardPage: React.FC<CoachDashboardPageProps> = ({ showMenuFromHea
     );
   }
 
+  // Don't render anything if user is not a coach (security guard)
+  if (!user?.isCoach) {
+    return (
+      <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
+        <View style={styles.centerContent}>
+          <Text style={[styles.cardTitle, { color: theme.colors.text }]}>Access Denied</Text>
+          <Text style={[styles.cardSubtitle, { color: theme.colors.textSecondary }]}>Coach access required</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView style={styles.healthMainContent} edges={['left', 'right']}>
       {showHamburgerMenu && (
@@ -383,53 +383,53 @@ const CoachDashboardPage: React.FC<CoachDashboardPageProps> = ({ showMenuFromHea
           }
         ]}>
           {user?.isCoach && user?.coachCode ? (
-              // Show coach code if profile exists
-              <>
-                <View style={styles.coachCodeIcon}>
-                  <SvgIcon name="ribbon" size={32} color="#3b82f6" />
+            // Show coach code if profile exists
+            <>
+              <View style={styles.coachCodeIcon}>
+                <SvgIcon name="ribbon" size={32} color="#3b82f6" />
+              </View>
+              <Text style={styles.coachCodeTitle}>Your Coach Code</Text>
+              <Text style={styles.coachCodeSubtitle}>Share this with clients to connect</Text>
+              <View style={styles.coachCodeContainer}>
+                <Text style={styles.coachCodeText}>{user.coachCode}</Text>
+              </View>
+              <Text style={styles.coachCodeHint}>Tap to copy</Text>
+            </>
+          ) : (
+            // Show setup prompt if no profile
+            <>
+              <View style={styles.coachSetupIcon}>
+                <SvgIcon name="briefcase" size={32} color="#3b82f6" />
+              </View>
+              <Text style={styles.coachSetupTitle}>Become a WiHY Coach</Text>
+              <Text style={styles.coachSetupSubtitle}>Help your clients achieve their health goals with personalized nutrition and fitness plans</Text>
+              <View style={styles.coachSetupBenefits}>
+                <View style={styles.benefitRow}>
+                  <SvgIcon name="checkmark-circle" size={20} color="#10b981" />
+                  <Text style={styles.benefitText}>Manage unlimited clients</Text>
                 </View>
-                <Text style={styles.coachCodeTitle}>Your Coach Code</Text>
-                <Text style={styles.coachCodeSubtitle}>Share this with clients to connect</Text>
-                <View style={styles.coachCodeContainer}>
-                  <Text style={styles.coachCodeText}>{user.coachCode}</Text>
+                <View style={styles.benefitRow}>
+                  <SvgIcon name="checkmark-circle" size={20} color="#10b981" />
+                  <Text style={styles.benefitText}>Track client progress</Text>
                 </View>
-                <Text style={styles.coachCodeHint}>Tap to copy</Text>
-              </>
-            ) : (
-              // Show setup prompt if no profile
-              <>
-                <View style={styles.coachSetupIcon}>
-                  <SvgIcon name="briefcase" size={32} color="#3b82f6" />
+                <View style={styles.benefitRow}>
+                  <SvgIcon name="checkmark-circle" size={20} color="#10b981" />
+                  <Text style={styles.benefitText}>Earn commission on referrals</Text>
                 </View>
-                <Text style={styles.coachSetupTitle}>Become a WiHY Coach</Text>
-                <Text style={styles.coachSetupSubtitle}>Help your clients achieve their health goals with personalized nutrition and fitness plans</Text>
-                <View style={styles.coachSetupBenefits}>
-                  <View style={styles.benefitRow}>
-                    <SvgIcon name="checkmark-circle" size={20} color="#10b981" />
-                    <Text style={styles.benefitText}>Manage unlimited clients</Text>
-                  </View>
-                  <View style={styles.benefitRow}>
-                    <SvgIcon name="checkmark-circle" size={20} color="#10b981" />
-                    <Text style={styles.benefitText}>Track client progress</Text>
-                  </View>
-                  <View style={styles.benefitRow}>
-                    <SvgIcon name="checkmark-circle" size={20} color="#10b981" />
-                    <Text style={styles.benefitText}>Earn commission on referrals</Text>
-                  </View>
-                  <View style={styles.benefitRow}>
-                    <SvgIcon name="checkmark-circle" size={20} color="#10b981" />
-                    <Text style={styles.benefitText}>Access coach analytics</Text>
-                  </View>
+                <View style={styles.benefitRow}>
+                  <SvgIcon name="checkmark-circle" size={20} color="#10b981" />
+                  <Text style={styles.benefitText}>Access coach analytics</Text>
                 </View>
-                <TouchableOpacity
-                  style={styles.startCoachingButton}
-                  onPress={() => setSelectedView('coachProfile')}
-                >
-                  <SvgIcon name="rocket" size={20} color="#ffffff" />
-                  <Text style={styles.startCoachingButtonText}>Start Coaching</Text>
-                </TouchableOpacity>
-              </>
-            )}
+              </View>
+              <TouchableOpacity
+                style={styles.startCoachingButton}
+                onPress={() => setSelectedView('coachProfile')}
+              >
+                <SvgIcon name="rocket" size={20} color="#ffffff" />
+                <Text style={styles.startCoachingButtonText}>Start Coaching</Text>
+              </TouchableOpacity>
+            </>
+          )}
         </View>
         
         {/* Bottom spacing for tab bar */
