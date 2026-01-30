@@ -50,6 +50,9 @@ export interface User {
   
   // Coach info (if applicable)
   coachId?: string;
+  isCoach?: boolean;
+  coachCode?: string;
+  coachProfileId?: string;
   commissionRate?: number;
   
   // Auth session (from auth.wihy.ai)

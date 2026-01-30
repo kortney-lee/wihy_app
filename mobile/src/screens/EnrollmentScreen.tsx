@@ -19,7 +19,7 @@ import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { AuthContext } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
-import { userService, Coach, CoachClient, CreateCoachInput } from '../services/userService';
+import { userService, Coach, CoachClient } from '../services/userService';
 import { familyService, FamilyMember as FamilyServiceMember, FamilyRole } from '../services/familyService';
 import { coachService, Client, ClientDashboard } from '../services/coachService';
 import { RootStackParamList } from '../types/navigation';
@@ -359,12 +359,25 @@ export default function EnrollmentScreen() {
   const handleBecomeCoach = async () => {
     setLoading(true);
     try {
-      // Create coach profile with required fields: name and specialty
-      const result = await userService.createCoach({
+      // Create coach profile with required fields
+      const result = await coachService.createCoachProfile({
         name: user?.name || user?.email?.split('@')[0] || 'WiHY Coach',
-        specialty: 'wellness', // Default specialty, can be updated later in profile
+        email: user?.email,
+        specialties: ['wellness'], // Array of specialty IDs
         title: 'Health & Wellness Coach',
         bio: 'Passionate about helping clients achieve their health goals through personalized coaching.',
+        years_experience: 0,
+        location: {
+          city: '',
+          state: '',
+          country: 'USA',
+          timezone: 'America/New_York',
+        },
+        pricing: {
+          session_rate: 0,
+          currency: 'USD',
+          session_duration_minutes: 60,
+        },
       });
       
       if (result.success && result.data) {
@@ -375,7 +388,7 @@ export default function EnrollmentScreen() {
         }
         Alert.alert('Success! 🎉', 'You are now a WiHY Coach! Complete your profile to start accepting clients.');
       } else {
-        const errorMessage = result.message || result.error || 'Failed to create coach profile';
+        const errorMessage = result.error || 'Failed to create coach profile';
         Alert.alert('Error', errorMessage);
         console.error('[Enrollment] Coach creation failed:', result);
       }
