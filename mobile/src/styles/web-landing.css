@@ -1095,6 +1095,57 @@
   padding: 0 24px;
 }
 
+/* Chat History Button - positioned on the left inside the input */
+.web-chat-history-button {
+  position: absolute;
+  left: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #5f6368;
+  transition: color 0.2s ease, background-color 0.2s ease;
+  z-index: 1;
+}
+
+.web-chat-history-button:hover {
+  background-color: #f1f3f4;
+  color: #1a73e8;
+}
+
+/* Dark mode chat history button */
+.web-search-landing[data-theme="dark"] .web-chat-history-button,
+.web-search-container[data-theme="dark"] .web-chat-history-button,
+.web-chat-page.web-page-wrapper[data-theme="dark"] .web-chat-history-button {
+  color: #ffffff;
+  background: #000000;
+}
+
+.web-search-landing[data-theme="dark"] .web-chat-history-button:hover,
+.web-search-container[data-theme="dark"] .web-chat-history-button:hover,
+.web-chat-page.web-page-wrapper[data-theme="dark"] .web-chat-history-button:hover {
+  background: #1f2937;
+  color: #ffffff;
+}
+
+.web-chat-history-button svg {
+  width: 20px;
+  height: 20px;
+  fill: currentColor;
+}
+
+/* Adjust input padding when history button is present */
+.web-chat-input-fixed .web-search-input-container:has(.web-chat-history-button) .web-search-input {
+  padding-left: 50px;
+}
+
 /* Send button active state */
 .web-icon-button.send-active {
   background: #e8f0fe;

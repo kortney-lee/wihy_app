@@ -27,6 +27,7 @@ interface MultiAuthLoginProps {
   onSignOut?: () => void;
   customProviders?: string[];
   title?: string;
+  subtitle?: string;
   visible?: boolean;
   onClose?: () => void;
   onSkip?: () => void;
@@ -72,6 +73,7 @@ export default function MultiAuthLogin({
   onSignOut,
   customProviders,
   title = 'Log in or sign up to WIHY',
+  subtitle,
   visible = false,
   onClose,
   onSkip,
@@ -240,7 +242,7 @@ export default function MultiAuthLogin({
               
               {Platform.OS === 'web' && (
                 <Text style={[styles.formSubtitle, { color: theme.colors.textSecondary }]}>
-                  {isSignUp ? 'Start your health journey today' : 'Sign in to continue'}
+                  {subtitle || (isSignUp ? 'Start your health journey today' : 'Sign in to continue')}
                 </Text>
               )}
 
