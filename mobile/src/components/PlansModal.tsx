@@ -198,39 +198,39 @@ export default function PlansModal({
       <View style={styles.modalOverlay}>
         <View style={[styles.modalContent, { backgroundColor: theme.colors.background }]}>
           {/* Header */}
-          <View style={styles.header}>
+          <View style={[styles.header, { borderBottomColor: theme.colors.border }]}>
             <View style={styles.headerTextContainer}>
-              <Text style={styles.headerTitle}>{title}</Text>
-              <Text style={styles.headerSubtitle}>{subtitle}</Text>
+              <Text style={[styles.headerTitle, { color: theme.colors.text }]}>{title}</Text>
+              <Text style={[styles.headerSubtitle, { color: theme.colors.textSecondary }]}>{subtitle}</Text>
             </View>
             <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-              <Ionicons name="close" size={28} color="#374151" />
+              <Ionicons name="close" size={28} color={theme.colors.text} />
             </TouchableOpacity>
           </View>
 
           {/* Current Plan Info */}
-          <View style={styles.currentPlanBanner}>
+          <View style={[styles.currentPlanBanner, { backgroundColor: theme.colors.background }]}>
             <Ionicons name="information-circle" size={24} color="#2563eb" />
-            <Text style={styles.currentPlanText}>
+            <Text style={[styles.currentPlanText, { color: theme.colors.text }]}>
               You're on the Free plan. Upgrade to unlock advanced features.
             </Text>
           </View>
 
           {/* Tabs */}
-          <View style={styles.tabContainer}>
+          <View style={[styles.tabContainer, { backgroundColor: theme.colors.background }]}>
             <TouchableOpacity
-              style={[styles.tab, activeTab === 'plans' && styles.tabActive]}
+              style={[styles.tab, activeTab === 'plans' && styles.tabActive, activeTab === 'plans' && { backgroundColor: theme.colors.surface }]}
               onPress={() => setActiveTab('plans')}
             >
               <Ionicons name="layers" size={18} color={activeTab === 'plans' ? '#3b82f6' : '#6b7280'} />
-              <Text style={[styles.tabText, activeTab === 'plans' && styles.tabTextActive]}>Plans</Text>
+              <Text style={[styles.tabText, { color: theme.colors.textSecondary }, activeTab === 'plans' && styles.tabTextActive]}>Plans</Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={[styles.tab, activeTab === 'addons' && styles.tabActive]}
+              style={[styles.tab, activeTab === 'addons' && styles.tabActive, activeTab === 'addons' && { backgroundColor: theme.colors.surface }]}
               onPress={() => setActiveTab('addons')}
             >
               <Ionicons name="add-circle" size={18} color={activeTab === 'addons' ? '#3b82f6' : '#6b7280'} />
-              <Text style={[styles.tabText, activeTab === 'addons' && styles.tabTextActive]}>Add-ons</Text>
+              <Text style={[styles.tabText, { color: theme.colors.textSecondary }, activeTab === 'addons' && styles.tabTextActive]}>Add-ons</Text>
             </TouchableOpacity>
           </View>
 
@@ -244,6 +244,7 @@ export default function PlansModal({
                 key={plan.id}
                 style={[
                   styles.planCard,
+                  { backgroundColor: theme.colors.surface, borderColor: theme.colors.border },
                   plan.recommended && styles.planCardRecommended,
                 ]}
                 onPress={() => handleSelectPlan(plan.id)}
@@ -260,10 +261,10 @@ export default function PlansModal({
                   />
                   <View style={styles.planHeaderText}>
                     <View style={styles.planTitleRow}>
-                      <Text style={styles.planName}>{plan.displayName}</Text>
-                      <Text style={styles.planPrice}>{plan.price}</Text>
+                      <Text style={[styles.planName, { color: theme.colors.text }]}>{plan.displayName}</Text>
+                      <Text style={[styles.planPrice, { color: theme.colors.text }]}>{plan.price}</Text>
                     </View>
-                    <Text style={styles.planDescription}>{plan.description}</Text>
+                    <Text style={[styles.planDescription, { color: theme.colors.textSecondary }]}>{plan.description}</Text>
                   </View>
                 </View>
 
@@ -275,7 +276,7 @@ export default function PlansModal({
                         size={18}
                         color={plan.color}
                       />
-                      <Text style={styles.featureText}>{feature}</Text>
+                      <Text style={[styles.featureText, { color: theme.colors.text }]}>{feature}</Text>
                     </View>
                   ))}
                 </View>
@@ -300,8 +301,8 @@ export default function PlansModal({
             {activeTab === 'addons' && (
               <>
                 <View style={styles.addOnsHeader}>
-                  <Text style={styles.addOnsTitle}>Power-Up Add-ons</Text>
-                  <Text style={styles.addOnsSubtitle}>
+                  <Text style={[styles.addOnsTitle, { color: theme.colors.text }]}>Power-Up Add-ons</Text>
+                  <Text style={[styles.addOnsSubtitle, { color: theme.colors.textSecondary }]}>
                     Add these features to any paid plan
                   </Text>
                 </View>
@@ -309,18 +310,18 @@ export default function PlansModal({
                 {Object.values(ADD_ONS).map((addon) => (
                   <Pressable
                     key={addon.id}
-                    style={styles.addOnCard}
+                    style={[styles.addOnCard, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}
                     onPress={() => handleSelectPlan(addon.id)}
                   >
                     <View style={[styles.addOnIconContainer, { backgroundColor: ADDON_COLORS[addon.id] + '20' }]}>
                       <Ionicons name={addon.icon as any} size={28} color={ADDON_COLORS[addon.id]} />
                     </View>
                     <View style={styles.addOnInfo}>
-                      <Text style={styles.addOnName}>{addon.displayName}</Text>
-                      <Text style={styles.addOnDescription}>{addon.description}</Text>
+                      <Text style={[styles.addOnName, { color: theme.colors.text }]}>{addon.displayName}</Text>
+                      <Text style={[styles.addOnDescription, { color: theme.colors.textSecondary }]}>{addon.description}</Text>
                     </View>
                     <View style={styles.addOnPriceContainer}>
-                      <Text style={styles.addOnPrice}>${addon.price.toFixed(2)}/mo</Text>
+                      <Text style={[styles.addOnPrice, { color: theme.colors.text }]}>${addon.price.toFixed(2)}/mo</Text>
                       <TouchableOpacity
                         style={[styles.addOnButton, { backgroundColor: ADDON_COLORS[addon.id] }]}
                         onPress={() => handleSelectPlan(addon.id)}
@@ -331,17 +332,17 @@ export default function PlansModal({
                   </Pressable>
                 ))}
                 
-                <View style={styles.addOnsNote}>
-                  <Ionicons name="information-circle-outline" size={18} color="#6b7280" />
-                  <Text style={styles.addOnsNoteText}>
+                <View style={[styles.addOnsNote, { backgroundColor: theme.colors.background }]}>
+                  <Ionicons name="information-circle-outline" size={18} color={theme.colors.textSecondary} />
+                  <Text style={[styles.addOnsNoteText, { color: theme.colors.textSecondary }]}>
                     Add-ons require an active subscription. WIHY Coach: $9.99/mo, Instacart: $7.99/mo
                   </Text>
                 </View>
               </>
             )}
 
-            <View style={styles.footer}>
-              <Text style={styles.footerText}>
+            <View style={[styles.footer, { backgroundColor: theme.colors.background }]}>
+              <Text style={[styles.footerText, { color: theme.colors.textSecondary }]}>
                 • Cancel anytime{'\n'}
                 • 7-day money-back guarantee{'\n'}
                 • Secure payment processing
@@ -352,9 +353,9 @@ export default function PlansModal({
           {/* Loading Overlay */}
           {(initializingPurchases || purchasing) && (
             <View style={styles.loadingOverlay}>
-              <View style={styles.loadingContainer}>
+              <View style={[styles.loadingContainer, { backgroundColor: theme.colors.surface }]}>
                 <ActivityIndicator size="large" color="#3b82f6" />
-                <Text style={styles.loadingText}>
+                <Text style={[styles.loadingText, { color: theme.colors.text }]}>
                   {initializingPurchases ? 'Loading plans...' : 'Processing purchase...'}
                 </Text>
               </View>
@@ -394,7 +395,7 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     padding: 20,
     borderBottomWidth: 1,
-    borderBottomColor: '#e5e7eb',
+    // borderBottomColor: '#e5e7eb', // theme.colors.border
   },
   headerTextContainer: {
     flex: 1,
@@ -403,11 +404,11 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 22,
     fontWeight: '700',
-    color: '#111827',
+    // color: theme.colors.text
   },
   headerSubtitle: {
     fontSize: 14,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
     marginTop: 4,
   },
   closeButton: {
@@ -417,7 +418,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
-    backgroundColor: '#dbeafe',
+    // backgroundColor: '#dbeafe', // theme.colors.background
     padding: 16,
     marginHorizontal: 20,
     marginTop: 16,
@@ -426,21 +427,21 @@ const styles = StyleSheet.create({
   currentPlanText: {
     flex: 1,
     fontSize: 13,
-    color: '#1e40af',
+    // color: '#1e40af', // theme.colors.text
     lineHeight: 18,
   },
   scrollView: {
     paddingHorizontal: 20,
     paddingTop: 16,
-    ...(isWeb && { maxHeight: '60vh', overflowY: 'auto' }),
+    ...(isWeb && { maxHeight: '60vh', overflowY: 'auto' } as any),
   },
   planCard: {
-    backgroundColor: '#fff',
+    // backgroundColor: '#fff', // theme.colors.surface
     borderRadius: 16,
     padding: 20,
     marginBottom: 16,
     borderWidth: 2,
-    borderColor: '#e5e7eb',
+    // borderColor: '#e5e7eb', // theme.colors.border
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
@@ -490,17 +491,17 @@ const styles = StyleSheet.create({
   planName: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#111827',
+    // color: theme.colors.text
   },
   planDescription: {
     fontSize: 13,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
     marginTop: 4,
   },
   planPrice: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#3b82f6',
+    // color: '#3b82f6', // theme.colors.text
   },
   featuresContainer: {
     gap: 10,
@@ -513,7 +514,7 @@ const styles = StyleSheet.create({
   },
   featureText: {
     fontSize: 14,
-    color: '#374151',
+    // color: theme.colors.text
     flex: 1,
   },
   selectButton: {
@@ -566,7 +567,7 @@ const styles = StyleSheet.create({
   tabText: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
   },
   tabTextActive: {
     color: '#3b82f6',
@@ -578,22 +579,22 @@ const styles = StyleSheet.create({
   addOnsTitle: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#111827',
+    // color: theme.colors.text
     marginBottom: 4,
   },
   addOnsSubtitle: {
     fontSize: 14,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
   },
   addOnCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#fff',
+    // backgroundColor: '#fff', // theme.colors.surface
     padding: 16,
     borderRadius: 16,
     marginBottom: 12,
     borderWidth: 1,
-    borderColor: '#e5e7eb',
+    // borderColor: '#e5e7eb', // theme.colors.border
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
@@ -614,12 +615,12 @@ const styles = StyleSheet.create({
   addOnName: {
     fontSize: 17,
     fontWeight: '700',
-    color: '#111827',
+    // color: theme.colors.text
     marginBottom: 2,
   },
   addOnDescription: {
     fontSize: 13,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
     lineHeight: 18,
   },
   addOnPriceContainer: {
@@ -629,7 +630,7 @@ const styles = StyleSheet.create({
   addOnPrice: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#111827',
+    // color: theme.colors.text
   },
   addOnButton: {
     width: 36,
@@ -650,7 +651,7 @@ const styles = StyleSheet.create({
   addOnsNoteText: {
     flex: 1,
     fontSize: 13,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
     lineHeight: 18,
   },
   footer: {
@@ -662,7 +663,7 @@ const styles = StyleSheet.create({
   },
   footerText: {
     fontSize: 13,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
     lineHeight: 20,
   },
   loadingOverlay: {
@@ -674,7 +675,7 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 24,
   },
   loadingContainer: {
-    backgroundColor: '#fff',
+    // backgroundColor: '#fff', // theme.colors.surface
     padding: 24,
     borderRadius: 16,
     alignItems: 'center',
@@ -683,7 +684,7 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 12,
     fontSize: 15,
-    color: '#374151',
+    // color: theme.colors.text
     fontWeight: '600',
   },
 });

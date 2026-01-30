@@ -93,7 +93,7 @@ export default function RequestCoaching() {
           <ScrollView style={styles.content} contentContainerStyle={styles.contentContainer}>
             {/* Message */}
             <View style={styles.formGroup}>
-              <Text style={styles.label}>Message to Coach (Optional)</Text>
+              <Text style={[styles.label, { color: theme.colors.text }]}>Message to Coach (Optional)</Text>
               <TextInput
                 style={styles.textArea}
                 placeholder="Tell the coach about your goals and what you're looking for..."
@@ -109,7 +109,7 @@ export default function RequestCoaching() {
 
             {/* Frequency */}
             <View style={styles.formGroup}>
-              <Text style={styles.label}>Preferred Session Frequency</Text>
+              <Text style={[styles.label, { color: theme.colors.text }]}>Preferred Session Frequency</Text>
               <View style={styles.frequencyOptions}>
                 <Pressable
                   style={[
@@ -124,6 +124,7 @@ export default function RequestCoaching() {
                   <Text
                     style={[
                       styles.frequencyText,
+                      { color: theme.colors.text },
                       frequency === 'weekly' && styles.frequencyTextSelected,
                     ]}
                   >
@@ -144,6 +145,7 @@ export default function RequestCoaching() {
                   <Text
                     style={[
                       styles.frequencyText,
+                      { color: theme.colors.text },
                       frequency === 'bi-weekly' && styles.frequencyTextSelected,
                     ]}
                   >
@@ -164,6 +166,7 @@ export default function RequestCoaching() {
                   <Text
                     style={[
                       styles.frequencyText,
+                      { color: theme.colors.text },
                       frequency === 'monthly' && styles.frequencyTextSelected,
                     ]}
                   >
@@ -188,7 +191,7 @@ export default function RequestCoaching() {
               style={styles.cancelButton}
               onPress={() => navigation.goBack()}
             >
-              <Text style={styles.cancelButtonText}>Cancel</Text>
+              <Text style={[styles.cancelButtonText, { color: theme.colors.text }]}>Cancel</Text>
             </Pressable>
 
             <Pressable
@@ -264,7 +267,7 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 14,
     fontWeight: '600',
-    color: theme.colors.text,
+    // color: theme.colors.text
     marginBottom: 8,
   },
   textArea: {
@@ -318,7 +321,7 @@ const styles = StyleSheet.create({
   },
   frequencyText: {
     fontSize: 15,
-    color: theme.colors.text,
+    // color: theme.colors.text
   },
   frequencyTextSelected: {
     color: '#3b82f6',
@@ -358,7 +361,7 @@ const styles = StyleSheet.create({
   cancelButtonText: {
     fontSize: 16,
     fontWeight: '600',
-    color: theme.colors.text,
+    // color: theme.colors.text
   },
   submitButton: {
     flex: 1,

@@ -210,7 +210,7 @@ export default function MultiAuthLogin({
         }}
       >
         <View style={styles.modalOverlay}>
-          <View style={[styles.emailFormContainer, Platform.OS === 'web' && styles.emailFormContainerWeb]}>
+          <View style={[styles.emailFormContainer, Platform.OS === 'web' && styles.emailFormContainerWeb, { backgroundColor: theme.colors.surface }]}>
             {/* Close button for web */}
             {Platform.OS === 'web' && onClose && (
               <View style={styles.closeButtonContainer}>
@@ -234,12 +234,12 @@ export default function MultiAuthLogin({
                 </View>
               )}
 
-              <Text style={styles.formTitle}>
+              <Text style={[styles.formTitle, { color: theme.colors.text }]}>
                 {isSignUp ? 'Create Account' : 'Welcome Back'}
               </Text>
               
               {Platform.OS === 'web' && (
-                <Text style={styles.formSubtitle}>
+                <Text style={[styles.formSubtitle, { color: theme.colors.textSecondary }]}>
                   {isSignUp ? 'Start your health journey today' : 'Sign in to continue'}
                 </Text>
               )}
@@ -251,6 +251,7 @@ export default function MultiAuthLogin({
                     key={provider.id}
                     style={({ pressed }) => [
                       styles.socialButton,
+                      { backgroundColor: '#ffffff' },
                       pressed && { opacity: 0.7 },
                     ]}
                     onPress={() => handleProviderPress(provider.id)}
@@ -267,7 +268,7 @@ export default function MultiAuthLogin({
               {/* Divider */}
               <View style={styles.dividerContainer}>
                 <View style={styles.dividerLine} />
-                <Text style={styles.dividerText}>or continue with email</Text>
+                <Text style={[styles.dividerText, { color: theme.colors.textSecondary }]}>or continue with email</Text>
                 <View style={styles.dividerLine} />
               </View>
 
@@ -280,8 +281,8 @@ export default function MultiAuthLogin({
 
               {isSignUp && (
                 <View style={styles.inputContainer}>
-                  <Text style={styles.inputLabel}>Full Name</Text>
-                  <View style={styles.inputWrapper}>
+                  <Text style={[styles.inputLabel, { color: theme.colors.text }]}>Full Name</Text>
+                  <View style={[styles.inputWrapper, { backgroundColor: theme.colors.background }]}>
                     <SvgIcon name="person-outline" size={20} color="#9ca3af" style={styles.inputIcon} />
                     <TextInput
                       style={styles.input}
@@ -297,8 +298,8 @@ export default function MultiAuthLogin({
             )}
 
             <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>Email</Text>
-              <View style={styles.inputWrapper}>
+              <Text style={[styles.inputLabel, { color: theme.colors.text }]}>Email</Text>
+              <View style={[styles.inputWrapper, { backgroundColor: theme.colors.background }]}>
                 <SvgIcon name="mail" size={20} color={colors.primary} style={styles.inputIcon} />
                 <TextInput
                   style={styles.input}
@@ -315,7 +316,7 @@ export default function MultiAuthLogin({
 
             <View style={styles.inputContainer}>
               <View style={styles.labelRow}>
-                <Text style={styles.inputLabel}>Password</Text>
+                <Text style={[styles.inputLabel, { color: theme.colors.text }]}>Password</Text>
                 {!isSignUp && (
                   <TouchableOpacity onPress={() => {
                     setShowForgotPassword(true);
@@ -325,7 +326,7 @@ export default function MultiAuthLogin({
                   </TouchableOpacity>
                 )}
               </View>
-              <View style={styles.inputWrapper}>
+              <View style={[styles.inputWrapper, { backgroundColor: theme.colors.background }]}>
                 <SvgIcon name="lock-closed" size={20} color="#9ca3af" style={styles.inputIcon} />
                 <TextInput
                   style={[styles.input, styles.passwordInput]}
@@ -451,7 +452,7 @@ export default function MultiAuthLogin({
         onRequestClose={() => setShowForgotPassword(false)}
       >
         <View style={styles.modalOverlay}>
-          <View style={[styles.emailFormContainer, Platform.OS === 'web' && styles.emailFormContainerWeb]}>
+          <View style={[styles.emailFormContainer, Platform.OS === 'web' && styles.emailFormContainerWeb, { backgroundColor: theme.colors.surface }]}>
             {/* Close button for web */}
             {Platform.OS === 'web' && (
               <View style={styles.closeButtonContainer}>
@@ -470,12 +471,12 @@ export default function MultiAuthLogin({
                 <View style={styles.successIconContainer}>
                   <SvgIcon name="checkmark-circle" size={64} color="#22c55e" />
                 </View>
-                <Text style={styles.formTitle}>Check Your Email</Text>
-                <Text style={styles.resetSuccessText}>
+                <Text style={[styles.formTitle, { color: theme.colors.text }]}>Check Your Email</Text>
+                <Text style={[styles.resetSuccessText, { color: theme.colors.textSecondary }]}>
                   We've sent password reset instructions to{'\n'}
-                  <Text style={styles.resetEmailHighlight}>{resetEmail}</Text>
+                  <Text style={[styles.resetEmailHighlight, { color: theme.colors.text }]}>{resetEmail}</Text>
                 </Text>
-                <Text style={styles.resetHelpText}>
+                <Text style={[styles.resetHelpText, { color: theme.colors.textSecondary }]}>
                   Didn't receive the email? Check your spam folder or try again.
                 </Text>
                 <TouchableOpacity
@@ -494,8 +495,8 @@ export default function MultiAuthLogin({
                 <View style={styles.resetIconContainer}>
                   <SvgIcon name="key" size={48} color={colors.primary} />
                 </View>
-                <Text style={styles.formTitle}>Reset Password</Text>
-                <Text style={styles.formSubtitle}>
+                <Text style={[styles.formTitle, { color: theme.colors.text }]}>Reset Password</Text>
+                <Text style={[styles.formSubtitle, { color: theme.colors.textSecondary }]}>
                   Enter your email address and we'll send you instructions to reset your password.
                 </Text>
 
@@ -507,8 +508,8 @@ export default function MultiAuthLogin({
                 ) : null}
 
                 <View style={styles.inputContainer}>
-                  <Text style={styles.inputLabel}>Email Address</Text>
-                  <View style={styles.inputWrapper}>
+                  <Text style={[styles.inputLabel, { color: theme.colors.text }]}>Email Address</Text>
+                  <View style={[styles.inputWrapper, { backgroundColor: theme.colors.background }]}>
                     <SvgIcon name="mail" size={20} color={colors.primary} style={styles.inputIcon} />
                     <TextInput
                       style={styles.input}

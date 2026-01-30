@@ -783,7 +783,11 @@ export default function WihyHomeScreen({}: Props = {}) {
   return (
     <>
       <SafeAreaView style={[styles.screen, { backgroundColor: theme.colors.surface }]} edges={['top', 'left', 'right']}>
-        <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} backgroundColor={theme.colors.surface} />
+        <StatusBar 
+          barStyle={isDark ? 'light-content' : 'dark-content'} 
+          backgroundColor={isDark ? '#000000' : '#ffffff'}
+          translucent={false}
+        />
         <KeyboardAvoidingView
           style={styles.keyboardAvoidingView}
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}

@@ -10,6 +10,7 @@ import {
   Image,
   ActivityIndicator,
   Modal,
+  StatusBar,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
@@ -39,7 +40,7 @@ export default function CameraScreen() {
   const navigation = useNavigation<NavigationProp>();
   const route = useRoute<CameraRouteProp>();
   const { user } = useContext(AuthContext);
-  const { theme } = useTheme();
+  const { theme, isDark } = useTheme();
   const autoScanEnabled = user?.preferences?.autoScan ?? false;
   const insets = useSafeAreaInsets();
   const topOffset = Math.max(insets.top, 16);
@@ -914,7 +915,12 @@ export default function CameraScreen() {
   }
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]} edges={['top', 'left', 'right']}>
+    <SafeAreaView style={[styles.container, { backgroundColor: isDark ? '#000000' : '#ffffff' }]} edges={['top', 'left', 'right']}>
+      <StatusBar 
+        barStyle={isDark ? 'light-content' : 'dark-content'} 
+        backgroundColor={isDark ? '#000000' : '#ffffff'} 
+        translucent={false} 
+      />
       {/* Camera View Area */}
       <View style={styles.cameraContainer}>
         {/* Real Camera View */}
@@ -970,21 +976,13 @@ export default function CameraScreen() {
               <View style={[styles.frameCorner, styles.frameCornerBR]} />
             </View>
 
-            {/* Instructions */}
-            {!isScanning && (
+            {/* Barcode Detection Badge */}
+            {!isScanning && selectedMode === 'barcode' && !autoScanEnabled && lastScannedBarcode && (
               <View style={styles.instructionsContainer}>
-                <Text style={styles.instructionsTitle}>
-                  {selectedModeData?.title}
-                </Text>
-                <Text style={styles.instructionsText}>
-                  {selectedModeData?.subtitle}
-                </Text>
-                {selectedMode === 'barcode' && !autoScanEnabled && lastScannedBarcode && (
-                  <View style={styles.barcodeDetectedBadge}>
-                    <Ionicons name="checkmark-circle" size={20} color="#10b981" />
-                    <Text style={styles.barcodeDetectedText}>Barcode Detected</Text>
-                  </View>
-                )}
+                <View style={styles.barcodeDetectedBadge}>
+                  <Ionicons name="checkmark-circle" size={20} color="#10b981" />
+                  <Text style={styles.barcodeDetectedText}>Barcode Detected</Text>
+                </View>
               </View>
             )}
 
@@ -1020,10 +1018,9 @@ export default function CameraScreen() {
       </View>
 
       {/* Bottom Panel */}
-      <View style={[styles.bottomPanel, { paddingBottom: insets.bottom + 20, marginBottom: -(insets.bottom + 10) }]}>
+      <View style={[styles.bottomPanel, { backgroundColor: '#ffffff', paddingBottom: insets.bottom + 20, marginBottom: -(insets.bottom + 10) }]}>
         {/* Scan Modes */}
         <View style={styles.modesContainer}>
-          <Text style={styles.modesTitle}>Scan Mode</Text>
           <View style={styles.modesList}>
             {scanModes.map((mode) => (
               <Pressable
@@ -1053,7 +1050,7 @@ export default function CameraScreen() {
                 <Text
                   style={[
                     styles.modeTitle,
-                    selectedMode === mode.id && styles.modeTitleSelected,
+                    { color: selectedMode === mode.id ? '#1f2937' : '#6b7280' },
                   ]}
                 >
                   {mode.title}
