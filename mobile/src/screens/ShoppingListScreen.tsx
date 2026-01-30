@@ -4,23 +4,25 @@ import {
   Text,
   StyleSheet,
   ScrollView,
-  SafeAreaView,
   TouchableOpacity,
   ActivityIndicator,
   Linking,
   Alert,
   Animated,
   Share,
+  TextInput,
+  Modal,
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { RouteProp } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../types/navigation';
 import { createInstacartLinkFromMealPlan } from '../services/instacartService';
+import { shoppingService, ShoppingList } from '../services/shoppingService';
 import { AuthContext } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { Ionicons } from '../components/shared';
 // Note: Mock data removed to expose real API issues
-import { GradientDashboardHeader } from '../components/shared';
 
 type ShoppingListScreenRouteProp = RouteProp<RootStackParamList, 'ShoppingList'>;
 type ShoppingListScreenNavigationProp = StackNavigationProp<
@@ -32,6 +34,7 @@ interface Props {
   route?: ShoppingListScreenRouteProp;
   navigation?: ShoppingListScreenNavigationProp;
   isDashboardMode?: boolean;
+  onBack?: () => void;
 }
 
 interface ShoppingItem {
@@ -45,18 +48,27 @@ interface ShoppingItem {
   brand?: string;
 }
 
-export default function ShoppingListScreen({ route, navigation, isDashboardMode = false }: Props) {
+export default function ShoppingListScreen({ route, navigation, isDashboardMode = false, onBack }: Props) {
   const { theme } = useTheme();
-  // Support both navigation mode (with route params) and dashboard mode (empty data if no params)
-  const mealPlanId: number = route?.params?.mealPlanId || 1;
-  const shoppingListData = route?.params?.shoppingListData || {
-    totalItems: 0,
-    itemsByCategory: {},
-    estimatedCost: { min: 0, max: 0 },
-  };
   const { user } = useContext(AuthContext);
-  const [loading, setLoading] = useState(false);
-  const [instacartUrl, setInstacartUrl] = useState<string | null>(null);
+  
+  // Data loading states
+  const [loading, setLoading] = useState(isDashboardMode);
+  const [userLists, setUserLists] = useState<ShoppingList[]>([]);
+  const [activeList, setActiveList] = useState<ShoppingList | null>(null);
+  
+  // Support both Stack navigation (route params) and dashboard mode (load from API)
+  const mealPlanId: number = route?.params?.mealPlanId || 0;
+  const routeShoppingData = route?.params?.shoppingListData;
+  
+  // Compute shopping list data from either route params or active list
+  const shoppingListData = routeShoppingData || {
+    totalItems: activeList?.total_items || 0,
+    itemsByCategory: activeList?.items_by_category || {},
+    estimatedCost: { min: 0, max: activeList?.estimated_total_cost || 0 },
+  };
+  
+  const [instacartUrl, setInstacartUrl] = useState<string | null>(activeList?.instacart_url || null);
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(
     new Set(['protein', 'produce', 'dairy'])
   );
@@ -64,8 +76,43 @@ export default function ShoppingListScreen({ route, navigation, isDashboardMode 
   // Track checked items
   const [checkedItems, setCheckedItems] = useState<Set<string>>(new Set());
   
+  // Manual entry states
+  const [showAddItemModal, setShowAddItemModal] = useState(false);
+  const [newItemName, setNewItemName] = useState('');
+  const [newItemQuantity, setNewItemQuantity] = useState('');
+  const [newItemUnit, setNewItemUnit] = useState('oz');
+  const [newItemCategory, setNewItemCategory] = useState<string>('Other');
+  
   // Animation for progress bar
   const progressAnim = React.useRef(new Animated.Value(0)).current;
+
+  // Load user's shopping lists in dashboard mode
+  useEffect(() => {
+    if (isDashboardMode && user?.id) {
+      loadUserShoppingLists();
+    }
+  }, [isDashboardMode, user?.id]);
+
+  const loadUserShoppingLists = async () => {
+    if (!user?.id) return;
+    
+    setLoading(true);
+    try {
+      const lists = await shoppingService.getUserLists(user.id, { status: 'active', limit: 10 });
+      setUserLists(lists);
+      
+      // Set the most recent active list as default
+      if (lists.length > 0) {
+        setActiveList(lists[0]);
+        setInstacartUrl(lists[0].instacart_url || null);
+      }
+    } catch (error) {
+      console.error('Error loading shopping lists:', error);
+      // Don't show alert in dashboard mode - just log the error
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const categories = Object.keys(shoppingListData.itemsByCategory || {});
   
@@ -186,6 +233,66 @@ export default function ShoppingListScreen({ route, navigation, isDashboardMode 
     );
   };
 
+  const handleAddItem = async () => {
+    if (!newItemName.trim() || !newItemQuantity.trim()) {
+      Alert.alert('Missing Information', 'Please enter item name and quantity');
+      return;
+    }
+
+    if (!user?.id) {
+      Alert.alert('Not Signed In', 'Please sign in to create shopping lists');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      
+      // Create list if none exists
+      let listId = activeList?.list_id;
+      if (!listId) {
+        const newList = await shoppingService.createManualList(user.id, {
+          name: `Shopping List - ${new Date().toLocaleDateString()}`,
+          budget: 150,
+        });
+        listId = newList.list_id!;
+        setActiveList(newList);
+      }
+      
+      // Add item to list
+      const newItem: any = {
+        name: newItemName,
+        quantity: parseFloat(newItemQuantity),
+        unit: newItemUnit,
+        category: newItemCategory,
+      };
+      
+      await shoppingService.addItemsToList(listId, [newItem]);
+      await loadUserShoppingLists();
+      
+      // Reset form
+      setNewItemName('');
+      setNewItemQuantity('');
+      setNewItemUnit('oz');
+      setNewItemCategory('Other');
+      setShowAddItemModal(false);
+      
+      Alert.alert('Success', 'Item added to shopping list');
+    } catch (error) {
+      console.error('Error adding item:', error);
+      Alert.alert('Error', 'Failed to add item. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleBack = () => {
+    if (isDashboardMode && onBack) {
+      onBack();
+    } else if (navigation) {
+      navigation.goBack();
+    }
+  };
+
   const getCategoryIcon = (category: string) => {
     const icons: { [key: string]: string } = {
       protein: '🥩',
@@ -222,58 +329,83 @@ export default function ShoppingListScreen({ route, navigation, isDashboardMode 
   };
 
   return (
-    <>
-      {/* Pattern B: Dual SafeAreaView - Stack Screen */}
-      <SafeAreaView style={[styles.topBox, { backgroundColor: theme.colors.primary }]}>
-        <GradientDashboardHeader
-          title="Shopping List"
-          gradient="shoppingList"
-          showBackButton={!!navigation}
-          onBackPress={() => navigation?.goBack()}
-          rightAction={checkedItems.size > 0 ? {
-            icon: 'checkmark-done-outline',
-            onPress: handleClearChecked,
-          } : undefined}
-          style={styles.header}
-        >
-          {/* Progress Section inside header */}
-          <View style={styles.progressSection}>
-            <View style={styles.progressHeader}>
-              <Text style={styles.progressText}>
-                {checkedCount} of {totalItems} items
-              </Text>
-              <Text style={styles.progressPercent}>
-                {Math.round(progressPercent)}%
-              </Text>
-            </View>
-            <View style={styles.progressBarContainer}>
-              <Animated.View
-                style={[
-                  styles.progressBarFill,
-                  {
-                    width: progressAnim.interpolate({
-                      inputRange: [0, 100],
-                      outputRange: ['0%', '100%'],
-                    }),
-                  },
-                ]}
-              />
-            </View>
-            {progressPercent === 100 && (
-              <View style={styles.completeBadge}>
-                <Ionicons name="checkmark-circle" size={16} color="#fff" />
-                <Text style={styles.completeBadgeText}>All done!</Text>
-              </View>
-            )}
-          </View>
-        </GradientDashboardHeader>
-      </SafeAreaView>
-
-      <SafeAreaView style={[styles.scrollContainer, { backgroundColor: theme.colors.background }]}>
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+      {loading && !routeShoppingData ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#4cbb17" />
+          <Text style={[styles.loadingText, { color: theme.colors.textSecondary }]}>Loading shopping lists...</Text>
+        </View>
+      ) : (
         <ScrollView
           style={styles.scrollView}
           contentContainerStyle={styles.scrollContent}
         >
+          {/* Pattern A: LinearGradient Header directly in ScrollView */}
+          <LinearGradient
+            colors={['#4cbb17', '#059669']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.gradientHeader}
+          >
+            {/* Header Actions */}
+            <View style={styles.headerTop}>
+              <TouchableOpacity onPress={handleBack} style={styles.backButton}>
+                <Ionicons name="arrow-back" size={24} color="#fff" />
+              </TouchableOpacity>
+              
+              <View style={styles.headerActions}>
+                {isDashboardMode && (
+                  <TouchableOpacity
+                    onPress={() => setShowAddItemModal(true)}
+                    style={styles.headerActionButton}
+                  >
+                    <Ionicons name="add-circle-outline" size={24} color="#fff" />
+                  </TouchableOpacity>
+                )}
+                {checkedItems.size > 0 && (
+                  <TouchableOpacity
+                    onPress={handleClearChecked}
+                    style={styles.headerActionButton}
+                  >
+                    <Ionicons name="checkmark-done-outline" size={24} color="#fff" />
+                  </TouchableOpacity>
+                )}
+              </View>
+            </View>
+
+            <Text style={styles.headerTitle}>Shopping List</Text>
+
+            {/* Progress Section */}
+            <View style={styles.progressSection}>
+              <View style={styles.progressHeader}>
+                <Text style={styles.progressText}>
+                  {checkedCount} of {totalItems} items
+                </Text>
+                <Text style={styles.progressPercent}>
+                  {Math.round(progressPercent)}%
+                </Text>
+              </View>
+              <View style={styles.progressBarContainer}>
+                <Animated.View
+                  style={[
+                    styles.progressBarFill,
+                    {
+                      width: progressAnim.interpolate({
+                        inputRange: [0, 100],
+                        outputRange: ['0%', '100%'],
+                      }),
+                    },
+                  ]}
+                />
+              </View>
+              {progressPercent === 100 && (
+                <View style={styles.completeBadge}>
+                  <Ionicons name="checkmark-circle" size={16} color="#fff" />
+                  <Text style={styles.completeBadgeText}>All done!</Text>
+                </View>
+              )}
+            </View>
+          </LinearGradient>
           {/* Quick Stats */}
           <View style={styles.statsRow}>
             <View style={[styles.statCard, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
@@ -439,37 +571,129 @@ export default function ShoppingListScreen({ route, navigation, isDashboardMode 
 
           <View style={styles.bottomPadding} />
         </ScrollView>
-      </SafeAreaView>
-    </>
+      )}
+
+      {/* Manual Item Entry Modal */}
+      <Modal
+        visible={showAddItemModal}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setShowAddItemModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContent, { backgroundColor: theme.colors.card }]}>
+            <View style={styles.modalHeader}>
+              <Text style={[styles.modalTitle, { color: theme.colors.text }]}>Add Item</Text>
+              <TouchableOpacity onPress={() => setShowAddItemModal(false)}>
+                <Ionicons name="close" size={24} color={theme.colors.textSecondary} />
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.modalForm}>
+              <Text style={[styles.inputLabel, { color: theme.colors.text }]}>Item Name</Text>
+              <TextInput
+                style={[styles.input, { backgroundColor: theme.colors.background, color: theme.colors.text, borderColor: theme.colors.border }]}
+                value={newItemName}
+                onChangeText={setNewItemName}
+                placeholder="e.g., Chicken Breast"
+                placeholderTextColor={theme.colors.textSecondary}
+              />
+
+              <Text style={[styles.inputLabel, { color: theme.colors.text }]}>Quantity</Text>
+              <View style={styles.quantityRow}>
+                <TextInput
+                  style={[styles.quantityInput, { backgroundColor: theme.colors.background, color: theme.colors.text, borderColor: theme.colors.border }]}
+                  value={newItemQuantity}
+                  onChangeText={setNewItemQuantity}
+                  placeholder="1.5"
+                  keyboardType="decimal-pad"
+                  placeholderTextColor={theme.colors.textSecondary}
+                />
+                <TextInput
+                  style={[styles.unitInput, { backgroundColor: theme.colors.background, color: theme.colors.text, borderColor: theme.colors.border }]}
+                  value={newItemUnit}
+                  onChangeText={setNewItemUnit}
+                  placeholder="lbs"
+                  placeholderTextColor={theme.colors.textSecondary}
+                />
+              </View>
+
+              <Text style={[styles.inputLabel, { color: theme.colors.text }]}>Category</Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.categoryPicker}>
+                {['Proteins', 'Produce', 'Dairy', 'Grains', 'Pantry', 'Other'].map((cat) => (
+                  <TouchableOpacity
+                    key={cat}
+                    onPress={() => setNewItemCategory(cat)}
+                    style={[
+                      styles.categoryChip,
+                      { borderColor: theme.colors.border },
+                      newItemCategory === cat && styles.categoryChipSelected,
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        styles.categoryChipText,
+                        { color: theme.colors.text },
+                        newItemCategory === cat && styles.categoryChipTextSelected,
+                      ]}
+                    >
+                      {cat}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+
+              <TouchableOpacity
+                style={[styles.addButton, (!newItemName.trim() || !newItemQuantity.trim()) && styles.addButtonDisabled]}
+                onPress={handleAddItem}
+                disabled={!newItemName.trim() || !newItemQuantity.trim()}
+              >
+                <Text style={styles.addButtonText}>Add Item</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  // Pattern B: Dual SafeAreaView
-  topBox: {
-    backgroundColor: '#4cbb17',
-  },
-  scrollContainer: {
+  // Pattern A: Simple View + ScrollView
+  container: {
     flex: 1,
-    // backgroundColor: '#e0f2fe', // theme.colors.background
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 40,
+  },
+  loadingText: {
+    marginTop: 16,
+    fontSize: 16,
+    fontWeight: '500',
   },
   scrollView: {
     flex: 1,
   },
   scrollContent: {
-    paddingBottom: 40,
+    paddingBottom: 100, // Extra space for bottom tab navigation
   },
-  header: {
+  gradientHeader: {
     paddingHorizontal: 20,
-    paddingVertical: 16,
+    paddingTop: 60,
+    paddingBottom: 24,
   },
   headerTop: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 16,
   },
-  backButton: {},
+  backButton: {
+    padding: 4,
+  },
   headerActions: {
     flexDirection: 'row',
     gap: 16,
@@ -478,10 +702,10 @@ const styles = StyleSheet.create({
     padding: 4,
   },
   headerTitle: {
-    fontSize: 28,
+    fontSize: 32,
     fontWeight: 'bold',
     color: '#fff',
-    marginBottom: 16,
+    marginBottom: 20,
   },
   
   // Progress Section
@@ -787,5 +1011,99 @@ const styles = StyleSheet.create({
   
   bottomPadding: {
     height: 40,
+  },
+  
+  // Manual Item Entry Modal Styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    paddingTop: 20,
+    paddingBottom: 40,
+    paddingHorizontal: 20,
+    minHeight: 400,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  modalTitle: {
+    fontSize: 24,
+    fontWeight: '700',
+  },
+  modalForm: {
+    gap: 16,
+  },
+  inputLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    marginBottom: 4,
+  },
+  input: {
+    borderWidth: 2,
+    borderRadius: 12,
+    padding: 14,
+    fontSize: 16,
+  },
+  quantityRow: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  quantityInput: {
+    flex: 2,
+    borderWidth: 2,
+    borderRadius: 12,
+    padding: 14,
+    fontSize: 16,
+  },
+  unitInput: {
+    flex: 1,
+    borderWidth: 2,
+    borderRadius: 12,
+    padding: 14,
+    fontSize: 16,
+  },
+  categoryPicker: {
+    marginBottom: 8,
+  },
+  categoryChip: {
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 20,
+    borderWidth: 2,
+    marginRight: 10,
+    backgroundColor: 'transparent',
+  },
+  categoryChipSelected: {
+    backgroundColor: '#4cbb17',
+    borderColor: '#4cbb17',
+  },
+  categoryChipText: {
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  categoryChipTextSelected: {
+    color: '#fff',
+  },
+  addButton: {
+    backgroundColor: '#4cbb17',
+    borderRadius: 12,
+    padding: 16,
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  addButtonDisabled: {
+    opacity: 0.5,
+  },
+  addButtonText: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#fff',
   },
 });
