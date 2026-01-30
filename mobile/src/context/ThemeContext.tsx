@@ -82,12 +82,18 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
 
   const loadTheme = async () => {
     try {
-      const storageKey = userId ? `${THEME_STORAGE_KEY_PREFIX}_${userId}` : GLOBAL_THEME_KEY;
+      if (!userId) {
+        // Not logged in - always use light mode
+        setThemeMode('light');
+        return;
+      }
+      
+      const storageKey = `${THEME_STORAGE_KEY_PREFIX}_${userId}`;
       const savedTheme = await AsyncStorage.getItem(storageKey);
       if (savedTheme) {
         setThemeMode(savedTheme as ThemeMode);
       } else {
-        // Use system preference
+        // Logged in user with no saved preference - use system preference
         const systemTheme = Appearance.getColorScheme() || 'light';
         setThemeMode(systemTheme as ThemeMode);
       }
@@ -126,9 +132,8 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
         const storageKey = `${THEME_STORAGE_KEY_PREFIX}_${userId}`;
         await AsyncStorage.removeItem(storageKey);
       }
-      // Reset to system preference
-      const systemTheme = Appearance.getColorScheme() || 'light';
-      setThemeMode(systemTheme as ThemeMode);
+      // Reset to light mode (default for non-logged-in users)
+      setThemeMode('light');
     } catch (error) {
       console.error('Error clearing user theme:', error);
     }
