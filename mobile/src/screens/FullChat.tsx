@@ -419,17 +419,19 @@ export default function FullChat() {
     try {
       let response;
       
-      // v3.0: All chat now goes through /ask with client-generated sessionId
-      // No distinction between guided flow and conversation flow
-      const currentSessionId = sessionId || chatService.getSessionId();
+      // v3.0: All chat now goes through /ask with sessionId from auth service
+      // Use sessionId from auth.wihy.ai response, fallback to client-generated
+      const currentSessionId = user?.sessionId || sessionId || chatService.getSessionId();
       
       console.log('=== CHAT API CALL (/ask) - v3.0 ===');
-      console.log('Session ID:', currentSessionId);
+      console.log('Session ID:', currentSessionId, user?.sessionId ? '(from auth)' : '(client-generated)');
       console.log('User ID:', userId);
+      console.log('Auth Token:', user?.authToken ? 'present' : 'not present');
       
       response = await chatService.ask(text, {
         sessionId: currentSessionId,
         userId,
+        authToken: user?.authToken,  // Pass JWT token for ML API
         user: user ? {
           id: user.id,
           name: user.name,
