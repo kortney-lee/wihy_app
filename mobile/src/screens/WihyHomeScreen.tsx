@@ -543,7 +543,7 @@ export default function WihyHomeScreen({}: Props = {}) {
     };
 
     return (
-      <div className="web-search-landing">
+      <div className="web-search-landing" data-theme={isDark ? 'dark' : 'light'}>
         {/* Top Navigation Bar */}
         {/* @ts-ignore */}
         <WebNavHeader 
@@ -552,7 +552,7 @@ export default function WihyHomeScreen({}: Props = {}) {
           setShowLoginModal={setShowLoginModal}
         />
 
-        <div className="web-search-container">
+        <div className="web-search-container" data-theme={isDark ? 'dark' : 'light'}>
           {/* Logo */}
           <div className="web-logo-container">
             <Image
@@ -590,7 +590,7 @@ export default function WihyHomeScreen({}: Props = {}) {
                   className="web-icon-button clear-btn"
                   type="button"
                 >
-                  <svg viewBox="0 0 24 24" width="24" height="24" fill="#5f6368">
+                  <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
                     <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
                   </svg>
                 </button>
@@ -603,7 +603,7 @@ export default function WihyHomeScreen({}: Props = {}) {
                   className="web-icon-button"
                   type="button"
                 >
-                  <svg viewBox="0 0 24 24" width="20" height="20" fill="#5f6368">
+                  <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
                     <path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/>
                   </svg>
                 </button>
@@ -615,7 +615,7 @@ export default function WihyHomeScreen({}: Props = {}) {
                 className="web-icon-button"
                 type="button"
               >
-                <svg viewBox="0 0 24 24" width="20" height="20" fill="#5f6368">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
                   <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
                   <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.28c3.39-.49 6-3.3 6-6.72h-2z"/>
                 </svg>

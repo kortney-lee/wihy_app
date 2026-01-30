@@ -9,6 +9,7 @@
 import React, { useContext, useState } from 'react';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { AuthContext } from '../../context/AuthContext';
+import { useTheme } from '../../context/ThemeContext';
 import MultiAuthLogin from '../auth/MultiAuthLogin';
 
 // Import the web landing CSS
@@ -33,6 +34,7 @@ export const WebNavHeader: React.FC<WebNavHeaderProps> = ({
   const navigation = useNavigation<any>();
   const route = useRoute();
   const { user } = useContext(AuthContext);
+  const { isDark } = useTheme();
   
   // Internal login modal state (used if not controlled externally)
   const [internalShowLogin, setInternalShowLogin] = useState(false);
@@ -91,7 +93,7 @@ export const WebNavHeader: React.FC<WebNavHeaderProps> = ({
 
   return (
     <>
-      <nav className="web-top-nav">
+      <nav className="web-top-nav" data-theme={isDark ? 'dark' : 'light'}>
         <div className="web-nav-left">
           {/* Home */}
           <button 

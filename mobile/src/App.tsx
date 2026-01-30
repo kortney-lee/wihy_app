@@ -8,6 +8,7 @@ import AppNavigator from './navigation/AppNavigator';
 import { SessionProvider } from './contexts/SessionContext';
 import { AuthProvider } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
+import { ThemeUserSync } from './context/ThemeUserSync';
 import { useDeepLinkHandler } from './utils/deepLinkHandler';
 import { debugLogService } from './services';
 
@@ -124,6 +125,7 @@ const App: React.FC = () => {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <ThemeProvider>
         <AuthProvider>
+          <ThemeUserSync />
           <SessionProvider>
             <SafeAreaProvider>
               <AppContent />

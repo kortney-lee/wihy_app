@@ -2,6 +2,7 @@ import React, { useContext, useState } from 'react';
 import { Platform } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { AuthContext } from '../../context/AuthContext';
+import { useTheme } from '../../context/ThemeContext';
 import MultiAuthLogin from '../auth/MultiAuthLogin';
 
 const isWeb = Platform.OS === 'web';
@@ -25,6 +26,7 @@ export function WebTopNav({ activeTab = 'none' }: WebTopNavProps) {
   const navigation = useNavigation<any>();
   const route = useRoute();
   const { user } = useContext(AuthContext);
+  const { isDark } = useTheme();
   const [showLoginModal, setShowLoginModal] = useState(false);
 
   // Only render on web
@@ -103,7 +105,7 @@ export function WebTopNav({ activeTab = 'none' }: WebTopNavProps) {
 
   return (
     <>
-    <nav className="web-top-nav">
+    <nav className="web-top-nav" data-theme={isDark ? 'dark' : 'light'}>
       <div className="web-nav-left">
         <button 
           onClick={(e) => {
@@ -209,12 +211,14 @@ interface WebPageWrapperProps {
  * Web page wrapper that includes the top nav and proper spacing
  */
 export function WebPageWrapper({ children, activeTab = 'none', className = '' }: WebPageWrapperProps) {
+  const { isDark } = useTheme();
+  
   if (!isWeb) {
     return <>{children}</>;
   }
 
   return (
-    <div className={`web-page-wrapper ${className}`}>
+    <div className={`web-page-wrapper ${className}`} data-theme={isDark ? 'dark' : 'light'}>
       <WebTopNav activeTab={activeTab} />
       <div className="web-page-content">
         {children}

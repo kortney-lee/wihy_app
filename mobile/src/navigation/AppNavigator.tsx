@@ -17,6 +17,7 @@ import SvgIcon from '../components/shared/SvgIcon';
 // Auth Components
 import MultiAuthLogin from '../components/auth/MultiAuthLogin';
 import { AuthContext } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import PlansModal from '../components/PlansModal';
 
 // Import screens
@@ -214,6 +215,7 @@ function ProfileScreenComponent() {
 function TabNavigator() {
   const insets = useSafeAreaInsets();
   const { user, initializing } = useContext(AuthContext);
+  const { theme, isDark } = useTheme();
   const [showPlansModal, setShowPlansModal] = React.useState(false);
 
   return (
@@ -272,15 +274,15 @@ function TabNavigator() {
             </View>
           );
         },
-        tabBarActiveTintColor: '#1e40af',
-        tabBarInactiveTintColor: '#64748b',
+        tabBarActiveTintColor: isDark ? '#ffffff' : '#1e40af',
+        tabBarInactiveTintColor: isDark ? '#9ca3af' : '#64748b',
         tabBarStyle: Platform.OS === 'web' ? { display: 'none' } : {
           height: 100 + insets.bottom,
           paddingBottom: Math.max(insets.bottom + 8, 20),
           paddingTop: 12,
-          backgroundColor: '#ffffff',
+          backgroundColor: isDark ? '#000000' : '#ffffff',
           borderTopWidth: 1,
-          borderTopColor: '#e2e8f0',
+          borderTopColor: '#f97316',
           shadowColor: '#000000',
           shadowOffset: { width: 0, height: -2 },
           shadowOpacity: 0.1,

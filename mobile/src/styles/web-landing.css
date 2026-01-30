@@ -66,11 +66,18 @@
   right: 0;
   height: 60px;
   background: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 24px;
   z-index: 1000;
+}
+
+/* Dark mode navigation */
+.web-top-nav[data-theme="dark"] {
+  background: #000000;
+  border-bottom: none;
 }
 
 .web-nav-left {
@@ -116,6 +123,21 @@
   color: #1a73e8;
 }
 
+/* Dark mode nav items */
+.web-top-nav[data-theme="dark"] .web-nav-item {
+  color: #9ca3af;
+}
+
+.web-top-nav[data-theme="dark"] .web-nav-item:hover {
+  background: #1f2937;
+  color: #ffffff;
+}
+
+.web-top-nav[data-theme="dark"] .web-nav-item.active {
+  background: #1f2937;
+  color: #ffffff;
+}
+
 .web-nav-item svg {
   flex-shrink: 0;
   width: 24px;
@@ -138,6 +160,19 @@
 .web-nav-item.nav-home.active {
   color: #1f2937;
   background: #f1f5f9;
+}
+
+/* Dark mode home button */
+.web-top-nav[data-theme="dark"] .web-nav-item.nav-home,
+.web-top-nav[data-theme="dark"] .web-nav-item.nav-home:hover,
+.web-top-nav[data-theme="dark"] .web-nav-item.nav-home.active {
+  color: #ffffff;
+}
+
+.web-top-nav[data-theme="dark"] .web-nav-item.nav-home svg,
+.web-top-nav[data-theme="dark"] .web-nav-item.nav-home:hover svg,
+.web-top-nav[data-theme="dark"] .web-nav-item.nav-home.active svg {
+  fill: #ffffff;
 }
 
 .web-nav-item.nav-dashboard {
@@ -265,6 +300,11 @@
   background-color: #ffffff;
 }
 
+/* Dark mode landing page */
+.web-search-landing[data-theme="dark"] {
+  background-color: #000000;
+}
+
 .web-search-container {
   width: 100%;
   max-width: 1200px;
@@ -325,6 +365,16 @@
   animation: wiH-border-sweep 2.2s linear infinite;
 }
 
+/* Dark mode search input container */
+.web-search-landing[data-theme="dark"] .web-search-input-container,
+.web-search-container[data-theme="dark"] .web-search-input-container,
+.web-page-wrapper[data-theme="dark"] .web-search-input-container {
+  background:
+    linear-gradient(#000, #000) padding-box,
+    linear-gradient(90deg, var(--wihy-orange), #ffffff, var(--wihy-silver), var(--wihy-green), var(--wihy-blue)) border-box;
+  background-size: 100% 100%, 200% 100%;
+}
+
 .web-search-input-container:hover,
 .web-search-input-container:focus-within {
   box-shadow: none;
@@ -352,6 +402,19 @@
   resize: none;
   overflow: hidden;
   box-sizing: border-box;
+}
+
+/* Dark mode search input */
+.web-search-landing[data-theme="dark"] .web-search-input,
+.web-search-container[data-theme="dark"] .web-search-input,
+.web-page-wrapper[data-theme="dark"] .web-search-input {
+  color: #ffffff;
+}
+
+.web-search-landing[data-theme="dark"] .web-search-input::placeholder,
+.web-search-container[data-theme="dark"] .web-search-input::placeholder,
+.web-page-wrapper[data-theme="dark"] .web-search-input::placeholder {
+  color: #6b7280;
 }
 
 .web-search-input::placeholder {
@@ -384,6 +447,12 @@
   border-radius: 20px;
 }
 
+/* Dark mode search icons container */
+.web-search-landing[data-theme="dark"] .web-search-icons,
+.web-search-container[data-theme="dark"] .web-search-icons {
+  background-color: rgba(0, 0, 0, 0.9);
+}
+
 /* ═══════════════════════════════════════════════════════════
    ICON BUTTONS
    Size: 36×36px with 24px icons
@@ -407,6 +476,19 @@
   color: #1a73e8;
 }
 
+/* Dark mode icon buttons */
+.web-search-landing[data-theme="dark"] .web-icon-button,
+.web-search-container[data-theme="dark"] .web-icon-button {
+  color: #ffffff;
+  background: #000000;
+}
+
+.web-search-landing[data-theme="dark"] .web-icon-button:hover,
+.web-search-container[data-theme="dark"] .web-icon-button:hover {
+  background: #1f2937;
+  color: #ffffff;
+}
+
 .web-icon-button svg {
   width: 24px;
   height: 24px;
@@ -420,6 +502,19 @@
 
 .web-icon-button.clear-btn:hover {
   background: #e8eaed;
+}
+
+/* Dark mode clear button */
+.web-search-landing[data-theme="dark"] .web-icon-button.clear-btn,
+.web-search-container[data-theme="dark"] .web-icon-button.clear-btn {
+  background: #000000;
+  color: #ffffff;
+}
+
+.web-search-landing[data-theme="dark"] .web-icon-button.clear-btn:hover,
+.web-search-container[data-theme="dark"] .web-icon-button.clear-btn:hover {
+  background: #1f2937;
+  color: #ffffff;
 }
 
 /* Voice button listening state */
@@ -906,6 +1001,11 @@
   overflow-y: auto;
 }
 
+/* Dark mode page wrapper */
+.web-page-wrapper[data-theme="dark"] {
+  background: #000000;
+}
+
 .web-page-content {
   padding-top: 60px; /* Account for fixed nav */
 }
@@ -952,6 +1052,10 @@
   overflow: hidden;
 }
 
+.web-chat-page.web-page-wrapper[data-theme="dark"] {
+  background: #000000;
+}
+
 .web-chat-page .web-page-content {
   padding-top: 60px;
   padding-bottom: 0px;
@@ -981,6 +1085,10 @@
   background: #ffffff;
   padding: 8px 0 8px 0;
   z-index: 100;
+}
+
+.web-chat-page.web-page-wrapper[data-theme="dark"] .web-chat-input-fixed {
+  background: #000000;
 }
 
 .web-chat-input-fixed .web-search-container {
