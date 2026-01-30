@@ -728,7 +728,11 @@ export default function FullChat() {
                 style={[
                   styles.messageText,
                   message.type === 'user' ? styles.userMessageText : styles.aiMessageText,
-                  message.type === 'ai' && { color: theme.colors.text },
+                  message.type === 'ai' && { 
+                    color: theme.colors.text,
+                    borderWidth: theme.mode === 'dark' ? 2 : 0,
+                    borderColor: '#4cbb17',
+                  },
                 ]}
               >
                 {message.type === 'ai' ? cleanResponseText(message.content) : message.content}
@@ -841,7 +845,10 @@ export default function FullChat() {
 
         {isTyping && (
           <View style={[styles.messageContainer, styles.aiMessage]}>
-            <View style={styles.typingIndicator}>
+            <View style={[
+              styles.typingIndicator,
+              theme.mode === 'dark' && { borderWidth: 2, borderColor: '#4cbb17' }
+            ]}>
               <Animated.View style={[styles.typingDot, { opacity: dot1Anim }]} />
               <Animated.View style={[styles.typingDot, { opacity: dot2Anim }]} />
               <Animated.View style={[styles.typingDot, { opacity: dot3Anim }]} />

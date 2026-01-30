@@ -239,7 +239,7 @@ export const QuickStartGuide: React.FC<QuickStartGuideProps> = ({
   };
 
   // Tab bar icons for highlighting
-  const tabIcons: Array<{ name: keyof typeof ExpoIonicons.glyphMap; label: string; target: string }> = [
+  const tabIcons: Array<{ name: string; label: string; target: string }> = [
     { name: 'home-outline', label: 'Home', target: 'Home' },
     { name: 'scan-outline', label: 'Scan', target: 'Scan' },
     { name: 'chatbubble-outline', label: 'Chat', target: 'Chat' },
@@ -271,6 +271,7 @@ export const QuickStartGuide: React.FC<QuickStartGuideProps> = ({
             styles.tooltipCard,
             getTooltipPosition(),
             {
+              backgroundColor: theme.colors.surface,
               opacity: fadeAnim,
               transform: [{ scale: scaleAnim }],
             },
@@ -301,8 +302,8 @@ export const QuickStartGuide: React.FC<QuickStartGuideProps> = ({
           </View>
 
           {/* Content */}
-          <Text style={styles.title}>{step.title}</Text>
-          <Text style={styles.description}>{step.description}</Text>
+          <Text style={[styles.title, { color: theme.colors.text }]}>{step.title}</Text>
+          <Text style={[styles.description, { color: theme.colors.textSecondary }]}>{step.description}</Text>
 
           {/* Try It button */}
           {step.tabTarget && (
@@ -326,7 +327,7 @@ export const QuickStartGuide: React.FC<QuickStartGuideProps> = ({
               <Text style={[styles.navText, isFirstStep && styles.navTextDisabled]}>Back</Text>
             </TouchableOpacity>
 
-            <Text style={styles.stepCount}>{currentStep + 1}/{GUIDE_STEPS.length}</Text>
+            <Text style={[styles.stepCount, { color: theme.colors.textSecondary }]}>{currentStep + 1}/{GUIDE_STEPS.length}</Text>
 
             <TouchableOpacity style={styles.navButton} onPress={handleNext}>
               <Text style={[styles.navText, styles.navTextPrimary]}>
@@ -339,7 +340,7 @@ export const QuickStartGuide: React.FC<QuickStartGuideProps> = ({
 
         {/* Highlighted Tab Bar */}
         {step.position === 'bottom' && step.tabTarget && (
-          <View style={[styles.tabBarHighlight, { paddingBottom: insets.bottom }]}>
+          <View style={[styles.tabBarHighlight, { backgroundColor: theme.colors.surface, borderTopColor: theme.colors.border, paddingBottom: insets.bottom }]}>
             {tabIcons.map((tab, index) => {
               const isHighlighted = tab.target === step.tabTarget;
               return (
@@ -359,12 +360,12 @@ export const QuickStartGuide: React.FC<QuickStartGuideProps> = ({
                     ]}
                   >
                     <Ionicons
-                      name={isHighlighted ? tab.name.replace('-outline', '') as keyof typeof ExpoIonicons.glyphMap : tab.name}
+                      name={isHighlighted ? tab.name.replace('-outline', '') : tab.name}
                       size={24}
                       color={isHighlighted ? '#ffffff' : '#9ca3af'}
                     />
                   </View>
-                  <Text style={[styles.tabLabel, isHighlighted && styles.tabLabelHighlighted]}>
+                  <Text style={[styles.tabLabel, { color: theme.colors.textSecondary }, isHighlighted && [styles.tabLabelHighlighted, { color: theme.colors.text }]]}>
                     {tab.label}
                   </Text>
                 </Animated.View>
@@ -387,7 +388,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 20,
     right: 20,
-    // backgroundColor: '#ffffff', // theme.colors.surface
+    // backgroundColor: theme.colors.surface
     borderRadius: 20,
     padding: 24,
     alignItems: 'center',
@@ -450,13 +451,13 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 22,
     fontWeight: '700',
-    color: '#1e293b',
+    // color: theme.colors.text
     marginBottom: 8,
     textAlign: 'center',
   },
   description: {
     fontSize: 15,
-    color: '#64748b',
+    // color: theme.colors.textSecondary
     textAlign: 'center',
     lineHeight: 22,
     marginBottom: 20,
@@ -507,7 +508,7 @@ const styles = StyleSheet.create({
   },
   stepCount: {
     fontSize: 13,
-    color: '#94a3b8',
+    // color: theme.colors.textSecondary
     fontWeight: '500',
   },
   tabBarHighlight: {
@@ -518,10 +519,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'flex-end',
-    // backgroundColor: '#ffffff', // theme.colors.surface
+    // backgroundColor: theme.colors.surface
     paddingTop: 12,
     borderTopWidth: 1,
-    borderTopColor: '#e5e7eb',
+    // borderTopColor: theme.colors.border
   },
   tabItem: {
     alignItems: 'center',
@@ -549,12 +550,12 @@ const styles = StyleSheet.create({
   },
   tabLabel: {
     fontSize: 11,
-    color: '#9ca3af',
+    // color: theme.colors.textSecondary
     marginTop: 4,
     fontWeight: '500',
   },
   tabLabelHighlighted: {
-    color: '#1e293b',
+    // color: theme.colors.text
     fontWeight: '600',
   },
 });
