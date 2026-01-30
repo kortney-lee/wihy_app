@@ -124,8 +124,8 @@ export default function CoachProfileSetup({
     sessionRate: '',
     currency: 'USD',
     availableDays: [],
-    availableHoursStart: '09:00',
-    availableHoursEnd: '17:00',
+    availableHoursStart: '9:00 AM',
+    availableHoursEnd: '5:00 PM',
   });
 
   // Load existing profile if it exists
@@ -157,8 +157,8 @@ export default function CoachProfileSetup({
           sessionRate: profile.pricing?.session_rate?.toString() || '',
           currency: profile.pricing?.currency || 'USD',
           availableDays: profile.availability?.available_days || [],
-          availableHoursStart: profile.availability?.available_hours?.start || '09:00',
-          availableHoursEnd: profile.availability?.available_hours?.end || '17:00',
+          availableHoursStart: convertTo12Hour(profile.availability?.available_hours?.start || '09:00'),
+          availableHoursEnd: convertTo12Hour(profile.availability?.available_hours?.end || '17:00'),
         });
       }
     } catch (error) {
@@ -181,6 +181,70 @@ export default function CoachProfileSetup({
         ? prev.availableDays.filter(d => d !== day)
         : [...prev.availableDays, day],
     }));
+  };
+
+  // Convert 24-hour time to 12-hour format with AM/PM
+  const convertTo12Hour = (time24: string): string => {
+    if (!time24) return '';
+    const [hours, minutes] = time24.split(':');
+    const hour = parseInt(hours, 10);
+    const period = hour >= 12 ? 'PM' : 'AM';
+    const hour12 = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
+    return `${hour12}:${minutes} ${period}`;
+  };
+
+  // Convert 12-hour time with AM/PM to 24-hour format
+  const convertTo24Hour = (time12: string): string => {
+    if (!time12) return '';
+    const match = time12.match(/(\d+):(\d+)\s*(AM|PM)/i);
+    if (!match) return time12; // Return as-is if format doesn't match
+    
+    let hour = parseInt(match[1], 10);
+    const minutes = match[2];
+    const period = match[3].toUpperCase();
+    
+    if (period === 'PM' && hour !== 12) {
+      hour += 12;
+    } else if (period === 'AM' && hour === 12) {
+      hour = 0;
+    }
+    
+    return `${hour.toString().padStart(2, '0')}:${minutes}`;
+  };
+
+  const handleTimeChange = (field: 'availableHoursStart' | 'availableHoursEnd', value: string) => {
+    // Auto-format as user types (e.g., "9" becomes "9:", "930" becomes "9:30 AM")
+    let formattedValue = value;
+    
+    // Remove any non-digit, colon, space, A, P, M characters
+    const cleaned = value.replace(/[^0-9:APMapm\s]/g, '');
+    
+    // If user enters just numbers, auto-add colon and AM/PM
+    if (/^\d{1,2}$/.test(cleaned)) {
+      // Just hour entered (e.g., "9")
+      const hour = parseInt(cleaned, 10);
+      if (hour >= 0 && hour <= 23) {
+        formattedValue = cleaned + ':';
+      }
+    } else if (/^\d{1,2}:\d{0,2}$/.test(cleaned)) {
+      // Hour and partial/full minutes (e.g., "9:" or "9:30")
+      formattedValue = cleaned;
+    } else if (/^\d{3,4}$/.test(cleaned)) {
+      // Continuous digits like "930" or "1730"
+      const hour = cleaned.slice(0, -2);
+      const minutes = cleaned.slice(-2);
+      formattedValue = `${hour}:${minutes}`;
+    }
+    
+    // If complete time without AM/PM, add it based on hour
+    if (/^\d{1,2}:\d{2}$/.test(formattedValue)) {
+      const hour = parseInt(formattedValue.split(':')[0], 10);
+      const period = hour >= 12 ? 'PM' : 'AM';
+      const hour12 = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
+      formattedValue = `${hour12}:${formattedValue.split(':')[1]} ${period}`;
+    }
+    
+    updateField(field, formattedValue);
   };
 
   const validateStep = (): boolean => {
@@ -257,8 +321,8 @@ export default function CoachProfileSetup({
           accepting_clients: true,
           available_days: formData.availableDays,
           available_hours: {
-            start: formData.availableHoursStart,
-            end: formData.availableHoursEnd,
+            start: convertTo24Hour(formData.availableHoursStart),
+            end: convertTo24Hour(formData.availableHoursEnd),
           },
         },
       };
@@ -513,23 +577,24 @@ export default function CoachProfileSetup({
             <Text style={styles.hourLabel}>From:</Text>
             <TextInput
               style={styles.hourInput}
-              placeholder="09:00"
+              placeholder="9:00 AM"
               placeholderTextColor="#9ca3af"
               value={formData.availableHoursStart}
-              onChangeText={(value) => updateField('availableHoursStart', value)}
+              onChangeText={(value) => handleTimeChange('availableHoursStart', value)}
             />
           </View>
           <View style={styles.hourPicker}>
             <Text style={styles.hourLabel}>To:</Text>
             <TextInput
               style={styles.hourInput}
-              placeholder="17:00"
+              placeholder="5:00 PM"
               placeholderTextColor="#9ca3af"
               value={formData.availableHoursEnd}
-              onChangeText={(value) => updateField('availableHoursEnd', value)}
+              onChangeText={(value) => handleTimeChange('availableHoursEnd', value)}
             />
           </View>
         </View>
+        <Text style={styles.helpText}>Enter time in 12-hour format (e.g., 9:00 AM, 5:30 PM)</Text>
       </View>
 
       <View style={styles.infoBox}>
