@@ -45,19 +45,19 @@ export const ModeToggle: React.FC<ModeToggleProps> = ({
           return (
             <TouchableOpacity
               key={mode.id}
-              style={[styles.modeButton, isSelected && styles.modeButtonSelected]}
+              style={[styles.modeButton, !isSelected && { backgroundColor: theme.colors.card }, isSelected && styles.modeButtonSelected]}
               onPress={() => onModeChange(mode.id)}
               activeOpacity={0.7}
             >
               <Ionicons
                 name={mode.icon as any}
                 size={20}
-                color={isSelected ? '#ffffff' : '#6b7280'}
+                color={isSelected ? '#ffffff' : theme.colors.textSecondary}
               />
-              <Text style={[styles.modeLabel, isSelected && styles.modeLabelSelected]}>
+              <Text style={[styles.modeLabel, !isSelected && { color: theme.colors.textSecondary }, isSelected && styles.modeLabelSelected]}>
                 {mode.label}
               </Text>
-              <Text style={[styles.modeDescription, isSelected && styles.modeDescriptionSelected]}>
+              <Text style={[styles.modeDescription, !isSelected && { color: theme.colors.textSecondary }, isSelected && styles.modeDescriptionSelected]}>
                 {mode.description}
               </Text>
             </TouchableOpacity>

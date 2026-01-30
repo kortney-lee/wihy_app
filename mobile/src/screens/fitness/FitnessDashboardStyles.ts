@@ -902,7 +902,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingVertical: 16,
     paddingHorizontal: 24,
-    backgroundColor: '#f8fafc',
+    // backgroundColor: '#f8fafc', // Use theme.colors.background inline
     borderBottomWidth: 1,
     borderBottomColor: '#e5e7eb',
   },
@@ -965,7 +965,7 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   levelCardSelected: {
-    backgroundColor: '#fafafa',
+    // backgroundColor: '#fafafa', // Use theme.colors.surface inline
   },
   levelCardHeader: {
     flexDirection: 'row',
@@ -1150,6 +1150,7 @@ const styles = StyleSheet.create({
     flex: 1,
     // backgroundColor: '#ffffff', // theme.colors.surface
     borderRadius: 12,
+    borderWidth: 2,
     padding: 16,
     alignItems: 'center',
     shadowColor: '#000',
@@ -1492,7 +1493,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
-    borderWidth: 1,
+    borderWidth: 2,
     borderColor: '#e5e7eb',
   },
   previewExerciseHeader: {
@@ -1852,8 +1853,9 @@ const styles = StyleSheet.create({
     transform: [{ scale: 1.2 }],
   },
   logSetSection: {
-    backgroundColor: '#f8fafc',
+    // backgroundColor: '#f8fafc', // Use theme.colors.card inline
     borderRadius: 12,
+    borderWidth: 2,
     padding: 16,
     marginBottom: 16,
   },
@@ -2388,6 +2390,7 @@ const styles = StyleSheet.create({
   exerciseCardItem: {
     // backgroundColor: '#ffffff', // theme.colors.surface
     borderRadius: 14,
+    borderWidth: 2,
     flexDirection: 'row',
     overflow: 'hidden',
     shadowColor: '#000',
@@ -2656,6 +2659,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
     marginTop: 16,
     borderRadius: 16,
+    borderWidth: 2,
     padding: 16,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -2785,6 +2789,7 @@ const styles = StyleSheet.create({
     // backgroundColor: '#ffffff', // theme.colors.surface
     marginHorizontal: 16,
     borderRadius: 16,
+    borderWidth: 2,
     paddingVertical: 12,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -2965,6 +2970,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     // backgroundColor: '#f9fafb', // theme.colors.surface
     borderRadius: 16,
+    borderWidth: 2,
     paddingVertical: 16,
     paddingHorizontal: 8,
     marginHorizontal: 4,

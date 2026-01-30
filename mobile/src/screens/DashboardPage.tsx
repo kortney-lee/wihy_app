@@ -588,11 +588,11 @@ const styles = StyleSheet.create({
   },
 
   tabContainer: {
-    backgroundColor: dashboardTheme.colors.surface,
     paddingVertical: dashboardTheme.spacing.sm,
     borderBottomWidth: 1,
     borderBottomColor: dashboardTheme.colors.border,
     ...dashboardTheme.shadows.sm,
+    borderWidth: 2,
   },
 
   tabScrollContent: {
@@ -635,7 +635,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     paddingVertical: dashboardTheme.spacing.sm,
-    backgroundColor: dashboardTheme.colors.surface,
+    borderWidth: 2,
   },
 
   pageIndicatorDot: {

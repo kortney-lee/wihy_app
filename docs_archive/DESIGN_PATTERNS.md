@@ -1,5 +1,7 @@
 # Wihy Health App - Design Patterns & Style Guide
 
+> **🌙 Dark Mode Standards:** For comprehensive dark mode design patterns, text colors, border widths, and implementation guidelines, see [DARK_MODE_DESIGN_STANDARDS.md](../docs/DARK_MODE_DESIGN_STANDARDS.md)
+
 ## 🎨 WiHY Brand Guide
 
 ### Color Palette
@@ -57,6 +59,41 @@
 - **Light Gray (Tertiary Text)**: `#9ca3af`
   - Tailwind: `text-gray-400`
   - Usage: Timestamps, metadata, disabled states
+
+#### Dark Mode Text Colors
+
+> **🌙 IMPORTANT:** These colors are ONLY for dark mode. See [DARK_MODE_DESIGN_STANDARDS.md](../docs/DARK_MODE_DESIGN_STANDARDS.md) for complete guidelines.
+
+**Theme-Aware Text (React Native)**
+- **Primary Text**: `theme.colors.text`
+  - Dark mode value: `#f9fafb` (nearly white)
+  - Usage: All primary content text in dark mode
+  - **CRITICAL:** Always use `theme.colors.text`, never hardcoded colors
+  
+- **Secondary Text**: `theme.colors.textSecondary`
+  - Dark mode value: `#9ca3af` (light gray)
+  - Usage: Secondary text, placeholders, timestamps in dark mode
+  - **CRITICAL:** Always use `theme.colors.textSecondary`, never hardcoded colors
+
+- **Header Text (on gradients)**: `#ffffff`
+  - Usage: Text on colored gradient headers (always white)
+  - Example: Collapsing headers with blue/purple/red gradients
+
+**Implementation:**
+```tsx
+import { useTheme } from '@react-navigation/native';
+
+const theme = useTheme();
+
+// Primary text
+<Text style={{ color: theme.colors.text }}>Content</Text>
+
+// Secondary text
+<Text style={{ color: theme.colors.textSecondary }}>Label</Text>
+
+// Header on gradient
+<Text style={{ color: '#ffffff' }}>Header Title</Text>
+```
 
 #### Accent Colors
 
@@ -161,6 +198,50 @@
 - **Large**: `16px` - Large cards, modals
 - **XL**: `20px` - Feature cards
 - **Full**: `24px`+ - Pills, search inputs
+
+**Component-Specific**
+- **Search Input**: `28px`
+- **Buttons**: `16px`
+- **Cards**: `12px`
+- **Badges**: `12px`
+
+### Border Width
+
+**Standard (Light Mode)**
+- **Subtle Borders**: `1px` - Default for light mode
+- **Emphasized Borders**: `2px` - Strong separators
+
+**Dark Mode (Required)**
+
+> **🌙 CRITICAL:** All UI element borders MUST be `2px` in dark mode for visibility. See [DARK_MODE_DESIGN_STANDARDS.md](../docs/DARK_MODE_DESIGN_STANDARDS.md)
+
+- **All Borders**: `2px` - Required for dark mode visibility
+- **UI Elements**: Input fields, buttons, chips, cards, badges, search results
+- **Implementation**: Change all `borderWidth: 1` to `borderWidth: 2`
+
+**Example:**
+```tsx
+// Light mode: 1px is acceptable
+// Dark mode: MUST be 2px
+
+const styles = StyleSheet.create({
+  input: {
+    borderWidth: 2,  // Use 2px for dark mode visibility
+    borderColor: theme.colors.border,
+    borderRadius: 12,
+  },
+  button: {
+    borderWidth: 2,  // Use 2px for dark mode visibility
+    borderColor: theme.colors.border,
+    borderRadius: 16,
+  },
+  chip: {
+    borderWidth: 2,  // Use 2px for dark mode visibility
+    borderColor: theme.colors.border,
+    borderRadius: 20,
+  },
+});
+```
 
 **Component-Specific**
 - **Search Input**: `28px`
@@ -2537,3 +2618,357 @@ When creating a new general screen:
 - [ ] Add color coding for stats/status indicators
 - [ ] Test safe area on devices with notches
 - [ ] Verify touch targets are 44px+ in height
+---
+
+## 🤖 GitHub Copilot Instructions
+
+### Dark Mode Implementation
+
+When implementing or fixing dark mode on any screen, **ALWAYS** follow these steps:
+
+#### Step 1: Import Theme
+```tsx
+import { useTheme } from '@react-navigation/native';
+
+// In component:
+const theme = useTheme();
+```
+
+#### Step 2: Replace All Text Colors
+
+**Find and replace ALL instances of:**
+
+```tsx
+// ❌ REMOVE - Hardcoded colors
+color: '#1f2937'
+color: '#6b7280'
+color: '#374151'
+color: '#4b5563'
+color: '#9ca3af'
+color: colors.textPrimary    // Light mode only
+color: colors.textSecondary  // Light mode only
+
+// ✅ REPLACE WITH - Theme colors
+color: theme.colors.text              // For primary text
+color: theme.colors.textSecondary     // For secondary/placeholder text
+color: '#ffffff'                      // For text on gradient headers
+```
+
+#### Step 3: Fix Card Backgrounds (CRITICAL!)
+
+**Dashboard screens often use hardcoded white backgrounds that break dark mode.**
+
+```tsx
+// ❌ WRONG - Hardcoded white background
+summaryCard: {
+  backgroundColor: dashboardTheme.colors.surface,  // Always white!
+  borderRadius: 12,
+  padding: 16,
+}
+
+// ✅ CORRECT - Theme-aware background
+summaryCard: {
+  // Remove backgroundColor from style definition
+  borderRadius: 12,
+  borderWidth: 2,  // Add border
+  padding: 16,
+}
+
+// Then apply inline with theme colors:
+<View style={[styles.summaryCard, { 
+  backgroundColor: theme.colors.card,
+  borderColor: theme.colors.border 
+}]}>
+```
+
+**Common Issue:**
+- `dashboardTheme.colors.surface` is hardcoded to `#ffffff`
+- Does NOT adapt to dark mode
+- Shows white cards on black background (Image 2 problem)
+
+**Solution Pattern:**
+1. Remove `backgroundColor: dashboardTheme.colors.surface` from StyleSheet
+2. Add `borderWidth: 2` to StyleSheet
+3. Apply background inline: `backgroundColor: theme.colors.card`
+4. Apply border inline: `borderColor: theme.colors.border`
+
+**Affects these screens:**
+- MyProgressDashboard.tsx
+- OverviewDashboard.tsx ✅ Fixed
+- ConsumptionDashboard.tsx
+- DashboardPage.tsx
+- FitnessDashboard.tsx
+- NotificationTile.tsx
+
+#### Step 4: Update Border Widths
+
+**Find and replace ALL instances of:**
+
+```tsx
+// ❌ WRONG - Too thin for dark mode
+borderWidth: 1
+
+// ✅ CORRECT - Visible in dark mode
+borderWidth: 2
+```
+
+**Apply to these elements:**
+- Input fields (`<TextInput>`)
+- Buttons (secondary/outline style)
+- Chips and pills (filters, categories, tags)
+- Cards (`<View>` with borders)
+- Badges (status indicators, labels)
+- Search result items
+
+#### Step 5: Verify Safe Areas
+
+**Ensure proper safe area handling:**
+
+```tsx
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
+const insets = useSafeAreaInsets();
+
+// Status bar area (before collapsing header)
+<View 
+  style={{ 
+    height: insets.top, 
+    backgroundColor: '#3b82f6'  // Match header gradient
+  }} 
+/>
+
+// Main content
+<SafeAreaView style={{ flex: 1 }} edges={['left', 'right', 'bottom']}>
+  {/* Content */}
+</SafeAreaView>
+```
+
+#### Step 6: Update Placeholder Colors
+
+**All TextInput placeholders:**
+
+```tsx
+<TextInput
+  placeholder="Search..."
+  placeholderTextColor={theme.colors.textSecondary}  // Always use theme
+  style={{ color: theme.colors.text }}
+/>
+```
+
+### Quick Reference Checklist
+
+Before completing any dark mode task, verify:
+
+✅ **Text Colors:**
+- [ ] All text uses `theme.colors.text` or `theme.colors.textSecondary`
+- [ ] No hardcoded gray colors (`#1f2937`, `#6b7280`, etc.)
+- [ ] No references to `colors.textPrimary` or `colors.textSecondary`
+- [ ] Placeholders use `theme.colors.textSecondary`
+- [ ] Headers on gradients use `#ffffff`
+
+✅ **Card Backgrounds (CRITICAL!):**
+- [ ] No `backgroundColor: dashboardTheme.colors.surface` in styles
+- [ ] Cards use `backgroundColor: theme.colors.card` inline
+- [ ] Cards use `borderColor: theme.colors.border` inline
+- [ ] All card backgrounds adapt to theme (dark gray in dark mode)
+
+✅ **Borders:**
+- [ ] All `borderWidth: 1` changed to `borderWidth: 2`
+- [ ] Inputs have 2px borders
+- [ ] Buttons have 2px borders
+- [ ] Chips/pills have 2px borders
+- [ ] Cards have 2px borders
+- [ ] Badges have 2px borders
+
+✅ **Safe Areas:**
+- [ ] Status bar area matches header color
+- [ ] No content hiding under notch
+- [ ] SafeAreaView configured correctly
+
+✅ **Testing:**
+- [ ] Switch to dark mode and verify text visibility
+- [ ] Verify borders are visible in dark mode
+- [ ] **Verify cards are DARK with WHITE borders (not white cards!)**
+- [ ] Check on device with notch (safe areas)
+- [ ] No compilation errors
+
+### Common Patterns
+
+**Pattern 1: Dashboard Card (Most Important!)**
+```tsx
+// In StyleSheet - NO backgroundColor
+const styles = StyleSheet.create({
+  summaryCard: {
+    width: '48.5%',
+    borderRadius: 12,
+    borderWidth: 2,  // Add this
+    padding: 16,
+    alignItems: 'center',
+  },
+});
+
+// In render - apply theme colors inline
+<View style={[
+  styles.summaryCard, 
+  { 
+    backgroundColor: theme.colors.card,      // Dark gray in dark mode
+    borderColor: theme.colors.border         // Visible border
+  }
+]}>
+  <Text style={{ color: theme.colors.text }}>Card Content</Text>
+</View>
+```
+
+**Pattern 2: Input Field**
+```tsx
+<TextInput
+  placeholder="Enter text..."
+  placeholderTextColor={theme.colors.textSecondary}
+  style={{
+    color: theme.colors.text,
+    borderWidth: 2,
+    borderColor: theme.colors.border,
+    borderRadius: 12,
+    padding: 12,
+  }}
+/>
+```
+
+**Pattern 3: Secondary Button**
+```tsx
+<Pressable
+  style={{
+    borderWidth: 2,
+    borderColor: theme.colors.border,
+    borderRadius: 16,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+  }}
+>
+  <Text style={{ color: theme.colors.text, fontSize: 16 }}>
+    Action
+  </Text>
+</Pressable>
+```
+
+**Pattern 4: Chip/Filter**
+```tsx
+<View
+  style={{
+    borderWidth: 2,
+    borderColor: theme.colors.border,
+    borderRadius: 20,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+  }}
+>
+  <Text style={{ color: theme.colors.text, fontSize: 14 }}>
+    Chip Label
+  </Text>
+</View>
+```
+
+### Search Strategy
+
+When fixing dark mode issues across multiple files:
+
+1. **Search for hardcoded card backgrounds (PRIORITY!):**
+   ```
+   backgroundColor: dashboardTheme.colors.surface
+   backgroundColor: '#ffffff'
+   backgroundColor: '#fff'
+   ```
+   Replace with inline: `backgroundColor: theme.colors.card, borderColor: theme.colors.border`
+
+2. **Search for hardcoded text colors:**
+   ```
+   color: '#1f2937'
+   color: '#6b7280'
+   color: colors.textPrimary
+   ```
+   Replace with: `color: theme.colors.text` or `color: theme.colors.textSecondary`
+
+3. **Search for thin borders:**
+   ```
+   borderWidth: 1
+   ```
+   Replace with: `borderWidth: 2`
+
+4. **Use multi-file replace:**
+   - Open search/replace in VS Code (Ctrl+Shift+H)
+   - Search files: `**/*.tsx`
+   - Replace systematically
+
+### Documentation
+
+**See comprehensive guidelines:**
+- [DARK_MODE_DESIGN_STANDARDS.md](../docs/DARK_MODE_DESIGN_STANDARDS.md) - Complete dark mode reference
+- Color values, implementation patterns, troubleshooting
+
+**Updated screens (reference implementations):**
+- ResearchScreen.tsx ✅
+- CreateMeals.tsx ✅
+- ManualMealForm.tsx ✅
+- CoachSelection.tsx ✅
+- CoachProfileSetup.tsx ✅
+- CoachDetailPage.tsx ✅
+- CoachOverview.tsx ✅
+- **OverviewDashboard.tsx** ✅ (Health Overview - fixed white cards issue)
+
+**Screens needing update:**
+- MyProgressDashboard.tsx ⚠️ (has white cards in dark mode)
+- DashboardPage.tsx ⚠️ (has white cards in dark mode)
+- ConsumptionDashboard.tsx ⚠️ (has white cards in dark mode)
+- FitnessDashboard.tsx ⚠️ (has white cards in dark mode)
+
+---
+
+## 🔑 Key Dark Mode Pattern Summary
+
+### The White Card Problem
+
+**Issue:** Dashboard screens using `dashboardTheme.colors.surface` show white cards in dark mode because this value is hardcoded to `#ffffff`.
+
+**Visual:** 
+- ❌ **Wrong:** White cards on black background (Image 2)
+- ✅ **Correct:** Dark gray cards with white borders (Image 1)
+
+**Solution:**
+1. Remove `backgroundColor: dashboardTheme.colors.surface` from StyleSheet
+2. Add `borderWidth: 2` to StyleSheet
+3. Apply inline: `backgroundColor: theme.colors.card`
+4. Apply inline: `borderColor: theme.colors.border`
+
+**Example:**
+```tsx
+// Before (WRONG - white cards in dark mode)
+const styles = StyleSheet.create({
+  card: {
+    backgroundColor: dashboardTheme.colors.surface,  // ❌ Always white!
+    borderRadius: 12,
+    padding: 16,
+  },
+});
+
+<View style={styles.card}>
+  <Text>Content</Text>
+</View>
+
+// After (CORRECT - adapts to dark mode)
+const styles = StyleSheet.create({
+  card: {
+    borderRadius: 12,
+    borderWidth: 2,  // ✅ Add border
+    padding: 16,
+  },
+});
+
+<View style={[styles.card, { 
+  backgroundColor: theme.colors.card,      // ✅ Dark in dark mode
+  borderColor: theme.colors.border         // ✅ Visible border
+}]}>
+  <Text style={{ color: theme.colors.text }}>Content</Text>
+</View>
+```
+
+This pattern ensures all dashboard cards properly support dark mode with dark backgrounds and visible borders.

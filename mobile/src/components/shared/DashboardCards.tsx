@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, ViewStyle } from 'react-nativ
 import { Ionicons } from './Ionicons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { dashboardTheme } from '../../theme/dashboardTheme';
+import { useTheme } from '../../context/ThemeContext';
 
 interface ActionCardProps {
   title: string;
@@ -25,6 +26,7 @@ export const ActionCard: React.FC<ActionCardProps> = ({
   iconSize = 28,
   gradient = false,
 }) => {
+  const { theme } = useTheme();
   const iconContainerSize = iconSize + 20; // Add padding to icon container
 
   const cardContent = (
@@ -62,7 +64,7 @@ export const ActionCard: React.FC<ActionCardProps> = ({
           {cardContent}
         </LinearGradient>
       ) : (
-        <View style={styles.card}>
+        <View style={[styles.card, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
           {cardContent}
         </View>
       )}
@@ -93,6 +95,7 @@ export const MetricCard: React.FC<MetricCardProps> = ({
   onPress,
   style,
 }) => {
+  const { theme } = useTheme();
   const getStatusColor = () => {
     switch (status) {
       case 'warning': return dashboardTheme.colors.warning;
@@ -113,7 +116,7 @@ export const MetricCard: React.FC<MetricCardProps> = ({
 
   return (
     <CardWrapper
-      style={[styles.metricCard, style]}
+      style={[styles.metricCard, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }, style]}
       onPress={onPress}
       activeOpacity={onPress ? 0.7 : 1}
     >
@@ -141,7 +144,6 @@ const styles = StyleSheet.create({
     marginHorizontal: dashboardTheme.spacing.xs,
   },
   card: {
-    backgroundColor: dashboardTheme.colors.surface,
     borderRadius: dashboardTheme.borderRadius.md,
     padding: dashboardTheme.spacing.md,
     shadowColor: '#000',
@@ -149,7 +151,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
-    borderWidth: 1,
+    borderWidth: 2,
     borderColor: dashboardTheme.colors.border,
   },
   iconContainer: {
@@ -172,7 +174,6 @@ const styles = StyleSheet.create({
     color: dashboardTheme.colors.textSecondary,
   },
   metricCard: {
-    backgroundColor: dashboardTheme.colors.surface,
     borderRadius: dashboardTheme.borderRadius.md,
     padding: dashboardTheme.spacing.md,
     shadowColor: '#000',
@@ -180,7 +181,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
-    borderWidth: 1,
+    borderWidth: 2,
     borderColor: dashboardTheme.colors.border,
     minHeight: 120,
   },

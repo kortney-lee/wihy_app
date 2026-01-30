@@ -13,6 +13,7 @@ import { useNavigation } from '@react-navigation/native';
 import type { StackNavigationProp } from '@react-navigation/stack';
 import type { RootStackParamList } from '../../types/navigation';
 import { dashboardTheme } from '../../theme/dashboardTheme';
+import { useTheme } from '../../context/ThemeContext';
 
 type NavigationProp = StackNavigationProp<RootStackParamList>;
 
@@ -41,6 +42,7 @@ export const HamburgerMenu: React.FC<HamburgerMenuProps> = ({
   isCoach = false,
 }) => {
   const navigation = useNavigation<NavigationProp>();
+  const { theme } = useTheme();
   
   // Define all dashboard options with context tags
   const allDashboardOptions: Array<DashboardOption & { contexts: Array<'personal' | 'coach' | 'family'> }> = [
@@ -172,22 +174,22 @@ export const HamburgerMenu: React.FC<HamburgerMenuProps> = ({
       onRequestClose={onClose}
     >
       <View style={styles.overlay}>
-        <View style={styles.menuContainer}>
+        <View style={[styles.menuContainer, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
           <SafeAreaView style={styles.safeArea}>
             {/* Header */}
             <View style={styles.header}>
-              <Text style={styles.headerTitle}>Dashboards</Text>
+              <Text style={[styles.headerTitle, { color: theme.colors.text }]}>Dashboards</Text>
               <TouchableOpacity
                 style={styles.closeButton}
                 onPress={onClose}
               >
-                <Ionicons name="close" size={24} color={dashboardTheme.colors.text} />
+                <Ionicons name="close" size={24} color={theme.colors.text} />
               </TouchableOpacity>
             </View>
 
             {/* Dashboard Options */}
             <ScrollView style={styles.content}>
-              <Text style={styles.sectionTitle}>Available Dashboards</Text>
+              <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Available Dashboards</Text>
               {dashboardOptions.map((option) => (
                 <TouchableOpacity
                   key={option.id}
@@ -201,10 +203,10 @@ export const HamburgerMenu: React.FC<HamburgerMenuProps> = ({
                     <Ionicons name={option.icon as any} size={24} color={option.color} />
                   </View>
                   <View style={styles.optionText}>
-                    <Text style={styles.optionTitle}>{option.title}</Text>
-                    <Text style={styles.optionSubtitle}>{option.subtitle}</Text>
+                    <Text style={[styles.optionTitle, { color: theme.colors.text }]}>{option.title}</Text>
+                    <Text style={[styles.optionSubtitle, { color: theme.colors.textSecondary }]}>{option.subtitle}</Text>
                   </View>
-                  <Ionicons name="chevron-forward" size={20} color={dashboardTheme.colors.textSecondary} />
+                  <Ionicons name="chevron-forward" size={20} color={theme.colors.textSecondary} />
                 </TouchableOpacity>
               ))}
             </ScrollView>
@@ -222,11 +224,11 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   menuContainer: {
-    backgroundColor: dashboardTheme.colors.surface,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     maxHeight: '80%',
     minHeight: '65%',
+    borderWidth: 2,
   },
   safeArea: {
     flex: 1,

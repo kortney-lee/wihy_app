@@ -128,7 +128,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   modal: {
-    backgroundColor: 'white',
+    // backgroundColor: 'white', // theme.colors.background
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     padding: 20,

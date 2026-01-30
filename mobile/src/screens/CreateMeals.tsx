@@ -2648,10 +2648,10 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
 
       {/* Quick Actions */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Quick Actions</Text>
+        <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Quick Actions</Text>
         <View style={styles.quickActionsGrid}>
           <TouchableOpacity 
-            style={styles.quickActionCard}
+            style={[styles.quickActionCard, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}
             onPress={handleScanRecipe}
             disabled={scanning}
           >
@@ -2662,12 +2662,12 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
                 <SvgIcon name="camera" size={28} color="#10b981" />
               )}
             </View>
-            <Text style={styles.quickActionTitle}>Scan Recipe</Text>
-            <Text style={styles.quickActionSubtitle}>From photo</Text>
+            <Text style={[styles.quickActionTitle, { color: theme.colors.text }]}>Scan Recipe</Text>
+            <Text style={[styles.quickActionSubtitle, { color: theme.colors.textSecondary }]}>From photo</Text>
           </TouchableOpacity>
 
           <TouchableOpacity 
-            style={styles.quickActionCard}
+            style={[styles.quickActionCard, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}
             onPress={() => {
               loadLibraryMeals();
               setShowLibrary(true);
@@ -2676,23 +2676,23 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
             <View style={[styles.quickActionIcon, { backgroundColor: '#ede9fe' }]}>
               <SvgIcon name="book" size={28} color="#8b5cf6" />
             </View>
-            <Text style={styles.quickActionTitle}>My Meals</Text>
-            <Text style={styles.quickActionSubtitle}>Saved recipes</Text>
+            <Text style={[styles.quickActionTitle, { color: theme.colors.text }]}>My Meals</Text>
+            <Text style={[styles.quickActionSubtitle, { color: theme.colors.textSecondary }]}>Saved recipes</Text>
           </TouchableOpacity>
 
           <TouchableOpacity 
-            style={styles.quickActionCard}
+            style={[styles.quickActionCard, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}
             onPress={() => navigation.navigate('MealCalendar' as never)}
           >
             <View style={[styles.quickActionIcon, { backgroundColor: '#fef3c7' }]}>
               <SvgIcon name="calendar" size={28} color="#f59e0b" />
             </View>
-            <Text style={styles.quickActionTitle}>Calendar</Text>
-            <Text style={styles.quickActionSubtitle}>View meal plan</Text>
+            <Text style={[styles.quickActionTitle, { color: theme.colors.text }]}>Calendar</Text>
+            <Text style={[styles.quickActionSubtitle, { color: theme.colors.textSecondary }]}>View meal plan</Text>
           </TouchableOpacity>
 
           <TouchableOpacity 
-            style={styles.quickActionCard}
+            style={[styles.quickActionCard, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}
             onPress={async () => {
               setShoppingListLoading(true);
               try {
@@ -2734,8 +2734,8 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
                 <SvgIcon name="cart" size={28} color="#22c55e" />
               )}
             </View>
-            <Text style={styles.quickActionTitle}>Shopping List</Text>
-            <Text style={styles.quickActionSubtitle}>View items</Text>
+            <Text style={[styles.quickActionTitle, { color: theme.colors.text }]}>Shopping List</Text>
+            <Text style={[styles.quickActionSubtitle, { color: theme.colors.textSecondary }]}>View items</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -2744,13 +2744,13 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
       {activeMealPlan && (
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Today's Meals</Text>
+            <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Today's Meals</Text>
             <TouchableOpacity onPress={() => navigation.navigate('MealCalendar' as never)}>
               <Text style={styles.sectionLink}>View All</Text>
             </TouchableOpacity>
           </View>
           
-          <View style={styles.todaysMealsCard}>
+          <View style={[styles.todaysMealsCard, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
             {Object.entries(mealTypeConfig).map(([type, config]) => {
               // Find meal for this type from today's meals or active plan
               const todayDate = new Date().toISOString().split('T')[0];
@@ -2796,8 +2796,8 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
                     <SvgIcon name={config.icon as any} size={20} color={config.color} />
                   </View>
                   <View style={styles.mealTypeInfo}>
-                    <Text style={styles.mealTypeLabel}>{type.charAt(0).toUpperCase() + type.slice(1)}</Text>
-                    <Text style={styles.mealTypeName} numberOfLines={1}>
+                    <Text style={[styles.mealTypeLabel, { color: theme.colors.text }]}>{type.charAt(0).toUpperCase() + type.slice(1)}</Text>
+                    <Text style={[styles.mealTypeName, { color: theme.colors.textSecondary }]} numberOfLines={1}>
                       {mealForType 
                         ? ((mealForType as any).meal_name || (mealForType as any).name || 'Meal planned')
                         : 'Tap to add meal'}
@@ -2818,7 +2818,7 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
       {/* Quick Templates */}
       <View style={styles.section}>
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Quick Templates</Text>
+          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Quick Templates</Text>
           <TouchableOpacity onPress={handleShowTemplates}>
             <Text style={styles.sectionLink}>See All</Text>
           </TouchableOpacity>
@@ -2828,7 +2828,7 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
           {QUICK_TEMPLATE_PRESETS.slice(0, 4).map((preset, index) => (
             <TouchableOpacity 
               key={preset.id}
-              style={styles.templatePreviewCard}
+              style={[styles.templatePreviewCard, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}
               onPress={() => {
                 // Pass the template to GoalSelectionMeals for pre-filled Plan mode
                 setSelectedTemplatePreset(preset);
@@ -2841,10 +2841,10 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
               ]}>
                 <Text style={{ fontSize: 24 }}>{preset.icon}</Text>
               </View>
-              <Text style={styles.templatePreviewName} numberOfLines={1}>
+              <Text style={[styles.templatePreviewName, { color: theme.colors.text }]} numberOfLines={1}>
                 {preset.label}
               </Text>
-              <Text style={styles.templatePreviewMacros}>
+              <Text style={[styles.templatePreviewMacros, { color: theme.colors.textSecondary }]}>
                 {preset.description.slice(0, 20)}...
               </Text>
             </TouchableOpacity>
@@ -2856,7 +2856,7 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
       {savedMeals.length > 0 && (
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Recent Meals</Text>
+            <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Recent Meals</Text>
             <TouchableOpacity onPress={() => {
               loadLibraryMeals();
               setShowLibrary(true);
@@ -2868,7 +2868,7 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
           {savedMeals.slice(0, 3).map((meal, index) => (
             <TouchableOpacity 
               key={meal.meal_id || index} 
-              style={styles.recentMealCard}
+              style={[styles.recentMealCard, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}
               onPress={() => {
                 setSelectedMeal(meal);
                 setMealServings(meal.serving_size || 1);
@@ -2876,8 +2876,8 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
               }}
             >
               <View style={styles.recentMealInfo}>
-                <Text style={styles.recentMealName}>{meal.name}</Text>
-                <Text style={styles.recentMealMacros}>
+                <Text style={[styles.recentMealName, { color: theme.colors.text }]}>{meal.name}</Text>
+                <Text style={[styles.recentMealMacros, { color: theme.colors.textSecondary }]}>
                   {meal.nutrition.calories} cal • {meal.nutrition.protein}g protein
                 </Text>
               </View>
@@ -2909,7 +2909,7 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
             style={{
               flexDirection: 'row',
               gap: 10,
-              backgroundColor: theme.colors.surface,
+              // backgroundColor: '#ffffff', // theme.colors.surface // Use theme.colors.surface
               paddingVertical: 14,
               paddingHorizontal: 32,
               borderRadius: 26,
@@ -3184,8 +3184,8 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
         resetPlanGenerator();
       }}
     >
-      <SafeAreaView style={styles.modalContainer} edges={['top', 'left', 'right']}>
-        <View style={styles.modalHeader}>
+      <SafeAreaView style={[styles.modalContainer, { backgroundColor: theme.colors.background }]} edges={['top', 'left', 'right']}>
+        <View style={[styles.modalHeader, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
           {planModalStep !== 'goals' && (
             <TouchableOpacity
               style={styles.modalBackButton}
@@ -3209,7 +3209,7 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
               size={24} 
               color="#ef4444" 
             />
-            <Text style={styles.modalTitle}>
+            <Text style={[styles.modalTitle, { color: theme.colors.text }]}>
               {planModalStep === 'goals' ? 'Create Meal Plan' : 
                planModalStep === 'preview' ? 'Your Program' :
                'Shopping List'}
@@ -3424,7 +3424,7 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
                                 <Text key={`protein-${idx}`} style={styles.shoppingItem}>• {formatIngredient(item)}</Text>
                               ))}
                               {shoppingItems.proteins.length > 5 && (
-                                <Text style={[styles.shoppingItem, { color: '#6b7280', fontStyle: 'italic' }]}>+ {shoppingItems.proteins.length - 5} more...</Text>
+                                <Text style={[styles.shoppingItem, { color: theme.colors.textSecondary, fontStyle: 'italic' }]}>+ {shoppingItems.proteins.length - 5} more...</Text>
                               )}
                             </View>
                           </View>
@@ -3443,7 +3443,7 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
                                 <Text key={`produce-${idx}`} style={styles.shoppingItem}>• {formatIngredient(item)}</Text>
                               ))}
                               {shoppingItems.produce.length > 5 && (
-                                <Text style={[styles.shoppingItem, { color: '#6b7280', fontStyle: 'italic' }]}>+ {shoppingItems.produce.length - 5} more...</Text>
+                                <Text style={[styles.shoppingItem, { color: theme.colors.textSecondary, fontStyle: 'italic' }]}>+ {shoppingItems.produce.length - 5} more...</Text>
                               )}
                             </View>
                           </View>
@@ -3494,7 +3494,7 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
                                 <Text key={`pantry-${idx}`} style={styles.shoppingItem}>• {formatIngredient(item)}</Text>
                               ))}
                               {shoppingItems.pantry.length > 5 && (
-                                <Text style={[styles.shoppingItem, { color: '#6b7280', fontStyle: 'italic' }]}>+ {shoppingItems.pantry.length - 5} more...</Text>
+                                <Text style={[styles.shoppingItem, { color: theme.colors.textSecondary, fontStyle: 'italic' }]}>+ {shoppingItems.pantry.length - 5} more...</Text>
                               )}
                             </View>
                           </View>
@@ -3557,7 +3557,7 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
       onRequestClose={() => setShowMealPlanSuccess(false)}
     >
       <View style={styles.successModalOverlay}>
-        <View style={styles.successModalContainer}>
+        <View style={[styles.successModalContainer, { backgroundColor: theme.colors.background }]}>
           <ScrollView 
             style={styles.successModalScrollView}
             contentContainerStyle={styles.successModalScrollContent}
@@ -3569,30 +3569,30 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
               <View style={styles.successCelebrationIcon}>
                 <SvgIcon name="checkmark-circle" size={64} color="#4cbb17" />
               </View>
-              <Text style={styles.successModalTitle}>Meal Plan Created!</Text>
-              <Text style={styles.successModalSubtitle}>Your personalized meal plan is ready</Text>
+              <Text style={[styles.successModalTitle, { color: theme.colors.text }]}>Meal Plan Created!</Text>
+              <Text style={[styles.successModalSubtitle, { color: theme.colors.textSecondary }]}>Your personalized meal plan is ready</Text>
             </View>
 
             {/* Stats Grid */}
             <View style={styles.successStatsGrid}>
               <View style={styles.successStatCard}>
                 <SvgIcon name="calendar-outline" size={28} color="#3b82f6" />
-                <Text style={styles.successStatValue}>{acceptedPlan?.duration_days || planDuration}</Text>
-                <Text style={styles.successStatLabel}>Days</Text>
+                <Text style={[styles.successStatValue, { color: theme.colors.text }]}>{acceptedPlan?.duration_days || planDuration}</Text>
+                <Text style={[styles.successStatLabel, { color: theme.colors.textSecondary }]}>Days</Text>
               </View>
               <View style={styles.successStatCard}>
                 <SvgIcon name="restaurant-outline" size={28} color="#4cbb17" />
-                <Text style={styles.successStatValue}>
+                <Text style={[styles.successStatValue, { color: theme.colors.text }]}>
                   {acceptedPlan?.summary?.total_meals || acceptedPlan?.days?.reduce((sum, d) => sum + (d.meals?.length || 0), 0) || 0}
                 </Text>
-                <Text style={styles.successStatLabel}>Total Meals</Text>
+                <Text style={[styles.successStatLabel, { color: theme.colors.textSecondary }]}>Total Meals</Text>
               </View>
               <View style={styles.successStatCard}>
                 <SvgIcon name="flame-outline" size={28} color="#f59e0b" />
-                <Text style={styles.successStatValue}>
+                <Text style={[styles.successStatValue, { color: theme.colors.text }]}>
                   {Math.round(acceptedPlan?.summary?.avg_calories_per_day || 0)}
                 </Text>
-                <Text style={styles.successStatLabel}>Avg Cal/Day</Text>
+                <Text style={[styles.successStatLabel, { color: theme.colors.textSecondary }]}>Avg Cal/Day</Text>
               </View>
             </View>
 
@@ -3779,9 +3779,9 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
       presentationStyle="pageSheet"
       onRequestClose={() => setShowTemplates(false)}
     >
-      <SafeAreaView style={styles.modalContainer} edges={['top', 'left', 'right']}>
+      <SafeAreaView style={[styles.modalContainer, { backgroundColor: theme.colors.background }]} edges={['top', 'left', 'right']}>
         <View style={styles.modalHeader}>
-          <Text style={styles.modalTitle}>Meal Templates</Text>
+          <Text style={[styles.modalTitle, { color: theme.colors.text }]}>Meal Templates</Text>
           <Pressable onPress={() => setShowTemplates(false)}>
             <SvgIcon name="close" size={28} color="#111827" />
           </Pressable>
@@ -3791,13 +3791,13 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
           {(!templates || templates.length === 0) ? (
             <View style={styles.loadingContainer}>
               <ActivityIndicator size="large" color="#3b82f6" />
-              <Text style={styles.loadingText}>Loading templates...</Text>
+              <Text style={[styles.loadingText, { color: theme.colors.textSecondary }]}>Loading templates...</Text>
             </View>
           ) : (
             templates.map((template) => (
               <Pressable
                 key={template.template_id}
-                style={styles.templateItem}
+                style={[styles.templateItem, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}
                 onPress={() => handleUseTemplate(template)}
               >
                 <View style={styles.templateIcon}>
@@ -3812,20 +3812,20 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
                   />
                 </View>
                 <View style={styles.templateInfo}>
-                  <Text style={styles.templateItemTitle}>{template.name}</Text>
-                  <Text style={styles.templateDescription}>{template.description || ''}</Text>
+                  <Text style={[styles.templateItemTitle, { color: theme.colors.text }]}>{template.name}</Text>
+                  <Text style={[styles.templateDescription, { color: theme.colors.textSecondary }]}>{template.description || ''}</Text>
                   <View style={styles.templateMacros}>
-                    <Text style={styles.macroText}>{template.nutrition?.calories || 0} cal</Text>
-                    <Text style={styles.macroText}>•</Text>
-                    <Text style={styles.macroText}>{template.nutrition?.protein || 0}g protein</Text>
-                    <Text style={styles.macroText}>•</Text>
-                    <Text style={styles.macroText}>{(template.preparation_time || 0) + (template.cooking_time || 0)} min</Text>
+                    <Text style={[styles.macroText, { color: theme.colors.textSecondary }]}>{template.nutrition?.calories || 0} cal</Text>
+                    <Text style={[styles.macroText, { color: theme.colors.textSecondary }]}>•</Text>
+                    <Text style={[styles.macroText, { color: theme.colors.textSecondary }]}>{template.nutrition?.protein || 0}g protein</Text>
+                    <Text style={[styles.macroText, { color: theme.colors.textSecondary }]}>•</Text>
+                    <Text style={[styles.macroText, { color: theme.colors.textSecondary }]}>{(template.preparation_time || 0) + (template.cooking_time || 0)} min</Text>
                   </View>
                   {(template.tags?.length ?? 0) > 0 && (
                     <View style={styles.templateTags}>
                       {template.tags.slice(0, 3).map((tag) => (
                         <View key={tag} style={styles.miniTag}>
-                          <Text style={styles.miniTagText}>{tag}</Text>
+                          <Text style={[styles.miniTagText, { color: theme.colors.textSecondary }]}>{tag}</Text>
                         </View>
                       ))}
                     </View>
@@ -4235,7 +4235,7 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
         onRequestClose={() => setShowShoppingListModal(false)}
       >
         <View style={{ flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.5)', justifyContent: 'flex-end' }}>
-          <View style={{ backgroundColor: '#fff', borderTopLeftRadius: 24, borderTopRightRadius: 24, height: '85%' }}>
+          <View style={{ backgroundColor: theme.colors.background, borderTopLeftRadius: 24, borderTopRightRadius: 24, height: '85%' }}>
             <SafeAreaView style={{ flex: 1, width: '100%' }}>
               {/* Header */}
               <View style={styles.shoppingModalHeader}>
@@ -4475,8 +4475,8 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
                     <View style={{ width: 100, height: 100, borderRadius: 50, backgroundColor: theme.colors.surface, alignItems: 'center', justifyContent: 'center', marginBottom: 20 }}>
                       <SvgIcon name="cart-outline" size={48} color="#9ca3af" />
                     </View>
-                    <Text style={{ fontSize: 20, fontWeight: '600', color: '#111827', marginBottom: 8 }}>No Shopping List</Text>
-                    <Text style={{ fontSize: 14, color: '#6b7280', textAlign: 'center', lineHeight: 20 }}>
+                    <Text style={{ fontSize: 20, fontWeight: '600', color: theme.colors.text, marginBottom: 8 }}>No Shopping List</Text>
+                    <Text style={{ fontSize: 14, color: theme.colors.textSecondary, textAlign: 'center', lineHeight: 20 }}>
                       Create a personalized meal plan to automatically generate your shopping list with all the ingredients you need.
                     </Text>
                     <TouchableOpacity 
@@ -4555,7 +4555,7 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
                       }]}
                       onPress={() => setShowShoppingListModal(false)}
                     >
-                      <Text style={[styles.shoppingDoneButtonText, { color: '#374151' }]}>Done</Text>
+                      <Text style={[styles.shoppingDoneButtonText, { color: theme.colors.text }]}>Done</Text>
                     </TouchableOpacity>
                   </View>
                 ) : (
@@ -4715,25 +4715,32 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
+    color: dashboardTheme.colors.text,
     marginBottom: 12,
   },
   card: {
+    // backgroundColor: '#fff', // theme.colors.card
+    borderWidth: 2,
+    borderColor: '#e5e7eb', // theme.colors.border
     borderRadius: 12,
     padding: 16,
   },
   label: {
     fontSize: 14,
     fontWeight: '600',
+    color: dashboardTheme.colors.textSecondary,
     marginBottom: 8,
     marginTop: 12,
   },
   input: {
-    borderWidth: 1,
+    // backgroundColor: '#f9fafb', // theme.colors.surface // Use theme.colors.surface
+    borderWidth: 2,
     borderColor: '#e5e7eb',
     borderRadius: 8,
     paddingHorizontal: 12,
     paddingVertical: 10,
     fontSize: 16,
+    color: dashboardTheme.colors.text,
     outlineStyle: 'none' as any,
   },
   servingContainer: {
@@ -4746,6 +4753,7 @@ const styles = StyleSheet.create({
   },
   servingUnit: {
     fontSize: 16,
+    color: dashboardTheme.colors.textSecondary,
   },
   mealTypeContainer: {
     flexDirection: 'row',
@@ -4758,7 +4766,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderRadius: 20,
     // backgroundColor: '#f3f4f6', // theme.colors.surface // Use theme.colors.background
-    borderWidth: 1,
+    borderWidth: 2,
     borderColor: '#e5e7eb',
   },
   mealTypeButtonSelected: {
@@ -4768,6 +4776,7 @@ const styles = StyleSheet.create({
   mealTypeText: {
     fontSize: 14,
     fontWeight: '500',
+    color: dashboardTheme.colors.text,
   },
   mealTypeTextSelected: {
     color: '#ffffff',
@@ -4811,7 +4820,7 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 14,
-    color: '#9ca3af',
+    color: dashboardTheme.colors.textSecondary,
     marginTop: 8,
   },
   ingredientRow: {
@@ -4839,7 +4848,7 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     borderRadius: 16,
     // backgroundColor: '#f3f4f6', // theme.colors.surface // Use theme.colors.background
-    borderWidth: 1,
+    borderWidth: 2,
     borderColor: '#e5e7eb',
   },
   tagSelected: {
@@ -4848,7 +4857,7 @@ const styles = StyleSheet.create({
   },
   tagText: {
     fontSize: 14,
-    color: '#6b7280',
+    color: dashboardTheme.colors.textSecondary,
   },
   tagTextSelected: {
     color: '#3b82f6',
@@ -4884,7 +4893,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 6,
     // backgroundColor: '#ffffff', // theme.colors.surface // Use theme.colors.surface
-    borderWidth: 1,
+    borderWidth: 2,
     borderColor: '#e5e7eb',
     paddingVertical: 12,
     borderRadius: 10,
@@ -4900,7 +4909,9 @@ const styles = StyleSheet.create({
   },
   templateCard: {
     flex: 1,
-    backgroundColor: '#fff',
+    // backgroundColor: '#fff', // theme.colors.card
+    borderWidth: 2,
+    borderColor: '#e5e7eb', // theme.colors.border
     borderRadius: 12,
     padding: 16,
     alignItems: 'center',
@@ -4908,12 +4919,12 @@ const styles = StyleSheet.create({
   templateTitle: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#111827',
+    color: dashboardTheme.colors.text,
     marginTop: 8,
   },
   templateSubtitle: {
     fontSize: 12,
-    color: '#6b7280',
+    color: dashboardTheme.colors.textSecondary,
     marginTop: 2,
   },
   templateCardDisabled: {
@@ -4927,7 +4938,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   successModalContainer: {
-    backgroundColor: '#fff',
+    // backgroundColor: '#fff', // theme.colors.background
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     maxHeight: '90%',
@@ -4950,12 +4961,12 @@ const styles = StyleSheet.create({
   successModalTitle: {
     fontSize: 28,
     fontWeight: '700',
-    color: '#111827',
+    // color: '#111827', // theme.colors.text
     marginBottom: 8,
   },
   successModalSubtitle: {
     fontSize: 16,
-    color: '#6b7280',
+    // color: '#6b7280', // theme.colors.textSecondary
     textAlign: 'center',
   },
   successStatsGrid: {
@@ -4974,12 +4985,12 @@ const styles = StyleSheet.create({
   successStatValue: {
     fontSize: 28,
     fontWeight: '700',
-    color: '#111827',
+    // color: '#111827', // theme.colors.text
     marginTop: 8,
   },
   successStatLabel: {
     fontSize: 13,
-    color: '#6b7280',
+    // color: '#6b7280', // theme.colors.textSecondary
     marginTop: 4,
   },
   successActionsContainer: {
@@ -5103,14 +5114,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 16,
     paddingVertical: 16,
-    backgroundColor: '#fff',
+    // backgroundColor: '#fff', // theme.colors.card
+    borderWidth: 2,
+    borderColor: '#e5e7eb', // theme.colors.border
     borderBottomWidth: 1,
     borderBottomColor: '#e5e7eb',
   },
   modalTitle: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#111827',
+    // color: '#111827', // theme.colors.text
   },
   modalContent: {
     flex: 1,
@@ -5122,13 +5135,15 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     fontSize: 16,
-    color: '#6b7280',
+    // color: '#6b7280', // theme.colors.textSecondary
     marginTop: 12,
   },
   templateItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#fff',
+    // backgroundColor: '#fff', // theme.colors.card
+    borderWidth: 2,
+    borderColor: '#e5e7eb', // theme.colors.border
     marginHorizontal: 16,
     marginTop: 12,
     padding: 16,
@@ -5149,12 +5164,12 @@ const styles = StyleSheet.create({
   templateItemTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#111827',
+    // color: '#111827', // theme.colors.text
     marginBottom: 4,
   },
   templateDescription: {
     fontSize: 14,
-    color: '#6b7280',
+    // color: '#6b7280', // theme.colors.textSecondary
     marginBottom: 6,
   },
   templateMacros: {
@@ -5165,7 +5180,7 @@ const styles = StyleSheet.create({
   },
   macroText: {
     fontSize: 12,
-    color: '#9ca3af',
+    // color: '#9ca3af', // theme.colors.textSecondary
   },
   templateTags: {
     flexDirection: 'row',
@@ -5179,7 +5194,7 @@ const styles = StyleSheet.create({
   },
   miniTagText: {
     fontSize: 11,
-    color: '#6b7280',
+    // color: '#6b7280', // theme.colors.textSecondary
   },
   planButton: {
     flexDirection: 'row',
@@ -5342,7 +5357,9 @@ const styles = StyleSheet.create({
   quickActionCard: {
     width: '48%',
     minWidth: 150,
-    backgroundColor: '#fff',
+    // backgroundColor: '#fff', // theme.colors.card
+    borderWidth: 2,
+    borderColor: '#e5e7eb', // theme.colors.border
     borderRadius: 12,
     padding: 16,
     alignItems: 'center',
@@ -5384,7 +5401,9 @@ const styles = StyleSheet.create({
 
   // Today's Meals Card
   todaysMealsCard: {
-    backgroundColor: '#fff',
+    // backgroundColor: '#fff', // theme.colors.card
+    borderWidth: 2,
+    borderColor: '#e5e7eb', // theme.colors.border
     borderRadius: 12,
     padding: 12,
   },
@@ -5409,18 +5428,20 @@ const styles = StyleSheet.create({
   mealTypeLabel: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#111827',
+    // color: '#111827', // theme.colors.text
   },
   mealTypeName: {
     fontSize: 12,
-    color: '#9ca3af',
+    // color: '#9ca3af', // theme.colors.textSecondary
     marginTop: 2,
   },
 
   // Template Preview Cards
   templatePreviewCard: {
     width: 120,
-    backgroundColor: '#fff',
+    // backgroundColor: '#fff', // theme.colors.card
+    borderWidth: 2,
+    borderColor: '#e5e7eb', // theme.colors.border
     borderRadius: 12,
     padding: 12,
     marginRight: 12,
@@ -5437,12 +5458,12 @@ const styles = StyleSheet.create({
   templatePreviewName: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#111827',
+    // color: '#111827', // theme.colors.text
     textAlign: 'center',
   },
   templatePreviewMacros: {
     fontSize: 11,
-    color: '#6b7280',
+    // color: '#6b7280', // theme.colors.textSecondary
     marginTop: 4,
   },
 
@@ -5450,7 +5471,9 @@ const styles = StyleSheet.create({
   recentMealCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#fff',
+    // backgroundColor: '#fff', // theme.colors.card
+    borderWidth: 2,
+    borderColor: '#e5e7eb', // theme.colors.border
     borderRadius: 12,
     padding: 12,
     marginBottom: 8,
@@ -5461,11 +5484,11 @@ const styles = StyleSheet.create({
   recentMealName: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#111827',
+    // color: '#111827', // theme.colors.text
   },
   recentMealMacros: {
     fontSize: 13,
-    color: '#6b7280',
+    // color: '#6b7280', // theme.colors.textSecondary
     marginTop: 2,
   },
   recentMealAction: {
@@ -5474,7 +5497,9 @@ const styles = StyleSheet.create({
 
   // Planning Card
   planningCard: {
-    backgroundColor: '#fff',
+    // backgroundColor: '#fff', // theme.colors.card
+    borderWidth: 2,
+    borderColor: '#e5e7eb', // theme.colors.border
     borderRadius: 12,
     padding: 16,
   },
@@ -5503,7 +5528,7 @@ const styles = StyleSheet.create({
   },
   planningFeatureText: {
     fontSize: 14,
-    color: '#6b7280',
+    // color: '#6b7280', // theme.colors.textSecondary
   },
 
   // Form Header with Back Button

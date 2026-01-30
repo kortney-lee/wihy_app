@@ -22,6 +22,7 @@ import {
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons, BrandInput } from '../../components/shared';
+import { useTheme } from '../../context/ThemeContext';
 import { API_CONFIG } from '../../services/config';
 import {
   ModeToggle,
@@ -223,6 +224,8 @@ export const GoalSelectionMeals: React.FC<GoalSelectionMealsProps> = ({
   initialTemplate,
   onTemplateCleared,
 }) => {
+  const { theme } = useTheme();
+  
   // Mode state - default to 'plan' if template provided
   const [mode, setMode] = useState<MealMode>(initialTemplate ? 'plan' : 'quick');
   
@@ -378,14 +381,14 @@ export const GoalSelectionMeals: React.FC<GoalSelectionMealsProps> = ({
     <>
       {/* Meal Type */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>What meal?</Text>
+        <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>What meal?</Text>
         <View style={styles.chipGrid}>
           {QUICK_MEAL_TYPES.map((type) => {
             const isSelected = quickMealTypes.includes(type.id);
             return (
               <TouchableOpacity
                 key={type.id}
-                style={[styles.chip, isSelected && styles.chipSelected]}
+                style={[styles.chip, !isSelected && { backgroundColor: theme.colors.card, borderColor: theme.colors.border }, isSelected && styles.chipSelected]}
                 onPress={() => {
                   setQuickMealTypes(prev => 
                     prev.includes(type.id) 
@@ -397,9 +400,9 @@ export const GoalSelectionMeals: React.FC<GoalSelectionMealsProps> = ({
                 <Ionicons
                   name={type.icon as any}
                   size={18}
-                  color={isSelected ? '#4cbb17' : '#6b7280'}
+                  color={isSelected ? '#4cbb17' : theme.colors.textSecondary}
                 />
-                <Text style={[styles.chipText, isSelected && styles.chipTextSelected]}>
+                <Text style={[styles.chipText, !isSelected && { color: theme.colors.textSecondary }, isSelected && styles.chipTextSelected]}>
                   {type.label}
                 </Text>
               </TouchableOpacity>
@@ -410,23 +413,31 @@ export const GoalSelectionMeals: React.FC<GoalSelectionMealsProps> = ({
 
       {/* Cuisine Type */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Cuisine (optional)</Text>
+        <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Cuisine (optional)</Text>
         
         {/* Cuisine Category Tabs */}
         <View style={styles.cuisineTabsContainer}>
           <TouchableOpacity
-            style={[styles.cuisineTab, cuisineTab === 'world' && styles.cuisineTabActive]}
+            style={[
+              styles.cuisineTab,
+              cuisineTab !== 'world' && { backgroundColor: theme.colors.card, borderColor: theme.colors.border },
+              cuisineTab === 'world' && styles.cuisineTabActive
+            ]}
             onPress={() => setCuisineTab('world')}
           >
-            <Ionicons name="globe-outline" size={16} color={cuisineTab === 'world' ? '#4cbb17' : '#6b7280'} />
-            <Text style={[styles.cuisineTabText, cuisineTab === 'world' && styles.cuisineTabTextActive]}>World</Text>
+            <Ionicons name="globe-outline" size={16} color={cuisineTab === 'world' ? '#4cbb17' : theme.colors.textSecondary} />
+            <Text style={[styles.cuisineTabText, cuisineTab !== 'world' && { color: theme.colors.textSecondary }, cuisineTab === 'world' && styles.cuisineTabTextActive]}>World</Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={[styles.cuisineTab, cuisineTab === 'vegetarian' && styles.cuisineTabActive]}
+            style={[
+              styles.cuisineTab,
+              cuisineTab !== 'vegetarian' && { backgroundColor: theme.colors.card, borderColor: theme.colors.border },
+              cuisineTab === 'vegetarian' && styles.cuisineTabActive
+            ]}
             onPress={() => setCuisineTab('vegetarian')}
           >
-            <Ionicons name="leaf-outline" size={16} color={cuisineTab === 'vegetarian' ? '#4cbb17' : '#6b7280'} />
-            <Text style={[styles.cuisineTabText, cuisineTab === 'vegetarian' && styles.cuisineTabTextActive]}>Veg-Friendly</Text>
+            <Ionicons name="leaf-outline" size={16} color={cuisineTab === 'vegetarian' ? '#4cbb17' : theme.colors.textSecondary} />
+            <Text style={[styles.cuisineTabText, cuisineTab !== 'vegetarian' && { color: theme.colors.textSecondary }, cuisineTab === 'vegetarian' && styles.cuisineTabTextActive]}>Veg-Friendly</Text>
           </TouchableOpacity>
         </View>
         
@@ -437,7 +448,7 @@ export const GoalSelectionMeals: React.FC<GoalSelectionMealsProps> = ({
             return (
               <TouchableOpacity
                 key={cuisine.id}
-                style={[styles.cuisineChip, isSelected && styles.cuisineChipSelected]}
+                style={[styles.cuisineChip, !isSelected && { backgroundColor: theme.colors.card, borderColor: theme.colors.border }, isSelected && styles.cuisineChipSelected]}
                 onPress={() => {
                   setQuickCuisines(prev => 
                     prev.includes(cuisine.id)
@@ -450,13 +461,13 @@ export const GoalSelectionMeals: React.FC<GoalSelectionMealsProps> = ({
                   <Ionicons
                     name={cuisine.icon as any}
                     size={18}
-                    color={isSelected ? '#4cbb17' : '#6b7280'}
+                    color={isSelected ? '#4cbb17' : theme.colors.textSecondary}
                   />
-                  <Text style={[styles.cuisineChipLabel, isSelected && styles.cuisineChipLabelSelected]}>
+                  <Text style={[styles.cuisineChipLabel, !isSelected && { color: theme.colors.text }, isSelected && styles.cuisineChipLabelSelected]}>
                     {cuisine.label}
                   </Text>
                 </View>
-                <Text style={[styles.cuisineChipDescription, isSelected && styles.cuisineChipDescriptionSelected]} numberOfLines={1}>
+                <Text style={[styles.cuisineChipDescription, !isSelected && { color: theme.colors.textSecondary }, isSelected && styles.cuisineChipDescriptionSelected]} numberOfLines={1}>
                   {cuisine.description}
                 </Text>
               </TouchableOpacity>
@@ -466,9 +477,9 @@ export const GoalSelectionMeals: React.FC<GoalSelectionMealsProps> = ({
         
         {/* Selected cuisines summary */}
         {quickCuisines.length > 0 && (
-          <View style={styles.selectedCuisinesSummary}>
-            <Text style={styles.selectedCuisinesLabel}>Selected: </Text>
-            <Text style={styles.selectedCuisinesText}>
+          <View style={[styles.selectedCuisinesSummary, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
+            <Text style={[styles.selectedCuisinesLabel, { color: theme.colors.textSecondary }]}>Selected: </Text>
+            <Text style={[styles.selectedCuisinesText, { color: theme.colors.text }]}>
               {quickCuisines.map(id => {
                 const cuisine = [...WORLD_CUISINES, ...VEGETARIAN_CUISINES].find(c => c.id === id);
                 return cuisine?.label || id;
@@ -483,22 +494,22 @@ export const GoalSelectionMeals: React.FC<GoalSelectionMealsProps> = ({
 
       {/* Time Constraint */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Time available</Text>
+        <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Time available</Text>
         <View style={styles.chipGrid}>
           {TIME_CONSTRAINTS.map((time) => {
             const isSelected = quickTime === time.id;
             return (
               <TouchableOpacity
                 key={time.id}
-                style={[styles.chip, isSelected && styles.chipSelected]}
+                style={[styles.chip, !isSelected && { backgroundColor: theme.colors.card, borderColor: theme.colors.border }, isSelected && styles.chipSelected]}
                 onPress={() => setQuickTime(time.id)}
               >
                 <Ionicons
                   name={time.icon as any}
                   size={18}
-                  color={isSelected ? '#4cbb17' : '#6b7280'}
+                  color={isSelected ? '#4cbb17' : theme.colors.textSecondary}
                 />
-                <Text style={[styles.chipText, isSelected && styles.chipTextSelected]}>
+                <Text style={[styles.chipText, !isSelected && { color: theme.colors.textSecondary }, isSelected && styles.chipTextSelected]}>
                   {time.label}
                 </Text>
               </TouchableOpacity>
@@ -547,14 +558,14 @@ export const GoalSelectionMeals: React.FC<GoalSelectionMealsProps> = ({
     <>
       {/* Quick Goals */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Quick start (optional)</Text>
+        <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Quick start (optional)</Text>
         <View style={styles.quickGoalGrid}>
           {QUICK_GOALS.map((goal) => {
             const isSelected = planGoal === goal.id;
             return (
               <TouchableOpacity
                 key={goal.id}
-                style={[styles.quickGoalCard, isSelected && styles.quickGoalCardSelected]}
+                style={[styles.quickGoalCard, !isSelected && { backgroundColor: theme.colors.card, borderColor: theme.colors.border }, isSelected && styles.quickGoalCardSelected]}
                 onPress={() => {
                   setPlanGoal(isSelected ? null : goal.id);
                   if (!isSelected && goal.config.servings) {
@@ -565,12 +576,12 @@ export const GoalSelectionMeals: React.FC<GoalSelectionMealsProps> = ({
                 <Ionicons
                   name={goal.icon as any}
                   size={24}
-                  color={isSelected ? '#4cbb17' : '#6b7280'}
+                  color={isSelected ? '#4cbb17' : theme.colors.textSecondary}
                 />
-                <Text style={[styles.quickGoalLabel, isSelected && styles.quickGoalLabelSelected]}>
+                <Text style={[styles.quickGoalLabel, !isSelected && { color: theme.colors.text }, isSelected && styles.quickGoalLabelSelected]}>
                   {goal.label}
                 </Text>
-                <Text style={styles.quickGoalDescription}>{goal.description}</Text>
+                <Text style={[styles.quickGoalDescription, { color: theme.colors.textSecondary }]}>{goal.description}</Text>
               </TouchableOpacity>
             );
           })}
@@ -579,11 +590,11 @@ export const GoalSelectionMeals: React.FC<GoalSelectionMealsProps> = ({
 
       {/* Description (optional) */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitleLight}>Describe your plan (optional)</Text>
+        <Text style={[styles.sectionTitleLight, { color: theme.colors.textSecondary }]}>Describe your plan (optional)</Text>
         <TextInput
-          style={styles.textInput}
+          style={[styles.textInput, { backgroundColor: theme.colors.card, borderColor: theme.colors.border, color: theme.colors.text }]}
           placeholder="e.g., Easy family dinners using Costco ingredients"
-          placeholderTextColor="#9ca3af"
+          placeholderTextColor={theme.colors.textSecondary}
           value={planDescription}
           onChangeText={setPlanDescription}
           multiline
@@ -612,14 +623,14 @@ export const GoalSelectionMeals: React.FC<GoalSelectionMealsProps> = ({
 
       {/* Cuisines */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitleLight}>Cuisines (optional)</Text>
+        <Text style={[styles.sectionTitleLight, { color: theme.colors.textSecondary }]}>Cuisines (optional)</Text>
         <View style={styles.chipGrid}>
           {QUICK_CUISINE_TYPES.map((cuisine) => {
             const isSelected = planCuisines.includes(cuisine.id);
             return (
               <TouchableOpacity
                 key={cuisine.id}
-                style={[styles.chip, isSelected && styles.chipSelected]}
+                style={[styles.chip, !isSelected && { backgroundColor: theme.colors.card, borderColor: theme.colors.border }, isSelected && styles.chipSelected]}
                 onPress={() => {
                   setPlanCuisines(prev => 
                     prev.includes(cuisine.id)
@@ -631,9 +642,9 @@ export const GoalSelectionMeals: React.FC<GoalSelectionMealsProps> = ({
                 <Ionicons
                   name={cuisine.icon as any}
                   size={16}
-                  color={isSelected ? '#4cbb17' : '#6b7280'}
+                  color={isSelected ? '#4cbb17' : theme.colors.textSecondary}
                 />
-                <Text style={[styles.chipText, isSelected && styles.chipTextSelected]}>
+                <Text style={[styles.chipText, !isSelected && { color: theme.colors.textSecondary }, isSelected && styles.chipTextSelected]}>
                   {cuisine.label}
                 </Text>
               </TouchableOpacity>
@@ -658,22 +669,22 @@ export const GoalSelectionMeals: React.FC<GoalSelectionMealsProps> = ({
 
       {/* Preferred Stores */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitleLight}>Preferred stores (optional)</Text>
+        <Text style={[styles.sectionTitleLight, { color: theme.colors.textSecondary }]}>Preferred stores (optional)</Text>
         <View style={styles.chipGrid}>
           {STORE_OPTIONS.map((store) => {
             const isSelected = selectedStores.includes(store.id);
             return (
               <TouchableOpacity
                 key={store.id}
-                style={[styles.chip, isSelected && styles.chipSelected]}
+                style={[styles.chip, !isSelected && { backgroundColor: theme.colors.card, borderColor: theme.colors.border }, isSelected && styles.chipSelected]}
                 onPress={() => toggleStore(store.id)}
               >
                 <Ionicons
                   name={store.icon as any}
                   size={16}
-                  color={isSelected ? '#4cbb17' : '#6b7280'}
+                  color={isSelected ? '#4cbb17' : theme.colors.textSecondary}
                 />
-                <Text style={[styles.chipText, isSelected && styles.chipTextSelected]}>
+                <Text style={[styles.chipText, !isSelected && { color: theme.colors.textSecondary }, isSelected && styles.chipTextSelected]}>
                   {store.label}
                 </Text>
               </TouchableOpacity>
@@ -699,8 +710,8 @@ export const GoalSelectionMeals: React.FC<GoalSelectionMealsProps> = ({
   const renderSavedMode = () => (
     <>
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Recent Meals</Text>
-        <Text style={styles.sectionTitleLight}>
+        <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Recent Meals</Text>
+        <Text style={[styles.sectionTitleLight, { color: theme.colors.textSecondary }]}>
           Select previously created meals to reorder to Instacart
         </Text>
       </View>
@@ -709,7 +720,7 @@ export const GoalSelectionMeals: React.FC<GoalSelectionMealsProps> = ({
       {loadingSavedMeals && (
         <View style={styles.section}>
           <ActivityIndicator size="large" color="#4cbb17" />
-          <Text style={styles.loadingText}>Loading saved meals...</Text>
+          <Text style={[styles.loadingText, { color: theme.colors.textSecondary }]}>Loading saved meals...</Text>
         </View>
       )}
 
@@ -726,10 +737,10 @@ export const GoalSelectionMeals: React.FC<GoalSelectionMealsProps> = ({
       {/* Empty state */}
       {!loadingSavedMeals && !savedMealsError && savedMeals.length === 0 && (
         <View style={styles.section}>
-          <View style={styles.placeholderBox}>
-            <Ionicons name="bookmark-outline" size={48} color="#9ca3af" />
-            <Text style={styles.placeholderText}>No saved meals yet</Text>
-            <Text style={styles.placeholderSubtext}>
+          <View style={[styles.placeholderBox, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
+            <Ionicons name="bookmark-outline" size={48} color={theme.colors.textSecondary} />
+            <Text style={[styles.placeholderText, { color: theme.colors.text }]}>No saved meals yet</Text>
+            <Text style={[styles.placeholderSubtext, { color: theme.colors.textSecondary }]}>
               Generate meals in Quick or Plan mode first
             </Text>
           </View>
@@ -744,7 +755,7 @@ export const GoalSelectionMeals: React.FC<GoalSelectionMealsProps> = ({
             return (
               <TouchableOpacity
                 key={mealPlan.id}
-                style={[styles.savedMealCard, isSelected && styles.savedMealCardSelected]}
+                style={[styles.savedMealCard, !isSelected && { backgroundColor: theme.colors.card, borderColor: theme.colors.border }, isSelected && styles.savedMealCardSelected]}
                 onPress={() => {
                   setSelectedSavedMealIds(prev => 
                     prev.includes(mealPlan.id)
@@ -755,33 +766,33 @@ export const GoalSelectionMeals: React.FC<GoalSelectionMealsProps> = ({
               >
                 <View style={styles.savedMealHeader}>
                   <View style={styles.savedMealInfo}>
-                    <Text style={styles.savedMealTitle}>{mealPlan.name}</Text>
-                    <Text style={styles.savedMealSubtitle}>{mealPlan.displayTitle}</Text>
+                    <Text style={[styles.savedMealTitle, { color: theme.colors.text }]}>{mealPlan.name}</Text>
+                    <Text style={[styles.savedMealSubtitle, { color: theme.colors.textSecondary }]}>{mealPlan.displayTitle}</Text>
                   </View>
-                  <View style={[styles.checkbox, isSelected && styles.checkboxSelected]}>
+                  <View style={[styles.checkbox, { borderColor: theme.colors.border }, isSelected && styles.checkboxSelected]}>
                     {isSelected && <Ionicons name="checkmark" size={16} color="#fff" />}
                   </View>
                 </View>
                 
                 <View style={styles.savedMealMeta}>
                   <View style={styles.metaItem}>
-                    <Ionicons name="restaurant-outline" size={14} color="#6b7280" />
-                    <Text style={styles.metaText}>{mealPlan.totalMeals} meals</Text>
+                    <Ionicons name="restaurant-outline" size={14} color={theme.colors.textSecondary} />
+                    <Text style={[styles.metaText, { color: theme.colors.textSecondary }]}>{mealPlan.totalMeals} meals</Text>
                   </View>
                   <View style={styles.metaItem}>
-                    <Ionicons name="calendar-outline" size={14} color="#6b7280" />
-                    <Text style={styles.metaText}>{mealPlan.duration} days</Text>
+                    <Ionicons name="calendar-outline" size={14} color={theme.colors.textSecondary} />
+                    <Text style={[styles.metaText, { color: theme.colors.textSecondary }]}>{mealPlan.duration} days</Text>
                   </View>
                   {mealPlan.orderCount > 0 && (
                     <View style={styles.metaItem}>
-                      <Ionicons name="repeat-outline" size={14} color="#6b7280" />
-                      <Text style={styles.metaText}>Ordered {mealPlan.orderCount}x</Text>
+                      <Ionicons name="repeat-outline" size={14} color={theme.colors.textSecondary} />
+                      <Text style={[styles.metaText, { color: theme.colors.textSecondary }]}>Ordered {mealPlan.orderCount}x</Text>
                     </View>
                   )}
                 </View>
                 
                 {mealPlan.description && (
-                  <Text style={styles.savedMealDescription} numberOfLines={2}>
+                  <Text style={[styles.savedMealDescription, { color: theme.colors.textSecondary }]} numberOfLines={2}>
                     {mealPlan.description}
                   </Text>
                 )}
@@ -808,26 +819,26 @@ export const GoalSelectionMeals: React.FC<GoalSelectionMealsProps> = ({
     <>
       {/* Program Selection */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Select Program</Text>
+        <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Select Program</Text>
         <View style={styles.programGrid}>
           {DIET_PROGRAMS.map((program) => {
             const isSelected = selectedProgram === program.id;
             return (
               <TouchableOpacity
                 key={program.id}
-                style={[styles.programCard, isSelected && styles.programCardSelected]}
+                style={[styles.programCard, !isSelected && { backgroundColor: theme.colors.card, borderColor: theme.colors.border }, isSelected && styles.programCardSelected]}
                 onPress={() => setSelectedProgram(program.id)}
               >
                 <Ionicons
                   name={program.icon as any}
                   size={24}
-                  color={isSelected ? '#4cbb17' : '#6b7280'}
+                  color={isSelected ? '#4cbb17' : theme.colors.textSecondary}
                 />
-                <Text style={[styles.programLabel, isSelected && styles.programLabelSelected]}>
+                <Text style={[styles.programLabel, !isSelected && { color: theme.colors.text }, isSelected && styles.programLabelSelected]}>
                   {program.label}
                 </Text>
-                <Text style={styles.programDescription}>{program.description}</Text>
-                <Text style={styles.programWeeks}>{program.weeks} weeks</Text>
+                <Text style={[styles.programDescription, { color: theme.colors.textSecondary }]}>{program.description}</Text>
+                <Text style={[styles.programWeeks, { color: theme.colors.textSecondary }]}>{program.weeks} weeks</Text>
               </TouchableOpacity>
             );
           })}
@@ -838,20 +849,20 @@ export const GoalSelectionMeals: React.FC<GoalSelectionMealsProps> = ({
         <>
           {/* Activity Level */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Activity Level</Text>
+            <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Activity Level</Text>
             <View style={styles.levelRow}>
               {ACTIVITY_LEVELS.map((level) => {
                 const isSelected = activityLevel === level.id;
                 return (
                   <TouchableOpacity
                     key={level.id}
-                    style={[styles.levelOption, isSelected && styles.levelOptionSelected]}
+                    style={[styles.levelOption, !isSelected && { backgroundColor: theme.colors.card, borderColor: theme.colors.border }, isSelected && styles.levelOptionSelected]}
                     onPress={() => setActivityLevel(level.id)}
                   >
-                    <Text style={[styles.levelLabel, isSelected && styles.levelLabelSelected]}>
+                    <Text style={[styles.levelLabel, !isSelected && { color: theme.colors.text }, isSelected && styles.levelLabelSelected]}>
                       {level.label}
                     </Text>
-                    <Text style={styles.levelDescription}>{level.description}</Text>
+                    <Text style={[styles.levelDescription, { color: theme.colors.textSecondary }]}>{level.description}</Text>
                   </TouchableOpacity>
                 );
               })}
@@ -860,11 +871,11 @@ export const GoalSelectionMeals: React.FC<GoalSelectionMealsProps> = ({
 
           {/* Calorie Target (optional) */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitleLight}>Daily calorie target (optional)</Text>
+            <Text style={[styles.sectionTitleLight, { color: theme.colors.textSecondary }]}>Daily calorie target (optional)</Text>
             <TextInput
-              style={styles.calorieInput}
+              style={[styles.calorieInput, { backgroundColor: theme.colors.card, borderColor: theme.colors.border, color: theme.colors.text }]}
               placeholder="Auto-calculated"
-              placeholderTextColor="#9ca3af"
+              placeholderTextColor={theme.colors.textSecondary}
               value={calorieTarget}
               onChangeText={setCalorieTarget}
               keyboardType="numeric"
@@ -894,7 +905,7 @@ export const GoalSelectionMeals: React.FC<GoalSelectionMealsProps> = ({
 
   return (
     <ScrollView 
-      style={styles.container} 
+      style={[styles.container, { backgroundColor: theme.colors.background }]} 
       showsVerticalScrollIndicator={false}
       contentContainerStyle={styles.contentContainer}
     >
@@ -954,13 +965,13 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#374151',
+    // color: '#374151', // theme.colors.text
     marginBottom: 10,
   },
   sectionTitleLight: {
     fontSize: 13,
     fontWeight: '500',
-    color: '#6b7280',
+    // color: '#6b7280', // theme.colors.textSecondary
     marginBottom: 8,
   },
   // Chip styles
@@ -987,7 +998,7 @@ const styles = StyleSheet.create({
   chipText: {
     fontSize: 13,
     fontWeight: '500',
-    color: '#6b7280',
+    // color: '#6b7280', // theme.colors.textSecondary
   },
   chipTextSelected: {
     color: '#166534',
@@ -1016,7 +1027,7 @@ const styles = StyleSheet.create({
   quickGoalLabel: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#374151',
+    // color: '#374151', // theme.colors.text
     textAlign: 'center',
   },
   quickGoalLabelSelected: {
@@ -1024,7 +1035,7 @@ const styles = StyleSheet.create({
   },
   quickGoalDescription: {
     fontSize: 10,
-    color: '#9ca3af',
+    // color: '#9ca3af', // theme.colors.textSecondary
     textAlign: 'center',
   },
   // Program styles
@@ -1050,7 +1061,7 @@ const styles = StyleSheet.create({
   programLabel: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#374151',
+    // color: '#374151', // theme.colors.text
     textAlign: 'center',
   },
   programLabelSelected: {
@@ -1058,7 +1069,7 @@ const styles = StyleSheet.create({
   },
   programDescription: {
     fontSize: 10,
-    color: '#9ca3af',
+    // color: '#9ca3af', // theme.colors.textSecondary
     textAlign: 'center',
   },
   programWeeks: {
@@ -1090,14 +1101,14 @@ const styles = StyleSheet.create({
   levelLabel: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#374151',
+    // color: '#374151', // theme.colors.text
   },
   levelLabelSelected: {
     color: '#166534',
   },
   levelDescription: {
     fontSize: 10,
-    color: '#9ca3af',
+    // color: '#9ca3af', // theme.colors.textSecondary
     marginTop: 2,
     textAlign: 'center',
   },
@@ -1110,7 +1121,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 12,
     fontSize: 14,
-    color: '#374151',
+    // color: '#374151', // theme.colors.text
     minHeight: 60,
     textAlignVertical: 'top',
     outlineStyle: 'none' as any,
@@ -1123,7 +1134,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 12,
     fontSize: 14,
-    color: '#374151',
+    // color: '#374151', // theme.colors.text
     outlineStyle: 'none' as any,
   },
   // Generate button
@@ -1160,19 +1171,19 @@ const styles = StyleSheet.create({
   placeholderText: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#6b7280',
+    // color: '#6b7280', // theme.colors.textSecondary
     marginTop: 12,
     textAlign: 'center',
   },
   placeholderSubtext: {
     fontSize: 13,
-    color: '#9ca3af',
+    // color: '#9ca3af', // theme.colors.textSecondary
     marginTop: 4,
     textAlign: 'center',
   },
   loadingText: {
     fontSize: 14,
-    color: '#6b7280',
+    // color: '#6b7280', // theme.colors.textSecondary
     marginTop: 12,
     textAlign: 'center',
   },
@@ -1194,7 +1205,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   savedMealCard: {
-    backgroundColor: '#fff',
+    // backgroundColor: '#fff', // theme.colors.card
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
@@ -1218,12 +1229,12 @@ const styles = StyleSheet.create({
   savedMealTitle: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#111827',
+    // color: '#111827', // theme.colors.text
     marginBottom: 4,
   },
   savedMealSubtitle: {
     fontSize: 13,
-    color: '#6b7280',
+    // color: '#6b7280', // theme.colors.textSecondary
   },
   checkbox: {
     width: 24,

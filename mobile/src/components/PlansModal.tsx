@@ -196,7 +196,7 @@ export default function PlansModal({
       onRequestClose={onClose}
     >
       <View style={styles.modalOverlay}>
-        <View style={styles.modalContent}>
+        <View style={[styles.modalContent, { backgroundColor: theme.colors.background }]}>
           {/* Header */}
           <View style={styles.header}>
             <View style={styles.headerTextContainer}>
@@ -376,7 +376,7 @@ const styles = StyleSheet.create({
     ...(isWeb && { alignItems: 'center', justifyContent: 'center' }),
   },
   modalContent: {
-    backgroundColor: '#fff',
+    // backgroundColor: '#ffffff', // theme.colors.background
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     maxHeight: '90%',

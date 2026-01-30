@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -13,7 +13,9 @@ import {
   FlatList,
   Keyboard,
   Platform,
+  Animated,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import SvgIcon from './shared/SvgIcon';
 import { SweepBorder } from './SweepBorder';
@@ -97,6 +99,32 @@ export const ManualMealForm: React.FC<ManualMealFormProps> = ({
   onClearMealToEdit,
 }) => {
   const { theme } = useTheme();
+  const insets = useSafeAreaInsets();
+  
+  // Collapsing header animation - CRITICAL: 180px per design patterns
+  const scrollY = useRef(new Animated.Value(0)).current;
+  const HEADER_MAX_HEIGHT = 180;
+  const HEADER_MIN_HEIGHT = 0;
+  const HEADER_SCROLL_DISTANCE = HEADER_MAX_HEIGHT - HEADER_MIN_HEIGHT;
+
+  const headerHeight = scrollY.interpolate({
+    inputRange: [0, HEADER_SCROLL_DISTANCE],
+    outputRange: [HEADER_MAX_HEIGHT, HEADER_MIN_HEIGHT],
+    extrapolate: 'clamp',
+  });
+
+  const headerOpacity = scrollY.interpolate({
+    inputRange: [0, HEADER_SCROLL_DISTANCE / 2],
+    outputRange: [1, 0],
+    extrapolate: 'clamp',
+  });
+
+  const titleScale = scrollY.interpolate({
+    inputRange: [0, HEADER_SCROLL_DISTANCE],
+    outputRange: [1, 0.9],
+    extrapolate: 'clamp',
+  });
+  
   // Form state
   const [mealName, setMealName] = useState('');
   const [servingSize, setServingSize] = useState('1');
@@ -257,17 +285,38 @@ export const ManualMealForm: React.FC<ManualMealFormProps> = ({
 
   return (
     <View style={[styles.formContainer, { backgroundColor: theme.colors.background }]}>
-      <ScrollView showsVerticalScrollIndicator={false}>
-        {/* Header */}
-        <LinearGradient
-          colors={['#3b82f6', '#2563eb']}
-          style={styles.formHeaderGradient}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
+      {/* Status bar area - Always blue to match header */}
+      <View style={{ height: insets.top, backgroundColor: '#3b82f6' }} />
+      
+      {/* Collapsing Header */}
+      <Animated.View style={[styles.collapsibleHeader, { height: headerHeight }]}>
+        <Animated.View 
+          style={{
+            flex: 1,
+            opacity: headerOpacity, 
+            transform: [{ scale: titleScale }]
+          }}
         >
-          <Text style={styles.formHeaderTitleWhite}>Plan Your Meal</Text>
-          <Text style={styles.formHeaderSubtitle}>Build your ingredient list and create shopping cart</Text>
-        </LinearGradient>
+          <LinearGradient
+            colors={['#3b82f6', '#2563eb']}
+            style={styles.formHeaderGradient}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+          >
+            <Text style={styles.formHeaderTitleWhite}>Plan Your Meal</Text>
+            <Text style={styles.formHeaderSubtitle}>Build your ingredient list and create shopping cart</Text>
+          </LinearGradient>
+        </Animated.View>
+      </Animated.View>
+
+      <Animated.ScrollView 
+        showsVerticalScrollIndicator={false}
+        scrollEventThrottle={16}
+        onScroll={Animated.event(
+          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+          { useNativeDriver: false }
+        )}
+      >
 
         {/* Meal Details */}
         <View style={styles.section}>
@@ -794,7 +843,7 @@ export const ManualMealForm: React.FC<ManualMealFormProps> = ({
         </View>
         
         <View style={{ height: 100 }} />
-      </ScrollView>
+      </Animated.ScrollView>
     </View>
   );
 };
@@ -804,10 +853,17 @@ const styles = StyleSheet.create({
     flex: 1,
     // backgroundColor: '#e0f2fe', // theme.colors.background
   },
+  collapsibleHeader: {
+    backgroundColor: '#3b82f6',  // Brand color - DO NOT theme per dark mode rules
+    overflow: 'hidden',
+    paddingBottom: 20,  // CRITICAL: Prevents color bleeding
+  },
   formHeaderGradient: {
-    paddingTop: 60,
-    paddingBottom: 24,
+    flex: 1,
+    justifyContent: 'center',
     paddingHorizontal: 20,
+    paddingTop: 10,  // CRITICAL: Proper spacing from top
+    paddingBottom: 20,
     position: 'relative',
   },
   headerBackButtonWhite: {
@@ -838,7 +894,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#111827',
+    // color: applied via inline { color: theme.colors.text }
     marginBottom: 12,
   },
   sectionHeader: {
@@ -860,18 +916,18 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#374151',
+    // color: applied via inline { color: theme.colors.text }
     marginBottom: 8,
   },
   input: {
     // backgroundColor: '#f9fafb', // theme.colors.surface // Use theme.colors.surface
-    borderWidth: 1,
+    borderWidth: 2,
     borderColor: '#e5e7eb',
     borderRadius: 8,
     paddingHorizontal: 12,
     paddingVertical: 10,
     fontSize: 15,
-    color: '#111827',
+    // color: applied via inline { color: theme.colors.text }
     marginBottom: 16,
     outlineStyle: 'none' as any,
   },
@@ -886,7 +942,7 @@ const styles = StyleSheet.create({
   },
   servingUnit: {
     fontSize: 15,
-    color: '#6b7280',
+    // color: applied via inline { color: theme.colors.textSecondary }
   },
   mealTypeContainer: {
     flexDirection: 'row',
@@ -898,7 +954,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     borderRadius: 8,
     // backgroundColor: '#f3f4f6', // theme.colors.surface // Use theme.colors.background
-    borderWidth: 1,
+    borderWidth: 2,
     borderColor: '#e5e7eb',
     alignItems: 'center',
   },
@@ -909,7 +965,7 @@ const styles = StyleSheet.create({
   mealTypeText: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#6b7280',
+    // color: applied via inline { color: theme.colors.textSecondary }
   },
   mealTypeTextSelected: {
     color: '#ffffff',
@@ -926,7 +982,7 @@ const styles = StyleSheet.create({
   miniNutritionText: {
     fontSize: 11,
     fontWeight: '600',
-    color: '#374151',
+    // color: applied via inline { color: theme.colors.text }
   },
   nutritionSummaryCard: {
     marginTop: 12,
@@ -994,7 +1050,7 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 14,
-    color: '#9ca3af',
+    // color: applied via inline { color: theme.colors.textSecondary }
     marginTop: 8,
   },
   // Inline Search Styles
@@ -1012,7 +1068,7 @@ const styles = StyleSheet.create({
   inlineSearchInput: {
     flex: 1,
     fontSize: 16,
-    color: '#111827',
+    // color: applied via inline { color: theme.colors.text }
     outlineStyle: 'none' as any,
   },
   quickCategoriesScroll: {
@@ -1031,7 +1087,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     backgroundColor: '#eff6ff',
     borderRadius: 20,
-    borderWidth: 1,
+    borderWidth: 2,
     borderColor: '#bfdbfe',
   },
   categoryPillText: {
@@ -1060,7 +1116,7 @@ const styles = StyleSheet.create({
   searchResultsTitle: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#374151',
+    // color: applied via inline { color: theme.colors.text }
   },
   clearResultsText: {
     fontSize: 14,
@@ -1074,7 +1130,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 12,
     marginBottom: 8,
-    borderWidth: 1,
+    borderWidth: 2,
     borderColor: '#e5e7eb',
   },
   searchResultInfo: {
@@ -1083,12 +1139,12 @@ const styles = StyleSheet.create({
   searchResultName: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#111827',
+    // color: applied via inline { color: theme.colors.text }
     marginBottom: 2,
   },
   searchResultBrand: {
     fontSize: 13,
-    color: '#6b7280',
+    // color: applied via inline { color: theme.colors.textSecondary }
     marginBottom: 6,
   },
   searchResultNutrition: {
@@ -1103,7 +1159,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 6,
-    borderWidth: 1,
+    borderWidth: 2,
     borderColor: '#e5e7eb',
   },
   nutrientValue: {
@@ -1113,7 +1169,7 @@ const styles = StyleSheet.create({
   },
   nutrientLabel: {
     fontSize: 11,
-    color: '#6b7280',
+    // color: applied via inline { color: theme.colors.textSecondary }
   },
   addProductButton: {
     padding: 4,
@@ -1124,13 +1180,13 @@ const styles = StyleSheet.create({
   myIngredientsTitle: {
     fontSize: 15,
     fontWeight: '700',
-    color: '#374151',
+    // color: applied via inline { color: theme.colors.text }
     marginBottom: 12,
   },
   ingredientNameText: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#111827',
+    // color: applied via inline { color: theme.colors.text }
   },
   emptyStateCard: {
     // backgroundColor: '#ffffff', // theme.colors.surface
@@ -1146,13 +1202,13 @@ const styles = StyleSheet.create({
   emptyStateTitle: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#111827',
+    // color: applied via inline { color: theme.colors.text }
     marginTop: 12,
     marginBottom: 4,
   },
   emptyStateText: {
     fontSize: 14,
-    color: '#6b7280',
+    // color: applied via inline { color: theme.colors.textSecondary }
     textAlign: 'center',
   },
   ingredientRow: {
@@ -1183,7 +1239,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 16,
     // backgroundColor: '#f3f4f6', // theme.colors.surface // Use theme.colors.background
-    borderWidth: 1,
+    borderWidth: 2,
     borderColor: '#e5e7eb',
   },
   tagSelected: {
@@ -1192,7 +1248,7 @@ const styles = StyleSheet.create({
   },
   tagText: {
     fontSize: 13,
-    color: '#6b7280',
+    // color: applied via inline { color: theme.colors.textSecondary }
     fontWeight: '500',
   },
   tagTextSelected: {
@@ -1235,7 +1291,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderRadius: 10,
     backgroundColor: '#eff6ff',
-    borderWidth: 1,
+    borderWidth: 2,
     borderColor: '#bfdbfe',
   },
   secondaryButtonText: {
@@ -1262,12 +1318,12 @@ const styles = StyleSheet.create({
   templateTitle: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#111827',
+    // color: applied via inline { color: theme.colors.text }
     marginTop: 8,
   },
   templateSubtitle: {
     fontSize: 11,
-    color: '#6b7280',
+    // color: applied via inline { color: theme.colors.textSecondary }
     marginTop: 2,
   },
 });

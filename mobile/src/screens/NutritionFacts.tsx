@@ -860,7 +860,7 @@ export default function NutritionFacts() {
         onRequestClose={() => setShowCompareModal(false)}
       >
         <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
+          <View style={[styles.modalContent, { backgroundColor: theme.colors.background }]}>
             {/* Modal Header */}
             <View style={styles.modalHeader}>
               <View style={{ width: 40 }} />

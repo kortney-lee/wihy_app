@@ -21,10 +21,10 @@ export const RepeatPerWeekSelector: React.FC<RepeatPerWeekSelectorProps> = ({
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.surface }]}>
       <View style={styles.header}>
-        <Ionicons name="calendar-outline" size={20} color="#6b7280" />
+        <Ionicons name="calendar-outline" size={20} color={theme.colors.textSecondary} />
         <View style={styles.headerText}>
-          <Text style={styles.title}>Repeat Per Week</Text>
-          <Text style={styles.subtitle}>Adjusts intensity & volume</Text>
+          <Text style={[styles.title, { color: theme.colors.text }]}>Repeat Per Week</Text>
+          <Text style={[styles.subtitle, { color: theme.colors.textSecondary }]}>Adjusts intensity & volume</Text>
         </View>
       </View>
       <View style={styles.optionsRow}>
@@ -33,18 +33,18 @@ export const RepeatPerWeekSelector: React.FC<RepeatPerWeekSelectorProps> = ({
           return (
             <TouchableOpacity
               key={days}
-              style={[styles.option, isSelected && styles.optionSelected]}
+              style={[styles.option, !isSelected && { backgroundColor: theme.colors.card, borderColor: theme.colors.border }, isSelected && styles.optionSelected]}
               onPress={() => onDaysChange(days)}
               activeOpacity={0.7}
             >
-              <Text style={[styles.optionText, isSelected && styles.optionTextSelected]}>
+              <Text style={[styles.optionText, !isSelected && { color: theme.colors.textSecondary }, isSelected && styles.optionTextSelected]}>
                 {days}
               </Text>
             </TouchableOpacity>
           );
         })}
       </View>
-      <Text style={styles.hint}>
+      <Text style={[styles.hint, { color: theme.colors.textSecondary }]}>
         {selectedDays <= 2 ? 'Light schedule' : selectedDays <= 4 ? 'Balanced routine' : 'Intensive training'}
       </Text>
     </View>

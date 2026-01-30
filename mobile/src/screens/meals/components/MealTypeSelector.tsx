@@ -44,7 +44,7 @@ export const MealTypeSelector: React.FC<MealTypeSelectorProps> = ({
   return (
     <View style={styles.container}>
       <View style={styles.titleRow}>
-        <Text style={styles.title}>{title}</Text>
+        <Text style={[styles.title, { color: theme.colors.text }]}>{title}</Text>
         <Text style={styles.countBadge}>{selectedCount} selected</Text>
       </View>
       <View style={styles.optionsRow}>
@@ -53,16 +53,16 @@ export const MealTypeSelector: React.FC<MealTypeSelectorProps> = ({
           return (
             <TouchableOpacity
               key={option.id}
-              style={[styles.option, isSelected && styles.optionSelected]}
+              style={[styles.option, !isSelected && { backgroundColor: theme.colors.card, borderColor: theme.colors.border }, isSelected && styles.optionSelected]}
               onPress={() => toggleMealType(option.id)}
               activeOpacity={0.7}
             >
               <Ionicons
                 name={option.icon as any}
                 size={20}
-                color={isSelected ? '#4cbb17' : '#6b7280'}
+                color={isSelected ? '#4cbb17' : theme.colors.textSecondary}
               />
-              <Text style={[styles.optionLabel, isSelected && styles.optionLabelSelected]}>
+              <Text style={[styles.optionLabel, !isSelected && { color: theme.colors.textSecondary }, isSelected && styles.optionLabelSelected]}>
                 {option.label}
               </Text>
             </TouchableOpacity>

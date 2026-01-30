@@ -46,8 +46,7 @@ export const FitnessLevelSelection: React.FC<FitnessLevelSelectionProps> = ({
           key={level.id}
           style={[
             styles.levelCard,
-            { backgroundColor: theme.colors.surface },
-            selectedLevel === level.id && styles.levelCardSelected,
+            { backgroundColor: theme.colors.card, borderColor: theme.colors.border },
             selectedLevel === level.id && { borderColor: level.color },
             { borderLeftColor: level.color, borderLeftWidth: 4 }
           ]}
@@ -62,19 +61,19 @@ export const FitnessLevelSelection: React.FC<FitnessLevelSelectionProps> = ({
               <Ionicons name="checkmark-circle" size={24} color={level.color} />
             )}
           </View>
-          <Text style={styles.levelCardDescription}>{level.description}</Text>
+          <Text style={[styles.levelCardDescription, { color: theme.colors.textSecondary }]}>{level.description}</Text>
           <View style={styles.levelFeatures}>
             {level.features.map((feature, index) => (
               <View key={index} style={styles.levelFeatureRow}>
                 <Ionicons name="checkmark-outline" size={16} color="#6B7280" />
-                <Text style={styles.levelFeatureText}>{feature}</Text>
+                <Text style={[styles.levelFeatureText, { color: theme.colors.textSecondary }]}>{feature}</Text>
               </View>
             ))}
           </View>
         </TouchableOpacity>
       ))}
 
-      <Text style={styles.note}>
+      <Text style={[styles.note, { color: theme.colors.textSecondary }]}>
         <Ionicons name="information-circle-outline" size={14} color="#9CA3AF" />
         {' '}You can change this later in settings
       </Text>
