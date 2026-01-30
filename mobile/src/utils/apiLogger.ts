@@ -399,8 +399,14 @@ async function refreshTokenSynchronized(): Promise<boolean> {
   refreshPromise = (async () => {
     try {
       const { authService } = await import('../services/authService');
-      const result = await authService.refreshToken?.();
-      return result || false;
+      // Call refreshAccessToken (the actual method name)
+      const result = await authService.refreshAccessToken();
+      if (result && result.access_token) {
+        console.log('[refreshTokenSynchronized] Token refreshed successfully');
+        return true;
+      }
+      console.error('[refreshTokenSynchronized] Refresh failed: No access token in response');
+      return false;
     } catch (error) {
       console.error('[refreshTokenSynchronized] Refresh failed:', error);
       return false;
