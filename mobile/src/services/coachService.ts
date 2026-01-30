@@ -742,6 +742,21 @@ class CoachService {
     return data.data || data;
   }
 
+  /**
+   * Get current user's coach profile (for profile editing)
+   * GET /api/coaches/profile
+   * 
+   * Returns the authenticated coach's own profile data
+   */
+  async getMyCoachProfile(): Promise<any> {
+    const response = await fetchWithLogging(
+      `${this.baseUrl}/api/coaches/profile`,
+      { method: 'GET' }
+    );
+    const data = await response.json();
+    return data.data || data;
+  }
+
   // ============= COACH PROFILE CREATION =============
 
   /**
@@ -793,6 +808,61 @@ class CoachService {
       `${this.baseUrl}/api/coaches/profile`,
       {
         method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(profile),
+      }
+    );
+    return response.json();
+  }
+
+  /**
+   * Update existing coach profile
+   * PUT /api/coaches/profile
+   * 
+   * Updates the authenticated coach's profile
+   */
+  async updateCoachProfile(profile: {
+    name?: string;
+    phone?: string;
+    title?: string;
+    bio?: string;
+    specialties?: string[];
+    certifications?: Array<{
+      name: string;
+      abbreviation: string;
+      issuing_org?: string;
+      year_obtained?: number;
+    }>;
+    years_experience?: number;
+    location?: {
+      city?: string;
+      state?: string;
+      country?: string;
+      timezone?: string;
+    };
+    pricing?: {
+      session_rate?: number;
+      currency?: string;
+      session_duration_minutes?: number;
+    };
+    availability?: {
+      accepting_clients?: boolean;
+      available_days?: string[];
+      available_hours?: {
+        start: string;
+        end: string;
+      };
+    };
+    social_links?: {
+      website?: string;
+      instagram?: string;
+      linkedin?: string;
+    };
+  }): Promise<{ success: boolean; data?: any; error?: any }> {
+    const response = await fetchWithLogging(
+      `${this.baseUrl}/api/coaches/profile`,
+      {
+        method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(profile),
       }
