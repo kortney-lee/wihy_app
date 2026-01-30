@@ -18,6 +18,8 @@ import { dashboardTheme } from '../theme/dashboardTheme';
 import { HamburgerMenu } from '../components/shared/HamburgerMenu';
 import { GradientDashboardHeader } from '../components/shared/GradientDashboardHeader';
 import { AuthContext } from '../context/AuthContext';
+import { coachService } from '../services';
+import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { useDashboardLayout } from '../hooks/useDashboardLayout';
 import SvgIcon from '../components/shared/SvgIcon';
@@ -62,8 +64,28 @@ const CoachDashboardPage: React.FC<CoachDashboardPageProps> = ({ showMenuFromHea
   const { theme } = useTheme();
   const [showHamburgerMenu, setShowHamburgerMenu] = useState(false);
   const [selectedView, setSelectedView] = useState<CoachViewType | null>(null); // Start with hub view
+  const [coachProfile, setCoachProfile] = useState<any>(null);
+  const [loadingProfile, setLoadingProfile] = useState(true);
   const layout = useDashboardLayout();
   const isMobileWeb = isWeb && layout.screenWidth < 768;
+
+  // Check for coach profile on mount
+  React.useEffect(() => {
+    checkCoachProfile();
+  }, []);
+
+  const checkCoachProfile = async () => {
+    try {
+      setLoadingProfile(true);
+      const profile = await coachService.getMyCoachProfile();
+      setCoachProfile(profile);
+    } catch (error) {
+      console.log('No coach profile found:', error);
+      setCoachProfile(null);
+    } finally {
+      setLoadingProfile(false);
+    }
+  };
 
   // Reset view state when user plan changes (dev mode switcher)
   React.useEffect(() => {
@@ -177,7 +199,11 @@ const CoachDashboardPage: React.FC<CoachDashboardPageProps> = ({ showMenuFromHea
         return (
           <CoachProfileSetup
             isDashboardMode={true}
-            onBack={handleBackToDashboardSelection}
+            onBack={() => {
+              // Reload coach profile after setup
+              checkCoachProfile();
+              handleBackToDashboardSelection();
+            }}
           />
         );
       default:
@@ -351,6 +377,68 @@ const CoachDashboardPage: React.FC<CoachDashboardPageProps> = ({ showMenuFromHea
           })()}
         </View>
         
+        {/* Coach Profile Card - Show code if exists, else create profile */}
+        {!loadingProfile && (
+          <View style={[
+            styles.coachProfileCard,
+            {
+              maxWidth: layout.maxContentWidth,
+              alignSelf: 'center',
+              width: '100%',
+              marginHorizontal: layout.horizontalPadding,
+            }
+          ]}>
+            {coachProfile && coachProfile.coach_code ? (
+              // Show coach code if profile exists
+              <>
+                <View style={styles.coachCodeIcon}>
+                  <SvgIcon name="ribbon" size={32} color="#3b82f6" />
+                </View>
+                <Text style={styles.coachCodeTitle}>Your Coach Code</Text>
+                <Text style={styles.coachCodeSubtitle}>Share this with clients to connect</Text>
+                <View style={styles.coachCodeContainer}>
+                  <Text style={styles.coachCodeText}>{coachProfile.coach_code}</Text>
+                </View>
+                <Text style={styles.coachCodeHint}>Tap to copy</Text>
+              </>
+            ) : (
+              // Show setup prompt if no profile
+              <>
+                <View style={styles.coachSetupIcon}>
+                  <SvgIcon name="briefcase" size={32} color="#3b82f6" />
+                </View>
+                <Text style={styles.coachSetupTitle}>Become a WiHY Coach</Text>
+                <Text style={styles.coachSetupSubtitle}>Help your clients achieve their health goals with personalized nutrition and fitness plans</Text>
+                <View style={styles.coachSetupBenefits}>
+                  <View style={styles.benefitRow}>
+                    <SvgIcon name="checkmark-circle" size={20} color="#10b981" />
+                    <Text style={styles.benefitText}>Manage unlimited clients</Text>
+                  </View>
+                  <View style={styles.benefitRow}>
+                    <SvgIcon name="checkmark-circle" size={20} color="#10b981" />
+                    <Text style={styles.benefitText}>Track client progress</Text>
+                  </View>
+                  <View style={styles.benefitRow}>
+                    <SvgIcon name="checkmark-circle" size={20} color="#10b981" />
+                    <Text style={styles.benefitText}>Earn commission on referrals</Text>
+                  </View>
+                  <View style={styles.benefitRow}>
+                    <SvgIcon name="checkmark-circle" size={20} color="#10b981" />
+                    <Text style={styles.benefitText}>Access coach analytics</Text>
+                  </View>
+                </View>
+                <TouchableOpacity
+                  style={styles.startCoachingButton}
+                  onPress={() => setSelectedView('coachProfile')}
+                >
+                  <SvgIcon name="rocket" size={20} color="#ffffff" />
+                  <Text style={styles.startCoachingButtonText}>Start Coaching</Text>
+                </TouchableOpacity>
+              </>
+            )}
+          </View>
+        )}
+        
         {/* Bottom spacing for tab bar */}
         <View style={{ height: 100 }} />
       </ScrollView>
@@ -431,6 +519,110 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: '#10b981',
     borderStyle: 'dashed',
+  },
+  coachProfileCard: {
+    backgroundColor: '#ffffff',
+    borderRadius: dashboardTheme.borderRadius.lg,
+    padding: dashboardTheme.spacing.lg,
+    marginTop: dashboardTheme.spacing.md,
+    marginBottom: dashboardTheme.spacing.md,
+    alignItems: 'center',
+    ...dashboardTheme.shadows.md,
+  },
+  coachCodeIcon: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: '#dbeafe',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+  },
+  coachCodeTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#111827',
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  coachCodeSubtitle: {
+    fontSize: 14,
+    color: '#6b7280',
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  coachCodeContainer: {
+    backgroundColor: '#f3f4f6',
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 12,
+    marginBottom: 8,
+  },
+  coachCodeText: {
+    fontSize: 28,
+    fontWeight: '800',
+    color: '#3b82f6',
+    letterSpacing: 2,
+  },
+  coachCodeHint: {
+    fontSize: 12,
+    color: '#9ca3af',
+    fontStyle: 'italic',
+  },
+  coachSetupIcon: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: '#dbeafe',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+  },
+  coachSetupTitle: {
+    fontSize: 22,
+    fontWeight: '700',
+    color: '#111827',
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  coachSetupSubtitle: {
+    fontSize: 14,
+    color: '#6b7280',
+    marginBottom: 20,
+    textAlign: 'center',
+    lineHeight: 20,
+  },
+  coachSetupBenefits: {
+    width: '100%',
+    marginBottom: 24,
+  },
+  benefitRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+    gap: 8,
+  },
+  benefitText: {
+    fontSize: 14,
+    color: '#374151',
+    flex: 1,
+  },
+  startCoachingButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#3b82f6',
+    paddingHorizontal: 32,
+    paddingVertical: 14,
+    borderRadius: 28,
+    gap: 8,
+    width: '100%',
+    ...dashboardTheme.shadows.sm,
+  },
+  startCoachingButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#ffffff',
   },
 });
 
