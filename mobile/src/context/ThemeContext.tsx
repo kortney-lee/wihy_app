@@ -22,6 +22,8 @@ interface ThemeContextType {
   isDark: boolean;
   toggleTheme: () => void;
   setTheme: (mode: ThemeMode) => void;
+  setUserId: (userId: string | null) => void;
+  clearUserTheme: () => Promise<void>;
 }
 
 const lightTheme: Theme = {
@@ -52,10 +54,12 @@ const darkTheme: Theme = {
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
-const THEME_STORAGE_KEY = '@wihy_theme_mode';
+const THEME_STORAGE_KEY_PREFIX = '@wihy_theme_mode';
+const GLOBAL_THEME_KEY = '@wihy_theme_mode_global';
 
 export const ThemeProvider = ({ children }: { children: ReactNode }) => {
   const [themeMode, setThemeMode] = useState<ThemeMode>('light');
+  const [userId, setUserIdState] = useState<string | null>(null);
 
   useEffect(() => {
     // Load saved theme preference
@@ -71,9 +75,15 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
     return () => subscription.remove();
   }, []);
 
+  // Reload theme when user changes
+  useEffect(() => {
+    loadTheme();
+  }, [userId]);
+
   const loadTheme = async () => {
     try {
-      const savedTheme = await AsyncStorage.getItem(THEME_STORAGE_KEY);
+      const storageKey = userId ? `${THEME_STORAGE_KEY_PREFIX}_${userId}` : GLOBAL_THEME_KEY;
+      const savedTheme = await AsyncStorage.getItem(storageKey);
       if (savedTheme) {
         setThemeMode(savedTheme as ThemeMode);
       } else {
@@ -88,7 +98,8 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
 
   const saveTheme = async (mode: ThemeMode) => {
     try {
-      await AsyncStorage.setItem(THEME_STORAGE_KEY, mode);
+      const storageKey = userId ? `${THEME_STORAGE_KEY_PREFIX}_${userId}` : GLOBAL_THEME_KEY;
+      await AsyncStorage.setItem(storageKey, mode);
     } catch (error) {
       console.error('Error saving theme:', error);
     }
@@ -105,6 +116,24 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
     saveTheme(mode);
   };
 
+  const setUserId = (newUserId: string | null) => {
+    setUserIdState(newUserId);
+  };
+
+  const clearUserTheme = async () => {
+    try {
+      if (userId) {
+        const storageKey = `${THEME_STORAGE_KEY_PREFIX}_${userId}`;
+        await AsyncStorage.removeItem(storageKey);
+      }
+      // Reset to system preference
+      const systemTheme = Appearance.getColorScheme() || 'light';
+      setThemeMode(systemTheme as ThemeMode);
+    } catch (error) {
+      console.error('Error clearing user theme:', error);
+    }
+  };
+
   const theme = themeMode === 'dark' ? darkTheme : lightTheme;
 
   return (
@@ -114,6 +143,8 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
         isDark: themeMode === 'dark',
         toggleTheme,
         setTheme,
+        setUserId,
+        clearUserTheme,
       }}
     >
       {children}

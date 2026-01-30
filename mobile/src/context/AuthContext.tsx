@@ -343,6 +343,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       
       // Clear local storage
       await AsyncStorage.removeItem(STORAGE_KEY);
+      
+      // Clear user-specific theme preference
+      // Note: We can't directly call theme context here, but ThemeUserSync
+      // will handle clearing when user becomes null
+      
       setUser(null);
     } catch (error) {
       console.error('Sign out error:', error);
