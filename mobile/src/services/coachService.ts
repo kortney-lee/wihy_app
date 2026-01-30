@@ -188,6 +188,20 @@ class CoachService {
     this.baseUrl = API_CONFIG.userUrl;
   }
 
+  // ============= SPECIALTIES =============
+
+  /**
+   * Get list of available coach specialties
+   * GET /api/coaches/specialties
+   */
+  async getSpecialties(): Promise<{ success: boolean; data: Array<{ id: string; label: string }>; count: number }> {
+    const response = await fetchWithLogging(
+      `${this.baseUrl}/api/coaches/specialties`,
+      { method: 'GET' }
+    );
+    return response.json();
+  }
+
   // ============= INVITATIONS =============
 
   /**

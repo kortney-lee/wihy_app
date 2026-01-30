@@ -29,7 +29,7 @@ interface CoachProfileData {
   // Step 1: Basic Information
   name: string;
   title: string;
-  specialty: string;
+  specialties: string[]; // Changed from single specialty to array
   
   // Step 2: Background
   bio: string;
@@ -48,14 +48,12 @@ interface CoachProfileData {
   availableHoursEnd: string;
 }
 
-const SPECIALTIES = [
-  'Nutrition',
-  'Fitness',
-  'Wellness',
-  'Mental Health',
-  'Business',
-  'Life Coaching',
-];
+interface Specialty {
+  id: string;
+  label: string;
+}
+
+// SPECIALTIES now fetched from API in component state
 
 const DAYS_OF_WEEK = [
   { key: 'monday', label: 'Mon' },
@@ -84,6 +82,8 @@ export default function CoachProfileSetup({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoadingProfile, setIsLoadingProfile] = useState(true);
   const [hasExistingProfile, setHasExistingProfile] = useState(false);
+  const [specialties, setSpecialties] = useState<Specialty[]>([]);
+  const [loadingSpecialties, setLoadingSpecialties] = useState(true);
   const totalSteps = 3;
   
   // Collapsing header animation
@@ -113,7 +113,7 @@ export default function CoachProfileSetup({
   const [formData, setFormData] = useState<CoachProfileData>({
     name: '',
     title: '',
-    specialty: '',
+    specialties: [], // Changed to array
     bio: '',
     yearsExperience: '',
     credentials: '',
@@ -128,10 +128,34 @@ export default function CoachProfileSetup({
     availableHoursEnd: '5:00 PM',
   });
 
-  // Load existing profile if it exists
+  // Load specialties and existing profile
   useEffect(() => {
+    loadSpecialties();
     loadExistingProfile();
   }, []);
+
+  const loadSpecialties = async () => {
+    try {
+      setLoadingSpecialties(true);
+      const response = await coachService.getSpecialties();
+      if (response.success && response.data) {
+        setSpecialties(response.data);
+      }
+    } catch (error) {
+      console.error('Failed to load specialties:', error);
+      // Fallback to default specialties if API fails
+      setSpecialties([
+        { id: 'nutrition', label: 'Nutrition' },
+        { id: 'fitness', label: 'Fitness' },
+        { id: 'wellness', label: 'Wellness' },
+        { id: 'mental_health', label: 'Mental Health' },
+        { id: 'business', label: 'Business' },
+        { id: 'life_coaching', label: 'Life Coaching' },
+      ]);
+    } finally {
+      setLoadingSpecialties(false);
+    }
+  };
 
   const loadExistingProfile = async () => {
     try {
@@ -141,10 +165,21 @@ export default function CoachProfileSetup({
       if (profile && profile.id) {
         // Profile exists - populate form
         setHasExistingProfile(true);
+        
+        // Convert specialty labels to IDs if needed
+        const specialtyIds = profile.specialties?.map((spec: string) => {
+          // If it's already an ID (lowercase with underscore), use it
+          if (spec.includes('_') || spec === spec.toLowerCase()) {
+            return spec;
+          }
+          // Otherwise, convert label to ID format
+          return spec.toLowerCase().replace(/\s+/g, '_');
+        }) || [];
+        
         setFormData({
           name: profile.name || '',
           title: profile.title || '',
-          specialty: profile.specialties?.[0] || '',
+          specialties: specialtyIds,
           bio: profile.bio || '',
           yearsExperience: profile.years_experience?.toString() || '',
           credentials: profile.certifications
@@ -180,6 +215,15 @@ export default function CoachProfileSetup({
       availableDays: prev.availableDays.includes(day)
         ? prev.availableDays.filter(d => d !== day)
         : [...prev.availableDays, day],
+    }));
+  };
+
+  const toggleSpecialty = (specialtyId: string) => {
+    setFormData(prev => ({
+      ...prev,
+      specialties: prev.specialties.includes(specialtyId)
+        ? prev.specialties.filter(s => s !== specialtyId)
+        : [...prev.specialties, specialtyId],
     }));
   };
 
@@ -250,7 +294,7 @@ export default function CoachProfileSetup({
   const validateStep = (): boolean => {
     switch (currentStep) {
       case 1:
-        return !!(formData.name && formData.title && formData.specialty);
+        return !!(formData.name && formData.title && formData.specialties.length > 0);
       case 2:
         return !!(formData.bio && formData.yearsExperience);
       case 3:
@@ -303,7 +347,7 @@ export default function CoachProfileSetup({
         email: user?.email,
         title: formData.title,
         bio: formData.bio,
-        specialties: [formData.specialty],
+        specialties: formData.specialties, // Now an array of specialty IDs
         certifications,
         years_experience: parseInt(formData.yearsExperience, 10) || 0,
         location: {
@@ -427,28 +471,40 @@ export default function CoachProfileSetup({
       </View>
 
       <View style={styles.formGroup}>
-        <Text style={styles.label}>Specialty (Primary focus) *</Text>
-        <View style={styles.optionsWrap}>
-          {SPECIALTIES.map((specialty) => (
-            <Pressable
-              key={specialty}
-              style={[
-                styles.optionChip,
-                formData.specialty === specialty && styles.optionChipSelected,
-              ]}
-              onPress={() => updateField('specialty', specialty)}
-            >
-              <Text
+        <Text style={styles.label}>Specialties (Select all that apply) *</Text>
+        {loadingSpecialties ? (
+          <View style={styles.specialtiesLoading}>
+            <ActivityIndicator size="small" color="#00BFA6" />
+            <Text style={styles.helpText}>Loading specialties...</Text>
+          </View>
+        ) : (
+          <View style={styles.optionsWrap}>
+            {specialties.map((specialty) => (
+              <Pressable
+                key={specialty.id}
                 style={[
-                  styles.optionText,
-                  formData.specialty === specialty && styles.optionTextSelected,
+                  styles.optionChip,
+                  formData.specialties.includes(specialty.id) && styles.optionChipSelected,
                 ]}
+                onPress={() => toggleSpecialty(specialty.id)}
               >
-                {specialty}
-              </Text>
-            </Pressable>
-          ))}
-        </View>
+                <Text
+                  style={[
+                    styles.optionText,
+                    formData.specialties.includes(specialty.id) && styles.optionTextSelected,
+                  ]}
+                >
+                  {specialty.label}
+                </Text>
+              </Pressable>
+            ))}
+          </View>
+        )}
+        <Text style={styles.helpText}>
+          {formData.specialties.length > 0 
+            ? `${formData.specialties.length} selected` 
+            : 'Select at least one specialty'}
+        </Text>
       </View>
     </View>
   );
@@ -970,6 +1026,12 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: '#1e40af',
     lineHeight: 18,
+  },
+  specialtiesLoading: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    padding: 16,
   },
   footer: {
     flexDirection: 'row',
