@@ -1261,11 +1261,11 @@ const styles = StyleSheet.create({
   },
   metaText: {
     fontSize: 12,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
   },
   savedMealDescription: {
     fontSize: 13,
-    color: '#4b5563',
+    // color: theme.colors.text
     lineHeight: 18,
   },
   // Cuisine Tab Styles
@@ -1293,7 +1293,7 @@ const styles = StyleSheet.create({
   cuisineTabText: {
     fontSize: 13,
     fontWeight: '500',
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
   },
   cuisineTabTextActive: {
     color: '#166534',
@@ -1321,7 +1321,7 @@ const styles = StyleSheet.create({
   cuisineChipLabel: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#374151',
+    // color: theme.colors.text
   },
   cuisineChipLabelSelected: {
     color: '#166534',
@@ -1343,7 +1343,7 @@ const styles = StyleSheet.create({
   selectedCuisinesLabel: {
     fontSize: 12,
     fontWeight: '500',
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
   },
   selectedCuisinesText: {
     fontSize: 12,

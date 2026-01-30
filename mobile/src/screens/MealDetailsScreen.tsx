@@ -799,7 +799,7 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     fontSize: 16,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
     marginTop: 12,
   },
   
@@ -819,7 +819,7 @@ const styles = StyleSheet.create({
   servingsLabel: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
     textAlign: 'center',
     marginBottom: 12,
   },
@@ -846,7 +846,7 @@ const styles = StyleSheet.create({
   servingsValue: {
     fontSize: 32,
     fontWeight: '700',
-    color: '#1f2937',
+    // color: theme.colors.text
   },
   servingsUnit: {
     fontSize: 12,
@@ -875,7 +875,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#1f2937',
+    // color: theme.colors.text
     marginBottom: 4,
   },
   nutritionSubtitle: {
@@ -912,12 +912,12 @@ const styles = StyleSheet.create({
   },
   macroProgressLabel: {
     fontSize: 13,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
   },
   macroProgressPercent: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#1f2937',
+    // color: theme.colors.text
   },
   macroProgressBar: {
     height: 8,
@@ -959,7 +959,7 @@ const styles = StyleSheet.create({
   },
   tagText: {
     fontSize: 13,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
     fontWeight: '600',
   },
   
@@ -987,12 +987,12 @@ const styles = StyleSheet.create({
   timeLabel: {
     flex: 1,
     fontSize: 14,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
   },
   timeValue: {
     fontSize: 14,
     fontWeight: '700',
-    color: '#1f2937',
+    // color: theme.colors.text
   },
   
   // Tabs
@@ -1018,7 +1018,7 @@ const styles = StyleSheet.create({
   tabText: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
   },
   tabTextActive: {
     color: '#fff',
@@ -1045,7 +1045,7 @@ const styles = StyleSheet.create({
   contentTitle: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#1f2937',
+    // color: theme.colors.text
   },
   adjustedBadge: {
     backgroundColor: '#fef3c7',
@@ -1090,7 +1090,7 @@ const styles = StyleSheet.create({
   ingredientText: {
     flex: 1,
     fontSize: 16,
-    color: '#1f2937',
+    // color: theme.colors.text
     lineHeight: 22,
   },
   ingredientAmount: {
@@ -1098,7 +1098,7 @@ const styles = StyleSheet.create({
   },
   ingredientNotes: {
     fontStyle: 'italic',
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
   },
   
   // Instructions
@@ -1127,13 +1127,13 @@ const styles = StyleSheet.create({
   instructionTitle: {
     fontSize: 15,
     fontWeight: '700',
-    color: '#1f2937',
+    // color: theme.colors.text
     marginBottom: 4,
   },
   instructionText: {
     flex: 1,
     fontSize: 16,
-    color: '#1f2937',
+    // color: theme.colors.text
     lineHeight: 24,
   },
   instructionMeta: {
@@ -1144,11 +1144,11 @@ const styles = StyleSheet.create({
   },
   instructionMetaText: {
     fontSize: 13,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
   },
   notesText: {
     fontSize: 16,
-    color: '#4b5563',
+    // color: theme.colors.text
     lineHeight: 24,
   },
   noInstructions: {
@@ -1224,7 +1224,7 @@ const styles = StyleSheet.create({
   storageTitle: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#374151',
+    // color: theme.colors.text
     marginBottom: 12,
   },
   storageItem: {
@@ -1236,7 +1236,7 @@ const styles = StyleSheet.create({
   storageText: {
     flex: 1,
     fontSize: 14,
-    color: '#4b5563',
+    // color: theme.colors.text
     lineHeight: 20,
   },
   
@@ -1398,7 +1398,7 @@ const styles = StyleSheet.create({
     color: '#fff',
   },
   navButtonTextDisabled: {
-    color: '#4b5563',
+    // color: theme.colors.text
   },
   navButtonTextPrimary: {
     fontSize: 16,

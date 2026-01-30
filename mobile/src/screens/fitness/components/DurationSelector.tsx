@@ -69,11 +69,11 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#1f2937',
+    // color: theme.colors.text
   },
   subtitle: {
     fontSize: 12,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
     marginTop: 1,
   },
   optionsRow: {
@@ -96,7 +96,7 @@ const styles = StyleSheet.create({
   optionText: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#374151',
+    // color: theme.colors.text
   },
   optionTextSelected: {
     color: '#ffffff',

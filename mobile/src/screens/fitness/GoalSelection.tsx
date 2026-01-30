@@ -280,6 +280,7 @@ export const GoalSelection: React.FC<GoalSelectionProps> = ({
           selectedCount={selectedBodyParts.length > 0 ? 1 : 0}
           isExpanded={expandedSections.quick}
           onToggle={() => onToggleSection('quick')}
+          theme={theme}
         />
         
         {expandedSections.quick && (
@@ -358,6 +359,7 @@ export const GoalSelection: React.FC<GoalSelectionProps> = ({
           selectedCount={selectedBodyParts.length}
           isExpanded={expandedSections.bodyAreas}
           onToggle={() => onToggleSection('bodyAreas')}
+          theme={theme}
         />
         
         {expandedSections.bodyAreas && (
@@ -419,6 +421,7 @@ export const GoalSelection: React.FC<GoalSelectionProps> = ({
           selectedCount={selectedEquipment.length}
           isExpanded={expandedSections.equipment}
           onToggle={() => onToggleSection('equipment')}
+          theme={theme}
         />
         
         {expandedSections.equipment && (
@@ -562,6 +565,7 @@ export const GoalSelection: React.FC<GoalSelectionProps> = ({
           selectedCount={selectedPerformanceGoals.length}
           isExpanded={expandedSections.performance}
           onToggle={() => onToggleSection('performance')}
+          theme={theme}
         />
         
         {expandedSections.performance && (
@@ -750,7 +754,7 @@ const styles = StyleSheet.create({
   collapsibleTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#1f2937',
+    // color: theme.colors.text
   },
   collapsibleSubtitle: {
     fontSize: 12,
@@ -806,7 +810,7 @@ const styles = StyleSheet.create({
   categoryFilterText: {
     fontSize: 13,
     fontWeight: '500',
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
   },
   categoryFilterTextSelected: {
     color: '#ffffff',
@@ -851,7 +855,7 @@ const styles = StyleSheet.create({
   quickGoalText: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#374151',
+    // color: theme.colors.text
     flex: 1,
   },
   quickGoalTextSelected: {
@@ -885,7 +889,7 @@ const styles = StyleSheet.create({
   },
   clearSelectionText: {
     fontSize: 13,
-    color: '#6B7280',
+    // color: theme.colors.textSecondary
   },
   section: {
     marginBottom: 16,
@@ -893,12 +897,12 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#1f2937',
+    // color: theme.colors.text
     marginBottom: 12,
   },
   sectionSubtitle: {
     fontSize: 13,
-    color: '#6B7280',
+    // color: theme.colors.textSecondary
     marginBottom: 12,
     fontStyle: 'italic',
   },
@@ -930,7 +934,7 @@ const styles = StyleSheet.create({
   bodyPartLabel: {
     fontSize: 13,
     fontWeight: '500',
-    color: '#374151',
+    // color: theme.colors.text
   },
   bodyPartLabelSelected: {
     color: '#166534',
@@ -968,7 +972,7 @@ const styles = StyleSheet.create({
   equipmentLabel: {
     fontSize: 13,
     fontWeight: '500',
-    color: '#374151',
+    // color: theme.colors.text
     flex: 1,
   },
   equipmentLabelSelected: {
@@ -1001,11 +1005,11 @@ const styles = StyleSheet.create({
   durationTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#1f2937',
+    // color: theme.colors.text
   },
   durationSubtitle: {
     fontSize: 13,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
     marginTop: 2,
   },
   durationContainer: {
@@ -1029,7 +1033,7 @@ const styles = StyleSheet.create({
   durationText: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#374151',
+    // color: theme.colors.text
   },
   durationTextSelected: {
     color: '#ffffff',
@@ -1058,14 +1062,14 @@ const styles = StyleSheet.create({
   programDayText: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#374151',
+    // color: theme.colors.text
   },
   programDayTextSelected: {
     color: '#ffffff',
   },
   programDaysHint: {
     fontSize: 12,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
     marginTop: 10,
     fontStyle: 'italic',
   },
@@ -1077,7 +1081,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     fontSize: 14,
-    color: '#1f2937',
+    // color: theme.colors.text
     textAlignVertical: 'top',
     outlineStyle: 'none' as any,
   },
@@ -1120,7 +1124,7 @@ const styles = StyleSheet.create({
   equipmentCategoryTitle: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#374151',
+    // color: theme.colors.text
   },
   equipmentCategoryCount: {
     fontSize: 13,

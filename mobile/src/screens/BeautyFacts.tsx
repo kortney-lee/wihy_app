@@ -522,7 +522,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#1f2937',
+    // color: theme.colors.text,
     marginBottom: 12,
   },
   safetyGrid: {
@@ -603,7 +603,7 @@ const styles = StyleSheet.create({
   },
   ingredientsText: {
     fontSize: 13,
-    color: '#4b5563',
+    // color: theme.colors.text,
     lineHeight: 20,
   },
   analyzeAllButton: {
@@ -629,15 +629,15 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingVertical: 8,
     borderBottomWidth: 1,
-    borderBottomColor: '#374151',
+    // borderBottomColor: theme.colors.text,
   },
   detailLabel: {
     fontSize: 14,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary,
   },
   detailValue: {
     fontSize: 14,
-    color: '#1f2937',
+    // color: theme.colors.text,
     fontWeight: '500',
   },
   assessmentCard: {
@@ -692,7 +692,7 @@ const styles = StyleSheet.create({
     borderColor: '#e5e7eb',
   },
   secondaryActionText: {
-    color: '#374151',
+    // color: theme.colors.text,
     fontSize: 14,
     fontWeight: '500',
   },
@@ -704,6 +704,6 @@ const styles = StyleSheet.create({
   },
   sourceText: {
     fontSize: 12,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary,
   },
 });

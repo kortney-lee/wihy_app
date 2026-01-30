@@ -486,7 +486,7 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 12,
     fontSize: 16,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
   },
   header: {
     paddingTop: 8,
@@ -539,7 +539,7 @@ const styles = StyleSheet.create({
   productName: {
     fontSize: 22,
     fontWeight: '700',
-    color: '#1f2937',
+    // color: theme.colors.text
     textAlign: 'center',
   },
 
@@ -557,7 +557,7 @@ const styles = StyleSheet.create({
   scoreTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#374151',
+    // color: theme.colors.text
   },
   scoreValueContainer: {
     flexDirection: 'row',
@@ -655,7 +655,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#1f2937',
+    // color: theme.colors.text
   },
   flagCard: {
     borderRadius: 12,
@@ -687,13 +687,13 @@ const styles = StyleSheet.create({
   flagClaimLabel: {
     fontSize: 11,
     fontWeight: '600',
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
     marginBottom: 2,
   },
   flagClaimText: {
     fontSize: 12,
     fontStyle: 'italic',
-    color: '#374151',
+    // color: theme.colors.text
   },
   showMoreText: {
     textAlign: 'center',
@@ -732,7 +732,7 @@ const styles = StyleSheet.create({
   claimCategory: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
     textTransform: 'capitalize',
   },
   verifiedBadge: {
@@ -760,11 +760,11 @@ const styles = StyleSheet.create({
   claimText: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#1f2937',
+    // color: theme.colors.text
   },
   claimDescription: {
     fontSize: 12,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
     marginTop: 4,
   },
 
@@ -823,7 +823,7 @@ const styles = StyleSheet.create({
   },
   detectedText: {
     fontSize: 12,
-    color: '#374151',
+    // color: theme.colors.text
     lineHeight: 18,
   },
 
@@ -865,7 +865,7 @@ const styles = StyleSheet.create({
   },
   analyzingText: {
     fontSize: 14,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
   },
   analysisResultCard: {
     backgroundColor: '#fef2f2',
@@ -877,7 +877,7 @@ const styles = StyleSheet.create({
   },
   analysisText: {
     fontSize: 14,
-    color: '#374151',
+    // color: theme.colors.text
     lineHeight: 22,
   },
 
@@ -902,7 +902,7 @@ const styles = StyleSheet.create({
   recommendationText: {
     flex: 1,
     fontSize: 14,
-    color: '#374151',
+    // color: theme.colors.text
     lineHeight: 20,
   },
 
@@ -941,7 +941,7 @@ const styles = StyleSheet.create({
     borderColor: '#e5e7eb',
   },
   secondaryActionText: {
-    color: '#374151',
+    // color: theme.colors.text
     fontSize: 14,
     fontWeight: '500',
   },

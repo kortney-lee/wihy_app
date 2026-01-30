@@ -275,7 +275,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 24,
     fontWeight: '700',
-    color: '#1f2937',
+    // color: theme.colors.text,
   },
   closeButton: {
     width: 32,
@@ -287,7 +287,7 @@ const styles = StyleSheet.create({
   },
   closeButtonText: {
     fontSize: 20,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary,
     fontWeight: '600',
   },
   infoBox: {
@@ -313,7 +313,7 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#1f2937',
+    // color: theme.colors.text,
     marginBottom: 8,
   },
   required: {
@@ -325,7 +325,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 12,
     fontSize: 16,
-    color: '#1f2937',
+    // color: theme.colors.text,
     backgroundColor: '#fff',
     outlineStyle: 'none' as any,
   },
@@ -336,7 +336,7 @@ const styles = StyleSheet.create({
   charCount: {
     textAlign: 'right',
     fontSize: 12,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary,
     marginTop: 4,
   },
   tipsBox: {
@@ -374,7 +374,7 @@ const styles = StyleSheet.create({
   cancelButtonText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#4b5563',
+    // color: theme.colors.text,
   },
   sendButton: {
     backgroundColor: '#3b82f6',

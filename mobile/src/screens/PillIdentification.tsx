@@ -208,19 +208,19 @@ export default function PillIdentification() {
             <View style={styles.characteristicsContainer}>
               {topMatch?.imprint && (
                 <View style={styles.characteristicChip}>
-                  <Ionicons name="text" size={14} color="#6b7280" />
+                  <Ionicons name="text" size={14} color={theme.colors.textSecondary} />
                   <Text style={styles.characteristicText}>Imprint: {topMatch.imprint}</Text>
                 </View>
               )}
               {topMatch?.color && (
                 <View style={styles.characteristicChip}>
-                  <Ionicons name="color-palette" size={14} color="#6b7280" />
+                  <Ionicons name="color-palette" size={14} color={theme.colors.textSecondary} />
                   <Text style={styles.characteristicText}>{topMatch.color}</Text>
                 </View>
               )}
               {topMatch?.shape && (
                 <View style={styles.characteristicChip}>
-                  <Ionicons name={getShapeIcon(topMatch.shape) as any} size={14} color="#6b7280" />
+                  <Ionicons name={getShapeIcon(topMatch.shape) as any} size={14} color={theme.colors.textSecondary} />
                   <Text style={styles.characteristicText}>{topMatch.shape}</Text>
                 </View>
               )}
@@ -353,7 +353,7 @@ export default function PillIdentification() {
               style={[styles.actionButton, styles.secondaryAction]}
               onPress={() => openChatWithContext({ type: 'alternatives' })}
             >
-              <Ionicons name="swap-horizontal" size={18} color="#6b7280" />
+              <Ionicons name="swap-horizontal" size={18} color={theme.colors.textSecondary} />
               <Text style={styles.secondaryActionText}>Compare alternatives</Text>
             </Pressable>
 
@@ -361,7 +361,7 @@ export default function PillIdentification() {
               style={[styles.actionButton, styles.secondaryAction]}
               onPress={() => Alert.alert('Feature Coming Soon', 'Medication tracking feature will be available soon!')}
             >
-              <Ionicons name="calendar" size={18} color="#6b7280" />
+              <Ionicons name="calendar" size={18} color={theme.colors.textSecondary} />
               <Text style={styles.secondaryActionText}>Track medication</Text>
             </Pressable>
           </View>
@@ -386,7 +386,7 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 12,
     fontSize: 16,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
   },
   header: {
     paddingTop: 8,
@@ -470,7 +470,7 @@ const styles = StyleSheet.create({
   pillName: {
     fontSize: 24,
     fontWeight: '800',
-    color: '#1f2937',
+    // color: theme.colors.text
     textAlign: 'center',
   },
   brandName: {
@@ -481,7 +481,7 @@ const styles = StyleSheet.create({
   },
   genericName: {
     fontSize: 14,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
     marginTop: 4,
   },
   characteristicsContainer: {
@@ -502,7 +502,7 @@ const styles = StyleSheet.create({
   },
   characteristicText: {
     fontSize: 13,
-    color: '#4b5563',
+    // color: theme.colors.text
   },
   additionalInfo: {
     width: '100%',
@@ -518,12 +518,12 @@ const styles = StyleSheet.create({
   },
   infoLabel: {
     fontSize: 14,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
   },
   infoValue: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#1f2937',
+    // color: theme.colors.text
   },
 
   // Analysis Section
@@ -541,7 +541,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#1f2937',
+    // color: theme.colors.text
     marginBottom: 12,
   },
   analyzeButton: {
@@ -569,7 +569,7 @@ const styles = StyleSheet.create({
   },
   analyzingText: {
     fontSize: 14,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
   },
   analysisResultCard: {
     backgroundColor: '#fffbeb',
@@ -580,7 +580,7 @@ const styles = StyleSheet.create({
   },
   analysisText: {
     fontSize: 14,
-    color: '#374151',
+    // color: theme.colors.text
     lineHeight: 22,
   },
 
@@ -616,11 +616,11 @@ const styles = StyleSheet.create({
   otherMatchName: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#1f2937',
+    // color: theme.colors.text
   },
   otherMatchBrand: {
     fontSize: 12,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
   },
   otherMatchConfidence: {
     paddingHorizontal: 10,
@@ -693,7 +693,7 @@ const styles = StyleSheet.create({
     borderColor: '#e5e7eb',
   },
   secondaryActionText: {
-    color: '#374151',
+    // color: theme.colors.text
     fontSize: 14,
     fontWeight: '500',
   },

@@ -499,7 +499,7 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 12,
     fontSize: 16,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary,
   },
   collapsibleHeader: {
     backgroundColor: '#6366f1',
@@ -533,7 +533,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#1f2937',
+    // color: theme.colors.text,
     marginBottom: 12,
   },
   sessionTypeCard: {
@@ -579,7 +579,7 @@ const styles = StyleSheet.create({
   sessionTypeTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#1f2937',
+    // color: theme.colors.text,
   },
   sessionTypeTitleActive: {
     color: '#1e40af',
@@ -591,12 +591,12 @@ const styles = StyleSheet.create({
   },
   sessionTypeDuration: {
     fontSize: 14,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary,
     marginBottom: 4,
   },
   sessionTypeDescription: {
     fontSize: 14,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary,
   },
   dateScroller: {
     marginHorizontal: -20,
@@ -619,7 +619,7 @@ const styles = StyleSheet.create({
   dayName: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#6b7280',
+    // color: theme.colors.textSecondary,
     marginBottom: 4,
   },
   dayNameActive: {
@@ -628,7 +628,7 @@ const styles = StyleSheet.create({
   dateText: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#1f2937',
+    // color: theme.colors.text,
   },
   dateTextActive: {
     color: '#fff',
@@ -660,7 +660,7 @@ const styles = StyleSheet.create({
   timeSlotText: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#1f2937',
+    // color: theme.colors.text,
   },
   timeSlotTextActive: {
     color: '#fff',
@@ -688,7 +688,7 @@ const styles = StyleSheet.create({
   paymentTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#1f2937',
+    // color: theme.colors.text,
     marginBottom: 4,
   },
   paymentTitleActive: {
@@ -696,7 +696,7 @@ const styles = StyleSheet.create({
   },
   paymentDescription: {
     fontSize: 14,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary,
   },
   summaryCard: {
     backgroundColor: '#fff',
@@ -711,7 +711,7 @@ const styles = StyleSheet.create({
   summaryTitle: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#1f2937',
+    // color: theme.colors.text,
     marginBottom: 16,
   },
   summaryRow: {
@@ -721,12 +721,12 @@ const styles = StyleSheet.create({
   },
   summaryLabel: {
     fontSize: 14,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary,
   },
   summaryValue: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#1f2937',
+    // color: theme.colors.text,
   },
   summaryTotal: {
     paddingTop: 12,
@@ -737,7 +737,7 @@ const styles = StyleSheet.create({
   summaryTotalLabel: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#1f2937',
+    // color: theme.colors.text,
   },
   summaryTotalValue: {
     fontSize: 20,

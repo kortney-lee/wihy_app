@@ -94,14 +94,14 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: '700',
-    color: '#1f2937',
+    // color: theme.colors.text
     marginTop: 12,
     marginBottom: 8,
     textAlign: 'center',
   },
   subtitle: {
     fontSize: 14,
-    color: '#6B7280',
+    // color: theme.colors.textSecondary
     textAlign: 'center',
     lineHeight: 20,
     paddingHorizontal: 16,
@@ -137,7 +137,7 @@ const styles = StyleSheet.create({
   },
   levelCardDescription: {
     fontSize: 14,
-    color: '#6B7280',
+    // color: theme.colors.textSecondary
     marginBottom: 16,
     lineHeight: 20,
   },
@@ -151,7 +151,7 @@ const styles = StyleSheet.create({
   },
   levelFeatureText: {
     fontSize: 13,
-    color: '#4B5563',
+    // color: theme.colors.text
   },
   note: {
     fontSize: 12,

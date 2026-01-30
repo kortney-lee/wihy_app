@@ -68,7 +68,7 @@ const styles = StyleSheet.create({
   modeText: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
   },
   modeTextSelected: {
     color: '#ffffff',

@@ -431,7 +431,7 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 12,
     fontSize: 16,
-    color: '#6b7280',
+    // color: '#6b7280', // theme.colors.textSecondary
   },
   header: {
     paddingTop: 8,
@@ -514,7 +514,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#1f2937',
+    // color: '#1f2937', // theme.colors.text
     marginBottom: 12,
   },
   detectedFoodsContainer: {
@@ -541,12 +541,12 @@ const styles = StyleSheet.create({
   mealType: {
     marginTop: 12,
     fontSize: 14,
-    color: '#6b7280',
+    // color: '#6b7280', // theme.colors.textSecondary
   },
   analysisSummary: {
     marginTop: 8,
     fontSize: 14,
-    color: '#374151',
+    // color: '#374151', // theme.colors.text
     lineHeight: 20,
   },
 
@@ -566,7 +566,7 @@ const styles = StyleSheet.create({
   scoreLabel: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#6b7280',
+    // color: '#6b7280', // theme.colors.textSecondary
     marginBottom: 4,
   },
   scoreValue: {
@@ -625,7 +625,7 @@ const styles = StyleSheet.create({
   },
   servingText: {
     fontSize: 12,
-    color: '#6b7280',
+    // color: '#6b7280', // theme.colors.textSecondary
     fontWeight: '500',
   },
   calorieCard: {
@@ -658,12 +658,12 @@ const styles = StyleSheet.create({
   macroValue: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#1f2937',
+    // color: '#1f2937', // theme.colors.text
     marginTop: 4,
   },
   macroLabel: {
     fontSize: 12,
-    color: '#6b7280',
+    // color: '#6b7280', // theme.colors.textSecondary
     marginTop: 2,
   },
   expandButton: {
@@ -694,12 +694,12 @@ const styles = StyleSheet.create({
   },
   nutrientName: {
     fontSize: 14,
-    color: '#374151',
+    // color: '#374151', // theme.colors.text
   },
   nutrientValue: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#1f2937',
+    // color: '#1f2937', // theme.colors.text
   },
 
   // Health Analysis
@@ -819,7 +819,7 @@ const styles = StyleSheet.create({
     borderColor: '#e5e7eb',
   },
   secondaryActionText: {
-    color: '#374151',
+    // color: '#374151', // theme.colors.text
     fontSize: 14,
     fontWeight: '500',
   },

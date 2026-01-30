@@ -820,12 +820,12 @@ const styles = StyleSheet.create({
   statValue: {
     fontSize: 24,
     fontWeight: '700',
-    color: '#1f2937',
+    // color: theme.colors.text,
     marginBottom: 4,
   },
   statLabel: {
     fontSize: 12,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary,
     fontWeight: '500',
   },
   settingsContainer: {
@@ -837,7 +837,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#1f2937',
+    // color: theme.colors.text,
     marginBottom: 16,
   },
   sectionContent: {
@@ -878,12 +878,12 @@ const styles = StyleSheet.create({
   settingsTitle: {
     fontSize: 16,
     fontWeight: '500',
-    color: '#1f2937',
+    // color: theme.colors.text,
     marginBottom: 2,
   },
   settingsSubtitle: {
     fontSize: 14,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary,
   },
   settingsItemRight: {
     marginLeft: 16,

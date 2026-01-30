@@ -502,7 +502,7 @@ const styles = StyleSheet.create({
   },
   metricSubLabel: {
     fontSize: 11,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary,
     marginBottom: 8,
   },
   metricBar: {
@@ -527,7 +527,7 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 14,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary,
     marginTop: 4,
   },
   notificationSection: {
@@ -657,7 +657,7 @@ const styles = StyleSheet.create({
   },
   memberMeta: {
     fontSize: 12,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary,
     marginBottom: 8,
   },
   healthScoreBar: {
@@ -674,7 +674,7 @@ const styles = StyleSheet.create({
   },
   healthScoreText: {
     fontSize: 11,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary,
   },
   upgradeBanner: {
     flexDirection: 'row',
@@ -732,7 +732,7 @@ const styles = StyleSheet.create({
   },
   featureSubtitle: {
     fontSize: 11,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary,
     marginTop: 2,
     textAlign: 'center',
   },

@@ -1539,7 +1539,7 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 12,
     fontSize: 16,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
   },
   errorContainer: {
     flex: 1,
@@ -1586,7 +1586,7 @@ const styles = StyleSheet.create({
   tabText: {
     marginLeft: 6,
     fontSize: 14,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
   },
   tabTextActive: {
     color: '#3b82f6',
@@ -1598,7 +1598,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#1f2937',
+    // color: theme.colors.text
     marginTop: 16,
     marginBottom: 8,
   },
@@ -1660,11 +1660,11 @@ const styles = StyleSheet.create({
   statBoxValue: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#1f2937',
+    // color: theme.colors.text
   },
   statBoxLabel: {
     fontSize: 12,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
     marginTop: 4,
   },
   programItem: {
@@ -1686,11 +1686,11 @@ const styles = StyleSheet.create({
   programName: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#1f2937',
+    // color: theme.colors.text
   },
   programMeta: {
     fontSize: 13,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
     marginTop: 2,
   },
   progressBadge: {
@@ -1736,11 +1736,11 @@ const styles = StyleSheet.create({
   activityTitle: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#1f2937',
+    // color: theme.colors.text
   },
   activityMeta: {
     fontSize: 12,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
     marginTop: 2,
   },
   rpeBadge: {
@@ -1752,7 +1752,7 @@ const styles = StyleSheet.create({
   rpeText: {
     fontSize: 11,
     fontWeight: '600',
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
   },
   goalItem: {
     flexDirection: 'row',
@@ -1761,7 +1761,7 @@ const styles = StyleSheet.create({
   },
   goalText: {
     fontSize: 14,
-    color: '#1f2937',
+    // color: theme.colors.text
     marginLeft: 10,
   },
   emptyText: {
@@ -1779,7 +1779,7 @@ const styles = StyleSheet.create({
   programTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#1f2937',
+    // color: theme.colors.text
   },
   goalBadge: {
     backgroundColor: '#eff6ff',
@@ -1805,7 +1805,7 @@ const styles = StyleSheet.create({
   },
   progressText: {
     fontSize: 12,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
     marginTop: 8,
     textAlign: 'center',
   },
@@ -1830,7 +1830,7 @@ const styles = StyleSheet.create({
   },
   chartLabel: {
     fontSize: 11,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
     marginTop: 8,
   },
   sessionItem: {
@@ -1848,12 +1848,12 @@ const styles = StyleSheet.create({
   },
   sessionDay: {
     fontSize: 11,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
   },
   sessionDateNum: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#1f2937',
+    // color: theme.colors.text
   },
   sessionInfo: {
     flex: 1,
@@ -1862,11 +1862,11 @@ const styles = StyleSheet.create({
   sessionName: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#1f2937',
+    // color: theme.colors.text
   },
   sessionMeta: {
     fontSize: 12,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
     marginTop: 2,
   },
   actionRow: {
@@ -1906,12 +1906,12 @@ const styles = StyleSheet.create({
   macroValue: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#1f2937',
+    // color: theme.colors.text
     marginTop: 8,
   },
   macroLabel: {
     fontSize: 12,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
     marginTop: 2,
   },
   macroTarget: {
@@ -1929,12 +1929,12 @@ const styles = StyleSheet.create({
   waterValue: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#1f2937',
+    // color: theme.colors.text
   },
   waterGoal: {
     fontSize: 14,
     fontWeight: '400',
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
   },
   waterBar: {
     height: 8,
@@ -1972,17 +1972,17 @@ const styles = StyleSheet.create({
   mealName: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#1f2937',
+    // color: theme.colors.text
   },
   mealMeta: {
     fontSize: 12,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
     marginTop: 2,
   },
   mealCalories: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
   },
   emptyState: {
     alignItems: 'center',
@@ -1991,7 +1991,7 @@ const styles = StyleSheet.create({
   emptyStateText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
     marginTop: 12,
   },
   emptyStateSubtext: {
@@ -2048,11 +2048,11 @@ const styles = StyleSheet.create({
   healthPermissionButtonText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#1f2937',
+    // color: theme.colors.text
   },
   healthInfoText: {
     fontSize: 14,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
     lineHeight: 20,
   },
   healthHeaderCard: {
@@ -2123,12 +2123,12 @@ const styles = StyleSheet.create({
   healthMetricValue: {
     fontSize: 24,
     fontWeight: '700',
-    color: '#1f2937',
+    // color: theme.colors.text
     marginTop: 8,
   },
   healthMetricLabel: {
     fontSize: 12,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
     marginTop: 4,
   },
   healthVitalsCard: {
@@ -2163,11 +2163,11 @@ const styles = StyleSheet.create({
   healthVitalValue: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#1f2937',
+    // color: theme.colors.text
   },
   healthVitalLabel: {
     fontSize: 13,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
   },
   weeklyStatsRow: {
     flexDirection: 'row',
@@ -2181,11 +2181,11 @@ const styles = StyleSheet.create({
   weeklyStatValue: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#1f2937',
+    // color: theme.colors.text
   },
   weeklyStatLabel: {
     fontSize: 11,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
     marginTop: 4,
   },
   trendsRow: {
@@ -2203,7 +2203,7 @@ const styles = StyleSheet.create({
   },
   trendText: {
     fontSize: 13,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
   },
   refreshHealthButton: {
     flexDirection: 'row',
@@ -2238,7 +2238,7 @@ const styles = StyleSheet.create({
   categoryChipText: {
     fontSize: 13,
     fontWeight: '500',
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
   },
   categoryChipTextActive: {
     color: '#fff',
@@ -2276,7 +2276,7 @@ const styles = StyleSheet.create({
   },
   noteContent: {
     fontSize: 14,
-    color: '#1f2937',
+    // color: theme.colors.text
     lineHeight: 20,
   },
   noteDate: {
@@ -2290,7 +2290,7 @@ const styles = StyleSheet.create({
   },
   loadingStateText: {
     fontSize: 14,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
     marginTop: 12,
   },
   modalOverlay: {
@@ -2319,12 +2319,12 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#1f2937',
+    // color: theme.colors.text
   },
   modalLabel: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#1f2937',
+    // color: theme.colors.text
     marginBottom: 8,
   },
   modalCategoryRow: {
@@ -2346,7 +2346,7 @@ const styles = StyleSheet.create({
   noteInput: {
     flex: 1,
     fontSize: 15,
-    color: '#1f2937',
+    // color: theme.colors.text
     minHeight: 100,
     lineHeight: 22,
     outlineStyle: 'none' as any,

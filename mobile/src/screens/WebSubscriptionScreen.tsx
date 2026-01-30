@@ -586,7 +586,7 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
                     <p className="pricing-yearly-note">${formatPrice(plan.yearlyPrice)}/year</p>
                   )}
                   {plan.note && (
-                    <p className="pricing-note" style={{ fontSize: '12px', color: '#6b7280', fontStyle: 'italic', marginTop: '8px', textAlign: 'center' }}>{plan.note}</p>
+                    <p className="pricing-note" style={{ fontSize: '12px', /*color: theme.colors.textSecondary,*/ fontStyle: 'italic', marginTop: '8px', textAlign: 'center' }}>{plan.note}</p>
                   )}
 
                   <ul className="pricing-features">
@@ -713,12 +713,12 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
                   </div>
                 </div>
                 <div style={{ flex: 1 }}>
-                  <h3 style={{ fontSize: '28px', fontWeight: '700', color: '#1f2937', marginBottom: '16px' }}>1. Scan Anything</h3>
+                  <h3 style={{ fontSize: '28px', fontWeight: '700', /*color: theme.colors.text,*/ marginBottom: '16px' }}>1. Scan Anything</h3>
                   <div style={{ borderLeft: '4px solid #fa5f06', paddingLeft: '20px' }}>
-                    <p style={{ fontSize: '16px', color: '#6b7280', lineHeight: 1.8, marginBottom: '12px' }}>
+                    <p style={{ fontSize: '16px', /*color: theme.colors.textSecondary,*/ lineHeight: 1.8, marginBottom: '12px' }}>
                       Point your camera at any food, barcode, nutrition label, or ingredient list. WIHY instantly recognizes what you're looking at.
                     </p>
-                    <p style={{ fontSize: '16px', color: '#6b7280', lineHeight: 1.8 }}>
+                    <p style={{ fontSize: '16px', /*color: theme.colors.textSecondary,*/ lineHeight: 1.8 }}>
                       Works with barcodes, photos, screenshots, or even handwritten lists.
                     </p>
                   </div>
@@ -775,12 +775,12 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
                   </div>
                 </div>
                 <div style={{ flex: 1 }}>
-                  <h3 style={{ fontSize: '28px', fontWeight: '700', color: '#1f2937', marginBottom: '16px' }}>2. Understand Instantly</h3>
+                  <h3 style={{ fontSize: '28px', fontWeight: '700', /*color: theme.colors.text,*/ marginBottom: '16px' }}>2. Understand Instantly</h3>
                   <div style={{ borderLeft: '4px solid #4cbb17', paddingLeft: '20px' }}>
-                    <p style={{ fontSize: '16px', color: '#6b7280', lineHeight: 1.8, marginBottom: '12px' }}>
+                    <p style={{ fontSize: '16px', /*color: theme.colors.textSecondary,*/ lineHeight: 1.8, marginBottom: '12px' }}>
                       See complete nutrition breakdowns, ingredient processing levels (NOVA groups), additives, and allergens—all explained in plain language.
                     </p>
-                    <p style={{ fontSize: '16px', color: '#6b7280', lineHeight: 1.8 }}>
+                    <p style={{ fontSize: '16px', /*color: theme.colors.textSecondary,*/ lineHeight: 1.8 }}>
                       No guessing. Just facts backed by 35+ million research articles.
                     </p>
                   </div>
@@ -837,12 +837,12 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
                   </div>
                 </div>
                 <div style={{ flex: 1 }}>
-                  <h3 style={{ fontSize: '28px', fontWeight: '700', color: '#1f2937', marginBottom: '16px' }}>3. Ask Anything</h3>
+                  <h3 style={{ fontSize: '28px', fontWeight: '700', /*color: theme.colors.text,*/ marginBottom: '16px' }}>3. Ask Anything</h3>
                   <div style={{ borderLeft: '4px solid #1a73e8', paddingLeft: '20px' }}>
-                    <p style={{ fontSize: '16px', color: '#6b7280', lineHeight: 1.8, marginBottom: '12px' }}>
+                    <p style={{ fontSize: '16px', /*color: theme.colors.textSecondary,*/ lineHeight: 1.8, marginBottom: '12px' }}>
                       Chat with WIHY about what you scanned. "Is this good for weight loss?" "Are these additives safe?" "How does this compare to alternatives?"
                     </p>
-                    <p style={{ fontSize: '16px', color: '#6b7280', lineHeight: 1.8 }}>
+                    <p style={{ fontSize: '16px', /*color: theme.colors.textSecondary,*/ lineHeight: 1.8 }}>
                       Get personalized, evidence-based answers—not generic advice.
                     </p>
                   </div>
@@ -899,12 +899,12 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
                   </div>
                 </div>
                 <div style={{ flex: 1 }}>
-                  <h3 style={{ fontSize: '28px', fontWeight: '700', color: '#1f2937', marginBottom: '16px' }}>4. Track My Progress</h3>
+                  <h3 style={{ fontSize: '28px', fontWeight: '700', /*color: theme.colors.text,*/ marginBottom: '16px' }}>4. Track My Progress</h3>
                   <div style={{ borderLeft: '4px solid #9333ea', paddingLeft: '20px' }}>
-                    <p style={{ fontSize: '16px', color: '#6b7280', lineHeight: 1.8, marginBottom: '12px' }}>
+                    <p style={{ fontSize: '16px', /*color: theme.colors.textSecondary,*/ lineHeight: 1.8, marginBottom: '12px' }}>
                       See your health patterns over time. Track nutrition trends, monitor fitness progress, and visualize how your habits are impacting your health goals.
                     </p>
-                    <p style={{ fontSize: '16px', color: '#6b7280', lineHeight: 1.8, marginBottom: '12px' }}>
+                    <p style={{ fontSize: '16px', /*color: theme.colors.textSecondary,*/ lineHeight: 1.8, marginBottom: '12px' }}>
                       Your data works for you—revealing insights and predicting where you're heading.
                     </p>
                     <p style={{ fontSize: '14px', color: '#9333ea', fontWeight: '600', lineHeight: 1.8 }}>
@@ -996,15 +996,15 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
             <div style={{ display: 'flex', justifyContent: 'center', gap: '32px', flexWrap: 'wrap', marginBottom: '16px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <SvgIcon name="shield-checkmark" size={20} color={colors.primary} />
-                <span style={{ fontSize: '14px', color: '#6b7280' }}>Secure Payments</span>
+                <span style={{ fontSize: '14px', /*color: theme.colors.textSecondary*/ }}>Secure Payments</span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <SvgIcon name="refresh" size={20} color={colors.primary} />
-                <span style={{ fontSize: '14px', color: '#6b7280' }}>Cancel Anytime</span>
+                <span style={{ fontSize: '14px', /*color: theme.colors.textSecondary*/ }}>Cancel Anytime</span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <SvgIcon name="card" size={20} color={colors.primary} />
-                <span style={{ fontSize: '14px', color: '#6b7280' }}>30-Day Guarantee</span>
+                <span style={{ fontSize: '14px', /*color: theme.colors.textSecondary*/ }}>30-Day Guarantee</span>
               </div>
             </div>
             <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '6px' }}>
@@ -1148,7 +1148,7 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
               )}
             </View>
             {plan.note && (
-              <Text style={{ fontSize: 12, color: '#6b7280', fontStyle: 'italic', textAlign: 'center', marginBottom: 8 }}>{plan.note}</Text>
+              <Text style={{ fontSize: 12, /*color: theme.colors.textSecondary,*/ fontStyle: 'italic', textAlign: 'center', marginBottom: 8 }}>{plan.note}</Text>
             )}
 
             <View style={styles.featuresList}>
@@ -1178,10 +1178,10 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
 
         {/* How WiHY Compares - Native */}
         <View style={{ paddingHorizontal: 16, marginTop: 8 }}>
-          <Text style={{ fontSize: 18, fontWeight: '800', color: '#1f2937', marginBottom: 8 }}>
+          <Text style={{ fontSize: 18, fontWeight: '800', /*color: theme.colors.text,*/ marginBottom: 8 }}>
             How WiHY Compares
           </Text>
-          <Text style={{ fontSize: 13, color: '#6b7280', marginBottom: 12 }}>
+          <Text style={{ fontSize: 13, /*color: theme.colors.textSecondary,*/ marginBottom: 12 }}>
             {COMPARISON_DISCLAIMER}
           </Text>
 
@@ -1202,12 +1202,12 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
               </View>
 
               <View style={{ borderTopWidth: 1, borderTopColor: '#f1f5f9', paddingTop: 10 }}>
-                <Text style={{ fontSize: 11, fontWeight: '800', color: '#6b7280', marginBottom: 4 }}>
+                <Text style={{ fontSize: 11, fontWeight: '800', /*color: theme.colors.textSecondary,*/ marginBottom: 4 }}>
                   Their Stated Focus
                 </Text>
                 <Text style={{ fontSize: 14, color: '#000000', marginBottom: 10, lineHeight: 20 }}>{item.statedFocus}</Text>
 
-                <Text style={{ fontSize: 11, fontWeight: '800', color: '#6b7280', marginBottom: 4 }}>
+                <Text style={{ fontSize: 11, fontWeight: '800', /*color: theme.colors.textSecondary,*/ marginBottom: 4 }}>
                   Scope Notes
                 </Text>
                 <Text style={{ fontSize: 14, color: '#000000', marginBottom: 12, lineHeight: 20 }}>{item.scopeNotes}</Text>
@@ -1221,7 +1221,7 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
                     padding: 14,
                   }}
                 >
-                  <Text style={{ fontSize: 13, fontWeight: '800', color: '#1f2937', marginBottom: 8 }}>
+                  <Text style={{ fontSize: 13, fontWeight: '800', /*color: theme.colors.text,*/ marginBottom: 8 }}>
                     WiHY Delivers
                   </Text>
                   <Text style={{ fontSize: 15, color: '#000000', lineHeight: 22, fontWeight: '500' }}>{item.wihyApproach}</Text>
@@ -1294,7 +1294,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 17,
     fontWeight: '600',
-    color: '#1f2937',
+    // color: theme.colors.text,
   },
   closeButton: {
     width: 40,
@@ -1326,13 +1326,13 @@ const styles = StyleSheet.create({
   heroTitle: {
     fontSize: 24,
     fontWeight: '800',
-    color: '#1f2937',
+    // color: theme.colors.text,
     textAlign: 'center',
     marginBottom: 8,
   },
   heroSubtitle: {
     fontSize: 16,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary,
     textAlign: 'center',
   },
   toggleContainer: {
@@ -1359,10 +1359,10 @@ const styles = StyleSheet.create({
   toggleText: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#6b7280',
+    // color: theme.colors.textSecondary,
   },
   toggleTextActive: {
-    color: '#1f2937',
+    // color: theme.colors.text,
   },
   saveBadge: {
     backgroundColor: '#dcfce7',
@@ -1415,13 +1415,13 @@ const styles = StyleSheet.create({
   planCardName: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#1f2937',
+    // color: theme.colors.text,
     textAlign: 'center',
     marginBottom: 4,
   },
   planCardTagline: {
     fontSize: 13,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary,
     textAlign: 'center',
     marginBottom: 16,
   },
@@ -1434,11 +1434,11 @@ const styles = StyleSheet.create({
   priceAmount: {
     fontSize: 32,
     fontWeight: '800',
-    color: '#1f2937',
+    // color: theme.colors.text,
   },
   pricePeriod: {
     fontSize: 14,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary,
   },
   featuresList: {
     marginBottom: 16,
@@ -1451,7 +1451,7 @@ const styles = StyleSheet.create({
   },
   featureText: {
     fontSize: 14,
-    color: '#374151',
+    // color: theme.colors.text,
     flex: 1,
   },
   subscribeBtn: {
@@ -1486,11 +1486,11 @@ const styles = StyleSheet.create({
   b2bLinkTitle: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#1f2937',
+    // color: theme.colors.text,
   },
   b2bLinkSubtitle: {
     fontSize: 13,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary,
   },
   footer: {
     padding: 24,

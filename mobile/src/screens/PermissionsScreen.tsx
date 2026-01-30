@@ -144,7 +144,7 @@ export default function PermissionsScreen() {
           style={styles.backButton}
           onPress={() => navigation.goBack()}
         >
-          <Ionicons name="arrow-back" size={24} color="#1f2937" />
+          <Ionicons name="arrow-back" size={24} color={theme.colors.text} />
         </Pressable>
         <Text style={styles.headerTitle}>Permissions</Text>
         <View style={styles.headerSpacer} />
@@ -171,7 +171,7 @@ export default function PermissionsScreen() {
                       ? '#10b981'
                       : permission.status === 'denied'
                       ? '#ef4444'
-                      : '#6b7280'
+                      : theme.colors.textSecondary
                   }
                 />
               </View>
@@ -252,7 +252,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#1f2937',
+    // color: theme.colors.text
   },
   headerSpacer: {
     width: 40,
@@ -278,13 +278,13 @@ const styles = StyleSheet.create({
   infoTitle: {
     fontSize: 20,
     fontWeight: '600',
-    color: '#1f2937',
+    // color: theme.colors.text
     marginTop: 16,
     marginBottom: 8,
   },
   infoText: {
     fontSize: 14,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
     textAlign: 'center',
     lineHeight: 20,
   },
@@ -318,12 +318,12 @@ const styles = StyleSheet.create({
   permissionTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#1f2937',
+    // color: theme.colors.text
     marginBottom: 4,
   },
   permissionDescription: {
     fontSize: 14,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
     lineHeight: 18,
   },
   permissionButton: {

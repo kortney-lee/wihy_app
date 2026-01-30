@@ -746,7 +746,7 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     fontSize: 14,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary,
   },
   emptyContainer: {
     padding: 40,
@@ -756,11 +756,11 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#374151',
+    // color: theme.colors.text,
   },
   emptySubtext: {
     fontSize: 14,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary,
     textAlign: 'center',
   },
   templateCard: {
@@ -784,7 +784,7 @@ const styles = StyleSheet.create({
   },
   templateDescription: {
     fontSize: 14,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary,
   },
   templateMeta: {
     flexDirection: 'row',
@@ -874,7 +874,7 @@ const styles = StyleSheet.create({
   libraryFilterTagText: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#4b5563',
+    // color: theme.colors.text,
   },
   libraryFilterTagTextActive: {
     color: '#ffffff',
@@ -889,7 +889,7 @@ const styles = StyleSheet.create({
   libraryCount: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#6b7280',
+    // color: theme.colors.textSecondary,
   },
   addMealButton: {
     flexDirection: 'row',
@@ -913,7 +913,7 @@ const styles = StyleSheet.create({
   },
   libraryLoadingText: {
     fontSize: 14,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary,
   },
   libraryEmptyState: {
     flex: 1,
@@ -925,11 +925,11 @@ const styles = StyleSheet.create({
   libraryEmptyTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#374151',
+    // color: theme.colors.text,
   },
   libraryEmptySubtitle: {
     fontSize: 14,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary,
     textAlign: 'center',
   },
   mealsList: {
@@ -972,7 +972,7 @@ const styles = StyleSheet.create({
   },
   mealCardMeta: {
     fontSize: 13,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary,
   },
   mealCardNutrition: {
     flexDirection: 'row',
@@ -992,7 +992,7 @@ const styles = StyleSheet.create({
   },
   nutritionLabel: {
     fontSize: 12,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary,
     marginTop: 2,
   },
   mealCardTags: {
@@ -1009,7 +1009,7 @@ const styles = StyleSheet.create({
   },
   mealTagText: {
     fontSize: 12,
-    color: '#4b5563',
+    // color: theme.colors.text,
   },
   mealCardActions: {
     flexDirection: 'row',
@@ -1032,7 +1032,7 @@ const styles = StyleSheet.create({
   },
   logButtonText: {
     fontSize: 13,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary,
   },
   instacartButton: {
     flexDirection: 'row',
@@ -1058,6 +1058,6 @@ const styles = StyleSheet.create({
   },
   loadMoreText: {
     fontSize: 14,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary,
   },
 });

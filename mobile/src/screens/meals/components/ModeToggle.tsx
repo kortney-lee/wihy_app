@@ -93,7 +93,7 @@ const styles = StyleSheet.create({
   modeLabel: {
     fontSize: 14,
     fontWeight: '700',
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
   },
   modeLabelSelected: {
     color: '#ffffff',

@@ -86,7 +86,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#374151',
+    // color: theme.colors.text
   },
   countBadge: {
     fontSize: 12,
@@ -114,7 +114,7 @@ const styles = StyleSheet.create({
   optionLabel: {
     fontSize: 12,
     fontWeight: '500',
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
   },
   optionLabelSelected: {
     color: '#166534',

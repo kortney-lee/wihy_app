@@ -199,12 +199,12 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     fontSize: 14,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
   },
   title: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#374151',
+    // color: theme.colors.text
     marginBottom: 10,
   },
   searchContainer: {
@@ -234,7 +234,7 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     fontSize: 14,
-    color: '#374151',
+    // color: theme.colors.text
     paddingVertical: 0,
     outlineStyle: 'none' as any,
   },
@@ -282,7 +282,7 @@ const styles = StyleSheet.create({
   chipText: {
     fontSize: 13,
     fontWeight: '500',
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
   },
   chipTextSelected: {
     color: '#166534',

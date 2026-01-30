@@ -1302,7 +1302,7 @@ const styles = StyleSheet.create({
   modesTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#1f2937',
+    // color: theme.colors.text,
     marginBottom: 16,
   },
   modesList: {
@@ -1331,11 +1331,11 @@ const styles = StyleSheet.create({
   modeTitle: {
     fontSize: 12,
     fontWeight: '500',
-    color: '#6b7280',
+    // color: theme.colors.textSecondary,
     textAlign: 'center',
   },
   modeTitleSelected: {
-    color: '#1f2937',
+    // color: theme.colors.text,
   },
   actionContainer: {
     flexDirection: 'row',
@@ -1383,7 +1383,7 @@ const styles = StyleSheet.create({
   autoScanText: {
     marginTop: 4,
     fontSize: 12,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary,
     fontWeight: '500',
   },
   historyButton: {
@@ -1463,7 +1463,7 @@ const styles = StyleSheet.create({
   },
   processingSubtitle: {
     fontSize: 14,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary,
     marginTop: 8,
     textAlign: 'center',
   },

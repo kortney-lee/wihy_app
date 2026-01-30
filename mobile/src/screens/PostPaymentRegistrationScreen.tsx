@@ -210,10 +210,10 @@ export const PostPaymentRegistrationScreen: React.FC<Props> = ({ navigation, rou
             }}>
               <Ionicons name="checkmark-circle" size={48} color={SUCCESS_COLOR} />
             </div>
-            <h1 style={{ fontSize: 28, fontWeight: 700, color: '#1f2937', margin: '0 0 12px' }}>
+            <h1 style={{ fontSize: 28, fontWeight: 700, color: theme.colors.text, margin: '0 0 12px' }}>
               Welcome to WIHY!
             </h1>
-            <p style={{ fontSize: 16, color: '#6b7280', margin: '0 0 24px' }}>
+            <p style={{ fontSize: 16, color: theme.colors.textSecondary, margin: '0 0 24px' }}>
               Your account has been created and your subscription is active.
             </p>
             <p style={{ fontSize: 14, color: '#9ca3af', margin: 0 }}>
@@ -286,10 +286,10 @@ export const PostPaymentRegistrationScreen: React.FC<Props> = ({ navigation, rou
             }}>
               <Ionicons name="checkmark-circle" size={36} color={SUCCESS_COLOR} />
             </div>
-            <h1 style={{ fontSize: 26, fontWeight: 700, color: '#1f2937', margin: '0 0 8px' }}>
+            <h1 style={{ fontSize: 26, fontWeight: 700, color: theme.colors.text, margin: '0 0 8px' }}>
               Payment Successful!
             </h1>
-            <p style={{ fontSize: 16, color: '#6b7280', margin: '0 0 4px' }}>
+            <p style={{ fontSize: 16, color: theme.colors.textSecondary, margin: '0 0 4px' }}>
               Create your password to complete setup
             </p>
             <p style={{ fontSize: 14, color: colors.primary, fontWeight: 600, margin: 0 }}>
@@ -303,7 +303,7 @@ export const PostPaymentRegistrationScreen: React.FC<Props> = ({ navigation, rou
               display: 'block',
               fontSize: 14,
               fontWeight: 600,
-              color: '#374151',
+              color: theme.colors.text,
               marginBottom: 8,
             }}>
               Create Password
@@ -353,7 +353,7 @@ export const PostPaymentRegistrationScreen: React.FC<Props> = ({ navigation, rou
               display: 'block',
               fontSize: 14,
               fontWeight: 600,
-              color: '#374151',
+              color: theme.colors.text,
               marginBottom: 8,
             }}>
               Confirm Password
@@ -408,7 +408,7 @@ export const PostPaymentRegistrationScreen: React.FC<Props> = ({ navigation, rou
             padding: 12,
             marginBottom: 24,
           }}>
-            <p style={{ fontSize: 12, color: '#6b7280', margin: '0 0 8px', fontWeight: 600 }}>
+            <p style={{ fontSize: 12, color: theme.colors.textSecondary, margin: '0 0 8px', fontWeight: 600 }}>
               Password must have:
             </p>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
@@ -605,12 +605,12 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 26,
     fontWeight: '700',
-    color: '#1f2937',
+    // color: theme.colors.text,
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 16,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary,
     marginBottom: 4,
   },
   email: {
@@ -634,7 +634,7 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#374151',
+    // color: theme.colors.text,
     marginBottom: 8,
   },
   inputWrapper: {
@@ -647,7 +647,7 @@ const styles = StyleSheet.create({
     padding: 14,
     paddingRight: 48,
     fontSize: 16,
-    color: '#1f2937',
+    // color: theme.colors.text,
     outlineStyle: 'none' as any,
   },
   eyeButton: {
@@ -695,7 +695,7 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 16,
     fontSize: 16,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary,
   },
   successContainer: {
     flex: 1,
@@ -715,12 +715,12 @@ const styles = StyleSheet.create({
   successTitle: {
     fontSize: 28,
     fontWeight: '700',
-    color: '#1f2937',
+    // color: theme.colors.text,
     marginBottom: 12,
   },
   successText: {
     fontSize: 16,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary,
     textAlign: 'center',
   },
 });
