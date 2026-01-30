@@ -105,42 +105,42 @@ export const DietSelector: React.FC<DietSelectorProps> = ({
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="small" color="#4cbb17" />
-        <Text style={styles.loadingText}>Loading diets...</Text>
+        <Text style={[styles.loadingText, { color: theme.colors.textSecondary }]}>Loading diets...</Text>
       </View>
     );
   }
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>{title}</Text>
+      <Text style={[styles.title, { color: theme.colors.text }]}>{title}</Text>
       
       {showSearch && (
-        <View style={styles.searchContainer}>
-          <Ionicons name="search-outline" size={18} color="#9ca3af" />
+        <View style={[styles.searchContainer, { backgroundColor: theme.colors.card }]}>
+          <Ionicons name="search-outline" size={18} color={theme.colors.textSecondary} />
           <TextInput
-            style={styles.searchInput}
+            style={[styles.searchInput, { color: theme.colors.text }]}
             placeholder="Search diets..."
-            placeholderTextColor="#9ca3af"
+            placeholderTextColor={theme.colors.textSecondary}
             value={searchQuery}
             onChangeText={setSearchQuery}
           />
           {searchQuery.length > 0 && (
             <TouchableOpacity onPress={() => setSearchQuery('')}>
-              <Ionicons name="close-circle" size={18} color="#9ca3af" />
+              <Ionicons name="close-circle" size={18} color={theme.colors.textSecondary} />
             </TouchableOpacity>
           )}
         </View>
       )}
 
       {maxSelection && (
-        <Text style={styles.selectionHint}>
+        <Text style={[styles.selectionHint, { color: theme.colors.textSecondary }]}>
           Select up to {maxSelection} ({selectedDiets.length}/{maxSelection})
         </Text>
       )}
 
       {groupedDiets.map((group) => (
         <View key={group.type} style={styles.groupContainer}>
-          <Text style={styles.groupLabel}>{getGroupLabel(group.type)}</Text>
+          <Text style={[styles.groupLabel, { color: theme.colors.textSecondary }]}>{getGroupLabel(group.type)}</Text>
           <View style={styles.chipGrid}>
             {group.diets.map((diet) => {
               const isSelected = selectedDiets.includes(diet.id);
@@ -151,6 +151,7 @@ export const DietSelector: React.FC<DietSelectorProps> = ({
                   key={diet.id}
                   style={[
                     styles.chip,
+                    !isSelected && !isDisabled && { backgroundColor: theme.colors.card, borderColor: theme.colors.border },
                     isSelected && styles.chipSelected,
                     isDisabled && styles.chipDisabled,
                   ]}
@@ -161,10 +162,11 @@ export const DietSelector: React.FC<DietSelectorProps> = ({
                   <Ionicons
                     name={diet.icon as any}
                     size={16}
-                    color={isSelected ? '#4cbb17' : isDisabled ? '#d1d5db' : '#6b7280'}
+                    color={isSelected ? '#4cbb17' : isDisabled ? '#d1d5db' : theme.colors.textSecondary}
                   />
                   <Text style={[
                     styles.chipText,
+                    !isSelected && !isDisabled && { color: theme.colors.textSecondary },
                     isSelected && styles.chipTextSelected,
                     isDisabled && styles.chipTextDisabled,
                   ]}>
@@ -178,7 +180,7 @@ export const DietSelector: React.FC<DietSelectorProps> = ({
       ))}
 
       {filteredDiets.length === 0 && (
-        <Text style={styles.noResults}>No diets match your search</Text>
+        <Text style={[styles.noResults, { color: theme.colors.textSecondary }]}>No diets match your search</Text>
       )}
     </View>
   );

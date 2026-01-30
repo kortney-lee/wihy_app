@@ -248,6 +248,7 @@ export default function ParentDashboard() {
         key={child.id}
         style={[
           styles.childCard,
+          { backgroundColor: theme.colors.card, borderColor: theme.colors.border },
           isSelected && styles.childCardSelected,
         ]}
         onPress={() => setSelectedChild(isSelected ? null : child)}
@@ -272,7 +273,7 @@ export default function ParentDashboard() {
   const renderProgressCard = (card: ReturnType<typeof getChildProgressCards>[0]) => {
     const statusColor = getStatusColor(card.status);
     return (
-      <View key={card.id} style={styles.progressCard}>
+      <View key={card.id} style={[styles.progressCard, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
         <View style={[styles.progressIcon, { backgroundColor: statusColor + '20' }]}>
           <Ionicons name={card.icon as any} size={24} color={statusColor} />
         </View>
@@ -427,17 +428,17 @@ export default function ParentDashboard() {
             <View style={styles.statsSection}>
               <Text style={styles.sectionTitle}>Family Overview</Text>
               <View style={styles.statsGrid}>
-                <View style={styles.statCard}>
+                <View style={[styles.statCard, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
                   <Ionicons name="restaurant" size={24} color={dashboardColors.orange} />
                   <Text style={styles.statValue}>{familyStats.total_meals_logged_today}</Text>
                   <Text style={styles.statLabel}>Meals Today</Text>
                 </View>
-                <View style={styles.statCard}>
+                <View style={[styles.statCard, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
                   <Ionicons name="fitness" size={24} color={dashboardColors.primary} />
                   <Text style={styles.statValue}>{familyStats.total_workouts_completed_week}</Text>
                   <Text style={styles.statLabel}>Workouts This Week</Text>
                 </View>
-                <View style={styles.statCard}>
+                <View style={[styles.statCard, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
                   <Ionicons name="calendar" size={24} color={dashboardColors.success} />
                   <Text style={styles.statValue}>{familyStats.active_meal_plans}</Text>
                   <Text style={styles.statLabel}>Active Plans</Text>
@@ -454,7 +455,7 @@ export default function ParentDashboard() {
                 {familyMembers.map(renderChildCard)}
               </ScrollView>
             ) : (
-              <View style={styles.noChildrenContainer}>
+              <View style={[styles.noChildrenContainer, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
                 <Ionicons name="person-add-outline" size={32} color="#9ca3af" />
                 <Text style={styles.noChildrenText}>No children added yet</Text>
                 <Text style={styles.noChildrenSubtext}>Add family members in Profile settings</Text>
@@ -481,7 +482,7 @@ export default function ParentDashboard() {
           {recentActivity.length > 0 && (
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>Recent Activity</Text>
-              <View style={styles.activityList}>
+              <View style={[styles.activityList, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
                 {recentActivity.slice(0, 5).map(renderActivityItem)}
               </View>
             </View>
@@ -662,7 +663,6 @@ const styles = StyleSheet.create({
   },
   statCard: {
     flex: 1,
-    backgroundColor: dashboardTheme.colors.surface,
     borderRadius: 16,
     padding: 16,
     alignItems: 'center',
@@ -671,6 +671,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.05,
     shadowRadius: 4,
     elevation: 2,
+    borderWidth: 2,
   },
   statValue: {
     fontSize: 28,
@@ -691,7 +692,6 @@ const styles = StyleSheet.create({
   childCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: dashboardTheme.colors.surface,
     borderRadius: 16,
     padding: 16,
     marginRight: 12,
@@ -744,8 +744,8 @@ const styles = StyleSheet.create({
   noChildrenContainer: {
     alignItems: 'center',
     paddingVertical: 32,
-    backgroundColor: dashboardTheme.colors.surface,
     borderRadius: 16,
+    borderWidth: 2,
   },
   noChildrenText: {
     fontSize: 16,
@@ -763,8 +763,8 @@ const styles = StyleSheet.create({
     paddingVertical: 48,
     marginHorizontal: 16,
     marginTop: 16,
-    backgroundColor: dashboardTheme.colors.surface,
     borderRadius: 16,
+    borderWidth: 2,
   },
   selectChildText: {
     fontSize: 16,
@@ -781,12 +781,12 @@ const styles = StyleSheet.create({
   progressCard: {
     // 2-column layout matching MyProgressDashboard pattern
     width: '48.5%',
-    backgroundColor: dashboardTheme.colors.surface,
     paddingVertical: 20,
     paddingHorizontal: 16,
     borderRadius: dashboardTheme.borderRadius.lg,
     ...dashboardTheme.shadows.md,
     alignItems: 'center',
+    borderWidth: 2,
   },
   progressIcon: {
     width: 56,
@@ -824,9 +824,9 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   activityList: {
-    backgroundColor: dashboardTheme.colors.surface,
     borderRadius: 16,
     overflow: 'hidden',
+    borderWidth: 2,
   },
   activityItem: {
     flexDirection: 'row',

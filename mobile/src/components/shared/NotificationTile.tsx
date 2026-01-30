@@ -163,7 +163,7 @@ export const NotificationTile: React.FC<NotificationTileProps> = ({
 
   return (
     <TouchableOpacity
-      style={[styles.container, { backgroundColor: theme.colors.surface }, style]}
+      style={[styles.container, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }, style]}
       onPress={onPress}
       activeOpacity={0.7}
     >
@@ -251,7 +251,6 @@ export const NotificationTile: React.FC<NotificationTileProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: dashboardTheme.colors.surface,
     borderRadius: dashboardTheme.borderRadius.lg,
     padding: dashboardTheme.spacing.md,
     shadowColor: '#000',
@@ -259,6 +258,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
+    borderWidth: 2,
   },
   header: {
     flexDirection: 'row',

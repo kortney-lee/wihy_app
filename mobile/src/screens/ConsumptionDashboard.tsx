@@ -663,7 +663,7 @@ const ConsumptionDashboard: React.FC<ConsumptionDashboardProps> = ({
 
   const renderMealItem = ({ item }: { item: MealItem }) => (
     <TouchableOpacity
-      style={styles.mealItem}
+      style={[styles.mealItem, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}
       onPress={() => navigateToNutritionFacts({
         name: item.name,
         calories: item.calories,
@@ -712,7 +712,7 @@ const ConsumptionDashboard: React.FC<ConsumptionDashboardProps> = ({
     if (meal.isConfirmed || meal.isSkipped) return null;
     
     return (
-      <View key={meal.id} style={styles.pendingMealCard}>
+      <View key={meal.id} style={[styles.pendingMealCard, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
         <View style={styles.pendingMealHeader}>
           <View style={[
             styles.mealTypeIndicator,
@@ -786,7 +786,7 @@ const ConsumptionDashboard: React.FC<ConsumptionDashboardProps> = ({
   const renderRecipeCard = (recipe: BrowsableRecipe) => (
     <TouchableOpacity
       key={recipe.id}
-      style={styles.recipeCard}
+      style={[styles.recipeCard, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}
       onPress={() => openConfirmModal(recipe)}
     >
       <View style={styles.recipeCardHeader}>
@@ -859,7 +859,7 @@ const ConsumptionDashboard: React.FC<ConsumptionDashboardProps> = ({
         return (
           <View>
             {/* Calorie Summary */}
-            <View style={styles.nutritionSummary}>
+            <View style={[styles.nutritionSummary, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
               {renderCircularProgress(nutritionGoals.calories.current, nutritionGoals.calories.target)}
               <View style={styles.macroBreakdown}>
                 {renderMacroBar('protein', 'Protein')}
@@ -869,7 +869,7 @@ const ConsumptionDashboard: React.FC<ConsumptionDashboardProps> = ({
             </View>
 
             {/* Hydration */}
-            <View style={styles.hydrationSection}>
+            <View style={[styles.hydrationSection, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
               <View style={styles.hydrationHeader}>
                 <Text style={[styles.hydrationTitle, { color: theme.colors.text }]}>Hydration</Text>
                 <TouchableOpacity
@@ -972,6 +972,7 @@ const ConsumptionDashboard: React.FC<ConsumptionDashboardProps> = ({
                   key={filter.key}
                   style={[
                     styles.filterChip,
+                    { backgroundColor: theme.colors.card, borderColor: theme.colors.border },
                     recipeFilter === filter.key && styles.filterChipActive,
                   ]}
                   onPress={() => setRecipeFilter(filter.key as any)}
@@ -1030,7 +1031,7 @@ const ConsumptionDashboard: React.FC<ConsumptionDashboardProps> = ({
                 {shoppingLists.map((list) => (
                   <TouchableOpacity
                     key={list.list_id || list.id || list.name}
-                    style={styles.shoppingListCard}
+                    style={[styles.shoppingListCard, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}
                     onPress={() => {
                       // Navigate to shopping list details
                       console.log('Open shopping list:', list.list_id || list.id);
@@ -1085,7 +1086,7 @@ const ConsumptionDashboard: React.FC<ConsumptionDashboardProps> = ({
       onRequestClose={() => setConfirmModal({ ...confirmModal, visible: false })}
     >
       <View style={styles.modalOverlay}>
-        <View style={styles.modalContent}>
+        <View style={[styles.modalContent, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
           <View style={styles.modalHeader}>
             <Text style={[styles.modalTitle, { color: theme.colors.text }]}>Log This Meal</Text>
             <TouchableOpacity
@@ -1229,7 +1230,7 @@ const ConsumptionDashboard: React.FC<ConsumptionDashboardProps> = ({
       </Animated.View>
 
       {/* Tab Selector - Fixed below header */}
-      <View style={styles.tabContainer}>
+      <View style={[styles.tabContainer, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -1553,11 +1554,11 @@ const styles = StyleSheet.create({
   },
 
   hydrationSection: {
-    backgroundColor: dashboardTheme.colors.surface,
     padding: dashboardTheme.spacing.lg,
     borderRadius: dashboardTheme.borderRadius.lg,
     ...dashboardTheme.shadows.md,
     marginBottom: dashboardTheme.spacing.lg,
+    borderWidth: 2,
   },
 
   hydrationHeader: {
@@ -1618,13 +1619,13 @@ const styles = StyleSheet.create({
   },
 
   mealItem: {
-    backgroundColor: dashboardTheme.colors.surface,
     padding: dashboardTheme.spacing.md,
     borderRadius: dashboardTheme.borderRadius.lg,
     ...dashboardTheme.shadows.md,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    borderWidth: 2,
   },
 
   mealLeft: {
@@ -1732,11 +1733,11 @@ const styles = StyleSheet.create({
   },
 
   pendingMealCard: {
-    backgroundColor: dashboardTheme.colors.surface,
     padding: dashboardTheme.spacing.md,
     borderRadius: dashboardTheme.borderRadius.lg,
     ...dashboardTheme.shadows.md,
     marginBottom: dashboardTheme.spacing.sm,
+    borderWidth: 2,
   },
 
   pendingMealHeader: {
@@ -1878,11 +1879,11 @@ const styles = StyleSheet.create({
   shoppingListCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: dashboardTheme.colors.surface,
     padding: dashboardTheme.spacing.md,
     borderRadius: dashboardTheme.borderRadius.lg,
     marginBottom: dashboardTheme.spacing.sm,
     ...dashboardTheme.shadows.sm,
+    borderWidth: 2,
   },
 
   shoppingListIcon: {
@@ -1949,9 +1950,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: dashboardTheme.spacing.md,
     paddingVertical: dashboardTheme.spacing.sm,
     borderRadius: 20,
-    backgroundColor: dashboardTheme.colors.surface,
     marginRight: dashboardTheme.spacing.sm,
-    borderWidth: 1,
+    borderWidth: 2,
     borderColor: dashboardTheme.colors.border,
   },
 
@@ -1982,11 +1982,11 @@ const styles = StyleSheet.create({
 
   recipeCard: {
     width: '48.5%',            // Percentage-based for 2x2 grid
-    backgroundColor: dashboardTheme.colors.surface,
     paddingVertical: 16,
     paddingHorizontal: 12,
     borderRadius: dashboardTheme.borderRadius.lg,
     ...dashboardTheme.shadows.md,
+    borderWidth: 2,
     // NO minWidth, flex, or marginHorizontal
   },
 
@@ -2091,11 +2091,11 @@ const styles = StyleSheet.create({
   },
 
   modalContent: {
-    backgroundColor: dashboardTheme.colors.surface,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     padding: dashboardTheme.spacing.lg,
     paddingBottom: 40,
+    borderWidth: 2,
   },
 
   modalHeader: {

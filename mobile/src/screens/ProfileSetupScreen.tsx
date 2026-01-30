@@ -388,7 +388,7 @@ export default function ProfileSetupScreen({ isDashboardMode = false, onBack }: 
 
   const renderBasicsStep = () => (
     <View style={styles.stepContent}>
-      <View style={styles.section}>
+      <View style={[styles.section, { backgroundColor: themeContext.colors.card, borderColor: themeContext.colors.border }]}>
         <Text style={styles.sectionTitle}>About You</Text>
         
         <View style={styles.row}>
@@ -453,7 +453,7 @@ export default function ProfileSetupScreen({ isDashboardMode = false, onBack }: 
         </View>
       </View>
 
-      <View style={styles.section}>
+      <View style={[styles.section, { backgroundColor: themeContext.colors.card, borderColor: themeContext.colors.border }]}>
         <Text style={styles.sectionTitle}>Physical Stats (Optional)</Text>
         <Text style={styles.sectionHint}>
           This helps us provide accurate nutrition recommendations
@@ -489,7 +489,7 @@ export default function ProfileSetupScreen({ isDashboardMode = false, onBack }: 
 
   const renderGoalsStep = () => (
     <View style={styles.stepContent}>
-      <View style={styles.section}>
+      <View style={[styles.section, { backgroundColor: themeContext.colors.card, borderColor: themeContext.colors.border }]}>
         <Text style={styles.sectionTitle}>Select Your Goals</Text>
         <Text style={styles.sectionHint}>Choose all that apply</Text>
         
@@ -523,7 +523,7 @@ export default function ProfileSetupScreen({ isDashboardMode = false, onBack }: 
       </View>
 
       {selectedGoals.includes('weight_loss') || selectedGoals.includes('weight_gain') ? (
-        <View style={styles.section}>
+        <View style={[styles.section, { backgroundColor: themeContext.colors.card, borderColor: themeContext.colors.border }]}>
           <Text style={styles.sectionTitle}>Target Details</Text>
           
           <View style={styles.row}>
@@ -573,7 +573,7 @@ export default function ProfileSetupScreen({ isDashboardMode = false, onBack }: 
 
   const renderPreferencesStep = () => (
     <View style={styles.stepContent}>
-      <View style={styles.section}>
+      <View style={[styles.section, { backgroundColor: themeContext.colors.card, borderColor: themeContext.colors.border }]}>
         <Text style={styles.sectionTitle}>Dietary Preference</Text>
         
         <View style={styles.preferencesGrid}>
@@ -608,7 +608,7 @@ export default function ProfileSetupScreen({ isDashboardMode = false, onBack }: 
         </View>
       </View>
 
-      <View style={styles.section}>
+      <View style={[styles.section, { backgroundColor: themeContext.colors.card, borderColor: themeContext.colors.border }]}>
         <Text style={styles.sectionTitle}>Food Allergies</Text>
         <Text style={styles.sectionHint}>Select any that apply</Text>
         
@@ -639,7 +639,7 @@ export default function ProfileSetupScreen({ isDashboardMode = false, onBack }: 
         </View>
       </View>
 
-      <View style={styles.section}>
+      <View style={[styles.section, { backgroundColor: themeContext.colors.card, borderColor: themeContext.colors.border }]}>
         <Text style={styles.sectionTitle}>Other Restrictions</Text>
         <TextInput
           style={[styles.input, styles.textArea]}
@@ -657,7 +657,7 @@ export default function ProfileSetupScreen({ isDashboardMode = false, onBack }: 
 
   const renderFitnessStep = () => (
     <View style={styles.stepContent}>
-      <View style={styles.section}>
+      <View style={[styles.section, { backgroundColor: themeContext.colors.card, borderColor: themeContext.colors.border }]}>
         <Text style={styles.sectionTitle}>Current Fitness Level</Text>
         
         <View style={styles.fitnessOptions}>
@@ -693,7 +693,7 @@ export default function ProfileSetupScreen({ isDashboardMode = false, onBack }: 
         </View>
       </View>
 
-      <View style={styles.section}>
+      <View style={[styles.section, { backgroundColor: themeContext.colors.card, borderColor: themeContext.colors.border }]}>
         <Text style={styles.sectionTitle}>Preferred Activities</Text>
         <Text style={styles.sectionHint}>Select activities you enjoy</Text>
         
@@ -938,11 +938,11 @@ const styles = StyleSheet.create({
     // Content is now padded by scrollContent, so no padding here
   },
   section: {
-    backgroundColor: dashboardTheme.colors.surface,
     borderRadius: dashboardTheme.borderRadius.lg,
     padding: dashboardTheme.spacing.lg,
     marginBottom: dashboardTheme.spacing.md,
     ...dashboardTheme.shadows.sm,
+    borderWidth: 2,
   },
   sectionTitle: {
     fontSize: 16,

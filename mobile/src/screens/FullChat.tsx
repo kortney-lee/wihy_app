@@ -993,7 +993,7 @@ export default function FullChat() {
         onRequestClose={() => setShowCompareModal(false)}
       >
         <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
+          <View style={[styles.modalContent, { backgroundColor: theme.colors.background }]}>
             {/* Modal Header */}
             <View style={styles.modalHeader}>
               <Text style={[styles.modalTitle, { color: theme.colors.text }]}>Healthier Alternatives</Text>

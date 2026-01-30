@@ -128,7 +128,7 @@ const StudyCard: React.FC<{
   const { theme } = useTheme();
   return (
     <TouchableOpacity
-      style={[styles.studyCard, { backgroundColor: theme.colors.surface, borderColor: theme.colors.text + '10' }]}
+      style={[styles.studyCard, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}
       onPress={() => onPress(study)}
       activeOpacity={0.7}
     >
@@ -411,25 +411,42 @@ export default function ResearchScreen({ isDashboardMode = false, onResultsViewC
     
     return (
       <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-        <ScrollView
+        {/* Status bar area - solid color */}
+        <View style={{ height: insets.top, backgroundColor: '#8b5cf6' }} />
+        
+        {/* Collapsing Header */}
+        <Animated.View style={[styles.collapsibleHeader, { height: headerHeight }]}>
+          <Animated.View style={[styles.headerContent, { opacity: headerOpacity, transform: [{ scale: titleScale }] }]}>
+            <TouchableOpacity onPress={handleBackToDashboard} style={{ marginBottom: 8 }}>
+              <Ionicons name="arrow-back" size={24} color="#fff" />
+            </TouchableOpacity>
+            <Text style={styles.headerTitle}>Research Results</Text>
+            <Text style={styles.headerSubtitle}>"{activeWorkspace}"</Text>
+            {error && (
+              <View style={styles.headerStats}>
+                <View style={styles.headerStatBadge}>
+                  <Ionicons name="information-circle" size={14} color="#fff" />
+                  <Text style={styles.headerStatText}>{error}</Text>
+                </View>
+              </View>
+            )}
+          </Animated.View>
+        </Animated.View>
+
+        <Animated.ScrollView
           showsVerticalScrollIndicator={false}
+          scrollEventThrottle={16}
+          onScroll={Animated.event(
+            [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+            { useNativeDriver: false }
+          )}
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#8b5cf6" />
           }
         >
-          {/* Results Header - Using dedicated GradientDashboardHeader component */}
-          <GradientDashboardHeader
-            title="Research Results"
-            subtitle={`"${activeWorkspace}"`}
-            gradient="research"
-            showBackButton={!isWeb}
-            onBackPress={handleBackToDashboard}
-            rightAction={isWeb ? { icon: 'arrow-back', onPress: handleBackToDashboard } : undefined}
-            badge={error ? { icon: "information-circle", text: error } : undefined}
-          />
 
           {/* Results Stats */}
-          <View style={[styles.resultsStats, { backgroundColor: theme.colors.surface }]}>
+          <View style={[styles.resultsStats, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
             <View style={styles.statItem}>
               <Text style={[styles.statValue, { color: theme.colors.text }]}>{searchResults.length}</Text>
               <Text style={[styles.statLabel, { color: theme.colors.textSecondary }]}>Studies Found</Text>
@@ -472,12 +489,12 @@ export default function ResearchScreen({ isDashboardMode = false, onResultsViewC
           )}
 
           <View style={{ height: 40 }} />
-        </ScrollView>
+        </Animated.ScrollView>
 
         {/* Study Detail Modal */}
         <Modal visible={showModal} animationType="slide" presentationStyle="pageSheet">
           <SafeAreaView style={[styles.modalContainer, { backgroundColor: theme.colors.background }]} edges={['top']}>
-            <View style={[styles.modalHeader, { backgroundColor: theme.colors.surface, borderBottomColor: theme.colors.text + '10' }]}>
+            <View style={[styles.modalHeader, { backgroundColor: theme.colors.card, borderBottomColor: theme.colors.border }]}>
               <View style={{ width: 40 }} />
               <Text style={[styles.modalHeaderTitle, { color: theme.colors.text }]}>Study Details</Text>
               <CloseButton onPress={() => setShowModal(false)} />
@@ -493,7 +510,7 @@ export default function ResearchScreen({ isDashboardMode = false, onResultsViewC
 
                 <Text style={[styles.modalTitle, { color: theme.colors.text }]}>{selectedStudy.title}</Text>
 
-                <View style={[styles.modalMeta, { backgroundColor: theme.colors.surface }]}>
+                <View style={[styles.modalMeta, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
                   <View style={styles.modalMetaRow}>
                     <Ionicons name="people-outline" size={16} color={theme.colors.textSecondary} />
                     <Text style={[styles.modalAuthors, { color: theme.colors.text }]}>{selectedStudy.authors}</Text>
@@ -510,7 +527,7 @@ export default function ResearchScreen({ isDashboardMode = false, onResultsViewC
 
                 <View style={styles.evidenceSection}>
                   <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Evidence Level</Text>
-                  <View style={[styles.evidenceLevelCard, { backgroundColor: theme.colors.surface }]}>
+                  <View style={[styles.evidenceLevelCard, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
                     <View style={[styles.evidenceLevelDot, { backgroundColor: getEvidenceLevelColor(selectedStudy.evidenceLevel) }]} />
                     <View>
                       <Text style={[styles.evidenceLevelText, { color: theme.colors.text }]}>
@@ -526,7 +543,7 @@ export default function ResearchScreen({ isDashboardMode = false, onResultsViewC
                 {selectedStudy.abstract && (
                   <View style={styles.abstractSection}>
                     <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Abstract</Text>
-                    <Text style={[styles.abstractText, { color: theme.colors.text, backgroundColor: theme.colors.surface }]}>{selectedStudy.abstract}</Text>
+                    <Text style={[styles.abstractText, { color: theme.colors.text, backgroundColor: theme.colors.card }]}>{selectedStudy.abstract}</Text>
                   </View>
                 )}
 
@@ -657,19 +674,19 @@ export default function ResearchScreen({ isDashboardMode = false, onResultsViewC
 
         {/* Quick Actions */}
         <View style={styles.quickActions}>
-          <TouchableOpacity style={[styles.quickAction, { backgroundColor: theme.colors.surface }]}>
+          <TouchableOpacity style={[styles.quickAction, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
             <View style={[styles.quickActionIcon, { backgroundColor: '#ede9fe' }]}>
               <Ionicons name="time" size={20} color="#8b5cf6" />
             </View>
             <Text style={[styles.quickActionText, { color: theme.colors.text }]}>History</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.quickAction, { backgroundColor: theme.colors.surface }]}>
+          <TouchableOpacity style={[styles.quickAction, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
             <View style={[styles.quickActionIcon, { backgroundColor: '#dcfce7' }]}>
               <Ionicons name="bookmark" size={20} color="#22c55e" />
             </View>
             <Text style={[styles.quickActionText, { color: theme.colors.text }]}>Saved</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.quickAction, { backgroundColor: theme.colors.surface }]}>
+          <TouchableOpacity style={[styles.quickAction, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
             <View style={[styles.quickActionIcon, { backgroundColor: '#dbeafe' }]}>
               <Ionicons name="trending-up" size={20} color="#3b82f6" />
             </View>
@@ -681,12 +698,12 @@ export default function ResearchScreen({ isDashboardMode = false, onResultsViewC
         <View style={styles.statsSection}>
           <Text style={[styles.sectionHeader, { color: theme.colors.text }]}>Your Research</Text>
           <View style={styles.statsCards}>
-            <View style={[styles.statsCard, { backgroundColor: theme.colors.surface, borderColor: '#8b5cf6' }]}>
+            <View style={[styles.statsCard, { backgroundColor: theme.colors.card, borderColor: '#8b5cf6' }]}>
               <Ionicons name="document-text" size={24} color="#8b5cf6" />
               <Text style={[styles.statsCardValue, { color: theme.colors.text }]}>{userStats?.new_papers || 0}</Text>
               <Text style={[styles.statsCardLabel, { color: theme.colors.textSecondary }]}>New Papers</Text>
             </View>
-            <View style={[styles.statsCard, { backgroundColor: theme.colors.surface, borderColor: '#22c55e' }]}>
+            <View style={[styles.statsCard, { backgroundColor: theme.colors.card, borderColor: '#22c55e' }]}>
               <Ionicons name="bookmark" size={24} color="#22c55e" />
               <Text style={[styles.statsCardValue, { color: theme.colors.text }]}>{userStats?.saved || 0}</Text>
               <Text style={[styles.statsCardLabel, { color: theme.colors.textSecondary }]}>Saved</Text>
@@ -702,7 +719,7 @@ export default function ResearchScreen({ isDashboardMode = false, onResultsViewC
               {recentSearches.map((search, index) => (
                 <TouchableOpacity
                   key={index}
-                  style={[styles.recentTag, { backgroundColor: theme.colors.surface }]}
+                  style={[styles.recentTag, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}
                   onPress={() => {
                     setQuery(search);
                     handleSearch(search);
@@ -846,7 +863,7 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     fontSize: 16,
-    color: '#1f2937',
+    color: dashboardTheme.colors.text,
     outlineStyle: 'none' as any,
   },
   searchButton: {
@@ -878,7 +895,7 @@ const styles = StyleSheet.create({
     // backgroundColor: '#ffffff', // theme.colors.surface // Use theme.colors.surface
     paddingVertical: 16,
     borderRadius: 12,
-    borderWidth: 1,
+    borderWidth: 2,
     borderColor: '#e5e7eb',
   },
   quickActionIcon: {
@@ -892,7 +909,7 @@ const styles = StyleSheet.create({
   quickActionText: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#374151',
+    color: dashboardTheme.colors.text,
   },
 
   // Stats Section
@@ -903,7 +920,7 @@ const styles = StyleSheet.create({
   sectionHeader: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#1f2937',
+    color: dashboardTheme.colors.text,
     marginBottom: 12,
   },
   statsCards: {
@@ -921,12 +938,12 @@ const styles = StyleSheet.create({
   statsCardValue: {
     fontSize: 24,
     fontWeight: '700',
-    color: '#1f2937',
+    color: dashboardTheme.colors.text,
     marginTop: 8,
   },
   statsCardLabel: {
     fontSize: 13,
-    color: '#6b7280',
+    color: dashboardTheme.colors.textSecondary,
     marginTop: 4,
   },
 
@@ -948,12 +965,12 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 20,
     gap: 6,
-    borderWidth: 1,
+    borderWidth: 2,
     borderColor: '#e5e7eb',
   },
   recentTagText: {
     fontSize: 14,
-    color: '#374151',
+    color: dashboardTheme.colors.text,
   },
 
   // Topics Section
@@ -965,6 +982,7 @@ const styles = StyleSheet.create({
     // backgroundColor: '#ffffff', // theme.colors.surface // Use theme.colors.surface
     borderRadius: 12,
     overflow: 'hidden',
+    borderWidth: 2,
   },
   topicItem: {
     flexDirection: 'row',
@@ -986,7 +1004,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 15,
     fontWeight: '500',
-    color: '#1f2937',
+    color: dashboardTheme.colors.text,
   },
 
   // Results Header
@@ -1038,6 +1056,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
+    borderWidth: 2,
   },
   statItem: {
     flex: 1,
@@ -1080,7 +1099,7 @@ const styles = StyleSheet.create({
     // backgroundColor: '#ffffff', // theme.colors.surface // Applied via theme
     borderRadius: 12,
     padding: 16,
-    borderWidth: 1,
+    borderWidth: 2,
     // borderColor: '#e5e7eb', // Applied via theme
     marginBottom: 12,
   },
@@ -1209,6 +1228,7 @@ const styles = StyleSheet.create({
     padding: 16,
     marginBottom: 16,
     gap: 12,
+    borderWidth: 2,
   },
   modalMetaRow: {
     flexDirection: 'row',
@@ -1245,6 +1265,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 16,
     gap: 12,
+    borderWidth: 2,
   },
   evidenceLevelDot: {
     width: 12,

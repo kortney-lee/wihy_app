@@ -48,25 +48,26 @@ export default function CoachSelection() {
   useDashboardLayout(); // For responsive behavior
   const scrollY = useRef(new Animated.Value(0)).current;
   
-  // Collapsible header animation constants
-  const HEADER_MAX_HEIGHT = 140;
+  // Collapsible header animation constants - CRITICAL: 180px per design patterns
+  const HEADER_MAX_HEIGHT = 180;
   const HEADER_MIN_HEIGHT = 0;
+  const HEADER_SCROLL_DISTANCE = HEADER_MAX_HEIGHT - HEADER_MIN_HEIGHT;
   
   const headerHeight = scrollY.interpolate({
-    inputRange: [0, HEADER_MAX_HEIGHT - HEADER_MIN_HEIGHT],
+    inputRange: [0, HEADER_SCROLL_DISTANCE],
     outputRange: [HEADER_MAX_HEIGHT, HEADER_MIN_HEIGHT],
     extrapolate: 'clamp',
   });
   
   const headerOpacity = scrollY.interpolate({
-    inputRange: [0, (HEADER_MAX_HEIGHT - HEADER_MIN_HEIGHT) / 2],
+    inputRange: [0, HEADER_SCROLL_DISTANCE / 2],
     outputRange: [1, 0],
     extrapolate: 'clamp',
   });
   
   const titleScale = scrollY.interpolate({
-    inputRange: [0, HEADER_MAX_HEIGHT - HEADER_MIN_HEIGHT],
-    outputRange: [1, 0.8],
+    inputRange: [0, HEADER_SCROLL_DISTANCE],
+    outputRange: [1, 0.9],
     extrapolate: 'clamp',
   });
 
@@ -206,7 +207,7 @@ export default function CoachSelection() {
 
   const renderCoachCard = ({ item }: { item: Coach }) => (
     <Pressable 
-      style={styles.coachCard}
+      style={[styles.coachCard, { backgroundColor: theme.colors.surface }]}
       onPress={() => navigation.navigate('CoachDetailPage' as any, { coachId: item.id })}
     >
       {/* Coach Header */}
@@ -217,12 +218,12 @@ export default function CoachSelection() {
           </Text>
         </View>
         <View style={styles.coachHeaderInfo}>
-          <Text style={styles.coachName}>{item.name}</Text>
-          <Text style={styles.coachTitle}>{item.title}</Text>
+          <Text style={[styles.coachName, { color: theme.colors.text }]}>{item.name}</Text>
+          <Text style={[styles.coachTitle, { color: theme.colors.textSecondary }]}>{item.title}</Text>
           <View style={styles.ratingContainer}>
             <SvgIcon name="star" size={16} color="#f59e0b" />
-            <Text style={styles.ratingText}>{item.rating}</Text>
-            <Text style={styles.reviewsText}>({item.reviews} reviews)</Text>
+            <Text style={[styles.ratingText, { color: theme.colors.text }]}>{item.rating}</Text>
+            <Text style={[styles.reviewsText, { color: theme.colors.textSecondary }]}>({item.reviews} reviews)</Text>
           </View>
         </View>
       </View>
@@ -237,34 +238,34 @@ export default function CoachSelection() {
       </View>
 
       {/* Bio */}
-      <Text style={styles.bio} numberOfLines={2}>
+      <Text style={[styles.bio, { color: theme.colors.textSecondary }]} numberOfLines={2}>
         {item.bio}
       </Text>
 
       {/* Coach Details */}
-      <View style={styles.detailsContainer}>
+      <View style={[styles.detailsContainer, { borderTopColor: theme.colors.border }]}>
         <View style={styles.detailItem}>
-          <SvgIcon name="briefcase" size={16} color="#6b7280" />
-          <Text style={styles.detailText}>{item.experience}</Text>
+          <SvgIcon name="briefcase" size={16} color={theme.colors.textSecondary} />
+          <Text style={[styles.detailText, { color: theme.colors.textSecondary }]}>{item.experience}</Text>
         </View>
         <View style={styles.detailItem}>
-          <SvgIcon name="medal" size={16} color="#6b7280" />
-          <Text style={styles.detailText}>{item.certification}</Text>
+          <SvgIcon name="medal" size={16} color={theme.colors.textSecondary} />
+          <Text style={[styles.detailText, { color: theme.colors.textSecondary }]}>{item.certification}</Text>
         </View>
         <View style={styles.detailItem}>
-          <SvgIcon name="location" size={16} color="#6b7280" />
-          <Text style={styles.detailText}>{item.location}</Text>
+          <SvgIcon name="location" size={16} color={theme.colors.textSecondary} />
+          <Text style={[styles.detailText, { color: theme.colors.textSecondary }]}>{item.location}</Text>
         </View>
       </View>
 
       {/* Action Buttons */}
       <View style={styles.actionButtons}>
         <View style={styles.rateInfo}>
-          <Text style={styles.rateLabel}>From</Text>
-          <Text style={styles.rateValue}>{item.rate}</Text>
+          <Text style={[styles.rateLabel, { color: theme.colors.textSecondary }]}>From</Text>
+          <Text style={[styles.rateValue, { color: theme.colors.text }]}>{item.rate}</Text>
         </View>
         <Pressable 
-          style={styles.viewProfileButton}
+          style={[styles.viewProfileButton, { borderColor: '#3b82f6' }]}
           onPress={() => navigation.navigate('CoachDetailPage' as any, { coachId: item.id })}
         >
           <Text style={styles.viewProfileText}>View Profile</Text>
@@ -283,18 +284,18 @@ export default function CoachSelection() {
   const renderHeader = () => (
     <>
       {/* Search Bar */}
-      <View style={styles.searchContainer}>
-        <SvgIcon name="search" size={20} color="#9ca3af" />
+      <View style={[styles.searchContainer, { backgroundColor: theme.colors.surface }]}>
+        <SvgIcon name="search" size={20} color={theme.colors.textSecondary} />
         <TextInput
-          style={styles.searchInput}
+          style={[styles.searchInput, { color: theme.colors.text }]}
           placeholder="Search by name, specialty..."
           value={searchQuery}
           onChangeText={setSearchQuery}
-          placeholderTextColor="#9ca3af"
+          placeholderTextColor={theme.colors.textSecondary}
         />
         {searchQuery.length > 0 && (
           <Pressable onPress={() => setSearchQuery('')}>
-            <SvgIcon name="close-circle" size={20} color="#9ca3af" />
+            <SvgIcon name="close-circle" size={20} color={theme.colors.textSecondary} />
           </Pressable>
         )}
       </View>
@@ -312,6 +313,7 @@ export default function CoachSelection() {
             key={specialty.key}
             style={[
               styles.filterChip,
+              { backgroundColor: theme.colors.surface, borderColor: theme.colors.border },
               selectedSpecialty === specialty.key && [
                 styles.filterChipActive,
                 { 
@@ -325,11 +327,12 @@ export default function CoachSelection() {
             <SvgIcon
               name={specialty.icon as any}
               size={20}
-              color={selectedSpecialty === specialty.key ? getSpecialtyColor(specialty.key) : '#6b7280'}
+              color={selectedSpecialty === specialty.key ? getSpecialtyColor(specialty.key) : theme.colors.textSecondary}
             />
             <Text
               style={[
                 styles.filterChipText,
+                { color: theme.colors.textSecondary },
                 selectedSpecialty === specialty.key && [
                   styles.filterChipTextActive,
                   { color: getSpecialtyColor(specialty.key) },
@@ -343,13 +346,13 @@ export default function CoachSelection() {
       </ScrollView>
 
       {/* Results Header */}
-      <View style={styles.resultsHeader}>
-        <Text style={styles.resultsText}>
+      <View style={[styles.resultsHeader, { backgroundColor: theme.colors.background }]}>
+        <Text style={[styles.resultsText, { color: theme.colors.textSecondary }]}>
           {filteredCoaches.length} Coach{filteredCoaches.length !== 1 ? 'es' : ''} Available
         </Text>
         <Pressable style={styles.sortButton}>
-          <Text style={styles.sortText}>Sort by Rating</Text>
-          <SvgIcon name="chevron-down" size={16} color="#6b7280" />
+          <Text style={[styles.sortText, { color: theme.colors.textSecondary }]}>Sort by Rating</Text>
+          <SvgIcon name="chevron-down" size={16} color={theme.colors.textSecondary} />
         </Pressable>
       </View>
     </>
@@ -357,18 +360,27 @@ export default function CoachSelection() {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-      {/* Collapsing Header */}
+      {/* Status bar area - Always indigo to match header */}
+      <View style={{ height: insets.top, backgroundColor: '#6366f1' }} />
+      
+      {/* Collapsing Header - Brand colors only, NO theme colors per dark mode exclusion rules */}
       <Animated.View style={[styles.collapsibleHeader, { height: headerHeight }]}>
-        <Animated.View style={[styles.headerContent, { opacity: headerOpacity, transform: [{ scale: titleScale }] }]}>
-          <View style={styles.headerTextContainer}>
-            <Text style={styles.headerTitle}>Find Your Coach</Text>
-            <Text style={styles.headerSubtitle}>Connect with expert health coaches</Text>
-            {coaches.length > 0 && (
-              <View style={styles.badge}>
-                <Text style={styles.badgeText}>{coaches.length} coaches available</Text>
-              </View>
-            )}
-          </View>
+        <Animated.View 
+          style={[
+            styles.headerContent,
+            { 
+              opacity: headerOpacity,
+              transform: [{ scale: titleScale }]
+            }
+          ]}
+        >
+          <Text style={styles.headerTitle}>Find Your Coach</Text>
+          <Text style={styles.headerSubtitle}>Connect with expert health coaches</Text>
+          {coaches.length > 0 && (
+            <View style={styles.badge}>
+              <Text style={styles.badgeText}>{coaches.length} coaches available</Text>
+            </View>
+          )}
         </Animated.View>
       </Animated.View>
 
@@ -396,21 +408,21 @@ export default function CoachSelection() {
         {isLoading ? (
           <View style={styles.loadingState}>
             <ActivityIndicator size="large" color={dashboardColors.primary} />
-            <Text style={styles.loadingText}>Finding coaches...</Text>
+            <Text style={[styles.loadingText, { color: theme.colors.textSecondary }]}>Finding coaches...</Text>
           </View>
         ) : error ? (
           <View style={styles.emptyState}>
             <SvgIcon name="alert-circle" size={64} color="#ef4444" />
-            <Text style={styles.emptyStateText}>{error}</Text>
+            <Text style={[styles.emptyStateText, { color: theme.colors.text }]}>{error}</Text>
             <Pressable style={styles.retryButton} onPress={() => loadCoaches()}>
               <Text style={styles.retryButtonText}>Retry</Text>
             </Pressable>
           </View>
         ) : filteredCoaches.length === 0 ? (
           <View style={styles.emptyState}>
-            <SvgIcon name="people" size={64} color="#d1d5db" />
-            <Text style={styles.emptyStateText}>No coaches found</Text>
-            <Text style={styles.emptyStateSubtext}>
+            <SvgIcon name="people" size={64} color={theme.colors.textSecondary} />
+            <Text style={[styles.emptyStateText, { color: theme.colors.text }]}>No coaches found</Text>
+            <Text style={[styles.emptyStateSubtext, { color: theme.colors.textSecondary }]}>
               Try adjusting your search or filters
             </Text>
           </View>
@@ -437,16 +449,16 @@ const styles = StyleSheet.create({
     // backgroundColor: '#e0f2fe', // theme.colors.background
   },
   collapsibleHeader: {
-    backgroundColor: '#6366f1',
+    backgroundColor: '#6366f1',  // Brand color - DO NOT theme per dark mode rules
     overflow: 'hidden',
-    justifyContent: 'flex-end',
+    paddingBottom: 20,  // CRITICAL: Prevents color bleeding
   },
   headerContent: {
-    padding: 20,
-    paddingBottom: 16,
-  },
-  headerTextContainer: {
-    alignItems: 'flex-start',
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingTop: 10,  // CRITICAL: Proper spacing from top
   },
   headerTitle: {
     fontSize: 28,
@@ -470,7 +482,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 16,
-    borderWidth: 1,
+    borderWidth: 2,
     borderColor: 'rgba(255, 255, 255, 0.3)',
   },
   badgeText: {
@@ -503,7 +515,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
-    borderWidth: 1,
+    borderWidth: 2,
     borderColor: 'rgba(255, 255, 255, 0.3)',
   },
   headerStatText: {
@@ -521,7 +533,7 @@ const styles = StyleSheet.create({
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    // backgroundColor: '#ffffff', // theme.colors.surface // Use theme.colors.surface
+    // backgroundColor: theme.colors.surface
     margin: 16,
     marginBottom: 12,
     paddingHorizontal: 18,
@@ -529,16 +541,16 @@ const styles = StyleSheet.create({
     borderRadius: 28,
     ...Platform.select({
       ios: {
-        shadowColor: 'rgba(64,60,67,0.35)',
-        shadowOpacity: 0.35,
-        shadowRadius: 6,
-        shadowOffset: { width: 0, height: 3 },
+        shadowColor: 'rgba(64,60,67,0.2)',
+        shadowOpacity: 0.2,
+        shadowRadius: 4,
+        shadowOffset: { width: 0, height: 2 },
       },
       android: {
-        elevation: 5,
+        elevation: 3,
       },
       web: {
-        boxShadow: '0 3px 6px rgba(64,60,67,0.35)',
+        boxShadow: '0 2px 4px rgba(64,60,67,0.2)',
       },
     }),
   },
@@ -546,13 +558,12 @@ const styles = StyleSheet.create({
     flex: 1,
     marginLeft: 8,
     fontSize: 16,
-    color: '#111827',
+    // color: theme.colors.text
     outlineStyle: 'none' as any,
   },
   filtersContainer: {
     maxHeight: 80,
     marginBottom: 4,
-    paddingBottom: 60,
   },
   filtersContent: {
     paddingHorizontal: 16,
@@ -567,9 +578,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 14,
     borderRadius: 24,
-    backgroundColor: '#fff',
-    borderWidth: 1,
-    borderColor: '#e5e7eb',
+    // backgroundColor: theme.colors.surface
+    borderWidth: 2,
+    // borderColor: theme.colors.border
     minHeight: 48,
   },
   filterChipActive: {
@@ -579,7 +590,7 @@ const styles = StyleSheet.create({
   filterChipText: {
     fontSize: 15,
     fontWeight: '500',
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
     lineHeight: 20,
   },
   filterChipTextActive: {
@@ -592,12 +603,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 16,
     paddingVertical: 12,
-    // backgroundColor: '#e0f2fe', // theme.colors.background
+    // backgroundColor: theme.colors.background
   },
   resultsText: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
   },
   sortButton: {
     flexDirection: 'row',
@@ -606,14 +617,14 @@ const styles = StyleSheet.create({
   },
   sortText: {
     fontSize: 14,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
   },
   coachList: {
     paddingHorizontal: 16,
     paddingBottom: 100,
   },
   coachCard: {
-    backgroundColor: '#fff',
+    // backgroundColor: theme.colors.surface
     borderRadius: 16,
     padding: 16,
     marginBottom: 16,
@@ -647,11 +658,11 @@ const styles = StyleSheet.create({
   coachName: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#111827',
+    // color: theme.colors.text
   },
   coachTitle: {
     fontSize: 14,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
     marginTop: 2,
   },
   ratingContainer: {
@@ -662,12 +673,12 @@ const styles = StyleSheet.create({
   ratingText: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#111827',
+    // color: theme.colors.text
     marginLeft: 4,
   },
   reviewsText: {
     fontSize: 14,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
     marginLeft: 4,
   },
   specialtiesContainer: {
@@ -681,7 +692,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 12,
-    borderWidth: 1,
+    borderWidth: 2,
     borderColor: '#bbf7d0',
   },
   specialtyText: {
@@ -691,7 +702,7 @@ const styles = StyleSheet.create({
   },
   bio: {
     fontSize: 14,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
     lineHeight: 20,
     marginBottom: 12,
   },
@@ -702,7 +713,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     paddingVertical: 12,
     borderTopWidth: 1,
-    borderTopColor: '#f3f4f6',
+    // borderTopColor: theme.colors.border
   },
   detailItem: {
     flexDirection: 'row',
@@ -711,7 +722,7 @@ const styles = StyleSheet.create({
   },
   detailText: {
     fontSize: 13,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
   },
   actionButtons: {
     flexDirection: 'row',
@@ -724,19 +735,19 @@ const styles = StyleSheet.create({
   },
   rateLabel: {
     fontSize: 12,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
   },
   rateValue: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#111827',
+    // color: theme.colors.text
   },
   viewProfileButton: {
     paddingHorizontal: 12,
     paddingVertical: 10,
     borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#3b82f6',
+    borderWidth: 2,
+    // borderColor: #3b82f6
     marginRight: 8,
   },
   viewProfileText: {
@@ -766,12 +777,12 @@ const styles = StyleSheet.create({
   emptyStateText: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#6b7280',
+    // color: theme.colors.text
     marginTop: 16,
   },
   emptyStateSubtext: {
     fontSize: 14,
-    color: '#9ca3af',
+    // color: theme.colors.textSecondary
     marginTop: 8,
   },
   loadingState: {
@@ -781,7 +792,7 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     fontSize: 16,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
     marginTop: 16,
   },
   retryButton: {

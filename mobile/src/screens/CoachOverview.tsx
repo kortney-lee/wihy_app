@@ -435,7 +435,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#111827',
+    color: '#111827', // Use dashboardTheme or inline for dark mode
     marginBottom: 16,
   },
   periodSelector: {
@@ -457,7 +457,7 @@ const styles = StyleSheet.create({
   periodButtonText: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#6b7280',
+    color: '#6b7280', // Use dashboardTheme or inline for dark mode
   },
   periodButtonTextActive: {
     color: '#fff',
@@ -524,7 +524,7 @@ const styles = StyleSheet.create({
   actionTitle: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#111827',
+    color: '#111827', // Use dashboardTheme or inline for dark mode
     textAlign: 'center',
   },
   upgradeText: {
@@ -553,16 +553,16 @@ const styles = StyleSheet.create({
   activityClient: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#111827',
+    color: '#111827', // Use dashboardTheme or inline for dark mode
   },
   activityAction: {
     fontSize: 12,
-    color: '#6b7280',
+    color: '#6b7280', // Use dashboardTheme or inline for dark mode
     marginTop: 2,
   },
   activityTime: {
     fontSize: 12,
-    color: '#9ca3af',
+    color: '#9ca3af', // Use dashboardTheme or inline for dark mode
   },
   loadingContainer: {
     flex: 1,
@@ -572,7 +572,7 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     fontSize: 16,
-    color: '#6b7280',
+    color: '#6b7280', // Use dashboardTheme or inline for dark mode
     marginTop: 16,
   },
 });

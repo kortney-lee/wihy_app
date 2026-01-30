@@ -90,14 +90,14 @@ export const EquipmentSelector: React.FC<EquipmentSelectorProps> = ({
   if (variant === 'gate' && onGateSelect) {
     return (
       <View style={styles.container}>
-        <Text style={styles.title}>Equipment Access</Text>
+        <Text style={[styles.title, { color: theme.colors.text }]}>Equipment Access</Text>
         <View style={styles.gateRow}>
           {GATE_OPTIONS.map((option) => {
             const isSelected = selectedGate === option.id;
             return (
               <TouchableOpacity
                 key={option.id}
-                style={[styles.gateOption, isSelected && styles.gateOptionSelected]}
+                style={[styles.gateOption, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }, isSelected && styles.gateOptionSelected]}
                 onPress={() => onGateSelect(option.id as 'bodyweight' | 'gym')}
                 activeOpacity={0.7}
               >
@@ -106,10 +106,10 @@ export const EquipmentSelector: React.FC<EquipmentSelectorProps> = ({
                   size={28}
                   color={isSelected ? '#4cbb17' : '#9ca3af'}
                 />
-                <Text style={[styles.gateLabel, isSelected && styles.gateLabelSelected]}>
+                <Text style={[styles.gateLabel, { color: theme.colors.textSecondary }, isSelected && styles.gateLabelSelected]}>
                   {option.label}
                 </Text>
-                <Text style={styles.gateDescription}>{option.description}</Text>
+                <Text style={[styles.gateDescription, { color: theme.colors.textSecondary }]}>{option.description}</Text>
               </TouchableOpacity>
             );
           })}
@@ -118,14 +118,14 @@ export const EquipmentSelector: React.FC<EquipmentSelectorProps> = ({
         {/* Gym Equipment Selection - shown when Gym is selected */}
         {selectedGate === 'gym' && onGymEquipmentChange && (
           <View style={styles.gymPresetsContainer}>
-            <Text style={styles.gymPresetsTitle}>Gym Equipment</Text>
+            <Text style={[styles.gymPresetsTitle, { color: theme.colors.text }]}>Gym Equipment</Text>
             <View style={styles.gymPresetsRow}>
               {GYM_PRESETS.map((preset) => {
                 const isSelected = gymPreset === preset.id;
                 return (
                   <TouchableOpacity
                     key={preset.id}
-                    style={[styles.gymPresetOption, isSelected && styles.gymPresetOptionSelected]}
+                    style={[styles.gymPresetOption, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }, isSelected && styles.gymPresetOptionSelected]}
                     onPress={() => {
                       setGymPreset(preset.id as any);
                       if (preset.id === 'full_gym') {
@@ -213,12 +213,12 @@ export const EquipmentSelector: React.FC<EquipmentSelectorProps> = ({
   // Simple variant with expandable library
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Equipment</Text>
+      <Text style={[styles.title, { color: theme.colors.text }]}>Equipment</Text>
       
       {/* Binary choice: No Equipment / Equipment */}
       <View style={styles.binaryRow}>
         <TouchableOpacity
-          style={[styles.binaryOption, isNoEquipment && !showLibrary && styles.binaryOptionSelected]}
+          style={[styles.binaryOption, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }, isNoEquipment && !showLibrary && styles.binaryOptionSelected]}
           onPress={handleNoEquipment}
           activeOpacity={0.7}
         >
@@ -234,7 +234,8 @@ export const EquipmentSelector: React.FC<EquipmentSelectorProps> = ({
 
         <TouchableOpacity
           style={[
-            styles.binaryOption, 
+            styles.binaryOption,
+            { backgroundColor: theme.colors.card, borderColor: theme.colors.border },
             (hasEquipmentSelected || showLibrary) && styles.binaryOptionSelected
           ]}
           onPress={handleEquipmentClick}
@@ -334,7 +335,6 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 20,
     paddingHorizontal: 12,
-    // backgroundColor: '#f9fafb', // theme.colors.surface // theme.colors.surface // Use theme.colors.surface
     borderRadius: 16,
     borderWidth: 2,
     borderColor: '#e5e7eb',
@@ -371,7 +371,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingVertical: 16,
     paddingHorizontal: 12,
-    // backgroundColor: '#f9fafb', // theme.colors.surface // theme.colors.surface // Use theme.colors.surface
     borderRadius: 12,
     borderWidth: 2,
     borderColor: '#e5e7eb',
@@ -475,7 +474,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingVertical: 12,
     paddingHorizontal: 8,
-    // backgroundColor: '#f9fafb', // theme.colors.surface // theme.colors.surface // Use theme.colors.surface
     borderRadius: 10,
     borderWidth: 2,
     borderColor: '#e5e7eb',

@@ -551,13 +551,13 @@ const OverviewDashboard: React.FC<BaseDashboardProps> = ({ onAnalyze }) => {
 
   const renderHealthSummaryItem = ({ item }: { item: HealthSummaryItem }) => {
     return (
-      <TouchableOpacity key={item.id} style={styles.summaryCard}>
+      <TouchableOpacity key={item.id} style={[styles.summaryCard, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
         <View style={[styles.summaryIcon, { backgroundColor: getStatusColor(item.status) + '20' }]}>
           <Ionicons name={item.icon as any} size={26} color={getStatusColor(item.status)} />
         </View>
-        <Text style={styles.summaryValue}>{item.value}</Text>
-        <Text style={styles.summaryTitle}>{item.title}</Text>
-        <Text style={styles.summaryUnit}>{item.unit}</Text>
+        <Text style={[styles.summaryValue, { color: theme.colors.text }]}>{item.value}</Text>
+        <Text style={[styles.summaryTitle, { color: theme.colors.text }]}>{item.title}</Text>
+        <Text style={[styles.summaryUnit, { color: theme.colors.textSecondary }]}>{item.unit}</Text>
         <View style={styles.trendContainer}>
           <Ionicons
             name={getTrendIcon(item.trend) as any}
@@ -577,14 +577,14 @@ const OverviewDashboard: React.FC<BaseDashboardProps> = ({ onAnalyze }) => {
     
     return (
       <TouchableOpacity
-        style={[styles.actionCard, { width: actionCardWidth as any }]}
+        style={[styles.actionCard, { width: actionCardWidth as any, backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}
         onPress={item.onPress}
       >
         <View style={[styles.actionIcon, { backgroundColor: item.color + '20' }]}>
           <Ionicons name={item.icon as any} size={layout.rfs(28)} color={item.color} />
         </View>
-        <Text style={[styles.actionTitle, { fontSize: layout.rfs(12) }]}>{item.title}</Text>
-        <Text style={[styles.actionSubtitle, { fontSize: layout.rfs(10) }]}>{item.subtitle}</Text>
+        <Text style={[styles.actionTitle, { fontSize: layout.rfs(12), color: theme.colors.text }]}>{item.title}</Text>
+        <Text style={[styles.actionSubtitle, { fontSize: layout.rfs(10), color: theme.colors.textSecondary }]}>{item.subtitle}</Text>
       </TouchableOpacity>
     );
   };
@@ -649,9 +649,9 @@ const OverviewDashboard: React.FC<BaseDashboardProps> = ({ onAnalyze }) => {
                   <ActivityIndicator size="small" color={dashboardColors.primary} />
                 </View>
               ) : recentScans.length === 0 ? (
-                <View style={styles.noScansContainer}>
-                  <Ionicons name="scan-outline" size={32} color="#9ca3af" />
-                  <Text style={styles.noScansText}>No recent scans</Text>
+                <View style={[styles.noScansContainer, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
+                  <Ionicons name="scan-outline" size={32} color={theme.colors.textSecondary} />
+                  <Text style={[styles.noScansText, { color: theme.colors.textSecondary }]}>No recent scans</Text>
                   <TouchableOpacity 
                     style={styles.startScanButton}
                     onPress={navigateToCamera}
@@ -668,7 +668,7 @@ const OverviewDashboard: React.FC<BaseDashboardProps> = ({ onAnalyze }) => {
                   {recentScans.map((scan) => (
                     <TouchableOpacity 
                       key={scan.id} 
-                      style={styles.scanCard}
+                      style={[styles.scanCard, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}
                       onPress={() => navigation.navigate('ScanHistory' as never)}
                     >
                       <View style={[styles.scanTypeIcon, { backgroundColor: getScanTypeColor(scan.scan_type) + '20' }]}>
@@ -678,10 +678,10 @@ const OverviewDashboard: React.FC<BaseDashboardProps> = ({ onAnalyze }) => {
                           color={getScanTypeColor(scan.scan_type)} 
                         />
                       </View>
-                      <Text style={styles.scanTitle} numberOfLines={1}>
+                      <Text style={[styles.scanTitle, { color: theme.colors.text }]} numberOfLines={1}>
                         {scan.product?.name || getScanTypeName(scan.scan_type)}
                       </Text>
-                      <Text style={styles.scanDate}>
+                      <Text style={[styles.scanDate, { color: theme.colors.textSecondary }]}>
                         {formatScanDate(scan.scan_timestamp)}
                       </Text>
                       {scan.health_score !== undefined && (
@@ -699,21 +699,21 @@ const OverviewDashboard: React.FC<BaseDashboardProps> = ({ onAnalyze }) => {
       case 'Insights':
         return (
           <View style={styles.insightsContainer}>
-            <Text style={styles.sectionTitle}>AI Health Insights</Text>
-            <View style={styles.insightCard}>
+            <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>AI Health Insights</Text>
+            <View style={[styles.insightCard, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
               <Ionicons name="bulb" size={24} color={dashboardTheme.colors.warning} />
               <View style={styles.insightContent}>
-                <Text style={styles.insightTitle}>Hydration Goal</Text>
-                <Text style={styles.insightText}>
+                <Text style={[styles.insightTitle, { color: theme.colors.text }]}>Hydration Goal</Text>
+                <Text style={[styles.insightText, { color: theme.colors.textSecondary }]}>
                   You're 0.5L behind your daily water goal. Consider drinking a glass now.
                 </Text>
               </View>
             </View>
-            <View style={styles.insightCard}>
+            <View style={[styles.insightCard, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
               <Ionicons name="moon" size={24} color={dashboardTheme.colors.primary} />
               <View style={styles.insightContent}>
-                <Text style={styles.insightTitle}>Sleep Pattern</Text>
-                <Text style={styles.insightText}>
+                <Text style={[styles.insightTitle, { color: theme.colors.text }]}>Sleep Pattern</Text>
+                <Text style={[styles.insightText, { color: theme.colors.textSecondary }]}>
                   Your sleep duration decreased by 45 minutes this week. Try a consistent bedtime.
                 </Text>
               </View>
@@ -763,7 +763,7 @@ const OverviewDashboard: React.FC<BaseDashboardProps> = ({ onAnalyze }) => {
       </Animated.View>
 
       {/* Tab Selector - Fixed below header */}
-      <View style={styles.tabContainer}>
+      <View style={[styles.tabContainer, { backgroundColor: theme.colors.card, borderBottomColor: theme.colors.border }]}>
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -816,7 +816,7 @@ const OverviewDashboard: React.FC<BaseDashboardProps> = ({ onAnalyze }) => {
         onRequestClose={() => setShowPermissionModal(false)}
       >
         <View style={styles.permissionOverlay}>
-          <View style={styles.permissionModalContainer}>
+          <View style={[styles.permissionModalContainer, { backgroundColor: theme.colors.background }]}>
             <SafeAreaView style={styles.permissionModalSafeArea} edges={['bottom']}>
               {/* Header with Icon and Close Button */}
               <View style={styles.permissionModalHeader}>
@@ -1007,10 +1007,8 @@ const styles = StyleSheet.create({
   },
 
   tabContainer: {
-    backgroundColor: dashboardTheme.colors.surface,
     paddingVertical: dashboardTheme.spacing.sm,
-    borderBottomWidth: 1,
-    borderBottomColor: dashboardTheme.colors.border,
+    borderBottomWidth: 2,
   },
 
   tabScrollContent: {
@@ -1045,7 +1043,8 @@ const styles = StyleSheet.create({
   },
 
   sectionTitle: {
-    ...dashboardTheme.typography.title,
+    fontSize: 18,
+    fontWeight: '600',
     marginBottom: dashboardTheme.spacing.md,
   },
 
@@ -1063,10 +1062,10 @@ const styles = StyleSheet.create({
   summaryCard: {
     // 2-column layout matching MyProgressDashboard pattern
     width: '48.5%',
-    backgroundColor: dashboardTheme.colors.surface,
     paddingVertical: 20,
     paddingHorizontal: 16,
     borderRadius: dashboardTheme.borderRadius.lg,
+    borderWidth: 2,
     ...dashboardTheme.shadows.md,
     alignItems: 'center',
   },
@@ -1088,7 +1087,6 @@ const styles = StyleSheet.create({
   summaryTitle: {
     fontSize: 15,
     fontWeight: '600',
-    color: dashboardTheme.colors.text,
     marginBottom: 4,
     textAlign: 'center',
   },
@@ -1103,12 +1101,10 @@ const styles = StyleSheet.create({
   summaryValue: {
     fontSize: 28,
     fontWeight: '700',
-    color: dashboardTheme.colors.text,
   },
 
   summaryUnit: {
     fontSize: 12,
-    color: dashboardTheme.colors.textSecondary,
     marginLeft: 2,
     marginBottom: 12,
   },
@@ -1125,9 +1121,9 @@ const styles = StyleSheet.create({
   },
 
   actionCard: {
-    backgroundColor: dashboardTheme.colors.surface,
     padding: dashboardTheme.spacing.sm,
     borderRadius: dashboardTheme.borderRadius.md,
+    borderWidth: 2,
     ...dashboardTheme.shadows.sm,
     alignItems: 'center',
     width: '23%',
@@ -1147,7 +1143,6 @@ const styles = StyleSheet.create({
   actionTitle: {
     ...dashboardTheme.typography.caption,
     fontWeight: '600',
-    color: dashboardTheme.colors.text,
     marginBottom: dashboardTheme.spacing.xs,
     textAlign: 'center',
     fontSize: 12,
@@ -1155,7 +1150,6 @@ const styles = StyleSheet.create({
 
   actionSubtitle: {
     ...dashboardTheme.typography.caption,
-    color: dashboardTheme.colors.textSecondary,
     textAlign: 'center',
     fontSize: 10,
     lineHeight: 12,
@@ -1166,9 +1160,9 @@ const styles = StyleSheet.create({
   },
 
   insightCard: {
-    backgroundColor: dashboardTheme.colors.surface,
     padding: dashboardTheme.spacing.md,
     borderRadius: dashboardTheme.borderRadius.lg,
+    borderWidth: 2,
     ...dashboardTheme.shadows.md,
     flexDirection: 'row',
     alignItems: 'flex-start',
@@ -1180,15 +1174,13 @@ const styles = StyleSheet.create({
   },
 
   insightTitle: {
-    ...dashboardTheme.typography.body,
+    fontSize: 16,
     fontWeight: '600',
-    color: dashboardTheme.colors.text,
     marginBottom: dashboardTheme.spacing.xs,
   },
 
   insightText: {
-    ...dashboardTheme.typography.caption,
-    color: dashboardTheme.colors.textSecondary,
+    fontSize: 14,
     lineHeight: 20,
   },
 
@@ -1442,16 +1434,15 @@ const styles = StyleSheet.create({
   },
 
   noScansContainer: {
-    backgroundColor: dashboardTheme.colors.surface,
     borderRadius: dashboardTheme.borderRadius.lg,
+    borderWidth: 2,
     padding: dashboardTheme.spacing.xl,
     alignItems: 'center',
     ...dashboardTheme.shadows.sm,
   },
 
   noScansText: {
-    ...dashboardTheme.typography.body,
-    color: dashboardTheme.colors.textSecondary,
+    fontSize: 16,
     marginTop: dashboardTheme.spacing.sm,
     marginBottom: dashboardTheme.spacing.md,
   },
@@ -1475,8 +1466,8 @@ const styles = StyleSheet.create({
 
   scanCard: {
     width: 140,
-    backgroundColor: dashboardTheme.colors.surface,
     borderRadius: dashboardTheme.borderRadius.lg,
+    borderWidth: 2,
     padding: dashboardTheme.spacing.md,
     marginRight: dashboardTheme.spacing.sm,
     ...dashboardTheme.shadows.sm,
@@ -1492,15 +1483,13 @@ const styles = StyleSheet.create({
   },
 
   scanTitle: {
-    ...dashboardTheme.typography.body,
+    fontSize: 16,
     fontWeight: '600',
-    color: dashboardTheme.colors.text,
     marginBottom: 4,
   },
 
   scanDate: {
-    ...dashboardTheme.typography.caption,
-    color: dashboardTheme.colors.textSecondary,
+    fontSize: 14,
   },
 
   scanScoreBadge: {

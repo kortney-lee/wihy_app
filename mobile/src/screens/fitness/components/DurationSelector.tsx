@@ -19,12 +19,12 @@ export const DurationSelector: React.FC<DurationSelectorProps> = ({
 }) => {
   const { theme } = useTheme();
   return (
-    <View style={[styles.container, { backgroundColor: theme.colors.surface }]}>
+    <View style={[styles.container, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
       <View style={styles.header}>
         <Ionicons name="time-outline" size={20} color="#4cbb17" />
         <View style={styles.headerText}>
-          <Text style={styles.title}>Duration</Text>
-          <Text style={styles.subtitle}>Per session</Text>
+          <Text style={[styles.title, { color: theme.colors.text }]}>Duration</Text>
+          <Text style={[styles.subtitle, { color: theme.colors.textSecondary }]}>Per session</Text>
         </View>
       </View>
       <View style={styles.optionsRow}>
@@ -33,11 +33,11 @@ export const DurationSelector: React.FC<DurationSelectorProps> = ({
           return (
             <TouchableOpacity
               key={mins}
-              style={[styles.option, isSelected && styles.optionSelected]}
+              style={[styles.option, !isSelected && { backgroundColor: theme.colors.card, borderColor: theme.colors.border }, isSelected && styles.optionSelected]}
               onPress={() => onDurationChange(mins)}
               activeOpacity={0.7}
             >
-              <Text style={[styles.optionText, isSelected && styles.optionTextSelected]}>
+              <Text style={[styles.optionText, !isSelected && { color: theme.colors.text }, isSelected && styles.optionTextSelected]}>
                 {mins} min
               </Text>
             </TouchableOpacity>

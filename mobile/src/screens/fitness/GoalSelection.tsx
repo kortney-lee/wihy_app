@@ -77,7 +77,8 @@ const CollapsibleHeader: React.FC<{
   selectedCount?: number;
   isExpanded: boolean;
   onToggle: () => void;
-}> = ({ title, subtitle, section, icon, selectedCount = 0, isExpanded, onToggle }) => (
+  theme: any;
+}> = ({ title, subtitle, section, icon, selectedCount = 0, isExpanded, onToggle, theme }) => (
   <TouchableOpacity 
     style={styles.collapsibleHeader}
     onPress={onToggle}
@@ -88,9 +89,9 @@ const CollapsibleHeader: React.FC<{
         <Ionicons name={icon as any} size={20} color={isExpanded ? '#4cbb17' : '#6b7280'} />
       </View>
       <View style={styles.collapsibleTitleContainer}>
-        <Text style={styles.collapsibleTitle}>{title}</Text>
+        <Text style={[styles.collapsibleTitle, { color: theme.colors.text }]}>{title}</Text>
         {subtitle && !isExpanded && (
-          <Text style={styles.collapsibleSubtitle} numberOfLines={1}>{subtitle}</Text>
+          <Text style={[styles.collapsibleSubtitle, { color: theme.colors.textSecondary }]} numberOfLines={1}>{subtitle}</Text>
         )}
       </View>
     </View>
@@ -212,6 +213,7 @@ export const GoalSelection: React.FC<GoalSelectionProps> = ({
           selectedCount={selectedBodyGoals.length}
           isExpanded={expandedSections.body}
           onToggle={() => onToggleSection('body')}
+          theme={theme}
         />
         
         {expandedSections.body && (

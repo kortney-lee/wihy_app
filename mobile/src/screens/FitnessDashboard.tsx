@@ -220,7 +220,8 @@ const ExerciseCard: React.FC<{
   exercise: ExerciseRowView;
   simplified?: boolean;
   borderColor?: string;
-}> = ({ exercise, simplified = true, borderColor = '#4cbb17' }) => {
+  theme: any;
+}> = ({ exercise, simplified = true, borderColor = '#4cbb17', theme }) => {
   const [expanded, setExpanded] = useState(false);
 
   return (
@@ -232,13 +233,13 @@ const ExerciseCard: React.FC<{
       {/* Exercise Header */}
       <View style={styles.exerciseHeader}>
         <View style={styles.exerciseInfo}>
-          <Text style={styles.exerciseName}>{exercise.meta.name}</Text>
-          <Text style={styles.exerciseEquipment}>
+          <Text style={[styles.exerciseName, { color: theme.colors.text }]}>{exercise.meta.name}</Text>
+          <Text style={[styles.exerciseEquipment, { color: theme.colors.textSecondary }]}>
             {exercise.meta.equipment === 'NONE' ? 'Bodyweight' : exercise.meta.equipment}
           </Text>
         </View>
         <View style={styles.setsContainer}>
-          <Text style={styles.setsText}>{exercise.prescription.sets} sets</Text>
+          <Text style={[styles.setsText, { color: theme.colors.textSecondary }]}>{exercise.prescription.sets} sets</Text>
           <Ionicons
             name={expanded ? 'chevron-up' : 'chevron-down'}
             size={20}
@@ -248,25 +249,25 @@ const ExerciseCard: React.FC<{
       </View>
 
       {/* Intensity */}
-      <Text style={styles.intensityText}>
+      <Text style={[styles.intensityText, { color: theme.colors.textSecondary }]}>
         {exercise.prescription.intensityLabel}
       </Text>
 
       {/* Load Indicators */}
       <View style={styles.loadContainer}>
         <View style={[styles.loadBadge, { backgroundColor: '#ef4444' }]}>
-          <Text style={styles.loadText}>
+          <Text style={[styles.loadText, { color: theme.colors.text }]}>
             Cardio {exercise.meta.fitnessLoad.CARDIO || 0}/3
           </Text>
         </View>
         <View style={[styles.loadBadge, { backgroundColor: '#8b5cf6' }]}>
-          <Text style={styles.loadText}>
+          <Text style={[styles.loadText, { color: theme.colors.text }]}>
             Strength {exercise.meta.fitnessLoad.STRENGTH || 0}/3
           </Text>
         </View>
         {!simplified && (
           <View style={[styles.loadBadge, { backgroundColor: '#f59e0b' }]}>
-            <Text style={styles.loadText}>
+            <Text style={[styles.loadText, { color: theme.colors.text }]}>
               Mobility {exercise.meta.fitnessLoad.MOBILITY || 0}/3
             </Text>
           </View>
@@ -276,14 +277,14 @@ const ExerciseCard: React.FC<{
       {/* Expanded Details */}
       {expanded && (
         <View style={styles.expandedContent}>
-          <Text style={styles.expandedTitle}>Exercise Details</Text>
+          <Text style={[styles.expandedTitle, { color: theme.colors.text }]}>Exercise Details</Text>
           {exercise.prescription.rest && (
-            <Text style={styles.detailText}>Rest: {exercise.prescription.rest}</Text>
+            <Text style={[styles.detailText, { color: theme.colors.textSecondary }]}>Rest: {exercise.prescription.rest}</Text>
           )}
           {exercise.prescription.duration && (
-            <Text style={styles.detailText}>Duration: {exercise.prescription.duration}</Text>
+            <Text style={[styles.detailText, { color: theme.colors.textSecondary }]}>Duration: {exercise.prescription.duration}</Text>
           )}
-          <Text style={styles.detailText}>
+          <Text style={[styles.detailText, { color: theme.colors.textSecondary }]}>
             Primary muscles: {Object.keys(exercise.meta.muscleLoad).join(', ')}
           </Text>
         </View>
@@ -1226,6 +1227,7 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
       exercise={item}
       simplified={viewMode === 'simple'}
       borderColor={exerciseColors[index % exerciseColors.length]}
+      theme={theme}
     />
   );
 
@@ -1721,14 +1723,14 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
     };
     
     return (
-      <ScrollView style={styles.modalContent} showsVerticalScrollIndicator={false}>
+      <ScrollView style={[styles.modalContent, { backgroundColor: theme.colors.background }]} showsVerticalScrollIndicator={false}>
         {/* Program Header */}
         <View style={styles.programHeader}>
           <View style={styles.programIconContainer}>
             <Ionicons name="calendar-outline" size={48} color="#4cbb17" />
           </View>
-          <Text style={styles.programTitle}>{program.name || 'Your Workout Program'}</Text>
-          <Text style={styles.programDescription}>
+          <Text style={[styles.programTitle, { color: theme.colors.text }]}>{program.name || 'Your Workout Program'}</Text>
+          <Text style={[styles.programDescription, { color: theme.colors.textSecondary }]}>
             {program.description || goalText || 'Personalized workout program based on your goals'}
           </Text>
           
@@ -1740,7 +1742,7 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
                 size={14} 
                 color="#6366f1" 
               />
-              <Text style={styles.schedulePatternText}>
+              <Text style={[styles.schedulePatternText, { color: theme.colors.textSecondary }]}>
                 {program.schedule_note}
               </Text>
             </View>
@@ -1749,27 +1751,27 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
 
         {/* Program Stats */}
         <View style={styles.programStatsRow}>
-          <View style={[styles.programStatCard, { backgroundColor: theme.colors.surface }]}>
+          <View style={[styles.programStatCard, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
             <Ionicons name="calendar-number-outline" size={24} color="#6366f1" />
-            <Text style={styles.programStatValue}>{workouts.length}</Text>
-            <Text style={styles.programStatLabel}>Workouts</Text>
+            <Text style={[styles.programStatValue, { color: theme.colors.text }]}>{workouts.length}</Text>
+            <Text style={[styles.programStatLabel, { color: theme.colors.textSecondary }]}>Workouts</Text>
           </View>
-          <View style={[styles.programStatCard, { backgroundColor: theme.colors.surface }]}>
+          <View style={[styles.programStatCard, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
             <Ionicons name="barbell-outline" size={24} color="#8b5cf6" />
-            <Text style={styles.programStatValue}>{totalExercises}</Text>
-            <Text style={styles.programStatLabel}>Exercises</Text>
+            <Text style={[styles.programStatValue, { color: theme.colors.text }]}>{totalExercises}</Text>
+            <Text style={[styles.programStatLabel, { color: theme.colors.textSecondary }]}>Exercises</Text>
           </View>
-          <View style={[styles.programStatCard, { backgroundColor: theme.colors.surface }]}>
+          <View style={[styles.programStatCard, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
             <Ionicons name="time-outline" size={24} color="#f59e0b" />
-            <Text style={styles.programStatValue}>{totalDuration}</Text>
-            <Text style={styles.programStatLabel}>Total Mins</Text>
+            <Text style={[styles.programStatValue, { color: theme.colors.text }]}>{totalDuration}</Text>
+            <Text style={[styles.programStatLabel, { color: theme.colors.textSecondary }]}>Total Mins</Text>
           </View>
         </View>
 
         {/* When to Start Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>When do you want to start?</Text>
-          <Text style={styles.sectionSubtitle}>Select a day to see the workout details</Text>
+          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>When do you want to start?</Text>
+          <Text style={[styles.sectionSubtitle, { color: theme.colors.textSecondary }]}>Select a day to see the workout details</Text>
           
           <ScrollView 
             horizontal 
@@ -1790,16 +1792,19 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
                   key={offset}
                   style={[
                     styles.startDayButton,
+                    !isSelected && { backgroundColor: theme.colors.card, borderColor: theme.colors.border },
                     isSelected && styles.startDayButtonSelected
                   ]}
                   onPress={() => setSelectedStartDayOffset(offset)}
                 >
                   <Text style={[
                     styles.startDayName,
+                    !isSelected && { color: theme.colors.text },
                     isSelected && styles.startDayNameSelected
                   ]}>{dayName}</Text>
                   <Text style={[
                     styles.startDayDate,
+                    !isSelected && { color: theme.colors.textSecondary },
                     isSelected && styles.startDayDateSelected
                   ]}>{dateStr}</Text>
                 </TouchableOpacity>
@@ -1908,7 +1913,7 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
             }}
           >
             <Ionicons name="play-circle" size={24} color="#ffffff" />
-            <Text style={styles.startProgramButtonText}>
+            <Text style={[styles.startProgramButtonText, { color: '#ffffff' }]}>
               Start Program {selectedStartDayOffset === 0 ? 'Today' : selectedStartDayOffset === 1 ? 'Tomorrow' : `on ${dayNames[new Date(Date.now() + selectedStartDayOffset * 86400000).getDay()]}`}
             </Text>
           </TouchableOpacity>
@@ -1916,8 +1921,8 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
 
         {/* Workouts List */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Your Workouts</Text>
-          <Text style={styles.sectionSubtitle}>Tap a workout to see details and start</Text>
+          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Your Workouts</Text>
+          <Text style={[styles.sectionSubtitle, { color: theme.colors.textSecondary }]}>Tap a workout to see details and start</Text>
           
           {workouts.map((workout: any, index: number) => {
             // Calculate the scheduled date for this workout
@@ -1970,15 +1975,15 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
               return (
                 <View
                   key={index}
-                  style={[styles.workoutDayCard, styles.restDayCard]}
+                  style={[styles.workoutDayCard, styles.restDayCard, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}
                 >
                   <View style={styles.workoutDayHeader}>
                     <View style={[styles.workoutDayNumber, { backgroundColor: '#e5e7eb' }]}>
                       <Text style={[styles.workoutDayNumberText, { color: theme.colors.textSecondary }]}>{index + 1}</Text>
                     </View>
                     <View style={styles.workoutDayInfo}>
-                      <Text style={styles.workoutDayTitle}>{workout.name || 'Rest Day'}</Text>
-                      <Text style={styles.workoutDayMuscles}>
+                      <Text style={[styles.workoutDayTitle, { color: theme.colors.text }]}>{workout.name || 'Rest Day'}</Text>
+                      <Text style={[styles.workoutDayMuscles, { color: theme.colors.textSecondary }]}>
                         {workoutDateStr} • {workout.notes || workout.suggestion || 'Recovery & Rest'}
                       </Text>
                     </View>
@@ -1993,6 +1998,7 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
                 key={index}
                 style={[
                   styles.workoutDayCard,
+                  { backgroundColor: theme.colors.card, borderColor: theme.colors.border },
                   selectedWorkoutDay === index && styles.workoutDayCardSelected
                 ]}
                 onPress={() => viewWorkoutDay(index)}
@@ -2002,10 +2008,10 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
                     <Text style={styles.workoutDayNumberText}>{index + 1}</Text>
                   </View>
                   <View style={styles.workoutDayInfo}>
-                    <Text style={styles.workoutDayTitle}>
+                    <Text style={[styles.workoutDayTitle, { color: theme.colors.text }]}>
                       {workout.name || workout.day_name || `Day ${index + 1}`}
                     </Text>
-                    <Text style={styles.workoutDayMuscles}>
+                    <Text style={[styles.workoutDayMuscles, { color: theme.colors.textSecondary }]}>
                       {workoutDateStr} • {workoutFocus}
                     </Text>
                   </View>
@@ -2020,17 +2026,17 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
                     )}
                     <View style={styles.workoutDayMetaItem}>
                       <Ionicons name="time-outline" size={14} color="#6B7280" />
-                      <Text style={styles.workoutDayMetaText}>{duration}m</Text>
+                      <Text style={[styles.workoutDayMetaText, { color: theme.colors.textSecondary }]}>{duration}m</Text>
                     </View>
                     {isRunning ? (
                       <View style={styles.workoutDayMetaItem}>
                         <Ionicons name="navigate-outline" size={14} color="#6B7280" />
-                        <Text style={styles.workoutDayMetaText}>{workout.distance_km || '?'} km</Text>
+                        <Text style={[styles.workoutDayMetaText, { color: theme.colors.textSecondary }]}>{workout.distance_km || '?'} km</Text>
                       </View>
                     ) : (
                       <View style={styles.workoutDayMetaItem}>
                         <Ionicons name="barbell-outline" size={14} color="#6B7280" />
-                        <Text style={styles.workoutDayMetaText}>{activityCount}</Text>
+                        <Text style={[styles.workoutDayMetaText, { color: theme.colors.textSecondary }]}>{activityCount}</Text>
                       </View>
                     )}
                   </View>
@@ -2044,20 +2050,20 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
                       {workout.pace_target && (
                         <View style={styles.workoutDayExerciseItem}>
                           <Ionicons name="speedometer-outline" size={12} color="#4cbb17" />
-                          <Text style={styles.workoutDayExerciseText}>Pace: {workout.pace_target} min/km</Text>
+                          <Text style={[styles.workoutDayExerciseText, { color: theme.colors.textSecondary }]}>Pace: {workout.pace_target} min/km</Text>
                         </View>
                       )}
                       {/* Show workout structure for interval workouts */}
                       {workout.workout?.structure && (
                         <View style={styles.workoutDayExerciseItem}>
                           <Ionicons name="repeat-outline" size={12} color="#6366f1" />
-                          <Text style={styles.workoutDayExerciseText} numberOfLines={1}>{workout.workout.structure}</Text>
+                          <Text style={[styles.workoutDayExerciseText, { color: theme.colors.textSecondary }]} numberOfLines={1}>{workout.workout.structure}</Text>
                         </View>
                       )}
                       {workout.instructions?.slice(0, 2).map((inst: string, instIdx: number) => (
                         <View key={instIdx} style={styles.workoutDayExerciseItem}>
                           <Ionicons name="chevron-forward" size={12} color="#9CA3AF" />
-                          <Text style={styles.workoutDayExerciseText} numberOfLines={1}>{inst}</Text>
+                          <Text style={[styles.workoutDayExerciseText, { color: theme.colors.textSecondary }]} numberOfLines={1}>{inst}</Text>
                         </View>
                       ))}
                       {workout.intervals?.length > 0 && (
@@ -2073,13 +2079,13 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
                       {workout.exercises?.slice(0, 3).map((ex: any, exIndex: number) => (
                         <View key={exIndex} style={styles.workoutDayExerciseItem}>
                           <Ionicons name="chevron-forward" size={12} color="#9CA3AF" />
-                          <Text style={styles.workoutDayExerciseText} numberOfLines={1}>
+                          <Text style={[styles.workoutDayExerciseText, { color: theme.colors.textSecondary }]} numberOfLines={1}>
                             {ex.name}
                           </Text>
                         </View>
                       ))}
                       {exerciseCount > 3 && (
-                        <Text style={styles.workoutDayMoreText}>
+                        <Text style={[styles.workoutDayMoreText, { color: theme.colors.textSecondary }]}>
                           +{exerciseCount - 3} more exercises
                         </Text>
                       )}
@@ -2089,7 +2095,7 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
                   {/* Motivation Message */}
                   {workout.motivation && (
                     <View style={styles.motivationContainer}>
-                      <Text style={styles.motivationText}>{workout.motivation}</Text>
+                      <Text style={[styles.motivationText, { color: theme.colors.textSecondary }]}>{workout.motivation}</Text>
                     </View>
                   )}
                   
@@ -2097,13 +2103,13 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
                   {workout.progression_note && (
                     <View style={styles.workoutCardProgressionNote}>
                       <Ionicons name="trending-up-outline" size={12} color="#8b5cf6" />
-                      <Text style={styles.workoutCardProgressionText}>{workout.progression_note}</Text>
+                      <Text style={[styles.workoutCardProgressionText, { color: theme.colors.textSecondary }]}>{workout.progression_note}</Text>
                     </View>
                   )}
                 </View>
                 
                 <View style={styles.workoutDayAction}>
-                  <Text style={styles.workoutDayActionText}>View Details</Text>
+                  <Text style={[styles.workoutDayActionText, { color: theme.colors.text }]}>View Details</Text>
                   <Ionicons name="arrow-forward" size={16} color="#4cbb17" />
                 </View>
               </TouchableOpacity>
@@ -2139,7 +2145,7 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
               size={28} 
               color="#4cbb17" 
             />
-            <Text style={styles.previewTitle}>
+            <Text style={[styles.previewTitle, { color: theme.colors.text }]}>
               {session?.title || workout.phase || 'Your Custom Workout'}
             </Text>
           </View>
@@ -2147,7 +2153,7 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
           <View style={styles.previewStats}>
             <View style={styles.previewStatItem}>
               <Ionicons name="time-outline" size={20} color="#6366f1" />
-              <Text style={styles.previewStatText}>
+              <Text style={[styles.previewStatText, { color: theme.colors.textSecondary }]}>
                 {session?.totalMinutes || workout.estimated_duration_min} min
               </Text>
             </View>
@@ -2155,13 +2161,13 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
               <>
                 <View style={styles.previewStatItem}>
                   <Ionicons name="navigate-outline" size={20} color="#8b5cf6" />
-                  <Text style={styles.previewStatText}>
+                  <Text style={[styles.previewStatText, { color: theme.colors.textSecondary }]}>
                     {runningData.distance_km} km
                   </Text>
                 </View>
                 <View style={styles.previewStatItem}>
                   <Ionicons name="speedometer-outline" size={20} color="#f59e0b" />
-                  <Text style={styles.previewStatText}>
+                  <Text style={[styles.previewStatText, { color: theme.colors.textSecondary }]}>
                     {runningData.pace_target}
                   </Text>
                 </View>
@@ -2170,19 +2176,19 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
               <>
                 <View style={styles.previewStatItem}>
                   <Ionicons name="flame-outline" size={20} color="#f59e0b" />
-                  <Text style={styles.previewStatText}>
+                  <Text style={[styles.previewStatText, { color: theme.colors.textSecondary }]}>
                     {session.warmupMinutes}m warmup
                   </Text>
                 </View>
                 <View style={styles.previewStatItem}>
                   <Ionicons name="barbell-outline" size={20} color="#8b5cf6" />
-                  <Text style={styles.previewStatText}>
+                  <Text style={[styles.previewStatText, { color: theme.colors.textSecondary }]}>
                     {session.mainMinutes}m main
                   </Text>
                 </View>
                 <View style={styles.previewStatItem}>
                   <Ionicons name="body-outline" size={20} color="#4cbb17" />
-                  <Text style={styles.previewStatText}>
+                  <Text style={[styles.previewStatText, { color: theme.colors.textSecondary }]}>
                     {session.cooldownMinutes}m cooldown
                   </Text>
                 </View>
@@ -2191,13 +2197,13 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
               <>
                 <View style={styles.previewStatItem}>
                   <Ionicons name="layers-outline" size={20} color="#8b5cf6" />
-                  <Text style={styles.previewStatText}>
+                  <Text style={[styles.previewStatText, { color: theme.colors.textSecondary }]}>
                     {workout.exercises.length} exercises
                   </Text>
                 </View>
                 <View style={styles.previewStatItem}>
                   <Ionicons name="repeat-outline" size={20} color="#f59e0b" />
-                  <Text style={styles.previewStatText}>
+                  <Text style={[styles.previewStatText, { color: theme.colors.textSecondary }]}>
                     {totalSets} sets
                   </Text>
                 </View>
@@ -2207,7 +2213,7 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
           
           <View style={styles.previewFocusRow}>
             <Ionicons name="flag-outline" size={16} color="#4cbb17" />
-            <Text style={styles.previewFocusText}>
+            <Text style={[styles.previewFocusText, { color: theme.colors.textSecondary }]}>
               Focus: {session?.category || (isRunningWorkout ? runningData.focus : focusAreas)}
             </Text>
           </View>
@@ -2216,7 +2222,7 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
           {hasSessionFormat && session.equipment && session.equipment.length > 0 && (
             <View style={styles.previewFocusRow}>
               <Ionicons name="cube-outline" size={16} color="#8b5cf6" />
-              <Text style={styles.previewFocusText}>
+              <Text style={[styles.previewFocusText, { color: theme.colors.textSecondary }]}>
                 Equipment: {session.equipment.join(', ')}
               </Text>
             </View>
@@ -2225,7 +2231,7 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
           {isRunningWorkout && runningData.calories_estimate && (
             <View style={styles.previewFocusRow}>
               <Ionicons name="flame-outline" size={16} color="#ef4444" />
-              <Text style={styles.previewFocusText}>
+              <Text style={[styles.previewFocusText, { color: theme.colors.textSecondary }]}>
                 Est. Calories: {runningData.calories_estimate}
               </Text>
             </View>
@@ -2240,44 +2246,44 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
               <Ionicons name="flame-outline" size={16} color="#f59e0b" /> Warm-up ({session.warmupMinutes} min)
             </Text>
             {session.warmup.map((warmupEx, index) => (
-              <View key={`warmup-${index}`} style={styles.previewExerciseCard}>
+              <View key={`warmup-${index}`} style={[styles.previewExerciseCard, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
                 <View style={styles.previewExerciseHeader}>
                   <View style={[styles.previewExerciseNumber, { backgroundColor: '#f59e0b' }]}>
                     <Text style={styles.previewExerciseNumberText}>{index + 1}</Text>
                   </View>
                   <View style={styles.previewExerciseInfo}>
-                    <Text style={styles.previewExerciseName}>{warmupEx.exercise}</Text>
+                    <Text style={[styles.previewExerciseName, { color: theme.colors.text }]}>{warmupEx.exercise}</Text>
                     <View style={styles.previewExerciseMeta}>
                       <Ionicons name="time-outline" size={14} color="#6B7280" />
-                      <Text style={styles.previewExerciseMetaText}>{warmupEx.duration} seconds</Text>
+                      <Text style={[styles.previewExerciseMetaText, { color: theme.colors.textSecondary }]}>{warmupEx.duration} seconds</Text>
                     </View>
                   </View>
                 </View>
                 {warmupEx.notes && (
                   <View style={styles.previewExerciseEquipment}>
                     <Ionicons name="information-circle-outline" size={14} color="#6B7280" />
-                    <Text style={styles.previewEquipmentText}>{warmupEx.notes}</Text>
+                    <Text style={[styles.previewEquipmentText, { color: theme.colors.textSecondary }]}>{warmupEx.notes}</Text>
                   </View>
                 )}
               </View>
             ))}
 
             {/* Main Workout Section */}
-            <Text style={styles.previewSectionTitle}>
+            <Text style={[styles.previewSectionTitle, { color: theme.colors.text }]}>
               <Ionicons name="barbell-outline" size={16} color="#6366f1" /> Main Workout ({session.mainMinutes} min)
             </Text>
             {session.main.map((mainEx, index) => (
-              <View key={`main-${index}`} style={styles.previewExerciseCard}>
+              <View key={`main-${index}`} style={[styles.previewExerciseCard, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
                 <View style={styles.previewExerciseHeader}>
                   <View style={[styles.previewExerciseNumber, { backgroundColor: exerciseColors[index % exerciseColors.length] }]}>
                     <Text style={styles.previewExerciseNumberText}>{index + 1}</Text>
                   </View>
                   <View style={styles.previewExerciseInfo}>
-                    <Text style={styles.previewExerciseName}>{mainEx.exercise}</Text>
+                    <Text style={[styles.previewExerciseName, { color: theme.colors.text }]}>{mainEx.exercise}</Text>
                     {mainEx.weight && (
                       <View style={styles.previewExerciseMeta}>
                         <Ionicons name="fitness-outline" size={14} color="#6B7280" />
-                        <Text style={styles.previewExerciseMetaText}>{mainEx.weight} weight</Text>
+                        <Text style={[styles.previewExerciseMetaText, { color: theme.colors.textSecondary }]}>{mainEx.weight} weight</Text>
                       </View>
                     )}
                   </View>
@@ -2285,43 +2291,43 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
                 
                 <View style={styles.previewExerciseDetails}>
                   <View style={styles.previewDetailItem}>
-                    <Text style={styles.previewDetailLabel}>Sets</Text>
-                    <Text style={styles.previewDetailValue}>{mainEx.sets}</Text>
+                    <Text style={[styles.previewDetailLabel, { color: theme.colors.textSecondary }]}>Sets</Text>
+                    <Text style={[styles.previewDetailValue, { color: theme.colors.text }]}>{mainEx.sets}</Text>
                   </View>
                   <View style={styles.previewDetailItem}>
-                    <Text style={styles.previewDetailLabel}>Reps</Text>
-                    <Text style={styles.previewDetailValue}>{mainEx.reps}</Text>
+                    <Text style={[styles.previewDetailLabel, { color: theme.colors.textSecondary }]}>Reps</Text>
+                    <Text style={[styles.previewDetailValue, { color: theme.colors.text }]}>{mainEx.reps}</Text>
                   </View>
                   <View style={styles.previewDetailItem}>
-                    <Text style={styles.previewDetailLabel}>Rest</Text>
-                    <Text style={styles.previewDetailValue}>{mainEx.rest}s</Text>
+                    <Text style={[styles.previewDetailLabel, { color: theme.colors.textSecondary }]}>Rest</Text>
+                    <Text style={[styles.previewDetailValue, { color: theme.colors.text }]}>{mainEx.rest}s</Text>
                   </View>
                 </View>
                 
                 {mainEx.notes && (
                   <View style={styles.previewExerciseEquipment}>
                     <Ionicons name="bulb-outline" size={14} color="#f59e0b" />
-                    <Text style={styles.previewEquipmentText}>{mainEx.notes}</Text>
+                    <Text style={[styles.previewEquipmentText, { color: theme.colors.textSecondary }]}>{mainEx.notes}</Text>
                   </View>
                 )}
               </View>
             ))}
 
             {/* Cooldown Section */}
-            <Text style={styles.previewSectionTitle}>
+            <Text style={[styles.previewSectionTitle, { color: theme.colors.text }]}>
               <Ionicons name="body-outline" size={16} color="#4cbb17" /> Cool-down ({session.cooldownMinutes} min)
             </Text>
             {session.cooldown.map((cooldownStretch, index) => (
-              <View key={`cooldown-${index}`} style={styles.previewExerciseCard}>
+              <View key={`cooldown-${index}`} style={[styles.previewExerciseCard, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
                 <View style={styles.previewExerciseHeader}>
                   <View style={[styles.previewExerciseNumber, { backgroundColor: '#4cbb17' }]}>
                     <Text style={styles.previewExerciseNumberText}>{index + 1}</Text>
                   </View>
                   <View style={styles.previewExerciseInfo}>
-                    <Text style={styles.previewExerciseName}>{cooldownStretch.exercise}</Text>
+                    <Text style={[styles.previewExerciseName, { color: theme.colors.text }]}>{cooldownStretch.exercise}</Text>
                     <View style={styles.previewExerciseMeta}>
                       <Ionicons name="time-outline" size={14} color="#6B7280" />
-                      <Text style={styles.previewExerciseMetaText}>
+                      <Text style={[styles.previewExerciseMetaText, { color: theme.colors.textSecondary }]}>
                         {cooldownStretch.duration}s {cooldownStretch.perSide ? '(per side)' : ''}
                       </Text>
                     </View>
@@ -2331,7 +2337,7 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
                 {cooldownStretch.targetMuscles && cooldownStretch.targetMuscles.length > 0 && (
                   <View style={styles.previewExerciseEquipment}>
                     <Ionicons name="fitness-outline" size={14} color="#6B7280" />
-                    <Text style={styles.previewEquipmentText}>
+                    <Text style={[styles.previewEquipmentText, { color: theme.colors.textSecondary }]}>
                       Target: {cooldownStretch.targetMuscles.join(', ')}
                     </Text>
                   </View>
@@ -2351,14 +2357,14 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
         {/* ========== LEGACY FORMAT: Running Instructions ========== */}
         {!hasSessionFormat && isRunningWorkout && runningData.instructions && runningData.instructions.length > 0 && (
           <>
-            <Text style={styles.previewSectionTitle}>Instructions</Text>
+            <Text style={[styles.previewSectionTitle, { color: theme.colors.text }]}>Instructions</Text>
             <View style={styles.runningInstructionsCard}>
               {runningData.instructions.map((instruction: string, idx: number) => (
                 <View key={idx} style={styles.runningInstructionItem}>
                   <View style={styles.runningInstructionBullet}>
-                    <Text style={styles.runningInstructionBulletText}>{idx + 1}</Text>
+                    <Text style={[styles.runningInstructionBulletText, { color: '#ffffff' }]}>{idx + 1}</Text>
                   </View>
-                  <Text style={styles.runningInstructionText}>{instruction}</Text>
+                  <Text style={[styles.runningInstructionText, { color: theme.colors.textSecondary }]}>{instruction}</Text>
                 </View>
               ))}
             </View>
@@ -2370,7 +2376,7 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
           <>
             <Text style={styles.previewSectionTitle}>Intervals</Text>
             {runningData.intervals.map((interval: any, index: number) => (
-              <View key={index} style={styles.previewExerciseCard}>
+              <View key={index} style={[styles.previewExerciseCard, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
                 <View style={styles.previewExerciseHeader}>
                   <View style={[
                     styles.previewExerciseNumber, 
@@ -2379,10 +2385,10 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
                     <Text style={styles.previewExerciseNumberText}>{index + 1}</Text>
                   </View>
                   <View style={styles.previewExerciseInfo}>
-                    <Text style={styles.previewExerciseName}>{interval.activity || interval.type}</Text>
+                    <Text style={[styles.previewExerciseName, { color: theme.colors.text }]}>{interval.activity || interval.type}</Text>
                     <View style={styles.previewExerciseMeta}>
                       <Ionicons name="time-outline" size={14} color="#6B7280" />
-                      <Text style={styles.previewExerciseMetaText}>
+                      <Text style={[styles.previewExerciseMetaText, { color: theme.colors.textSecondary }]}>
                         {interval.duration_minutes} min
                         {interval.repeat && interval.repeat > 1 ? ` × ${interval.repeat}` : ''}
                       </Text>
@@ -2393,7 +2399,7 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
                 {interval.rest_minutes > 0 && (
                   <View style={styles.previewExerciseEquipment}>
                     <Ionicons name="pause-circle-outline" size={14} color="#6B7280" />
-                    <Text style={styles.previewEquipmentText}>Rest: {interval.rest_minutes} min between sets</Text>
+                    <Text style={[styles.previewEquipmentText, { color: theme.colors.textSecondary }]}>Rest: {interval.rest_minutes} min between sets</Text>
                   </View>
                 )}
               </View>
@@ -2408,16 +2414,16 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
               {isRunningWorkout ? 'Workout Details' : "Today's Exercises"}
             </Text>
             {(workout.exercises || []).map((exercise, index) => (
-              <View key={exercise.exercise_id || index} style={styles.previewExerciseCard}>
+              <View key={exercise.exercise_id || index} style={[styles.previewExerciseCard, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
                 <View style={styles.previewExerciseHeader}>
                   <View style={[styles.previewExerciseNumber, { backgroundColor: exerciseColors[index % exerciseColors.length] }]}>
                     <Text style={styles.previewExerciseNumberText}>{index + 1}</Text>
                   </View>
                   <View style={styles.previewExerciseInfo}>
-                    <Text style={styles.previewExerciseName}>{exercise.name}</Text>
+                    <Text style={[styles.previewExerciseName, { color: theme.colors.text }]}>{exercise.name}</Text>
                     <View style={styles.previewExerciseMeta}>
                       <Ionicons name="fitness-outline" size={14} color="#6B7280" />
-                      <Text style={styles.previewExerciseMetaText}>{exercise.muscle_group}</Text>
+                      <Text style={[styles.previewExerciseMetaText, { color: theme.colors.textSecondary }]}>{exercise.muscle_group}</Text>
                     </View>
                   </View>
                 </View>
@@ -2425,8 +2431,8 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
                 <View style={styles.previewExerciseDetails}>
                   {!isRunningWorkout && (
                     <View style={styles.previewDetailItem}>
-                      <Text style={styles.previewDetailLabel}>Sets</Text>
-                      <Text style={styles.previewDetailValue}>{exercise.sets}</Text>
+                      <Text style={[styles.previewDetailLabel, { color: theme.colors.textSecondary }]}>Sets</Text>
+                      <Text style={[styles.previewDetailValue, { color: theme.colors.text }]}>{exercise.sets}</Text>
                     </View>
                   )}
                   <View style={styles.previewDetailItem}>
@@ -2499,7 +2505,7 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
       presentationStyle="pageSheet"
       onRequestClose={closeGoalSelector}
     >
-      <SafeAreaView style={styles.modalContainer}>
+      <SafeAreaView style={[styles.modalContainer, { backgroundColor: theme.colors.background }]}>
         <View style={styles.modalHeader}>
           {/* Back button for navigation between steps */}
           {modalStep !== 'goals' && (
@@ -2550,7 +2556,7 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
         </View>
 
         {/* Step Indicator - 3 steps */}
-        <View style={styles.stepIndicator}>
+        <View style={[styles.stepIndicator, { backgroundColor: theme.colors.background }]}>
           <View style={[styles.stepDot, modalStep === 'goals' ? styles.stepDotActive : styles.stepDotCompleted]} />
           <View style={[styles.stepLine, (modalStep === 'program' || modalStep === 'preview') && styles.stepLineActive]} />
           <View style={[styles.stepDot, modalStep === 'program' ? styles.stepDotActive : (modalStep === 'preview' ? styles.stepDotCompleted : null)]} />
@@ -3058,26 +3064,26 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
               <View style={styles.celebrationIcon}>
                 <Text style={styles.celebrationEmoji}>🎉</Text>
               </View>
-              <Text style={styles.workoutCompleteTitle}>Workout Complete!</Text>
-              <Text style={styles.workoutCompleteSubtitle}>Great job crushing it today!</Text>
+              <Text style={[styles.workoutCompleteTitle, { color: theme.colors.text }]}>Workout Complete!</Text>
+              <Text style={[styles.workoutCompleteSubtitle, { color: theme.colors.textSecondary }]}>Great job crushing it today!</Text>
             </View>
 
             {/* Stats Grid */}
             <View style={styles.workoutStatsGrid}>
-              <View style={[styles.workoutStatCard, { backgroundColor: theme.colors.surface }]}>
+              <View style={[styles.workoutStatCard, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
                 <Ionicons name="time-outline" size={28} color="#3b82f6" />
-                <Text style={styles.workoutCompleteStatValue}>{workoutSummary?.duration || '00:00'}</Text>
-                <Text style={styles.workoutCompleteStatLabel}>Duration</Text>
+                <Text style={[styles.workoutCompleteStatValue, { color: theme.colors.text }]}>{workoutSummary?.duration || '00:00'}</Text>
+                <Text style={[styles.workoutCompleteStatLabel, { color: theme.colors.textSecondary }]}>Duration</Text>
               </View>
-              <View style={[styles.workoutStatCard, { backgroundColor: theme.colors.surface }]}>
+              <View style={[styles.workoutStatCard, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
                 <Ionicons name="checkmark-done-outline" size={28} color="#4cbb17" />
-                <Text style={styles.workoutCompleteStatValue}>{workoutSummary?.setsCompleted || 0}</Text>
-                <Text style={styles.workoutCompleteStatLabel}>Sets Completed</Text>
+                <Text style={[styles.workoutCompleteStatValue, { color: theme.colors.text }]}>{workoutSummary?.setsCompleted || 0}</Text>
+                <Text style={[styles.workoutCompleteStatLabel, { color: theme.colors.textSecondary }]}>Sets Completed</Text>
               </View>
-              <View style={[styles.workoutStatCard, { backgroundColor: theme.colors.surface }]}>
+              <View style={[styles.workoutStatCard, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
                 <Ionicons name="flame-outline" size={28} color="#f59e0b" />
-                <Text style={styles.workoutCompleteStatValue}>{workoutSummary?.calories || 0}</Text>
-                <Text style={styles.workoutCompleteStatLabel}>Est. Calories</Text>
+                <Text style={[styles.workoutCompleteStatValue, { color: theme.colors.text }]}>{workoutSummary?.calories || 0}</Text>
+                <Text style={[styles.workoutCompleteStatLabel, { color: theme.colors.textSecondary }]}>Est. Calories</Text>
               </View>
             </View>
 
@@ -3193,7 +3199,7 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
     const monthName = calendarMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
 
     return (
-      <View style={[styles.dayPickerContainer, { backgroundColor: theme.colors.surface }]}>
+      <View style={[styles.dayPickerContainer, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
         {/* Month Header */}
         <View style={styles.dayPickerHeader}>
           <TouchableOpacity onPress={() => changeMonth(-1)} style={styles.dayPickerNavButton}>
@@ -3404,34 +3410,34 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
           {/* Exercise Card */}
           <View style={styles.executionExerciseCard}>
             <Ionicons name="barbell-outline" size={40} color="#4cbb17" />
-            <Text style={styles.executionExerciseName}>{currentExercise.name}</Text>
+            <Text style={[styles.executionExerciseName, { color: theme.colors.text }]}>{currentExercise.name}</Text>
           </View>
 
           {/* Exercise Info Card */}
           <View style={styles.executionInfoCard}>
             <View style={styles.executionInfoRow}>
               <Ionicons name="fitness-outline" size={22} color="#6366f1" />
-              <Text style={styles.executionInfoText}>Target: {currentExercise.muscle_group}</Text>
+              <Text style={[styles.executionInfoText, { color: theme.colors.textSecondary }]}>Target: {currentExercise.muscle_group}</Text>
             </View>
             <View style={styles.executionInfoRow}>
               <Ionicons name="cube-outline" size={22} color="#8b5cf6" />
-              <Text style={styles.executionInfoText}>Equipment: {currentExercise.equipment || 'None (Bodyweight)'}</Text>
+              <Text style={[styles.executionInfoText, { color: theme.colors.textSecondary }]}>Equipment: {currentExercise.equipment || 'None (Bodyweight)'}</Text>
             </View>
             <View style={styles.executionInfoRow}>
               <Ionicons name="repeat-outline" size={22} color="#fa5f06" />
-              <Text style={styles.executionInfoText}>Target: {currentExercise.reps} reps</Text>
+              <Text style={[styles.executionInfoText, { color: theme.colors.textSecondary }]}>Target: {currentExercise.reps} reps</Text>
             </View>
           </View>
 
           {/* Log Set Section */}
-          <View style={styles.logSetSection}>
-            <Text style={styles.logSetTitle}>Log Your Set</Text>
+          <View style={[styles.logSetSection, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
+            <Text style={[styles.logSetTitle, { color: theme.colors.text }]}>Log Your Set</Text>
             
             <View style={styles.logInputsRow}>
               <View style={styles.logInputGroup}>
-                <Text style={styles.logInputLabel}>Reps</Text>
+                <Text style={[styles.logInputLabel, { color: theme.colors.textSecondary }]}>Reps</Text>
                 <TextInput
-                  style={styles.logInput}
+                  style={[styles.logInput, { backgroundColor: theme.colors.card }]}
                   keyboardType="numeric"
                   placeholder={currentExercise.reps?.toString().split('-')[0] || '10'}
                   placeholderTextColor="#9ca3af"
@@ -3440,9 +3446,9 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
                 />
               </View>
               <View style={styles.logInputGroup}>
-                <Text style={styles.logInputLabel}>Weight (lbs)</Text>
+                <Text style={[styles.logInputLabel, { color: theme.colors.textSecondary }]}>Weight (lbs)</Text>
                 <TextInput
-                  style={styles.logInput}
+                  style={[styles.logInput, { backgroundColor: theme.colors.card }]}
                   keyboardType="numeric"
                   placeholder="0"
                   placeholderTextColor="#9ca3af"
@@ -3620,7 +3626,7 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
 
           {/* Weather Section */}
           <TouchableOpacity
-            style={[styles.weatherCard, { backgroundColor: theme.colors.surface }, showWeather && weather && styles.weatherCardExpanded]}
+            style={[styles.weatherCard, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }, showWeather && weather && styles.weatherCardExpanded]}
             onPress={() => {
               if (!showWeather && !weather) {
                 loadWeatherData();
@@ -4187,7 +4193,7 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
                 {(workout as any).session.main.slice(0, 4).map((mainEx: MainExercise, index: number) => (
                   <TouchableOpacity 
                     key={`main-${index}`} 
-                    style={styles.exerciseCardItem}
+                    style={[styles.exerciseCardItem, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}
                     onPress={() => startWorkoutForExercise(index)}
                     activeOpacity={0.7}
                   >
@@ -4262,7 +4268,7 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
                   return (
                     <TouchableOpacity 
                       key={exercise.exercise_id || index} 
-                      style={styles.exerciseCardItem}
+                      style={[styles.exerciseCardItem, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}
                       onPress={() => startWorkoutForExercise(index)}
                       activeOpacity={0.7}
                     >

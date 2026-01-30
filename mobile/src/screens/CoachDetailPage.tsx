@@ -290,7 +290,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#111827',
+    color: '#111827', // Use dashboardTheme or inline for dark mode
   },
   scrollView: {
     flex: 1,
@@ -326,12 +326,12 @@ const styles = StyleSheet.create({
   coachName: {
     fontSize: 24,
     fontWeight: '700',
-    color: '#111827',
+    color: '#111827', // Use dashboardTheme or inline for dark mode
     marginBottom: 4,
   },
   coachTitle: {
     fontSize: 16,
-    color: '#6b7280',
+    color: '#6b7280', // Use dashboardTheme or inline for dark mode
     marginBottom: 12,
   },
   statsRow: {
@@ -348,7 +348,7 @@ const styles = StyleSheet.create({
   },
   ratingText: {
     fontSize: 14,
-    color: '#6b7280',
+    color: '#6b7280', // Use dashboardTheme or inline for dark mode
     marginTop: 4,
   },
   detailsRow: {
@@ -363,7 +363,7 @@ const styles = StyleSheet.create({
   },
   detailText: {
     fontSize: 14,
-    color: '#6b7280',
+    color: '#6b7280', // Use dashboardTheme or inline for dark mode
   },
   section: {
     backgroundColor: '#fff',
@@ -373,12 +373,12 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#111827',
+    color: '#111827', // Use dashboardTheme or inline for dark mode
     marginBottom: 12,
   },
   bioText: {
     fontSize: 15,
-    color: '#374151',
+    color: '#374151', // Use dashboardTheme or inline for dark mode
     lineHeight: 22,
   },
   specialtiesRow: {
@@ -391,7 +391,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 12,
-    borderWidth: 1,
+    borderWidth: 2,
     borderColor: '#bbf7d0',
   },
   specialtyText: {
@@ -401,15 +401,15 @@ const styles = StyleSheet.create({
   },
   credentialsText: {
     fontSize: 15,
-    color: '#374151',
+    color: '#374151', // Use dashboardTheme or inline for dark mode
   },
   experienceText: {
     fontSize: 15,
-    color: '#374151',
+    color: '#374151', // Use dashboardTheme or inline for dark mode
   },
   availabilityText: {
     fontSize: 15,
-    color: '#374151',
+    color: '#374151', // Use dashboardTheme or inline for dark mode
     marginBottom: 4,
   },
   reviewCard: {
@@ -426,18 +426,18 @@ const styles = StyleSheet.create({
   },
   reviewTime: {
     fontSize: 12,
-    color: '#9ca3af',
+    color: '#9ca3af', // Use dashboardTheme or inline for dark mode
   },
   reviewComment: {
     fontSize: 14,
-    color: '#374151',
+    color: '#374151', // Use dashboardTheme or inline for dark mode
     fontStyle: 'italic',
     lineHeight: 20,
     marginBottom: 8,
   },
   reviewAuthor: {
     fontSize: 13,
-    color: '#6b7280',
+    color: '#6b7280', // Use dashboardTheme or inline for dark mode
   },
   bottomActions: {
     flexDirection: 'row',
@@ -455,7 +455,7 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     paddingHorizontal: 20,
     borderRadius: 8,
-    borderWidth: 1,
+    borderWidth: 2,
     borderColor: '#3b82f6',
     backgroundColor: '#fff',
   },
@@ -487,7 +487,7 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     fontSize: 16,
-    color: '#6b7280',
+    color: '#6b7280', // Use dashboardTheme or inline for dark mode
     marginTop: 16,
   },
   errorContainer: {
@@ -500,7 +500,7 @@ const styles = StyleSheet.create({
   errorText: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#111827',
+    color: '#111827', // Use dashboardTheme or inline for dark mode
     marginTop: 16,
     marginBottom: 24,
   },

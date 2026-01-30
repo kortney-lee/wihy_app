@@ -33,21 +33,21 @@ export const ServingsSelector: React.FC<ServingsSelectorProps> = ({
   const { theme } = useTheme();
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>{title}</Text>
+      <Text style={[styles.title, { color: theme.colors.text }]}>{title}</Text>
       <View style={styles.optionsRow}>
         {SERVING_OPTIONS.map((option) => {
           const isSelected = selectedServings === option.value;
           return (
             <TouchableOpacity
               key={option.value}
-              style={[styles.option, isSelected && styles.optionSelected]}
+              style={[styles.option, !isSelected && { backgroundColor: theme.colors.card, borderColor: theme.colors.border }, isSelected && styles.optionSelected]}
               onPress={() => onServingsChange(option.value)}
               activeOpacity={0.7}
             >
-              <Text style={[styles.optionValue, isSelected && styles.optionValueSelected]}>
+              <Text style={[styles.optionValue, !isSelected && { color: theme.colors.text }, isSelected && styles.optionValueSelected]}>
                 {option.label}
               </Text>
-              <Text style={[styles.optionDescription, isSelected && styles.optionDescriptionSelected]}>
+              <Text style={[styles.optionDescription, !isSelected && { color: theme.colors.textSecondary }, isSelected && styles.optionDescriptionSelected]}>
                 {option.description}
               </Text>
             </TouchableOpacity>

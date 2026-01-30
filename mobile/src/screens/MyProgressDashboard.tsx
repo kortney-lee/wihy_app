@@ -885,13 +885,13 @@ const MyProgressDashboard: React.FC<MyProgressDashboardProps> = ({
     const percentage = getProgressPercentage(item.completed, item.target);
 
     return (
-      <View key={item.id} style={styles.progressCard}>
+      <View key={item.id} style={[styles.progressCard, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
         <View style={[styles.progressIcon, { backgroundColor: item.color + '20' }]}>
           <Ionicons name={item.icon as any} size={26} color={item.color} />
         </View>
-        <Text style={styles.progressPercentage}>{Math.round(percentage)}%</Text>
-        <Text style={styles.progressTitle}>{item.title}</Text>
-        <Text style={styles.progressValue}>
+        <Text style={[styles.progressPercentage, { color: theme.colors.text }]}>{Math.round(percentage)}%</Text>
+        <Text style={[styles.progressTitle, { color: theme.colors.text }]}>{item.title}</Text>
+        <Text style={[styles.progressValue, { color: theme.colors.textSecondary }]}>
           {item.completed} / {item.target} {item.unit}
         </Text>
         <View style={styles.progressBarBackground}>
@@ -908,7 +908,7 @@ const MyProgressDashboard: React.FC<MyProgressDashboardProps> = ({
 
   const renderActionItem = ({ item }: { item: ActionItem }) => (
     <TouchableOpacity
-      style={[styles.actionItem, item.completed && styles.actionItemCompleted]}
+      style={[styles.actionItem, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }, item.completed && styles.actionItemCompleted]}
       onPress={() => handleToggleAction(item.id)}
     >
       <View style={styles.actionLeft}>
@@ -942,7 +942,7 @@ const MyProgressDashboard: React.FC<MyProgressDashboardProps> = ({
   );
 
   const renderCoachRecommendation = ({ item }: { item: CoachRecommendation }) => (
-    <TouchableOpacity style={styles.coachCard}>
+    <TouchableOpacity style={[styles.coachCard, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
       <View style={styles.coachHeader}>
         <View style={[styles.coachIcon, { backgroundColor: getPriorityColor(item.priority) + '20' }]}>
           <Ionicons name={item.icon as any} size={20} color={getPriorityColor(item.priority)} />
@@ -1040,7 +1040,7 @@ const MyProgressDashboard: React.FC<MyProgressDashboardProps> = ({
       </Animated.View>
 
       {/* Period Selector - Fixed outside ScrollView */}
-      <View style={styles.periodSelector}>
+      <View style={[styles.periodSelector, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
         {(['today', 'week', 'month'] as const).map(period => (
           <TouchableOpacity
             key={period}
@@ -1152,7 +1152,7 @@ const MyProgressDashboard: React.FC<MyProgressDashboardProps> = ({
               <ActivityIndicator size="small" color={dashboardColors.primary} />
             </View>
           ) : healthTrends && healthTrends.totalScans > 0 ? (
-            <View style={styles.trendsContent}>
+            <View style={[styles.trendsContent, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
               {/* Scan Statistics */}
               <View style={styles.scanStatsRow}>
                 <View style={styles.scanStatCard}>
@@ -1223,9 +1223,9 @@ const MyProgressDashboard: React.FC<MyProgressDashboardProps> = ({
               )}
             </View>
           ) : (
-            <View style={styles.noTrendsContainer}>
-              <Ionicons name="analytics-outline" size={32} color="#9ca3af" />
-              <Text style={styles.noTrendsText}>No scan data for this period</Text>
+            <View style={[styles.noTrendsContainer, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
+              <Ionicons name="analytics-outline" size={32} color={theme.colors.textSecondary} />
+              <Text style={[styles.noTrendsText, { color: theme.colors.textSecondary }]}>No scan data for this period</Text>
               <TouchableOpacity 
                 style={styles.startScanningButton}
                 onPress={() => navigation.navigate('Camera' as never)}
@@ -1307,7 +1307,7 @@ const MyProgressDashboard: React.FC<MyProgressDashboardProps> = ({
               
               {/* Active Goal Progress (from backend) */}
               {goalsData.activeGoal && goalsData.userProgress && (
-                <View style={styles.activeProgramStats}>
+                <View style={[styles.activeProgramStats, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
                   <View style={styles.activeProgramStatsHeader}>
                     <Text style={styles.activeProgramStatsTitle}>
                       {goalsData.goals.find(g => g.id === goalsData.activeGoal)?.label} Progress
@@ -1353,7 +1353,7 @@ const MyProgressDashboard: React.FC<MyProgressDashboardProps> = ({
               
               {/* Community Stats */}
               {goalsData.community && (
-                <View style={styles.communityStatsContainer}>
+                <View style={[styles.communityStatsContainer, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
                   <Text style={styles.communityStatsTitle}>Community</Text>
                   <View style={styles.communityStatsRow}>
                     <View style={styles.communityStatItem}>
@@ -1502,8 +1502,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     marginHorizontal: dashboardTheme.spacing.lg,
     marginVertical: dashboardTheme.spacing.md,
-    backgroundColor: dashboardTheme.colors.surface,
     borderRadius: dashboardTheme.borderRadius.lg,
+    borderWidth: 2,
     padding: dashboardTheme.spacing.xs,
     ...dashboardTheme.shadows.sm,
   },
@@ -1553,7 +1553,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 20,
-    backgroundColor: dashboardTheme.colors.surface,
+    borderWidth: 2,
     ...dashboardTheme.shadows.sm,
   },
 
@@ -1575,10 +1575,10 @@ const styles = StyleSheet.create({
 
   progressCard: {
     width: '48.5%',
-    backgroundColor: dashboardTheme.colors.surface,
     paddingVertical: 20,
     paddingHorizontal: 16,
     borderRadius: dashboardTheme.borderRadius.lg,
+    borderWidth: 2,
     ...dashboardTheme.shadows.md,
     alignItems: 'center',
   },
@@ -1595,20 +1595,17 @@ const styles = StyleSheet.create({
   progressPercentage: {
     fontSize: 28,
     fontWeight: '700',
-    color: dashboardTheme.colors.text,
     marginBottom: 4,
   },
 
   progressTitle: {
     fontSize: 15,
     fontWeight: '600',
-    color: dashboardTheme.colors.text,
     marginBottom: 4,
   },
 
   progressValue: {
     fontSize: 12,
-    color: dashboardTheme.colors.textSecondary,
     marginBottom: 12,
   },
 
@@ -1634,9 +1631,9 @@ const styles = StyleSheet.create({
   },
 
   actionItem: {
-    backgroundColor: dashboardTheme.colors.surface,
     padding: dashboardTheme.spacing.md,
     borderRadius: dashboardTheme.borderRadius.lg,
+    borderWidth: 2,
     ...dashboardTheme.shadows.sm,
     flexDirection: 'row',
     alignItems: 'center',
@@ -1714,9 +1711,9 @@ const styles = StyleSheet.create({
   },
 
   coachCard: {
-    backgroundColor: dashboardTheme.colors.surface,
     padding: dashboardTheme.spacing.md,
     borderRadius: dashboardTheme.borderRadius.lg,
+    borderWidth: 2,
     ...dashboardTheme.shadows.md,
   },
 
@@ -1821,8 +1818,8 @@ const styles = StyleSheet.create({
   },
 
   trendsContent: {
-    backgroundColor: dashboardTheme.colors.surface,
     borderRadius: dashboardTheme.borderRadius.lg,
+    borderWidth: 2,
     padding: dashboardTheme.spacing.md,
     ...dashboardTheme.shadows.sm,
   },
@@ -1923,8 +1920,8 @@ const styles = StyleSheet.create({
   },
 
   noTrendsContainer: {
-    backgroundColor: dashboardTheme.colors.surface,
     borderRadius: dashboardTheme.borderRadius.lg,
+    borderWidth: 2,
     padding: dashboardTheme.spacing.xl,
     alignItems: 'center',
     ...dashboardTheme.shadows.sm,
@@ -2063,8 +2060,8 @@ const styles = StyleSheet.create({
 
   activeProgramStats: {
     marginTop: dashboardTheme.spacing.lg,
-    backgroundColor: dashboardTheme.colors.surface,
     borderRadius: 16,
+    borderWidth: 2,
     padding: dashboardTheme.spacing.md,
     ...dashboardTheme.shadows.sm,
   },
@@ -2118,8 +2115,8 @@ const styles = StyleSheet.create({
   // Community Stats Styles
   communityStatsContainer: {
     marginTop: dashboardTheme.spacing.lg,
-    backgroundColor: dashboardTheme.colors.surface,
     borderRadius: 16,
+    borderWidth: 2,
     padding: dashboardTheme.spacing.md,
     ...dashboardTheme.shadows.sm,
   },

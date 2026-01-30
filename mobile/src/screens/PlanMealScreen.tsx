@@ -531,7 +531,7 @@ export default function PlanMealScreen({
         presentationStyle="pageSheet"
         onRequestClose={() => setShowTemplates(false)}
       >
-        <SafeAreaView style={styles.modalContainer} edges={['top', 'left', 'right']}>
+        <SafeAreaView style={[styles.modalContainer, { backgroundColor: theme.colors.background }]} edges={['top', 'left', 'right']}>
           <View style={styles.modalHeader}>
             <View style={{ width: 40 }} />
             <Text style={styles.modalTitle}>Meal Templates</Text>

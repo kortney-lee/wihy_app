@@ -252,7 +252,7 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
   },
   modalContainer: {
-    backgroundColor: '#fff',
+    // backgroundColor: '#fff', // theme.colors.background
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     maxHeight: '90%',

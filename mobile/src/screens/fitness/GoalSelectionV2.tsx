@@ -310,22 +310,22 @@ export const GoalSelection: React.FC<GoalSelectionProps> = ({
         <>
           {/* Workout Type */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Workout Type</Text>
+            <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Workout Type</Text>
             <View style={styles.chipGrid}>
               {QUICK_WORKOUT_TYPES.map((type) => {
                 const isSelected = quickWorkoutType === type.id;
                 return (
                   <TouchableOpacity
                     key={type.id}
-                    style={[styles.chip, isSelected && styles.chipSelected]}
+                    style={[styles.chip, !isSelected && { backgroundColor: theme.colors.card, borderColor: theme.colors.border }, isSelected && styles.chipSelected]}
                     onPress={() => handleWorkoutTypeSelect(type.id)}
                   >
                     <Ionicons
                       name={type.icon as any}
                       size={18}
-                      color={isSelected ? '#4cbb17' : '#6b7280'}
+                      color={isSelected ? '#4cbb17' : theme.colors.textSecondary}
                     />
-                    <Text style={[styles.chipText, isSelected && styles.chipTextSelected]}>
+                    <Text style={[styles.chipText, !isSelected && { color: theme.colors.textSecondary }, isSelected && styles.chipTextSelected]}>
                       {type.label}
                     </Text>
                   </TouchableOpacity>
@@ -336,22 +336,22 @@ export const GoalSelection: React.FC<GoalSelectionProps> = ({
 
           {/* Target Body Parts */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Target Areas (optional)</Text>
+            <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Target Areas (optional)</Text>
             <View style={styles.chipGrid}>
               {TARGET_BODY_AREAS.map((area) => {
                 const isSelected = targetAreas.includes(area.id);
                 return (
                   <TouchableOpacity
                     key={area.id}
-                    style={[styles.chip, isSelected && styles.chipSelected]}
+                    style={[styles.chip, !isSelected && { backgroundColor: theme.colors.card, borderColor: theme.colors.border }, isSelected && styles.chipSelected]}
                     onPress={() => toggleTargetArea(area.id)}
                   >
                     <Ionicons
                       name={area.icon as any}
                       size={18}
-                      color={isSelected ? '#4cbb17' : '#6b7280'}
+                      color={isSelected ? '#4cbb17' : theme.colors.textSecondary}
                     />
-                    <Text style={[styles.chipText, isSelected && styles.chipTextSelected]}>
+                    <Text style={[styles.chipText, !isSelected && { color: theme.colors.textSecondary }, isSelected && styles.chipTextSelected]}>
                       {area.label}
                     </Text>
                   </TouchableOpacity>
@@ -362,22 +362,22 @@ export const GoalSelection: React.FC<GoalSelectionProps> = ({
 
           {/* Workout Focus */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Workout Focus</Text>
+            <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Workout Focus</Text>
             <View style={styles.chipGrid}>
               {WORKOUT_FOCUS_OPTIONS.map((option) => {
                 const isSelected = workoutFocus === option.id;
                 return (
                   <TouchableOpacity
                     key={option.id}
-                    style={[styles.chip, isSelected && styles.chipSelected]}
+                    style={[styles.chip, !isSelected && { backgroundColor: theme.colors.card, borderColor: theme.colors.border }, isSelected && styles.chipSelected]}
                     onPress={() => handleWorkoutFocusSelect(option.id)}
                   >
                     <Ionicons
                       name={option.icon as any}
                       size={18}
-                      color={isSelected ? '#4cbb17' : '#6b7280'}
+                      color={isSelected ? '#4cbb17' : theme.colors.textSecondary}
                     />
-                    <Text style={[styles.chipText, isSelected && styles.chipTextSelected]}>
+                    <Text style={[styles.chipText, !isSelected && { color: theme.colors.textSecondary }, isSelected && styles.chipTextSelected]}>
                       {option.label}
                     </Text>
                   </TouchableOpacity>
@@ -388,18 +388,18 @@ export const GoalSelection: React.FC<GoalSelectionProps> = ({
 
           {/* Fitness Level */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Fitness Level</Text>
+            <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Fitness Level</Text>
             <View style={styles.levelRow}>
               {EXPERIENCE_LEVELS.map((level) => {
                 const isSelected = experienceLevel === level.id;
                 return (
                   <TouchableOpacity
                     key={level.id}
-                    style={[styles.levelOption, isSelected && styles.levelOptionSelected]}
+                    style={[styles.levelOption, !isSelected && { backgroundColor: theme.colors.card, borderColor: theme.colors.border }, isSelected && styles.levelOptionSelected]}
                     onPress={() => setExperienceLevel(level.id)}
                     activeOpacity={0.7}
                   >
-                    <Text style={[styles.levelLabel, isSelected && styles.levelLabelSelected]}>
+                    <Text style={[styles.levelLabel, !isSelected && { color: theme.colors.text }, isSelected && styles.levelLabelSelected]}>
                       {level.label}
                     </Text>
                   </TouchableOpacity>
@@ -447,22 +447,22 @@ export const GoalSelection: React.FC<GoalSelectionProps> = ({
         <>
           {/* Workout Type - same as Quick mode */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Workout Type</Text>
+            <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Workout Type</Text>
             <View style={styles.chipGrid}>
               {QUICK_WORKOUT_TYPES.map((type) => {
                 const isSelected = quickWorkoutType === type.id;
                 return (
                   <TouchableOpacity
                     key={type.id}
-                    style={[styles.chip, isSelected && styles.chipSelected]}
+                    style={[styles.chip, !isSelected && { backgroundColor: theme.colors.card, borderColor: theme.colors.border }, isSelected && styles.chipSelected]}
                     onPress={() => handleWorkoutTypeSelect(type.id)}
                   >
                     <Ionicons
                       name={type.icon as any}
                       size={18}
-                      color={isSelected ? '#4cbb17' : '#6b7280'}
+                      color={isSelected ? '#4cbb17' : theme.colors.textSecondary}
                     />
-                    <Text style={[styles.chipText, isSelected && styles.chipTextSelected]}>
+                    <Text style={[styles.chipText, !isSelected && { color: theme.colors.textSecondary }, isSelected && styles.chipTextSelected]}>
                       {type.label}
                     </Text>
                   </TouchableOpacity>
@@ -473,22 +473,22 @@ export const GoalSelection: React.FC<GoalSelectionProps> = ({
 
           {/* Target Body Parts - same as Quick mode */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Target Areas (optional)</Text>
+            <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Target Areas (optional)</Text>
             <View style={styles.chipGrid}>
               {TARGET_BODY_AREAS.map((area) => {
                 const isSelected = targetAreas.includes(area.id);
                 return (
                   <TouchableOpacity
                     key={area.id}
-                    style={[styles.chip, isSelected && styles.chipSelected]}
+                    style={[styles.chip, !isSelected && { backgroundColor: theme.colors.card, borderColor: theme.colors.border }, isSelected && styles.chipSelected]}
                     onPress={() => toggleTargetArea(area.id)}
                   >
                     <Ionicons
                       name={area.icon as any}
                       size={18}
-                      color={isSelected ? '#4cbb17' : '#6b7280'}
+                      color={isSelected ? '#4cbb17' : theme.colors.textSecondary}
                     />
-                    <Text style={[styles.chipText, isSelected && styles.chipTextSelected]}>
+                    <Text style={[styles.chipText, !isSelected && { color: theme.colors.textSecondary }, isSelected && styles.chipTextSelected]}>
                       {area.label}
                     </Text>
                   </TouchableOpacity>
@@ -499,22 +499,22 @@ export const GoalSelection: React.FC<GoalSelectionProps> = ({
 
           {/* Workout Focus */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Workout Focus</Text>
+            <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Workout Focus</Text>
             <View style={styles.chipGrid}>
               {WORKOUT_FOCUS_OPTIONS.map((option) => {
                 const isSelected = workoutFocus === option.id;
                 return (
                   <TouchableOpacity
                     key={option.id}
-                    style={[styles.chip, isSelected && styles.chipSelected]}
+                    style={[styles.chip, !isSelected && { backgroundColor: theme.colors.card, borderColor: theme.colors.border }, isSelected && styles.chipSelected]}
                     onPress={() => handleWorkoutFocusSelect(option.id)}
                   >
                     <Ionicons
                       name={option.icon as any}
                       size={18}
-                      color={isSelected ? '#4cbb17' : '#6b7280'}
+                      color={isSelected ? '#4cbb17' : theme.colors.textSecondary}
                     />
-                    <Text style={[styles.chipText, isSelected && styles.chipTextSelected]}>
+                    <Text style={[styles.chipText, !isSelected && { color: theme.colors.textSecondary }, isSelected && styles.chipTextSelected]}>
                       {option.label}
                     </Text>
                   </TouchableOpacity>
@@ -525,18 +525,18 @@ export const GoalSelection: React.FC<GoalSelectionProps> = ({
 
           {/* Fitness Level */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Fitness Level</Text>
+            <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Fitness Level</Text>
             <View style={styles.levelRow}>
               {EXPERIENCE_LEVELS.map((level) => {
                 const isSelected = experienceLevel === level.id;
                 return (
                   <TouchableOpacity
                     key={level.id}
-                    style={[styles.levelOption, isSelected && styles.levelOptionSelected]}
+                    style={[styles.levelOption, !isSelected && { backgroundColor: theme.colors.card, borderColor: theme.colors.border }, isSelected && styles.levelOptionSelected]}
                     onPress={() => setExperienceLevel(level.id)}
                     activeOpacity={0.7}
                   >
-                    <Text style={[styles.levelLabel, isSelected && styles.levelLabelSelected]}>
+                    <Text style={[styles.levelLabel, !isSelected && { color: theme.colors.text }, isSelected && styles.levelLabelSelected]}>
                       {level.label}
                     </Text>
                   </TouchableOpacity>
@@ -568,17 +568,17 @@ export const GoalSelection: React.FC<GoalSelectionProps> = ({
 
           {/* Optional Goal Tags */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitleLight}>Goal Tags (optional, max 2)</Text>
+            <Text style={[styles.sectionTitleLight, { color: theme.colors.textSecondary }]}>Goal Tags (optional, max 2)</Text>
             <View style={styles.tagRow}>
               {GOAL_TAGS.map((tag) => {
                 const isSelected = goalTags.includes(tag.id);
                 return (
                   <TouchableOpacity
                     key={tag.id}
-                    style={[styles.tag, isSelected && styles.tagSelected]}
+                    style={[styles.tag, !isSelected && { backgroundColor: theme.colors.card, borderWidth: 2, borderColor: theme.colors.border }, isSelected && styles.tagSelected]}
                     onPress={() => toggleGoalTag(tag.id)}
                   >
-                    <Text style={[styles.tagText, isSelected && styles.tagTextSelected]}>
+                    <Text style={[styles.tagText, !isSelected && { color: theme.colors.textSecondary }, isSelected && styles.tagTextSelected]}>
                       {tag.label}
                     </Text>
                   </TouchableOpacity>
@@ -598,7 +598,7 @@ export const GoalSelection: React.FC<GoalSelectionProps> = ({
     <>
       {/* Training Category Toggle */}
       <View style={styles.section}>
-        <View style={styles.categoryToggle}>
+        <View style={[styles.categoryToggle, { backgroundColor: theme.colors.card }]}>
           {TRAINING_CATEGORIES.map((cat) => {
             const isSelected = trainingCategory === cat.id;
             return (
@@ -613,9 +613,9 @@ export const GoalSelection: React.FC<GoalSelectionProps> = ({
                 <Ionicons
                   name={cat.icon as any}
                   size={20}
-                  color={isSelected ? '#ffffff' : '#6b7280'}
+                  color={isSelected ? '#ffffff' : theme.colors.textSecondary}
                 />
-                <Text style={[styles.categoryText, isSelected && styles.categoryTextSelected]}>
+                <Text style={[styles.categoryText, !isSelected && { color: theme.colors.textSecondary }, isSelected && styles.categoryTextSelected]}>
                   {cat.label}
                 </Text>
               </TouchableOpacity>
@@ -626,7 +626,7 @@ export const GoalSelection: React.FC<GoalSelectionProps> = ({
 
       {/* Program Picker */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>
+        <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
           {trainingCategory === 'running' ? 'Select Program' : 'Select Sport'}
         </Text>
         <View style={styles.programGrid}>
@@ -635,14 +635,14 @@ export const GoalSelection: React.FC<GoalSelectionProps> = ({
             return (
               <TouchableOpacity
                 key={program.id}
-                style={[styles.programCard, isSelected && styles.programCardSelected]}
+                style={[styles.programCard, !isSelected && { backgroundColor: theme.colors.card, borderColor: theme.colors.border }, isSelected && styles.programCardSelected]}
                 onPress={() => setSelectedProgram(program.id)}
               >
-                <Text style={[styles.programLabel, isSelected && styles.programLabelSelected]}>
+                <Text style={[styles.programLabel, !isSelected && { color: theme.colors.text }, isSelected && styles.programLabelSelected]}>
                   {program.label}
                 </Text>
                 {'weeks' in program && (
-                  <Text style={styles.programWeeks}>{program.weeks} weeks</Text>
+                  <Text style={[styles.programWeeks, { color: theme.colors.textSecondary }]}>{program.weeks} weeks</Text>
                 )}
               </TouchableOpacity>
             );
@@ -654,20 +654,20 @@ export const GoalSelection: React.FC<GoalSelectionProps> = ({
         <>
           {/* Experience Level */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Your Level</Text>
+            <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Your Level</Text>
             <View style={styles.levelRow}>
               {EXPERIENCE_LEVELS.map((level) => {
                 const isSelected = experienceLevel === level.id;
                 return (
                   <TouchableOpacity
                     key={level.id}
-                    style={[styles.levelOption, isSelected && styles.levelOptionSelected]}
+                    style={[styles.levelOption, !isSelected && { backgroundColor: theme.colors.card, borderColor: theme.colors.border }, isSelected && styles.levelOptionSelected]}
                     onPress={() => setExperienceLevel(level.id)}
                   >
-                    <Text style={[styles.levelLabel, isSelected && styles.levelLabelSelected]}>
+                    <Text style={[styles.levelLabel, !isSelected && { color: theme.colors.text }, isSelected && styles.levelLabelSelected]}>
                       {level.label}
                     </Text>
-                    <Text style={styles.levelDescription}>{level.description}</Text>
+                    <Text style={[styles.levelDescription, { color: theme.colors.textSecondary }]}>{level.description}</Text>
                   </TouchableOpacity>
                 );
               })}
@@ -772,9 +772,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 10,
     paddingHorizontal: 14,
-    // backgroundColor: '#f9fafb', // theme.colors.surface // theme.colors.surface // Use theme.colors.surface
     borderRadius: 10,
-    borderWidth: 1.5,
+    borderWidth: 2,
     borderColor: '#e5e7eb',
     gap: 6,
   },
@@ -800,7 +799,6 @@ const styles = StyleSheet.create({
   tag: {
     paddingVertical: 6,
     paddingHorizontal: 12,
-    // backgroundColor: '#f3f4f6', // theme.colors.surface // theme.colors.surface // Use theme.colors.background
     borderRadius: 16,
   },
   tagSelected: {
@@ -817,7 +815,6 @@ const styles = StyleSheet.create({
   // Category toggle (Train mode)
   categoryToggle: {
     flexDirection: 'row',
-    // backgroundColor: '#f3f4f6', // theme.colors.surface // theme.colors.surface // Use theme.colors.background
     borderRadius: 10,
     padding: 4,
   },
@@ -848,9 +845,8 @@ const styles = StyleSheet.create({
   programCard: {
     paddingVertical: 14,
     paddingHorizontal: 16,
-    // backgroundColor: '#f9fafb', // theme.colors.surface // theme.colors.surface // Use theme.colors.surface
     borderRadius: 12,
-    borderWidth: 1.5,
+    borderWidth: 2,
     borderColor: '#e5e7eb',
   },
   programCardSelected: {
@@ -879,9 +875,8 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 12,
     paddingHorizontal: 10,
-    // backgroundColor: '#f9fafb', // theme.colors.surface // theme.colors.surface // Use theme.colors.surface
     borderRadius: 10,
-    borderWidth: 1.5,
+    borderWidth: 2,
     borderColor: '#e5e7eb',
     alignItems: 'center',
   },

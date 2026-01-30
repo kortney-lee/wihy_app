@@ -636,7 +636,7 @@ const styles = StyleSheet.create({
   stepNumber: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#6b7280',
+    color: '#6b7280', // Use dashboardTheme or inline for dark mode
   },
   scrollView: {
     flex: 1,
@@ -651,11 +651,11 @@ const styles = StyleSheet.create({
   stepTitle: {
     fontSize: 24,
     fontWeight: '700',
-    color: '#111827',
+    color: '#111827', // Use dashboardTheme or inline for dark mode
   },
   stepDescription: {
     fontSize: 16,
-    color: '#6b7280',
+    color: '#6b7280', // Use dashboardTheme or inline for dark mode
     marginTop: -12,
   },
   formGroup: {
@@ -664,17 +664,17 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#374151',
+    color: '#374151', // Use dashboardTheme or inline for dark mode
   },
   input: {
     backgroundColor: '#fff',
-    borderWidth: 1,
+    borderWidth: 2,
     borderColor: '#e5e7eb',
     borderRadius: 8,
     paddingHorizontal: 12,
     paddingVertical: 12,
     fontSize: 16,
-    color: '#111827',
+    color: '#111827', // Use dashboardTheme or inline for dark mode
     outlineStyle: 'none' as any,
   },
   textArea: {
@@ -683,7 +683,7 @@ const styles = StyleSheet.create({
   },
   helpText: {
     fontSize: 12,
-    color: '#9ca3af',
+    color: '#9ca3af', // Use dashboardTheme or inline for dark mode
     marginTop: 4,
   },
   optionsWrap: {
@@ -696,7 +696,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 20,
     backgroundColor: '#fff',
-    borderWidth: 1,
+    borderWidth: 2,
     borderColor: '#e5e7eb',
   },
   optionChipSelected: {
@@ -705,7 +705,7 @@ const styles = StyleSheet.create({
   },
   optionText: {
     fontSize: 14,
-    color: '#6b7280',
+    color: '#6b7280', // Use dashboardTheme or inline for dark mode
   },
   optionTextSelected: {
     color: '#3b82f6',
@@ -724,7 +724,7 @@ const styles = StyleSheet.create({
   avatarText: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#374151',
+    color: '#374151', // Use dashboardTheme or inline for dark mode
     marginTop: 8,
   },
   locationRow: {
@@ -742,7 +742,7 @@ const styles = StyleSheet.create({
   currencySymbol: {
     fontSize: 24,
     fontWeight: '600',
-    color: '#111827',
+    color: '#111827', // Use dashboardTheme or inline for dark mode
   },
   priceInput: {
     flex: 1,
@@ -757,7 +757,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderRadius: 8,
     backgroundColor: '#fff',
-    borderWidth: 1,
+    borderWidth: 2,
     borderColor: '#e5e7eb',
     minWidth: 50,
     alignItems: 'center',
@@ -769,7 +769,7 @@ const styles = StyleSheet.create({
   dayText: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#6b7280',
+    color: '#6b7280', // Use dashboardTheme or inline for dark mode
   },
   dayTextSelected: {
     color: '#3b82f6',
@@ -784,18 +784,18 @@ const styles = StyleSheet.create({
   },
   hourLabel: {
     fontSize: 12,
-    color: '#6b7280',
+    color: '#6b7280', // Use dashboardTheme or inline for dark mode
     marginBottom: 4,
   },
   hourInput: {
     backgroundColor: '#fff',
-    borderWidth: 1,
+    borderWidth: 2,
     borderColor: '#e5e7eb',
     borderRadius: 8,
     paddingHorizontal: 12,
     paddingVertical: 10,
     fontSize: 16,
-    color: '#111827',
+    color: '#111827', // Use dashboardTheme or inline for dark mode
     outlineStyle: 'none' as any,
   },
   infoBox: {
@@ -803,7 +803,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 12,
     backgroundColor: '#eff6ff',
-    borderWidth: 1,
+    borderWidth: 2,
     borderColor: '#bfdbfe',
     borderRadius: 8,
     padding: 12,
@@ -848,6 +848,6 @@ const styles = StyleSheet.create({
   buttonSecondaryText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#374151',
+    color: '#374151', // Use dashboardTheme or inline for dark mode
   },
 });
