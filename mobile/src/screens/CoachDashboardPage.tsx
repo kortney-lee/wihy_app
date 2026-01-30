@@ -18,7 +18,6 @@ import { dashboardTheme } from '../theme/dashboardTheme';
 import { HamburgerMenu } from '../components/shared/HamburgerMenu';
 import { GradientDashboardHeader } from '../components/shared/GradientDashboardHeader';
 import { AuthContext } from '../context/AuthContext';
-import { coachService } from '../services';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { useDashboardLayout } from '../hooks/useDashboardLayout';
@@ -64,28 +63,28 @@ const CoachDashboardPage: React.FC<CoachDashboardPageProps> = ({ showMenuFromHea
   const { theme } = useTheme();
   const [showHamburgerMenu, setShowHamburgerMenu] = useState(false);
   const [selectedView, setSelectedView] = useState<CoachViewType | null>(null); // Start with hub view
-  const [coachProfile, setCoachProfile] = useState<any>(null);
-  const [loadingProfile, setLoadingProfile] = useState(true);
   const layout = useDashboardLayout();
   const isMobileWeb = isWeb && layout.screenWidth < 768;
 
-  // Check for coach profile on mount
+  // Security: Only allow coaches to access this page
   React.useEffect(() => {
-    checkCoachProfile();
-  }, []);
-
-  const checkCoachProfile = async () => {
-    try {
-      setLoadingProfile(true);
-      const profile = await coachService.getMyCoachProfile();
-      setCoachProfile(profile);
-    } catch (error) {
-      console.log('No coach profile found:', error);
-      setCoachProfile(null);
-    } finally {
-      setLoadingProfile(false);
+    if (!user?.isCoach) {
+      console.log('Access denied: User is not a coach');
+      navigation.navigate('Health');
     }
-  };
+  }, [user?.isCoach, navigation]);
+
+  // Don't render anything if user is not a coach (security)
+  if (!user?.isCoach) {
+    return (
+      <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
+        <View style={styles.centerContent}>
+          <Text style={[styles.cardTitle, { color: theme.colors.text }]}>Access Denied</Text>
+          <Text style={[styles.cardSubtitle, { color: theme.colors.textSecondary }]}>Coach access required</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   // Reset view state when user plan changes (dev mode switcher)
   React.useEffect(() => {
@@ -199,11 +198,7 @@ const CoachDashboardPage: React.FC<CoachDashboardPageProps> = ({ showMenuFromHea
         return (
           <CoachProfileSetup
             isDashboardMode={true}
-            onBack={() => {
-              // Reload coach profile after setup
-              checkCoachProfile();
-              handleBackToDashboardSelection();
-            }}
+            onBack={handleBackToDashboardSelection}
           />
         );
       default:
@@ -378,17 +373,16 @@ const CoachDashboardPage: React.FC<CoachDashboardPageProps> = ({ showMenuFromHea
         </View>
         
         {/* Coach Profile Card - Show code if exists, else create profile */}
-        {!loadingProfile && (
-          <View style={[
-            styles.coachProfileCard,
-            {
-              maxWidth: layout.maxContentWidth,
-              alignSelf: 'center',
-              width: '100%',
-              marginHorizontal: layout.horizontalPadding,
-            }
-          ]}>
-            {coachProfile && coachProfile.coach_code ? (
+        <View style={[
+          styles.coachProfileCard,
+          {
+            maxWidth: layout.maxContentWidth,
+            alignSelf: 'center',
+            width: '100%',
+            marginHorizontal: layout.horizontalPadding,
+          }
+        ]}>
+          {user?.isCoach && user?.coachCode ? (
               // Show coach code if profile exists
               <>
                 <View style={styles.coachCodeIcon}>
@@ -397,7 +391,7 @@ const CoachDashboardPage: React.FC<CoachDashboardPageProps> = ({ showMenuFromHea
                 <Text style={styles.coachCodeTitle}>Your Coach Code</Text>
                 <Text style={styles.coachCodeSubtitle}>Share this with clients to connect</Text>
                 <View style={styles.coachCodeContainer}>
-                  <Text style={styles.coachCodeText}>{coachProfile.coach_code}</Text>
+                  <Text style={styles.coachCodeText}>{user.coachCode}</Text>
                 </View>
                 <Text style={styles.coachCodeHint}>Tap to copy</Text>
               </>
@@ -436,10 +430,9 @@ const CoachDashboardPage: React.FC<CoachDashboardPageProps> = ({ showMenuFromHea
                 </TouchableOpacity>
               </>
             )}
-          </View>
-        )}
+        </View>
         
-        {/* Bottom spacing for tab bar */}
+        {/* Bottom spacing for tab bar */
         <View style={{ height: 100 }} />
       </ScrollView>
     </SafeAreaView>
@@ -623,6 +616,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: '#ffffff',
+  },
+  centerContent: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
   },
 });
 
