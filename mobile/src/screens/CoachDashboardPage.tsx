@@ -74,6 +74,18 @@ const CoachDashboardPage: React.FC<CoachDashboardPageProps> = ({ showMenuFromHea
     }
   }, [user?.isCoach, navigation]);
 
+  // Don't render anything if user is not a coach (security)
+  if (!user?.isCoach) {
+    return (
+      <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
+        <View style={styles.centerContent}>
+          <Text style={[styles.cardTitle, { color: theme.colors.text }]}>Access Denied</Text>
+          <Text style={[styles.cardSubtitle, { color: theme.colors.textSecondary }]}>Coach access required</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
   // Reset view state when user plan changes (dev mode switcher)
   React.useEffect(() => {
     setSelectedView(null);
@@ -236,18 +248,6 @@ const CoachDashboardPage: React.FC<CoachDashboardPageProps> = ({ showMenuFromHea
     );
   }
 
-  // Don't render anything if user is not a coach (security guard)
-  if (!user?.isCoach) {
-    return (
-      <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
-        <View style={styles.centerContent}>
-          <Text style={[styles.cardTitle, { color: theme.colors.text }]}>Access Denied</Text>
-          <Text style={[styles.cardSubtitle, { color: theme.colors.textSecondary }]}>Coach access required</Text>
-        </View>
-      </SafeAreaView>
-    );
-  }
-
   return (
     <SafeAreaView style={styles.healthMainContent} edges={['left', 'right']}>
       {showHamburgerMenu && (
@@ -383,7 +383,6 @@ const CoachDashboardPage: React.FC<CoachDashboardPageProps> = ({ showMenuFromHea
           }
         ]}>
           {user?.isCoach && user?.coachCode ? (
-            // Show coach code if profile exists
             <>
               <View style={styles.coachCodeIcon}>
                 <SvgIcon name="ribbon" size={32} color="#3b82f6" />
@@ -396,7 +395,6 @@ const CoachDashboardPage: React.FC<CoachDashboardPageProps> = ({ showMenuFromHea
               <Text style={styles.coachCodeHint}>Tap to copy</Text>
             </>
           ) : (
-            // Show setup prompt if no profile
             <>
               <View style={styles.coachSetupIcon}>
                 <SvgIcon name="briefcase" size={32} color="#3b82f6" />
@@ -432,7 +430,7 @@ const CoachDashboardPage: React.FC<CoachDashboardPageProps> = ({ showMenuFromHea
           )}
         </View>
         
-        {/* Bottom spacing for tab bar */
+        {/* Bottom spacing for tab bar */}
         <View style={{ height: 100 }} />
       </ScrollView>
     </SafeAreaView>
