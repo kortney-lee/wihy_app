@@ -5099,7 +5099,7 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
   },
   successDoneText: {
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
     fontSize: 16,
     fontWeight: '500',
   },
@@ -5231,7 +5231,7 @@ const styles = StyleSheet.create({
   },
   planHintText: {
     fontSize: 13,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
     textAlign: 'center',
     lineHeight: 18,
   },
@@ -5288,7 +5288,7 @@ const styles = StyleSheet.create({
   dayPickerMonthText: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#1f2937',
+    // color: theme.colors.text
   },
   dayPickerScroll: {
     paddingHorizontal: 12,
@@ -5332,7 +5332,7 @@ const styles = StyleSheet.create({
   dayPickerDayNumber: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#374151',
+    // color: theme.colors.text
   },
   dayPickerTextToday: {
     color: '#ffffff',
@@ -5388,7 +5388,7 @@ const styles = StyleSheet.create({
   },
   quickActionSubtitle: {
     fontSize: 12,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
     marginTop: 2,
   },
 
@@ -5603,7 +5603,7 @@ const styles = StyleSheet.create({
   },
   backToText: {
     fontSize: 14,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
   },
 
   // Calendar View Styles
@@ -5666,7 +5666,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 12,
     fontWeight: '600',
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
   },
   calendarGrid: {
     flexDirection: 'row',
@@ -5695,7 +5695,7 @@ const styles = StyleSheet.create({
   calendarDayText: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#374151',
+    // color: theme.colors.text
   },
   calendarDayTextToday: {
     color: '#3b82f6',
@@ -5757,7 +5757,7 @@ const styles = StyleSheet.create({
   calendarMealType: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
     textTransform: 'uppercase',
   },
   calendarMealName: {
@@ -5828,7 +5828,7 @@ const styles = StyleSheet.create({
   },
   calendarSummaryLabel: {
     fontSize: 12,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
     marginTop: 4,
   },
   
@@ -5951,7 +5951,7 @@ const styles = StyleSheet.create({
   },
   quickGoalDesc: {
     fontSize: 12,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
     textAlign: 'center',
     marginTop: 2,
   },
@@ -6008,7 +6008,7 @@ const styles = StyleSheet.create({
   durationOptionText: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
   },
   durationOptionTextSelected: {
     color: '#ef4444',
@@ -6046,7 +6046,7 @@ const styles = StyleSheet.create({
   mealTypeOptionLabel: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#374151',
+    // color: theme.colors.text
   },
 
   // Dietary Search
@@ -6063,7 +6063,7 @@ const styles = StyleSheet.create({
   dietarySearchInput: {
     flex: 1,
     fontSize: 14,
-    color: '#1f2937',
+    // color: theme.colors.text
     padding: 0,
     outlineStyle: 'none' as any,
   },
@@ -6076,7 +6076,7 @@ const styles = StyleSheet.create({
   },
   selectedDietaryCountText: {
     fontSize: 13,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
     fontWeight: '500',
   },
   clearAllText: {
@@ -6099,7 +6099,7 @@ const styles = StyleSheet.create({
   dietaryCategoryTitle: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#374151',
+    // color: theme.colors.text
   },
   noResultsContainer: {
     alignItems: 'center',
@@ -6133,7 +6133,7 @@ const styles = StyleSheet.create({
   },
   dietaryOptionLabel: {
     fontSize: 13,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
   },
   dietaryOptionLabelSelected: {
     color: '#ef4444',
@@ -6163,7 +6163,7 @@ const styles = StyleSheet.create({
   },
   storeOptionLabel: {
     fontSize: 13,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
   },
   storeOptionLabelSelected: {
     color: '#3b82f6',
@@ -6205,7 +6205,7 @@ const styles = StyleSheet.create({
   },
   previewSubtitle: {
     fontSize: 14,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
     marginTop: 4,
   },
   previewDayCard: {
@@ -6245,7 +6245,7 @@ const styles = StyleSheet.create({
   },
   previewMealMacros: {
     fontSize: 12,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
     marginTop: 2,
   },
   previewNoMealsText: {
@@ -6263,7 +6263,7 @@ const styles = StyleSheet.create({
   },
   previewEmptyText: {
     fontSize: 14,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
     textAlign: 'center',
     lineHeight: 20,
   },
@@ -6308,12 +6308,12 @@ const styles = StyleSheet.create({
   },
   planSummaryStatLabel: {
     fontSize: 12,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
   },
   previewSampleTitle: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
     marginBottom: 12,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
@@ -6376,7 +6376,7 @@ const styles = StyleSheet.create({
   },
   shoppingCategoryCount: {
     fontSize: 14,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
     // backgroundColor: '#f3f4f6', // theme.colors.surface // Use theme.colors.background
     paddingHorizontal: 12,
     paddingVertical: 4,
@@ -6387,7 +6387,7 @@ const styles = StyleSheet.create({
   },
   shoppingItem: {
     fontSize: 14,
-    color: '#374151',
+    // color: theme.colors.text
     lineHeight: 20,
   },
   shoppingListNote: {
@@ -6402,7 +6402,7 @@ const styles = StyleSheet.create({
   shoppingListNoteText: {
     flex: 1,
     fontSize: 13,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
     lineHeight: 18,
   },
 
@@ -6437,7 +6437,7 @@ const styles = StyleSheet.create({
   librarySearchInput: {
     flex: 1,
     fontSize: 16,
-    color: '#1f2937',
+    // color: theme.colors.text
     outlineStyle: 'none' as any,
   },
   libraryTagsScroll: {
@@ -6463,7 +6463,7 @@ const styles = StyleSheet.create({
   libraryFilterTagText: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
   },
   libraryFilterTagTextActive: {
     color: '#fff',
@@ -6478,7 +6478,7 @@ const styles = StyleSheet.create({
   },
   libraryCount: {
     fontSize: 15,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
     fontWeight: '500',
   },
   addMealButton: {
@@ -6502,7 +6502,7 @@ const styles = StyleSheet.create({
   },
   libraryLoadingText: {
     fontSize: 16,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
     marginTop: 12,
   },
   libraryEmptyState: {
@@ -6514,13 +6514,13 @@ const styles = StyleSheet.create({
   libraryEmptyTitle: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#1f2937',
+    // color: theme.colors.text
     marginTop: 16,
     marginBottom: 8,
   },
   libraryEmptySubtitle: {
     fontSize: 16,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
     textAlign: 'center',
     marginBottom: 24,
   },
@@ -6573,12 +6573,12 @@ const styles = StyleSheet.create({
   libraryMealName: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#1f2937',
+    // color: theme.colors.text
     marginBottom: 4,
   },
   libraryMealStats: {
     fontSize: 14,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
   },
   libraryMealMacros: {
     flexDirection: 'row',
@@ -6595,7 +6595,7 @@ const styles = StyleSheet.create({
   libraryMacroValue: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#1f2937',
+    // color: theme.colors.text
     marginBottom: 2,
   },
   libraryMacroLabel: {
@@ -6616,7 +6616,7 @@ const styles = StyleSheet.create({
   },
   libraryMealTagText: {
     fontSize: 12,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
   },
   libraryMealFooter: {
     flexDirection: 'row',
@@ -6776,7 +6776,7 @@ const styles = StyleSheet.create({
   mealDetailServingsTitle: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
     marginBottom: 12,
   },
   mealDetailServingsControls: {
@@ -6799,7 +6799,7 @@ const styles = StyleSheet.create({
   },
   mealDetailServingsLabel: {
     fontSize: 14,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
     marginTop: 4,
   },
   mealDetailSection: {
@@ -6841,7 +6841,7 @@ const styles = StyleSheet.create({
   },
   mealDetailNutritionLabel: {
     fontSize: 12,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
     marginTop: 4,
   },
   mealDetailMacroBar: {
@@ -6854,12 +6854,12 @@ const styles = StyleSheet.create({
   },
   mealDetailMacroBarLabel: {
     fontSize: 14,
-    color: '#374151',
+    // color: theme.colors.text
   },
   mealDetailMacroBarPercent: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#374151',
+    // color: theme.colors.text
   },
   mealDetailMacroBarTrack: {
     height: 8,
@@ -6885,7 +6885,7 @@ const styles = StyleSheet.create({
   },
   mealDetailTagText: {
     fontSize: 13,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
   },
   mealDetailTimeRow: {
     flexDirection: 'row',
@@ -6905,7 +6905,7 @@ const styles = StyleSheet.create({
   },
   mealDetailTimeLabel: {
     fontSize: 13,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
   },
   mealDetailTimeValue: {
     fontSize: 16,
@@ -6939,7 +6939,7 @@ const styles = StyleSheet.create({
   mealDetailTabText: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
   },
   mealDetailTabTextActive: {
     color: '#111827',
@@ -6974,7 +6974,7 @@ const styles = StyleSheet.create({
   mealDetailIngredientText: {
     flex: 1,
     fontSize: 15,
-    color: '#374151',
+    // color: theme.colors.text
     lineHeight: 22,
   },
   mealDetailIngredientAmount: {
@@ -7005,7 +7005,7 @@ const styles = StyleSheet.create({
   mealDetailInstructionText: {
     flex: 1,
     fontSize: 15,
-    color: '#374151',
+    // color: theme.colors.text
     lineHeight: 22,
   },
   mealDetailNoInstructions: {
@@ -7059,7 +7059,7 @@ const styles = StyleSheet.create({
   mealDetailActionButtonText: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
   },
   mealDetailActionButtonTextActive: {
     color: '#ef4444',
@@ -7143,7 +7143,7 @@ const styles = StyleSheet.create({
   },
   shoppingStatLabel: {
     fontSize: 12,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
     marginTop: 4,
   },
   shoppingListScrollView: {
@@ -7170,7 +7170,7 @@ const styles = StyleSheet.create({
   },
   shoppingCategorySectionCount: {
     fontSize: 14,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
     // backgroundColor: '#f3f4f6', // theme.colors.surface // Use theme.colors.background
     paddingHorizontal: 10,
     paddingVertical: 4,
@@ -7186,7 +7186,7 @@ const styles = StyleSheet.create({
   },
   shoppingListItemText: {
     fontSize: 15,
-    color: '#374151',
+    // color: theme.colors.text
     flex: 1,
   },
   shoppingModalBottomAction: {
@@ -7247,7 +7247,7 @@ const styles = StyleSheet.create({
   },
   workoutCompleteSubtitle: {
     fontSize: 16,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
   },
   workoutStatsGrid: {
     flexDirection: 'row',
@@ -7271,7 +7271,7 @@ const styles = StyleSheet.create({
   },
   workoutCompleteStatLabel: {
     fontSize: 12,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
     marginTop: 4,
   },
   workoutCompleteDoneButton: {

@@ -752,13 +752,13 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#374151',
+    // color: theme.colors.text
     marginBottom: 10,
   },
   sectionTitleLight: {
     fontSize: 13,
     fontWeight: '500',
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
     marginBottom: 8,
   },
   // Chip styles
@@ -784,7 +784,7 @@ const styles = StyleSheet.create({
   chipText: {
     fontSize: 13,
     fontWeight: '500',
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
   },
   chipTextSelected: {
     color: '#166534',
@@ -807,7 +807,7 @@ const styles = StyleSheet.create({
   tagText: {
     fontSize: 12,
     fontWeight: '500',
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
   },
   tagTextSelected: {
     color: '#166534',
@@ -833,7 +833,7 @@ const styles = StyleSheet.create({
   categoryText: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
   },
   categoryTextSelected: {
     color: '#ffffff',
@@ -856,7 +856,7 @@ const styles = StyleSheet.create({
   programLabel: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#374151',
+    // color: theme.colors.text
   },
   programLabelSelected: {
     color: '#166534',
@@ -887,7 +887,7 @@ const styles = StyleSheet.create({
   levelLabel: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#374151',
+    // color: theme.colors.text
   },
   levelLabelSelected: {
     color: '#166534',

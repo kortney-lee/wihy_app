@@ -1310,7 +1310,7 @@ const styles = StyleSheet.create({
 
   permissionModalDescription: {
     ...dashboardTheme.typography.body,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
     textAlign: 'center',
     lineHeight: 22,
     marginBottom: 24,
@@ -1352,13 +1352,13 @@ const styles = StyleSheet.create({
 
   permissionFeatureItemDesc: {
     ...dashboardTheme.typography.caption,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
     lineHeight: 18,
   },
 
   permissionModalNote: {
     ...dashboardTheme.typography.caption,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
     textAlign: 'center',
     fontStyle: 'italic',
     lineHeight: 20,
@@ -1394,7 +1394,7 @@ const styles = StyleSheet.create({
   permissionSecondaryButtonText: {
     ...dashboardTheme.typography.body,
     fontWeight: '600',
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
     fontSize: 16,
   },
 

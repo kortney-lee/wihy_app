@@ -331,7 +331,7 @@ const styles = StyleSheet.create({
   },
   coachTitle: {
     fontSize: 16,
-    color: '#6b7280', // Use dashboardTheme or inline for dark mode
+    // color: theme.colors.textSecondary
     marginBottom: 12,
   },
   statsRow: {
@@ -348,7 +348,7 @@ const styles = StyleSheet.create({
   },
   ratingText: {
     fontSize: 14,
-    color: '#6b7280', // Use dashboardTheme or inline for dark mode
+    // color: theme.colors.textSecondary
     marginTop: 4,
   },
   detailsRow: {
@@ -363,7 +363,7 @@ const styles = StyleSheet.create({
   },
   detailText: {
     fontSize: 14,
-    color: '#6b7280', // Use dashboardTheme or inline for dark mode
+    // color: theme.colors.textSecondary
   },
   section: {
     backgroundColor: '#fff',
@@ -378,7 +378,7 @@ const styles = StyleSheet.create({
   },
   bioText: {
     fontSize: 15,
-    color: '#374151', // Use dashboardTheme or inline for dark mode
+    // color: theme.colors.text
     lineHeight: 22,
   },
   specialtiesRow: {
@@ -401,15 +401,15 @@ const styles = StyleSheet.create({
   },
   credentialsText: {
     fontSize: 15,
-    color: '#374151', // Use dashboardTheme or inline for dark mode
+    // color: theme.colors.text
   },
   experienceText: {
     fontSize: 15,
-    color: '#374151', // Use dashboardTheme or inline for dark mode
+    // color: theme.colors.text
   },
   availabilityText: {
     fontSize: 15,
-    color: '#374151', // Use dashboardTheme or inline for dark mode
+    // color: theme.colors.text
     marginBottom: 4,
   },
   reviewCard: {
@@ -426,18 +426,18 @@ const styles = StyleSheet.create({
   },
   reviewTime: {
     fontSize: 12,
-    color: '#9ca3af', // Use dashboardTheme or inline for dark mode
+    // color: theme.colors.textSecondary
   },
   reviewComment: {
     fontSize: 14,
-    color: '#374151', // Use dashboardTheme or inline for dark mode
+    // color: theme.colors.text
     fontStyle: 'italic',
     lineHeight: 20,
     marginBottom: 8,
   },
   reviewAuthor: {
     fontSize: 13,
-    color: '#6b7280', // Use dashboardTheme or inline for dark mode
+    // color: theme.colors.textSecondary
   },
   bottomActions: {
     flexDirection: 'row',
@@ -487,7 +487,7 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     fontSize: 16,
-    color: '#6b7280', // Use dashboardTheme or inline for dark mode
+    // color: theme.colors.textSecondary
     marginTop: 16,
   },
   errorContainer: {

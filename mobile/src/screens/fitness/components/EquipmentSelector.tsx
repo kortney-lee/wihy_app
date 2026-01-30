@@ -323,7 +323,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#374151',
+    // color: theme.colors.text
     marginBottom: 10,
   },
   // Gate styles (Routine mode)
@@ -348,7 +348,7 @@ const styles = StyleSheet.create({
   gateLabel: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
     marginTop: 4,
   },
   gateLabelSelected: {
@@ -383,7 +383,7 @@ const styles = StyleSheet.create({
   binaryLabel: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
   },
   binaryLabelSelected: {
     color: '#166534',
@@ -448,7 +448,7 @@ const styles = StyleSheet.create({
   equipmentLabel: {
     fontSize: 12,
     fontWeight: '500',
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
   },
   equipmentLabelSelected: {
     color: '#166534',
@@ -460,7 +460,7 @@ const styles = StyleSheet.create({
   gymPresetsTitle: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#374151',
+    // color: theme.colors.text
     marginBottom: 10,
   },
   gymPresetsRow: {
@@ -486,7 +486,7 @@ const styles = StyleSheet.create({
   gymPresetLabel: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
   },
   gymPresetLabelSelected: {
     color: '#166534',

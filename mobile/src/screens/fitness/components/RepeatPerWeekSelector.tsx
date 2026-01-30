@@ -70,7 +70,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#374151',
+    // color: theme.colors.text
   },
   subtitle: {
     fontSize: 11,
@@ -97,7 +97,7 @@ const styles = StyleSheet.create({
   optionText: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
   },
   optionTextSelected: {
     color: '#166534',

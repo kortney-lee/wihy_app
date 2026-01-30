@@ -125,7 +125,7 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 12,
     fontSize: 16,
-    color: '#6b7280',
+    // color: '#6b7280', // theme.colors.textSecondary
   },
   programHeader: {
     alignItems: 'center',
@@ -143,13 +143,13 @@ const styles = StyleSheet.create({
   programTitle: {
     fontSize: 24,
     fontWeight: '700',
-    color: '#1f2937',
+    // color: '#1f2937', // theme.colors.text
     textAlign: 'center',
     marginBottom: 4,
   },
   programSubtitle: {
     fontSize: 14,
-    color: '#6b7280',
+    // color: '#6b7280', // theme.colors.textSecondary
   },
   placeholderCard: {
     // backgroundColor: '#ffffff', // theme.colors.surface // Use theme.colors.surface
@@ -173,13 +173,13 @@ const styles = StyleSheet.create({
   placeholderTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#374151',
+    // color: '#374151', // theme.colors.text
     marginTop: 16,
     marginBottom: 8,
   },
   placeholderText: {
     fontSize: 14,
-    color: '#6b7280',
+    // color: '#6b7280', // theme.colors.textSecondary
     textAlign: 'center',
     marginBottom: 16,
   },
@@ -188,7 +188,7 @@ const styles = StyleSheet.create({
   },
   featureItem: {
     fontSize: 14,
-    color: '#4b5563',
+    // color: '#4b5563', // theme.colors.text
     marginBottom: 8,
   },
   actionButtons: {

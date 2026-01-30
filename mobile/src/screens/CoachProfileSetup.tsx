@@ -636,7 +636,7 @@ const styles = StyleSheet.create({
   stepNumber: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#6b7280', // Use dashboardTheme or inline for dark mode
+    // color: theme.colors.textSecondary
   },
   scrollView: {
     flex: 1,
@@ -655,7 +655,7 @@ const styles = StyleSheet.create({
   },
   stepDescription: {
     fontSize: 16,
-    color: '#6b7280', // Use dashboardTheme or inline for dark mode
+    // color: theme.colors.textSecondary
     marginTop: -12,
   },
   formGroup: {
@@ -664,7 +664,7 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#374151', // Use dashboardTheme or inline for dark mode
+    // color: theme.colors.text
   },
   input: {
     backgroundColor: '#fff',
@@ -705,7 +705,7 @@ const styles = StyleSheet.create({
   },
   optionText: {
     fontSize: 14,
-    color: '#6b7280', // Use dashboardTheme or inline for dark mode
+    // color: theme.colors.textSecondary
   },
   optionTextSelected: {
     color: '#3b82f6',
@@ -724,7 +724,7 @@ const styles = StyleSheet.create({
   avatarText: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#374151', // Use dashboardTheme or inline for dark mode
+    // color: theme.colors.text
     marginTop: 8,
   },
   locationRow: {
@@ -769,7 +769,7 @@ const styles = StyleSheet.create({
   dayText: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#6b7280', // Use dashboardTheme or inline for dark mode
+    // color: theme.colors.textSecondary
   },
   dayTextSelected: {
     color: '#3b82f6',
@@ -784,7 +784,7 @@ const styles = StyleSheet.create({
   },
   hourLabel: {
     fontSize: 12,
-    color: '#6b7280', // Use dashboardTheme or inline for dark mode
+    // color: theme.colors.textSecondary
     marginBottom: 4,
   },
   hourInput: {
@@ -848,6 +848,6 @@ const styles = StyleSheet.create({
   buttonSecondaryText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#374151', // Use dashboardTheme or inline for dark mode
+    // color: theme.colors.text
   },
 });

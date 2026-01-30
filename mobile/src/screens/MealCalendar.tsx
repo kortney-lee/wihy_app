@@ -222,7 +222,7 @@ const MealCalendar: React.FC<MealCalendarProps> = ({ isDashboardMode = false }) 
         ) : (
           <>
             {/* Month Navigation */}
-            <View style={[styles.calendarMonthNav, { backgroundColor: theme.colors.surface }]}>
+            <View style={[styles.calendarMonthNav, { backgroundColor: theme.colors.surface, borderBottomColor: theme.colors.border }]}>
               <TouchableOpacity onPress={() => handleNavigateMonth(-1)} style={styles.calendarNavButton}>
                 <SvgIcon name="chevron-back" size={24} color="#3b82f6" />
               </TouchableOpacity>
@@ -248,6 +248,7 @@ const MealCalendar: React.FC<MealCalendarProps> = ({ isDashboardMode = false }) 
                   key={index}
                   style={[
                     styles.calendarDayCell,
+                    { borderColor: theme.colors.border },
                     !item.isCurrentMonth && styles.calendarDayCellEmpty,
                     isToday(item.date) && styles.calendarDayCellToday,
                     isSelected(item.date) && styles.calendarDayCellSelected,
@@ -299,7 +300,7 @@ const MealCalendar: React.FC<MealCalendarProps> = ({ isDashboardMode = false }) 
               {selectedDayMeals.length > 0 ? (
                 <View style={styles.calendarMealsList}>
                   {selectedDayMeals.map((scheduledMeal, index) => (
-                    <View key={index} style={styles.calendarMealCard}>
+                    <View key={index} style={[styles.calendarMealCard, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
                       <View style={[
                         styles.calendarMealIcon,
                         { backgroundColor: mealTypeConfig[scheduledMeal.meal_slot]?.bgColor || '#f3f4f6' }
@@ -374,9 +375,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 20,
     paddingVertical: 16,
-    // // backgroundColor: '#ffffff', // theme.colors.surface // Use theme.colors.surface
-    borderBottomWidth: 1,
-    borderBottomColor: '#e5e7eb',
+    // backgroundColor: theme.colors.surface
+    borderBottomWidth: 2,
+    // borderBottomColor: theme.colors.border
   },
   calendarNavButton: {
     padding: 8,
@@ -397,7 +398,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 12,
     fontWeight: '600',
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
   },
   calendarGrid: {
     flexDirection: 'row',
@@ -411,11 +412,11 @@ const styles = StyleSheet.create({
     padding: 4,
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#f3f4f6',
+    borderWidth: 2,
+    // borderColor: theme.colors.border
   },
   calendarDayCellEmpty: {
-    // // backgroundColor: '#f9fafb', // theme.colors.surface // Use theme.colors.surface
+    // backgroundColor: theme.colors.surface
   },
   calendarDayCellToday: {
     backgroundColor: '#dbeafe',
@@ -428,7 +429,7 @@ const styles = StyleSheet.create({
   calendarDayText: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#111827',
+    // color: theme.colors.text
   },
   calendarDayTextToday: {
     color: '#3b82f6',
@@ -462,7 +463,7 @@ const styles = StyleSheet.create({
   calendarSelectedDayTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#111827',
+    // color: theme.colors.text
     flex: 1,
   },
   addMealButton: {
@@ -486,8 +487,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     padding: 12,
-    // // backgroundColor: '#f9fafb', // theme.colors.surface // Use theme.colors.surface
+    // backgroundColor: theme.colors.card
     borderRadius: 12,
+    borderWidth: 2,
+    // borderColor: theme.colors.border
     gap: 12,
   },
   calendarMealIcon: {
@@ -503,18 +506,18 @@ const styles = StyleSheet.create({
   calendarMealType: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
     textTransform: 'uppercase',
   },
   calendarMealName: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#111827',
+    // color: theme.colors.text
     marginTop: 2,
   },
   calendarMealMacros: {
     fontSize: 12,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
     marginTop: 2,
   },
   calendarNoMeals: {
@@ -524,7 +527,7 @@ const styles = StyleSheet.create({
   calendarNoMealsText: {
     marginTop: 12,
     fontSize: 14,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
   },
 });
 

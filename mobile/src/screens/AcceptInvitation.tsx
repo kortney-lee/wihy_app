@@ -376,7 +376,7 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 12,
     fontSize: 16,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary,
   },
   errorIcon: {
     fontSize: 48,
@@ -384,7 +384,7 @@ const styles = StyleSheet.create({
   },
   errorText: {
     fontSize: 16,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary,
     textAlign: 'center',
     marginBottom: 24,
   },
@@ -412,12 +412,12 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 28,
     fontWeight: '700',
-    color: '#1f2937',
+    // color: theme.colors.text,
     marginBottom: 4,
   },
   headerSubtitle: {
     fontSize: 16,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary,
   },
   coachCard: {
     backgroundColor: '#fff',
@@ -455,12 +455,12 @@ const styles = StyleSheet.create({
   coachName: {
     fontSize: 24,
     fontWeight: '700',
-    color: '#1f2937',
+    // color: theme.colors.text,
     marginBottom: 4,
   },
   coachTitle: {
     fontSize: 16,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary,
     marginBottom: 12,
   },
   ratingContainer: {
@@ -477,7 +477,7 @@ const styles = StyleSheet.create({
   },
   ratingText: {
     fontSize: 14,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary,
   },
   messageCard: {
     backgroundColor: '#fff',
@@ -493,12 +493,12 @@ const styles = StyleSheet.create({
   messageLabel: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#6b7280',
+    // color: theme.colors.textSecondary,
     marginBottom: 8,
   },
   messageText: {
     fontSize: 16,
-    color: '#1f2937',
+    // color: theme.colors.text,
     lineHeight: 24,
   },
   optionsCard: {
@@ -515,7 +515,7 @@ const styles = StyleSheet.create({
   optionsTitle: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#1f2937',
+    // color: theme.colors.text,
     marginBottom: 16,
   },
   optionButton: {
@@ -553,7 +553,7 @@ const styles = StyleSheet.create({
   optionTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#1f2937',
+    // color: theme.colors.text,
     marginBottom: 2,
   },
   optionTitleActive: {
@@ -561,7 +561,7 @@ const styles = StyleSheet.create({
   },
   optionDescription: {
     fontSize: 14,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary,
   },
   infoBox: {
     flexDirection: 'row',

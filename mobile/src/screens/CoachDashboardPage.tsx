@@ -345,7 +345,7 @@ const CoachDashboardPage: React.FC<CoachDashboardPageProps> = ({ showMenuFromHea
                   <SvgIcon name="person" size={iconSize} color="#10b981" />
                 </View>
                 <Text style={[styles.cardTitle, { color: '#10b981', fontSize: titleSize }]}>Personal</Text>
-                <Text style={[styles.cardSubtitle, { color: '#6b7280', fontSize: subtitleSize }]}>Back to my health</Text>
+                <Text style={[styles.cardSubtitle, { color: theme.colors.textSecondary, fontSize: subtitleSize }]}>Back to my health</Text>
               </TouchableOpacity>
             );
           })()}

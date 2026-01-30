@@ -382,7 +382,7 @@ const styles = StyleSheet.create({
   exerciseName: {
     fontSize: 24,
     fontWeight: '700',
-    color: '#1f2937',
+    // color: theme.colors.text,
     marginTop: 12,
     textAlign: 'center',
   },
@@ -400,7 +400,7 @@ const styles = StyleSheet.create({
   },
   infoText: {
     fontSize: 15,
-    color: '#374151',
+    // color: theme.colors.text,
     flex: 1,
   },
   logSetSection: {
@@ -412,7 +412,7 @@ const styles = StyleSheet.create({
   logSetTitle: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#1f2937',
+    // color: theme.colors.text,
     marginBottom: 16,
     textAlign: 'center',
   },
@@ -427,7 +427,7 @@ const styles = StyleSheet.create({
   logInputLabel: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#6B7280',
+    // color: theme.colors.textSecondary,
     marginBottom: 6,
   },
   logInput: {
@@ -439,7 +439,7 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     fontSize: 18,
     fontWeight: '600',
-    color: '#1f2937',
+    // color: theme.colors.text,
     textAlign: 'center',
     outlineStyle: 'none' as any,
   },
@@ -479,7 +479,7 @@ const styles = StyleSheet.create({
   },
   completedSetText: {
     fontSize: 14,
-    color: '#374151',
+    // color: theme.colors.text,
   },
   actions: {
     flexDirection: 'row',
@@ -501,7 +501,7 @@ const styles = StyleSheet.create({
   skipExerciseText: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#6B7280',
+    // color: theme.colors.textSecondary,
   },
   endWorkoutButton: {
     flex: 1,
@@ -531,7 +531,7 @@ const styles = StyleSheet.create({
   startLaterText: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#6B7280',
+    // color: theme.colors.textSecondary,
   },
   lockedContainer: {
     flex: 1,
@@ -542,13 +542,13 @@ const styles = StyleSheet.create({
   lockedTitle: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#1f2937',
+    // color: theme.colors.text,
     marginTop: 16,
     textAlign: 'center',
   },
   lockedMessage: {
     fontSize: 15,
-    color: '#6B7280',
+    // color: theme.colors.textSecondary,
     textAlign: 'center',
     marginTop: 8,
     lineHeight: 22,

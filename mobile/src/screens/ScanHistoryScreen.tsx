@@ -176,12 +176,12 @@ export default function ScanHistoryScreen() {
       case 'label':
         return '#ef4444';
       default:
-        return '#6b7280';
+        return theme.colors.textSecondary;
     }
   };
 
   const getGradeColor = (grade?: string) => {
-    if (!grade) return '#6b7280';
+    if (!grade) return theme.colors.textSecondary;
     switch (grade.toUpperCase()) {
       case 'A':
         return '#10b981';
@@ -194,7 +194,7 @@ export default function ScanHistoryScreen() {
       case 'F':
         return '#ef4444';
       default:
-        return '#6b7280';
+        return theme.colors.textSecondary;
     }
   };
 
@@ -402,7 +402,7 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 16,
     fontSize: 16,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary,
   },
   filterContainer: {
     flexDirection: 'row',
@@ -428,7 +428,7 @@ const styles = StyleSheet.create({
   filterButtonText: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#6b7280',
+    // color: theme.colors.textSecondary,
   },
   filterButtonTextActive: {
     color: '#fff',
@@ -471,7 +471,7 @@ const styles = StyleSheet.create({
   },
   scanDate: {
     fontSize: 14,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary,
   },
   scoreBadge: {
     paddingHorizontal: 12,
@@ -519,7 +519,7 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#6b7280',
+    // color: theme.colors.textSecondary,
     marginTop: 16,
   },
   emptySubtext: {

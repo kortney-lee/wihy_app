@@ -1287,7 +1287,7 @@ const styles = StyleSheet.create({
   },
   aiMessageText: {
     // backgroundColor: '#ffffff', // theme.colors.surface // Use theme.colors.surface
-    color: '#1f2937',
+    // color: '#1f2937', // theme.colors.text
     borderBottomLeftRadius: 6,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
@@ -1379,7 +1379,7 @@ const styles = StyleSheet.create({
   },
   textInput: {
     fontSize: 15,
-    color: '#1f2937',
+    // color: '#1f2937', // theme.colors.text
     minHeight: 22,
     textAlignVertical: 'center',
     paddingTop: 0,
@@ -1434,7 +1434,7 @@ const styles = StyleSheet.create({
   resourceCardTitle: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#1f2937',
+    // color: '#1f2937', // theme.colors.text
     marginBottom: 2,
   },
   resourceCardType: {
@@ -1557,7 +1557,7 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#1f2937',
+    // color: '#1f2937', // theme.colors.text
   },
   modalCloseButton: {
     padding: 8,
@@ -1597,7 +1597,7 @@ const styles = StyleSheet.create({
   foodName: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#1f2937',
+    // color: '#1f2937', // theme.colors.text
     marginBottom: 12,
   },
   nutritionRow: {
@@ -1640,7 +1640,7 @@ const styles = StyleSheet.create({
   alternativeName: {
     fontSize: 17,
     fontWeight: '700',
-    color: '#1f2937',
+    // color: '#1f2937', // theme.colors.text
   },
   comparisonText: {
     fontSize: 14,

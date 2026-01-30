@@ -1015,7 +1015,7 @@ const styles = StyleSheet.create({
   foodName: {
     fontSize: 20,
     fontWeight: '600',
-    color: '#1f2937',
+    // color: theme.colors.text
     marginBottom: 8,
   },
 
@@ -1027,7 +1027,7 @@ const styles = StyleSheet.create({
 
   servingLabel: {
     fontSize: 14,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
   },
 
   servingControls: {
@@ -1048,7 +1048,7 @@ const styles = StyleSheet.create({
   servingText: {
     fontSize: 16,
     fontWeight: '500',
-    color: '#1f2937',
+    // color: theme.colors.text
     minWidth: 60,
     textAlign: 'center',
   },
@@ -1097,7 +1097,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#1f2937',
+    // color: theme.colors.text
     marginBottom: 12,
   },
 
@@ -1122,7 +1122,7 @@ const styles = StyleSheet.create({
 
   macroLabel: {
     fontSize: 12,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
     marginBottom: 4,
   },
 
@@ -1137,7 +1137,7 @@ const styles = StyleSheet.create({
   macroValue: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#1f2937',
+    // color: theme.colors.text
   },
 
   macroValueWhite: {
@@ -1152,7 +1152,7 @@ const styles = StyleSheet.create({
 
   nutrientsTip: {
     fontSize: 14,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
     marginBottom: 16,
     fontStyle: 'italic',
   },
@@ -1181,7 +1181,7 @@ const styles = StyleSheet.create({
   nutrientName: {
     fontSize: 16,
     fontWeight: '500',
-    color: '#1f2937',
+    // color: theme.colors.text
   },
 
   nutrientNameWhite: {
@@ -1192,7 +1192,7 @@ const styles = StyleSheet.create({
 
   nutrientAmount: {
     fontSize: 14,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
     marginTop: 2,
   },
 
@@ -1268,7 +1268,7 @@ const styles = StyleSheet.create({
 
   scoreLabel: {
     fontSize: 12,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
     marginBottom: 4,
   },
 
@@ -1290,7 +1290,7 @@ const styles = StyleSheet.create({
 
   gradeLabel: {
     fontSize: 12,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
     marginBottom: 4,
   },
 
@@ -1327,7 +1327,7 @@ const styles = StyleSheet.create({
 
   healthAnalysisLabel: {
     fontSize: 14,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
     fontWeight: '500',
     marginBottom: 8,
   },
@@ -1411,7 +1411,7 @@ const styles = StyleSheet.create({
   secondaryActionText: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#374151',
+    // color: theme.colors.text
   },
 
   loadingContainer: {
@@ -1434,13 +1434,13 @@ const styles = StyleSheet.create({
   loadingTitle: {
     fontSize: 24,
     fontWeight: '600',
-    color: '#1f2937',
+    // color: theme.colors.text
     marginTop: 16,
   },
 
   loadingSubtitle: {
     fontSize: 16,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
     textAlign: 'center',
     marginTop: 8,
     lineHeight: 24,
@@ -1472,13 +1472,13 @@ const styles = StyleSheet.create({
   errorTitle: {
     fontSize: 24,
     fontWeight: '600',
-    color: '#1f2937',
+    // color: theme.colors.text
     marginTop: 16,
   },
 
   errorSubtitle: {
     fontSize: 16,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
     textAlign: 'center',
     marginTop: 8,
     marginBottom: 32,
@@ -1493,7 +1493,7 @@ const styles = StyleSheet.create({
 
   ingredientsText: {
     fontSize: 14,
-    color: '#374151',
+    // color: theme.colors.text
     lineHeight: 20,
     marginTop: 8,
   },
@@ -1580,7 +1580,7 @@ const styles = StyleSheet.create({
 
   sectionSubtitle: {
     fontSize: 12,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
     marginTop: 4,
   },
 
@@ -1672,7 +1672,7 @@ const styles = StyleSheet.create({
   analysisSummary: {
     fontSize: 12,
     fontStyle: 'italic',
-    color: '#4b5563',
+    // color: theme.colors.text,
     marginTop: 4,
   },
 
@@ -1696,12 +1696,12 @@ const styles = StyleSheet.create({
   statValue: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#1f2937',
+    // color: theme.colors.text
   },
 
   statLabel: {
     fontSize: 10,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
     marginTop: 4,
     textAlign: 'center',
   },
@@ -1791,7 +1791,7 @@ const styles = StyleSheet.create({
 
   novaLabel: {
     fontSize: 12,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
     marginBottom: 4,
   },
 
@@ -1820,7 +1820,7 @@ const styles = StyleSheet.create({
 
   additivesLabel: {
     fontSize: 12,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
     marginBottom: 4,
   },
 
@@ -1842,7 +1842,7 @@ const styles = StyleSheet.create({
 
   ingredientsCountLabel: {
     fontSize: 12,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
     marginBottom: 4,
   },
 
@@ -2021,7 +2021,7 @@ const styles = StyleSheet.create({
   },
   typeHeaderSubtitle: {
     fontSize: 13,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary,
     marginTop: 2,
   },
 
@@ -2055,7 +2055,7 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#1f2937',
+    // color: theme.colors.text
   },
   modalCloseButton: {
     padding: 8,
@@ -2095,7 +2095,7 @@ const styles = StyleSheet.create({
   foodCardName: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#1f2937',
+    // color: theme.colors.text
     marginBottom: 12,
   },
   nutritionRow: {
@@ -2138,7 +2138,7 @@ const styles = StyleSheet.create({
   alternativeName: {
     fontSize: 17,
     fontWeight: '700',
-    color: '#1f2937',
+    // color: theme.colors.text
   },
   comparisonText: {
     fontSize: 14,

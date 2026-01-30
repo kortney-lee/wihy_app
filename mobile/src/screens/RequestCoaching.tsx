@@ -86,7 +86,7 @@ export default function RequestCoaching() {
               style={styles.closeButton}
               onPress={() => navigation.goBack()}
             >
-              <Ionicons name="close" size={24} color="#6b7280" />
+              <Ionicons name="close" size={24} color={theme.colors.textSecondary} />
             </Pressable>
           </View>
 
@@ -264,7 +264,7 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#374151',
+    color: theme.colors.text,
     marginBottom: 8,
   },
   textArea: {
@@ -318,7 +318,7 @@ const styles = StyleSheet.create({
   },
   frequencyText: {
     fontSize: 15,
-    color: '#374151',
+    color: theme.colors.text,
   },
   frequencyTextSelected: {
     color: '#3b82f6',
@@ -358,7 +358,7 @@ const styles = StyleSheet.create({
   cancelButtonText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#374151',
+    color: theme.colors.text,
   },
   submitButton: {
     flex: 1,

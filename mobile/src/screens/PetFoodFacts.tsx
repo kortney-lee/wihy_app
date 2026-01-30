@@ -48,7 +48,7 @@ function getNutritionGradeColor(grade: string) {
     case 'D': return { bg: '#fed7aa', text: '#9a3412', border: '#f97316' };
     case 'E':
     case 'F': return { bg: '#fecaca', text: '#991b1b', border: '#ef4444' };
-    default: return { bg: '#e5e7eb', text: '#374151', border: '#9ca3af' };
+    default: return { bg: '#e5e7eb', text: '#111827' /* theme.colors.text */, border: '#9ca3af' };
   }
 }
 
@@ -422,7 +422,7 @@ export default function PetFoodFacts() {
                 query: `Is ${productInfo.name} by ${productInfo.brand} a good choice for my ${pet_info?.suggested_pet_type || 'pet'}? Give me a full assessment.`
               })}
             >
-              <Ionicons name="shield-checkmark" size={18} color="#6b7280" />
+              <Ionicons name="shield-checkmark" size={18} color={theme.colors.textSecondary} />
               <Text style={styles.secondaryActionText}>Full assessment</Text>
             </Pressable>
 
@@ -430,7 +430,7 @@ export default function PetFoodFacts() {
               style={[styles.actionButton, styles.secondaryAction]}
               onPress={() => Alert.alert('Feature Coming Soon', 'Product tracking feature will be available soon!')}
             >
-              <Ionicons name="bookmark" size={18} color="#6b7280" />
+              <Ionicons name="bookmark" size={18} color={theme.colors.textSecondary} />
               <Text style={styles.secondaryActionText}>Save product</Text>
             </Pressable>
           </View>
@@ -600,7 +600,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#1f2937',
+    // color: theme.colors.text
     marginBottom: 12,
   },
   gradeContainer: {
@@ -630,11 +630,11 @@ const styles = StyleSheet.create({
   },
   nutritionLabel: {
     fontSize: 14,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
   },
   nutritionValue: {
     fontSize: 14,
-    color: '#1f2937',
+    // color: theme.colors.text
     fontWeight: '600',
   },
   proteinSourcesContainer: {
@@ -732,7 +732,7 @@ const styles = StyleSheet.create({
   },
   ingredientsText: {
     fontSize: 13,
-    color: '#4b5563',
+    // color: theme.colors.text
     lineHeight: 20,
   },
   analyzeAllButton: {
@@ -758,15 +758,15 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingVertical: 8,
     borderBottomWidth: 1,
-    borderBottomColor: '#374151',
+    // borderBottomColor: theme.colors.text,
   },
   detailLabel: {
     fontSize: 14,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
   },
   detailValue: {
     fontSize: 14,
-    color: '#1f2937',
+    // color: theme.colors.text
     fontWeight: '500',
   },
   assessmentCard: {
@@ -824,7 +824,7 @@ const styles = StyleSheet.create({
     borderColor: '#e5e7eb',
   },
   secondaryActionText: {
-    color: '#374151',
+    // color: theme.colors.text
     fontSize: 14,
     fontWeight: '500',
   },
@@ -836,6 +836,6 @@ const styles = StyleSheet.create({
   },
   sourceText: {
     fontSize: 12,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
   },
 });

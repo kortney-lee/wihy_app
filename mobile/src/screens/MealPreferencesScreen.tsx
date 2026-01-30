@@ -448,7 +448,7 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     fontSize: 16,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
     marginTop: 12,
   },
   section: {
@@ -459,12 +459,12 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#1f2937',
+    // color: theme.colors.text
     marginBottom: 4,
   },
   sectionSubtitle: {
     fontSize: 14,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
     marginBottom: 16,
   },
   focusCard: {
@@ -498,7 +498,7 @@ const styles = StyleSheet.create({
   focusCardTitle: {
     fontSize: 17,
     fontWeight: '700',
-    color: '#1f2937',
+    // color: theme.colors.text
     marginBottom: 4,
   },
   focusCardTitleSelected: {
@@ -506,7 +506,7 @@ const styles = StyleSheet.create({
   },
   focusCardDescription: {
     fontSize: 13,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
     lineHeight: 18,
   },
   optionsGrid: {
@@ -529,7 +529,7 @@ const styles = StyleSheet.create({
   optionChipText: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
   },
   optionChipTextSelected: {
     color: '#dc2626',
@@ -539,7 +539,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 16,
     fontSize: 15,
-    color: '#1f2937',
+    // color: theme.colors.text
     borderWidth: 1,
     borderColor: '#e5e7eb',
     minHeight: 80,
@@ -585,7 +585,7 @@ const styles = StyleSheet.create({
   skillLabel: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#1f2937',
+    // color: theme.colors.text
     marginBottom: 2,
   },
   skillLabelSelected: {
@@ -593,7 +593,7 @@ const styles = StyleSheet.create({
   },
   skillDescription: {
     fontSize: 13,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
   },
   actionsSection: {
     padding: 20,
@@ -627,7 +627,7 @@ const styles = StyleSheet.create({
   },
   skipButtonText: {
     fontSize: 14,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
     textDecorationLine: 'underline',
   },
 });

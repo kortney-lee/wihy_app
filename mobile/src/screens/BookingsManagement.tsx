@@ -467,7 +467,7 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 12,
     fontSize: 16,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary,
   },
   collapsibleHeader: {
     backgroundColor: '#6366f1',
@@ -543,7 +543,7 @@ const styles = StyleSheet.create({
   filterTabText: {
     fontSize: 13,
     fontWeight: '500',
-    color: '#6b7280',
+    // color: theme.colors.textSecondary,
   },
   filterTabTextActive: {
     color: '#6366f1',
@@ -592,11 +592,11 @@ const styles = StyleSheet.create({
   clientName: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#1f2937',
+    // color: theme.colors.text,
   },
   sessionType: {
     fontSize: 13,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary,
     marginTop: 2,
   },
   statusBadge: {
@@ -622,7 +622,7 @@ const styles = StyleSheet.create({
   },
   detailText: {
     fontSize: 13,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary,
   },
   actionButtons: {
     flexDirection: 'row',
@@ -666,12 +666,12 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#374151',
+    // color: theme.colors.text,
     marginTop: 16,
   },
   emptySubtitle: {
     fontSize: 14,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary,
     marginTop: 8,
     textAlign: 'center',
   },

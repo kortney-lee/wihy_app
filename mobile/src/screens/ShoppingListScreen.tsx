@@ -276,20 +276,20 @@ export default function ShoppingListScreen({ route, navigation, isDashboardMode 
         >
           {/* Quick Stats */}
           <View style={styles.statsRow}>
-            <View style={styles.statCard}>
+            <View style={[styles.statCard, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
               <Ionicons name="grid-outline" size={20} color="#4cbb17" />
-              <Text style={styles.statValue}>{categories.length}</Text>
-              <Text style={styles.statLabel}>Categories</Text>
+              <Text style={[styles.statValue, { color: theme.colors.text }]}>{categories.length}</Text>
+              <Text style={[styles.statLabel, { color: theme.colors.textSecondary }]}>Categories</Text>
             </View>
-            <View style={styles.statCard}>
+            <View style={[styles.statCard, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
               <Ionicons name="cart-outline" size={20} color="#4cbb17" />
-              <Text style={styles.statValue}>{totalItems - checkedCount}</Text>
-              <Text style={styles.statLabel}>Remaining</Text>
+              <Text style={[styles.statValue, { color: theme.colors.text }]}>{totalItems - checkedCount}</Text>
+              <Text style={[styles.statLabel, { color: theme.colors.textSecondary }]}>Remaining</Text>
             </View>
-            <View style={styles.statCard}>
+            <View style={[styles.statCard, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
               <Ionicons name="checkbox-outline" size={20} color="#4cbb17" />
-              <Text style={styles.statValue}>{checkedCount}</Text>
-              <Text style={styles.statLabel}>Checked</Text>
+              <Text style={[styles.statValue, { color: theme.colors.text }]}>{checkedCount}</Text>
+              <Text style={[styles.statLabel, { color: theme.colors.textSecondary }]}>Checked</Text>
             </View>
           </View>
 
@@ -301,20 +301,20 @@ export default function ShoppingListScreen({ route, navigation, isDashboardMode 
             const allChecked = uncheckedCount === 0;
 
             return (
-              <View key={category} style={[styles.categoryCard, allChecked && styles.categoryCardComplete]}>
+              <View key={category} style={[styles.categoryCard, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }, allChecked && styles.categoryCardComplete]}>
                 <TouchableOpacity
                   onPress={() => toggleCategory(category)}
-                  style={styles.categoryHeader}
+                  style={[styles.categoryHeader, { backgroundColor: theme.colors.card }]}
                 >
                   <View style={styles.categoryTitleRow}>
                     <Text style={styles.categoryIcon}>
                       {getCategoryIcon(category)}
                     </Text>
-                    <Text style={[styles.categoryTitle, allChecked && styles.categoryTitleComplete]}>
+                    <Text style={[styles.categoryTitle, { color: theme.colors.text }, allChecked && styles.categoryTitleComplete]}>
                       {category.charAt(0).toUpperCase() + category.slice(1)}
                     </Text>
                     <View style={[styles.categoryBadge, allChecked && styles.categoryBadgeComplete]}>
-                      <Text style={[styles.categoryBadgeText, allChecked && styles.categoryBadgeTextComplete]}>
+                      <Text style={[styles.categoryBadgeText, { color: theme.colors.textSecondary }, allChecked && styles.categoryBadgeTextComplete]}>
                         {allChecked ? '✓' : uncheckedCount}
                       </Text>
                     </View>
@@ -327,7 +327,7 @@ export default function ShoppingListScreen({ route, navigation, isDashboardMode 
                 </TouchableOpacity>
 
                 {isExpanded && (
-                  <View style={styles.itemsList}>
+                  <View style={[styles.itemsList, { borderTopColor: theme.colors.border }]}>
                     {items.map((item: ShoppingItem, index: number) => {
                       const itemKey = getItemKey(category, index);
                       const isChecked = checkedItems.has(itemKey);
@@ -335,20 +335,20 @@ export default function ShoppingListScreen({ route, navigation, isDashboardMode 
                       return (
                         <TouchableOpacity 
                           key={itemKey} 
-                          style={[styles.itemRow, isChecked && styles.itemRowChecked]}
+                          style={[styles.itemRow, { borderBottomColor: theme.colors.border }, isChecked && styles.itemRowChecked]}
                           onPress={() => toggleItemChecked(itemKey)}
                           activeOpacity={0.7}
                         >
-                          <View style={[styles.checkbox, isChecked && styles.checkboxChecked]}>
+                          <View style={[styles.checkbox, { borderColor: theme.colors.border }, isChecked && styles.checkboxChecked]}>
                             {isChecked && (
                               <Ionicons name="checkmark" size={14} color="#fff" />
                             )}
                           </View>
                           <View style={styles.itemContent}>
-                            <Text style={[styles.itemName, isChecked && styles.itemNameChecked]}>
+                            <Text style={[styles.itemName, { color: theme.colors.text }, isChecked && styles.itemNameChecked]}>
                               {item.name}
                             </Text>
-                            <Text style={[styles.itemQuantity, isChecked && styles.itemQuantityChecked]}>
+                            <Text style={[styles.itemQuantity, { color: theme.colors.textSecondary }, isChecked && styles.itemQuantityChecked]}>
                               {item.quantity} {item.unit}
                             </Text>
                           </View>
@@ -365,10 +365,10 @@ export default function ShoppingListScreen({ route, navigation, isDashboardMode 
           })}
 
           {/* Instacart Section */}
-          <View style={styles.instacartSection}>
+          <View style={[styles.instacartSection, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
             <View style={styles.instacartHeader}>
-              <Text style={styles.instacartTitle}>🛒 Shop Online</Text>
-              <Text style={styles.instacartSubtitle}>
+              <Text style={[styles.instacartTitle, { color: theme.colors.text }]}>🛒 Shop Online</Text>
+              <Text style={[styles.instacartSubtitle, { color: theme.colors.textSecondary }]}>
                 Get groceries delivered from 58+ retailers
               </Text>
             </View>
@@ -539,25 +539,22 @@ const styles = StyleSheet.create({
   },
   statCard: {
     flex: 1,
-    backgroundColor: '#fff',
+    // backgroundColor: theme.colors.card
     borderRadius: 12,
+    borderWidth: 2,
+    // borderColor: theme.colors.border
     padding: 12,
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
   },
   statValue: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#1f2937',
+    // color: theme.colors.text
     marginTop: 4,
   },
   statLabel: {
     fontSize: 11,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
     marginTop: 2,
   },
   
@@ -565,14 +562,11 @@ const styles = StyleSheet.create({
   categoryCard: {
     marginHorizontal: 16,
     marginTop: 12,
-    backgroundColor: '#fff',
+    // backgroundColor: theme.colors.card
     borderRadius: 12,
+    borderWidth: 2,
+    // borderColor: theme.colors.border
     overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
   },
   categoryCardComplete: {
     opacity: 0.7,
@@ -583,7 +577,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: 14,
-    backgroundColor: '#fff',
+    // backgroundColor: theme.colors.card
   },
   categoryTitleRow: {
     flexDirection: 'row',
@@ -597,12 +591,12 @@ const styles = StyleSheet.create({
   categoryTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#1f2937',
+    // color: theme.colors.text
     flex: 1,
   },
   categoryTitleComplete: {
     textDecorationLine: 'line-through',
-    color: '#9ca3af',
+    // color: theme.colors.textSecondary
   },
   categoryBadge: {
     // backgroundColor: '#f3f4f6', // theme.colors.surface // Use theme.colors.background
@@ -617,7 +611,7 @@ const styles = StyleSheet.create({
   categoryBadgeText: {
     fontSize: 13,
     fontWeight: '700',
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
   },
   categoryBadgeTextComplete: {
     color: '#059669',
@@ -627,15 +621,15 @@ const styles = StyleSheet.create({
   itemsList: {
     paddingHorizontal: 14,
     paddingBottom: 8,
-    borderTopWidth: 1,
-    borderTopColor: '#f3f4f6',
+    borderTopWidth: 2,
+    // borderTopColor: theme.colors.border
   },
   itemRow: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f9fafb',
+    borderBottomWidth: 2,
+    // borderBottomColor: theme.colors.border
   },
   itemRowChecked: {
     opacity: 0.6,
@@ -645,7 +639,7 @@ const styles = StyleSheet.create({
     height: 24,
     borderRadius: 6,
     borderWidth: 2,
-    borderColor: '#d1d5db',
+    // borderColor: theme.colors.border
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 12,
@@ -660,16 +654,16 @@ const styles = StyleSheet.create({
   itemName: {
     fontSize: 15,
     fontWeight: '500',
-    color: '#1f2937',
+    // color: theme.colors.text
     marginBottom: 2,
   },
   itemNameChecked: {
     textDecorationLine: 'line-through',
-    color: '#9ca3af',
+    // color: theme.colors.textSecondary
   },
   itemQuantity: {
     fontSize: 13,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
   },
   itemQuantityChecked: {
     color: '#d1d5db',
@@ -687,14 +681,11 @@ const styles = StyleSheet.create({
   instacartSection: {
     marginHorizontal: 16,
     marginTop: 24,
-    backgroundColor: '#fff',
+    // backgroundColor: theme.colors.card
     borderRadius: 16,
+    borderWidth: 2,
+    // borderColor: theme.colors.border
     padding: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
   },
   instacartHeader: {
     marginBottom: 16,
@@ -702,12 +693,12 @@ const styles = StyleSheet.create({
   instacartTitle: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#1f2937',
+    // color: theme.colors.text
     marginBottom: 4,
   },
   instacartSubtitle: {
     fontSize: 14,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
   },
   instacartButton: {
     backgroundColor: '#059669',
@@ -771,7 +762,7 @@ const styles = StyleSheet.create({
   storeOptionsTitle: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
     marginBottom: 12,
     marginLeft: 4,
   },
@@ -781,16 +772,16 @@ const styles = StyleSheet.create({
     paddingRight: 16,
   },
   storeLogo: {
-    backgroundColor: '#fff',
+    // backgroundColor: theme.colors.card
     paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: 20,
-    borderWidth: 1,
-    borderColor: '#e5e7eb',
+    borderWidth: 2,
+    // borderColor: theme.colors.border
   },
   storeLogoText: {
     fontSize: 13,
-    color: '#4b5563',
+    // color: theme.colors.text
     fontWeight: '500',
   },
   

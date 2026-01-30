@@ -681,7 +681,7 @@ const styles = StyleSheet.create({
   },
   headerSubtitle: {
     fontSize: 13,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
   },
   userInfo: {
     backgroundColor: '#fff',
@@ -700,7 +700,7 @@ const styles = StyleSheet.create({
   infoLabel: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
   },
   infoValue: {
     fontSize: 13,
@@ -729,7 +729,7 @@ const styles = StyleSheet.create({
   },
   summaryLabel: {
     fontSize: 11,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
     marginTop: 2,
   },
   runButton: {
@@ -818,7 +818,7 @@ const styles = StyleSheet.create({
   },
   testMessage: {
     fontSize: 11,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
     marginTop: 4,
     marginLeft: 26,
   },

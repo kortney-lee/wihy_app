@@ -694,7 +694,7 @@ const styles = StyleSheet.create({
   },
   filterText: {
     fontSize: 15,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary,
     lineHeight: 20,
   },
   filterTextActive: {
@@ -737,7 +737,7 @@ const styles = StyleSheet.create({
   },
   statLabel: {
     fontSize: 12,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary,
     marginTop: 2,
   },
   content: {
@@ -797,12 +797,12 @@ const styles = StyleSheet.create({
   },
   clientEmail: {
     fontSize: 14,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary,
     marginTop: 2,
   },
   clientPhone: {
     fontSize: 14,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary,
     marginTop: 2,
   },
   statusBadge: {
@@ -825,7 +825,7 @@ const styles = StyleSheet.create({
   },
   metaText: {
     fontSize: 14,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary,
   },
   adherenceContainer: {
     gap: 6,
@@ -838,7 +838,7 @@ const styles = StyleSheet.create({
   adherenceLabel: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#6b7280',
+    // color: theme.colors.textSecondary,
   },
   adherenceValue: {
     fontSize: 16,
@@ -917,7 +917,7 @@ const styles = StyleSheet.create({
   },
   gridProgram: {
     fontSize: 12,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary,
     textAlign: 'center',
     marginTop: 2,
   },
@@ -934,7 +934,7 @@ const styles = StyleSheet.create({
   },
   gridAdherenceText: {
     fontSize: 12,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary,
     marginTop: 4,
   },
   emptyState: {
@@ -951,7 +951,7 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     fontSize: 16,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary,
     marginTop: 16,
   },
   emptyTitle: {
@@ -962,7 +962,7 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 14,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary,
     textAlign: 'center',
     marginTop: 8,
   },

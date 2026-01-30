@@ -991,7 +991,7 @@ const styles = StyleSheet.create({
   },
   stepDescription: {
     fontSize: 16,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary,
     marginBottom: 8,
   },
   formGroup: {
@@ -1000,7 +1000,7 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#374151',
+    // color: theme.colors.text,
   },
   input: {
     backgroundColor: '#fff',
@@ -1043,7 +1043,7 @@ const styles = StyleSheet.create({
   },
   optionText: {
     fontSize: 14,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary,
   },
   optionTextSelected: {
     color: '#3b82f6',
@@ -1080,7 +1080,7 @@ const styles = StyleSheet.create({
   },
   radioLabel: {
     fontSize: 14,
-    color: '#374151',
+    // color: theme.colors.text,
     flex: 1,
   },
   consentCard: {
@@ -1096,7 +1096,7 @@ const styles = StyleSheet.create({
   },
   consentText: {
     fontSize: 14,
-    color: '#374151',
+    // color: theme.colors.text,
     flex: 1,
   },
   link: {
@@ -1122,7 +1122,7 @@ const styles = StyleSheet.create({
   },
   summaryText: {
     fontSize: 14,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary,
   },
   footer: {
     flexDirection: 'row',
@@ -1156,6 +1156,6 @@ const styles = StyleSheet.create({
   buttonSecondaryText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#374151',
+    // color: theme.colors.text,
   },
 });

@@ -257,11 +257,11 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#1f2937',
+    // color: theme.colors.text
   },
   stepCounter: {
     fontSize: 14,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
     fontWeight: '500',
   },
   progressBarContainer: {
@@ -293,13 +293,13 @@ const styles = StyleSheet.create({
   stepTitle: {
     fontSize: 28,
     fontWeight: '700',
-    color: '#1f2937',
+    // color: theme.colors.text
     marginBottom: 12,
     textAlign: 'center',
   },
   stepDescription: {
     fontSize: 16,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
     lineHeight: 24,
     textAlign: 'center',
     marginBottom: 24,
@@ -371,7 +371,7 @@ const styles = StyleSheet.create({
   secondaryButtonText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
   },
   primaryButton: {
     flex: 1,

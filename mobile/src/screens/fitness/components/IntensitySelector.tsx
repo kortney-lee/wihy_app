@@ -59,7 +59,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#374151',
+    // color: theme.colors.text
     marginBottom: 10,
   },
   optionsRow: {
@@ -84,7 +84,7 @@ const styles = StyleSheet.create({
   optionLabel: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#6b7280',
+    // color: theme.colors.textSecondary
     marginTop: 4,
   },
   optionLabelSelected: {

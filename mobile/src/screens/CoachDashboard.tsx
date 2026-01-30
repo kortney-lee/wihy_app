@@ -714,7 +714,7 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 16,
     fontSize: 16,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary,
     fontWeight: '500',
   },
   emptyContainer: {
@@ -726,7 +726,7 @@ const styles = StyleSheet.create({
     marginTop: 16,
     fontSize: 18,
     fontWeight: '600',
-    color: '#6b7280',
+    // color: theme.colors.textSecondary,
   },
   emptySubtext: {
     marginTop: 8,
@@ -790,7 +790,7 @@ const styles = StyleSheet.create({
   listHeaderText: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#6b7280',
+    // color: theme.colors.textSecondary,
   },
   addClientButton: {
     flexDirection: 'row',
@@ -842,7 +842,7 @@ const styles = StyleSheet.create({
   },
   clientEmail: {
     fontSize: 14,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary,
     marginTop: 2,
   },
   goalsContainer: {
@@ -893,7 +893,7 @@ const styles = StyleSheet.create({
   },
   clientHeaderEmail: {
     fontSize: 14,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary,
   },
   tabBar: {
     backgroundColor: '#fff',
@@ -915,7 +915,7 @@ const styles = StyleSheet.create({
   tabText: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#6b7280',
+    // color: theme.colors.textSecondary,
   },
   tabTextActive: {
     color: '#3b82f6',
@@ -939,7 +939,7 @@ const styles = StyleSheet.create({
   cardLabel: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#6b7280',
+    // color: theme.colors.textSecondary,
     marginBottom: 12,
   },
   goalItem: {
@@ -982,7 +982,7 @@ const styles = StyleSheet.create({
   },
   dietOptionText: {
     fontSize: 14,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary,
   },
   dietOptionTextSelected: {
     color: '#3b82f6',
@@ -1006,7 +1006,7 @@ const styles = StyleSheet.create({
   },
   actionStatus: {
     fontSize: 14,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary,
     marginTop: 2,
   },
   priorityBadge: {
@@ -1037,7 +1037,7 @@ const styles = StyleSheet.create({
   mealType: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#6b7280',
+    // color: theme.colors.textSecondary,
   },
   mealName: {
     fontSize: 14,
@@ -1073,7 +1073,7 @@ const styles = StyleSheet.create({
   previewSubtitle: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#6b7280',
+    // color: theme.colors.textSecondary,
     marginTop: 12,
     marginBottom: 8,
   },
@@ -1085,7 +1085,7 @@ const styles = StyleSheet.create({
   previewMealTime: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#6b7280',
+    // color: theme.colors.textSecondary,
     textTransform: 'uppercase',
   },
   previewMealName: {
@@ -1096,7 +1096,7 @@ const styles = StyleSheet.create({
   },
   previewMacros: {
     fontSize: 14,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary,
     marginTop: 4,
   },
   primaryButton: {
@@ -1156,7 +1156,7 @@ const styles = StyleSheet.create({
   },
   statLabel: {
     fontSize: 12,
-    color: '#6b7280',
+    // color: theme.colors.textSecondary,
     marginBottom: 4,
   },
   statNumber: {
