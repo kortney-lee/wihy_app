@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
   Text,
@@ -82,6 +82,8 @@ export default function CoachProfileSetup({
   const { user } = useAuth();
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoadingProfile, setIsLoadingProfile] = useState(true);
+  const [hasExistingProfile, setHasExistingProfile] = useState(false);
   const totalSteps = 3;
   
   // Collapsing header animation
@@ -125,6 +127,48 @@ export default function CoachProfileSetup({
     availableHoursStart: '09:00',
     availableHoursEnd: '17:00',
   });
+
+  // Load existing profile if it exists
+  useEffect(() => {
+    loadExistingProfile();
+  }, []);
+
+  const loadExistingProfile = async () => {
+    try {
+      setIsLoadingProfile(true);
+      const profile = await coachService.getMyCoachProfile();
+      
+      if (profile && profile.id) {
+        // Profile exists - populate form
+        setHasExistingProfile(true);
+        setFormData({
+          name: profile.name || '',
+          title: profile.title || '',
+          specialty: profile.specialties?.[0] || '',
+          bio: profile.bio || '',
+          yearsExperience: profile.years_experience?.toString() || '',
+          credentials: profile.certifications
+            ?.map((cert: any) => cert.name || cert.abbreviation)
+            .join(', ') || '',
+          avatarUrl: profile.avatar_url || '',
+          city: profile.location?.city || '',
+          state: profile.location?.state || '',
+          country: profile.location?.country || 'USA',
+          sessionRate: profile.pricing?.session_rate?.toString() || '',
+          currency: profile.pricing?.currency || 'USD',
+          availableDays: profile.availability?.available_days || [],
+          availableHoursStart: profile.availability?.available_hours?.start || '09:00',
+          availableHoursEnd: profile.availability?.available_hours?.end || '17:00',
+        });
+      }
+    } catch (error) {
+      console.log('CoachProfileSetup: No existing profile found or error loading:', error);
+      // No profile exists yet - this is fine for new coaches
+      setHasExistingProfile(false);
+    } finally {
+      setIsLoadingProfile(false);
+    }
+  };
 
   const updateField = (field: keyof CoachProfileData, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -190,9 +234,7 @@ export default function CoachProfileSetup({
           }))
         : [];
 
-      // Call API to create coach profile
-      // POST /api/coaches/profile
-      const result = await coachService.createCoachProfile({
+      const profileData = {
         name: formData.name,
         email: user?.email,
         title: formData.title,
@@ -219,16 +261,25 @@ export default function CoachProfileSetup({
             end: formData.availableHoursEnd,
           },
         },
-      });
+      };
+
+      // Use update API if profile exists, otherwise create new
+      const result = hasExistingProfile
+        ? await coachService.updateCoachProfile(profileData)
+        : await coachService.createCoachProfile(profileData);
 
       if (!result.success) {
-        throw new Error(result.error?.message || 'Failed to create profile');
+        throw new Error(result.error?.message || `Failed to ${hasExistingProfile ? 'update' : 'create'} profile`);
       }
 
-      // Show success and navigate back to Coach Hub
+      // Show success notification
+      const successMessage = hasExistingProfile
+        ? 'Your coach profile has been updated successfully!'
+        : 'Your coach profile has been created successfully!';
+      
       Alert.alert(
-        'Profile Created!',
-        'Your coach profile has been created and is pending verification.',
+        'Success!',
+        successMessage,
         [
           {
             text: 'OK',
@@ -243,10 +294,10 @@ export default function CoachProfileSetup({
         ]
       );
     } catch (error) {
-      console.error('CoachProfileSetup: Error creating profile:', error);
+      console.error('CoachProfileSetup: Error saving profile:', error);
       Alert.alert(
         'Error',
-        error instanceof Error ? error.message : 'Failed to create coach profile. Please try again.'
+        error instanceof Error ? error.message : `Failed to ${hasExistingProfile ? 'update' : 'create'} coach profile. Please try again.`
       );
     } finally {
       setIsSubmitting(false);
@@ -492,81 +543,101 @@ export default function CoachProfileSetup({
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-      {/* Back to Coach Hub button - only on web */}
-      {isDashboardMode && onBack && (
-        <BackToHubButton
-          hubName="Coach Hub"
-          color="#10b981"
-          onPress={onBack}
-          isMobileWeb={isWeb && screenWidth < 768}
-          spinnerGif={spinnerGif}
-        />
-      )}
-
-      {/* Status bar area */}
-      <View style={{ height: insets.top, backgroundColor: '#10b981' }} />
-      
-      {/* Collapsing Header */}
-      <Animated.View style={[styles.collapsibleHeader, { height: headerHeight }]}>
-        <Animated.View style={[styles.headerContent, { opacity: headerOpacity }]}>
-          <Animated.Text style={[styles.headerTitle, { transform: [{ scale: titleScale }] }]}>
-            Complete Your Profile
-          </Animated.Text>
-          <Text style={styles.headerSubtitle}>
-            Step {currentStep} of {totalSteps}
+      {/* Loading state while fetching profile */}
+      {isLoadingProfile ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#10b981" />
+          <Text style={[styles.loadingText, { color: theme.colors.textSecondary }]}>
+            Loading profile...
           </Text>
-          <View style={styles.progressBar}>
-            <View style={[styles.progressFill, { width: `${(currentStep / totalSteps) * 100}%` }]} />
-          </View>
-        </Animated.View>
-      </Animated.View>
-
-      {/* Step Indicator */}
-      {renderStepIndicator()}
-
-      {/* Content */}
-      <Animated.ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.contentContainer}
-        onScroll={Animated.event(
-          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-          { useNativeDriver: false }
-        )}
-        scrollEventThrottle={16}
-      >
-        {currentStep === 1 && renderStep1()}
-        {currentStep === 2 && renderStep2()}
-        {currentStep === 3 && renderStep3()}
-      </Animated.ScrollView>
-
-      {/* Footer */}
-      <View style={styles.footer}>
-        <Pressable
-          style={[styles.button, styles.buttonSecondary]}
-          onPress={handleBack}
-        >
-          <Text style={styles.buttonSecondaryText}>
-            {currentStep === 1 ? 'Cancel' : 'Back'}
-          </Text>
-        </Pressable>
-        
-        <Pressable
-          style={[
-            styles.button,
-            styles.buttonPrimary,
-            !validateStep() && styles.buttonDisabled,
-          ]}
-          onPress={currentStep === totalSteps ? handleSubmit : handleNext}
-          disabled={!validateStep()}
-        >
-          <Text style={styles.buttonPrimaryText}>
-            {currentStep === totalSteps ? 'Create Profile' : 'Next'}
-          </Text>
-          {currentStep < totalSteps && (
-            <Ionicons name="arrow-forward" size={16} color="#fff" style={{ marginLeft: 8 }} />
+        </View>
+      ) : (
+        <>
+          {/* Back to Coach Hub button - only on web */}
+          {isDashboardMode && onBack && (
+            <BackToHubButton
+              hubName="Coach Hub"
+              color="#10b981"
+              onPress={onBack}
+              isMobileWeb={isWeb && screenWidth < 768}
+              spinnerGif={spinnerGif}
+            />
           )}
-        </Pressable>
-      </View>
+
+          {/* Status bar area */}
+          <View style={{ height: insets.top, backgroundColor: '#10b981' }} />
+          
+          {/* Collapsing Header */}
+          <Animated.View style={[styles.collapsibleHeader, { height: headerHeight }]}>
+            <Animated.View style={[styles.headerContent, { opacity: headerOpacity }]}>
+              <Animated.Text style={[styles.headerTitle, { transform: [{ scale: titleScale }] }]}>
+                {hasExistingProfile ? 'Update Your Profile' : 'Complete Your Profile'}
+              </Animated.Text>
+              <Text style={styles.headerSubtitle}>
+                Step {currentStep} of {totalSteps}
+              </Text>
+              <View style={styles.progressBar}>
+                <View style={[styles.progressFill, { width: `${(currentStep / totalSteps) * 100}%` }]} />
+              </View>
+            </Animated.View>
+          </Animated.View>
+
+          {/* Step Indicator */}
+          {renderStepIndicator()}
+
+          {/* Content */}
+          <Animated.ScrollView
+            style={styles.scrollView}
+            contentContainerStyle={styles.contentContainer}
+            onScroll={Animated.event(
+              [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+              { useNativeDriver: false }
+            )}
+            scrollEventThrottle={16}
+          >
+            {currentStep === 1 && renderStep1()}
+            {currentStep === 2 && renderStep2()}
+            {currentStep === 3 && renderStep3()}
+          </Animated.ScrollView>
+
+          {/* Footer */}
+          <View style={styles.footer}>
+            <Pressable
+              style={[styles.button, styles.buttonSecondary]}
+              onPress={handleBack}
+            >
+              <Text style={styles.buttonSecondaryText}>
+                {currentStep === 1 ? 'Cancel' : 'Back'}
+              </Text>
+            </Pressable>
+            
+            <Pressable
+              style={[
+                styles.button,
+                styles.buttonPrimary,
+                !validateStep() && styles.buttonDisabled,
+              ]}
+              onPress={currentStep === totalSteps ? handleSubmit : handleNext}
+              disabled={!validateStep()}
+            >
+              {isSubmitting ? (
+                <ActivityIndicator size="small" color="#fff" />
+              ) : (
+                <>
+                  <Text style={styles.buttonPrimaryText}>
+                    {currentStep === totalSteps 
+                      ? (hasExistingProfile ? 'Update Profile' : 'Create Profile')
+                      : 'Next'}
+                  </Text>
+                  {currentStep < totalSteps && (
+                    <Ionicons name="arrow-forward" size={16} color="#fff" style={{ marginLeft: 8 }} />
+                  )}
+                </>
+              )}
+            </Pressable>
+          </View>
+        </>
+      )}
     </View>
   );
 }
@@ -575,6 +646,17 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     // backgroundColor: '#e0f2fe', // theme.colors.background
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 40,
+  },
+  loadingText: {
+    marginTop: 16,
+    fontSize: 16,
+    fontWeight: '500',
   },
   collapsibleHeader: {
     backgroundColor: '#10b981',
