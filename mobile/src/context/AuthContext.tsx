@@ -144,6 +144,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         // Convert UserData to User format
         const userData = await convertUserData(sessionValid.user);
         setUser(userData);
+        
+        // Start auto token refresh for existing session
+        console.log('[AuthContext] Starting auto token refresh for existing session');
+        await enhancedAuthService.startAutoTokenRefresh();
       } else {
         // Try loading from local storage as fallback
         const storedData = await AsyncStorage.getItem(STORAGE_KEY);
@@ -345,6 +349,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const normalizedUser = normalizeUser(userData);
       setUser(normalizedUser);
       await saveUserData(normalizedUser);
+      
+      // Enable automatic token refresh to keep user logged in
+      console.log('[AuthContext] Starting auto token refresh...');
+      await enhancedAuthService.startAutoTokenRefresh();
+      
       return normalizedUser;
     } catch (error) {
       console.error('Sign in error:', error);

@@ -332,7 +332,11 @@ export default function CoachProfileSetup({
         ? await coachService.updateCoachProfile(profileData)
         : await coachService.createCoachProfile(profileData);
 
+      console.log('CoachProfileSetup: API result:', JSON.stringify(result, null, 2));
+      console.log('CoachProfileSetup: result.success =', result.success);
+
       if (!result.success) {
+        console.error('CoachProfileSetup: Profile save failed:', result.error);
         throw new Error(result.error?.message || `Failed to ${hasExistingProfile ? 'update' : 'create'} profile`);
       }
 
@@ -341,6 +345,8 @@ export default function CoachProfileSetup({
         ? 'Your coach profile has been updated successfully!'
         : 'Your coach profile has been created successfully!';
       
+      console.log('CoachProfileSetup: About to show success alert:', successMessage);
+      
       Alert.alert(
         'Success!',
         successMessage,
@@ -348,6 +354,7 @@ export default function CoachProfileSetup({
           {
             text: 'OK',
             onPress: () => {
+              console.log('CoachProfileSetup: Success alert OK pressed');
               if (isDashboardMode && onBack) {
                 onBack();
               } else {
@@ -357,6 +364,8 @@ export default function CoachProfileSetup({
           },
         ]
       );
+      
+      console.log('CoachProfileSetup: Alert.alert called');
     } catch (error) {
       console.error('CoachProfileSetup: Error saving profile:', error);
       Alert.alert(
