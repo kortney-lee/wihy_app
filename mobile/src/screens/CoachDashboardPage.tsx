@@ -389,7 +389,7 @@ const styles = StyleSheet.create({
   },
   healthMainContent: {
     flex: 1,
-    backgroundColor: '#f0fdf4', // Light green background matching Health Hub
+    backgroundColor: '#e0f2fe', // Light blue background for Coach Hub
   },
   dashboardGrid: {
     flexDirection: 'row',
