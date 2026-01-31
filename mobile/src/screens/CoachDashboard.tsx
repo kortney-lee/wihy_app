@@ -26,6 +26,7 @@ import { coachService, Client as APIClient, ClientDashboard } from '../services'
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import SendInvitation from './SendInvitation';
+import * as Clipboard from 'expo-clipboard';
 
 const spinnerGif = require('../../assets/whatishealthyspinner.gif');
 const isWeb = Platform.OS === 'web';
@@ -53,7 +54,7 @@ export default function CoachDashboard({
   onBack,
 }: CoachDashboardProps) {
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
-  const { coachId } = useAuth();
+  const { coachId, user } = useAuth();
   const { theme } = useTheme();
   
   // Collapsing header animation
@@ -188,6 +189,13 @@ export default function CoachDashboard({
 
   const handleSearch = async () => {
     await loadClients();
+  };
+
+  const copyCoachCode = async () => {
+    if (user?.coachCode) {
+      await Clipboard.setStringAsync(user.coachCode);
+      Alert.alert('Copied!', 'Coach code copied to clipboard');
+    }
   };
 
   const filteredClients = clients.filter(client =>
@@ -571,17 +579,25 @@ export default function CoachDashboard({
               />
             </View>
 
+            {/* Coach Code Section */}
+            {user?.coachCode && (
+              <Pressable style={styles.coachCodeCard} onPress={copyCoachCode}>
+                <View style={styles.coachCodeCardHeader}>
+                  <Ionicons name="ribbon" size={24} color="#3b82f6" />
+                  <Text style={styles.coachCodeLabel}>Your Coach Code</Text>
+                </View>
+                <View style={styles.coachCodeValueContainer}>
+                  <Text style={styles.coachCodeValue}>{user.coachCode}</Text>
+                  <Ionicons name="copy-outline" size={20} color="#6b7280" />
+                </View>
+                <Text style={styles.coachCodeHint}>Share this code with clients to connect</Text>
+              </Pressable>
+            )}
+
             <View style={styles.listHeader}>
               <Text style={[styles.listHeaderText, { color: theme.colors.textSecondary }]}>
                 {filteredClients.length} Client{filteredClients.length !== 1 ? 's' : ''}
               </Text>
-              <Pressable 
-                style={styles.addClientButton}
-                onPress={() => setShowSendInvitation(true)}
-              >
-                <Ionicons name="person-add" size={20} color="#3b82f6" />
-                <Text style={styles.addClientText}>Invite Client</Text>
-              </Pressable>
             </View>
 
             {loading && clients.length === 0 ? (
@@ -779,6 +795,63 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#111827',
     outlineStyle: 'none' as any,
+  },
+  // Coach Code Card Styles
+  coachCodeCard: {
+    marginHorizontal: 16,
+    marginBottom: 16,
+    backgroundColor: '#ffffff',
+    borderRadius: 16,
+    padding: 20,
+    borderWidth: 2,
+    borderColor: '#dbeafe',
+    ...Platform.select({
+      ios: {
+        shadowColor: '#3b82f6',
+        shadowOpacity: 0.1,
+        shadowRadius: 8,
+        shadowOffset: { width: 0, height: 2 },
+      },
+      android: {
+        elevation: 3,
+      },
+      web: {
+        boxShadow: '0 2px 8px rgba(59, 130, 246, 0.1)',
+      },
+    }),
+  },
+  coachCodeCardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 12,
+  },
+  coachCodeLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#6b7280',
+  },
+  coachCodeValueContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#f0f9ff',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    borderRadius: 12,
+    marginBottom: 8,
+  },
+  coachCodeValue: {
+    fontSize: 32,
+    fontWeight: '800',
+    color: '#3b82f6',
+    letterSpacing: 4,
+  },
+  coachCodeHint: {
+    fontSize: 12,
+    color: '#9ca3af',
+    textAlign: 'center',
+    fontStyle: 'italic',
   },
   listHeader: {
     flexDirection: 'row',

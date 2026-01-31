@@ -66,16 +66,19 @@ const CoachDashboardPage: React.FC<CoachDashboardPageProps> = ({ showMenuFromHea
   const layout = useDashboardLayout();
   const isMobileWeb = isWeb && layout.screenWidth < 768;
 
-  // Security: Only allow coaches to access this page
+  // Check if user has coach access (coach, admin, or employee roles)
+  const hasCoachAccess = user?.isCoach || user?.role === 'admin' || user?.role === 'employee';
+
+  // Security: Only allow coaches, admins, and employees to access this page
   React.useEffect(() => {
-    if (!user?.isCoach) {
-      console.log('Access denied: User is not a coach');
+    if (!hasCoachAccess) {
+      console.log('Access denied: User does not have coach access');
       navigation.navigate('Health');
     }
-  }, [user?.isCoach, navigation]);
+  }, [hasCoachAccess, navigation]);
 
-  // Don't render anything if user is not a coach (security)
-  if (!user?.isCoach) {
+  // Don't render anything if user doesn't have coach access (security)
+  if (!hasCoachAccess) {
     return (
       <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
         <View style={styles.centerContent}>
@@ -382,7 +385,7 @@ const CoachDashboardPage: React.FC<CoachDashboardPageProps> = ({ showMenuFromHea
             marginHorizontal: layout.horizontalPadding,
           }
         ]}>
-          {user?.isCoach && user?.coachCode ? (
+          {user?.coachCode ? (
             <>
               <View style={styles.coachCodeIcon}>
                 <SvgIcon name="ribbon" size={32} color="#3b82f6" />
