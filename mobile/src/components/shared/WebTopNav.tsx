@@ -25,7 +25,7 @@ interface WebTopNavProps {
 export function WebTopNav({ activeTab = 'none' }: WebTopNavProps) {
   const navigation = useNavigation<any>();
   const route = useRoute();
-  const { user } = useContext(AuthContext);
+  const { user, loading, initializing } = useContext(AuthContext);
   const { isDark } = useTheme();
   const [showLoginModal, setShowLoginModal] = useState(false);
 
@@ -83,7 +83,15 @@ export function WebTopNav({ activeTab = 'none' }: WebTopNavProps) {
   
   // Handle health button click - show subscription for non-logged-in users
   const handleHealthPress = () => {
-    console.log('[WebTopNav] handleHealthPress called, user:', user?.email);
+    console.log('[WebTopNav] handleHealthPress called, user:', user?.email, 'loading:', loading, 'initializing:', initializing);
+    
+    // Don't redirect to subscription if auth is still loading
+    if (loading || initializing) {
+      console.log('[WebTopNav] Auth still loading, navigating to Health anyway');
+      navigateToTab('Health');
+      return;
+    }
+    
     if (!user) {
       // Not logged in - redirect to subscription/plans
       navigateToStack('Subscription');

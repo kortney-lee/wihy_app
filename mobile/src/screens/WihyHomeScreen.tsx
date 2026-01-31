@@ -52,7 +52,7 @@ export default function WihyHomeScreen({}: Props = {}) {
   const [query, setQuery] = useState('');
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [uploadTextInput, setUploadTextInput] = useState('');
-  const { user } = useContext(AuthContext);
+  const { user, loading, initializing } = useContext(AuthContext);
   const { theme, isDark } = useTheme();
   const [showLoginModal, setShowLoginModal] = useState(false);
   
@@ -61,6 +61,12 @@ export default function WihyHomeScreen({}: Props = {}) {
 
   // Handle health button click - show subscription for non-logged-in users
   const handleHealthPress = () => {
+    // Don't redirect to subscription if auth is still loading
+    if (loading || initializing) {
+      navigation.navigate('Health');
+      return;
+    }
+    
     if (!user) {
       // Not logged in - redirect to subscription
       navigation.navigate('Subscription');
