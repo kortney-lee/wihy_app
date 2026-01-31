@@ -33,7 +33,7 @@ export const WebNavHeader: React.FC<WebNavHeaderProps> = ({
 }) => {
   const navigation = useNavigation<any>();
   const route = useRoute();
-  const { user } = useContext(AuthContext);
+  const { user, loading, initializing } = useContext(AuthContext);
   const { isDark } = useTheme();
   
   // Internal login modal state (used if not controlled externally)
@@ -73,6 +73,12 @@ export const WebNavHeader: React.FC<WebNavHeaderProps> = ({
   // Handle Health navigation - logged-in users can access Health
   // Non-logged-in users go to subscription/plans page
   const handleHealthClick = () => {
+    // Don't redirect to subscription if auth is still loading
+    if (loading || initializing) {
+      navigateToTab('Health');
+      return;
+    }
+    
     if (!user) {
       // Not logged in - show subscription/plans
       navigateToStack('Subscription');
