@@ -252,7 +252,7 @@ const CoachDashboardPage: React.FC<CoachDashboardPageProps> = ({ showMenuFromHea
   }
 
   return (
-    <SafeAreaView style={styles.healthMainContent} edges={['left', 'right']}>
+    <SafeAreaView style={[styles.healthMainContent, { backgroundColor: theme.colors.background }]} edges={['left', 'right']}>
       {showHamburgerMenu && (
         <HamburgerMenu
           visible={showHamburgerMenu}
@@ -389,7 +389,7 @@ const styles = StyleSheet.create({
   },
   healthMainContent: {
     flex: 1,
-    backgroundColor: '#e0f2fe', // Light blue background for Coach Hub
+    // backgroundColor set dynamically via theme.colors.background for dark mode
   },
   dashboardGrid: {
     flexDirection: 'row',
