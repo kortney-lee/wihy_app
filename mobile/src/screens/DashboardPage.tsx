@@ -271,6 +271,40 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
     // Check if user has premium access (not free plan)
     const isFreeUser = !user || user.plan === 'free';
     
+    // Helper to check access and navigate to subscription if needed
+    const handlePremiumTilePress = (dashboard: typeof selectedDashboard, requiredCapability: 'premium' | 'meals' | 'family' | 'coach') => {
+      // Check access based on capability
+      let hasAccess = false;
+      switch (requiredCapability) {
+        case 'premium':
+          hasAccess = !isFreeUser;
+          break;
+        case 'meals':
+          hasAccess = hasMealsAccess(user);
+          break;
+        case 'family':
+          hasAccess = hasFamilyAccess(user);
+          break;
+        case 'coach':
+          hasAccess = hasCoachAccess(user);
+          break;
+      }
+      
+      if (hasAccess) {
+        setSelectedDashboard(dashboard);
+      } else {
+        // Navigate to subscription to upgrade
+        navigation.navigate('Subscription');
+      }
+    };
+    
+    // Lock badge component for premium features
+    const LockBadge = () => (
+      <View style={styles.lockBadge}>
+        <SvgIcon name="lock-closed" size={10} color="#ffffff" />
+      </View>
+    );
+    
     return (
     <View style={[styles.healthMainContent, { backgroundColor: theme.colors.background }]}>
       <StatusBar barStyle="light-content" backgroundColor="#16a34a" />
@@ -365,89 +399,96 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
           <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>Health profile</Text>
         </TouchableOpacity>
 
-        {/* Progress Dashboard - Premium only */}
-        {!isFreeUser && (
+        {/* Progress Dashboard - Available to ALL, paywall on click */}
         <TouchableOpacity
           style={[styles.dashboardCard, styles.progressCard, { width: cardWidth as any }]}
-          onPress={() => setSelectedDashboard('progress')}
+          onPress={() => handlePremiumTilePress('progress', 'premium')}
         >
           <View style={[styles.cardIconContainer, { width: iconContainerSize, height: iconContainerSize, borderRadius: iconContainerSize / 2 }]}>
             <SvgIcon name="trending-up" size={iconSize} color="#ffffff" />
           </View>
+          {isFreeUser && <LockBadge />}
           <Text style={[styles.cardTitle, { fontSize: titleSize }]}>Progress</Text>
           <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>Track goals</Text>
         </TouchableOpacity>
-        )}
 
-        {/* AI Meal Plans Card (premium+ users) */}
-        {hasMealsAccess(user) && (
-          <TouchableOpacity
-            style={[styles.dashboardCard, styles.mealsCard, { width: cardWidth as any }]}
-            onPress={() => handleNavigateToDashboard('meals')}
-          >
-            <View style={[styles.cardIconContainer, { width: iconContainerSize, height: iconContainerSize, borderRadius: iconContainerSize / 2 }]}>
-              <SvgIcon name="sparkles" size={iconSize} color="#ffffff" />
-            </View>
-            <Text style={[styles.cardTitle, { fontSize: titleSize }]}>AI Meal Plans</Text>
-            <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>Auto-generate</Text>
-          </TouchableOpacity>
-        )}
+        {/* AI Meal Plans Card - Available to ALL, paywall on click */}
+        <TouchableOpacity
+          style={[styles.dashboardCard, styles.mealsCard, { width: cardWidth as any }]}
+          onPress={() => hasMealsAccess(user) ? handleNavigateToDashboard('meals') : navigation.navigate('Subscription')}
+        >
+          <View style={[styles.cardIconContainer, { width: iconContainerSize, height: iconContainerSize, borderRadius: iconContainerSize / 2 }]}>
+            <SvgIcon name="sparkles" size={iconSize} color="#ffffff" />
+          </View>
+          {!hasMealsAccess(user) && <LockBadge />}
+          <Text style={[styles.cardTitle, { fontSize: titleSize }]}>AI Meal Plans</Text>
+          <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>Auto-generate</Text>
+        </TouchableOpacity>
 
-        {/* Meal Calendar Card (premium+ users) */}
-        {hasMealsAccess(user) && (
-          <TouchableOpacity
-            style={[styles.dashboardCard, styles.calendarCard, { width: cardWidth as any }]}
-            onPress={() => setSelectedDashboard('calendar')}
-          >
-            <View style={[styles.cardIconContainer, { width: iconContainerSize, height: iconContainerSize, borderRadius: iconContainerSize / 2 }]}>
-              <SvgIcon name="calendar" size={iconSize} color="#ffffff" />
-            </View>
-            <Text style={[styles.cardTitle, { fontSize: titleSize }]}>Meal Calendar</Text>
-            <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>View schedule</Text>
-          </TouchableOpacity>
-        )}
+        {/* Meal Calendar Card - Available to ALL, paywall on click */}
+        <TouchableOpacity
+          style={[styles.dashboardCard, styles.calendarCard, { width: cardWidth as any }]}
+          onPress={() => hasMealsAccess(user) ? setSelectedDashboard('calendar') : navigation.navigate('Subscription')}
+        >
+          <View style={[styles.cardIconContainer, { width: iconContainerSize, height: iconContainerSize, borderRadius: iconContainerSize / 2 }]}>
+            <SvgIcon name="calendar" size={iconSize} color="#ffffff" />
+          </View>
+          {!hasMealsAccess(user) && <LockBadge />}
+          <Text style={[styles.cardTitle, { fontSize: titleSize }]}>Meal Calendar</Text>
+          <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>View schedule</Text>
+        </TouchableOpacity>
 
-        {/* Plan Meal Card (premium+ users) - Manual meal planning with product search */}
-        {hasMealsAccess(user) && (
-          <TouchableOpacity
-            style={[styles.dashboardCard, styles.planMealCard, { width: cardWidth as any }]}
-            onPress={() => setSelectedDashboard('planMeal')}
-          >
-            <View style={[styles.cardIconContainer, { width: iconContainerSize, height: iconContainerSize, borderRadius: iconContainerSize / 2 }]}>
-              <SvgIcon name="create" size={iconSize} color="#ffffff" />
-            </View>
-            <Text style={[styles.cardTitle, { fontSize: titleSize }]}>Plan Meal</Text>
-            <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>Build shopping list</Text>
-          </TouchableOpacity>
-        )}
+        {/* Plan Meal Card - Available to ALL, paywall on click */}
+        <TouchableOpacity
+          style={[styles.dashboardCard, styles.planMealCard, { width: cardWidth as any }]}
+          onPress={() => hasMealsAccess(user) ? setSelectedDashboard('planMeal') : navigation.navigate('Subscription')}
+        >
+          <View style={[styles.cardIconContainer, { width: iconContainerSize, height: iconContainerSize, borderRadius: iconContainerSize / 2 }]}>
+            <SvgIcon name="create" size={iconSize} color="#ffffff" />
+          </View>
+          {!hasMealsAccess(user) && <LockBadge />}
+          <Text style={[styles.cardTitle, { fontSize: titleSize }]}>Plan Meal</Text>
+          <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>Build shopping list</Text>
+        </TouchableOpacity>
 
-        {/* Research Card - Premium only */}
-        {!isFreeUser && (
+        {/* Research Card - Available to ALL, paywall on click */}
         <TouchableOpacity
           style={[styles.dashboardCard, styles.researchCard, { width: cardWidth as any }]}
-          onPress={() => setSelectedDashboard('research')}
+          onPress={() => handlePremiumTilePress('research', 'premium')}
         >
           <View style={[styles.cardIconContainer, { width: iconContainerSize, height: iconContainerSize, borderRadius: iconContainerSize / 2 }]}>
             <SvgIcon name="library" size={iconSize} color="#ffffff" />
           </View>
+          {isFreeUser && <LockBadge />}
           <Text style={[styles.cardTitle, { fontSize: titleSize }]}>Research</Text>
           <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>Health insights</Text>
         </TouchableOpacity>
-        )}
 
-        {/* Fitness Dashboard - Premium only */}
-        {!isFreeUser && (
+        {/* Fitness Dashboard - Available to ALL, paywall on click */}
         <TouchableOpacity
           style={[styles.dashboardCard, styles.fitnessCard, { width: cardWidth as any }]}
-          onPress={() => setSelectedDashboard('fitness')}
+          onPress={() => handlePremiumTilePress('fitness', 'premium')}
         >
           <View style={[styles.cardIconContainer, { width: iconContainerSize, height: iconContainerSize, borderRadius: iconContainerSize / 2 }]}>
             <SvgIcon name="fitness" size={iconSize} color="#ffffff" />
           </View>
+          {isFreeUser && <LockBadge />}
           <Text style={[styles.cardTitle, { fontSize: titleSize }]}>Fitness</Text>
           <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>Workout plans</Text>
         </TouchableOpacity>
-        )}
+
+        {/* Training Programs - NEW: Template workouts for sports/running */}
+        <TouchableOpacity
+          style={[styles.dashboardCard, styles.trainingCard, { width: cardWidth as any }]}
+          onPress={() => handlePremiumTilePress('fitness', 'premium')}
+        >
+          <View style={[styles.cardIconContainer, { width: iconContainerSize, height: iconContainerSize, borderRadius: iconContainerSize / 2 }]}>
+            <SvgIcon name="trophy" size={iconSize} color="#ffffff" />
+          </View>
+          {isFreeUser && <LockBadge />}
+          <Text style={[styles.cardTitle, { fontSize: titleSize }]}>Training</Text>
+          <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>Sports programs</Text>
+        </TouchableOpacity>
 
         {/* Find a Coach - Available to all */}
         <TouchableOpacity
@@ -465,7 +506,7 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
         {isFreeUser && (
           <TouchableOpacity
             style={[styles.dashboardCard, styles.upgradeCard, { width: cardWidth as any }]}
-            onPress={() => navigation.navigate('Profile')}
+            onPress={() => navigation.navigate('Subscription')}
           >
             <View style={[styles.cardIconContainer, { width: iconContainerSize, height: iconContainerSize, borderRadius: iconContainerSize / 2 }]}>
               <SvgIcon name="rocket" size={iconSize} color="#ffffff" />
@@ -475,45 +516,46 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
           </TouchableOpacity>
         )}
 
-        {/* Family Dashboard (family plan users only) */}
-        {hasFamilyAccess(user) && (
-          <TouchableOpacity
-            style={[styles.dashboardCard, styles.parentCard, { width: cardWidth as any }]}
-            onPress={() => setSelectedDashboard('parent')}
-          >
-            <View style={[styles.cardIconContainer, { width: iconContainerSize, height: iconContainerSize, borderRadius: iconContainerSize / 2 }]}>
-              <SvgIcon name="heart" size={iconSize} color="#ffffff" />
-            </View>
-            <Text style={[styles.cardTitle, { fontSize: titleSize }]}>Family</Text>
-            <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>Kids health</Text>
-          </TouchableOpacity>
-        )}
+        {/* Family Dashboard - Available to ALL, paywall on click */}
+        <TouchableOpacity
+          style={[styles.dashboardCard, styles.parentCard, { width: cardWidth as any }]}
+          onPress={() => hasFamilyAccess(user) ? setSelectedDashboard('parent') : navigation.navigate('Subscription')}
+        >
+          <View style={[styles.cardIconContainer, { width: iconContainerSize, height: iconContainerSize, borderRadius: iconContainerSize / 2 }]}>
+            <SvgIcon name="heart" size={iconSize} color="#ffffff" />
+          </View>
+          {!hasFamilyAccess(user) && <LockBadge />}
+          <Text style={[styles.cardTitle, { fontSize: titleSize }]}>Family</Text>
+          <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>$49.99/mo</Text>
+        </TouchableOpacity>
 
-        {/* Switch to Family Dashboard (if user has family access) */}
-        {canAccessFamily && onContextChange && (
+        {/* Switch to Family Hub - Available to ALL, paywall on click */}
+        {onContextChange && (
           <TouchableOpacity
             style={[styles.dashboardCard, styles.switchFamilyCard, { width: cardWidth as any }]}
-            onPress={() => onContextChange('family')}
+            onPress={() => hasFamilyAccess(user) ? onContextChange('family') : navigation.navigate('Subscription')}
           >
             <View style={[styles.cardIconContainer, { width: iconContainerSize, height: iconContainerSize, borderRadius: iconContainerSize / 2 }]}>
               <SvgIcon name="people-circle" size={iconSize} color="#ffffff" />
             </View>
+            {!hasFamilyAccess(user) && <LockBadge />}
             <Text style={[styles.cardTitle, { fontSize: titleSize }]}>Family Hub</Text>
-            <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>Switch view</Text>
+            <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>{hasFamilyAccess(user) ? 'Switch view' : '$49.99/mo'}</Text>
           </TouchableOpacity>
         )}
 
-        {/* Switch to Coach Dashboard (if user has coach access) */}
-        {canAccessCoach && onContextChange && (
+        {/* Switch to Coach Hub - Available to ALL, paywall on click */}
+        {onContextChange && (
           <TouchableOpacity
             style={[styles.dashboardCard, styles.switchCoachCard, { width: cardWidth as any }]}
-            onPress={() => onContextChange('coach')}
+            onPress={() => hasCoachAccess(user) ? onContextChange('coach') : navigation.navigate('Subscription')}
           >
             <View style={[styles.cardIconContainer, { width: iconContainerSize, height: iconContainerSize, borderRadius: iconContainerSize / 2 }]}>
               <SvgIcon name="briefcase" size={iconSize} color="#ffffff" />
             </View>
+            {!hasCoachAccess(user) && <LockBadge />}
             <Text style={[styles.cardTitle, { fontSize: titleSize }]}>Coach Hub</Text>
-            <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>Switch view</Text>
+            <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>{hasCoachAccess(user) ? 'Switch view' : '$99.99 one-time'}</Text>
           </TouchableOpacity>
         )}
 
@@ -862,6 +904,22 @@ const styles = StyleSheet.create({
 
   profileSetupCard: {
     backgroundColor: '#14b8a6', // Teal - for profile/wellness setup
+  },
+
+  trainingCard: {
+    backgroundColor: '#10b981', // Green for training/sports programs
+  },
+
+  lockBadge: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    borderRadius: 10,
+    width: 20,
+    height: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 
   cardIconContainer: {
