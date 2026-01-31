@@ -268,11 +268,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const statusFromServer = authUser.status;
     const normalizedStatus = statusFromServer ? statusFromServer.toLowerCase() as User['status'] : existingData?.status;
     
+    // Dev tools access:
+    // - Admin role always has dev tools
+    // - Anyone with is_developer flag in profile_data (including employees)
     const isDeveloperFlag = Boolean(
+      normalizedRole === 'admin' ||
       authUser.profile_data?.is_developer ||
-      authUser.profile_data?.isDeveloper ||
-      existingData?.isDeveloper ||
-      normalizedRole === 'admin'
+      authUser.profile_data?.isDeveloper
     );
     
     return {
