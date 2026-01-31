@@ -54,9 +54,10 @@ export type RootStackParamList = {
   MealCalendar: undefined;
   MealPreferences: { returnTo?: keyof RootStackParamList };
   ShoppingList: { 
-    mealPlanId: number; 
-    shoppingListData: any; 
-  };
+    mealPlanId?: number; 
+    shoppingListData?: any;
+    fromMealPlan?: boolean;
+  } | undefined;
   MealDetails: { mealId: string };
   IntegrationTest: undefined;
   

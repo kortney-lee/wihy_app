@@ -448,7 +448,20 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
           </View>
           {!hasMealsAccess(user) && <LockBadge />}
           <Text style={[styles.cardTitle, { fontSize: titleSize }]}>Plan Meal</Text>
-          <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>Build shopping list</Text>
+          <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>Create meals</Text>
+        </TouchableOpacity>
+
+        {/* Shopping List Card - Available to ALL, paywall on click */}
+        <TouchableOpacity
+          style={[styles.dashboardCard, styles.shoppingListCard, { width: cardWidth as any }]}
+          onPress={() => hasMealsAccess(user) ? handleNavigateToDashboard('shoppingList') : navigation.navigate('Subscription')}
+        >
+          <View style={[styles.cardIconContainer, { width: iconContainerSize, height: iconContainerSize, borderRadius: iconContainerSize / 2 }]}>
+            <SvgIcon name="cart" size={iconSize} color="#ffffff" />
+          </View>
+          {!hasMealsAccess(user) && <LockBadge />}
+          <Text style={[styles.cardTitle, { fontSize: titleSize }]}>Shopping List</Text>
+          <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>Grocery items</Text>
         </TouchableOpacity>
 
         {/* Research Card - Available to ALL, paywall on click */}
