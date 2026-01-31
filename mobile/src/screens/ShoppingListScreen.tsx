@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useRef } from 'react';
 import {
   View,
   Text,
@@ -13,11 +13,11 @@ import {
   TextInput,
   Modal,
 } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { RouteProp } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../types/navigation';
-import { createInstacartLinkFromMealPlan } from '../services/instacartService';
+import { createShoppingList, ShoppingListItem as InstacartItem } from '../services/instacartService';
 import { shoppingService, ShoppingList } from '../services/shoppingService';
 import { AuthContext } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
@@ -60,6 +60,7 @@ export default function ShoppingListScreen({ route, navigation, isDashboardMode 
   // Support both Stack navigation (route params) and dashboard mode (load from API)
   const mealPlanId: number = route?.params?.mealPlanId || 0;
   const routeShoppingData = route?.params?.shoppingListData;
+  const fromMealPlan = route?.params?.fromMealPlan || false;
   
   // Compute shopping list data from either route params or active list
   const shoppingListData = routeShoppingData || {
@@ -84,7 +85,33 @@ export default function ShoppingListScreen({ route, navigation, isDashboardMode 
   const [newItemCategory, setNewItemCategory] = useState<string>('Other');
   
   // Animation for progress bar
-  const progressAnim = React.useRef(new Animated.Value(0)).current;
+  const progressAnim = useRef(new Animated.Value(0)).current;
+  
+  // Collapsing header animation
+  const scrollY = useRef(new Animated.Value(0)).current;
+  const insets = useSafeAreaInsets();
+  
+  const HEADER_MAX_HEIGHT = 180;
+  const HEADER_MIN_HEIGHT = 0;
+  const HEADER_SCROLL_DISTANCE = HEADER_MAX_HEIGHT - HEADER_MIN_HEIGHT;
+
+  const headerHeight = scrollY.interpolate({
+    inputRange: [0, HEADER_SCROLL_DISTANCE],
+    outputRange: [HEADER_MAX_HEIGHT, HEADER_MIN_HEIGHT],
+    extrapolate: 'clamp',
+  });
+
+  const headerOpacity = scrollY.interpolate({
+    inputRange: [0, HEADER_SCROLL_DISTANCE / 2],
+    outputRange: [1, 0],
+    extrapolate: 'clamp',
+  });
+
+  const titleScale = scrollY.interpolate({
+    inputRange: [0, HEADER_SCROLL_DISTANCE],
+    outputRange: [1, 0.8],
+    extrapolate: 'clamp',
+  });
 
   // Load user's shopping lists in dashboard mode
   useEffect(() => {
@@ -92,6 +119,56 @@ export default function ShoppingListScreen({ route, navigation, isDashboardMode 
       loadUserShoppingLists();
     }
   }, [isDashboardMode, user?.id]);
+
+  // Auto-create Instacart link when coming from meal plan save
+  useEffect(() => {
+    if (fromMealPlan && routeShoppingData && !instacartUrl) {
+      // Auto-trigger Instacart link creation and open
+      const autoCreateInstacartLink = async () => {
+        const allItems: InstacartItem[] = [];
+        
+        const cats = Object.keys(routeShoppingData.itemsByCategory || {});
+        cats.forEach((category) => {
+          const items = routeShoppingData.itemsByCategory[category] || [];
+          items.forEach((item: ShoppingItem) => {
+            if (item.name) {
+              allItems.push({
+                name: item.name,
+                quantity: item.quantity || 1,
+                unit: item.unit || 'item',
+              });
+            }
+          });
+        });
+        
+        if (allItems.length === 0) return;
+        
+        setLoading(true);
+        try {
+          console.log('[ShoppingList] Auto-creating Instacart link with', allItems.length, 'items');
+          const response = await createShoppingList(allItems, 'WIHY Meal Plan');
+          
+          if (response?.success && response?.data?.productsLinkUrl) {
+            const url = response.data.productsLinkUrl;
+            setInstacartUrl(url);
+            
+            // Auto-open Instacart
+            try {
+              await Linking.openURL(url);
+            } catch (linkError) {
+              console.warn('Failed to auto-open Instacart:', linkError);
+            }
+          }
+        } catch (error) {
+          console.error('Error auto-creating Instacart link:', error);
+        } finally {
+          setLoading(false);
+        }
+      };
+      
+      autoCreateInstacartLink();
+    }
+  }, [fromMealPlan, routeShoppingData]);
 
   const loadUserShoppingLists = async () => {
     if (!user?.id) return;
@@ -158,18 +235,45 @@ export default function ShoppingListScreen({ route, navigation, isDashboardMode 
   const getItemKey = (category: string, index: number) => `${category}-${index}`;
 
   const handleCreateInstacartLink = async () => {
+    // Extract all items from the shopping list data
+    const allItems: InstacartItem[] = [];
+    
+    categories.forEach((category) => {
+      const items = shoppingListData.itemsByCategory[category] || [];
+      items.forEach((item: ShoppingItem) => {
+        if (item.name) {
+          allItems.push({
+            name: item.name,
+            quantity: item.quantity || 1,
+            unit: item.unit || 'item',
+          });
+        }
+      });
+    });
+    
+    if (allItems.length === 0) {
+      Alert.alert('No Items', 'Add items to your shopping list first');
+      return;
+    }
+    
     setLoading(true);
     try {
-      const response = await createInstacartLinkFromMealPlan(mealPlanId);
-      setInstacartUrl(response.productsLinkUrl);
-      Alert.alert(
-        '🛒 Instacart Link Ready!',
-        `${response.ingredientCount} ingredients ready to shop at your favorite store`,
-        [{ text: 'OK' }]
-      );
+      console.log('[ShoppingList] Creating Instacart link with', allItems.length, 'items');
+      const response = await createShoppingList(allItems, 'WIHY Shopping List');
+      
+      if (response?.success && response?.data?.productsLinkUrl) {
+        setInstacartUrl(response.data.productsLinkUrl);
+        Alert.alert(
+          '🛒 Instacart Link Ready!',
+          `${allItems.length} items ready to shop at your favorite store`,
+          [{ text: 'OK' }]
+        );
+      } else {
+        throw new Error('Invalid response from Instacart service');
+      }
     } catch (error) {
       console.error('Error creating Instacart link:', error);
-      Alert.alert('Error', 'Failed to create Instacart shopping link');
+      Alert.alert('Error', 'Failed to create Instacart shopping link. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -336,76 +440,85 @@ export default function ShoppingListScreen({ route, navigation, isDashboardMode 
           <Text style={[styles.loadingText, { color: theme.colors.textSecondary }]}>Loading shopping lists...</Text>
         </View>
       ) : (
-        <ScrollView
-          style={styles.scrollView}
-          contentContainerStyle={styles.scrollContent}
-        >
-          {/* Pattern A: LinearGradient Header directly in ScrollView */}
-          <LinearGradient
-            colors={['#4cbb17', '#059669']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.gradientHeader}
-          >
-            {/* Header Actions */}
-            <View style={styles.headerTop}>
-              <TouchableOpacity onPress={handleBack} style={styles.backButton}>
-                <Ionicons name="arrow-back" size={24} color="#fff" />
-              </TouchableOpacity>
-              
-              <View style={styles.headerActions}>
-                {isDashboardMode && (
-                  <TouchableOpacity
-                    onPress={() => setShowAddItemModal(true)}
-                    style={styles.headerActionButton}
-                  >
-                    <Ionicons name="add-circle-outline" size={24} color="#fff" />
-                  </TouchableOpacity>
-                )}
-                {checkedItems.size > 0 && (
-                  <TouchableOpacity
-                    onPress={handleClearChecked}
-                    style={styles.headerActionButton}
-                  >
-                    <Ionicons name="checkmark-done-outline" size={24} color="#fff" />
-                  </TouchableOpacity>
-                )}
-              </View>
-            </View>
-
-            <Text style={styles.headerTitle}>Shopping List</Text>
-
-            {/* Progress Section */}
-            <View style={styles.progressSection}>
-              <View style={styles.progressHeader}>
-                <Text style={styles.progressText}>
-                  {checkedCount} of {totalItems} items
-                </Text>
-                <Text style={styles.progressPercent}>
-                  {Math.round(progressPercent)}%
-                </Text>
-              </View>
-              <View style={styles.progressBarContainer}>
-                <Animated.View
-                  style={[
-                    styles.progressBarFill,
-                    {
-                      width: progressAnim.interpolate({
-                        inputRange: [0, 100],
-                        outputRange: ['0%', '100%'],
-                      }),
-                    },
-                  ]}
-                />
-              </View>
+        <>
+          {/* Status bar area - Always green */}
+          <View style={{ height: insets.top, backgroundColor: '#4cbb17' }} />
+          
+          {/* Collapsing Header */}
+          <Animated.View style={[styles.collapsibleHeader, { height: headerHeight, backgroundColor: '#4cbb17' }]}>
+            <Animated.View 
+              style={[
+                styles.headerContent,
+                { 
+                  opacity: headerOpacity,
+                  transform: [{ scale: titleScale }]
+                }
+              ]}
+            >
+              <Text style={styles.collapsibleHeaderTitle}>Shopping List</Text>
+              <Text style={styles.collapsibleHeaderSubtitle}>
+                {checkedCount} of {totalItems} items • {Math.round(progressPercent)}% complete
+              </Text>
               {progressPercent === 100 && (
-                <View style={styles.completeBadge}>
-                  <Ionicons name="checkmark-circle" size={16} color="#fff" />
-                  <Text style={styles.completeBadgeText}>All done!</Text>
+                <View style={styles.progressBadge}>
+                  <Text style={styles.progressBadgeText}>✓ All done!</Text>
                 </View>
               )}
+            </Animated.View>
+          </Animated.View>
+
+          {/* Fixed Action Bar - Below collapsing header */}
+          <View style={[styles.actionBar, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
+            <TouchableOpacity onPress={handleBack} style={styles.actionButton}>
+              <Ionicons name="arrow-back" size={22} color={theme.colors.text} />
+            </TouchableOpacity>
+            
+            <View style={styles.progressBarMini}>
+              <Animated.View
+                style={[
+                  styles.progressBarMiniFill,
+                  {
+                    width: progressAnim.interpolate({
+                      inputRange: [0, 100],
+                      outputRange: ['0%', '100%'],
+                    }),
+                  },
+                ]}
+              />
             </View>
-          </LinearGradient>
+            
+            <View style={styles.actionButtonsRight}>
+              {isDashboardMode && (
+                <TouchableOpacity
+                  onPress={() => setShowAddItemModal(true)}
+                  style={styles.actionButton}
+                >
+                  <Ionicons name="add-circle-outline" size={22} color="#4cbb17" />
+                </TouchableOpacity>
+              )}
+              {checkedItems.size > 0 && (
+                <TouchableOpacity
+                  onPress={handleClearChecked}
+                  style={styles.actionButton}
+                >
+                  <Ionicons name="checkmark-done-outline" size={22} color="#4cbb17" />
+                </TouchableOpacity>
+              )}
+              <TouchableOpacity onPress={handleShareList} style={styles.actionButton}>
+                <Ionicons name="share-outline" size={22} color={theme.colors.textSecondary} />
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          <Animated.ScrollView
+            style={styles.scrollView}
+            contentContainerStyle={styles.scrollContent}
+            scrollEventThrottle={16}
+            onScroll={Animated.event(
+              [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+              { useNativeDriver: false }
+            )}
+          >
           {/* Quick Stats */}
           <View style={styles.statsRow}>
             <View style={[styles.statCard, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
@@ -445,7 +558,7 @@ export default function ShoppingListScreen({ route, navigation, isDashboardMode 
                     <Text style={[styles.categoryTitle, { color: theme.colors.text }, allChecked && styles.categoryTitleComplete]}>
                       {category.charAt(0).toUpperCase() + category.slice(1)}
                     </Text>
-                    <View style={[styles.categoryBadge, allChecked && styles.categoryBadgeComplete]}>
+                    <View style={[styles.categoryBadge, { backgroundColor: theme.colors.background }, allChecked && styles.categoryBadgeComplete]}>
                       <Text style={[styles.categoryBadgeText, { color: theme.colors.textSecondary }, allChecked && styles.categoryBadgeTextComplete]}>
                         {allChecked ? '✓' : uncheckedCount}
                       </Text>
@@ -454,7 +567,7 @@ export default function ShoppingListScreen({ route, navigation, isDashboardMode 
                   <Ionicons 
                     name={isExpanded ? 'chevron-down' : 'chevron-forward'} 
                     size={20} 
-                    color="#9ca3af" 
+                    color={theme.colors.textSecondary} 
                   />
                 </TouchableOpacity>
 
@@ -485,7 +598,7 @@ export default function ShoppingListScreen({ route, navigation, isDashboardMode 
                             </Text>
                           </View>
                           {item.brand && (
-                            <Text style={styles.itemBrand}>{item.brand}</Text>
+                            <Text style={[styles.itemBrand, { backgroundColor: theme.colors.background, color: theme.colors.textSecondary }]}>{item.brand}</Text>
                           )}
                         </TouchableOpacity>
                       );
@@ -550,27 +663,11 @@ export default function ShoppingListScreen({ route, navigation, isDashboardMode 
                   <Ionicons name="open-outline" size={20} color="#fff" />
                 </View>
               </TouchableOpacity>
-            )}
-          </View>
-
-          {/* Store Options */}
-          <View style={styles.storeOptions}>
-            <Text style={styles.storeOptionsTitle}>Available at</Text>
-            <ScrollView 
-              horizontal 
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.storeLogos}
-            >
-              {['🟡 ALDI', '🔵 Walmart', '🔴 Target', '🟢 Costco', '🟣 Wegmans', '🟠 Kroger'].map((store) => (
-                <View key={store} style={styles.storeLogo}>
-                  <Text style={styles.storeLogoText}>{store}</Text>
-                </View>
-              ))}
-            </ScrollView>
-          </View>
+            )}n          </View>
 
           <View style={styles.bottomPadding} />
-        </ScrollView>
+          </Animated.ScrollView>
+        </>
       )}
 
       {/* Manual Item Entry Modal */}
@@ -680,78 +777,68 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingBottom: 100, // Extra space for bottom tab navigation
   },
-  gradientHeader: {
+  
+  // Collapsing Header
+  collapsibleHeader: {
+    overflow: 'hidden',
+    justifyContent: 'flex-end',
     paddingHorizontal: 20,
-    paddingTop: 60,
-    paddingBottom: 24,
+    paddingBottom: 16,
   },
-  headerTop: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 16,
+  headerContent: {
+    alignItems: 'flex-start',
   },
-  backButton: {
-    padding: 4,
-  },
-  headerActions: {
-    flexDirection: 'row',
-    gap: 16,
-  },
-  headerActionButton: {
-    padding: 4,
-  },
-  headerTitle: {
-    fontSize: 32,
+  collapsibleHeaderTitle: {
+    fontSize: 28,
     fontWeight: 'bold',
     color: '#fff',
-    marginBottom: 20,
+    marginBottom: 4,
   },
-  
-  // Progress Section
-  progressSection: {
-    backgroundColor: 'rgba(255, 255, 255, 0.15)',
-    borderRadius: 12,
-    padding: 12,
-  },
-  progressHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+  collapsibleHeaderSubtitle: {
+    fontSize: 14,
+    color: 'rgba(255, 255, 255, 0.9)',
     marginBottom: 8,
   },
-  progressText: {
-    fontSize: 14,
-    color: '#fff',
+  progressBadge: {
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  progressBadgeText: {
+    fontSize: 12,
     fontWeight: '600',
+    color: '#fff',
   },
-  progressPercent: {
-    fontSize: 14,
-    color: '#d1fae5',
-    fontWeight: '700',
-  },
-  progressBarContainer: {
-    height: 8,
-    backgroundColor: 'rgba(255, 255, 255, 0.3)',
-    borderRadius: 4,
-    overflow: 'hidden',
-  },
-  progressBarFill: {
-    height: '100%',
-    backgroundColor: '#fff',
-    borderRadius: 4,
-  },
-  completeBadge: {
+  
+  // Action Bar (fixed below collapsing header)
+  actionBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    gap: 4,
-    marginTop: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    gap: 12,
   },
-  completeBadgeText: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#fff',
+  actionButton: {
+    padding: 6,
+  },
+  actionButtonsRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  progressBarMini: {
+    flex: 1,
+    height: 4,
+    backgroundColor: 'rgba(76, 187, 23, 0.2)',
+    borderRadius: 2,
+    overflow: 'hidden',
+  },
+  progressBarMiniFill: {
+    height: '100%',
+    backgroundColor: '#4cbb17',
+    borderRadius: 2,
   },
   
   // Stats Row
@@ -890,12 +977,11 @@ const styles = StyleSheet.create({
     // color: theme.colors.textSecondary
   },
   itemQuantityChecked: {
-    color: '#d1d5db',
+    // Uses opacity from itemRowChecked instead of hardcoded color
   },
   itemBrand: {
     fontSize: 12,
-    color: '#9ca3af',
-    // backgroundColor: '#f3f4f6', // theme.colors.surface // Use theme.colors.background
+    // color and backgroundColor applied inline with theme
     paddingHorizontal: 8,
     paddingVertical: 2,
     borderRadius: 4,

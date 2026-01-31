@@ -31,7 +31,7 @@ import { AuthContext } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { mealService, MealTemplate, QUICK_TEMPLATE_PRESETS, MealType, CookingSkillLevel, MealVariety, TimePerMeal, CreateMealPlanRequest, MealPlanResponse, CalendarDay, SavedMeal, DietOption } from '../services/mealService';
 import { createMealPlan, generateShoppingList } from '../services/mealPlanService';
-import { createShoppingList, createInstacartLinkFromMealPlan, ShoppingListItem } from '../services/instacartService';
+import { createShoppingList, ShoppingListItem } from '../services/instacartService';
 import { getMealDiaryService, type Meal, type DietaryPreferences } from '../services/mealDiary';
 import { nutritionService } from '../services';
 import { authService } from '../services/authService';
@@ -246,7 +246,7 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
   // AI Plan Generator State
   const [showPlanGenerator, setShowPlanGenerator] = useState(false);
   const [useGoalSelectionUI, setUseGoalSelectionUI] = useState(true); // Use new 3-mode UI
-  const [planModalStep, setPlanModalStep] = useState<'goals' | 'preview' | 'meals'>('goals');
+  const [planModalStep, setPlanModalStep] = useState<'goals' | 'preview'>('goals');
   const [selectedTemplatePreset, setSelectedTemplatePreset] = useState<typeof QUICK_TEMPLATE_PRESETS[0] | null>(null);
   const [planDescription, setPlanDescription] = useState('');
   const [planDuration, setPlanDuration] = useState(7);
@@ -320,10 +320,8 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
   const [savingMealsToDb, setSavingMealsToDb] = useState(false); // Loading state for saving meals
   const [mealsAutoSaved, setMealsAutoSaved] = useState(false); // Track if meals were auto-saved by API (plan/diet mode)
 
-  // Shopping List Modal state (bottom sheet style)
-  const [showShoppingListModal, setShowShoppingListModal] = useState(false);
+  // Shopping List state - kept for extracting items to pass to ShoppingListScreen
   const [shoppingListItems, setShoppingListItems] = useState<ReturnType<typeof extractShoppingListFromPlan> | null>(null);
-  const [shoppingListLoading, setShoppingListLoading] = useState(false);
   const [checkedShoppingItems, setCheckedShoppingItems] = useState<Set<string>>(new Set());
   
   // ============================================================================
@@ -336,8 +334,6 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
   // ============================================================================
   const [instacartUrl, setInstacartUrl] = useState<string | null>(null);
   const INSTACART_URL_STORAGE_KEY = '@wihy_instacart_url'; // AsyncStorage fallback key
-  const [showInstacartSuccessModal, setShowInstacartSuccessModal] = useState(false);
-  const [instacartItemCount, setInstacartItemCount] = useState(0);
 
   // Toggle shopping item checked state
   const toggleShoppingItem = (category: string, index: number) => {
@@ -1719,64 +1715,38 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
     setGeneratingList(true);
     
     try {
-      let productsLinkUrl: string | null = null;
-      let itemCount = 0;
+      // Extract shopping items from the accepted plan
+      const extractedItems = extractShoppingListFromPlan(acceptedPlan);
       
-      // Strategy 1: If meal plan is saved, use the more efficient /meal-plan/recipe endpoint
-      if (mealPlanId) {
-        console.log('[Instacart] Using saved meal plan endpoint with ID:', mealPlanId);
-        try {
-          const response = await createInstacartLinkFromMealPlan(mealPlanId);
-          if (response?.productsLinkUrl) {
-            productsLinkUrl = response.productsLinkUrl;
-            itemCount = response.ingredientCount || 0;
-            console.log('[Instacart] Saved meal plan link created successfully');
+      // Flatten all categories into a single array for Instacart
+      const allItems: ShoppingListItem[] = [];
+      Object.values(extractedItems).forEach(categoryItems => {
+        categoryItems.forEach(item => {
+          if (item.name) {
+            allItems.push({
+              name: item.name,
+              quantity: item.amount || 1,
+              unit: item.unit || 'item',
+            });
           }
-        } catch (savedPlanError) {
-          console.warn('[Instacart] Saved meal plan endpoint failed, falling back to create-list:', savedPlanError);
-          // Fall through to Strategy 2
-        }
-      }
-      
-      // Strategy 2: Extract items and use /create-list endpoint
-      if (!productsLinkUrl) {
-        console.log('[Instacart] Using create-list endpoint with extracted items');
-        
-        // Extract shopping items from the accepted plan
-        const extractedItems = extractShoppingListFromPlan(acceptedPlan);
-        
-        // Flatten all categories into a single array for Instacart
-        const allItems: ShoppingListItem[] = [];
-        Object.values(extractedItems).forEach(categoryItems => {
-          categoryItems.forEach(item => {
-            if (item.name) {
-              allItems.push({
-                name: item.name,
-                quantity: item.amount || 1,
-                unit: item.unit || 'item',
-              });
-            }
-          });
         });
-        
-        if (allItems.length === 0) {
-          Alert.alert('No Items', 'No ingredients found in this meal plan.');
-          setGeneratingList(false);
-          return;
-        }
-        
-        itemCount = allItems.length;
-        console.log('[Instacart] Creating shopping list with', itemCount, 'items');
-        
-        const instacartResponse = await createShoppingList(allItems, 'WIHY Meal Plan');
-        
-        if (instacartResponse?.success && instacartResponse?.data?.productsLinkUrl) {
-          productsLinkUrl = instacartResponse.data.productsLinkUrl;
-        }
+      });
+      
+      if (allItems.length === 0) {
+        Alert.alert('No Items', 'No ingredients found in this meal plan.');
+        setGeneratingList(false);
+        return;
       }
       
-      // Handle successful response
-      if (productsLinkUrl) {
+      const itemCount = allItems.length;
+      console.log('[Instacart] Creating shopping list with', itemCount, 'items via /create-list');
+      
+      // Use /create-list endpoint - works without saved meal plan
+      const instacartResponse = await createShoppingList(allItems, 'WIHY Meal Plan');
+      
+      if (instacartResponse?.success && instacartResponse?.data?.productsLinkUrl) {
+        const productsLinkUrl = instacartResponse.data.productsLinkUrl;
+        
         // Save the Instacart URL to state and storage
         setInstacartUrl(productsLinkUrl);
         
@@ -1794,34 +1764,43 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
           console.warn('[Instacart] Failed to open deep link:', linkError);
         }
         
-        // Show shopping list modal so user can review/edit when they return
-        if (acceptedPlan) {
-          const shoppingItems = extractShoppingListFromPlan(acceptedPlan);
-          setShoppingListItems(shoppingItems);
-          setShowMealPlanSuccess(false);
-          setTimeout(() => {
-            setShowShoppingListModal(true);
-          }, 300);
-        }
+        // Save shopping list and navigate to ShoppingListScreen
+        const shoppingItems = extractShoppingListFromPlan(acceptedPlan);
+        await saveShoppingListToStorage(shoppingItems);
+        setShowMealPlanSuccess(false);
+        
+        navigation.navigate('ShoppingList', { 
+          fromMealPlan: true,
+          shoppingListData: {
+            totalItems: allItems.length,
+            itemsByCategory: shoppingItems,
+          }
+        });
       } else {
-        throw new Error('No Instacart link returned');
+        throw new Error('No Instacart link returned from API');
       }
     } catch (error: any) {
-      console.error('[Instacart] Error:', error);
-      // Fallback - save locally
-      if (acceptedPlan) {
-        const items = extractShoppingListFromPlan(acceptedPlan);
-        await saveShoppingListToStorage(items);
-      }
-      // Show error fallback - open shopping list modal
-      if (acceptedPlan) {
-        const shoppingItems = extractShoppingListFromPlan(acceptedPlan);
-        setShoppingListItems(shoppingItems);
-        setShowMealPlanSuccess(false);
-        setTimeout(() => {
-          setShowShoppingListModal(true);
-        }, 300);
-      }
+      console.error('[Instacart] Error creating shopping list:', error);
+      
+      // Fallback - save locally and navigate to ShoppingListScreen
+      const items = extractShoppingListFromPlan(acceptedPlan);
+      await saveShoppingListToStorage(items);
+      
+      setShowMealPlanSuccess(false);
+      
+      Alert.alert(
+        'Shopping List Saved',
+        'Could not connect to Instacart. Your shopping list has been saved locally.',
+        [{ text: 'OK' }]
+      );
+      
+      navigation.navigate('ShoppingList', { 
+        fromMealPlan: true,
+        shoppingListData: {
+          totalItems: Object.values(items).flat().length,
+          itemsByCategory: items,
+        }
+      });
     } finally {
       setGeneratingList(false);
     }
@@ -1861,11 +1840,25 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
       console.log('[SaveMealPlan] Plan saved successfully!');
       setMealPlanSaved(true);
       
-      Alert.alert(
-        'Saved!',
-        'Your meal plan has been saved to your library. Access it anytime from the Consumption Dashboard.',
-        [{ text: 'Great!' }]
-      );
+      // Extract shopping list and navigate to ShoppingListScreen
+      const shoppingItems = extractShoppingListFromPlan(acceptedPlan);
+      const totalItems = Object.values(shoppingItems).flat().length;
+      
+      if (totalItems > 0) {
+        await saveShoppingListToStorage(shoppingItems);
+      }
+      
+      // Close success modal and navigate to ShoppingListScreen
+      setShowMealPlanSuccess(false);
+      setMealPlanSaved(false);
+      
+      navigation.navigate('ShoppingList', { 
+        fromMealPlan: true,
+        shoppingListData: {
+          totalItems,
+          itemsByCategory: shoppingItems,
+        }
+      });
     } catch (error: any) {
       console.error('[SaveMealPlan] Error saving:', error);
       
@@ -1881,11 +1874,25 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
         await AsyncStorage.setItem('saved_meal_plans', JSON.stringify(plans.slice(0, 20))); // Keep last 20
         
         setMealPlanSaved(true);
-        Alert.alert(
-          'Saved Locally',
-          'Your meal plan has been saved to this device.',
-          [{ text: 'OK' }]
-        );
+        
+        // Still navigate to shopping list even on local save
+        const shoppingItems = extractShoppingListFromPlan(acceptedPlan);
+        const totalItems = Object.values(shoppingItems).flat().length;
+        
+        if (totalItems > 0) {
+          await saveShoppingListToStorage(shoppingItems);
+        }
+        
+        setShowMealPlanSuccess(false);
+        setMealPlanSaved(false);
+        
+        navigation.navigate('ShoppingList', { 
+          fromMealPlan: true,
+          shoppingListData: {
+            totalItems,
+            itemsByCategory: shoppingItems,
+          }
+        });
       } catch (storageError) {
         console.error('[SaveMealPlan] Storage error:', storageError);
         Alert.alert('Error', 'Failed to save meal plan. Please try again.');
@@ -2693,46 +2700,10 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
 
           <TouchableOpacity 
             style={[styles.quickActionCard, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}
-            onPress={async () => {
-              setShoppingListLoading(true);
-              try {
-                // First check if we have items in memory
-                if (shoppingListItems && Object.values(shoppingListItems).flat().length > 0) {
-                  setShowShoppingListModal(true);
-                  return;
-                }
-                
-                // Try to load from API first, then storage
-                const loadedItems = await loadShoppingList();
-                if (loadedItems && Object.values(loadedItems).flat().length > 0) {
-                  setShowShoppingListModal(true);
-                  return;
-                }
-                
-                // Try to extract from accepted plan
-                if (acceptedPlan) {
-                  const items = extractShoppingListFromPlan(acceptedPlan);
-                  if (Object.values(items).flat().length > 0) {
-                    setShoppingListItems(items);
-                    saveShoppingListToStorage(items);
-                    setShowShoppingListModal(true);
-                    return;
-                  }
-                }
-                
-                // No items found - show empty state modal
-                setShowShoppingListModal(true);
-              } finally {
-                setShoppingListLoading(false);
-              }
-            }}
+            onPress={() => navigation.navigate('ShoppingList')}
           >
             <View style={[styles.quickActionIcon, { backgroundColor: '#dcfce7' }]}>
-              {shoppingListLoading ? (
-                <ActivityIndicator color="#22c55e" />
-              ) : (
-                <SvgIcon name="cart" size={28} color="#22c55e" />
-              )}
+              <SvgIcon name="cart" size={28} color="#22c55e" />
             </View>
             <Text style={[styles.quickActionTitle, { color: theme.colors.text }]}>Shopping List</Text>
             <Text style={[styles.quickActionSubtitle, { color: theme.colors.textSecondary }]}>View items</Text>
@@ -3192,7 +3163,6 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
               onPress={() => {
                 // Skip customize step - go directly between goals/preview/meals
                 if (planModalStep === 'preview') setPlanModalStep('goals');
-                else if (planModalStep === 'meals') setPlanModalStep('preview');
               }}
             >
               <SvgIcon name="arrow-back" size={24} color="#374151" />
@@ -3201,18 +3171,12 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
           
           <View style={styles.modalTitleContainer}>
 <SvgIcon 
-              name={
-                planModalStep === 'goals' ? 'sparkles' : 
-                planModalStep === 'preview' ? 'calendar-outline' :
-                'cart-outline'
-              } 
+              name={planModalStep === 'goals' ? 'sparkles' : 'calendar-outline'} 
               size={24} 
               color="#ef4444" 
             />
             <Text style={[styles.modalTitle, { color: theme.colors.text }]}>
-              {planModalStep === 'goals' ? 'Create Meal Plan' : 
-               planModalStep === 'preview' ? 'Your Program' :
-               'Shopping List'}
+              {planModalStep === 'goals' ? 'Create Meal Plan' : 'Your Meal Plan'}
             </Text>
           </View>
           
@@ -3234,13 +3198,11 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
           />
         ) : (
           <>
-            {/* Step Indicator - 3 steps: goals -> preview -> shopping */}
+            {/* Step Indicator - 2 steps: goals -> preview */}
             <View style={styles.stepIndicator}>
               <View style={[styles.stepDot, planModalStep === 'goals' ? styles.stepDotActive : styles.stepDotCompleted]} />
               <View style={[styles.stepLine, planModalStep !== 'goals' && styles.stepLineActive]} />
-              <View style={[styles.stepDot, planModalStep === 'preview' ? styles.stepDotActive : (planModalStep === 'meals' ? styles.stepDotCompleted : null)]} />
-              <View style={[styles.stepLine, planModalStep === 'meals' && styles.stepLineActive]} />
-              <View style={[styles.stepDot, planModalStep === 'meals' && styles.stepDotActive]} />
+              <View style={[styles.stepDot, planModalStep === 'preview' && styles.stepDotActive]} />
             </View>
 
             <ScrollView style={styles.modalScrollContent} showsVerticalScrollIndicator={false}>
@@ -3373,161 +3335,7 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
                 )}
               </View>
 
-              <TouchableOpacity
-                style={[styles.viewAllMealsButton, (!generatedPlan.days || generatedPlan.days.length === 0) && styles.viewAllMealsButtonDisabled]}
-                onPress={() => setPlanModalStep('meals')}
-                disabled={!generatedPlan.days || generatedPlan.days.length === 0}
-              >
-                <SvgIcon name="cart-outline" size={24} color="#ef4444" />
-                <Text style={styles.viewAllMealsButtonText}>View Shopping List</Text>
-                <SvgIcon name="arrow-forward" size={20} color="#ef4444" />
-              </TouchableOpacity>
-            </>
-          )}
-
-          {planModalStep === 'meals' && generatedPlan && (
-            <>
-              <View style={styles.modalSection}>
-                <View style={styles.previewHeader}>
-                  <Text style={styles.previewTitle}>Shopping List</Text>
-                  <Text style={styles.previewSubtitle}>
-                    Ingredients for {generatedPlan.duration_days || 0} days • {generatedPlan.summary?.total_meals || 0} meals
-                  </Text>
-                </View>
-
-                {/* Shopping List Categories - Dynamically generated from meal plan */}
-                <View style={styles.shoppingListContainer}>
-                  {(() => {
-                    const shoppingItems = extractShoppingListFromPlan(generatedPlan);
-                    const totalItems = Object.values(shoppingItems).flat().length;
-                    
-                    if (totalItems === 0) {
-                      return (
-                        <View style={styles.shoppingCategoryCard}>
-                          <Text style={styles.shoppingItem}>No ingredients found in meal plan</Text>
-                        </View>
-                      );
-                    }
-
-                    return (
-                      <>
-                        {/* Proteins */}
-                        {shoppingItems.proteins.length > 0 && (
-                          <View style={styles.shoppingCategoryCard}>
-                            <View style={styles.shoppingCategoryHeader}>
-                              <SvgIcon name="nutrition-outline" size={20} color="#f59e0b" />
-                              <Text style={styles.shoppingCategoryTitle}>Proteins</Text>
-                              <Text style={styles.shoppingCategoryCount}>{shoppingItems.proteins.length} items</Text>
-                            </View>
-                            <View style={styles.shoppingItemsList}>
-                              {shoppingItems.proteins.slice(0, 5).map((item, idx) => (
-                                <Text key={`protein-${idx}`} style={styles.shoppingItem}>• {formatIngredient(item)}</Text>
-                              ))}
-                              {shoppingItems.proteins.length > 5 && (
-                                <Text style={[styles.shoppingItem, { color: theme.colors.textSecondary, fontStyle: 'italic' }]}>+ {shoppingItems.proteins.length - 5} more...</Text>
-                              )}
-                            </View>
-                          </View>
-                        )}
-
-                        {/* Produce */}
-                        {shoppingItems.produce.length > 0 && (
-                          <View style={styles.shoppingCategoryCard}>
-                            <View style={styles.shoppingCategoryHeader}>
-                              <SvgIcon name="leaf-outline" size={20} color="#10b981" />
-                              <Text style={styles.shoppingCategoryTitle}>Produce</Text>
-                              <Text style={styles.shoppingCategoryCount}>{shoppingItems.produce.length} items</Text>
-                            </View>
-                            <View style={styles.shoppingItemsList}>
-                              {shoppingItems.produce.slice(0, 5).map((item, idx) => (
-                                <Text key={`produce-${idx}`} style={styles.shoppingItem}>• {formatIngredient(item)}</Text>
-                              ))}
-                              {shoppingItems.produce.length > 5 && (
-                                <Text style={[styles.shoppingItem, { color: theme.colors.textSecondary, fontStyle: 'italic' }]}>+ {shoppingItems.produce.length - 5} more...</Text>
-                              )}
-                            </View>
-                          </View>
-                        )}
-
-                        {/* Dairy */}
-                        {shoppingItems.dairy.length > 0 && (
-                          <View style={styles.shoppingCategoryCard}>
-                            <View style={styles.shoppingCategoryHeader}>
-                              <SvgIcon name="water-outline" size={20} color="#3b82f6" />
-                              <Text style={styles.shoppingCategoryTitle}>Dairy</Text>
-                              <Text style={styles.shoppingCategoryCount}>{shoppingItems.dairy.length} items</Text>
-                            </View>
-                            <View style={styles.shoppingItemsList}>
-                              {shoppingItems.dairy.slice(0, 5).map((item, idx) => (
-                                <Text key={`dairy-${idx}`} style={styles.shoppingItem}>• {formatIngredient(item)}</Text>
-                              ))}
-                            </View>
-                          </View>
-                        )}
-
-                        {/* Grains */}
-                        {shoppingItems.grains.length > 0 && (
-                          <View style={styles.shoppingCategoryCard}>
-                            <View style={styles.shoppingCategoryHeader}>
-                              <SvgIcon name="grid-outline" size={20} color="#d97706" />
-                              <Text style={styles.shoppingCategoryTitle}>Grains</Text>
-                              <Text style={styles.shoppingCategoryCount}>{shoppingItems.grains.length} items</Text>
-                            </View>
-                            <View style={styles.shoppingItemsList}>
-                              {shoppingItems.grains.slice(0, 5).map((item, idx) => (
-                                <Text key={`grain-${idx}`} style={styles.shoppingItem}>• {formatIngredient(item)}</Text>
-                              ))}
-                            </View>
-                          </View>
-                        )}
-
-                        {/* Pantry */}
-                        {shoppingItems.pantry.length > 0 && (
-                          <View style={styles.shoppingCategoryCard}>
-                            <View style={styles.shoppingCategoryHeader}>
-                              <SvgIcon name="wine-outline" size={20} color="#ef4444" />
-                              <Text style={styles.shoppingCategoryTitle}>Pantry</Text>
-                              <Text style={styles.shoppingCategoryCount}>{shoppingItems.pantry.length} items</Text>
-                            </View>
-                            <View style={styles.shoppingItemsList}>
-                              {shoppingItems.pantry.slice(0, 5).map((item, idx) => (
-                                <Text key={`pantry-${idx}`} style={styles.shoppingItem}>• {formatIngredient(item)}</Text>
-                              ))}
-                              {shoppingItems.pantry.length > 5 && (
-                                <Text style={[styles.shoppingItem, { color: theme.colors.textSecondary, fontStyle: 'italic' }]}>+ {shoppingItems.pantry.length - 5} more...</Text>
-                              )}
-                            </View>
-                          </View>
-                        )}
-
-                        {/* Other Items */}
-                        {shoppingItems.other.length > 0 && (
-                          <View style={styles.shoppingCategoryCard}>
-                            <View style={styles.shoppingCategoryHeader}>
-                              <SvgIcon name="basket-outline" size={20} color="#8b5cf6" />
-                              <Text style={styles.shoppingCategoryTitle}>Other</Text>
-                              <Text style={styles.shoppingCategoryCount}>{shoppingItems.other.length} items</Text>
-                            </View>
-                            <View style={styles.shoppingItemsList}>
-                              {shoppingItems.other.slice(0, 5).map((item, idx) => (
-                                <Text key={`other-${idx}`} style={styles.shoppingItem}>• {formatIngredient(item)}</Text>
-                              ))}
-                            </View>
-                          </View>
-                        )}
-                      </>
-                    );
-                  })()}
-
-                  <View style={styles.shoppingListNote}>
-                    <SvgIcon name="information-circle-outline" size={20} color="#6b7280" />
-                    <Text style={styles.shoppingListNoteText}>
-                      Shopping list generated based on your {generatedPlan.duration_days}-day meal plan
-                    </Text>
-                  </View>
-                </View>
-              </View>
-
+              {/* Accept Plan Button */}
               <TouchableOpacity
                 style={[styles.acceptPlanButton, (!generatedPlan.days || generatedPlan.days.length === 0) && styles.acceptPlanButtonDisabled]}
                 onPress={handleAcceptGeneratedPlan}
@@ -3596,66 +3404,40 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
               </View>
             </View>
 
-            {/* Action Buttons */}
+            {/* Action Buttons - Simplified */}
             <View style={styles.successActionsContainer}>
-              {/* View Shopping List - Primary Action */}
+              {/* View Shopping List - Primary Action - Goes to full ShoppingListScreen */}
               <TouchableOpacity 
-                style={[styles.instacartButton, savingMealsToDb && styles.instacartButtonDisabled]}
+                style={styles.instacartButton}
                 activeOpacity={0.7}
-                onPress={async (e) => {
-                  e.stopPropagation();
-                  console.log('[ViewShoppingList] Button pressed');
-                  
-                  // Check if we have a plan with days/meals (program_id not required for shopping list)
+                onPress={async () => {
                   if (!acceptedPlan || !acceptedPlan.days || acceptedPlan.days.length === 0) {
                     Alert.alert('Error', 'No meal plan available');
                     return;
                   }
                   
-                  console.log('[ViewShoppingList] Plan has', acceptedPlan.days.length, 'days');
-                  
-                  // ⭐ UPDATED: Check if meals are already auto-saved (plan/diet mode)
-                  // Plan and Diet mode meals are now automatically saved by the backend
-                  // Only save manually for Quick mode or if no saved IDs exist
-                  if (savedMealIds.length === 0 && !mealsAutoSaved && acceptedPlan) {
-                    try {
-                      setSavingMealsToDb(true);
-                      console.log('[ViewShoppingList] Quick mode - saving meals to database for deep link support...');
-                      const mealIds = await mealService.saveMealsFromPlan(userId, acceptedPlan);
-                      setSavedMealIds(mealIds);
-                      console.log('[ViewShoppingList] Saved', mealIds.length, 'meals to database');
-                    } catch (saveError) {
-                      console.warn('[ViewShoppingList] Failed to save meals to DB (deep links may not work):', saveError);
-                      // Continue anyway - meals in local state can still be used
-                    } finally {
-                      setSavingMealsToDb(false);
-                    }
-                  } else if (mealsAutoSaved) {
-                    console.log('[ViewShoppingList] ✅ Meals already auto-saved by API, skipping manual save');
-                  }
-                  
-                  // Extract shopping list from the accepted plan
+                  // Extract shopping items
                   const shoppingItems = extractShoppingListFromPlan(acceptedPlan);
                   const totalItems = Object.values(shoppingItems).flat().length;
                   
-                  console.log('[ViewShoppingList] Extracted items:', totalItems, shoppingItems);
-                  
                   if (totalItems > 0) {
-                    // Store shopping items first
-                    setShoppingListItems(shoppingItems);
-                    // Close success modal
+                    // Save to storage for ShoppingListScreen to pick up
+                    await saveShoppingListToStorage(shoppingItems);
                     setShowMealPlanSuccess(false);
-                    // Open shopping list modal after a brief delay to allow animation
-                    console.log('[ViewShoppingList] Opening shopping list modal in 300ms...');
-                    setTimeout(() => {
-                      console.log('[ViewShoppingList] Setting showShoppingListModal to true');
-                      setShowShoppingListModal(true);
-                    }, 300);
+                    
+                    // Navigate to ShoppingList screen with the data
+                    navigation.navigate('ShoppingList', { 
+                      fromMealPlan: true,
+                      shoppingListData: {
+                        totalItems,
+                        itemsByCategory: shoppingItems,
+                      }
+                    });
                   } else {
                     Alert.alert('No Items', 'No ingredients found in this meal plan.');
                   }
                 }}
-                disabled={!acceptedPlan || generatingList || savingMealsToDb}
+                disabled={!acceptedPlan}
               >
                 <LinearGradient
                   colors={['#43B02A', '#2E8B1F']}
@@ -3663,66 +3445,11 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
                   end={{ x: 1, y: 0 }}
                   style={styles.instacartButtonGradient}
                 >
-                  {savingMealsToDb ? (
-                    <ActivityIndicator size="small" color="#fff" />
-                  ) : (
-                    <SvgIcon name="list-outline" size={24} color="#fff" />
-                  )}
+                  <SvgIcon name="cart-outline" size={24} color="#fff" />
                   <Text style={styles.instacartButtonText}>
                     View Shopping List
                   </Text>
                 </LinearGradient>
-              </TouchableOpacity>
-
-              {/* Open Instacart Shopping List - Creates link and deep links */}
-              <TouchableOpacity 
-                style={[
-                  styles.instacartButton,
-                  (!user?.capabilities?.instacart || generatingList) && styles.instacartButtonDisabled
-                ]}
-                activeOpacity={0.7}
-                onPress={(e) => {
-                  e.stopPropagation();
-                  if (user?.capabilities?.instacart) {
-                    // User has Instacart enabled - proceed with submission
-                    handleSubmitToInstacart();
-                  } else {
-                    // User doesn't have Instacart - show upgrade prompt
-                    setShowMealPlanSuccess(false);
-                    navigation.navigate('PlansScreen' as any, {
-                      highlightFeature: 'instacart',
-                      source: 'meal_plan_success',
-                    });
-                  }
-                }}
-                disabled={generatingList}
-              >
-                {user?.capabilities?.instacart ? (
-                  <LinearGradient
-                    colors={['#43B02A', '#2E8B1F']}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 0 }}
-                    style={styles.instacartButtonGradient}
-                  >
-                    {generatingList ? (
-                      <ActivityIndicator color="#fff" size="small" />
-                    ) : (
-                      <SvgIcon name="cart-outline" size={24} color="#fff" />
-                    )}
-                    <Text style={styles.instacartButtonText}>
-                      {generatingList ? 'Creating Shopping List...' : 'Open Instacart Shopping List'}
-                    </Text>
-                  </LinearGradient>
-                ) : (
-                  <View style={styles.instacartButtonGradientDisabled}>
-                    <SvgIcon name="cart-outline" size={24} color="#9ca3af" />
-                    <Text style={styles.instacartButtonTextDisabled}>Open Instacart Shopping List</Text>
-                    <View style={styles.premiumBadge}>
-                      <SvgIcon name="star" size={12} color="#f59e0b" />
-                      <Text style={styles.premiumBadgeText}>PRO</Text>
-                    </View>
-                  </View>
-                )}
               </TouchableOpacity>
 
               {/* Save Meal Plan Button */}
@@ -3741,7 +3468,7 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
                   <SvgIcon 
                     name={mealPlanSaved ? "checkmark-circle" : "bookmark-outline"} 
                     size={20} 
-                    color={mealPlanSaved ? "#4cbb17" : "#4cbb17"} 
+                    color="#4cbb17" 
                   />
                 )}
                 <Text style={[
@@ -3756,10 +3483,9 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
               <TouchableOpacity 
                 style={styles.successDoneButton}
                 activeOpacity={0.7}
-                onPress={(e) => {
-                  e.stopPropagation();
+                onPress={() => {
                   setShowMealPlanSuccess(false);
-                  setMealPlanSaved(false); // Reset for next plan
+                  setMealPlanSaved(false);
                 }}
               >
                 <Text style={styles.successDoneText}>Done</Text>
@@ -4157,423 +3883,6 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
 
   // Shopping List Modal - Slides up from bottom
   // Instacart Success Modal (similar to workout complete modal)
-  const renderInstacartSuccessModal = () => (
-    <Modal
-      visible={showInstacartSuccessModal}
-      animationType="slide"
-      presentationStyle="overFullScreen"
-      transparent={true}
-      onRequestClose={() => setShowInstacartSuccessModal(false)}
-    >
-      <View style={styles.workoutCompleteOverlay}>
-        <View style={styles.workoutCompleteContainer}>
-          <SafeAreaView style={styles.workoutCompleteSafeArea}>
-            {/* Header with celebration */}
-            <View style={styles.workoutCompleteHeader}>
-              <View style={styles.celebrationIcon}>
-                <Text style={styles.celebrationEmoji}>🎉</Text>
-              </View>
-              <Text style={styles.workoutCompleteTitle}>Shopping List Created!</Text>
-              <Text style={styles.workoutCompleteSubtitle}>Your ingredients are ready in Instacart</Text>
-            </View>
-
-            {/* Stats Grid */}
-            <View style={styles.workoutStatsGrid}>
-              <View style={styles.workoutStatCard}>
-                <SvgIcon name="cart-outline" size={28} color="#4cbb17" />
-                <Text style={styles.workoutCompleteStatValue}>{instacartItemCount}</Text>
-                <Text style={styles.workoutCompleteStatLabel}>Items</Text>
-              </View>
-              <View style={styles.workoutStatCard}>
-                <SvgIcon name="checkmark-circle-outline" size={28} color="#3b82f6" />
-                <Text style={styles.workoutCompleteStatValue}>Ready</Text>
-                <Text style={styles.workoutCompleteStatLabel}>To Order</Text>
-              </View>
-              <View style={styles.workoutStatCard}>
-                <SvgIcon name="time-outline" size={28} color="#f59e0b" />
-                <Text style={styles.workoutCompleteStatValue}>Fast</Text>
-                <Text style={styles.workoutCompleteStatLabel}>Delivery</Text>
-              </View>
-            </View>
-
-            {/* Done Button */}
-            <TouchableOpacity 
-              style={styles.workoutCompleteDoneButton}
-              onPress={async () => {
-                setShowInstacartSuccessModal(false);
-                // Open Instacart if URL is available
-                if (instacartUrl) {
-                  try {
-                    await Linking.openURL(instacartUrl);
-                  } catch (err) {
-                    console.warn('Failed to open Instacart:', err);
-                  }
-                }
-              }}
-            >
-              <Text style={styles.workoutCompleteDoneText}>Open Instacart</Text>
-            </TouchableOpacity>
-          </SafeAreaView>
-        </View>
-      </View>
-    </Modal>
-  );
-
-  const renderShoppingListModal = () => {
-    const items = shoppingListItems;
-    const totalItems = items ? Object.values(items).flat().length : 0;
-    const categoryCount = items ? Object.entries(items).filter(([_, arr]) => arr.length > 0).length : 0;
-    
-    console.log('[ShoppingListModal] Render called - visible:', showShoppingListModal, 'hasItems:', !!items, 'totalItems:', totalItems);
-
-    return (
-      <Modal
-        visible={showShoppingListModal}
-        animationType="slide"
-        presentationStyle="overFullScreen"
-        transparent={true}
-        onRequestClose={() => setShowShoppingListModal(false)}
-      >
-        <View style={{ flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.5)', justifyContent: 'flex-end' }}>
-          <View style={{ backgroundColor: theme.colors.background, borderTopLeftRadius: 24, borderTopRightRadius: 24, height: '85%' }}>
-            <SafeAreaView style={{ flex: 1, width: '100%' }}>
-              {/* Header */}
-              <View style={styles.shoppingModalHeader}>
-                <BackButton onPress={() => setShowShoppingListModal(false)} />
-                <View style={styles.shoppingModalHeaderCenter}>
-                  <SvgIcon name="cart-outline" size={24} color="#4cbb17" />
-                  <Text style={styles.shoppingModalTitle}>Shopping List</Text>
-                </View>
-                <CloseButton onPress={() => setShowShoppingListModal(false)} />
-              </View>
-
-              {/* Stats Bar */}
-              <View style={styles.shoppingStatsBar}>
-                <View style={styles.shoppingStatItem}>
-                  <Text style={styles.shoppingStatValue}>{categoryCount}</Text>
-                  <Text style={styles.shoppingStatLabel}>Categories</Text>
-                </View>
-                <View style={styles.shoppingStatItem}>
-                  <Text style={styles.shoppingStatValue}>{checkedShoppingItems.size}/{totalItems}</Text>
-                  <Text style={styles.shoppingStatLabel}>Checked</Text>
-                </View>
-                <View style={styles.shoppingStatItem}>
-                  <Text style={styles.shoppingStatValue}>{acceptedPlan?.duration_days || 7}</Text>
-                  <Text style={styles.shoppingStatLabel}>Days</Text>
-                </View>
-              </View>
-
-              {/* Shopping List Items */}
-              <ScrollView style={styles.shoppingListScrollView} showsVerticalScrollIndicator={false}>
-                {/* Proteins */}
-                {items?.proteins && items.proteins.length > 0 && (
-                  <View style={styles.shoppingCategorySection}>
-                    <View style={styles.shoppingCategorySectionHeader}>
-                      <SvgIcon name="nutrition-outline" size={20} color="#f59e0b" />
-                      <Text style={styles.shoppingCategorySectionTitle}>Proteins</Text>
-                      <Text style={styles.shoppingCategorySectionCount}>{items.proteins.length}</Text>
-                    </View>
-                    {items.proteins.map((item, idx) => {
-                      const isChecked = checkedShoppingItems.has(`proteins-${idx}`);
-                      return (
-                        <TouchableOpacity 
-                          key={`protein-${idx}`} 
-                          style={styles.shoppingListItemRow}
-                          onPress={() => toggleShoppingItem('proteins', idx)}
-                          activeOpacity={0.6}
-                        >
-<SvgIcon 
-                            name={isChecked ? "checkbox" : "square-outline"} 
-                            size={22} 
-                            color={isChecked ? "#4cbb17" : "#d1d5db"} 
-                          />
-                          <Text style={[
-                            styles.shoppingListItemText,
-                            isChecked && { textDecorationLine: 'line-through', color: '#9ca3af' }
-                          ]}>
-                            {formatIngredient(item)}
-                          </Text>
-                        </TouchableOpacity>
-                      );
-                    })}
-                  </View>
-                )}
-
-                {/* Produce */}
-                {items?.produce && items.produce.length > 0 && (
-                  <View style={styles.shoppingCategorySection}>
-                    <View style={styles.shoppingCategorySectionHeader}>
-                      <SvgIcon name="leaf-outline" size={20} color="#10b981" />
-                      <Text style={styles.shoppingCategorySectionTitle}>Produce</Text>
-                      <Text style={styles.shoppingCategorySectionCount}>{items.produce.length}</Text>
-                    </View>
-                    {items.produce.map((item, idx) => {
-                      const isChecked = checkedShoppingItems.has(`produce-${idx}`);
-                      return (
-                        <TouchableOpacity 
-                          key={`produce-${idx}`} 
-                          style={styles.shoppingListItemRow}
-                          onPress={() => toggleShoppingItem('produce', idx)}
-                          activeOpacity={0.6}
-                        >
-<SvgIcon 
-                            name={isChecked ? "checkbox" : "square-outline"} 
-                            size={22} 
-                            color={isChecked ? "#4cbb17" : "#d1d5db"} 
-                          />
-                          <Text style={[
-                            styles.shoppingListItemText,
-                            isChecked && { textDecorationLine: 'line-through', color: '#9ca3af' }
-                          ]}>
-                            {formatIngredient(item)}
-                          </Text>
-                        </TouchableOpacity>
-                      );
-                    })}
-                  </View>
-                )}
-
-                {/* Dairy */}
-                {items?.dairy && items.dairy.length > 0 && (
-                  <View style={styles.shoppingCategorySection}>
-                    <View style={styles.shoppingCategorySectionHeader}>
-                      <SvgIcon name="water-outline" size={20} color="#3b82f6" />
-                      <Text style={styles.shoppingCategorySectionTitle}>Dairy</Text>
-                      <Text style={styles.shoppingCategorySectionCount}>{items.dairy.length}</Text>
-                    </View>
-                    {items.dairy.map((item, idx) => {
-                      const isChecked = checkedShoppingItems.has(`dairy-${idx}`);
-                      return (
-                        <TouchableOpacity 
-                          key={`dairy-${idx}`} 
-                          style={styles.shoppingListItemRow}
-                          onPress={() => toggleShoppingItem('dairy', idx)}
-                          activeOpacity={0.6}
-                        >
-<SvgIcon 
-                            name={isChecked ? "checkbox" : "square-outline"} 
-                            size={22} 
-                            color={isChecked ? "#4cbb17" : "#d1d5db"} 
-                          />
-                          <Text style={[
-                            styles.shoppingListItemText,
-                            isChecked && { textDecorationLine: 'line-through', color: '#9ca3af' }
-                          ]}>
-                            {formatIngredient(item)}
-                          </Text>
-                        </TouchableOpacity>
-                      );
-                    })}
-                  </View>
-                )}
-
-                {/* Grains */}
-                {items?.grains && items.grains.length > 0 && (
-                  <View style={styles.shoppingCategorySection}>
-                    <View style={styles.shoppingCategorySectionHeader}>
-                      <SvgIcon name="grid-outline" size={20} color="#d97706" />
-                      <Text style={styles.shoppingCategorySectionTitle}>Grains</Text>
-                      <Text style={styles.shoppingCategorySectionCount}>{items.grains.length}</Text>
-                    </View>
-                    {items.grains.map((item, idx) => {
-                      const isChecked = checkedShoppingItems.has(`grains-${idx}`);
-                      return (
-                        <TouchableOpacity 
-                          key={`grain-${idx}`} 
-                          style={styles.shoppingListItemRow}
-                          onPress={() => toggleShoppingItem('grains', idx)}
-                          activeOpacity={0.6}
-                        >
-<SvgIcon 
-                            name={isChecked ? "checkbox" : "square-outline"} 
-                            size={22} 
-                            color={isChecked ? "#4cbb17" : "#d1d5db"} 
-                          />
-                          <Text style={[
-                            styles.shoppingListItemText,
-                            isChecked && { textDecorationLine: 'line-through', color: '#9ca3af' }
-                          ]}>
-                            {formatIngredient(item)}
-                          </Text>
-                        </TouchableOpacity>
-                      );
-                    })}
-                  </View>
-                )}
-
-                {/* Pantry */}
-                {items?.pantry && items.pantry.length > 0 && (
-                  <View style={styles.shoppingCategorySection}>
-                    <View style={styles.shoppingCategorySectionHeader}>
-                      <SvgIcon name="wine-outline" size={20} color="#ef4444" />
-                      <Text style={styles.shoppingCategorySectionTitle}>Pantry</Text>
-                      <Text style={styles.shoppingCategorySectionCount}>{items.pantry.length}</Text>
-                    </View>
-                    {items.pantry.map((item, idx) => {
-                      const isChecked = checkedShoppingItems.has(`pantry-${idx}`);
-                      return (
-                        <TouchableOpacity 
-                          key={`pantry-${idx}`} 
-                          style={styles.shoppingListItemRow}
-                          onPress={() => toggleShoppingItem('pantry', idx)}
-                          activeOpacity={0.6}
-                        >
-<SvgIcon 
-                            name={isChecked ? "checkbox" : "square-outline"} 
-                            size={22} 
-                            color={isChecked ? "#4cbb17" : "#d1d5db"} 
-                          />
-                          <Text style={[
-                            styles.shoppingListItemText,
-                            isChecked && { textDecorationLine: 'line-through', color: '#9ca3af' }
-                          ]}>
-                            {formatIngredient(item)}
-                          </Text>
-                        </TouchableOpacity>
-                      );
-                    })}
-                  </View>
-                )}
-
-                {/* Other */}
-                {items?.other && items.other.length > 0 && (
-                  <View style={styles.shoppingCategorySection}>
-                    <View style={styles.shoppingCategorySectionHeader}>
-                      <SvgIcon name="basket-outline" size={20} color="#8b5cf6" />
-                      <Text style={styles.shoppingCategorySectionTitle}>Other</Text>
-                      <Text style={styles.shoppingCategorySectionCount}>{items.other.length}</Text>
-                    </View>
-                    {items.other.map((item, idx) => {
-                      const isChecked = checkedShoppingItems.has(`other-${idx}`);
-                      return (
-                        <TouchableOpacity 
-                          key={`other-${idx}`} 
-                          style={styles.shoppingListItemRow}
-                          onPress={() => toggleShoppingItem('other', idx)}
-                          activeOpacity={0.6}
-                        >
-<SvgIcon 
-                            name={isChecked ? "checkbox" : "square-outline"} 
-                            size={22} 
-                            color={isChecked ? "#4cbb17" : "#d1d5db"} 
-                          />
-                          <Text style={[
-                            styles.shoppingListItemText,
-                            isChecked && { textDecorationLine: 'line-through', color: '#9ca3af' }
-                          ]}>
-                            {formatIngredient(item)}
-                          </Text>
-                        </TouchableOpacity>
-                      );
-                    })}
-                  </View>
-                )}
-
-                {/* Empty state if no items */}
-                {totalItems === 0 && (
-                  <View style={{ alignItems: 'center', paddingTop: 60, paddingHorizontal: 32 }}>
-                    <View style={{ width: 100, height: 100, borderRadius: 50, backgroundColor: theme.colors.surface, alignItems: 'center', justifyContent: 'center', marginBottom: 20 }}>
-                      <SvgIcon name="cart-outline" size={48} color="#9ca3af" />
-                    </View>
-                    <Text style={{ fontSize: 20, fontWeight: '600', color: theme.colors.text, marginBottom: 8 }}>No Shopping List</Text>
-                    <Text style={{ fontSize: 14, color: theme.colors.textSecondary, textAlign: 'center', lineHeight: 20 }}>
-                      Create a personalized meal plan to automatically generate your shopping list with all the ingredients you need.
-                    </Text>
-                    <TouchableOpacity 
-                      style={{ 
-                        marginTop: 24,
-                        backgroundColor: '#4cbb17',
-                        paddingVertical: 14,
-                        paddingHorizontal: 32,
-                        borderRadius: 12,
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                        gap: 8,
-                      }}
-                      onPress={() => {
-                        setShowShoppingListModal(false);
-                        setTimeout(() => setShowPlanGenerator(true), 300);
-                      }}
-                    >
-                      <SvgIcon name="add-circle" size={20} color="#fff" />
-                      <Text style={{ color: '#fff', fontSize: 16, fontWeight: '600' }}>Create Meal Plan</Text>
-                    </TouchableOpacity>
-                  </View>
-                )}
-
-                <View style={{ height: 40 }} />
-              </ScrollView>
-
-              {/* Bottom Action */}
-              <View style={styles.shoppingModalBottomAction}>
-                {totalItems > 0 ? (
-                  <View style={{ flexDirection: 'row', gap: 12 }}>
-                    {/* Order with Instacart - only unchecked items */}
-                    <TouchableOpacity 
-                      style={[styles.shoppingDoneButton, { 
-                        flex: 1, 
-                        backgroundColor: totalItems - checkedShoppingItems.size > 0 ? '#1a8917' : '#9ca3af',
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: 8,
-                      }]}
-                      disabled={totalItems - checkedShoppingItems.size === 0}
-                      onPress={async () => {
-                        const uncheckedCount = totalItems - checkedShoppingItems.size;
-                        if (uncheckedCount === 0) {
-                          Alert.alert('All items checked!', 'All items have been marked as purchased.');
-                          return;
-                        }
-                        setShowShoppingListModal(false);
-                        // If we have an accepted plan, use Instacart flow
-                        if (acceptedPlan) {
-                          handleSubmitToInstacart();
-                        } else {
-                          // Manual list - show coming soon
-                          Alert.alert(
-                            'Instacart',
-                            `Order ${uncheckedCount} unchecked items with Instacart. This feature is coming soon!`,
-                            [{ text: 'OK' }]
-                          );
-                        }
-                      }}
-                    >
-                      <SvgIcon name="cart" size={20} color="#fff" />
-                      <Text style={styles.shoppingDoneButtonText}>
-                        {totalItems - checkedShoppingItems.size > 0 
-                          ? `Order ${totalItems - checkedShoppingItems.size} items` 
-                          : 'All checked!'}
-                      </Text>
-                    </TouchableOpacity>
-                    
-                    {/* Done button */}
-                    <TouchableOpacity 
-                      style={[styles.shoppingDoneButton, { 
-                        paddingHorizontal: 24,
-                        // backgroundColor: '#f3f4f6', // theme.colors.surface // Use theme.colors.background
-                      }]}
-                      onPress={() => setShowShoppingListModal(false)}
-                    >
-                      <Text style={[styles.shoppingDoneButtonText, { color: theme.colors.text }]}>Done</Text>
-                    </TouchableOpacity>
-                  </View>
-                ) : (
-                  <TouchableOpacity 
-                    style={[styles.shoppingDoneButton, { backgroundColor: theme.colors.surface }]}
-                    onPress={() => setShowShoppingListModal(false)}
-                  >
-                    <Text style={[styles.shoppingDoneButtonText, { color: theme.colors.textSecondary }]}>Close</Text>
-                  </TouchableOpacity>
-                )}
-              </View>
-            </SafeAreaView>
-          </View>
-        </View>
-      </Modal>
-    );
-  };
-
   // Main Return
   return (
     <>
@@ -4596,7 +3905,6 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
       {/* Modals */}
       {renderPlanGeneratorModal()}
       {renderMealPlanSuccessModal()}
-      {renderShoppingListModal()}
       {renderTemplatesModal()}
       {renderMealDetailsModal()}
       {renderLibraryModal()}
