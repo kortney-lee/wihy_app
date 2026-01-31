@@ -301,6 +301,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       familyRole: authUser.familyRole ?? existingData?.familyRole,
       guardianCode: authUser.guardianCode ?? existingData?.guardianCode,
       coachId: authUser.coachId ?? existingData?.coachId,
+      isCoach: authUser.isCoach ?? existingData?.isCoach,
+      coachCode: authUser.coachCode ?? existingData?.coachCode,
+      coachProfileId: authUser.coachProfileId ?? existingData?.coachProfileId,
       commissionRate: authUser.commissionRate ?? existingData?.commissionRate,
       organizationId: authUser.organizationId ?? existingData?.organizationId,
       organizationRole: authUser.organizationRole ?? existingData?.organizationRole,
@@ -686,8 +689,8 @@ export const useAuth = () => {
   return {
     ...context,
     userId: context.user?.id,
-    coachId: context.user?.coachId,
-    isCoach: context.user?.plan?.includes('coach') || false,
+    coachId: context.user?.coachId || context.user?.coachProfileId,
+    isCoach: context.user?.isCoach || context.user?.role === 'coach' || context.user?.plan?.includes('coach') || false,
     isAuthenticated: !!context.user,
     // Family helpers
     isInFamily: !!context.user?.familyId,
