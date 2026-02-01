@@ -43,6 +43,8 @@ import CoachSelection from './CoachSelection';
 import ProfileSetupScreen from './ProfileSetupScreen';
 import MealCalendar from './MealCalendar';
 import PlanMealScreen from './PlanMealScreen';
+import CookingDashboard from './CookingDashboard';
+import TrainingDashboard from './TrainingDashboard';
 
 // Note: screenWidth is now handled dynamically via useDashboardLayout
 
@@ -112,7 +114,7 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
   const [hasActiveSession, setHasActiveSession] = useState(false);
   const [showQuickStartGuide, setShowQuickStartGuide] = useState(false);
   const [showHamburgerMenu, setShowHamburgerMenu] = useState(false);
-  const [selectedDashboard, setSelectedDashboard] = useState<'overview' | 'progress' | 'nutrition' | 'research' | 'fitness' | 'parent' | 'meals' | 'shoppingList' | 'profileSetup' | 'calendar' | 'planMeal' | null>(null);
+  const [selectedDashboard, setSelectedDashboard] = useState<'overview' | 'progress' | 'nutrition' | 'research' | 'fitness' | 'training' | 'parent' | 'meals' | 'shoppingList' | 'profileSetup' | 'calendar' | 'planMeal' | 'cooking' | null>(null);
   const [hideHubButtonForSubView, setHideHubButtonForSubView] = useState(false);
 
   // Reset dashboard state when user plan changes (dev mode switcher)
@@ -235,11 +237,13 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
           />
         )}
         {selectedDashboard === 'fitness' && <FitnessDashboard />}
+        {selectedDashboard === 'training' && <TrainingDashboard isDashboardMode={true} onBack={() => setSelectedDashboard(null)} />}
         {selectedDashboard === 'parent' && <ParentDashboard />}
         {selectedDashboard === 'meals' && <CreateMeals isDashboardMode={true} />}
         {selectedDashboard === 'shoppingList' && <ShoppingListScreen isDashboardMode={true} onBack={() => setSelectedDashboard(null)} />}
         {selectedDashboard === 'calendar' && <MealCalendar isDashboardMode={true} />}
         {selectedDashboard === 'planMeal' && <PlanMealScreen isDashboardMode={true} onBack={() => setSelectedDashboard(null)} />}
+        {selectedDashboard === 'cooking' && <CookingDashboard isDashboardMode={true} onBack={() => setSelectedDashboard(null)} />}
         {(selectedDashboard as any) === 'findCoach' && <CoachSelection />}
         {selectedDashboard === 'profileSetup' && <ProfileSetupScreen isDashboardMode={true} onBack={() => setSelectedDashboard(null)} />}
       </View>
@@ -464,6 +468,19 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
           <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>Grocery items</Text>
         </TouchableOpacity>
 
+        {/* Cooking Dashboard Card - Available to ALL, paywall on click */}
+        <TouchableOpacity
+          style={[styles.dashboardCard, styles.cookingCard, { width: cardWidth as any }]}
+          onPress={() => hasMealsAccess(user) ? setSelectedDashboard('cooking') : navigation.navigate('Subscription')}
+        >
+          <View style={[styles.cardIconContainer, { width: iconContainerSize, height: iconContainerSize, borderRadius: iconContainerSize / 2 }]}>
+            <SvgIcon name="flame" size={iconSize} color="#ffffff" />
+          </View>
+          {!hasMealsAccess(user) && <LockBadge />}
+          <Text style={[styles.cardTitle, { fontSize: titleSize }]}>Cooking</Text>
+          <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>Instructions</Text>
+        </TouchableOpacity>
+
         {/* Research Card - Available to ALL, paywall on click */}
         <TouchableOpacity
           style={[styles.dashboardCard, styles.researchCard, { width: cardWidth as any }]}
@@ -493,7 +510,7 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
         {/* Training Programs - NEW: Template workouts for sports/running */}
         <TouchableOpacity
           style={[styles.dashboardCard, styles.trainingCard, { width: cardWidth as any }]}
-          onPress={() => handlePremiumTilePress('fitness', 'premium')}
+          onPress={() => handlePremiumTilePress('training', 'premium')}
         >
           <View style={[styles.cardIconContainer, { width: iconContainerSize, height: iconContainerSize, borderRadius: iconContainerSize / 2 }]}>
             <SvgIcon name="trophy" size={iconSize} color="#ffffff" />
@@ -905,6 +922,10 @@ const styles = StyleSheet.create({
 
   shoppingListCard: {
     backgroundColor: '#4cbb17',
+  },
+
+  cookingCard: {
+    backgroundColor: '#ef4444', // Red for cooking/instructions
   },
 
   clientCard: {

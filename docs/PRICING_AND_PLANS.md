@@ -142,31 +142,165 @@ Enterprise pricing is based on:
 
 ## Dashboard Tiles & Access by Plan
 
-| Feature | Free | Premium | Family | Coach |
-|---------|------|---------|--------|-------|
-| Overview Dashboard | ✅ | ✅ | ✅ | ✅ |
-| Notifications | ✅ | ✅ | ✅ | ✅ |
-| Nutrition (Scan History) | ✅ | ✅ | ✅ | ✅ |
-| Profile Setup | ✅ | ✅ | ✅ | ✅ |
-| Find Coach | ✅ | ✅ | ✅ | ✅ |
-| Quick Start Guide | ✅ | ✅ | ✅ | ✅ |
-| Progress Dashboard | 🔒 | ✅ | ✅ | ✅ |
-| Research Insights | 🔒 | ✅ | ✅ | ✅ |
-| Fitness Dashboard | 🔒 | ✅ | ✅ | ✅ |
-| Training Programs | 🔒 | ✅ | ✅ | ✅ |
-| AI Meal Plans | 🔒 | ✅ | ✅ | ✅ |
-| Meal Calendar | 🔒 | ✅ | ✅ | ✅ |
-| Plan Meal | 🔒 | ✅ | ✅ | ✅ |
-| Family Dashboard | 🔒 | 🔒 | ✅ | ❌ |
-| Family Hub | 🔒 | 🔒 | ✅ | ❌ |
-| Coach Hub | 🔒 | 🔒 | 🔒 | ✅ |
-| Client Management | ❌ | ❌ | ❌ | ✅ |
-| Coach Overview | ❌ | ❌ | ❌ | ✅ |
+### Health Dashboard Tiles (20 tiles)
+
+| # | Tile | Icon | Subtitle | Free | Premium | Family | Coach | Description |
+|---|------|------|----------|------|---------|--------|-------|-------------|
+| 1 | Overview | analytics | Health metrics | ✅ | ✅ | ✅ | ✅ | Health metrics summary, daily stats |
+| 2 | Notifications | notifications | Messages & alerts | ✅ | ✅ | ✅ | ✅ | Push notifications, messages |
+| 3 | Nutrition | nutrition | Scan history | ✅ | ✅ | ✅ | ✅ | Food scan history, analysis |
+| 4 | Profile Setup | person-add | Health profile | ✅ | ✅ | ✅ | ✅ | Health profile configuration |
+| 5 | Progress | trending-up | Track goals | 🔒 | ✅ | ✅ | ✅ | Goal tracking, metrics history |
+| 6 | AI Meal Plans | sparkles | Auto-generate | 🔒 | ✅ | ✅ | ✅ | AI-generated personalized meal plans |
+| 7 | Meal Calendar | calendar | View schedule | 🔒 | ✅ | ✅ | ✅ | Weekly/monthly meal schedule |
+| 8 | Plan Meal | create | Create meals | 🔒 | ✅ | ✅ | ✅ | Manual meal creation |
+| 9 | Shopping List | cart | Grocery items | 🔒 | ✅ | ✅ | ✅ | Grocery list + Instacart integration |
+| 10 | Cooking | flame | Instructions | 🔒 | ✅ | ✅ | ✅ | Today's meals with cooking steps |
+| 11 | Research | library | Health insights | 🔒 | ✅ | ✅ | ✅ | Health research & studies |
+| 12 | Fitness | fitness | Workout plans | 🔒 | ✅ | ✅ | ✅ | Workout programs & tracking |
+| 13 | Training | trophy | Sports programs | 🔒 | ✅ | ✅ | ✅ | Sports-specific training templates |
+| 14 | Find Coach | people | Expert guidance | ✅ | ✅ | ✅ | ✅ | Browse & hire coaches |
+| 15 | Upgrade | rocket | Go Premium | ✅ | ❌ | ❌ | ❌ | Only shown to free users |
+| 16 | Family | heart | $49.99/mo | 🔒 | 🔒 | ✅ | ❌ | Family member health overview |
+| 17 | Family Hub | people-circle | Switch view | 🔒 | 🔒 | ✅ | ❌ | Switch to family dashboard context |
+| 18 | Coach Hub | briefcase | Switch view | 🔒 | 🔒 | 🔒 | ✅ | Switch to coach dashboard context |
+| 19 | Quick Start | compass | App guide | ✅ | ✅ | ✅ | ✅ | Interactive app tutorial |
+| 20 | Personal | person | Back to my health | — | — | ✅ | ✅ | Switch back to personal dashboard |
+
+### Coach Hub Tiles (8 tiles)
+
+| # | Tile | Icon | Subtitle | Color | Description |
+|---|------|------|----------|-------|-------------|
+| 1 | Overview | stats-chart | Revenue & quick actions | #10b981 | Coach dashboard overview, revenue stats |
+| 2 | Coach Dashboard | people | Manage your clients & programs | #3b82f6 | Full client/program management |
+| 3 | Clients | people-circle | View and manage all clients | #8b5cf6 | Client list and management |
+| 4 | Programs | restaurant | Meal plans & workout programs | #f59e0b | Create/manage meal & workout plans |
+| 5 | Onboarding | person-add | Add new clients | #10b981 | Client onboarding flow |
+| 6 | Bookings | calendar | Manage sessions & schedule | #6366f1 | Session scheduling & bookings |
+| 7 | Coach Profile | briefcase | Your coach bio & settings | #14b8a6 | Coach profile configuration |
+| 8 | Personal | person | Back to my health | #16a34a | Switch back to personal dashboard |
+
+### Family Hub Features
+
+The Family Hub is not a tile-based dashboard. It displays:
+
+| Section | Description |
+|---------|-------------|
+| Guardian Code | Shareable code for family members to join |
+| Family Members | List of all family members with health scores |
+| Add Member | Button to invite new family members |
+| Member Cards | Individual member stats, age, last active, health score |
+| Back to Health Hub | Button to return to personal dashboard |
 
 **Legend:**
-- ✅ = Included
-- 🔒 = Locked (shows tile, redirects to Subscription on click)
-- ❌ = Not available
+- ✅ = Included (full access)
+- 🔒 = Locked (shows tile with lock badge, redirects to Subscription on click)
+- ❌ = Not available/not shown
+- — = Not applicable (tile only appears in specific context)
+
+---
+
+## Meal Plan & Shopping Flow
+
+### Meal Plan Creation Flow (2 Steps)
+
+```
+Dashboard → "AI Meal Plans" tile
+  → Step 1: Goals (select dietary preferences, duration, servings)
+  → Generate Plan (AI creates personalized meals)
+  → Step 2: Preview (view all meals with calories/macros)
+  → "Accept Plan" button
+  → Success Modal ("Meal Plan Created!")
+    → "View Shopping List" → ShoppingListScreen
+    → "Save Meal Plan" → Saves + auto-opens ShoppingListScreen + Instacart
+    → "Done" → Closes modal
+```
+
+### Shopping List & Instacart Integration
+
+When a meal plan is saved:
+1. Shopping list is extracted from meal plan ingredients
+2. List is saved to user's account
+3. Instacart link is auto-created with all items
+4. Instacart app/website opens automatically
+5. User can shop at ALDI, Walmart, Target, Costco, Wegmans, Kroger, etc.
+
+**ShoppingListScreen Features:**
+- View all items by category (Proteins, Produce, Dairy, Grains, Pantry, Other)
+- Check off items as purchased
+- Share list via text/email
+- "Shop on Instacart" button for grocery delivery
+- Collapsing header with progress indicator
+
+### Cooking Dashboard
+
+The Cooking Dashboard shows today's scheduled meals with detailed cooking instructions.
+
+**Data Flow:**
+1. Loads scheduled meals from `getMealsForDate` API
+2. Fetches full meal details (ingredients, instructions) from `getMealDetails` API
+3. Caches details on first expand for instant re-expansion
+
+**Features:**
+- Today's meals listed by meal slot (breakfast, lunch, dinner, snack)
+- Pull-to-refresh to reload meals
+- Expandable meal cards with:
+  - Prep time & cook time
+  - Serving size
+  - Difficulty level
+  - Full ingredients list with amounts
+  - Step-by-step cooking instructions (numbered)
+  - Nutrition per serving (calories, protein, carbs, fat)
+- Loading indicator when fetching meal details
+- Empty state when no meals scheduled
+- Collapsing red header with "Ready to Cook" badge
+
+### Training Dashboard
+
+The Training Dashboard provides sport-specific training programs for athletes and fitness enthusiasts.
+
+**Data Flow:**
+1. User selects a sport from 16 available options
+2. Configures training phase, intensity, duration, and equipment
+3. Generates workout via `generateQuickWorkout` API with `mode: 'training'`
+4. Caches recent workouts locally for quick access
+
+**Sports Available (16):**
+- Running, Cycling, Swimming, Triathlon
+- Basketball, Soccer, Tennis, Golf
+- Hiking, Rock Climbing, Skiing
+- Martial Arts, CrossFit, Yoga
+- Weightlifting, General Fitness
+
+**Training Phases:**
+- **Off Season** - Build base fitness & recovery
+- **Pre Season** - Increase intensity & sport-specific
+- **In Season** - Maintain & peak performance
+
+**Features:**
+- Sport selection grid with colorful icons
+- Training phase selector (Off/Pre/In Season)
+- Intensity selector (Light/Moderate/Intense)
+- Duration picker (15-90 minutes)
+- Equipment presets (Bodyweight, Basic, Home Gym, Full Gym, Outdoor)
+- "Generate Workout" button styled to selected sport color
+- Recent workouts carousel (last 5 saved locally)
+- Pull-to-refresh to reload saved programs
+- Collapsing green header with trophy icon (HEADER_MAX_HEIGHT=180)
+
+**Workout Preview Modal:**
+- Displays generated workout with segments (Warmup, Main, Cooldown)
+- Stats row: Duration, Calories, Exercise count
+- Exercise cards with sets, reps, instructions
+- Equipment needed section
+- "Start Workout" button
+
+**Design Pattern Compliance:**
+- ✅ Collapsing header (180px max, paddingBottom: 20, paddingTop: 10)
+- ✅ Dark mode support (theme.colors.text, textSecondary, card, background, border)
+- ✅ Pull-to-refresh with RefreshControl
+- ✅ Safe area insets for notched devices
+- ✅ useNativeDriver: false for scroll animations
 
 ---
 
@@ -195,4 +329,4 @@ Enterprise pricing is based on:
 
 ---
 
-*Last updated: January 31, 2026*
+*Last updated: February 1, 2026*
