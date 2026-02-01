@@ -97,6 +97,31 @@ Coach pricing is based on:
 
 ---
 
+## Feature Access Matrix
+
+| Feature Area | Dimension | **Free** $0 | **Premium** $12.99/mo | **Premium+** $24.99/mo | **Family** $24.99/mo | **Family+** $49.99/mo | **Coach** $29.99/mo |
+|---|---|---|---|---|---|---|---|
+| **Scanning (Food + Meds)** | Access | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| | Action (Scan) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| | Action (Save) | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| | Retention | 30 days | Unlimited | Unlimited | Unlimited | Unlimited | Unlimited |
+| **Health Overview** | Access | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| | Action | ❌ read-only | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **Nutrition (Meals)** | Access | 👁️ tile only | ✅ | ✅ | ✅ | ✅ | ✅ |
+| | Action (Create/Plan) | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **Shopping Lists** | Access | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **Cooking** | Access | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **Fitness / Training** | Access | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| | Action (Track) | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **Progress / Trends** | Access | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **Family Hub** | Access | ❌ | ❌ | ❌ | ✅ | ✅ | ❌ |
+| **Coach Hub** | Access | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ |
+| **AI Automation (WIHY Coach AI)** | Access | ❌ | ❌ | ✅ | ❌ | ✅ | ✅ |
+| **Instacart** | Access | ❌ | ❌ | ✅ | ❌ | ✅ | ✅ |
+| **Data Export** | Action | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ |
+
+---
+
 ## Feature Add-Ons (Available for all paid plans)
 
 | Feature | Price | Description |

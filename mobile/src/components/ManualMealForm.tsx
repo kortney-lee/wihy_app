@@ -476,8 +476,8 @@ export const ManualMealForm: React.FC<ManualMealFormProps> = ({
                 keyExtractor={(item) => item.id || Math.random().toString()}
                 horizontal={false}
                 numColumns={1}
-                scrollEnabled={false}
-                style={{ maxHeight: 300 }}
+                scrollEnabled={true}
+                style={{ maxHeight: 400 }}
                 nestedScrollEnabled
                 renderItem={({ item }) => (
                   <TouchableOpacity
