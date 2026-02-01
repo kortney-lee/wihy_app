@@ -47,39 +47,42 @@ export default function PaymentSuccessScreen() {
       }
 
       console.log('Checkout session retrieved:', {
+        hasAuth: !!checkoutResult.auth,
         hasLoginToken: !!checkoutResult.session.loginToken,
         email: checkoutResult.session.email,
+        userId: checkoutResult.auth?.userId,
+        isNewUser: checkoutResult.auth?.isNewUser,
       });
 
-      if (!checkoutResult.session.loginToken) {
+      // Get login token and auth info - token is in auth object
+      const loginToken = checkoutResult.session.loginToken || checkoutResult.auth?.loginToken;
+      const userId = checkoutResult.auth?.userId;
+      const isNewUser = checkoutResult.auth?.isNewUser;
+
+      if (!loginToken) {
         throw new Error('No login token in checkout session');
       }
 
-      // Step 2: Exchange login token for auth tokens
-      const authResult = await checkoutService.verifyPaymentToken(checkoutResult.session.loginToken);
-
-      if (!authResult.success || !authResult.accessToken) {
-        throw new Error(authResult.error || 'Failed to authenticate with payment token');
-      }
-
-      console.log('Auth tokens received:', {
-        success: authResult.success,
-        hasAccessToken: !!authResult.accessToken,
-        hasRefreshToken: !!authResult.refreshToken,
+      console.log('Auth data from checkout:', {
+        hasLoginToken: !!loginToken,
+        hasUserId: !!userId,
+        isNewUser,
       });
 
-      // Step 3: Store tokens
+      // Step 2: Store the login token directly as auth token
+      // Per API guide: loginToken from checkout session IS the auth token
       if (Platform.OS === 'web' && typeof localStorage !== 'undefined') {
-        localStorage.setItem('accessToken', authResult.accessToken);
-        if (authResult.refreshToken) {
-          localStorage.setItem('refreshToken', authResult.refreshToken);
+        localStorage.setItem('accessToken', loginToken);
+        localStorage.setItem('authToken', loginToken);
+        if (userId) {
+          localStorage.setItem('userId', userId);
         }
       } else {
         // Native: use authService to store tokens
-        await authService.storeSessionToken(authResult.accessToken);
+        await authService.storeSessionToken(loginToken);
       }
 
-      // Step 4: Refresh user context
+      // Step 3: Refresh user context to load user data
       await refreshUserContext();
 
       // Set plan name from checkout session
@@ -89,14 +92,20 @@ export default function PaymentSuccessScreen() {
       console.log('Payment login complete:', {
         email: checkoutResult.session?.email,
         plan: planName,
+        isNewUser,
       });
 
       setStatus('success');
 
-      // Redirect to main app after brief delay
+      // Redirect based on user status
       setTimeout(() => {
         if (Platform.OS === 'web' && typeof window !== 'undefined') {
-          window.location.href = '/dashboard';
+          // New users go to onboarding, existing users go to dashboard
+          if (isNewUser) {
+            window.location.href = '/onboarding?plan=' + encodeURIComponent(planName);
+          } else {
+            window.location.href = '/dashboard';
+          }
         } else {
           navigation.dispatch(
             CommonActions.reset({

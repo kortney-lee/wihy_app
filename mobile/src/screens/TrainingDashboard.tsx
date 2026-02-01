@@ -13,7 +13,7 @@ import {
   Modal,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons } from '../components/shared';
 import SvgIcon from '../components/shared/SvgIcon';
 import { useTheme } from '../context/ThemeContext';
 import { AuthContext, useAuth } from '../context/AuthContext';
