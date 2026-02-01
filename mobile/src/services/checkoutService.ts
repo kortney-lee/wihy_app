@@ -836,6 +836,13 @@ class CheckoutService {
    * Get checkout session details by session ID
    * Used after Stripe redirect to get payment info
    * Note: This is a public endpoint (no auth required) - used before login
+   * 
+   * API Response format:
+   * {
+   *   success: true,
+   *   session: { id, status, paymentStatus, email, plan, customerId, subscriptionId },
+   *   auth: { userId, isNewUser, loginToken }  // <- login token is HERE, not in session
+   * }
    */
   async getCheckoutSession(sessionId: string): Promise<{
     success: boolean;
@@ -843,8 +850,16 @@ class CheckoutService {
       email?: string;
       planName?: string;
       plan?: string;
-      loginToken?: string;
+      loginToken?: string;  // Mapped from auth.loginToken for backwards compatibility
       status?: string;
+      paymentStatus?: string;
+      customerId?: string;
+      subscriptionId?: string;
+    };
+    auth?: {
+      userId?: string;
+      isNewUser?: boolean;
+      loginToken?: string;
     };
     error?: string;
   }> {
@@ -860,9 +875,18 @@ class CheckoutService {
       const data = await response.json();
 
       if (response.ok) {
+        // CRITICAL: Login token is in data.auth, not data.session
+        // Map auth.loginToken to session.loginToken for backwards compatibility
+        const session = {
+          ...data.session,
+          // Extract loginToken from auth object (correct API location)
+          loginToken: data.auth?.loginToken,
+        };
+
         return {
           success: true,
-          session: data.session,
+          session,
+          auth: data.auth,  // Also include full auth object
         };
       }
 

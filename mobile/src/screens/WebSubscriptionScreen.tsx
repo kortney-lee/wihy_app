@@ -61,6 +61,7 @@ const WebIcon = ({ name, size = 24, color = '#3b82f6' }: { name: string; size?: 
 
 
 // Consumer Plans - Matches backend plan keys
+// Updated: February 1, 2026 - Aligned with WIHY Subscription Plans & Payment API Guide
 const CONSUMER_PLANS = [
   {
     id: 'free',
@@ -80,13 +81,13 @@ const CONSUMER_PLANS = [
     id: 'pro_monthly',
     name: 'Premium',
     monthlyPrice: 12.99,
-    yearlyPrice: 99.99,
+    yearlyPrice: 99.00, // Save 36% ($57/year) - 2 months free
     tagline: 'For individuals focused on their health journey',
     features: [
       'Full nutrition and fitness tools',
       'Personal dashboard',
       'Meal planning and tracking',
-      'Optional WIHY Coach (AI)',
+      'Optional WIHY Coach (AI) add-on',
     ],
     icon: 'person',
   },
@@ -94,13 +95,13 @@ const CONSUMER_PLANS = [
     id: 'family_basic',
     name: 'Family Basic',
     monthlyPrice: 24.99,
-    yearlyPrice: 249.99,
+    yearlyPrice: 0, // No annual option
     tagline: 'For households with up to 4 members',
     features: [
       'Up to 4 family members',
       'Shared parent/guardian dashboard',
       'Individual accounts for everyone',
-      'Optional WIHY Coach (AI)',
+      'Optional WIHY Coach (AI) add-on',
     ],
     icon: 'people',
   },
@@ -108,7 +109,7 @@ const CONSUMER_PLANS = [
     id: 'family_pro',
     name: 'Family Pro',
     monthlyPrice: 49.99,
-    yearlyPrice: 499.99,
+    yearlyPrice: 479.99, // Save 20% ($120/year)
     tagline: 'For entire households — no limits',
     features: [
       'Up to 5 family members',
@@ -122,18 +123,17 @@ const CONSUMER_PLANS = [
   {
     id: 'coach',
     name: 'Coach Platform',
-    setupFee: 99.99,
+    setupFee: 99.99, // One-time setup fee
     monthlyPrice: 29.99,
     commission: '1%',
     tagline: 'For health & fitness professionals',
-    note: 'A team member will reach out for training.',
+    note: 'First payment: $129.98 ($99.99 setup + $29.99 first month)',
     features: [
       'Unlimited clients',
       'Meal plan and workout creation',
       'Progress tracking & reporting',
       'Full app access for yourself',
       'Up to 1% affiliate commission',
-      'A team member will reach out for training',
     ],
     icon: 'fitness',
   },
