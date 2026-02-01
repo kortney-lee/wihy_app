@@ -842,13 +842,34 @@ export default function ProfileSetupScreen({ isDashboardMode = false, onBack }: 
           [{ nativeEvent: { contentOffset: { y: scrollY } } }],
           { useNativeDriver: false }
         )}
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[styles.scrollContent, { paddingBottom: 120 }]}
       >
         {/* Step content */}
         {renderCurrentStep()}
-
+      </Animated.ScrollView>
+      
+      {/* Fixed Footer Navigation - Always Visible */}
+      <View style={[styles.fixedFooter, { paddingBottom: Math.max(insets.bottom, 16) }]}>
+        {/* Progress indicator */}
+        <View style={styles.progressBarContainer}>
+          <View style={styles.progressBarBackground}>
+            <View style={[styles.progressBarFill, { width: `${progress}%` }]} />
+          </View>
+          <Text style={styles.progressText}>Step {currentStepIndex + 1} of {steps.length}</Text>
+        </View>
+        
         {/* Navigation buttons */}
         <View style={styles.buttonContainer}>
+          {currentStep !== 'basics' && (
+            <Pressable 
+              style={styles.backButton} 
+              onPress={handleBack}
+            >
+              <SvgIcon name="arrow-back" size={20} color={theme.text} />
+              <Text style={styles.backButtonText}>Back</Text>
+            </Pressable>
+          )}
+          
           {currentStep !== 'complete' && currentStep !== 'basics' && (
             <Pressable style={styles.skipButton} onPress={handleSkip}>
               <Text style={styles.skipButtonText}>Skip</Text>
@@ -876,15 +897,14 @@ export default function ProfileSetupScreen({ isDashboardMode = false, onBack }: 
               onPress={handleNext}
               disabled={!canProceed()}
             >
-              <Text style={styles.primaryButtonText}>Continue</Text>
+              <Text style={styles.primaryButtonText}>
+                {currentStep === 'basics' ? 'Get Started' : 'Continue'}
+              </Text>
               <SvgIcon name="arrow-forward" size={20} color="#fff" />
             </Pressable>
           )}
         </View>
-        
-        {/* Bottom spacing */}
-        <View style={{ height: 100 }} />
-      </Animated.ScrollView>
+      </View>
     </View>
   );
 }
@@ -1283,16 +1303,73 @@ const styles = StyleSheet.create({
   },
 
   // Buttons
+  fixedFooter: {
+    backgroundColor: theme.card,
+    borderTopWidth: 1,
+    borderTopColor: theme.cardBorder,
+    paddingHorizontal: 16,
+    paddingTop: 12,
+    ...Platform.select({
+      web: {
+        boxShadow: '0 -2px 10px rgba(0, 0, 0, 0.08)',
+      } as any,
+      default: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: -2 },
+        shadowOpacity: 0.08,
+        shadowRadius: 4,
+        elevation: 8,
+      },
+    }),
+  },
+  progressBarContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+    gap: 12,
+  },
+  progressBarBackground: {
+    flex: 1,
+    height: 6,
+    backgroundColor: theme.cardBorder,
+    borderRadius: 3,
+    overflow: 'hidden',
+  },
+  progressBarFill: {
+    height: '100%',
+    backgroundColor: '#14b8a6',
+    borderRadius: 3,
+  },
+  progressText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: theme.textSecondary,
+    minWidth: 70,
+  },
   buttonContainer: {
     flexDirection: 'row',
     gap: 12,
+  },
+  backButton: {
+    height: 52,
     paddingHorizontal: 16,
-    paddingTop: 24,
-    paddingBottom: 20,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: theme.cardBorder,
+    backgroundColor: theme.card,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+  },
+  backButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: theme.text,
   },
   skipButton: {
-    flex: 1,
     height: 52,
+    paddingHorizontal: 20,
     borderRadius: 12,
     borderWidth: 2,
     borderColor: theme.cardBorder,
@@ -1306,10 +1383,10 @@ const styles = StyleSheet.create({
     color: theme.textSecondary,
   },
   primaryButton: {
-    flex: 2,
+    flex: 1,
     height: 52,
     borderRadius: 12,
-    backgroundColor: theme.accent,
+    backgroundColor: '#14b8a6',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
