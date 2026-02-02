@@ -355,251 +355,344 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
           paddingHorizontal: layout.horizontalPadding,
         }
       ]}>
-        {/* Overview Dashboard - Available to ALL users */}
-        <TouchableOpacity
-          style={[styles.dashboardCard, styles.overviewCard, { width: cardWidth as any }]}
-          onPress={() => setSelectedDashboard('overview')}
-        >
-          <View style={[styles.cardIconContainer, { width: iconContainerSize, height: iconContainerSize, borderRadius: iconContainerSize / 2 }]}>
-            <SvgIcon name="analytics" size={iconSize} color="#ffffff" />
-          </View>
-          <Text style={[styles.cardTitle, { fontSize: titleSize }]}>Overview</Text>
-          <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>Health metrics</Text>
-        </TouchableOpacity>
+        {/* === FREE USER VIEW: Only show essential tiles + Hub upgrade paths === */}
+        {isFreeUser ? (
+          <>
+            {/* Overview Dashboard - Available to ALL users */}
+            <TouchableOpacity
+              style={[styles.dashboardCard, styles.overviewCard, { width: cardWidth as any }]}
+              onPress={() => setSelectedDashboard('overview')}
+            >
+              <View style={[styles.cardIconContainer, { width: iconContainerSize, height: iconContainerSize, borderRadius: iconContainerSize / 2 }]}>
+                <SvgIcon name="analytics" size={iconSize} color="#ffffff" />
+              </View>
+              <Text style={[styles.cardTitle, { fontSize: titleSize }]}>Overview</Text>
+              <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>Health metrics</Text>
+            </TouchableOpacity>
 
-        {/* Notifications - Available to ALL users */}
-        <TouchableOpacity
-          style={[styles.dashboardCard, styles.notificationsCard, { width: cardWidth as any }]}
-          onPress={() => navigation.navigate('Notifications' as never)}
-        >
-          <View style={[styles.cardIconContainer, { width: iconContainerSize, height: iconContainerSize, borderRadius: iconContainerSize / 2 }]}>
-            <SvgIcon name="notifications" size={iconSize} color="#ffffff" />
-          </View>
-          <Text style={[styles.cardTitle, { fontSize: titleSize }]}>Notifications</Text>
-          <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>Messages & alerts</Text>
-        </TouchableOpacity>
+            {/* Notifications - Available to ALL users */}
+            <TouchableOpacity
+              style={[styles.dashboardCard, styles.notificationsCard, { width: cardWidth as any }]}
+              onPress={() => navigation.navigate('Notifications' as never)}
+            >
+              <View style={[styles.cardIconContainer, { width: iconContainerSize, height: iconContainerSize, borderRadius: iconContainerSize / 2 }]}>
+                <SvgIcon name="notifications" size={iconSize} color="#ffffff" />
+              </View>
+              <Text style={[styles.cardTitle, { fontSize: titleSize }]}>Notifications</Text>
+              <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>Messages & alerts</Text>
+            </TouchableOpacity>
 
-        {/* Nutrition Dashboard - Available to ALL users (scan history, food analysis) */}
-        <TouchableOpacity
-          style={[styles.dashboardCard, styles.nutritionCard, { width: cardWidth as any }]}
-          onPress={() => setSelectedDashboard('nutrition')}
-        >
-          <View style={[styles.cardIconContainer, { width: iconContainerSize, height: iconContainerSize, borderRadius: iconContainerSize / 2 }]}>
-            <SvgIcon name="nutrition" size={iconSize} color="#ffffff" />
-          </View>
-          <Text style={[styles.cardTitle, { fontSize: titleSize }]}>Nutrition</Text>
-          <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>Scan history</Text>
-        </TouchableOpacity>
+            {/* Nutrition Dashboard - Available to ALL users (scan history, food analysis) */}
+            <TouchableOpacity
+              style={[styles.dashboardCard, styles.nutritionCard, { width: cardWidth as any }]}
+              onPress={() => setSelectedDashboard('nutrition')}
+            >
+              <View style={[styles.cardIconContainer, { width: iconContainerSize, height: iconContainerSize, borderRadius: iconContainerSize / 2 }]}>
+                <SvgIcon name="nutrition" size={iconSize} color="#ffffff" />
+              </View>
+              <Text style={[styles.cardTitle, { fontSize: titleSize }]}>Nutrition</Text>
+              <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>Scan history</Text>
+            </TouchableOpacity>
 
-        {/* Profile Setup - Available to ALL users to set up their health profile */}
-        <TouchableOpacity
-          style={[styles.dashboardCard, styles.profileSetupCard, { width: cardWidth as any }]}
-          onPress={() => setSelectedDashboard('profileSetup')}
-        >
-          <View style={[styles.cardIconContainer, { width: iconContainerSize, height: iconContainerSize, borderRadius: iconContainerSize / 2 }]}>
-            <SvgIcon name="person-add" size={iconSize} color="#ffffff" />
-          </View>
-          <Text style={[styles.cardTitle, { fontSize: titleSize }]}>Profile Setup</Text>
-          <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>Health profile</Text>
-        </TouchableOpacity>
+            {/* Profile Setup - Available to ALL users */}
+            <TouchableOpacity
+              style={[styles.dashboardCard, styles.profileSetupCard, { width: cardWidth as any }]}
+              onPress={() => setSelectedDashboard('profileSetup')}
+            >
+              <View style={[styles.cardIconContainer, { width: iconContainerSize, height: iconContainerSize, borderRadius: iconContainerSize / 2 }]}>
+                <SvgIcon name="person-add" size={iconSize} color="#ffffff" />
+              </View>
+              <Text style={[styles.cardTitle, { fontSize: titleSize }]}>Profile Setup</Text>
+              <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>Health profile</Text>
+            </TouchableOpacity>
 
-        {/* Progress Dashboard - Available to ALL, paywall on click */}
-        <TouchableOpacity
-          style={[styles.dashboardCard, styles.progressCard, { width: cardWidth as any }]}
-          onPress={() => handlePremiumTilePress('progress', 'premium')}
-        >
-          <View style={[styles.cardIconContainer, { width: iconContainerSize, height: iconContainerSize, borderRadius: iconContainerSize / 2 }]}>
-            <SvgIcon name="trending-up" size={iconSize} color="#ffffff" />
-          </View>
-          {isFreeUser && <LockBadge />}
-          <Text style={[styles.cardTitle, { fontSize: titleSize }]}>Progress</Text>
-          <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>Track goals</Text>
-        </TouchableOpacity>
+            {/* Find a Coach - Available to all */}
+            <TouchableOpacity
+              style={[styles.dashboardCard, styles.coachCard, { width: cardWidth as any }]}
+              onPress={() => handleNavigateToDashboard('findCoach')}
+            >
+              <View style={[styles.cardIconContainer, { width: iconContainerSize, height: iconContainerSize, borderRadius: iconContainerSize / 2 }]}>
+                <SvgIcon name="people" size={iconSize} color="#ffffff" />
+              </View>
+              <Text style={[styles.cardTitle, { fontSize: titleSize }]}>Find Coach</Text>
+              <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>Expert guidance</Text>
+            </TouchableOpacity>
 
-        {/* AI Meal Plans Card - Available to ALL, paywall on click */}
-        <TouchableOpacity
-          style={[styles.dashboardCard, styles.mealsCard, { width: cardWidth as any }]}
-          onPress={() => hasMealsAccess(user) ? handleNavigateToDashboard('meals') : navigation.navigate('Subscription')}
-        >
-          <View style={[styles.cardIconContainer, { width: iconContainerSize, height: iconContainerSize, borderRadius: iconContainerSize / 2 }]}>
-            <SvgIcon name="sparkles" size={iconSize} color="#ffffff" />
-          </View>
-          {!hasMealsAccess(user) && <LockBadge />}
-          <Text style={[styles.cardTitle, { fontSize: titleSize }]}>AI Meal Plans</Text>
-          <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>Auto-generate</Text>
-        </TouchableOpacity>
+            {/* Switch to Family Hub - Upgrade path for free users */}
+            {onContextChange && (
+              <TouchableOpacity
+                style={[styles.dashboardCard, styles.switchFamilyCard, { width: cardWidth as any }]}
+                onPress={() => navigation.navigate('Subscription')}
+              >
+                <View style={[styles.cardIconContainer, { width: iconContainerSize, height: iconContainerSize, borderRadius: iconContainerSize / 2 }]}>
+                  <SvgIcon name="people-circle" size={iconSize} color="#ffffff" />
+                </View>
+                <LockBadge />
+                <Text style={[styles.cardTitle, { fontSize: titleSize }]}>Family Hub</Text>
+                <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>$49.99/mo</Text>
+              </TouchableOpacity>
+            )}
 
-        {/* Meal Calendar Card - Available to ALL, paywall on click */}
-        <TouchableOpacity
-          style={[styles.dashboardCard, styles.calendarCard, { width: cardWidth as any }]}
-          onPress={() => hasMealsAccess(user) ? setSelectedDashboard('calendar') : navigation.navigate('Subscription')}
-        >
-          <View style={[styles.cardIconContainer, { width: iconContainerSize, height: iconContainerSize, borderRadius: iconContainerSize / 2 }]}>
-            <SvgIcon name="calendar" size={iconSize} color="#ffffff" />
-          </View>
-          {!hasMealsAccess(user) && <LockBadge />}
-          <Text style={[styles.cardTitle, { fontSize: titleSize }]}>Meal Calendar</Text>
-          <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>View schedule</Text>
-        </TouchableOpacity>
+            {/* Switch to Coach Hub - Upgrade path for free users */}
+            {onContextChange && (
+              <TouchableOpacity
+                style={[styles.dashboardCard, styles.switchCoachCard, { width: cardWidth as any }]}
+                onPress={() => navigation.navigate('Subscription')}
+              >
+                <View style={[styles.cardIconContainer, { width: iconContainerSize, height: iconContainerSize, borderRadius: iconContainerSize / 2 }]}>
+                  <SvgIcon name="briefcase" size={iconSize} color="#ffffff" />
+                </View>
+                <LockBadge />
+                <Text style={[styles.cardTitle, { fontSize: titleSize }]}>Coach Hub</Text>
+                <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>$99.99 one-time</Text>
+              </TouchableOpacity>
+            )}
 
-        {/* Plan Meal Card - Available to ALL, paywall on click */}
-        <TouchableOpacity
-          style={[styles.dashboardCard, styles.planMealCard, { width: cardWidth as any }]}
-          onPress={() => hasMealsAccess(user) ? setSelectedDashboard('planMeal') : navigation.navigate('Subscription')}
-        >
-          <View style={[styles.cardIconContainer, { width: iconContainerSize, height: iconContainerSize, borderRadius: iconContainerSize / 2 }]}>
-            <SvgIcon name="create" size={iconSize} color="#ffffff" />
-          </View>
-          {!hasMealsAccess(user) && <LockBadge />}
-          <Text style={[styles.cardTitle, { fontSize: titleSize }]}>Plan Meal</Text>
-          <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>Create meals</Text>
-        </TouchableOpacity>
+            {/* Quick Start Guide */}
+            <TouchableOpacity
+              style={[styles.dashboardCard, styles.actionCard, { width: cardWidth as any }]}
+              onPress={openQuickStartGuide}
+            >
+              <View style={[styles.cardIconContainer, { width: iconContainerSize, height: iconContainerSize, borderRadius: iconContainerSize / 2 }]}>
+                <SvgIcon name="compass" size={iconSize} color="#ffffff" />
+              </View>
+              <Text style={[styles.cardTitle, { fontSize: titleSize }]}>Quick Start</Text>
+              <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>App guide</Text>
+            </TouchableOpacity>
+          </>
+        ) : (
+          <>
+            {/* === PAID USER VIEW: Show all tiles === */}
+            {/* Overview Dashboard - Available to ALL users */}
+            <TouchableOpacity
+              style={[styles.dashboardCard, styles.overviewCard, { width: cardWidth as any }]}
+              onPress={() => setSelectedDashboard('overview')}
+            >
+              <View style={[styles.cardIconContainer, { width: iconContainerSize, height: iconContainerSize, borderRadius: iconContainerSize / 2 }]}>
+                <SvgIcon name="analytics" size={iconSize} color="#ffffff" />
+              </View>
+              <Text style={[styles.cardTitle, { fontSize: titleSize }]}>Overview</Text>
+              <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>Health metrics</Text>
+            </TouchableOpacity>
 
-        {/* Shopping List Card - Available to ALL, paywall on click */}
-        <TouchableOpacity
-          style={[styles.dashboardCard, styles.shoppingListCard, { width: cardWidth as any }]}
-          onPress={() => hasMealsAccess(user) ? handleNavigateToDashboard('shoppingList') : navigation.navigate('Subscription')}
-        >
-          <View style={[styles.cardIconContainer, { width: iconContainerSize, height: iconContainerSize, borderRadius: iconContainerSize / 2 }]}>
-            <SvgIcon name="cart" size={iconSize} color="#ffffff" />
-          </View>
-          {!hasMealsAccess(user) && <LockBadge />}
-          <Text style={[styles.cardTitle, { fontSize: titleSize }]}>Shopping List</Text>
-          <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>Grocery items</Text>
-        </TouchableOpacity>
+            {/* Notifications - Available to ALL users */}
+            <TouchableOpacity
+              style={[styles.dashboardCard, styles.notificationsCard, { width: cardWidth as any }]}
+              onPress={() => navigation.navigate('Notifications' as never)}
+            >
+              <View style={[styles.cardIconContainer, { width: iconContainerSize, height: iconContainerSize, borderRadius: iconContainerSize / 2 }]}>
+                <SvgIcon name="notifications" size={iconSize} color="#ffffff" />
+              </View>
+              <Text style={[styles.cardTitle, { fontSize: titleSize }]}>Notifications</Text>
+              <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>Messages & alerts</Text>
+            </TouchableOpacity>
 
-        {/* Cooking Dashboard Card - Available to ALL, paywall on click */}
-        <TouchableOpacity
-          style={[styles.dashboardCard, styles.cookingCard, { width: cardWidth as any }]}
-          onPress={() => hasMealsAccess(user) ? setSelectedDashboard('cooking') : navigation.navigate('Subscription')}
-        >
-          <View style={[styles.cardIconContainer, { width: iconContainerSize, height: iconContainerSize, borderRadius: iconContainerSize / 2 }]}>
-            <SvgIcon name="flame" size={iconSize} color="#ffffff" />
-          </View>
-          {!hasMealsAccess(user) && <LockBadge />}
-          <Text style={[styles.cardTitle, { fontSize: titleSize }]}>Cooking</Text>
-          <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>Instructions</Text>
-        </TouchableOpacity>
+            {/* Nutrition Dashboard - Available to ALL users (scan history, food analysis) */}
+            <TouchableOpacity
+              style={[styles.dashboardCard, styles.nutritionCard, { width: cardWidth as any }]}
+              onPress={() => setSelectedDashboard('nutrition')}
+            >
+              <View style={[styles.cardIconContainer, { width: iconContainerSize, height: iconContainerSize, borderRadius: iconContainerSize / 2 }]}>
+                <SvgIcon name="nutrition" size={iconSize} color="#ffffff" />
+              </View>
+              <Text style={[styles.cardTitle, { fontSize: titleSize }]}>Nutrition</Text>
+              <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>Scan history</Text>
+            </TouchableOpacity>
 
-        {/* Research Card - Available to ALL, paywall on click */}
-        <TouchableOpacity
-          style={[styles.dashboardCard, styles.researchCard, { width: cardWidth as any }]}
-          onPress={() => handlePremiumTilePress('research', 'premium')}
-        >
-          <View style={[styles.cardIconContainer, { width: iconContainerSize, height: iconContainerSize, borderRadius: iconContainerSize / 2 }]}>
-            <SvgIcon name="library" size={iconSize} color="#ffffff" />
-          </View>
-          {isFreeUser && <LockBadge />}
-          <Text style={[styles.cardTitle, { fontSize: titleSize }]}>Research</Text>
-          <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>Health insights</Text>
-        </TouchableOpacity>
+            {/* Profile Setup - Available to ALL users to set up their health profile */}
+            <TouchableOpacity
+              style={[styles.dashboardCard, styles.profileSetupCard, { width: cardWidth as any }]}
+              onPress={() => setSelectedDashboard('profileSetup')}
+            >
+              <View style={[styles.cardIconContainer, { width: iconContainerSize, height: iconContainerSize, borderRadius: iconContainerSize / 2 }]}>
+                <SvgIcon name="person-add" size={iconSize} color="#ffffff" />
+              </View>
+              <Text style={[styles.cardTitle, { fontSize: titleSize }]}>Profile Setup</Text>
+              <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>Health profile</Text>
+            </TouchableOpacity>
 
-        {/* Fitness Dashboard - Available to ALL, paywall on click */}
-        <TouchableOpacity
-          style={[styles.dashboardCard, styles.fitnessCard, { width: cardWidth as any }]}
-          onPress={() => handlePremiumTilePress('fitness', 'premium')}
-        >
-          <View style={[styles.cardIconContainer, { width: iconContainerSize, height: iconContainerSize, borderRadius: iconContainerSize / 2 }]}>
-            <SvgIcon name="fitness" size={iconSize} color="#ffffff" />
-          </View>
-          {isFreeUser && <LockBadge />}
-          <Text style={[styles.cardTitle, { fontSize: titleSize }]}>Fitness</Text>
-          <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>Workout plans</Text>
-        </TouchableOpacity>
+            {/* Progress Dashboard - Premium users */}
+            <TouchableOpacity
+              style={[styles.dashboardCard, styles.progressCard, { width: cardWidth as any }]}
+              onPress={() => setSelectedDashboard('progress')}
+            >
+              <View style={[styles.cardIconContainer, { width: iconContainerSize, height: iconContainerSize, borderRadius: iconContainerSize / 2 }]}>
+                <SvgIcon name="trending-up" size={iconSize} color="#ffffff" />
+              </View>
+              <Text style={[styles.cardTitle, { fontSize: titleSize }]}>Progress</Text>
+              <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>Track goals</Text>
+            </TouchableOpacity>
 
-        {/* Training Programs - NEW: Template workouts for sports/running */}
-        <TouchableOpacity
-          style={[styles.dashboardCard, styles.trainingCard, { width: cardWidth as any }]}
-          onPress={() => handlePremiumTilePress('training', 'premium')}
-        >
-          <View style={[styles.cardIconContainer, { width: iconContainerSize, height: iconContainerSize, borderRadius: iconContainerSize / 2 }]}>
-            <SvgIcon name="trophy" size={iconSize} color="#ffffff" />
-          </View>
-          {isFreeUser && <LockBadge />}
-          <Text style={[styles.cardTitle, { fontSize: titleSize }]}>Training</Text>
-          <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>Sports programs</Text>
-        </TouchableOpacity>
+            {/* AI Meal Plans Card - Available to meal plan subscribers */}
+            <TouchableOpacity
+              style={[styles.dashboardCard, styles.mealsCard, { width: cardWidth as any }]}
+              onPress={() => hasMealsAccess(user) ? handleNavigateToDashboard('meals') : navigation.navigate('Subscription')}
+            >
+              <View style={[styles.cardIconContainer, { width: iconContainerSize, height: iconContainerSize, borderRadius: iconContainerSize / 2 }]}>
+                <SvgIcon name="sparkles" size={iconSize} color="#ffffff" />
+              </View>
+              {!hasMealsAccess(user) && <LockBadge />}
+              <Text style={[styles.cardTitle, { fontSize: titleSize }]}>AI Meal Plans</Text>
+              <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>Auto-generate</Text>
+            </TouchableOpacity>
 
-        {/* Find a Coach - Available to all */}
-        <TouchableOpacity
-          style={[styles.dashboardCard, styles.coachCard, { width: cardWidth as any }]}
-          onPress={() => handleNavigateToDashboard('findCoach')}
-        >
-          <View style={[styles.cardIconContainer, { width: iconContainerSize, height: iconContainerSize, borderRadius: iconContainerSize / 2 }]}>
-            <SvgIcon name="people" size={iconSize} color="#ffffff" />
-          </View>
-          <Text style={[styles.cardTitle, { fontSize: titleSize }]}>Find Coach</Text>
-          <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>Expert guidance</Text>
-        </TouchableOpacity>
+            {/* Meal Calendar Card - Available to meal plan subscribers */}
+            <TouchableOpacity
+              style={[styles.dashboardCard, styles.calendarCard, { width: cardWidth as any }]}
+              onPress={() => hasMealsAccess(user) ? setSelectedDashboard('calendar') : navigation.navigate('Subscription')}
+            >
+              <View style={[styles.cardIconContainer, { width: iconContainerSize, height: iconContainerSize, borderRadius: iconContainerSize / 2 }]}>
+                <SvgIcon name="calendar" size={iconSize} color="#ffffff" />
+              </View>
+              {!hasMealsAccess(user) && <LockBadge />}
+              <Text style={[styles.cardTitle, { fontSize: titleSize }]}>Meal Calendar</Text>
+              <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>View schedule</Text>
+            </TouchableOpacity>
 
-        {/* Upgrade to Premium - Free users only */}
-        {isFreeUser && (
-          <TouchableOpacity
-            style={[styles.dashboardCard, styles.upgradeCard, { width: cardWidth as any }]}
-            onPress={() => navigation.navigate('Subscription')}
-          >
-            <View style={[styles.cardIconContainer, { width: iconContainerSize, height: iconContainerSize, borderRadius: iconContainerSize / 2 }]}>
-              <SvgIcon name="rocket" size={iconSize} color="#ffffff" />
-            </View>
-            <Text style={[styles.cardTitle, { fontSize: titleSize }]}>Upgrade</Text>
-            <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>Go Premium</Text>
-          </TouchableOpacity>
+            {/* Plan Meal Card - Available to meal plan subscribers */}
+            <TouchableOpacity
+              style={[styles.dashboardCard, styles.planMealCard, { width: cardWidth as any }]}
+              onPress={() => hasMealsAccess(user) ? setSelectedDashboard('planMeal') : navigation.navigate('Subscription')}
+            >
+              <View style={[styles.cardIconContainer, { width: iconContainerSize, height: iconContainerSize, borderRadius: iconContainerSize / 2 }]}>
+                <SvgIcon name="create" size={iconSize} color="#ffffff" />
+              </View>
+              {!hasMealsAccess(user) && <LockBadge />}
+              <Text style={[styles.cardTitle, { fontSize: titleSize }]}>Plan Meal</Text>
+              <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>Create meals</Text>
+            </TouchableOpacity>
+
+            {/* Shopping List Card - Available to meal plan subscribers */}
+            <TouchableOpacity
+              style={[styles.dashboardCard, styles.shoppingListCard, { width: cardWidth as any }]}
+              onPress={() => hasMealsAccess(user) ? handleNavigateToDashboard('shoppingList') : navigation.navigate('Subscription')}
+            >
+              <View style={[styles.cardIconContainer, { width: iconContainerSize, height: iconContainerSize, borderRadius: iconContainerSize / 2 }]}>
+                <SvgIcon name="cart" size={iconSize} color="#ffffff" />
+              </View>
+              {!hasMealsAccess(user) && <LockBadge />}
+              <Text style={[styles.cardTitle, { fontSize: titleSize }]}>Shopping List</Text>
+              <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>Grocery items</Text>
+            </TouchableOpacity>
+
+            {/* Cooking Dashboard Card - Available to meal plan subscribers */}
+            <TouchableOpacity
+              style={[styles.dashboardCard, styles.cookingCard, { width: cardWidth as any }]}
+              onPress={() => hasMealsAccess(user) ? setSelectedDashboard('cooking') : navigation.navigate('Subscription')}
+            >
+              <View style={[styles.cardIconContainer, { width: iconContainerSize, height: iconContainerSize, borderRadius: iconContainerSize / 2 }]}>
+                <SvgIcon name="flame" size={iconSize} color="#ffffff" />
+              </View>
+              {!hasMealsAccess(user) && <LockBadge />}
+              <Text style={[styles.cardTitle, { fontSize: titleSize }]}>Cooking</Text>
+              <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>Instructions</Text>
+            </TouchableOpacity>
+
+            {/* Research Card - Premium users */}
+            <TouchableOpacity
+              style={[styles.dashboardCard, styles.researchCard, { width: cardWidth as any }]}
+              onPress={() => setSelectedDashboard('research')}
+            >
+              <View style={[styles.cardIconContainer, { width: iconContainerSize, height: iconContainerSize, borderRadius: iconContainerSize / 2 }]}>
+                <SvgIcon name="library" size={iconSize} color="#ffffff" />
+              </View>
+              <Text style={[styles.cardTitle, { fontSize: titleSize }]}>Research</Text>
+              <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>Health insights</Text>
+            </TouchableOpacity>
+
+            {/* Fitness Dashboard - Premium users */}
+            <TouchableOpacity
+              style={[styles.dashboardCard, styles.fitnessCard, { width: cardWidth as any }]}
+              onPress={() => setSelectedDashboard('fitness')}
+            >
+              <View style={[styles.cardIconContainer, { width: iconContainerSize, height: iconContainerSize, borderRadius: iconContainerSize / 2 }]}>
+                <SvgIcon name="fitness" size={iconSize} color="#ffffff" />
+              </View>
+              <Text style={[styles.cardTitle, { fontSize: titleSize }]}>Fitness</Text>
+              <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>Workout plans</Text>
+            </TouchableOpacity>
+
+            {/* Training Programs - Premium users */}
+            <TouchableOpacity
+              style={[styles.dashboardCard, styles.trainingCard, { width: cardWidth as any }]}
+              onPress={() => setSelectedDashboard('training')}
+            >
+              <View style={[styles.cardIconContainer, { width: iconContainerSize, height: iconContainerSize, borderRadius: iconContainerSize / 2 }]}>
+                <SvgIcon name="trophy" size={iconSize} color="#ffffff" />
+              </View>
+              <Text style={[styles.cardTitle, { fontSize: titleSize }]}>Training</Text>
+              <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>Sports programs</Text>
+            </TouchableOpacity>
+
+            {/* Find a Coach - Available to all */}
+            <TouchableOpacity
+              style={[styles.dashboardCard, styles.coachCard, { width: cardWidth as any }]}
+              onPress={() => handleNavigateToDashboard('findCoach')}
+            >
+              <View style={[styles.cardIconContainer, { width: iconContainerSize, height: iconContainerSize, borderRadius: iconContainerSize / 2 }]}>
+                <SvgIcon name="people" size={iconSize} color="#ffffff" />
+              </View>
+              <Text style={[styles.cardTitle, { fontSize: titleSize }]}>Find Coach</Text>
+              <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>Expert guidance</Text>
+            </TouchableOpacity>
+
+            {/* Family Dashboard - Only visible when user has Family Hub access */}
+            {hasFamilyAccess(user) && (
+              <TouchableOpacity
+                style={[styles.dashboardCard, styles.parentCard, { width: cardWidth as any }]}
+                onPress={() => setSelectedDashboard('parent')}
+              >
+                <View style={[styles.cardIconContainer, { width: iconContainerSize, height: iconContainerSize, borderRadius: iconContainerSize / 2 }]}>
+                  <SvgIcon name="heart" size={iconSize} color="#ffffff" />
+                </View>
+                <Text style={[styles.cardTitle, { fontSize: titleSize }]}>Family</Text>
+                <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>Manage family</Text>
+              </TouchableOpacity>
+            )}
+
+            {/* Switch to Family Hub - Show with lock if no access */}
+            {onContextChange && (
+              <TouchableOpacity
+                style={[styles.dashboardCard, styles.switchFamilyCard, { width: cardWidth as any }]}
+                onPress={() => hasFamilyAccess(user) ? onContextChange('family') : navigation.navigate('Subscription')}
+              >
+                <View style={[styles.cardIconContainer, { width: iconContainerSize, height: iconContainerSize, borderRadius: iconContainerSize / 2 }]}>
+                  <SvgIcon name="people-circle" size={iconSize} color="#ffffff" />
+                </View>
+                {!hasFamilyAccess(user) && <LockBadge />}
+                <Text style={[styles.cardTitle, { fontSize: titleSize }]}>Family Hub</Text>
+                <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>{hasFamilyAccess(user) ? 'Switch view' : '$49.99/mo'}</Text>
+              </TouchableOpacity>
+            )}
+
+            {/* Switch to Coach Hub - Show with lock if no access */}
+            {onContextChange && (
+              <TouchableOpacity
+                style={[styles.dashboardCard, styles.switchCoachCard, { width: cardWidth as any }]}
+                onPress={() => hasCoachAccess(user) ? onContextChange('coach') : navigation.navigate('Subscription')}
+              >
+                <View style={[styles.cardIconContainer, { width: iconContainerSize, height: iconContainerSize, borderRadius: iconContainerSize / 2 }]}>
+                  <SvgIcon name="briefcase" size={iconSize} color="#ffffff" />
+                </View>
+                {!hasCoachAccess(user) && <LockBadge />}
+                <Text style={[styles.cardTitle, { fontSize: titleSize }]}>Coach Hub</Text>
+                <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>{hasCoachAccess(user) ? 'Switch view' : '$99.99 one-time'}</Text>
+              </TouchableOpacity>
+            )}
+
+            {/* Quick Start Guide */}
+            <TouchableOpacity
+              style={[styles.dashboardCard, styles.actionCard, { width: cardWidth as any }]}
+              onPress={openQuickStartGuide}
+            >
+              <View style={[styles.cardIconContainer, { width: iconContainerSize, height: iconContainerSize, borderRadius: iconContainerSize / 2 }]}>
+                <SvgIcon name="compass" size={iconSize} color="#ffffff" />
+              </View>
+              <Text style={[styles.cardTitle, { fontSize: titleSize }]}>Quick Start</Text>
+              <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>App guide</Text>
+            </TouchableOpacity>
+          </>
         )}
-
-        {/* Family Dashboard - Available to ALL, paywall on click */}
-        <TouchableOpacity
-          style={[styles.dashboardCard, styles.parentCard, { width: cardWidth as any }]}
-          onPress={() => hasFamilyAccess(user) ? setSelectedDashboard('parent') : navigation.navigate('Subscription')}
-        >
-          <View style={[styles.cardIconContainer, { width: iconContainerSize, height: iconContainerSize, borderRadius: iconContainerSize / 2 }]}>
-            <SvgIcon name="heart" size={iconSize} color="#ffffff" />
-          </View>
-          {!hasFamilyAccess(user) && <LockBadge />}
-          <Text style={[styles.cardTitle, { fontSize: titleSize }]}>Family</Text>
-          <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>$49.99/mo</Text>
-        </TouchableOpacity>
-
-        {/* Switch to Family Hub - Available to ALL, paywall on click */}
-        {onContextChange && (
-          <TouchableOpacity
-            style={[styles.dashboardCard, styles.switchFamilyCard, { width: cardWidth as any }]}
-            onPress={() => hasFamilyAccess(user) ? onContextChange('family') : navigation.navigate('Subscription')}
-          >
-            <View style={[styles.cardIconContainer, { width: iconContainerSize, height: iconContainerSize, borderRadius: iconContainerSize / 2 }]}>
-              <SvgIcon name="people-circle" size={iconSize} color="#ffffff" />
-            </View>
-            {!hasFamilyAccess(user) && <LockBadge />}
-            <Text style={[styles.cardTitle, { fontSize: titleSize }]}>Family Hub</Text>
-            <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>{hasFamilyAccess(user) ? 'Switch view' : '$49.99/mo'}</Text>
-          </TouchableOpacity>
-        )}
-
-        {/* Switch to Coach Hub - Available to ALL, paywall on click */}
-        {onContextChange && (
-          <TouchableOpacity
-            style={[styles.dashboardCard, styles.switchCoachCard, { width: cardWidth as any }]}
-            onPress={() => hasCoachAccess(user) ? onContextChange('coach') : navigation.navigate('Subscription')}
-          >
-            <View style={[styles.cardIconContainer, { width: iconContainerSize, height: iconContainerSize, borderRadius: iconContainerSize / 2 }]}>
-              <SvgIcon name="briefcase" size={iconSize} color="#ffffff" />
-            </View>
-            {!hasCoachAccess(user) && <LockBadge />}
-            <Text style={[styles.cardTitle, { fontSize: titleSize }]}>Coach Hub</Text>
-            <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>{hasCoachAccess(user) ? 'Switch view' : '$99.99 one-time'}</Text>
-          </TouchableOpacity>
-        )}
-
-        {/* Quick Start Guide */}
-        <TouchableOpacity
-          style={[styles.dashboardCard, styles.actionCard, { width: cardWidth as any }]}
-          onPress={openQuickStartGuide}
-        >
-          <View style={[styles.cardIconContainer, { width: iconContainerSize, height: iconContainerSize, borderRadius: iconContainerSize / 2 }]}>
-            <SvgIcon name="compass" size={iconSize} color="#ffffff" />
-          </View>
-          <Text style={[styles.cardTitle, { fontSize: titleSize }]}>Quick Start</Text>
-          <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>App guide</Text>
-        </TouchableOpacity>
       </View>
 
       {/* Session Status */}
