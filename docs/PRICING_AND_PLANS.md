@@ -416,9 +416,10 @@ Pay → Payment Success → Check userExists
 
 | Component | Status | Notes |
 |-----------|--------|-------|
-| `POST /register-with-payment` | ❌ BACKEND NEEDED | New backend endpoint required |
-| `POST /link-payment` | ❌ BACKEND NEEDED | Links OAuth user to Stripe payment |
-| `GET /check-email` | ❌ BACKEND NEEDED | Optional fallback endpoint |
+| `GET /checkout-session/:id` | ✅ DEPLOYED | Returns `needsSignup` for unknown emails |
+| `POST /register-with-payment` | ✅ DEPLOYED | Creates account + links Stripe payment |
+| `GET /check-email` | ✅ DEPLOYED | Check if email has existing account |
+| `POST /verify-payment-token` | ✅ DEPLOYED | Login existing users after payment |
 | `SignupWithPaymentScreen.tsx` | ✅ IMPLEMENTED | New screen with OAuth + email/password |
 | `PaymentSuccessScreen.tsx` | ✅ UPDATED | Handles `needsSignup` response |
 | `checkoutService.ts` | ✅ UPDATED | Parses `needsSignup`, `userExists` |
@@ -426,46 +427,54 @@ Pay → Payment Success → Check userExists
 | `AppNavigator.tsx` | ✅ UPDATED | Added SignupWithPayment route |
 | `navigation.ts` | ✅ UPDATED | Added SignupWithPayment types |
 
-### API Changes Required
+### API Endpoints (All Deployed)
 
-**Modified: GET `/checkout-session/:sessionId`**
+#### GET `/api/stripe/checkout-session/:sessionId`
 
-Current response:
+Response when user EXISTS:
 ```json
 {
-  "auth": {
-    "userId": "uuid",
-    "isNewUser": true,
-    "loginToken": "xxx"
-  }
+  "success": true,
+  "session": { "id": "cs_xxx", "email": "user@example.com", "plan": "pro_monthly", "customerId": "cus_xxx", "subscriptionId": "sub_xxx" },
+  "auth": { "userId": "uuid", "isNewUser": false, "loginToken": "xxx", "userExists": true }
 }
 ```
 
-Proposed response (when user doesn't exist):
+Response when user DOES NOT EXIST:
 ```json
 {
-  "auth": {
-    "userExists": false,
-    "needsSignup": true,
-    "email": "newuser@example.com",
-    "name": "New User",
-    "plan": "pro_monthly",
-    "stripeCustomerId": "cus_xxx",
-    "stripeSubscriptionId": "sub_xxx"
-  }
+  "success": true,
+  "session": { "id": "cs_xxx", "email": "newuser@example.com", "plan": "pro_monthly", "customerId": "cus_xxx", "subscriptionId": "sub_xxx" },
+  "auth": { "userExists": false, "needsSignup": true, "email": "newuser@example.com", "name": "New User", "plan": "pro_monthly", "stripeCustomerId": "cus_xxx", "stripeSubscriptionId": "sub_xxx" }
 }
 ```
 
-**New: POST `/api/auth/register-with-payment`**
+#### POST `/api/auth/register-with-payment`
 
-Request:
+Request (Email/Password):
 ```json
 {
   "email": "user@example.com",
-  "password": "xxx",           // Only for email/password
+  "password": "SecurePass123!",
   "name": "John Doe",
-  "provider": "local|google|apple|facebook|microsoft",
-  "providerId": "oauth-id",    // Only for OAuth
+  "firstName": "John",
+  "lastName": "Doe",
+  "provider": "local",
+  "stripeCustomerId": "cus_xxx",
+  "stripeSubscriptionId": "sub_xxx",
+  "plan": "pro_monthly"
+}
+```
+
+Request (OAuth - Google/Apple/Facebook/Microsoft):
+```json
+{
+  "email": "user@gmail.com",
+  "name": "John Doe",
+  "firstName": "John",
+  "lastName": "Doe",
+  "provider": "google",
+  "providerId": "google-user-id-123",
   "stripeCustomerId": "cus_xxx",
   "stripeSubscriptionId": "sub_xxx",
   "plan": "pro_monthly"
@@ -476,11 +485,39 @@ Response:
 ```json
 {
   "success": true,
+  "message": "Account created successfully",
   "data": {
-    "user": { "id": "uuid", "email": "...", "plan": "pro_monthly" },
+    "user": { "id": "uuid", "email": "...", "plan": "pro_monthly", "isNewUser": true, "onboardingCompleted": false },
     "sessionToken": "xxx",
-    "refreshToken": "xxx"
+    "refreshToken": "xxx",
+    "expiresIn": "24h"
   }
+}
+```
+
+#### GET `/api/auth/check-email?email=user@example.com`
+
+Response:
+```json
+{
+  "success": true,
+  "exists": true,
+  "data": { "provider": "google", "needsPassword": false }
+}
+```
+
+#### POST `/api/auth/verify-payment-token`
+
+Request:
+```json
+{ "token": "login-token-from-checkout-session" }
+```
+
+Response:
+```json
+{
+  "success": true,
+  "data": { "token": "session-token", "refreshToken": "xxx", "user": { ... } }
 }
 ```
 
@@ -491,32 +528,36 @@ Response:
 3. **OAuth Support**: Full support for Google, Apple, Facebook, Microsoft
 4. **Account Linking**: Clean linking of Stripe payment to new account
 
-### Migration Path
+### Implementation Complete ✅
 
-1. ✅ Frontend: Created `SignupWithPaymentScreen.tsx` with OAuth + email/password
-2. ✅ Frontend: Updated `PaymentSuccessScreen.tsx` to handle `needsSignup`
-3. ✅ Frontend: Updated `AuthCallbackScreen.tsx` for OAuth → payment flow
-4. ✅ Frontend: Updated navigation types and routes
-5. ❌ Backend: Add `/register-with-payment` endpoint
-6. ❌ Backend: Add `/link-payment` endpoint (for OAuth users)
-7. ❌ Backend: Modify `/checkout-session` to return `needsSignup` for unknown emails
-8. ⏳ Test: All OAuth providers + email/password signup after payment
+| Step | Status | Details |
+|------|--------|--------|
+| Frontend: `SignupWithPaymentScreen.tsx` | ✅ | OAuth + email/password signup |
+| Frontend: `PaymentSuccessScreen.tsx` | ✅ | Handles `needsSignup` redirect |
+| Frontend: `AuthCallbackScreen.tsx` | ✅ | OAuth → payment flow |
+| Frontend: Navigation routes | ✅ | Added SignupWithPayment route |
+| Backend: `/register-with-payment` | ✅ | Creates account + links Stripe |
+| Backend: `/check-email` | ✅ | Check if account exists |
+| Backend: `/verify-payment-token` | ✅ | Login existing users |
+| Backend: `/checkout-session` modified | ✅ | Returns `needsSignup` for new users |
+| Testing | ⏳ | All OAuth providers + email/password |
 
 ### File Locations
 
 ```
-Frontend (implemented):
-├── src/screens/SignupWithPaymentScreen.tsx  ← NEW: Account creation after payment
-├── src/screens/PaymentSuccessScreen.tsx     ← UPDATED: Handles needsSignup redirect
-├── src/screens/AuthCallbackScreen.tsx       ← UPDATED: OAuth → payment linking
-├── src/services/checkoutService.ts          ← UPDATED: Parses new response
-├── src/navigation/AppNavigator.tsx          ← UPDATED: Added route
-└── src/types/navigation.ts                  ← UPDATED: Added types
+Frontend:
+├── src/screens/SignupWithPaymentScreen.tsx  ← Account creation after payment
+├── src/screens/PaymentSuccessScreen.tsx     ← Handles needsSignup redirect
+├── src/screens/AuthCallbackScreen.tsx       ← OAuth → payment linking
+├── src/services/checkoutService.ts          ← Parses new response
+├── src/navigation/AppNavigator.tsx          ← Route: /signup-with-payment
+└── src/types/navigation.ts                  ← SignupWithPayment types
 
-Backend (needed):
-├── POST /api/auth/register-with-payment     ← Creates account + links Stripe
-├── POST /api/auth/link-payment              ← Links existing OAuth user to Stripe
-└── GET /api/stripe/checkout-session/:id     ← Return needsSignup for new users
+Backend (Deployed):
+├── GET  /api/stripe/checkout-session/:id    ← payment.wihy.ai
+├── POST /api/auth/register-with-payment     ← auth.wihy.ai
+├── GET  /api/auth/check-email               ← auth.wihy.ai
+└── POST /api/auth/verify-payment-token      ← auth.wihy.ai
 ```
 
 ```

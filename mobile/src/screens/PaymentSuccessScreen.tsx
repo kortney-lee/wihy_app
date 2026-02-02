@@ -104,17 +104,47 @@ export default function PaymentSuccessScreen() {
         isNewUser,
       });
 
-      // Step 2: Store the login token directly as auth token
-      // Per API guide: loginToken from checkout session IS the auth token
-      if (Platform.OS === 'web' && typeof localStorage !== 'undefined') {
-        localStorage.setItem('accessToken', loginToken);
-        localStorage.setItem('authToken', loginToken);
-        if (userId) {
-          localStorage.setItem('userId', userId);
+      // Step 2: Verify payment token to get proper session tokens
+      // The loginToken from checkout session must be exchanged for session/refresh tokens
+      console.log('Verifying payment token...');
+      const verifyResponse = await fetch('https://auth.wihy.ai/api/auth/verify-payment-token', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ token: loginToken }),
+      });
+
+      const verifyData = await verifyResponse.json();
+
+      if (!verifyData.success) {
+        console.warn('Token verification failed, using loginToken directly as fallback');
+        // Fallback: use loginToken directly (backwards compatibility)
+        if (Platform.OS === 'web' && typeof localStorage !== 'undefined') {
+          localStorage.setItem('accessToken', loginToken);
+          localStorage.setItem('authToken', loginToken);
+          if (userId) {
+            localStorage.setItem('userId', userId);
+          }
+        } else {
+          await authService.storeSessionToken(loginToken);
         }
       } else {
-        // Native: use authService to store tokens
-        await authService.storeSessionToken(loginToken);
+        // Use verified session tokens
+        const sessionToken = verifyData.data?.token || verifyData.data?.sessionToken;
+        const refreshToken = verifyData.data?.refreshToken;
+
+        if (Platform.OS === 'web' && typeof localStorage !== 'undefined') {
+          localStorage.setItem('accessToken', sessionToken);
+          localStorage.setItem('authToken', sessionToken);
+          if (refreshToken) {
+            localStorage.setItem('refreshToken', refreshToken);
+          }
+          if (userId) {
+            localStorage.setItem('userId', userId);
+          }
+        } else {
+          await authService.storeSessionToken(sessionToken);
+        }
       }
 
       // Step 3: Refresh user context to load user data

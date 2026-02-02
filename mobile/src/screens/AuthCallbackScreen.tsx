@@ -152,17 +152,23 @@ export default function AuthCallbackScreen() {
                 console.log('Found payment info from payment-first flow, completing registration');
                 sessionStorage.removeItem('wihy_oauth_payment_info');
                 
-                // Complete registration with payment info
-                // The OAuth flow already authenticated the user, now we need to link to Stripe
+                // Complete registration with payment info using OAuth credentials
+                // POST /api/auth/register-with-payment with OAuth provider details
                 const registerResponse = await fetch(
-                  `https://auth.wihy.ai/api/auth/link-payment`,
+                  `https://auth.wihy.ai/api/auth/register-with-payment`,
                   {
                     method: 'POST',
                     headers: {
                       'Content-Type': 'application/json',
-                      'Authorization': `Bearer ${params.session_token}`,
                     },
+                    credentials: 'include',
                     body: JSON.stringify({
+                      email: session.user.email,
+                      name: session.user.name || paymentInfo.name,
+                      firstName: session.user.name?.split(' ')[0] || '',
+                      lastName: session.user.name?.split(' ').slice(1).join(' ') || '',
+                      provider: params.provider || 'google',
+                      providerId: session.user.id,
                       stripeCustomerId: paymentInfo.stripeCustomerId,
                       stripeSubscriptionId: paymentInfo.stripeSubscriptionId,
                       plan: paymentInfo.plan,
@@ -170,9 +176,25 @@ export default function AuthCallbackScreen() {
                   }
                 );
                 
-                if (!registerResponse.ok) {
-                  console.error('Failed to link payment to account');
-                  // Continue anyway - support can fix this
+                const registerData = await registerResponse.json();
+                
+                if (!registerResponse.ok || !registerData.success) {
+                  // Check if user already exists - this is okay, they're authenticated via OAuth
+                  if (registerData.code === 'USER_EXISTS') {
+                    console.log('User already exists, continuing with OAuth session');
+                  } else {
+                    console.error('Failed to register with payment:', registerData.error);
+                    // Continue anyway - support can fix this
+                  }
+                } else {
+                  // Store new tokens from registration
+                  if (registerData.data?.sessionToken) {
+                    localStorage.setItem('accessToken', registerData.data.sessionToken);
+                    localStorage.setItem('authToken', registerData.data.sessionToken);
+                  }
+                  if (registerData.data?.refreshToken) {
+                    localStorage.setItem('refreshToken', registerData.data.refreshToken);
+                  }
                 }
                 
                 // Redirect to ProfileSetup for new user
