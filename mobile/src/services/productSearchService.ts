@@ -4,6 +4,11 @@
  * Authentication: Not required (public endpoints)
  * 
  * Searches 4M+ products from OpenFoodFacts, OpenBeautyFacts, OpenPetFoodFacts
+ * 
+ * Endpoints:
+ * - GET /trending - Popular search terms for empty search box
+ * - GET /suggest - Autocomplete suggestions as user types (2+ chars)
+ * - GET /search - Full search results when user submits
  */
 
 import { fetchWithLogging } from '../utils/apiLogger';
@@ -14,11 +19,49 @@ const BASE_URL = 'https://services.wihy.ai/api/products';
 // TYPES
 // ==========================================
 
+export interface TrendingResponse {
+  success: boolean;
+  type: string;
+  trending: string[];
+  timestamp: string;
+}
+
+export interface SuggestResponse {
+  success: boolean;
+  query: string;
+  type: string;
+  suggestions: string[];
+  products: Array<{
+    name: string;
+    brand?: string;
+    type: string;
+  }>;
+  brands: string[];
+  categories: string[];
+  responseTime: string;
+  fromCache: boolean;
+  timestamp: string;
+}
+
+export interface ProductNutrition {
+  calories?: number;
+  protein?: number;
+  carbs?: number;
+  fat?: number;
+  fiber?: number;
+  sugar?: number;
+  sodium?: number;
+  saturated_fat?: number;
+  salt?: number;
+  per?: string;
+}
+
 export interface FoodProduct {
   id: string;
   name: string;
   brand?: string;
   categories?: string;
+  nutrition?: ProductNutrition;
   calories?: number;
   protein?: number;
   fat?: number;
@@ -29,7 +72,13 @@ export interface FoodProduct {
   imageUrl?: string;
   ingredients?: string;
   servingSize?: string;
+  serving_size?: string;
   nutriscore?: string;
+  nutriscore_grade?: string;
+  nova_group?: number;
+  additives?: string[];
+  allergens?: string[];
+  countries?: string;
   score: number;
   type: 'food';
 }
@@ -113,6 +162,116 @@ export type PetType = 'dog' | 'cat' | 'bird' | 'fish' | 'rabbit' | 'small_animal
 
 class ProductSearchService {
   private baseUrl = BASE_URL;
+
+  /**
+   * Get trending searches for empty search box
+   * Call this when search input is focused with empty query
+   * 
+   * @param type - Product type filter
+   * @param limit - Number of trending terms (1-20, default 10)
+   * @returns TrendingResponse with array of trending search terms
+   * 
+   * @example
+   * const trending = await productSearchService.trending('food');
+   * console.log(trending.trending); // ["Organic snacks", "Protein bars", ...]
+   */
+  async trending(
+    type: 'food' | 'beauty' | 'petfood' | 'all' = 'all',
+    limit: number = 10
+  ): Promise<TrendingResponse> {
+    const params = new URLSearchParams();
+    if (type !== 'all') params.append('type', type);
+    params.append('limit', limit.toString());
+
+    try {
+      const response = await fetchWithLogging(`${this.baseUrl}/trending?${params}`, {
+        method: 'GET',
+      });
+
+      if (!response.ok) {
+        throw new Error(`Trending search failed: ${response.status}`);
+      }
+
+      return response.json();
+    } catch (error) {
+      console.error('Trending search error:', error);
+      // Return empty trending on error
+      return {
+        success: false,
+        type,
+        trending: [],
+        timestamp: new Date().toISOString(),
+      };
+    }
+  }
+
+  /**
+   * Get autocomplete suggestions as user types
+   * Call this with debounce (150ms) after 2+ characters
+   * 
+   * @param query - Search query (min 2 chars)
+   * @param type - Product type filter
+   * @param limit - Number of suggestions (1-15, default 8)
+   * @returns SuggestResponse with suggestions, products, and brands
+   * 
+   * @example
+   * const suggestions = await productSearchService.suggest('coke', 'food');
+   * console.log(suggestions.suggestions); // ["Diet coke soda", "Coke Zero", ...]
+   * console.log(suggestions.products); // [{ name, brand, type }, ...]
+   */
+  async suggest(
+    query: string,
+    type: 'food' | 'beauty' | 'petfood' | 'all' = 'all',
+    limit: number = 8
+  ): Promise<SuggestResponse> {
+    if (query.length < 2) {
+      return {
+        success: true,
+        query,
+        type,
+        suggestions: [],
+        products: [],
+        brands: [],
+        categories: [],
+        responseTime: '0ms',
+        fromCache: false,
+        timestamp: new Date().toISOString(),
+      };
+    }
+
+    const params = new URLSearchParams({
+      q: query,
+      limit: limit.toString(),
+    });
+    if (type !== 'all') params.append('type', type);
+
+    try {
+      const response = await fetchWithLogging(`${this.baseUrl}/suggest?${params}`, {
+        method: 'GET',
+      });
+
+      if (!response.ok) {
+        throw new Error(`Suggest failed: ${response.status}`);
+      }
+
+      return response.json();
+    } catch (error) {
+      console.error('Suggest error:', error);
+      // Return empty suggestions on error
+      return {
+        success: false,
+        query,
+        type,
+        suggestions: [],
+        products: [],
+        brands: [],
+        categories: [],
+        responseTime: '0ms',
+        fromCache: false,
+        timestamp: new Date().toISOString(),
+      };
+    }
+  }
 
   /**
    * Search across all product databases (food, beauty, petfood)

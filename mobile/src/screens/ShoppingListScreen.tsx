@@ -12,6 +12,8 @@ import {
   Share,
   TextInput,
   Modal,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { RouteProp } from '@react-navigation/native';
@@ -22,6 +24,8 @@ import { shoppingService, ShoppingList } from '../services/shoppingService';
 import { AuthContext } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { Ionicons } from '../components/shared';
+import ProductSearchAutocomplete from '../components/ProductSearchAutocomplete';
+import { FoodProduct } from '../services/productSearchService';
 // Note: Mock data removed to expose real API issues
 
 type ShoppingListScreenRouteProp = RouteProp<RootStackParamList, 'ShoppingList'>;
@@ -80,9 +84,11 @@ export default function ShoppingListScreen({ route, navigation, isDashboardMode 
   // Manual entry states
   const [showAddItemModal, setShowAddItemModal] = useState(false);
   const [newItemName, setNewItemName] = useState('');
-  const [newItemQuantity, setNewItemQuantity] = useState('');
-  const [newItemUnit, setNewItemUnit] = useState('oz');
+  const [newItemQuantity, setNewItemQuantity] = useState('1');
+  const [newItemUnit, setNewItemUnit] = useState('item');
   const [newItemCategory, setNewItemCategory] = useState<string>('Other');
+  const [newItemBrand, setNewItemBrand] = useState('');
+  const [selectedProduct, setSelectedProduct] = useState<FoodProduct | null>(null);
   
   // Animation for progress bar
   const progressAnim = useRef(new Animated.Value(0)).current;
@@ -362,12 +368,20 @@ export default function ShoppingListScreen({ route, navigation, isDashboardMode 
         setActiveList(newList);
       }
       
-      // Add item to list
+      // Add item to list with nutrition data if from product search
       const newItem: any = {
         name: newItemName,
-        quantity: parseFloat(newItemQuantity),
+        quantity: parseFloat(newItemQuantity) || 1,
         unit: newItemUnit,
         category: newItemCategory,
+        brand: newItemBrand || selectedProduct?.brand,
+        ...(selectedProduct && {
+          product_id: selectedProduct.id,
+          calories: selectedProduct.nutrition?.calories || selectedProduct.calories,
+          protein: selectedProduct.nutrition?.protein || selectedProduct.protein,
+          carbs: selectedProduct.nutrition?.carbs || selectedProduct.carbs,
+          fat: selectedProduct.nutrition?.fat || selectedProduct.fat,
+        }),
       };
       
       await shoppingService.addItemsToList(listId, [newItem]);
@@ -375,9 +389,11 @@ export default function ShoppingListScreen({ route, navigation, isDashboardMode 
       
       // Reset form
       setNewItemName('');
-      setNewItemQuantity('');
-      setNewItemUnit('oz');
+      setNewItemQuantity('1');
+      setNewItemUnit('item');
       setNewItemCategory('Other');
+      setNewItemBrand('');
+      setSelectedProduct(null);
       setShowAddItemModal(false);
       
       Alert.alert('Success', 'Item added to shopping list');
@@ -387,6 +403,34 @@ export default function ShoppingListScreen({ route, navigation, isDashboardMode 
     } finally {
       setLoading(false);
     }
+  };
+
+  // Handle product selection from autocomplete
+  const handleProductSelect = (product: FoodProduct) => {
+    setSelectedProduct(product);
+    setNewItemName(product.name);
+    setNewItemBrand(product.brand || '');
+    // Auto-detect category from product categories
+    if (product.categories) {
+      const categories = product.categories.toLowerCase();
+      if (categories.includes('meat') || categories.includes('protein') || categories.includes('chicken') || categories.includes('beef')) {
+        setNewItemCategory('Proteins');
+      } else if (categories.includes('vegetable') || categories.includes('fruit') || categories.includes('produce')) {
+        setNewItemCategory('Produce');
+      } else if (categories.includes('dairy') || categories.includes('milk') || categories.includes('cheese') || categories.includes('yogurt')) {
+        setNewItemCategory('Dairy');
+      } else if (categories.includes('grain') || categories.includes('bread') || categories.includes('pasta') || categories.includes('rice')) {
+        setNewItemCategory('Grains');
+      } else if (categories.includes('snack') || categories.includes('chip') || categories.includes('cookie')) {
+        setNewItemCategory('Pantry');
+      }
+    }
+  };
+
+  // Handle suggestion selection (custom text entry)
+  const handleSuggestionSelect = (text: string) => {
+    setNewItemName(text);
+    setSelectedProduct(null);
   };
 
   const handleBack = () => {
@@ -675,81 +719,164 @@ export default function ShoppingListScreen({ route, navigation, isDashboardMode 
         visible={showAddItemModal}
         animationType="slide"
         transparent={true}
-        onRequestClose={() => setShowAddItemModal(false)}
+        onRequestClose={() => {
+          setShowAddItemModal(false);
+          setSelectedProduct(null);
+          setNewItemName('');
+          setNewItemBrand('');
+        }}
       >
-        <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { backgroundColor: theme.colors.card }]}>
+        <KeyboardAvoidingView 
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={styles.modalOverlay}
+        >
+          <View style={[styles.modalContent, { backgroundColor: theme.colors.card, maxHeight: '90%' }]}>
             <View style={styles.modalHeader}>
               <Text style={[styles.modalTitle, { color: theme.colors.text }]}>Add Item</Text>
-              <TouchableOpacity onPress={() => setShowAddItemModal(false)}>
+              <TouchableOpacity onPress={() => {
+                setShowAddItemModal(false);
+                setSelectedProduct(null);
+                setNewItemName('');
+                setNewItemBrand('');
+              }}>
                 <Ionicons name="close" size={24} color={theme.colors.textSecondary} />
               </TouchableOpacity>
             </View>
 
-            <View style={styles.modalForm}>
-              <Text style={[styles.inputLabel, { color: theme.colors.text }]}>Item Name</Text>
-              <TextInput
-                style={[styles.input, { backgroundColor: theme.colors.background, color: theme.colors.text, borderColor: theme.colors.border }]}
-                value={newItemName}
-                onChangeText={setNewItemName}
-                placeholder="e.g., Chicken Breast"
-                placeholderTextColor={theme.colors.textSecondary}
-              />
-
-              <Text style={[styles.inputLabel, { color: theme.colors.text }]}>Quantity</Text>
-              <View style={styles.quantityRow}>
-                <TextInput
-                  style={[styles.quantityInput, { backgroundColor: theme.colors.background, color: theme.colors.text, borderColor: theme.colors.border }]}
-                  value={newItemQuantity}
-                  onChangeText={setNewItemQuantity}
-                  placeholder="1.5"
-                  keyboardType="decimal-pad"
-                  placeholderTextColor={theme.colors.textSecondary}
+            <ScrollView style={styles.modalScrollContent} keyboardShouldPersistTaps="handled">
+              <View style={styles.modalForm}>
+                <Text style={[styles.inputLabel, { color: theme.colors.text }]}>Search Product</Text>
+                <ProductSearchAutocomplete
+                  onSelectProduct={handleProductSelect}
+                  onSelectSuggestion={handleSuggestionSelect}
+                  productType="food"
+                  placeholder="Search foods, brands..."
+                  autoFocus
                 />
-                <TextInput
-                  style={[styles.unitInput, { backgroundColor: theme.colors.background, color: theme.colors.text, borderColor: theme.colors.border }]}
-                  value={newItemUnit}
-                  onChangeText={setNewItemUnit}
-                  placeholder="lbs"
-                  placeholderTextColor={theme.colors.textSecondary}
-                />
-              </View>
 
-              <Text style={[styles.inputLabel, { color: theme.colors.text }]}>Category</Text>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.categoryPicker}>
-                {['Proteins', 'Produce', 'Dairy', 'Grains', 'Pantry', 'Other'].map((cat) => (
-                  <TouchableOpacity
-                    key={cat}
-                    onPress={() => setNewItemCategory(cat)}
-                    style={[
-                      styles.categoryChip,
-                      { borderColor: theme.colors.border },
-                      newItemCategory === cat && styles.categoryChipSelected,
-                    ]}
-                  >
-                    <Text
+                {/* Selected Product Info */}
+                {selectedProduct && (
+                  <View style={[styles.selectedProductInfo, { backgroundColor: theme.colors.background, borderColor: theme.colors.border }]}>
+                    <View style={styles.selectedProductHeader}>
+                      <View style={{ flex: 1 }}>
+                        <Text style={[styles.selectedProductName, { color: theme.colors.text }]}>
+                          {selectedProduct.name}
+                        </Text>
+                        {selectedProduct.brand && (
+                          <Text style={[styles.selectedProductBrand, { color: theme.colors.textSecondary }]}>
+                            {selectedProduct.brand}
+                          </Text>
+                        )}
+                      </View>
+                      <TouchableOpacity 
+                        onPress={() => {
+                          setSelectedProduct(null);
+                          setNewItemName('');
+                          setNewItemBrand('');
+                        }}
+                        style={styles.clearProductButton}
+                      >
+                        <Ionicons name="close-circle" size={20} color={theme.colors.textSecondary} />
+                      </TouchableOpacity>
+                    </View>
+                    {selectedProduct.nutrition && (
+                      <View style={styles.nutritionGrid}>
+                        <View style={styles.nutritionItem}>
+                          <Text style={[styles.nutritionValue, { color: theme.colors.primary }]}>
+                            {selectedProduct.nutrition.calories || 0}
+                          </Text>
+                          <Text style={[styles.nutritionLabel, { color: theme.colors.textSecondary }]}>cal</Text>
+                        </View>
+                        <View style={styles.nutritionItem}>
+                          <Text style={[styles.nutritionValue, { color: '#4CAF50' }]}>
+                            {selectedProduct.nutrition.protein || 0}g
+                          </Text>
+                          <Text style={[styles.nutritionLabel, { color: theme.colors.textSecondary }]}>protein</Text>
+                        </View>
+                        <View style={styles.nutritionItem}>
+                          <Text style={[styles.nutritionValue, { color: '#FF9800' }]}>
+                            {selectedProduct.nutrition.carbs || 0}g
+                          </Text>
+                          <Text style={[styles.nutritionLabel, { color: theme.colors.textSecondary }]}>carbs</Text>
+                        </View>
+                        <View style={styles.nutritionItem}>
+                          <Text style={[styles.nutritionValue, { color: '#9C27B0' }]}>
+                            {selectedProduct.nutrition.fat || 0}g
+                          </Text>
+                          <Text style={[styles.nutritionLabel, { color: theme.colors.textSecondary }]}>fat</Text>
+                        </View>
+                      </View>
+                    )}
+                  </View>
+                )}
+
+                {/* Manual entry fallback */}
+                {!selectedProduct && newItemName && (
+                  <View style={[styles.manualEntryNote, { backgroundColor: theme.colors.background }]}>
+                    <Ionicons name="create-outline" size={16} color={theme.colors.textSecondary} />
+                    <Text style={[styles.manualEntryText, { color: theme.colors.textSecondary }]}>
+                      Adding "{newItemName}" as custom item
+                    </Text>
+                  </View>
+                )}
+
+                <Text style={[styles.inputLabel, { color: theme.colors.text, marginTop: 16 }]}>Quantity</Text>
+                <View style={styles.quantityRow}>
+                  <TextInput
+                    style={[styles.quantityInput, { backgroundColor: theme.colors.background, color: theme.colors.text, borderColor: theme.colors.border }]}
+                    value={newItemQuantity}
+                    onChangeText={setNewItemQuantity}
+                    placeholder="1.5"
+                    keyboardType="decimal-pad"
+                    placeholderTextColor={theme.colors.textSecondary}
+                  />
+                  <TextInput
+                    style={[styles.unitInput, { backgroundColor: theme.colors.background, color: theme.colors.text, borderColor: theme.colors.border }]}
+                    value={newItemUnit}
+                    onChangeText={setNewItemUnit}
+                    placeholder="lbs"
+                    placeholderTextColor={theme.colors.textSecondary}
+                  />
+                </View>
+
+                <Text style={[styles.inputLabel, { color: theme.colors.text }]}>Category</Text>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.categoryPicker}>
+                  {['Proteins', 'Produce', 'Dairy', 'Grains', 'Pantry', 'Other'].map((cat) => (
+                    <TouchableOpacity
+                      key={cat}
+                      onPress={() => setNewItemCategory(cat)}
                       style={[
-                        styles.categoryChipText,
-                        { color: theme.colors.text },
-                        newItemCategory === cat && styles.categoryChipTextSelected,
+                        styles.categoryChip,
+                        { borderColor: theme.colors.border },
+                        newItemCategory === cat && styles.categoryChipSelected,
                       ]}
                     >
-                      {cat}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </ScrollView>
+                      <Text
+                        style={[
+                          styles.categoryChipText,
+                          { color: theme.colors.text },
+                          newItemCategory === cat && styles.categoryChipTextSelected,
+                        ]}
+                      >
+                        {cat}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
 
-              <TouchableOpacity
-                style={[styles.addButton, (!newItemName.trim() || !newItemQuantity.trim()) && styles.addButtonDisabled]}
-                onPress={handleAddItem}
-                disabled={!newItemName.trim() || !newItemQuantity.trim()}
-              >
-                <Text style={styles.addButtonText}>Add Item</Text>
-              </TouchableOpacity>
-            </View>
+                <TouchableOpacity
+                  style={[styles.addButton, (!newItemName.trim() || !newItemQuantity.trim()) && styles.addButtonDisabled]}
+                  onPress={handleAddItem}
+                  disabled={!newItemName.trim() || !newItemQuantity.trim()}
+                >
+                  <Text style={styles.addButtonText}>
+                    {selectedProduct ? 'Add Product' : 'Add Custom Item'}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </ScrollView>
           </View>
-        </View>
+        </KeyboardAvoidingView>
       </Modal>
     </View>
   );
@@ -1191,5 +1318,65 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '700',
     color: '#fff',
+  },
+  
+  // Product Search Modal Additions
+  modalScrollContent: {
+    flexGrow: 1,
+  },
+  selectedProductInfo: {
+    marginTop: 12,
+    padding: 14,
+    borderRadius: 12,
+    borderWidth: 2,
+  },
+  selectedProductHeader: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: 12,
+  },
+  selectedProductName: {
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  selectedProductBrand: {
+    fontSize: 13,
+    marginTop: 2,
+  },
+  clearProductButton: {
+    padding: 4,
+    marginLeft: 8,
+  },
+  nutritionGrid: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(0,0,0,0.1)',
+    paddingTop: 12,
+  },
+  nutritionItem: {
+    alignItems: 'center',
+    flex: 1,
+  },
+  nutritionValue: {
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  nutritionLabel: {
+    fontSize: 11,
+    marginTop: 2,
+    textTransform: 'uppercase',
+  },
+  manualEntryNote: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 10,
+    borderRadius: 8,
+    marginTop: 8,
+    gap: 8,
+  },
+  manualEntryText: {
+    fontSize: 13,
+    flex: 1,
   },
 });
