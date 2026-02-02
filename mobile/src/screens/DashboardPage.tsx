@@ -422,14 +422,14 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
             {onContextChange && (
               <TouchableOpacity
                 style={[styles.dashboardCard, styles.switchFamilyCard, { width: cardWidth as any }]}
-                onPress={() => navigation.navigate('Subscription')}
+                onPress={() => navigation.navigate('Subscription', { highlight: 'family' })}
               >
                 <View style={[styles.cardIconContainer, { width: iconContainerSize, height: iconContainerSize, borderRadius: iconContainerSize / 2 }]}>
                   <SvgIcon name="people-circle" size={iconSize} color="#ffffff" />
                 </View>
                 <LockBadge />
                 <Text style={[styles.cardTitle, { fontSize: titleSize }]}>Family Hub</Text>
-                <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>$49.99/mo</Text>
+                <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>Manage family</Text>
               </TouchableOpacity>
             )}
 
@@ -437,14 +437,14 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
             {onContextChange && (
               <TouchableOpacity
                 style={[styles.dashboardCard, styles.switchCoachCard, { width: cardWidth as any }]}
-                onPress={() => navigation.navigate('Subscription')}
+                onPress={() => navigation.navigate('Subscription', { highlight: 'coach' })}
               >
                 <View style={[styles.cardIconContainer, { width: iconContainerSize, height: iconContainerSize, borderRadius: iconContainerSize / 2 }]}>
                   <SvgIcon name="briefcase" size={iconSize} color="#ffffff" />
                 </View>
                 <LockBadge />
                 <Text style={[styles.cardTitle, { fontSize: titleSize }]}>Coach Hub</Text>
-                <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>$99.99 one-time</Text>
+                <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>Become a coach</Text>
               </TouchableOpacity>
             )}
 
@@ -654,14 +654,14 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
             {onContextChange && (
               <TouchableOpacity
                 style={[styles.dashboardCard, styles.switchFamilyCard, { width: cardWidth as any }]}
-                onPress={() => hasFamilyAccess(user) ? onContextChange('family') : navigation.navigate('Subscription')}
+                onPress={() => hasFamilyAccess(user) ? onContextChange('family') : navigation.navigate('Subscription', { highlight: 'family' })}
               >
                 <View style={[styles.cardIconContainer, { width: iconContainerSize, height: iconContainerSize, borderRadius: iconContainerSize / 2 }]}>
                   <SvgIcon name="people-circle" size={iconSize} color="#ffffff" />
                 </View>
                 {!hasFamilyAccess(user) && <LockBadge />}
                 <Text style={[styles.cardTitle, { fontSize: titleSize }]}>Family Hub</Text>
-                <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>{hasFamilyAccess(user) ? 'Switch view' : '$49.99/mo'}</Text>
+                <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>{hasFamilyAccess(user) ? 'Switch view' : 'Manage family'}</Text>
               </TouchableOpacity>
             )}
 
@@ -669,14 +669,14 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
             {onContextChange && (
               <TouchableOpacity
                 style={[styles.dashboardCard, styles.switchCoachCard, { width: cardWidth as any }]}
-                onPress={() => hasCoachAccess(user) ? onContextChange('coach') : navigation.navigate('Subscription')}
+                onPress={() => hasCoachAccess(user) ? onContextChange('coach') : navigation.navigate('Subscription', { highlight: 'coach' })}
               >
                 <View style={[styles.cardIconContainer, { width: iconContainerSize, height: iconContainerSize, borderRadius: iconContainerSize / 2 }]}>
                   <SvgIcon name="briefcase" size={iconSize} color="#ffffff" />
                 </View>
                 {!hasCoachAccess(user) && <LockBadge />}
                 <Text style={[styles.cardTitle, { fontSize: titleSize }]}>Coach Hub</Text>
-                <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>{hasCoachAccess(user) ? 'Switch view' : '$99.99 one-time'}</Text>
+                <Text style={[styles.cardSubtitle, { fontSize: subtitleSize }]}>{hasCoachAccess(user) ? 'Switch view' : 'Become a coach'}</Text>
               </TouchableOpacity>
             )}
 
