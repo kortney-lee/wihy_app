@@ -246,22 +246,25 @@ class CheckoutService {
    * Validates before sending to backend to avoid 400 errors
    */
   async initiateCheckout(plan: string, email: string, userId: string): Promise<CheckoutResponse> {
+    console.log('[Checkout] === INITIATING CHECKOUT REQUEST ===');
+    console.log('[Checkout] Parameters:', { plan, email, userId });
+    
     // CRITICAL VALIDATION: Email, plan, and userId are required (account-first flow)
     if (!email || typeof email !== 'string') {
       const errorMsg = 'Email is required for checkout';
-      console.error('[Checkout] Validation Error:', errorMsg);
+      console.error('[Checkout] ❌ Validation Error:', errorMsg, { email });
       return { success: false, error: errorMsg };
     }
 
     if (!plan || typeof plan !== 'string') {
       const errorMsg = 'Plan is required for checkout';
-      console.error('[Checkout] Validation Error:', errorMsg);
+      console.error('[Checkout] ❌ Validation Error:', errorMsg, { plan });
       return { success: false, error: errorMsg };
     }
 
     if (!userId || typeof userId !== 'string') {
       const errorMsg = 'User must be authenticated before checkout';
-      console.error('[Checkout] Validation Error:', errorMsg);
+      console.error('[Checkout] ❌ Validation Error:', errorMsg, { userId, userIdType: typeof userId });
       return { success: false, error: errorMsg };
     }
 
@@ -270,7 +273,7 @@ class CheckoutService {
     const trimmedEmail = email.trim();
     if (!emailRegex.test(trimmedEmail)) {
       const errorMsg = 'Please provide a valid email address';
-      console.error('[Checkout] Email Validation Error:', errorMsg);
+      console.error('[Checkout] ❌ Email Validation Error:', errorMsg, { email: trimmedEmail });
       return { success: false, error: errorMsg };
     }
 
@@ -283,7 +286,8 @@ class CheckoutService {
     );
     if (!validPlan) {
       const errorMsg = `Invalid plan: ${plan}`;
-      console.error('[Checkout] Plan Validation Error:', errorMsg);
+      console.error('[Checkout] ❌ Plan Validation Error:', errorMsg);
+      console.error('[Checkout] Available plans:', WIHY_PLANS.map(p => ({ id: p.id, name: p.name, stripePriceId: p.stripePriceId })));
       return { success: false, error: errorMsg };
     }
 
@@ -291,7 +295,7 @@ class CheckoutService {
     const stripePriceId = validPlan.stripePriceId || plan;
     if (!stripePriceId) {
       const errorMsg = `No Stripe price ID for plan: ${plan}`;
-      console.error('[Checkout] Stripe Price ID Error:', errorMsg);
+      console.error('[Checkout] ❌ Stripe Price ID Error:', errorMsg);
       return { success: false, error: errorMsg };
     }
 

@@ -299,13 +299,28 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
     if (Platform.OS === 'web' && typeof sessionStorage !== 'undefined') {
       const pendingPlanStr = sessionStorage.getItem('pendingPlan');
       if (pendingPlanStr) {
-        const { planId, billingCycle: savedCycle } = JSON.parse(pendingPlanStr);
-        setBillingCycle(savedCycle);
-        
-        // Wait for auth context to update, then retry
-        setTimeout(() => {
-          handleSubscribe(planId);
-        }, 500);
+        try {
+          const { planId, billingCycle: savedCycle } = JSON.parse(pendingPlanStr);
+          setBillingCycle(savedCycle);
+          
+          // Wait for auth context to update with new user data (increased timeout for signup flow)
+          // New signup takes longer than login
+          await new Promise(resolve => setTimeout(resolve, 2000));
+          
+          console.log('[Subscribe] Auth context updated, user:', user);
+          if (user?.id && user?.email) {
+            console.log('[Subscribe] Proceeding to checkout with user:', { id: user.id, email: user.email });
+            handleSubscribe(planId);
+          } else {
+            console.error('[Subscribe] Auth context not properly updated after signup:', user);
+            Alert.alert('Error', 'Failed to complete authentication. Please try again.');
+          }
+        } catch (error) {
+          console.error('[Subscribe] Error during auth success:', error);
+          Alert.alert('Error', 'Something went wrong. Please try again.');
+        }
+      } else {
+        console.log('[Subscribe] No pending plan found');
       }
     }
   };
@@ -399,7 +414,16 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
         } else {
           // Fallback to Stripe for Android if product not in Google Play
           console.log('[Subscription] Android Stripe fallback:', planId);
-          const checkoutPlanId = billingCycle === 'yearly' && plan.yearlyPrice ? `${planId}-yearly` : planId;
+          // Map plan IDs to correct yearly versions if applicable
+          let checkoutPlanId = planId;
+          if (billingCycle === 'yearly' && plan.yearlyPrice) {
+            if (planId === 'pro_monthly') {
+              checkoutPlanId = 'pro_yearly';
+            } else if (planId === 'family_pro') {
+              checkoutPlanId = 'family_pro_yearly';
+            }
+            console.log('[Subscription] Mapped yearly plan for Android Stripe:', { original: planId, final: checkoutPlanId });
+          }
           const response = await checkoutService.initiateCheckout(checkoutPlanId, user.email, user.id);
           
           if (response.success && response.checkoutUrl) {
@@ -439,8 +463,20 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
     // User is authenticated - proceed to checkout
     setIsLoading(true);
     try {
-      console.log('[Subscribe] Creating checkout for authenticated user:', user.id);
-      const checkoutPlanId = billingCycle === 'yearly' && plan.yearlyPrice ? `${planId}-yearly` : planId;
+      console.log('[Subscribe] Creating checkout for authenticated user:', { userId: user?.id, email: user?.email });
+      // Map plan IDs to correct yearly versions if applicable
+      let checkoutPlanId = planId;
+      if (billingCycle === 'yearly' && plan.yearlyPrice) {
+        // Handle plan name to ID mapping for yearly plans
+        if (planId === 'pro_monthly') {
+          checkoutPlanId = 'pro_yearly';
+        } else if (planId === 'family_pro') {
+          checkoutPlanId = 'family_pro_yearly';
+        }
+        // Note: family_basic and coach don't have yearly variants
+        console.log('[Subscribe] Mapped yearly plan:', { original: planId, final: checkoutPlanId });
+      }
+      console.log('[Subscribe] Plan ID for checkout:', checkoutPlanId);
       const response = await checkoutService.initiateCheckout(checkoutPlanId, user.email, user.id);
         
       if (response.success && response.checkoutUrl) {
