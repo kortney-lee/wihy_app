@@ -719,64 +719,23 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
             </div>
           </section>
 
-          {/* B2B Enterprise Solutions Section */}
-          <section className="pricing-section">
-            <p className="pricing-section-label">FOR ORGANIZATIONS</p>
-            <h2 className="pricing-section-title">Enterprise Solutions</h2>
-            <p style={{ textAlign: 'center', marginBottom: '48px', fontSize: '16px', color: '#666' }}>
-              Custom wellness programs designed for teams of all sizes. Build healthier, more engaged organizations with WIHY's enterprise platform.
-            </p>
-
-            {/* Enterprise Plan Card */}
-            <div style={{ maxWidth: '500px', margin: '0 auto' }}>
-              {CONSUMER_PLANS.filter(plan => plan.id === 'coach').map((plan) => (
-                <div 
-                  key={plan.id}
-                  className="pricing-card"
-                  style={{ padding: '48px' }}
-                >
-                  <div className="pricing-card-icon">
-                    <WebIcon name={plan.icon} size={32} color={colors.primary} />
-                  </div>
-                  <h3 className="pricing-card-name">{plan.name}</h3>
-                  <p className="pricing-card-tagline">{plan.tagline}</p>
-                  
-                  <div className="pricing-card-price" style={{ marginTop: '24px' }}>
-                    {plan.setupFee ? (
-                      <>
-                        <span className="pricing-amount">${formatPrice(plan.setupFee)}</span>
-                        <span className="pricing-period"> setup + ${formatPrice(plan.monthlyPrice)}/mo</span>
-                      </>
-                    ) : null}
-                  </div>
-                  {plan.note && (
-                    <p className="pricing-note" style={{ fontSize: '12px', fontStyle: 'italic', marginTop: '12px', textAlign: 'center' }}>{plan.note}</p>
-                  )}
-
-                  <ul className="pricing-features" style={{ marginTop: '32px' }}>
-                    {plan.features.map((feature, index) => (
-                      <li key={index} className="pricing-feature">
-                        <WebIcon name="checkmark-circle" size={18} color="#22c55e" />
-                        <span>{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-
-                  <button
-                    onClick={() => handleSubscribe(plan.id)}
-                    className="pricing-btn pricing-btn-primary"
-                    disabled={isLoading}
-                    type="button"
-                    style={{ marginTop: '32px', width: '100%' }}
-                  >
-                    {isLoading ? 'Loading...' : 'Get Started'}
-                  </button>
-
-                  <p style={{ textAlign: 'center', marginTop: '20px', fontSize: '12px', color: '#999' }}>
-                    Contact our team for custom pricing and enterprise features
-                  </p>
-                </div>
-              ))}
+          {/* B2B Enterprise Solutions CTA */}
+          <section className="pricing-section pricing-cta-section">
+            <div className="pricing-cta-box">
+              <WebIcon name="business" size={40} color={colors.primary} />
+              <h3 style={{ fontSize: '28px', marginTop: '16px' }}>Enterprise Solutions</h3>
+              <p style={{ fontSize: '16px', maxWidth: '500px', margin: '0 auto' }}>
+                Looking for workplace wellness programs? Explore our Workplace Core, Workplace Plus, and Enterprise plans designed for teams of all sizes.
+              </p>
+              <button
+                onClick={() => navigation.navigate('Pricing')}
+                className="pricing-btn pricing-btn-primary pricing-btn-lg"
+                type="button"
+                style={{ marginTop: '24px' }}
+              >
+                <WebIcon name="arrow-forward" size={20} color="#fff" />
+                View Enterprise Plans
+              </button>
             </div>
           </section>
 

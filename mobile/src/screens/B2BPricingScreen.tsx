@@ -40,6 +40,7 @@ const WebIcon = ({ name, size = 24, color = '#3b82f6' }: { name: string; size?: 
     'person': 'M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z',
     'people': 'M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z',
     'mail': 'M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z',
+    'fitness': 'M20.57 14.86L22 13.43 20.57 12 17 15.57 8.43 7 12 3.43 10.57 2 9.14 3.43 7.71 2 5.57 4.14 4.14 2.71 2.71 4.14l1.43 1.43L2 7.71l1.43 1.43L2 10.57 3.43 12 7 8.43 15.57 17 12 20.57 13.43 22l1.43-1.43L16.29 22l2.14-2.14 1.43 1.43 1.43-1.43-1.43-1.43L22 16.29z',
   };
   
   const path = icons[name] || icons['business'];
@@ -96,6 +97,21 @@ const B2B_PLANS = [
       'SLA guarantees',
     ],
     icon: 'globe',
+  },
+  {
+    id: 'coach',
+    name: 'Coach',
+    tagline: 'Tools for health & wellness professionals',
+    description: 'Perfect for personal trainers, nutritionists, and wellness coaches managing clients.',
+    features: [
+      'Unlimited client management',
+      'Custom meal & workout plans',
+      'Client progress tracking',
+      'White-label client portal',
+      'Up to 1% affiliate commission',
+      'Priority coach support',
+    ],
+    icon: 'fitness',
   },
 ];
 
@@ -200,9 +216,9 @@ export const B2BPricingScreen: React.FC<Props> = ({ navigation }) => {
           {/* B2B Plans */}
           <section className="pricing-section">
             <p className="pricing-section-label">FOR BUSINESSES</p>
-            <h2 className="pricing-section-title">Workplace Wellness</h2>
+            <h2 className="pricing-section-title">Enterprise</h2>
 
-            <div className={`pricing-grid ${isDesktop ? 'pricing-grid-3' : isTablet ? 'pricing-grid-2' : 'pricing-grid-1'}`}>
+            <div className={`pricing-grid ${isDesktop ? 'pricing-grid-4' : isTablet ? 'pricing-grid-2' : 'pricing-grid-1'}`}>
               {B2B_PLANS.map((plan) => (
                 <div 
                   key={plan.id}
