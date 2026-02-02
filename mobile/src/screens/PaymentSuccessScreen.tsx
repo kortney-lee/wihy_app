@@ -52,7 +52,42 @@ export default function PaymentSuccessScreen() {
         email: checkoutResult.session.email,
         userId: checkoutResult.auth?.userId,
         isNewUser: checkoutResult.auth?.isNewUser,
+        needsSignup: checkoutResult.auth?.needsSignup,
+        userExists: checkoutResult.auth?.userExists,
       });
+
+      // Check if user needs to create an account after payment (Payment-first flow)
+      // This happens when a new user paid without having an existing account
+      if (checkoutResult.auth?.needsSignup === true) {
+        console.log('User needs to create account after payment - redirecting to SignupWithPayment');
+        
+        const planName = checkoutResult.session.planName || checkoutResult.session.plan || 'Premium';
+        setPlanName(planName);
+        setStatus('success');
+        
+        // Navigate to SignupWithPayment screen with Stripe info
+        setTimeout(() => {
+          if (Platform.OS === 'web' && typeof window !== 'undefined') {
+            const params = new URLSearchParams({
+              email: checkoutResult.session?.email || '',
+              name: checkoutResult.session?.name || '',
+              plan: planName,
+              stripeCustomerId: checkoutResult.session?.customerId || '',
+              stripeSubscriptionId: checkoutResult.session?.subscriptionId || '',
+            });
+            window.location.href = `/signup-with-payment?${params.toString()}`;
+          } else {
+            navigation.navigate('SignupWithPayment', {
+              email: checkoutResult.session?.email || '',
+              name: checkoutResult.session?.name || '',
+              plan: planName,
+              stripeCustomerId: checkoutResult.session?.customerId || '',
+              stripeSubscriptionId: checkoutResult.session?.subscriptionId || '',
+            });
+          }
+        }, 1500);
+        return;
+      }
 
       // Get login token and auth info - token is in auth object
       const loginToken = checkoutResult.session.loginToken || checkoutResult.auth?.loginToken;

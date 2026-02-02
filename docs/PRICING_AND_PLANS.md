@@ -371,6 +371,158 @@ CHECK:
 
 ---
 
+## 🆕 Payment → Signup Flow (Proposed Enhancement)
+
+### Current vs Proposed Architecture
+
+The **CURRENT** flow auto-creates accounts during payment. The **PROPOSED** flow separates payment from account creation, allowing users to choose their preferred auth method AFTER paying.
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│              CURRENT FLOW (Auto-Account Creation)                           │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+Pay → Payment Success → loginToken returned → Auto-login → ProfileSetup
+      (account auto-created by payment service)
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│              PROPOSED FLOW (Separate Account Creation)                      │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+Pay → Payment Success → Check userExists
+                        │
+                        ├─ IF userExists: true → Login with token → Dashboard
+                        │
+                        └─ IF needsSignup: true → SignupWithPaymentScreen
+                                                  │
+                                                  ├─ Email/Password
+                                                  ├─ Google OAuth
+                                                  ├─ Apple OAuth
+                                                  ├─ Facebook OAuth
+                                                  └─ Microsoft OAuth
+                                                         │
+                                                         ↓
+                                          POST /register-with-payment
+                                                         │
+                                                         ↓
+                                              Account Created + Linked
+                                                         │
+                                                         ↓
+                                                   ProfileSetup
+
+```
+
+### Implementation Status
+
+| Component | Status | Notes |
+|-----------|--------|-------|
+| `POST /register-with-payment` | ❌ BACKEND NEEDED | New backend endpoint required |
+| `POST /link-payment` | ❌ BACKEND NEEDED | Links OAuth user to Stripe payment |
+| `GET /check-email` | ❌ BACKEND NEEDED | Optional fallback endpoint |
+| `SignupWithPaymentScreen.tsx` | ✅ IMPLEMENTED | New screen with OAuth + email/password |
+| `PaymentSuccessScreen.tsx` | ✅ UPDATED | Handles `needsSignup` response |
+| `checkoutService.ts` | ✅ UPDATED | Parses `needsSignup`, `userExists` |
+| `AuthCallbackScreen.tsx` | ✅ UPDATED | Handles OAuth → payment linking |
+| `AppNavigator.tsx` | ✅ UPDATED | Added SignupWithPayment route |
+| `navigation.ts` | ✅ UPDATED | Added SignupWithPayment types |
+
+### API Changes Required
+
+**Modified: GET `/checkout-session/:sessionId`**
+
+Current response:
+```json
+{
+  "auth": {
+    "userId": "uuid",
+    "isNewUser": true,
+    "loginToken": "xxx"
+  }
+}
+```
+
+Proposed response (when user doesn't exist):
+```json
+{
+  "auth": {
+    "userExists": false,
+    "needsSignup": true,
+    "email": "newuser@example.com",
+    "name": "New User",
+    "plan": "pro_monthly",
+    "stripeCustomerId": "cus_xxx",
+    "stripeSubscriptionId": "sub_xxx"
+  }
+}
+```
+
+**New: POST `/api/auth/register-with-payment`**
+
+Request:
+```json
+{
+  "email": "user@example.com",
+  "password": "xxx",           // Only for email/password
+  "name": "John Doe",
+  "provider": "local|google|apple|facebook|microsoft",
+  "providerId": "oauth-id",    // Only for OAuth
+  "stripeCustomerId": "cus_xxx",
+  "stripeSubscriptionId": "sub_xxx",
+  "plan": "pro_monthly"
+}
+```
+
+Response:
+```json
+{
+  "success": true,
+  "data": {
+    "user": { "id": "uuid", "email": "...", "plan": "pro_monthly" },
+    "sessionToken": "xxx",
+    "refreshToken": "xxx"
+  }
+}
+```
+
+### Benefits of Proposed Flow
+
+1. **Auth Flexibility**: Users choose how to authenticate (email/OAuth)
+2. **Better UX**: Payment with any email, then choose login method
+3. **OAuth Support**: Full support for Google, Apple, Facebook, Microsoft
+4. **Account Linking**: Clean linking of Stripe payment to new account
+
+### Migration Path
+
+1. ✅ Frontend: Created `SignupWithPaymentScreen.tsx` with OAuth + email/password
+2. ✅ Frontend: Updated `PaymentSuccessScreen.tsx` to handle `needsSignup`
+3. ✅ Frontend: Updated `AuthCallbackScreen.tsx` for OAuth → payment flow
+4. ✅ Frontend: Updated navigation types and routes
+5. ❌ Backend: Add `/register-with-payment` endpoint
+6. ❌ Backend: Add `/link-payment` endpoint (for OAuth users)
+7. ❌ Backend: Modify `/checkout-session` to return `needsSignup` for unknown emails
+8. ⏳ Test: All OAuth providers + email/password signup after payment
+
+### File Locations
+
+```
+Frontend (implemented):
+├── src/screens/SignupWithPaymentScreen.tsx  ← NEW: Account creation after payment
+├── src/screens/PaymentSuccessScreen.tsx     ← UPDATED: Handles needsSignup redirect
+├── src/screens/AuthCallbackScreen.tsx       ← UPDATED: OAuth → payment linking
+├── src/services/checkoutService.ts          ← UPDATED: Parses new response
+├── src/navigation/AppNavigator.tsx          ← UPDATED: Added route
+└── src/types/navigation.ts                  ← UPDATED: Added types
+
+Backend (needed):
+├── POST /api/auth/register-with-payment     ← Creates account + links Stripe
+├── POST /api/auth/link-payment              ← Links existing OAuth user to Stripe
+└── GET /api/stripe/checkout-session/:id     ← Return needsSignup for new users
+```
+
+```
+
+---
+
 ## Pricing Approach: Client + Feature Based
 
 WIHY uses a **client and feature-based pricing model** where users pay based on:

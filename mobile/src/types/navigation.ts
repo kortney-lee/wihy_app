@@ -88,6 +88,15 @@ export type RootStackParamList = {
     session_id?: string;
   } | undefined;
   
+  // Signup with payment (Payment-first flow - account creation after payment)
+  SignupWithPayment: {
+    email: string;
+    name?: string;
+    plan: string;
+    stripeCustomerId: string;
+    stripeSubscriptionId: string;
+  };
+  
   // Legal and info pages
   About: undefined;
   Terms: undefined;

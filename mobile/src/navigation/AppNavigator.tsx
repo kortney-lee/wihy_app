@@ -75,6 +75,7 @@ import HealthDataScreen from '../screens/HealthDataScreen';
 import AuthCallbackScreen from '../screens/AuthCallbackScreen';
 import SubscribeCompleteScreen from '../screens/SubscribeCompleteScreen';
 import PaymentSuccessScreen from '../screens/PaymentSuccessScreen';
+import SignupWithPaymentScreen from '../screens/SignupWithPaymentScreen';
 import ChatHistoryScreen from '../screens/ChatHistoryScreen';
 
 const Tab = createBottomTabNavigator<TabParamList>();
@@ -150,6 +151,8 @@ const linking: LinkingOptions<RootStackParamList> = {
       SubscribeComplete: 'subscribe/complete',
       // Payment success route for Stripe redirect
       PaymentSuccess: 'payment/success',
+      // Signup with payment (Payment-first flow - account creation after payment)
+      SignupWithPayment: 'signup-with-payment',
     },
   },
 };
@@ -775,6 +778,14 @@ export default function AppNavigator() {
         <Stack.Screen
           name="PaymentSuccess"
           component={PaymentSuccessScreen}
+          options={{
+            headerShown: false,
+            gestureEnabled: false,
+          }}
+        />
+        <Stack.Screen
+          name="SignupWithPayment"
+          component={SignupWithPaymentScreen}
           options={{
             headerShown: false,
             gestureEnabled: false,

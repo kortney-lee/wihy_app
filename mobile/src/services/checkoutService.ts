@@ -841,13 +841,17 @@ class CheckoutService {
    * {
    *   success: true,
    *   session: { id, status, paymentStatus, email, plan, customerId, subscriptionId },
-   *   auth: { userId, isNewUser, loginToken }  // <- login token is HERE, not in session
+   *   auth: { userId, isNewUser, loginToken, needsSignup, userExists }
    * }
+   * 
+   * When needsSignup is true, the user needs to create an account after payment.
+   * When userExists is true, the user already has an account and can be auto-logged in.
    */
   async getCheckoutSession(sessionId: string): Promise<{
     success: boolean;
     session?: {
       email?: string;
+      name?: string;
       planName?: string;
       plan?: string;
       loginToken?: string;  // Mapped from auth.loginToken for backwards compatibility
@@ -860,6 +864,8 @@ class CheckoutService {
       userId?: string;
       isNewUser?: boolean;
       loginToken?: string;
+      needsSignup?: boolean;   // True when user needs to create account after payment
+      userExists?: boolean;    // True when user already has an account
     };
     error?: string;
   }> {

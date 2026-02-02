@@ -144,6 +144,48 @@ export default function AuthCallbackScreen() {
 
           // Check for pending subscription or plan (OAuth-first, then pay flow)
           if (Platform.OS === 'web' && typeof window !== 'undefined') {
+            // First check for payment-first flow (user paid, then did OAuth)
+            const paymentInfoStr = sessionStorage.getItem('wihy_oauth_payment_info');
+            if (paymentInfoStr) {
+              try {
+                const paymentInfo = JSON.parse(paymentInfoStr);
+                console.log('Found payment info from payment-first flow, completing registration');
+                sessionStorage.removeItem('wihy_oauth_payment_info');
+                
+                // Complete registration with payment info
+                // The OAuth flow already authenticated the user, now we need to link to Stripe
+                const registerResponse = await fetch(
+                  `https://auth.wihy.ai/api/auth/link-payment`,
+                  {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                      'Authorization': `Bearer ${params.session_token}`,
+                    },
+                    body: JSON.stringify({
+                      stripeCustomerId: paymentInfo.stripeCustomerId,
+                      stripeSubscriptionId: paymentInfo.stripeSubscriptionId,
+                      plan: paymentInfo.plan,
+                    }),
+                  }
+                );
+                
+                if (!registerResponse.ok) {
+                  console.error('Failed to link payment to account');
+                  // Continue anyway - support can fix this
+                }
+                
+                // Redirect to ProfileSetup for new user
+                setTimeout(() => {
+                  window.location.href = '/ProfileSetup?isOnboarding=true&plan=' + encodeURIComponent(paymentInfo.plan);
+                }, 1500);
+                return;
+              } catch (e) {
+                console.error('Error processing payment-first flow:', e);
+                // Continue to normal flow
+              }
+            }
+            
             const pendingPlan = sessionStorage.getItem('pendingPlan');
             const pendingSubscription = sessionStorage.getItem('pendingSubscription');
             
