@@ -1,5 +1,376 @@
 # WIHY Pricing & Plans Reference
 
+## 🚨 Subscription to Profile Workflow
+
+### Complete Authentication Flow (Subscription → Profile Setup)
+
+This section documents the end-to-end flow from subscription selection through profile completion.
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                         SUBSCRIPTION → AUTH WORKFLOW                        │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+Step 1: SELECT PLAN
+─────────────────────
+• Web: /subscription (WebSubscriptionScreen.tsx)
+• Mobile: SubscriptionScreen.tsx
+
+User selects a plan (Free, Premium, Family, Coach)
+↓
+
+Step 2: CREATE CHECKOUT SESSION
+─────────────────────────────────
+• POST https://payment.wihy.ai/api/stripe/create-checkout-session
+• Request: { email, plan, source: 'web'|'ios'|'android' }
+• Response: { checkoutUrl, sessionId }
+↓
+
+Step 3: STRIPE CHECKOUT
+─────────────────────────
+• Redirect to checkoutUrl (Stripe hosted page)
+• User enters payment details
+• Payment processed
+↓
+
+Step 4: PAYMENT SUCCESS REDIRECT
+────────────────────────────────
+• Stripe redirects to: /payment/success?session_id=cs_xxx
+• PaymentSuccessScreen.tsx handles this route
+↓
+
+Step 5: RETRIEVE AUTH TOKEN
+───────────────────────────
+• GET https://payment.wihy.ai/api/stripe/checkout-session/{sessionId}
+• Response includes:
+  {
+    session: { id, status, email, plan },
+    auth: {
+      userId: "uuid",
+      isNewUser: true|false,
+      loginToken: "xxx"  ← THIS IS THE AUTH TOKEN
+    }
+  }
+↓
+
+Step 6: STORE AUTH & REDIRECT
+─────────────────────────────
+• Store loginToken as authToken in localStorage/AsyncStorage
+• Store userId
+• Refresh AuthContext
+
+• IF isNewUser === true:
+  └→ Redirect to /onboarding (OnboardingFlow)
+     └→ Step 1: ProfileSetup
+     └→ Step 2: First Scan
+     └→ Step 3: Log Meal
+     └→ Step 4: Set Goals
+     └→ Step 5: Find Coach
+
+• IF isNewUser === false (returning subscriber):
+  └→ Redirect to /dashboard (Main app)
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                         PLATFORM-SPECIFIC BEHAVIOR                          │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+WEB PLATFORM:
+─────────────
+1. /payment/success?session_id=xxx
+2. PaymentSuccessScreen retrieves session
+3. Stores auth token in localStorage:
+   - localStorage.setItem('accessToken', loginToken)
+   - localStorage.setItem('authToken', loginToken)
+   - localStorage.setItem('userId', userId)
+4. Refreshes user context
+5. Redirects:
+   - New users: window.location.href = '/onboarding?plan=xxx'
+   - Existing: window.location.href = '/dashboard'
+
+⚠️ KNOWN ISSUE: On web, OnboardingFlow is NOT shown (native only).
+   New web users go directly to the main app.
+   TODO: Either show OnboardingFlow on web OR redirect to /ProfileSetup
+
+NATIVE (iOS/Android):
+────────────────────
+1. Deep link: wihy://payment/success?session_id=xxx
+2. PaymentSuccessScreen or checkoutService handles callback
+3. Stores auth token via authService.storeSessionToken()
+4. For new users (isFirstTimeUser && !onboardingCompleted):
+   - AppNavigator shows OnboardingFlow stack
+   - OnboardingFlow Step 1 → ProfileSetup screen
+   - User completes profile before seeing main app
+5. For existing users:
+   - Navigation resets to Main tab navigator
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                         KEY CODE LOCATIONS                                  │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+FILE                                    PURPOSE
+────────────────────────────────────── ────────────────────────────────────────
+screens/WebSubscriptionScreen.tsx       Plan selection UI (web)
+screens/SubscriptionScreen.tsx          Plan selection UI (mobile)
+services/checkoutService.ts             Create checkout session, get session
+screens/PaymentSuccessScreen.tsx        Handle Stripe redirect, auto-login
+screens/PostPaymentRegistrationScreen   Alternative: password creation flow
+screens/OnboardingFlow.tsx              Native onboarding wizard (5 steps)
+screens/ProfileSetupScreen.tsx          Profile/health preferences form
+navigation/AppNavigator.tsx             Route definitions, platform logic
+context/AuthContext.tsx                 Auth state, refreshUserContext()
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                         API RESPONSE EXAMPLE                                │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+GET /checkout-session/cs_test_xxx
+
+{
+  "success": true,
+  "session": {
+    "id": "cs_test_xxx",
+    "status": "complete",
+    "paymentStatus": "paid",
+    "email": "user@example.com",
+    "plan": "pro_monthly"
+  },
+  "auth": {
+    "userId": "312d15b6-3147-4a24-b2f6-d1c812ab0ea6",
+    "isNewUser": true,
+    "loginToken": "2a61bf3f7e920cdcd7132bfcf296147065b49c973fee7ca4200897807044a96d"
+  }
+}
+
+⚠️ CRITICAL: loginToken is in auth object, NOT session object!
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                         TROUBLESHOOTING                                     │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+PROBLEM: User lands on /ProfileSetup but can't proceed
+─────────────────────────────────────────────────────────
+✅ FIXED: ProfileSetup now has fixed footer with Get Started/Continue buttons
+   and progress bar always visible at bottom of screen.
+
+PROBLEM: "Failed to authenticate with payment token"
+─────────────────────────────────────────────────────
+✅ FIXED: Use loginToken directly from auth object as authToken.
+   No verifyPaymentToken() call needed - loginToken IS the auth token.
+
+PROBLEM: User not logged in after payment
+─────────────────────────────────────────
+CHECK:
+1. session_id present in URL query params?
+2. getCheckoutSession() returns auth.loginToken?
+3. Token stored in localStorage/AsyncStorage?
+4. refreshUserContext() called after storing token?
+
+PROBLEM: New users skip profile setup on web
+────────────────────────────────────────────
+CURRENT BEHAVIOR: Web redirects to /onboarding but OnboardingFlow
+is mobile-only. Web users see main app directly.
+
+POTENTIAL FIXES:
+1. Enable OnboardingFlow for web (remove Platform.OS !== 'web' check)
+2. Redirect web users to /ProfileSetup instead of /onboarding
+3. Check !profileSetupCompleted in AppNavigator to force ProfileSetup
+
+```
+
+---
+
+## 🔄 Upgrade Flow (Free → Paid)
+
+When an existing FREE user upgrades to a paid plan, the flow is slightly different from new signups.
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                         FREE → PAID UPGRADE WORKFLOW                        │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+TRIGGER POINTS (Where users can upgrade):
+─────────────────────────────────────────
+1. "Upgrade" tile on Dashboard (DashboardPage.tsx)
+   - Only shown to free users
+   - Navigates to Subscription screen
+
+2. Lock badge on premium features
+   - Locked tiles show 🔒 icon
+   - Clicking redirects to Subscription
+
+3. UpgradePrompt modal (UpgradePrompt component)
+   - Shown when free user tries to access premium feature
+   - Example: FitnessDashboard, CreateMeals, TrainingDashboard
+
+4. Profile screen subscription section
+   - Shows current plan status
+   - "Upgrade" button for free users
+
+UPGRADE FLOW STEPS:
+─────────────────────
+
+Step 1: USER TRIGGERS UPGRADE
+────────────────────────────
+• User is already authenticated (has valid session token)
+• User clicks "Upgrade" or tries to access locked feature
+• Redirect to /subscription or show UpgradePrompt modal
+↓
+
+Step 2: SELECT PAID PLAN
+─────────────────────────
+• Subscription screen shows available plans
+• User selects Premium, Family, or Coach plan
+↓
+
+Step 3: CREATE CHECKOUT (AUTHENTICATED)
+────────────────────────────────────────
+• POST /create-checkout-session
+• Request includes Authorization header with existing token
+• Request body: { email: user.email, plan, source }
+• Backend associates checkout with existing userId
+↓
+
+Step 4: STRIPE CHECKOUT
+────────────────────────
+• Redirect to Stripe checkout URL
+• User enters/confirms payment details
+• Payment processed
+↓
+
+Step 5: PAYMENT SUCCESS REDIRECT
+─────────────────────────────────
+• Stripe redirects to /payment/success?session_id=xxx
+• PaymentSuccessScreen handles callback
+↓
+
+Step 6: RETRIEVE SESSION (EXISTING USER)
+─────────────────────────────────────────
+• GET /checkout-session/{sessionId}
+• Response has isNewUser: FALSE for upgrades
+• loginToken may be same token or refreshed
+
+{
+  "auth": {
+    "userId": "existing-user-uuid",
+    "isNewUser": false,  ← KEY DIFFERENCE
+    "loginToken": "xxx"
+  }
+}
+↓
+
+Step 7: UPDATE AUTH & REDIRECT TO DASHBOARD
+────────────────────────────────────────────
+• Store new/refreshed token
+• Call refreshUserContext() to reload user data
+  - This fetches updated subscription status
+  - Updates user.plan, user.features in context
+• Redirect to /dashboard (NOT ProfileSetup)
+• User sees unlocked premium features immediately
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                         KEY DIFFERENCES: NEW vs UPGRADE                     │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+                          NEW USER SIGNUP     FREE → PAID UPGRADE
+─────────────────────────────────────────────────────────────────────────────
+isNewUser                 true                false
+Has existing token        No                  Yes (Authorization header)
+Profile exists            No                  Yes (may need updates)
+After payment redirect    /ProfileSetup       /dashboard
+Needs onboarding          Yes (5 steps)       No
+refreshUserContext        Creates new user    Updates subscription
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                         UPGRADE IMPLEMENTATION DETAILS                      │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+FILE                                    PURPOSE
+────────────────────────────────────── ────────────────────────────────────────
+screens/DashboardPage.tsx               "Upgrade" tile (lines 535-548)
+components/UpgradePrompt.tsx            Modal for locked features
+screens/NativeSubscriptionScreen.tsx    Plan selection (shows current plan)
+services/checkoutService.ts             Sends auth header if logged in
+context/AuthContext.tsx                 refreshUserContext() updates plan
+
+UPGRADE PROMPT COMPONENT:
+─────────────────────────
+```tsx
+import { UpgradePrompt } from '../components/UpgradePrompt';
+
+// In your component:
+const [showUpgrade, setShowUpgrade] = useState(false);
+
+// Check access before allowing feature
+const handleFeatureClick = () => {
+  if (!isPremium) {
+    setShowUpgrade(true);
+    return;
+  }
+  // ... proceed with feature
+};
+
+// Render modal
+<UpgradePrompt
+  visible={showUpgrade}
+  onClose={() => setShowUpgrade(false)}
+  onUpgrade={() => navigation.navigate('Subscription')}
+/>
+```
+
+CHECKOUT WITH AUTH TOKEN:
+─────────────────────────
+```typescript
+// checkoutService.ts sends auth header for logged-in users
+const sessionToken = await authService.getSessionToken();
+const headers: Record<string, string> = {
+  'Content-Type': 'application/json',
+};
+if (sessionToken) {
+  headers['Authorization'] = `Bearer ${sessionToken}`;
+}
+```
+
+REFRESH USER AFTER UPGRADE:
+────────────────────────────
+```typescript
+// PaymentSuccessScreen.tsx
+await refreshUserContext(); // Reloads user with updated plan
+
+// User context now has:
+// user.plan = 'pro_monthly' (was 'free')
+// user.features = ['meals', 'fitness', 'coaching', ...]
+```
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                         UPGRADE TROUBLESHOOTING                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+PROBLEM: Features still locked after upgrade
+────────────────────────────────────────────
+CHECK:
+1. refreshUserContext() was called after payment success?
+2. Backend updated subscription status?
+3. User context reflects new plan? (check user.plan)
+4. Feature access checks use current user.plan?
+
+PROBLEM: User redirected to ProfileSetup after upgrade
+───────────────────────────────────────────────────────
+CHECK:
+1. isNewUser should be FALSE for existing users
+2. Backend correctly identifies existing user by email
+3. PaymentSuccessScreen checks isNewUser before redirecting
+
+PROBLEM: Upgrade tile still shows after upgrading
+─────────────────────────────────────────────────
+CHECK:
+1. DashboardPage checks isPremiumUser correctly
+2. refreshUserContext() updated user state
+3. isPremiumUser includes all paid plans (not just 'premium')
+
+```
+
+---
+
 ## Pricing Approach: Client + Feature Based
 
 WIHY uses a **client and feature-based pricing model** where users pay based on:

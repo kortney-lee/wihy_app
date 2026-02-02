@@ -156,7 +156,20 @@ export default function ProfileSetupScreen({ isDashboardMode = false, onBack }: 
   const route = useRoute<any>();
   const { user, updateUser } = useContext(AuthContext);
   const { theme: themeContext } = useTheme();
-  const isOnboarding = isDashboardMode ? false : (route.params?.isOnboarding ?? false);
+  
+  // Determine if this is an onboarding flow
+  // Check route params first, then URL query params on web
+  const getIsOnboarding = (): boolean => {
+    if (isDashboardMode) return false;
+    if (route.params?.isOnboarding) return true;
+    // On web, check URL query params
+    if (Platform.OS === 'web' && typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get('isOnboarding') === 'true';
+    }
+    return false;
+  };
+  const isOnboarding = getIsOnboarding();
   
   const [currentStep, setCurrentStep] = useState<SetupStep>('basics');
   const [saving, setSaving] = useState(false);
@@ -369,10 +382,15 @@ export default function ProfileSetupScreen({ isDashboardMode = false, onBack }: 
 
       // Navigate appropriately
       if (isOnboarding) {
-        navigation.reset({
-          index: 0,
-          routes: [{ name: 'Main' }],
-        });
+        // On web, redirect to dashboard URL for clean navigation
+        if (Platform.OS === 'web' && typeof window !== 'undefined') {
+          window.location.href = '/dashboard';
+        } else {
+          navigation.reset({
+            index: 0,
+            routes: [{ name: 'Main' }],
+          });
+        }
       } else if (isDashboardMode && onBack) {
         onBack();
       } else {

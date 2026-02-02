@@ -100,9 +100,12 @@ export default function PaymentSuccessScreen() {
       // Redirect based on user status
       setTimeout(() => {
         if (Platform.OS === 'web' && typeof window !== 'undefined') {
-          // New users go to onboarding, existing users go to dashboard
+          // New users go to ProfileSetup for initial profile configuration
+          // Existing users go to dashboard
           if (isNewUser) {
-            window.location.href = '/onboarding?plan=' + encodeURIComponent(planName);
+            // Direct to ProfileSetup with onboarding flag
+            // This ensures new users complete their health profile before using the app
+            window.location.href = '/ProfileSetup?isOnboarding=true&plan=' + encodeURIComponent(planName);
           } else {
             window.location.href = '/dashboard';
           }
