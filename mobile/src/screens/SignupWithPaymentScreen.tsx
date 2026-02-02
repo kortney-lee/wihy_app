@@ -11,9 +11,16 @@
  * 
  * The Stripe payment info (customerId, subscriptionId) is passed via route params
  * and linked to the new account during registration.
+ * 
+ * Flow:
+ * 1. User pays via Stripe → PaymentSuccessScreen detects needsSignup=true
+ * 2. Redirected here with Stripe customer/subscription IDs
+ * 3. User chooses auth method (email/password or OAuth)
+ * 4. POST /api/auth/register-with-payment creates account + links Stripe
+ * 5. Redirected to ProfileSetup as new user
  */
 
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import {
   View,
   Text,
@@ -28,12 +35,19 @@ import {
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation, useRoute, CommonActions } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as WebBrowser from 'expo-web-browser';
 import { AuthContext } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { authService } from '../services/authService';
+import { enhancedAuthService } from '../services/enhancedAuthService';
+import { appleAuthService } from '../services/appleAuthService';
 import { API_CONFIG } from '../services/config';
 import { fetchWithLogging } from '../utils/apiLogger';
 import SvgIcon from '../components/shared/SvgIcon';
+
+// Key for storing payment info during OAuth flow
+const PAYMENT_INFO_KEY = '@wihy_pending_payment_info';
 
 // Theme colors
 const theme = {
@@ -85,6 +99,26 @@ export default function SignupWithPaymentScreen() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  // Check for pending payment info from interrupted OAuth flow
+  useEffect(() => {
+    const checkPendingPayment = async () => {
+      if (Platform.OS !== 'web') {
+        try {
+          const pendingInfo = await AsyncStorage.getItem(PAYMENT_INFO_KEY);
+          if (pendingInfo) {
+            console.log('Found pending payment info from previous OAuth attempt');
+            // If we have route params, prefer those (they're more recent)
+            // Otherwise, we could restore from pending info if needed
+            // For now, just log it - the OAuth flow will clean it up when complete
+          }
+        } catch (err) {
+          console.warn('Error checking pending payment info:', err);
+        }
+      }
+    };
+    checkPendingPayment();
+  }, []);
 
   // Validate password
   const validatePassword = (): boolean => {
@@ -154,45 +188,133 @@ export default function SignupWithPaymentScreen() {
     }
   };
 
-  // Handle OAuth signup (Google, Apple, Facebook, Microsoft)
-  // On web: redirects to OAuth provider, returns via /auth/callback with state that includes Stripe info
-  // On mobile: uses native OAuth flow
+  /**
+   * Handle OAuth signup (Google, Apple, Facebook, Microsoft)
+   * 
+   * Flow:
+   * 1. Store payment info in AsyncStorage (survives app restart)
+   * 2. Start OAuth flow (WebBrowser for Google/FB/MS, native for Apple)
+   * 3. On OAuth success, get session token
+   * 4. Call /register-with-payment to link Stripe payment to new account
+   * 5. Store tokens and redirect to ProfileSetup
+   */
   const handleOAuthSignup = async (provider: 'google' | 'apple' | 'facebook' | 'microsoft') => {
     setError('');
     setLoading(true);
 
     try {
+      // Store payment info before OAuth redirect (in case app is restarted)
+      const paymentInfo = {
+        stripeCustomerId,
+        stripeSubscriptionId,
+        plan,
+        email: prefilledEmail,
+        name: prefilledName,
+      };
+      
       if (Platform.OS === 'web' && typeof window !== 'undefined') {
-        // Web: Redirect to OAuth provider with payment state encoded
-        // Store payment info in session storage so we can use it after OAuth callback
-        sessionStorage.setItem('wihy_oauth_payment_info', JSON.stringify({
-          stripeCustomerId,
-          stripeSubscriptionId,
-          plan,
-          email,
-          name,
-        }));
+        // Web: Use sessionStorage and redirect
+        sessionStorage.setItem('wihy_oauth_payment_info', JSON.stringify(paymentInfo));
         
-        // Get OAuth URL from authService
         const { url, state } = await authService.getWebOAuthUrl(provider);
-        
-        // Redirect to OAuth provider
         window.location.href = url;
         return;
+      }
+      
+      // Native: Store in AsyncStorage before OAuth
+      await AsyncStorage.setItem(PAYMENT_INFO_KEY, JSON.stringify(paymentInfo));
+      console.log('=== SIGNUP WITH PAYMENT: STARTING NATIVE OAUTH ===');
+      console.log('Provider:', provider);
+      console.log('Payment info stored for post-OAuth linking');
+      
+      let oauthResult: { success: boolean; user?: any; sessionToken?: string; error?: string };
+      
+      if (provider === 'apple') {
+        // Use Apple-specific auth service
+        oauthResult = await appleAuthService.signInWithApple();
       } else {
-        // Native: OAuth flow not yet implemented for SignupWithPayment
-        // For now, show message to use email/password
-        Alert.alert(
-          'Use Email/Password',
-          'OAuth signup is available on web. Please use email and password to create your account.',
-          [{ text: 'OK' }]
+        // Use enhanced auth service for Google/Facebook/Microsoft
+        oauthResult = await enhancedAuthService.authenticateWithOAuth(provider);
+      }
+      
+      console.log('OAuth result:', {
+        success: oauthResult.success,
+        hasUser: !!oauthResult.user,
+        hasToken: !!oauthResult.sessionToken,
+      });
+      
+      if (!oauthResult.success || !oauthResult.user) {
+        throw new Error(oauthResult.error || 'OAuth authentication failed');
+      }
+      
+      // OAuth succeeded - now link Stripe payment to account
+      console.log('OAuth successful, linking Stripe payment to account...');
+      
+      const registerResponse = await fetchWithLogging(
+        `${API_CONFIG.authUrl}/api/auth/register-with-payment`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({
+            email: oauthResult.user.email,
+            name: oauthResult.user.name || `${firstName} ${lastName}`.trim(),
+            firstName: oauthResult.user.name?.split(' ')[0] || firstName,
+            lastName: oauthResult.user.name?.split(' ').slice(1).join(' ') || lastName,
+            provider,
+            providerId: oauthResult.user.id,
+            stripeCustomerId,
+            stripeSubscriptionId,
+            plan,
+          }),
+        }
+      );
+
+      const registerData = await registerResponse.json();
+      console.log('Register-with-payment response:', {
+        success: registerData.success,
+        hasToken: !!registerData.data?.sessionToken,
+        error: registerData.error,
+        code: registerData.code,
+      });
+
+      // Clear stored payment info
+      await AsyncStorage.removeItem(PAYMENT_INFO_KEY);
+
+      if (registerData.success && registerData.data?.sessionToken) {
+        // Registration successful - store tokens and redirect
+        await storeTokensAndRedirect(
+          registerData.data.sessionToken,
+          registerData.data.refreshToken || ''
         );
-        setLoading(false);
-        return;
+      } else if (registerData.code === 'USER_EXISTS') {
+        // User already exists (e.g., they paid but OAuth account already exists)
+        // This is OK - the OAuth session is already valid
+        console.log('User already exists, using OAuth session');
+        
+        // Get session token from OAuth result or storage
+        const sessionToken = oauthResult.sessionToken || await authService.getSessionToken();
+        if (sessionToken) {
+          await storeTokensAndRedirect(sessionToken, '');
+        } else {
+          // Fallback: refresh user context with existing session
+          await refreshUserContext();
+          navigation.dispatch(
+            CommonActions.reset({
+              index: 0,
+              routes: [{ name: 'ProfileSetup', params: { isOnboarding: true } }],
+            })
+          );
+        }
+      } else {
+        throw new Error(registerData.error || 'Failed to link payment to account');
       }
     } catch (err: any) {
       console.error('OAuth signup error:', err);
       setError(err.message || 'OAuth authentication failed');
+      // Clean up payment info on error
+      await AsyncStorage.removeItem(PAYMENT_INFO_KEY).catch(() => {});
+    } finally {
       setLoading(false);
     }
   };
