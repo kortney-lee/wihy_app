@@ -707,7 +707,8 @@ export default function ShoppingListScreen({ route, navigation, isDashboardMode 
                   <Ionicons name="open-outline" size={20} color="#fff" />
                 </View>
               </TouchableOpacity>
-            )}n          </View>
+            )}
+          </View>
 
           <View style={styles.bottomPadding} />
           </Animated.ScrollView>
