@@ -21,6 +21,7 @@ import SvgIcon from './shared/SvgIcon';
 import { SweepBorder } from './SweepBorder';
 import { colors } from '../theme/design-tokens';
 import { useTheme } from '../context/ThemeContext';
+import Ionicons from '@expo/vector-icons/Ionicons';
 
 const isWeb = Platform.OS === 'web';
 
@@ -29,7 +30,7 @@ if (isWeb) {
   require('../styles/web-landing.css');
 }
 import { useCreateMealWithShopping } from '../hooks/useCreateMealWithShopping';
-import { FoodProduct, productSearchService } from '../services/productSearchService';
+import { FoodProduct, productSearchService, SuggestResponse } from '../services/productSearchService';
 
 interface Ingredient {
   id: string;
@@ -134,11 +135,20 @@ export const ManualMealForm: React.FC<ManualMealFormProps> = ({
   const [ingredients, setIngredients] = useState<Ingredient[]>([]);
   const [saving, setSaving] = useState(false);
   
-  // Inline search state
+  // Inline search state - Google-like autocomplete
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<FoodProduct[]>([]);
   const [searchLoading, setSearchLoading] = useState(false);
   const [showSearch, setShowSearch] = useState(true); // Always show search by default
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
+  
+  // Autocomplete state (like Google search)
+  const [trendingSearches, setTrendingSearches] = useState<string[]>([]);
+  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [suggestedProducts, setSuggestedProducts] = useState<FoodProduct[]>([]);
+  const [suggestedBrands, setSuggestedBrands] = useState<string[]>([]);
+  const debounceTimer = useRef<NodeJS.Timeout | null>(null);
 
   // Shopping hook
   const mealShoppingHook = useCreateMealWithShopping(userId);
@@ -180,6 +190,56 @@ export const ManualMealForm: React.FC<ManualMealFormProps> = ({
     }
   }, [mealToEdit]);
 
+  // Load trending searches on mount (like Google showing popular searches)
+  useEffect(() => {
+    const loadTrending = async () => {
+      try {
+        const data = await productSearchService.trending('food', 8);
+        setTrendingSearches(data.trending || []);
+      } catch (error) {
+        console.warn('Failed to load trending searches:', error);
+        // Fallback to static trending
+        setTrendingSearches(['chicken breast', 'rice', 'salmon', 'broccoli', 'eggs', 'avocado']);
+      }
+    };
+    loadTrending();
+  }, []);
+
+  // Debounced autocomplete as user types (like Google search)
+  useEffect(() => {
+    // Clear previous timer
+    if (debounceTimer.current) {
+      clearTimeout(debounceTimer.current);
+    }
+
+    // Need at least 2 characters for autocomplete
+    if (searchQuery.length < 2) {
+      setSuggestions([]);
+      setSuggestedProducts([]);
+      setSuggestedBrands([]);
+      return;
+    }
+
+    // Debounce 150ms (fast like Google)
+    debounceTimer.current = setTimeout(async () => {
+      try {
+        const data = await productSearchService.suggest(searchQuery, 'food', 8);
+        setSuggestions(data.suggestions || []);
+        setSuggestedProducts(data.products || []);
+        setSuggestedBrands(data.brands || []);
+        setShowDropdown(true);
+      } catch (error) {
+        console.warn('Autocomplete error:', error);
+      }
+    }, 150);
+
+    return () => {
+      if (debounceTimer.current) {
+        clearTimeout(debounceTimer.current);
+      }
+    };
+  }, [searchQuery]);
+
   // Quick search categories
   const quickCategories = [
     { name: 'Chicken', icon: 'restaurant' },
@@ -190,11 +250,47 @@ export const ManualMealForm: React.FC<ManualMealFormProps> = ({
     { name: 'Vegetables', icon: 'leaf' },
   ];
 
-  // Inline product search
+  // Handle selecting a suggestion (autocomplete)
+  const handleSelectSuggestion = useCallback(async (suggestion: string) => {
+    setSearchQuery(suggestion);
+    setShowDropdown(false);
+    setSuggestions([]);
+    setSuggestedProducts([]);
+    setSuggestedBrands([]);
+    
+    // Perform full search with the suggestion
+    setSearchLoading(true);
+    Keyboard.dismiss();
+    try {
+      const data = await productSearchService.search(suggestion, {
+        type: 'food',
+        limit: 20,
+      });
+      setSearchResults(data.food || []);
+    } catch (error) {
+      console.error('Product search error:', error);
+      setSearchResults([]);
+    } finally {
+      setSearchLoading(false);
+    }
+  }, []);
+
+  // Handle selecting a product directly from suggestions
+  const handleSelectSuggestedProduct = useCallback((product: FoodProduct) => {
+    setShowDropdown(false);
+    setSuggestions([]);
+    setSuggestedProducts([]);
+    setSuggestedBrands([]);
+    setSearchQuery('');
+    handleAddProduct(product);
+  }, []);
+
+  // Inline product search (full search on submit)
   const handleSearch = useCallback(async (query?: string) => {
     const searchTerm = query || searchQuery;
     if (!searchTerm.trim()) return;
 
+    setShowDropdown(false);
     setSearchLoading(true);
     Keyboard.dismiss();
     try {
@@ -389,13 +485,15 @@ export const ManualMealForm: React.FC<ManualMealFormProps> = ({
                     value={searchQuery}
                     onChangeText={setSearchQuery}
                     onSubmitEditing={() => handleSearch()}
+                    onFocus={() => setIsFocused(true)}
+                    onBlur={() => setTimeout(() => setIsFocused(false), 200)}
                     returnKeyType="search"
                     placeholderTextColor="#9ca3af"
                   />
                   {searchLoading ? (
                     <ActivityIndicator size="small" color="#3b82f6" />
                   ) : searchQuery ? (
-                    <TouchableOpacity onPress={() => { setSearchQuery(''); setSearchResults([]); }}>
+                    <TouchableOpacity onPress={() => { setSearchQuery(''); setSearchResults([]); setShowDropdown(false); }}>
                       <SvgIcon name="close-circle" size={20} color="#9ca3af" />
                     </TouchableOpacity>
                   ) : null}
@@ -416,6 +514,8 @@ export const ManualMealForm: React.FC<ManualMealFormProps> = ({
                     value={searchQuery}
                     onChangeText={setSearchQuery}
                     onSubmitEditing={() => handleSearch()}
+                    onFocus={() => setIsFocused(true)}
+                    onBlur={() => setTimeout(() => setIsFocused(false), 200)}
                     returnKeyType="search"
                     placeholderTextColor={theme.colors.textSecondary}
                     autoComplete="off"
@@ -431,6 +531,97 @@ export const ManualMealForm: React.FC<ManualMealFormProps> = ({
                   ) : null}
                 </View>
               </SweepBorder>
+            )}
+
+            {/* Autocomplete Dropdown - Google-like suggestions */}
+            {(showDropdown || (isFocused && searchQuery.length < 2 && trendingSearches.length > 0)) && (
+              <View style={[styles.autocompleteDropdown, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
+                {/* Show trending when empty, suggestions when typing */}
+                {searchQuery.length < 2 ? (
+                  // Trending searches (like Google showing popular searches)
+                  <>
+                    <Text style={[styles.dropdownSectionTitle, { color: theme.colors.textSecondary }]}>
+                      🔥 Trending Searches
+                    </Text>
+                    {trendingSearches.map((term, index) => (
+                      <TouchableOpacity
+                        key={`trending-${index}`}
+                        style={styles.dropdownItem}
+                        onPress={() => handleSelectSuggestion(term)}
+                      >
+                        <Ionicons name="trending-up" size={16} color="#f97316" />
+                        <Text style={[styles.dropdownItemText, { color: theme.colors.text }]}>{term}</Text>
+                      </TouchableOpacity>
+                    ))}
+                  </>
+                ) : (
+                  // Autocomplete suggestions
+                  <>
+                    {suggestions.length > 0 && (
+                      <>
+                        <Text style={[styles.dropdownSectionTitle, { color: theme.colors.textSecondary }]}>
+                          🔍 Suggestions
+                        </Text>
+                        {suggestions.slice(0, 5).map((suggestion, index) => (
+                          <TouchableOpacity
+                            key={`suggestion-${index}`}
+                            style={styles.dropdownItem}
+                            onPress={() => handleSelectSuggestion(suggestion)}
+                          >
+                            <Ionicons name="search" size={16} color={theme.colors.textSecondary} />
+                            <Text style={[styles.dropdownItemText, { color: theme.colors.text }]}>{suggestion}</Text>
+                          </TouchableOpacity>
+                        ))}
+                      </>
+                    )}
+                    
+                    {suggestedBrands.length > 0 && (
+                      <>
+                        <Text style={[styles.dropdownSectionTitle, { color: theme.colors.textSecondary, marginTop: 8 }]}>
+                          🏷️ Brands
+                        </Text>
+                        {suggestedBrands.slice(0, 3).map((brand, index) => (
+                          <TouchableOpacity
+                            key={`brand-${index}`}
+                            style={styles.dropdownItem}
+                            onPress={() => handleSelectSuggestion(brand)}
+                          >
+                            <Ionicons name="pricetag" size={16} color="#8b5cf6" />
+                            <Text style={[styles.dropdownItemText, { color: theme.colors.text }]}>{brand}</Text>
+                          </TouchableOpacity>
+                        ))}
+                      </>
+                    )}
+
+                    {suggestedProducts.length > 0 && (
+                      <>
+                        <Text style={[styles.dropdownSectionTitle, { color: theme.colors.textSecondary, marginTop: 8 }]}>
+                          📦 Products
+                        </Text>
+                        {suggestedProducts.slice(0, 4).map((product, index) => (
+                          <TouchableOpacity
+                            key={`product-${index}`}
+                            style={[styles.dropdownProductItem, { borderColor: theme.colors.border }]}
+                            onPress={() => handleSelectSuggestedProduct(product)}
+                          >
+                            <View style={styles.dropdownProductInfo}>
+                              <Text style={[styles.dropdownProductName, { color: theme.colors.text }]} numberOfLines={1}>
+                                {product.name}
+                              </Text>
+                              {product.brand && (
+                                <Text style={[styles.dropdownProductBrand, { color: theme.colors.textSecondary }]}>
+                                  {product.brand}
+                                </Text>
+                              )}
+                            </View>
+                            <Ionicons name="add-circle" size={24} color="#22c55e" />
+                          </TouchableOpacity>
+                        ))}
+                      </>
+                    )}
+                  </>
+                )}
+              </View>
             )}
             
             {/* Quick Category Pills */}
@@ -1324,6 +1515,60 @@ const styles = StyleSheet.create({
   templateSubtitle: {
     fontSize: 11,
     // color: applied via inline { color: theme.colors.textSecondary }
+    marginTop: 2,
+  },
+  
+  // Autocomplete Dropdown Styles (Google-like search)
+  autocompleteDropdown: {
+    marginTop: 8,
+    borderRadius: 12,
+    borderWidth: 1,
+    paddingVertical: 8,
+    maxHeight: 350,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  dropdownSectionTitle: {
+    fontSize: 12,
+    fontWeight: '600',
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  dropdownItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    gap: 10,
+  },
+  dropdownItemText: {
+    fontSize: 15,
+    flex: 1,
+  },
+  dropdownProductItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    marginHorizontal: 8,
+    marginVertical: 4,
+    borderRadius: 8,
+    borderWidth: 1,
+  },
+  dropdownProductInfo: {
+    flex: 1,
+  },
+  dropdownProductName: {
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  dropdownProductBrand: {
+    fontSize: 12,
     marginTop: 2,
   },
 });
