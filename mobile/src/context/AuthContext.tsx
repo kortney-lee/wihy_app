@@ -71,6 +71,8 @@ interface AuthContextType {
   user: User | null;
   loading: boolean;
   initializing: boolean; // True until first auth check completes
+  isHydrating: boolean; // True while auth context is still loading/updating (post-login)
+  authReady: boolean; // True when: !isHydrating && !!token && !!user?.id && !!user?.email
   signIn: (provider: string, credentials?: any) => Promise<User>;
   signOut: () => Promise<void>;
   updateUser: (userData: Partial<User>) => Promise<User>;
@@ -87,6 +89,8 @@ export const AuthContext = createContext<AuthContextType>({
   user: null,
   loading: false,
   initializing: true, // Start as true until first auth check
+  isHydrating: true,
+  authReady: false,
   signIn: async () => {
     throw new Error('AuthContext not initialized');
   },
@@ -126,6 +130,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(false);
   const [initializing, setInitializing] = useState(true); // True until first auth check completes
+  const [isHydrating, setIsHydrating] = useState(true); // True while profile fetching / token updating
+  const [authToken, setAuthToken] = useState<string | null>(null); // Track token separately for authReady
+
+  // Compute authReady: user must have id, email, token, and hydration must be complete
+  const authReady = !isHydrating && !!authToken && !!user?.id && !!user?.email;
 
   // Load user data on app start
   useEffect(() => {
@@ -135,6 +144,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const loadUserData = async () => {
     try {
       setLoading(true);
+      setIsHydrating(true); // Start hydration
       
       // First check if we have a valid session (with retry and fallback for resilience)
       const sessionValid = await authService.verifySession({ maxRetries: 1, useFallback: true });
@@ -147,6 +157,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         // Convert UserData to User format
         const userData = await convertUserData(sessionValid.user);
         setUser(userData);
+        
+        // Retrieve and set auth token
+        try {
+          const token = await AsyncStorage.getItem('@wihy_access_token');
+          if (token) {
+            setAuthToken(token);
+          }
+        } catch (err) {
+          console.error('[AuthContext] Failed to retrieve token:', err);
+        }
         
         // Start auto token refresh for existing session
         console.log('[AuthContext] Starting auto token refresh for existing session');
@@ -177,6 +197,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     } finally {
       setLoading(false);
       setInitializing(false); // Auth check complete
+      setIsHydrating(false); // Hydration complete
     }
   };
 
@@ -323,6 +344,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const signIn = async (provider: string, credentials?: any): Promise<User> => {
     setLoading(true);
+    setIsHydrating(true); // Start hydration for post-login profile fetch
 
     try {
       let userData: User;
@@ -358,16 +380,29 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setUser(normalizedUser);
       await saveUserData(normalizedUser);
       
+      // Retrieve and set auth token
+      try {
+        const token = await AsyncStorage.getItem('@wihy_access_token');
+        if (token) {
+          setAuthToken(token);
+          console.log('[AuthContext] Auth token set after signIn');
+        }
+      } catch (err) {
+        console.error('[AuthContext] Failed to retrieve token after signIn:', err);
+      }
+      
       // Enable automatic token refresh to keep user logged in
       console.log('[AuthContext] Starting auto token refresh...');
       await enhancedAuthService.startAutoTokenRefresh();
       
+      console.log('[AuthContext] SignIn complete, authReady will be true on next render');
       return normalizedUser;
     } catch (error) {
       console.error('Sign in error:', error);
       throw error;
     } finally {
       setLoading(false);
+      setIsHydrating(false); // Hydration complete after signIn
     }
   };
 
@@ -667,6 +702,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     user,
     loading,
     initializing,
+    isHydrating,
+    authReady,
     signIn,
     signOut,
     updateUser,

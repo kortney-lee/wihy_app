@@ -37,6 +37,7 @@ export interface CheckoutRequest {
   source: 'web' | 'ios' | 'android';
   successUrl?: string;
   cancelUrl?: string;
+  checkoutAttemptId?: string; // UUID for tracing across logs
   metadata?: Record<string, string>;
 }
 
@@ -188,15 +189,18 @@ class CheckoutService {
 
   /**
    * Get callback URLs based on platform
+   * Web: Uses window.location.origin for maximum accuracy
+   * Mobile: Uses deep links (wihy://)
    */
   private getCallbackUrls(): { successUrl: string; cancelUrl: string } {
     const source = this.getPlatformSource();
     
     if (source === 'web') {
-      // Web uses HTTPS callbacks
-      const baseUrl = typeof window !== 'undefined' 
+      // Web uses HTTPS callbacks with current origin
+      // window.location.origin is always available in browser context
+      const baseUrl = typeof window !== 'undefined' && window.location && window.location.origin
         ? window.location.origin 
-        : 'https://wihy.ai';
+        : 'https://app.wihy.ai'; // Fallback for build-time evaluation
       return {
         successUrl: `${baseUrl}/payment/success`,
         cancelUrl: `${baseUrl}/payment/cancel`,
@@ -244,10 +248,15 @@ class CheckoutService {
    * 
    * REQUIRED: email, plan, and userId must be provided (account-first flow)
    * Validates before sending to backend to avoid 400 errors
+   * 
+   * @param plan - Plan ID or Stripe price ID
+   * @param email - User email
+   * @param userId - User ID (from AuthContext)
+   * @param checkoutAttemptId - Optional UUID for tracing across logs
    */
-  async initiateCheckout(plan: string, email: string, userId: string): Promise<CheckoutResponse> {
+  async initiateCheckout(plan: string, email: string, userId: string, checkoutAttemptId?: string): Promise<CheckoutResponse> {
     console.log('[Checkout] === INITIATING CHECKOUT REQUEST ===');
-    console.log('[Checkout] Parameters:', { plan, email, userId });
+    console.log('[Checkout] Parameters:', { plan, email, userId, checkoutAttemptId });
     
     // CRITICAL VALIDATION: Email, plan, and userId are required (account-first flow)
     if (!email || typeof email !== 'string') {
@@ -327,6 +336,7 @@ class CheckoutService {
         source,
         successUrl: callbacks.successUrl,
         cancelUrl: callbacks.cancelUrl,
+        checkoutAttemptId, // Unique ID for tracing
       };
 
       // Get session token for authenticated requests
@@ -442,9 +452,14 @@ class CheckoutService {
   /**
    * Complete checkout flow - initiate and open in one call
    * REQUIRES: User must be authenticated (account-first flow)
+   * 
+   * @param plan - Plan ID or Stripe price ID
+   * @param email - User email
+   * @param userId - User ID (from AuthContext)
+   * @param checkoutAttemptId - Optional UUID for tracing
    */
-  async checkout(plan: string, email: string, userId: string): Promise<CheckoutResult> {
-    const checkoutResponse = await this.initiateCheckout(plan, email, userId);
+  async checkout(plan: string, email: string, userId: string, checkoutAttemptId?: string): Promise<CheckoutResult> {
+    const checkoutResponse = await this.initiateCheckout(plan, email, userId, checkoutAttemptId);
     
     if (!checkoutResponse.success || !checkoutResponse.checkoutUrl) {
       return {

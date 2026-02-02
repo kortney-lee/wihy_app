@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -260,15 +260,27 @@ interface Props {
   navigation: SubscriptionScreenNavigationProp;
 }
 
+/**
+ * Generate a unique checkout attempt ID for tracing across logs
+ * Format: checkout_attempt_{timestamp}_{randomId}
+ */
+function generateCheckoutAttemptId(): string {
+  const timestamp = Date.now();
+  const randomId = Math.random().toString(36).substring(2, 9);
+  return `checkout_attempt_${timestamp}_${randomId}`;
+}
+
 export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
   const { width } = useWindowDimensions();
-  const { user } = useAuth();
+  const { user, authReady } = useAuth();
   const { theme } = useTheme();
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
   const [isLoading, setIsLoading] = useState(false);
   const [showFreeLoginModal, setShowFreeLoginModal] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);  // Auth modal for paid plans
   const [selectedPlan, setSelectedPlan] = useState<typeof CONSUMER_PLANS[0] | null>(null);
+  const [pendingCheckoutPlanId, setPendingCheckoutPlanId] = useState<string | null>(null);
+  const [pendingCheckoutCycle, setPendingCheckoutCycle] = useState<'monthly' | 'yearly'>('monthly');
 
   const isDesktop = width >= 1024;
   const isTablet = width >= 640;
@@ -290,40 +302,58 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
     return `$${formatPrice(price)}/month`;
   };
 
-  // Handle successful authentication - retry checkout
+  // Handle successful authentication - use authReady flag instead of setTimeout
   const handleAuthSuccess = async () => {
-    console.log('[Subscribe] Authentication successful, retrying checkout');
+    console.log('[Subscribe] Authentication successful, preparing for checkout');
     setShowAuthModal(false);
     
-    // Get pending plan from sessionStorage
+    // On web, store pending plan to sessionStorage and localStorage (bulletproof storage)
     if (Platform.OS === 'web' && typeof sessionStorage !== 'undefined') {
-      const pendingPlanStr = sessionStorage.getItem('pendingPlan');
-      if (pendingPlanStr) {
-        try {
-          const { planId, billingCycle: savedCycle } = JSON.parse(pendingPlanStr);
-          setBillingCycle(savedCycle);
-          
-          // Wait for auth context to update with new user data (increased timeout for signup flow)
-          // New signup takes longer than login
-          await new Promise(resolve => setTimeout(resolve, 2000));
-          
-          console.log('[Subscribe] Auth context updated, user:', user);
-          if (user?.id && user?.email) {
-            console.log('[Subscribe] Proceeding to checkout with user:', { id: user.id, email: user.email });
-            handleSubscribe(planId);
-          } else {
-            console.error('[Subscribe] Auth context not properly updated after signup:', user);
-            Alert.alert('Error', 'Failed to complete authentication. Please try again.');
-          }
-        } catch (error) {
-          console.error('[Subscribe] Error during auth success:', error);
-          Alert.alert('Error', 'Something went wrong. Please try again.');
-        }
-      } else {
-        console.log('[Subscribe] No pending plan found');
+      const pendingPlanData = {
+        planId: pendingCheckoutPlanId,
+        billingCycle: pendingCheckoutCycle,
+        checkoutAttemptId: generateCheckoutAttemptId(),
+        timestamp: Date.now(),
+      };
+      
+      try {
+        // Write to both sessionStorage and localStorage for redundancy
+        sessionStorage.setItem('pendingPlan', JSON.stringify(pendingPlanData));
+        console.log('[Subscribe] Stored pending plan to sessionStorage');
+      } catch (e) {
+        console.warn('[Subscribe] Failed to write to sessionStorage:', e);
+      }
+      
+      try {
+        localStorage.setItem('pendingPlan', JSON.stringify(pendingPlanData));
+        console.log('[Subscribe] Stored pending plan to localStorage');
+      } catch (e) {
+        console.warn('[Subscribe] Failed to write to localStorage:', e);
       }
     }
+    
+    // Trigger checkout when authReady becomes true
+    // authReady includes: !isHydrating && !!token && !!user?.id && !!user?.email
+    // The useEffect below will handle the actual checkout
   };
+
+  // Monitor authReady flag - trigger checkout when auth is fully ready
+  useEffect(() => {
+    // Only proceed if authReady and we have a pending checkout
+    if (authReady && pendingCheckoutPlanId && user?.id && user?.email) {
+      console.log('[Subscribe] Auth is ready, proceeding with pending checkout');
+      console.log('[Subscribe] User state:', { id: user.id, email: user.email });
+      
+      // Reset pending state
+      const planToCheckout = pendingCheckoutPlanId;
+      const cycleToUse = pendingCheckoutCycle;
+      setPendingCheckoutPlanId(null);
+      setPendingCheckoutCycle('monthly');
+      
+      // Perform the actual checkout
+      handleSubscribe(planToCheckout);
+    }
+  }, [authReady, pendingCheckoutPlanId, user?.id, user?.email]);
 
   // Map plan IDs to native store product IDs
   const getNativeProductId = (planId: string, yearly: boolean): string => {
@@ -358,6 +388,11 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
       // User must be authenticated for iOS IAP
       if (!user?.id || !user?.email) {
         console.log('[Subscribe] iOS requires authentication');
+        
+        // Store pending checkout plan and cycle in state
+        setPendingCheckoutPlanId(planId);
+        setPendingCheckoutCycle(billingCycle);
+        
         setSelectedPlan(plan);
         setShowAuthModal(true);
         return;
@@ -393,6 +428,11 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
       // User must be authenticated for Android billing
       if (!user?.id || !user?.email) {
         console.log('[Subscribe] Android requires authentication');
+        
+        // Store pending checkout plan and cycle in state
+        setPendingCheckoutPlanId(planId);
+        setPendingCheckoutCycle(billingCycle);
+        
         setSelectedPlan(plan);
         setShowAuthModal(true);
         return;
@@ -414,6 +454,11 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
         } else {
           // Fallback to Stripe for Android if product not in Google Play
           console.log('[Subscription] Android Stripe fallback:', planId);
+          
+          // Generate unique checkout attempt ID for tracing
+          const checkoutAttemptId = generateCheckoutAttemptId();
+          console.log('[Subscription] Checkout attempt ID:', checkoutAttemptId);
+          
           // Map plan IDs to correct yearly versions if applicable
           let checkoutPlanId = planId;
           if (billingCycle === 'yearly' && plan.yearlyPrice) {
@@ -424,7 +469,7 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
             }
             console.log('[Subscription] Mapped yearly plan for Android Stripe:', { original: planId, final: checkoutPlanId });
           }
-          const response = await checkoutService.initiateCheckout(checkoutPlanId, user.email, user.id);
+          const response = await checkoutService.initiateCheckout(checkoutPlanId, user.email, user.id, checkoutAttemptId);
           
           if (response.success && response.checkoutUrl) {
             await checkoutService.openCheckout(response.checkoutUrl);
@@ -447,14 +492,12 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
     // Web: Use Stripe checkout (user MUST be authenticated)
     if (!user?.id || !user?.email) {
       console.log('[Subscribe] User not authenticated - showing auth modal');
-      // Store selected plan to resume after login
-      if (Platform.OS === 'web' && typeof sessionStorage !== 'undefined') {
-        sessionStorage.setItem('pendingPlan', JSON.stringify({
-          planId,
-          billingCycle,
-        }));
-      }
-      // Show auth modal
+      
+      // Store pending checkout plan and cycle in state
+      setPendingCheckoutPlanId(planId);
+      setPendingCheckoutCycle(billingCycle);
+      
+      // Show auth modal - handleAuthSuccess will be called when auth is complete
       setSelectedPlan(plan);
       setShowAuthModal(true);
       return;
@@ -464,6 +507,11 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
     setIsLoading(true);
     try {
       console.log('[Subscribe] Creating checkout for authenticated user:', { userId: user?.id, email: user?.email });
+      
+      // Generate unique checkout attempt ID for tracing
+      const checkoutAttemptId = generateCheckoutAttemptId();
+      console.log('[Subscribe] Checkout attempt ID:', checkoutAttemptId);
+      
       // Map plan IDs to correct yearly versions if applicable
       let checkoutPlanId = planId;
       if (billingCycle === 'yearly' && plan.yearlyPrice) {
@@ -477,7 +525,7 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
         console.log('[Subscribe] Mapped yearly plan:', { original: planId, final: checkoutPlanId });
       }
       console.log('[Subscribe] Plan ID for checkout:', checkoutPlanId);
-      const response = await checkoutService.initiateCheckout(checkoutPlanId, user.email, user.id);
+      const response = await checkoutService.initiateCheckout(checkoutPlanId, user.email, user.id, checkoutAttemptId);
         
       if (response.success && response.checkoutUrl) {
         console.log('[Subscribe] Redirecting to checkout');
