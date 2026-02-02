@@ -36,13 +36,22 @@ export default function PaymentSuccessScreen() {
 
   const completePaymentLogin = async (sessionId: string) => {
     try {
-      console.log('=== COMPLETING PAYMENT LOGIN ===');
+      console.log('=== PAYMENT SUCCESS: COMPLETING PAYMENT LOGIN ===');
       console.log('Session ID:', sessionId);
+      console.log('Platform:', Platform.OS);
 
       // Step 1: Get checkout session with login token from payment service
+      console.log('Fetching checkout session from payment service...');
       const checkoutResult = await checkoutService.getCheckoutSession(sessionId);
+      console.log('Checkout result:', {
+        success: checkoutResult.success,
+        hasSession: !!checkoutResult.session,
+        hasAuth: !!checkoutResult.auth,
+        error: checkoutResult.error,
+      });
 
       if (!checkoutResult.success || !checkoutResult.session) {
+        console.error('Failed to retrieve checkout session:', checkoutResult.error);
         throw new Error(checkoutResult.error || 'Failed to retrieve checkout session');
       }
 
@@ -50,44 +59,16 @@ export default function PaymentSuccessScreen() {
         hasAuth: !!checkoutResult.auth,
         hasLoginToken: !!checkoutResult.session.loginToken,
         email: checkoutResult.session.email,
+        planName: checkoutResult.session.planName,
         userId: checkoutResult.auth?.userId,
         isNewUser: checkoutResult.auth?.isNewUser,
         needsSignup: checkoutResult.auth?.needsSignup,
         userExists: checkoutResult.auth?.userExists,
       });
 
-      // Check if user needs to create an account after payment (Payment-first flow)
-      // This happens when a new user paid without having an existing account
-      if (checkoutResult.auth?.needsSignup === true) {
-        console.log('User needs to create account after payment - redirecting to CompleteAccount');
-        
-        const planName = checkoutResult.session.planName || checkoutResult.session.plan || 'Premium';
-        setPlanName(planName);
-        setStatus('success');
-        
-        // Navigate to CompleteAccount screen with Stripe info
-        setTimeout(() => {
-          if (Platform.OS === 'web' && typeof window !== 'undefined') {
-            const params = new URLSearchParams({
-              email: checkoutResult.session?.email || '',
-              name: checkoutResult.session?.name || '',
-              plan: planName,
-              stripeCustomerId: checkoutResult.session?.customerId || '',
-              stripeSubscriptionId: checkoutResult.session?.subscriptionId || '',
-            });
-            window.location.href = `/complete-account?${params.toString()}`;
-          } else {
-            navigation.navigate('CompleteAccount', {
-              email: checkoutResult.session?.email || '',
-              name: checkoutResult.session?.name || '',
-              plan: planName,
-              stripeCustomerId: checkoutResult.session?.customerId || '',
-              stripeSubscriptionId: checkoutResult.session?.subscriptionId || '',
-            });
-          }
-        }, 1500);
-        return;
-      }
+      // ACCOUNT-FIRST FLOW: User must already be authenticated before payment
+      // If auth data exists, it means user is already authenticated and subscription is linked by webhook
+      // No need to check needsSignup or redirect to account creation
 
       // Get login token and auth info - token is in auth object
       const loginToken = checkoutResult.session.loginToken || checkoutResult.auth?.loginToken;

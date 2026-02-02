@@ -75,11 +75,18 @@ export function useCheckout(): UseCheckoutState & UseCheckoutActions {
       return { success: false, error: err };
     }
 
+    // Require authentication (account-first flow)
+    if (!user?.id) {
+      const err = 'You must be signed in to subscribe';
+      setError(err);
+      return { success: false, error: err };
+    }
+
     setLoading(true);
     setError(null);
 
     try {
-      const result = await checkoutService.checkout(selectedPlan.id, userEmail);
+      const result = await checkoutService.checkout(selectedPlan.id, userEmail, user.id);
       
       if (!result.success && !result.canceled) {
         setError(result.error || 'Checkout failed');
@@ -93,7 +100,7 @@ export function useCheckout(): UseCheckoutState & UseCheckoutActions {
     } finally {
       setLoading(false);
     }
-  }, [selectedPlan, user?.email]);
+  }, [selectedPlan, user?.email, user?.id]);
 
   const checkStatus = useCallback(async (email: string): Promise<PaymentStatus> => {
     setLoading(true);

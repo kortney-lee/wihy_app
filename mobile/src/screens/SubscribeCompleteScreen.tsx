@@ -94,7 +94,8 @@ export default function SubscribeCompleteScreen() {
       
       const response = await checkoutService.initiateCheckout(
         pending.planId,
-        user.email // User is authenticated, use their email
+        user.email, // User is authenticated, use their email
+        user.id     // User must be authenticated (account-first flow)
       );
 
       if (response.success && response.checkoutUrl) {

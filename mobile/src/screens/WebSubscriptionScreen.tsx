@@ -21,7 +21,6 @@ import { purchaseService } from '../services/purchaseService';
 import { authService } from '../services/authService';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
-import EmailCheckoutModal from '../components/checkout/EmailCheckoutModal';
 import MultiAuthLogin from '../components/auth/MultiAuthLogin';
 import { WebNavHeader } from '../components/web/WebNavHeader';
 
@@ -267,8 +266,8 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
   const { theme } = useTheme();
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
   const [isLoading, setIsLoading] = useState(false);
-  const [showEmailModal, setShowEmailModal] = useState(false);
   const [showFreeLoginModal, setShowFreeLoginModal] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);  // Auth modal for paid plans
   const [selectedPlan, setSelectedPlan] = useState<typeof CONSUMER_PLANS[0] | null>(null);
 
   const isDesktop = width >= 1024;
@@ -291,44 +290,23 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
     return `$${formatPrice(price)}/month`;
   };
 
-  // Process checkout with email (for new users)
-  const processCheckoutWithEmail = async (email: string) => {
-    if (!selectedPlan) return;
+  // Handle successful authentication - retry checkout
+  const handleAuthSuccess = async () => {
+    console.log('[Subscribe] Authentication successful, retrying checkout');
+    setShowAuthModal(false);
     
-    setIsLoading(true);
-    try {
-      const checkoutPlanId = billingCycle === 'yearly' && selectedPlan.yearlyPrice 
-        ? `${selectedPlan.id}-yearly` 
-        : selectedPlan.id;
-      
-      // Initiate checkout with the email (no login required)
-      const response = await checkoutService.initiateCheckout(checkoutPlanId, email);
-      
-      if (response.success && response.checkoutUrl) {
-        setShowEmailModal(false);
-        if (Platform.OS === 'web' && typeof window !== 'undefined') {
-          // Store pending checkout info for post-payment registration
-          sessionStorage.setItem('pendingCheckout', JSON.stringify({
-            email,
-            planId: checkoutPlanId,
-            planName: selectedPlan.name,
-          }));
-          window.location.href = response.checkoutUrl;
-        } else {
-          await checkoutService.openCheckout(response.checkoutUrl);
-        }
-      } else {
-        throw new Error(response.error || 'Failed to create checkout session');
+    // Get pending plan from sessionStorage
+    if (Platform.OS === 'web' && typeof sessionStorage !== 'undefined') {
+      const pendingPlanStr = sessionStorage.getItem('pendingPlan');
+      if (pendingPlanStr) {
+        const { planId, billingCycle: savedCycle } = JSON.parse(pendingPlanStr);
+        setBillingCycle(savedCycle);
+        
+        // Wait for auth context to update, then retry
+        setTimeout(() => {
+          handleSubscribe(planId);
+        }, 500);
       }
-    } catch (error: any) {
-      console.error('Checkout error:', error);
-      if (Platform.OS === 'web' && typeof window !== 'undefined') {
-        window.alert(`Checkout Error\n\n${error.message || 'Please try again.'}`);
-      } else {
-        Alert.alert('Checkout Error', error.message || 'Please try again.');
-      }
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -362,10 +340,11 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
 
     // iOS: Use Apple In-App Purchases (required by App Store policy)
     if (Platform.OS === 'ios') {
-      // For new users, show email modal first (consistent with web)
-      if (!user?.email) {
+      // User must be authenticated for iOS IAP
+      if (!user?.id || !user?.email) {
+        console.log('[Subscribe] iOS requires authentication');
         setSelectedPlan(plan);
-        setShowEmailModal(true);
+        setShowAuthModal(true);
         return;
       }
 
@@ -396,10 +375,11 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
 
     // Android: Use Google Play Billing (preferred) or Stripe
     if (Platform.OS === 'android') {
-      // For new users, show email modal first (consistent with web)
-      if (!user?.email) {
+      // User must be authenticated for Android billing
+      if (!user?.id || !user?.email) {
+        console.log('[Subscribe] Android requires authentication');
         setSelectedPlan(plan);
-        setShowEmailModal(true);
+        setShowAuthModal(true);
         return;
       }
 
@@ -420,7 +400,7 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
           // Fallback to Stripe for Android if product not in Google Play
           console.log('[Subscription] Android Stripe fallback:', planId);
           const checkoutPlanId = billingCycle === 'yearly' && plan.yearlyPrice ? `${planId}-yearly` : planId;
-          const response = await checkoutService.initiateCheckout(checkoutPlanId, user.email);
+          const response = await checkoutService.initiateCheckout(checkoutPlanId, user.email, user.id);
           
           if (response.success && response.checkoutUrl) {
             await checkoutService.openCheckout(response.checkoutUrl);
@@ -440,43 +420,45 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
       return;
     }
 
-    // Web: Use Stripe checkout
-    if (user?.email) {
-      setIsLoading(true);
-      try {
-        const checkoutPlanId = billingCycle === 'yearly' && plan.yearlyPrice ? `${planId}-yearly` : planId;
-        const response = await checkoutService.initiateCheckout(checkoutPlanId, user.email);
-        
-        if (response.success && response.checkoutUrl) {
-          if (typeof window !== 'undefined') {
-            window.location.href = response.checkoutUrl;
-          }
-        } else {
-          throw new Error(response.error || 'Failed to create checkout session');
-        }
-      } catch (error: any) {
-        console.error('[Subscription] Web checkout error:', error);
-        if (typeof window !== 'undefined') {
-          window.alert(`Checkout Error\n\n${error.message || 'Please try again.'}`);
-        }
-      } finally {
-        setIsLoading(false);
+    // Web: Use Stripe checkout (user MUST be authenticated)
+    if (!user?.id || !user?.email) {
+      console.log('[Subscribe] User not authenticated - showing auth modal');
+      // Store selected plan to resume after login
+      if (Platform.OS === 'web' && typeof sessionStorage !== 'undefined') {
+        sessionStorage.setItem('pendingPlan', JSON.stringify({
+          planId,
+          billingCycle,
+        }));
       }
+      // Show auth modal
+      setSelectedPlan(plan);
+      setShowAuthModal(true);
       return;
     }
 
-    // For new users on web, show email collection modal
-    setSelectedPlan(plan);
-    setShowEmailModal(true);
-  };
-
-  const handleEmailModalClose = () => {
-    setShowEmailModal(false);
-    setSelectedPlan(null);
-    // Option: User clicked "Sign in" in modal - navigate to login
-    if (Platform.OS === 'web' && typeof window !== 'undefined') {
-      // Check if user wants to sign in
-      // For now, just close the modal
+    // User is authenticated - proceed to checkout
+    setIsLoading(true);
+    try {
+      console.log('[Subscribe] Creating checkout for authenticated user:', user.id);
+      const checkoutPlanId = billingCycle === 'yearly' && plan.yearlyPrice ? `${planId}-yearly` : planId;
+      const response = await checkoutService.initiateCheckout(checkoutPlanId, user.email, user.id);
+        
+      if (response.success && response.checkoutUrl) {
+        console.log('[Subscribe] Redirecting to checkout');
+        if (typeof window !== 'undefined') {
+          window.location.href = response.checkoutUrl;
+        }
+      } else {
+        console.error('[Subscribe] Checkout failed:', response.error);
+        throw new Error(response.error || 'Failed to create checkout session');
+      }
+    } catch (error: any) {
+      console.error('[Subscribe] Web checkout error:', error);
+      if (typeof window !== 'undefined') {
+        window.alert(`Checkout Error\n\n${error.message || 'Please try again.'}`);
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -1029,14 +1011,12 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
           </footer>
         </div>
 
-        {/* Email Collection Modal */}
-        <EmailCheckoutModal
-          visible={showEmailModal}
-          onClose={handleEmailModalClose}
-          onContinue={processCheckoutWithEmail}
-          planName={selectedPlan?.name || ''}
-          planPrice={getSelectedPlanPrice()}
-          isLoading={isLoading}
+        {/* Authentication Modal */}
+        <MultiAuthLogin
+          visible={showAuthModal}
+          onClose={() => setShowAuthModal(false)}
+          onSignIn={handleAuthSuccess}
+          title="Sign In to Continue"
         />
 
         {/* Free Plan Login Modal */}

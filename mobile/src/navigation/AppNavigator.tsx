@@ -75,7 +75,6 @@ import HealthDataScreen from '../screens/HealthDataScreen';
 import AuthCallbackScreen from '../screens/AuthCallbackScreen';
 import SubscribeCompleteScreen from '../screens/SubscribeCompleteScreen';
 import PaymentSuccessScreen from '../screens/PaymentSuccessScreen';
-import SignupWithPaymentScreen from '../screens/SignupWithPaymentScreen';
 import ChatHistoryScreen from '../screens/ChatHistoryScreen';
 
 const Tab = createBottomTabNavigator<TabParamList>();
@@ -780,22 +779,6 @@ export default function AppNavigator() {
         <Stack.Screen
           name="PaymentSuccess"
           component={PaymentSuccessScreen}
-          options={{
-            headerShown: false,
-            gestureEnabled: false,
-          }}
-        />
-        <Stack.Screen
-          name="SignupWithPayment"
-          component={SignupWithPaymentScreen}
-          options={{
-            headerShown: false,
-            gestureEnabled: false,
-          }}
-        />
-        <Stack.Screen
-          name="CompleteAccount"
-          component={CompleteAccountScreen}
           options={{
             headerShown: false,
             gestureEnabled: false,

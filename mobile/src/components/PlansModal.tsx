@@ -142,6 +142,14 @@ export default function PlansModal({
     if (Platform.OS === 'web') {
       setPurchasing(true);
       try {
+        // Require authentication before checkout (account-first flow)
+        if (!user?.id || !user?.email) {
+          Alert.alert('Authentication Required', 'Please sign in to continue with your purchase.');
+          setPurchasing(false);
+          onClose();
+          return;
+        }
+
         // Map plan IDs to checkout service plan IDs
         const checkoutPlanMap: Record<string, string> = {
           'premium': 'premium',
@@ -151,8 +159,7 @@ export default function PlansModal({
         };
         
         const checkoutPlanId = checkoutPlanMap[planId] || planId;
-        const userEmail = user?.email || '';
-        const result = await checkoutService.initiateCheckout(checkoutPlanId, userEmail);
+        const result = await checkoutService.initiateCheckout(checkoutPlanId, user.email, user.id);
         
         if (result.success && result.checkoutUrl) {
           // Open Stripe checkout in new tab

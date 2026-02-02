@@ -33,6 +33,7 @@ export interface Plan {
 export interface CheckoutRequest {
   plan: string;
   email: string;
+  userId: string; // REQUIRED: User must be authenticated before checkout (account-first flow)
   source: 'web' | 'ios' | 'android';
   successUrl?: string;
   cancelUrl?: string;
@@ -241,11 +242,11 @@ class CheckoutService {
    * Initiate a checkout session
    * Returns a Stripe checkout URL
    * 
-   * REQUIRED: email and plan must be provided
+   * REQUIRED: email, plan, and userId must be provided (account-first flow)
    * Validates before sending to backend to avoid 400 errors
    */
-  async initiateCheckout(plan: string, email: string): Promise<CheckoutResponse> {
-    // CRITICAL VALIDATION: Email and plan are required
+  async initiateCheckout(plan: string, email: string, userId: string): Promise<CheckoutResponse> {
+    // CRITICAL VALIDATION: Email, plan, and userId are required (account-first flow)
     if (!email || typeof email !== 'string') {
       const errorMsg = 'Email is required for checkout';
       console.error('[Checkout] Validation Error:', errorMsg);
@@ -254,6 +255,12 @@ class CheckoutService {
 
     if (!plan || typeof plan !== 'string') {
       const errorMsg = 'Plan is required for checkout';
+      console.error('[Checkout] Validation Error:', errorMsg);
+      return { success: false, error: errorMsg };
+    }
+
+    if (!userId || typeof userId !== 'string') {
+      const errorMsg = 'User must be authenticated before checkout';
       console.error('[Checkout] Validation Error:', errorMsg);
       return { success: false, error: errorMsg };
     }
@@ -295,6 +302,7 @@ class CheckoutService {
     console.log('[Checkout] Local Plan ID:', plan);
     console.log('[Checkout] Stripe Price ID:', stripePriceId);
     console.log('[Checkout] Email:', trimmedEmail);
+    console.log('[Checkout] User ID:', userId);
     console.log('[Checkout] Source:', source);
     console.log('[Checkout] Callbacks:', callbacks);
 
@@ -303,6 +311,7 @@ class CheckoutService {
       await AsyncStorage.setItem(CHECKOUT_STORAGE_KEY, JSON.stringify({
         plan,
         email: trimmedEmail,
+        userId,
         initiatedAt: Date.now(),
       }));
 
@@ -310,6 +319,7 @@ class CheckoutService {
       const request: CheckoutRequest = {
         plan: stripePriceId, // Send Stripe price ID: pro_monthly, pro_yearly, family_basic, family_pro, coach
         email: trimmedEmail,
+        userId, // REQUIRED: User must be authenticated before checkout
         source,
         successUrl: callbacks.successUrl,
         cancelUrl: callbacks.cancelUrl,
@@ -427,9 +437,10 @@ class CheckoutService {
 
   /**
    * Complete checkout flow - initiate and open in one call
+   * REQUIRES: User must be authenticated (account-first flow)
    */
-  async checkout(plan: string, email: string): Promise<CheckoutResult> {
-    const checkoutResponse = await this.initiateCheckout(plan, email);
+  async checkout(plan: string, email: string, userId: string): Promise<CheckoutResult> {
+    const checkoutResponse = await this.initiateCheckout(plan, email, userId);
     
     if (!checkoutResponse.success || !checkoutResponse.checkoutUrl) {
       return {
