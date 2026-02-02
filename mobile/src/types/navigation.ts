@@ -97,6 +97,15 @@ export type RootStackParamList = {
     stripeSubscriptionId: string;
   };
   
+  // Complete account (Comprehensive account setup with auth + profile)
+  CompleteAccount: {
+    email: string;
+    name?: string;
+    plan: string;
+    stripeCustomerId: string;
+    stripeSubscriptionId: string;
+  };
+  
   // Legal and info pages
   About: undefined;
   Terms: undefined;

@@ -153,6 +153,8 @@ const linking: LinkingOptions<RootStackParamList> = {
       PaymentSuccess: 'payment/success',
       // Signup with payment (Payment-first flow - account creation after payment)
       SignupWithPayment: 'signup-with-payment',
+      // Complete account (Comprehensive account setup with auth + profile)
+      CompleteAccount: 'complete-account',
     },
   },
 };
@@ -786,6 +788,14 @@ export default function AppNavigator() {
         <Stack.Screen
           name="SignupWithPayment"
           component={SignupWithPaymentScreen}
+          options={{
+            headerShown: false,
+            gestureEnabled: false,
+          }}
+        />
+        <Stack.Screen
+          name="CompleteAccount"
+          component={CompleteAccountScreen}
           options={{
             headerShown: false,
             gestureEnabled: false,

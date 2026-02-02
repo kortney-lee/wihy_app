@@ -59,13 +59,13 @@ export default function PaymentSuccessScreen() {
       // Check if user needs to create an account after payment (Payment-first flow)
       // This happens when a new user paid without having an existing account
       if (checkoutResult.auth?.needsSignup === true) {
-        console.log('User needs to create account after payment - redirecting to SignupWithPayment');
+        console.log('User needs to create account after payment - redirecting to CompleteAccount');
         
         const planName = checkoutResult.session.planName || checkoutResult.session.plan || 'Premium';
         setPlanName(planName);
         setStatus('success');
         
-        // Navigate to SignupWithPayment screen with Stripe info
+        // Navigate to CompleteAccount screen with Stripe info
         setTimeout(() => {
           if (Platform.OS === 'web' && typeof window !== 'undefined') {
             const params = new URLSearchParams({
@@ -75,9 +75,9 @@ export default function PaymentSuccessScreen() {
               stripeCustomerId: checkoutResult.session?.customerId || '',
               stripeSubscriptionId: checkoutResult.session?.subscriptionId || '',
             });
-            window.location.href = `/signup-with-payment?${params.toString()}`;
+            window.location.href = `/complete-account?${params.toString()}`;
           } else {
-            navigation.navigate('SignupWithPayment', {
+            navigation.navigate('CompleteAccount', {
               email: checkoutResult.session?.email || '',
               name: checkoutResult.session?.name || '',
               plan: planName,
