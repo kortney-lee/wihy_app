@@ -24,8 +24,8 @@ export enum PlanId {
   FAMILY_PRO = 'family_pro',
   FAMILY_PRO_YEARLY = 'family_pro_yearly',
   
-  // Professional Plans
-  COACH = 'coach',
+  // Enterprise Plans
+  COACH = 'coach', // Now Enterprise Solutions (B2B)
 }
 
 /**
@@ -120,7 +120,7 @@ export function mapPlanToBillingCycle(planId: string, yearly: boolean): string {
 export function supportsNativePurchase(planId: string): boolean {
   // Stripe-only plans (not available in Google Play or Apple App Store)
   const stripeOnlyPlans = [
-    PlanId.COACH, // Requires special setup with Stripe Connect
+    PlanId.COACH, // Enterprise plan requires special setup with Stripe Connect
   ];
   
   return !stripeOnlyPlans.includes(planId as PlanId);
@@ -141,7 +141,7 @@ export function getPlanDisplayName(planId: string): string {
     [PlanId.FAMILY_BASIC]: 'Family Basic',
     [PlanId.FAMILY_PRO]: 'Family Pro (Monthly)',
     [PlanId.FAMILY_PRO_YEARLY]: 'Family Pro (Annual)',
-    [PlanId.COACH]: 'Coach Platform',
+    [PlanId.COACH]: 'Enterprise Solutions',
   };
   
   const name = names[planId];
@@ -213,10 +213,10 @@ export function getValidPlanIds(): string[] {
 }
 
 /**
- * Check if plan is a consumer plan (vs professional)
+ * Check if plan is a consumer plan (vs enterprise)
  * 
  * @param planId - Plan ID
- * @returns true if consumer plan, false if professional plan
+ * @returns true if consumer plan, false if enterprise plan
  */
 export function isConsumerPlan(planId: string): boolean {
   const consumerPlans = [
@@ -248,7 +248,7 @@ export function isFamilyPlan(planId: string): boolean {
 }
 
 /**
- * Check if plan requires setup fee (coach platform)
+ * Check if plan requires setup fee (enterprise plans)
  * 
  * @param planId - Plan ID
  * @returns true if plan has setup fee, false otherwise
