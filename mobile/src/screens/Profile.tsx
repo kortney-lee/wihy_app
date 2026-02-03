@@ -237,17 +237,22 @@ export default function Profile() {
     } else {
       // Paid user - redirect to Stripe Customer Portal
       if (isWeb) {
+        if (!user?.id) {
+          window.alert('Please sign in to manage your subscription.');
+          return;
+        }
         try {
           setLoadingSubscription(true);
-          const portalUrl = await subscriptionService.getCustomerPortal();
+          const portalUrl = await subscriptionService.getCustomerPortal(user.id);
           if (portalUrl) {
-            window.open(portalUrl, '_blank');
+            window.location.href = portalUrl;
           } else {
             window.alert('Unable to access subscription portal. Please try again or contact support.');
           }
-        } catch (error) {
+        } catch (error: any) {
           console.error('Failed to get customer portal:', error);
-          window.alert('Unable to access subscription portal. Please try again or contact support.');
+          const errorMessage = error?.message || 'Unable to access subscription portal.';
+          window.alert(errorMessage);
         } finally {
           setLoadingSubscription(false);
         }
@@ -267,18 +272,23 @@ export default function Profile() {
   };
 
   const openSubscriptionPortal = async () => {
+    if (!user?.id) {
+      Alert.alert('Error', 'Please sign in to manage your subscription.');
+      return;
+    }
     try {
       setLoadingSubscription(true);
-      const portalUrl = await subscriptionService.getCustomerPortal();
+      const portalUrl = await subscriptionService.getCustomerPortal(user.id);
       if (portalUrl) {
         const { Linking } = require('react-native');
         await Linking.openURL(portalUrl);
       } else {
         Alert.alert('Error', 'Unable to access subscription portal. Please try again.');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to get customer portal:', error);
-      Alert.alert('Error', 'Unable to access subscription portal. Please contact support.');
+      const errorMessage = error?.message || 'Unable to access subscription portal.';
+      Alert.alert('Error', errorMessage);
     } finally {
       setLoadingSubscription(false);
     }

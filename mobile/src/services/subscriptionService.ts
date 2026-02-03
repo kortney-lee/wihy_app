@@ -169,14 +169,41 @@ class SubscriptionService {
 
   /**
    * Get Stripe customer portal URL for subscription management
-   * GET /api/stripe/customer-portal
+   * GET /api/stripe/customer-portal?customerId=cus_xxx&returnUrl=xxx
+   * 
+   * Requires the user's stripe_customer_id from the user service.
+   * 
+   * @param userId - User ID to fetch stripe_customer_id
+   * @param returnUrl - Optional URL to return to after portal (defaults to current page)
    */
-  async getCustomerPortal(): Promise<string> {
-    const response = await apiClient.payment<{ success: boolean; portalUrl: string }>(
+  async getCustomerPortal(userId: string, returnUrl?: string): Promise<string> {
+    // Step 1: Get user's Stripe customer ID from user service
+    const userResponse = await apiClient.user<{ success: boolean; data?: { stripe_customer_id?: string } }>(
       'GET',
-      '/api/stripe/customer-portal'
+      `/api/users/${userId}`
     );
-    return response.portalUrl;
+
+    const customerId = userResponse.data?.stripe_customer_id;
+    if (!customerId) {
+      throw new Error('No Stripe customer ID found. Please subscribe first.');
+    }
+
+    // Step 2: Build query parameters
+    const params = new URLSearchParams();
+    params.append('customerId', customerId);
+    if (returnUrl) {
+      params.append('returnUrl', returnUrl);
+    } else if (typeof window !== 'undefined') {
+      params.append('returnUrl', window.location.href);
+    }
+
+    // Step 3: Call customer-portal with customerId
+    const response = await apiClient.payment<{ success: boolean; url: string; portalUrl?: string }>(
+      'GET',
+      `/api/stripe/customer-portal?${params.toString()}`
+    );
+    
+    return response.url || response.portalUrl || '';
   }
 
   /**
