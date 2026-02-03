@@ -32,6 +32,7 @@ import SvgIcon from '../components/shared/SvgIcon';
 import { UpgradePrompt } from '../components/UpgradePrompt';
 import { useFeatureAccess } from '../hooks/usePaywall';
 import { ADD_ONS } from '../config/subscriptionConfig';
+import { subscriptionService } from '../services/subscriptionService';
 
 const isWeb = Platform.OS === 'web';
 
@@ -227,25 +228,35 @@ export default function Profile() {
     return price + aiText;
   };
 
-  const handleSubscribe = () => {
+  const handleSubscribe = async () => {
     const currentPlan = user?.plan || 'free';
     
     if (currentPlan === 'free') {
       // Free user - show upgrade options
       setShowPlansModal(true);
     } else {
-      // Paid user - show manage subscription options
+      // Paid user - redirect to Stripe Customer Portal
       if (isWeb) {
-        if (window.confirm('Would you like to manage your subscription?\n\n• Update payment method\n• Change plan\n• Cancel subscription\n\nYou will be redirected to the Stripe Customer Portal.')) {
-          // TODO: Implement Stripe Customer Portal
-          window.alert('Stripe Customer Portal integration coming soon!\n\nFor now, please contact support to manage your subscription.');
+        try {
+          setLoadingSubscription(true);
+          const portalUrl = await subscriptionService.getCustomerPortal();
+          if (portalUrl) {
+            window.open(portalUrl, '_blank');
+          } else {
+            window.alert('Unable to access subscription portal. Please try again or contact support.');
+          }
+        } catch (error) {
+          console.error('Failed to get customer portal:', error);
+          window.alert('Unable to access subscription portal. Please try again or contact support.');
+        } finally {
+          setLoadingSubscription(false);
         }
       } else {
         Alert.alert(
           'Manage Subscription',
           `Current Plan: ${getPlanDisplayName(currentPlan)}\n\nWhat would you like to do?`,
           [
-            { text: 'Update Payment Method', onPress: () => Alert.alert('Coming Soon', 'Payment method updates will be available soon.') },
+            { text: 'Update Payment Method', onPress: () => openSubscriptionPortal() },
             { text: 'Change Plan', onPress: () => setShowPlansModal(true) },
             { text: 'Cancel Subscription', onPress: handleCancelSubscription, style: 'destructive' },
             { text: 'Close', style: 'cancel' },
@@ -255,14 +266,52 @@ export default function Profile() {
     }
   };
 
-  const handleCancelSubscription = () => {
+  const openSubscriptionPortal = async () => {
+    try {
+      setLoadingSubscription(true);
+      const portalUrl = await subscriptionService.getCustomerPortal();
+      if (portalUrl) {
+        const { Linking } = require('react-native');
+        await Linking.openURL(portalUrl);
+      } else {
+        Alert.alert('Error', 'Unable to access subscription portal. Please try again.');
+      }
+    } catch (error) {
+      console.error('Failed to get customer portal:', error);
+      Alert.alert('Error', 'Unable to access subscription portal. Please contact support.');
+    } finally {
+      setLoadingSubscription(false);
+    }
+  };
+
+  const handleCancelSubscription = async () => {
     const planName = getPlanDisplayName(user?.plan);
     const message = `Are you sure you want to cancel your ${planName} subscription?\n\nYou'll lose access to:\n• Unlimited scans\n• Premium features\n• AI capabilities\n\nYour subscription will remain active until the end of your billing period.`;
     
     if (isWeb) {
       if (window.confirm(message)) {
-        // TODO: Implement cancellation API call
-        window.alert('Cancellation request received!\n\nYour subscription will be cancelled at the end of your current billing period.\n\n(API integration coming soon)');
+        try {
+          setLoadingSubscription(true);
+          // Get active subscription to get the subscription ID
+          const activeSubscription = await subscriptionService.getActiveSubscription(user?.id || '');
+          if (activeSubscription?.id || activeSubscription?.providerSubscriptionId) {
+            const subscriptionId = activeSubscription.providerSubscriptionId || activeSubscription.id;
+            const result = await subscriptionService.cancelSubscription(subscriptionId, user?.id);
+            if (result.cancelAt) {
+              const cancelDate = new Date(result.cancelAt * 1000).toLocaleDateString();
+              window.alert(`Subscription cancelled successfully.\n\nYour access will continue until ${cancelDate}.`);
+            } else {
+              window.alert('Subscription cancelled successfully.\n\nYour access will continue until the end of your billing period.');
+            }
+          } else {
+            window.alert('No active subscription found. Please contact support if this is an error.');
+          }
+        } catch (error) {
+          console.error('Failed to cancel subscription:', error);
+          window.alert('Failed to cancel subscription. Please contact support.');
+        } finally {
+          setLoadingSubscription(false);
+        }
       }
     } else {
       Alert.alert(
@@ -272,9 +321,28 @@ export default function Profile() {
           { text: 'Keep Subscription', style: 'cancel' },
           {
             text: 'Cancel Subscription',
-            onPress: () => {
-              // TODO: Implement cancellation API call
-              Alert.alert('Cancellation Confirmed', 'Your subscription will be cancelled at the end of your current billing period.');
+            onPress: async () => {
+              try {
+                setLoadingSubscription(true);
+                const activeSubscription = await subscriptionService.getActiveSubscription(user?.id || '');
+                if (activeSubscription?.id || activeSubscription?.providerSubscriptionId) {
+                  const subscriptionId = activeSubscription.providerSubscriptionId || activeSubscription.id;
+                  const result = await subscriptionService.cancelSubscription(subscriptionId, user?.id);
+                  if (result.cancelAt) {
+                    const cancelDate = new Date(result.cancelAt * 1000).toLocaleDateString();
+                    Alert.alert('Cancelled', `Your access will continue until ${cancelDate}.`);
+                  } else {
+                    Alert.alert('Cancelled', 'Your access will continue until the end of your billing period.');
+                  }
+                } else {
+                  Alert.alert('Error', 'No active subscription found. Please contact support.');
+                }
+              } catch (error) {
+                console.error('Failed to cancel subscription:', error);
+                Alert.alert('Error', 'Failed to cancel subscription. Please contact support.');
+              } finally {
+                setLoadingSubscription(false);
+              }
             },
             style: 'destructive',
           },
