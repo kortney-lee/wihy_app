@@ -1808,6 +1808,7 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
 
   /**
    * Save the meal plan to user's library for future use
+   * NOTE: This only saves - does NOT navigate to shopping list
    */
   const handleSaveMealPlan = async () => {
     if (!acceptedPlan) {
@@ -1840,25 +1841,12 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
       console.log('[SaveMealPlan] Plan saved successfully!');
       setMealPlanSaved(true);
       
-      // Extract shopping list and navigate to ShoppingListScreen
-      const shoppingItems = extractShoppingListFromPlan(acceptedPlan);
-      const totalItems = Object.values(shoppingItems).flat().length;
-      
-      if (totalItems > 0) {
-        await saveShoppingListToStorage(shoppingItems);
-      }
-      
-      // Close success modal and navigate to ShoppingListScreen
-      setShowMealPlanSuccess(false);
-      setMealPlanSaved(false);
-      
-      navigation.navigate('ShoppingList', { 
-        fromMealPlan: true,
-        shoppingListData: {
-          totalItems,
-          itemsByCategory: shoppingItems,
-        }
-      });
+      // Just show success - don't navigate (user can click "View Shopping List" separately)
+      Alert.alert(
+        'Saved! ✓',
+        'Your meal plan has been saved to your library.',
+        [{ text: 'OK' }]
+      );
     } catch (error: any) {
       console.error('[SaveMealPlan] Error saving:', error);
       
@@ -1875,24 +1863,11 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
         
         setMealPlanSaved(true);
         
-        // Still navigate to shopping list even on local save
-        const shoppingItems = extractShoppingListFromPlan(acceptedPlan);
-        const totalItems = Object.values(shoppingItems).flat().length;
-        
-        if (totalItems > 0) {
-          await saveShoppingListToStorage(shoppingItems);
-        }
-        
-        setShowMealPlanSuccess(false);
-        setMealPlanSaved(false);
-        
-        navigation.navigate('ShoppingList', { 
-          fromMealPlan: true,
-          shoppingListData: {
-            totalItems,
-            itemsByCategory: shoppingItems,
-          }
-        });
+        Alert.alert(
+          'Saved Locally ✓',
+          'Your meal plan has been saved to your device.',
+          [{ text: 'OK' }]
+        );
       } catch (storageError) {
         console.error('[SaveMealPlan] Storage error:', storageError);
         Alert.alert('Error', 'Failed to save meal plan. Please try again.');
