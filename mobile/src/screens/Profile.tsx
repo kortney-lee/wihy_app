@@ -349,15 +349,14 @@ export default function Profile() {
     }
   };
 
-  // Check if dev/admin mode (show all options)
-  const isDevMode = __DEV__ || user?.plan === 'corporate-enterprise' || user?.plan === 'workplace-plus';
-  const showFamilyOption = isDevMode || hasFamilyAccess(user);
-  const showCoachOption = isDevMode || hasCoachAccess(user);
-  
   const currentPlan = user?.plan || 'free';
   const planBadge = getPlanBadge(currentPlan);
   const isFreeUser = currentPlan === 'free';
   const isPaidUser = !isFreeUser;
+  
+  // Only show family/coach options if user actually has those plans
+  const showFamilyOption = hasFamilyAccess(user);
+  const showCoachOption = hasCoachAccess(user);
 
   // Build subscription section items dynamically based on plan
   const buildSubscriptionItems = () => {
@@ -408,8 +407,8 @@ export default function Profile() {
       });
     }
     
-    // Power-Up Add-ons (always show for premium users)
-    if (isPaidUser || isDevMode) {
+    // Power-Up Add-ons (show for paid users only)
+    if (isPaidUser) {
       items.push({
         id: 'addons',
         title: 'Power-Up Add-ons',
@@ -426,7 +425,7 @@ export default function Profile() {
       });
     }
     
-    // Family option - only show if user has family access or in dev mode
+    // Family option - only show if user has family plan
     if (showFamilyOption) {
       items.push({
         id: 'family',
@@ -438,7 +437,7 @@ export default function Profile() {
       });
     }
     
-    // Coach option - only show if user has coach access or in dev mode
+    // Coach option - only show if user has coach plan
     if (showCoachOption) {
       items.push({
         id: 'coaching',

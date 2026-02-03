@@ -57,7 +57,9 @@ export const SubscriptionManagementScreen: React.FC<Props> = ({ navigation }) =>
     setLoading(true);
     try {
       // Load active subscription
-      const subscription = await subscriptionService.getActiveSubscription();
+      const subscription = user?.id
+        ? await subscriptionService.getActiveSubscription(user.id)
+        : null;
       setActiveSubscription(subscription);
 
       // Load available plans and add-ons
@@ -118,14 +120,12 @@ export const SubscriptionManagementScreen: React.FC<Props> = ({ navigation }) =>
   };
 
   const handleUpgrade = async (newPlanId: string) => {
-    if (!activeSubscription?.id) return;
+    const subscriptionId = activeSubscription?.providerSubscriptionId || activeSubscription?.id;
+    if (!subscriptionId) return;
 
     setProcessing(true);
     try {
-      await subscriptionService.upgradeSubscription(
-        activeSubscription.id,
-        newPlanId as any
-      );
+      await subscriptionService.upgradeSubscription(subscriptionId, newPlanId as any);
       
       Alert.alert('Success', 'Your subscription has been upgraded!');
       await loadSubscriptionData();

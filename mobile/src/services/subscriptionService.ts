@@ -4,7 +4,7 @@
  * Handles consumer subscriptions and add-ons
  * for both web (Stripe) and native (Apple/Google IAP)
  * 
- * Base URL: https://payment.wihy.ai/api/stripe
+ * Base URL: https://payment.wihy.ai
  */
 
 import { Platform } from 'react-native';
@@ -14,12 +14,17 @@ import { apiClient } from './apiClient';
 
 export type PlanId = 
   | 'free'
-  | 'pro_monthly' 
+  | 'pro_monthly'
+  | 'pro_monthly_plus'
   | 'pro_yearly'
   | 'family_basic'
-  | 'family_pro'
   | 'family_yearly'
-  | 'coach';
+  | 'family_pro_plus'
+  | 'family_pro_plus_yearly'
+  | 'coach'
+  // Legacy plan IDs (backward compatibility)
+  | 'family_pro'
+  | 'family_pro_yearly';
 
 export type AddOnId = 
   | 'wihy_coach'
@@ -52,12 +57,48 @@ export interface CheckoutSession {
 
 export interface ActiveSubscription {
   id: string;
+  providerSubscriptionId?: string;
   plan: PlanId;
   status: 'active' | 'canceled' | 'past_due' | 'trialing' | 'incomplete';
   currentPeriodEnd: number; // Unix timestamp
   auto_renew: boolean;
   provider: 'stripe' | 'apple' | 'google';
   addons?: SubscriptionAddon[];
+}
+
+interface ApiActiveSubscription {
+  id: string;
+  plan: PlanId;
+  status: 'active' | 'canceled' | 'past_due' | 'trialing' | 'incomplete';
+  provider: 'stripe' | 'apple' | 'google';
+  startDate?: string;
+  endDate?: string;
+  trialEndDate?: string | null;
+  provider_subscription_id?: string;
+}
+
+interface ActiveSubscriptionResponse {
+  success: boolean;
+  hasActiveSubscription: boolean;
+  subscription: ApiActiveSubscription | null;
+  userPlan: PlanId;
+  userSubscriptionStatus: string;
+}
+
+interface VerifySubscriptionResponse {
+  success: boolean;
+  isActive: boolean;
+  currentPlan: PlanId;
+  subscriptionStatus: string;
+  providers?: {
+    stripe?: {
+      status: string;
+      currentPeriodEnd?: string;
+      cancelAtPeriodEnd?: boolean;
+    } | null;
+    apple?: { status: string; expiresDate?: string } | null;
+    google?: { status: string; expiresDate?: string } | null;
+  };
 }
 
 export interface SubscriptionAddon {
@@ -77,23 +118,23 @@ export interface UpgradeOption {
 // ============= SERVICE IMPLEMENTATION =============
 
 class SubscriptionService {
-  private baseUrl = 'https://payment.wihy.ai/api/stripe';
+  private baseUrl = 'https://payment.wihy.ai';
 
   /**
-   * Get all available subscription plans
-   * GET /api/stripe/plans
+  * Get all available subscription plans
+  * GET /api/stripe/plans
    */
   async getPlans(): Promise<SubscriptionPlan[]> {
     const response = await apiClient.payment<{ success: boolean; plans: SubscriptionPlan[] }>(
       'GET',
-      '/plans'
+      '/api/stripe/plans'
     );
     return response.plans;
   }
 
   /**
-   * Create Stripe checkout session for web
-   * POST /api/stripe/create-checkout-session
+  * Create Stripe checkout session for web
+  * POST /api/stripe/create-checkout-session
    * 
    * @param plan - Plan ID (e.g., 'pro_monthly')
    * @param email - User email
@@ -108,7 +149,7 @@ class SubscriptionService {
   ): Promise<CheckoutSession> {
     const response = await apiClient.payment<{ success: boolean } & CheckoutSession>(
       'POST',
-      '/create-checkout-session',
+      '/api/stripe/create-checkout-session',
       {
         plan,
         email,
@@ -133,20 +174,25 @@ class SubscriptionService {
   async getCustomerPortal(): Promise<string> {
     const response = await apiClient.payment<{ success: boolean; portalUrl: string }>(
       'GET',
-      '/customer-portal'
+      '/api/stripe/customer-portal'
     );
     return response.portalUrl;
   }
 
   /**
    * Cancel subscription
-   * POST /api/stripe/cancel
+   * POST /api/stripe/cancel-subscription
    */
-  async cancelSubscription(): Promise<void> {
-    await apiClient.payment<{ success: boolean; message: string }>(
+  async cancelSubscription(subscriptionId: string, userId?: string): Promise<{ cancelAt?: number }> {
+    const response = await apiClient.payment<{ success: boolean; cancelAt?: number }>(
       'POST',
-      '/cancel'
+      '/api/stripe/cancel-subscription',
+      {
+        subscriptionId,
+        ...(userId ? { userId } : {}),
+      }
     );
+    return { cancelAt: response.cancelAt };
   }
 
   /**
@@ -156,28 +202,28 @@ class SubscriptionService {
   async getAddons(): Promise<AddOn[]> {
     const response = await apiClient.payment<{ success: boolean; addons: AddOn[] }>(
       'GET',
-      '/addons'
+      '/api/stripe/addons'
     );
     return response.addons;
   }
 
   /**
-   * Get valid upgrade options from current plan
-   * GET /api/stripe/upgrade-options/:currentPlan
+  * Get valid upgrade options from current plan
+  * GET /api/stripe/upgrade-options/:currentPlan
    * 
    * @param currentPlan - Current plan ID (e.g., 'pro_monthly')
    */
   async getUpgradeOptions(currentPlan: PlanId): Promise<UpgradeOption[]> {
     const response = await apiClient.payment<{ success: boolean; upgrades: UpgradeOption[] }>(
       'GET',
-      `/upgrade-options/${currentPlan}`
+      `/api/stripe/upgrade-options/${currentPlan}`
     );
     return response.upgrades;
   }
 
   /**
-   * Add an add-on or integration to existing subscription
-   * POST /api/stripe/add-addon
+  * Add an add-on or integration to existing subscription
+  * POST /api/stripe/add-addon
    * 
    * @param subscriptionId - Stripe subscription ID
    * @param addonId - Add-on or integration ID
@@ -185,7 +231,7 @@ class SubscriptionService {
   async addAddon(subscriptionId: string, addonId: AddOnId): Promise<SubscriptionAddon> {
     const response = await apiClient.payment<{ success: boolean; addon: SubscriptionAddon }>(
       'POST',
-      '/add-addon',
+      '/api/stripe/add-addon',
       {
         subscriptionId,
         addonId,
@@ -195,15 +241,15 @@ class SubscriptionService {
   }
 
   /**
-   * Remove an add-on from subscription
-   * POST /api/stripe/remove-addon
+  * Remove an add-on from subscription
+  * POST /api/stripe/remove-addon
    * 
    * @param subscriptionItemId - Stripe subscription item ID
    */
   async removeAddon(subscriptionItemId: string): Promise<void> {
     await apiClient.payment<{ success: boolean; message: string }>(
       'POST',
-      '/remove-addon',
+      '/api/stripe/remove-addon',
       {
         subscriptionItemId,
       }
@@ -211,8 +257,8 @@ class SubscriptionService {
   }
 
   /**
-   * Upgrade subscription to a higher-tier plan
-   * POST /api/stripe/upgrade
+  * Upgrade subscription to a higher-tier plan
+  * POST /api/stripe/upgrade
    * 
    * @param subscriptionId - Current Stripe subscription ID
    * @param newPlan - New plan ID to upgrade to
@@ -220,7 +266,7 @@ class SubscriptionService {
   async upgradeSubscription(subscriptionId: string, newPlan: PlanId): Promise<ActiveSubscription> {
     const response = await apiClient.payment<{ success: boolean; subscription: ActiveSubscription }>(
       'POST',
-      '/upgrade',
+      '/api/stripe/upgrade',
       {
         subscriptionId,
         newPlan,
@@ -231,15 +277,41 @@ class SubscriptionService {
 
   /**
    * Get active subscription from any provider (Stripe, Apple, Google)
-   * GET /api/subscriptions/active
+   * GET /api/subscriptions/active/:userId
    */
-  async getActiveSubscription(): Promise<ActiveSubscription | null> {
+  async getActiveSubscription(userId: string): Promise<ActiveSubscription | null> {
     try {
-      const response = await apiClient.payment<{ success: boolean; data: ActiveSubscription }>(
+      const response = await apiClient.payment<ActiveSubscriptionResponse>(
         'GET',
-        '/subscriptions/active'
+        `/api/subscriptions/active/${userId}`
       );
-      return response.data;
+
+      if (!response.hasActiveSubscription || !response.subscription) {
+        return null;
+      }
+
+      const mapped: ActiveSubscription = {
+        id: response.subscription.provider_subscription_id || response.subscription.id,
+        providerSubscriptionId: response.subscription.provider_subscription_id,
+        plan: response.subscription.plan,
+        status: response.subscription.status,
+        provider: response.subscription.provider,
+        currentPeriodEnd: response.subscription.endDate
+          ? Math.floor(new Date(response.subscription.endDate).getTime() / 1000)
+          : 0,
+        auto_renew: response.subscription.status === 'active',
+      };
+
+      if (!mapped.providerSubscriptionId) {
+        const subscriptions = await this.getAllSubscriptions(userId);
+        const active = subscriptions.find((sub) => sub.status === 'active');
+        if (active?.provider_subscription_id) {
+          mapped.providerSubscriptionId = active.provider_subscription_id;
+          mapped.id = active.provider_subscription_id;
+        }
+      }
+
+      return mapped;
     } catch (error) {
       console.log('[SubscriptionService] No active subscription found');
       return null;
@@ -247,16 +319,29 @@ class SubscriptionService {
   }
 
   /**
+   * Get all subscriptions for a user (past and present)
+   * GET /api/subscriptions/:userId
+   */
+  async getAllSubscriptions(userId: string): Promise<Array<ApiActiveSubscription & { provider_subscription_id?: string }>> {
+    const response = await apiClient.payment<{ success: boolean; subscriptions: Array<ApiActiveSubscription & { provider_subscription_id?: string }>; data?: Array<ApiActiveSubscription & { provider_subscription_id?: string }> }>(
+      'GET',
+      `/api/subscriptions/${userId}`
+    );
+    return response.subscriptions || response.data || [];
+  }
+
+  /**
    * Verify all subscriptions (Stripe, Apple, Google) and sync status
    * POST /api/subscriptions/verify
    */
-  async verifyAllSubscriptions(): Promise<ActiveSubscription | null> {
+  async verifyAllSubscriptions(userId: string): Promise<VerifySubscriptionResponse | null> {
     try {
-      const response = await apiClient.payment<{ success: boolean; data: ActiveSubscription }>(
+      const response = await apiClient.payment<VerifySubscriptionResponse>(
         'POST',
-        '/subscriptions/verify'
+        '/api/subscriptions/verify',
+        { userId }
       );
-      return response.data;
+      return response;
     } catch (error) {
       console.error('[SubscriptionService] Failed to verify subscriptions:', error);
       return null;
@@ -360,32 +445,32 @@ class SubscriptionService {
   /**
    * Check if user has active subscription
    */
-  async hasActiveSubscription(): Promise<boolean> {
-    const subscription = await this.getActiveSubscription();
+  async hasActiveSubscription(userId: string): Promise<boolean> {
+    const subscription = await this.getActiveSubscription(userId);
     return subscription?.status === 'active';
   }
 
   /**
    * Check if user has specific plan
    */
-  async hasPlan(planId: PlanId): Promise<boolean> {
-    const subscription = await this.getActiveSubscription();
+  async hasPlan(userId: string, planId: PlanId): Promise<boolean> {
+    const subscription = await this.getActiveSubscription(userId);
     return subscription?.plan === planId;
   }
 
   /**
    * Get user's current plan (or 'free' if no subscription)
    */
-  async getCurrentPlan(): Promise<PlanId> {
-    const subscription = await this.getActiveSubscription();
+  async getCurrentPlan(userId: string): Promise<PlanId> {
+    const subscription = await this.getActiveSubscription(userId);
     return subscription?.plan || 'free';
   }
 
   /**
    * Check if user can upgrade to a specific plan
    */
-  async canUpgradeTo(newPlan: PlanId): Promise<boolean> {
-    const currentPlan = await this.getCurrentPlan();
+  async canUpgradeTo(userId: string, newPlan: PlanId): Promise<boolean> {
+    const currentPlan = await this.getCurrentPlan(userId);
     const upgradeOptions = await this.getUpgradeOptions(currentPlan);
     return upgradeOptions.some(option => option.id === newPlan);
   }
