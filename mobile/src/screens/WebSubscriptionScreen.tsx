@@ -23,6 +23,7 @@ import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import MultiAuthLogin from '../components/auth/MultiAuthLogin';
 import { WebNavHeader } from '../components/web/WebNavHeader';
+import { EmbeddedCheckout } from '../components/web/EmbeddedCheckout';
 
 // Import CSS for web only
 if (Platform.OS === 'web') {
@@ -282,6 +283,11 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
   const [selectedPlan, setSelectedPlan] = useState<typeof CONSUMER_PLANS[0] | null>(null);
   const [pendingCheckoutPlanId, setPendingCheckoutPlanId] = useState<string | null>(null);
   const [pendingCheckoutCycle, setPendingCheckoutCycle] = useState<'monthly' | 'yearly'>('monthly');
+  
+  // Embedded checkout state
+  const [showEmbeddedCheckout, setShowEmbeddedCheckout] = useState(false);
+  const [checkoutClientSecret, setCheckoutClientSecret] = useState<string | null>(null);
+  const [checkoutPlanName, setCheckoutPlanName] = useState<string>('');
 
   const isDesktop = width >= 1024;
   const isTablet = width >= 640;
@@ -504,10 +510,10 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
       return;
     }
 
-    // User is authenticated - proceed to checkout
+    // User is authenticated - proceed to embedded checkout
     setIsLoading(true);
     try {
-      console.log('[Subscribe] Creating checkout for authenticated user:', { userId: user?.id, email: user?.email });
+      console.log('[Subscribe] Creating embedded checkout for authenticated user:', { userId: user?.id, email: user?.email });
       
       // Generate unique checkout attempt ID for tracing
       const checkoutAttemptId = generateCheckoutAttemptId();
@@ -528,8 +534,15 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
       console.log('[Subscribe] Plan ID for checkout:', checkoutPlanId);
       const response = await checkoutService.initiateCheckout(checkoutPlanId, user.email, user.id, checkoutAttemptId);
         
-      if (response.success && response.checkoutUrl) {
-        console.log('[Subscribe] Redirecting to checkout');
+      if (response.success && response.clientSecret) {
+        // Embedded checkout - show modal with Stripe form
+        console.log('[Subscribe] Opening embedded checkout');
+        setCheckoutClientSecret(response.clientSecret);
+        setCheckoutPlanName(plan.name);
+        setShowEmbeddedCheckout(true);
+      } else if (response.success && response.checkoutUrl) {
+        // Fallback to redirect checkout if backend doesn't support embedded
+        console.log('[Subscribe] Falling back to redirect checkout');
         if (typeof window !== 'undefined') {
           window.location.href = response.checkoutUrl;
         }
@@ -545,6 +558,24 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // Handle embedded checkout completion
+  const handleCheckoutComplete = () => {
+    console.log('[Subscribe] Embedded checkout completed');
+    setShowEmbeddedCheckout(false);
+    setCheckoutClientSecret(null);
+    // Redirect to success page
+    if (typeof window !== 'undefined') {
+      window.location.href = `${window.location.origin}/payment/success`;
+    }
+  };
+
+  // Handle embedded checkout cancel
+  const handleCheckoutCancel = () => {
+    console.log('[Subscribe] Embedded checkout cancelled');
+    setShowEmbeddedCheckout(false);
+    setCheckoutClientSecret(null);
   };
 
   // Navigate to tab screens (inside Main TabNavigator)
@@ -565,6 +596,16 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
       <div className="pricing-page">
         {/* @ts-ignore */}
         <WebNavHeader activePage="subscription" />
+        
+        {/* Embedded Checkout Modal */}
+        {showEmbeddedCheckout && checkoutClientSecret && (
+          <EmbeddedCheckout
+            clientSecret={checkoutClientSecret}
+            onComplete={handleCheckoutComplete}
+            onCancel={handleCheckoutCancel}
+            planName={checkoutPlanName}
+          />
+        )}
         
         <div className="pricing-content">
           {/* Hero Section */}

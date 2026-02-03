@@ -45,6 +45,7 @@ export interface CheckoutResponse {
   success: boolean;
   checkoutUrl?: string;
   sessionId?: string;
+  clientSecret?: string; // For embedded checkout
   error?: string;
 }
 
@@ -375,19 +376,36 @@ class CheckoutService {
         };
       }
 
+      // Handle embedded checkout (clientSecret) - preferred for web
+      const clientSecret = data.clientSecret || data.client_secret;
+      
       // Handle both old (checkout_url) and new (url) response formats
       const checkoutUrl = data.url || data.checkout_url;
       const sessionId = data.sessionId || data.session_id;
 
-      if (response.ok && data.success && checkoutUrl) {
+      if (response.ok && data.success) {
         console.log('[Checkout] === CHECKOUT SESSION CREATED ===');
-        console.log('[Checkout] Checkout URL:', checkoutUrl);
         
-        return {
-          success: true,
-          checkoutUrl: checkoutUrl,
-          sessionId: sessionId,
-        };
+        // Prefer embedded checkout if clientSecret is available
+        if (clientSecret) {
+          console.log('[Checkout] Embedded checkout mode - clientSecret available');
+          return {
+            success: true,
+            clientSecret: clientSecret,
+            sessionId: sessionId,
+            checkoutUrl: checkoutUrl, // May be null in embedded mode
+          };
+        }
+        
+        // Fallback to redirect checkout
+        if (checkoutUrl) {
+          console.log('[Checkout] Redirect checkout mode - URL:', checkoutUrl);
+          return {
+            success: true,
+            checkoutUrl: checkoutUrl,
+            sessionId: sessionId,
+          };
+        }
       }
 
       console.log('[Checkout] === CHECKOUT INITIATION FAILED ===');
