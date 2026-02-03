@@ -34,6 +34,7 @@ export { researchService } from './researchService';
 export { notificationService } from './notificationService';
 export { debugLogService } from './debugLogService';
 export { consumptionService } from './consumptionService';
+export { cookingService } from './cookingService';
 
 // NEW: Export Wellness Service (user.wihy.ai)
 export { wellnessService, WellnessService } from './wellnessService';
@@ -246,6 +247,7 @@ export type {
   ShoppingList as MealShoppingList,
   SavedMeal,
   QuickTemplatePreset,
+  SavedMealPlan,
   // Progressive Enhancement Types (NEW!)
   EnhancementLevel,
   AvailableStore,
@@ -264,6 +266,21 @@ export type {
   ShoppingListItem,
   ShoppingListStatus,
 } from './shoppingService';
+
+// Cooking Service Types (Combined Shopping + Cooking Instructions)
+export type {
+  CookingIngredient,
+  CookingInstruction,
+  MealNutrition,
+  CookingMeal,
+  ShoppingListByCategory,
+  ShoppingListData,
+  CookingData,
+  CombinedCookingResponse,
+  ShoppingOnlyResponse,
+  InstructionsOnlyResponse,
+  SingleMealResponse,
+} from './cookingService';
 
 export type {
   CoachInvitation,

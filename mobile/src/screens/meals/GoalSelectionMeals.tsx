@@ -9,7 +9,7 @@
  * Mirrors the fitness GoalSelectionV2 pattern.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -23,7 +23,9 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons, BrandInput } from '../../components/shared';
 import { useTheme } from '../../context/ThemeContext';
+import { useAuth } from '../../context/AuthContext';
 import { API_CONFIG } from '../../services/config';
+import { mealService, type SavedMealPlan } from '../../services';
 import {
   ModeToggle,
   DietSelector,
@@ -225,6 +227,7 @@ export const GoalSelectionMeals: React.FC<GoalSelectionMealsProps> = ({
   onTemplateCleared,
 }) => {
   const { theme } = useTheme();
+  const { userId, authToken } = useAuth();
   
   // Mode state - default to 'plan' if template provided
   const [mode, setMode] = useState<MealMode>(initialTemplate ? 'plan' : 'quick');
@@ -260,12 +263,48 @@ export const GoalSelectionMeals: React.FC<GoalSelectionMealsProps> = ({
   
   // Saved mode state
   const [selectedSavedMealIds, setSelectedSavedMealIds] = useState<string[]>([]);
-  const [savedMeals, setSavedMeals] = useState<any[]>([]);
+  const [savedMeals, setSavedMeals] = useState<SavedMealPlan[]>([]);
   const [loadingSavedMeals, setLoadingSavedMeals] = useState(false);
   const [savedMealsError, setSavedMealsError] = useState<string | null>(null);
   
   // Brand preferences (shared across all modes)
   const [preferredBrands, setPreferredBrands] = useState<string[]>([]);
+
+  // Fetch saved meals when switching to 'saved' mode
+  const fetchSavedMeals = useCallback(async () => {
+    if (!userId) {
+      setSavedMealsError('Please log in to view saved meals');
+      return;
+    }
+    
+    setLoadingSavedMeals(true);
+    setSavedMealsError(null);
+    
+    try {
+      console.log('[GoalSelectionMeals] Fetching saved meals for user:', userId);
+      const response = await mealService.getSavedMealPlans(userId, { limit: 20 }, authToken || undefined);
+      
+      if (response.success && response.data) {
+        console.log('[GoalSelectionMeals] Loaded saved meals:', response.data.length);
+        setSavedMeals(response.data);
+      } else {
+        console.log('[GoalSelectionMeals] No saved meals found');
+        setSavedMeals([]);
+      }
+    } catch (error) {
+      console.error('[GoalSelectionMeals] Error fetching saved meals:', error);
+      setSavedMealsError('Failed to load saved meals. Please try again.');
+    } finally {
+      setLoadingSavedMeals(false);
+    }
+  }, [userId, authToken]);
+
+  // Load saved meals when mode changes to 'saved'
+  useEffect(() => {
+    if (mode === 'saved') {
+      fetchSavedMeals();
+    }
+  }, [mode, fetchSavedMeals]);
 
   // Update duration when mode changes
   useEffect(() => {

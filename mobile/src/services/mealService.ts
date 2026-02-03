@@ -2632,6 +2632,153 @@ class MealService {
     );
     return response.json();
   }
+
+  // ============= SAVED MEALS & REORDER =============
+
+  /**
+   * Get user's saved meal plans for reordering
+   * GET /api/meals/saved/:userId
+   * 
+   * Returns saved meal programs with metadata for browse/reorder
+   * 
+   * @param userId - User ID
+   * @param options - Pagination and sorting options
+   */
+  async getSavedMealPlans(
+    userId: string,
+    options?: {
+      limit?: number;
+      offset?: number;
+      sortBy?: 'created_at' | 'last_ordered';
+      order?: 'desc' | 'asc';
+    },
+    authToken?: string
+  ): Promise<{
+    success: boolean;
+    meals: SavedMealPlan[];
+    total: number;
+    hasMore: boolean;
+    pagination: { limit: number; offset: number; returned: number };
+  }> {
+    const headers = this.getHeaders(authToken);
+    
+    const params = new URLSearchParams();
+    if (options?.limit) params.append('limit', String(options.limit));
+    if (options?.offset) params.append('offset', String(options.offset));
+    if (options?.sortBy) params.append('sortBy', options.sortBy);
+    if (options?.order) params.append('order', options.order);
+    
+    const queryString = params.toString();
+    const url = `${this.baseUrl}/api/meals/saved/${userId}${queryString ? '?' + queryString : ''}`;
+    
+    console.log('[MealService] getSavedMealPlans:', url);
+    
+    try {
+      const response = await fetchWithLogging(url, { headers });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('[MealService] getSavedMealPlans failed:', {
+          status: response.status,
+          error: errorText,
+        });
+        throw new Error(`Failed to get saved meals: ${response.status}`);
+      }
+      
+      return response.json();
+    } catch (error) {
+      console.error('[MealService] getSavedMealPlans error:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Reorder saved meals to Instacart shopping list
+   * POST /api/meals/reorder
+   * 
+   * @param userId - User ID
+   * @param savedMealIds - Array of meal program IDs to reorder
+   * @param options - Optional servings and store preferences
+   */
+  async reorderMeals(
+    userId: string,
+    savedMealIds: string[],
+    options?: {
+      servings?: number;
+      preferredStores?: string[];
+    },
+    authToken?: string
+  ): Promise<{
+    success: boolean;
+    shoppingListId: string;
+    instacartUrl?: string;
+    meals: Array<{ id: string; name: string }>;
+    totalIngredients: number;
+    estimatedCost: number;
+    message: string;
+  }> {
+    const headers = this.getHeaders(authToken);
+    
+    const body = {
+      userId,
+      savedMealIds,
+      ...(options?.servings && { servings: options.servings }),
+      ...(options?.preferredStores && { preferredStores: options.preferredStores }),
+    };
+    
+    console.log('[MealService] reorderMeals:', JSON.stringify(body, null, 2));
+    
+    try {
+      const response = await fetchWithLogging(
+        `${this.baseUrl}/api/meals/reorder`,
+        {
+          method: 'POST',
+          headers,
+          body: JSON.stringify(body),
+        }
+      );
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        console.error('[MealService] reorderMeals failed:', {
+          status: response.status,
+          error: errorData,
+        });
+        throw new Error(errorData.error || `Failed to reorder meals: ${response.status}`);
+      }
+      
+      return response.json();
+    } catch (error) {
+      console.error('[MealService] reorderMeals error:', error);
+      throw error;
+    }
+  }
+}
+
+// ============= SAVED MEAL PLAN TYPE =============
+
+export interface SavedMealPlan {
+  id: string;
+  userId: string;
+  name: string;
+  displayTitle: string;
+  description?: string;
+  mode: 'quick' | 'plan' | 'diet';
+  meals: Array<{
+    id: string;
+    name: string;
+    mealType: string;
+    cuisineType?: string;
+    servings: number;
+    imageUrl?: string | null;
+  }>;
+  totalMeals: number;
+  duration?: number;
+  createdAt: string;
+  lastOrderedAt?: string;
+  orderCount: number;
+  estimatedCost?: number;
+  ingredientCount: number;
 }
 
 export const mealService = new MealService();
