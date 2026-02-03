@@ -172,14 +172,113 @@ export default function Profile() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Helper functions for plan display
+  const getPlanDisplayName = (plan?: string): string => {
+    const planMap: Record<string, string> = {
+      'free': 'Free',
+      'pro_monthly': 'Premium',
+      'pro_monthly_plus': 'Premium Plus',
+      'pro_yearly': 'Premium Annual',
+      'family_basic': 'Family Basic',
+      'family_yearly': 'Family Basic Annual',
+      'family_pro_plus': 'Family Pro Plus',
+      'family_pro_plus_yearly': 'Family Pro Plus Annual',
+      'coach': 'Coach Platform',
+    };
+    return planMap[plan || 'free'] || 'Free';
+  };
+
+  const getPlanPrice = (plan?: string): string => {
+    const priceMap: Record<string, string> = {
+      'pro_monthly': '$12.99/month',
+      'pro_monthly_plus': '$24.99/month',
+      'pro_yearly': '$99/year',
+      'family_basic': '$34.99/month',
+      'family_yearly': '$349.99/year',
+      'family_pro_plus': '$49.99/month',
+      'family_pro_plus_yearly': '$479.99/year',
+      'coach': '$29.99/month',
+    };
+    return priceMap[plan || 'free'] || '';
+  };
+
+  const getPlanIcon = (plan?: string): string => {
+    if (plan?.includes('family')) return 'people';
+    if (plan === 'coach') return 'school';
+    if (plan?.includes('pro') || plan?.includes('premium')) return 'star';
+    return 'gift';
+  };
+
+  const getPlanBadge = (plan?: string): { text: string; color: string } => {
+    if (!plan || plan === 'free') return { text: 'FREE', color: '#6b7280' };
+    if (plan?.includes('family')) return { text: 'FAMILY', color: '#8b5cf6' };
+    if (plan === 'coach') return { text: 'COACH', color: '#f97316' };
+    if (plan?.includes('plus')) return { text: 'PREMIUM+', color: '#3b82f6' };
+    return { text: 'PREMIUM', color: '#3b82f6' };
+  };
+
+  const getPlanSubtitle = (plan?: string): string => {
+    if (!plan || plan === 'free') {
+      return 'Basic features with limited scans';
+    }
+    const price = getPlanPrice(plan);
+    const hasAI = plan?.includes('plus') || plan === 'coach';
+    const aiText = hasAI ? ' • AI Features' : '';
+    return price + aiText;
+  };
+
   const handleSubscribe = () => {
-    if (user?.plan === 'free' || !isPremium) {
+    const currentPlan = user?.plan || 'free';
+    
+    if (currentPlan === 'free') {
+      // Free user - show upgrade options
       setShowPlansModal(true);
     } else {
+      // Paid user - show manage subscription options
+      if (isWeb) {
+        if (window.confirm('Would you like to manage your subscription?\n\n• Update payment method\n• Change plan\n• Cancel subscription\n\nYou will be redirected to the Stripe Customer Portal.')) {
+          // TODO: Implement Stripe Customer Portal
+          window.alert('Stripe Customer Portal integration coming soon!\n\nFor now, please contact support to manage your subscription.');
+        }
+      } else {
+        Alert.alert(
+          'Manage Subscription',
+          `Current Plan: ${getPlanDisplayName(currentPlan)}\n\nWhat would you like to do?`,
+          [
+            { text: 'Update Payment Method', onPress: () => Alert.alert('Coming Soon', 'Payment method updates will be available soon.') },
+            { text: 'Change Plan', onPress: () => setShowPlansModal(true) },
+            { text: 'Cancel Subscription', onPress: handleCancelSubscription, style: 'destructive' },
+            { text: 'Close', style: 'cancel' },
+          ]
+        );
+      }
+    }
+  };
+
+  const handleCancelSubscription = () => {
+    const planName = getPlanDisplayName(user?.plan);
+    const message = `Are you sure you want to cancel your ${planName} subscription?\n\nYou'll lose access to:\n• Unlimited scans\n• Premium features\n• AI capabilities\n\nYour subscription will remain active until the end of your billing period.`;
+    
+    if (isWeb) {
+      if (window.confirm(message)) {
+        // TODO: Implement cancellation API call
+        window.alert('Cancellation request received!\n\nYour subscription will be cancelled at the end of your current billing period.\n\n(API integration coming soon)');
+      }
+    } else {
       Alert.alert(
-        'Premium Active',
-        'You already have an active premium subscription!',
-        [{ text: 'OK' }]
+        'Cancel Subscription',
+        message,
+        [
+          { text: 'Keep Subscription', style: 'cancel' },
+          {
+            text: 'Cancel Subscription',
+            onPress: () => {
+              // TODO: Implement cancellation API call
+              Alert.alert('Cancellation Confirmed', 'Your subscription will be cancelled at the end of your current billing period.');
+            },
+            style: 'destructive',
+          },
+        ]
       );
     }
   };
@@ -254,54 +353,110 @@ export default function Profile() {
   const isDevMode = __DEV__ || user?.plan === 'corporate-enterprise' || user?.plan === 'workplace-plus';
   const showFamilyOption = isDevMode || hasFamilyAccess(user);
   const showCoachOption = isDevMode || hasCoachAccess(user);
+  
+  const currentPlan = user?.plan || 'free';
+  const planBadge = getPlanBadge(currentPlan);
+  const isFreeUser = currentPlan === 'free';
+  const isPaidUser = !isFreeUser;
+
+  // Build subscription section items dynamically based on plan
+  const buildSubscriptionItems = () => {
+    const items: any[] = [];
+    
+    // Current Plan Status (always show)
+    items.push({
+      id: 'current-plan',
+      title: `Current Plan: ${getPlanDisplayName(currentPlan)}`,
+      subtitle: getPlanSubtitle(currentPlan),
+      type: 'navigation' as const,
+      icon: getPlanIcon(currentPlan),
+      badge: planBadge,
+      onPress: handleSubscribe,
+    });
+    
+    // For FREE users - show upgrade option
+    if (isFreeUser) {
+      items.push({
+        id: 'upgrade',
+        title: 'Upgrade to Premium',
+        subtitle: 'Unlock unlimited scans & AI features',
+        type: 'navigation' as const,
+        icon: 'rocket',
+        onPress: handleSubscribe,
+      });
+    }
+    
+    // For PAID users - show manage subscription
+    if (isPaidUser) {
+      items.push({
+        id: 'manage',
+        title: 'Manage Subscription',
+        subtitle: 'Update payment method or change plan',
+        type: 'navigation' as const,
+        icon: 'settings',
+        onPress: handleSubscribe,
+      });
+      
+      items.push({
+        id: 'cancel',
+        title: 'Cancel Subscription',
+        subtitle: 'Downgrade to Free plan',
+        type: 'navigation' as const,
+        icon: 'close-circle',
+        destructive: true,
+        onPress: handleCancelSubscription,
+      });
+    }
+    
+    // Power-Up Add-ons (always show for premium users)
+    if (isPaidUser || isDevMode) {
+      items.push({
+        id: 'addons',
+        title: 'Power-Up Add-ons',
+        subtitle: 'WIHY Coach $9.99/mo | Instacart $7.99/mo',
+        type: 'navigation' as const,
+        icon: 'sparkles',
+        onPress: () => {
+          if (!hasAIAccess) {
+            setShowAIUpgrade(true);
+          } else {
+            setShowAddOnsModal(true);
+          }
+        },
+      });
+    }
+    
+    // Family option - only show if user has family access or in dev mode
+    if (showFamilyOption) {
+      items.push({
+        id: 'family',
+        title: 'Family Management',
+        subtitle: 'Manage family members & guardian code',
+        type: 'navigation' as const,
+        icon: 'people',
+        onPress: () => navigation.navigate('Enrollment', { tab: 'parent' }),
+      });
+    }
+    
+    // Coach option - only show if user has coach access or in dev mode
+    if (showCoachOption) {
+      items.push({
+        id: 'coaching',
+        title: 'Coach Dashboard',
+        subtitle: 'Manage clients & track progress',
+        type: 'navigation' as const,
+        icon: 'fitness',
+        onPress: () => navigation.navigate('Enrollment', { tab: 'coach' }),
+      });
+    }
+    
+    return items;
+  };
 
   const settingsSections = [
     {
       title: 'Subscription',
-      items: [
-        {
-          id: 'premium',
-          title: isPremium ? 'Premium Active' : 'Upgrade to Premium',
-          subtitle: isPremium 
-            ? 'Unlimited scans & advanced insights'
-            : 'Unlock all features and unlimited scans',
-          type: 'navigation' as const,
-          icon: isPremium ? 'checkmark-circle' : 'rocket',
-          onPress: handleSubscribe,
-        },
-        {
-          id: 'addons',
-          title: 'Power-Up Add-ons',
-          subtitle: 'WIHY Coach $9.99/mo | Instacart $7.99/mo',
-          type: 'navigation' as const,
-          icon: 'sparkles',
-          onPress: () => {
-            if (!hasAIAccess) {
-              setShowAIUpgrade(true);
-            } else {
-              setShowAddOnsModal(true);
-            }
-          },
-        },
-        // Family option - only show if user has family access or in dev mode
-        ...(showFamilyOption ? [{
-          id: 'family',
-          title: 'Family Management',
-          subtitle: 'Manage family members & guardian code',
-          type: 'navigation' as const,
-          icon: 'people',
-          onPress: () => navigation.navigate('Enrollment', { tab: 'parent' }),
-        }] : []),
-        // Coach option - only show if user has coach access or in dev mode
-        ...(showCoachOption ? [{
-          id: 'coaching',
-          title: 'Coach Dashboard',
-          subtitle: 'Manage clients & track progress',
-          type: 'navigation' as const,
-          icon: 'fitness',
-          onPress: () => navigation.navigate('Enrollment', { tab: 'coach' }),
-        }] : []),
-      ],
+      items: buildSubscriptionItems(),
     },
     {
       title: 'Account',
@@ -534,6 +689,11 @@ export default function Profile() {
         </View>
       </View>
       <View style={styles.settingsItemRight}>
+        {item.badge && (
+          <View style={[styles.planBadge, { backgroundColor: item.badge.color + '20', marginRight: 8 }]}>
+            <Text style={[styles.planBadgeText, { color: item.badge.color }]}>{item.badge.text}</Text>
+          </View>
+        )}
         {item.type === 'toggle' ? (
           <Switch
             value={item.value}
@@ -886,7 +1046,19 @@ const styles = StyleSheet.create({
     // color: theme.colors.textSecondary,
   },
   settingsItemRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
     marginLeft: 16,
+  },
+  planBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+  },
+  planBadgeText: {
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 0.5,
   },
   versionContainer: {
     alignItems: 'center',
