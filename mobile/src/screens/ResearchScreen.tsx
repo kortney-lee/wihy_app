@@ -23,6 +23,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { researchService, ResearchArticle, ResearchDashboardStats, ResearchBookmark, SearchHistoryItem } from '../services';
 import { AuthContext } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
+import { requireUserId } from '../utils/authGuards';
 
 const isWeb = Platform.OS === 'web';
 
@@ -179,7 +180,7 @@ export default function ResearchScreen({ isDashboardMode = false, onResultsViewC
   // Auth context for user ID
   const { user } = useContext(AuthContext);
   const { theme } = useTheme();
-  const userId = user?.id || '';
+  const userId = user?.id;
 
   // State management
   const [activeWorkspace, setActiveWorkspace] = useState<string | null>(null);
@@ -196,6 +197,12 @@ export default function ResearchScreen({ isDashboardMode = false, onResultsViewC
   const [userStats, setUserStats] = useState<ResearchDashboardStats | null>(null);
   const [popularTopics, setPopularTopics] = useState<string[]>([]);
   const [loadingStats, setLoadingStats] = useState(false);
+
+  const getRequiredUserId = (action: string) =>
+    requireUserId(userId, {
+      context: `ResearchScreen.${action}`,
+      showAlert: false,
+    });
 
   // Collapsing header animation
   const scrollY = useRef(new Animated.Value(0)).current;
@@ -234,9 +241,10 @@ export default function ResearchScreen({ isDashboardMode = false, onResultsViewC
       await loadRecentSearches();
       
       // Load user stats from backend
-      if (userId) {
+      const resolvedUserId = getRequiredUserId('loadDashboardData');
+      if (resolvedUserId) {
         try {
-          const stats = await researchService.getUserStats(userId);
+          const stats = await researchService.getUserStats(resolvedUserId);
           setUserStats(stats);
         } catch (statsError) {
           console.warn('[Research] Failed to load user stats:', statsError);
@@ -271,9 +279,10 @@ export default function ResearchScreen({ isDashboardMode = false, onResultsViewC
   const loadRecentSearches = async () => {
     try {
       // Try backend first if user is logged in
-      if (userId) {
+      const resolvedUserId = getRequiredUserId('loadRecentSearches');
+      if (resolvedUserId) {
         try {
-          const history = await researchService.getSearchHistory(userId, 5);
+          const history = await researchService.getSearchHistory(resolvedUserId, 5);
           if (history.searches.length > 0) {
             const searches = history.searches.map(s => s.keyword);
             setRecentSearches(searches);

@@ -17,6 +17,7 @@ import { AuthContext } from '../context/AuthContext';
 import { mealCalendarService, CalendarDay, GeneratedMeal, MealSlot } from '../services/mealCalendarService';
 import { mealService } from '../services/mealService';
 import { getMealDetails } from '../services/mealPlanService';
+import { requireUserId } from '../utils/authGuards';
 
 interface CookingDashboardProps {
   isDashboardMode?: boolean;
@@ -101,12 +102,20 @@ const CookingDashboard: React.FC<CookingDashboardProps> = ({ isDashboardMode = f
   const [error, setError] = useState<string | null>(null);
   const [loadingMealDetails, setLoadingMealDetails] = useState<Record<string, boolean>>({});
 
+  const getRequiredUserId = useCallback(
+    (action: string) =>
+      requireUserId(userId, {
+        context: `CookingDashboard.${action}`,
+        onError: (message) => setError(message),
+        showAlert: true,
+      }),
+    [userId]
+  );
+
   // Load today's meals with full details
   const loadTodaysMeals = useCallback(async (isRefresh = false) => {
-    if (!userId) {
-      console.log('[CookingDashboard] No userId');
-      return;
-    }
+    const resolvedUserId = getRequiredUserId('loadTodaysMeals');
+    if (!resolvedUserId) return;
 
     try {
       if (isRefresh) {
@@ -121,7 +130,7 @@ const CookingDashboard: React.FC<CookingDashboardProps> = ({ isDashboardMode = f
       console.log('[CookingDashboard] Loading meals for', today);
 
       // Use getMealsForDate for single day - more efficient
-      const dayData = await mealCalendarService.getMealsForDate(userId, today);
+      const dayData = await mealCalendarService.getMealsForDate(resolvedUserId, today);
 
       if (dayData && dayData.meals && dayData.meals.length > 0) {
         console.log('[CookingDashboard] Loaded', dayData.meals.length, 'scheduled meals');
@@ -166,7 +175,7 @@ const CookingDashboard: React.FC<CookingDashboardProps> = ({ isDashboardMode = f
       setLoading(false);
       setRefreshing(false);
     }
-  }, [userId]);
+  }, [getRequiredUserId]);
 
   useEffect(() => {
     if (userId) {

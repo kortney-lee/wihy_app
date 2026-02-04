@@ -19,6 +19,7 @@ import { chatService, ChatSession } from '../services/chatService';
 import { AuthContext } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { colors, spacing, borderRadius } from '../theme/design-tokens';
+import { requireUserId } from '../utils/authGuards';
 
 const isWeb = Platform.OS === 'web';
 
@@ -33,7 +34,7 @@ export default function ChatHistoryScreen() {
   const navigation = useNavigation<NavigationProp>();
   const { user } = useContext(AuthContext);
   const { theme } = useTheme();
-  const userId = user?.id || 'guest';
+  const userId = user?.id;
 
   const [sessions, setSessions] = useState<ChatSession[]>([]);
   const [loading, setLoading] = useState(true);
@@ -44,7 +45,18 @@ export default function ChatHistoryScreen() {
   const loadSessions = useCallback(async () => {
     try {
       setError(null);
-      const userSessions = await chatService.getUserSessions(userId);
+      const resolvedUserId = requireUserId(userId, {
+        context: 'ChatHistoryScreen.loadSessions',
+        onError: (message) => setError(message),
+        showAlert: true,
+      });
+      if (!resolvedUserId) {
+        setSessions([]);
+        setLoading(false);
+        setRefreshing(false);
+        return;
+      }
+      const userSessions = await chatService.getUserSessions(resolvedUserId);
       setSessions(userSessions);
     } catch (err: any) {
       console.error('Failed to load sessions:', err);

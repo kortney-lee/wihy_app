@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useContext } from 'react';
+import React, { useState, useEffect, useRef, useContext, useCallback } from 'react';
 import {
   View,
   Text,
@@ -29,6 +29,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { dashboardTheme } from '../theme/dashboardTheme';
 import { DashboardGradientType } from '../components/shared';
 import { SweepBorder } from '../components/SweepBorder';
+import { requireUserId } from '../utils/authGuards';
 import type {
   BarcodeScanResponse,
   ScanResponse,
@@ -111,7 +112,7 @@ export default function NutritionFacts() {
   const { theme } = useTheme();
 
   // Get user ID for food logging
-  const userId = user?.id || `guest_${Date.now()}`;
+  const userId = user?.id;
 
   const routeParams = route?.params;
   const { foodItem: initialFoodItem, context } = routeParams || { foodItem: null, context: null };
@@ -142,6 +143,15 @@ export default function NutritionFacts() {
   const [showCompareModal, setShowCompareModal] = useState(false);
   const [comparisonData, setComparisonData] = useState<any>(null);
   const [isLoadingComparison, setIsLoadingComparison] = useState(false);
+
+  const getRequiredUserId = useCallback(
+    (action: string) =>
+      requireUserId(userId, {
+        context: `NutritionFacts.${action}`,
+        showAlert: true,
+      }),
+    [userId]
+  );
 
   // Animation refs
   const analysisProgress = useRef(new Animated.Value(0)).current;
@@ -244,6 +254,8 @@ export default function NutritionFacts() {
     }
 
     try {
+      const resolvedUserId = getRequiredUserId('handleLogFood');
+      if (!resolvedUserId) return;
       const productName = isBarcodeScanResponse(foodItem) ? foodItem.product_name : 'Unknown Food';
       const calories = getCalories(foodItem);
       const protein = isBarcodeScanResponse(foodItem) ? foodItem.protein_g : 0;
@@ -261,7 +273,7 @@ export default function NutritionFacts() {
         sugar_g: sugar * servingMultiplier,
       };
 
-      await consumptionService.logMeal(userId, {
+      await consumptionService.logMeal(resolvedUserId, {
         name: productName,
         meal_type: 'snack',
         servings: servingMultiplier,
@@ -929,7 +941,9 @@ export default function NutritionFacts() {
                         style={styles.logAlternativeButton}
                         onPress={async () => {
                           try {
-                            await consumptionService.logMeal(userId, {
+                            const resolvedUserId = getRequiredUserId('logAlternative');
+                            if (!resolvedUserId) return;
+                            await consumptionService.logMeal(resolvedUserId, {
                               name: alt.name,
                               meal_type: 'snack',
                               servings: 1,

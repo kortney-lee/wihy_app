@@ -34,6 +34,7 @@ import { useAuth } from '../context/AuthContext';
 import { useNavigation } from '@react-navigation/native';
 import type { StackNavigationProp } from '@react-navigation/stack';
 import type { RootStackParamList } from '../types/navigation';
+import { requireCoachId } from '../utils/authGuards';
 
 interface Client {
   id: string;
@@ -101,7 +102,12 @@ export default function ClientManagement({
   }, [coachId]);
 
   const loadClients = useCallback(async () => {
-    if (!coachId) {
+    const resolvedCoachId = requireCoachId(coachId, {
+      context: 'ClientManagement.loadClients',
+      onError: (message) => setError(message),
+      showAlert: true,
+    });
+    if (!resolvedCoachId) {
       setLoading(false);
       return;
     }
@@ -111,7 +117,7 @@ export default function ClientManagement({
       setError(null);
       
       // Get coach overview which includes all clients
-      const overview = await coachService.getCoachOverview(coachId);
+      const overview = await coachService.getCoachOverview(resolvedCoachId);
       
       // Map API clients to UI Client format
       const mappedClients: Client[] = (overview.clients || []).map((apiClient: any) => ({

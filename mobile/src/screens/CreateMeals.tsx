@@ -44,6 +44,7 @@ import { useFeatureAccess } from '../hooks/usePaywall';
 import { useCreateMealWithShopping } from '../hooks/useCreateMealWithShopping';
 import { ManualMealForm } from '../components/ManualMealForm';
 import { ProductSearchModal } from '../components/ProductSearchModal';
+import { requireAuthToken, requireUserId } from '../utils/authGuards';
 
 // New GoalSelection component for 3-mode meal planning
 import { GoalSelectionMeals, GenerateMealParams } from './meals/GoalSelectionMeals';
@@ -200,6 +201,23 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
   // PRODUCT SEARCH & MEAL CREATION WITH SHOPPING HOOK
   // ============================================================================
   const mealShoppingHook = useCreateMealWithShopping(userId || '');
+
+  const getRequiredUserId = useCallback(
+    (action: string) =>
+      requireUserId(userId, {
+        context: `CreateMeals.${action}`,
+        showAlert: true,
+      }),
+    [userId]
+  );
+
+  const getRequiredAuthToken = useCallback(async (action: string) => {
+    const token = await authService.getAccessToken();
+    return requireAuthToken(token, {
+      context: `CreateMeals.${action}`,
+      showAlert: true,
+    });
+  }, []);
   
   // Paywall check
   const hasMealAccess = useFeatureAccess('meals');
@@ -563,22 +581,32 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
       
       // Load user's saved meals from Meal Diary API
       let userMeals: SavedMeal[] = [];
-      const token = await authService.getAccessToken();
+      const resolvedUserId = getRequiredUserId('loadDashboardData');
+      if (!resolvedUserId) {
+        setSavedMeals([]);
+        setLoadingMeals(false);
+        return;
+      }
+      const token = await getRequiredAuthToken('loadDashboardData');
+      if (!token) {
+        setSavedMeals([]);
+        setLoadingMeals(false);
+        return;
+      }
       
-      if (userId && token) {
-        try {
-          console.log('[CreateMeals] Loading user meals from Meal Diary API...');
-          const mealDiaryService = getMealDiaryService(token);
-          const response = await mealDiaryService.getMealDiary(userId, {
-            limit: 50,
-            offset: 0,
-          });
+      try {
+        console.log('[CreateMeals] Loading user meals from Meal Diary API...');
+        const mealDiaryService = getMealDiaryService(token);
+        const response = await mealDiaryService.getMealDiary(resolvedUserId, {
+          limit: 50,
+          offset: 0,
+        });
           
           // Convert API response to SavedMeal format
-          if (response.recent_meals && response.recent_meals.length > 0) {
-            userMeals = response.recent_meals.map((meal: Meal) => ({
-              meal_id: meal.meal_id,
-              user_id: meal.user_id || userId,
+        if (response.recent_meals && response.recent_meals.length > 0) {
+          userMeals = response.recent_meals.map((meal: Meal) => ({
+            meal_id: meal.meal_id,
+            user_id: meal.user_id || resolvedUserId,
               name: meal.name,
               nutrition: meal.nutrition,
               ingredients: Array.isArray(meal.ingredients) 
@@ -594,14 +622,11 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
               preparation_time: meal.preparation_time,
               cooking_time: meal.cooking_time,
               instructions: meal.instructions || [],
-            })) as SavedMeal[];
-            console.log('[CreateMeals] Loaded', userMeals.length, 'meals from Meal Diary API');
-          }
-        } catch (apiError) {
-          console.log('[CreateMeals] API failed to load user meals:', apiError);
+          })) as SavedMeal[];
+          console.log('[CreateMeals] Loaded', userMeals.length, 'meals from Meal Diary API');
         }
-      } else {
-        console.log('[CreateMeals] User or token not available for API call');
+      } catch (apiError) {
+        console.log('[CreateMeals] API failed to load user meals:', apiError);
       }
       
       // Set saved meals (may be empty if API failed)
@@ -612,10 +637,9 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
       }
       
       // Try to load active meal plan from API
-      if (userId && token) {
-        try {
-          console.log('[CreateMeals] Loading active meal plan from API...');
-          const activePlanResponse = await mealService.getActiveMealPlan(userId);
+      try {
+        console.log('[CreateMeals] Loading active meal plan from API...');
+        const activePlanResponse = await mealService.getActiveMealPlan(resolvedUserId);
           if (activePlanResponse && activePlanResponse.has_active_plan && activePlanResponse.plan) {
             const plan = activePlanResponse.plan;
             setActiveMealPlan(plan);
@@ -667,9 +691,8 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
           } else {
             console.log('[CreateMeals] No active meal plan found');
           }
-        } catch (planError) {
-          console.log('[CreateMeals] Failed to load active meal plan:', planError);
-        }
+      } catch (planError) {
+        console.log('[CreateMeals] Failed to load active meal plan:', planError);
       }
       
     } catch (error) {
@@ -1077,9 +1100,11 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
       };
       
       // Build request based on mode - using /api/meals/create-from-text
+      const resolvedUserId = getRequiredUserId('generateMealPlan');
+      if (!resolvedUserId) return;
       const request: CreateMealPlanRequest = {
         mode: (params.mode === 'saved' ? 'plan' : params.mode) as 'quick' | 'plan' | 'diet', // CRITICAL: Pass mode for proper endpoint routing
-        userId: userId,
+        userId: resolvedUserId,
         description: params.description || `Generate ${params.mode} meal`,
         duration: params.duration || (params.mode === 'quick' ? 1 : 7),
         mealsPerDay: params.mealsPerDay ? {
@@ -1104,7 +1129,8 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
       };
 
       // Get auth token for saved mode
-      const token = await authService.getAccessToken();
+      const token = await getRequiredAuthToken('generateMealPlan');
+      if (!token) return;
       
       // Add mode-specific parameters per MEAL_COMBINATIONS_GUIDE
       if (params.mode === 'saved') {
@@ -1126,7 +1152,7 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
                 'Content-Type': 'application/json',
               },
               body: JSON.stringify({
-                userId: userId,
+                userId: resolvedUserId,
                 savedMealIds: params.savedMealIds,
                 servings: params.servings,
               }),
@@ -1601,7 +1627,7 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
   };
 
   const handleLogToDiary = async () => {
-    if (!acceptedPlan || !userId) {
+    if (!acceptedPlan) {
       Alert.alert('Error', 'No meal plan available or user not logged in');
       return;
     }
@@ -1610,12 +1636,10 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
       setLoggingToDiary(true);
       
       // Log meals using nutritionService (used by ConsumptionDashboard)
-      const token = await authService.getAccessToken();
-      if (!token) {
-        Alert.alert('Error', 'Authentication required');
-        setLoggingToDiary(false);
-        return;
-      }
+      const resolvedUserId = getRequiredUserId('handleLogToDiary');
+      if (!resolvedUserId) return;
+      const token = await getRequiredAuthToken('handleLogToDiary');
+      if (!token) return;
       
       let loggedCount = 0;
       for (const [dayIndex, day] of (acceptedPlan.days || []).entries()) {
@@ -1624,7 +1648,7 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
         
         for (const meal of day.meals || []) {
           await nutritionService.logMeal({
-            userId,
+            userId: resolvedUserId,
             foodName: meal.meal_name || 'Meal',
             calories: meal.calories || 0,
             protein_g: meal.protein || 0,
@@ -2098,10 +2122,8 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
 
   // Delete meal handler
   const handleDeleteMeal = async (mealId: string, mealName: string) => {
-    if (!userId) {
-      Alert.alert('Error', 'User not authenticated');
-      return;
-    }
+    const resolvedUserId = getRequiredUserId('handleDeleteMeal');
+    if (!resolvedUserId) return;
 
     Alert.alert(
       'Delete Meal',
@@ -2113,14 +2135,11 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
           style: 'destructive',
           onPress: async () => {
             try {
-              const token = await authService.getAccessToken();
-              if (!token) {
-                Alert.alert('Error', 'Authentication token not available');
-                return;
-              }
+              const token = await getRequiredAuthToken('handleDeleteMeal');
+              if (!token) return;
 
               const mealDiaryService = getMealDiaryService(token);
-              await mealDiaryService.deleteMeal(userId, mealId);
+              await mealDiaryService.deleteMeal(resolvedUserId, mealId);
               
               // Update local state - remove from savedMeals
               setSavedMeals(prev => prev.filter(m => m.meal_id !== mealId));
@@ -2148,20 +2167,15 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
 
   // Toggle favorite handler
   const handleToggleFavorite = async (mealId: string, currentFavorite: boolean) => {
-    if (!userId) {
-      Alert.alert('Error', 'User not authenticated');
-      return;
-    }
+    const resolvedUserId = getRequiredUserId('handleToggleFavorite');
+    if (!resolvedUserId) return;
 
     try {
-      const token = await authService.getAccessToken();
-      if (!token) {
-        Alert.alert('Error', 'Authentication token not available');
-        return;
-      }
+      const token = await getRequiredAuthToken('handleToggleFavorite');
+      if (!token) return;
 
       const mealDiaryService = getMealDiaryService(token);
-      const result = await mealDiaryService.toggleFavorite(userId, mealId);
+      const result = await mealDiaryService.toggleFavorite(resolvedUserId, mealId);
       
       // Update local state - update in allMeals
       setAllMeals(prev => prev.map(m => 
@@ -2187,23 +2201,18 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
 
   // Log meal to diary handler
   const handleLogMealToDiary = async (meal: SavedMeal, servings: number = 1, mealType: string = 'lunch') => {
-    if (!userId) {
-      Alert.alert('Error', 'User not authenticated');
-      return;
-    }
+    const resolvedUserId = getRequiredUserId('handleLogMealToDiary');
+    if (!resolvedUserId) return;
 
     try {
-      const token = await authService.getAccessToken();
-      if (!token) {
-        Alert.alert('Error', 'Authentication token not available');
-        return;
-      }
+      const token = await getRequiredAuthToken('handleLogMealToDiary');
+      if (!token) return;
 
       const baseServings = meal.serving_size || 1;
       const ratio = servings / baseServings;
       
       await nutritionService.logMeal({
-        userId,
+        userId: resolvedUserId,
         mealType: mealType as 'breakfast' | 'lunch' | 'dinner' | 'snack',
         foodName: meal.name,
         calories: Math.round((meal.nutrition?.calories || 0) * ratio),

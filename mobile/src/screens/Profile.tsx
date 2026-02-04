@@ -33,6 +33,7 @@ import { UpgradePrompt } from '../components/UpgradePrompt';
 import { useFeatureAccess } from '../hooks/usePaywall';
 import { ADD_ONS } from '../config/subscriptionConfig';
 import { subscriptionService } from '../services/subscriptionService';
+import { requireUserId } from '../utils/authGuards';
 
 const isWeb = Platform.OS === 'web';
 
@@ -272,13 +273,14 @@ export default function Profile() {
   };
 
   const openSubscriptionPortal = async () => {
-    if (!user?.id) {
-      Alert.alert('Error', 'Please sign in to manage your subscription.');
-      return;
-    }
+    const resolvedUserId = requireUserId(user?.id, {
+      context: 'Profile.openSubscriptionPortal',
+      showAlert: true,
+    });
+    if (!resolvedUserId) return;
     try {
       setLoadingSubscription(true);
-      const portalUrl = await subscriptionService.getCustomerPortal(user.id);
+      const portalUrl = await subscriptionService.getCustomerPortal(resolvedUserId);
       if (portalUrl) {
         const { Linking } = require('react-native');
         await Linking.openURL(portalUrl);
@@ -302,11 +304,16 @@ export default function Profile() {
       if (window.confirm(message)) {
         try {
           setLoadingSubscription(true);
+          const resolvedUserId = requireUserId(user?.id, {
+            context: 'Profile.handleCancelSubscription',
+            showAlert: true,
+          });
+          if (!resolvedUserId) return;
           // Get active subscription to get the subscription ID
-          const activeSubscription = await subscriptionService.getActiveSubscription(user?.id || '');
+          const activeSubscription = await subscriptionService.getActiveSubscription(resolvedUserId);
           if (activeSubscription?.id || activeSubscription?.providerSubscriptionId) {
             const subscriptionId = activeSubscription.providerSubscriptionId || activeSubscription.id;
-            const result = await subscriptionService.cancelSubscription(subscriptionId, user?.id);
+            const result = await subscriptionService.cancelSubscription(subscriptionId, resolvedUserId);
             if (result.cancelAt) {
               const cancelDate = new Date(result.cancelAt * 1000).toLocaleDateString();
               window.alert(`Subscription cancelled successfully.\n\nYour access will continue until ${cancelDate}.`);
@@ -334,10 +341,15 @@ export default function Profile() {
             onPress: async () => {
               try {
                 setLoadingSubscription(true);
-                const activeSubscription = await subscriptionService.getActiveSubscription(user?.id || '');
+                const resolvedUserId = requireUserId(user?.id, {
+                  context: 'Profile.handleCancelSubscription',
+                  showAlert: true,
+                });
+                if (!resolvedUserId) return;
+                const activeSubscription = await subscriptionService.getActiveSubscription(resolvedUserId);
                 if (activeSubscription?.id || activeSubscription?.providerSubscriptionId) {
                   const subscriptionId = activeSubscription.providerSubscriptionId || activeSubscription.id;
-                  const result = await subscriptionService.cancelSubscription(subscriptionId, user?.id);
+                  const result = await subscriptionService.cancelSubscription(subscriptionId, resolvedUserId);
                   if (result.cancelAt) {
                     const cancelDate = new Date(result.cancelAt * 1000).toLocaleDateString();
                     Alert.alert('Cancelled', `Your access will continue until ${cancelDate}.`);

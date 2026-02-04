@@ -23,6 +23,7 @@ import { compressImageForUpload } from '../utils/imageCompression';
 import { scanService } from '../services';
 import { AuthContext } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
+import { requireUserId } from '../utils/authGuards';
 import PlansModal from '../components/PlansModal';
 
 type NavigationProp = StackNavigationProp<RootStackParamList>;
@@ -195,21 +196,26 @@ export default function CameraScreen() {
             capturedPhotoUri = photo.uri;
             console.log('[CameraScreen] User photo captured:', capturedPhotoUri);
             
-            // Upload photo to backend storage (non-blocking)
-            scanService.uploadScanImage(photo.uri, {
-              barcode: data,
-              scanType: 'barcode',
-              userId: user?.email,
-            }).then(uploadResult => {
-              if (uploadResult.success && uploadResult.imageUrl) {
-                console.log('[CameraScreen] Photo uploaded to:', uploadResult.imageUrl);
-                uploadedImageUrl = uploadResult.imageUrl;
-              } else {
-                console.log('[CameraScreen] Photo upload skipped:', uploadResult.error);
-              }
-            }).catch(err => {
-              console.warn('[CameraScreen] Photo upload failed:', err);
+            const resolvedUserId = requireUserId(user?.id, {
+              context: 'CameraScreen.uploadBarcodeImage',
+              showAlert: false,
             });
+            if (resolvedUserId) {
+              scanService.uploadScanImage(photo.uri, {
+                barcode: data,
+                scanType: 'barcode',
+                userId: resolvedUserId,
+              }).then(uploadResult => {
+                if (uploadResult.success && uploadResult.imageUrl) {
+                  console.log('[CameraScreen] Photo uploaded to:', uploadResult.imageUrl);
+                  uploadedImageUrl = uploadResult.imageUrl;
+                } else {
+                  console.log('[CameraScreen] Photo upload skipped:', uploadResult.error);
+                }
+              }).catch(err => {
+                console.warn('[CameraScreen] Photo upload failed:', err);
+              });
+            }
           }
         } catch (photoErr) {
           console.warn('[CameraScreen] Could not capture photo:', photoErr);
@@ -440,20 +446,26 @@ export default function CameraScreen() {
               console.log('[CameraScreen] User photo captured:', capturedPhotoUri);
               
               // Upload photo to backend storage (non-blocking)
-              setProcessingMessage('Uploading photo...');
-              scanService.uploadScanImage(photo.uri, {
-                barcode: lastScannedBarcode,
-                scanType: 'barcode',
-                userId: user?.email,
-              }).then(uploadResult => {
-                if (uploadResult.success && uploadResult.imageUrl) {
-                  console.log('[CameraScreen] Photo uploaded to:', uploadResult.imageUrl);
-                } else {
-                  console.log('[CameraScreen] Photo upload skipped:', uploadResult.error);
-                }
-              }).catch(err => {
-                console.warn('[CameraScreen] Photo upload failed:', err);
+              const resolvedUserId = requireUserId(user?.id, {
+                context: 'CameraScreen.uploadManualBarcodeImage',
+                showAlert: false,
               });
+              if (resolvedUserId) {
+                setProcessingMessage('Uploading photo...');
+                scanService.uploadScanImage(photo.uri, {
+                  barcode: lastScannedBarcode,
+                  scanType: 'barcode',
+                  userId: resolvedUserId,
+                }).then(uploadResult => {
+                  if (uploadResult.success && uploadResult.imageUrl) {
+                    console.log('[CameraScreen] Photo uploaded to:', uploadResult.imageUrl);
+                  } else {
+                    console.log('[CameraScreen] Photo upload skipped:', uploadResult.error);
+                  }
+                }).catch(err => {
+                  console.warn('[CameraScreen] Photo upload failed:', err);
+                });
+              }
             }
           } catch (photoErr) {
             console.warn('[CameraScreen] Could not capture photo:', photoErr);

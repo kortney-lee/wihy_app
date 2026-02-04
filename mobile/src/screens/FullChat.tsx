@@ -31,6 +31,7 @@ import { AuthContext } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import type { CreatedResource, SuggestedAction } from '../services/types';
 import MultiAuthLogin from '../components/auth/MultiAuthLogin';
+import { requireUserId } from '../utils/authGuards';
 
 const isWeb = Platform.OS === 'web';
 
@@ -77,7 +78,7 @@ export default function FullChat() {
   const { theme } = useTheme();
 
   // Get user ID for session management
-  const userId = user?.id || `guest_${Date.now()}`;
+  const userId = user?.id;
 
   // Safely extract route params
   const routeParams = route?.params || {};
@@ -98,6 +99,15 @@ export default function FullChat() {
   
   // Track the last processed initialMessage to detect new ones
   const lastProcessedMessage = useRef<string | null>(null);
+
+  const getRequiredUserId = useCallback(
+    (action: string) =>
+      requireUserId(userId, {
+        context: `FullChat.${action}`,
+        showAlert: true,
+      }),
+    [userId]
+  );
   
   // Reset initialMessageSent when a new initialMessage comes in
   useEffect(() => {
@@ -402,6 +412,12 @@ export default function FullChat() {
     const text = messageText || inputText.trim();
     if (!text) {return;}
 
+    const resolvedUserId = getRequiredUserId('handleSendMessage');
+    if (!resolvedUserId) {
+      setShowLoginModal(true);
+      return;
+    }
+
     // Add user message
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -425,12 +441,12 @@ export default function FullChat() {
       
       console.log('=== CHAT API CALL (/ask) - v3.0 ===');
       console.log('Session ID:', currentSessionId, user?.sessionId ? '(from auth)' : '(client-generated)');
-      console.log('User ID:', userId);
+      console.log('User ID:', resolvedUserId);
       console.log('Auth Token:', user?.authToken ? 'present' : 'not present');
       
       response = await chatService.ask(text, {
         sessionId: currentSessionId,
-        userId,
+        userId: resolvedUserId,
         authToken: user?.authToken,  // Pass JWT token for ML API
         user: user ? {
           id: user.id,
@@ -564,6 +580,12 @@ export default function FullChat() {
 
   const handleLogFood = async () => {
     if (!hasNutritionFacts) return;
+
+    const resolvedUserId = getRequiredUserId('handleLogFood');
+    if (!resolvedUserId) {
+      setShowLoginModal(true);
+      return;
+    }
     
     try {
       // Extract nutrition data from context
@@ -585,7 +607,7 @@ export default function FullChat() {
       };
 
       // Log the food
-      await consumptionService.logMeal(userId, {
+      await consumptionService.logMeal(resolvedUserId, {
         name: foodData.name,
         meal_type: 'snack',
         servings: 1,
@@ -1095,7 +1117,12 @@ export default function FullChat() {
                         style={styles.logAlternativeButton}
                         onPress={async () => {
                           try {
-                            await consumptionService.logMeal(userId, {
+                            const resolvedUserId = getRequiredUserId('logAlternative');
+                            if (!resolvedUserId) {
+                              setShowLoginModal(true);
+                              return;
+                            }
+                            await consumptionService.logMeal(resolvedUserId, {
                               name: alt.name,
                               meal_type: 'snack',
                               servings: 1,

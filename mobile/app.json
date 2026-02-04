@@ -1,0 +1,158 @@
+{
+  "expo": {
+    "name": "WiHY Ai",
+    "slug": "wihy-ai",
+    "version": "1.0.0",
+    "orientation": "default",
+    "icon": "./assets/Favicon.png",
+    "userInterfaceStyle": "light",
+    "scheme": "wihy",
+    "updates": {
+      "enabled": true,
+      "checkAutomatically": "ON_ERROR_RECOVERY",
+      "fallbackToCacheTimeout": 0
+    },
+    "plugins": [
+      "expo-camera",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow WiHY to access your photos to analyze and attach images.",
+          "cameraPermission": "Allow WiHY to use the camera for scanning and photo capture."
+        }
+      ],
+      "expo-contacts",
+      [
+        "@kingstinct/react-native-healthkit",
+        {
+          "NSHealthShareUsageDescription": "WiHY reads your Health data including steps, distance, calories, heart rate, weight, sleep, and exercise time to provide personalized fitness and nutrition insights.",
+          "NSHealthUpdateUsageDescription": "WiHY writes workout and nutrition data to Apple Health to keep your health data synchronized.",
+          "background": true
+        }
+      ],
+      "expo-local-authentication",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "minSdkVersion": 26,
+            "compileSdkVersion": 35,
+            "targetSdkVersion": 35
+          },
+          "ios": {
+            "deploymentTarget": "15.1"
+          }
+        }
+      ]
+    ],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "usesIcloudStorage": false,
+      "infoPlist": {
+        "NSCameraUsageDescription": "WiHY uses the camera to scan barcodes and capture food photos for analysis.",
+        "NSMicrophoneUsageDescription": "WiHY uses the microphone for audio capture in health interactions.",
+        "NSPhotoLibraryUsageDescription": "WiHY needs photo library access to select images for analysis.",
+        "NSPhotoLibraryAddUsageDescription": "WiHY saves analysis-related images to your library when you choose to export.",
+        "NSContactsUsageDescription": "WiHY uses contacts to personalize and share health insights with people you select.",
+        "NSHealthShareUsageDescription": "WiHY reads your Health data including steps, distance, calories, heart rate, weight, sleep, and exercise time to provide personalized fitness and nutrition insights.",
+        "NSHealthUpdateUsageDescription": "WiHY writes workout and nutrition data to Apple Health to keep your health data synchronized.",
+        "ITSAppUsesNonExemptEncryption": false
+      },
+      "entitlements": {
+        "com.apple.developer.healthkit": true,
+        "com.apple.developer.in-app-payments": ["merchant.com.wihy.app"]
+      },
+      "bundleIdentifier": "com.wihy.app",
+      "associatedDomains": [
+        "applinks:auth.wihy.ai",
+        "applinks:wihy.ai"
+      ],
+      "urlSchemes": ["wihy"]
+    },
+    "android": {
+      "package": "com.wihy.app",
+      "minSdkVersion": 26,
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.READ_CONTACTS",
+        "android.permission.WRITE_CONTACTS",
+        "android.permission.ACTIVITY_RECOGNITION",
+        "android.permission.BODY_SENSORS",
+        "android.permission.USE_BIOMETRIC",
+        "android.permission.USE_FINGERPRINT",
+        "android.permission.RECORD_AUDIO"
+      ],
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/Favicon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            {
+              "scheme": "https",
+              "host": "auth.wihy.ai",
+              "pathPrefix": "/auth/callback"
+            },
+            {
+              "scheme": "https",
+              "host": "auth.wihy.ai",
+              "pathPrefix": "/mobile/payment-success"
+            },
+            {
+              "scheme": "https",
+              "host": "auth.wihy.ai",
+              "pathPrefix": "/mobile/payment-cancel"
+            },
+            {
+              "scheme": "wihy",
+              "host": "auth",
+              "pathPrefix": "/callback"
+            },
+            {
+              "scheme": "wihy",
+              "host": "payment-success"
+            },
+            {
+              "scheme": "wihy",
+              "host": "payment-cancel"
+            }
+          ],
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
+        }
+      ]
+    },
+    "web": {
+      "bundler": "metro",
+      "favicon": "./assets/Favicon.png",
+      "name": "WIHY AI | World's Smartest Health Search Engine",
+      "shortName": "WIHY AI",
+      "description": "Evidence-based nutrition and fitness answers for individuals, plus a coaching platform after login to track client success.",
+      "themeColor": "#0AAE5E",
+      "backgroundColor": "#ffffff",
+      "lang": "en"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "a60de855-4859-40e4-9765-eff58cfa207d"
+      },
+      "wihyNativeClientId": "wihy_native_mk1waylu",
+      "wihyNativeClientSecret": "PxAqbUr1YBR9SkwsLHBosWnC5VYfXFWq64EPSL4ZLBZqjqe5LA7xTJjIZ8gxAtOV",
+      "wihyServicesClientId": "wihy_services_mk1waylw",
+      "wihyServicesClientSecret": "XZM4Xqm5WlcpSEJNMFC80saG1mH8BF0tOyRYLf70uz4ErhPMzqXw4DqEt9hMud54",
+      "wihyMlClientId": "wihy_ml_mk1waylw",
+      "wihyMlClientSecret": "FJw-fSnViiPBKe-6aELy1kNUs7Oznw2xWZxbJQkxZcVcWUCPnCM1mbnHL2TYhDcb",
+      "wihyFrontendClientId": "wihy_frontend_mk1waylx",
+      "wihyFrontendClientSecret": "I2c8-jBdQE9a3KK_-IELHYZzBZWnpfGQuFQaq3Z6Owz_PDwwPEaG9vKgbXqSyR25F"
+    },
+    "owner": "wihy-ai"
+  }
+}

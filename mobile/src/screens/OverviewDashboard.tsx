@@ -20,6 +20,7 @@ import { scanService } from '../services/scanService';
 import type { ScanHistoryItem } from '../services/types';
 import { AuthContext } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
+import { requireUserId } from '../utils/authGuards';
 
 // Remove static screenWidth - use dynamic values instead
 const BASE_SCREEN_WIDTH = 390; // Reference for scaling
@@ -75,6 +76,15 @@ const OverviewDashboard: React.FC<BaseDashboardProps> = ({ onAnalyze }) => {
     extrapolate: 'clamp',
   });
 
+  const getRequiredUserId = useCallback(
+    (action: string) =>
+      requireUserId(user?.id, {
+        context: `OverviewDashboard.${action}`,
+        showAlert: false,
+      }),
+    [user?.id]
+  );
+
   // Cleanup on unmount to prevent memory leaks
   useEffect(() => {
     isMountedRef.current = true;
@@ -95,7 +105,7 @@ const OverviewDashboard: React.FC<BaseDashboardProps> = ({ onAnalyze }) => {
     if (isMountedRef.current) setScansLoading(true);
     
     try {
-      const userId = user?.id;
+      const userId = getRequiredUserId('loadRecentScans');
       if (!userId) return;
       const result = await scanService.getScanHistory(userId, { limit: 5 });
       // Only update state if still mounted
@@ -109,7 +119,7 @@ const OverviewDashboard: React.FC<BaseDashboardProps> = ({ onAnalyze }) => {
       if (isMountedRef.current) setScansLoading(false);
       isLoadingScansRef.current = false;
     }
-  }, []);
+  }, [getRequiredUserId]);
 
   // Load health data with guard to prevent duplicate calls
   const loadHealthData = useCallback(async () => {
@@ -123,10 +133,9 @@ const OverviewDashboard: React.FC<BaseDashboardProps> = ({ onAnalyze }) => {
     if (isMountedRef.current) setIsLoading(true);
     
     try {
-      const userId = user?.id;
+      const userId = getRequiredUserId('loadHealthData');
 
       if (!userId) {
-        console.error('[OverviewDashboard] User ID not available');
         if (isMountedRef.current) setIsLoading(false);
         isLoadingHealthRef.current = false;
         return;
@@ -406,7 +415,7 @@ const OverviewDashboard: React.FC<BaseDashboardProps> = ({ onAnalyze }) => {
       if (isMountedRef.current) setIsLoading(false);
       isLoadingHealthRef.current = false;
     }
-  }, [user?.id]);
+  }, [getRequiredUserId]);
 
   // Load data on mount only - with guard to prevent multiple loads
   // ONLY load when Health tab is focused to prevent unnecessary API calls

@@ -16,6 +16,7 @@ import { getMealDiaryService, Meal } from '../services/mealDiary';
 import { authService } from '../services/authService';
 import { dashboardTheme } from '../theme/dashboardTheme';
 import type { RootStackParamList } from '../types/navigation';
+import { requireAuthToken, requireUserId } from '../utils/authGuards';
 
 interface PlanMealScreenProps {
   isDashboardMode?: boolean;
@@ -43,7 +44,7 @@ export default function PlanMealScreen({
 }: PlanMealScreenProps) {
   const { user } = useContext(AuthContext);
   const { theme } = useTheme();
-  const userId = user?.id || '';
+  const userId = user?.id;
   const navigation = useNavigation<NavigationProp>();
   const insets = useSafeAreaInsets();
   
@@ -76,10 +77,27 @@ export default function PlanMealScreen({
   const [loadingTemplates, setLoadingTemplates] = useState(false);
   
   // Meal shopping hook for product search
-  const mealShoppingHook = useCreateMealWithShopping(userId);
+  const mealShoppingHook = useCreateMealWithShopping(userId || '');
   
   // Library filter tags
   const libraryTags = ['Breakfast', 'Lunch', 'Dinner', 'Snack', 'High Protein', 'Low Carb', 'Vegan', 'Favorites'];
+
+  const getRequiredUserId = useCallback(
+    (action: string) =>
+      requireUserId(userId, {
+        context: `PlanMealScreen.${action}`,
+        showAlert: true,
+      }),
+    [userId]
+  );
+
+  const getRequiredAuthToken = useCallback(async (action: string) => {
+    const token = await authService.getAccessToken();
+    return requireAuthToken(token, {
+      context: `PlanMealScreen.${action}`,
+      showAlert: true,
+    });
+  }, []);
 
   const handleBack = () => {
     if (isDashboardMode && onBack) {
@@ -108,12 +126,14 @@ export default function PlanMealScreen({
     offset: number = 0,
     append: boolean = false
   ) => {
-    if (!userId) return;
+    const resolvedUserId = getRequiredUserId('loadLibraryMeals');
+    if (!resolvedUserId) return;
     
     setLoadingLibrary(true);
     try {
-      const token = await authService.getAccessToken();
-      const mealDiaryService = getMealDiaryService(token || undefined);
+      const token = await getRequiredAuthToken('loadLibraryMeals');
+      if (!token) return;
+      const mealDiaryService = getMealDiaryService(token);
       
       // Determine meal_type filter
       let mealType: string | undefined;
@@ -123,7 +143,7 @@ export default function PlanMealScreen({
       
       // For Favorites, use the favorites endpoint
       if (filterTag === 'Favorites') {
-        const result = await mealDiaryService.getFavorites(userId);
+        const result = await mealDiaryService.getFavorites(resolvedUserId);
         setLibraryMeals(result.meals || []);
         setLibraryTotal(result.pagination?.total || result.meals?.length || 0);
         setLibraryHasMore(false);
@@ -132,7 +152,7 @@ export default function PlanMealScreen({
       }
       
       // Standard query with pagination
-      const result = await mealDiaryService.getAllMeals(userId, {
+      const result = await mealDiaryService.getAllMeals(resolvedUserId, {
         limit: 20,
         offset,
         meal_type: mealType,
@@ -159,7 +179,7 @@ export default function PlanMealScreen({
     } finally {
       setLoadingLibrary(false);
     }
-  }, [userId]);
+  }, [getRequiredUserId, getRequiredAuthToken]);
   
   /**
    * Handle library search
@@ -193,12 +213,14 @@ export default function PlanMealScreen({
    * Toggle favorite status of a meal
    */
   const handleToggleFavorite = useCallback(async (mealId: string) => {
-    if (!userId) return;
+    const resolvedUserId = getRequiredUserId('handleToggleFavorite');
+    if (!resolvedUserId) return;
     
     try {
-      const token = await authService.getAccessToken();
-      const mealDiaryService = getMealDiaryService(token || undefined);
-      const result = await mealDiaryService.toggleFavorite(userId, mealId);
+      const token = await getRequiredAuthToken('handleToggleFavorite');
+      if (!token) return;
+      const mealDiaryService = getMealDiaryService(token);
+      const result = await mealDiaryService.toggleFavorite(resolvedUserId, mealId);
       
       // Update local state
       setLibraryMeals(prev => prev.map(meal => 
@@ -210,7 +232,7 @@ export default function PlanMealScreen({
       console.error('[PlanMealScreen] Error toggling favorite:', error);
       Alert.alert('Error', 'Failed to update favorite status');
     }
-  }, [userId]);
+  }, [getRequiredUserId, getRequiredAuthToken]);
   
   /**
    * Delete a meal from library
@@ -225,10 +247,13 @@ export default function PlanMealScreen({
           text: 'Delete',
           style: 'destructive',
           onPress: async () => {
+            const resolvedUserId = getRequiredUserId('handleDeleteMeal');
+            if (!resolvedUserId) return;
             try {
-              const token = await authService.getAccessToken();
-              const mealDiaryService = getMealDiaryService(token || undefined);
-              await mealDiaryService.deleteMeal(userId, mealId);
+              const token = await getRequiredAuthToken('handleDeleteMeal');
+              if (!token) return;
+              const mealDiaryService = getMealDiaryService(token);
+              await mealDiaryService.deleteMeal(resolvedUserId, mealId);
               
               // Remove from local state
               setLibraryMeals(prev => prev.filter(meal => meal.meal_id !== mealId));
@@ -243,45 +268,44 @@ export default function PlanMealScreen({
         }
       ]
     );
-  }, [userId]);
+  }, [getRequiredUserId, getRequiredAuthToken]);
   
   /**
    * Log a meal (mark as eaten)
    */
   const handleLogMeal = useCallback(async (mealId: string, mealName: string) => {
-    if (!userId) return;
+    const resolvedUserId = getRequiredUserId('handleLogMeal');
+    if (!resolvedUserId) return;
     
     try {
-      const token = await authService.getAccessToken();
-      const mealDiaryService = getMealDiaryService(token || undefined);
-      const result = await mealDiaryService.logMeal(userId, mealId);
-      
-      // Update local state
-      setLibraryMeals(prev => prev.map(meal => 
-        meal.meal_id === mealId 
-          ? { ...meal, times_logged: result.times_logged, last_logged: result.last_logged }
-          : meal
-      ));
+      const token = await getRequiredAuthToken('handleLogMeal');
+      if (!token) return;
+      const mealDiaryService = getMealDiaryService(token);
+      const result = await mealDiaryService.logMeal(resolvedUserId, mealId);
       
       Alert.alert('Logged!', `"${mealName}" logged (${result.times_logged} times total)`);
     } catch (error) {
       console.error('[PlanMealScreen] Error logging meal:', error);
       Alert.alert('Error', 'Failed to log meal');
     }
-  }, [userId]);
+  }, [getRequiredUserId, getRequiredAuthToken]);
   
   /**
    * Add a saved meal's ingredients to Instacart
    */
   const handleAddToInstacart = useCallback(async (meal: Meal) => {
+    const resolvedUserId = getRequiredUserId('handleAddToInstacart');
+    if (!resolvedUserId) return;
+
     try {
       // Get full meal details if ingredients are not loaded
       let mealWithIngredients = meal;
       
       if (!meal.ingredients || meal.ingredients.length === 0) {
-        const token = await authService.getAccessToken();
-        const mealDiaryService = getMealDiaryService(token || undefined);
-        const fullMeal = await mealDiaryService.getMeal(userId, meal.meal_id);
+        const token = await getRequiredAuthToken('handleAddToInstacart');
+        if (!token) return;
+        const mealDiaryService = getMealDiaryService(token);
+        const fullMeal = await mealDiaryService.getMeal(resolvedUserId, meal.meal_id);
         mealWithIngredients = fullMeal.meal;
       }
       
@@ -329,17 +353,20 @@ export default function PlanMealScreen({
       console.error('[PlanMealScreen] Error adding to Instacart:', error);
       Alert.alert('Error', 'Failed to add ingredients to cart');
     }
-  }, [userId, mealShoppingHook]);
+  }, [getRequiredUserId, getRequiredAuthToken, mealShoppingHook]);
   
   /**
    * Load a meal into the form for editing/duplicating
    */
   const handleLoadMealIntoForm = useCallback(async (meal: Meal) => {
     try {
+      const resolvedUserId = getRequiredUserId('handleLoadMealIntoForm');
+      if (!resolvedUserId) return;
       // Get full meal details
-      const token = await authService.getAccessToken();
-      const mealDiaryService = getMealDiaryService(token || undefined);
-      const fullMeal = await mealDiaryService.getMeal(userId, meal.meal_id);
+      const token = await getRequiredAuthToken('handleLoadMealIntoForm');
+      if (!token) return;
+      const mealDiaryService = getMealDiaryService(token);
+      const fullMeal = await mealDiaryService.getMeal(resolvedUserId, meal.meal_id);
       setSelectedMealForEdit(fullMeal.meal);
       setShowLibrary(false);
       
@@ -351,7 +378,7 @@ export default function PlanMealScreen({
       console.error('[PlanMealScreen] Error loading meal:', error);
       Alert.alert('Error', 'Failed to load meal details');
     }
-  }, [userId]);
+  }, [getRequiredUserId, getRequiredAuthToken]);
 
   const handleShowLibrary = () => {
     setShowLibrary(true);

@@ -22,6 +22,7 @@ import { useTheme } from '../context/ThemeContext';
 import { useNavigation } from '@react-navigation/native';
 import type { StackNavigationProp } from '@react-navigation/stack';
 import type { RootStackParamList } from '../types/navigation';
+import { requireUserId } from '../utils/authGuards';
 
 const isWeb = Platform.OS === 'web';
 
@@ -79,15 +80,24 @@ export default function ParentDashboard() {
     extrapolate: 'clamp',
   });
 
+  const getRequiredUserId = useCallback(
+    (action: string) =>
+      requireUserId(user?.id, {
+        context: `ParentDashboard.${action}`,
+        onError: (message) => setError(message),
+        showAlert: true,
+      }),
+    [user?.id]
+  );
+
   // Load family data from API
   const loadFamilyData = useCallback(async () => {
     try {
       setIsLoading(true);
       setError(null);
 
-      const userId = user?.id;
+      const userId = getRequiredUserId('loadFamilyData');
       if (!userId) {
-        setError('Please log in to view family data');
         setIsLoading(false);
         return;
       }
@@ -142,7 +152,7 @@ export default function ParentDashboard() {
     } finally {
       setIsLoading(false);
     }
-  }, [user]);
+  }, [getRequiredUserId]);
 
   // Calculate approximate age from age_group
   const calculateAge = (ageGroup?: 'adult' | 'teen' | 'child'): number => {
