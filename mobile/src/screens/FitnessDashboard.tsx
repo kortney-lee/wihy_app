@@ -44,6 +44,7 @@ import { useTheme } from '../context/ThemeContext';
 import { useNavigation } from '@react-navigation/native';
 import { UpgradePrompt } from '../components/UpgradePrompt';
 import { useFeatureAccess } from '../hooks/usePaywall';
+import { requireAuthToken, requireUserId } from '../utils/authGuards';
 import {
   FITNESS_LEVELS,
   BODY_PARTS,
@@ -440,12 +441,31 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
     loadWorkoutHistory();
   }, []);
 
+  const getRequiredUserId = (action: string) =>
+    requireUserId(userId, {
+      context: `FitnessDashboard.${action}`,
+      onError: (message) => setError(message),
+      showAlert: true,
+    });
+
+  const getRequiredAuthToken = async (action: string) => {
+    const token = await authService.getAccessToken();
+    return requireAuthToken(token, {
+      context: `FitnessDashboard.${action}`,
+      onError: (message) => setError(message),
+      showAlert: true,
+    });
+  };
+
   // Load user's saved programs from API
   const loadUserPrograms = async (forceRefresh = false) => {
     try {
       setProgramsLoading(true);
-      const authToken = await authService.getAccessToken();
-      const response = await fitnessService.listPrograms(userId, authToken || undefined);
+      const resolvedUserId = getRequiredUserId('loadUserPrograms');
+      if (!resolvedUserId) return;
+      const authToken = await getRequiredAuthToken('loadUserPrograms');
+      if (!authToken) return;
+      const response = await fitnessService.listPrograms(resolvedUserId, authToken);
       console.log('[FitnessDashboard] Loaded user programs:', response.programs?.length);
       
       // Filter to show only active programs, sort by most recent
@@ -512,7 +532,8 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
   // Load scheduled workouts from all active programs to calendar
   const loadProgramsToCalendar = async (programs: any[], forceRefresh = false) => {
     try {
-      const authToken = await authService.getAccessToken();
+      const authToken = await getRequiredAuthToken('loadProgramsToCalendar');
+      if (!authToken) return;
       const allScheduledWorkouts: {date: Date, workout: any, programId: string, programName: string}[] = [];
       
       // Fetch workouts in parallel with caching
@@ -530,7 +551,7 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
         const workoutsResponse = await fitnessService.getProgramWorkouts(
           program.programId,
           {},
-          authToken || undefined
+          authToken
         );
         
         // Cache the response
@@ -573,7 +594,9 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
   const loadWorkoutHistory = async () => {
     try {
       setHistoryLoading(true);
-      const history = await fitnessService.getHistory(userId, 30); // Last 30 workouts
+      const resolvedUserId = getRequiredUserId('loadWorkoutHistory');
+      if (!resolvedUserId) return;
+      const history = await fitnessService.getHistory(resolvedUserId, 30); // Last 30 workouts
       setWorkoutHistory(history.workouts || history.data || []);
       console.log('[FitnessDashboard] Loaded workout history:', history);
     } catch (err) {
@@ -586,11 +609,12 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
   // Load specific workout details from API
   const loadWorkoutDetails = async (programId: string, workoutId: string) => {
     try {
-      const authToken = await authService.getAccessToken();
+      const authToken = await getRequiredAuthToken('loadWorkoutDetails');
+      if (!authToken) return null;
       const workoutDetails = await fitnessService.getWorkoutDetails(
         programId,
         workoutId,
-        authToken || undefined
+        authToken
       );
       console.log('[FitnessDashboard] Loaded workout details:', workoutDetails);
       return workoutDetails;
@@ -612,8 +636,9 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
     
     try {
       setDeletingProgramId(programToDelete.id);
-      const authToken = await authService.getAccessToken();
-      await fitnessService.deleteProgram(programToDelete.id, authToken || undefined);
+      const authToken = await getRequiredAuthToken('confirmDeleteProgram');
+      if (!authToken) return;
+      await fitnessService.deleteProgram(programToDelete.id, authToken);
       
       // Clear cache for deleted program
       await clearProgramCache(programToDelete.id);
@@ -716,8 +741,9 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
     try {
       setLoading(true);
       setError(null);
-      
-      const data = await fitnessService.getTodayWorkout(userId);
+      const resolvedUserId = getRequiredUserId('loadTodayWorkout');
+      if (!resolvedUserId) return;
+      const data = await fitnessService.getTodayWorkout(resolvedUserId);
       setWorkout(data);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to load workout';
@@ -881,6 +907,9 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
   // Generate workout from selections or natural language
   // Uses POST /api/fitness/programs/create with full API parameters
   const generateWorkout = async (isQuick?: boolean, durationOverride?: number) => {
+    const resolvedUserId = getRequiredUserId('generateWorkout');
+    if (!resolvedUserId) return;
+
     // Use passed parameters or fall back to state
     const shouldBeQuickWorkout = isQuick ?? isQuickWorkout;
     const actualDuration = durationOverride ?? workoutDuration;
@@ -908,7 +937,8 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
 
     try {
       // Get auth token for authenticated API calls
-      const authToken = await authService.getAccessToken();
+      const authToken = await getRequiredAuthToken('generateWorkout');
+      if (!authToken) return;
       
       // Build natural language description from all selected goals
       let description = goalText;
@@ -942,7 +972,7 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
 
       // Build the request with all supported API parameters
       const request: CreateProgramRequest = {
-        userId: userId,
+        userId: resolvedUserId,
         description: description,
         difficulty: (levelId as 'beginner' | 'intermediate' | 'advanced') || 'intermediate',
         duration: actualDuration,
@@ -1201,8 +1231,11 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
       }
       
       try {
+        const resolvedUserId = getRequiredUserId('startSession');
+        if (!resolvedUserId) return;
+
         const newSession = await fitnessService.startSession({
-          userId,
+          userId: resolvedUserId,
           workoutId: workout.workout_id,
         });
         
@@ -1418,7 +1451,8 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
     // Try to complete workout via new API if we have program info
     if (generatedProgram?.program_id && workout?.workout_id) {
       try {
-        const authToken = await authService.getAccessToken();
+        const authToken = await getRequiredAuthToken('finishActiveWorkout');
+        if (!authToken) return;
         
         // Format completed sets for API
         const exercisesCompleted = completedSets.reduce((acc, set) => {
@@ -1459,7 +1493,7 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
           generatedProgram.program_id,
           workout.workout_id,
           completionData,
-          authToken || undefined
+          authToken
         );
         
         console.log('[FitnessDashboard] Workout completion response:', JSON.stringify(result, null, 2));
@@ -2586,7 +2620,10 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
                 // ============================================
                 setIsGenerating(true);
                 try {
-                  const authToken = await authService.getAccessToken();
+                  const resolvedUserId = getRequiredUserId('generateQuickWorkout');
+                  if (!resolvedUserId) return;
+                  const authToken = await getRequiredAuthToken('generateQuickWorkout');
+                  if (!authToken) return;
                   
                   // Map workout type to API format
                   const workoutTypeMap: Record<string, 'full_body' | 'upper_body' | 'lower_body' | 'core' | 'cardio' | 'hiit'> = {
@@ -2603,7 +2640,7 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
                   const isFullGymPreset = params.equipment?.length === 1 && params.equipment[0] === 'full_gym';
                   
                   const quickRequest: QuickWorkoutRequest = {
-                    user_id: userId,
+                    user_id: resolvedUserId,
                     workout_type: workoutTypeMap[params.workoutType || 'full_body'] || 'full_body',
                     intensity: params.intensity || 'moderate',
                     duration: params.duration,
@@ -2620,7 +2657,7 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
                   console.log('[FitnessDashboard] Calling NEW /api/fitness/quick-workout with:', JSON.stringify(quickRequest, null, 2));
                   
                   // Call the NEW quick workout endpoint
-                  const result = await fitnessService.generateQuickWorkout(quickRequest, authToken || undefined);
+                  const result = await fitnessService.generateQuickWorkout(quickRequest, authToken);
                   
                   console.log('[FitnessDashboard] Quick workout response:', JSON.stringify(result, null, 2));
                   
@@ -2706,7 +2743,10 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
                 // ============================================
                 setIsGenerating(true);
                 try {
-                  const authToken = await authService.getAccessToken();
+                  const resolvedUserId = getRequiredUserId('generateRoutineWorkout');
+                  if (!resolvedUserId) return;
+                  const authToken = await getRequiredAuthToken('generateRoutineWorkout');
+                  if (!authToken) return;
                   
                   // Map workout type to API format
                   const workoutTypeMap: Record<string, 'full_body' | 'upper_body' | 'lower_body' | 'core' | 'cardio' | 'hiit'> = {
@@ -2734,7 +2774,7 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
                   const apiGoals = (params.goalTags || []).map(g => goalMapping[g] || 'general_fitness');
                   
                   const routineRequest: QuickWorkoutRequest = {
-                    user_id: userId,
+                    user_id: resolvedUserId,
                     workout_type: workoutTypeMap[params.workoutType || 'full_body'] || 'full_body',
                     intensity: params.intensity || 'moderate',
                     duration: params.duration,
@@ -2754,7 +2794,7 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
                   console.log('[FitnessDashboard] Routine mode calling /api/fitness/quick-workout with:', JSON.stringify(routineRequest, null, 2));
                   
                   // Call the workout endpoint with routine mode
-                  const result = await fitnessService.generateQuickWorkout(routineRequest, authToken || undefined);
+                  const result = await fitnessService.generateQuickWorkout(routineRequest, authToken);
                   
                   console.log('[FitnessDashboard] Routine workout response:', JSON.stringify(result, null, 2));
                   
@@ -2925,7 +2965,10 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
                 // ============================================
                 setIsGenerating(true);
                 try {
-                  const authToken = await authService.getAccessToken();
+                  const resolvedUserId = getRequiredUserId('generateTrainingWorkout');
+                  if (!resolvedUserId) return;
+                  const authToken = await getRequiredAuthToken('generateTrainingWorkout');
+                  if (!authToken) return;
                   
                   // Determine if it's a running program or sport
                   const runningPrograms = ['couch_5k', 'c25k', '5k', '5k_improve', '10k', 'half_marathon', 'marathon'];
@@ -2943,7 +2986,7 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
                   };
                   
                   const trainingRequest: QuickWorkoutRequest = {
-                    user_id: userId,
+                    user_id: resolvedUserId,
                     mode: 'training',
                     sport: (isRunningProgram ? runningProgramMap[params.program || ''] : params.program) as any || 'general_fitness',
                     training_phase: 'pre_season', // Default to pre_season
@@ -2957,7 +3000,7 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
                   console.log('[FitnessDashboard] Training mode calling /api/fitness/quick-workout with:', JSON.stringify(trainingRequest, null, 2));
                   
                   // Call the workout endpoint with training mode
-                  const result = await fitnessService.generateQuickWorkout(trainingRequest, authToken || undefined);
+                  const result = await fitnessService.generateQuickWorkout(trainingRequest, authToken);
                   
                   console.log('[FitnessDashboard] Training workout response:', JSON.stringify(result, null, 2));
                   
@@ -3801,11 +3844,12 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
                   style={styles.savedProgramStartButton}
                   onPress={async () => {
                     // Load the program's first pending workout
-                    const authToken = await authService.getAccessToken();
+                    const authToken = await getRequiredAuthToken('loadProgramWorkouts');
+                    if (!authToken) return;
                     const workoutsResponse = await fitnessService.getProgramWorkouts(
                       program.programId,
                       {},
-                      authToken || undefined
+                      authToken
                     );
                     
                     if (workoutsResponse.workouts && workoutsResponse.workouts.length > 0) {

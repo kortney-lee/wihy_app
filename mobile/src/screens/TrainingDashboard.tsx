@@ -21,6 +21,7 @@ import { fitnessService, QuickWorkoutRequest, QuickWorkout, ProgramWorkout } fro
 import { authService } from '../services/authService';
 import { useFeatureAccess } from '../hooks/usePaywall';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { requireAuthToken, requireUserId } from '../utils/authGuards';
 
 interface TrainingDashboardProps {
   isDashboardMode?: boolean;
@@ -152,8 +153,20 @@ const TrainingDashboard: React.FC<TrainingDashboardProps> = ({ isDashboardMode =
   const loadSavedPrograms = async () => {
     try {
       setProgramsLoading(true);
+      const resolvedUserId = requireUserId(userId, {
+        context: 'TrainingDashboard.loadSavedPrograms',
+        onError: (message) => setError(message),
+        showAlert: false,
+      });
+      if (!resolvedUserId) return;
       const authToken = await authService.getAccessToken();
-      const response = await fitnessService.listPrograms(userId || '', authToken || undefined);
+      const resolvedToken = requireAuthToken(authToken, {
+        context: 'TrainingDashboard.loadSavedPrograms',
+        onError: (message) => setError(message),
+        showAlert: true,
+      });
+      if (!resolvedToken) return;
+      const response = await fitnessService.listPrograms(resolvedUserId, resolvedToken);
       
       // Filter to show only sport-specific programs
       const sportPrograms = (response.programs || []).filter(
@@ -211,10 +224,23 @@ const TrainingDashboard: React.FC<TrainingDashboardProps> = ({ isDashboardMode =
       setIsGenerating(true);
       setError(null);
 
+      const resolvedUserId = requireUserId(userId, {
+        context: 'TrainingDashboard.generateSportWorkout',
+        onError: (message) => setError(message),
+        showAlert: true,
+      });
+      if (!resolvedUserId) return;
+
       const authToken = await authService.getAccessToken();
+      const resolvedToken = requireAuthToken(authToken, {
+        context: 'TrainingDashboard.generateSportWorkout',
+        onError: (message) => setError(message),
+        showAlert: true,
+      });
+      if (!resolvedToken) return;
 
       const request: QuickWorkoutRequest = {
-        user_id: userId || '',
+        user_id: resolvedUserId,
         mode: 'training',
         sport: selectedSport as any,
         training_phase: selectedPhase as any,
@@ -226,7 +252,7 @@ const TrainingDashboard: React.FC<TrainingDashboardProps> = ({ isDashboardMode =
 
       console.log('[TrainingDashboard] Generating sport workout:', request);
 
-      const response = await fitnessService.generateQuickWorkout(request, authToken || undefined);
+      const response = await fitnessService.generateQuickWorkout(request, resolvedToken);
 
       if (response.success && response.workout) {
         const workoutWithMeta: GeneratedWorkout = {

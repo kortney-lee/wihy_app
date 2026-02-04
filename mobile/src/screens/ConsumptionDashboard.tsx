@@ -30,6 +30,7 @@ import { shoppingService, ShoppingList, ShoppingListItem } from '../services/sho
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
+import { requireUserId } from '../utils/authGuards';
 
 interface ConsumptionDashboardProps extends BaseDashboardProps {
   period?: 'today' | 'week' | 'month';
@@ -268,7 +269,13 @@ const ConsumptionDashboard: React.FC<ConsumptionDashboardProps> = ({
     try {
       setLoading(true);
       setError(null);
-      const data = await nutritionService.getDailySummary(userId);
+      const resolvedUserId = requireUserId(userId, {
+        context: 'ConsumptionDashboard.loadDailySummary',
+        onError: (message) => setError(message),
+        showAlert: false,
+      });
+      if (!resolvedUserId) return;
+      const data = await nutritionService.getDailySummary(resolvedUserId);
       setDailySummary(data);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to load nutrition data';
@@ -287,7 +294,12 @@ const ConsumptionDashboard: React.FC<ConsumptionDashboardProps> = ({
 
   const handleLogWater = async () => {
     try {
-      await nutritionService.logWater({ userId, amountMl: 250 }); // 1 glass = 250ml
+      const resolvedUserId = requireUserId(userId, {
+        context: 'ConsumptionDashboard.handleLogWater',
+        showAlert: true,
+      });
+      if (!resolvedUserId) return;
+      await nutritionService.logWater({ userId: resolvedUserId, amountMl: 250 }); // 1 glass = 250ml
       await loadDailySummary();
     } catch (err) {
       Alert.alert('Error', 'Could not log water');

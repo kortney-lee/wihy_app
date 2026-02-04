@@ -27,6 +27,7 @@ import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import SendInvitation from './SendInvitation';
 import * as Clipboard from 'expo-clipboard';
+import { requireCoachId } from '../utils/authGuards';
 
 const spinnerGif = require('../../assets/whatishealthyspinner.gif');
 const isWeb = Platform.OS === 'web';
@@ -96,6 +97,13 @@ export default function CoachDashboard({
   // Client invitation - using SendInvitation modal
   const [showSendInvitation, setShowSendInvitation] = useState(false);
 
+  const getRequiredCoachId = (action: string) =>
+    requireCoachId(coachId, {
+      context: `CoachDashboard.${action}`,
+      onError: (message) => setError(message),
+      showAlert: true,
+    });
+
   // Load clients on mount
   useEffect(() => {
     loadClients();
@@ -114,11 +122,10 @@ export default function CoachDashboard({
       setError(null);
       
       // Require authenticated coachId
-      if (!coachId) {
-        throw new Error('Coach authentication required');
-      }
+      const resolvedCoachId = getRequiredCoachId('loadClients');
+      if (!resolvedCoachId) return;
       
-      const data = await coachService.listClients(coachId, {
+      const data = await coachService.listClients(resolvedCoachId, {
         status: 'ACTIVE',
         search: searchQuery || undefined,
       });
@@ -147,11 +154,10 @@ export default function CoachDashboard({
   const loadClientDashboard = async (clientId: string) => {
     try {
       // Require authenticated coachId
-      if (!coachId) {
-        throw new Error('Coach authentication required');
-      }
+      const resolvedCoachId = getRequiredCoachId('loadClientDashboard');
+      if (!resolvedCoachId) return;
       
-      const data = await coachService.getClientDashboard(coachId, clientId);
+      const data = await coachService.getClientDashboard(resolvedCoachId, clientId);
       setClientDashboard(data);
       
       // Update selected client with dashboard data
@@ -394,12 +400,11 @@ export default function CoachDashboard({
           
           try {
             // Require authenticated coachId
-            if (!coachId) {
-              throw new Error('Coach authentication required');
-            }
+            const resolvedCoachId = getRequiredCoachId('assignFitnessPlan');
+            if (!resolvedCoachId) return;
             
             await coachService.assignFitnessPlan({
-              coachId: coachId,
+              coachId: resolvedCoachId,
               clientId: selectedClient.id,
               programId: programId.trim(),
             });

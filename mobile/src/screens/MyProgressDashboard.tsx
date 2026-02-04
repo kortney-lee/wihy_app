@@ -34,6 +34,7 @@ import { useTheme } from '../context/ThemeContext';
 import { wihyApiService } from '../services/wihyApiService';
 import { useGoalsDashboard } from '../hooks/useGoalsDashboard';
 import type { HealthTrends } from '../services/wihyApiService';
+import { requireUserId } from '../utils/authGuards';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -107,11 +108,20 @@ const MyProgressDashboard: React.FC<MyProgressDashboardProps> = ({
     refresh: refreshGoals,
   } = useGoalsDashboard(selectedPeriod);
 
+  const getRequiredUserId = useCallback(
+    (action: string) =>
+      requireUserId(user?.id, {
+        context: `MyProgressDashboard.${action}`,
+        showAlert: true,
+      }),
+    [user?.id]
+  );
+
   // Load health trends from scan data
   const loadHealthTrends = useCallback(async () => {
     try {
       setTrendsLoading(true);
-      const userId = user?.id;
+      const userId = getRequiredUserId('loadHealthTrends');
       if (!userId) return;
       const timeRange = selectedPeriod === 'today' ? 'day' : selectedPeriod;
       const trends = await scanService.getHealthTrends(userId, timeRange);
@@ -121,7 +131,7 @@ const MyProgressDashboard: React.FC<MyProgressDashboardProps> = ({
     } finally {
       setTrendsLoading(false);
     }
-  }, [selectedPeriod, user?.id]);
+  }, [selectedPeriod, getRequiredUserId]);
 
   // Load trends when period changes
   useEffect(() => {
@@ -129,10 +139,8 @@ const MyProgressDashboard: React.FC<MyProgressDashboardProps> = ({
   }, [loadHealthTrends]);
 
   const loadProgressData = async () => {
-    const userId = user?.id;
-    
+    const userId = getRequiredUserId('loadProgressData');
     if (!userId) {
-      console.error('[MyProgressDashboard] No user ID available');
       setProgressCards([]);
       setIsLoading(false);
       return;
@@ -524,10 +532,8 @@ const MyProgressDashboard: React.FC<MyProgressDashboardProps> = ({
    */
   const loadMealAndWorkoutData = async () => {
     try {
-      const userId = user?.id;
-
+      const userId = getRequiredUserId('loadMealAndWorkoutData');
       if (!userId) {
-        console.error('[MyProgressDashboard] User ID not available');
         setProgressCards([]);
         return;
       }
