@@ -18,7 +18,6 @@ import { useNavigation } from '@react-navigation/native';
 import { AuthContext } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { RootStackParamList } from '../types/navigation';
-import { ghlService } from '../services/ghlService';
 import { userService } from '../services/userService';
 import { notificationService } from '../services/notificationService';
 import { colors, sizes } from '../theme/design-tokens';
@@ -65,19 +64,17 @@ export default function Profile() {
   const [darkModeEnabled, setDarkModeEnabled] = useState(defaultPreferences.darkMode);
   const [analyticsEnabled, setAnalyticsEnabled] = useState(defaultPreferences.analytics);
   const [autoScanEnabled, setAutoScanEnabled] = useState(defaultPreferences.autoScan);
-  const [isPremium, setIsPremium] = useState(false);
-  const [loadingSubscription, setLoadingSubscription] = useState(false);
   const [showPlansModal, setShowPlansModal] = useState(false);
   const [showAddOnsModal, setShowAddOnsModal] = useState(false);
+  
+  // Premium status derived from auth context plan
+  const isPremium = user?.plan && user.plan !== 'free';
   
   // User stats from API
   const [healthScore, setHealthScore] = useState(0);
   const [dayStreak, setDayStreak] = useState(0);
   const [scansCount, setScansCount] = useState(0);
   const [memberSince, setMemberSince] = useState('January 2026');
-  
-  // Ref to track if subscription has been checked (prevents infinite calls)
-  const subscriptionCheckedRef = useRef(false);
   
   // AI Add-on upgrade prompt
   const hasAIAccess = useFeatureAccess('ai');
@@ -103,36 +100,6 @@ export default function Profile() {
     setAnalyticsEnabled(prefs.analytics ?? defaultPreferences.analytics);
     setAutoScanEnabled(prefs.autoScan ?? defaultPreferences.autoScan);
   }, [user?.preferences]);
-
-  const checkSubscriptionStatus = useCallback(async () => {
-    if (!user?.email) return;
-    
-    // Prevent duplicate calls - only check once per mount
-    if (subscriptionCheckedRef.current) {
-      console.log('[Profile] Subscription already checked, skipping');
-      return;
-    }
-    subscriptionCheckedRef.current = true;
-    
-    // Skip GHL subscription check in development to avoid 404 errors
-    if (__DEV__) {
-      console.log('[Profile] Skipping GHL subscription check in development');
-      setIsPremium(false);
-      return;
-    }
-    
-    try {
-      setLoadingSubscription(true);
-      const status = await ghlService.checkSubscriptionStatus(user.email);
-      setIsPremium(status.isPremium);
-      console.log('[Profile] GHL subscription status:', status);
-    } catch (error) {
-      console.error('[Profile] Failed to check subscription status:', error);
-      setIsPremium(false);
-    } finally {
-      setLoadingSubscription(false);
-    }
-  }, [user?.email]);
 
   // Fetch user stats from API
   const fetchUserStats = useCallback(async () => {
@@ -170,7 +137,7 @@ export default function Profile() {
   useEffect(() => {
     syncFromUser();
     fetchUserStats();
-    checkSubscriptionStatus();
+    // Subscription status now comes from auth context (user.plan)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

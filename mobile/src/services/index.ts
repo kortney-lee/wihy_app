@@ -8,7 +8,6 @@ export { enhancedAuthService } from './enhancedAuthService';
 export { enhancedScanService } from './enhancedScanService';
 export { purchaseService } from './purchaseService'; // IAP service - handles platform detection internally
 export type { IAPItemDetails, InAppPurchase } from './purchaseService';
-export { ghlService } from './ghlService';
 export { profileService } from './profileService';
 
 // NEW: Unified API Client with automatic authentication
