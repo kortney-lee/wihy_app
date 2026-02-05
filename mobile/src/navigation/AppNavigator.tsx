@@ -68,7 +68,6 @@ import { PostPaymentRegistrationScreen } from '../screens/PostPaymentRegistratio
 import AboutScreen from '../screens/AboutScreen';
 import TermsScreen from '../screens/TermsScreen';
 import PrivacyScreen from '../screens/PrivacyScreen';
-import EditProfileScreen from '../screens/EditProfileScreen';
 import ProfileSetupScreen from '../screens/ProfileSetupScreen';
 import HealthDataScreen from '../screens/HealthDataScreen';
 
@@ -731,14 +730,6 @@ export default function AppNavigator() {
         <Stack.Screen
           name="Privacy"
           component={PrivacyScreen}
-          options={{
-            presentation: 'card',
-            headerShown: false,
-          }}
-        />
-        <Stack.Screen
-          name="EditProfile"
-          component={EditProfileScreen}
           options={{
             presentation: 'card',
             headerShown: false,

@@ -112,7 +112,6 @@ export type RootStackParamList = {
   Privacy: undefined;
   
   // Profile screens
-  EditProfile: undefined;
   ProfileSetup: { isOnboarding?: boolean } | undefined;
   HealthData: undefined;
 };
