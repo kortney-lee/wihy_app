@@ -350,7 +350,7 @@ export default function Profile() {
   };
 
   const handleEditProfile = () => {
-    navigation.navigate('EditProfile');
+    navigation.navigate('ProfileSetup');
   };
 
   const handleHealthData = () => {
