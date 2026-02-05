@@ -292,6 +292,26 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
   const isDesktop = width >= 1024;
   const isTablet = width >= 640;
 
+  // Restore pending plan from storage on mount (for post-auth flow)
+  useEffect(() => {
+    if (Platform.OS === 'web' && typeof sessionStorage !== 'undefined') {
+      try {
+        const storedPlan = sessionStorage.getItem('pendingPlan') || localStorage.getItem('pendingPlan');
+        if (storedPlan) {
+          const pendingPlanData = JSON.parse(storedPlan);
+          console.log('[Subscribe] Restored pending plan from storage:', pendingPlanData);
+          setPendingCheckoutPlanId(pendingPlanData.planId);
+          setPendingCheckoutCycle(pendingPlanData.billingCycle || 'monthly');
+          // Clear from storage
+          sessionStorage.removeItem('pendingPlan');
+          localStorage.removeItem('pendingPlan');
+        }
+      } catch (e) {
+        console.warn('[Subscribe] Failed to restore pending plan:', e);
+      }
+    }
+  }, []);
+
   const formatPrice = (price: number) => {
     return price.toFixed(2).replace(/\.00$/, '');
   };
