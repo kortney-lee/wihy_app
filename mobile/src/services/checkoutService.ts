@@ -65,10 +65,16 @@ export interface CheckoutResult {
   error?: string;
 }
 
+export interface StripeConfig {
+  publishableKey: string;
+  isTestMode: boolean;
+}
+
 // ============= CONSTANTS =============
 
 const CHECKOUT_STORAGE_KEY = '@wihy_pending_checkout';
 const API_BASE_URL = API_CONFIG.paymentUrl || 'https://payment.wihy.ai';
+const AUTH_URL = API_CONFIG.authUrl || 'https://auth.wihy.ai';
 
 // Available plans
 export const WIHY_PLANS: Plan[] = [
@@ -174,9 +180,47 @@ export const WIHY_PLANS: Plan[] = [
 
 class CheckoutService {
   private baseUrl: string;
+  private stripeConfigCache: StripeConfig | null = null;
 
   constructor() {
     this.baseUrl = API_BASE_URL;
+  }
+
+  /**
+   * Fetch Stripe configuration from backend
+   * This returns the publishable key and test mode status
+   * SECURITY: Frontend should never hardcode Stripe keys
+   */
+  async getStripeConfig(): Promise<StripeConfig> {
+    // Return cached config if available
+    if (this.stripeConfigCache) {
+      return this.stripeConfigCache;
+    }
+
+    try {
+      console.log('[Checkout] Fetching Stripe config from backend...');
+      const response = await fetchWithLogging(
+        `${AUTH_URL}/api/auth/stripe/config`,
+        { method: 'GET' }
+      );
+
+      const result = await response.json();
+
+      if (!result.success || !result.data?.publishableKey) {
+        throw new Error('Invalid Stripe config response');
+      }
+
+      this.stripeConfigCache = {
+        publishableKey: result.data.publishableKey,
+        isTestMode: result.data.isTestMode ?? true,
+      };
+
+      console.log('[Checkout] Stripe config loaded, test mode:', this.stripeConfigCache.isTestMode);
+      return this.stripeConfigCache;
+    } catch (error) {
+      console.error('[Checkout] Failed to fetch Stripe config:', error);
+      throw new Error('Failed to load payment configuration');
+    }
   }
 
   /**

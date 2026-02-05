@@ -3,6 +3,8 @@
  * 
  * Renders the Stripe embedded checkout form.
  * Can be used inline (embedded in parent) or as a modal overlay.
+ * 
+ * SECURITY: Fetches Stripe publishable key from backend, not hardcoded.
  */
 
 import React, { useEffect, useState, useCallback } from 'react';
@@ -14,8 +16,36 @@ if (Platform.OS === 'web') {
   loadStripe = require('@stripe/stripe-js').loadStripe;
 }
 
-// Get publishable key from environment
-const STRIPE_PUBLISHABLE_KEY = process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY || '';
+// Cache for Stripe instance to avoid re-fetching
+let stripePromise: Promise<any> | null = null;
+
+/**
+ * Fetch Stripe publishable key from backend and initialize Stripe
+ * This follows security best practice - don't hardcode keys in frontend
+ */
+const getStripe = async () => {
+  if (!stripePromise) {
+    stripePromise = (async () => {
+      try {
+        const response = await fetch('https://auth.wihy.ai/api/auth/stripe/config');
+        const result = await response.json();
+        
+        if (!result.success || !result.data?.publishableKey) {
+          console.error('[EmbeddedCheckout] Failed to fetch Stripe config:', result);
+          throw new Error('Failed to fetch Stripe configuration');
+        }
+        
+        console.log('[EmbeddedCheckout] Stripe config loaded, test mode:', result.data.isTestMode);
+        return loadStripe(result.data.publishableKey);
+      } catch (error) {
+        console.error('[EmbeddedCheckout] Error fetching Stripe config:', error);
+        stripePromise = null; // Reset so it can retry
+        throw error;
+      }
+    })();
+  }
+  return stripePromise;
+};
 
 interface EmbeddedCheckoutProps {
   clientSecret: string;
@@ -49,11 +79,8 @@ export const EmbeddedCheckout: React.FC<EmbeddedCheckoutProps> = ({
         setIsLoading(true);
         setError(null);
 
-        if (!STRIPE_PUBLISHABLE_KEY) {
-          throw new Error('Stripe publishable key not configured');
-        }
-
-        const stripe = await loadStripe(STRIPE_PUBLISHABLE_KEY);
+        // Fetch Stripe instance (with publishable key from backend)
+        const stripe = await getStripe();
         if (!stripe) {
           throw new Error('Failed to initialize Stripe');
         }
