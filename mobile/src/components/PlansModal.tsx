@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -23,6 +23,11 @@ import {
   type PlanConfig,
   type AddOnConfig,
 } from '../config/subscriptionConfig';
+
+// Conditionally import embedded checkout for web
+const EmbeddedCheckout = Platform.OS === 'web' 
+  ? require('./web/EmbeddedCheckout').EmbeddedCheckout 
+  : null;
 // import { purchaseService } from '../services/purchaseService'; // Requires production build
 
 // Map plan IDs to in-app purchase product IDs
@@ -90,6 +95,11 @@ export default function PlansModal({
   const [purchasing, setPurchasing] = useState(false);
   const [initializingPurchases, setInitializingPurchases] = useState(true);
   const [activeTab, setActiveTab] = useState<'plans' | 'addons'>(showAddOns ? 'addons' : 'plans');
+  
+  // Embedded checkout state (web only)
+  const [showEmbeddedCheckout, setShowEmbeddedCheckout] = useState(false);
+  const [clientSecret, setClientSecret] = useState<string | null>(null);
+  const [selectedPlanForCheckout, setSelectedPlanForCheckout] = useState<Plan | null>(null);
 
   useEffect(() => {
     if (visible) {
@@ -102,6 +112,37 @@ export default function PlansModal({
     // For Expo Go development, we skip this step
     setInitializingPurchases(false);
   };
+
+  // Reset embedded checkout state when modal closes
+  useEffect(() => {
+    if (!visible) {
+      setShowEmbeddedCheckout(false);
+      setClientSecret(null);
+      setSelectedPlanForCheckout(null);
+    }
+  }, [visible]);
+
+  // Handle embedded checkout completion
+  const handleCheckoutComplete = useCallback(() => {
+    console.log('[PlansModal] Checkout completed successfully');
+    setShowEmbeddedCheckout(false);
+    setClientSecret(null);
+    setSelectedPlanForCheckout(null);
+    onClose();
+    Alert.alert(
+      'Success!',
+      'Your subscription has been activated. Thank you for subscribing!',
+      [{ text: 'OK' }]
+    );
+  }, [onClose]);
+
+  // Handle embedded checkout cancel
+  const handleCheckoutCancel = useCallback(() => {
+    console.log('[PlansModal] Checkout cancelled');
+    setShowEmbeddedCheckout(false);
+    setClientSecret(null);
+    setSelectedPlanForCheckout(null);
+  }, []);
 
   const handleSelectPlan = async (planId: string) => {
     const selectedPlan = PLANS.find(p => p.id === planId);
@@ -138,7 +179,7 @@ export default function PlansModal({
       return;
     }
     
-    // Use web checkout for web platform
+    // Use embedded checkout for web platform
     if (Platform.OS === 'web') {
       setPurchasing(true);
       try {
@@ -159,20 +200,34 @@ export default function PlansModal({
         };
         
         const checkoutPlanId = checkoutPlanMap[planId] || planId;
+        console.log('[PlansModal] Initiating checkout for plan:', checkoutPlanId);
+        
         const result = await checkoutService.initiateCheckout(checkoutPlanId, user.email, user.id);
         
-        if (result.success && result.checkoutUrl) {
-          // Open Stripe checkout in new tab
-          if (typeof window !== 'undefined') {
-            window.open(result.checkoutUrl, '_blank');
+        if (result.success) {
+          // Prefer embedded checkout if clientSecret is available
+          if (result.clientSecret) {
+            console.log('[PlansModal] Using embedded checkout with clientSecret');
+            setClientSecret(result.clientSecret);
+            setSelectedPlanForCheckout(selectedPlan || null);
+            setShowEmbeddedCheckout(true);
+          } else if (result.checkoutUrl) {
+            // Fallback to redirect checkout
+            console.log('[PlansModal] Falling back to redirect checkout');
+            if (typeof window !== 'undefined') {
+              window.open(result.checkoutUrl, '_blank');
+            } else {
+              await Linking.openURL(result.checkoutUrl);
+            }
+            onClose();
           } else {
-            await Linking.openURL(result.checkoutUrl);
+            Alert.alert('Error', 'Failed to get checkout session');
           }
-          onClose();
         } else {
           Alert.alert('Error', result.error || 'Failed to start checkout');
         }
       } catch (error) {
+        console.error('[PlansModal] Checkout error:', error);
         Alert.alert('Error', 'Failed to start checkout. Please try again.');
       } finally {
         setPurchasing(false);
@@ -203,49 +258,122 @@ export default function PlansModal({
       onRequestClose={onClose}
     >
       <View style={styles.modalOverlay}>
-        <View style={[styles.modalContent, { backgroundColor: theme.colors.background }]}>
-          {/* Header */}
-          <View style={[styles.header, { borderBottomColor: theme.colors.border }]}>
-            <View style={styles.headerTextContainer}>
-              <Text style={[styles.headerTitle, { color: theme.colors.text }]}>{title}</Text>
-              <Text style={[styles.headerSubtitle, { color: theme.colors.textSecondary }]}>{subtitle}</Text>
-            </View>
-            <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-              <Ionicons name="close" size={28} color={theme.colors.text} />
-            </TouchableOpacity>
-          </View>
+        <View style={[
+          styles.modalContent, 
+          { backgroundColor: theme.colors.background },
+          // Expand modal when showing embedded checkout on web
+          Platform.OS === 'web' && showEmbeddedCheckout && styles.modalContentExpanded,
+        ]}>
+          {/* Split layout container for web with embedded checkout */}
+          <View style={[
+            styles.splitContainer,
+            Platform.OS === 'web' && showEmbeddedCheckout && styles.splitContainerActive,
+          ]}>
+            {/* Left side - Plans selection */}
+            <View style={[
+              styles.plansSection,
+              Platform.OS === 'web' && showEmbeddedCheckout && styles.plansSectionWithCheckout,
+            ]}>
+              {/* Header */}
+              <View style={[styles.header, { borderBottomColor: theme.colors.border }]}>
+                <View style={styles.headerTextContainer}>
+                  <Text style={[styles.headerTitle, { color: theme.colors.text }]}>
+                    {showEmbeddedCheckout ? 'Complete Your Purchase' : title}
+                  </Text>
+                  <Text style={[styles.headerSubtitle, { color: theme.colors.textSecondary }]}>
+                    {showEmbeddedCheckout 
+                      ? `Selected: ${selectedPlanForCheckout?.displayName || 'Premium Plan'}` 
+                      : subtitle}
+                  </Text>
+                </View>
+                <TouchableOpacity onPress={showEmbeddedCheckout ? handleCheckoutCancel : onClose} style={styles.closeButton}>
+                  <Ionicons name="close" size={28} color={theme.colors.text} />
+                </TouchableOpacity>
+              </View>
 
-          {/* Current Plan Info */}
-          <View style={[styles.currentPlanBanner, { backgroundColor: theme.colors.background }]}>
-            <Ionicons name="information-circle" size={24} color="#2563eb" />
-            <Text style={[styles.currentPlanText, { color: theme.colors.text }]}>
-              You're on the Free plan. Upgrade to unlock advanced features.
-            </Text>
-          </View>
+              {/* Current Plan Info - hide when showing checkout */}
+              {!showEmbeddedCheckout && (
+                <View style={[styles.currentPlanBanner, { backgroundColor: theme.colors.background }]}>
+                  <Ionicons name="information-circle" size={24} color="#2563eb" />
+                  <Text style={[styles.currentPlanText, { color: theme.colors.text }]}>
+                    You're on the Free plan. Upgrade to unlock advanced features.
+                  </Text>
+                </View>
+              )}
 
-          {/* Tabs */}
-          <View style={[styles.tabContainer, { backgroundColor: theme.colors.background }]}>
-            <TouchableOpacity
-              style={[styles.tab, activeTab === 'plans' && styles.tabActive, activeTab === 'plans' && { backgroundColor: theme.colors.surface }]}
-              onPress={() => setActiveTab('plans')}
-            >
-              <Ionicons name="layers" size={18} color={activeTab === 'plans' ? '#3b82f6' : '#6b7280'} />
-              <Text style={[styles.tabText, { color: theme.colors.textSecondary }, activeTab === 'plans' && styles.tabTextActive]}>Plans</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.tab, activeTab === 'addons' && styles.tabActive, activeTab === 'addons' && { backgroundColor: theme.colors.surface }]}
-              onPress={() => setActiveTab('addons')}
-            >
-              <Ionicons name="add-circle" size={18} color={activeTab === 'addons' ? '#3b82f6' : '#6b7280'} />
-              <Text style={[styles.tabText, { color: theme.colors.textSecondary }, activeTab === 'addons' && styles.tabTextActive]}>Add-ons</Text>
-            </TouchableOpacity>
-          </View>
+              {/* Tabs - hide when showing checkout */}
+              {!showEmbeddedCheckout && (
+                <View style={[styles.tabContainer, { backgroundColor: theme.colors.background }]}>
+                  <TouchableOpacity
+                    style={[styles.tab, activeTab === 'plans' && styles.tabActive, activeTab === 'plans' && { backgroundColor: theme.colors.surface }]}
+                    onPress={() => setActiveTab('plans')}
+                  >
+                    <Ionicons name="layers" size={18} color={activeTab === 'plans' ? '#3b82f6' : '#6b7280'} />
+                    <Text style={[styles.tabText, { color: theme.colors.textSecondary }, activeTab === 'plans' && styles.tabTextActive]}>Plans</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[styles.tab, activeTab === 'addons' && styles.tabActive, activeTab === 'addons' && { backgroundColor: theme.colors.surface }]}
+                    onPress={() => setActiveTab('addons')}
+                  >
+                    <Ionicons name="add-circle" size={18} color={activeTab === 'addons' ? '#3b82f6' : '#6b7280'} />
+                    <Text style={[styles.tabText, { color: theme.colors.textSecondary }, activeTab === 'addons' && styles.tabTextActive]}>Add-ons</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
 
-          {/* Plans List */}
-          <ScrollView
-            style={styles.scrollView}
-            showsVerticalScrollIndicator={false}
-          >
+              {/* Plans List - show when NOT in checkout mode OR show selected plan summary */}
+              {showEmbeddedCheckout ? (
+                <View style={styles.selectedPlanSummary}>
+                  {selectedPlanForCheckout && (
+                    <View style={[styles.summaryCard, { backgroundColor: theme.colors.surface, borderColor: selectedPlanForCheckout.color }]}>
+                      <View style={[styles.planColorBadge, { backgroundColor: selectedPlanForCheckout.color }]} />
+                      <View style={styles.summaryInfo}>
+                        <Text style={[styles.summaryPlanName, { color: theme.colors.text }]}>
+                          {selectedPlanForCheckout.displayName}
+                        </Text>
+                        <Text style={[styles.summaryPrice, { color: selectedPlanForCheckout.color }]}>
+                          {selectedPlanForCheckout.price}
+                        </Text>
+                        <Text style={[styles.summaryDescription, { color: theme.colors.textSecondary }]}>
+                          {selectedPlanForCheckout.description}
+                        </Text>
+                      </View>
+                    </View>
+                  )}
+                  
+                  <TouchableOpacity 
+                    style={styles.changePlanButton}
+                    onPress={handleCheckoutCancel}
+                  >
+                    <Ionicons name="arrow-back" size={18} color="#3b82f6" />
+                    <Text style={styles.changePlanText}>Change Plan</Text>
+                  </TouchableOpacity>
+
+                  <View style={styles.checkoutFeatures}>
+                    <Text style={[styles.featuresTitle, { color: theme.colors.text }]}>What you'll get:</Text>
+                    {selectedPlanForCheckout?.features.slice(0, 4).map((feature, index) => (
+                      <View key={index} style={styles.featureItem}>
+                        <Ionicons name="checkmark-circle" size={18} color={selectedPlanForCheckout.color} />
+                        <Text style={[styles.featureText, { color: theme.colors.text }]}>{feature}</Text>
+                      </View>
+                    ))}
+                  </View>
+
+                  <View style={styles.guaranteeBox}>
+                    <Ionicons name="shield-checkmark" size={24} color="#10b981" />
+                    <View style={styles.guaranteeText}>
+                      <Text style={[styles.guaranteeTitle, { color: theme.colors.text }]}>7-Day Money-Back Guarantee</Text>
+                      <Text style={[styles.guaranteeSubtitle, { color: theme.colors.textSecondary }]}>
+                        Try risk-free. Cancel anytime.
+                      </Text>
+                    </View>
+                  </View>
+                </View>
+              ) : (
+                <ScrollView
+                  style={styles.scrollView}
+                  showsVerticalScrollIndicator={false}
+                >
             {activeTab === 'plans' && PLANS.map((plan) => (
               <Pressable
                 key={plan.id}
@@ -356,6 +484,22 @@ export default function PlansModal({
               </Text>
             </View>
           </ScrollView>
+              )}
+            </View>
+
+            {/* Right side - Embedded Checkout (web only) */}
+            {Platform.OS === 'web' && showEmbeddedCheckout && clientSecret && EmbeddedCheckout && (
+              <View style={styles.checkoutSection}>
+                <EmbeddedCheckout
+                  clientSecret={clientSecret}
+                  onComplete={handleCheckoutComplete}
+                  onCancel={handleCheckoutCancel}
+                  planName={selectedPlanForCheckout?.displayName || 'Subscription'}
+                  inline={true}
+                />
+              </View>
+            )}
+          </View>
 
           {/* Loading Overlay */}
           {(initializingPurchases || purchasing) && (
@@ -395,6 +539,106 @@ const styles = StyleSheet.create({
       width: '95%',
       overflow: 'hidden',
     }),
+  },
+  // New: Expanded modal when showing embedded checkout
+  modalContentExpanded: {
+    maxWidth: 1100,
+    width: '98%',
+    maxHeight: '95%',
+  },
+  // New: Split container for plans + checkout
+  splitContainer: {
+    flex: 1,
+    flexDirection: 'column',
+  },
+  splitContainerActive: {
+    flexDirection: 'row',
+  },
+  // New: Plans section (left side when checkout is shown)
+  plansSection: {
+    flex: 1,
+  },
+  plansSectionWithCheckout: {
+    flex: 0,
+    width: 400,
+    borderRightWidth: 1,
+    borderRightColor: '#e5e7eb',
+    maxHeight: '100%',
+  },
+  // New: Selected plan summary (shown when checkout is active)
+  selectedPlanSummary: {
+    padding: 20,
+  },
+  summaryCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 2,
+    marginBottom: 16,
+  },
+  summaryInfo: {
+    flex: 1,
+    marginLeft: 12,
+  },
+  summaryPlanName: {
+    fontSize: 18,
+    fontWeight: '700',
+  },
+  summaryPrice: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginTop: 4,
+  },
+  summaryDescription: {
+    fontSize: 13,
+    marginTop: 4,
+  },
+  changePlanButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingVertical: 8,
+    marginBottom: 16,
+  },
+  changePlanText: {
+    color: '#3b82f6',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  checkoutFeatures: {
+    marginBottom: 20,
+  },
+  featuresTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    marginBottom: 12,
+  },
+  guaranteeBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    padding: 16,
+    backgroundColor: '#f0fdf4',
+    borderRadius: 12,
+  },
+  guaranteeText: {
+    flex: 1,
+  },
+  guaranteeTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  guaranteeSubtitle: {
+    fontSize: 13,
+    marginTop: 2,
+  },
+  // New: Checkout section (right side)
+  checkoutSection: {
+    flex: 1,
+    minWidth: 450,
+    backgroundColor: '#f9fafb',
+    overflow: 'hidden',
   },
   header: {
     flexDirection: 'row',

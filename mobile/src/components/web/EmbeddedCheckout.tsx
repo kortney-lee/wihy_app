@@ -1,8 +1,8 @@
 /**
  * Embedded Stripe Checkout Component
  * 
- * Renders the Stripe embedded checkout form in a modal overlay.
- * This provides a seamless checkout experience without leaving the app.
+ * Renders the Stripe embedded checkout form.
+ * Can be used inline (embedded in parent) or as a modal overlay.
  */
 
 import React, { useEffect, useState, useCallback } from 'react';
@@ -22,6 +22,8 @@ interface EmbeddedCheckoutProps {
   onComplete: () => void;
   onCancel: () => void;
   planName?: string;
+  /** If true, renders inline without overlay (for embedding in parent modal) */
+  inline?: boolean;
 }
 
 export const EmbeddedCheckout: React.FC<EmbeddedCheckoutProps> = ({
@@ -29,6 +31,7 @@ export const EmbeddedCheckout: React.FC<EmbeddedCheckoutProps> = ({
   onComplete,
   onCancel,
   planName = 'Subscription',
+  inline = false,
 }) => {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -118,10 +121,11 @@ export const EmbeddedCheckout: React.FC<EmbeddedCheckoutProps> = ({
     return null;
   }
 
-  return (
-    <div className="embedded-checkout-overlay" style={styles.overlay}>
-      <div className="embedded-checkout-modal" style={styles.modal}>
-        {/* Header */}
+  // Inline content (for embedding in parent modal)
+  const checkoutContent = (
+    <div style={inline ? styles.inlineContainer : styles.modal}>
+      {/* Header - only show in modal mode */}
+      {!inline && (
         <div style={styles.header}>
           <h2 style={styles.title}>Complete Your Purchase</h2>
           <p style={styles.subtitle}>{planName}</p>
@@ -133,21 +137,22 @@ export const EmbeddedCheckout: React.FC<EmbeddedCheckoutProps> = ({
             ✕
           </button>
         </div>
+      )}
 
-        {/* Content */}
-        <div style={styles.content}>
-          {isLoading && (
-            <div style={styles.loadingContainer}>
-              <div style={styles.spinner}></div>
-              <p style={styles.loadingText}>Loading secure checkout...</p>
-            </div>
-          )}
+      {/* Content */}
+      <div style={inline ? styles.inlineContent : styles.content}>
+        {isLoading && (
+          <div style={styles.loadingContainer}>
+            <div style={styles.spinner}></div>
+            <p style={styles.loadingText}>Loading secure checkout...</p>
+          </div>
+        )}
 
-          {error && (
-            <div style={styles.errorContainer}>
-              <p style={styles.errorText}>⚠️ {error}</p>
-              <button onClick={handleCancel} style={styles.retryButton}>
-                Go Back
+        {error && (
+          <div style={styles.errorContainer}>
+            <p style={styles.errorText}>⚠️ {error}</p>
+            <button onClick={handleCancel} style={styles.retryButton}>
+              Go Back
               </button>
             </div>
           )}
@@ -162,16 +167,38 @@ export const EmbeddedCheckout: React.FC<EmbeddedCheckoutProps> = ({
           />
         </div>
 
-        {/* Footer */}
-        <div style={styles.footer}>
-          <button onClick={handleCancel} style={styles.cancelButton}>
-            ← Cancel and go back
-          </button>
-          <p style={styles.secureText}>
-            🔒 Secured by Stripe
-          </p>
-        </div>
+        {/* Footer - only show in modal mode */}
+        {!inline && (
+          <div style={styles.footer}>
+            <button onClick={handleCancel} style={styles.cancelButton}>
+              ← Cancel and go back
+            </button>
+            <p style={styles.secureText}>
+              🔒 Secured by Stripe
+            </p>
+          </div>
+        )}
+
+        {/* Inline footer - simplified */}
+        {inline && (
+          <div style={styles.inlineFooter}>
+            <p style={styles.secureText}>
+              🔒 Secured by Stripe
+            </p>
+          </div>
+        )}
       </div>
+  );
+
+  // If inline, just return the content
+  if (inline) {
+    return checkoutContent;
+  }
+
+  // Otherwise wrap in overlay
+  return (
+    <div className="embedded-checkout-overlay" style={styles.overlay}>
+      {checkoutContent}
     </div>
   );
 };
@@ -201,6 +228,26 @@ const styles: Record<string, React.CSSProperties> = {
     flexDirection: 'column',
     boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
     overflow: 'hidden',
+  },
+  // Inline mode styles (no overlay, embedded in parent)
+  inlineContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+    height: '100%',
+    backgroundColor: '#f9fafb',
+  },
+  inlineContent: {
+    flex: 1,
+    overflow: 'auto',
+    padding: '20px',
+    minHeight: '400px',
+  },
+  inlineFooter: {
+    padding: '16px 20px',
+    borderTop: '1px solid #e5e7eb',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   header: {
     padding: '24px 24px 16px',

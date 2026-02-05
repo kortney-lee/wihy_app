@@ -842,7 +842,7 @@ export const ManualMealForm: React.FC<ManualMealFormProps> = ({
                     </View>
                   </TouchableOpacity>
                   );
-                )}
+                }}
               />
             </View>
           )}
