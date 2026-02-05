@@ -597,7 +597,7 @@ export const ManualMealForm: React.FC<ManualMealFormProps> = ({
                     // Trending searches (like Google showing popular searches)
                     <>
                       <Text style={[styles.dropdownSectionTitle, { color: theme.colors.textSecondary }]}>
-                        🔥 Trending Searches
+                        TRENDING SEARCHES
                       </Text>
                       {trendingSearches.map((term, index) => (
                         <TouchableOpacity
@@ -605,7 +605,6 @@ export const ManualMealForm: React.FC<ManualMealFormProps> = ({
                           style={styles.dropdownItem}
                           onPress={() => handleSelectSuggestion(term)}
                         >
-                          <Ionicons name="trending-up" size={16} color="#f97316" />
                           <Text style={[styles.dropdownItemText, { color: theme.colors.text }]}>{term}</Text>
                         </TouchableOpacity>
                       ))}
@@ -1088,17 +1087,19 @@ export const ManualMealForm: React.FC<ManualMealFormProps> = ({
                         notes: ing.productData?.brand ? `Brand: ${ing.productData.brand}` : undefined,
                       }));
                     
-                    // 4. Create shopping list via API
-                    const listResult = await shoppingService.createList({
-                      user_id: userId,
+                    // 4. Create manual shopping list via API (POST /api/shopping-lists/manual)
+                    const listResult = await shoppingService.createManualList(userId, {
                       name: `Shopping for: ${finalMealName}`,
-                      items: shoppingItems,
-                      status: 'active',
                     });
                     
-                    const listId = listResult?.list?.list_id || listResult?.list_id || listResult?.data?.list_id;
+                    const listId = listResult?.list_id || listResult?.id;
                     
-                    // 5. Build shopping list data for navigation
+                    // 5. Add items to the list (POST /api/shopping-lists/:listId/items)
+                    if (listId && shoppingItems.length > 0) {
+                      await shoppingService.addItemsToList(listId, shoppingItems);
+                    }
+                    
+                    // 6. Build shopping list data for navigation
                     const itemsByCategory: Record<string, any[]> = {};
                     shoppingItems.forEach(item => {
                       const cat = item.category || 'Other';
