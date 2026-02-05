@@ -269,10 +269,10 @@ export default function PlansModal({
             styles.splitContainer,
             Platform.OS === 'web' && showEmbeddedCheckout && styles.splitContainerActive,
           ]}>
-            {/* Left side - Plans selection */}
+            {/* Left side - Plans selection (hide completely when checkout is shown on web) */}
+            {!(Platform.OS === 'web' && showEmbeddedCheckout) && (
             <View style={[
               styles.plansSection,
-              Platform.OS === 'web' && showEmbeddedCheckout && styles.plansSectionWithCheckout,
             ]}>
               {/* Header */}
               <View style={[styles.header, { borderBottomColor: theme.colors.border }]}>
@@ -487,10 +487,26 @@ export default function PlansModal({
           </ScrollView>
               )}
             </View>
+            )}
 
             {/* Right side - Embedded Checkout (web only) */}
             {Platform.OS === 'web' && showEmbeddedCheckout && clientSecret && EmbeddedCheckout && (
               <View style={styles.checkoutSection}>
+                {/* Checkout header with close button */}
+                <View style={[styles.checkoutHeader, { borderBottomColor: theme.colors.border }]}>
+                  <View style={styles.headerTextContainer}>
+                    <Text style={[styles.headerTitle, { color: theme.colors.text }]}>
+                      Complete Your Purchase
+                    </Text>
+                    <Text style={[styles.headerSubtitle, { color: theme.colors.textSecondary }]}>
+                      {selectedPlanForCheckout?.displayName || 'Premium Plan'} - {selectedPlanForCheckout?.price}
+                    </Text>
+                  </View>
+                  <CloseButton 
+                    onPress={handleCheckoutCancel} 
+                    iconColor={theme.colors.text}
+                  />
+                </View>
                 <EmbeddedCheckout
                   clientSecret={clientSecret}
                   onComplete={handleCheckoutComplete}
@@ -541,30 +557,24 @@ const styles = StyleSheet.create({
       overflow: 'hidden',
     }),
   },
-  // New: Expanded modal when showing embedded checkout
+  // Checkout modal - narrower for just the Stripe form
   modalContentExpanded: {
-    maxWidth: 1100,
-    width: '98%',
+    maxWidth: 600,
+    width: '95%',
     maxHeight: '95%',
+    paddingBottom: 0,
   },
-  // New: Split container for plans + checkout
+  // Container for content
   splitContainer: {
     flex: 1,
     flexDirection: 'column',
   },
   splitContainerActive: {
-    flexDirection: 'row',
+    flexDirection: 'column',
   },
-  // New: Plans section (left side when checkout is shown)
+  // Plans section
   plansSection: {
     flex: 1,
-  },
-  plansSectionWithCheckout: {
-    flex: 0,
-    width: 400,
-    borderRightWidth: 1,
-    borderRightColor: '#e5e7eb',
-    maxHeight: '100%',
   },
   // New: Selected plan summary (shown when checkout is active)
   selectedPlanSummary: {
@@ -634,15 +644,23 @@ const styles = StyleSheet.create({
     fontSize: 13,
     marginTop: 2,
   },
-  // New: Checkout section (right side)
+  // New: Checkout section (full width when shown)
   checkoutSection: {
     flex: 1,
-    minWidth: 450,
+    minWidth: 500,
+    maxWidth: 600,
     backgroundColor: '#ffffff',
     overflow: 'hidden',
-    borderLeftWidth: 1,
-    borderLeftColor: '#e5e7eb',
-    padding: 0,
+    borderRadius: 16,
+  },
+  // Header for checkout section
+  checkoutHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    padding: 20,
+    borderBottomWidth: 1,
+    backgroundColor: '#ffffff',
   },
   header: {
     flexDirection: 'row',
