@@ -3124,6 +3124,7 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
       onSavedMealId={(id) => setSavedMealId(id)}
       scanning={scanning}
       onLoadLibraryMeals={loadLibraryMeals}
+      navigation={navigation}
     />
   );
 

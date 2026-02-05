@@ -15,6 +15,7 @@ import {
   Platform,
   Animated,
 } from 'react-native';
+import { NavigationProp } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import SvgIcon from './shared/SvgIcon';
@@ -30,6 +31,8 @@ if (isWeb) {
   require('../styles/web-landing.css');
 }
 import { useCreateMealWithShopping } from '../hooks/useCreateMealWithShopping';
+import { shoppingService, ShoppingListItem } from '../services/shoppingService';
+import type { RootStackParamList } from '../types/navigation';
 import { FoodProduct, productSearchService, SuggestResponse } from '../services/productSearchService';
 
 interface Ingredient {
@@ -79,6 +82,8 @@ interface ManualMealFormProps {
   mealToEdit?: MealToEdit | null;
   /** Callback when meal edit is cleared */
   onClearMealToEdit?: () => void;
+  /** Navigation prop for navigating to shopping list */
+  navigation?: NavigationProp<RootStackParamList>;
 }
 
 const TAGS = [
@@ -98,6 +103,7 @@ export const ManualMealForm: React.FC<ManualMealFormProps> = ({
   onLoadLibraryMeals,
   mealToEdit,
   onClearMealToEdit,
+  navigation,
 }) => {
   const { theme } = useTheme();
   const insets = useSafeAreaInsets();
@@ -149,6 +155,9 @@ export const ManualMealForm: React.FC<ManualMealFormProps> = ({
   const [suggestedProducts, setSuggestedProducts] = useState<FoodProduct[]>([]);
   const [suggestedBrands, setSuggestedBrands] = useState<string[]>([]);
   const debounceTimer = useRef<NodeJS.Timeout | null>(null);
+  
+  // Collapsible section state
+  const [expandedSection, setExpandedSection] = useState<'suggestions' | 'brands' | 'products' | null>('suggestions');
 
   // Shopping hook
   const mealShoppingHook = useCreateMealWithShopping(userId);
@@ -323,19 +332,9 @@ export const ManualMealForm: React.FC<ManualMealFormProps> = ({
     
     setIngredients([...ingredients, newIngredient]);
     
-    // Also add to shopping hook for cart functionality
-    mealShoppingHook.addIngredientFromProduct({
-      id: product.id || newIngredient.id,
-      name: product.name,
-      brands: product.brand,
-      nutriments: {
-        energy_kcal: product.calories || 0,
-        proteins: product.protein || 0,
-        carbohydrates: product.carbs || 0,
-        fat: product.fat || 0,
-      },
-      image_url: product.imageUrl,
-    } as any);
+    // Also add to shopping hook for cart functionality - pass the product directly
+    // The hook expects FoodProduct with direct properties (calories, protein, etc.)
+    mealShoppingHook.addIngredientFromProduct(product);
     
     // Clear search after adding
     setSearchQuery('');
@@ -533,94 +532,152 @@ export const ManualMealForm: React.FC<ManualMealFormProps> = ({
               </SweepBorder>
             )}
 
-            {/* Autocomplete Dropdown - Google-like suggestions */}
+            {/* Autocomplete Dropdown - Google-like suggestions with collapsible sections */}
             {(showDropdown || (isFocused && searchQuery.length < 2 && trendingSearches.length > 0)) && (
               <View style={[styles.autocompleteDropdown, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
-                {/* Show trending when empty, suggestions when typing */}
-                {searchQuery.length < 2 ? (
-                  // Trending searches (like Google showing popular searches)
-                  <>
-                    <Text style={[styles.dropdownSectionTitle, { color: theme.colors.textSecondary }]}>
-                      🔥 Trending Searches
-                    </Text>
-                    {trendingSearches.map((term, index) => (
-                      <TouchableOpacity
-                        key={`trending-${index}`}
-                        style={styles.dropdownItem}
-                        onPress={() => handleSelectSuggestion(term)}
-                      >
-                        <Ionicons name="trending-up" size={16} color="#f97316" />
-                        <Text style={[styles.dropdownItemText, { color: theme.colors.text }]}>{term}</Text>
-                      </TouchableOpacity>
-                    ))}
-                  </>
-                ) : (
-                  // Autocomplete suggestions
-                  <>
-                    {suggestions.length > 0 && (
-                      <>
-                        <Text style={[styles.dropdownSectionTitle, { color: theme.colors.textSecondary }]}>
-                          🔍 Suggestions
-                        </Text>
-                        {suggestions.slice(0, 5).map((suggestion, index) => (
-                          <TouchableOpacity
-                            key={`suggestion-${index}`}
-                            style={styles.dropdownItem}
-                            onPress={() => handleSelectSuggestion(suggestion)}
+                <ScrollView 
+                  style={{ maxHeight: 300 }} 
+                  keyboardShouldPersistTaps="handled"
+                  showsVerticalScrollIndicator={true}
+                  nestedScrollEnabled={true}
+                >
+                  {/* Show trending when empty, suggestions when typing */}
+                  {searchQuery.length < 2 ? (
+                    // Trending searches (like Google showing popular searches)
+                    <>
+                      <Text style={[styles.dropdownSectionTitle, { color: theme.colors.textSecondary }]}>
+                        🔥 Trending Searches
+                      </Text>
+                      {trendingSearches.map((term, index) => (
+                        <TouchableOpacity
+                          key={`trending-${index}`}
+                          style={styles.dropdownItem}
+                          onPress={() => handleSelectSuggestion(term)}
+                        >
+                          <Ionicons name="trending-up" size={16} color="#f97316" />
+                          <Text style={[styles.dropdownItemText, { color: theme.colors.text }]}>{term}</Text>
+                        </TouchableOpacity>
+                      ))}
+                    </>
+                  ) : (
+                    // Autocomplete suggestions - with collapsible sections
+                    <>
+                      {/* SUGGESTIONS Section - Collapsible */}
+                      {suggestions.length > 0 && (
+                        <>
+                          <TouchableOpacity 
+                            style={styles.collapsibleHeader}
+                            onPress={() => setExpandedSection(expandedSection === 'suggestions' ? null : 'suggestions')}
                           >
-                            <Ionicons name="search" size={16} color={theme.colors.textSecondary} />
-                            <Text style={[styles.dropdownItemText, { color: theme.colors.text }]}>{suggestion}</Text>
-                          </TouchableOpacity>
-                        ))}
-                      </>
-                    )}
-                    
-                    {suggestedBrands.length > 0 && (
-                      <>
-                        <Text style={[styles.dropdownSectionTitle, { color: theme.colors.textSecondary, marginTop: 8 }]}>
-                          🏷️ Brands
-                        </Text>
-                        {suggestedBrands.slice(0, 3).map((brand, index) => (
-                          <TouchableOpacity
-                            key={`brand-${index}`}
-                            style={styles.dropdownItem}
-                            onPress={() => handleSelectSuggestion(brand)}
-                          >
-                            <Ionicons name="pricetag" size={16} color="#8b5cf6" />
-                            <Text style={[styles.dropdownItemText, { color: theme.colors.text }]}>{brand}</Text>
-                          </TouchableOpacity>
-                        ))}
-                      </>
-                    )}
-
-                    {suggestedProducts.length > 0 && (
-                      <>
-                        <Text style={[styles.dropdownSectionTitle, { color: theme.colors.textSecondary, marginTop: 8 }]}>
-                          📦 Products
-                        </Text>
-                        {suggestedProducts.slice(0, 4).map((product, index) => (
-                          <TouchableOpacity
-                            key={`product-${index}`}
-                            style={[styles.dropdownProductItem, { borderColor: theme.colors.border }]}
-                            onPress={() => handleSelectSuggestedProduct(product)}
-                          >
-                            <View style={styles.dropdownProductInfo}>
-                              <Text style={[styles.dropdownProductName, { color: theme.colors.text }]} numberOfLines={1}>
-                                {product.name}
+                            <View style={styles.collapsibleHeaderLeft}>
+                              <Ionicons name="search" size={14} color="#4cbb17" />
+                              <Text style={[styles.dropdownSectionTitle, { color: theme.colors.textSecondary, marginBottom: 0, paddingVertical: 0 }]}>
+                                Suggestions
                               </Text>
-                              {product.brand && (
-                                <Text style={[styles.dropdownProductBrand, { color: theme.colors.textSecondary }]}>
-                                  {product.brand}
-                                </Text>
-                              )}
+                              <View style={styles.countBadge}>
+                                <Text style={styles.countBadgeText}>{suggestions.length}</Text>
+                              </View>
                             </View>
-                            <Ionicons name="add-circle" size={24} color="#22c55e" />
+                            <Ionicons 
+                              name={expandedSection === 'suggestions' ? 'chevron-up' : 'chevron-down'} 
+                              size={18} 
+                              color={theme.colors.textSecondary} 
+                            />
                           </TouchableOpacity>
-                        ))}
-                      </>
-                    )}
-                  </>
-                )}
+                          {expandedSection === 'suggestions' && suggestions.slice(0, 5).map((suggestion, index) => (
+                            <TouchableOpacity
+                              key={`suggestion-${index}`}
+                              style={styles.dropdownItem}
+                              onPress={() => handleSelectSuggestion(suggestion)}
+                            >
+                              <Ionicons name="search-outline" size={16} color={theme.colors.textSecondary} />
+                              <Text style={[styles.dropdownItemText, { color: theme.colors.text }]}>{suggestion}</Text>
+                            </TouchableOpacity>
+                          ))}
+                        </>
+                      )}
+                      
+                      {/* BRANDS Section - Collapsible */}
+                      {suggestedBrands.length > 0 && (
+                        <>
+                          <TouchableOpacity 
+                            style={styles.collapsibleHeader}
+                            onPress={() => setExpandedSection(expandedSection === 'brands' ? null : 'brands')}
+                          >
+                            <View style={styles.collapsibleHeaderLeft}>
+                              <Ionicons name="pricetag" size={14} color="#8b5cf6" />
+                              <Text style={[styles.dropdownSectionTitle, { color: theme.colors.textSecondary, marginBottom: 0, paddingVertical: 0 }]}>
+                                Brands
+                              </Text>
+                              <View style={[styles.countBadge, { backgroundColor: '#f3e8ff' }]}>
+                                <Text style={[styles.countBadgeText, { color: '#8b5cf6' }]}>{suggestedBrands.length}</Text>
+                              </View>
+                            </View>
+                            <Ionicons 
+                              name={expandedSection === 'brands' ? 'chevron-up' : 'chevron-down'} 
+                              size={18} 
+                              color={theme.colors.textSecondary} 
+                            />
+                          </TouchableOpacity>
+                          {expandedSection === 'brands' && suggestedBrands.slice(0, 5).map((brand, index) => (
+                            <TouchableOpacity
+                              key={`brand-${index}`}
+                              style={styles.dropdownItem}
+                              onPress={() => handleSelectSuggestion(brand)}
+                            >
+                              <Ionicons name="pricetag-outline" size={16} color="#8b5cf6" />
+                              <Text style={[styles.dropdownItemText, { color: theme.colors.text }]}>{brand}</Text>
+                            </TouchableOpacity>
+                          ))}
+                        </>
+                      )}
+
+                      {/* PRODUCTS Section - Collapsible */}
+                      {suggestedProducts.length > 0 && (
+                        <>
+                          <TouchableOpacity 
+                            style={styles.collapsibleHeader}
+                            onPress={() => setExpandedSection(expandedSection === 'products' ? null : 'products')}
+                          >
+                            <View style={styles.collapsibleHeaderLeft}>
+                              <Ionicons name="cube" size={14} color="#22c55e" />
+                              <Text style={[styles.dropdownSectionTitle, { color: theme.colors.textSecondary, marginBottom: 0, paddingVertical: 0 }]}>
+                                Products
+                              </Text>
+                              <View style={[styles.countBadge, { backgroundColor: '#dcfce7' }]}>
+                                <Text style={[styles.countBadgeText, { color: '#22c55e' }]}>{suggestedProducts.length}</Text>
+                              </View>
+                            </View>
+                            <Ionicons 
+                              name={expandedSection === 'products' ? 'chevron-up' : 'chevron-down'} 
+                              size={18} 
+                              color={theme.colors.textSecondary} 
+                            />
+                          </TouchableOpacity>
+                          {expandedSection === 'products' && suggestedProducts.slice(0, 6).map((product, index) => (
+                            <TouchableOpacity
+                              key={`product-${index}`}
+                              style={[styles.dropdownProductItem, { borderColor: theme.colors.border }]}
+                              onPress={() => handleSelectSuggestedProduct(product)}
+                            >
+                              <View style={styles.dropdownProductInfo}>
+                                <Text style={[styles.dropdownProductName, { color: theme.colors.text }]} numberOfLines={1}>
+                                  {product.name}
+                                </Text>
+                                {product.brand && (
+                                  <Text style={[styles.dropdownProductBrand, { color: theme.colors.textSecondary }]}>
+                                    {product.brand}
+                                  </Text>
+                                )}
+                              </View>
+                              <Ionicons name="add-circle" size={24} color="#22c55e" />
+                            </TouchableOpacity>
+                          ))}
+                        </>
+                      )}
+                    </>
+                  )}
+                </ScrollView>
               </View>
             )}
             
@@ -886,16 +943,19 @@ export const ManualMealForm: React.FC<ManualMealFormProps> = ({
         <View style={styles.section}>
           {/* Primary: Save & Shop on Instacart */}
           <Pressable 
-            style={[styles.saveButton, (saving || !mealName.trim()) && styles.saveButtonDisabled]} 
+            style={[styles.saveButton, (saving || ingredients.length === 0) && styles.saveButtonDisabled]} 
             onPress={async () => {
-              if (!mealName.trim()) {
-                Alert.alert('Missing Information', 'Please enter a meal name');
+              if (ingredients.length === 0) {
+                Alert.alert('No Items', 'Please add at least one ingredient to your meal');
                 return;
               }
               
+              // Auto-generate meal name if not provided
+              const finalMealName = mealName.trim() || `My ${mealType.charAt(0).toUpperCase() + mealType.slice(1)} - ${new Date().toLocaleDateString()}`;
+              
               setSaving(true);
               const result = await mealShoppingHook.saveAndShopOnInstacart(
-                mealName, mealType, servingSize, '', '', '', '', selectedTags, notes
+                finalMealName, mealType, servingSize, '', '', '', '', selectedTags, notes
               );
               setSaving(false);
               
@@ -911,7 +971,7 @@ export const ManualMealForm: React.FC<ManualMealFormProps> = ({
                 );
               }
             }}
-            disabled={saving || !mealName.trim()}
+            disabled={saving || ingredients.length === 0}
           >
             {saving ? (
               <ActivityIndicator color="#fff" />
@@ -926,51 +986,125 @@ export const ManualMealForm: React.FC<ManualMealFormProps> = ({
           {/* Secondary Actions */}
           <View style={{ flexDirection: 'row', gap: 12, marginTop: 12 }}>
             <Pressable 
-              style={[styles.secondaryButton, saving && styles.saveButtonDisabled]}
+              style={[styles.secondaryButton, (saving || ingredients.length === 0) && styles.saveButtonDisabled]}
               onPress={async () => {
-                if (!mealName.trim()) {
-                  Alert.alert('Missing Information', 'Please enter a meal name');
+                if (ingredients.length === 0) {
+                  Alert.alert('No Items', 'Please add at least one ingredient to create a shopping list');
                   return;
                 }
                 
-                setSaving(true);
-                const mealId = await mealShoppingHook.saveMeal(
-                  mealName, mealType, servingSize, '', '', '', '', selectedTags, notes
-                );
-                setSaving(false);
+                // Auto-generate meal name if not provided
+                const finalMealName = mealName.trim() || `My ${mealType.charAt(0).toUpperCase() + mealType.slice(1)} - ${new Date().toLocaleDateString()}`;
                 
-                if (mealId) {
-                  onSavedMealId(mealId);
-                  const instacartUrl = await mealShoppingHook.createShoppingListFromMeal(mealName);
-                  if (instacartUrl) {
-                    Alert.alert(
-                      'Shopping List Created! 🛒',
-                      'Your Instacart shopping list is ready',
-                      [
-                        { text: 'Open List', onPress: () => Linking.openURL(instacartUrl) },
-                        { text: 'Done', style: 'cancel' }
-                      ]
-                    );
+                setSaving(true);
+                try {
+                  // 1. Save the meal first
+                  const mealId = await mealShoppingHook.saveMeal(
+                    finalMealName, mealType, servingSize, '', '', '', '', selectedTags, notes
+                  );
+                  
+                  if (mealId) {
+                    onSavedMealId(mealId);
+                    
+                    // 2. Calculate total nutrition
+                    const totalCalories = ingredients.reduce((sum, ing) => sum + ((ing.calories || 0) * parseFloat(ing.amount || '1')), 0);
+                    const totalProtein = ingredients.reduce((sum, ing) => sum + ((ing.protein || 0) * parseFloat(ing.amount || '1')), 0);
+                    
+                    // 3. Create shopping list items with proper format
+                    const shoppingItems: ShoppingListItem[] = ingredients
+                      .filter(ing => ing.name.trim())
+                      .map(ing => ({
+                        name: ing.name,
+                        quantity: parseFloat(ing.amount) || 1,
+                        unit: ing.unit || 'item',
+                        category: 'Other' as const,
+                        checked: false,
+                        estimated_price: 0,
+                        notes: ing.productData?.brand ? `Brand: ${ing.productData.brand}` : undefined,
+                      }));
+                    
+                    // 4. Create shopping list via API
+                    const listResult = await shoppingService.createList({
+                      user_id: userId,
+                      name: `Shopping for: ${finalMealName}`,
+                      items: shoppingItems,
+                      status: 'active',
+                    });
+                    
+                    const listId = listResult?.list?.list_id || listResult?.list_id || listResult?.data?.list_id;
+                    
+                    // 5. Build shopping list data for navigation
+                    const itemsByCategory: Record<string, any[]> = {};
+                    shoppingItems.forEach(item => {
+                      const cat = item.category || 'Other';
+                      if (!itemsByCategory[cat]) itemsByCategory[cat] = [];
+                      itemsByCategory[cat].push({
+                        id: `item-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+                        name: item.name,
+                        quantity: item.quantity,
+                        unit: item.unit,
+                        checked: false,
+                      });
+                    });
+                    
+                    const shoppingListData = {
+                      listId,
+                      listName: `Shopping for: ${finalMealName}`,
+                      totalItems: shoppingItems.length,
+                      itemsByCategory,
+                      estimatedCost: { min: 0, max: 0 },
+                      mealInfo: {
+                        name: finalMealName,
+                        servings: parseInt(servingSize) || 1,
+                        calories: Math.round(totalCalories),
+                        protein: Math.round(totalProtein),
+                      },
+                    };
+                    
+                    // 6. Navigate to ShoppingListScreen
+                    if (navigation) {
+                      navigation.navigate('ShoppingList', {
+                        shoppingListData,
+                        fromMealPlan: true,
+                      });
+                    } else {
+                      // Fallback: show alert with option to view list
+                      Alert.alert(
+                        'Shopping List Created! 🛒',
+                        `${shoppingItems.length} items added for ${finalMealName}\n\nServings: ${servingSize}\nCalories: ${Math.round(totalCalories)} kcal`,
+                        [
+                          { text: 'Done', style: 'cancel' }
+                        ]
+                      );
+                    }
                   }
+                } catch (error) {
+                  console.error('Error creating shopping list:', error);
+                  Alert.alert('Error', 'Failed to create shopping list. Please try again.');
+                } finally {
+                  setSaving(false);
                 }
               }}
-              disabled={saving}
+              disabled={saving || ingredients.length === 0}
             >
               <SvgIcon name="list" size={18} color="#3b82f6" />
               <Text style={styles.secondaryButtonText}>Shopping List</Text>
             </Pressable>
 
             <Pressable 
-              style={[styles.secondaryButton, saving && styles.saveButtonDisabled]}
+              style={[styles.secondaryButton, (saving || ingredients.length === 0) && styles.saveButtonDisabled]}
               onPress={async () => {
-                if (!mealName.trim()) {
-                  Alert.alert('Missing Information', 'Please enter a meal name');
+                if (ingredients.length === 0) {
+                  Alert.alert('No Items', 'Please add at least one ingredient to save your meal');
                   return;
                 }
                 
+                // Auto-generate meal name if not provided
+                const finalMealName = mealName.trim() || `My ${mealType.charAt(0).toUpperCase() + mealType.slice(1)} - ${new Date().toLocaleDateString()}`;
+                
                 setSaving(true);
                 const mealId = await mealShoppingHook.saveMeal(
-                  mealName, mealType, servingSize, '', '', '', '', selectedTags, notes
+                  finalMealName, mealType, servingSize, '', '', '', '', selectedTags, notes
                 );
                 setSaving(false);
                 
@@ -978,7 +1112,7 @@ export const ManualMealForm: React.FC<ManualMealFormProps> = ({
                   onSavedMealId(mealId);
                   Alert.alert(
                     'Meal Saved! 🎉',
-                    `${mealName} has been added to your meal library!`,
+                    `${finalMealName} has been added to your meal library!`,
                     [
                       { text: 'Create Another', onPress: resetForm },
                       { text: 'Done', style: 'cancel' }
@@ -986,7 +1120,7 @@ export const ManualMealForm: React.FC<ManualMealFormProps> = ({
                   );
                 }
               }}
-              disabled={saving}
+              disabled={saving || ingredients.length === 0}
             >
               <SvgIcon name="bookmark" size={18} color="#3b82f6" />
               <Text style={styles.secondaryButtonText}>Save Only</Text>
@@ -1570,5 +1704,33 @@ const styles = StyleSheet.create({
   dropdownProductBrand: {
     fontSize: 12,
     marginTop: 2,
+  },
+  // Collapsible section styles
+  collapsibleHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e5e7eb',
+  },
+  collapsibleHeaderLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  countBadge: {
+    backgroundColor: '#e0f2fe',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 10,
+    minWidth: 24,
+    alignItems: 'center',
+  },
+  countBadgeText: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#0284c7',
   },
 });

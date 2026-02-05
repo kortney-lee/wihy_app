@@ -66,6 +66,10 @@ export default function ShoppingListScreen({ route, navigation, isDashboardMode 
   const routeShoppingData = route?.params?.shoppingListData;
   const fromMealPlan = route?.params?.fromMealPlan || false;
   
+  // Extract meal info if available (servings, calories, etc.)
+  const mealInfo = routeShoppingData?.mealInfo || null;
+  const listName = routeShoppingData?.listName || activeList?.name || 'Shopping List';
+  
   // Compute shopping list data from either route params or active list
   const shoppingListData = routeShoppingData || {
     totalItems: activeList?.total_items || 0,
@@ -499,10 +503,30 @@ export default function ShoppingListScreen({ route, navigation, isDashboardMode 
                 }
               ]}
             >
-              <Text style={styles.collapsibleHeaderTitle}>Shopping List</Text>
+              <Text style={styles.collapsibleHeaderTitle}>{mealInfo?.name || 'Shopping List'}</Text>
               <Text style={styles.collapsibleHeaderSubtitle}>
                 {checkedCount} of {totalItems} items • {Math.round(progressPercent)}% complete
               </Text>
+              {/* Meal nutrition info */}
+              {mealInfo && (
+                <View style={styles.mealInfoRow}>
+                  {mealInfo.servings && (
+                    <View style={styles.mealInfoBadge}>
+                      <Text style={styles.mealInfoText}>🍽️ {mealInfo.servings} serving{mealInfo.servings > 1 ? 's' : ''}</Text>
+                    </View>
+                  )}
+                  {mealInfo.calories && (
+                    <View style={styles.mealInfoBadge}>
+                      <Text style={styles.mealInfoText}>🔥 {mealInfo.calories} kcal</Text>
+                    </View>
+                  )}
+                  {mealInfo.protein && (
+                    <View style={styles.mealInfoBadge}>
+                      <Text style={styles.mealInfoText}>💪 {mealInfo.protein}g protein</Text>
+                    </View>
+                  )}
+                </View>
+              )}
               {progressPercent === 100 && (
                 <View style={styles.progressBadge}>
                   <Text style={styles.progressBadgeText}>✓ All done!</Text>
@@ -926,6 +950,25 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: 'rgba(255, 255, 255, 0.9)',
     marginBottom: 8,
+  },
+  mealInfoRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    gap: 8,
+    marginTop: 8,
+    marginBottom: 4,
+  },
+  mealInfoBadge: {
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  mealInfoText: {
+    fontSize: 12,
+    fontWeight: '500',
+    color: '#fff',
   },
   progressBadge: {
     backgroundColor: 'rgba(255, 255, 255, 0.2)',

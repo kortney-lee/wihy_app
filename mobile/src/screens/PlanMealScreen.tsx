@@ -549,6 +549,7 @@ export default function PlanMealScreen({
         onLoadLibraryMeals={loadLibraryMeals}
         mealToEdit={selectedMealForEdit}
         onClearMealToEdit={() => setSelectedMealForEdit(null)}
+        navigation={navigation}
       />
 
       {/* Meal Templates Modal */}
