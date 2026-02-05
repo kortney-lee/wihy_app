@@ -638,8 +638,11 @@ const styles = StyleSheet.create({
   checkoutSection: {
     flex: 1,
     minWidth: 450,
-    backgroundColor: '#f9fafb',
+    backgroundColor: '#ffffff',
     overflow: 'hidden',
+    borderLeftWidth: 1,
+    borderLeftColor: '#e5e7eb',
+    padding: 0,
   },
   header: {
     flexDirection: 'row',

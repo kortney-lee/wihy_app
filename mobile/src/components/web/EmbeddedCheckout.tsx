@@ -210,21 +210,12 @@ export const EmbeddedCheckout: React.FC<EmbeddedCheckoutProps> = ({
           />
         </div>
 
-        {/* Footer - only show in modal mode */}
+        {/* Footer - only show in modal mode (standalone usage) */}
         {!inline && (
           <div style={styles.footer}>
             <button onClick={handleCancel} style={styles.cancelButton}>
               ← Cancel and go back
             </button>
-            <p style={styles.secureText}>
-              🔒 Secured by Stripe
-            </p>
-          </div>
-        )}
-
-        {/* Inline footer - simplified */}
-        {inline && (
-          <div style={styles.inlineFooter}>
             <p style={styles.secureText}>
               🔒 Secured by Stripe
             </p>
@@ -272,25 +263,20 @@ const styles: Record<string, React.CSSProperties> = {
     boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
     overflow: 'hidden',
   },
-  // Inline mode styles (no overlay, embedded in parent)
+  // Inline mode styles (no overlay, embedded in parent modal)
   inlineContainer: {
     display: 'flex',
     flexDirection: 'column',
     height: '100%',
-    backgroundColor: '#f9fafb',
+    backgroundColor: '#ffffff',
+    borderRadius: '12px',
+    overflow: 'hidden',
   },
   inlineContent: {
     flex: 1,
     overflow: 'auto',
-    padding: '20px',
-    minHeight: '400px',
-  },
-  inlineFooter: {
-    padding: '16px 20px',
-    borderTop: '1px solid #e5e7eb',
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
+    padding: '0',
+    minHeight: '500px',
   },
   header: {
     padding: '24px 24px 16px',
