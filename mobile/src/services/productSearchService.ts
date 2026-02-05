@@ -35,6 +35,15 @@ export interface SuggestResponse {
     name: string;
     brand?: string;
     type: string;
+    calories?: number;
+    protein?: number;
+    carbs?: number;
+    fat?: number;
+    fiber?: number;
+    sugar?: number;
+    sodium?: number;
+    servingSize?: string;
+    nutriscoreGrade?: string;
   }>;
   brands: string[];
   categories: string[];

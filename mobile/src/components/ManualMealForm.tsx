@@ -152,7 +152,16 @@ export const ManualMealForm: React.FC<ManualMealFormProps> = ({
   // Autocomplete state (like Google search)
   const [trendingSearches, setTrendingSearches] = useState<string[]>([]);
   const [suggestions, setSuggestions] = useState<string[]>([]);
-  const [suggestedProducts, setSuggestedProducts] = useState<Array<{ name: string; brand?: string; type?: string }>>([]); // Note: suggest API doesn't return nutrition
+  const [suggestedProducts, setSuggestedProducts] = useState<Array<{
+    name: string;
+    brand?: string;
+    type?: string;
+    calories?: number;
+    protein?: number;
+    carbs?: number;
+    fat?: number;
+    servingSize?: string;
+  }>>([]); // Suggest API returns nutrition data
   const [suggestedBrands, setSuggestedBrands] = useState<string[]>([]);
   const debounceTimer = useRef<NodeJS.Timeout | null>(null);
   
@@ -284,49 +293,41 @@ export const ManualMealForm: React.FC<ManualMealFormProps> = ({
     }
   }, []);
 
-  // Handle selecting a product from suggestions - search for full product data with nutrition
-  const handleSelectSuggestedProduct = useCallback(async (product: { name: string; brand?: string; type?: string }) => {
+  // Handle selecting a product from suggestions - add directly (suggest API includes nutrition)
+  const handleSelectSuggestedProduct = useCallback((product: {
+    name: string;
+    brand?: string;
+    type?: string;
+    calories?: number;
+    protein?: number;
+    carbs?: number;
+    fat?: number;
+    servingSize?: string;
+  }) => {
     setShowDropdown(false);
     setSuggestions([]);
     setSuggestedProducts([]);
     setSuggestedBrands([]);
+    setSearchQuery('');
     
-    // Search for the full product to get nutrition data (suggest API doesn't include nutrition)
-    const searchTerm = product.brand ? `${product.name} ${product.brand}` : product.name;
-    setSearchQuery(searchTerm);
-    setSearchLoading(true);
+    // Create ingredient directly from suggest API product (it has nutrition data)
+    const newIngredient: Ingredient = {
+      id: `product-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      name: product.name || 'Unknown Product',
+      amount: '1',
+      unit: product.servingSize || 'serving',
+      calories: product.calories || 0,
+      protein: product.protein || 0,
+      carbs: product.carbs || 0,
+      fat: product.fat || 0,
+      productData: product as any, // Mark as product data for display purposes
+    };
     
-    try {
-      const data = await productSearchService.search(searchTerm, {
-        type: 'food',
-        limit: 10,
-      });
-      
-      // Find the best match (prefer exact name match or first result)
-      const results = data.food || [];
-      if (results.length > 0) {
-        // Try to find exact match first
-        const exactMatch = results.find(p => 
-          p.name?.toLowerCase() === product.name?.toLowerCase() ||
-          (p.name?.toLowerCase().includes(product.name?.toLowerCase()) && p.brand?.toLowerCase() === product.brand?.toLowerCase())
-        );
-        const bestMatch = exactMatch || results[0];
-        
-        // Add the product with full nutrition data
-        handleAddProduct(bestMatch);
-        setSearchQuery('');
-        setSearchResults([]);
-      } else {
-        // No results found, show search results for user to pick
-        setSearchResults(results);
-      }
-    } catch (error) {
-      console.error('Product search error:', error);
-      setSearchResults([]);
-    } finally {
-      setSearchLoading(false);
-    }
-  }, []);
+    setIngredients(prev => [...prev, newIngredient]);
+    
+    // Also add to shopping hook
+    mealShoppingHook.addIngredientFromProduct(product as any);
+  }, [ingredients, mealShoppingHook]);
 
   // Inline product search (full search on submit)
   const handleSearch = useCallback(async (query?: string) => {
