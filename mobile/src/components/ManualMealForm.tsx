@@ -1061,19 +1061,19 @@ export const ManualMealForm: React.FC<ManualMealFormProps> = ({
                       },
                     };
                     
-                    // 6. Navigate to ShoppingListScreen
+                    // 6. Navigate to ShoppingListScreen (Save for Later - no Instacart auto-open)
                     if (navigation) {
                       navigation.navigate('ShoppingList', {
                         shoppingListData,
-                        fromMealPlan: true,
+                        fromMealPlan: false, // Don't auto-open Instacart - this is Save for Later
                       });
                     } else {
                       // Fallback: show alert with option to view list
                       Alert.alert(
-                        'Shopping List Created! 🛒',
-                        `${shoppingItems.length} items added for ${finalMealName}\n\nServings: ${servingSize}\nCalories: ${Math.round(totalCalories)} kcal`,
+                        'Saved to Shopping List! 🛒',
+                        `${shoppingItems.length} items saved for later.\n\nMeal: ${finalMealName}\nServings: ${servingSize}\nCalories: ${Math.round(totalCalories)} kcal`,
                         [
-                          { text: 'Done', style: 'cancel' }
+                          { text: 'OK', style: 'default', onPress: resetForm }
                         ]
                       );
                     }
@@ -1088,7 +1088,7 @@ export const ManualMealForm: React.FC<ManualMealFormProps> = ({
               disabled={saving || ingredients.length === 0}
             >
               <SvgIcon name="list" size={18} color="#3b82f6" />
-              <Text style={styles.secondaryButtonText}>Shopping List</Text>
+              <Text style={styles.secondaryButtonText}>Save for Later</Text>
             </Pressable>
 
             <Pressable 
