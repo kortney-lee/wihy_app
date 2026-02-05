@@ -52,7 +52,8 @@ export interface SuggestResponse {
   timestamp: string;
 }
 
-export interface ProductNutrition {
+// Nutrition values structure (per serving or per 100g)
+export interface NutritionValues {
   calories?: number;
   protein?: number;
   carbs?: number;
@@ -62,15 +63,35 @@ export interface ProductNutrition {
   sodium?: number;
   saturated_fat?: number;
   salt?: number;
-  per?: string;
+}
+
+// Full nutrition object from API
+export interface ProductNutrition {
+  per_serving?: NutritionValues;
+  per_100g?: NutritionValues;
+  serving_size?: string;
+  serving_size_grams?: number;
 }
 
 export interface FoodProduct {
+  // Identifiers
   id: string;
+  domain?: 'foods' | 'openfoodfacts';
+  score: number;
+  
+  // Basic Info
   name: string;
   brand?: string;
   categories?: string;
+  
+  // Visual
+  image_url?: string;
+  imageUrl?: string; // Legacy alias
+  
+  // Nutrition (nested object from API)
   nutrition?: ProductNutrition;
+  
+  // Legacy flat nutrition fields (for backward compatibility)
   calories?: number;
   protein?: number;
   fat?: number;
@@ -78,17 +99,27 @@ export interface FoodProduct {
   fiber?: number;
   sugar?: number;
   sodium?: number;
-  imageUrl?: string;
-  ingredients?: string;
-  servingSize?: string;
-  serving_size?: string;
-  nutriscore?: string;
-  nutriscore_grade?: string;
+  
+  // Product Info
+  nutrition_grade?: string;
+  nutriscore_grade?: string; // Legacy alias
+  ingredients_text?: string;
+  ingredients?: string; // Legacy alias
+  allergens_tags?: string[];
+  allergens?: string[]; // Legacy alias
+  additives_tags?: string[];
+  additives?: string[]; // Legacy alias
+  labels?: string;
   nova_group?: number;
-  additives?: string[];
-  allergens?: string[];
+  
+  // Location
   countries?: string;
-  score: number;
+  country_code?: string;
+  
+  // Serving size
+  serving_size?: string;
+  servingSize?: string; // Legacy alias
+  
   type: 'food';
 }
 

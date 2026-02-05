@@ -319,15 +319,25 @@ export const ManualMealForm: React.FC<ManualMealFormProps> = ({
       fat: product.fat,
     });
     
+    // Extract nutrition from nested structure (per_serving preferred, fallback to per_100g, then flat fields)
+    const nutrition = product.nutrition?.per_serving || product.nutrition?.per_100g;
+    const calories = product.calories ?? nutrition?.calories ?? 0;
+    const protein = product.protein ?? nutrition?.protein ?? 0;
+    const carbs = product.carbs ?? nutrition?.carbs ?? 0;
+    const fat = product.fat ?? nutrition?.fat ?? 0;
+    
+    // Get serving size from nested nutrition or flat field
+    const servingSize = product.servingSize || product.nutrition?.serving_size || 'serving';
+    
     const newIngredient: Ingredient = {
       id: `product-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       name: product.name || 'Unknown Product',
       amount: '1',
-      unit: product.servingSize || 'serving',
-      calories: product.calories || 0,
-      protein: product.protein || 0,
-      carbs: product.carbs || 0,
-      fat: product.fat || 0,
+      unit: servingSize,
+      calories,
+      protein,
+      carbs,
+      fat,
       productData: product as any, // Mark as product data for display purposes
     };
     
@@ -363,17 +373,21 @@ export const ManualMealForm: React.FC<ManualMealFormProps> = ({
 
   // Add product from search results
   const handleAddProduct = (product: FoodProduct) => {
-    // Extract nutrition - API may return at top level OR in nutrition object
-    const calories = product.calories || product.nutrition?.calories || 0;
-    const protein = product.protein || product.nutrition?.protein || 0;
-    const carbs = product.carbs || product.nutrition?.carbs || 0;
-    const fat = product.fat || product.nutrition?.fat || 0;
+    // Extract nutrition from nested structure (per_serving preferred, fallback to per_100g, then flat fields)
+    const nutrition = product.nutrition?.per_serving || product.nutrition?.per_100g;
+    const calories = product.calories ?? nutrition?.calories ?? 0;
+    const protein = product.protein ?? nutrition?.protein ?? 0;
+    const carbs = product.carbs ?? nutrition?.carbs ?? 0;
+    const fat = product.fat ?? nutrition?.fat ?? 0;
+    
+    // Get serving size from nested nutrition or flat field
+    const servingSize = product.servingSize || product.serving_size || product.nutrition?.serving_size || 'serving';
     
     const newIngredient: Ingredient = {
       id: `product-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       name: product.name || 'Unknown Product',
       amount: '1',
-      unit: product.servingSize || product.serving_size || 'serving',
+      unit: servingSize,
       calories,
       protein,
       carbs,
@@ -778,7 +792,14 @@ export const ManualMealForm: React.FC<ManualMealFormProps> = ({
                 scrollEnabled={true}
                 style={{ maxHeight: 400 }}
                 nestedScrollEnabled
-                renderItem={({ item }) => (
+                renderItem={({ item }) => {
+                  // Extract nutrition from nested structure
+                  const nutrition = item.nutrition?.per_serving || item.nutrition?.per_100g;
+                  const calories = item.calories ?? nutrition?.calories ?? 0;
+                  const protein = item.protein ?? nutrition?.protein ?? 0;
+                  const servingSize = item.servingSize || item.serving_size || item.nutrition?.serving_size || '';
+                  
+                  return (
                   <TouchableOpacity
                     style={[styles.searchResultCard, { backgroundColor: theme.colors.background, borderColor: theme.colors.text + '20' }]}
                     onPress={() => handleAddProduct(item)}
@@ -790,20 +811,26 @@ export const ManualMealForm: React.FC<ManualMealFormProps> = ({
                       {item.brand && (
                         <Text style={[styles.searchResultBrand, { color: theme.colors.textSecondary }]}>{item.brand}</Text>
                       )}
-                      {/* Nutrition badges - check both top-level and nutrition object */}
+                      {/* Serving size */}
+                      {servingSize && (
+                        <Text style={[styles.searchResultServing, { color: theme.colors.textSecondary }]}>
+                          per {servingSize}
+                        </Text>
+                      )}
+                      {/* Nutrition badges */}
                       <View style={styles.searchResultNutrition}>
-                        {((item.calories || item.nutrition?.calories) ?? 0) > 0 && (
+                        {calories > 0 && (
                           <View style={styles.nutrientBadge}>
                             <Text style={styles.nutrientValue}>
-                              {Math.round(item.calories || item.nutrition?.calories || 0)}
+                              {Math.round(calories)}
                             </Text>
                             <Text style={styles.nutrientLabel}>cal</Text>
                           </View>
                         )}
-                        {((item.protein || item.nutrition?.protein) ?? 0) > 0 && (
+                        {protein > 0 && (
                           <View style={styles.nutrientBadge}>
                             <Text style={styles.nutrientValue}>
-                              {Math.round(item.protein || item.nutrition?.protein || 0)}g
+                              {Math.round(protein)}g
                             </Text>
                             <Text style={styles.nutrientLabel}>protein</Text>
                           </View>
@@ -814,6 +841,7 @@ export const ManualMealForm: React.FC<ManualMealFormProps> = ({
                       <SvgIcon name="add-circle" size={28} color="#3b82f6" />
                     </View>
                   </TouchableOpacity>
+                  );
                 )}
               />
             </View>
@@ -1534,6 +1562,12 @@ const styles = StyleSheet.create({
   },
   searchResultBrand: {
     fontSize: 13,
+    // color: applied via inline { color: theme.colors.textSecondary }
+    marginBottom: 4,
+  },
+  searchResultServing: {
+    fontSize: 12,
+    fontStyle: 'italic',
     // color: applied via inline { color: theme.colors.textSecondary }
     marginBottom: 6,
   },
