@@ -94,8 +94,8 @@ const CONSUMER_PLANS = [
   {
     id: 'family_basic',
     name: 'Family Basic',
-    monthlyPrice: 24.99,
-    yearlyPrice: 0, // No annual option
+    monthlyPrice: 34.99,
+    yearlyPrice: 349.99, // Save 17% ($70/year)
     tagline: 'For households with up to 4 members',
     features: [
       'Up to 4 family members',
