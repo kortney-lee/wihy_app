@@ -12,7 +12,7 @@ import {
   Platform,
   Linking,
 } from 'react-native';
-import { Ionicons } from './shared';
+import { Ionicons, CloseButton } from './shared';
 import { useTheme } from '../context/ThemeContext';
 import { checkoutService } from '../services/checkoutService';
 import { useAuth } from '../context/AuthContext';
@@ -286,9 +286,10 @@ export default function PlansModal({
                       : subtitle}
                   </Text>
                 </View>
-                <TouchableOpacity onPress={showEmbeddedCheckout ? handleCheckoutCancel : onClose} style={styles.closeButton}>
-                  <Ionicons name="close" size={28} color={theme.colors.text} />
-                </TouchableOpacity>
+                <CloseButton 
+                  onPress={showEmbeddedCheckout ? handleCheckoutCancel : onClose} 
+                  iconColor={theme.colors.text}
+                />
               </View>
 
               {/* Current Plan Info - hide when showing checkout */}
@@ -662,9 +663,7 @@ const styles = StyleSheet.create({
     // color: theme.colors.textSecondary
     marginTop: 4,
   },
-  closeButton: {
-    padding: 4,
-  },
+  // closeButton style moved to shared CloseButton component
   currentPlanBanner: {
     flexDirection: 'row',
     alignItems: 'center',

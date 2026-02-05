@@ -113,7 +113,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: BORDER_RADIUS,
-    // backgroundColor: '#f3f4f6', // theme.colors.surface // Use theme.colors.background // Light gray silhouette background
+    backgroundColor: '#f3f4f6', // Light gray silhouette background
     ...Platform.select({
       ios: {
         shadowColor: 'rgba(0,0,0,0.1)',
@@ -135,7 +135,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: BORDER_RADIUS,
-    // backgroundColor: '#f3f4f6', // theme.colors.surface // Use theme.colors.background // Light gray silhouette background
+    backgroundColor: '#f3f4f6', // Light gray silhouette background
     ...Platform.select({
       ios: {
         shadowColor: 'rgba(0,0,0,0.1)',
