@@ -21,27 +21,43 @@ let stripePromise: Promise<any> | null = null;
 
 /**
  * Fetch Stripe publishable key from backend and initialize Stripe
- * This follows security best practice - don't hardcode keys in frontend
+ * Falls back to environment variable if backend is not configured
  */
 const getStripe = async () => {
   if (!stripePromise) {
     stripePromise = (async () => {
+      let publishableKey: string | null = null;
+      
+      // Try to fetch from backend first (preferred for security)
       try {
         const response = await fetch('https://auth.wihy.ai/api/auth/stripe/config');
         const result = await response.json();
         
-        if (!result.success || !result.data?.publishableKey) {
-          console.error('[EmbeddedCheckout] Failed to fetch Stripe config:', result);
-          throw new Error('Failed to fetch Stripe configuration');
+        if (result.success && result.data?.publishableKey) {
+          console.log('[EmbeddedCheckout] Stripe config loaded from backend, test mode:', result.data.isTestMode);
+          publishableKey = result.data.publishableKey;
+        } else {
+          console.warn('[EmbeddedCheckout] Backend Stripe config not available:', result.error || 'Unknown error');
         }
-        
-        console.log('[EmbeddedCheckout] Stripe config loaded, test mode:', result.data.isTestMode);
-        return loadStripe(result.data.publishableKey);
       } catch (error) {
-        console.error('[EmbeddedCheckout] Error fetching Stripe config:', error);
-        stripePromise = null; // Reset so it can retry
-        throw error;
+        console.warn('[EmbeddedCheckout] Failed to fetch Stripe config from backend:', error);
       }
+      
+      // Fallback to environment variable if backend didn't provide key
+      if (!publishableKey) {
+        publishableKey = process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY || null;
+        if (publishableKey) {
+          console.log('[EmbeddedCheckout] Using Stripe key from environment variable (fallback)');
+        }
+      }
+      
+      if (!publishableKey) {
+        console.error('[EmbeddedCheckout] No Stripe publishable key available');
+        stripePromise = null;
+        throw new Error('Stripe publishable key not configured');
+      }
+      
+      return loadStripe(publishableKey);
     })();
   }
   return stripePromise;
