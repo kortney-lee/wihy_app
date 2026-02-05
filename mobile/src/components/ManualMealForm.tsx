@@ -436,23 +436,24 @@ export const ManualMealForm: React.FC<ManualMealFormProps> = ({
       
       {/* Collapsing Header */}
       <Animated.View style={[styles.collapsibleHeader, { height: headerHeight }]}>
-        <Animated.View 
-          style={{
-            flex: 1,
-            opacity: headerOpacity, 
-            transform: [{ scale: titleScale }]
-          }}
+        <LinearGradient
+          colors={['#3b82f6', '#2563eb']}
+          style={styles.formHeaderGradient}
         >
-          <LinearGradient
-            colors={['#3b82f6', '#2563eb']}
-            style={styles.formHeaderGradient}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
+          <Animated.View 
+            style={{
+              flex: 1,
+              justifyContent: 'flex-end',
+              opacity: headerOpacity, 
+              transform: [{ scale: titleScale }]
+            }}
           >
-            <Text style={styles.formHeaderTitleWhite}>Plan Your Meal</Text>
-            <Text style={styles.formHeaderSubtitle}>Build your ingredient list and create shopping cart</Text>
-          </LinearGradient>
-        </Animated.View>
+            <View style={styles.headerContent}>
+              <Text style={styles.formHeaderTitleWhite}>Plan Your Meal</Text>
+              <Text style={styles.formHeaderSubtitle}>Search products, track nutrition, and build your shopping list</Text>
+            </View>
+          </Animated.View>
+        </LinearGradient>
       </Animated.View>
 
       <Animated.ScrollView 
@@ -1247,15 +1248,13 @@ const styles = StyleSheet.create({
   collapsibleHeader: {
     backgroundColor: '#3b82f6',  // Brand color - DO NOT theme per dark mode rules
     overflow: 'hidden',
-    paddingBottom: 20,  // CRITICAL: Prevents color bleeding
   },
   formHeaderGradient: {
     flex: 1,
-    justifyContent: 'center',
+  },
+  headerContent: {
     paddingHorizontal: 20,
-    paddingTop: 10,  // CRITICAL: Proper spacing from top
     paddingBottom: 20,
-    position: 'relative',
   },
   headerBackButtonWhite: {
     position: 'absolute',
