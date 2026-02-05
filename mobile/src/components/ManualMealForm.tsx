@@ -152,7 +152,7 @@ export const ManualMealForm: React.FC<ManualMealFormProps> = ({
   // Autocomplete state (like Google search)
   const [trendingSearches, setTrendingSearches] = useState<string[]>([]);
   const [suggestions, setSuggestions] = useState<string[]>([]);
-  const [suggestedProducts, setSuggestedProducts] = useState<FoodProduct[]>([]);
+  const [suggestedProducts, setSuggestedProducts] = useState<Array<{ name: string; brand?: string; type?: string }>>([]); // Note: suggest API doesn't return nutrition
   const [suggestedBrands, setSuggestedBrands] = useState<string[]>([]);
   const debounceTimer = useRef<NodeJS.Timeout | null>(null);
   
@@ -284,14 +284,48 @@ export const ManualMealForm: React.FC<ManualMealFormProps> = ({
     }
   }, []);
 
-  // Handle selecting a product directly from suggestions
-  const handleSelectSuggestedProduct = useCallback((product: FoodProduct) => {
+  // Handle selecting a product from suggestions - search for full product data with nutrition
+  const handleSelectSuggestedProduct = useCallback(async (product: { name: string; brand?: string; type?: string }) => {
     setShowDropdown(false);
     setSuggestions([]);
     setSuggestedProducts([]);
     setSuggestedBrands([]);
-    setSearchQuery('');
-    handleAddProduct(product);
+    
+    // Search for the full product to get nutrition data (suggest API doesn't include nutrition)
+    const searchTerm = product.brand ? `${product.name} ${product.brand}` : product.name;
+    setSearchQuery(searchTerm);
+    setSearchLoading(true);
+    
+    try {
+      const data = await productSearchService.search(searchTerm, {
+        type: 'food',
+        limit: 10,
+      });
+      
+      // Find the best match (prefer exact name match or first result)
+      const results = data.food || [];
+      if (results.length > 0) {
+        // Try to find exact match first
+        const exactMatch = results.find(p => 
+          p.name?.toLowerCase() === product.name?.toLowerCase() ||
+          (p.name?.toLowerCase().includes(product.name?.toLowerCase()) && p.brand?.toLowerCase() === product.brand?.toLowerCase())
+        );
+        const bestMatch = exactMatch || results[0];
+        
+        // Add the product with full nutrition data
+        handleAddProduct(bestMatch);
+        setSearchQuery('');
+        setSearchResults([]);
+      } else {
+        // No results found, show search results for user to pick
+        setSearchResults(results);
+      }
+    } catch (error) {
+      console.error('Product search error:', error);
+      setSearchResults([]);
+    } finally {
+      setSearchLoading(false);
+    }
   }, []);
 
   // Inline product search (full search on submit)
@@ -318,15 +352,21 @@ export const ManualMealForm: React.FC<ManualMealFormProps> = ({
 
   // Add product from search results
   const handleAddProduct = (product: FoodProduct) => {
+    // Extract nutrition - API may return at top level OR in nutrition object
+    const calories = product.calories || product.nutrition?.calories || 0;
+    const protein = product.protein || product.nutrition?.protein || 0;
+    const carbs = product.carbs || product.nutrition?.carbs || 0;
+    const fat = product.fat || product.nutrition?.fat || 0;
+    
     const newIngredient: Ingredient = {
       id: `product-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       name: product.name || 'Unknown Product',
       amount: '1',
-      unit: product.servingSize || 'serving',
-      calories: product.calories || 0,
-      protein: product.protein || 0,
-      carbs: product.carbs || 0,
-      fat: product.fat || 0,
+      unit: product.servingSize || product.serving_size || 'serving',
+      calories,
+      protein,
+      carbs,
+      fat,
       productData: product,
     };
     
@@ -739,20 +779,20 @@ export const ManualMealForm: React.FC<ManualMealFormProps> = ({
                       {item.brand && (
                         <Text style={[styles.searchResultBrand, { color: theme.colors.textSecondary }]}>{item.brand}</Text>
                       )}
-                      {/* Nutrition badges */}
+                      {/* Nutrition badges - check both top-level and nutrition object */}
                       <View style={styles.searchResultNutrition}>
-                        {item.calories && (
+                        {((item.calories || item.nutrition?.calories) ?? 0) > 0 && (
                           <View style={styles.nutrientBadge}>
                             <Text style={styles.nutrientValue}>
-                              {Math.round(item.calories)}
+                              {Math.round(item.calories || item.nutrition?.calories || 0)}
                             </Text>
                             <Text style={styles.nutrientLabel}>cal</Text>
                           </View>
                         )}
-                        {item.protein && (
+                        {((item.protein || item.nutrition?.protein) ?? 0) > 0 && (
                           <View style={styles.nutrientBadge}>
                             <Text style={styles.nutrientValue}>
-                              {Math.round(item.protein)}g
+                              {Math.round(item.protein || item.nutrition?.protein || 0)}g
                             </Text>
                             <Text style={styles.nutrientLabel}>protein</Text>
                           </View>
@@ -783,7 +823,7 @@ export const ManualMealForm: React.FC<ManualMealFormProps> = ({
                         <View>
                           <Text style={[styles.ingredientNameText, { color: theme.colors.text }]}>{ingredient.name}</Text>
                           <View style={{ flexDirection: 'row', gap: 8, marginTop: 4 }}>
-                            {ingredient.calories && (
+                            {(ingredient.calories !== undefined && ingredient.calories > 0) && (
                               <View style={styles.miniNutritionBadge}>
                                 <SvgIcon name="flame" size={10} color="#f59e0b" />
                                 <Text style={styles.miniNutritionText}>
@@ -791,7 +831,7 @@ export const ManualMealForm: React.FC<ManualMealFormProps> = ({
                                 </Text>
                               </View>
                             )}
-                            {ingredient.protein && (
+                            {(ingredient.protein !== undefined && ingredient.protein > 0) && (
                               <View style={styles.miniNutritionBadge}>
                                 <SvgIcon name="fitness" size={10} color="#10b981" />
                                 <Text style={styles.miniNutritionText}>
