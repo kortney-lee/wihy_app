@@ -311,6 +311,14 @@ export const ManualMealForm: React.FC<ManualMealFormProps> = ({
     setSearchQuery('');
     
     // Create ingredient directly from suggest API product (it has nutrition data)
+    console.log('[ManualMealForm] Adding product from suggest:', {
+      name: product.name,
+      calories: product.calories,
+      protein: product.protein,
+      carbs: product.carbs,
+      fat: product.fat,
+    });
+    
     const newIngredient: Ingredient = {
       id: `product-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       name: product.name || 'Unknown Product',
@@ -322,6 +330,8 @@ export const ManualMealForm: React.FC<ManualMealFormProps> = ({
       fat: product.fat || 0,
       productData: product as any, // Mark as product data for display purposes
     };
+    
+    console.log('[ManualMealForm] Created ingredient:', newIngredient);
     
     setIngredients(prev => [...prev, newIngredient]);
     
@@ -823,7 +833,7 @@ export const ManualMealForm: React.FC<ManualMealFormProps> = ({
                         // Product from search - show name and nutrition
                         <View>
                           <Text style={[styles.ingredientNameText, { color: theme.colors.text }]}>{ingredient.name}</Text>
-                          <View style={{ flexDirection: 'row', gap: 8, marginTop: 4 }}>
+                          <View style={{ flexDirection: 'row', gap: 8, marginTop: 4, flexWrap: 'wrap' }}>
                             {(ingredient.calories !== undefined && ingredient.calories > 0) && (
                               <View style={styles.miniNutritionBadge}>
                                 <SvgIcon name="flame" size={10} color="#f59e0b" />
@@ -837,6 +847,20 @@ export const ManualMealForm: React.FC<ManualMealFormProps> = ({
                                 <SvgIcon name="fitness" size={10} color="#10b981" />
                                 <Text style={styles.miniNutritionText}>
                                   {Math.round(ingredient.protein * parseFloat(ingredient.amount || '1'))}g protein
+                                </Text>
+                              </View>
+                            )}
+                            {(ingredient.carbs !== undefined && ingredient.carbs > 0) && (
+                              <View style={styles.miniNutritionBadge}>
+                                <Text style={styles.miniNutritionText}>
+                                  {Math.round(ingredient.carbs * parseFloat(ingredient.amount || '1'))}g carbs
+                                </Text>
+                              </View>
+                            )}
+                            {(ingredient.fat !== undefined && ingredient.fat > 0) && (
+                              <View style={styles.miniNutritionBadge}>
+                                <Text style={styles.miniNutritionText}>
+                                  {Math.round(ingredient.fat * parseFloat(ingredient.amount || '1'))}g fat
                                 </Text>
                               </View>
                             )}
