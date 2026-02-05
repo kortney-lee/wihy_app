@@ -605,7 +605,7 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
 
   // Determine grid columns based on screen size
   const getGridClass = () => {
-    if (isDesktop) return 'pricing-grid pricing-grid-3';
+    if (isDesktop) return 'pricing-grid pricing-grid-4';
     if (isTablet) return 'pricing-grid pricing-grid-2';
     return 'pricing-grid pricing-grid-1';
   };
@@ -673,7 +673,7 @@ export const SubscriptionScreen: React.FC<Props> = ({ navigation }) => {
 
             {/* Plan Cards */}
             <div className={getGridClass()}>
-              {CONSUMER_PLANS.map((plan) => (
+              {CONSUMER_PLANS.filter(plan => plan.id !== 'coach').map((plan) => (
                 <div 
                   key={plan.id}
                   className={`pricing-card ${plan.popular ? 'pricing-card-popular' : ''}`}
