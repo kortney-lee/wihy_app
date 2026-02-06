@@ -49,6 +49,7 @@
       "**/*"
     ],
     "ios": {
+      "appleTeamId": "6Q442R8GCU",
       "supportsTablet": true,
       "usesIcloudStorage": false,
       "infoPlist": {
@@ -62,10 +63,9 @@
         "ITSAppUsesNonExemptEncryption": false
       },
       "entitlements": {
-        "com.apple.developer.healthkit": true,
-        "com.apple.developer.in-app-payments": ["merchant.com.wihy.app"]
+        "com.apple.developer.healthkit": true
       },
-      "bundleIdentifier": "com.wihy.app",
+      "bundleIdentifier": "com.wihy.ai.app",
       "associatedDomains": [
         "applinks:auth.wihy.ai",
         "applinks:wihy.ai"
@@ -73,7 +73,7 @@
       "urlSchemes": ["wihy"]
     },
     "android": {
-      "package": "com.wihy.app",
+      "package": "com.wihy.ai",
       "minSdkVersion": 26,
       "permissions": [
         "android.permission.CAMERA",

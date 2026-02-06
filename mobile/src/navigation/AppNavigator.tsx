@@ -331,8 +331,11 @@ function TabNavigator() {
             // Skip check while auth is still initializing to avoid false positives
             if (Platform.OS !== 'web' && !user && !initializing) {
               e.preventDefault();
+              console.log('[Health Tab] Showing Plans Modal for unauthenticated user');
               setShowPlansModal(true);
+              return;
             }
+            console.log('[Health Tab] Allowing navigation - user:', !!user);
             // Otherwise, allow normal navigation to Health tab
           },
         })}
@@ -354,11 +357,14 @@ function TabNavigator() {
     {/* Plans Modal for Free Users */}
     <PlansModal
       visible={showPlansModal}
-      onClose={() => setShowPlansModal(false)}
-      title="Upgrade to Access Health Features"
+      onClose={() => {
+        console.log('[Plans Modal] Closing modal');
+        setShowPlansModal(false);
+      }}
+      title="Sign In to Access Health Features"
       subtitle="Track your complete health journey with Premium"
       onSelectPlan={(planId) => {
-        console.log('Selected plan:', planId);
+        console.log('[Plans Modal] Selected plan:', planId);
         // TODO: Integrate with actual subscription flow
         // For now, just show an alert
         alert(`Plan selected: ${planId}\n\nSubscription integration coming soon!`);

@@ -20,7 +20,7 @@ platform :ios, podfile_properties['ios.deploymentTarget'] || '15.1'
 
 prepare_react_native_project!
 
-target 'WiHYAi' do
+target 'wihyapp' do
   use_expo_modules!
 
   if ENV['EXPO_USE_COMMUNITY_AUTOLINKING'] == '1'
@@ -59,15 +59,5 @@ target 'WiHYAi' do
       :mac_catalyst_enabled => false,
       :ccache_enabled => ccache_enabled?(podfile_properties),
     )
-    
-    # Fix for react-native-skia linking issue on simulator
-    installer.pods_project.targets.each do |target|
-      if target.name == 'react-native-skia'
-        target.build_configurations.each do |config|
-          config.build_settings['OTHER_LDFLAGS'] ||= ['$(inherited)']
-          config.build_settings['OTHER_LDFLAGS'] << '-lc++'
-        end
-      end
-    end
   end
 end

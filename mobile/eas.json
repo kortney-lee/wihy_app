@@ -65,8 +65,8 @@
   "submit": {
     "production": {
       "ios": {
-        "appleId": "kortney.lee@snackingwell.com",
-        "appleTeamId": "8FPA6366BC"
+        "appleId": "kortney@wihy.ai",
+        "appleTeamId": "6Q442R8GCU"
       },
       "android": {
         "serviceAccountKeyPath": "./google-play-service-account.json",

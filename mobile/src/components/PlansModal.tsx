@@ -541,14 +541,15 @@ const styles = StyleSheet.create({
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'flex-end',
-    ...(isWeb && { alignItems: 'center', justifyContent: 'center' }),
+    justifyContent: isWeb ? 'center' : 'flex-end',
+    ...(isWeb && { alignItems: 'center' }),
   },
   modalContent: {
     // backgroundColor: '#ffffff', // theme.colors.background
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    maxHeight: '90%',
+    borderTopLeftRadius: isWeb ? 0 : 24,
+    borderTopRightRadius: isWeb ? 0 : 24,
+    height: isWeb ? 'auto' : '95%',
+    maxHeight: isWeb ? '95%' : '95%',
     paddingBottom: 40,
     ...(isWeb && { 
       borderRadius: 24, 
