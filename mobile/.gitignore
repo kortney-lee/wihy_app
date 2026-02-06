@@ -90,3 +90,5 @@ __tests__/
 # Debug
 *.hprofbuild-*.tar.gz
 *.tar.gz
+ios-backup-modified/
+.expo/
