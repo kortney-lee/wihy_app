@@ -281,9 +281,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     // For role-based users, always compute client-side to ensure correct access
     const rolesWithOverride: User['role'][] = ['admin', 'employee', 'coach', 'family-pro', 'family-basic', 'premium'];
     const shouldComputeClientSide = normalizedRole && rolesWithOverride.includes(normalizedRole);
-    const capabilities = (!shouldComputeClientSide && authUser.capabilities)
-      ? authUser.capabilities 
-      : getPlanCapabilities(plan, addOns);
+    // Always start with computed capabilities, then merge backend overrides if available
+    const baseCapabilities = getPlanCapabilities(plan, addOns);
+    const capabilities: Capabilities = shouldComputeClientSide 
+      ? baseCapabilities 
+      : { ...baseCapabilities, ...authUser.capabilities } as Capabilities;
     
     // Status from server (normalize to lowercase)
     const statusFromServer = authUser.status;
@@ -592,7 +594,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       console.log('[AuthContext] Session verification failed, trying user profile...');
       const profile = await userService.getUserProfile();
       if (profile) {
-        return convertUserData(profile);
+        // Cast to UserData - profiles are compatible enough for conversion
+        return convertUserData(profile as unknown as UserData);
       }
     }
     
@@ -731,6 +734,8 @@ export const useAuth = () => {
     coachId: context.user?.coachId || context.user?.coachProfileId,
     isCoach: context.user?.isCoach || context.user?.role === 'coach' || context.user?.plan?.includes('coach') || false,
     isAuthenticated: !!context.user,
+    // Auth token for API calls
+    authToken: context.user?.authToken,
     // Family helpers
     isInFamily: !!context.user?.familyId,
     isFamilyOwner: context.user?.familyRole === 'owner',

@@ -26,7 +26,8 @@ export type RootStackParamList = {
   WihyHome: undefined;
   ResearchDashboard: undefined;
   Permissions: undefined;
-  Subscription: undefined;
+  Subscription: { highlight?: string } | undefined;
+  Pricing: undefined;
   B2BPricing: undefined;
   PostPaymentRegistration: { 
     email?: string; 

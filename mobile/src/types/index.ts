@@ -116,14 +116,14 @@ export interface FamilyPermissions {
   canInviteMembers: boolean;
 }
 
-// Export Goals types
-export * from './goals.types';
+// Export Goals types (skip if overlapping with api.ts)
+// export * from './goals.types';
 
-// Export Progress types
-export * from './progress.types';
+// Export Progress types (skip if overlapping with api.ts)
+// export * from './progress.types';
 
-// Export Reminders types
-export * from './reminders.types';
+// Export Reminders types (skip if overlapping with api.ts)
+// export * from './reminders.types';
 
 // Export Scan types
 export * from './scan.types';

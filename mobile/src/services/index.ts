@@ -117,7 +117,7 @@ export type {
   UserLinks, 
   FeatureFlags, 
   SessionData, 
-  UserPreferences,
+  UserPreferences as ClientDataUserPreferences,
   SetValueOptions,
 } from './clientDataService';
 
@@ -136,7 +136,7 @@ export {
   type Meal,
   type DietaryPreferences,
   type MealDiaryResponse,
-  type CreateMealRequest,
+  type CreateMealRequest as MealDiaryCreateMealRequest,
 } from './mealDiary';
 
 export { 
@@ -222,24 +222,24 @@ export type {
 } from './nutritionService';
 
 export type {
-  MealProgram,
+  MealProgram as MealServiceProgram,
   Recipe,
   DietType,
   RecipeDifficulty,
-  MealType,
+  MealType as MealServiceMealType,
   PlanningFocus,
   CookingSkillLevel,
   MealVariety,
   TimePerMeal,
   MealPlanningPreferences,
-  CreateMealPlanRequest,
+  CreateMealPlanRequest as MealServiceCreateMealPlanRequest,
   PlanMeal,
   PlanDay,
   MealPlanResponse,
   MealCalendarResponse,
-  CalendarDay as MealCalendarDay,
+  CalendarDay as MealServiceCalendarDay,
   CalendarSummary,
-  MealTemplate,
+  MealTemplate as MealServiceTemplate,
   MealIngredient,
   ScannedRecipe,
   ShoppingListItem as MealShoppingListItem,
@@ -374,7 +374,7 @@ export type {
   DashboardSummary,
   ConsumptionTrends,
   NutritionRecommendation,
-  DashboardData,
+  DashboardData as ConsumptionDashboardData,
   PendingMeal,
   PendingMealStatus,
   SkipReason,
@@ -473,7 +473,7 @@ export type { GoalId, GoalCard, GoalsDashboardData } from './goalsDashboardServi
 
 // Global Goals (Cache-First)
 export { globalGoalsService } from './globalGoalsService';
-export type { GlobalGoalStats, UserGoalRanking, GlobalLeaderboard, CommunityChallenge, GoalType } from './globalGoalsService';
+export type { GlobalGoalStats, UserGoalRanking, GlobalLeaderboard, CommunityChallenge, GoalType as GlobalGoalType } from './globalGoalsService';
 
 // Combined Programs (Backend API)
 export type {
@@ -488,7 +488,7 @@ export type {
   SyncedMealDay,
   PostWorkoutCombo,
   PostWorkoutMealSuggestion,
-  Recommendation,
+  Recommendation as CombinedRecommendation,
 } from './combinedProgramService';
 
 // Shopping Preferences (user.wihy.ai)
@@ -555,9 +555,9 @@ export type {
   // Shopping types
   SaveShoppingPreferencesRequest as SaveShoppingPreferencesApiRequest,
   
-  // Family types
-  Family,
-  FamilyMember,
+  // Family types (skip - already exported from familyService)
+  // Family,
+  // FamilyMember,
   CreateFamilyRequest,
   JoinFamilyRequest,
   AddFamilyMemberRequest,
@@ -571,7 +571,7 @@ export type {
   CoachFilters,
   CoachesDiscoverResponse,
   UpdateCoachProfileRequest,
-  CoachOverview,
+  // CoachOverview, // Already exported from coachService
   CoachClient,
   AddClientRequest,
   UpdateClientStatusRequest,
@@ -611,14 +611,14 @@ export type {
   // Notifications types
   RegisterPushTokenRequest,
   DeactivatePushTokenRequest,
-  NotificationPreferences,
+  // NotificationPreferences, // Already exported from notificationService
   UpdateNotificationPreferencesRequest,
   CreateReminderRequest,
   Reminder,
   UpdateReminderRequest,
   
   // Global Goals types
-  GlobalGoalStats,
+  // GlobalGoalStats, // Already exported from globalGoalsService
   UserRanking,
   LeaderboardEntry,
   Leaderboard,

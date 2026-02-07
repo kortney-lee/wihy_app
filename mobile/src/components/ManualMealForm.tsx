@@ -303,6 +303,11 @@ export const ManualMealForm: React.FC<ManualMealFormProps> = ({
     carbs?: number;
     fat?: number;
     servingSize?: string;
+    nutrition?: {
+      per_serving?: { calories?: number; protein?: number; carbs?: number; fat?: number; };
+      per_100g?: { calories?: number; protein?: number; carbs?: number; fat?: number; };
+      serving_size?: string;
+    };
   }) => {
     setShowDropdown(false);
     setSuggestions([]);
@@ -1805,7 +1810,7 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   // Collapsible section styles
-  collapsibleHeader: {
+  collapsibleSectionHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',

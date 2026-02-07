@@ -85,7 +85,14 @@ export function ProductSearchModal({
       try {
         const data = await productSearchService.suggest(query, 'food', 8);
         setSuggestions(data.suggestions || []);
-        setSuggestedProducts(data.products || []);
+        // Map products to include required FoodProduct fields
+        const mappedProducts = (data.products || []).map((p, index) => ({
+          ...p,
+          id: `suggest-${index}-${Date.now()}`,
+          score: 1,
+          type: 'food' as const,
+        }));
+        setSuggestedProducts(mappedProducts);
         setSuggestedBrands(data.brands || []);
         setShowDropdown(true);
       } catch (error) {

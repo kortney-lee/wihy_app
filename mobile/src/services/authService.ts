@@ -204,7 +204,10 @@ export interface UserData {
   addOns?: string[];
   
   // Capabilities (computed by backend based on plan + addOns)
-  capabilities?: import('../utils/capabilities').Capabilities;
+  capabilities?: Partial<import('../utils/capabilities').Capabilities> | UserCapabilities;
+  
+  // Auth session data
+  sessionId?: string;
   
   // Family info (from backend)
   familyId?: string | null;
@@ -313,7 +316,7 @@ export interface UserProfile {
   familyRole?: string;
   guardianCode?: string;
   organizationId?: string;
-  organizationRole?: string;
+  organizationRole?: 'admin' | 'user' | 'student' | 'employee';
   coachId?: string;
   commissionRate?: number;
   healthScore?: number;

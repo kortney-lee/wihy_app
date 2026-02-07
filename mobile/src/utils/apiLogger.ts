@@ -520,7 +520,7 @@ export async function fetchWithLogging(
           // Refresh failed - token signature invalid, clear auth and force re-login
           console.error('[fetchWithLogging] Token refresh failed - clearing auth data');
           const { authService } = await import('../services/authService');
-          await authService.clearAllData();
+          await authService.clearTokens();
           // Reload page to trigger login flow (web) or return to login screen (mobile)
           if (typeof window !== 'undefined') {
             window.location.href = '/';

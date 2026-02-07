@@ -71,6 +71,14 @@ export interface ProductNutrition {
   per_100g?: NutritionValues;
   serving_size?: string;
   serving_size_grams?: number;
+  // Convenience flat properties for backward compatibility
+  calories?: number;
+  protein?: number;
+  carbs?: number;
+  fat?: number;
+  fiber?: number;
+  sugar?: number;
+  sodium?: number;
 }
 
 export interface FoodProduct {

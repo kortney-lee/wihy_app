@@ -284,9 +284,9 @@ export const GoalSelectionMeals: React.FC<GoalSelectionMealsProps> = ({
       console.log('[GoalSelectionMeals] Fetching saved meals for user:', userId);
       const response = await mealService.getSavedMealPlans(userId, { limit: 20 }, authToken || undefined);
       
-      if (response.success && response.data) {
-        console.log('[GoalSelectionMeals] Loaded saved meals:', response.data.length);
-        setSavedMeals(response.data);
+      if (response.success && response.meals) {
+        console.log('[GoalSelectionMeals] Loaded saved meals:', response.meals.length);
+        setSavedMeals(response.meals);
       } else {
         console.log('[GoalSelectionMeals] No saved meals found');
         setSavedMeals([]);

@@ -21,7 +21,7 @@ import { getPlanDisplayName } from '../utils/capabilities';
 
 type PlanType = 'free' | 'premium' | 'family-basic' | 'family-premium' | 'family-pro' | 'coach' | 'coach-family'
   | 'workplace-core' | 'workplace-plus' | 'corporate-enterprise' | 'k12-school' 
-  | 'university' | 'hospital' | 'hospitality';
+  | 'university' | 'hospital' | 'hospitality' | 'admin';
 
 interface PlanOption {
   id: PlanType;

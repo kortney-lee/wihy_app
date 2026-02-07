@@ -193,9 +193,14 @@ export const SubscriptionManagementScreen: React.FC<Props> = ({ navigation }) =>
       return;
     }
 
+    if (!user?.id) {
+      Alert.alert('Error', 'Please log in to manage your subscription');
+      return;
+    }
+
     setProcessing(true);
     try {
-      const portalUrl = await subscriptionService.getCustomerPortal();
+      const portalUrl = await subscriptionService.getCustomerPortal(user.id);
       if (typeof window !== 'undefined') {
         window.location.href = portalUrl;
       }

@@ -28,6 +28,7 @@ export interface Plan {
   stripePriceId?: string;
   popular?: boolean;
   savings?: string;
+  setupFee?: number;
 }
 
 export interface CheckoutRequest {
@@ -681,37 +682,6 @@ class CheckoutService {
       return price / 12;
     }
     return price;
-  }
-
-  /**
-   * Get Stripe publishable key for client-side Stripe.js
-   */
-  async getStripeConfig(): Promise<{ success: boolean; publishableKey?: string; error?: string }> {
-    try {
-      const response = await fetchWithLogging(
-        `${this.baseUrl}/api/payment/config`,
-        { method: 'GET' }
-      );
-
-      const data = await response.json();
-
-      if (response.ok && data.success) {
-        return {
-          success: true,
-          publishableKey: data.publishableKey,
-        };
-      }
-
-      return {
-        success: false,
-        error: data.error || 'Failed to get Stripe config',
-      };
-    } catch (error: any) {
-      return {
-        success: false,
-        error: error.message || 'Network error',
-      };
-    }
   }
 
   /**
