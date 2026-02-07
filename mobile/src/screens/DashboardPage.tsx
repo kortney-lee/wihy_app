@@ -19,7 +19,7 @@ import type { StackNavigationProp } from '@react-navigation/stack';
 import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import type { TabParamList, RootStackParamList } from '../types/navigation';
 import type { DashboardContext } from './HealthHub';
-import { dashboardTheme } from '../theme/dashboardTheme';
+import { getDashboardTheme } from '../theme/dashboardTheme';
 import { HamburgerMenu } from '../components/shared/HamburgerMenu';
 import { GradientDashboardHeader, QuickStartGuide } from '../components/shared';
 import { AuthContext } from '../context/AuthContext';
@@ -82,7 +82,8 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
   const navigation = useNavigation<NavigationProp>();
   const route = useRoute();
   const { user } = React.useContext(AuthContext);
-  const { theme } = useTheme();
+  const { theme, isDark } = useTheme();
+  const dashboardTheme = getDashboardTheme(isDark);
   const layout = useDashboardLayout();
   const insets = useSafeAreaInsets();
 
@@ -1134,7 +1135,7 @@ const styles = StyleSheet.create({
   dashboardTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: dashboardTheme.colors.text, // Note: Override with theme.colors.text inline where used
+    // color is set inline via theme.colors.text
   },
 
   menuButton: {

@@ -1,8 +1,8 @@
 import React from 'react';
 import { View, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { dashboardTheme } from '../../theme/dashboardTheme';
 import { useDashboardLayout } from '../../hooks/useDashboardLayout';
+import { useTheme } from '../../context/ThemeContext';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -16,9 +16,10 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   contentPadding = true,
 }) => {
   const layout = useDashboardLayout();
+  const { theme } = useTheme();
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={[
@@ -48,9 +49,9 @@ export const DashboardSection: React.FC<SectionProps> = ({
 }) => {
   const getSpacing = () => {
     switch (spacing) {
-      case 'sm': return dashboardTheme.spacing.sm;
-      case 'lg': return dashboardTheme.spacing.lg;
-      default: return dashboardTheme.spacing.md;
+      case 'sm': return 8;
+      case 'lg': return 24;
+      default: return 16;
     }
   };
 
@@ -70,7 +71,7 @@ interface GridProps {
 export const DashboardGrid: React.FC<GridProps> = ({
   children,
   columns = 2,
-  spacing = dashboardTheme.spacing.sm,
+  spacing = 8,
 }) => {
   return (
     <View style={[styles.grid, { gap: spacing }]}>
@@ -82,16 +83,15 @@ export const DashboardGrid: React.FC<GridProps> = ({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: dashboardTheme.colors.background,
   },
   scrollView: {
     flex: 1,
   },
   content: {
-    paddingTop: dashboardTheme.spacing.sm,
+    paddingTop: 8,
   },
   section: {
-    marginBottom: dashboardTheme.spacing.md,
+    marginBottom: 16,
   },
   grid: {
     flexDirection: 'row',

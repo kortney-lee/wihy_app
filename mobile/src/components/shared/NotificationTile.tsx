@@ -2,7 +2,6 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Animated } from 'react-native';
 import { Ionicons } from './Ionicons';
 import { useTheme } from '../../context/ThemeContext';
-import { dashboardTheme } from '../../theme/dashboardTheme';
 import { notificationService } from '../../services';
 
 export interface NotificationSummary {
@@ -198,7 +197,7 @@ export const NotificationTile: React.FC<NotificationTileProps> = ({
       </View>
 
       {!isLoading && (
-        <View style={styles.statsContainer}>
+        <View style={[styles.statsContainer, { borderTopColor: theme.colors.border }]}>
           {/* Messages */}
           <TouchableOpacity 
             style={styles.statItem}
@@ -251,8 +250,8 @@ export const NotificationTile: React.FC<NotificationTileProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    borderRadius: dashboardTheme.borderRadius.lg,
-    padding: dashboardTheme.spacing.md,
+    borderRadius: 16,
+    padding: 16,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -271,7 +270,7 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: dashboardTheme.colors.primary + '15',
+    backgroundColor: '#0ea5e915',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -279,7 +278,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: -4,
     right: -4,
-    backgroundColor: dashboardTheme.colors.error,
+    backgroundColor: '#ef4444',
     borderRadius: 12,
     minWidth: 22,
     height: 22,
@@ -287,7 +286,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 6,
     borderWidth: 2,
-    borderColor: dashboardTheme.colors.surface,
+    borderColor: '#fff',
   },
   badgeText: {
     color: '#fff',
@@ -296,24 +295,21 @@ const styles = StyleSheet.create({
   },
   titleContainer: {
     flex: 1,
-    marginLeft: dashboardTheme.spacing.md,
+    marginLeft: 16,
   },
   title: {
     fontSize: 16,
     fontWeight: '600',
-    color: dashboardTheme.colors.text,
   },
   subtitle: {
     fontSize: 13,
-    color: dashboardTheme.colors.textSecondary,
     marginTop: 2,
   },
   statsContainer: {
     flexDirection: 'row',
-    marginTop: dashboardTheme.spacing.md,
-    paddingTop: dashboardTheme.spacing.md,
+    marginTop: 16,
+    paddingTop: 16,
     borderTopWidth: 1,
-    borderTopColor: dashboardTheme.colors.border,
   },
   statItem: {
     flex: 1,
@@ -333,11 +329,9 @@ const styles = StyleSheet.create({
   statValue: {
     fontSize: 16,
     fontWeight: '700',
-    color: dashboardTheme.colors.text,
   },
   statLabel: {
     fontSize: 11,
-    color: dashboardTheme.colors.textSecondary,
   },
   // Compact styles
   compactContainer: {
@@ -351,7 +345,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: -6,
     right: -6,
-    backgroundColor: dashboardTheme.colors.error,
+    backgroundColor: '#ef4444',
     borderRadius: 10,
     minWidth: 18,
     height: 18,

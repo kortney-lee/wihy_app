@@ -1,7 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ViewStyle, Platform, useWindowDimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { dashboardTheme } from '../../theme/dashboardTheme';
 import SvgIcon from './SvgIcon';
 
 /**
@@ -218,9 +217,9 @@ export const GradientDashboardHeader: React.FC<GradientDashboardHeaderProps> = (
 
 const styles = StyleSheet.create({
   header: {
-    paddingHorizontal: dashboardTheme.header.paddingHorizontal,
-    paddingTop: dashboardTheme.header.paddingTop,
-    paddingBottom: dashboardTheme.header.paddingBottom,
+    paddingHorizontal: 20,
+    paddingTop: 16,
+    paddingBottom: 24,
   },
   headerWeb: {
     paddingTop: 16,
@@ -234,8 +233,8 @@ const styles = StyleSheet.create({
     paddingRight: 110, // Space for the floating Health Hub button
   },
   backButton: {
-    padding: dashboardTheme.spacing.xs,
-    marginRight: dashboardTheme.spacing.sm,
+    padding: 4,
+    marginRight: 8,
     marginTop: 2,
   },
   titleContainer: {
@@ -292,12 +291,12 @@ const styles = StyleSheet.create({
     fontSize: 12,
   },
   rightAction: {
-    padding: dashboardTheme.spacing.xs,
-    marginLeft: dashboardTheme.spacing.sm,
+    padding: 4,
+    marginLeft: 8,
   },
   closeButton: {
-    padding: dashboardTheme.spacing.xs,
-    marginLeft: dashboardTheme.spacing.sm,
+    padding: 4,
+    marginLeft: 8,
     marginTop: 2,
   },
 });

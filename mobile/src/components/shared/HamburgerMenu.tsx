@@ -12,7 +12,6 @@ import { Ionicons } from './Ionicons';
 import { useNavigation } from '@react-navigation/native';
 import type { StackNavigationProp } from '@react-navigation/stack';
 import type { RootStackParamList } from '../../types/navigation';
-import { dashboardTheme } from '../../theme/dashboardTheme';
 import { useTheme } from '../../context/ThemeContext';
 
 type NavigationProp = StackNavigationProp<RootStackParamList>;
@@ -177,7 +176,7 @@ export const HamburgerMenu: React.FC<HamburgerMenuProps> = ({
         <View style={[styles.menuContainer, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
           <SafeAreaView style={styles.safeArea}>
             {/* Header */}
-            <View style={styles.header}>
+            <View style={[styles.header, { borderBottomColor: theme.colors.border }]}>
               <Text style={[styles.headerTitle, { color: theme.colors.text }]}>Dashboards</Text>
               <TouchableOpacity
                 style={styles.closeButton}
@@ -237,35 +236,32 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: dashboardTheme.spacing.md,
+    padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: dashboardTheme.colors.border,
   },
   headerTitle: {
     fontSize: 20,
     fontWeight: '600',
-    color: dashboardTheme.colors.text,
   },
   closeButton: {
-    padding: dashboardTheme.spacing.xs,
+    padding: 4,
   },
   content: {
     flex: 1,
-    padding: dashboardTheme.spacing.md,
+    padding: 16,
   },
   sectionTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: dashboardTheme.colors.text,
-    marginBottom: dashboardTheme.spacing.md,
+    marginBottom: 16,
   },
   optionItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: dashboardTheme.spacing.md,
-    paddingHorizontal: dashboardTheme.spacing.sm,
-    borderRadius: dashboardTheme.borderRadius.md,
-    marginBottom: dashboardTheme.spacing.xs,
+    paddingVertical: 16,
+    paddingHorizontal: 8,
+    borderRadius: 12,
+    marginBottom: 4,
   },
   optionIcon: {
     width: 48,
@@ -273,7 +269,7 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: dashboardTheme.spacing.md,
+    marginRight: 16,
   },
   optionText: {
     flex: 1,
@@ -281,11 +277,9 @@ const styles = StyleSheet.create({
   optionTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: dashboardTheme.colors.text,
     marginBottom: 2,
   },
   optionSubtitle: {
     fontSize: 14,
-    color: dashboardTheme.colors.textSecondary,
   },
 });

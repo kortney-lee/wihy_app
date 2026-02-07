@@ -1,7 +1,8 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from './Ionicons';
-import { dashboardTheme } from '../../theme/dashboardTheme';
+import { getDashboardTheme } from '../../theme/dashboardTheme';
+import { useTheme } from '../../context/ThemeContext';
 
 interface DashboardHeaderProps {
   title: string;
@@ -21,6 +22,9 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   rightAction,
   onBackPress,
 }) => {
+  const { isDark } = useTheme();
+  const dashboardTheme = getDashboardTheme(isDark);
+
   return (
     <View style={styles.header}>
       <View style={styles.headerContent}>
@@ -31,8 +35,8 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
         )}
 
         <View style={styles.titleContainer}>
-          <Text style={styles.title}>{title}</Text>
-          {subtitle && <Text style={styles.subtitle}>{subtitle}</Text>}
+          <Text style={[styles.title, { color: dashboardTheme.colors.text }]}>{title}</Text>
+          {subtitle && <Text style={[styles.subtitle, { color: dashboardTheme.colors.textSecondary }]}>{subtitle}</Text>}
         </View>
 
         {rightAction && (
@@ -47,9 +51,9 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
 
 const styles = StyleSheet.create({
   header: {
-    paddingTop: dashboardTheme.spacing.md,
-    paddingHorizontal: dashboardTheme.spacing.md,
-    paddingBottom: dashboardTheme.spacing.sm,
+    paddingTop: 16,
+    paddingHorizontal: 16,
+    paddingBottom: 8,
   },
   headerContent: {
     flexDirection: 'row',
@@ -57,8 +61,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   backButton: {
-    padding: dashboardTheme.spacing.xs,
-    marginRight: dashboardTheme.spacing.sm,
+    padding: 4,
+    marginRight: 8,
   },
   titleContainer: {
     flex: 1,
@@ -66,15 +70,13 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: '700',
-    color: dashboardTheme.colors.text,
   },
   subtitle: {
     fontSize: 14,
-    color: dashboardTheme.colors.textSecondary,
     marginTop: 2,
   },
   rightAction: {
-    padding: dashboardTheme.spacing.xs,
-    marginLeft: dashboardTheme.spacing.sm,
+    padding: 4,
+    marginLeft: 8,
   },
 });

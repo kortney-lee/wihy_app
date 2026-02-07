@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ViewStyle } from 'react-native';
 import { Ionicons } from './Ionicons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { dashboardTheme } from '../../theme/dashboardTheme';
+import { getDashboardTheme } from '../../theme/dashboardTheme';
 import { useTheme } from '../../context/ThemeContext';
 
 interface ActionCardProps {
@@ -26,7 +26,8 @@ export const ActionCard: React.FC<ActionCardProps> = ({
   iconSize = 28,
   gradient = false,
 }) => {
-  const { theme } = useTheme();
+  const { theme, isDark } = useTheme();
+  const dashboardTheme = getDashboardTheme(isDark);
   const iconContainerSize = iconSize + 20; // Add padding to icon container
 
   const cardContent = (
@@ -42,8 +43,8 @@ export const ActionCard: React.FC<ActionCardProps> = ({
         <Ionicons name={icon as any} size={iconSize} color={color} />
       </View>
       <View style={styles.textContainer}>
-        <Text style={styles.title}>{title}</Text>
-        <Text style={styles.subtitle}>{subtitle}</Text>
+        <Text style={[styles.title, { color: dashboardTheme.colors.text }]}>{title}</Text>
+        <Text style={[styles.subtitle, { color: dashboardTheme.colors.textSecondary }]}>{subtitle}</Text>
       </View>
     </>
   );
@@ -95,7 +96,8 @@ export const MetricCard: React.FC<MetricCardProps> = ({
   onPress,
   style,
 }) => {
-  const { theme } = useTheme();
+  const { theme, isDark } = useTheme();
+  const dashboardTheme = getDashboardTheme(isDark);
   const getStatusColor = () => {
     switch (status) {
       case 'warning': return dashboardTheme.colors.warning;
@@ -130,10 +132,10 @@ export const MetricCard: React.FC<MetricCardProps> = ({
           </View>
         )}
       </View>
-      <Text style={styles.metricValue}>
-        {value}{unit && <Text style={styles.metricUnit}>{unit}</Text>}
+      <Text style={[styles.metricValue, { color: dashboardTheme.colors.text }]}>
+        {value}{unit && <Text style={[styles.metricUnit, { color: dashboardTheme.colors.textSecondary }]}>{unit}</Text>}
       </Text>
-      <Text style={styles.metricTitle}>{title}</Text>
+      <Text style={[styles.metricTitle, { color: dashboardTheme.colors.textSecondary }]}>{title}</Text>
     </CardWrapper>
   );
 };
@@ -141,24 +143,23 @@ export const MetricCard: React.FC<MetricCardProps> = ({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    marginHorizontal: dashboardTheme.spacing.xs,
+    marginHorizontal: 4,
   },
   card: {
-    borderRadius: dashboardTheme.borderRadius.md,
-    padding: dashboardTheme.spacing.md,
+    borderRadius: 12,
+    padding: 16,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
     borderWidth: 2,
-    borderColor: dashboardTheme.colors.border,
   },
   iconContainer: {
-    borderRadius: dashboardTheme.borderRadius.sm,
+    borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: dashboardTheme.spacing.sm,
+    marginBottom: 8,
   },
   textContainer: {
     flex: 1,
@@ -166,35 +167,32 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 16,
     fontWeight: '600',
-    color: dashboardTheme.colors.text,
     marginBottom: 2,
   },
   subtitle: {
     fontSize: 12,
-    color: dashboardTheme.colors.textSecondary,
   },
   metricCard: {
-    borderRadius: dashboardTheme.borderRadius.md,
-    padding: dashboardTheme.spacing.md,
+    borderRadius: 12,
+    padding: 16,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
     borderWidth: 2,
-    borderColor: dashboardTheme.colors.border,
     minHeight: 120,
   },
   metricHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: dashboardTheme.spacing.sm,
+    marginBottom: 8,
   },
   metricIcon: {
     width: 32,
     height: 32,
-    borderRadius: dashboardTheme.borderRadius.sm,
+    borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -208,16 +206,13 @@ const styles = StyleSheet.create({
   metricValue: {
     fontSize: 24,
     fontWeight: '700',
-    color: dashboardTheme.colors.text,
     marginBottom: 4,
   },
   metricUnit: {
     fontSize: 16,
     fontWeight: '400',
-    color: dashboardTheme.colors.textSecondary,
   },
   metricTitle: {
     fontSize: 14,
-    color: dashboardTheme.colors.textSecondary,
   },
 });
