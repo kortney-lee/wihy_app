@@ -928,7 +928,9 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     justifyContent: 'flex-start',
     gap: dashboardTheme.spacing.md,
-    padding: dashboardTheme.spacing.md,
+    paddingTop: 16,
+    paddingHorizontal: dashboardTheme.spacing.md,
+    paddingBottom: dashboardTheme.spacing.md,
   },
 
   dashboardCard: {
