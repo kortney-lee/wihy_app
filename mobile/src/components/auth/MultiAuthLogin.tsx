@@ -258,11 +258,19 @@ export default function MultiAuthLogin({
                     ]}
                     onPress={() => handleProviderPress(provider.id)}
                   >
-                    <SvgIcon
-                      name={provider.icon as any}
-                      size={28}
-                      color={provider.color}
-                    />
+                    {provider.id === 'google' ? (
+                      <Image
+                        source={{ uri: 'https://www.google.com/images/branding/googleg/1x/googleg_standard_color_128dp.png' }}
+                        style={{ width: 32, height: 32 }}
+                        resizeMode="contain"
+                      />
+                    ) : (
+                      <SvgIcon
+                        name={provider.icon as any}
+                        size={32}
+                        color={provider.color}
+                      />
+                    )}
                   </Pressable>
                 ))}
               </View>
@@ -809,6 +817,7 @@ const styles = StyleSheet.create({
     borderColor: '#e5e7eb',
     alignItems: 'center',
     justifyContent: 'center',
+    overflow: 'visible',
     // backgroundColor: '#ffffff', // theme.colors.surface
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
