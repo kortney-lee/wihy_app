@@ -1099,14 +1099,36 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
         snack: selectedMealTypes.includes('snack'),
       };
       
+      // Auto-correct mode based on complexity:
+      // - If duration > 1 day → must use "plan"
+      // - If multiple meals per day → must use "plan"
+      // - If multiple cuisines for same meal type → must use "plan"
+      let correctedMode = params.mode;
+      const duration = params.duration || 1;
+      const mealsCount = Object.values(params.mealsPerDay || defaultMealsPerDay).filter(Boolean).length;
+      const cuisinesCount = (params.cuisineTypes?.length || 0) + (params.cuisineType ? 1 : 0);
+      
+      if (params.mode === 'quick') {
+        if (duration > 1) {
+          console.log('[CreateMeals] Auto-correcting mode: quick → plan (duration > 1)');
+          correctedMode = 'plan';
+        } else if (mealsCount > 1) {
+          console.log('[CreateMeals] Auto-correcting mode: quick → plan (multiple meals per day)');
+          correctedMode = 'plan';
+        } else if (cuisinesCount > 1) {
+          console.log('[CreateMeals] Auto-correcting mode: quick → plan (multiple cuisines)');
+          correctedMode = 'plan';
+        }
+      }
+      
       // Build request based on mode - using /api/meals/create-from-text
       const resolvedUserId = getRequiredUserId('generateMealPlan');
       if (!resolvedUserId) return;
       const request: CreateMealPlanRequest = {
-        mode: (params.mode === 'saved' ? 'plan' : params.mode) as 'quick' | 'plan' | 'diet', // CRITICAL: Pass mode for proper endpoint routing
+        mode: (params.mode === 'saved' ? 'plan' : correctedMode) as 'quick' | 'plan' | 'diet', // CRITICAL: Use corrected mode for proper endpoint routing
         userId: resolvedUserId,
-        description: params.description || `Generate ${params.mode} meal`,
-        duration: params.duration || (params.mode === 'quick' ? 1 : 7),
+        description: params.description || `Generate ${correctedMode} meal`,
+        duration: params.duration || (correctedMode === 'quick' ? 1 : 7),
         mealsPerDay: params.mealsPerDay ? {
           breakfast: Boolean(params.mealsPerDay.breakfast),
           lunch: Boolean(params.mealsPerDay.lunch),
@@ -1194,7 +1216,7 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
           throw error; // Will be caught by outer catch
         }
         return;
-      } else if (params.mode === 'quick') {
+      } else if (correctedMode === 'quick') {
         // ⭐ Multi-select support: Send arrays for meal types and cuisines
         if (params.mealTypes && params.mealTypes.length > 0) {
           request.mealTypes = params.mealTypes as ('breakfast' | 'lunch' | 'dinner' | 'snack' | 'dessert')[];
@@ -1234,7 +1256,7 @@ export default function CreateMeals({ isDashboardMode = false, onBack }: CreateM
           cuisinesStr ? ` (${cuisinesStr} cuisine)` : ''
         }${durationText}${dietaryPart}${params.timeConstraint ? `, ${params.timeConstraint} prep time` : ''}`;
         request.duration = duration; // Use selected duration (1, 3, or 5 days)
-      } else if (params.mode === 'plan') {
+      } else if (correctedMode === 'plan') {
         // ⭐ Multi-select support for Plan mode cuisines
         if (params.cuisineTypes && params.cuisineTypes.length > 0) {
           request.cuisineTypes = params.cuisineTypes;
