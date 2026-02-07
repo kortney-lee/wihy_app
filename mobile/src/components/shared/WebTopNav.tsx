@@ -1,9 +1,11 @@
-import React, { useContext, useState } from 'react';
-import { Platform } from 'react-native';
+import React, { useContext, useState, lazy, Suspense } from 'react';
+import { Platform, ActivityIndicator, View } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { AuthContext } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
-import MultiAuthLogin from '../auth/MultiAuthLogin';
+
+// Lazy load MultiAuthLogin to break the require cycle
+const MultiAuthLogin = lazy(() => import('../auth/MultiAuthLogin'));
 
 const isWeb = Platform.OS === 'web';
 
@@ -204,7 +206,9 @@ export function WebTopNav({ activeTab = 'none' }: WebTopNavProps) {
         </button>
       </div>
     </nav>
-    <MultiAuthLogin visible={showLoginModal} onClose={() => setShowLoginModal(false)} onSignIn={() => setShowLoginModal(false)} />
+    <Suspense fallback={<View />}>
+      <MultiAuthLogin visible={showLoginModal} onClose={() => setShowLoginModal(false)} onSignIn={() => setShowLoginModal(false)} />
+    </Suspense>
     </>
   );
 }
