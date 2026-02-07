@@ -230,54 +230,8 @@ export default function CameraScreen() {
         }
       }
 
-      // Call Universal Ask WiHY API to search ALL databases (Food, Beauty, Pet Food)
-      console.log('[CameraScreen] Calling Ask WiHY for barcode:', data);
-      const universalResult = await scanService.askWihy(data, 'barcode');
-      console.log('[CameraScreen] Ask WiHY Response - product_type:', universalResult.product_type, 'found:', universalResult.found);
-      
-      // Route based on product_type
-      if (universalResult.success && universalResult.found) {
-        const productType = universalResult.product_type;
-        
-        // Handle Beauty Products
-        if (productType === 'beauty') {
-          console.log('[CameraScreen] Navigating to BeautyFacts');
-          navigation.navigate('BeautyFacts', {
-            product: universalResult,
-            context: {
-              sessionId: `beauty_${data}_${Date.now()}`,
-              timestamp: universalResult.timestamp || new Date().toISOString(),
-              scanType: 'barcode',
-              capturedImage: capturedPhotoUri,
-            },
-          });
-          setBarcodeProcessing(false);
-          setIsScanning(false);
-          return;
-        }
-        
-        // Handle Pet Food Products
-        if (productType === 'pet_food') {
-          console.log('[CameraScreen] Navigating to PetFoodFacts');
-          navigation.navigate('PetFoodFacts', {
-            product: universalResult,
-            context: {
-              sessionId: `petfood_${data}_${Date.now()}`,
-              timestamp: universalResult.timestamp || new Date().toISOString(),
-              scanType: 'barcode',
-              capturedImage: capturedPhotoUri,
-            },
-          });
-          setBarcodeProcessing(false);
-          setIsScanning(false);
-          return;
-        }
-        
-        // For food products or unknown, fall through to existing NutritionFacts flow
-        console.log('[CameraScreen] Product type is food or unknown, using legacy barcode scan');
-      }
-      
-      // Legacy barcode scan for food products (maintains backward compatibility)
+      // Barcode scan - single API call using scanBarcode for food products
+      // Note: askWihy is for multi-database routing (beauty/pet food), scanBarcode has full food data
       const result = await scanService.scanBarcode(data);
       console.log('[CameraScreen] Legacy API Response:', result);
       
