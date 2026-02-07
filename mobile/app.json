@@ -3,7 +3,7 @@
     "name": "WiHY Ai",
     "slug": "wihy-ai",
     "version": "1.0.0",
-    "orientation": "default",
+    "orientation": "portrait",
     "icon": "./assets/Favicon.png",
     "userInterfaceStyle": "light",
     "scheme": "wihy",

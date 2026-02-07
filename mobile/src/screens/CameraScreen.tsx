@@ -61,7 +61,6 @@ export default function CameraScreen() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [processingMessage, setProcessingMessage] = useState('');
   const [flashEnabled, setFlashEnabled] = useState(false);
-  const [zoom, setZoom] = useState(0);
 
   const scanModes: ScanMode[] = [
     {
@@ -954,7 +953,7 @@ export default function CameraScreen() {
           style={styles.cameraView}
           facing="back"
           flash={flashEnabled ? 'on' : 'off'}
-          zoom={zoom}
+          autofocus="on"
           barcodeScannerSettings={{
             barcodeTypes: [
               'ean13',
@@ -1051,27 +1050,6 @@ export default function CameraScreen() {
           </Pressable>
         </View>
 
-        {/* Zoom Controls */}
-        <View style={styles.zoomControls}>
-          <Pressable
-            style={[styles.zoomButton, zoom === 0 && styles.zoomButtonActive]}
-            onPress={() => setZoom(0)}
-          >
-            <Text style={[styles.zoomText, zoom === 0 && styles.zoomTextActive]}>1x</Text>
-          </Pressable>
-          <Pressable
-            style={[styles.zoomButton, zoom === 0.25 && styles.zoomButtonActive]}
-            onPress={() => setZoom(0.25)}
-          >
-            <Text style={[styles.zoomText, zoom === 0.25 && styles.zoomTextActive]}>2x</Text>
-          </Pressable>
-          <Pressable
-            style={[styles.zoomButton, zoom === 0.5 && styles.zoomButtonActive]}
-            onPress={() => setZoom(0.5)}
-          >
-            <Text style={[styles.zoomText, zoom === 0.5 && styles.zoomTextActive]}>3x</Text>
-          </Pressable>
-        </View>
       </View>
 
       {/* Bottom Panel */}
@@ -1563,34 +1541,5 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     color: '#10b981',
-  },
-  zoomControls: {
-    position: 'absolute',
-    bottom: 16,
-    left: 0,
-    right: 0,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: 12,
-  },
-  zoomButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    backgroundColor: 'rgba(0, 0, 0, 0.4)',
-    borderRadius: 20,
-    minWidth: 50,
-    alignItems: 'center',
-  },
-  zoomButtonActive: {
-    backgroundColor: 'rgba(59, 130, 246, 0.8)',
-  },
-  zoomText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#ffffff',
-  },
-  zoomTextActive: {
-    color: '#ffffff',
   },
 });
