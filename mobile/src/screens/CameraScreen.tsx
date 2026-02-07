@@ -7,7 +7,6 @@ import {
   Alert,
   Dimensions,
   Animated,
-  Image,
   ActivityIndicator,
   Modal,
 } from 'react-native';
@@ -1023,11 +1022,7 @@ export default function CameraScreen() {
             {isScanning && (
               <View style={styles.scanningContainer}>
                 <View style={styles.scanningIndicator}>
-                  <Image
-                    source={require('../../assets/whatishealthyspinner.gif')}
-                    style={styles.scanningSpinner}
-                    resizeMode="contain"
-                  />
+                  <ActivityIndicator size="large" color="#ffffff" />
                 </View>
                 <Text style={styles.scanningText}>Analyzing...</Text>
               </View>
@@ -1338,11 +1333,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 16,
-  },
-  scanningSpinner: {
-    width: 40,
-    height: 40,
-    tintColor: '#ffffff',
   },
   scanningText: {
     fontSize: 16,
