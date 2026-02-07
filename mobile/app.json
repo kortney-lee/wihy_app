@@ -135,7 +135,7 @@
     },
     "web": {
       "bundler": "metro",
-      "favicon": "./assets/Favicon.png",
+      "favicon": "./assets/Favicon-web.png",
       "name": "WIHY AI | World's Smartest Health Search Engine",
       "shortName": "WIHY AI",
       "description": "Evidence-based nutrition and fitness answers for individuals, plus a coaching platform after login to track client success.",
