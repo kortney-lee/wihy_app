@@ -3,19 +3,23 @@ import { API_CONFIG } from './config';
 import { fetchWithLogging } from '../utils/apiLogger';
 import { authService } from './authService';
 
+// In-App Purchases only work on native platforms (iOS/Android)
+// Web uses Stripe checkout instead - this service is a no-op on web
+const isNative = Platform.OS === 'ios' || Platform.OS === 'android';
+
 // Conditionally import InAppPurchases only on native platforms
-// This prevents "Cannot find native module 'ExpoInAppPurchases'" error on web
+// This prevents "Cannot find native module 'ExpoInAppPurchases'" error on web/simulator
 let InAppPurchases: typeof import('expo-in-app-purchases') | null = null;
-if (Platform.OS === 'ios' || Platform.OS === 'android') {
-  InAppPurchases = require('expo-in-app-purchases');
+if (isNative) {
+  try {
+    InAppPurchases = require('expo-in-app-purchases');
+  } catch (e) {
+    console.warn('[PurchaseService] expo-in-app-purchases not available:', e);
+  }
 }
 
 // Payment service base URL for IAP verification
 const PAYMENT_BASE_URL = API_CONFIG.paymentUrl || 'https://payment.wihy.ai';
-
-// In-App Purchases only work on native platforms (iOS/Android)
-// Web uses Stripe checkout instead - this service is a no-op on web
-const isNative = Platform.OS === 'ios' || Platform.OS === 'android';
 
 // ============= APPLE APP STORE PRODUCT IDS =============
 // These must match exactly what you create in App Store Connect
