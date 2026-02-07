@@ -324,6 +324,21 @@ function TabNavigator() {
       <Tab.Screen
         name="Scan"
         component={CameraScreen}
+        listeners={() => ({
+          tabPress: (e) => {
+            // On native platforms (iOS/Android), if user is not logged in,
+            // show the PlansModal (Sign In) instead of Camera Screen
+            // Skip check while auth is still initializing to avoid false positives
+            if (Platform.OS !== 'web' && !user && !initializing) {
+              e.preventDefault();
+              console.log('[Scan Tab] Showing Plans Modal for unauthenticated user');
+              setShowPlansModal(true);
+              return;
+            }
+            console.log('[Scan Tab] Allowing navigation - user:', !!user);
+            // Otherwise, allow normal navigation to Scan tab
+          },
+        })}
       />
       <Tab.Screen
         name="Chat"

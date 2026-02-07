@@ -23,12 +23,12 @@ import {
   type PlanConfig,
   type AddOnConfig,
 } from '../config/subscriptionConfig';
+import { purchaseService, PLAN_TO_APPLE_PRODUCT } from '../services/purchaseService';
 
 // Conditionally import embedded checkout for web
 const EmbeddedCheckout = Platform.OS === 'web' 
   ? require('./web/EmbeddedCheckout').EmbeddedCheckout 
   : null;
-// import { purchaseService } from '../services/purchaseService'; // Requires production build
 
 // Map plan IDs to in-app purchase product IDs
 // In-app purchases require a production build (EAS Build)
@@ -108,8 +108,15 @@ export default function PlansModal({
   }, [visible]);
 
   const initializePurchases = async () => {
-    // In production build, this would initialize expo-in-app-purchases
-    // For Expo Go development, we skip this step
+    // Initialize IAP for native platforms
+    if (Platform.OS === 'ios' || Platform.OS === 'android') {
+      try {
+        await purchaseService.initialize();
+        console.log('[PlansModal] IAP initialized');
+      } catch (error) {
+        console.log('[PlansModal] IAP initialization failed (expected in dev):', error);
+      }
+    }
     setInitializingPurchases(false);
   };
 
@@ -235,19 +242,49 @@ export default function PlansModal({
       return;
     }
     
-    // Native in-app purchases require production build
-    Alert.alert(
-      'Subscription Upgrade',
-      `You selected: ${selectedPlan?.displayName || planId}\n\n` +
-      'In-app purchases require a production build.\n\n' +
-      'To enable purchases:\n' +
-      '1. Run: npx eas build\n' +
-      '2. Configure product IDs in App Store Connect / Google Play Console\n' +
-      '3. Test in TestFlight or Internal Testing',
-      [
-        { text: 'OK', onPress: () => onClose() }
-      ]
-    );
+    // Native in-app purchases (iOS/Android)
+    if (Platform.OS === 'ios' || Platform.OS === 'android') {
+      // User must be authenticated
+      if (!user?.id || !user?.email) {
+        Alert.alert('Sign In Required', 'Please sign in to purchase a subscription.');
+        setPurchasing(false);
+        onClose();
+        return;
+      }
+
+      setPurchasing(true);
+      try {
+        // Determine if yearly based on plan ID
+        const isYearly = planId.includes('yearly') || planId.includes('annual');
+        
+        // Map to correct plan key for product lookup
+        let lookupPlanId = planId;
+        if (planId === 'pro_monthly' || planId === 'pro_yearly') {
+          lookupPlanId = 'premium';
+        }
+        
+        const result = await purchaseService.purchaseByPlanId(lookupPlanId, isYearly);
+        
+        if (result.success) {
+          Alert.alert(
+            'Purchase Successful!',
+            'Your subscription has been activated. Thank you!',
+            [{ text: 'OK', onPress: () => onClose() }]
+          );
+        } else {
+          // Don't show alert for user cancellation
+          if (result.error !== 'Purchase cancelled') {
+            Alert.alert('Purchase Failed', result.error || 'Unable to complete purchase.');
+          }
+        }
+      } catch (error) {
+        console.error('[PlansModal] IAP error:', error);
+        Alert.alert('Error', 'Unable to process purchase. Please try again.');
+      } finally {
+        setPurchasing(false);
+      }
+      return;
+    }
   };
 
   return (

@@ -1,7 +1,8 @@
-import { Platform } from 'react-native';
+import { Platform, Alert } from 'react-native';
 import { API_CONFIG } from './config';
 import { fetchWithLogging } from '../utils/apiLogger';
 import { authService } from './authService';
+import * as InAppPurchases from 'expo-in-app-purchases';
 
 // Payment service base URL for IAP verification
 const PAYMENT_BASE_URL = API_CONFIG.paymentUrl || 'https://payment.wihy.ai';
@@ -10,19 +11,62 @@ const PAYMENT_BASE_URL = API_CONFIG.paymentUrl || 'https://payment.wihy.ai';
 // Web uses Stripe checkout instead - this service is a no-op on web
 const isNative = Platform.OS === 'ios' || Platform.OS === 'android';
 
-// Product/Subscription IDs - update with your real store IDs
+// ============= APPLE APP STORE PRODUCT IDS =============
+// These must match exactly what you create in App Store Connect
+// Path: App Store Connect > Your App > Features > In-App Purchases
+export const APPLE_PRODUCT_IDS = {
+  // Auto-Renewable Subscriptions
+  PREMIUM_MONTHLY: 'com.wihy.ai.app.premium_monthly',
+  PREMIUM_YEARLY: 'com.wihy.ai.app.premium_yearly',
+  FAMILY_BASIC_MONTHLY: 'com.wihy.ai.app.family_basic_monthly',
+  FAMILY_BASIC_YEARLY: 'com.wihy.ai.app.family_basic_yearly',
+  FAMILY_PRO_MONTHLY: 'com.wihy.ai.app.family_pro_monthly',
+  FAMILY_PRO_YEARLY: 'com.wihy.ai.app.family_pro_yearly',
+  COACH_MONTHLY: 'com.wihy.ai.app.coach_monthly',
+  COACH_YEARLY: 'com.wihy.ai.app.coach_yearly',
+  // Add-ons
+  WIHY_COACH_AI: 'com.wihy.ai.app.coach_ai_addon',
+  // Consumables (if any)
+  NUTRITION_ANALYSIS: 'com.wihy.ai.app.nutrition_analysis',
+};
+
+// Map plan IDs from the app to Apple product IDs
+export const PLAN_TO_APPLE_PRODUCT: Record<string, { monthly?: string; yearly?: string }> = {
+  'premium': {
+    monthly: APPLE_PRODUCT_IDS.PREMIUM_MONTHLY,
+    yearly: APPLE_PRODUCT_IDS.PREMIUM_YEARLY,
+  },
+  'pro_monthly': {
+    monthly: APPLE_PRODUCT_IDS.PREMIUM_MONTHLY,
+  },
+  'pro_yearly': {
+    yearly: APPLE_PRODUCT_IDS.PREMIUM_YEARLY,
+  },
+  'family-basic': {
+    monthly: APPLE_PRODUCT_IDS.FAMILY_BASIC_MONTHLY,
+    yearly: APPLE_PRODUCT_IDS.FAMILY_BASIC_YEARLY,
+  },
+  'family_basic': {
+    monthly: APPLE_PRODUCT_IDS.FAMILY_BASIC_MONTHLY,
+    yearly: APPLE_PRODUCT_IDS.FAMILY_BASIC_YEARLY,
+  },
+  'family-pro': {
+    monthly: APPLE_PRODUCT_IDS.FAMILY_PRO_MONTHLY,
+    yearly: APPLE_PRODUCT_IDS.FAMILY_PRO_YEARLY,
+  },
+  'family_pro': {
+    monthly: APPLE_PRODUCT_IDS.FAMILY_PRO_MONTHLY,
+    yearly: APPLE_PRODUCT_IDS.FAMILY_PRO_YEARLY,
+  },
+  'coach': {
+    monthly: APPLE_PRODUCT_IDS.COACH_MONTHLY,
+    yearly: APPLE_PRODUCT_IDS.COACH_YEARLY,
+  },
+};
+
+// All product IDs for fetching from store
 const PRODUCT_IDS = Platform.select({
-  ios: [
-    'com.wihy.native.premium_monthly',
-    'com.wihy.native.premium_yearly',
-    'com.wihy.native.family_basic_monthly',
-    'com.wihy.native.family_basic_yearly',
-    'com.wihy.native.family_premium_monthly',
-    'com.wihy.native.family_premium_yearly',
-    'com.wihy.native.coach_monthly',
-    'com.wihy.native.coach_yearly',
-    'com.wihy.native.nutrition_analysis',
-  ],
+  ios: Object.values(APPLE_PRODUCT_IDS),
   android: [
     'com.wihy.native.premium_monthly',
     'com.wihy.native.premium_yearly',
@@ -58,10 +102,17 @@ export interface InAppPurchase {
 }
 
 export interface PurchaseServiceState {
-  products: IAPItemDetails[];
+  products: InAppPurchases.IAPItemDetails[];
   isInitialized: boolean;
-  purchaseHistory: InAppPurchase[];
+  purchaseHistory: InAppPurchases.InAppPurchase[];
 }
+
+// Purchase result callback type
+type PurchaseResultCallback = (result: {
+  success: boolean;
+  productId?: string;
+  error?: string;
+}) => void;
 
 class PurchaseService {
   private state: PurchaseServiceState = {
@@ -69,6 +120,8 @@ class PurchaseService {
     isInitialized: false,
     purchaseHistory: [],
   };
+
+  private purchaseResultCallback: PurchaseResultCallback | null = null;
 
   /**
    * Initialize the IAP connection
@@ -85,56 +138,219 @@ class PurchaseService {
       return;
     }
 
-    // TODO: When building for native, install expo-in-app-purchases and implement:
-    // - connectAsync()
-    // - setPurchaseListener()
-    // - getProductsAsync()
-    console.log('[PurchaseService] Native IAP - implement with expo-in-app-purchases');
-    this.state.isInitialized = true;
+    try {
+      console.log('[PurchaseService] Connecting to store...');
+      await InAppPurchases.connectAsync();
+      
+      // Set up purchase listener to handle transaction updates
+      InAppPurchases.setPurchaseListener(async ({ responseCode, results, errorCode }) => {
+        console.log('[PurchaseService] Purchase listener triggered:', { responseCode, errorCode });
+        
+        if (responseCode === InAppPurchases.IAPResponseCode.OK && results) {
+          for (const purchase of results) {
+            console.log('[PurchaseService] Processing purchase:', purchase.productId);
+            
+            if (!purchase.acknowledged) {
+              // Verify with backend
+              const verification = await this.verifyPurchase({
+                productId: purchase.productId,
+                transactionReceipt: purchase.transactionReceipt,
+                purchaseToken: purchase.purchaseToken,
+                acknowledged: purchase.acknowledged,
+                purchaseState: purchase.purchaseState,
+                purchaseTime: purchase.purchaseTime,
+              });
+              
+              if (verification.valid) {
+                // Finish the transaction (acknowledge)
+                await InAppPurchases.finishTransactionAsync(purchase, true);
+                console.log('[PurchaseService] Purchase completed and acknowledged:', purchase.productId);
+                
+                // Notify callback
+                if (this.purchaseResultCallback) {
+                  this.purchaseResultCallback({ success: true, productId: purchase.productId });
+                }
+              } else {
+                console.error('[PurchaseService] Purchase verification failed:', verification.error);
+                if (this.purchaseResultCallback) {
+                  this.purchaseResultCallback({ 
+                    success: false, 
+                    productId: purchase.productId, 
+                    error: verification.error 
+                  });
+                }
+              }
+            }
+          }
+        } else if (responseCode === InAppPurchases.IAPResponseCode.USER_CANCELED) {
+          console.log('[PurchaseService] User cancelled purchase');
+          if (this.purchaseResultCallback) {
+            this.purchaseResultCallback({ success: false, error: 'Purchase cancelled' });
+          }
+        } else {
+          console.error('[PurchaseService] Purchase error:', errorCode);
+          if (this.purchaseResultCallback) {
+            this.purchaseResultCallback({ 
+              success: false, 
+              error: `Purchase failed with error code: ${errorCode}` 
+            });
+          }
+        }
+      });
+
+      this.state.isInitialized = true;
+      console.log('[PurchaseService] IAP initialized successfully');
+      
+      // Load products after initialization
+      await this.loadProducts();
+    } catch (error) {
+      console.error('[PurchaseService] Failed to initialize IAP:', error);
+      throw error;
+    }
   }
 
   /**
-   * Load available products
+   * Load available products from the store
    */
-  async loadProducts(): Promise<void> {
+  async loadProducts(): Promise<InAppPurchases.IAPItemDetails[]> {
     if (!isNative) {
       console.log('[PurchaseService] Web platform - no products to load');
-      return;
+      return [];
     }
 
-    // TODO: Implement with expo-in-app-purchases getProductsAsync(PRODUCT_IDS)
-    console.log('[PurchaseService] Loading products:', PRODUCT_IDS);
+    if (!this.state.isInitialized) {
+      console.log('[PurchaseService] Not initialized, initializing first...');
+      await this.initialize();
+    }
+
+    try {
+      console.log('[PurchaseService] Loading products:', PRODUCT_IDS);
+      const { responseCode, results } = await InAppPurchases.getProductsAsync(PRODUCT_IDS);
+      
+      if (responseCode === InAppPurchases.IAPResponseCode.OK && results) {
+        this.state.products = results;
+        console.log('[PurchaseService] Loaded products:', results.map(p => p.productId));
+        return results;
+      } else {
+        console.warn('[PurchaseService] Failed to load products, responseCode:', responseCode);
+        return [];
+      }
+    } catch (error) {
+      console.error('[PurchaseService] Error loading products:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Get product by ID
+   */
+  getProductById(productId: string): InAppPurchases.IAPItemDetails | undefined {
+    return this.state.products.find(p => p.productId === productId);
+  }
+
+  /**
+   * Get Apple product ID for a plan
+   */
+  getAppleProductId(planId: string, yearly: boolean = false): string | undefined {
+    const mapping = PLAN_TO_APPLE_PRODUCT[planId];
+    if (!mapping) return undefined;
+    return yearly ? mapping.yearly : mapping.monthly;
   }
 
   /**
    * Purchase a product or subscription
    * On web, throws an error - use Stripe checkout instead
    */
-  async purchase(productId: string): Promise<void> {
+  async purchase(productId: string): Promise<{ success: boolean; error?: string }> {
     if (!isNative) {
       throw new Error('In-App Purchases not available on web. Use Stripe checkout.');
     }
 
-    // TODO: Implement with expo-in-app-purchases purchaseItemAsync()
-    console.log('[PurchaseService] Purchase requested for:', productId);
-    throw new Error('Native IAP not yet implemented. Install expo-in-app-purchases.');
+    if (!this.state.isInitialized) {
+      await this.initialize();
+    }
+
+    return new Promise(async (resolve) => {
+      try {
+        console.log('[PurchaseService] Starting purchase for:', productId);
+        
+        // Set up callback for purchase result
+        this.purchaseResultCallback = (result) => {
+          this.purchaseResultCallback = null;
+          resolve(result);
+        };
+        
+        // Start the purchase
+        await InAppPurchases.purchaseItemAsync(productId);
+        
+        // Note: The result will come through the purchase listener
+      } catch (error) {
+        console.error('[PurchaseService] Purchase error:', error);
+        this.purchaseResultCallback = null;
+        resolve({ 
+          success: false, 
+          error: error instanceof Error ? error.message : 'Purchase failed' 
+        });
+      }
+    });
+  }
+
+  /**
+   * Purchase by plan ID (convenience method)
+   */
+  async purchaseByPlanId(planId: string, yearly: boolean = false): Promise<{ success: boolean; error?: string }> {
+    const productId = this.getAppleProductId(planId, yearly);
+    if (!productId) {
+      return { success: false, error: `No product ID found for plan: ${planId}` };
+    }
+    return this.purchase(productId);
   }
 
   /**
    * Restore previous purchases
    */
-  async restorePurchases(): Promise<InAppPurchase[]> {
+  async restorePurchases(): Promise<InAppPurchases.InAppPurchase[]> {
     if (!isNative) {
       console.log('[PurchaseService] Web platform - cannot restore purchases');
       return [];
     }
 
-    // TODO: Implement with expo-in-app-purchases getPurchaseHistoryAsync()
-    console.log('[PurchaseService] Restore purchases requested');
-    return [];
+    if (!this.state.isInitialized) {
+      await this.initialize();
+    }
+
+    try {
+      console.log('[PurchaseService] Restoring purchases...');
+      const { responseCode, results } = await InAppPurchases.getPurchaseHistoryAsync();
+      
+      if (responseCode === InAppPurchases.IAPResponseCode.OK && results) {
+        this.state.purchaseHistory = results;
+        console.log('[PurchaseService] Restored purchases:', results.length);
+        
+        // Verify each restored purchase with backend
+        for (const purchase of results) {
+          await this.verifyPurchase({
+            productId: purchase.productId,
+            transactionReceipt: purchase.transactionReceipt,
+            purchaseToken: purchase.purchaseToken,
+            acknowledged: purchase.acknowledged,
+            purchaseState: purchase.purchaseState,
+            purchaseTime: purchase.purchaseTime,
+          });
+        }
+        
+        return results;
+      } else {
+        console.warn('[PurchaseService] Failed to restore purchases, responseCode:', responseCode);
+        return [];
+      }
+    } catch (error) {
+      console.error('[PurchaseService] Error restoring purchases:', error);
+      return [];
+    }
   }
 
-  getProducts(): IAPItemDetails[] {
+  getProducts(): InAppPurchases.IAPItemDetails[] {
     return this.state.products;
   }
 
@@ -142,12 +358,21 @@ class PurchaseService {
     return isNative;
   }
 
+  isInitialized(): boolean {
+    return this.state.isInitialized;
+  }
+
   async disconnect(): Promise<void> {
     if (!isNative) return;
     
-    // TODO: Implement with expo-in-app-purchases disconnectAsync()
-    this.state.isInitialized = false;
-    console.log('[PurchaseService] Disconnected');
+    try {
+      await InAppPurchases.disconnectAsync();
+      this.state.isInitialized = false;
+      this.state.products = [];
+      console.log('[PurchaseService] Disconnected');
+    } catch (error) {
+      console.error('[PurchaseService] Error disconnecting:', error);
+    }
   }
 
   // ============= BACKEND RECEIPT VERIFICATION =============
