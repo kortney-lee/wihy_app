@@ -2,7 +2,13 @@ import { Platform, Alert } from 'react-native';
 import { API_CONFIG } from './config';
 import { fetchWithLogging } from '../utils/apiLogger';
 import { authService } from './authService';
-import * as InAppPurchases from 'expo-in-app-purchases';
+
+// Conditionally import InAppPurchases only on native platforms
+// This prevents "Cannot find native module 'ExpoInAppPurchases'" error on web
+let InAppPurchases: typeof import('expo-in-app-purchases') | null = null;
+if (Platform.OS === 'ios' || Platform.OS === 'android') {
+  InAppPurchases = require('expo-in-app-purchases');
+}
 
 // Payment service base URL for IAP verification
 const PAYMENT_BASE_URL = API_CONFIG.paymentUrl || 'https://payment.wihy.ai';
@@ -102,9 +108,9 @@ export interface InAppPurchase {
 }
 
 export interface PurchaseServiceState {
-  products: InAppPurchases.IAPItemDetails[];
+  products: IAPItemDetails[];
   isInitialized: boolean;
-  purchaseHistory: InAppPurchases.InAppPurchase[];
+  purchaseHistory: InAppPurchase[];
 }
 
 // Purchase result callback type
@@ -140,6 +146,9 @@ class PurchaseService {
 
     try {
       console.log('[PurchaseService] Connecting to store...');
+      if (!InAppPurchases) {
+        throw new Error('InAppPurchases module not available');
+      }
       await InAppPurchases.connectAsync();
       
       // Set up purchase listener to handle transaction updates
@@ -163,7 +172,7 @@ class PurchaseService {
               
               if (verification.valid) {
                 // Finish the transaction (acknowledge)
-                await InAppPurchases.finishTransactionAsync(purchase, true);
+                await InAppPurchases!.finishTransactionAsync(purchase, true);
                 console.log('[PurchaseService] Purchase completed and acknowledged:', purchase.productId);
                 
                 // Notify callback
@@ -182,7 +191,7 @@ class PurchaseService {
               }
             }
           }
-        } else if (responseCode === InAppPurchases.IAPResponseCode.USER_CANCELED) {
+        } else if (responseCode === InAppPurchases!.IAPResponseCode.USER_CANCELED) {
           console.log('[PurchaseService] User cancelled purchase');
           if (this.purchaseResultCallback) {
             this.purchaseResultCallback({ success: false, error: 'Purchase cancelled' });
@@ -212,7 +221,7 @@ class PurchaseService {
   /**
    * Load available products from the store
    */
-  async loadProducts(): Promise<InAppPurchases.IAPItemDetails[]> {
+  async loadProducts(): Promise<IAPItemDetails[]> {
     if (!isNative) {
       console.log('[PurchaseService] Web platform - no products to load');
       return [];
@@ -225,6 +234,9 @@ class PurchaseService {
 
     try {
       console.log('[PurchaseService] Loading products:', PRODUCT_IDS);
+      if (!InAppPurchases) {
+        throw new Error('InAppPurchases module not available');
+      }
       const { responseCode, results } = await InAppPurchases.getProductsAsync(PRODUCT_IDS);
       
       if (responseCode === InAppPurchases.IAPResponseCode.OK && results) {
@@ -244,7 +256,7 @@ class PurchaseService {
   /**
    * Get product by ID
    */
-  getProductById(productId: string): InAppPurchases.IAPItemDetails | undefined {
+  getProductById(productId: string): IAPItemDetails | undefined {
     return this.state.products.find(p => p.productId === productId);
   }
 
@@ -281,6 +293,9 @@ class PurchaseService {
         };
         
         // Start the purchase
+        if (!InAppPurchases) {
+          throw new Error('InAppPurchases module not available');
+        }
         await InAppPurchases.purchaseItemAsync(productId);
         
         // Note: The result will come through the purchase listener
@@ -309,7 +324,7 @@ class PurchaseService {
   /**
    * Restore previous purchases
    */
-  async restorePurchases(): Promise<InAppPurchases.InAppPurchase[]> {
+  async restorePurchases(): Promise<InAppPurchase[]> {
     if (!isNative) {
       console.log('[PurchaseService] Web platform - cannot restore purchases');
       return [];
@@ -321,6 +336,9 @@ class PurchaseService {
 
     try {
       console.log('[PurchaseService] Restoring purchases...');
+      if (!InAppPurchases) {
+        throw new Error('InAppPurchases module not available');
+      }
       const { responseCode, results } = await InAppPurchases.getPurchaseHistoryAsync();
       
       if (responseCode === InAppPurchases.IAPResponseCode.OK && results) {
@@ -350,7 +368,7 @@ class PurchaseService {
     }
   }
 
-  getProducts(): InAppPurchases.IAPItemDetails[] {
+  getProducts(): IAPItemDetails[] {
     return this.state.products;
   }
 
@@ -363,7 +381,7 @@ class PurchaseService {
   }
 
   async disconnect(): Promise<void> {
-    if (!isNative) return;
+    if (!isNative || !InAppPurchases) return;
     
     try {
       await InAppPurchases.disconnectAsync();

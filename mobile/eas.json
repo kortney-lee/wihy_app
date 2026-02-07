@@ -68,7 +68,8 @@
     "production": {
       "ios": {
         "appleId": "kortney@wihy.ai",
-        "appleTeamId": "6Q442R8GCU"
+        "appleTeamId": "6Q442R8GCU",
+        "ascAppId": "6758858368"
       },
       "android": {
         "serviceAccountKeyPath": "./google-play-service-account.json",
