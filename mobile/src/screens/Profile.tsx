@@ -927,7 +927,7 @@ const styles = StyleSheet.create({
     backgroundColor: dashboardTheme.colors.background,
   },
   collapsibleHeader: {
-    overflow: 'hidden',
+    overflow: 'visible',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -938,7 +938,8 @@ const styles = StyleSheet.create({
   },
   profileHeaderContent: {
     alignItems: 'center',
-    paddingVertical: 16,
+    paddingVertical: 20,
+    paddingTop: 30,
   },
   avatarContainer: {
     marginBottom: 16,
