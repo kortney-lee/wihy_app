@@ -1,21 +1,29 @@
 // Apple HealthKit and Google Fit integration using native SDKs.
 import { Platform } from 'react-native';
 
-// Conditional imports for native modules (not available on web)
+// Conditional imports for native modules (not available on web or Expo Go)
 let HealthKit: any;
 let HKQuantityTypeIdentifier: any;
 let GoogleFit: any;
 let Scopes: any;
 
 if (Platform.OS === 'ios') {
-  const healthKit = require('@kingstinct/react-native-healthkit');
-  HealthKit = healthKit.default;
-  HKQuantityTypeIdentifier = healthKit.HKQuantityTypeIdentifier;
+  try {
+    const healthKit = require('@kingstinct/react-native-healthkit');
+    HealthKit = healthKit.default;
+    HKQuantityTypeIdentifier = healthKit.HKQuantityTypeIdentifier;
+  } catch (e) {
+    console.warn('[Health] HealthKit not available (Expo Go does not support native modules)');
+  }
 }
 
 if (Platform.OS === 'android') {
-  GoogleFit = require('react-native-google-fit').default;
-  Scopes = require('react-native-google-fit').Scopes;
+  try {
+    GoogleFit = require('react-native-google-fit').default;
+    Scopes = require('react-native-google-fit').Scopes;
+  } catch (e) {
+    console.warn('[Health] Google Fit not available');
+  }
 }
 
 export type HealthPermission = {
