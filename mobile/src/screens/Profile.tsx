@@ -775,7 +775,7 @@ export default function Profile() {
   const insets = useSafeAreaInsets();
   
   // Profile header is taller than progress header
-  const HEADER_MAX_HEIGHT = 220;
+  const HEADER_MAX_HEIGHT = 260;
   const HEADER_MIN_HEIGHT = 0;
   const HEADER_SCROLL_DISTANCE = HEADER_MAX_HEIGHT - HEADER_MIN_HEIGHT;
 
