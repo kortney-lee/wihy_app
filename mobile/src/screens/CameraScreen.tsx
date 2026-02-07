@@ -9,6 +9,7 @@ import {
   Animated,
   ActivityIndicator,
   Modal,
+  Image,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -1022,7 +1023,11 @@ export default function CameraScreen() {
             {isScanning && (
               <View style={styles.scanningContainer}>
                 <View style={styles.scanningIndicator}>
-                  <ActivityIndicator size="large" color="#ffffff" />
+                  <Image
+                    source={require('../../assets/whatishealthyspinner.gif')}
+                    style={styles.scanningSpinner}
+                    resizeMode="contain"
+                  />
                 </View>
                 <Text style={styles.scanningText}>Analyzing...</Text>
               </View>
@@ -1333,6 +1338,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 16,
+  },
+  scanningSpinner: {
+    width: 80,
+    height: 80,
   },
   scanningText: {
     fontSize: 16,
