@@ -52,6 +52,7 @@
       "appleTeamId": "6Q442R8GCU",
       "supportsTablet": true,
       "usesIcloudStorage": false,
+      "usesAppleSignIn": true,
       "infoPlist": {
         "NSCameraUsageDescription": "WiHY uses the camera to scan barcodes and capture food photos for analysis.",
         "NSMicrophoneUsageDescription": "WiHY uses the microphone for audio capture in health interactions.",
@@ -63,7 +64,8 @@
         "ITSAppUsesNonExemptEncryption": false
       },
       "entitlements": {
-        "com.apple.developer.healthkit": true
+        "com.apple.developer.healthkit": true,
+        "com.apple.developer.applesignin": ["Default"]
       },
       "bundleIdentifier": "com.wihy.ai.app",
       "associatedDomains": [
