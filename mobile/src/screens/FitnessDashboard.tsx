@@ -1643,6 +1643,27 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
   };
 
   const startWorkoutForExercise = (exerciseIndex: number) => {
+    // Convert session-based workout to exercises format if needed
+    if (workout && (workout as any).session?.main && (!workout.exercises || workout.exercises.length === 0)) {
+      const sessionWorkout = workout as any;
+      const convertedExercises = sessionWorkout.session.main.map((mainEx: MainExercise, idx: number) => ({
+        exercise_id: `main_${idx}`,
+        name: mainEx.exercise,
+        muscle_group: mainEx.category || 'Mixed',
+        sets: parseInt(mainEx.sets) || 3,
+        reps: mainEx.reps || '10-12',
+        rest_sec: mainEx.rest || 60,
+        equipment: mainEx.weight ? 'Weighted' : 'Bodyweight',
+        instructions: mainEx.cues || [],
+        intensity: 'Moderate',
+      }));
+      
+      setWorkout({
+        ...workout,
+        exercises: convertedExercises,
+      });
+    }
+    
     setCurrentExerciseIndex(exerciseIndex);
     setCurrentSet(1);
     setCompletedSets([]);
@@ -3350,8 +3371,48 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
   const renderExerciseExecution = () => {
     if (!workout || !isWorkoutActive) return null;
     
+    // Check if exercises array exists and has items
+    if (!workout.exercises || workout.exercises.length === 0) {
+      // Show error state - no exercises available
+      return (
+        <View style={styles.executionContainer}>
+          <GradientDashboardHeader
+            title="No Exercises"
+            gradient="workoutExecution"
+            showBackButton
+            onBackPress={() => {
+              setIsWorkoutActive(false);
+              setWorkoutStartTime(null);
+            }}
+            style={styles.executionHeader}
+          />
+          <View style={styles.lockedWorkoutContainer}>
+            <Ionicons name="alert-circle-outline" size={64} color="#F59E0B" />
+            <Text style={styles.lockedWorkoutTitle}>No Exercises Found</Text>
+            <Text style={styles.lockedWorkoutMessage}>
+              This workout doesn't have any exercises configured.{'\n'}
+              Please try creating a new workout or contact support.
+            </Text>
+            <TouchableOpacity 
+              style={styles.lockedWorkoutButton} 
+              onPress={() => {
+                setIsWorkoutActive(false);
+                setWorkoutStartTime(null);
+              }}
+            >
+              <Text style={styles.lockedWorkoutButtonText}>Go Back</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      );
+    }
+    
     const currentExercise = workout.exercises[currentExerciseIndex];
-    if (!currentExercise) return null;
+    if (!currentExercise) {
+      // Exercise index out of bounds - reset to first exercise
+      setCurrentExerciseIndex(0);
+      return null;
+    }
     
     const totalExercises = workout.exercises.length;
     const progress = ((currentExerciseIndex * currentExercise.sets + currentSet - 1) / 
