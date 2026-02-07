@@ -127,3 +127,62 @@ firebase deploy --only hosting
 - Workflow: `.github/workflows/deploy-web.yml`
 - Triggers: Push to `main` branch
 - Auto-deploys to Firebase Hosting
+
+### iOS Build & TestFlight Deployment (EAS)
+
+**IMPORTANT: All commands must be run from the `mobile` directory**
+
+**Prerequisites:**
+- EAS CLI installed: `npm install -g eas-cli`
+- Logged in to Expo: `npx eas whoami` (should show @wihy-ai)
+- Apple Developer account credentials
+
+**Build and Submit to TestFlight:**
+```bash
+# Navigate to mobile directory FIRST
+cd mobile
+
+# Build iOS production and auto-submit to TestFlight
+EAS_NO_VCS=1 npx eas build --platform ios --profile production --auto-submit
+
+# Or build without auto-submit, then submit separately
+EAS_NO_VCS=1 npx eas build --platform ios --profile production
+npx eas submit --platform ios --latest
+```
+
+**Important Notes:**
+- `EAS_NO_VCS=1` is REQUIRED due to monorepo structure (git status issues)
+- Build number auto-increments (configured in eas.json)
+- Apple credentials are stored remotely on EAS servers
+- ASC App ID: 6758858368 (configured in eas.json for auto-submit)
+
+**EAS Configuration (eas.json):**
+- Bundle ID: `com.wihy.ai.app`
+- Apple Team ID: `6Q442R8GCU` (WIHY AI LLC)
+- Production profile uses `m-medium` resource class for faster builds
+
+**Check Build Status:**
+```bash
+cd mobile
+npx eas build:list --platform ios
+npx eas build:view <build-id>
+```
+
+**Common Issues:**
+- "git status -s -uall exited with non-zero code: 128" → Use `EAS_NO_VCS=1` prefix
+- "Set ascAppId" error → Already fixed in eas.json, use latest version
+- Build fails with missing native module → Web-only modules need conditional imports
+
+### Android Build (EAS)
+
+**Build APK for testing:**
+```bash
+cd mobile
+EAS_NO_VCS=1 npx eas build --platform android --profile preview
+```
+
+**Build AAB for Play Store:**
+```bash
+cd mobile
+EAS_NO_VCS=1 npx eas build --platform android --profile production
+```
