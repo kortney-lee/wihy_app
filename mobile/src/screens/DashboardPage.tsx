@@ -19,7 +19,7 @@ import type { StackNavigationProp } from '@react-navigation/stack';
 import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import type { TabParamList, RootStackParamList } from '../types/navigation';
 import type { DashboardContext } from './HealthHub';
-import { getDashboardTheme } from '../theme/dashboardTheme';
+import { getDashboardTheme, dashboardTheme } from '../theme/dashboardTheme';
 import { HamburgerMenu } from '../components/shared/HamburgerMenu';
 import { GradientDashboardHeader, QuickStartGuide } from '../components/shared';
 import { AuthContext } from '../context/AuthContext';

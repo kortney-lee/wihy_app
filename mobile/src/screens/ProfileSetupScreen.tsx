@@ -18,7 +18,7 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import { AuthContext } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { userService } from '../services/userService';
-import { getDashboardTheme } from '../theme/dashboardTheme';
+import { getDashboardTheme, dashboardTheme } from '../theme/dashboardTheme';
 import { formatDateInput, formatISODateForDisplay } from '../utils/dateFormatter';
 import SvgIcon from '../components/shared/SvgIcon';
 

@@ -26,7 +26,7 @@ import { AuthContext } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import type { IngredientAnalysis } from '../services/types';
 import { LinearGradient } from 'expo-linear-gradient';
-import { getDashboardTheme } from '../theme/dashboardTheme';
+import { getDashboardTheme, dashboardTheme } from '../theme/dashboardTheme';
 import { DashboardGradientType } from '../components/shared';
 import { SweepBorder } from '../components/SweepBorder';
 import { requireUserId } from '../utils/authGuards';

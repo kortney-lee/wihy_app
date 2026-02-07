@@ -14,7 +14,7 @@ import {
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { dashboardColors, Ionicons } from '../components/shared';
-import { getDashboardTheme } from '../theme/dashboardTheme';
+import { getDashboardTheme, dashboardTheme } from '../theme/dashboardTheme';
 import { useDashboardLayout } from '../hooks/useDashboardLayout';
 import { familyService, Family, FamilyMember, FamilyDashboard as FamilyDashboardData } from '../services/familyService';
 import { AuthContext } from '../context/AuthContext';

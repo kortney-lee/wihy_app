@@ -18,7 +18,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { GradientDashboardHeader, Ionicons, CloseButton } from '../components/shared';
 import { SweepBorder } from '../components/SweepBorder';
 import { colors } from '../theme/design-tokens';
-import { getDashboardTheme } from '../theme/dashboardTheme';
+import { getDashboardTheme, dashboardTheme } from '../theme/dashboardTheme';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { researchService, ResearchArticle, ResearchDashboardStats, ResearchBookmark, SearchHistoryItem } from '../services';
 import { AuthContext } from '../context/AuthContext';

@@ -22,7 +22,7 @@ import { userService } from '../services/userService';
 import { notificationService } from '../services/notificationService';
 import { colors, sizes } from '../theme/design-tokens';
 import { dashboardColors, GradientDashboardHeader, WebPageWrapper } from '../components/shared';
-import { getDashboardTheme } from '../theme/dashboardTheme';
+import { getDashboardTheme, dashboardTheme } from '../theme/dashboardTheme';
 import { getResponsiveIconSize } from '../utils/responsive';
 import { DevPlanSwitcher } from '../components/DevPlanSwitcher';
 import PlansModal from '../components/PlansModal';
@@ -46,6 +46,10 @@ interface SettingsItem {
   onPress?: () => void;
   onToggle?: (value: boolean) => void;
   destructive?: boolean;
+  badge?: {
+    text: string;
+    color: string;
+  };
 }
 
 export default function Profile() {
@@ -67,6 +71,7 @@ export default function Profile() {
   const [autoScanEnabled, setAutoScanEnabled] = useState(defaultPreferences.autoScan);
   const [showPlansModal, setShowPlansModal] = useState(false);
   const [showAddOnsModal, setShowAddOnsModal] = useState(false);
+  const [loadingSubscription, setLoadingSubscription] = useState(false);
   
   // Premium status derived from auth context plan
   const isPremium = user?.plan && user.plan !== 'free';

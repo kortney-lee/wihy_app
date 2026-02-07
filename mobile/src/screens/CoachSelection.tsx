@@ -17,7 +17,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { dashboardColors, SvgIcon } from '../components/shared';
 import { useTheme } from '../context/ThemeContext';
-import { getDashboardTheme } from '../theme/dashboardTheme';
+import { getDashboardTheme, dashboardTheme } from '../theme/dashboardTheme';
 import { userService } from '../services/userService';
 import { useDashboardLayout } from '../hooks/useDashboardLayout';
 import { useNavigation } from '@react-navigation/native';

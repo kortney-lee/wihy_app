@@ -14,7 +14,7 @@ import { SavedMeal, MealTemplate, MealIngredient } from '../services/mealService
 import { mealService } from '../services/mealService';
 import { getMealDiaryService, Meal } from '../services/mealDiary';
 import { authService } from '../services/authService';
-import { getDashboardTheme } from '../theme/dashboardTheme';
+import { getDashboardTheme, dashboardTheme } from '../theme/dashboardTheme';
 import type { RootStackParamList } from '../types/navigation';
 import { requireAuthToken, requireUserId } from '../utils/authGuards';
 
