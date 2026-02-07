@@ -928,9 +928,9 @@ const styles = StyleSheet.create({
   },
   collapsibleHeader: {
     overflow: 'visible',
-    justifyContent: 'flex-end',
+    justifyContent: 'flex-start',
     alignItems: 'center',
-    paddingBottom: 10,
+    paddingTop: 20,
   },
   profileHeader: {
     paddingTop: 40, // Account for status bar since gradient goes to top
@@ -940,7 +940,7 @@ const styles = StyleSheet.create({
   profileHeaderContent: {
     alignItems: 'center',
     paddingVertical: 20,
-    paddingTop: 50,
+    paddingTop: 20,
   },
   avatarContainer: {
     marginBottom: 16,
