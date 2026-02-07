@@ -56,7 +56,9 @@ export const AUTH_CONFIG = {
   // SECURITY: Mobile apps are PUBLIC clients - NEVER use client secret
   // OAuth flow: Auth service handles ALL provider configurations server-side
   // Mobile receives session_token directly via redirect (PKCE flow)
-  redirectUri: 'wihy://auth/callback',
+  // Using Universal Link (https) for better iOS/Android compatibility
+  // Backend should redirect to this URL with session_token parameter
+  redirectUri: 'https://auth.wihy.ai/mobile/auth/callback',
   // OAuth scopes - only profile and email are supported by auth service
   scopes: ['profile', 'email'],
   endpoints: {

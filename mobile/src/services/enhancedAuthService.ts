@@ -235,12 +235,13 @@ class EnhancedAuthService {
       // Get OAuth URL for native
       const authUrl = authService.getOAuthUrl(provider);
       console.log('Opening OAuth URL:', authUrl);
-      console.log('Expected redirect: wihy://auth/callback?session_token=...');
+      console.log('Expected redirect: https://auth.wihy.ai/mobile/auth/callback?session_token=...');
       
       // Open browser for authentication
+      // Using Universal Link for redirect - better compatibility with iOS/Android
       const result = await WebBrowser.openAuthSessionAsync(
         authUrl,
-        'wihy://auth/callback'
+        'https://auth.wihy.ai/mobile/auth/callback'
       );
       
       console.log('OAuth result type:', result.type);
