@@ -808,6 +808,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 20,
     marginBottom: 20,
+    paddingHorizontal: 8,
+    overflow: 'visible',
   },
   socialButton: {
     width: 64,
