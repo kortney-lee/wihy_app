@@ -13,6 +13,7 @@ import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '../components/shared';
 import { AuthContext } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
+import { getDashboardTheme } from '../theme/dashboardTheme';
 import MultiAuthLogin from '../components/auth/MultiAuthLogin';
 import { WebNavHeader } from '../components/web/WebNavHeader';
 
@@ -227,7 +228,8 @@ const termsData = [
 export default function TermsScreen() {
   const navigation = useNavigation<any>();
   const { user } = useContext(AuthContext);
-  const { theme } = useTheme();
+  const { theme, isDark } = useTheme();
+  const dashboardTheme = getDashboardTheme(isDark);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [expandedSections, setExpandedSections] = useState<ExpandedSections>({});
 

@@ -14,7 +14,7 @@ import { SavedMeal, MealTemplate, MealIngredient } from '../services/mealService
 import { mealService } from '../services/mealService';
 import { getMealDiaryService, Meal } from '../services/mealDiary';
 import { authService } from '../services/authService';
-import { dashboardTheme } from '../theme/dashboardTheme';
+import { getDashboardTheme } from '../theme/dashboardTheme';
 import type { RootStackParamList } from '../types/navigation';
 import { requireAuthToken, requireUserId } from '../utils/authGuards';
 
@@ -43,7 +43,8 @@ export default function PlanMealScreen({
   onBack 
 }: PlanMealScreenProps) {
   const { user } = useContext(AuthContext);
-  const { theme } = useTheme();
+  const { theme, isDark } = useTheme();
+  const dashboardTheme = getDashboardTheme(isDark);
   const userId = user?.id;
   const navigation = useNavigation<NavigationProp>();
   const insets = useSafeAreaInsets();

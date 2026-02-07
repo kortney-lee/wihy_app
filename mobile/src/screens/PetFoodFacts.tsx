@@ -18,7 +18,7 @@ import type { RouteProp } from '@react-navigation/native';
 import type { StackNavigationProp } from '@react-navigation/stack';
 import type { RootStackParamList } from '../types/navigation';
 import { LinearGradient } from 'expo-linear-gradient';
-import { dashboardTheme } from '../theme/dashboardTheme';
+import { getDashboardTheme } from '../theme/dashboardTheme';
 import { SweepBorder } from '../components/SweepBorder';
 import type { PetFoodProductResponse, PetFoodIngredientConcern } from '../services/types';
 import { chatService } from '../services/chatService';
@@ -61,7 +61,8 @@ function getIngredientFlagColor(hasIssue: boolean) {
 export default function PetFoodFacts() {
   const route = useRoute<RouteProps>();
   const navigation = useNavigation<NavigationProp>();
-  const { theme } = useTheme();
+  const { theme, isDark } = useTheme();
+  const dashboardTheme = getDashboardTheme(isDark);
 
   const { product: initialProduct, context } = route?.params || { product: null, context: null };
   

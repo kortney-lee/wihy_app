@@ -13,6 +13,7 @@ import { Ionicons } from '../components/shared';
 import type { StackNavigationProp } from '@react-navigation/stack';
 import { AuthContext } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
+import { getDashboardTheme } from '../theme/dashboardTheme';
 import { colors, sizes } from '../theme/design-tokens';
 
 type NavigationProp = StackNavigationProp<any, 'OnboardingFlow'>;
@@ -92,7 +93,8 @@ const onboardingSteps: OnboardingStep[] = [
 const OnboardingFlow: React.FC = () => {
   const navigation = useNavigation<NavigationProp>();
   const { user, updateUser } = useContext(AuthContext);
-  const { theme } = useTheme();
+  const { theme, isDark } = useTheme();
+  const dashboardTheme = getDashboardTheme(isDark);
   const [currentStep, setCurrentStep] = useState(0);
   const [completedSteps, setCompletedSteps] = useState<string[]>([]);
 

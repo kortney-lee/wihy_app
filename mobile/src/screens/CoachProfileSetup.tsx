@@ -20,6 +20,7 @@ import type { RootStackParamList } from '../types/navigation';
 import { coachService } from '../services';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
+import { getDashboardTheme } from '../theme/dashboardTheme';
 
 const spinnerGif = require('../../assets/whatishealthyspinner.gif');
 const isWeb = Platform.OS === 'web';
@@ -75,7 +76,8 @@ export default function CoachProfileSetup({
   onBack,
 }: CoachProfileSetupProps) {
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
-  const { theme } = useTheme();
+  const { theme, isDark } = useTheme();
+  const dashboardTheme = getDashboardTheme(isDark);
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
   const [currentStep, setCurrentStep] = useState(1);

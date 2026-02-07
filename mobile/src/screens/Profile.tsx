@@ -22,7 +22,7 @@ import { userService } from '../services/userService';
 import { notificationService } from '../services/notificationService';
 import { colors, sizes } from '../theme/design-tokens';
 import { dashboardColors, GradientDashboardHeader, WebPageWrapper } from '../components/shared';
-import { dashboardTheme } from '../theme/dashboardTheme';
+import { getDashboardTheme } from '../theme/dashboardTheme';
 import { getResponsiveIconSize } from '../utils/responsive';
 import { DevPlanSwitcher } from '../components/DevPlanSwitcher';
 import PlansModal from '../components/PlansModal';
@@ -51,6 +51,7 @@ interface SettingsItem {
 export default function Profile() {
   const { user, signOut, updateUser } = useContext(AuthContext);
   const { theme, isDark, toggleTheme } = useTheme();
+  const dashboardTheme = getDashboardTheme(isDark);
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   const defaultPreferences = {
     notifications: true,

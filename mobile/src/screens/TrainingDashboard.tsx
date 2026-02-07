@@ -16,6 +16,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '../components/shared';
 import SvgIcon from '../components/shared/SvgIcon';
 import { useTheme } from '../context/ThemeContext';
+import { getDashboardTheme } from '../theme/dashboardTheme';
 import { AuthContext, useAuth } from '../context/AuthContext';
 import { fitnessService, QuickWorkoutRequest, QuickWorkout, ProgramWorkout } from '../services/fitnessService';
 import { authService } from '../services/authService';
@@ -83,7 +84,8 @@ const TrainingDashboard: React.FC<TrainingDashboardProps> = ({ isDashboardMode =
   const { user } = useContext(AuthContext);
   const { userId } = useAuth();
   const insets = useSafeAreaInsets();
-  const { theme } = useTheme();
+  const { theme, isDark } = useTheme();
+  const dashboardTheme = getDashboardTheme(isDark);
   const { width } = Dimensions.get('window');
 
   // Paywall check

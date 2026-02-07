@@ -18,7 +18,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { dashboardColors, Ionicons, BackToHubButton } from '../components/shared';
 import SvgIcon from '../components/shared/SvgIcon';
-import { dashboardTheme } from '../theme/dashboardTheme';
+import { getDashboardTheme } from '../theme/dashboardTheme';
 import { userService } from '../services/userService';
 import { AuthContext } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
@@ -73,7 +73,8 @@ export default function ClientOnboarding({
 }: ClientOnboardingProps) {
   const navigation = useNavigation<any>();
   const { user, updateUser } = useContext(AuthContext);
-  const { theme } = useTheme();
+  const { theme, isDark } = useTheme();
+  const dashboardTheme = getDashboardTheme(isDark);
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const totalSteps = 5;

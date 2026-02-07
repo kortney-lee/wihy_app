@@ -15,7 +15,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { dashboardColors, Ionicons, BackToHubButton } from '../components/shared';
-import { dashboardTheme } from '../theme/dashboardTheme';
+import { getDashboardTheme } from '../theme/dashboardTheme';
 import { coachService } from '../services';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
@@ -45,7 +45,8 @@ export default function BookingsManagement({
   onBack,
 }: BookingsManagementProps) {
   const { coachId } = useAuth();
-  const { theme } = useTheme();
+  const { theme, isDark } = useTheme();
+  const dashboardTheme = getDashboardTheme(isDark);
   
   const [selectedFilter, setSelectedFilter] = useState<'all' | 'upcoming' | 'pending' | 'completed'>('upcoming');
   const [bookings, setBookings] = useState<Booking[]>([]);

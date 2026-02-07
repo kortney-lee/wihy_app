@@ -21,6 +21,8 @@ import { ensureCameraPermission, ensureMediaLibraryPermission } from '../utils/p
 import { compressImageForUpload } from '../utils/imageCompression';
 import { scanService } from '../services';
 import { AuthContext } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
+import { getDashboardTheme } from '../theme/dashboardTheme';
 import PlansModal from '../components/PlansModal';
 import MultiAuthLogin from '../components/auth/MultiAuthLogin';
 
@@ -39,6 +41,8 @@ export default function CameraScreen() {
   const navigation = useNavigation<NavigationProp>();
   const route = useRoute<CameraRouteProp>();
   const { user } = useContext(AuthContext);
+  const { theme, isDark } = useTheme();
+  const dashboardTheme = getDashboardTheme(isDark);
   const autoScanEnabled = user?.preferences?.autoScan ?? false;
   const insets = useSafeAreaInsets();
   const topOffset = Math.max(insets.top, 16);
@@ -1074,7 +1078,7 @@ export default function CameraScreen() {
       <View style={[styles.bottomPanel, { paddingBottom: insets.bottom + 20, marginBottom: -(insets.bottom + 10) }]}>
         {/* Scan Modes */}
         <View style={styles.modesContainer}>
-          <Text style={styles.modesTitle}>Scan Mode</Text>
+          <Text style={[styles.modesTitle, { color: dashboardTheme.colors.text }]}>Scan Mode</Text>
           <View style={styles.modesList}>
             {scanModes.map((mode) => (
               <Pressable
@@ -1104,7 +1108,7 @@ export default function CameraScreen() {
                 <Text
                   style={[
                     styles.modeTitle,
-                    selectedMode === mode.id && styles.modeTitleSelected,
+                    selectedMode === mode.id && { color: dashboardTheme.colors.text },
                   ]}
                 >
                   {mode.title}
@@ -1188,7 +1192,7 @@ export default function CameraScreen() {
         <View style={styles.processingOverlay}>
           <View style={styles.processingContainer}>
             <ActivityIndicator size="large" color="#3b82f6" />
-            <Text style={styles.processingTitle}>{processingMessage}</Text>
+            <Text style={[styles.processingTitle, { color: '#111827' }]}>{processingMessage}</Text>
             <Text style={styles.processingSubtitle}>Please wait...</Text>
           </View>
         </View>

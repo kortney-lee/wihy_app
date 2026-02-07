@@ -28,7 +28,7 @@ if (isWeb) {
   require('../styles/web-landing.css');
 }
 const { width: screenWidth } = Dimensions.get('window');
-import { dashboardTheme } from '../theme/dashboardTheme';
+import { getDashboardTheme } from '../theme/dashboardTheme';
 import { coachService, Client as APIClient, ClientDashboard } from '../services';
 import { useAuth } from '../context/AuthContext';
 import { useNavigation } from '@react-navigation/native';
@@ -59,7 +59,8 @@ export default function ClientManagement({
 }: ClientManagementProps) {
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   const { coachId, user } = useAuth();
-  const { theme } = useTheme();
+  const { theme, isDark } = useTheme();
+  const dashboardTheme = getDashboardTheme(isDark);
   
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFilter, setSelectedFilter] = useState<'all' | 'active' | 'inactive' | 'pending'>('all');

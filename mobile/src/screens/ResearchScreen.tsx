@@ -18,7 +18,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { GradientDashboardHeader, Ionicons, CloseButton } from '../components/shared';
 import { SweepBorder } from '../components/SweepBorder';
 import { colors } from '../theme/design-tokens';
-import { dashboardTheme } from '../theme/dashboardTheme';
+import { getDashboardTheme } from '../theme/dashboardTheme';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { researchService, ResearchArticle, ResearchDashboardStats, ResearchBookmark, SearchHistoryItem } from '../services';
 import { AuthContext } from '../context/AuthContext';
@@ -179,7 +179,8 @@ const StudyCard: React.FC<{
 export default function ResearchScreen({ isDashboardMode = false, onResultsViewChange }: ResearchScreenProps) {
   // Auth context for user ID
   const { user } = useContext(AuthContext);
-  const { theme } = useTheme();
+  const { theme, isDark } = useTheme();
+  const dashboardTheme = getDashboardTheme(isDark);
   const userId = user?.id;
 
   // State management

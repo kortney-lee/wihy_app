@@ -18,7 +18,7 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import { AuthContext } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { userService } from '../services/userService';
-import { dashboardTheme } from '../theme/dashboardTheme';
+import { getDashboardTheme } from '../theme/dashboardTheme';
 import { formatDateInput, formatISODateForDisplay } from '../utils/dateFormatter';
 import SvgIcon from '../components/shared/SvgIcon';
 
@@ -155,7 +155,8 @@ export default function ProfileSetupScreen({ isDashboardMode = false, onBack }: 
   const navigation = useNavigation<any>();
   const route = useRoute<any>();
   const { user, updateUser } = useContext(AuthContext);
-  const { theme: themeContext } = useTheme();
+  const { theme: themeContext, isDark } = useTheme();
+  const dashboardTheme = getDashboardTheme(isDark);
   
   // Determine if this is an onboarding flow
   // Check route params first, then URL query params on web

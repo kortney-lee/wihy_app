@@ -26,7 +26,7 @@ import { AuthContext } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import type { IngredientAnalysis } from '../services/types';
 import { LinearGradient } from 'expo-linear-gradient';
-import { dashboardTheme } from '../theme/dashboardTheme';
+import { getDashboardTheme } from '../theme/dashboardTheme';
 import { DashboardGradientType } from '../components/shared';
 import { SweepBorder } from '../components/SweepBorder';
 import { requireUserId } from '../utils/authGuards';
@@ -109,7 +109,8 @@ export default function NutritionFacts() {
   const route = useRoute<RouteProps>();
   const navigation = useNavigation<NavigationProp>();
   const { user } = useContext(AuthContext);
-  const { theme } = useTheme();
+  const { theme, isDark } = useTheme();
+  const dashboardTheme = getDashboardTheme(isDark);
 
   // Get user ID for food logging
   const userId = user?.id;

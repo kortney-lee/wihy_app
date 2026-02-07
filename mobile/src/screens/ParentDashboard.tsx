@@ -14,7 +14,7 @@ import {
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { dashboardColors, Ionicons } from '../components/shared';
-import { dashboardTheme } from '../theme/dashboardTheme';
+import { getDashboardTheme } from '../theme/dashboardTheme';
 import { useDashboardLayout } from '../hooks/useDashboardLayout';
 import { familyService, Family, FamilyMember, FamilyDashboard as FamilyDashboardData } from '../services/familyService';
 import { AuthContext } from '../context/AuthContext';
@@ -42,7 +42,8 @@ interface ChildHealthData {
 
 export default function ParentDashboard() {
   const { user } = useContext(AuthContext);
-  const { theme } = useTheme();
+  const { theme, isDark } = useTheme();
+  const dashboardTheme = getDashboardTheme(isDark);
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   const [selectedChild, setSelectedChild] = useState<ChildHealthData | null>(null);
   const [refreshing, setRefreshing] = useState(false);

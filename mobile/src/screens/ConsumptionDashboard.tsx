@@ -17,7 +17,7 @@ import {
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { GradientDashboardHeader, Ionicons, NotificationTile } from '../components/shared';
-import { dashboardTheme } from '../theme/dashboardTheme';
+import { getDashboardTheme } from '../theme/dashboardTheme';
 import { useDashboardLayout } from '../hooks/useDashboardLayout';
 import {
   useDashboardNavigation,
@@ -118,7 +118,8 @@ const ConsumptionDashboard: React.FC<ConsumptionDashboardProps> = ({
   const layout = useDashboardLayout();
   const { navigation, navigateToNutritionFacts } = useDashboardNavigation();
   const { userId } = useAuth();
-  const { theme } = useTheme();
+  const { theme, isDark } = useTheme();
+  const dashboardTheme = getDashboardTheme(isDark);
   
   const [selectedTab, setSelectedTab] = useState<'nutrition' | 'meals' | 'recipes' | 'shopping'>('nutrition');
   const [searchQuery, setSearchQuery] = useState('');

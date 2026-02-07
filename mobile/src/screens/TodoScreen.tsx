@@ -11,6 +11,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {useNavigation} from '@react-navigation/native';
 import { useTheme } from '../context/ThemeContext';
+import { getDashboardTheme } from '../theme/dashboardTheme';
 import {colors, spacing, typography} from '../theme';
 
 interface Task {
@@ -22,7 +23,8 @@ interface Task {
 
 const TodoScreen: React.FC = () => {
   const navigation = useNavigation();
-  const { theme } = useTheme();
+  const { theme, isDark } = useTheme();
+  const dashboardTheme = getDashboardTheme(isDark);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [inputText, setInputText] = useState('');
 

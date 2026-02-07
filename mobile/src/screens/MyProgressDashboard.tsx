@@ -21,7 +21,7 @@ import type { CompositeNavigationProp } from '@react-navigation/native';
 import type { StackNavigationProp } from '@react-navigation/stack';
 import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import type { TabParamList, RootStackParamList } from '../types/navigation';
-import { dashboardTheme } from '../theme/dashboardTheme';
+import { getDashboardTheme } from '../theme/dashboardTheme';
 import { useDashboardLayout } from '../hooks/useDashboardLayout';
 import { dashboardColors } from '../components/shared';
 import { healthDataService } from '../services/healthDataService';
@@ -89,7 +89,8 @@ const MyProgressDashboard: React.FC<MyProgressDashboardProps> = ({
 }) => {
   const layout = useDashboardLayout();
   const navigation = useNavigation<NavigationProp>();
-  const { theme } = useTheme();
+  const { theme, isDark } = useTheme();
+  const dashboardTheme = getDashboardTheme(isDark);
   const { user } = useContext(AuthContext);
   const [selectedPeriod, setSelectedPeriod] = useState<'today' | 'week' | 'month'>('today');
   const [isLoading, setIsLoading] = useState(true);

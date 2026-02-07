@@ -16,7 +16,7 @@ import { AuthContext } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { Ionicons, BackToHubButton } from '../components/shared';
 import { hasAIAccess } from '../utils/capabilities';
-import { dashboardTheme } from '../theme/dashboardTheme';
+import { getDashboardTheme } from '../theme/dashboardTheme';
 import { coachService, CoachOverview as CoachOverviewData } from '../services';
 
 const spinnerGif = require('../../assets/whatishealthyspinner.gif');
@@ -41,7 +41,8 @@ export default function CoachOverview({
   onBack,
 }: CoachOverviewProps) {
   const { user } = useContext(AuthContext);
-  const { theme } = useTheme();
+  const { theme, isDark } = useTheme();
+  const dashboardTheme = getDashboardTheme(isDark);
   const coachId = user?.coachId;
   const [selectedPeriod, setSelectedPeriod] = useState<'week' | 'month' | 'year'>('month');
   const [loading, setLoading] = useState(true);

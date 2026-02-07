@@ -21,7 +21,7 @@ import { Ionicons, NotificationTile, BackToHubButton } from '../components/share
 import type { StackNavigationProp } from '@react-navigation/stack';
 import type { RootStackParamList } from '../types/navigation';
 import { dashboardColors, GradientDashboardHeader } from '../components/shared';
-import { dashboardTheme } from '../theme/dashboardTheme';
+import { getDashboardTheme } from '../theme/dashboardTheme';
 import { coachService, Client as APIClient, ClientDashboard } from '../services';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
@@ -56,7 +56,8 @@ export default function CoachDashboard({
 }: CoachDashboardProps) {
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   const { coachId, user } = useAuth();
-  const { theme } = useTheme();
+  const { theme, isDark } = useTheme();
+  const dashboardTheme = getDashboardTheme(isDark);
   
   // Collapsing header animation
   const scrollY = useRef(new Animated.Value(0)).current;

@@ -17,7 +17,7 @@ import type { RouteProp } from '@react-navigation/native';
 import type { StackNavigationProp } from '@react-navigation/stack';
 import type { RootStackParamList } from '../types/navigation';
 import { LinearGradient } from 'expo-linear-gradient';
-import { dashboardTheme } from '../theme/dashboardTheme';
+import { getDashboardTheme } from '../theme/dashboardTheme';
 import { SweepBorder } from '../components/SweepBorder';
 import { useTheme } from '../context/ThemeContext';
 import type { PhotoScanResponse } from '../services/types';
@@ -60,7 +60,8 @@ function getNovaColor(nova: number) {
 export default function FoodPhotoFacts() {
   const route = useRoute<RouteProps>();
   const navigation = useNavigation<NavigationProp>();
-  const { theme } = useTheme();
+  const { theme, isDark } = useTheme();
+  const dashboardTheme = getDashboardTheme(isDark);
 
   const { photoData: initialData, context, capturedImage } = route?.params || { 
     photoData: null, 

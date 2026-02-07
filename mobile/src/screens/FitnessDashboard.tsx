@@ -41,6 +41,7 @@ import {
 import { authService } from '../services/authService';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
+import { getDashboardTheme } from '../theme/dashboardTheme';
 import { useNavigation } from '@react-navigation/native';
 import { UpgradePrompt } from '../components/UpgradePrompt';
 import { useFeatureAccess } from '../hooks/usePaywall';
@@ -300,7 +301,8 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
   onStartSession,
 }) => {
   const { userId } = useAuth();
-  const { theme } = useTheme();
+  const { theme, isDark } = useTheme();
+  const dashboardTheme = getDashboardTheme(isDark);
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
   

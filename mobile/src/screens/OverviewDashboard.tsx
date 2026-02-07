@@ -4,7 +4,7 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useIsFocused } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { GradientDashboardHeader, Ionicons, NotificationTile, CloseButton } from '../components/shared';
-import { dashboardTheme } from '../theme/dashboardTheme';
+import { getDashboardTheme } from '../theme/dashboardTheme';
 import { useDashboardLayout } from '../hooks/useDashboardLayout';
 import {
   useDashboardNavigation,
@@ -33,7 +33,8 @@ const TABS = ['Summary', 'Insights', 'Wellness', 'Trends', 'Predictive'];
 
 const OverviewDashboard: React.FC<BaseDashboardProps> = ({ onAnalyze }) => {
   const { user } = React.useContext(AuthContext);
-  const { theme } = useTheme();
+  const { theme, isDark } = useTheme();
+  const dashboardTheme = getDashboardTheme(isDark);
   const layout = useDashboardLayout();
   const { navigation, navigateToCamera, navigateToChat, handleAnalyze } = useDashboardNavigation();
   const isFocused = useIsFocused(); // Check if Health tab is actually visible

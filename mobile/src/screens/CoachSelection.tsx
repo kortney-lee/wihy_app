@@ -17,7 +17,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { dashboardColors, SvgIcon } from '../components/shared';
 import { useTheme } from '../context/ThemeContext';
-import { dashboardTheme } from '../theme/dashboardTheme';
+import { getDashboardTheme } from '../theme/dashboardTheme';
 import { userService } from '../services/userService';
 import { useDashboardLayout } from '../hooks/useDashboardLayout';
 import { useNavigation } from '@react-navigation/native';
@@ -43,7 +43,8 @@ interface Coach {
 
 export default function CoachSelection() {
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
-  const { theme } = useTheme();
+  const { theme, isDark } = useTheme();
+  const dashboardTheme = getDashboardTheme(isDark);
   const insets = useSafeAreaInsets();
   useDashboardLayout(); // For responsive behavior
   const scrollY = useRef(new Animated.Value(0)).current;
