@@ -4171,16 +4171,31 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
                 <View style={styles.workoutStatsRow}>
                   <View style={styles.workoutStatItem}>
                     <Ionicons name="time-outline" size={18} color="#3b82f6" />
-                    <Text style={styles.workoutStatValue}>{currentWorkout.estimated_duration_min} min</Text>
+                    <Text style={styles.workoutStatValue}>{currentWorkout.estimated_duration_min || currentWorkout.duration_minutes || 30} min</Text>
                   </View>
-                  <View style={styles.workoutStatItem}>
-                    <Ionicons name="layers-outline" size={18} color="#4cbb17" />
-                    <Text style={styles.workoutStatValue}>{currentWorkout.exercises?.length || 0} exercises</Text>
-                  </View>
-                  <View style={styles.workoutStatItem}>
-                    <Ionicons name="repeat-outline" size={18} color="#fa5f06" />
-                    <Text style={styles.workoutStatValue}>{currentWorkout.exercises?.reduce((sum, ex) => sum + ex.sets, 0) || 0} sets</Text>
-                  </View>
+                  {['easy_run', 'intervals', 'tempo', 'long_run', 'recovery', 'fartlek'].includes(currentWorkout.type) ? (
+                    <>
+                      <View style={styles.workoutStatItem}>
+                        <Ionicons name="speedometer-outline" size={18} color="#4cbb17" />
+                        <Text style={styles.workoutStatValue}>{currentWorkout.intervals?.length || 1} intervals</Text>
+                      </View>
+                      <View style={styles.workoutStatItem}>
+                        <Ionicons name="map-outline" size={18} color="#fa5f06" />
+                        <Text style={styles.workoutStatValue}>{currentWorkout.distance_km || '—'} km</Text>
+                      </View>
+                    </>
+                  ) : (
+                    <>
+                      <View style={styles.workoutStatItem}>
+                        <Ionicons name="layers-outline" size={18} color="#4cbb17" />
+                        <Text style={styles.workoutStatValue}>{currentWorkout.exercises?.length || 0} exercises</Text>
+                      </View>
+                      <View style={styles.workoutStatItem}>
+                        <Ionicons name="repeat-outline" size={18} color="#fa5f06" />
+                        <Text style={styles.workoutStatValue}>{currentWorkout.exercises?.reduce((sum, ex) => sum + ex.sets, 0) || 0} sets</Text>
+                      </View>
+                    </>
+                  )}
                 </View>
               </View>
             ))
@@ -4242,6 +4257,32 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
                   <Text style={styles.workoutStatValue}>{(workout as any).session.cooldownMinutes}m stretch</Text>
                 </View>
               </View>
+            ) : (workout as any).type === 'easy_run' || (workout as any).type === 'intervals' || (workout as any).type === 'tempo' || (workout as any).type === 'long_run' || (workout as any).distance_km ? (
+              /* Running workout stats */
+              <View style={styles.workoutStatsRow}>
+                <View style={styles.workoutStatItem}>
+                  <Ionicons name="time-outline" size={18} color="#3b82f6" />
+                  <Text style={styles.workoutStatValue}>{workout.estimated_duration_min || (workout as any).duration_minutes || 30} min</Text>
+                </View>
+                {(workout as any).distance_km && (
+                  <View style={styles.workoutStatItem}>
+                    <Ionicons name="walk-outline" size={18} color="#4cbb17" />
+                    <Text style={styles.workoutStatValue}>{(workout as any).distance_km} km</Text>
+                  </View>
+                )}
+                {(workout as any).intervals?.length > 0 && (
+                  <View style={styles.workoutStatItem}>
+                    <Ionicons name="repeat-outline" size={18} color="#fa5f06" />
+                    <Text style={styles.workoutStatValue}>{(workout as any).intervals.length} intervals</Text>
+                  </View>
+                )}
+                {(workout as any).pace_target && (
+                  <View style={styles.workoutStatItem}>
+                    <Ionicons name="speedometer-outline" size={18} color="#8b5cf6" />
+                    <Text style={styles.workoutStatValue}>{(workout as any).pace_target}</Text>
+                  </View>
+                )}
+              </View>
             ) : (
               <View style={styles.workoutStatsRow}>
                 <View style={styles.workoutStatItem}>
@@ -4250,7 +4291,7 @@ const FitnessDashboard: React.FC<FitnessDashboardProps> = ({
                 </View>
                 <View style={styles.workoutStatItem}>
                   <Ionicons name="layers-outline" size={18} color="#4cbb17" />
-                  <Text style={styles.workoutStatValue}>{workout.exercises?.length || 0} exercises</Text>
+                  <Text style={styles.workoutStatValue}>{workout.exercises?.length || (workout as any).session?.main?.length || 0} exercises</Text>
                 </View>
                 <View style={styles.workoutStatItem}>
                   <Ionicons name="repeat-outline" size={18} color="#fa5f06" />
