@@ -10,11 +10,10 @@ import {
   Image,
   ActivityIndicator,
   Modal,
-  StatusBar,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
-import { Ionicons } from '../components/shared';
 import type { StackNavigationProp } from '@react-navigation/stack';
 import type { RootStackParamList } from '../navigation/AppNavigator';
 import { Camera, CameraView, type BarcodeScanningResult } from 'expo-camera';
@@ -22,9 +21,8 @@ import { ensureCameraPermission, ensureMediaLibraryPermission } from '../utils/p
 import { compressImageForUpload } from '../utils/imageCompression';
 import { scanService } from '../services';
 import { AuthContext } from '../context/AuthContext';
-import { useTheme } from '../context/ThemeContext';
-import { requireUserId } from '../utils/authGuards';
 import PlansModal from '../components/PlansModal';
+import MultiAuthLogin from '../components/auth/MultiAuthLogin';
 
 type NavigationProp = StackNavigationProp<RootStackParamList>;
 type CameraRouteProp = RouteProp<RootStackParamList, 'Camera'>;
@@ -41,7 +39,6 @@ export default function CameraScreen() {
   const navigation = useNavigation<NavigationProp>();
   const route = useRoute<CameraRouteProp>();
   const { user } = useContext(AuthContext);
-  const { theme, isDark } = useTheme();
   const autoScanEnabled = user?.preferences?.autoScan ?? false;
   const insets = useSafeAreaInsets();
   const topOffset = Math.max(insets.top, 16);
@@ -55,6 +52,8 @@ export default function CameraScreen() {
   const scanAnimation = useRef(new Animated.Value(0)).current;
   const cameraRef = useRef<any>(null);
   const [showPlansModal, setShowPlansModal] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [pendingBarcode, setPendingBarcode] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [processingMessage, setProcessingMessage] = useState('');
 
@@ -157,6 +156,15 @@ export default function CameraScreen() {
   };
 
   const handleBarcodeScanned = async ({ data }: BarcodeScanningResult) => {
+    // Require authentication to scan
+    if (!user) {
+      // Store the barcode for manual capture (so user can sign in and scan)
+      setLastScannedBarcode(data);
+      setPendingBarcode(data);
+      setShowAuthModal(true);
+      return;
+    }
+
     // Only auto-scan if the feature is enabled
     if (!autoScanEnabled) {
       // Store the barcode for manual capture
@@ -196,26 +204,21 @@ export default function CameraScreen() {
             capturedPhotoUri = photo.uri;
             console.log('[CameraScreen] User photo captured:', capturedPhotoUri);
             
-            const resolvedUserId = requireUserId(user?.id, {
-              context: 'CameraScreen.uploadBarcodeImage',
-              showAlert: false,
+            // Upload photo to backend storage (non-blocking)
+            scanService.uploadScanImage(photo.uri, {
+              barcode: data,
+              scanType: 'barcode',
+              userId: user?.email,
+            }).then(uploadResult => {
+              if (uploadResult.success && uploadResult.imageUrl) {
+                console.log('[CameraScreen] Photo uploaded to:', uploadResult.imageUrl);
+                uploadedImageUrl = uploadResult.imageUrl;
+              } else {
+                console.log('[CameraScreen] Photo upload skipped:', uploadResult.error);
+              }
+            }).catch(err => {
+              console.warn('[CameraScreen] Photo upload failed:', err);
             });
-            if (resolvedUserId) {
-              scanService.uploadScanImage(photo.uri, {
-                barcode: data,
-                scanType: 'barcode',
-                userId: resolvedUserId,
-              }).then(uploadResult => {
-                if (uploadResult.success && uploadResult.imageUrl) {
-                  console.log('[CameraScreen] Photo uploaded to:', uploadResult.imageUrl);
-                  uploadedImageUrl = uploadResult.imageUrl;
-                } else {
-                  console.log('[CameraScreen] Photo upload skipped:', uploadResult.error);
-                }
-              }).catch(err => {
-                console.warn('[CameraScreen] Photo upload failed:', err);
-              });
-            }
           }
         } catch (photoErr) {
           console.warn('[CameraScreen] Could not capture photo:', photoErr);
@@ -416,6 +419,15 @@ export default function CameraScreen() {
   };
 
   const handleStartScan = async () => {
+    // Require authentication to scan
+    if (!user) {
+      if (lastScannedBarcode) {
+        setPendingBarcode(lastScannedBarcode);
+      }
+      setShowAuthModal(true);
+      return;
+    }
+
     const mode = scanModes.find(m => m.id === selectedMode);
     if (!mode) return;
 
@@ -446,26 +458,20 @@ export default function CameraScreen() {
               console.log('[CameraScreen] User photo captured:', capturedPhotoUri);
               
               // Upload photo to backend storage (non-blocking)
-              const resolvedUserId = requireUserId(user?.id, {
-                context: 'CameraScreen.uploadManualBarcodeImage',
-                showAlert: false,
+              setProcessingMessage('Uploading photo...');
+              scanService.uploadScanImage(photo.uri, {
+                barcode: lastScannedBarcode,
+                scanType: 'barcode',
+                userId: user?.email,
+              }).then(uploadResult => {
+                if (uploadResult.success && uploadResult.imageUrl) {
+                  console.log('[CameraScreen] Photo uploaded to:', uploadResult.imageUrl);
+                } else {
+                  console.log('[CameraScreen] Photo upload skipped:', uploadResult.error);
+                }
+              }).catch(err => {
+                console.warn('[CameraScreen] Photo upload failed:', err);
               });
-              if (resolvedUserId) {
-                setProcessingMessage('Uploading photo...');
-                scanService.uploadScanImage(photo.uri, {
-                  barcode: lastScannedBarcode,
-                  scanType: 'barcode',
-                  userId: resolvedUserId,
-                }).then(uploadResult => {
-                  if (uploadResult.success && uploadResult.imageUrl) {
-                    console.log('[CameraScreen] Photo uploaded to:', uploadResult.imageUrl);
-                  } else {
-                    console.log('[CameraScreen] Photo upload skipped:', uploadResult.error);
-                  }
-                }).catch(err => {
-                  console.warn('[CameraScreen] Photo upload failed:', err);
-                });
-              }
             }
           } catch (photoErr) {
             console.warn('[CameraScreen] Could not capture photo:', photoErr);
@@ -613,7 +619,9 @@ export default function CameraScreen() {
           const imageData = await compressImageForUpload(photo.uri, { maxSizeKB: 500 });
           console.log('[CameraScreen] Photo compressed, sending to API...');
           setProcessingMessage('Analyzing food...');
-          const result = await scanService.scanFoodPhoto(imageData);
+          const result = await scanService.scanFoodPhoto(imageData, {
+            userId: user?.email || 'mobile-user',
+          });
 
           setIsScanning(false);
           setIsProcessing(false);
@@ -702,7 +710,9 @@ export default function CameraScreen() {
           const imageData = await compressImageForUpload(photo.uri, { maxSizeKB: 500 });
           console.log('[CameraScreen] Photo compressed, sending to API...');
           setProcessingMessage('Identifying pill...');
-          const result = await scanService.scanPill(imageData);
+          const result = await scanService.scanPill(imageData, {
+            userId: user?.email || 'mobile-user',
+          });
 
           setIsScanning(false);
           setIsProcessing(false);
@@ -781,7 +791,9 @@ export default function CameraScreen() {
           const imageData = await compressImageForUpload(photo.uri, { maxSizeKB: 500 });
           console.log('[CameraScreen] Photo compressed, sending to API...');
           setProcessingMessage('Analyzing label...');
-          const result = await scanService.scanLabel(imageData);
+          const result = await scanService.scanLabel(imageData, {
+            userId: user?.email || 'mobile-user',
+          });
 
           setIsScanning(false);
           setIsProcessing(false);
@@ -897,7 +909,7 @@ export default function CameraScreen() {
 
   if (hasPermission === null) {
     return (
-      <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]} edges={['top', 'left', 'right']}>
+      <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#3b82f6" />
           <Text style={styles.loadingText}>Checking permissions...</Text>
@@ -908,7 +920,7 @@ export default function CameraScreen() {
 
   if (hasPermission === false) {
     return (
-      <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]} edges={['top', 'left', 'right']}>
+      <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
         <View style={styles.permissionDeniedContainer}>
           <Ionicons name="videocam-off" size={64} color="#6b7280" />
           <Text style={styles.permissionDeniedTitle}>Camera Access Required</Text>
@@ -927,12 +939,7 @@ export default function CameraScreen() {
   }
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: isDark ? '#000000' : '#ffffff' }]} edges={['top', 'left', 'right']}>
-      <StatusBar 
-        barStyle={isDark ? 'light-content' : 'dark-content'} 
-        backgroundColor={isDark ? '#000000' : '#ffffff'} 
-        translucent={false} 
-      />
+    <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
       {/* Camera View Area */}
       <View style={styles.cameraContainer}>
         {/* Real Camera View */}
@@ -988,13 +995,21 @@ export default function CameraScreen() {
               <View style={[styles.frameCorner, styles.frameCornerBR]} />
             </View>
 
-            {/* Barcode Detection Badge */}
-            {!isScanning && selectedMode === 'barcode' && !autoScanEnabled && lastScannedBarcode && (
+            {/* Instructions */}
+            {!isScanning && (
               <View style={styles.instructionsContainer}>
-                <View style={styles.barcodeDetectedBadge}>
-                  <Ionicons name="checkmark-circle" size={20} color="#10b981" />
-                  <Text style={styles.barcodeDetectedText}>Barcode Detected</Text>
-                </View>
+                <Text style={styles.instructionsTitle}>
+                  {selectedModeData?.title}
+                </Text>
+                <Text style={styles.instructionsText}>
+                  {selectedModeData?.subtitle}
+                </Text>
+                {selectedMode === 'barcode' && !autoScanEnabled && lastScannedBarcode && (
+                  <View style={styles.barcodeDetectedBadge}>
+                    <Ionicons name="checkmark-circle" size={20} color="#10b981" />
+                    <Text style={styles.barcodeDetectedText}>Barcode Detected</Text>
+                  </View>
+                )}
               </View>
             )}
 
@@ -1030,9 +1045,10 @@ export default function CameraScreen() {
       </View>
 
       {/* Bottom Panel */}
-      <View style={[styles.bottomPanel, { backgroundColor: '#ffffff', paddingBottom: insets.bottom + 20, marginBottom: -(insets.bottom + 10) }]}>
+      <View style={[styles.bottomPanel, { paddingBottom: insets.bottom + 20, marginBottom: -(insets.bottom + 10) }]}>
         {/* Scan Modes */}
         <View style={styles.modesContainer}>
+          <Text style={styles.modesTitle}>Scan Mode</Text>
           <View style={styles.modesList}>
             {scanModes.map((mode) => (
               <Pressable
@@ -1062,7 +1078,7 @@ export default function CameraScreen() {
                 <Text
                   style={[
                     styles.modeTitle,
-                    { color: selectedMode === mode.id ? '#1f2937' : '#6b7280' },
+                    selectedMode === mode.id && styles.modeTitleSelected,
                   ]}
                 >
                   {mode.title}
@@ -1163,6 +1179,30 @@ export default function CameraScreen() {
           // TODO: Integrate with actual subscription flow
           alert(`Plan selected: ${planId}\n\nSubscription integration coming soon!`);
         }}
+      />
+
+      {/* Auth Modal for Unauthenticated Users */}
+      <MultiAuthLogin
+        visible={showAuthModal}
+        onClose={() => {
+          setShowAuthModal(false);
+          setPendingBarcode(null);
+        }}
+        onSignIn={() => {
+          setShowAuthModal(false);
+          // If there was a pending barcode, trigger the scan now
+          if (pendingBarcode) {
+            setLastScannedBarcode(pendingBarcode);
+            setPendingBarcode(null);
+          }
+        }}
+        onSkip={() => {
+          setShowAuthModal(false);
+          setPendingBarcode(null);
+        }}
+        title="Sign in to scan products"
+        subtitle="Create a free account to use the barcode scanner and track your nutrition"
+        skipLabel="Cancel"
       />
     </SafeAreaView>
   );
@@ -1299,7 +1339,7 @@ const styles = StyleSheet.create({
     color: '#ffffff',
   },
   bottomPanel: {
-    // // backgroundColor: '#ffffff', // theme.colors.surface // Use theme.colors.surface
+    backgroundColor: '#ffffff',
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     paddingTop: 24,
@@ -1311,7 +1351,7 @@ const styles = StyleSheet.create({
   modesTitle: {
     fontSize: 16,
     fontWeight: '600',
-    // color: theme.colors.text,
+    color: '#1f2937',
     marginBottom: 16,
   },
   modesList: {
@@ -1340,11 +1380,11 @@ const styles = StyleSheet.create({
   modeTitle: {
     fontSize: 12,
     fontWeight: '500',
-    // color: theme.colors.textSecondary,
+    color: '#6b7280',
     textAlign: 'center',
   },
   modeTitleSelected: {
-    // color: theme.colors.text,
+    color: '#1f2937',
   },
   actionContainer: {
     flexDirection: 'row',
@@ -1356,7 +1396,7 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     borderRadius: 25,
-    // // backgroundColor: '#f3f4f6', // theme.colors.surface // Use theme.colors.background
+    backgroundColor: '#f3f4f6',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -1368,7 +1408,7 @@ const styles = StyleSheet.create({
     borderColor: '#3b82f6',
     alignItems: 'center',
     justifyContent: 'center',
-    // // backgroundColor: '#ffffff', // theme.colors.surface // Use theme.colors.surface
+    backgroundColor: '#ffffff',
   },
   captureButtonScanning: {
     borderColor: '#ef4444',
@@ -1392,14 +1432,14 @@ const styles = StyleSheet.create({
   autoScanText: {
     marginTop: 4,
     fontSize: 12,
-    // color: theme.colors.textSecondary,
+    color: '#6b7280',
     fontWeight: '500',
   },
   historyButton: {
     width: 50,
     height: 50,
     borderRadius: 25,
-    // // backgroundColor: '#f3f4f6', // theme.colors.surface // Use theme.colors.background
+    backgroundColor: '#f3f4f6',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -1452,7 +1492,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   processingContainer: {
-    // // backgroundColor: '#ffffff', // theme.colors.surface // Use theme.colors.surface
+    backgroundColor: '#ffffff',
     borderRadius: 16,
     padding: 32,
     alignItems: 'center',
@@ -1472,7 +1512,7 @@ const styles = StyleSheet.create({
   },
   processingSubtitle: {
     fontSize: 14,
-    // color: theme.colors.textSecondary,
+    color: '#6b7280',
     marginTop: 8,
     textAlign: 'center',
   },

@@ -17,14 +17,42 @@
  */
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { EXPO_PUBLIC_WIHY_NATIVE_CLIENT_ID, EXPO_PUBLIC_AUTH_URL } from '@env';
+import Constants from 'expo-constants';
 import { fetchWithLogging } from '../utils/apiLogger';
 import { affiliateService } from './affiliateService';
 
+// Map of EXPO_PUBLIC_* keys to their app.json extra equivalents
+const extraKeyMap: Record<string, string> = {
+  'EXPO_PUBLIC_WIHY_NATIVE_CLIENT_ID': 'wihyNativeClientId',
+  'EXPO_PUBLIC_WIHY_NATIVE_CLIENT_SECRET': 'wihyNativeClientSecret',
+  'EXPO_PUBLIC_WIHY_SERVICES_CLIENT_ID': 'wihyServicesClientId',
+  'EXPO_PUBLIC_WIHY_SERVICES_CLIENT_SECRET': 'wihyServicesClientSecret',
+  'EXPO_PUBLIC_WIHY_ML_CLIENT_ID': 'wihyMlClientId',
+  'EXPO_PUBLIC_WIHY_ML_CLIENT_SECRET': 'wihyMlClientSecret',
+  'EXPO_PUBLIC_AUTH_URL': 'authUrl',
+};
+
+// Get env vars from multiple sources (works in both dev and production)
+const getEnvVar = (key: string, fallback: string): string => {
+  // 1. Try process.env first (works with EXPO_PUBLIC_ prefix in SDK 54+)
+  const processEnvValue = (process.env as any)[key];
+  if (processEnvValue) return processEnvValue;
+  
+  // 2. Try Constants.expoConfig.extra with mapped key
+  const extra = Constants.expoConfig?.extra || {};
+  const extraKey = extraKeyMap[key];
+  if (extraKey && extra[extraKey]) return extra[extraKey];
+  
+  // 3. Try the original key name in extra
+  if (extra[key]) return extra[key];
+  
+  return fallback;
+};
+
 // Auth configuration - Only your client credentials needed
 export const AUTH_CONFIG = {
-  baseUrl: EXPO_PUBLIC_AUTH_URL || 'https://auth.wihy.ai',
-  clientId: EXPO_PUBLIC_WIHY_NATIVE_CLIENT_ID || 'wihy_native_2025',
+  baseUrl: getEnvVar('EXPO_PUBLIC_AUTH_URL', 'https://auth.wihy.ai'),
+  clientId: getEnvVar('EXPO_PUBLIC_WIHY_NATIVE_CLIENT_ID', 'wihy_native_2025'),
   // SECURITY: Mobile apps are PUBLIC clients - NEVER use client secret
   // OAuth flow: Auth service handles ALL provider configurations server-side
   // Mobile receives session_token directly via redirect (PKCE flow)

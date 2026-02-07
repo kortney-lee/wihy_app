@@ -81,11 +81,19 @@ const Stack = createStackNavigator<RootStackParamList>();
 
 // Web URL linking configuration - maps URL paths to screens
 // This ensures backward compatibility with wihy.ai/about, wihy.ai/privacy, etc.
-const prefix = Linking.createURL('/');
+// Use try-catch because createURL throws in standalone builds without proper scheme registration
+let prefix = 'wihy://';
+try {
+  prefix = Linking.createURL('/');
+} catch (e) {
+  // In standalone builds, fall back to the scheme defined in app.json
+  console.log('Using fallback scheme for deep linking:', prefix);
+}
 
 const linking: LinkingOptions<RootStackParamList> = {
   prefixes: [
     prefix,
+    'wihy://', // Native deep link scheme from app.json
     'https://wihy.ai',
     'https://www.wihy.ai',
     'http://localhost:19006', // Expo web dev

@@ -8,8 +8,8 @@
     "userInterfaceStyle": "light",
     "scheme": "wihy",
     "updates": {
-      "enabled": true,
-      "checkAutomatically": "ON_ERROR_RECOVERY",
+      "enabled": false,
+      "checkAutomatically": "NEVER",
       "fallbackToCacheTimeout": 0
     },
     "plugins": [
@@ -144,6 +144,7 @@
       "eas": {
         "projectId": "a60de855-4859-40e4-9765-eff58cfa207d"
       },
+      "authUrl": "https://auth.wihy.ai",
       "wihyNativeClientId": "wihy_native_mk1waylu",
       "wihyNativeClientSecret": "PxAqbUr1YBR9SkwsLHBosWnC5VYfXFWq64EPSL4ZLBZqjqe5LA7xTJjIZ8gxAtOV",
       "wihyServicesClientId": "wihy_services_mk1waylw",
