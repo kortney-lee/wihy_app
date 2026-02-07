@@ -90,7 +90,7 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
   // Collapsing header animation
   const scrollY = useRef(new Animated.Value(0)).current;
   
-  const HEADER_MAX_HEIGHT = 180;
+  const HEADER_MAX_HEIGHT = 220;
   const HEADER_MIN_HEIGHT = 0;
   const HEADER_SCROLL_DISTANCE = HEADER_MAX_HEIGHT - HEADER_MIN_HEIGHT;
 
